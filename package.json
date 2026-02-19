@@ -1,0 +1,22 @@
+{
+  "name": "bao-build-buddy",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "bun run --filter '@navi/server' dev & bun run --filter '@navi/client' dev",
+    "dev:server": "bun run --filter '@navi/server' dev",
+    "dev:client": "bun run --filter '@navi/client' dev",
+    "build": "bun run --filter '@navi/shared' build && bun run --filter '@navi/server' build && bun run --filter '@navi/client' build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "db:generate": "bun --env-file=.env run drizzle-kit generate",
+    "db:push": "bun --env-file=.env run drizzle-kit push",
+    "db:studio": "bun --env-file=.env run drizzle-kit studio",
+    "test": "bun run --filter '@navi/server' test && bun run --filter '@navi/client' test",
+    "lint": "bunx @biomejs/biome check . && bun run --filter '@navi/client' lint",
+    "lint:fix": "bunx @biomejs/biome check . --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "drizzle-kit": "^0.31.0"
+  }
+}

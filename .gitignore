@@ -1,0 +1,33 @@
+node_modules
+.env
+.env.local
+.env.production
+.env.development
+
+# Build output
+dist/
+dist-electron/
+build/
+
+# Cache
+.vite/
+.cache/
+*.cache
+
+# Nuxt
+.nuxt/
+.output/
+
+# Local development
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor directories and files
+.vscode/
+.idea/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
