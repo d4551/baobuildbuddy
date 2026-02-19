@@ -25,7 +25,7 @@
          '-----'          Take this setup guide."
 ```
 
-BaoBuildBuddy is a full-stack, Bun-first monorepo for building game-industry career automation workflows.
+BaoBuildBuddy is a full-stack, Bun-first monorepo for building game-industry career automation workflows. It aggregates job listings from studios, helps build resumes and cover letters, runs AI-powered mock interviews, automates job applications via browser RPA, and tracks your progress with a gamification system.
 
 - `packages/server` -- Bun + Elysia API, Drizzle ORM, WebSocket endpoints, process orchestration
 - `packages/client` -- Nuxt 3 (SSR-first), Tailwind CSS v4, daisyUI v5
@@ -40,22 +40,27 @@ This is the canonical local setup runbook for BaoBuildBuddy v1.0. It covers:
 - Environment configuration via `.env` and source-of-truth config files
 - Data flow between UI, API, DB, AI providers, and RPA
 - How automation and AI requests are validated, executed, and persisted
+- The job provider registry and how studio aggregation works
+- Service layer architecture including skill extraction, data export, and CV questionnaires
 - Troubleshooting and verification steps
 
 ## 2) Architecture overview
 
 ```text
           _____
-         |     |    "The cake is a lie."
-         | GLa |    But the architecture diagram is real.
-         |  D  |
+         |     |
+         | GLa |    "The cake is a lie."
+         |  D  |     But the architecture diagram is real.
          | 0S  |
          |_____|
 
     Browser ──> Nuxt SSR ──> Elysia API ──> SQLite
        |                        |    |
-       |── WebSocket ──> /ws/chat    |── AI providers
-       |── WebSocket ──> /ws/interview   |── RPA subprocess
+       |── WebSocket ──> /ws/chat    |── AI providers (5 adapters)
+       |── WebSocket ──> /ws/interview   |── RPA subprocess (Bun.spawn)
+                                    |
+                          Job provider registry
+                          (Greenhouse, Lever, company boards)
 ```
 
 ```mermaid
@@ -88,20 +93,31 @@ flowchart TD
   RouteGroup --> AutomationRoutes["automationRoutes"]
 
   AuthRoutes --> AuthSvc["Auth service + authGuard policy"]
-  JobsRoutes --> JobsSvc["jobs service + provider registry"]
+  JobsRoutes --> JobsSvc["jobs service"]
+  JobsSvc --> JobAggregator["job-aggregator.ts"]
+  JobAggregator --> ProviderRegistry["provider-registry.ts"]
+  ProviderRegistry --> Greenhouse["greenhouse.ts"]
+  ProviderRegistry --> Lever["lever.ts"]
+  ProviderRegistry --> CompanyBoards["company-board.ts"]
+  ProviderRegistry --> GamingProviders["gaming-providers.ts"]
+  JobsSvc --> MatchingSvc["matching-service.ts"]
+  JobsSvc --> DedupSvc["deduplication.ts"]
+
   ResumeRoutes --> ResumeSvc["resume service"]
   CoverLetterRoutes --> CoverLetterSvc["cover-letter service"]
   PortfolioRoutes --> PortfolioSvc["portfolio service"]
   InterviewRoutes --> InterviewSvc["interview service"]
   StudioRoutes --> StudioSvc["studio service"]
   ScraperRoutes --> ScraperSvc["scraper service"]
-  AiRoutes --> AiSvc["AI service + provider adapter chain"]
+  AiRoutes --> AiSvc["AI service + context manager"]
   GamificationRoutes --> GamificationSvc["gamification service"]
   SkillMappingRoutes --> SkillMappingSvc["skill mapping service"]
+  SkillMappingSvc --> SkillExtractor["skill-extractor.ts"]
   SearchRoutes --> SearchSvc["search service"]
   StatsRoutes --> StatsSvc["statistics service"]
   SettingsRoutes --> SettingsSvc["settings service"]
-  AutomationRoutes --> RpaRunner["rpa-runner.ts (Bun.spawn)"]
+  AutomationRoutes --> AutoSvc["application-automation-service.ts"]
+  AutoSvc --> RpaRunner["rpa-runner.ts (Bun.spawn)"]
 
   RpaRunner -->|JSON via stdin/stdout| Scraper["packages/scraper/*.py"]
   Scraper -->|result JSON| RpaRunner
@@ -117,7 +133,18 @@ flowchart TD
   ScraperSvc --> DB
   SearchSvc --> DB
   StatsSvc --> DB
-  AiSvc --> AIBackends["Local + cloud provider adapters"]
+
+  AiSvc --> AIBackends["provider-interface.ts"]
+  AIBackends --> LocalProvider["local-provider.ts"]
+  AIBackends --> OpenAIProvider["openai-provider.ts"]
+  AIBackends --> GeminiProvider["gemini-provider.ts"]
+  AIBackends --> ClaudeProvider["claude-provider.ts"]
+  AIBackends --> HuggingFaceProvider["huggingface-provider.ts"]
+  LocalProvider --> LocalModel["LOCAL_MODEL_ENDPOINT"]
+  OpenAIProvider --> OpenAIAPI["OpenAI API"]
+  GeminiProvider --> GeminiAPI["Gemini API"]
+  ClaudeProvider --> ClaudeAPI["Anthropic API"]
+  HuggingFaceProvider --> HFAPI["HuggingFace Inference API"]
 ```
 
 ## 3) Implementation principles
@@ -130,10 +157,13 @@ Each Elysia route module owns its service directly -- routes call services, serv
          ___
         |   |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         | ! |      CAUTION: Entering RPA territory
-        |___|      Automation runs are persisted to
-        /   \      automation_runs in SQLite for full
-       / BAO \     audit trail and replay capability.
-      /_______\    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        |___|
+        /   \      Automation runs are persisted to
+       / BAO \     automation_runs in SQLite for full
+      /_______\    audit trail and replay capability.
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       "Do a barrel roll!" -- but only after
+       verifying your Python venv is active.
 ```
 
 Automation execution is invoked from `automationRoutes` and routed through `application-automation-service.ts` --> `rpa-runner.ts`.
@@ -141,7 +171,7 @@ Automation execution is invoked from `automationRoutes` and routed through `appl
 ### 4.1 Execution model
 
 1. API route receives typed payload for a job apply request.
-2. Service resolves required domain entities from DB (resume and optional cover letter).
+2. `application-automation-service.ts` resolves required domain entities from DB (resume and optional cover letter).
 3. Service writes an `automation_runs` record with:
    - unique run ID
    - type (`job_apply`)
@@ -218,7 +248,13 @@ The Python entry points use these RPA primitives:
 - `r.snap("page", outputPath)`
 - `r.close()`
 
-`packages/scraper/apply_job_rpa.py` keeps all browser interaction inside these primitives and returns JSON as defined above.
+Three scripts exist in `packages/scraper/`:
+
+| Script | Purpose |
+|--------|---------|
+| `apply_job_rpa.py` | Automates job application form submission |
+| `job_scraper_gamedev.py` | Scrapes game industry job listings |
+| `studio_scraper.py` | Scrapes studio directory data |
 
 ### 4.4 Bun subprocess contract
 
@@ -230,28 +266,68 @@ The Python entry points use these RPA primitives:
 
 It passes payload to stdin, reads both stdout/stderr, and fails with structured context on non-zero exit.
 
-## 5) AI integration and provider chain
+## 5) Job provider registry
 
 ```text
-     .---------.
-    /   LOCAL   \       Provider selection order:
-   |  INFERENCE  |
-   |   SERVER    |      1. Local model (when LOCAL_MODEL_ENDPOINT is set)
-    \           /       2. Cloud adapters (OpenAI, Gemini, Claude, HuggingFace)
-     '---------'        3. Per-request validation via shared schemas
-          |
-     .----+----.
-    /  CLOUD    \       Five provider adapters:
-   | PROVIDERS   |       - packages/server/src/services/ai/local-provider.ts
-   | OpenAI      |       - packages/server/src/services/ai/openai-provider.ts
-   | Gemini      |       - packages/server/src/services/ai/gemini-provider.ts
-   | Claude      |       - packages/server/src/services/ai/claude-provider.ts
-   | HuggingFace |       - packages/server/src/services/ai/huggingface-provider.ts
-    \           /
-     '---------'        All implement provider-interface.ts
+       .-----------.
+      /  JOBS BOARD  \      "War. War never changes."
+     |  +-----------+ |      But job boards do. The provider
+     |  | Greenhouse| |      registry abstracts the differences
+     |  | Lever     | |      so the aggregator doesn't have to
+     |  | Company   | |      care which ATS you're scraping.
+     |  +-----------+ |
+      \             /
+       '-----------'
 ```
 
-### 5.1 Environment keys
+The job aggregation system lives under `packages/server/src/services/jobs/` and consists of:
+
+| File | Responsibility |
+|------|---------------|
+| `job-aggregator.ts` | Orchestrates fetching across all registered providers |
+| `matching-service.ts` | Scores job listings against user profile and skills |
+| `deduplication.ts` | Deduplicates listings that appear on multiple boards |
+| `providers/provider-interface.ts` | Common interface all providers implement |
+| `providers/provider-registry.ts` | Registry for adding/removing providers at runtime |
+| `providers/greenhouse.ts` | Greenhouse ATS integration |
+| `providers/lever.ts` | Lever ATS integration |
+| `providers/company-board.ts` | Direct company career page scraping |
+| `providers/company-boards-config.ts` | Configuration for known company board URLs |
+| `providers/gaming-providers.ts` | Game-industry-specific board aggregation |
+
+The aggregator calls each registered provider, deduplicates results, runs matching against the user's resume/skills profile, and persists to the `jobs` schema in SQLite.
+
+## 6) AI integration and provider chain
+
+```text
+                    .-------------.
+                   /    CHOOSE     \
+                  /    YOUR CLASS   \
+                 /                   \
+                |  [1] Local Mage     |
+                |  [2] OpenAI Knight  |
+                |  [3] Gemini Ranger  |      "Would you kindly"
+                |  [4] Claude Healer  |       configure at least
+                |  [5] HF Summoner   |       one provider?
+                 \                   /
+                  \_________________/
+```
+
+The AI subsystem lives under `packages/server/src/services/ai/` with these files:
+
+| File | Responsibility |
+|------|---------------|
+| `ai-service.ts` | Main service, routes requests to the active provider |
+| `provider-interface.ts` | Common interface all providers implement |
+| `local-provider.ts` | Connects to a local inference server (Ollama, LM Studio, etc.) |
+| `openai-provider.ts` | OpenAI API adapter |
+| `gemini-provider.ts` | Google Gemini API adapter |
+| `claude-provider.ts` | Anthropic Claude API adapter |
+| `huggingface-provider.ts` | HuggingFace Inference API adapter |
+| `context-manager.ts` | Manages conversation history and context windows |
+| `prompts.ts` | Prompt templates for resume review, interview prep, cover letters |
+
+### 6.1 Environment keys
 
 - `LOCAL_MODEL_ENDPOINT` -- local inference server URL
 - `LOCAL_MODEL_NAME` -- model identifier for local provider
@@ -260,15 +336,39 @@ It passes payload to stdin, reads both stdout/stderr, and fails with structured 
 - `CLAUDE_API_KEY` -- optional cloud Anthropic
 - `HUGGINGFACE_TOKEN` -- optional cloud HuggingFace
 
-### 5.2 Provider selection
+### 6.2 Provider selection
 
 1. Local provider is used when `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` are set.
 2. Cloud adapters are selected based on which API keys are configured.
-3. The AI context manager (`context-manager.ts`) handles conversation state and prompt construction (`prompts.ts`).
+3. The AI context manager handles conversation state and prompt construction.
 
 All AI calls are server-owned. The client communicates through API routes and WebSocket endpoints, never directly to AI providers.
 
-## 6) Install and local setup
+## 7) Additional server services
+
+```text
+     ____________________________
+    |     SERVICE INVENTORY      |
+    |____________________________|
+    |                            |
+    | "I used to be an          |
+    |  adventurer like you,     |
+    |  then I took a service    |
+    |  layer to the knee."      |
+    |____________________________|
+```
+
+Beyond the route-specific services, the server includes:
+
+| Service | File | Purpose |
+|---------|------|---------|
+| CV Questionnaire | `cv-questionnaire-service.ts` | Guided questionnaire flow for building resume data |
+| Data Service | `data-service.ts` | Shared data access patterns across services |
+| Export Service | `export-service.ts` | Export resumes, portfolios, and cover letters to PDF/JSON |
+| Skill Extractor | `skill-extractor.ts` | Extracts and normalizes skills from job listings and resumes |
+| Skill Mapping | `skill-mapping-service.ts` | Maps user skills to job requirements for match scoring |
+
+## 8) Install and local setup
 
 ```text
               ,    ,
@@ -281,7 +381,7 @@ All AI calls are server-owned. The client communicates through API routes and We
        /___|___||||___|___\
 ```
 
-### 6.1 Prerequisites
+### 8.1 Prerequisites
 
 | Required              | Version      | Purpose                        |
 |-----------------------|-------------|-------------------------------|
@@ -292,7 +392,35 @@ All AI calls are server-owned. The client communicates through API routes and We
 
 Optional: `curl` and `jq` for command-line diagnostics.
 
-### 6.2 Clone and install
+### 8.2 Automated setup (recommended)
+
+One command handles prerequisites check, dependency install, Python venv, database setup, and verification:
+
+**macOS / Linux:**
+```bash
+git clone https://github.com/d4551/baobuildbuddy.git
+cd baobuildbuddy
+bash scripts/setup.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/d4551/baobuildbuddy.git
+cd baobuildbuddy
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
+```
+
+The setup scripts will:
+1. Verify all prerequisites (Bun, Git, Python 3.10+, Chrome)
+2. Run `bun install`
+3. Create Python venv and install RPA dependencies
+4. Copy `.env.example` to `.env` if it doesn't exist
+5. Run `db:generate` and `db:push`
+6. Run typecheck and lint
+
+### 8.3 Manual setup (step-by-step)
+
+If you prefer manual control, follow these steps:
 
 ```bash
 cd /path/to/workspace
@@ -301,7 +429,7 @@ cd baobuildbuddy
 bun install
 ```
 
-### 6.3 Python environment setup
+**Python environment:**
 
 ```bash
 python3 -m venv .venv
@@ -310,7 +438,7 @@ python -m pip install --upgrade pip
 python -m pip install -r packages/scraper/requirements.txt
 ```
 
-### 6.4 Environment bootstrap
+**Environment file:**
 
 ```bash
 cp .env.example .env
@@ -318,18 +446,31 @@ cp .env.example .env
 
 Edit `.env` with your environment-specific values. Defaults are already defined in source config files -- you only need to set what differs from defaults.
 
-### 6.5 Source-of-truth config files
+### 8.5 Source-of-truth config files
 
 | File                                     | Governs                        |
 |------------------------------------------|-------------------------------|
 | `packages/server/src/config/env.ts`      | Server environment validation  |
+| `packages/server/src/config/paths.ts`    | File system paths used by server |
 | `packages/client/nuxt.config.ts`         | Client runtime config, proxy, modules |
 | `packages/scraper/requirements.txt`      | Python RPA dependencies        |
 | `.env.example`                           | Template for all env vars      |
 
-## 7) Configuration reference
+## 9) Configuration reference
 
-### 7.1 Server (`.env`)
+```text
+      .---------.
+     | .-------. |      ~~~ OPTIONS MENU ~~~
+     | |  .env | |
+     | |       | |      Every configurable value lives
+     | '-------' |      in .env or a source-of-truth
+     '----( )----'      config file. Nothing is hardcoded.
+          | |
+          | |           "Hey! Listen!" -- set your
+          '-'            LOCAL_MODEL_ENDPOINT first.
+```
+
+### 9.1 Server (`.env`)
 
 | Key | Purpose | Details |
 |-----|---------|---------|
@@ -340,7 +481,7 @@ Edit `.env` with your environment-specific values. Defaults are already defined 
 | `CORS_ORIGINS` | Comma-separated allowed origins | Defaults include localhost variants |
 | `BAO_DISABLE_AUTH` | Disable auth for local dev | Set `true` or `1` to skip auth checks |
 
-### 7.2 Client (`.env`)
+### 9.2 Client (`.env`)
 
 | Key | Purpose |
 |-----|---------|
@@ -351,7 +492,7 @@ Edit `.env` with your environment-specific values. Defaults are already defined 
 | `NUXT_PUBLIC_QUERY_RETRY_COUNT` | TanStack Query retry budget |
 | `NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS` | Refetch on window focus |
 
-### 7.3 AI provider keys
+### 9.3 AI provider keys
 
 | Key | Purpose |
 |-----|---------|
@@ -362,20 +503,22 @@ Edit `.env` with your environment-specific values. Defaults are already defined 
 | `CLAUDE_API_KEY` | Anthropic Claude cloud provider |
 | `HUGGINGFACE_TOKEN` | HuggingFace Inference API |
 
-## 8) Start procedures
+## 10) Start procedures
 
 ```text
      _____________
     |  ___  ___  |
     | | 1 || 2 | |      PLAYER SELECT
     | |___||___| |
-    |  ___  ___  |      1 = Full stack (bun run dev)
-    | | 3 || 4 | |      2 = Server only
-    | |___||___| |      3 = Client only
+    |  ___  ___  |      1 = Full stack   (bun run dev)
+    | | 3 || 4 | |      2 = Server only  (bun run dev:server)
+    | |___||___| |      3 = Client only  (bun run dev:client)
     |_____________|      4 = Split terminals
+
+     "Press START to begin"
 ```
 
-### 8.1 Full stack (recommended)
+### 10.1 Full stack (recommended)
 
 ```bash
 bun run dev
@@ -385,7 +528,7 @@ Runs both services in parallel:
 - `bun run dev:server` (packages/server on `PORT`, default 3000)
 - `bun run dev:client` (packages/client, default 3001)
 
-### 8.2 Split terminal startup
+### 10.2 Split terminal startup
 
 Terminal 1:
 ```bash
@@ -397,7 +540,7 @@ Terminal 2:
 bun run dev:client
 ```
 
-### 8.3 Expected endpoints
+### 10.3 Expected endpoints
 
 | Endpoint | Default | Config key |
 |----------|---------|-----------|
@@ -406,7 +549,23 @@ bun run dev:client
 | Chat WebSocket | `ws://localhost:3000/api/ws/chat` | derived from API base |
 | Interview WebSocket | `ws://localhost:3000/api/ws/interview` | derived from API base |
 
-## 9) End-to-end verification
+### 10.4 All available scripts
+
+| Script | Command | Purpose |
+|--------|---------|---------|
+| Dev (full) | `bun run dev` | Start server + client in parallel |
+| Dev server | `bun run dev:server` | Start API server only |
+| Dev client | `bun run dev:client` | Start Nuxt client only |
+| Build | `bun run build` | Build shared, server, and client |
+| Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
+| Test | `bun run test` | Run test suites for server and client |
+| Lint | `bun run lint` | Biome linter check |
+| Lint fix | `bun run lint:fix` | Auto-fix lint issues |
+| DB generate | `bun run db:generate` | Generate Drizzle migration files |
+| DB push | `bun run db:push` | Push schema changes to SQLite |
+| DB studio | `bun run db:studio` | Open Drizzle Studio GUI for database inspection |
+
+## 11) End-to-end verification
 
 ```text
          ______
@@ -415,10 +574,10 @@ bun run dev:client
         |______|      Before you open the UI, run these
          /    \       verification checks. Every check that
         /  ()  \      passes is XP earned. Every check
-       /________\     skipped is a ghost that haunts you later.
+       /________\     skipped is a Boo that haunts you later.
 ```
 
-### 9.1 Build and lint checks
+### 11.1 Build and lint checks
 
 ```bash
 bun run typecheck
@@ -426,20 +585,22 @@ bun run lint
 bun run test
 ```
 
-### 9.2 Database setup
+### 11.2 Database setup
 
 ```bash
 bun run db:generate
 bun run db:push
 ```
 
-### 9.3 ASCII geometry validation
+The seed directory (`packages/server/src/db/seed/`) contains initial data for gaming studios and industry data to bootstrap the database.
+
+### 11.3 ASCII geometry validation
 
 ```bash
 bun run scripts/validate-ascii-geometry.ts README.md
 ```
 
-### 9.4 Live service checks
+### 11.4 Live service checks
 
 ```bash
 API_BASE="${NUXT_PUBLIC_API_BASE:-http://localhost:3000}"
@@ -450,7 +611,7 @@ curl -fsS "${API_BASE}/api/automation/runs" | head
 curl -fsS "${API_BASE}/api/stats" | head
 ```
 
-### 9.5 Route health matrix
+### 11.5 Route health matrix
 
 | Endpoint | Purpose | Expected response |
 |----------|---------|-------------------|
@@ -458,59 +619,143 @@ curl -fsS "${API_BASE}/api/stats" | head
 | `/api/auth/status` | Auth state | Whether auth system is initialized |
 | `/api/studio` | Studio data | Studio list structure |
 | `/api/jobs` | Job search | Paginated job list |
+| `/api/resume` | Resume CRUD | Resume list or creation response |
+| `/api/cover-letter` | Cover letter CRUD | Cover letter list or creation response |
+| `/api/portfolio` | Portfolio CRUD | Portfolio project list |
+| `/api/interview` | Interview sessions | Interview history |
+| `/api/gamification` | XP and achievements | Gamification state payload |
+| `/api/skill-mapping` | Skill analysis | Skill mapping and gap analysis |
 | `/api/automation/runs` | Automation audit | Persisted run records |
 | `/api/stats` | Usage statistics | Aggregate stat payload |
 | `/api/ws/chat` | AI chat | WebSocket upgrade handshake |
 | `/api/ws/interview` | Mock interview | WebSocket upgrade handshake |
 
-## 10) Project structure
+## 12) Project structure
+
+```text
+     "The right man in the wrong place
+      can make all the difference in the world."
+      -- But the right file in the wrong directory? Not so much.
+```
 
 ```text
     baobuildbuddy/
     +-- packages/
-    |   +-- server/              Bun + Elysia API server
+    |   +-- server/                 Bun + Elysia API server
     |   |   +-- src/
-    |   |   |   +-- routes/      16 route modules (auth, jobs, resume, AI, automation...)
-    |   |   |   +-- services/    Business logic layer
-    |   |   |   |   +-- ai/      5 provider adapters + context manager + prompts
-    |   |   |   |   +-- automation/  RPA runner + application automation service
-    |   |   |   |   +-- jobs/    Aggregator + matching + dedup + provider registry
+    |   |   |   +-- routes/         16 route modules + test files
+    |   |   |   |   +-- auth.routes.ts
+    |   |   |   |   +-- user.routes.ts
+    |   |   |   |   +-- settings.routes.ts
+    |   |   |   |   +-- jobs.routes.ts
+    |   |   |   |   +-- resume.routes.ts
+    |   |   |   |   +-- cover-letter.routes.ts
+    |   |   |   |   +-- portfolio.routes.ts
+    |   |   |   |   +-- interview.routes.ts
+    |   |   |   |   +-- studio.routes.ts
+    |   |   |   |   +-- scraper.routes.ts
+    |   |   |   |   +-- ai.routes.ts
+    |   |   |   |   +-- gamification.routes.ts
+    |   |   |   |   +-- skill-mapping.routes.ts
+    |   |   |   |   +-- search.routes.ts
+    |   |   |   |   +-- stats.routes.ts
+    |   |   |   |   +-- automation.routes.ts
+    |   |   |   +-- services/       Business logic layer
+    |   |   |   |   +-- ai/         5 provider adapters + context manager + prompts
+    |   |   |   |   +-- automation/ application-automation-service.ts, rpa-runner.ts
+    |   |   |   |   +-- jobs/       Aggregator, matching, dedup, provider registry
+    |   |   |   |   |   +-- providers/  greenhouse, lever, company-board, gaming-providers
+    |   |   |   |   +-- resume-service.ts
+    |   |   |   |   +-- cover-letter-service.ts
+    |   |   |   |   +-- portfolio-service.ts
+    |   |   |   |   +-- interview-service.ts
+    |   |   |   |   +-- gamification-service.ts
+    |   |   |   |   +-- scraper-service.ts
+    |   |   |   |   +-- search-service.ts
+    |   |   |   |   +-- statistics-service.ts
+    |   |   |   |   +-- export-service.ts
+    |   |   |   |   +-- data-service.ts
+    |   |   |   |   +-- cv-questionnaire-service.ts
+    |   |   |   |   +-- skill-extractor.ts
+    |   |   |   |   +-- skill-mapping-service.ts
     |   |   |   +-- db/
-    |   |   |   |   +-- schema/  14 Drizzle schema files (users, jobs, resumes, automation_runs...)
+    |   |   |   |   +-- schema/     13 Drizzle schema files
+    |   |   |   |   |   +-- user.ts, auth.ts, resumes.ts, cover-letters.ts
+    |   |   |   |   |   +-- portfolios.ts, interviews.ts, studios.ts, jobs.ts
+    |   |   |   |   |   +-- skill-mappings.ts, gamification.ts, settings.ts
+    |   |   |   |   |   +-- automation-runs.ts, chat-history.ts
     |   |   |   |   +-- migrations/
-    |   |   |   |   +-- seed/
-    |   |   |   +-- middleware/  auth, error-handler, logger
-    |   |   |   +-- ws/          chat.ws.ts, interview.ws.ts
-    |   |   |   +-- config/      env.ts (validation), paths.ts
-    |   +-- client/              Nuxt 3 SSR application
-    |   |   +-- pages/           28 page components across 8 feature areas
-    |   |   +-- components/      25 Vue components (AI, resume, jobs, interview, layout, UI)
-    |   |   +-- composables/     24 composables (useJobs, useAI, useAutomation, useResume...)
-    |   |   +-- plugins/         vue-query, toast, eden (Elysia client)
-    |   |   +-- middleware/      auth guard
-    |   |   +-- layouts/         default, onboarding
-    |   +-- shared/              Cross-package contracts
+    |   |   |   |   +-- seed/       Initial gaming data and studio records
+    |   |   |   |   +-- client.ts, init.ts
+    |   |   |   +-- middleware/     auth.ts, error-handler.ts, logger.ts
+    |   |   |   +-- ws/             chat.ws.ts, interview.ws.ts
+    |   |   |   +-- config/         env.ts (validation), paths.ts
+    |   +-- client/                 Nuxt 3 SSR application
+    |   |   +-- pages/              28 page components across 10 feature areas
+    |   |   +-- components/         25 Vue components
+    |   |   |   +-- ai/             AIChatBubble, AIStreamingResponse, BaoFairy
+    |   |   |   +-- resume/         ResumePreview, ExperienceList, PersonalInfoForm,
+    |   |   |   |                   SkillsEditor, EducationList
+    |   |   |   +-- jobs/           JobCard, JobMatchScore, JobSearchBar, JobFilters
+    |   |   |   +-- interview/      InterviewChat, ScoreCard, StudioSelector
+    |   |   |   +-- gamification/   DailyChallenge, XPBar, AchievementBadge
+    |   |   |   +-- portfolio/      PortfolioGrid, ProjectCard
+    |   |   |   +-- layout/         AppNavbar, AppSidebar, AppDock
+    |   |   |   +-- ui/             ConfirmDialog, LoadingSkeleton
+    |   |   +-- composables/        22 composables
+    |   |   |   +-- useApi, useAuth, useUser, useSettings, useSettingsQuery
+    |   |   |   +-- useTheme, useWebSocket, useSpeech, useTTS, useSTT
+    |   |   |   +-- useJobs, useSearch, useResume, useCoverLetter
+    |   |   |   +-- usePortfolio, useStudio, useInterview, useAI
+    |   |   |   +-- useAutomation, useGamification, useSkillMapping, useStatistics
+    |   |   +-- plugins/            vue-query.ts, toast.client.ts, eden.ts
+    |   |   +-- middleware/         auth.ts (client-side auth guard)
+    |   |   +-- layouts/            default.vue, onboarding.vue
+    |   |   +-- utils/              errors.ts
+    |   |   +-- types/              nuxt.d.ts, speech.d.ts
+    |   |   +-- assets/css/         main.css
+    |   +-- shared/                 Cross-package contracts
     |   |   +-- src/
-    |   |   |   +-- types/       13 type definition files
-    |   |   |   +-- schemas/     5 validation schemas (user, resume, job, interview, settings)
-    |   |   |   +-- constants/   7 constant files (gaming roles, technologies, XP levels, salary...)
-    |   |   |   +-- utils/       4 utility modules (validation, dates, salary parsing, resume transform)
-    |   +-- scraper/             Python RPA scripts
+    |   |   |   +-- types/          12 type definition files
+    |   |   |   |   +-- user, ai, resume, interview, jobs, cover-letter
+    |   |   |   |   +-- portfolio, studio, gamification, skill-mapping
+    |   |   |   |   +-- settings, search
+    |   |   |   +-- schemas/        5 validation schemas
+    |   |   |   |   +-- user.schema, resume.schema, job.schema
+    |   |   |   |   +-- interview.schema, settings.schema
+    |   |   |   +-- constants/      7 constant files
+    |   |   |   |   +-- ai, branding, gaming-roles, gaming-technologies
+    |   |   |   |   +-- salary-ranges, state-keys, xp-levels
+    |   |   |   +-- utils/          4 utility modules
+    |   |   |       +-- validation, date-helpers, salary-parser, resume-transform
+    |   +-- scraper/                Python RPA scripts
     |       +-- apply_job_rpa.py
     |       +-- job_scraper_gamedev.py
     |       +-- studio_scraper.py
     |       +-- requirements.txt
     +-- scripts/
-    |   +-- validate-ascii-geometry.ts
+    |   +-- setup.sh                    Automated setup for macOS / Linux
+    |   +-- setup.ps1                   Automated setup for Windows (PowerShell)
+    |   +-- validate-ascii-geometry.ts  ASCII art geometry checker
     +-- .env.example
     +-- package.json
     +-- drizzle.config.ts
     +-- biome.json
 ```
 
-## 11) Client pages and features
+## 13) Client pages and features
 
-The Nuxt client provides 28 pages organized by feature:
+```text
+       _____________________
+      |  _______________    |
+      | |               |   |     "All your base
+      | |  WORLD MAP    |   |      are belong to us."
+      | |               |   |
+      | |  10 regions   |   |      Navigate 28 pages across
+      | |  28 zones     |   |      10 feature areas.
+      | |_______________|   |
+      |_____________________|
+```
 
 | Feature area | Pages | Key composables |
 |-------------|-------|-----------------|
@@ -530,6 +775,8 @@ The Nuxt client provides 28 pages organized by feature:
 - SSR-first data loading by default; composables for client-side interactivity.
 - `useFetch` for route/page-level data, `$fetch` for user-triggered actions.
 - Async state (`idle`, `pending`, `success`, `error`) mapped to daisyUI components (`loading`, `alert`, `stat`, `card`, `table`).
+- The Elysia Eden client (`plugins/eden.ts`) provides end-to-end type safety between Nuxt and the API.
+- TanStack Vue Query (`plugins/vue-query.ts`) manages cache, stale time, and retry for all API calls.
 
 ### daisyUI component references
 
@@ -540,18 +787,47 @@ The Nuxt client provides 28 pages organized by feature:
 - https://daisyui.com/components/alert/
 - https://daisyui.com/components/loading/
 
-## 12) Troubleshooting
+## 14) Database schema
+
+```text
+      .-----------.
+     /             \       "A man chooses. A slave obeys."
+    |   13 TABLES   |       But a schema migrates.
+    |   IN SQLite   |
+     \             /       All tables are defined in
+      '-----------'        packages/server/src/db/schema/
+```
+
+| Schema file | Tables | Purpose |
+|------------|--------|---------|
+| `user.ts` | users | User accounts and profiles |
+| `auth.ts` | auth tokens | Authentication sessions and tokens |
+| `resumes.ts` | resumes | Resume data with structured sections |
+| `cover-letters.ts` | cover_letters | Generated and custom cover letters |
+| `portfolios.ts` | portfolios, portfolio_projects | Portfolio collections and individual projects |
+| `interviews.ts` | interviews, interview_messages | Mock interview sessions and transcript history |
+| `studios.ts` | studios | Game studio directory |
+| `jobs.ts` | jobs | Aggregated job listings from all providers |
+| `skill-mappings.ts` | skill_mappings | User skill profiles and gap analysis |
+| `gamification.ts` | achievements, xp_events | XP tracking, achievements, daily challenges |
+| `settings.ts` | settings | User preferences and app configuration |
+| `automation-runs.ts` | automation_runs | RPA execution audit trail with input/output snapshots |
+| `chat-history.ts` | chat_messages | AI conversation history |
+
+Migrations are in `packages/server/src/db/migrations/`. Seed data (`packages/server/src/db/seed/`) provides initial gaming studio records and industry reference data.
+
+## 15) Troubleshooting
 
 ```text
         .--------.
        / YOU DIED \       Don't panic. Check the matrix below.
       |  ________  |      Every problem has a save file.
       | |CONTINUE| |
-      | |________| |
-       \__________/
+      | |________| |      "Had to be me. Someone else might
+       \__________/        have gotten it wrong." -- debug carefully.
 ```
 
-### 12.1 API does not start
+### 15.1 API does not start
 
 | Check | Command / action |
 |-------|-----------------|
@@ -560,7 +836,7 @@ The Nuxt client provides 28 pages organized by feature:
 | DB path writable? | Verify parent directory of `DB_PATH` exists and is writable |
 | Detailed logs | Set `LOG_LEVEL=debug` in `.env` and restart |
 
-### 12.2 Client cannot reach API
+### 15.2 Client cannot reach API
 
 | Check | Command / action |
 |-------|-----------------|
@@ -569,7 +845,7 @@ The Nuxt client provides 28 pages organized by feature:
 | CORS issue? | Ensure `CORS_ORIGINS` includes client origin |
 | Server running? | `curl http://localhost:3000/api/health` |
 
-### 12.3 WebSocket handshake fails
+### 15.3 WebSocket handshake fails
 
 | Check | Command / action |
 |-------|-----------------|
@@ -577,7 +853,7 @@ The Nuxt client provides 28 pages organized by feature:
 | Routes registered? | Server logs should show `/api/ws/chat` and `/api/ws/interview` |
 | Firewall blocking? | Test with `wscat -c ws://localhost:3000/api/ws/chat` |
 
-### 12.4 RPA automation fails
+### 15.4 RPA automation fails
 
 | Check | Command / action |
 |-------|-----------------|
@@ -586,23 +862,33 @@ The Nuxt client provides 28 pages organized by feature:
 | Script output? | Check server logs for stdout/stderr from subprocess |
 | Run record? | Query `/api/automation/runs` for the run ID, check `error` and `screenshots` |
 
-### 12.5 AI providers not responding
+### 15.5 AI providers not responding
 
 | Check | Command / action |
 |-------|-----------------|
 | Keys configured? | Verify API keys are set in `.env` |
-| Local model running? | Confirm `LOCAL_MODEL_ENDPOINT` is reachable |
+| Local model running? | `curl ${LOCAL_MODEL_ENDPOINT}/api/tags` or equivalent health check |
 | Provider logs? | Set `LOG_LEVEL=debug` and check AI service output |
+| Context overflow? | `context-manager.ts` may be truncating -- check conversation length |
 
-## 13) ASCII art and geometry validation
+### 15.6 Job aggregation returns empty results
 
-All ASCII art blocks in this document use consistent box geometry. After editing any ASCII block, validate:
+| Check | Command / action |
+|-------|-----------------|
+| Providers registered? | Check server logs for provider registration on startup |
+| Network access? | Verify outbound HTTP to Greenhouse/Lever APIs |
+| DB seeded? | Run seed if studios table is empty |
+| Dedup too aggressive? | Check `deduplication.ts` thresholds |
+
+## 16) ASCII art and geometry validation
+
+All ASCII art blocks in this document use consistent formatting. After editing any ASCII block, validate:
 
 ```bash
 bun run scripts/validate-ascii-geometry.ts README.md
 ```
 
-## 14) Final checklist
+## 17) Final checklist
 
 ```text
     ========================================
@@ -615,7 +901,7 @@ bun run scripts/validate-ascii-geometry.ts README.md
     |  ,%.-"""--,         to defeat this   |
     |  %%/      |         boss and go live.|
     |  %'  \   /                           |
-    |   |  /   |                           |
+    |   |  /   |          "Finish Him!"    |
     |   |  |   |                           |
     ========================================
 ```
@@ -646,13 +932,19 @@ bun run scripts/validate-ascii-geometry.ts README.md
     |  | |  | || | ___) |__) | | |_| | |\  |     |
     |  |_|  |_|___|____/____/___\___/|_| \_|     |
     |                                             |
-    |   ____ ___  __  __ ____  _     _____ _____ ___|
-    |  / ___/ _ \|  \/  |  _ \| |   | ____|_   _| __|
-    | | |  | | | | |\/| | |_) | |   |  _|   | | |  _|
-    | | |__| |_| | |  | |  __/| |___| |___  | | | |__|
-    |  \____\___/|_|  |_|_|   |_____|_____| |_| |____|
+    |   ____ ___  __  __ ____  _     _____ _____  |
+    |  / ___/ _ \|  \/  |  _ \| |   | ____|_   _| |
+    | | |  | | | | |\/| | |_) | |   |  _|   | |   |
+    | | |__| |_| | |  | |  __/| |___| |___  | |   |
+    |  \____\___/|_|  |_|_|   |_____|_____| |_|   |
     |                                             |
     |          BaoBuildBuddy v1.0 is ready.       |
+    |                                             |
+    |          "Thank you Mario!                  |
+    |           But our princess is in            |
+    |           another castle."                  |
+    |                                             |
+    |          Just kidding. You're done.         |
     |                                             |
     +=============================================+
 ```
