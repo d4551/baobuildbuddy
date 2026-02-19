@@ -80,8 +80,8 @@ transport bridge is used for local setup. Every command in this guide is Bun-nat
 
 ```text
  +----------------------------+
- |  /\_/\\                    |
- | ( o o )   if (health.ok && |
+ |  /\___/\                   |
+ | (  o o  ) if (health.ok && |
  |  \  -  /   schema.synced)  |
  |   `---'   runBossFight();  |
  +----------------------------+
@@ -173,19 +173,6 @@ for runtime defaults and parsing behavior.
 | `HUGGINGFACE_TOKEN` | Server/Settings | Hugging Face token (optional) | empty |
 | `LOCAL_MODEL_ENDPOINT` | Server/Settings | Local model endpoint | `http://localhost:8080/v1` |
 | `LOCAL_MODEL_NAME` | Server/Settings | Local default model name | `llama3.2` |
-
-```text
- +-------------------------------------+
- |                 XP GAIN             |
- +-------------------------------------+
- |                   |                 |
- +-------------------------------------+
- |       /\_/\\            /\_/\\      |
- |      (  o o )         (  o o )      |
- |       \\  ###  /\\  ### /           |
- |        \\_____/  \\_____/           |
- +-------------------------------------+
-```
 
 ### 5) Start local services
 
@@ -281,10 +268,10 @@ application code or tests.
  |                  /       \  "Critical missions require      |
  |                 |  O   O  |  reliable defaults."            |
  |                 |   \_/   |                                 |
- |                 |  / \    |          /\                     |
- |                 |_/   \___|         /  \     /\\            |
- |                   | .-. |         |  |___/     \\           |
- |                   |/   \|        |            /\\           |
+ |                 |  /   \  |                                 |
+ |                 |_________|                                 |
+ |                   | .-. |                                   |
+ |                   |/   \|                                   |
  |                      "HARD MODE ACTIVE"                     |
  +-------------------------------------------------------------+
 ```
@@ -348,9 +335,9 @@ application code or tests.
  +---------------------------+
  |            READY          |
  +---------------------------+
- |        .----------.       |
- |       /   .--.     \      |
- |      /   (OK) \     \     |
+ |        .-------.          |
+ |       /  .--.    \        |
+ |      /   (OK)     \       |
  |     +-------------+       |
  |     |   PLAYER    |       |
  |     |    CHECK    |       |
@@ -472,12 +459,12 @@ What the validator enforces:
 
 ```text
  +--------------------------------------------------------+
- |               /\            /\                         |
+ |               /\          /\                           |
  |              /  \        /  \                          |
  |     /\      /____\______/____\      /\                 |
  |    /  \____|  @@  |    |  @@  |____/  \                |
- |   /       /      \    /      \      \                  |
- |  /       /        \  /        \       \                |
+ |   /       /      \    /      \         \               |
+ |  /       /        \  /        \         \              |
  +--------------------------------------------------------+
  |         LEVEL: LOCAL SETUP                             |
  |         BAO-UI / API CORE                              |
@@ -491,10 +478,10 @@ What the validator enforces:
  |   .-"-.          .-"-.          .-"-.          .-"-.      |
  |  /     \        /     \        /     \        /     \     |
  | | M E M |      | 8 B I |      | T R E |      | Q U E |    |
- | |  E S  |      |  T    |      |  A S U|      | S T   |    |
- |  \     /        \     /        \     /        \     /     |
+ | |  E S  |      |  T    |      | A S U |      | S T   |    |
+ |  \     /        \     /        \ R E /        \     /     |
  |   `---'          `---'          `---'          `---'      |
- |      M E M E S     8 B I T     T R E A S U R E   QUEST    |
+ |                                                           |
  +-----------------------------------------------------------+
 ```
 
@@ -507,10 +494,3 @@ What the validator enforces:
  |            +-------+   +-----------+           |
  +------------------------------------------------+
 ```
-
-References:
-
-- The setup flow mirrors classic RPG onboarding patterns (prepare, equip, and boss-fight the first run).
-- `healthcheck`, migration, and test scripts should be treated like a game loop:
-  - `init` -> `play` -> `save` -> `respawn fast`.
-- If this setup fails, it behaves like a speedrunner’s trial room: clear diagnostics first, no hidden magic.
