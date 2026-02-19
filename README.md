@@ -410,13 +410,22 @@ cd baobuildbuddy
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
 
+**Setup script flags:**
+
+| Flag | Bash | PowerShell | Effect |
+|------|------|-----------|--------|
+| Skip verification | `--skip-checks` | `-SkipChecks` | Skip typecheck, lint, and test runs |
+| Skip Python | `--skip-python` | `-SkipPython` | Skip venv creation (Bun-only install) |
+| Help | `--help` | `-Help` | Print usage and exit |
+
 The setup scripts will:
-1. Verify all prerequisites (Bun, Git, Python 3.10+, Chrome)
+1. Detect OS and architecture, verify all prerequisites (Bun, Git, Python 3.10+, Chrome)
 2. Run `bun install`
-3. Create Python venv and install RPA dependencies
+3. Create Python venv, install RPA dependencies, verify `rpa` module import
 4. Copy `.env.example` to `.env` if it doesn't exist
 5. Run `db:generate` and `db:push`
-6. Run typecheck and lint
+6. Run typecheck, lint, and tests
+7. Print summary with error/warning counts
 
 ### 8.3 Manual setup (step-by-step)
 
@@ -924,27 +933,27 @@ bun run scripts/validate-ascii-geometry.ts README.md
 - [ ] `bun run scripts/validate-ascii-geometry.ts README.md` passes
 
 ```text
-    +=========================================================+
-    |                                                         |
-    |   __  __ ___ ____ ____ ___ ___  _   _                   |
-    |  |  \/  |_ _/ ___/ ___|_ _/ _ \| \ | |                  |
-    |  | |\/| || |\___ \___ \| | | | |  \| |                  |
-    |  | |  | || | ___) |__) | | |_| | |\  |                  |
-    |  |_|  |_|___|____/____/___\___/|_| \_|                  |
-    |                                                         |
-    |    ____ ___  __  __ ____  _     _____ _____ _____        |
-    |   / ___/ _ \|  \/  |  _ \| |   | ____|_   _| ____|      |
-    |  | |  | | | | |\/| | |_) | |   |  _|   | | |  _|        |
-    |  | |__| |_| | |  | |  __/| |___| |___  | | | |___       |
-    |   \____\___/|_|  |_|_|   |_____|_____| |_| |_____|      |
-    |                                                         |
-    |              BaoBuildBuddy v1.0 is ready.               |
-    |                                                         |
-    |              "Thank you Mario!                          |
-    |               But our princess is in                    |
-    |               another castle."                          |
-    |                                                         |
-    |              Just kidding. You're done.                 |
-    |                                                         |
-    +=========================================================+
+  +============================================================+
+  |                                                            |
+  |    __  __ ___ ____ ____ ___ ___  _   _                     |
+  |   |  \/  |_ _/ ___/ ___|_ _/ _ \| \ | |                   |
+  |   | |\/| || |\___ \___ \| | | | |  \| |                   |
+  |   | |  | || | ___) |__) | | |_| | |\  |                   |
+  |   |_|  |_|___|____/____/___\___/|_| \_|                   |
+  |                                                            |
+  |     ____ ___  __  __ ____  _     _____ _____ _____         |
+  |    / ___/ _ \|  \/  |  _ \| |   | ____|_   _| ____|       |
+  |   | |  | | | | |\/| | |_) | |   |  _|   | | |  _|         |
+  |   | |__| |_| | |  | |  __/| |___| |___  | | | |___        |
+  |    \____\___/|_|  |_|_|   |_____|_____| |_| |_____|       |
+  |                                                            |
+  |               BaoBuildBuddy v1.0 is ready.                 |
+  |                                                            |
+  |               "Thank you Mario!                            |
+  |                But our princess is in                       |
+  |                another castle."                            |
+  |                                                            |
+  |               Just kidding. You're done.                   |
+  |                                                            |
+  +============================================================+
 ```
