@@ -1,7 +1,7 @@
 ```text
 +-------------------------------+
-|  BaoBuildBuddy Local Setup    |
-|  Build order: setup → verify  |
+|  BaoBuildBuddy v1.0.0         |
+|  Initial release setup guide  |
 +-------------------------------+
 ```
 
@@ -44,8 +44,8 @@ flowchart TB
     Contracts[contracts, schemas]
   end
 
-  subgraph Data[(Data)]
-    SQLite[(SQLite via bun:sqlite)]
+  subgraph Data["Data"]
+    SQLite["SQLite via bun.sqlite"]
   end
 
   subgraph External[External]
@@ -148,7 +148,7 @@ cp .env.example .env
 - Uses direct JSON over subprocess stdin/stdout for script contracts.
 - Uses direct Elysia contracts and shared models in `packages/shared`.
 - Uses Nuxt-native fetch primitives (`useFetch` for SSR-capable reads, `$fetch` for user actions).
-- No Node shims, no wrapper transport layer, no legacy proxy service in between.
+- No Node shims, no wrapper transport layer, no proxy service in between.
 - No hardcoded URLs for service routing in the app logic; runtime config and constants are the source.
 
 ## 4) Environment-specific runbook
@@ -227,7 +227,7 @@ Automation execution state is persisted in `automation_runs` and surfaced via:
 - `GET /api/automation/runs`
 - `GET /api/automation/runs/:id`
 
-The architecture keeps automation explicit and typed through direct calls, shared schema, and direct DB insert/update operations.
+The architecture keeps automation explicit and typed through direct calls, shared schema, and direct DB insert/write operations.
 
 ## 7) Contracts, anti-pattern checks, and no hardcodes
 
@@ -246,7 +246,7 @@ The architecture keeps automation explicit and typed through direct calls, share
 - manual socket HTTP transport for local Python execution
 - custom client layer that bypasses `useFetch/$fetch`
 - inline API base rewriting in components
-- legacy naming leftovers in docs and examples
+- inconsistent naming in docs and examples
 
 ## 8) UI/UX implementation notes (daisyUI + Nuxt)
 
@@ -335,4 +335,4 @@ All ASCII geometry blocks in this document should remain boxed with closed `+`, 
 - [ ] `curl "${API_BASE}/api/health"` returns healthy status
 - [ ] `curl "${API_BASE}/api/automation/runs"` returns collection
 - [ ] `bun run scripts/validate-ascii-geometry.ts README.md` is clean
-- [ ] No legacy aliases remain in local setup documentation
+- [ ] Setup docs use correct package and route names
