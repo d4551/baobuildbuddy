@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 /**
  * Shared filesystem path utilities for server runtime and tooling configuration.
@@ -33,3 +34,15 @@ export function resolveDatabasePath(rawPath?: string): string {
 }
 
 export const defaultDatabasePath = resolveDatabasePath();
+
+/**
+ * Path to packages/scraper (RPA-Python scripts).
+ * Resolved relative to packages/server/src/config.
+ */
+const SERVER_SOURCE_DIR =
+  typeof import.meta.dir === "undefined" ? dirname(fileURLToPath(import.meta.url)) : import.meta.dir;
+
+/**
+ * Absolute path to the shared scraper package used by automation services.
+ */
+export const SCRAPER_DIR = resolve(SERVER_SOURCE_DIR, "..", "..", "..", "scraper");

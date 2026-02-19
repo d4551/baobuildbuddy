@@ -6,7 +6,7 @@ import {
   type InterviewSession,
   type InterviewerPersona,
   generateId,
-} from "@navi/shared";
+} from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { interviewSessions } from "../db/schema/interviews";

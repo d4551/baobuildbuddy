@@ -1,5 +1,5 @@
 {
-  "name": "@navi/client",
+  "name": "@bao/client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@elysiajs/eden": "^1.3.0",
-    "@navi/shared": "workspace:*",
+    "@bao/shared": "workspace:*",
     "@nuxt/image": "^2.0.0",
     "@tanstack/vue-query": "^5.92.9",
     "nuxt": "^3.16.0",

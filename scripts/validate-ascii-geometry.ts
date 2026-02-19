@@ -1,5 +1,7 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
+import path from "node:path";
+
+const filePath = process.argv[2] ?? "README.md";
+const filePathName = path.resolve(process.cwd(), filePath);
 
 type Failure = {
   blockIndex: number;
@@ -19,9 +21,7 @@ type Component = {
   cells: Coord[];
 };
 
-const filePath = process.argv[2] ?? 'navi-omega/README.md';
-const filePathName = path.resolve(process.cwd(), filePath);
-const fileText = readFileSync(filePathName, 'utf8');
+const fileText = await Bun.file(filePathName).text();
 const lines = fileText.split('\n');
 
 const GRAPH_CHARS = new Set(['+', '-', '|']);

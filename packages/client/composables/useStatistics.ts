@@ -1,5 +1,5 @@
-import type { CareerProgress, DashboardStats, WeeklyActivity } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Dashboard statistics composable for aggregate metrics and activity tracking.

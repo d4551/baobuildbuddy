@@ -1,5 +1,5 @@
-import type { AutocompleteResult, SearchResult, SearchResults } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { AutocompleteResult, SearchResult, SearchResults } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Unified search composable for searching across jobs, studios, skills, and resumes.

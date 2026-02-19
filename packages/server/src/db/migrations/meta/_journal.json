@@ -1,1 +1,13 @@
-{ "version": "7", "dialect": "sqlite", "entries": [] }
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1771515799686,
+      "tag": "0000_fancy_starfox",
+      "breakpoints": true
+    }
+  ]
+}

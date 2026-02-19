@@ -1,4 +1,4 @@
-import type { ResumeData } from "@navi/shared";
+import type { ResumeData } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";

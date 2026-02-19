@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SkillMapping } from "@navi/shared";
+import type { SkillMapping } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 const api = useApi();

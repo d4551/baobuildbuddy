@@ -1,4 +1,4 @@
-import { generateId } from "@navi/shared";
+import { generateId } from "@bao/shared";
 import { desc, eq, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";

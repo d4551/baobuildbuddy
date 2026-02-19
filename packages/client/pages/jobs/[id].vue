@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Job } from "@navi/shared";
+import type { Job } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();

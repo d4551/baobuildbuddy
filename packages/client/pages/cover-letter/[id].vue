@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CoverLetterData } from "@navi/shared";
+import type { CoverLetterData } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();

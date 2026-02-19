@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ResumeData } from "@navi/shared";
+import type { ResumeData } from "@bao/shared";
 
 const route = useRoute();
 const router = useRouter();

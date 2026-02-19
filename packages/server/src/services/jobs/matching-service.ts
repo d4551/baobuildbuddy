@@ -3,7 +3,7 @@
  * Calculates match scores between user profiles and job postings
  */
 
-import type { Job, JobExperienceLevel, MatchScore } from "@navi/shared";
+import type { Job, JobExperienceLevel, MatchScore } from "@bao/shared";
 
 export interface UserProfile {
   skills: string[];

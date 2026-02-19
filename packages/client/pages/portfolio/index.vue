@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PortfolioProject } from "@navi/shared";
+import type { PortfolioProject } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({

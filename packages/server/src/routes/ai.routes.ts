@@ -1,5 +1,5 @@
-import { generateId } from "@navi/shared";
-import { AI_PROVIDER_CATALOG } from "@navi/shared";
+import { generateId } from "@bao/shared";
+import { AI_PROVIDER_CATALOG } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";

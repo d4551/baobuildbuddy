@@ -1,7 +1,7 @@
 /**
  * Provider interface for job aggregation
  */
-import { APP_BRAND } from "@navi/shared";
+import { APP_BRAND } from "@bao/shared";
 
 export const JOB_AGGREGATOR_VERSION = "1.0";
 export const JOB_AGGREGATOR_USER_AGENT = `${APP_BRAND.name}-JobAggregator/${JOB_AGGREGATOR_VERSION}`;

@@ -1,5 +1,5 @@
-import type { ResumeData } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { ResumeData } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 import { getStoredApiKey } from "~/plugins/eden";
 
 /**

@@ -1,5 +1,5 @@
-import type { ChatMessage } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { ChatMessage } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 type AIChatResponse = {
   message?: string;

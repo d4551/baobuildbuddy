@@ -15,7 +15,4 @@ export const THEME_NAMES = {
   light: "bao-light",
   dark: "bao-dark",
   storageKey: "bao-theme",
-  legacyStorageKey: "navi-theme",
-  legacyLight: "navi-light",
-  legacyDark: "navi-dark",
 } as const;

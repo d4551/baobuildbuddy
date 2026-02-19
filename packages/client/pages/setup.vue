@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { APP_BRAND, APP_SEO } from "@navi/shared";
-import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@navi/shared/constants/ai";
+import { APP_BRAND, APP_SEO } from "@bao/shared";
+import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared/constants/ai";
 
 definePageMeta({
   layout: "onboarding",

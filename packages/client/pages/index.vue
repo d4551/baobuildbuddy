@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DailyChallenge, UserGamificationData } from "@navi/shared";
+import type { DailyChallenge, UserGamificationData } from "@bao/shared";
 
 const { profile, fetchProfile, loading: userLoading } = useUser();
 const { jobs } = useJobs();

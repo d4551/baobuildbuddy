@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VoiceSettings } from "@navi/shared";
+import type { VoiceSettings } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 const { sessions, stats, loading, startSession, fetchSessions, fetchStats } = useInterview();

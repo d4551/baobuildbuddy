@@ -2,7 +2,7 @@
 @plugin "daisyui";
 
 @plugin "daisyui/theme" {
-  name: "navi-light";
+  name: "bao-light";
   default: true;
   prefersdark: false;
   color-scheme: light;
@@ -37,7 +37,7 @@
 }
 
 @plugin "daisyui/theme" {
-  name: "navi-dark";
+  name: "bao-dark";
   default: false;
   prefersdark: true;
   color-scheme: dark;

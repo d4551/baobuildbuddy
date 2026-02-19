@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { InterviewSession } from "@navi/shared";
+import type { InterviewSession } from "@bao/shared";
 
 const route = useRoute();
 const { sessions, loading, fetchSessions, getSession } = useInterview();

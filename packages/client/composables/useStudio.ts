@@ -1,5 +1,5 @@
-import type { GameStudio } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { GameStudio } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Interview studio discovery and analytics composable.

@@ -1,4 +1,4 @@
-import { STATE_KEYS } from "@navi/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * WebSocket connection manager with auto-reconnect, timeout, and keep-alive.

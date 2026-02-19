@@ -1,4 +1,4 @@
-import type { AppSettings } from "@navi/shared";
+import type { AppSettings } from "@bao/shared";
 import { useQuery } from "@tanstack/vue-query";
 
 export function useSettingsQuery() {

@@ -1,5 +1,5 @@
-import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Skill mapping and pathway management composable.

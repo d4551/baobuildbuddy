@@ -10,3 +10,4 @@ export * from "./studios";
 export * from "./gamification";
 export * from "./skill-mappings";
 export * from "./chat-history";
+export * from "./automation-runs";

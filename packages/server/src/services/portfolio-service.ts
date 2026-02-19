@@ -1,5 +1,5 @@
-import { generateId } from "@navi/shared";
-import type { PortfolioMetadata, PortfolioProject } from "@navi/shared";
+import { generateId } from "@bao/shared";
+import type { PortfolioMetadata, PortfolioProject } from "@bao/shared";
 import { desc, eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { portfolioProjects, portfolios } from "../db/schema";

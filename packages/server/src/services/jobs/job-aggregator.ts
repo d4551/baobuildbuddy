@@ -12,7 +12,7 @@ import type {
   JobType,
   Platform,
   StudioType,
-} from "@navi/shared";
+} from "@bao/shared";
 import { and, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs, savedJobs } from "../../db/schema/jobs";

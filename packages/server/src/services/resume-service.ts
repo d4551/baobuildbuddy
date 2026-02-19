@@ -1,5 +1,5 @@
-import { generateId } from "@navi/shared";
-import type { ResumeData } from "@navi/shared";
+import { generateId } from "@bao/shared";
+import type { ResumeData } from "@bao/shared";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { resumes } from "../db/schema";

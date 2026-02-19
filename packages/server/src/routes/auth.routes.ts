@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { config } from "../config/env";

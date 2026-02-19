@@ -1,5 +1,5 @@
-import type { CoverLetterData } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { CoverLetterData } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Cover letter management composable.

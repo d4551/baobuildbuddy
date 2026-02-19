@@ -1,4 +1,4 @@
-import type { VoiceSettings } from "@navi/shared";
+import type { VoiceSettings } from "@bao/shared";
 
 /**
  * Web Speech API Speech-to-Text composable.

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CareerPathway } from "@navi/shared";
+import type { CareerPathway } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 const { $toast } = useNuxtApp();

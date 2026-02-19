@@ -1,5 +1,5 @@
-import type { Achievement, DailyChallenge, UserGamificationData } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Gamification system composable for XP, achievements, and challenges.

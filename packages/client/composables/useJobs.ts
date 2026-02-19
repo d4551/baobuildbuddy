@@ -1,5 +1,5 @@
-import type { Job } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { Job } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Job search and application management composable.

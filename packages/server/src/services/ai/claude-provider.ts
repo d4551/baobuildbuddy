@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { AIResponse, GenerateOptions } from "@navi/shared";
+import type { AIResponse, GenerateOptions } from "@bao/shared";
 import { BaseAIProvider } from "./provider-interface";
 
 /**

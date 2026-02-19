@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Achievement } from "@navi/shared";
+import type { Achievement } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 const { $toast } = useNuxtApp();

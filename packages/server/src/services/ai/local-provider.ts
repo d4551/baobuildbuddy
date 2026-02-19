@@ -1,5 +1,5 @@
-import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL, LOCAL_AI_SERVERS } from "@navi/shared";
-import type { AIResponse, GenerateOptions } from "@navi/shared";
+import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL, LOCAL_AI_SERVERS } from "@bao/shared";
+import type { AIResponse, GenerateOptions } from "@bao/shared";
 import OpenAI from "openai";
 import { BaseAIProvider } from "./provider-interface";
 

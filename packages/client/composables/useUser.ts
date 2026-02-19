@@ -1,5 +1,5 @@
-import type { UserProfile } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { UserProfile } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * User profile management composable.

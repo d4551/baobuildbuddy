@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formDataToResumeData, resumeDataToFormData, type ResumeFormData } from "@navi/shared";
+import { formDataToResumeData, resumeDataToFormData, type ResumeFormData } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({

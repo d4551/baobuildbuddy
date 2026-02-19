@@ -1,5 +1,5 @@
 {
-  "name": "@navi/server",
+  "name": "@bao/server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -24,7 +24,7 @@
     "@elysiajs/swagger": "^1.3.0",
     "@google/generative-ai": "^0.24.0",
     "@huggingface/inference": "^3.6.0",
-    "@navi/shared": "workspace:*",
+    "@bao/shared": "workspace:*",
     "drizzle-orm": "^0.39.0",
     "elysia": "^1.3.0",
     "elysia-rate-limit": "^4.2.0",

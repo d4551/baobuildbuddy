@@ -1,4 +1,4 @@
-import type { AIResponse, GenerateOptions } from "@navi/shared";
+import type { AIResponse, GenerateOptions } from "@bao/shared";
 import OpenAI from "openai";
 import { BaseAIProvider } from "./provider-interface";
 

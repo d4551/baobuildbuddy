@@ -1,4 +1,4 @@
-import { generateId } from "@navi/shared";
+import { generateId } from "@bao/shared";
 import type { Job, JobFilters, JobProvider } from "./provider-interface";
 import { scraperService } from "../../scraper-service";
 

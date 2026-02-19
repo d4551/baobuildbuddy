@@ -1,5 +1,5 @@
-import type { AppSettings } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { AppSettings } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Settings and API key management composable.

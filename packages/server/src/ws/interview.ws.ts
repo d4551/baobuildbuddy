@@ -1,4 +1,4 @@
-import type { AIProviderType } from "@navi/shared";
+import type { AIProviderType } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";

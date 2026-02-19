@@ -1,11 +1,11 @@
-import { generateId } from "@navi/shared";
+import { generateId } from "@bao/shared";
 import type {
   CareerPathway,
   CategoryAssessment,
   ReadinessAssessment,
   SkillCategory,
   SkillMapping,
-} from "@navi/shared";
+} from "@bao/shared";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { skillMappings } from "../db/schema";

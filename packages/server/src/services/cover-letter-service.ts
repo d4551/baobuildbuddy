@@ -1,5 +1,5 @@
-import { generateId } from "@navi/shared";
-import type { CoverLetterData } from "@navi/shared";
+import { generateId } from "@bao/shared";
+import type { CoverLetterData } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema";

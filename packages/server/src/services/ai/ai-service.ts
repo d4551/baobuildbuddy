@@ -2,14 +2,14 @@ import {
   AI_PROVIDER_DEFAULT_ORDER,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
-} from "@navi/shared";
+} from "@bao/shared";
 import type {
   AIProviderConfig,
   AIProviderStatus,
   AIProviderType,
   AIResponse,
   GenerateOptions,
-} from "@navi/shared";
+} from "@bao/shared";
 import { ClaudeProvider } from "./claude-provider";
 import { GeminiProvider } from "./gemini-provider";
 import { HuggingFaceProvider } from "./huggingface-provider";

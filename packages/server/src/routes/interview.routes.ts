@@ -3,7 +3,7 @@ import type {
   InterviewQuestion,
   InterviewResponse,
   InterviewSession,
-} from "@navi/shared";
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";

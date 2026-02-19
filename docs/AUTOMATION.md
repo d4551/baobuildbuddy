@@ -1,31 +1,79 @@
 # Automation & RPA
 
-## Bun-Native Approach
+BaoBuildBuddy uses RPA-Python for browser automation workflows through direct subprocess JSON I/O.
 
-NAVI Omega uses **Playwright** (Node/Bun compatible) for browser automation rather than RPA-Python. This keeps the stack Bun-native with no Python bridge.
+## Why this approach
 
-### Rationale
+- Direct automation bridge with no API abstraction layer.
+- Deterministic input/output contract: JSON over stdin/stdout.
+- No HTTP automation proxy or long-running adapter process.
 
-- **RPA-Python** (TagUI) is Python-based; integrating would require subprocess calls or a separate Python service.
-- **Playwright** runs in Bun/Node, shares the same process, and provides equivalent web automation (navigate, click, fill, screenshot).
-- Industry practice: prefer native tooling to avoid process boundaries and serialization overhead.
+## Implementation
 
-### Playwright Automation Service
+- Scraper scripts live in `packages/scraper/`:
+  - `job_scraper_gamedev.py`
+  - `studio_scraper.py`
+  - `apply_job_rpa.py`
+- Automation runner on the server lives in `packages/server/src/services/automation/rpa-runner.ts` and launches Python with `Bun.spawn`.
+- Job application orchestration is implemented in `packages/server/src/services/automation/application-automation-service.ts`.
 
-For job application automation (filling ATS forms, submitting applications), use the `ApplicationAutomationService` (to be implemented in `packages/server/src/services/automation/`). It will:
+### RPA input contract (`apply_job_rpa.py`)
 
-1. Accept job URL + resume data + application answers.
-2. Launch headless browser via Playwright.
-3. Navigate, fill forms, upload resume.
-4. Return status and screenshots for verification.
+```json
+{
+  "jobUrl": "https://...",
+  "resume": {
+    "fullName": "...",
+    "email": "...",
+    "...": "..."
+  },
+  "coverLetter": {
+    "company": "Acme",
+    "content": {}
+  },
+  "customAnswers": {
+    "field_id": "value"
+  }
+}
+```
 
-### RPA-Python Integration (Optional)
+### RPA output contract
 
-If you need RPA-Python (TagUI) for visual automation, OCR, or desktop automation:
+```json
+{
+  "success": true,
+  "error": null,
+  "screenshots": ["/tmp/.../step1.png"],
+  "steps": [
+    {
+      "action": "navigate",
+      "status": "ok",
+      "message": "Loaded page"
+    }
+  ]
+}
+```
 
-1. Install: `pip install rpa`
-2. Create a Python script that accepts JSON args and outputs JSON result.
-3. Call from Bun: `Bun.spawn(["python", "scripts/apply_rpa.py"], { stdin: "pipe", stdout: "pipe" })`.
-4. Document the script interface in this folder.
+## API routes
 
-For now, Playwright covers web-based job application automation without external dependencies.
+- `POST /api/automation/job-apply` — starts a job-application automation run.
+- `GET /api/automation/runs` — list recent runs with optional `type` and `status`.
+- `GET /api/automation/runs/:id` — fetch run detail payload.
+
+## Operation
+
+1. Route inserts a row in `automation_runs` and returns `{ runId, status: "running" }`.
+2. Background job executes `apply_job_rpa.py` with typed JSON input.
+3. Output is written back into the same run row (`success`, `error`, `screenshots`, `output`).
+4. UI pages under `/automation` track and present history plus screenshots.
+
+## Environment
+
+- Python dependency: `rpa` (TagUI backend)
+- Install in the Python environment used by Bun:
+
+```bash
+pip install rpa
+```
+
+Automation requires `python3` on Unix and `python` on Windows.

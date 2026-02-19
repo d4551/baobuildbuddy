@@ -1,7 +1,6 @@
-import { randomUUID } from "node:crypto";
-import { mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { mkdirSync } from "fs";
+import { tmpdir } from "os";
+import { dirname, join } from "path";
 import type { Elysia } from "elysia";
 
 export interface ApiResponseEnvelope<T> {
@@ -10,7 +9,7 @@ export interface ApiResponseEnvelope<T> {
 }
 
 export function createTestDbPath(prefix: string): string {
-  const testDbPath = join(tmpdir(), `bao-${prefix}`, `${randomUUID()}.db`);
+  const testDbPath = join(tmpdir(), `bao-${prefix}`, `${crypto.randomUUID()}.db`);
   mkdirSync(dirname(testDbPath), { recursive: true });
   return testDbPath;
 }

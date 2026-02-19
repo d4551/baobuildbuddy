@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ChatMessage } from "@navi/shared";
-import { APP_BRAND, APP_SEO } from "@navi/shared";
+import type { ChatMessage } from "@bao/shared";
+import { APP_BRAND, APP_SEO } from "@bao/shared";
 
 definePageMeta({
   middleware: ["auth"],

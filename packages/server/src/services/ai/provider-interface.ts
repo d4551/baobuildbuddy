@@ -1,4 +1,4 @@
-import type { AIProviderType, AIResponse, GenerateOptions } from "@navi/shared";
+import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
 
 /**
  * Common interface for all AI providers

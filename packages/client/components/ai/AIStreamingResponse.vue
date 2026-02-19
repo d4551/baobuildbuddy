@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_BRAND } from "@navi/shared";
+import { APP_BRAND } from "@bao/shared";
 
 defineProps<{
   text: string;

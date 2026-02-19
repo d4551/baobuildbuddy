@@ -1,5 +1,5 @@
-import type { PortfolioData, PortfolioProject } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { PortfolioData, PortfolioProject } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Portfolio management composable.

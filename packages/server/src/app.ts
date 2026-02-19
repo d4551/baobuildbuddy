@@ -1,6 +1,6 @@
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import { APP_BRAND } from "@navi/shared";
+import { APP_BRAND } from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "./config/env";
@@ -12,6 +12,7 @@ import {
   aiRoutes,
   authRoutes,
   coverLetterRoutes,
+  automationRoutes,
   gamificationRoutes,
   interviewRoutes,
   jobsRoutes,
@@ -136,6 +137,7 @@ export const app = new Elysia({ prefix: API_PREFIX })
   .use(skillMappingRoutes)
   .use(searchRoutes)
   .use(statsRoutes)
+  .use(automationRoutes)
   .use(chatWebSocket)
   .use(interviewWebSocket);
 

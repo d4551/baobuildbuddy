@@ -1,34 +1,27 @@
-import { generateId } from "@navi/shared";
+import { generateId } from "@bao/shared";
 import { eq } from "drizzle-orm";
-import { spawn } from "node:child_process";
 import { join } from "node:path";
+import { SCRAPER_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { studios } from "../db/schema/studios";
 
-const SCRAPER_DIR = join(process.cwd(), "..", "scraper");
-
 async function runPythonScript(scriptName: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const scriptPath = join(SCRAPER_DIR, scriptName);
-    const python = process.platform === "win32" ? "python" : "python3";
-    const proc = spawn(python, [scriptPath], {
-      cwd: SCRAPER_DIR,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    let stdout = "";
-    let stderr = "";
-    proc.stdout?.on("data", (chunk) => (stdout += chunk.toString()));
-    proc.stderr?.on("data", (chunk) => (stderr += chunk.toString()));
-    proc.on("close", (code) => {
-      if (code !== 0) {
-        reject(new Error(`Script exited ${code}: ${stderr || stdout}`));
-      } else {
-        resolve(stdout);
-      }
-    });
-    proc.on("error", (err) => reject(err));
+  const scriptPath = join(SCRAPER_DIR, scriptName);
+  const python = process.platform === "win32" ? "python" : "python3";
+  const proc = Bun.spawn([python, scriptPath], {
+    cwd: SCRAPER_DIR,
+    stdin: "ignore",
+    stdout: "pipe",
+    stderr: "pipe",
   });
+  const stdout = await new Response(proc.stdout).text();
+  const stderr = await new Response(proc.stderr).text();
+  const exitCode = await proc.exited;
+  if (exitCode !== 0) {
+    throw new Error(`Script exited ${exitCode}: ${stderr || stdout}`);
+  }
+  return stdout;
 }
 
 export interface ScrapedStudio {

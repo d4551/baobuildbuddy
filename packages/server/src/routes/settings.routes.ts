@@ -2,7 +2,7 @@ import {
   AI_PROVIDER_DEFAULT_ORDER,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
-} from "@navi/shared";
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";

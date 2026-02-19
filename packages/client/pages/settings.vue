@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { AppSettings } from "@navi/shared";
+import type { AppSettings } from "@bao/shared";
 import {
   AI_PROVIDER_CATALOG,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
-} from "@navi/shared/constants/ai";
-import type { AIProviderType } from "@navi/shared/types/ai";
+} from "@bao/shared/constants/ai";
+import type { AIProviderType } from "@bao/shared/types/ai";
 
 type SettingsWithFlags = AppSettings & {
   hasGeminiKey?: boolean;

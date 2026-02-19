@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
-import type { InterviewResponse, InterviewSession } from "@navi/shared";
+import type { InterviewResponse, InterviewSession } from "@bao/shared";
 import type { Elysia } from "elysia";
 
 interface TestHarness {

@@ -1,5 +1,5 @@
 import { treaty } from "@elysiajs/eden";
-import type { App } from "@navi/server/app";
+import type { App } from "@bao/server/app";
 
 const AUTH_KEY = "bao_api_key";
 

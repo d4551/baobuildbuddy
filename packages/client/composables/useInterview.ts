@@ -1,5 +1,5 @@
-import type { InterviewSession } from "@navi/shared";
-import { STATE_KEYS } from "@navi/shared";
+import type { InterviewSession } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared";
 
 /**
  * Interview practice session management composable.

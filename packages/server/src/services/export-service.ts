@@ -1,4 +1,4 @@
-import type { PortfolioMetadata, PortfolioProject, ResumeData } from "@navi/shared";
+import type { PortfolioMetadata, PortfolioProject, ResumeData } from "@bao/shared";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
 interface RGB {

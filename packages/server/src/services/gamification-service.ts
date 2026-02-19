@@ -1,11 +1,11 @@
-import { XP_LEVELS, getLevelForXP } from "@navi/shared";
+import { XP_LEVELS, getLevelForXP } from "@bao/shared";
 import type {
   Achievement,
   DailyChallenge,
   GamificationStats,
   LevelUpResult,
   UserGamificationData,
-} from "@navi/shared";
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { gamification } from "../db/schema";
