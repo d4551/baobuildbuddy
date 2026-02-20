@@ -10,6 +10,12 @@
 
 # BaoBuildBuddy v1.0 Local Setup Guide
 
+[![Bun](https://img.shields.io/badge/Bun-1.3.*-f9f9f1?logo=bun&logoColor=black)](https://bun.sh/)
+[![Nuxt](https://img.shields.io/badge/Nuxt-4.x-00dc82?logo=nuxtdotjs&logoColor=white)](https://nuxt.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/github/license/d4551/baobuildbuddy)](https://github.com/d4551/baobuildbuddy/blob/main/LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/d4551/baobuildbuddy)](https://github.com/d4551/baobuildbuddy/commits/main)
+
 ## Quick links
 
 - [Getting Started (First-time setup)](docs/STARTER_GUIDE.md)
