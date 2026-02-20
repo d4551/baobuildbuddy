@@ -271,7 +271,11 @@ function removeSkill(index: number) {
           v-for="resume in resumes"
           :key="resume.id"
           class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
+          role="button"
+          tabindex="0"
           @click="selectedResumeId = resume.id"
+          @keydown.enter="selectedResumeId = resume.id"
+          @keydown.space.prevent="selectedResumeId = resume.id"
         >
           <div class="card-body">
             <h3 class="card-title">{{ resume.name }}</h3>
@@ -356,32 +360,32 @@ function removeSkill(index: number) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Full Name</legend>
-              <input v-model="formData.name" type="text" class="input w-full" />
+              <input v-model="formData.name" type="text" class="input w-full" aria-label="Name"/>
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Email</legend>
-              <input v-model="formData.email" type="email" class="input w-full" />
+              <input v-model="formData.email" type="email" class="input w-full" aria-label="Email"/>
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Phone</legend>
-              <input v-model="formData.phone" type="tel" class="input w-full" />
+              <input v-model="formData.phone" type="tel" class="input w-full" aria-label="Phone"/>
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Location</legend>
-              <input v-model="formData.location" type="text" class="input w-full" />
+              <input v-model="formData.location" type="text" class="input w-full" aria-label="Location"/>
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">LinkedIn</legend>
-              <input v-model="formData.linkedIn" type="url" class="input w-full" />
+              <input v-model="formData.linkedIn" type="url" class="input w-full" aria-label="Linked In"/>
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Portfolio</legend>
-              <input v-model="formData.portfolio" type="url" class="input w-full" />
+              <input v-model="formData.portfolio" type="url" class="input w-full" aria-label="Portfolio"/>
             </fieldset>
           </div>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Professional Summary</legend>
-            <textarea v-model="formData.summary" class="textarea w-full" rows="4"></textarea>
+            <textarea v-model="formData.summary" class="textarea w-full" rows="4" aria-label="Summary"></textarea>
           </fieldset>
         </div>
       </div>
@@ -407,36 +411,36 @@ function removeSkill(index: number) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Job Title</legend>
-                    <input v-model="exp.title" type="text" class="input w-full input-sm" />
+                    <input v-model="exp.title" type="text" class="input w-full input-sm" aria-label="Title"/>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Company</legend>
-                    <input v-model="exp.company" type="text" class="input w-full input-sm" />
+                    <input v-model="exp.company" type="text" class="input w-full input-sm" aria-label="Company"/>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Location</legend>
-                    <input v-model="exp.location" type="text" class="input w-full input-sm" />
+                    <input v-model="exp.location" type="text" class="input w-full input-sm" aria-label="Location"/>
                   </fieldset>
                   <div class="flex gap-2">
                     <fieldset class="fieldset flex-1">
                       <legend class="fieldset-legend">Start Date</legend>
-                      <input v-model="exp.startDate" type="month" class="input w-full input-sm" />
+                      <input v-model="exp.startDate" type="month" class="input w-full input-sm" aria-label="Start Date"/>
                     </fieldset>
                     <fieldset class="fieldset flex-1">
                       <legend class="fieldset-legend">End Date</legend>
-                      <input v-model="exp.endDate" type="month" class="input w-full input-sm" :disabled="exp.current" />
+                      <input v-model="exp.endDate" type="month" class="input w-full input-sm" :disabled="exp.current" aria-label="End Date"/>
                     </fieldset>
                   </div>
                 </div>
                 <div class="form-control">
                   <label class="label cursor-pointer justify-start gap-2">
-                    <input v-model="exp.current" type="checkbox" class="checkbox checkbox-sm" />
+                    <input v-model="exp.current" type="checkbox" class="checkbox checkbox-sm" aria-label="Current"/>
                     <span class="label-text">Current Position</span>
                   </label>
                 </div>
                 <fieldset class="fieldset">
                   <legend class="fieldset-legend">Description</legend>
-                  <textarea v-model="exp.description" class="textarea w-full" rows="3"></textarea>
+                  <textarea v-model="exp.description" class="textarea w-full" rows="3" aria-label="Description"></textarea>
                 </fieldset>
               </div>
             </div>
@@ -465,23 +469,23 @@ function removeSkill(index: number) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Degree</legend>
-                    <input v-model="edu.degree" type="text" class="input w-full input-sm" />
+                    <input v-model="edu.degree" type="text" class="input w-full input-sm" aria-label="Degree"/>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">School</legend>
-                    <input v-model="edu.school" type="text" class="input w-full input-sm" />
+                    <input v-model="edu.school" type="text" class="input w-full input-sm" aria-label="School"/>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Location</legend>
-                    <input v-model="edu.location" type="text" class="input w-full input-sm" />
+                    <input v-model="edu.location" type="text" class="input w-full input-sm" aria-label="Location"/>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Graduation Date</legend>
-                    <input v-model="edu.graduationDate" type="month" class="input w-full input-sm" />
+                    <input v-model="edu.graduationDate" type="month" class="input w-full input-sm" aria-label="Graduation Date"/>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">GPA (Optional)</legend>
-                    <input v-model="edu.gpa" type="text" class="input w-full input-sm" />
+                    <input v-model="edu.gpa" type="text" class="input w-full input-sm" aria-label="Gpa"/>
                   </fieldset>
                 </div>
               </div>
@@ -501,7 +505,7 @@ function removeSkill(index: number) {
               placeholder="Add a skill"
               class="input input-sm flex-1"
               @keyup.enter="addSkill"
-            />
+              aria-label="Add a skill"/>
             <button class="btn btn-sm btn-primary" @click="addSkill">
               Add
             </button>
@@ -544,16 +548,16 @@ function removeSkill(index: number) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Project Name</legend>
-                    <input v-model="project.name" type="text" class="input w-full input-sm" />
+                    <input v-model="project.name" type="text" class="input w-full input-sm" aria-label="Name"/>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">URL (Optional)</legend>
-                    <input v-model="project.url" type="url" class="input w-full input-sm" />
+                    <input v-model="project.url" type="url" class="input w-full input-sm" aria-label="Url"/>
                   </fieldset>
                 </div>
                 <fieldset class="fieldset">
                   <legend class="fieldset-legend">Description</legend>
-                  <textarea v-model="project.description" class="textarea w-full" rows="3"></textarea>
+                  <textarea v-model="project.description" class="textarea w-full" rows="3" aria-label="Description"></textarea>
                 </fieldset>
               </div>
             </div>
@@ -575,7 +579,7 @@ function removeSkill(index: number) {
               type="text"
               placeholder="e.g. Raid Leader, Guild Officer, Tournament Organizer"
               class="input w-full"
-            />
+              aria-label="e.g. Raid Leader, Guild Officer, Tournament Organizer"/>
           </fieldset>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Favorite Genres (comma-separated)</legend>
@@ -584,7 +588,7 @@ function removeSkill(index: number) {
               type="text"
               placeholder="e.g. RPG, Strategy, FPS"
               class="input w-full"
-            />
+              aria-label="e.g. RPG, Strategy, FPS"/>
           </fieldset>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Gaming Achievements (comma-separated)</legend>
@@ -593,7 +597,7 @@ function removeSkill(index: number) {
               class="textarea w-full"
               rows="4"
               placeholder="e.g. Ranked top 100 in Overwatch competitive, Led 40-person raid guild, Organized local esports tournament"
-            ></textarea>
+              aria-label="e.g. Ranked top 100 in Overwatch competitive, Led 40-person raid guild, Organized local esports tournament"></textarea>
           </fieldset>
         </div>
       </div>
@@ -611,12 +615,12 @@ function removeSkill(index: number) {
             type="text"
             placeholder="e.g. Game Designer Resume"
             class="input w-full"
-          />
+            aria-label="e.g. Game Designer Resume"/>
         </fieldset>
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Template</legend>
-          <select v-model="newResumeTemplate" class="select w-full">
+          <select v-model="newResumeTemplate" class="select w-full" aria-label="New Resume Template">
             <option value="modern">Modern</option>
             <option value="classic">Classic</option>
             <option value="creative">Creative</option>

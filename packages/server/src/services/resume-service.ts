@@ -1,6 +1,6 @@
 import { generateId } from "@bao/shared";
 import type { GamingExperience, ResumeData, ResumePersonalInfo, ResumeSkills } from "@bao/shared";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { resumes } from "../db/schema";
 
@@ -146,7 +146,7 @@ export class ResumeService {
    * Delete a resume by ID
    */
   async deleteResume(id: string): Promise<boolean> {
-    const result = await db.delete(resumes).where(eq(resumes.id, id));
+    await db.delete(resumes).where(eq(resumes.id, id));
     return true;
   }
 

@@ -157,7 +157,7 @@ function formatTime(date?: string) {
             class="input input-bordered flex-1"
             :disabled="loading"
             @keyup.enter="sendMessage"
-          />
+            aria-label="Ask BaoBuildBuddy anything about your game industry career..."/>
           <button
             class="btn btn-primary"
             :disabled="!input.trim() || loading"

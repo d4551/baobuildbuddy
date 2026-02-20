@@ -106,7 +106,11 @@ async function handleGenerate() {
         v-for="letter in coverLetters"
         :key="letter.id"
         class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
+        role="button"
+        tabindex="0"
         @click="editLetter(letter.id)"
+        @keydown.enter="editLetter(letter.id)"
+        @keydown.space.prevent="editLetter(letter.id)"
       >
         <div class="card-body">
           <h3 class="card-title text-lg">{{ letter.position }}</h3>
@@ -154,7 +158,7 @@ async function handleGenerate() {
               type="text"
               placeholder="e.g. Riot Games"
               class="input w-full"
-            />
+              aria-label="e.g. Riot Games"/>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -164,7 +168,7 @@ async function handleGenerate() {
               type="text"
               placeholder="e.g. Senior Game Designer"
               class="input w-full"
-            />
+              aria-label="e.g. Senior Game Designer"/>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -174,12 +178,12 @@ async function handleGenerate() {
               class="textarea textarea-bordered w-full"
               rows="5"
               placeholder="Paste the job description here for a more tailored cover letter..."
-            ></textarea>
+              aria-label="Paste the job description here for a more tailored cover letter..."></textarea>
           </fieldset>
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Template Style</legend>
-            <select v-model="generateForm.template" class="select w-full">
+            <select v-model="generateForm.template" class="select w-full" aria-label="Template">
               <option value="professional">Professional</option>
               <option value="creative">Creative</option>
               <option value="passionate">Passionate</option>

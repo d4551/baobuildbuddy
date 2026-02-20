@@ -37,7 +37,7 @@ const scoreBorderColor = computed(() => {
           class="progress progress-success w-full"
           :value="breakdown.skills"
           max="100"
-        ></progress>
+          aria-label="Skills progress"></progress>
       </div>
 
       <div>
@@ -49,7 +49,7 @@ const scoreBorderColor = computed(() => {
           class="progress progress-success w-full"
           :value="breakdown.experience"
           max="100"
-        ></progress>
+          aria-label="Experience progress"></progress>
       </div>
 
       <div>
@@ -61,7 +61,7 @@ const scoreBorderColor = computed(() => {
           class="progress progress-success w-full"
           :value="breakdown.location"
           max="100"
-        ></progress>
+          aria-label="Location progress"></progress>
       </div>
     </div>
   </div>

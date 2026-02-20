@@ -95,12 +95,12 @@ async function submitJobApply() {
               type="url"
               class="input input-bordered w-full"
               placeholder="https://example.com/jobs/123"
-            />
+              aria-label="https://example.com/jobs/123"/>
           </fieldset>
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Resume</legend>
-            <select v-model="form.resumeId" class="select select-bordered w-full">
+            <select v-model="form.resumeId" class="select select-bordered w-full" aria-label="Resume Id">
               <option value="" disabled>Select resume</option>
               <option v-for="resume in resumesData || []" :key="resume.id" :value="resume.id">
                 {{ resume.name || `Resume ${resume.id}` }}
@@ -110,7 +110,7 @@ async function submitJobApply() {
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Cover Letter (optional)</legend>
-            <select v-model="form.coverLetterId" class="select select-bordered w-full">
+            <select v-model="form.coverLetterId" class="select select-bordered w-full" aria-label="Cover Letter Id">
               <option value="">No cover letter</option>
               <option v-for="letter in coverLettersData || []" :key="letter.id" :value="letter.id">
                 {{ letter.company || "Unknown" }} - {{ letter.position || "Position" }}
@@ -124,7 +124,7 @@ async function submitJobApply() {
               v-model="form.jobId"
               class="input input-bordered w-full"
               placeholder="Optional job ID for correlation"
-            />
+              aria-label="Optional job ID for correlation"/>
           </fieldset>
         </div>
 

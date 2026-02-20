@@ -1,4 +1,4 @@
-import { XP_LEVELS, getLevelForXP } from "@bao/shared";
+import { getLevelForXP } from "@bao/shared";
 import type {
   Achievement,
   DailyChallenge,

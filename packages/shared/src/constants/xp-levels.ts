@@ -87,11 +87,22 @@ export const XP_LEVELS: XPLevel[] = [
   },
 ];
 
+const getFirstXPLevel = (): XPLevel => {
+  const firstLevel = XP_LEVELS[0];
+  if (!firstLevel) {
+    throw new Error("XP levels are not configured.");
+  }
+  return firstLevel;
+};
+
 export function getLevelForXP(xp: number): XPLevel {
   for (let i = XP_LEVELS.length - 1; i >= 0; i--) {
-    if (xp >= XP_LEVELS[i].minXP) return XP_LEVELS[i];
+    const level = XP_LEVELS[i];
+    if (level && xp >= level.minXP) {
+      return level;
+    }
   }
-  return XP_LEVELS[0];
+  return getFirstXPLevel();
 }
 
 export function getXPProgress(xp: number): {
@@ -101,7 +112,10 @@ export function getXPProgress(xp: number): {
 } {
   const level = getLevelForXP(xp);
   const levelIndex = XP_LEVELS.indexOf(level);
-  const nextLevel = levelIndex < XP_LEVELS.length - 1 ? XP_LEVELS[levelIndex + 1] : null;
+  const nextLevel =
+    levelIndex >= 0 && levelIndex < XP_LEVELS.length - 1
+      ? (XP_LEVELS[levelIndex + 1] ?? null)
+      : null;
 
   const progress = nextLevel ? (xp - level.minXP) / (nextLevel.minXP - level.minXP) : 1;
 

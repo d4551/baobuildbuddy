@@ -183,7 +183,6 @@ export class SkillExtractor {
     preferred: ExtractedSkill[];
   } {
     const allSkills = this.extractSkills(description);
-    const lowerDesc = description.toLowerCase();
 
     const requiredPatterns = /\b(required|must\s+have|essential|minimum|mandatory)\b/i;
     const preferredPatterns = /\b(preferred|nice\s+to\s+have|bonus|plus|desired|optional)\b/i;

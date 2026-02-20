@@ -1,12 +1,12 @@
 import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
-import { count, desc, eq, sql } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import { chatHistory } from "../db/schema/chat-history";
 import { coverLetters } from "../db/schema/cover-letters";
 import { gamification } from "../db/schema/gamification";
 import { interviewSessions } from "../db/schema/interviews";
-import { applications, jobs, savedJobs } from "../db/schema/jobs";
+import { applications, savedJobs } from "../db/schema/jobs";
 import { portfolioProjects } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";

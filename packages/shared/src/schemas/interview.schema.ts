@@ -1,4 +1,4 @@
-import * as z from "zod/v3";
+import { z } from "zod";
 
 export const interviewConfigSchema = z.object({
   roleType: z.string(),

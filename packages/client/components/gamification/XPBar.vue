@@ -47,6 +47,6 @@ watch(
       :class="{ 'animate-pulse': isAnimating }"
       :value="xpProgress"
       max="100"
-    ></progress>
+      aria-label="Xp Progress progress"></progress>
   </div>
 </template>

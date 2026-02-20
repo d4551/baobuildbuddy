@@ -32,8 +32,12 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
         let conf = 0;
         for (let i = e.resultIndex; i < e.results.length; i++) {
           const result = e.results[i];
-          const chunk = result[0].transcript;
-          const c = result[0].confidence ?? 0;
+          const firstAlternative = result?.[0];
+          if (!firstAlternative) {
+            continue;
+          }
+          const chunk = firstAlternative.transcript;
+          const c = firstAlternative.confidence ?? 0;
           if (result.isFinal) {
             final += chunk;
             conf = Math.max(conf, c);

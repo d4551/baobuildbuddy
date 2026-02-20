@@ -8,26 +8,6 @@ import {
 } from "~/constants/gamification";
 import { getErrorMessage } from "~/utils/errors";
 
-interface DailyChallengesResponse {
-  readonly date: string;
-  readonly challenges: DailyChallenge[];
-  readonly completedCount: number;
-  readonly totalCount: number;
-}
-
-interface EdenErrorPayload {
-  readonly message?: string;
-}
-
-interface EdenErrorEnvelope {
-  readonly value?: EdenErrorPayload;
-}
-
-interface EdenResult<T> {
-  readonly data: T;
-  readonly error?: EdenErrorEnvelope | null;
-}
-
 interface GamificationHubData {
   readonly progress: UserGamificationData;
   readonly achievements: readonly Achievement[];
@@ -136,15 +116,7 @@ async function handleCompleteChallenge(challengeId: string) {
 
   try {
     await requestData(
-      api.gamification.challenges[challengeId].complete.post() as Promise<
-        EdenResult<{
-          message: string;
-          challengeId: string;
-          completed: boolean;
-          totalXP: number;
-          level: number;
-        }>
-      >,
+      api.gamification.challenges({ id: challengeId }).complete.post(),
       GAMIFICATION_COPY.challengeCompleteErrorFallback,
     );
     await retryPageLoad();
@@ -158,18 +130,9 @@ async function handleCompleteChallenge(challengeId: string) {
 
 async function fetchGamificationHubData(): Promise<GamificationHubData> {
   const [progress, achievements, challengePayload] = await Promise.all([
-    requestData<UserGamificationData>(
-      api.gamification.progress.get() as Promise<EdenResult<UserGamificationData>>,
-      GAMIFICATION_COPY.loadErrorFallback,
-    ),
-    requestData<Achievement[]>(
-      api.gamification.achievements.get() as Promise<EdenResult<Achievement[]>>,
-      GAMIFICATION_COPY.loadErrorFallback,
-    ),
-    requestData<DailyChallengesResponse>(
-      api.gamification.challenges.get() as Promise<EdenResult<DailyChallengesResponse>>,
-      GAMIFICATION_COPY.loadErrorFallback,
-    ),
+    requestData(api.gamification.progress.get(), GAMIFICATION_COPY.loadErrorFallback),
+    requestData(api.gamification.achievements.get(), GAMIFICATION_COPY.loadErrorFallback),
+    requestData(api.gamification.challenges.get(), GAMIFICATION_COPY.loadErrorFallback),
   ]);
 
   return {
@@ -179,13 +142,21 @@ async function fetchGamificationHubData(): Promise<GamificationHubData> {
   };
 }
 
+function toEdenErrorMessage(error: unknown): string | undefined {
+  if (!error || typeof error !== "object") return undefined;
+  const value = Reflect.get(error, "value");
+  if (!value || typeof value !== "object") return undefined;
+  const message = Reflect.get(value, "message");
+  return typeof message === "string" ? message : undefined;
+}
+
 async function requestData<T>(
-  request: Promise<EdenResult<T>>,
+  request: Promise<{ readonly data: T; readonly error?: unknown }>,
   fallbackMessage: string,
 ): Promise<T> {
   const response = await request;
   if (response.error) {
-    throw new Error(response.error.value?.message ?? fallbackMessage);
+    throw new Error(toEdenErrorMessage(response.error) ?? fallbackMessage);
   }
   return response.data;
 }
@@ -247,7 +218,7 @@ async function requestData<T>(
             class="progress progress-primary-content w-full h-4"
             :value="levelProgress"
             max="100"
-          ></progress>
+            aria-label="Level Progress progress"></progress>
 
           <p class="text-sm opacity-80 mt-2">
             {{ xpUntilNextLevel }} {{ GAMIFICATION_COPY.xpUntilLevelLabel }} {{ hubData.progress.level + 1 }}
@@ -301,7 +272,7 @@ async function requestData<T>(
                     :class="challenge.completed ? 'progress-success' : 'progress-primary'"
                     :value="getChallengeProgress(challenge)"
                     :max="getChallengeGoal(challenge)"
-                  ></progress>
+                    aria-label="Get Challenge Progress(challenge) progress"></progress>
                   <span class="text-sm font-medium">
                     {{ getChallengeProgress(challenge) }} / {{ getChallengeGoal(challenge) }}
                   </span>

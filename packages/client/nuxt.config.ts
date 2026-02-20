@@ -1,5 +1,3 @@
-import tailwindcss from "@tailwindcss/vite";
-
 const apiBaseProxy = process.env.NUXT_PUBLIC_API_BASE || process.env.NUXT_PUBLIC_API_PROXY;
 const DECIMAL_RADIX = 10;
 const DEFAULT_QUERY_STALE_TIME_MS = 60_000;
@@ -27,12 +25,17 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()],
     css: {
       devSourcemap: true,
     },
     build: {
       sourcemap: false,
+    },
+  },
+
+  postcss: {
+    plugins: {
+      "@tailwindcss/postcss": {},
     },
   },
 

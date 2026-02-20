@@ -224,7 +224,7 @@ async function handleSaveAutomation() {
               :key="provider.id"
               class="collapse collapse-arrow bg-base-100"
             >
-              <input type="radio" name="provider-accordion" />
+              <input type="radio" name="provider-accordion" aria-label="Provider Accordion"/>
               <div class="collapse-title font-medium flex items-center gap-2">
                 {{ provider.label }}
                 <span v-if="isProviderConfigured(provider.id)" class="badge badge-success badge-xs">configured</span>
@@ -239,7 +239,7 @@ async function handleSaveAutomation() {
                       :type="provider.id === 'local' ? 'text' : 'password'"
                       :placeholder="provider.placeholder"
                       class="input join-item w-full"
-                    />
+                      aria-label="provider.placeholder"/>
                     <button class="btn btn-outline join-item" @click="handleTest(provider.id)">
                       <span v-if="testingProvider === provider.id" class="loading loading-spinner loading-xs"></span>
                       Test
@@ -254,7 +254,7 @@ async function handleSaveAutomation() {
                       type="text"
                       class="input w-full"
                       placeholder="e.g. llama3.2"
-                    />
+                      aria-label="e.g. llama3.2"/>
                   </fieldset>
                 </div>
                 <span
@@ -289,7 +289,7 @@ async function handleSaveAutomation() {
                 <span class="font-medium">Headless Mode</span>
                 <p class="text-sm text-base-content/60">Run browser automation without visible window</p>
               </div>
-              <input v-model="automationForm.headless" type="checkbox" class="toggle toggle-primary" />
+              <input v-model="automationForm.headless" type="checkbox" class="toggle toggle-primary" aria-label="Headless"/>
             </div>
 
             <!-- Smart AI Selectors -->
@@ -298,7 +298,7 @@ async function handleSaveAutomation() {
                 <span class="font-medium">Smart AI Selectors</span>
                 <p class="text-sm text-base-content/60">Use AI to detect form fields automatically</p>
               </div>
-              <input v-model="automationForm.enableSmartSelectors" type="checkbox" class="toggle toggle-primary" />
+              <input v-model="automationForm.enableSmartSelectors" type="checkbox" class="toggle toggle-primary" aria-label="Enable Smart Selectors"/>
             </div>
 
             <!-- Auto-save Screenshots -->
@@ -307,7 +307,7 @@ async function handleSaveAutomation() {
                 <span class="font-medium">Auto-save Screenshots</span>
                 <p class="text-sm text-base-content/60">Capture screenshots at each step of automation</p>
               </div>
-              <input v-model="automationForm.autoSaveScreenshots" type="checkbox" class="toggle toggle-primary" />
+              <input v-model="automationForm.autoSaveScreenshots" type="checkbox" class="toggle toggle-primary" aria-label="Auto Save Screenshots"/>
             </div>
 
             <div class="divider"></div>
@@ -322,7 +322,7 @@ async function handleSaveAutomation() {
                 min="5"
                 max="120"
                 placeholder="30"
-              />
+                aria-label="30"/>
               <p class="text-xs text-base-content/50 mt-1">How long to wait for page elements (5-120 seconds)</p>
             </fieldset>
 
@@ -336,7 +336,7 @@ async function handleSaveAutomation() {
                 min="1"
                 max="30"
                 placeholder="7"
-              />
+                aria-label="7"/>
               <p class="text-xs text-base-content/50 mt-1">How long to keep automation screenshots (1-30 days)</p>
             </fieldset>
 
@@ -350,14 +350,14 @@ async function handleSaveAutomation() {
                 min="1"
                 max="5"
                 placeholder="1"
-              />
+                aria-label="1"/>
               <p class="text-xs text-base-content/50 mt-1">Maximum simultaneous automation runs (1-5)</p>
             </fieldset>
 
             <!-- Default Browser -->
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Default Browser</legend>
-              <select v-model="automationForm.defaultBrowser" class="select w-full">
+              <select v-model="automationForm.defaultBrowser" class="select w-full" aria-label="Default Browser">
                 <option value="chrome">Chrome</option>
                 <option value="chromium">Chromium</option>
                 <option value="edge">Edge</option>

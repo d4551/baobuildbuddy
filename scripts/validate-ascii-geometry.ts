@@ -159,7 +159,6 @@ const analyzeBlock = (
   };
 
   const countConnectedNeighbors = (row: number, col: number): number => {
-    const current = grid[row][col];
     let connected = 0;
 
     for (const direction of DIRECTIONS) {

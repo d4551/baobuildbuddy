@@ -195,7 +195,7 @@ function viewSession(id: string) {
         <div class="space-y-4">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Studio</legend>
-            <select v-model="sessionConfig.studioId" class="select w-full">
+            <select v-model="sessionConfig.studioId" class="select w-full" aria-label="Studio Id">
               <option value="">Select a studio</option>
               <option v-for="studio in studios" :key="studio.id" :value="studio.id">
                 {{ studio.name }}
@@ -205,7 +205,7 @@ function viewSession(id: string) {
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Role</legend>
-            <select v-model="sessionConfig.role" class="select w-full">
+            <select v-model="sessionConfig.role" class="select w-full" aria-label="Role">
               <option value="game-designer">Game Designer</option>
               <option value="programmer">Programmer</option>
               <option value="artist">Artist</option>
@@ -216,7 +216,7 @@ function viewSession(id: string) {
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Experience Level</legend>
-            <select v-model="sessionConfig.experienceLevel" class="select w-full">
+            <select v-model="sessionConfig.experienceLevel" class="select w-full" aria-label="Experience Level">
               <option value="entry">Entry Level</option>
               <option value="mid">Mid Level</option>
               <option value="senior">Senior</option>
@@ -226,7 +226,7 @@ function viewSession(id: string) {
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Number of Questions</legend>
-            <select v-model="sessionConfig.questionCount" class="select w-full">
+            <select v-model="sessionConfig.questionCount" class="select w-full" aria-label="Question Count">
               <option :value="3">3 Questions (Quick)</option>
               <option :value="5">5 Questions (Standard)</option>
               <option :value="10">10 Questions (Full)</option>
@@ -234,7 +234,7 @@ function viewSession(id: string) {
           </fieldset>
 
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="sessionConfig.enableVoiceMode" type="checkbox" class="toggle toggle-primary" />
+            <input v-model="sessionConfig.enableVoiceMode" type="checkbox" class="toggle toggle-primary" aria-label="Enable Voice Mode"/>
             <span>Enable voice mode (TTS reads questions, STT captures answers)</span>
           </label>
 
@@ -246,7 +246,7 @@ function viewSession(id: string) {
                 id="voice-select"
                 v-model="sessionConfig.voiceSettings.voiceId"
                 class="select select-bordered w-full"
-              >
+                aria-label="Voice Select">
                 <option value="">Default</option>
                 <option
                   v-for="v in tts.voices"

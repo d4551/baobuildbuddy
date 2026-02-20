@@ -70,7 +70,9 @@ flowchart TD
   Client --> Composables["Nuxt composables (typed)"]
   Composables --> Normalizers["api-normalizers.ts"]
   Composables --> EdenClient["plugins/eden.ts (Eden Treaty client)"]
+  ServerTypes["packages/server/dist-types (generated API type contract)"]
   EdenClient -->|function-param route calls| API_PREFIX["/api prefix (Nuxt config runtimeBase)"]
+  EdenClient -->|type import| ServerTypes
   API_PREFIX --> Server["packages/server (Elysia)"]
 
   Browser -->|WebSocket| ChatWS["/api/ws/chat"]
@@ -78,6 +80,7 @@ flowchart TD
   Browser -->|WebSocket| AutomationWS["/api/ws/automation"]
   Server -->|auth + error envelope| AuthMiddleware["auth middleware"]
   Server -->|contracts| Shared["packages/shared"]
+  Server -->|build:types| ServerTypes
 
   Server -->|register routes| RouteGroup["route modules under packages/server/src/routes/index.ts"]
   RouteGroup --> AuthRoutes["authRoutes"]
@@ -293,7 +296,7 @@ It passes payload to stdin, reads both stdout/stderr, and fails with structured 
        .-----------.
       /  JOBS BOARD  \      "War. War never changes."
      |  +-----------+ |      But job boards do. The provider
-     |  | Greenhouse| |      registry abstracts the differences
+     |  | Greenhouse| |      registry normalizes provider behavior
      |  | Lever     | |      so the aggregator doesn't have to
      |  | Company   | |      care which ATS you're scraping.
      |  +-----------+ |
@@ -406,12 +409,12 @@ Beyond the route-specific services, the server includes:
 
 ### 8.1 Prerequisites
 
-| Required              | Version      | Purpose                        |
-|-----------------------|-------------|-------------------------------|
-| Bun                   | 1.3.x       | Runtime, package manager, test runner |
-| Git                   | any recent  | Source control                 |
-| Python                | 3.10+       | RPA script execution           |
-| Chrome or Chromium    | any recent  | Browser automation target      |
+| Required           | Purpose                                |
+|--------------------|----------------------------------------|
+| Bun                | Runtime, package manager, test runner  |
+| Git                | Source control                         |
+| Python             | RPA script execution                   |
+| Chrome or Chromium | Browser automation target              |
 
 Optional: `curl` and `jq` for command-line diagnostics.
 
@@ -470,7 +473,6 @@ bun install
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
-python -m pip install --upgrade pip
 python -m pip install -r packages/scraper/requirements.txt
 ```
 
@@ -479,7 +481,6 @@ Windows manual alternative:
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
 python -m pip install -r packages\scraper\requirements.txt
 ```
 
@@ -489,7 +490,7 @@ python -m pip install -r packages\scraper\requirements.txt
 cp .env.example .env
 ```
 
-Edit `.env` with your environment-specific values. Defaults are already defined in source config files -- you only need to set what differs from defaults.
+Edit `.env` with your environment-specific values. Defaults are already defined in source config files.
 
 ### 8.5 Source-of-truth config files
 
@@ -635,6 +636,7 @@ bun run dev:client
 | Build (macOS) | `bun run build:macos` | macOS entrypoint for CI/local build |
 | Build (Linux) | `bun run build:linux` | Linux entrypoint for CI/local build |
 | Build (Windows) | `bun run build:windows` | Windows entrypoint for CI/local build |
+| Server API type contract | `bun run --filter '@bao/server' build:types` | Generate `packages/server/dist-types` declarations used by client typecheck |
 | Format | `bun run format` | Apply Biome formatter |
 | Format check | `bun run format:check` | Verify formatter output |
 | Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
@@ -668,6 +670,9 @@ bun run test
 ```
 
 Client-side runtime tests for composables use `*.nuxt.spec.ts` and initialize Nuxt with a package-root `rootDir` so alias resolution stays deterministic in workspace runs. Keep those tests explicit about external dependencies (`useApi`) and avoid relying on unresolved auto-import side effects.
+`bun run typecheck` now generates server API declarations (`packages/server/dist-types`) before running package typechecks, so Nuxt client typechecking consumes contract types instead of server implementation internals.
+Server-side tests run with deterministic in-process AI behavior (`BAO_TEST_MODE=1`), so test execution does not depend on external AI providers or network availability.
+Rate-limited route groups use header-aware client-key generation (`x-forwarded-for` / `cf-connecting-ip` / `x-real-ip` fallback), which keeps behavior deterministic in local tests and proxy deployments.
 
 ### 11.2 Database setup
 
@@ -714,6 +719,36 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 | `/api/automation/job-apply` | Start job application automation | `{ runId, status: "running" }` |
 | `/api/gamification/progress` | XP and level progression | Gamification progress payload |
 | `/api/automation/runs` | Automation audit | Persisted run records |
+
+### 11.6 UI wiring and accessibility verification
+
+```bash
+bun run --filter '@bao/client' lint
+```
+
+The client lint pipeline includes `eslint-plugin-vuejs-accessibility` in flat-config mode and validates:
+
+- form controls are programmatically labeled (`label` + `for`, nesting, or ARIA label)
+- clickable UI surfaces are keyboard-operable and focusable
+- anchor and icon-only controls expose accessible names
+- unsupported ARIA usage is rejected
+
+```mermaid
+flowchart LR
+  Templates["Vue templates"] --> A11yLint["Client ESLint + vuejs-accessibility"]
+  A11yLint --> LintState{"A11y errors = 0?"}
+  LintState -->|No| Fixes["Fix labels, keyboard handlers, control semantics"]
+  Fixes --> A11yLint
+  LintState -->|Yes| BrowserQA["Manual browser QA: tab order, Enter/Space, CTA wiring"]
+  BrowserQA --> Ready["Release-ready UI"]
+```
+
+Manual browser checklist for final sign-off:
+
+1. Verify primary CTAs on each page trigger expected state transitions and API calls.
+2. Verify keyboard-only navigation (`Tab`, `Shift+Tab`, `Enter`, `Space`) works on cards, menus, and dialogs.
+3. Verify icon-only controls have accessible names and visible focus states.
+4. Verify form submission and validation states are reachable without pointer input.
 | `/api/automation/runs/:id` | Run detail | Single run snapshot |
 | `/api/automation/screenshots/:runId/:index` | Run screenshot bytes | PNG/JPEG/WebP image stream |
 | `/api/stats/dashboard` | Usage statistics dashboard | Aggregate stat payload |

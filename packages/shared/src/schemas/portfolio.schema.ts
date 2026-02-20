@@ -1,4 +1,4 @@
-import * as z from "zod/v3";
+import { z } from "zod";
 
 import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "../types/portfolio";
 
@@ -35,7 +35,7 @@ export const portfolioProjectSchema = z.object({
   role: z.string().optional(),
   responsibilities: z.array(z.string()).optional(),
   outcomes: z.array(z.string()).optional(),
-  metrics: z.record(z.union([z.string(), z.number()])).optional(),
+  metrics: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
   platforms: z.array(z.string()).optional(),
   engines: z.array(z.string()).optional(),
   sortOrder: z.number().int().optional(),

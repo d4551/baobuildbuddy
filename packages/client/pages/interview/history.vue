@@ -49,7 +49,7 @@ function closeDetail() {
           <div class="card-body">
             <div class="flex items-center justify-between mb-4">
               <h2 class="card-title">All Sessions</h2>
-              <select v-model="studioFilter" class="select select-sm">
+              <select v-model="studioFilter" class="select select-sm" aria-label="Studio Filter">
                 <option value="">All Studios</option>
                 <option v-for="studio in studios" :key="studio" :value="studio">
                   {{ studio }}
@@ -155,7 +155,7 @@ function closeDetail() {
                     :key="idx"
                     class="collapse collapse-arrow bg-base-100"
                   >
-                    <input type="radio" :name="`question-${selectedSession.id}`" />
+                    <input type="radio" :name="`question-${selectedSession.id}`" aria-label="`question ${selected Session Id}`"/>
                     <div class="collapse-title text-sm font-medium">
                       Q{{ idx + 1 }}: {{ q.score }}%
                     </div>

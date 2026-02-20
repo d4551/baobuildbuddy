@@ -2,6 +2,11 @@ import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = "test";
+}
+process.env.BAO_TEST_MODE = "1";
+
 export interface ApiResponseEnvelope<T> {
   status: number;
   body: T;

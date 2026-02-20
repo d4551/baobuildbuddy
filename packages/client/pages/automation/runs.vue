@@ -34,7 +34,7 @@ function formatDate(value: string) {
     <div class="flex flex-wrap gap-4 mb-4">
       <label class="form-control">
         <span class="mb-1 text-sm">Type</span>
-        <select v-model="typeFilter" class="select select-bordered">
+        <select v-model="typeFilter" class="select select-bordered" aria-label="Type Filter">
           <option value="">All</option>
           <option value="job_apply">Job Apply</option>
           <option value="scrape">Scraper</option>
@@ -44,7 +44,7 @@ function formatDate(value: string) {
 
       <label class="form-control">
         <span class="mb-1 text-sm">Status</span>
-        <select v-model="statusFilter" class="select select-bordered">
+        <select v-model="statusFilter" class="select select-bordered" aria-label="Status Filter">
           <option value="">All</option>
           <option value="pending">Pending</option>
           <option value="running">Running</option>

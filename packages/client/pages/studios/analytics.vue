@@ -104,7 +104,7 @@ function getMaxCount(items: Array<{ name: string; count: number }>) {
                 class="progress progress-primary w-full"
                 :value="count"
                 :max="analytics.totalStudios"
-              ></progress>
+                aria-label="Count progress"></progress>
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ function getMaxCount(items: Array<{ name: string; count: number }>) {
                   class="progress progress-primary w-full"
                   :value="tech.count"
                   :max="getMaxCount(analytics.topTechnologies)"
-                ></progress>
+                  aria-label="Count progress"></progress>
               </div>
               <span class="badge">{{ tech.count }}</span>
             </div>

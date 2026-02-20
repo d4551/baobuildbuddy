@@ -140,7 +140,7 @@ async function handleComplete() {
         <h2 class="text-lg font-semibold">Tell us about yourself</h2>
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Your Name</legend>
-          <input v-model="name" type="text" placeholder="Enter your name" class="input w-full" />
+          <input v-model="name" type="text" placeholder="Enter your name" class="input w-full" aria-label="Enter your name"/>
         </fieldset>
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Current Role (optional)</legend>
@@ -149,7 +149,7 @@ async function handleComplete() {
             type="text"
             placeholder="e.g. Game Designer, 3D Artist"
             class="input w-full"
-          />
+            aria-label="e.g. Game Designer, 3D Artist"/>
         </fieldset>
 
         <div class="flex justify-end">
@@ -168,13 +168,13 @@ async function handleComplete() {
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Local endpoint</legend>
-          <input v-model="localModelEndpoint" type="text" class="input w-full" />
-          <label class="label">Examples: RamaLama <code>/v1</code>, Ollama <code>/v1</code></label>
+          <input v-model="localModelEndpoint" type="text" class="input w-full" aria-label="Local Model Endpoint"/>
+          <div class="label">Examples: RamaLama <code>/v1</code>, Ollama <code>/v1</code></div>
         </fieldset>
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Local model name</legend>
-          <input v-model="localModelName" type="text" class="input w-full" />
+          <input v-model="localModelName" type="text" class="input w-full" aria-label="Local Model Name"/>
         </fieldset>
 
         <button class="btn btn-outline btn-sm" :disabled="testing && testingProvider === 'local'" @click="handleTestProvider('local')">
@@ -188,7 +188,7 @@ async function handleComplete() {
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Gemini API key</legend>
               <div class="join w-full">
-                <input v-model="geminiKey" type="password" placeholder="Enter key" class="input join-item w-full" />
+                <input v-model="geminiKey" type="password" placeholder="Enter key" class="input join-item w-full" aria-label="Enter key"/>
                 <button
                   class="btn btn-outline join-item"
                   :disabled="testing || !geminiKey.trim()"
@@ -202,7 +202,7 @@ async function handleComplete() {
             <fieldset class="fieldset">
               <legend class="fieldset-legend">OpenAI API key</legend>
               <div class="join w-full">
-                <input v-model="openaiKey" type="password" placeholder="Enter key" class="input join-item w-full" />
+                <input v-model="openaiKey" type="password" placeholder="Enter key" class="input join-item w-full" aria-label="Enter key"/>
                 <button
                   class="btn btn-outline join-item"
                   :disabled="testing || !openaiKey.trim()"
@@ -216,7 +216,7 @@ async function handleComplete() {
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Claude API key</legend>
               <div class="join w-full">
-                <input v-model="claudeKey" type="password" placeholder="Enter key" class="input join-item w-full" />
+                <input v-model="claudeKey" type="password" placeholder="Enter key" class="input join-item w-full" aria-label="Enter key"/>
                 <button
                   class="btn btn-outline join-item"
                   :disabled="testing || !claudeKey.trim()"
@@ -230,7 +230,7 @@ async function handleComplete() {
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Hugging Face token</legend>
               <div class="join w-full">
-                <input v-model="huggingFaceToken" type="password" placeholder="Enter token" class="input join-item w-full" />
+                <input v-model="huggingFaceToken" type="password" placeholder="Enter token" class="input join-item w-full" aria-label="Enter token"/>
                 <button
                   class="btn btn-outline join-item"
                   :disabled="testing || !huggingFaceToken.trim()"

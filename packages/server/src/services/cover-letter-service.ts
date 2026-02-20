@@ -140,7 +140,7 @@ export class CoverLetterService {
    * Delete a cover letter by ID
    */
   async deleteCoverLetter(id: string): Promise<boolean> {
-    const result = await db.delete(coverLetters).where(eq(coverLetters.id, id));
+    await db.delete(coverLetters).where(eq(coverLetters.id, id));
     return true;
   }
 }

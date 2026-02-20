@@ -47,7 +47,7 @@ watch(
           type="text"
           placeholder="John Doe"
           class="input input-bordered"
-        />
+          aria-label="John Doe"/>
       </div>
 
       <div>
@@ -58,7 +58,7 @@ watch(
           type="email"
           placeholder="john@example.com"
           class="input input-bordered"
-        />
+          aria-label="john@example.com"/>
       </div>
 
       <div>
@@ -69,7 +69,7 @@ watch(
           type="tel"
           placeholder="+1 (555) 123-4567"
           class="input input-bordered"
-        />
+          aria-label="+1 (555) 123-4567"/>
       </div>
 
       <div>
@@ -80,7 +80,7 @@ watch(
           type="text"
           placeholder="San Francisco, CA"
           class="input input-bordered"
-        />
+          aria-label="San Francisco, CA"/>
       </div>
 
       <div>
@@ -91,7 +91,7 @@ watch(
           type="url"
           placeholder="https://yoursite.com"
           class="input input-bordered"
-        />
+          aria-label="https://yoursite.com"/>
       </div>
 
       <div>
@@ -102,7 +102,7 @@ watch(
           type="url"
           placeholder="https://linkedin.com/in/johndoe"
           class="input input-bordered"
-        />
+          aria-label="https://linkedin.com/in/johndoe"/>
       </div>
 
       <div class="md:col-span-2">
@@ -113,7 +113,7 @@ watch(
           type="url"
           placeholder="https://github.com/johndoe"
           class="input input-bordered"
-        />
+          aria-label="https://github.com/johndoe"/>
       </div>
     </div>
   </fieldset>

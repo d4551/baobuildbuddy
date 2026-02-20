@@ -4,7 +4,7 @@ import { chatHistory } from "../db/schema/chat-history";
 import { coverLetters } from "../db/schema/cover-letters";
 import { gamification } from "../db/schema/gamification";
 import { interviewSessions } from "../db/schema/interviews";
-import { applications, jobs, savedJobs } from "../db/schema/jobs";
+import { applications, savedJobs } from "../db/schema/jobs";
 import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";

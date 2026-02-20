@@ -259,7 +259,7 @@ watch(selectedProvider, (provider) => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Provider</legend>
-              <select v-model="selectedProvider" class="select w-full">
+              <select v-model="selectedProvider" class="select w-full" aria-label="Selected Provider">
                 <option value="">Select provider</option>
                 <option
                   v-for="provider in providers"
@@ -274,7 +274,7 @@ watch(selectedProvider, (provider) => {
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Model</legend>
-              <select v-model="selectedModel" class="select w-full" :disabled="!selectedProvider">
+              <select v-model="selectedModel" class="select w-full" :disabled="!selectedProvider" aria-label="Selected Model">
                 <option value="">Select model</option>
                 <option v-for="model in providers.find((item) => item.id === selectedProvider)?.models || []" :key="model" :value="model">
                   {{ model }}

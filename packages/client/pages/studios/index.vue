@@ -83,9 +83,9 @@ function viewStudio(id: string) {
             type="text"
             placeholder="Search studios by name, location..."
             class="input input-bordered flex-1"
-          />
+            aria-label="Search studios by name, location..."/>
           <div class="flex gap-2">
-            <select v-model="filters.type" class="select select-bordered">
+            <select v-model="filters.type" class="select select-bordered" aria-label="Type">
               <option value="">All Types</option>
               <option value="AAA">AAA</option>
               <option value="Indie">Indie</option>
@@ -93,7 +93,7 @@ function viewStudio(id: string) {
               <option value="Publisher">Publisher</option>
             </select>
 
-            <select v-model="filters.size" class="select select-bordered">
+            <select v-model="filters.size" class="select select-bordered" aria-label="Size">
               <option value="">All Sizes</option>
               <option value="Small (10-50)">Small (10-50)</option>
               <option value="Medium (300-1000)">Medium (300-1000)</option>
@@ -106,7 +106,7 @@ function viewStudio(id: string) {
                 v-model="filters.remoteWork"
                 type="checkbox"
                 class="toggle toggle-primary toggle-sm"
-              />
+                aria-label="Remote Work"/>
             </label>
           </div>
         </div>
@@ -127,7 +127,11 @@ function viewStudio(id: string) {
         v-for="studio in filteredStudios"
         :key="studio.id"
         class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
+        role="button"
+        tabindex="0"
         @click="viewStudio(studio.id)"
+        @keydown.enter="viewStudio(studio.id)"
+        @keydown.space.prevent="viewStudio(studio.id)"
       >
         <div class="card-body">
           <div class="flex items-center gap-3 mb-2">

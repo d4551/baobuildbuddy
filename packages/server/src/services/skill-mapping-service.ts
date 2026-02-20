@@ -1,13 +1,12 @@
 import { generateId } from "@bao/shared";
 import type {
   CareerPathway,
-  CategoryAssessment,
   ReadinessAssessment,
   SkillEvidence,
   SkillCategory,
   SkillMapping,
 } from "@bao/shared";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { skillMappings } from "../db/schema";
 
@@ -20,8 +19,6 @@ const SKILL_CATEGORIES: readonly SkillCategory[] = [
   "communication",
   "project_management",
 ];
-
-const DEMAND_LEVELS: readonly SkillMapping["demandLevel"][] = ["high", "medium", "low"];
 
 const EVIDENCE_TYPES: readonly SkillEvidence["type"][] = [
   "clip",

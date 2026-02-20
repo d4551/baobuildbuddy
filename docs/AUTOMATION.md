@@ -97,7 +97,7 @@ flowchart LR
 - `POST /api/automation/job-apply` — starts a job-application automation run.
 - `POST /api/automation/job-apply` response contract:
   - `200`: `{"runId": string, "status": "running"}`
-  - `400`: route-level validation rejection for malformed request envelopes (legacy path compatibility)
+  - `400`: route-level validation rejection for malformed request envelopes
   - `404`: missing dependency (`resume` / `cover-letter`)
   - `409`: concurrency limit hit
   - `422`: schema/validation failure
@@ -142,6 +142,21 @@ flowchart LR
 Use `PUT /api/settings` with `automationSettings.jobProviders` to change any runtime source without code changes or redeploys. The service does not auto-fill provider runtime defaults; a complete valid `jobProviders` object must be present before ingestion runs.
 `automationSettings` patch payloads are merged with persisted settings and revalidated against the full schema before commit, so invalid or incomplete updates are rejected with a deterministic `422` response.
 
+## UI dashboard accessibility and wiring checks
+
+Automation pages under `/automation` must pass the same UI wiring/accessibility gate as the rest of the client:
+
+```bash
+bun run --filter '@bao/client' lint
+```
+
+Required behavior:
+
+1. Interactive elements triggered by click must be keyboard-operable (`Enter`/`Space`) and focusable.
+2. Form controls must have programmatic labels (`label` association or ARIA label).
+3. Icon-only controls and anchor-only icon links must expose accessible names.
+4. Run actions (`start`, `retry`, history navigation, screenshot browsing) must remain reachable without pointer input.
+
 ## Verification commands
 
 Run these before shipping automation changes:
@@ -152,6 +167,8 @@ bun run typecheck
 bun run lint
 bun run test
 ```
+
+`bun run typecheck` generates `packages/server/dist-types` first so client-side Nuxt typechecking validates against the typed API contract surface.
 
 ## Environment
 

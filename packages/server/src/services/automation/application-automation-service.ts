@@ -63,7 +63,6 @@ const MAX_PROGRESS_STEPS = 10_000;
 const MIN_ID_LENGTH = 8;
 const MIN_CONCURRENT_RUNS = 1;
 const MIN_RESUME_ID_LENGTH = 1;
-const MIN_RUN_ID_LENGTH = 8;
 const SUPPORTED_SCREENSHOT_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"] as const;
 const RUN_SCREENSHOT_PREFIX = "step";
 const MIN_SCREENSHOT_RETENTION_DAYS = 1;

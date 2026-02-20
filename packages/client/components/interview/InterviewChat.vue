@@ -97,17 +97,17 @@ function submitResponse() {
     <!-- Response Input -->
     <div v-if="currentQuestion" class="p-4 bg-base-100 rounded-b-lg border-t border-base-300">
       <div class="form-control">
-        <label class="label">
+        <div class="label">
           <span class="label-text font-medium">Your Response</span>
           <span class="label-text-alt">Question {{ currentIndex + 1 }} of {{ questions.length }}</span>
-        </label>
+        </div>
         <textarea
           v-model="currentResponse"
           class="textarea textarea-bordered h-24"
           placeholder="Type your answer here..."
           @keyup.ctrl.enter="submitResponse"
-        ></textarea>
-        <label class="label">
+          aria-label="Type your answer here..."></textarea>
+        <div class="label">
           <span class="label-text-alt">Press Ctrl+Enter to submit</span>
           <button
             class="btn btn-primary btn-sm"
@@ -116,7 +116,7 @@ function submitResponse() {
           >
             Submit Response
           </button>
-        </label>
+        </div>
       </div>
     </div>
 

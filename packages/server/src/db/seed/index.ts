@@ -10,12 +10,9 @@ export async function seedDatabase(db: BunSQLiteDatabase<typeof schema>) {
     for (const studio of SEED_STUDIOS) {
       try {
         db.insert(studios).values(studio).onConflictDoNothing().run();
-      } catch (e) {
+      } catch {
         // Skip duplicates
       }
     }
-    console.log(`Seeded ${SEED_STUDIOS.length} gaming studios`);
-  } else {
-    console.log(`Studios already seeded (${result.count} records)`);
   }
 }

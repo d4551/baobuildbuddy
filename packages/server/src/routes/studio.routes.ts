@@ -1,5 +1,5 @@
 import { generateId } from "@bao/shared";
-import { desc, eq, like, or } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";

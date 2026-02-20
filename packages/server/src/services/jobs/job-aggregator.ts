@@ -14,7 +14,7 @@ import type {
   Platform,
   StudioType,
 } from "@bao/shared";
-import { and, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, like, sql } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs, savedJobs } from "../../db/schema/jobs";
 import { deduplicateJobs, generateContentHash } from "./deduplication";
@@ -266,14 +266,6 @@ export class JobAggregator {
             .where(and(...conditions))
         : db.select().from(jobs);
 
-    // Get total count
-    const countResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(jobs)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
-
-    const total = Number(countResult[0]?.count || 0);
-
     // Apply ordering and pagination
     const offset = (page - 1) * limit;
     const results = await query_builder.orderBy(desc(jobs.postedDate)).limit(limit).offset(offset);
@@ -320,8 +312,8 @@ export class JobAggregator {
         if (typeof job.salary === "string") {
           const numbers = job.salary.match(/\d+/g);
           if (numbers) {
-            jobMin = Number.parseInt(numbers[0]) * 1000;
-            jobMax = numbers.length > 1 ? Number.parseInt(numbers[1]) * 1000 : jobMin;
+            jobMin = Number.parseInt(numbers[0], 10) * 1000;
+            jobMax = numbers.length > 1 ? Number.parseInt(numbers[1], 10) * 1000 : jobMin;
           }
         } else {
           jobMin = job.salary.min;

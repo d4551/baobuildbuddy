@@ -5,7 +5,9 @@
   "engines": {
     "bun": ">=1.3.9 <1.4.0"
   },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "bun run --parallel --filter '@bao/server' --filter '@bao/client' dev",
     "dev:server": "bun run --filter '@bao/server' dev",
@@ -14,7 +16,7 @@
     "build:macos": "bun run build",
     "build:linux": "bun run build",
     "build:windows": "bun run build",
-    "typecheck": "bun run --filter '*' typecheck",
+    "typecheck": "bun run --filter '@bao/server' build:types && bun run --filter '@bao/shared' typecheck && bun run --filter '@bao/server' typecheck && bun run --filter '@bao/client' typecheck",
     "db:generate": "bun --env-file=.env run drizzle-kit generate",
     "db:push": "bun --env-file=.env run drizzle-kit push",
     "db:studio": "bun --env-file=.env run drizzle-kit studio",
@@ -25,7 +27,7 @@
     "lint:fix": "bun --bun run biome lint . --write && bun run --filter '@bao/client' lint --fix"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
-    "drizzle-kit": "^0.31.0"
+    "@biomejs/biome": "^2.4.3",
+    "drizzle-kit": "^0.31.9"
   }
 }

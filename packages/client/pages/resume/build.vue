@@ -125,7 +125,7 @@ function backToTarget() {
       Tell us your target role and studio. We'll generate tailored questions and create your resume.
     </p>
 
-    <progress class="progress progress-primary w-full mb-8" :value="progressValue" max="100"></progress>
+    <progress class="progress progress-primary w-full mb-8" :value="progressValue" max="100" aria-label="Progress Value progress"></progress>
 
     <!-- Phase: Target role/studio -->
     <div v-if="phase === 'target'" class="card bg-base-200">
@@ -144,7 +144,7 @@ function backToTarget() {
             type="text"
             class="input input-bordered w-full"
             placeholder="e.g. Game Designer at AAA studio"
-          />
+            aria-label="e.g. Game Designer at AAA studio"/>
         </fieldset>
 
         <fieldset class="fieldset mt-4">
@@ -154,7 +154,7 @@ function backToTarget() {
             id="studio-select"
             v-model="studioId"
             class="select select-bordered w-full"
-          >
+            aria-label="Studio Select">
             <option value="">None selected</option>
             <option v-for="s in studios" :key="s.id" :value="s.id">
               {{ s.name }}
@@ -167,7 +167,7 @@ function backToTarget() {
             type="text"
             class="input input-bordered w-full"
             placeholder="e.g. Epic Games"
-          />
+            aria-label="e.g. Epic Games"/>
         </fieldset>
 
         <fieldset class="fieldset mt-4">
@@ -176,7 +176,7 @@ function backToTarget() {
             id="experience-level"
             v-model="experienceLevel"
             class="select select-bordered w-full"
-          >
+            aria-label="Experience Level">
             <option value="">Any</option>
             <option value="Entry">Entry</option>
             <option value="Mid">Mid</option>
@@ -226,7 +226,7 @@ function backToTarget() {
             class="textarea textarea-bordered w-full"
             rows="4"
             :placeholder="`Your answer for: ${currentQuestion.question}`"
-          />
+            aria-label="`Your answer for: ${currentQuestion.question}`"/>
         </fieldset>
 
         <p v-if="errorMessage" class="text-error text-sm mt-2">{{ errorMessage }}</p>

@@ -1,4 +1,4 @@
-import { like, or, sql } from "drizzle-orm";
+import { like, or } from "drizzle-orm";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { resumes } from "../db/schema/resumes";

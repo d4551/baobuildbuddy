@@ -342,7 +342,7 @@ async function requestData<T>(
                   <p class="font-bold">{{ dashboard.gamification.xp }} / {{ xpTarget }} XP</p>
                 </div>
               </div>
-              <progress class="progress progress-primary w-full" :value="levelProgress" max="100"></progress>
+              <progress class="progress progress-primary w-full" :value="levelProgress" max="100" aria-label="Level Progress progress"></progress>
             </div>
 
             <div v-if="dashboard.gamification.currentStreak" class="text-center">
@@ -393,7 +393,7 @@ async function requestData<T>(
                     :class="dashboard.dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
                     :value="dashboard.dailyChallenge.progress"
                     :max="dashboard.dailyChallenge.goal"
-                  ></progress>
+                    aria-label="Progress progress"></progress>
                   <span class="text-sm font-medium">
                     {{ dashboard.dailyChallenge.progress }} / {{ dashboard.dailyChallenge.goal }}
                   </span>

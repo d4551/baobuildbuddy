@@ -155,4 +155,7 @@ export const AI_PROVIDER_DEFAULT_ORDER: readonly AIProviderType[] = [
   ...AI_PROVIDER_ID_LIST.filter((provider) => provider !== "local"),
 ];
 
+export const AI_PROVIDER_DEFAULT: AIProviderType =
+  AI_PROVIDER_DEFAULT_ORDER[0] ?? AI_PROVIDER_IDS[0];
+
 export const AI_PROVIDER_LIST_FOR_FORMS = AI_PROVIDER_DEFAULT_ORDER as readonly AIProviderType[];

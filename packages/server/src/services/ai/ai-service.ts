@@ -13,6 +13,152 @@ import { LocalProvider } from "./local-provider";
 import { OpenAIProvider } from "./openai-provider";
 import type { AIProvider } from "./provider-interface";
 
+const TEST_AI_PROVIDER_NAME = "local" as const;
+const TEST_AI_MODEL_NAME = "deterministic-test-model";
+const TEST_AI_MAX_QUESTION_COUNT = 12;
+
+function parseQuestionCount(prompt: string): number {
+  const exactMatch = prompt.match(/exactly\s+(\d+)\s+questions/i);
+  const generateMatch = prompt.match(/generate\s+(\d+)\s+interview questions/i);
+  const matchedValue = exactMatch?.[1] ?? generateMatch?.[1];
+  const parsed = matchedValue ? Number.parseInt(matchedValue, 10) : Number.NaN;
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return 3;
+  }
+  return Math.min(parsed, TEST_AI_MAX_QUESTION_COUNT);
+}
+
+function parseIncludeFlag(prompt: string, label: string, fallback: boolean): boolean {
+  const matcher = new RegExp(`${label}\\s*=\\s*(true|false)`, "i");
+  const matched = prompt.match(matcher)?.[1];
+  if (matched === "true") return true;
+  if (matched === "false") return false;
+  return fallback;
+}
+
+function buildDeterministicQuestionSet(prompt: string): string {
+  const questionCount = parseQuestionCount(prompt);
+  const includeTechnical = parseIncludeFlag(prompt, "technical", true);
+  const includeBehavioral = parseIncludeFlag(prompt, "behavioral", true);
+  const includeStudioSpecific = parseIncludeFlag(prompt, "studio-specific", true);
+  const candidateTypes: Array<
+    "intro" | "behavioral" | "technical" | "studio-specific" | "closing"
+  > = ["intro"];
+  if (includeBehavioral) {
+    candidateTypes.push("behavioral");
+  }
+  if (includeTechnical) {
+    candidateTypes.push("technical");
+  }
+  if (includeStudioSpecific) {
+    candidateTypes.push("studio-specific");
+  }
+  candidateTypes.push("closing");
+
+  const questions: Array<{
+    id: string;
+    question: string;
+    type: "intro" | "behavioral" | "technical" | "studio-specific" | "closing";
+    followUps: string[];
+    expectedDuration: number;
+    difficulty: "easy" | "medium" | "hard";
+    tags: string[];
+  }> = [];
+
+  for (let index = 0; index < questionCount; index += 1) {
+    const position = index + 1;
+    const type = candidateTypes[index % candidateTypes.length] ?? "behavioral";
+    questions.push({
+      id: `test-q${position}`,
+      question: `Deterministic interview question ${position} for reliable test execution.`,
+      type,
+      followUps: ["Can you describe your approach?", "What measurable result did you achieve?"],
+      expectedDuration: 90,
+      difficulty: type === "technical" ? "hard" : "medium",
+      tags: ["deterministic", "test"],
+    });
+  }
+
+  return JSON.stringify(questions);
+}
+
+function buildDeterministicFeedback(): string {
+  return JSON.stringify({
+    score: 78,
+    feedback: "Clear structured response with actionable detail.",
+    strengths: ["Structured explanation", "Relevant technical context"],
+    improvements: ["Add one measurable outcome"],
+  });
+}
+
+function buildDeterministicFinalAnalysis(): string {
+  return JSON.stringify({
+    overallScore: 80,
+    strengths: ["Clear communication", "Practical technical reasoning"],
+    improvements: ["Provide deeper metric context"],
+    recommendations: ["Continue using STAR-style response framing"],
+    feedback: "Consistent and production-ready interview performance.",
+  });
+}
+
+function buildDeterministicContent(prompt: string): string {
+  const normalizedPrompt = prompt.toLowerCase();
+
+  if (
+    normalizedPrompt.includes('"overallscore": 0-100') &&
+    normalizedPrompt.includes('"recommendations"')
+  ) {
+    return buildDeterministicFinalAnalysis();
+  }
+
+  if (
+    normalizedPrompt.includes('"score": 0-100') &&
+    normalizedPrompt.includes('"strengths"') &&
+    normalizedPrompt.includes('"improvements"')
+  ) {
+    return buildDeterministicFeedback();
+  }
+
+  if (
+    normalizedPrompt.includes("return strict json array only") &&
+    normalizedPrompt.includes("interview")
+  ) {
+    return buildDeterministicQuestionSet(prompt);
+  }
+
+  return "Deterministic test response.";
+}
+
+class DeterministicTestProvider implements AIProvider {
+  name = TEST_AI_PROVIDER_NAME;
+  model = TEST_AI_MODEL_NAME;
+
+  async generate(prompt: string): Promise<AIResponse> {
+    const startedAt = Date.now();
+    const content = buildDeterministicContent(prompt);
+    const completedAt = Date.now();
+    return {
+      id: `test-${startedAt}`,
+      provider: this.name,
+      model: this.model,
+      content,
+      timing: {
+        startedAt,
+        completedAt,
+        totalTime: completedAt - startedAt,
+      },
+    };
+  }
+
+  async *stream(prompt: string): AsyncGenerator<string> {
+    yield buildDeterministicContent(prompt);
+  }
+
+  async isAvailable(): Promise<boolean> {
+    return true;
+  }
+}
+
 /**
  * Multi-provider AI service with fallback capabilities
  */
@@ -41,6 +187,10 @@ export class AIService {
     localModelName?: string | null;
     preferredProvider?: string | null;
   }): AIService {
+    if (AIService.isTestRuntime()) {
+      return AIService.createDeterministicTestService();
+    }
+
     const localModelEndpoint =
       typeof settings?.localModelEndpoint === "string" && settings.localModelEndpoint.trim()
         ? settings.localModelEndpoint.trim()
@@ -92,6 +242,19 @@ export class AIService {
 
     const preferredProvider = AIService.resolvePreferredProvider(settings?.preferredProvider);
     return new AIService(configs, preferredProvider);
+  }
+
+  private static isTestRuntime(): boolean {
+    return process.env.NODE_ENV === "test" || process.env.BAO_TEST_MODE === "1";
+  }
+
+  private static createDeterministicTestService(): AIService {
+    const service = new AIService([], TEST_AI_PROVIDER_NAME);
+    service.providers.clear();
+    service.providers.set(TEST_AI_PROVIDER_NAME, new DeterministicTestProvider());
+    service.fallbackOrder = [TEST_AI_PROVIDER_NAME];
+    service.preferredProvider = TEST_AI_PROVIDER_NAME;
+    return service;
   }
 
   /**

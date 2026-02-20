@@ -83,16 +83,27 @@ function safeJSONParse<T>(jsonString: string, fallback: T): T {
   }
 }
 
-const jsonValueSchema = t.Recursive((Self) =>
-  t.Union([
-    t.String(),
-    t.Number(),
-    t.Boolean(),
-    t.Null(),
-    t.Array(Self),
-    t.Record(t.String(), Self),
-  ]),
-);
+const jsonObjectSchema = t.Record(t.String(), t.Any());
+
+const resolveRateLimitClientKey = (request: Request): string => {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor && forwardedFor.trim().length > 0) {
+    const firstHop = forwardedFor.split(",")[0]?.trim();
+    if (firstHop) return firstHop;
+  }
+
+  const cloudflareIp = request.headers.get("cf-connecting-ip");
+  if (cloudflareIp && cloudflareIp.trim().length > 0) {
+    return cloudflareIp.trim();
+  }
+
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp && realIp.trim().length > 0) {
+    return realIp.trim();
+  }
+
+  return new URL(request.url).host;
+};
 
 interface ExperienceEntry {
   title?: string;
@@ -254,11 +265,18 @@ function serializeResume(resume: ResumeRecord): string {
  * AI route group for chat, content generation, matching, and automation triggers.
  */
 export const aiRoutes = new Elysia({ prefix: "/ai" })
-  .use(rateLimit({ scoping: "scoped", duration: 60000, max: 25 }))
+  .use(
+    rateLimit({
+      scoping: "scoped",
+      duration: 60000,
+      max: 25,
+      generator: (request) => resolveRateLimitClientKey(request),
+    }),
+  )
   .post(
     "/chat",
     async ({ body, set }) => {
-      const { message, sessionId = "default", context } = body;
+      const { message, sessionId = "default" } = body;
 
       try {
         // Save user message
@@ -313,7 +331,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
       body: t.Object({
         message: t.String({ maxLength: 10000 }),
         sessionId: t.Optional(t.String({ maxLength: 100 })),
-        context: t.Optional(t.Record(t.String(), jsonValueSchema)),
+        context: t.Optional(jsonObjectSchema),
       }),
     },
   )
@@ -484,7 +502,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
   .post(
     "/match-jobs",
     async ({ body, set }) => {
-      const { resumeId, skills, preferences } = body;
+      const { resumeId, skills } = body;
 
       try {
         // Load user profile
@@ -633,7 +651,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
       body: t.Object({
         resumeId: t.Optional(t.String({ maxLength: 100 })),
         skills: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
-        preferences: t.Optional(t.Record(t.String(), jsonValueSchema)),
+        preferences: t.Optional(jsonObjectSchema),
       }),
     },
   )
@@ -672,7 +690,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
         preferredProvider: aiService.getFallbackOrder()[0],
         configuredProviders: aiService.getConfiguredProviders(),
       };
-    } catch (error) {
+    } catch {
       // If settings not found or no providers configured, return default list
       const providers = AI_PROVIDER_CATALOG.map((provider) => ({
         id: provider.id,

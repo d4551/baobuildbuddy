@@ -1,5 +1,5 @@
-import * as z from "zod/v3";
-import { AI_PROVIDER_DEFAULT_ORDER, AI_PROVIDER_ID_LIST } from "../constants/ai";
+import { z } from "zod";
+import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
 import type { AIProviderType } from "../types/ai";
 import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES } from "../types/settings";
 
@@ -10,7 +10,7 @@ export const apiKeyConfigSchema = z.object({
 
 const aiProviderSchema = z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]);
 
-export const preferredModelsSchema = z.record(aiProviderSchema, z.string().min(1));
+export const preferredModelsSchema = z.partialRecord(aiProviderSchema, z.string().min(1));
 
 export const companyBoardTypeSchema = z.enum([
   "greenhouse",
@@ -120,7 +120,7 @@ export const settingsSchema = z.object({
   huggingfaceToken: z.string().optional(),
   localModelEndpoint: z.string().url().optional(),
   localModelName: z.string().optional(),
-  preferredProvider: aiProviderSchema.default(AI_PROVIDER_DEFAULT_ORDER[0]),
+  preferredProvider: aiProviderSchema.default(AI_PROVIDER_DEFAULT),
   preferredModel: z.string().optional(),
   preferredModels: preferredModelsSchema.optional(),
   theme: z.enum(["bao-light", "bao-dark"]).default("bao-light"),

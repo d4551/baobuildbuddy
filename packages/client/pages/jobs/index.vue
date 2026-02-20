@@ -144,7 +144,7 @@ function formatDate(date: string) {
             placeholder="Search jobs by title, company, or keywords..."
             class="input input-bordered flex-1"
             @keyup.enter="handleSearch"
-          />
+            aria-label="Search jobs by title, company, or keywords..."/>
           <button class="btn btn-primary" @click="handleSearch">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -190,7 +190,7 @@ function formatDate(date: string) {
                   type="text"
                   placeholder="City, State, or Country"
                   class="input input-sm w-full"
-                />
+                  aria-label="City, State, or Country"/>
               </fieldset>
 
               <div class="form-control">
@@ -200,7 +200,7 @@ function formatDate(date: string) {
                     v-model="localFilters.remote"
                     type="checkbox"
                     class="toggle toggle-primary toggle-sm"
-                  />
+                    aria-label="Remote"/>
                 </label>
               </div>
 
@@ -209,7 +209,7 @@ function formatDate(date: string) {
                 <select
                   v-model="localFilters.experienceLevel"
                   class="select select-sm w-full"
-                >
+                  aria-label="Experience Level">
                   <option value="">All Levels</option>
                   <option value="entry">Entry Level</option>
                   <option value="mid">Mid Level</option>
@@ -223,7 +223,7 @@ function formatDate(date: string) {
                 <select
                   v-model="localFilters.studioType"
                   class="select select-sm w-full"
-                >
+                  aria-label="Studio Type">
                   <option value="">All Types</option>
                   <option value="indie">Indie</option>
                   <option value="aaa">AAA</option>
@@ -237,7 +237,7 @@ function formatDate(date: string) {
                 <select
                   v-model="localFilters.platform"
                   class="select select-sm w-full"
-                >
+                  aria-label="Platform">
                   <option value="">All Platforms</option>
                   <option value="pc">PC</option>
                   <option value="console">Console</option>
@@ -251,7 +251,7 @@ function formatDate(date: string) {
                 <select
                   v-model="localFilters.genre"
                   class="select select-sm w-full"
-                >
+                  aria-label="Genre">
                   <option value="">All Genres</option>
                   <option value="action">Action</option>
                   <option value="rpg">RPG</option>
@@ -282,7 +282,11 @@ function formatDate(date: string) {
               v-for="job in paginatedJobs"
               :key="job.id"
               class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
+              role="button"
+              tabindex="0"
               @click="viewJob(job.id)"
+              @keydown.enter="viewJob(job.id)"
+              @keydown.space.prevent="viewJob(job.id)"
             >
               <div class="card-body">
                 <div class="flex items-start justify-between gap-2">

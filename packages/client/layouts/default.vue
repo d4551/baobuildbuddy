@@ -8,7 +8,7 @@ onMounted(() => {
 
 <template>
   <div class="drawer lg:drawer-open">
-    <input id="bao-drawer" type="checkbox" class="drawer-toggle" />
+    <input id="bao-drawer" type="checkbox" class="drawer-toggle" aria-label="Bao Drawer"/>
     <div class="drawer-content flex flex-col min-h-screen">
       <AppNavbar />
       <main id="app-main-content" class="flex-1 p-4 lg:p-6 pb-20 lg:pb-6">

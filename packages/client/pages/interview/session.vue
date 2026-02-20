@@ -150,7 +150,7 @@ function formatTime(seconds: number) {
             </span>
             <span class="text-sm text-base-content/60">{{ Math.round(progress) }}%</span>
           </div>
-          <progress class="progress progress-primary w-full" :value="progress" max="100"></progress>
+          <progress class="progress progress-primary w-full" :value="progress" max="100" aria-label="Progress progress"></progress>
         </div>
       </div>
 
@@ -215,7 +215,7 @@ function formatTime(seconds: number) {
             rows="8"
             placeholder="Type your answer here..."
             :disabled="submitting"
-          ></textarea>
+            aria-label="Type your answer here..."></textarea>
 
           <div class="card-actions justify-between mt-4">
             <button

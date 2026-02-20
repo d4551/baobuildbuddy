@@ -141,7 +141,7 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
   )
   .post(
     "/export",
-    async ({ body, set }) => {
+    async ({ set }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio) {
         set.status = 404;

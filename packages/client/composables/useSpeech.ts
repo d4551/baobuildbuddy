@@ -39,7 +39,11 @@ export function useSpeech() {
         let interim = "";
         for (let i = e.resultIndex; i < e.results.length; i++) {
           const result = e.results[i];
-          const chunk = result[0].transcript;
+          const firstAlternative = result?.[0];
+          if (!firstAlternative) {
+            continue;
+          }
+          const chunk = firstAlternative.transcript;
           if (result.isFinal) {
             final += chunk;
           } else {

@@ -1,0 +1,17 @@
+export { authRoutes } from "./auth.routes";
+export { userRoutes } from "./user.routes";
+export { settingsRoutes } from "./settings.routes";
+export { jobsRoutes } from "./jobs.routes";
+export { resumeRoutes } from "./resume.routes";
+export { coverLetterRoutes } from "./cover-letter.routes";
+export { portfolioRoutes } from "./portfolio.routes";
+export { interviewRoutes } from "./interview.routes";
+export { studioRoutes } from "./studio.routes";
+export { scraperRoutes } from "./scraper.routes";
+export { aiRoutes } from "./ai.routes";
+export { gamificationRoutes } from "./gamification.routes";
+export { skillMappingRoutes } from "./skill-mapping.routes";
+export { searchRoutes } from "./search.routes";
+export { statsRoutes } from "./stats.routes";
+export { automationRoutes } from "./automation.routes";
+export { automationScreenshotRoutes } from "./automation-screenshots.routes";

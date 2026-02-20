@@ -1,4 +1,4 @@
-import * as z from "zod/v3";
+import { z } from "zod";
 
 export const resumePersonalInfoSchema = z.object({
   name: z.string().optional(),

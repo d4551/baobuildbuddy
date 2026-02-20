@@ -1,4 +1,4 @@
-import * as z from "zod/v3";
+import { z } from "zod";
 
 export const personalInfoSchema = z.object({
   name: z.string().optional(),
@@ -47,7 +47,13 @@ export const userProfileSchema = z.object({
         )
         .default([]),
     })
-    .default({}),
+    .default({
+      specializations: [],
+      gameEngines: [],
+      platforms: [],
+      genres: [],
+      shippedTitles: [],
+    }),
   careerGoals: z
     .object({
       desiredRoles: z.array(z.string()).default([]),
@@ -63,7 +69,9 @@ export const userProfileSchema = z.object({
         .optional(),
       willingToRelocate: z.boolean().optional(),
     })
-    .default({}),
+    .default({
+      desiredRoles: [],
+    }),
 });
 
 export type UserProfileInput = z.infer<typeof userProfileSchema>;

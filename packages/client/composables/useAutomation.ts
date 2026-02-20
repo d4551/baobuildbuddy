@@ -1,5 +1,4 @@
 import type { MaybeRef } from "vue";
-import type { AsyncData } from "#app";
 
 export interface AutomationRun {
   id: string;
@@ -81,9 +80,7 @@ export function useAutomation() {
   /**
    * Fetch automation run history with optional type/status filters.
    */
-  const fetchRuns = (
-    params: MaybeRef<FetchRunsParams> = {},
-  ): AsyncData<AutomationRun[] | null, Error | null> =>
+  const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}) =>
     useFetch<AutomationRun[]>(resolveEndpoint("/api/automation/runs"), {
       query: params,
     });
@@ -91,7 +88,7 @@ export function useAutomation() {
   /**
    * Fetch a single automation run by ID.
    */
-  const fetchRun = (id: string): AsyncData<AutomationRun | null, Error | null> =>
+  const fetchRun = (id: string) =>
     useFetch<AutomationRun>(resolveEndpoint(`/api/automation/runs/${encodeURIComponent(id)}`));
 
   /**

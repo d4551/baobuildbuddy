@@ -71,7 +71,7 @@ function toggleGenre(genre: string) {
   <div class="flex flex-col gap-4">
     <!-- Location -->
     <div class="collapse collapse-arrow bg-base-200">
-      <input type="checkbox" checked />
+      <input type="checkbox" checked aria-label="Toggle location filters" />
       <div class="collapse-title font-medium">Location</div>
       <div class="collapse-content">
         <input
@@ -79,11 +79,11 @@ function toggleGenre(genre: string) {
           type="text"
           placeholder="City, State, or Country"
           class="input input-bordered w-full"
-        />
+          aria-label="City, State, or Country"/>
         <div class="form-control mt-2">
           <label class="label cursor-pointer">
             <span class="label-text">Remote Only</span>
-            <input v-model="localFilters.remote" type="checkbox" class="checkbox checkbox-primary" />
+            <input v-model="localFilters.remote" type="checkbox" class="checkbox checkbox-primary" aria-label="Remote"/>
           </label>
         </div>
       </div>
@@ -91,10 +91,10 @@ function toggleGenre(genre: string) {
 
     <!-- Experience Level -->
     <div class="collapse collapse-arrow bg-base-200">
-      <input type="checkbox" checked />
+      <input type="checkbox" checked aria-label="Toggle experience level filters" />
       <div class="collapse-title font-medium">Experience Level</div>
       <div class="collapse-content">
-        <select v-model="localFilters.experienceLevel" class="select select-bordered w-full">
+        <select v-model="localFilters.experienceLevel" class="select select-bordered w-full" aria-label="Experience Level">
           <option value="">Any Level</option>
           <option v-for="level in experienceLevels" :key="level" :value="level">
             {{ level }}
@@ -105,10 +105,10 @@ function toggleGenre(genre: string) {
 
     <!-- Studio Type -->
     <div class="collapse collapse-arrow bg-base-200">
-      <input type="checkbox" />
+      <input type="checkbox" aria-label="Toggle studio type filters" />
       <div class="collapse-title font-medium">Studio Type</div>
       <div class="collapse-content">
-        <select v-model="localFilters.studioType" class="select select-bordered w-full">
+        <select v-model="localFilters.studioType" class="select select-bordered w-full" aria-label="Studio Type">
           <option value="">Any Type</option>
           <option v-for="type in studioTypes" :key="type" :value="type">
             {{ type }}
@@ -119,7 +119,7 @@ function toggleGenre(genre: string) {
 
     <!-- Platforms -->
     <div class="collapse collapse-arrow bg-base-200">
-      <input type="checkbox" />
+      <input type="checkbox" aria-label="Toggle platform filters" />
       <div class="collapse-title font-medium">Platforms</div>
       <div class="collapse-content flex flex-col gap-2">
         <label
@@ -140,7 +140,7 @@ function toggleGenre(genre: string) {
 
     <!-- Genres -->
     <div class="collapse collapse-arrow bg-base-200">
-      <input type="checkbox" />
+      <input type="checkbox" aria-label="Toggle genre filters" />
       <div class="collapse-title font-medium">Genres</div>
       <div class="collapse-content flex flex-col gap-2">
         <label

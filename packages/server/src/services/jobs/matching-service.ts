@@ -217,8 +217,8 @@ function calculateSalaryMatch(profile: UserProfile, job: Job): number {
     // Try to parse salary from string
     const numbers = job.salary.match(/\d+/g);
     if (numbers && numbers.length >= 1) {
-      jobMin = Number.parseInt(numbers[0]) * 1000; // Assume K format
-      jobMax = numbers.length > 1 ? Number.parseInt(numbers[1]) * 1000 : jobMin;
+      jobMin = Number.parseInt(numbers[0], 10) * 1000; // Assume K format
+      jobMax = numbers.length > 1 ? Number.parseInt(numbers[1], 10) * 1000 : jobMin;
     }
   } else if (typeof job.salary === "object") {
     jobMin = job.salary.min;

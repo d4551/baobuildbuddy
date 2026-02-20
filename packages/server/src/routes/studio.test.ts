@@ -1,9 +1,7 @@
-import type { Database } from "bun:sqlite";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
-let sqlite: Database;
 
 beforeAll(async () => {
   const dbModule = await import("../db/client");
@@ -16,7 +14,6 @@ beforeAll(async () => {
   await seedModule.seedDatabase(dbModule.db);
 
   app = new Elysia({ prefix: "/api" }).use(routesModule.studioRoutes);
-  sqlite = dbModule.sqlite;
 });
 
 afterAll(() => {});

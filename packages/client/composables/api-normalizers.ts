@@ -1,5 +1,5 @@
 import {
-  AI_PROVIDER_DEFAULT_ORDER,
+  AI_PROVIDER_DEFAULT,
   type AIProviderType,
   type AppSettings,
   type CoverLetterData,
@@ -120,7 +120,7 @@ const normalizeJobType = (value: unknown): JobType =>
 const normalizeAIProvider = (value: unknown): AIProviderType =>
   typeof value === "string" && AI_PROVIDERS.includes(value as AIProviderType)
     ? (value as AIProviderType)
-    : AI_PROVIDER_DEFAULT_ORDER[0];
+    : AI_PROVIDER_DEFAULT;
 
 const normalizeStudioCulture = (value: unknown): StudioCulture => {
   if (!isRecord(value)) {

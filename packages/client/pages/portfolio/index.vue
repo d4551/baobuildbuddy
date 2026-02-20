@@ -240,7 +240,7 @@ function removeTechnology(index: number) {
                 type="text"
                 placeholder="e.g. John Doe - Game Developer"
                 class="input w-full"
-              />
+                aria-label="e.g. John Doe - Game Developer"/>
             </fieldset>
 
             <fieldset class="fieldset">
@@ -250,7 +250,7 @@ function removeTechnology(index: number) {
                 type="email"
                 placeholder="contact@example.com"
                 class="input w-full"
-              />
+                aria-label="contact@example.com"/>
             </fieldset>
 
             <fieldset class="fieldset md:col-span-2">
@@ -260,7 +260,7 @@ function removeTechnology(index: number) {
                 type="url"
                 placeholder="https://yourwebsite.com"
                 class="input w-full"
-              />
+                aria-label="https://yourwebsite.com"/>
             </fieldset>
 
             <fieldset class="fieldset md:col-span-2">
@@ -270,7 +270,7 @@ function removeTechnology(index: number) {
                 class="textarea w-full"
                 rows="4"
                 placeholder="Tell the world about yourself and your game development experience..."
-              ></textarea>
+                aria-label="Tell the world about yourself and your game development experience..."></textarea>
             </fieldset>
           </div>
 
@@ -307,10 +307,14 @@ function removeTechnology(index: number) {
               v-for="(project, idx) in displayProjects"
               :key="project.id"
               class="card bg-base-100 cursor-move"
+              role="button"
+              tabindex="0"
               draggable="true"
               @dragstart="handleDragStart(idx)"
               @dragover.prevent
               @drop="handleDrop(idx)"
+              @keydown.enter.prevent
+              @keydown.space.prevent
             >
               <figure v-if="project.image" class="h-48">
                 <NuxtImg
@@ -389,7 +393,7 @@ function removeTechnology(index: number) {
               type="text"
               placeholder="e.g. Dungeon Crawler RPG"
               class="input w-full"
-            />
+              aria-label="e.g. Dungeon Crawler RPG"/>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -399,7 +403,7 @@ function removeTechnology(index: number) {
               class="textarea textarea-bordered w-full"
               rows="4"
               placeholder="Describe your project, your role, and key achievements..."
-            ></textarea>
+              aria-label="Describe your project, your role, and key achievements..."></textarea>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -409,7 +413,7 @@ function removeTechnology(index: number) {
               type="url"
               placeholder="https://..."
               class="input w-full"
-            />
+              aria-label="https://..."/>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -419,11 +423,11 @@ function removeTechnology(index: number) {
               type="url"
               placeholder="https://..."
               class="input w-full"
-            />
+              aria-label="https://..."/>
           </fieldset>
 
           <div>
-            <label class="fieldset-legend mb-2 block">Technologies</label>
+            <div class="fieldset-legend mb-2 block">Technologies</div>
             <div class="flex gap-2 mb-2">
               <input
                 v-model="newTech"
@@ -431,7 +435,7 @@ function removeTechnology(index: number) {
                 placeholder="Add technology"
                 class="input input-sm flex-1"
                 @keyup.enter="addTechnology"
-              />
+                aria-label="Add technology"/>
               <button class="btn btn-sm btn-primary" @click="addTechnology">
                 Add
               </button>
@@ -458,7 +462,7 @@ function removeTechnology(index: number) {
                 v-model="projectForm.featured"
                 type="checkbox"
                 class="checkbox checkbox-primary"
-              />
+                aria-label="Featured"/>
               <span class="label-text">Featured Project</span>
             </label>
           </div>

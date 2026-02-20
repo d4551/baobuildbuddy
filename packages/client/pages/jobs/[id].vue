@@ -205,7 +205,7 @@ function formatDate(date: string) {
                   <span class="text-sm font-medium">{{ key }}</span>
                   <span class="text-sm">{{ item.score }}%</span>
                 </div>
-                <progress class="progress progress-primary w-full" :value="item.score" max="100"></progress>
+                <progress class="progress progress-primary w-full" :value="item.score" max="100" aria-label="Score progress"></progress>
                 <p class="text-xs text-base-content/60 mt-1">{{ item.reason }}</p>
               </div>
             </div>
@@ -307,7 +307,7 @@ function formatDate(date: string) {
             class="textarea textarea-bordered w-full"
             rows="5"
             placeholder="Add any notes about this application..."
-          ></textarea>
+            aria-label="Add any notes about this application..."></textarea>
         </fieldset>
 
         <div class="modal-action">

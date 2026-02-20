@@ -140,7 +140,7 @@ export const chatWebSocket = new Elysia().ws("/ws/chat", {
         timestamp: new Date().toISOString(),
         sessionId,
       });
-    } catch (e) {
+    } catch {
       ws.send(
         JSON.stringify({
           type: "error",

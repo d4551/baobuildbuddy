@@ -57,7 +57,7 @@ function handleSubmit() {
         type="text"
         placeholder="Search jobs by title, company, or skills..."
         class="input input-bordered w-full"
-      />
+        aria-label="Search jobs by title, company, or skills..."/>
       <button
         v-if="searchValue"
         type="button"

@@ -86,11 +86,7 @@ function formatDurationMs(startTime: number, endTime?: number | null): string {
   return `${minutes}m ${seconds}s`;
 }
 
-function buildQuestionCard(
-  session: InterviewSession,
-  question: InterviewQuestion,
-  response?: InterviewResponse,
-) {
+function buildQuestionCard(question: InterviewQuestion, response?: InterviewResponse) {
   return {
     ...question,
     score: response?.aiAnalysis?.score ?? 0,
@@ -103,7 +99,7 @@ async function sessionWithDerivedFields(session: InterviewSession): Promise<Sess
   const studioRows = await db.select().from(studios).where(eq(studios.id, session.studioId));
   const studioName = studioRows[0]?.name || session.studioId;
   const questions = session.questions.map((question, index) =>
-    buildQuestionCard(session, question, session.responses[index]),
+    buildQuestionCard(question, session.responses[index]),
   );
   const totalQuestions = questions.length;
   const score = Math.round(session.finalAnalysis?.overallScore || 0);

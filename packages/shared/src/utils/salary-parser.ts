@@ -23,7 +23,11 @@ export function parseSalary(input: string | SalaryRange | undefined): SalaryRang
     };
   }
   if (parsed.length === 1) {
-    return { min: parsed[0], max: parsed[0], currency: "USD", frequency: "yearly" };
+    const firstValue = parsed[0];
+    if (firstValue === undefined) {
+      return undefined;
+    }
+    return { min: firstValue, max: firstValue, currency: "USD", frequency: "yearly" };
   }
 
   return undefined;

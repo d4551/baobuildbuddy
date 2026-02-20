@@ -1,5 +1,5 @@
 import { generateId } from "@bao/shared";
-import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, desc, eq, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { applications, jobs, savedJobs } from "../db/schema/jobs";
@@ -148,7 +148,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
   )
   .delete(
     "/save/:jobId",
-    async ({ params, set }) => {
+    async ({ params }) => {
       const result = await db.delete(savedJobs).where(eq(savedJobs.jobId, params.jobId));
       return { success: true, deleted: result };
     },

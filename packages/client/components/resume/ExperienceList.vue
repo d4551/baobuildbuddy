@@ -149,59 +149,59 @@ function moveDown(index: number) {
         <div v-if="editingId === item.id" class="space-y-3 mt-2">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="form-control">
-              <label class="label label-text-alt">Company</label>
+              <div class="label label-text-alt">Company</div>
               <input
                 v-model="item.company"
                 type="text"
                 placeholder="Company Name"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-              />
+                aria-label="Company Name"/>
             </div>
             <div class="form-control">
-              <label class="label label-text-alt">Title</label>
+              <div class="label label-text-alt">Title</div>
               <input
                 v-model="item.title"
                 type="text"
                 placeholder="Job Title"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-              />
+                aria-label="Job Title"/>
             </div>
             <div class="form-control">
-              <label class="label label-text-alt">Start Date</label>
+              <div class="label label-text-alt">Start Date</div>
               <input
                 v-model="item.startDate"
                 type="month"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-              />
+                aria-label="Start Date"/>
             </div>
             <div class="form-control">
-              <label class="label label-text-alt">End Date</label>
+              <div class="label label-text-alt">End Date</div>
               <input
                 v-model="item.endDate"
                 type="month"
                 placeholder="Present"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-              />
+                aria-label="Present"/>
             </div>
           </div>
 
           <div class="form-control">
-            <label class="label label-text-alt">Description</label>
+            <div class="label label-text-alt">Description</div>
             <textarea
               v-model="item.description"
               class="textarea textarea-bordered"
               rows="3"
               placeholder="Brief description of your role..."
               @input="updateValue"
-            ></textarea>
+              aria-label="Brief description of your role..."></textarea>
           </div>
 
           <div class="form-control">
-            <label class="label label-text-alt">Key Highlights</label>
+            <div class="label label-text-alt">Key Highlights</div>
             <div class="space-y-2">
               <div
                 v-for="(highlight, hIndex) in item.highlights"
@@ -225,7 +225,7 @@ function moveDown(index: number) {
                   placeholder="Add achievement or responsibility"
                   class="input input-bordered input-sm flex-1"
                   @keyup.enter="addHighlight(item.id)"
-                />
+                  aria-label="Add achievement or responsibility"/>
                 <button
                   class="btn btn-primary btn-sm"
                   @click="addHighlight(item.id)"

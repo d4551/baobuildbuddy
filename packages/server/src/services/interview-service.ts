@@ -21,7 +21,6 @@ import {
 } from "./ai/prompts";
 
 type DBInterviewSession = typeof interviewSessions.$inferSelect;
-type DBStudio = typeof studios.$inferSelect;
 type InterviewConfigInput = Record<string, unknown>;
 type JsonRecord = Record<string, unknown>;
 type JsonArray = unknown[];
@@ -493,6 +492,9 @@ function safeParseJSON<T>(payload: unknown, fallback: T): T {
 }
 
 function normalizeScore(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
@@ -509,7 +511,7 @@ function fallbackResponseScore(transcript: string): number {
 
 function fallbackResponseFeedback(
   transcript: string,
-  question: InterviewQuestion,
+  _question: InterviewQuestion,
 ): NonNullable<InterviewResponse["aiAnalysis"]> {
   return {
     score: fallbackResponseScore(transcript),
@@ -531,7 +533,6 @@ function buildInterviewerPersona(
   studio: StudioContext,
   config: InterviewConfig,
 ): InterviewerPersona {
-  const personality = `Professional interviewer with ${studio.type} studio perspective`;
   const level = config.experienceLevel.replace("level", "").trim() || "experienced";
 
   return {
@@ -848,7 +849,9 @@ function normalizeFinalFromAI(raw: unknown): InterviewAnalysis | null {
 
   if (!isRecord(parsed)) return null;
 
-  if (typeof parsed.overallScore !== "number") return null;
+  if (typeof parsed.overallScore !== "number" || !Number.isFinite(parsed.overallScore)) {
+    return null;
+  }
 
   return {
     overallScore: normalizeScore(parsed.overallScore),

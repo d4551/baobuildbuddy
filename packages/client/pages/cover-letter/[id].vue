@@ -123,7 +123,7 @@ async function handleExport() {
                 type="text"
                 class="input w-full"
                 placeholder="Company Name"
-              />
+                aria-label="Company Name"/>
             </fieldset>
 
             <fieldset class="fieldset">
@@ -133,12 +133,12 @@ async function handleExport() {
                 type="text"
                 class="input w-full"
                 placeholder="Job Title"
-              />
+                aria-label="Job Title"/>
             </fieldset>
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Template Style</legend>
-              <select v-model="formData.template" class="select w-full">
+              <select v-model="formData.template" class="select w-full" aria-label="Template">
                 <option value="professional">Professional</option>
                 <option value="creative">Creative</option>
                 <option value="passionate">Passionate</option>
@@ -168,7 +168,7 @@ async function handleExport() {
             class="textarea textarea-bordered w-full font-mono text-sm"
             rows="20"
             placeholder="Your cover letter content will appear here..."
-          ></textarea>
+            aria-label="Your cover letter content will appear here..."></textarea>
 
           <div class="flex items-center justify-between mt-4">
             <span class="text-sm text-base-content/60">

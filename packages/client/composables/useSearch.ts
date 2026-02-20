@@ -153,8 +153,12 @@ export function useSearch() {
     if (!results.value?.results) return {};
     const grouped: Record<string, SearchResult[]> = {};
     for (const result of results.value.results) {
-      if (!grouped[result.type]) grouped[result.type] = [];
-      grouped[result.type].push(result);
+      let group = grouped[result.type];
+      if (!group) {
+        group = [];
+        grouped[result.type] = group;
+      }
+      group.push(result);
     }
     return grouped;
   });

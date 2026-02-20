@@ -64,9 +64,9 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
   <div class="space-y-6">
     <!-- Technical Skills -->
     <div class="form-control">
-      <label class="label">
+      <div class="label">
         <span class="label-text font-bold">Technical Skills</span>
-      </label>
+      </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
           v-for="(skill, index) in localValue.technical"
@@ -91,7 +91,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           placeholder="e.g., Unity, C#, Unreal Engine"
           class="input input-bordered flex-1"
           @keyup.enter="addSkill('technical')"
-        />
+          aria-label="e.g., Unity, C#, Unreal Engine"/>
         <button
           class="btn btn-primary"
           @click="addSkill('technical')"
@@ -103,9 +103,9 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
 
     <!-- Soft Skills -->
     <div class="form-control">
-      <label class="label">
+      <div class="label">
         <span class="label-text font-bold">Soft Skills</span>
-      </label>
+      </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
           v-for="(skill, index) in localValue.soft"
@@ -130,7 +130,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           placeholder="e.g., Leadership, Communication, Problem Solving"
           class="input input-bordered flex-1"
           @keyup.enter="addSkill('soft')"
-        />
+          aria-label="e.g., Leadership, Communication, Problem Solving"/>
         <button
           class="btn btn-secondary"
           @click="addSkill('soft')"
@@ -142,9 +142,9 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
 
     <!-- Gaming Skills -->
     <div class="form-control">
-      <label class="label">
+      <div class="label">
         <span class="label-text font-bold">Gaming Industry Skills</span>
-      </label>
+      </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
           v-for="(skill, index) in localValue.gaming"
@@ -169,7 +169,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           placeholder="e.g., Game Design, Level Design, Multiplayer Systems"
           class="input input-bordered flex-1"
           @keyup.enter="addSkill('gaming')"
-        />
+          aria-label="e.g., Game Design, Level Design, Multiplayer Systems"/>
         <button
           class="btn btn-accent"
           @click="addSkill('gaming')"

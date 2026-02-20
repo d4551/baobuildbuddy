@@ -108,7 +108,7 @@ function getReadinessBadgeColor(percentage: number) {
                     :class="getReadinessColor(category.score)"
                     :value="category.score"
                     max="100"
-                  ></progress>
+                    aria-label="Score progress"></progress>
                   <p class="text-xs opacity-80 mt-1">{{ category.feedback }}</p>
                 </div>
               </div>
@@ -187,7 +187,7 @@ function getReadinessBadgeColor(percentage: number) {
                     :class="getReadinessColor(pathway.matchScore)"
                     :value="pathway.matchScore"
                     max="100"
-                  ></progress>
+                    aria-label="Match Score progress"></progress>
                   <p class="text-xs mt-2">
                     Estimated time to entry:
                     <span class="font-semibold">{{ pathway.estimatedTimeToEntry }}</span>

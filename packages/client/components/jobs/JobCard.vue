@@ -55,7 +55,14 @@ function navigateToJob() {
 
 <template>
   <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-    <div class="card-body" @click="navigateToJob">
+    <div
+      class="card-body"
+      role="button"
+      tabindex="0"
+      @click="navigateToJob"
+      @keydown.enter="navigateToJob"
+      @keydown.space.prevent="navigateToJob"
+    >
       <div class="flex justify-between items-start">
         <h2 class="card-title text-lg">{{ job.title }}</h2>
         <button

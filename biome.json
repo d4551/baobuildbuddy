@@ -1,7 +1,15 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.3/schema.json",
   "files": {
-    "ignore": ["**/node_modules/**", "**/dist/**", "**/.nuxt/**", "**/.output/**", "bun.lock"]
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/dist-types",
+      "!**/.nuxt",
+      "!**/.output",
+      "!**/bun.lock"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -21,15 +29,20 @@
       "jsxQuoteStyle": "double"
     }
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "overrides": [
     {
-      "include": ["**/*.vue"],
+      "includes": ["**/*.vue"],
       "linter": {
         "enabled": false
       }
     },
     {
-      "include": ["packages/client/assets/css/main.css"],
+      "includes": ["**/packages/client/assets/css/main.css"],
       "linter": {
         "rules": {
           "correctness": {

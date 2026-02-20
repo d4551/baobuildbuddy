@@ -70,10 +70,14 @@ function handleToggleFeatured(project: PortfolioProject) {
     <div
       v-for="(project, index) in localProjects"
       :key="project.id"
+      role="button"
+      tabindex="0"
       draggable="true"
       @dragstart="handleDragStart($event, index)"
       @dragover="handleDragOver"
       @drop="handleDrop($event, index)"
+      @keydown.enter.prevent
+      @keydown.space.prevent
       class="cursor-move"
     >
       <ProjectCard

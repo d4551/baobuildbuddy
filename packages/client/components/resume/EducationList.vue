@@ -125,58 +125,58 @@ function moveDown(index: number) {
 
         <div v-if="editingId === item.id" class="space-y-3 mt-2">
           <div class="form-control">
-            <label class="label label-text-alt">Institution</label>
+            <div class="label label-text-alt">Institution</div>
             <input
               v-model="item.institution"
               type="text"
               placeholder="University Name"
               class="input input-bordered input-sm"
               @input="updateValue"
-            />
+              aria-label="University Name"/>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="form-control">
-              <label class="label label-text-alt">Degree</label>
+              <div class="label label-text-alt">Degree</div>
               <input
                 v-model="item.degree"
                 type="text"
                 placeholder="Bachelor of Science"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-              />
+                aria-label="Bachelor of Science"/>
             </div>
             <div class="form-control">
-              <label class="label label-text-alt">Field of Study</label>
+              <div class="label label-text-alt">Field of Study</div>
               <input
                 v-model="item.field"
                 type="text"
                 placeholder="Computer Science"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-              />
+                aria-label="Computer Science"/>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="form-control">
-              <label class="label label-text-alt">Graduation Date</label>
+              <div class="label label-text-alt">Graduation Date</div>
               <input
                 v-model="item.graduationDate"
                 type="month"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-              />
+                aria-label="Graduation Date"/>
             </div>
             <div class="form-control">
-              <label class="label label-text-alt">GPA (optional)</label>
+              <div class="label label-text-alt">GPA (optional)</div>
               <input
                 v-model="item.gpa"
                 type="text"
                 placeholder="3.8"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-              />
+                aria-label="3.8"/>
             </div>
           </div>
         </div>

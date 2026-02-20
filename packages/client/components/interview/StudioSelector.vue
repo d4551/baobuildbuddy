@@ -62,10 +62,12 @@ const studioTypeBadgeClass = (type: string) => {
 
 <template>
   <div class="dropdown w-full" :class="{ 'dropdown-open': isOpen }">
-    <label
-      tabindex="0"
+    <button
+      type="button"
       class="btn btn-outline w-full justify-between"
       @click="toggleDropdown"
+      :aria-expanded="isOpen"
+      aria-haspopup="listbox"
     >
       <span v-if="selectedStudio" class="flex items-center gap-2">
         {{ selectedStudio.name }}
@@ -77,7 +79,7 @@ const studioTypeBadgeClass = (type: string) => {
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
-    </label>
+    </button>
 
     <div
       v-if="isOpen"
@@ -91,12 +93,13 @@ const studioTypeBadgeClass = (type: string) => {
           placeholder="Search studios..."
           class="input input-bordered input-sm w-full"
           @click.stop
-        />
+          aria-label="Search studios..."/>
       </div>
 
       <ul class="space-y-1">
         <li v-for="studio in filteredStudios" :key="studio.id">
-          <a
+          <button
+            type="button"
             class="flex flex-col items-start gap-1"
             :class="{ 'active': studio.id === modelValue }"
             @click="selectStudio(studio.id)"
@@ -108,7 +111,7 @@ const studioTypeBadgeClass = (type: string) => {
               </span>
             </div>
             <span class="text-xs text-base-content/60">{{ studio.location }}</span>
-          </a>
+          </button>
         </li>
         <li v-if="filteredStudios.length === 0">
           <span class="text-base-content/50">No studios found</span>
@@ -117,9 +120,11 @@ const studioTypeBadgeClass = (type: string) => {
     </div>
   </div>
 
-  <div
+  <button
     v-if="isOpen"
+    type="button"
     class="fixed inset-0 z-0"
+    aria-label="Close studio selector"
     @click="closeDropdown"
-  ></div>
+  ></button>
 </template>

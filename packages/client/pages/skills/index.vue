@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SkillMapping } from "@bao/shared";
+import { toSkillMapping } from "~/composables/api-normalizers";
 import { getErrorMessage } from "~/utils/errors";
 
 const api = useApi();
@@ -49,7 +50,11 @@ async function fetchMappings() {
   loading.value = true;
   try {
     const { data } = await api.skills.mappings.get();
-    mappings.value = (data as SkillMapping[]) || [];
+    mappings.value = Array.isArray(data)
+      ? data
+          .map((entry) => toSkillMapping(entry))
+          .filter((entry): entry is SkillMapping => entry !== null)
+      : [];
   } catch (error: unknown) {
     $toast.error(getErrorMessage(error, "Failed to fetch skill mappings"));
   } finally {
@@ -92,7 +97,7 @@ async function handleDeleteMapping(id: string) {
 
   loading.value = true;
   try {
-    await api.skills.mappings[id].delete();
+    await api.skills.mappings({ id }).delete();
     await fetchMappings();
     $toast.success("Skill mapping deleted");
   } catch (error: unknown) {
@@ -105,7 +110,7 @@ async function handleDeleteMapping(id: string) {
 async function handleAIAnalyze() {
   analyzing.value = true;
   try {
-    const { data } = await api.skills.analyze.post();
+    const { data } = await api.skills["ai-analyze"].post({});
     if (data) {
       await fetchMappings();
       $toast.success("Skills analyzed successfully");
@@ -241,7 +246,7 @@ function removeApplication(index: number) {
                   class="progress progress-primary w-20"
                   :value="mapping.confidence"
                   max="100"
-                ></progress>
+                  aria-label="Confidence progress"></progress>
                 <span class="text-xs">{{ mapping.confidence }}%</span>
               </div>
             </td>
@@ -276,7 +281,7 @@ function removeApplication(index: number) {
               type="text"
               placeholder="e.g. Led 40-person raid guild to world-first clear"
               class="input w-full"
-            />
+              aria-label="e.g. Led 40-person raid guild to world-first clear"/>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -286,12 +291,12 @@ function removeApplication(index: number) {
               type="text"
               placeholder="e.g. Team Leadership & Coordination"
               class="input w-full"
-            />
+              aria-label="e.g. Team Leadership & Coordination"/>
           </fieldset>
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Category</legend>
-            <select v-model="newMapping.category" class="select w-full">
+            <select v-model="newMapping.category" class="select w-full" aria-label="Category">
               <option v-for="cat in categories" :key="cat.value" :value="cat.value">
                 {{ cat.label }}
               </option>
@@ -299,7 +304,7 @@ function removeApplication(index: number) {
           </fieldset>
 
           <div>
-            <label class="fieldset-legend mb-2 block">Industry Applications</label>
+            <div class="fieldset-legend mb-2 block">Industry Applications</div>
             <div class="flex gap-2 mb-2">
               <input
                 v-model="newApplication"
@@ -307,7 +312,7 @@ function removeApplication(index: number) {
                 placeholder="e.g. Project Management"
                 class="input input-sm flex-1"
                 @keyup.enter="addApplication"
-              />
+                aria-label="e.g. Project Management"/>
               <button class="btn btn-sm btn-primary" @click="addApplication">
                 Add
               </button>
@@ -336,7 +341,7 @@ function removeApplication(index: number) {
               min="0"
               max="100"
               class="range range-primary"
-            />
+              aria-label="Confidence"/>
           </fieldset>
         </div>
 
