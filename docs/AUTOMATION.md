@@ -116,6 +116,7 @@ flowchart LR
   - `422`: schema/validation failure
   - `500`: unexpected execution failure
   - Error responses are deterministic JSON envelopes in the form `{"error": string}` on handled routes.
+  - Error handling follows Elysia centralized `onError` semantics; client callers branch on Eden `{ data, error }` instead of `try/catch`.
 - `GET /api/automation/runs` — list recent runs with optional `type` and `status`.
 - `GET /api/automation/runs/:id` — fetch run detail payload.
 - `GET /api/automation/screenshots/:runId/:index` — read stored screenshot bytes.
@@ -161,6 +162,7 @@ Use `PUT /api/settings` with `automationSettings.jobProviders` to change any run
 Automation pages under `/automation` must pass the same UI wiring/accessibility gate as the rest of the client:
 
 ```bash
+bun run validate:no-try-catch
 bun run validate:ui
 bun run --filter '@bao/client' lint
 ```
@@ -191,12 +193,14 @@ Run these before shipping automation changes:
 
 ```bash
 bun run format:check
+bun run validate:no-try-catch
 bun run typecheck
 bun run lint
 bun run test
 ```
 
 `bun run typecheck` generates `packages/server/dist-types` first so client-side Nuxt typechecking validates against the typed API contract surface.
+`bun run lint` includes `validate:no-try-catch`, which enforces the repository no-`try/catch` rule in source files.
 
 ### Integration coverage
 

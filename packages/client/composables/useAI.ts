@@ -22,9 +22,11 @@ import {
 import type { LocationQueryValue } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, settlePromise, withLoadingState } from "~/composables/async-flow";
+import { createChatMessage } from "~/utils/chat";
 
 type AIChatResponse = {
   message?: string;
+  id?: string;
   sessionId?: string;
   timestamp?: string;
 };
@@ -179,13 +181,14 @@ export function useAI() {
     t("aiChatCommon.defaultGreeting", { brand: APP_BRAND.name });
   const unableToProcessFallback = () => t("aiChatCommon.unableToProcessFallback");
   const requestErrorFallback = () => t("aiChatCommon.requestErrorFallback");
-  const messages = useState<ChatMessage[]>(STATE_KEYS.AI_MESSAGES, () => [
-    {
+  function buildAssistantGreetingMessage(): ChatMessage {
+    return createChatMessage({
       role: "assistant",
       content: defaultAssistantGreeting(),
       timestamp: new Date().toISOString(),
-    },
-  ]);
+    });
+  }
+  const messages = useState<ChatMessage[]>(STATE_KEYS.AI_MESSAGES, () => [buildAssistantGreetingMessage()]);
   const sessionId = useState<string>(STATE_KEYS.AI_SESSION_ID, () => generateId());
   const streaming = useState(STATE_KEYS.AI_STREAMING, () => false);
   const loading = useState(STATE_KEYS.AI_LOADING, () => false);
@@ -247,11 +250,12 @@ export function useAI() {
     streaming.value = true;
     const sendResult = await settlePromise(
       withLoadingState(loading, async () => {
-        const userMessage: ChatMessage = {
+        const userMessage = createChatMessage({
           role: "user",
           content,
+          sessionId: sessionId.value,
           timestamp: new Date().toISOString(),
-        };
+        });
         messages.value.push(userMessage);
 
         const context = buildCurrentContext(options.source);
@@ -267,6 +271,9 @@ export function useAI() {
           if ("message" in data && typeof data.message === "string") {
             response.message = data.message;
           }
+          if ("id" in data && typeof data.id === "string") {
+            response.id = data.id;
+          }
           if ("sessionId" in data && typeof data.sessionId === "string") {
             response.sessionId = data.sessionId;
           }
@@ -277,11 +284,13 @@ export function useAI() {
         if (typeof response.sessionId === "string" && response.sessionId.length > 0) {
           sessionId.value = response.sessionId;
         }
-        const assistantMessage: ChatMessage = {
+        const assistantMessage = createChatMessage({
           role: "assistant",
           content: response.message || unableToProcessFallback(),
-          timestamp: new Date().toISOString(),
-        };
+          id: response.id,
+          sessionId: response.sessionId ?? sessionId.value,
+          timestamp: response.timestamp ?? new Date().toISOString(),
+        });
         messages.value.push(assistantMessage);
         return response;
       }),
@@ -292,9 +301,12 @@ export function useAI() {
     if (!sendResult.ok) {
       $toast.error(t("aiChatCommon.requestErrorToast"));
       messages.value.push({
-        role: "assistant",
-        content: requestErrorFallback(),
-        timestamp: new Date().toISOString(),
+        ...createChatMessage({
+          role: "assistant",
+          content: requestErrorFallback(),
+          sessionId: sessionId.value,
+          timestamp: new Date().toISOString(),
+        }),
       });
       return null;
     }
@@ -344,13 +356,7 @@ export function useAI() {
 
   function clearMessages() {
     sessionId.value = generateId();
-    messages.value = [
-      {
-        role: "assistant",
-        content: defaultAssistantGreeting(),
-        timestamp: new Date().toISOString(),
-      },
-    ];
+    messages.value = [buildAssistantGreetingMessage()];
   }
 
   return {

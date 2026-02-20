@@ -96,52 +96,52 @@ export class ScraperService {
     let upserted = 0;
     await Promise.resolve()
       .then(async () => {
-      const output = await runPythonScript("studio_scraper.py");
-      const raw = JSON.parse(output);
-      const items = Array.isArray(raw)
-        ? raw
-        : raw && typeof raw === "object" && "error" in raw
-          ? []
-          : [raw];
-      const list = items.filter(
-        (x): x is ScrapedStudio =>
-          x && typeof x === "object" && typeof (x as ScrapedStudio).name === "string",
-      );
-      scraped = list.length;
-      const now = new Date().toISOString();
-      for (const s of list) {
-        await runWithErrorCollection(async () => {
-          const id = String(s.id || generateId()).trim() || generateId();
-          const studioData = {
-            name: String(s.name || "").slice(0, 200),
-            website: s.website ? String(s.website).slice(0, 500) : null,
-            location: s.location ? String(s.location).slice(0, 200) : null,
-            size: s.size ? String(s.size).slice(0, 50) : null,
-            type: s.type ? String(s.type).slice(0, 50) : null,
-            description: s.description ? String(s.description).slice(0, 2000) : null,
-            games: Array.isArray(s.games) ? s.games : [],
-            technologies: Array.isArray(s.technologies) ? s.technologies : [],
-            interviewStyle: s.interviewStyle ? String(s.interviewStyle).slice(0, 500) : null,
-            remoteWork: s.remoteWork ?? null,
-          };
+        const output = await runPythonScript("studio_scraper.py");
+        const raw = JSON.parse(output);
+        const items = Array.isArray(raw)
+          ? raw
+          : raw && typeof raw === "object" && "error" in raw
+            ? []
+            : [raw];
+        const list = items.filter(
+          (x): x is ScrapedStudio =>
+            x && typeof x === "object" && typeof (x as ScrapedStudio).name === "string",
+        );
+        scraped = list.length;
+        const now = new Date().toISOString();
+        for (const s of list) {
+          await runWithErrorCollection(async () => {
+            const id = String(s.id || generateId()).trim() || generateId();
+            const studioData = {
+              name: String(s.name || "").slice(0, 200),
+              website: s.website ? String(s.website).slice(0, 500) : null,
+              location: s.location ? String(s.location).slice(0, 200) : null,
+              size: s.size ? String(s.size).slice(0, 50) : null,
+              type: s.type ? String(s.type).slice(0, 50) : null,
+              description: s.description ? String(s.description).slice(0, 2000) : null,
+              games: Array.isArray(s.games) ? s.games : [],
+              technologies: Array.isArray(s.technologies) ? s.technologies : [],
+              interviewStyle: s.interviewStyle ? String(s.interviewStyle).slice(0, 500) : null,
+              remoteWork: s.remoteWork ?? null,
+            };
 
-          await db
-            .insert(studios)
-            .values({
-              id,
-              ...studioData,
-              logo: null,
-              culture: null,
-              createdAt: now,
-              updatedAt: now,
-            })
-            .onConflictDoUpdate({
-              target: studios.id,
-              set: { ...studioData, updatedAt: now },
-            });
-          upserted++;
-        }, errors);
-      }
+            await db
+              .insert(studios)
+              .values({
+                id,
+                ...studioData,
+                logo: null,
+                culture: null,
+                createdAt: now,
+                updatedAt: now,
+              })
+              .onConflictDoUpdate({
+                target: studios.id,
+                set: { ...studioData, updatedAt: now },
+              });
+            upserted++;
+          }, errors);
+        }
       })
       .catch((error: unknown) => {
         errors.push(toErrorMessage(error));
@@ -179,34 +179,34 @@ export class ScraperService {
     let upserted = 0;
     await Promise.resolve()
       .then(async () => {
-      const list = await this.scrapeGameDevNetJobsRaw();
-      scraped = list.length;
-      const now = new Date().toISOString();
-      for (const j of list) {
-        await runWithErrorCollection(async () => {
-          const contentHash = String(j.contentHash || `gdn-${generateId()}`).slice(0, 100);
-          const existing = await db.select().from(jobs).where(eq(jobs.contentHash, contentHash));
-          if (existing.length > 0) return; // dedupe by contentHash
-          const id = generateId();
-          await db.insert(jobs).values({
-            id,
-            title: String(j.title || "").slice(0, 200),
-            company: String(j.company || "Unknown").slice(0, 200),
-            location: String(j.location || "Unknown").slice(0, 200),
-            remote: !!j.remote,
-            hybrid: false,
-            description: j.description ? String(j.description).slice(0, 5000) : null,
-            url: j.url ? String(j.url).slice(0, 500) : null,
-            source: j.source || "gamedev-net",
-            contentHash,
-            postedDate: j.postedDate ? String(j.postedDate).slice(0, 50) : null,
-            type: "full-time",
-            createdAt: now,
-            updatedAt: now,
-          });
-          upserted++;
-        }, errors);
-      }
+        const list = await this.scrapeGameDevNetJobsRaw();
+        scraped = list.length;
+        const now = new Date().toISOString();
+        for (const j of list) {
+          await runWithErrorCollection(async () => {
+            const contentHash = String(j.contentHash || `gdn-${generateId()}`).slice(0, 100);
+            const existing = await db.select().from(jobs).where(eq(jobs.contentHash, contentHash));
+            if (existing.length > 0) return; // dedupe by contentHash
+            const id = generateId();
+            await db.insert(jobs).values({
+              id,
+              title: String(j.title || "").slice(0, 200),
+              company: String(j.company || "Unknown").slice(0, 200),
+              location: String(j.location || "Unknown").slice(0, 200),
+              remote: !!j.remote,
+              hybrid: false,
+              description: j.description ? String(j.description).slice(0, 5000) : null,
+              url: j.url ? String(j.url).slice(0, 500) : null,
+              source: j.source || "gamedev-net",
+              contentHash,
+              postedDate: j.postedDate ? String(j.postedDate).slice(0, 50) : null,
+              type: "full-time",
+              createdAt: now,
+              updatedAt: now,
+            });
+            upserted++;
+          }, errors);
+        }
       })
       .catch((error: unknown) => {
         errors.push(toErrorMessage(error));

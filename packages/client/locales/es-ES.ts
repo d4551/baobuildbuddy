@@ -2242,6 +2242,7 @@ const esES = {
     unableToProcessFallback: "Lo siento, no pude procesar esa solicitud.",
     requestErrorFallback: "Ocurrió un error al procesar la solicitud. Inténtalo de nuevo.",
     requestErrorToast: "Error en la solicitud del chat. Inténtalo de nuevo.",
+    timeAt: "a las {time}",
     voice: {
       startTitle: "Iniciar entrada de voz",
       stopTitle: "Detener entrada de voz",

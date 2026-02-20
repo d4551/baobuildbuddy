@@ -2229,6 +2229,7 @@ const enUS = {
     unableToProcessFallback: "I'm sorry, I couldn't process that request.",
     requestErrorFallback: "I hit an error processing that request. Please try again.",
     requestErrorToast: "Chat request failed. Please try again.",
+    timeAt: "at {time}",
     voice: {
       startTitle: "Start voice input",
       stopTitle: "Stop voice input",

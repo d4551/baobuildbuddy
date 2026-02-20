@@ -46,7 +46,7 @@ The setup script will:
 2. Install dependencies
 3. Create `.env` from `.env.example` if needed
 4. Set up the database
-5. Run checks (`typecheck`, `lint`, `test`)
+5. Run checks (`typecheck`, `lint`, `test`) including no-`try/catch` and accessibility validation inside `lint`
 
 ## 4) Start the app
 
@@ -87,7 +87,7 @@ Then open:
 
 ```mermaid
 flowchart LR
-  Setup["Run setup script"] --> Verify["Typecheck + Lint + Tests"]
+  Setup["Run setup script"] --> Verify["NoTry + Typecheck + Lint + Tests"]
   Verify --> Start["bun run dev"]
   Start --> UI["Open Nuxt UI"]
   UI --> Settings["Configure AI in Settings"]
@@ -106,6 +106,7 @@ flowchart LR
 - Run checks directly:
 
 ```bash
+bun run validate:no-try-catch
 bun run typecheck
 bun run lint
 bun run test

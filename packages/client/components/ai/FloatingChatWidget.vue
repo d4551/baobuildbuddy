@@ -7,6 +7,11 @@ import {
   APP_BRAND,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import {
+  buildChatMessageRenderRows,
+  createStreamingAssistantMessage,
+  resolveLatestAssistantMessageIndex,
+} from "~/utils/chat";
 
 const route = useRoute();
 const { messages, loading, streaming, sendMessage, clearMessages, buildCurrentContext } = useAI();
@@ -45,6 +50,11 @@ const voiceErrorLabel = computed(() => {
   return t("aiChatCommon.voice.errorLabel", { error: t(voiceErrorMessageKey.value) });
 });
 const chatContext = computed(() => buildCurrentContext("floating-widget"));
+const renderedMessages = computed(() => buildChatMessageRenderRows(messages.value));
+const latestAssistantMessageIndex = computed(() =>
+  resolveLatestAssistantMessageIndex(messages.value),
+);
+const streamingBubble = computed(() => createStreamingAssistantMessage("floatingWidget"));
 const currentContextLabel = computed(() => {
   const domain = chatContext.value.domain ?? "general";
   return t(AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS[domain]);
@@ -95,6 +105,11 @@ watch(
     }
   },
 );
+watch(streaming, () => {
+  if (streaming.value && isOpen.value) {
+    scrollToBottom();
+  }
+});
 
 watch(isOpen, (open) => {
   if (!open) return;
@@ -152,18 +167,6 @@ async function handleSendSuggestion(prompt: string) {
   await handleSendMessage();
 }
 
-function formatTime(date?: string): string {
-  if (!date) return "";
-
-  const parsedDate = new Date(date);
-  if (Number.isNaN(parsedDate.getTime())) return "";
-
-  return parsedDate.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 onMounted(() => {
   window.addEventListener("bao:focus-chat", onFocusChatShortcut);
 });
@@ -214,32 +217,38 @@ onUnmounted(() => {
                 {{ t("floatingChat.expandButton") }}
               </NuxtLink>
               <button
+                type="button"
                 class="btn btn-ghost btn-xs"
                 :aria-label="t('floatingChat.clearAria')"
                 @click="clearMessages"
               >
                 {{ t("floatingChat.clearButton") }}
               </button>
-              <button class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.closeAria')" @click="closeWidget">
+              <button
+                type="button"
+                class="btn btn-ghost btn-xs"
+                :aria-label="t('floatingChat.closeAria')"
+                @click="closeWidget"
+              >
                 ✕
               </button>
             </div>
           </header>
 
           <div class="border-b border-base-300 px-3 py-2">
-            <div class="flex flex-wrap gap-2" role="group" :aria-label="t('floatingChat.suggestionsAria')">
-              <button
-                v-for="prompt in contextualPrompts"
-                :key="prompt"
-                type="button"
-                class="btn btn-xs btn-soft"
-                :aria-label="t('floatingChat.suggestionAria', { prompt })"
-                :disabled="loading"
-                @click="handleSendSuggestion(prompt)"
-              >
-                {{ prompt }}
-              </button>
-            </div>
+            <ul class="flex flex-wrap gap-2" :aria-label="t('floatingChat.suggestionsAria')">
+              <li v-for="prompt in contextualPrompts" :key="prompt">
+                <button
+                  type="button"
+                  class="btn btn-xs btn-soft"
+                  :aria-label="t('floatingChat.suggestionAria', { prompt })"
+                  :disabled="loading"
+                  @click="handleSendSuggestion(prompt)"
+                >
+                  {{ prompt }}
+                </button>
+              </li>
+            </ul>
           </div>
 
           <div
@@ -249,31 +258,33 @@ onUnmounted(() => {
             aria-live="polite"
             aria-atomic="false"
             :aria-label="t('floatingChat.logAria')"
+            :aria-busy="loading || streaming"
           >
-            <div
-              v-for="(message, index) in messages"
-              :key="`${message.timestamp}-${index}`"
-              class="chat"
-              :class="message.role === 'user' ? 'chat-end' : 'chat-start'"
-            >
-              <div class="chat-header text-[11px] opacity-60 mb-1">
-                {{ message.role === 'user' ? t("floatingChat.youLabel") : APP_BRAND.assistantName }}
-                <time class="ml-1">{{ formatTime(message.timestamp) }}</time>
-              </div>
-              <div class="chat-bubble text-sm" :class="message.role === 'user' ? 'chat-bubble-primary' : 'chat-bubble-secondary'">
-                {{ message.content }}
-              </div>
-            </div>
-
-            <div v-if="streaming" class="chat chat-start">
-              <div class="chat-bubble chat-bubble-secondary">
-                <span class="loading loading-dots loading-sm"></span>
-              </div>
-            </div>
+            <AIChatBubble
+              v-for="(messageRow, index) in renderedMessages"
+              :key="messageRow.key"
+              :assistant-label="APP_BRAND.assistantName"
+              :is-latest-assistant-message="
+                index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
+              "
+              :is-streaming="false"
+              :locale="locale"
+              :message="messageRow.message"
+              :user-label="t('floatingChat.youLabel')"
+            />
+            <AIChatBubble
+              v-if="streaming"
+              :assistant-label="APP_BRAND.assistantName"
+              :is-latest-assistant-message="true"
+              :is-streaming="true"
+              :locale="locale"
+              :message="streamingBubble"
+              :user-label="t('floatingChat.youLabel')"
+            />
           </div>
 
           <div class="p-3 border-t border-base-300">
-            <div class="join w-full">
+            <form class="join w-full" @submit.prevent="handleSendMessage">
               <input
                 ref="floatingChatInput"
                 v-model="draft"
@@ -282,7 +293,6 @@ onUnmounted(() => {
                 :placeholder="t('floatingChat.inputPlaceholder')"
                 :aria-label="t('floatingChat.inputAria')"
                 :disabled="loading"
-                @keyup.enter="handleSendMessage"
               />
               <ChatVoiceControls
                 v-model:selected-voice-id="selectedVoiceId"
@@ -301,17 +311,29 @@ onUnmounted(() => {
                 @replay-assistant="speakLatestAssistantMessage"
               />
               <button
+                type="submit"
                 class="btn btn-primary join-item"
                 :aria-label="t('floatingChat.sendAria')"
                 :disabled="!draft.trim() || loading"
-                @click="handleSendMessage"
               >
                 <span v-if="loading" class="loading loading-spinner loading-xs"></span>
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                <svg
+                  v-else
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
                 </svg>
               </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -325,6 +347,7 @@ onUnmounted(() => {
           {{ unreadCount }}
         </span>
         <button
+          type="button"
           class="btn btn-primary btn-circle shadow-lg"
           :aria-label="isOpen ? t('floatingChat.hideAria') : t('floatingChat.showAria')"
           :aria-expanded="isOpen"
@@ -332,7 +355,12 @@ onUnmounted(() => {
           @click="toggleWidget"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z"
+            />
           </svg>
         </button>
       </div>

@@ -644,10 +644,11 @@ bun run dev:client
 | Format | `bun run format` | Apply Biome formatter |
 | Format check | `bun run format:check` | Verify formatter output |
 | UI accessibility + token checks | `bun run validate:ui` | Enforce WCAG contrast pairs and block hardcoded UI colors in client source |
+| No try/catch validation | `bun run validate:no-try-catch` | Enforce repository-wide no-`try/catch` policy in source files |
 | Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
 | Test | `bun run test` | Run test suites for server and client |
-| Lint | `bun run lint` | `validate:ui` + Biome lint + client ESLint |
-| Lint fix | `bun run lint:fix` | `validate:ui` + auto-fix lint issues in Biome and client ESLint |
+| Lint | `bun run lint` | `validate:no-try-catch` + `validate:ui` + Biome lint + client ESLint |
+| Lint fix | `bun run lint:fix` | `validate:no-try-catch` + `validate:ui` + auto-fix lint issues in Biome and client ESLint |
 | DB generate | `bun run db:generate` | Generate Drizzle migration files |
 | DB push | `bun run db:push` | Push schema changes to SQLite |
 | DB studio | `bun run db:studio` | Open Drizzle Studio GUI for database inspection |
@@ -669,6 +670,7 @@ bun run dev:client
 
 ```bash
 bun run format:check
+bun run validate:no-try-catch
 bun run validate:ui
 bun run typecheck
 bun run lint
@@ -677,6 +679,7 @@ bun run test
 
 Client-side runtime tests for composables use `*.nuxt.spec.ts` and initialize Nuxt with a package-root `rootDir` so alias resolution stays deterministic in workspace runs. Keep those tests explicit about external dependencies (`useApi`) and avoid relying on unresolved auto-import side effects.
 `bun run typecheck` generates server API declarations (`packages/server/dist-types`) before running package typechecks, so Nuxt client typechecking consumes contract types instead of server implementation internals.
+`bun run lint` includes `validate:no-try-catch`, which fails when `try/catch` blocks appear in source. Error handling should follow Elysia/Eden typed response contracts and shared settled-result helpers.
 Server-side tests run with deterministic in-process AI behavior (`BAO_TEST_MODE=1`), so test execution does not depend on external AI providers or network availability.
 Rate-limited route groups use header-aware client-key generation (`x-forwarded-for` / `cf-connecting-ip` / `x-real-ip` fallback), which keeps behavior deterministic in local tests and proxy deployments.
 For a non-technical runbook with copy/paste steps only, use `docs/STARTER_GUIDE.md`.
@@ -888,6 +891,7 @@ Manual browser checklist for final sign-off:
     |   +-- setup.sh                    Automated setup for macOS / Linux
     |   +-- setup.ps1                   Automated setup for Windows (PowerShell)
     |   +-- validate-ascii-geometry.ts  ASCII art geometry checker
+    |   +-- validate-no-try-catch.ts    Repository no-try/catch policy validator
     |   +-- validate-ui-accessibility.ts WCAG + hardcoded-color drift validator
     +-- docs/
     |   +-- STARTER_GUIDE.md            Non-technical getting-started guide
@@ -933,6 +937,7 @@ Manual browser checklist for final sign-off:
 - The Elysia Eden client (`plugins/eden.ts`) provides end-to-end type safety between Nuxt and the API.
 - Dynamic API endpoints use Eden function-param invocation (for example `api.resumes({ id }).get()`), not string-index access.
 - API payloads are normalized in `packages/client/composables/api-normalizers.ts` before binding to shared domain state.
+- Error handling follows Elysia centralized `onError` middleware and Eden `{ data, error }` branching; source-level `try/catch` is blocked by `validate:no-try-catch`.
 - TanStack Vue Query (`plugins/vue-query.ts`) manages cache, stale time, and retry for all API calls.
 
 ### daisyUI component references
@@ -943,6 +948,11 @@ Manual browser checklist for final sign-off:
 - https://daisyui.com/components/table/
 - https://daisyui.com/components/alert/
 - https://daisyui.com/components/loading/
+
+### Elysia / Eden references
+
+- https://elysiajs.com/essential/life-cycle#on-error
+- https://elysiajs.com/eden/treaty/response
 
 ## 14) Database schema
 
@@ -1067,6 +1077,7 @@ bun run scripts/validate-ascii-geometry.ts README.md
 - [ ] Python venv created and `rpa` installed from `packages/scraper/requirements.txt`
 - [ ] `.env` populated from `.env.example` with environment-specific values
 - [ ] `bun run typecheck` passes
+- [ ] `bun run validate:no-try-catch` passes
 - [ ] `bun run lint` passes
 - [ ] `bun run test` passes
 - [ ] `bun run db:generate` + `bun run db:push` complete

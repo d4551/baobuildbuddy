@@ -54,6 +54,7 @@ export interface StreamCallbacks {
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
+  id?: string;
   content: string;
   timestamp?: string;
   sessionId?: string;
