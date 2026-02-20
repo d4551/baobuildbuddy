@@ -6,6 +6,7 @@ type RouteVerificationResult = {
   route: string;
   status: number;
   heading: string;
+  title: string;
 };
 
 type RouteVerificationFailure = {
@@ -18,6 +19,8 @@ type RouteVerificationFailure = {
 const defaultBaseUrl = "http://127.0.0.1:3001";
 const baseUrl = (process.env.VERIFY_BASE_URL || defaultBaseUrl).replace(/\/$/u, "");
 const htmlHeadingPattern = /<h1\b[^>]*>([\s\S]*?)<\/h1>/iu;
+const htmlTitlePattern = /<title\b[^>]*>([\s\S]*?)<\/title>/iu;
+const htmlMainPattern = /<main\b[^>]*>/iu;
 const htmlTagPattern = /<[^>]+>/gu;
 const whitespacePattern = /\s+/gu;
 const lineSeparator = "-".repeat(72);
@@ -60,11 +63,34 @@ const verifyRoute = async (
     };
   }
 
+  const titleMatch = html.match(htmlTitlePattern);
+  const title = normalizeText(titleMatch?.[1] ?? "");
+
+  if (title.length === 0) {
+    return {
+      locale,
+      route,
+      status: response.status,
+      reason: "No non-empty <title> found in SSR HTML.",
+    };
+  }
+
+  const hasMainLandmark = htmlMainPattern.test(html);
+  if (!hasMainLandmark) {
+    return {
+      locale,
+      route,
+      status: response.status,
+      reason: "No <main> landmark found in SSR HTML.",
+    };
+  }
+
   return {
     locale,
     route,
     status: response.status,
     heading,
+    title,
   };
 };
 
@@ -87,14 +113,14 @@ const main = async (): Promise<void> => {
   console.log(lineSeparator);
   for (const success of successes) {
     console.log(
-      `[ok] ${success.locale.padEnd(5)} ${success.status} ${success.route.padEnd(26)} ${success.heading}`,
+      `[ok] ${success.locale.padEnd(5)} ${success.status} ${success.route.padEnd(26)} ${success.heading} | ${success.title}`,
     );
   }
 
   if (failures.length === 0) {
     console.log(lineSeparator);
     console.log(
-      `Verified ${successes.length} localized route renders with non-empty page headings.`,
+      `Verified ${successes.length} localized route renders with non-empty page title, heading, and main landmark.`,
     );
     return;
   }
