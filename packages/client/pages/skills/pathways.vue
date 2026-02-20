@@ -187,7 +187,12 @@ function getCategoryLabel(key: ReadinessCategoryKey): string {
         />
       </svg>
       <span>{{ getErrorMessage(error, t("skillsPathwaysPage.errors.loadFailed")) }}</span>
-      <button type="button" class="btn btn-sm" @click="retryLoad">
+      <button
+        type="button"
+        class="btn btn-sm"
+        :aria-label="t('skillsPathwaysPage.retryAria')"
+        @click="retryLoad"
+      >
         {{ t("skillsPathwaysPage.retryButtonLabel") }}
       </button>
     </div>

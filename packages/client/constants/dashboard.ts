@@ -20,6 +20,7 @@ type DashboardTopLevelKey =
   | "levelLabel"
   | "streakLabel"
   | "retryButtonLabel"
+  | "retryAria"
   | "loadErrorFallback"
   | "setupCtaLabel"
   | "onboardingChecklistTitle"
@@ -157,6 +158,7 @@ export const DASHBOARD_COPY_KEYS = {
   levelLabel: "dashboard.levelLabel",
   streakLabel: "dashboard.streakLabel",
   retryButtonLabel: "dashboard.retryButtonLabel",
+  retryAria: "dashboard.retryAria",
   loadErrorFallback: "dashboard.loadErrorFallback",
   setupCtaLabel: "dashboard.setupCtaLabel",
   onboardingChecklistTitle: "dashboard.onboardingChecklistTitle",

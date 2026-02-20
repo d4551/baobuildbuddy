@@ -112,7 +112,12 @@ async function retryLoad(): Promise<void> {
         />
       </svg>
       <span>{{ getErrorMessage(error, t("automation.hub.loadErrorFallback")) }}</span>
-      <button type="button" class="btn btn-sm" @click="retryLoad">
+      <button
+        type="button"
+        class="btn btn-sm"
+        :aria-label="t('automation.hub.retryAria')"
+        @click="retryLoad"
+      >
         {{ t("automation.hub.retryButtonLabel") }}
       </button>
     </div>

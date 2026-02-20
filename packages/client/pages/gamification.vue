@@ -195,7 +195,12 @@ async function requestData<T>(
         />
       </svg>
       <span>{{ getErrorMessage(error, t("gamificationPage.loadErrorFallback")) }}</span>
-      <button type="button" class="btn btn-sm" @click="retryPageLoad">
+      <button
+        type="button"
+        class="btn btn-sm"
+        :aria-label="t('gamificationPage.retryAria')"
+        @click="retryPageLoad"
+      >
         {{ t("gamificationPage.retryButtonLabel") }}
       </button>
     </div>
@@ -298,6 +303,7 @@ async function requestData<T>(
                     type="button"
                     class="btn btn-success btn-sm"
                     :disabled="completingChallenge === challenge.id"
+                    :aria-label="t('gamificationPage.challengeClaimAria', { challenge: challenge.name })"
                     @click="handleCompleteChallenge(challenge.id)"
                   >
                     <span

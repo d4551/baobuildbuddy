@@ -180,6 +180,10 @@ function resumeTabLabel(tab: ResumeTabId): string {
   return t("resumePage.tabs.gaming");
 }
 
+function resumeTabAriaLabel(tab: ResumeTabId): string {
+  return t("resumePage.tabs.selectAria", { tab: resumeTabLabel(tab) });
+}
+
 function clearResumeFilters() {
   resumeSearchQuery.value = "";
 }
@@ -765,12 +769,60 @@ async function resolvePipelineReward(
       </div>
 
       <div class="tabs tabs-lift">
-        <button class="tab" :class="{ 'tab-active': activeTab === 'personal' }" @click="activeTab = 'personal'">{{ t("resumePage.tabs.personal") }}</button>
-        <button class="tab" :class="{ 'tab-active': activeTab === 'experience' }" @click="activeTab = 'experience'">{{ t("resumePage.tabs.experience") }}</button>
-        <button class="tab" :class="{ 'tab-active': activeTab === 'education' }" @click="activeTab = 'education'">{{ t("resumePage.tabs.education") }}</button>
-        <button class="tab" :class="{ 'tab-active': activeTab === 'skills' }" @click="activeTab = 'skills'">{{ t("resumePage.tabs.skills") }}</button>
-        <button class="tab" :class="{ 'tab-active': activeTab === 'projects' }" @click="activeTab = 'projects'">{{ t("resumePage.tabs.projects") }}</button>
-        <button class="tab" :class="{ 'tab-active': activeTab === 'gaming' }" @click="activeTab = 'gaming'">{{ t("resumePage.tabs.gaming") }}</button>
+        <button
+          type="button"
+          class="tab"
+          :class="{ 'tab-active': activeTab === 'personal' }"
+          :aria-label="resumeTabAriaLabel('personal')"
+          @click="activeTab = 'personal'"
+        >
+          {{ t("resumePage.tabs.personal") }}
+        </button>
+        <button
+          type="button"
+          class="tab"
+          :class="{ 'tab-active': activeTab === 'experience' }"
+          :aria-label="resumeTabAriaLabel('experience')"
+          @click="activeTab = 'experience'"
+        >
+          {{ t("resumePage.tabs.experience") }}
+        </button>
+        <button
+          type="button"
+          class="tab"
+          :class="{ 'tab-active': activeTab === 'education' }"
+          :aria-label="resumeTabAriaLabel('education')"
+          @click="activeTab = 'education'"
+        >
+          {{ t("resumePage.tabs.education") }}
+        </button>
+        <button
+          type="button"
+          class="tab"
+          :class="{ 'tab-active': activeTab === 'skills' }"
+          :aria-label="resumeTabAriaLabel('skills')"
+          @click="activeTab = 'skills'"
+        >
+          {{ t("resumePage.tabs.skills") }}
+        </button>
+        <button
+          type="button"
+          class="tab"
+          :class="{ 'tab-active': activeTab === 'projects' }"
+          :aria-label="resumeTabAriaLabel('projects')"
+          @click="activeTab = 'projects'"
+        >
+          {{ t("resumePage.tabs.projects") }}
+        </button>
+        <button
+          type="button"
+          class="tab"
+          :class="{ 'tab-active': activeTab === 'gaming' }"
+          :aria-label="resumeTabAriaLabel('gaming')"
+          @click="activeTab = 'gaming'"
+        >
+          {{ t("resumePage.tabs.gaming") }}
+        </button>
       </div>
 
       <!-- Personal Info Tab -->
@@ -1159,7 +1211,12 @@ async function resolvePipelineReward(
         </div>
       </div>
       <form method="dialog" class="modal-backdrop">
-        <button @click="showCreateModal = false">{{ t("resumePage.createModal.closeBackdropButton") }}</button>
+        <button
+          :aria-label="t('resumePage.createModal.closeBackdropAria')"
+          @click="showCreateModal = false"
+        >
+          {{ t("resumePage.createModal.closeBackdropButton") }}
+        </button>
       </form>
     </dialog>
 

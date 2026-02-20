@@ -32,6 +32,7 @@ const enUS = {
     notifications: "Notifications",
     dismissNotification: "Dismiss notification",
     localeSwitcher: "Change language",
+    localeOptionAria: "Switch language to {locale}",
   },
   confirmDialog: {
     confirmButton: "Confirm",
@@ -86,6 +87,7 @@ const enUS = {
     levelLabel: "Level",
     streakLabel: "day streak",
     retryButtonLabel: "Retry",
+    retryAria: "Retry loading dashboard data",
     loadErrorFallback: "Failed to load dashboard data",
     activityFallback: "Activity",
     heroPhrases: {
@@ -153,6 +155,7 @@ const enUS = {
       "Track XP progression, daily challenge completion, streak consistency, and achievement unlocks in one view.",
     loadErrorFallback: "Failed to load gamification data",
     retryButtonLabel: "Retry",
+    retryAria: "Retry loading gamification data",
     emptyStateTitle: "No progression data yet",
     emptyStateDescription:
       "Complete setup tasks, start interview practice, and take daily challenges to begin earning XP and unlocking achievements.",
@@ -167,6 +170,7 @@ const enUS = {
     achievementsLockedLabel: "Locked",
     dailyChallengesTitle: "Daily Challenges",
     challengeClaimLabel: "Claim Reward",
+    challengeClaimAria: "Claim reward for challenge {challenge}",
     challengeDoneLabel: "Done",
     challengeCompletionToast: "Challenge completed",
     challengeCompleteErrorFallback: "Failed to complete challenge",
@@ -413,6 +417,7 @@ const enUS = {
       createButton: "Add Mapping",
       createAria: "Create skill mapping",
       closeBackdropButton: "close",
+      closeBackdropAria: "Close skill mapping dialog",
     },
     deleteDialog: {
       title: "Delete mapping",
@@ -445,6 +450,7 @@ const enUS = {
     subtitle:
       "Track readiness and explore role pathways generated from your mapped skill evidence.",
     retryButtonLabel: "Retry",
+    retryAria: "Retry loading career pathways",
     gamification: {
       levelLabel: "Lvl {level}",
       xpLabel: "{xp} XP",
@@ -524,6 +530,7 @@ const enUS = {
       skills: "Skills",
       projects: "Projects",
       gaming: "Gaming",
+      selectAria: "Select {tab} section",
     },
     completion: {
       title: "Resume Completion",
@@ -677,6 +684,7 @@ const enUS = {
       createButton: "Create Resume",
       createAria: "Create resume",
       closeBackdropButton: "Close",
+      closeBackdropAria: "Close create resume dialog",
     },
     deleteDialog: {
       title: "Delete Resume",
@@ -1436,6 +1444,7 @@ const enUS = {
       pipelineNextStepLabel: "Next workflow milestone: {step}",
       loadErrorFallback: "Failed to load automation hub metrics",
       retryButtonLabel: "Retry",
+      retryAria: "Retry loading automation hub metrics",
       stats: {
         totalRunsTitle: "Total Runs",
         totalRunsDescription: "Tracked automation executions",
@@ -2249,6 +2258,7 @@ const enUS = {
     searchPlaceholder: "Search studios",
     searchAria: "Search studios",
     emptyState: "No studios found",
+    optionAria: "Select studio {studio}",
     closeAria: "Close studio selector",
     unknownType: "Unknown type",
     unknownLocation: "Unknown location",

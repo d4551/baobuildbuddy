@@ -133,6 +133,7 @@ function studioLocationLabel(location: string): string {
             role="option"
             class="flex flex-col items-start gap-1"
             :aria-selected="studio.id === modelValue"
+            :aria-label="t('studioSelector.optionAria', { studio: studio.name })"
             :class="{ active: studio.id === modelValue }"
             @click="selectStudio(studio.id)"
           >

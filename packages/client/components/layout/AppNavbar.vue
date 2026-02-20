@@ -46,6 +46,7 @@ const getLocaleLabel = (localeCode: string): string => {
           class="theme-controller"
           value="bao-dark"
           :checked="theme === 'bao-dark'"
+          :aria-label="t('a11y.toggleTheme')"
           @change="toggleTheme()"
         />
         <svg class="swap-off h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
@@ -69,6 +70,7 @@ const getLocaleLabel = (localeCode: string): string => {
               :class="{ 'active': locale === loc }"
               role="option"
               :aria-selected="locale === loc"
+              :aria-label="t('a11y.localeOptionAria', { locale: getLocaleLabel(loc) })"
               @click="locale = loc"
             >
               {{ getLocaleLabel(loc) }}

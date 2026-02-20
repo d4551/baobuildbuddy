@@ -402,7 +402,12 @@ async function requestData<T>(
         />
       </svg>
       <span>{{ getErrorMessage(error, t(DASHBOARD_COPY_KEYS.loadErrorFallback)) }}</span>
-      <button type="button" class="btn btn-sm" @click="retryDashboardLoad">
+      <button
+        type="button"
+        class="btn btn-sm"
+        :aria-label="t(DASHBOARD_COPY_KEYS.retryAria)"
+        @click="retryDashboardLoad"
+      >
         {{ t(DASHBOARD_COPY_KEYS.retryButtonLabel) }}
       </button>
     </div>

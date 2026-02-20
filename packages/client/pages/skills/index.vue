@@ -760,7 +760,12 @@ function removeApplication(index: number): void {
         </div>
       </div>
       <form method="dialog" class="modal-backdrop">
-        <button @click="showAddModal = false">{{ t("skillsPage.createModal.closeBackdropButton") }}</button>
+        <button
+          :aria-label="t('skillsPage.createModal.closeBackdropAria')"
+          @click="showAddModal = false"
+        >
+          {{ t("skillsPage.createModal.closeBackdropButton") }}
+        </button>
       </form>
     </dialog>
 
