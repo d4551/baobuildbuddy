@@ -14,6 +14,8 @@ export * from "./types/search";
 // Schemas
 export * from "./schemas/user.schema";
 export * from "./schemas/settings.schema";
+export * from "./schemas/portfolio.schema";
+export * from "./schemas/skill-mapping.schema";
 export * from "./schemas/resume.schema";
 export * from "./schemas/job.schema";
 export * from "./schemas/interview.schema";

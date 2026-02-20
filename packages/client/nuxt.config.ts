@@ -61,7 +61,8 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_QUERY_RETRY_COUNT || String(DEFAULT_QUERY_RETRY_COUNT),
         DECIMAL_RADIX,
       ),
-      queryRefetchOnFocus: process.env.NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS !== QUERY_REFOCUS_DISABLED,
+      queryRefetchOnFocus:
+        process.env.NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS !== QUERY_REFOCUS_DISABLED,
     },
   },
 

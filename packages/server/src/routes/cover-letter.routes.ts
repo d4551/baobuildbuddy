@@ -152,11 +152,11 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
           return { error: "Cover letter generation failed", details: response.error };
         }
 
-        let generatedContent: unknown;
+        let generatedContent: Record<string, unknown>;
         try {
           generatedContent = JSON.parse(response.content);
         } catch {
-          const lines = response.content.split("\n").filter((line) => line.trim());
+          const lines = response.content.split("\n").filter((line: string) => line.trim());
           generatedContent = {
             introduction: lines[0] || "Dear Hiring Manager,",
             body: lines.slice(1, -1).join("\n\n") || response.content,
@@ -165,9 +165,9 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
         }
 
         const content = {
-          introduction: generatedContent.introduction || generatedContent.intro || "",
-          body: generatedContent.body || generatedContent.main || "",
-          conclusion: generatedContent.conclusion || generatedContent.closing || "",
+          introduction: String(generatedContent.introduction || generatedContent.intro || ""),
+          body: String(generatedContent.body || generatedContent.main || ""),
+          conclusion: String(generatedContent.conclusion || generatedContent.closing || ""),
         };
 
         if (body.save) {

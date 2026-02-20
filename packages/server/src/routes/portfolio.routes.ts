@@ -1,49 +1,16 @@
-import { generateId } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db } from "../db/client";
-import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { exportService } from "../services/export-service";
+import { portfolioService } from "../services/portfolio-service";
 
 export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
   .get("/", async () => {
-    // Single portfolio per user, auto-create if missing
-    const rows = await db.select().from(portfolios);
-    if (rows.length === 0) {
-      const newPortfolio = {
-        id: generateId(),
-        metadata: {},
-      };
-      await db.insert(portfolios).values(newPortfolio);
-      return newPortfolio;
-    }
-    return rows[0];
+    return await portfolioService.getPortfolioPayload();
   })
   .put(
     "/",
     async ({ body }) => {
-      const existing = await db.select().from(portfolios);
-      let portfolioId: string;
-
-      if (existing.length === 0) {
-        portfolioId = generateId();
-        await db.insert(portfolios).values({
-          id: portfolioId,
-          metadata: body.metadata || {},
-        });
-      } else {
-        portfolioId = existing[0].id;
-        await db
-          .update(portfolios)
-          .set({
-            metadata: body.metadata,
-            updatedAt: new Date().toISOString(),
-          })
-          .where(eq(portfolios.id, portfolioId));
-      }
-
-      const updated = await db.select().from(portfolios).where(eq(portfolios.id, portfolioId));
-      return updated[0];
+      return await portfolioService.updatePortfolio({ metadata: body.metadata });
     },
     {
       body: t.Object({
@@ -54,35 +21,21 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
   .post(
     "/projects",
     async ({ body, set }) => {
-      // Ensure portfolio exists
-      let portfolio = await db.select().from(portfolios);
-      if (portfolio.length === 0) {
-        const newPortfolio = {
-          id: generateId(),
-          metadata: {},
-        };
-        await db.insert(portfolios).values(newPortfolio);
-        portfolio = [newPortfolio];
-      }
-
-      const newProject = {
-        id: generateId(),
-        portfolioId: portfolio[0].id,
+      const portfolio = await portfolioService.getPortfolioPayload();
+      const newProject = await portfolioService.addProject(portfolio.id, {
         title: body.title,
         description: body.description,
         technologies: body.technologies || [],
-        image: body.image || null,
-        liveUrl: body.liveUrl || null,
-        githubUrl: body.githubUrl || null,
+        image: body.image,
+        liveUrl: body.liveUrl,
+        githubUrl: body.githubUrl,
         tags: body.tags || [],
         featured: body.featured || false,
-        role: body.role || null,
-        platforms: body.platforms || null,
-        engines: body.engines || null,
+        role: body.role,
+        platforms: body.platforms || [],
+        engines: body.engines || [],
         sortOrder: body.sortOrder || 0,
-      };
-
-      await db.insert(portfolioProjects).values(newProject);
+      });
       set.status = 201;
       return newProject;
     },
@@ -103,42 +56,43 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
       }),
     },
   )
+  .post(
+    "/projects/reorder",
+    async ({ body }) => {
+      const portfolio = await portfolioService.getPortfolioPayload();
+      await portfolioService.reorderProjects(portfolio.id, body.orderedIds);
+      return await portfolioService.getPortfolioPayload();
+    },
+    {
+      body: t.Object({
+        orderedIds: t.Array(t.String({ minLength: 1 })),
+      }),
+    },
+  )
   .put(
     "/projects/:id",
     async ({ params, body, set }) => {
-      const existing = await db
-        .select()
-        .from(portfolioProjects)
-        .where(eq(portfolioProjects.id, params.id));
-      if (existing.length === 0) {
+      const updated = await portfolioService.updateProject(params.id, {
+        title: body.title,
+        description: body.description,
+        technologies: body.technologies,
+        image: body.image,
+        liveUrl: body.liveUrl,
+        githubUrl: body.githubUrl,
+        tags: body.tags,
+        featured: body.featured,
+        role: body.role,
+        platforms: body.platforms,
+        engines: body.engines,
+        sortOrder: body.sortOrder,
+      });
+
+      if (!updated) {
         set.status = 404;
         return { error: "Project not found" };
       }
 
-      const updates: Record<string, unknown> = {
-        updatedAt: new Date().toISOString(),
-      };
-
-      if (body.title !== undefined) updates.title = body.title;
-      if (body.description !== undefined) updates.description = body.description;
-      if (body.technologies !== undefined) updates.technologies = body.technologies;
-      if (body.image !== undefined) updates.image = body.image;
-      if (body.liveUrl !== undefined) updates.liveUrl = body.liveUrl;
-      if (body.githubUrl !== undefined) updates.githubUrl = body.githubUrl;
-      if (body.tags !== undefined) updates.tags = body.tags;
-      if (body.featured !== undefined) updates.featured = body.featured;
-      if (body.role !== undefined) updates.role = body.role;
-      if (body.platforms !== undefined) updates.platforms = body.platforms;
-      if (body.engines !== undefined) updates.engines = body.engines;
-      if (body.sortOrder !== undefined) updates.sortOrder = body.sortOrder;
-
-      await db.update(portfolioProjects).set(updates).where(eq(portfolioProjects.id, params.id));
-
-      const updated = await db
-        .select()
-        .from(portfolioProjects)
-        .where(eq(portfolioProjects.id, params.id));
-      return updated[0];
+      return updated;
     },
     {
       params: t.Object({
@@ -163,16 +117,12 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
   .delete(
     "/projects/:id",
     async ({ params, set }) => {
-      const existing = await db
-        .select()
-        .from(portfolioProjects)
-        .where(eq(portfolioProjects.id, params.id));
-      if (existing.length === 0) {
+      const deleted = await portfolioService.deleteProject(params.id);
+      if (!deleted) {
         set.status = 404;
         return { error: "Project not found" };
       }
 
-      await db.delete(portfolioProjects).where(eq(portfolioProjects.id, params.id));
       return { success: true, id: params.id };
     },
     {
@@ -184,20 +134,17 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
   .post(
     "/export",
     async ({ body, set }) => {
-      const portfolioRows = await db.select().from(portfolios);
-      if (portfolioRows.length === 0) {
+      const portfolio = await portfolioService.getPortfolioPayload();
+      if (!portfolio) {
         set.status = 404;
         return { error: "Portfolio not found" };
       }
 
-      const portfolio = portfolioRows[0];
-      const projects = await db
-        .select()
-        .from(portfolioProjects)
-        .where(eq(portfolioProjects.portfolioId, portfolio.id));
-
       try {
-        const pdfBytes = await exportService.exportPortfolioPDF(portfolio.metadata, projects);
+        const pdfBytes = await exportService.exportPortfolioPDF(
+          portfolio.metadata,
+          portfolio.projects,
+        );
 
         set.headers["content-type"] = "application/pdf";
         set.headers["content-disposition"] = `attachment; filename="portfolio-${portfolio.id}.pdf"`;

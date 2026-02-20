@@ -17,7 +17,20 @@ import { and, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs, savedJobs } from "../../db/schema/jobs";
 import { deduplicateJobs, generateContentHash } from "./deduplication";
-import { gameDevNetProvider, GreenhouseProvider, type JobProvider, LeverProvider, type RawJob } from "./providers";
+import {
+  CompanyBoardsProvider,
+  GreenhouseProvider,
+  type JobProvider,
+  LeverProvider,
+  type RawJob,
+  gameDevNetProvider,
+  gamesJobsDirectProvider,
+  grackleProvider,
+  hitmarkerProvider,
+  pocketGamerProvider,
+  remoteGameJobsProvider,
+  workWithIndiesProvider,
+} from "./providers";
 
 export class JobAggregator {
   private providers: JobProvider[];
@@ -68,7 +81,23 @@ export class JobAggregator {
   ]);
 
   constructor() {
-    this.providers = [new GreenhouseProvider(), new LeverProvider(), gameDevNetProvider];
+    this.providers = [
+      // API-native providers
+      new GreenhouseProvider(),
+      new LeverProvider(),
+      hitmarkerProvider,
+
+      // RPA-backed scrapers
+      gameDevNetProvider,
+      grackleProvider,
+      workWithIndiesProvider,
+      remoteGameJobsProvider,
+      gamesJobsDirectProvider,
+      pocketGamerProvider,
+
+      // Multi-ATS company boards (SmartRecruiters, Workday, Ashby, etc.)
+      new CompanyBoardsProvider(),
+    ];
 
     // Cache jobs for 6 hours by default
     this.cacheExpiry = 6 * 60 * 60 * 1000;
@@ -230,7 +259,10 @@ export class JobAggregator {
     // Build the query
     const query_builder =
       conditions.length > 0
-        ? db.select().from(jobs).where(and(...conditions))
+        ? db
+            .select()
+            .from(jobs)
+            .where(and(...conditions))
         : db.select().from(jobs);
 
     // Get total count
@@ -533,20 +565,20 @@ export class JobAggregator {
       location: raw.location,
       remote: this.detectRemote(raw.location),
       hybrid: this.detectHybrid(raw.location),
-      description: raw.description,
+      description: raw.description || "",
       requirements: this.extractRequirements(raw.description),
       technologies: this.extractTechnologies(raw.description),
       experienceLevel: this.detectExperienceLevel(raw.title),
       type: this.detectJobType(raw.title),
       postedDate: raw.postedDate || new Date().toISOString(),
       url: raw.url,
-      source: raw.source,
+      source: raw.source || "unknown",
       contentHash,
       studioType: this.detectStudioType(raw.company),
       gameGenres: this.extractGenres(raw.description),
       platforms: this.extractPlatforms(raw.description),
       tags: this.generateTags(raw),
-      applicationUrl: raw.applyUrl || raw.url,
+      applicationUrl: (raw.applyUrl as string) || raw.url,
     };
   }
 
@@ -559,24 +591,24 @@ export class JobAggregator {
       title: row.title,
       company: row.company,
       location: row.location,
-      remote: row.remote || false,
-      hybrid: row.hybrid,
-      salary: row.salary,
-      description: row.description,
-      requirements: row.requirements,
-      technologies: row.technologies,
-      experienceLevel: row.experienceLevel as JobExperienceLevel | undefined,
+      remote: row.remote ?? false,
+      hybrid: row.hybrid ?? undefined,
+      salary: (row.salary as Job["salary"]) ?? undefined,
+      description: row.description ?? "",
+      requirements: row.requirements ?? undefined,
+      technologies: row.technologies ?? undefined,
+      experienceLevel: (row.experienceLevel as JobExperienceLevel) ?? undefined,
       type: (row.type || "full-time") as JobType,
       postedDate: row.postedDate || new Date().toISOString(),
       url: row.url,
       source: row.source,
-      contentHash: row.contentHash,
+      contentHash: row.contentHash ?? undefined,
       studioType: this.normalizeStudioType(row.studioType),
       gameGenres: this.normalizeGameGenres(row.gameGenres),
       platforms: this.normalizePlatforms(row.platforms),
-      tags: row.tags,
-      companyLogo: row.companyLogo,
-      applicationUrl: row.applicationUrl,
+      tags: row.tags ?? undefined,
+      companyLogo: row.companyLogo ?? undefined,
+      applicationUrl: row.applicationUrl ?? undefined,
     };
   }
 
@@ -595,9 +627,7 @@ export class JobAggregator {
 
   private normalizeGameGenres(value: string[] | null): GameGenre[] | undefined {
     if (!Array.isArray(value)) return undefined;
-    return value.filter((genre): genre is GameGenre =>
-      this.genres.has(genre as GameGenre),
-    );
+    return value.filter((genre): genre is GameGenre => this.genres.has(genre as GameGenre));
   }
 
   private normalizePlatforms(value: string[] | null): Platform[] | undefined {
@@ -636,18 +666,79 @@ export class JobAggregator {
     return "full-time";
   }
 
-  private detectStudioType(company: string): string {
+  private detectStudioType(company: string): StudioType {
     const companyLower = company.toLowerCase();
 
-    const aaaStudios = ["riot", "epic", "blizzard", "ea", "activision", "ubisoft", "rockstar"];
-    const mobileStudios = ["supercell", "zynga", "king"];
+    const aaaStudios = [
+      "riot",
+      "epic",
+      "blizzard",
+      "electronic arts",
+      "ea",
+      "activision",
+      "ubisoft",
+      "rockstar",
+      "bungie",
+      "naughty dog",
+      "insomniac",
+      "respawn",
+      "guerrilla",
+      "treyarch",
+      "sledgehammer",
+      "infinity ward",
+      "2k",
+      "square enix",
+      "obsidian",
+      "gearbox",
+      "playground games",
+      "sucker punch",
+      "arkane",
+      "machinegames",
+      "machine games",
+      "cd projekt",
+      "wargaming",
+      "mojang",
+      "firaxis",
+      "avalanche",
+      "amplitude",
+      "cloud imperium",
+      "cloud chamber",
+      "netflix games",
+      "lightspeed",
+      "striking distance",
+      "bandai namco",
+      "capcom",
+      "sega",
+      "konami",
+      "take-two",
+      "take two",
+      "bethesda",
+      "larian",
+      "double fine",
+      "second dinner",
+      "archetype entertainment",
+    ];
+    const mobileStudios = [
+      "supercell",
+      "zynga",
+      "king",
+      "jam city",
+      "wildlife",
+      "playq",
+      "voodoo",
+      "niantic",
+      "pokemon",
+      "demiurge",
+    ];
     const vrStudios = ["meta", "oculus"];
-    const platformStudios = ["valve", "unity", "unreal", "nvidia"];
+    const platformStudios = ["valve", "unity", "unreal", "nvidia", "roblox", "discord"];
+    const esportsStudios = ["esl", "faceit", "hitmarker"];
 
     if (aaaStudios.some((s) => companyLower.includes(s))) return "AAA";
     if (mobileStudios.some((s) => companyLower.includes(s))) return "Mobile";
     if (vrStudios.some((s) => companyLower.includes(s))) return "VR/AR";
     if (platformStudios.some((s) => companyLower.includes(s))) return "Platform";
+    if (esportsStudios.some((s) => companyLower.includes(s))) return "Esports";
 
     return "Indie";
   }

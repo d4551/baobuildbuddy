@@ -255,7 +255,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
     return {
       totalSessions: sessions.length,
       completedSessions: completedSessions.length,
-      inProgressSessions: sessions.filter((session) => session.status === "in-progress").length,
+      inProgressSessions: sessions.filter((session) => session.status === "active").length,
       averageQuestions:
         sessions.length > 0
           ? sessions.reduce((sum, session) => sum + session.questions.length, 0) / sessions.length

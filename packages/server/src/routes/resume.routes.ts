@@ -2,9 +2,9 @@ import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { settings } from "../db/schema/settings";
-import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { AIService } from "../services/ai/ai-service";
 import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts";
+import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { exportService } from "../services/export-service";
 import { resumeService } from "../services/resume-service";
 
@@ -330,7 +330,7 @@ Type: ${job.type || "Not specified"}
           return { error: "AI scoring failed", details: response.error };
         }
 
-        let analysis: unknown;
+        let analysis: Record<string, unknown>;
         try {
           analysis = JSON.parse(response.content);
         } catch {
@@ -345,10 +345,10 @@ Type: ${job.type || "Not specified"}
         return {
           resumeId: params.id,
           jobId: body.jobId,
-          score: analysis.score || 0,
-          strengths: analysis.strengths || [],
-          improvements: analysis.improvements || [],
-          keywords: analysis.keywords || [],
+          score: (analysis.score as number) || 0,
+          strengths: (analysis.strengths as string[]) || [],
+          improvements: (analysis.improvements as string[]) || [],
+          keywords: (analysis.keywords as string[]) || [],
           analysis: analysis,
         };
       } catch (error) {

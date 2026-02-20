@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAutomation, type AutomationRun } from "~/composables/useAutomation";
+import { useAutomation } from "~/composables/useAutomation";
 
 const route = useRoute();
 const { fetchRun } = useAutomation();
@@ -8,8 +8,18 @@ const runId = computed(() => {
   return Array.isArray(rawId) ? String(rawId[0] || "") : String(rawId || "");
 });
 const { data: run, error } = await fetchRun(runId.value);
+const requestUrl = useRequestURL();
+const apiBase = String(useRuntimeConfig().public.apiBase || "/");
+const resolvedApiBase = new URL(apiBase, requestUrl).toString().replace(/\/$/, "");
+const isApiBase = /\/api\/?$/i.test(new URL(resolvedApiBase).pathname);
 
-const screenshotUrls = computed(() => (run.value?.screenshots || []).filter((value) => typeof value === "string" && value.length > 0));
+const screenshotUrls = computed(() =>
+  (run.value?.screenshots || []).filter((value) => typeof value === "string" && value.length > 0),
+);
+const screenshotEndpoint = (index: number): string => {
+  const resolvedPath = `/automation/screenshots/${encodeURIComponent(run.value?.id || runId.value)}/${index}`;
+  return isApiBase ? `${resolvedApiBase}${resolvedPath}` : `/api${resolvedPath}`;
+};
 const statusText = computed(() => {
   if (!run.value) return "Loading...";
   return run.value.status;
@@ -31,8 +41,6 @@ const formattedInput = computed(() =>
 const formattedOutput = computed(() =>
   run.value?.output ? JSON.stringify(run.value.output, null, 2) : "No output payload",
 );
-const isAbsoluteUrl = (value: string) => /^https?:\/\//i.test(value);
-
 </script>
 
 <template>
@@ -97,14 +105,10 @@ const isAbsoluteUrl = (value: string) => /^https?:\/\//i.test(value);
             <div v-for="(screenshot, index) in screenshotUrls" :key="screenshot" class="card bg-base-200">
               <figure class="px-4 pt-4">
                 <img
-                  v-if="isAbsoluteUrl(screenshot)"
-                  :src="screenshot"
+                  :src="screenshotEndpoint(index)"
                   class="rounded-lg"
                   :alt="`Automation screenshot ${index + 1}`"
                 />
-                <div v-else class="py-8 text-sm text-center">
-                  Screenshot captured at {{ screenshot }}
-                </div>
               </figure>
             </div>
           </div>

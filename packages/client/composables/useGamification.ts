@@ -1,12 +1,22 @@
 import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 
+interface DailyChallengesResponse {
+  readonly date: string;
+  readonly challenges: DailyChallenge[];
+  readonly completedCount: number;
+  readonly totalCount: number;
+}
+
 /**
  * Gamification system composable for XP, achievements, and challenges.
  */
 export function useGamification() {
   const api = useApi();
-  const progress = useState<UserGamificationData | null>(STATE_KEYS.GAMIFICATION_PROGRESS, () => null);
+  const progress = useState<UserGamificationData | null>(
+    STATE_KEYS.GAMIFICATION_PROGRESS,
+    () => null,
+  );
   const achievements = useState<Achievement[]>(STATE_KEYS.GAMIFICATION_ACHIEVEMENTS, () => []);
   const challenges = useState<DailyChallenge[]>(STATE_KEYS.GAMIFICATION_CHALLENGES, () => []);
   const loading = useState(STATE_KEYS.GAMIFICATION_LOADING, () => false);
@@ -50,7 +60,8 @@ export function useGamification() {
     try {
       const { data, error } = await api.gamification.challenges.get();
       if (error) throw new Error("Failed to fetch challenges");
-      challenges.value = data as DailyChallenge[];
+      const payload = data as DailyChallengesResponse;
+      challenges.value = Array.isArray(payload.challenges) ? payload.challenges : [];
     } finally {
       loading.value = false;
     }
@@ -99,7 +110,10 @@ export function useGamification() {
     STATE_KEYS.GAMIFICATION_WEEKLY,
     () => null,
   );
-  const monthlyStats = useState<Record<string, unknown> | null>(STATE_KEYS.GAMIFICATION_MONTHLY, () => null);
+  const monthlyStats = useState<Record<string, unknown> | null>(
+    STATE_KEYS.GAMIFICATION_MONTHLY,
+    () => null,
+  );
 
   async function fetchWeeklyProgress() {
     loading.value = true;

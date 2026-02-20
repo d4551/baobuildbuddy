@@ -21,14 +21,16 @@ interface FormState {
   jobId: string;
 }
 
-const { data: resumesData } = await useFetch<{ id: string; name?: string }[]>(resolveEndpoint("/api/resumes"), {
-  method: "GET",
-});
-
-const { data: coverLettersData } = await useFetch<{ id: string; company?: string; position?: string }[]>(
-  resolveEndpoint("/api/cover-letters"),
-  { method: "GET" },
+const { data: resumesData } = await useFetch<{ id: string; name?: string }[]>(
+  resolveEndpoint("/api/resumes"),
+  {
+    method: "GET",
+  },
 );
+
+const { data: coverLettersData } = await useFetch<
+  { id: string; company?: string; position?: string }[]
+>(resolveEndpoint("/api/cover-letters"), { method: "GET" });
 
 const form = reactive<FormState>({
   jobUrl: "",
@@ -63,6 +65,11 @@ async function submitJobApply() {
       output: null,
       screenshots: [],
       error: null,
+      progress: 0,
+      currentStep: null,
+      totalSteps: null,
+      startedAt: null,
+      completedAt: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

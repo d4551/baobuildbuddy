@@ -21,9 +21,7 @@ export const searchRoutes = new Elysia({ prefix: "/search" })
         ? query.types
             .split(",")
             .map((type) => type.trim())
-            .filter((type): type is SearchType =>
-              (searchTypes as readonly string[]).includes(type),
-            )
+            .filter((type): type is SearchType => (searchTypes as readonly string[]).includes(type))
         : undefined;
       return searchService.searchAll(q, types);
     },

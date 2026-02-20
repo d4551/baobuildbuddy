@@ -1,145 +1,291 @@
 import { generateId } from "@bao/shared";
-import type { Job, JobFilters, JobProvider } from "./provider-interface";
+import type { CompanyBoardATSType, CompanyBoardConfig, JobProviderSettings } from "@bao/shared";
+import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
+import { loadJobProviderSettings } from "./provider-settings";
 
-type ATSType =
-  | "greenhouse"
-  | "lever"
-  | "recruitee"
-  | "workable"
-  | "ashby"
-  | "smartrecruiters"
-  | "teamtailor"
-  | "workday";
-
-interface CompanyBoardConfig {
-  name: string;
-  token: string;
-  type: ATSType;
-  priority?: number;
+interface ATSJob extends Record<string, unknown> {
+  id?: string;
+  title?: string;
+  text?: string;
+  name?: string;
+  content?: string;
+  description?: string;
+  descriptionPlain?: string;
+  location?: { name?: string; city?: string } | string;
+  offices?: Array<{ name?: string }>;
+  categories?: { location?: string };
+  absolute_url?: string;
+  hostedUrl?: string;
+  applyUrl?: string;
+  url?: string;
+  ref?: string;
+  updated_at?: string;
+  created_at?: string;
+  createdAt?: number | string;
+  releasedDate?: string;
 }
 
-const BASE_URLS: Record<ATSType, (token: string) => string> = {
-  greenhouse: (token) => `https://boards-api.greenhouse.io/v1/boards/${token}/jobs`,
-  lever: (token) => `https://api.lever.co/v0/postings/${token}?mode=json`,
-  recruitee: (token) => `https://api.recruitee.com/c/${token}/offers`,
-  workable: (token) => `https://apply.workable.com/api/v1/widget/accounts/${token}`,
-  ashby: (token) => `https://api.ashbyhq.com/posting-api/job-board/${token}`,
-  smartrecruiters: (token) => `https://api.smartrecruiters.com/v1/companies/${token}/postings`,
-  teamtailor: (token) => "https://api.teamtailor.com/v1/jobs",
-  workday: (token) => `https://${token}.wd1.myworkdayjobs.com/wday/cxs/${token}/External/jobs`,
+type ATSResponseFields = {
+  jobs?: ATSJob[];
+  content?: ATSJob[];
+  postings?: ATSJob[];
+  results?: ATSJob[];
+  data?: ATSJob[];
 };
 
+type ATSResponse = ATSJob[] | (ATSResponseFields & Record<string, unknown>);
+
+const REMOTE_PATTERN = /remote/i;
+
+const resolveLocation = (location: ATSJob["location"]): string => {
+  if (typeof location === "string") {
+    return location;
+  }
+  return location?.name ?? location?.city ?? "";
+};
+
+const toISODate = (value?: string | number): string => {
+  if (typeof value === "number") {
+    return new Date(value).toISOString();
+  }
+  if (typeof value === "string" && value.length > 0) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
+  }
+  return new Date().toISOString();
+};
+
+const sanitizeHashFragment = (value: string): string =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-_]/g, "");
+
+const resolveHashFragment = (job: ATSJob): string => {
+  const candidate =
+    job.id ??
+    job.url ??
+    job.absolute_url ??
+    job.hostedUrl ??
+    job.applyUrl ??
+    job.ref ??
+    job.title ??
+    job.name ??
+    job.text ??
+    generateId();
+
+  return sanitizeHashFragment(String(candidate)) || generateId();
+};
+
+const resolveJobs = (data: ATSResponse, keys: ReadonlyArray<keyof ATSResponseFields>): ATSJob[] => {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  for (const key of keys) {
+    const candidate = data[key];
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return [];
+};
+
+const resolveBoardUrl = (
+  providerType: CompanyBoardATSType,
+  token: string,
+  settings: JobProviderSettings,
+): string => {
+  const template = settings.companyBoardApiTemplates[providerType];
+  return template.replaceAll("{token}", token);
+};
+
+/**
+ * Provider that normalizes a single ATS board payload into `RawJob[]`.
+ */
 export class CompanyBoardProvider implements JobProvider {
   name: string;
-  type: string;
+  type = "company-board";
   enabled = true;
-  private config: CompanyBoardConfig;
+  private readonly config: CompanyBoardConfig;
 
   constructor(config: CompanyBoardConfig) {
     this.config = config;
     this.name = config.name;
-    this.type = config.type;
+    this.enabled = config.enabled;
   }
 
-  async fetchJobs(filters: JobFilters): Promise<Job[]> {
-    const url = BASE_URLS[this.config.type](this.config.token);
+  async fetchJobs(_filters?: JobFilters): Promise<RawJob[]> {
+    const providerSettings = await loadJobProviderSettings();
+    return this.fetchJobsWithSettings(providerSettings);
+  }
+
+  async fetchJobsWithSettings(providerSettings: JobProviderSettings): Promise<RawJob[]> {
+    if (!this.config.enabled) {
+      return [];
+    }
+
+    const url = resolveBoardUrl(this.config.type, this.config.token, providerSettings);
 
     try {
       const response = await fetch(url, {
         headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
       });
 
-      if (!response.ok) return [];
+      if (!response.ok) {
+        return [];
+      }
 
-      const data = await response.json();
-      return this.parseJobs(data);
+      const data = (await response.json()) as ATSResponse;
+      return this.parseJobs(data, providerSettings);
     } catch {
       return [];
     }
   }
 
-  private parseJobs(data: unknown): Job[] {
+  private parseJobs(data: ATSResponse, providerSettings: JobProviderSettings): RawJob[] {
     switch (this.config.type) {
       case "greenhouse":
-        return this.parseGreenhouseJobs(data);
+        return this.parseGreenhouseJobs(data, providerSettings);
       case "lever":
-        return this.parseLeverJobs(data);
+        return this.parseLeverJobs(data, providerSettings);
       case "smartrecruiters":
-        return this.parseSmartRecruitersJobs(data);
+        return this.parseSmartRecruitersJobs(data, providerSettings);
       default:
-        return this.parseGenericJobs(data);
+        return this.parseGenericJobs(data, providerSettings);
     }
   }
 
-  private parseGreenhouseJobs(data: unknown): Job[] {
-    const jobs = data?.jobs || data || [];
-    if (!Array.isArray(jobs)) return [];
+  private parseGreenhouseJobs(data: ATSResponse, providerSettings: JobProviderSettings): RawJob[] {
+    const jobs = resolveJobs(data, ["jobs"]);
 
-    return jobs.slice(0, 50).map((job: unknown) => ({
-      id: generateId(),
-      title: job.title || "",
-      company: this.config.name,
-      location: job.location?.name || job.offices?.[0]?.name || "Unknown",
-      remote: /remote/i.test(job.location?.name || ""),
-      description: job.content || "",
-      url: job.absolute_url || "",
-      source: `greenhouse:${this.config.token}`,
-      postedDate: job.updated_at || job.created_at || new Date().toISOString(),
-      contentHash: `gh-${this.config.token}-${job.id}`,
-    }));
+    return jobs.slice(0, providerSettings.companyBoardResultLimit).map((job) => {
+      const location =
+        resolveLocation(job.location) ||
+        job.offices?.[0]?.name ||
+        providerSettings.unknownLocationLabel;
+
+      return {
+        id: generateId(),
+        title: job.title || "",
+        company: this.config.name,
+        location,
+        remote: REMOTE_PATTERN.test(location),
+        description: job.content || "",
+        url: job.absolute_url || "",
+        source: `greenhouse:${this.config.token}`,
+        postedDate: toISODate(job.updated_at || job.created_at),
+        contentHash: `gh-${this.config.token}-${resolveHashFragment(job)}`,
+      };
+    });
   }
 
-  private parseLeverJobs(data: unknown): Job[] {
-    const jobs = Array.isArray(data) ? data : [];
+  private parseLeverJobs(data: ATSResponse, providerSettings: JobProviderSettings): RawJob[] {
+    const jobs = resolveJobs(data, ["data", "jobs", "results"]);
 
-    return jobs.slice(0, 50).map((job: unknown) => ({
-      id: generateId(),
-      title: job.text || "",
-      company: this.config.name,
-      location: job.categories?.location || "Unknown",
-      remote: /remote/i.test(job.categories?.location || ""),
-      description: job.descriptionPlain || job.description || "",
-      url: job.hostedUrl || "",
-      source: `lever:${this.config.token}`,
-      postedDate: job.createdAt ? new Date(job.createdAt).toISOString() : new Date().toISOString(),
-      contentHash: `lv-${this.config.token}-${job.id}`,
-    }));
+    return jobs.slice(0, providerSettings.companyBoardResultLimit).map((job) => {
+      const location =
+        job.categories?.location ||
+        resolveLocation(job.location) ||
+        providerSettings.unknownLocationLabel;
+
+      return {
+        id: generateId(),
+        title: job.text || "",
+        company: this.config.name,
+        location,
+        remote: REMOTE_PATTERN.test(location),
+        description: job.descriptionPlain || job.description || "",
+        url: job.hostedUrl || job.url || "",
+        source: `lever:${this.config.token}`,
+        postedDate: toISODate(job.createdAt),
+        contentHash: `lv-${this.config.token}-${resolveHashFragment(job)}`,
+      };
+    });
   }
 
-  private parseSmartRecruitersJobs(data: unknown): Job[] {
-    const jobs = data?.content || data?.postings || [];
-    if (!Array.isArray(jobs)) return [];
+  private parseSmartRecruitersJobs(
+    data: ATSResponse,
+    providerSettings: JobProviderSettings,
+  ): RawJob[] {
+    const jobs = resolveJobs(data, ["content", "postings"]);
 
-    return jobs.slice(0, 50).map((job: unknown) => ({
-      id: generateId(),
-      title: job.name || job.title || "",
-      company: this.config.name,
-      location: job.location?.city || "Unknown",
-      remote: /remote/i.test(job.location?.city || ""),
-      description: "",
-      url: job.applyUrl || job.ref || "",
-      source: `smartrecruiters:${this.config.token}`,
-      postedDate: job.releasedDate || new Date().toISOString(),
-      contentHash: `sr-${this.config.token}-${job.id}`,
-    }));
+    return jobs.slice(0, providerSettings.companyBoardResultLimit).map((job) => {
+      const location = resolveLocation(job.location) || providerSettings.unknownLocationLabel;
+
+      return {
+        id: generateId(),
+        title: job.name || job.title || "",
+        company: this.config.name,
+        location,
+        remote: REMOTE_PATTERN.test(location),
+        description: job.description || job.content || "",
+        url: job.applyUrl || job.ref || job.url || "",
+        source: `smartrecruiters:${this.config.token}`,
+        postedDate: toISODate(job.releasedDate),
+        contentHash: `sr-${this.config.token}-${resolveHashFragment(job)}`,
+      };
+    });
   }
 
-  private parseGenericJobs(data: unknown): Job[] {
-    const jobs = data?.jobs || data?.results || data?.data || (Array.isArray(data) ? data : []);
-    if (!Array.isArray(jobs)) return [];
+  private parseGenericJobs(data: ATSResponse, providerSettings: JobProviderSettings): RawJob[] {
+    const jobs = resolveJobs(data, ["jobs", "results", "data", "content", "postings"]);
 
-    return jobs.slice(0, 50).map((job: unknown) => ({
-      id: generateId(),
-      title: job.title || job.name || job.text || "",
-      company: this.config.name,
-      location: job.location?.name || job.location?.city || job.location || "Unknown",
-      remote: /remote/i.test(JSON.stringify(job.location || "")),
-      description: job.description || job.content || "",
-      url: job.url || job.absolute_url || job.hostedUrl || "",
-      source: `${this.config.type}:${this.config.token}`,
-      postedDate: job.created_at || job.createdAt || new Date().toISOString(),
-      contentHash: `${this.config.type.slice(0, 2)}-${this.config.token}-${job.id || Math.random().toString(36).slice(2)}`,
-    }));
+    return jobs.slice(0, providerSettings.companyBoardResultLimit).map((job) => {
+      const location = resolveLocation(job.location) || providerSettings.unknownLocationLabel;
+      const remoteProbe =
+        typeof job.location === "string" ? job.location : JSON.stringify(job.location ?? "");
+
+      return {
+        id: generateId(),
+        title: job.title || job.name || job.text || "",
+        company: this.config.name,
+        location,
+        remote: REMOTE_PATTERN.test(remoteProbe),
+        description: job.description || job.content || "",
+        url: job.url || job.absolute_url || job.hostedUrl || "",
+        source: `${this.config.type}:${this.config.token}`,
+        postedDate: toISODate(job.created_at || job.createdAt || job.releasedDate),
+        contentHash: `${this.config.type.slice(0, 2)}-${this.config.token}-${resolveHashFragment(job)}`,
+      };
+    });
+  }
+}
+
+/**
+ * Provider that fetches all configured company-board ATS sources.
+ */
+export class CompanyBoardsProvider implements JobProvider {
+  name = "Company Boards";
+  type = "company-board";
+  enabled = true;
+
+  async fetchJobs(_filters?: JobFilters): Promise<RawJob[]> {
+    const providerSettings = await loadJobProviderSettings();
+    const boards = [...providerSettings.companyBoards]
+      .filter((board) => board.enabled)
+      .sort((left, right) => right.priority - left.priority);
+
+    if (boards.length === 0) {
+      return [];
+    }
+
+    const results = await Promise.allSettled(
+      boards.map((board) =>
+        new CompanyBoardProvider(board).fetchJobsWithSettings(providerSettings),
+      ),
+    );
+
+    const jobs: RawJob[] = [];
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        jobs.push(...result.value);
+      }
+    }
+
+    return jobs;
   }
 }

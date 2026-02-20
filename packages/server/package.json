@@ -11,11 +11,11 @@
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "bunx --bun tsc --noEmit",
     "test": "bun test",
-    "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:generate": "bun --bun run drizzle-kit generate",
+    "db:push": "bun --bun run drizzle-kit push",
+    "db:studio": "bun --bun run drizzle-kit studio"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.40.0",

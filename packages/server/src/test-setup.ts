@@ -1,6 +1,6 @@
-import { mkdirSync } from "fs";
-import { tmpdir } from "os";
-import { dirname, join } from "path";
+import { mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 
 process.env.NODE_ENV = "test";
 process.env.BAO_DISABLE_AUTH = "true";

@@ -27,14 +27,15 @@ const TABLE_DEFINITIONS = [
       openai_api_key TEXT,
       claude_api_key TEXT,
       huggingface_token TEXT,
-      local_model_endpoint TEXT,
-      local_model_name TEXT,
+      local_model_endpoint TEXT DEFAULT 'http://localhost:8080/v1',
+      local_model_name TEXT DEFAULT 'llama3.2',
       preferred_provider TEXT DEFAULT 'local',
       preferred_model TEXT,
       preferred_models TEXT,
       theme TEXT DEFAULT 'bao-light',
       language TEXT DEFAULT 'en',
       notifications TEXT DEFAULT '{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}',
+      automation_settings TEXT DEFAULT '{"headless":true,"defaultTimeout":30,"screenshotRetention":7,"maxConcurrentRuns":1,"defaultBrowser":"chrome","enableSmartSelectors":true,"autoSaveScreenshots":true}',
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
@@ -196,6 +197,24 @@ const TABLE_DEFINITIONS = [
       timestamp TEXT NOT NULL,
       session_id TEXT,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS automation_runs (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      job_id TEXT,
+      user_id TEXT,
+      input TEXT,
+      output TEXT,
+      screenshots TEXT,
+      error TEXT,
+      progress INTEGER DEFAULT 0,
+      current_step INTEGER,
+      total_steps INTEGER,
+      started_at TEXT,
+      completed_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
 ] as const;
 

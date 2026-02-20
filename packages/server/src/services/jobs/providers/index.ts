@@ -7,5 +7,4 @@ export * from "./greenhouse";
 export * from "./lever";
 export * from "./provider-registry";
 export * from "./company-board";
-export * from "./company-boards-config";
 export * from "./gaming-providers";

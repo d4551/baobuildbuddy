@@ -1,104 +1,246 @@
 <script setup lang="ts">
-import type { Achievement } from "@bao/shared";
+import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
+import { getXPProgress } from "@bao/shared";
+import {
+  GAMIFICATION_ASYNC_DATA_KEY,
+  GAMIFICATION_COPY,
+  GAMIFICATION_DEFAULT_CHALLENGE_GOAL,
+} from "~/constants/gamification";
 import { getErrorMessage } from "~/utils/errors";
 
-const { $toast } = useNuxtApp();
-const {
-  progress,
-  achievements,
-  challenges,
-  loading,
-  fetchProgress,
-  fetchAchievements,
-  fetchChallenges,
-  completeChallenge,
-  level,
-  xpToNextLevel,
-} = useGamification();
+interface DailyChallengesResponse {
+  readonly date: string;
+  readonly challenges: DailyChallenge[];
+  readonly completedCount: number;
+  readonly totalCount: number;
+}
 
-const pageError = ref<string | null>(null);
+interface EdenErrorPayload {
+  readonly message?: string;
+}
+
+interface EdenErrorEnvelope {
+  readonly value?: EdenErrorPayload;
+}
+
+interface EdenResult<T> {
+  readonly data: T;
+  readonly error?: EdenErrorEnvelope | null;
+}
+
+interface GamificationHubData {
+  readonly progress: UserGamificationData;
+  readonly achievements: readonly Achievement[];
+  readonly challenges: readonly DailyChallenge[];
+}
+
+type GamificationUiState = "idle" | "loading" | "error" | "empty" | "success";
+
+const api = useApi();
+const { $toast } = useNuxtApp();
 const completingChallenge = ref<string | null>(null);
 
-const gamification = computed(() => {
-  if (!progress.value) return null;
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: GAMIFICATION_COPY.seoTitle,
+    description: GAMIFICATION_COPY.seoDescription,
+  });
+}
 
-  return {
-    xp: progress.value.xp || 0,
-    level: level.value || 1,
-    xpToNextLevel: xpToNextLevel.value || 0,
-    xpForNextLevel: progress.value.xpForNextLevel || 0,
-    currentStreak: progress.value.currentStreak || 0,
-    longestStreak: progress.value.longestStreak || 0,
-    achievements: achievements.value || [],
-    dailyChallenges: challenges.value || [],
-  };
+const { data, status, error, refresh } = await useAsyncData<GamificationHubData>(
+  GAMIFICATION_ASYNC_DATA_KEY,
+  fetchGamificationHubData,
+  {
+    lazy: false,
+    server: true,
+  },
+);
+
+const hubData = computed(() => data.value ?? null);
+
+const uiState = computed<GamificationUiState>(() => {
+  if (status.value === "pending") return "loading";
+  if (status.value === "error") return "error";
+  if (status.value === "idle") return "idle";
+  if (!hubData.value || isGamificationEmpty(hubData.value)) return "empty";
+  return "success";
 });
 
-onMounted(async () => {
-  await fetchData();
+const unlockedAchievements = computed(() => {
+  return hubData.value?.achievements.filter((achievement) => achievement.unlocked) ?? [];
 });
 
-async function fetchData() {
-  pageError.value = null;
-  try {
-    await Promise.all([fetchProgress(), fetchAchievements(), fetchChallenges()]);
-  } catch (error: unknown) {
-    pageError.value = getErrorMessage(error, "Failed to load gamification data");
-    $toast.error(pageError.value);
+const lockedAchievements = computed(() => {
+  return hubData.value?.achievements.filter((achievement) => !achievement.unlocked) ?? [];
+});
+
+const levelProgress = computed(() => {
+  const progress = hubData.value?.progress;
+  if (!progress) return 0;
+  return Math.round(getXPProgress(progress.xp).progress * 100);
+});
+
+const xpTarget = computed(() => {
+  const progress = hubData.value?.progress;
+  if (!progress) return 100;
+  const { nextLevel } = getXPProgress(progress.xp);
+  return nextLevel ? nextLevel.minXP : progress.xp;
+});
+
+const xpUntilNextLevel = computed(() => {
+  const progress = hubData.value?.progress;
+  if (!progress) return 0;
+  const { nextLevel } = getXPProgress(progress.xp);
+  if (!nextLevel) return 0;
+  return Math.max(0, nextLevel.minXP - progress.xp);
+});
+
+watch(error, (nextError) => {
+  if (import.meta.client && nextError) {
+    $toast.error(getErrorMessage(nextError, GAMIFICATION_COPY.loadErrorFallback));
   }
+});
+
+function isGamificationEmpty(payload: GamificationHubData): boolean {
+  return (
+    payload.progress.xp === 0 &&
+    payload.achievements.length === 0 &&
+    payload.challenges.length === 0
+  );
+}
+
+function getChallengeGoal(challenge: DailyChallenge): number {
+  if (typeof challenge.goal === "number" && challenge.goal > 0) {
+    return challenge.goal;
+  }
+  return GAMIFICATION_DEFAULT_CHALLENGE_GOAL;
+}
+
+function getChallengeProgress(challenge: DailyChallenge): number {
+  if (typeof challenge.progress === "number") {
+    return challenge.progress;
+  }
+  return challenge.completed ? getChallengeGoal(challenge) : 0;
+}
+
+function canClaimChallenge(challenge: DailyChallenge): boolean {
+  return !challenge.completed && getChallengeProgress(challenge) >= getChallengeGoal(challenge);
+}
+
+async function retryPageLoad() {
+  await refresh();
 }
 
 async function handleCompleteChallenge(challengeId: string) {
   completingChallenge.value = challengeId;
+
   try {
-    await completeChallenge(challengeId);
-    await fetchChallenges();
-    $toast.success("Challenge completed!");
-  } catch (error: unknown) {
-    $toast.error(getErrorMessage(error, "Failed to complete challenge"));
+    await requestData(
+      api.gamification.challenges[challengeId].complete.post() as Promise<
+        EdenResult<{
+          message: string;
+          challengeId: string;
+          completed: boolean;
+          totalXP: number;
+          level: number;
+        }>
+      >,
+      GAMIFICATION_COPY.challengeCompleteErrorFallback,
+    );
+    await retryPageLoad();
+    $toast.success(GAMIFICATION_COPY.challengeCompletionToast);
+  } catch (actionError: unknown) {
+    $toast.error(getErrorMessage(actionError, GAMIFICATION_COPY.challengeCompleteErrorFallback));
   } finally {
     completingChallenge.value = null;
   }
 }
 
-const unlockedAchievements = computed(() => {
-  return gamification.value?.achievements?.filter((a: Achievement) => a.unlocked) || [];
-});
+async function fetchGamificationHubData(): Promise<GamificationHubData> {
+  const [progress, achievements, challengePayload] = await Promise.all([
+    requestData<UserGamificationData>(
+      api.gamification.progress.get() as Promise<EdenResult<UserGamificationData>>,
+      GAMIFICATION_COPY.loadErrorFallback,
+    ),
+    requestData<Achievement[]>(
+      api.gamification.achievements.get() as Promise<EdenResult<Achievement[]>>,
+      GAMIFICATION_COPY.loadErrorFallback,
+    ),
+    requestData<DailyChallengesResponse>(
+      api.gamification.challenges.get() as Promise<EdenResult<DailyChallengesResponse>>,
+      GAMIFICATION_COPY.loadErrorFallback,
+    ),
+  ]);
 
-const lockedAchievements = computed(() => {
-  return gamification.value?.achievements?.filter((a: Achievement) => !a.unlocked) || [];
-});
+  return {
+    progress,
+    achievements,
+    challenges: challengePayload.challenges,
+  };
+}
 
-const levelProgress = computed(() => {
-  if (!gamification.value) return 0;
-  return (gamification.value.xp / gamification.value.xpForNextLevel) * 100;
-});
+async function requestData<T>(
+  request: Promise<EdenResult<T>>,
+  fallbackMessage: string,
+): Promise<T> {
+  const response = await request;
+  if (response.error) {
+    throw new Error(response.error.value?.message ?? fallbackMessage);
+  }
+  return response.data;
+}
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-bold mb-6">Gamification Hub</h1>
+  <section class="space-y-6" aria-labelledby="gamification-title">
+    <header class="space-y-1">
+      <h1 id="gamification-title" class="text-3xl font-bold">{{ GAMIFICATION_COPY.pageTitle }}</h1>
+      <p class="text-sm text-base-content/60">{{ GAMIFICATION_COPY.metricsSummary }}</p>
+    </header>
 
-    <div v-if="pageError" class="alert alert-error mb-6">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <LoadingSkeleton
+      v-if="uiState === 'loading' || uiState === 'idle'"
+      :lines="GAMIFICATION_COPY.loadingSkeletonLines"
+    />
+
+    <div v-else-if="uiState === 'error'" class="alert alert-error" role="alert">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
       </svg>
-      <span>{{ pageError }}</span>
-      <button class="btn btn-sm" @click="fetchData">Retry</button>
+      <span>{{ getErrorMessage(error, GAMIFICATION_COPY.loadErrorFallback) }}</span>
+      <button type="button" class="btn btn-sm" @click="retryPageLoad">
+        {{ GAMIFICATION_COPY.retryButtonLabel }}
+      </button>
     </div>
 
-    <LoadingSkeleton v-else-if="loading && !gamification" :lines="8" />
+    <div v-else-if="uiState === 'empty'" class="card bg-base-200 card-border">
+      <div class="card-body items-start gap-3">
+        <h2 class="card-title">{{ GAMIFICATION_COPY.emptyStateTitle }}</h2>
+        <p class="text-sm text-base-content/70">{{ GAMIFICATION_COPY.emptyStateDescription }}</p>
+        <div class="card-actions">
+          <NuxtLink to="/" class="btn btn-primary">{{ GAMIFICATION_COPY.emptyStateCta }}</NuxtLink>
+        </div>
+      </div>
+    </div>
 
-    <div v-else-if="gamification" class="space-y-6">
-      <!-- Level & XP -->
-      <div class="card bg-gradient-to-br from-primary to-secondary text-primary-content">
+    <div v-else-if="hubData" class="space-y-6">
+      <section class="card bg-gradient-to-br from-primary to-secondary text-primary-content">
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h2 class="text-4xl font-bold">Level {{ gamification.level }}</h2>
-              <p class="opacity-80">{{ gamification.xp }} / {{ gamification.xpForNextLevel }} XP</p>
+              <h2 class="text-4xl font-bold">
+                {{ GAMIFICATION_COPY.levelPrefix }} {{ hubData.progress.level }}
+              </h2>
+              <p class="opacity-80">
+                {{ hubData.progress.xp }} / {{ xpTarget }} {{ GAMIFICATION_COPY.xpSuffix }}
+              </p>
             </div>
-            <div class="text-6xl">🎮</div>
+            <div class="text-6xl" aria-hidden="true">🎮</div>
           </div>
 
           <progress
@@ -108,52 +250,48 @@ const levelProgress = computed(() => {
           ></progress>
 
           <p class="text-sm opacity-80 mt-2">
-            {{ gamification.xpToNextLevel }} XP until level {{ gamification.level + 1 }}
+            {{ xpUntilNextLevel }} {{ GAMIFICATION_COPY.xpUntilLevelLabel }} {{ hubData.progress.level + 1 }}
           </p>
         </div>
-      </div>
+      </section>
 
-      <!-- Streak -->
-      <div class="stats stats-vertical lg:stats-horizontal w-full bg-base-200">
+      <section class="stats stats-vertical lg:stats-horizontal w-full bg-base-200">
         <div class="stat">
-          <div class="stat-figure text-4xl">🔥</div>
-          <div class="stat-title">Current Streak</div>
-          <div class="stat-value text-primary">{{ gamification.currentStreak }}</div>
-          <div class="stat-desc">days in a row</div>
+          <div class="stat-figure text-4xl" aria-hidden="true">🔥</div>
+          <div class="stat-title">{{ GAMIFICATION_COPY.currentStreakTitle }}</div>
+          <div class="stat-value text-primary">{{ hubData.progress.currentStreak || 0 }}</div>
+          <div class="stat-desc">{{ GAMIFICATION_COPY.streakDaysSuffix }}</div>
         </div>
 
         <div class="stat">
-          <div class="stat-figure text-4xl">⭐</div>
-          <div class="stat-title">Longest Streak</div>
-          <div class="stat-value text-secondary">{{ gamification.longestStreak }}</div>
-          <div class="stat-desc">personal best</div>
+          <div class="stat-figure text-4xl" aria-hidden="true">⭐</div>
+          <div class="stat-title">{{ GAMIFICATION_COPY.longestStreakTitle }}</div>
+          <div class="stat-value text-secondary">{{ hubData.progress.longestStreak || 0 }}</div>
+          <div class="stat-desc">{{ GAMIFICATION_COPY.longestStreakDesc }}</div>
         </div>
 
         <div class="stat">
-          <div class="stat-figure text-4xl">🏆</div>
-          <div class="stat-title">Achievements</div>
+          <div class="stat-figure text-4xl" aria-hidden="true">🏆</div>
+          <div class="stat-title">{{ GAMIFICATION_COPY.achievementsTitle }}</div>
           <div class="stat-value text-accent">{{ unlockedAchievements.length }}</div>
-          <div class="stat-desc">of {{ gamification.achievements.length }} unlocked</div>
+          <div class="stat-desc">
+            {{ unlockedAchievements.length }} / {{ hubData.achievements.length }}
+          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Daily Challenges -->
-      <div class="card bg-base-200">
+      <section class="card bg-base-200">
         <div class="card-body">
-          <h2 class="card-title mb-4">Daily Challenges</h2>
+          <h2 class="card-title mb-4">{{ GAMIFICATION_COPY.dailyChallengesTitle }}</h2>
 
-          <div class="space-y-3">
-            <div
-              v-for="challenge in gamification.dailyChallenges"
-              :key="challenge.id"
-              class="card bg-base-100"
-            >
+          <div class="space-y-3" v-if="hubData.challenges.length > 0">
+            <article v-for="challenge in hubData.challenges" :key="challenge.id" class="card bg-base-100 card-border">
               <div class="card-body p-4">
                 <div class="flex items-center justify-between mb-2">
-                  <h3 class="font-semibold">{{ challenge.title }}</h3>
+                  <h3 class="font-semibold">{{ challenge.name }}</h3>
                   <div class="flex items-center gap-2">
-                    <span class="badge badge-primary">+{{ challenge.xp }} XP</span>
-                    <span v-if="challenge.completed" class="badge badge-success">✓ Done</span>
+                    <span class="badge badge-primary">+{{ challenge.xpReward }} {{ GAMIFICATION_COPY.xpSuffix }}</span>
+                    <span v-if="challenge.completed" class="badge badge-success">{{ GAMIFICATION_COPY.challengeDoneLabel }}</span>
                   </div>
                 </div>
 
@@ -161,74 +299,78 @@ const levelProgress = computed(() => {
                   <progress
                     class="progress flex-1"
                     :class="challenge.completed ? 'progress-success' : 'progress-primary'"
-                    :value="challenge.progress"
-                    :max="challenge.goal"
+                    :value="getChallengeProgress(challenge)"
+                    :max="getChallengeGoal(challenge)"
                   ></progress>
                   <span class="text-sm font-medium">
-                    {{ challenge.progress }} / {{ challenge.goal }}
+                    {{ getChallengeProgress(challenge) }} / {{ getChallengeGoal(challenge) }}
                   </span>
                 </div>
 
-                <div v-if="!challenge.completed && challenge.progress >= challenge.goal" class="card-actions justify-end mt-2">
+                <div v-if="canClaimChallenge(challenge)" class="card-actions justify-end mt-2">
                   <button
+                    type="button"
                     class="btn btn-success btn-sm"
                     :disabled="completingChallenge === challenge.id"
                     @click="handleCompleteChallenge(challenge.id)"
                   >
-                    <span v-if="completingChallenge === challenge.id" class="loading loading-spinner loading-xs"></span>
-                    Claim Reward
+                    <span
+                      v-if="completingChallenge === challenge.id"
+                      class="loading loading-spinner loading-xs"
+                      aria-hidden="true"
+                    ></span>
+                    {{ GAMIFICATION_COPY.challengeClaimLabel }}
                   </button>
                 </div>
               </div>
-            </div>
+            </article>
           </div>
+
+          <p v-else class="text-sm text-base-content/60">{{ GAMIFICATION_COPY.noChallengesLabel }}</p>
         </div>
-      </div>
+      </section>
 
-      <!-- Achievements -->
-      <div class="card bg-base-200">
+      <section class="card bg-base-200">
         <div class="card-body">
-          <h2 class="card-title mb-4">Achievements</h2>
+          <h2 class="card-title mb-4">{{ GAMIFICATION_COPY.achievementsTitle }}</h2>
 
-          <!-- Unlocked -->
           <div v-if="unlockedAchievements.length" class="mb-6">
-            <h3 class="font-semibold mb-3 text-success">Unlocked</h3>
+            <h3 class="font-semibold mb-3 text-success">{{ GAMIFICATION_COPY.achievementsUnlockedLabel }}</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <div
+              <article
                 v-for="achievement in unlockedAchievements"
                 :key="achievement.id"
                 class="card bg-base-100 border-2 border-success shadow-lg"
               >
                 <div class="card-body p-4 text-center">
-                  <div class="text-4xl mb-2">{{ achievement.icon }}</div>
+                  <div class="text-4xl mb-2" aria-hidden="true">{{ achievement.icon }}</div>
                   <h4 class="font-bold text-sm">{{ achievement.name }}</h4>
                   <p class="text-xs text-base-content/60">{{ achievement.description }}</p>
-                  <div class="badge badge-success badge-sm mt-2">+{{ achievement.xp }} XP</div>
+                  <span class="badge badge-success badge-sm mt-2">
+                    +{{ achievement.xpReward }} {{ GAMIFICATION_COPY.xpSuffix }}
+                  </span>
                 </div>
-              </div>
+              </article>
             </div>
           </div>
 
-          <!-- Locked -->
           <div v-if="lockedAchievements.length">
-            <h3 class="font-semibold mb-3 text-base-content/60">Locked</h3>
+            <h3 class="font-semibold mb-3 text-base-content/60">{{ GAMIFICATION_COPY.achievementsLockedLabel }}</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <div
-                v-for="achievement in lockedAchievements"
-                :key="achievement.id"
-                class="card bg-base-100 opacity-50"
-              >
+              <article v-for="achievement in lockedAchievements" :key="achievement.id" class="card bg-base-100 opacity-60">
                 <div class="card-body p-4 text-center">
-                  <div class="text-4xl mb-2 grayscale">{{ achievement.icon }}</div>
+                  <div class="text-4xl mb-2 grayscale" aria-hidden="true">{{ achievement.icon }}</div>
                   <h4 class="font-bold text-sm">{{ achievement.name }}</h4>
                   <p class="text-xs text-base-content/60">{{ achievement.description }}</p>
-                  <div class="badge badge-ghost badge-sm mt-2">+{{ achievement.xp }} XP</div>
+                  <span class="badge badge-ghost badge-sm mt-2">
+                    +{{ achievement.xpReward }} {{ GAMIFICATION_COPY.xpSuffix }}
+                  </span>
                 </div>
-              </div>
+              </article>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
-  </div>
+  </section>
 </template>

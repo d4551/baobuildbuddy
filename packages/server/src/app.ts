@@ -1,6 +1,6 @@
+import { APP_BRAND } from "@bao/shared";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import { APP_BRAND } from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "./config/env";
@@ -11,8 +11,9 @@ import { logger } from "./middleware/logger";
 import {
   aiRoutes,
   authRoutes,
-  coverLetterRoutes,
   automationRoutes,
+  automationScreenshotRoutes,
+  coverLetterRoutes,
   gamificationRoutes,
   interviewRoutes,
   jobsRoutes,
@@ -26,19 +27,18 @@ import {
   studioRoutes,
   userRoutes,
 } from "./routes";
+import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
 
 const API_PREFIX = "/api" as const;
 const OPENAPI_VERSION = "0.1.0" as const;
 const HTTP_STATUS_OK = 200;
-const HTTP_STATUS_BAD_REQUEST = 400;
-const HTTP_STATUS_NOT_FOUND = 404;
 const GLOBAL_RATE_LIMIT_DURATION_MS = 60_000;
 const GLOBAL_RATE_LIMIT_MAX_REQUESTS = 100;
 const HEALTHCHECK_PROBE_SQL = "SELECT 1";
 
-export const app = new Elysia({ prefix: API_PREFIX })
+export const app = new Elysia({ prefix: API_PREFIX, nativeStaticResponse: true })
   .use(
     cors({
       origin: config.corsOrigins,
@@ -68,31 +68,6 @@ export const app = new Elysia({ prefix: API_PREFIX })
       code: t.Optional(t.String()),
       fields: t.Optional(t.Array(t.Any())),
     }),
-  })
-  .onError(({ code, error, set }) => {
-    if (code === "VALIDATION") {
-      let fields: unknown[] | undefined;
-      if (typeof error === "object" && error && "all" in error) {
-        const details = (error as { all?: unknown }).all;
-        if (Array.isArray(details)) {
-          fields = details;
-        } else if (typeof details === "function") {
-          fields = details();
-        }
-      }
-
-      set.status = HTTP_STATUS_BAD_REQUEST;
-      return {
-        error: "Validation failed",
-        code,
-        fields,
-      };
-    }
-
-    if (code === "NOT_FOUND") {
-      set.status = HTTP_STATUS_NOT_FOUND;
-      return { error: "Not found", code };
-    }
   })
   .use(rateLimit({ duration: GLOBAL_RATE_LIMIT_DURATION_MS, max: GLOBAL_RATE_LIMIT_MAX_REQUESTS }))
   .use(logger)
@@ -138,6 +113,8 @@ export const app = new Elysia({ prefix: API_PREFIX })
   .use(searchRoutes)
   .use(statsRoutes)
   .use(automationRoutes)
+  .use(automationScreenshotRoutes)
+  .use(automationWebSocket)
   .use(chatWebSocket)
   .use(interviewWebSocket);
 

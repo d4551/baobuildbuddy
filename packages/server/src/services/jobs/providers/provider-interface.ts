@@ -38,7 +38,9 @@ export interface RawJob {
   location: string;
   description?: string;
   url: string;
+  source?: string;
   postedDate?: string;
+  applyUrl?: string;
   [key: string]: unknown;
 }
 
@@ -46,5 +48,5 @@ export interface JobProvider {
   name: string;
   type?: string;
   enabled?: boolean;
-  fetchJobs(filters: JobFilters): Promise<Job[]>;
+  fetchJobs(filters?: JobFilters): Promise<RawJob[]>;
 }

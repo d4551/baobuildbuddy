@@ -17,8 +17,7 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
     if (import.meta.server) return;
 
     const SpeechRecognitionCtor =
-      typeof window !== "undefined" &&
-      (window.SpeechRecognition || window.webkitSpeechRecognition);
+      typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
 
     if (SpeechRecognitionCtor) {
       recognition = new (SpeechRecognitionCtor as new () => SpeechRecognition)();
@@ -66,8 +65,7 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
   const isSupported = computed(() => {
     if (import.meta.server) return false;
     const SR =
-      typeof window !== "undefined" &&
-      (window.SpeechRecognition || window.webkitSpeechRecognition);
+      typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
     return !!SR;
   });
 

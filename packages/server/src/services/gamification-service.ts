@@ -31,9 +31,7 @@ export class GamificationService {
 
     return {
       ...normalized,
-      actionHistory: Array.isArray(normalized.actionHistory)
-        ? normalized.actionHistory
-        : [],
+      actionHistory: Array.isArray(normalized.actionHistory) ? normalized.actionHistory : [],
     };
   }
 

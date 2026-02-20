@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAutomation, type AutomationRun } from "~/composables/useAutomation";
+import { useAutomation } from "~/composables/useAutomation";
 
 const statusFilter = ref("");
 const typeFilter = ref("");
@@ -54,7 +54,7 @@ function formatDate(value: string) {
       </label>
     </div>
 
-      <div class="overflow-x-auto">
+    <div class="overflow-x-auto">
       <table class="table table-zebra">
         <thead>
           <tr>

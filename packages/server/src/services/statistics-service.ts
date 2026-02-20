@@ -1,5 +1,6 @@
-import { count, eq, sql } from "drizzle-orm";
+import { count, desc, eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
+import { automationRuns } from "../db/schema/automation-runs";
 import { chatHistory } from "../db/schema/chat-history";
 import { coverLetters } from "../db/schema/cover-letters";
 import { gamification } from "../db/schema/gamification";
@@ -9,6 +10,14 @@ import { portfolioProjects } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { userProfile } from "../db/schema/user";
+
+interface AutomationStats {
+  totalRuns: number;
+  successfulRuns: number;
+  successRate: number;
+  todayRuns: number;
+  recentRuns: Array<{ id: string; type: string; status: string; createdAt: string }>;
+}
 
 interface DashboardStats {
   profile: { completeness: number };
@@ -20,6 +29,7 @@ interface DashboardStats {
   skills: { mappedCount: number };
   ai: { chatMessages: number; chatSessions: number };
   gamification: { level: number; xp: number; achievements: number; streak: number };
+  automation: AutomationStats;
 }
 
 interface WeeklyActivity {
@@ -136,6 +146,38 @@ export class StatisticsService {
       /* */
     }
 
+    // Automation stats
+    const autoStats: AutomationStats = {
+      totalRuns: 0,
+      successfulRuns: 0,
+      successRate: 0,
+      todayRuns: 0,
+      recentRuns: [],
+    };
+    try {
+      const allRuns = await db
+        .select()
+        .from(automationRuns)
+        .orderBy(desc(automationRuns.createdAt))
+        .limit(100);
+      autoStats.totalRuns = allRuns.length;
+      autoStats.successfulRuns = allRuns.filter((r) => r.status === "success").length;
+      autoStats.successRate =
+        autoStats.totalRuns > 0
+          ? Math.round((autoStats.successfulRuns / autoStats.totalRuns) * 100)
+          : 0;
+      const today = new Date().toISOString().split("T")[0];
+      autoStats.todayRuns = allRuns.filter((r) => r.createdAt?.startsWith(today)).length;
+      autoStats.recentRuns = allRuns.slice(0, 5).map((r) => ({
+        id: r.id,
+        type: r.type,
+        status: r.status,
+        createdAt: r.createdAt,
+      }));
+    } catch {
+      /* */
+    }
+
     return {
       profile: { completeness: profileCompleteness },
       jobs: jobStats,
@@ -146,6 +188,7 @@ export class StatisticsService {
       skills: { mappedCount },
       ai: aiStats,
       gamification: gamStats,
+      automation: autoStats,
     };
   }
 

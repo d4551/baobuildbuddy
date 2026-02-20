@@ -12,14 +12,38 @@ Job providers fetch listings from various Applicant Tracking Systems (ATS) used 
 
 **Available Providers:**
 
-- **Greenhouse** - Major studios including Riot Games, Epic Games, Blizzard, Bungie, Unity, NVIDIA
-- **Lever** - Studios including Rockstar, Ubisoft, EA, Activision, Discord, Roblox
+- **ATS-native providers**:
+  - **Greenhouse**
+  - **Lever**
+- **Gaming job boards**:
+  - **Hitmarker** (API-native)
+  - **GameDev.net** (RPA-backed)
+  - **GrackleHQ** (RPA-backed)
+  - **Work With Indies** (RPA-backed)
+  - **RemoteGameJobs** (RPA-backed)
+  - **GamesJobsDirect** (RPA-backed)
+  - **PocketGamer.biz** (RPA-backed)
+- **Company board adapters** via `settings.automationSettings.jobProviders.companyBoards`:
+  - **SmartRecruiters** (e.g. CD Projekt Red)
+  - **Workday** (e.g. Cloud Imperium Games, Activision/King, Netflix Games, Lightspeed Studios)
+  - **Ashby** (e.g. Second Dinner, Sierra Studio)
+
+**Provider Registry Behavior (`provider-registry.ts`):**
+
+- Registers and unregisters providers at runtime.
+- Filters disabled providers from execution.
+- Applies a per-provider request limiter before fetch.
+- Executes provider fetches concurrently with `Promise.allSettled`.
+- Returns partial success when some providers fail.
+- Deduplicates by `contentHash` (fallback: normalized `title::company`).
 
 **Provider Interface:**
 ```typescript
 interface JobProvider {
   name: string
-  fetchJobs(query?: string): Promise<RawJob[]>
+  type?: string
+  enabled?: boolean
+  fetchJobs(filters?: JobFilters): Promise<RawJob[]>
 }
 ```
 
@@ -334,7 +358,7 @@ PC, Console (PlayStation, Xbox, Switch), Mobile, VR, AR, Web, Steam
 
 1. **Refresh Frequency** - Run `refreshJobs()` on a schedule (e.g., every 6 hours) via cron or job queue
 2. **Error Handling** - Providers fail gracefully; partial results returned if some providers fail
-3. **Rate Limiting** - Providers implement pagination limits to avoid rate limits
+3. **Rate Limiting** - Use registry/provider limits and request budgets to avoid source blocking
 4. **Deduplication** - Always run deduplication when combining multiple sources
 5. **Matching** - Calculate match scores in batches for better performance
 6. **Caching** - Rely on database cache; avoid excessive API calls
@@ -361,8 +385,8 @@ const results = await Promise.allSettled(
 ## Future Enhancements
 
 Potential additions:
-- More ATS providers (Workday, iCIMS, BambooHR)
-- Gaming-specific job boards (GameJobs, GamesIndustry.biz)
+- Additional ATS adapters (iCIMS, BambooHR)
+- Additional gaming boards and regional sources
 - AI-powered job description analysis
 - Salary data integration
 - Company culture scores

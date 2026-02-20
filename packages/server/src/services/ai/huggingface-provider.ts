@@ -1,5 +1,5 @@
-import { HfInference } from "@huggingface/inference";
 import type { AIResponse, GenerateOptions } from "@bao/shared";
+import { HfInference } from "@huggingface/inference";
 import { BaseAIProvider } from "./provider-interface";
 
 /**

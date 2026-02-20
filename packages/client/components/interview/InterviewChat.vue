@@ -24,7 +24,7 @@ const currentResponse = ref("");
 const chatMessages = computed(() => {
   const messages: Array<{ role: "interviewer" | "user"; text: string; questionId: string }> = [];
 
-  props.questions.forEach((question, index) => {
+  props.questions.forEach((question) => {
     messages.push({
       role: "interviewer",
       text: question.text,

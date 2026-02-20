@@ -36,11 +36,22 @@ export function resolveDatabasePath(rawPath?: string): string {
 export const defaultDatabasePath = resolveDatabasePath();
 
 /**
+ * Absolute path for browser automation screenshot assets.
+ */
+const DATABASE_DIR = dirname(defaultDatabasePath);
+export const AUTOMATION_SCREENSHOT_DIR = resolve(DATABASE_DIR, "automation", "screenshots");
+if (!existsSync(AUTOMATION_SCREENSHOT_DIR)) {
+  mkdirSync(AUTOMATION_SCREENSHOT_DIR, { recursive: true });
+}
+
+/**
  * Path to packages/scraper (RPA-Python scripts).
  * Resolved relative to packages/server/src/config.
  */
 const SERVER_SOURCE_DIR =
-  typeof import.meta.dir === "undefined" ? dirname(fileURLToPath(import.meta.url)) : import.meta.dir;
+  typeof import.meta.dir === "undefined"
+    ? dirname(fileURLToPath(import.meta.url))
+    : import.meta.dir;
 
 /**
  * Absolute path to the shared scraper package used by automation services.

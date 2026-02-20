@@ -7,7 +7,7 @@ import { interviewSessions } from "../db/schema/interviews";
 import { applications, jobs, savedJobs } from "../db/schema/jobs";
 import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
-import { settings } from "../db/schema/settings";
+import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { userProfile } from "../db/schema/user";
 
@@ -43,7 +43,10 @@ export class DataService {
    */
   async exportAll(): Promise<BaoExportData> {
     const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
-    const settingsRows = await db.select().from(settings).where(eq(settings.id, "default"));
+    const settingsRows = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.id, DEFAULT_SETTINGS_ID));
     const allResumes = await db.select().from(resumes);
     const allCoverLetters = await db.select().from(coverLetters);
     const allPortfolios = await db.select().from(portfolios);
@@ -106,13 +109,15 @@ export class DataService {
         try {
           const existing = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
           if (existing.length > 0) {
-            const { id, createdAt, ...rest } = data.profile;
+            const profile = data.profile as Record<string, unknown>;
+            const { id, createdAt, ...rest } = profile;
             await db
               .update(userProfile)
               .set({ ...rest, updatedAt: new Date().toISOString() })
               .where(eq(userProfile.id, "default"));
           } else {
-            await db.insert(userProfile).values({ ...data.profile, id: "default" });
+            const profile = data.profile as Record<string, unknown>;
+            await db.insert(userProfile).values({ ...profile, id: "default" });
           }
           imported.profile = 1;
         } catch (e) {
@@ -123,7 +128,7 @@ export class DataService {
       // Import settings (skip redacted API keys)
       if (data.settings) {
         try {
-          const s = { ...data.settings };
+          const s = { ...(data.settings as Record<string, unknown>) };
           // Don't overwrite API keys with redacted values
           if (s.geminiApiKey === "***REDACTED***") s.geminiApiKey = undefined;
           if (s.openaiApiKey === "***REDACTED***") s.openaiApiKey = undefined;
@@ -132,14 +137,17 @@ export class DataService {
           s.id = undefined;
           s.createdAt = undefined;
 
-          const existing = await db.select().from(settings).where(eq(settings.id, "default"));
+          const existing = await db
+            .select()
+            .from(settings)
+            .where(eq(settings.id, DEFAULT_SETTINGS_ID));
           if (existing.length > 0) {
             await db
               .update(settings)
               .set({ ...s, updatedAt: new Date().toISOString() })
-              .where(eq(settings.id, "default"));
+              .where(eq(settings.id, DEFAULT_SETTINGS_ID));
           } else {
-            await db.insert(settings).values({ ...s, id: "default" });
+            await db.insert(settings).values({ ...s, id: DEFAULT_SETTINGS_ID });
           }
           imported.settings = 1;
         } catch (e) {
@@ -152,17 +160,19 @@ export class DataService {
         let count = 0;
         for (const resume of data.resumes) {
           try {
+            const r = resume as Record<string, unknown>;
             await db
               .insert(resumes)
-              .values(resume)
+              .values(r)
               .onConflictDoUpdate({
                 target: resumes.id,
-                set: { ...resume, updatedAt: new Date().toISOString() },
+                set: { ...r, updatedAt: new Date().toISOString() },
               });
             count++;
           } catch (e) {
+            const r = resume as Record<string, unknown>;
             errors.push(
-              `Resume "${resume.name}" import failed: ${e instanceof Error ? e.message : String(e)}`,
+              `Resume "${r.name}" import failed: ${e instanceof Error ? e.message : String(e)}`,
             );
           }
         }
@@ -174,12 +184,13 @@ export class DataService {
         let count = 0;
         for (const cl of data.coverLetters) {
           try {
+            const c = cl as Record<string, unknown>;
             await db
               .insert(coverLetters)
-              .values(cl)
+              .values(c)
               .onConflictDoUpdate({
                 target: coverLetters.id,
-                set: { ...cl, updatedAt: new Date().toISOString() },
+                set: { ...c, updatedAt: new Date().toISOString() },
               });
             count++;
           } catch (e) {
@@ -196,7 +207,10 @@ export class DataService {
         // Ensure portfolio container exists
         if (data.portfolio) {
           try {
-            await db.insert(portfolios).values(data.portfolio).onConflictDoNothing();
+            await db
+              .insert(portfolios)
+              .values(data.portfolio as Record<string, unknown>)
+              .onConflictDoNothing();
           } catch {
             /* ignore */
           }
@@ -205,17 +219,19 @@ export class DataService {
         let count = 0;
         for (const project of data.portfolioProjects) {
           try {
+            const p = project as Record<string, unknown>;
             await db
               .insert(portfolioProjects)
-              .values(project)
+              .values(p)
               .onConflictDoUpdate({
                 target: portfolioProjects.id,
-                set: { ...project, updatedAt: new Date().toISOString() },
+                set: { ...p, updatedAt: new Date().toISOString() },
               });
             count++;
           } catch (e) {
+            const p = project as Record<string, unknown>;
             errors.push(
-              `Portfolio project "${project.title}" import failed: ${e instanceof Error ? e.message : String(e)}`,
+              `Portfolio project "${p.title}" import failed: ${e instanceof Error ? e.message : String(e)}`,
             );
           }
         }
@@ -227,12 +243,13 @@ export class DataService {
         let count = 0;
         for (const session of data.interviewSessions) {
           try {
+            const sess = session as Record<string, unknown>;
             await db
               .insert(interviewSessions)
-              .values(session)
+              .values(sess)
               .onConflictDoUpdate({
                 target: interviewSessions.id,
-                set: { ...session, updatedAt: new Date().toISOString() },
+                set: { ...sess, updatedAt: new Date().toISOString() },
               });
             count++;
           } catch (e) {
@@ -252,13 +269,15 @@ export class DataService {
             .from(gamification)
             .where(eq(gamification.id, "default"));
           if (existing.length > 0) {
-            const { id, createdAt, ...rest } = data.gamification;
+            const gam = data.gamification as Record<string, unknown>;
+            const { id, createdAt, ...rest } = gam;
             await db
               .update(gamification)
               .set({ ...rest, updatedAt: new Date().toISOString() })
               .where(eq(gamification.id, "default"));
           } else {
-            await db.insert(gamification).values({ ...data.gamification, id: "default" });
+            const gam = data.gamification as Record<string, unknown>;
+            await db.insert(gamification).values({ ...gam, id: "default" });
           }
           imported.gamification = 1;
         } catch (e) {
@@ -271,12 +290,13 @@ export class DataService {
         let count = 0;
         for (const skill of data.skillMappings) {
           try {
+            const sk = skill as Record<string, unknown>;
             await db
               .insert(skillMappings)
-              .values(skill)
+              .values(sk)
               .onConflictDoUpdate({
                 target: skillMappings.id,
-                set: { ...skill, updatedAt: new Date().toISOString() },
+                set: { ...sk, updatedAt: new Date().toISOString() },
               });
             count++;
           } catch (e) {
@@ -293,7 +313,8 @@ export class DataService {
         let count = 0;
         for (const msg of data.chatHistory) {
           try {
-            await db.insert(chatHistory).values(msg).onConflictDoNothing();
+            const m = msg as Record<string, unknown>;
+            await db.insert(chatHistory).values(m).onConflictDoNothing();
             count++;
           } catch {
             /* skip duplicates silently */

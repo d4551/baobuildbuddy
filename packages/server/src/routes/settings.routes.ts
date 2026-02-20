@@ -1,8 +1,12 @@
 import {
-  AI_PROVIDER_DEFAULT_ORDER,
+  AI_PROVIDER_ID_LIST,
+  AI_PROVIDER_TEST_STRATEGY_BY_ID,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  DEFAULT_SETTINGS_ID,
   LOCAL_AI_DEFAULT_ENDPOINT,
-  LOCAL_AI_DEFAULT_MODEL,
+  automationSettingsSchema,
 } from "@bao/shared";
+import type { AIProviderType, AutomationSettings, NotificationPreferences } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
@@ -10,17 +14,144 @@ import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { DATA_EXPORT_VERSION } from "../services/data-service";
 
-const validProviders = ["gemini", "openai", "claude", "local", "huggingface"] as const;
+const VALID_PROVIDERS = AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]];
+
 const SETTINGS_RATE_LIMIT_DURATION_MS = 60_000;
 const SETTINGS_RATE_LIMIT_MAX_REQUESTS = 10;
 const KEY_MASK_VISIBLE_CHARS = 4;
 const MODEL_MAX_LENGTH = 200;
 const LANGUAGE_MAX_LENGTH = 10;
 const API_KEY_MAX_LENGTH = 500;
-const CLAUDE_TEST_MAX_TOKENS = 1;
-const CLAUDE_RATE_LIMIT_STATUS = 429;
-const ANTHROPIC_API_VERSION = "2023-06-01";
-const CLAUDE_TEST_MODEL = "claude-sonnet-4-5-20250929";
+const SETTINGS_LABEL_MAX_LENGTH = 120;
+const URL_MAX_LENGTH = 200;
+
+const COMPANY_BOARD_PROVIDER_TYPES = [
+  "greenhouse",
+  "lever",
+  "recruitee",
+  "workable",
+  "ashby",
+  "smartrecruiters",
+  "teamtailor",
+  "workday",
+] as const;
+
+const GAMING_PORTAL_IDS = [
+  "gamedev-net",
+  "grackle",
+  "workwithindies",
+  "remotegamejobs",
+  "gamesjobsdirect",
+  "pocketgamer",
+] as const;
+
+const companyBoardApiTemplatesBodySchema = t.Object({
+  greenhouse: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  lever: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  recruitee: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  workable: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  ashby: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  smartrecruiters: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  teamtailor: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  workday: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+});
+
+const companyBoardConfigBodySchema = t.Object({
+  name: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  token: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  type: t.Union(COMPANY_BOARD_PROVIDER_TYPES.map((providerType) => t.Literal(providerType))),
+  enabled: t.Boolean(),
+  priority: t.Number({ minimum: 0, maximum: 1000 }),
+});
+
+const greenhouseBoardConfigBodySchema = t.Object({
+  board: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  company: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  enabled: t.Boolean(),
+});
+
+const leverCompanyConfigBodySchema = t.Object({
+  slug: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  company: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  enabled: t.Boolean(),
+});
+
+const gamingPortalConfigBodySchema = t.Object({
+  id: t.Union(GAMING_PORTAL_IDS.map((portalId) => t.Literal(portalId))),
+  name: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  source: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  fallbackUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  enabled: t.Boolean(),
+});
+
+const jobProviderSettingsBodySchema = t.Object({
+  providerTimeoutMs: t.Number({ minimum: 1000, maximum: 120000 }),
+  companyBoardResultLimit: t.Number({ minimum: 1, maximum: 200 }),
+  gamingBoardResultLimit: t.Number({ minimum: 1, maximum: 200 }),
+  unknownLocationLabel: t.String({ minLength: 1, maxLength: 100 }),
+  unknownCompanyLabel: t.String({ minLength: 1, maxLength: 100 }),
+  hitmarkerApiBaseUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  hitmarkerDefaultQuery: t.String({ minLength: 1, maxLength: 100 }),
+  hitmarkerDefaultLocation: t.String({ minLength: 1, maxLength: 100 }),
+  greenhouseApiBaseUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  greenhouseMaxPages: t.Number({ minimum: 1, maximum: 20 }),
+  greenhouseBoards: t.Array(greenhouseBoardConfigBodySchema, { maxItems: 500 }),
+  leverApiBaseUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  leverMaxPages: t.Number({ minimum: 1, maximum: 20 }),
+  leverCompanies: t.Array(leverCompanyConfigBodySchema, { maxItems: 500 }),
+  companyBoardApiTemplates: companyBoardApiTemplatesBodySchema,
+  companyBoards: t.Array(companyBoardConfigBodySchema, { maxItems: 500 }),
+  gamingPortals: t.Array(gamingPortalConfigBodySchema, { maxItems: 50 }),
+});
+
+const jsonValueBodySchema = t.Recursive((Self) =>
+  t.Union([
+    t.String(),
+    t.Number(),
+    t.Boolean(),
+    t.Null(),
+    t.Array(Self),
+    t.Record(t.String(), Self),
+  ]),
+);
+
+const nullableJsonValueBodySchema = t.Union([jsonValueBodySchema, t.Null()]);
+
+const automationSettingsPatchSchema = automationSettingsSchema.removeDefault().partial();
+
+const mergeNotifications = (
+  current: NotificationPreferences | null | undefined,
+  patch: Partial<NotificationPreferences> | null | undefined,
+): NotificationPreferences => ({
+  ...DEFAULT_NOTIFICATION_PREFERENCES,
+  ...(current ?? {}),
+  ...(patch ?? {}),
+});
+
+const mergeAutomationSettings = (
+  current: AutomationSettings | null | undefined,
+  patch: Partial<AutomationSettings> | null | undefined,
+): AutomationSettings | null => {
+  const currentParsed = automationSettingsSchema.safeParse(current);
+  const patchParsed = automationSettingsPatchSchema.safeParse(patch ?? {});
+
+  if (!currentParsed.success || !patchParsed.success) {
+    return null;
+  }
+
+  const mergedCandidate: AutomationSettings = {
+    ...currentParsed.data,
+    ...patchParsed.data,
+    jobProviders: patchParsed.data.jobProviders ?? currentParsed.data.jobProviders,
+  };
+
+  const mergedParsed = automationSettingsSchema.safeParse(mergedCandidate);
+  if (!mergedParsed.success) {
+    return null;
+  }
+
+  return mergedParsed.data;
+};
 
 export const settingsRoutes = new Elysia({ prefix: "/settings" })
   .use(
@@ -31,33 +162,28 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
     }),
   )
   .get("/", async () => {
-    const rows = await db.select().from(settings).where(eq(settings.id, "default"));
+    let rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
     if (rows.length === 0) {
-      const defaults = {
-        id: "default",
-        preferredProvider: AI_PROVIDER_DEFAULT_ORDER[0],
-        preferredModel: LOCAL_AI_DEFAULT_MODEL,
-        localModelEndpoint: LOCAL_AI_DEFAULT_ENDPOINT,
-        localModelName: LOCAL_AI_DEFAULT_MODEL,
-        theme: "bao-light",
-        language: "en",
-        notifications: {
-          achievements: true,
-          dailyChallenges: true,
-          levelUp: true,
-          jobAlerts: true,
-        },
-      };
-      await db.insert(settings).values(defaults);
-      return defaults;
+      await db.insert(settings).values({ id: DEFAULT_SETTINGS_ID });
+      rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
     }
-    // Mask API keys for the response (return only last 4 chars)
+
     const row = rows[0];
+    if (!row) {
+      return { error: "Failed to load settings" };
+    }
+
     return {
       ...row,
-      geminiApiKey: row.geminiApiKey ? `***${row.geminiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
-      openaiApiKey: row.openaiApiKey ? `***${row.openaiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
-      claudeApiKey: row.claudeApiKey ? `***${row.claudeApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
+      geminiApiKey: row.geminiApiKey
+        ? `***${row.geminiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
+        : null,
+      openaiApiKey: row.openaiApiKey
+        ? `***${row.openaiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
+        : null,
+      claudeApiKey: row.claudeApiKey
+        ? `***${row.claudeApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
+        : null,
       huggingfaceToken: row.huggingfaceToken
         ? `***${row.huggingfaceToken.slice(-KEY_MASK_VISIBLE_CHARS)}`
         : null,
@@ -65,26 +191,64 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       hasOpenaiKey: !!row.openaiApiKey,
       hasClaudeKey: !!row.claudeApiKey,
       hasHuggingfaceToken: !!row.huggingfaceToken,
-      hasLocalKey: true,
+      hasLocalKey: !!row.localModelEndpoint,
     };
   })
   .put(
     "/",
-    async ({ body }) => {
-      const existing = await db.select().from(settings).where(eq(settings.id, "default"));
+    async ({ body, set }) => {
+      let existing = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
       if (existing.length === 0) {
-        await db.insert(settings).values({ id: "default", ...body });
-      } else {
-        await db
-          .update(settings)
-          .set({ ...body, updatedAt: new Date().toISOString() })
-          .where(eq(settings.id, "default"));
+        await db.insert(settings).values({ id: DEFAULT_SETTINGS_ID });
+        existing = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
       }
+
+      const existingRow = existing[0];
+      if (!existingRow) {
+        set.status = 500;
+        return { success: false, error: "Failed to initialize settings row" };
+      }
+
+      const update: Partial<typeof settings.$inferInsert> = {};
+
+      if (body.preferredProvider !== undefined) update.preferredProvider = body.preferredProvider;
+      if (body.preferredModel !== undefined) update.preferredModel = body.preferredModel;
+      if (body.theme !== undefined) update.theme = body.theme;
+      if (body.language !== undefined) update.language = body.language;
+
+      if (body.notifications !== undefined) {
+        update.notifications = mergeNotifications(existingRow.notifications, body.notifications);
+      }
+
+      if (body.automationSettings !== undefined) {
+        const mergedAutomationSettings = mergeAutomationSettings(
+          existingRow.automationSettings,
+          body.automationSettings,
+        );
+
+        if (!mergedAutomationSettings) {
+          set.status = 422;
+          return {
+            success: false,
+            error: "Invalid automationSettings payload",
+          };
+        }
+
+        update.automationSettings = mergedAutomationSettings;
+      }
+
+      await db
+        .update(settings)
+        .set({ ...update, updatedAt: new Date().toISOString() })
+        .where(eq(settings.id, DEFAULT_SETTINGS_ID));
+
       return { success: true };
     },
     {
       body: t.Object({
-        preferredProvider: t.Optional(t.Union(validProviders.map((p) => t.Literal(p)))),
+        preferredProvider: t.Optional(
+          t.Union(VALID_PROVIDERS.map((provider) => t.Literal(provider))),
+        ),
         preferredModel: t.Optional(t.String({ maxLength: MODEL_MAX_LENGTH })),
         theme: t.Optional(t.Union([t.Literal("bao-light"), t.Literal("bao-dark")])),
         language: t.Optional(t.String({ maxLength: LANGUAGE_MAX_LENGTH })),
@@ -92,8 +256,22 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
           t.Object({
             achievements: t.Optional(t.Boolean()),
             dailyChallenges: t.Optional(t.Boolean()),
-            levelUp: t.Optional(t.Boolean()),
             jobAlerts: t.Optional(t.Boolean()),
+            levelUp: t.Optional(t.Boolean()),
+          }),
+        ),
+        automationSettings: t.Optional(
+          t.Object({
+            headless: t.Optional(t.Boolean()),
+            defaultTimeout: t.Optional(t.Number({ minimum: 1, maximum: 120 })),
+            screenshotRetention: t.Optional(t.Number({ minimum: 1, maximum: 30 })),
+            maxConcurrentRuns: t.Optional(t.Number({ minimum: 1, maximum: 5 })),
+            defaultBrowser: t.Optional(
+              t.Union([t.Literal("chrome"), t.Literal("chromium"), t.Literal("edge")]),
+            ),
+            enableSmartSelectors: t.Optional(t.Boolean()),
+            autoSaveScreenshots: t.Optional(t.Boolean()),
+            jobProviders: t.Optional(jobProviderSettingsBodySchema),
           }),
         ),
       }),
@@ -102,7 +280,12 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
   .put(
     "/api-keys",
     async ({ body }) => {
-      const update: Record<string, unknown> = {};
+      const existing = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+      if (existing.length === 0) {
+        await db.insert(settings).values({ id: DEFAULT_SETTINGS_ID });
+      }
+
+      const update: Partial<typeof settings.$inferInsert> = {};
       if (body.geminiApiKey !== undefined) update.geminiApiKey = body.geminiApiKey;
       if (body.openaiApiKey !== undefined) update.openaiApiKey = body.openaiApiKey;
       if (body.claudeApiKey !== undefined) update.claudeApiKey = body.claudeApiKey;
@@ -112,12 +295,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       if (body.localModelName !== undefined) update.localModelName = body.localModelName;
       update.updatedAt = new Date().toISOString();
 
-      const existing = await db.select().from(settings).where(eq(settings.id, "default"));
-      if (existing.length === 0) {
-        await db.insert(settings).values({ id: "default", ...update });
-      } else {
-        await db.update(settings).set(update).where(eq(settings.id, "default"));
-      }
+      await db.update(settings).set(update).where(eq(settings.id, DEFAULT_SETTINGS_ID));
       return { success: true };
     },
     {
@@ -134,55 +312,29 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
   .post(
     "/test-api-key",
     async ({ body }) => {
-      const { provider, key } = body;
+      const strategy = AI_PROVIDER_TEST_STRATEGY_BY_ID[body.provider];
+      if (!strategy) {
+        return { valid: false, provider: body.provider, error: "Unknown provider" };
+      }
+
+      const endpointInput =
+        body.provider === "local" ? body.key || LOCAL_AI_DEFAULT_ENDPOINT : "unused";
+      const requestUrl = strategy.buildUrl(body.key, endpointInput);
+      const requestInit = strategy.buildInit(body.key, endpointInput);
+
       try {
-        if (provider === "gemini") {
-          const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`,
-          );
-          return { valid: res.ok, provider };
+        const response = await fetch(requestUrl, requestInit).catch(() => null);
+        if (!response) {
+          return { valid: false, provider: body.provider };
         }
-        if (provider === "openai") {
-          const res = await fetch("https://api.openai.com/v1/models", {
-            headers: { Authorization: `Bearer ${key}` },
-          });
-          return { valid: res.ok, provider };
-        }
-        if (provider === "claude") {
-          const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "x-api-key": key,
-              "anthropic-version": ANTHROPIC_API_VERSION,
-              "content-type": "application/json",
-            },
-            body: JSON.stringify({
-              model: CLAUDE_TEST_MODEL,
-              max_tokens: CLAUDE_TEST_MAX_TOKENS,
-              messages: [{ role: "user", content: "hi" }],
-            }),
-          });
-          return { valid: res.ok || res.status === CLAUDE_RATE_LIMIT_STATUS, provider };
-        }
-        if (provider === "local") {
-          const endpoint = key || LOCAL_AI_DEFAULT_ENDPOINT;
-          const res = await fetch(`${endpoint}/models`).catch(() => null);
-          return { valid: !!res?.ok, provider };
-        }
-        if (provider === "huggingface") {
-          const res = await fetch("https://huggingface.co/api/whoami-v2", {
-            headers: { Authorization: `Bearer ${key}` },
-          });
-          return { valid: res.ok, provider };
-        }
-        return { valid: false, provider, error: "Unknown provider" };
+        return { valid: strategy.isSuccess(response.status), provider: body.provider };
       } catch {
-        return { valid: false, provider, error: "Connection failed" };
+        return { valid: false, provider: body.provider, error: "Connection failed" };
       }
     },
     {
       body: t.Object({
-        provider: t.Union(validProviders.map((p) => t.Literal(p))),
+        provider: t.Union(VALID_PROVIDERS.map((provider) => t.Literal(provider))),
         key: t.String({ maxLength: API_KEY_MAX_LENGTH }),
       }),
     },
@@ -217,18 +369,18 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       body: t.Object({
         version: t.Literal(DATA_EXPORT_VERSION),
         exportedAt: t.String(),
-        profile: t.Any(),
-        settings: t.Any(),
-        resumes: t.Array(t.Any()),
-        coverLetters: t.Array(t.Any()),
-        portfolio: t.Any(),
-        portfolioProjects: t.Array(t.Any()),
-        interviewSessions: t.Array(t.Any()),
-        gamification: t.Any(),
-        skillMappings: t.Array(t.Any()),
-        savedJobs: t.Array(t.Any()),
-        applications: t.Array(t.Any()),
-        chatHistory: t.Array(t.Any()),
+        profile: nullableJsonValueBodySchema,
+        settings: nullableJsonValueBodySchema,
+        resumes: t.Array(jsonValueBodySchema),
+        coverLetters: t.Array(jsonValueBodySchema),
+        portfolio: nullableJsonValueBodySchema,
+        portfolioProjects: t.Array(jsonValueBodySchema),
+        interviewSessions: t.Array(jsonValueBodySchema),
+        gamification: nullableJsonValueBodySchema,
+        applications: t.Array(jsonValueBodySchema),
+        chatHistory: t.Array(jsonValueBodySchema),
+        savedJobs: t.Array(jsonValueBodySchema),
+        skillMappings: t.Array(jsonValueBodySchema),
       }),
     },
   );

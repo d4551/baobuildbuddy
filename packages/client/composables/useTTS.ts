@@ -11,7 +11,6 @@ export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
   const voices = ref<SpeechSynthesisVoice[]>([]);
 
   let synthesis: SpeechSynthesis | null = null;
-  let currentUtterance: SpeechSynthesisUtterance | null = null;
 
   function loadVoices(): SpeechSynthesisVoice[] {
     if (import.meta.server) return [];
@@ -29,10 +28,7 @@ export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
 
   const voiceById = (id: string): SpeechSynthesisVoice | undefined =>
     voices.value.find(
-      (v) =>
-        v.voiceURI === id ||
-        v.name === id ||
-        v.name.toLowerCase().includes(id.toLowerCase()),
+      (v) => v.voiceURI === id || v.name === id || v.name.toLowerCase().includes(id.toLowerCase()),
     );
 
   const isSupported = computed(() => {
@@ -64,7 +60,6 @@ export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
       if (voice) utterance.voice = voice;
     }
 
-    currentUtterance = utterance;
     utterance.onstart = () => {
       isSpeaking.value = true;
       isPaused.value = false;
@@ -73,13 +68,11 @@ export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
     utterance.onend = () => {
       isSpeaking.value = false;
       isPaused.value = false;
-      currentUtterance = null;
     };
     utterance.onerror = (e) => {
       error.value = String(e);
       isSpeaking.value = false;
       isPaused.value = false;
-      currentUtterance = null;
     };
 
     synthesis.speak(utterance);
@@ -104,7 +97,6 @@ export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
       synthesis.cancel();
       isSpeaking.value = false;
       isPaused.value = false;
-      currentUtterance = null;
     }
   }
 

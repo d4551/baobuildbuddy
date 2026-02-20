@@ -22,11 +22,11 @@ type Component = {
 };
 
 const fileText = await Bun.file(filePathName).text();
-const lines = fileText.split('\n');
+const lines = fileText.split("\n");
 
-const GRAPH_CHARS = new Set(['+', '-', '|']);
-const HORIZONTAL_ENDPOINTS = new Set(['+', '|']);
-const VERTICAL_ENDPOINTS = new Set(['+']);
+const GRAPH_CHARS = new Set(["+", "-", "|"]);
+const HORIZONTAL_ENDPOINTS = new Set(["+", "|"]);
+const VERTICAL_ENDPOINTS = new Set(["+"]);
 const DIRECTIONS = [
   { row: 0, col: -1 },
   { row: 0, col: 1 },
@@ -40,22 +40,33 @@ const hasConnection = (from: string, to: string, dr: number, dc: number): boolea
   if (!isGraphChar(to) || (dr !== 0 && dc !== 0)) return false;
 
   if (dr !== 0) {
-    if (from === '|') return to === '|' || to === '+';
-    if (from === '+') return to === '|' || to === '+' || to === '-';
+    if (from === "|") return to === "|" || to === "+";
+    if (from === "+") return to === "|" || to === "+" || to === "-";
     return false;
   }
 
   if (dc !== 0) {
-    if (from === '-') return to === '-' || to === '+';
-    if (from === '+') return to === '-' || to === '+' || to === '|';
+    if (from === "-") return to === "-" || to === "+";
+    if (from === "+") return to === "-" || to === "+" || to === "|";
     return false;
   }
 
   return false;
 };
 
-const canConnect = (grid: string[], row: number, col: number, otherRow: number, otherCol: number): boolean => {
-  if (otherRow < 0 || otherCol < 0 || otherRow >= grid.length || otherCol >= grid[otherRow].length) {
+const canConnect = (
+  grid: string[],
+  row: number,
+  col: number,
+  otherRow: number,
+  otherCol: number,
+): boolean => {
+  if (
+    otherRow < 0 ||
+    otherCol < 0 ||
+    otherRow >= grid.length ||
+    otherCol >= grid[otherRow].length
+  ) {
     return false;
   }
 
@@ -67,7 +78,10 @@ const canConnect = (grid: string[], row: number, col: number, otherRow: number, 
   return hasConnection(source, target, dr, dc) && hasConnection(target, source, -dr, -dc);
 };
 
-const buildComponents = (grid: string[], width: number): { componentIds: number[][]; components: Component[] } => {
+const buildComponents = (
+  grid: string[],
+  width: number,
+): { componentIds: number[][]; components: Component[] } => {
   const height = grid.length;
   const componentIds = Array.from({ length: height }, () => Array(width).fill(-1));
   const components: Component[] = [];
@@ -91,7 +105,7 @@ const buildComponents = (grid: string[], width: number): { componentIds: number[
         const cell = grid[current.row][current.col];
 
         cells.push(current);
-        if (cell === '+') {
+        if (cell === "+") {
           hasPlus = true;
         }
 
@@ -129,7 +143,7 @@ const analyzeBlock = (
 ): Failure[] => {
   const failures: Failure[] = [];
   const maxWidth = Math.max(0, ...blockLines.map((line) => line.length));
-  const grid = blockLines.map((line) => line.padEnd(maxWidth, ' '));
+  const grid = blockLines.map((line) => line.padEnd(maxWidth, " "));
   const height = grid.length;
   const width = maxWidth;
   const { componentIds, components } = buildComponents(grid, width);
@@ -160,21 +174,21 @@ const analyzeBlock = (
   const validateDegree = (row: number, col: number, current: string): void => {
     const connected = countConnectedNeighbors(row, col);
 
-    if (current === '-') {
+    if (current === "-") {
       if (connected !== 2) {
         lineInBlock(row, current, `horizontal segment has degree ${connected}, expected 2`, col);
       }
       return;
     }
 
-    if (current === '|') {
+    if (current === "|") {
       if (connected !== 2) {
         lineInBlock(row, current, `vertical segment has degree ${connected}, expected 2`, col);
       }
       return;
     }
 
-    if (current === '+') {
+    if (current === "+") {
       if (connected < 2) {
         lineInBlock(row, current, `junction has degree ${connected}, expected >= 2`, col);
       }
@@ -195,13 +209,13 @@ const analyzeBlock = (
   for (let row = 0; row < height; row += 1) {
     let col = 0;
     while (col < width) {
-      if (grid[row][col] !== '-') {
+      if (grid[row][col] !== "-") {
         col += 1;
         continue;
       }
 
       const runStart = col;
-      while (col + 1 < width && grid[row][col + 1] === '-') {
+      while (col + 1 < width && grid[row][col + 1] === "-") {
         col += 1;
       }
       const runEnd = col;
@@ -209,14 +223,19 @@ const analyzeBlock = (
       const componentId = componentIds[row][runStart];
 
       if (runLength >= 2 && componentId >= 0 && components[componentId]?.hasPlus) {
-        const left = runStart > 0 ? grid[row][runStart - 1] : ' ';
-        const right = runEnd + 1 < width ? grid[row][runEnd + 1] : ' ';
+        const left = runStart > 0 ? grid[row][runStart - 1] : " ";
+        const right = runEnd + 1 < width ? grid[row][runEnd + 1] : " ";
 
         if (!HORIZONTAL_ENDPOINTS.has(left)) {
-          lineInBlock(row, '-', 'horizontal run start must connect to a box corner or side', runStart);
+          lineInBlock(
+            row,
+            "-",
+            "horizontal run start must connect to a box corner or side",
+            runStart,
+          );
         }
         if (!HORIZONTAL_ENDPOINTS.has(right)) {
-          lineInBlock(row, '-', 'horizontal run end must connect to a box corner or side', runEnd);
+          lineInBlock(row, "-", "horizontal run end must connect to a box corner or side", runEnd);
         }
       }
 
@@ -227,13 +246,13 @@ const analyzeBlock = (
   for (let col = 0; col < width; col += 1) {
     let row = 0;
     while (row < height) {
-      if (grid[row][col] !== '|') {
+      if (grid[row][col] !== "|") {
         row += 1;
         continue;
       }
 
       const runStart = row;
-      while (row + 1 < height && grid[row + 1][col] === '|') {
+      while (row + 1 < height && grid[row + 1][col] === "|") {
         row += 1;
       }
       const runEnd = row;
@@ -241,14 +260,14 @@ const analyzeBlock = (
       const componentId = componentIds[runStart][col];
 
       if (runLength >= 2 && componentId >= 0 && components[componentId]?.hasPlus) {
-        const top = runStart > 0 ? grid[runStart - 1][col] : ' ';
-        const bottom = runEnd + 1 < height ? grid[runEnd + 1][col] : ' ';
+        const top = runStart > 0 ? grid[runStart - 1][col] : " ";
+        const bottom = runEnd + 1 < height ? grid[runEnd + 1][col] : " ";
 
         if (!VERTICAL_ENDPOINTS.has(top)) {
-          lineInBlock(runStart, '|', 'vertical run start must connect at the top', runStart);
+          lineInBlock(runStart, "|", "vertical run start must connect at the top", runStart);
         }
         if (!VERTICAL_ENDPOINTS.has(bottom)) {
-          lineInBlock(runEnd, '|', 'vertical run end must connect at the bottom', col);
+          lineInBlock(runEnd, "|", "vertical run end must connect at the bottom", col);
         }
       }
 
@@ -267,7 +286,7 @@ const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
   let blockLines: string[] = [];
 
   for (const [index, line] of linesToAnalyze.entries()) {
-    if (line === '```text') {
+    if (line === "```text") {
       if (!inBlock) {
         inBlock = true;
         currentBlock += 1;
@@ -277,7 +296,7 @@ const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
       continue;
     }
 
-    if (line === '```' && inBlock) {
+    if (line === "```" && inBlock) {
       diagnostics.push(...analyzeBlock(blockLines, currentBlock, blockStartLine));
       inBlock = false;
       blockLines = [];
@@ -305,6 +324,8 @@ if (diagnostics.length === 0) {
 
 console.log(`❌ geometry issues found: ${diagnostics.length}`);
 for (const d of diagnostics) {
-  console.log(`block #${d.blockIndex} line ${d.lineNumber} col ${d.columnNumber} char ${JSON.stringify(d.ch)} :: ${d.reason}`);
+  console.log(
+    `block #${d.blockIndex} line ${d.lineNumber} col ${d.columnNumber} char ${JSON.stringify(d.ch)} :: ${d.reason}`,
+  );
 }
 process.exit(1);

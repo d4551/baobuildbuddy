@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formDataToResumeData, resumeDataToFormData, type ResumeFormData } from "@bao/shared";
+import { type ResumeFormData, formDataToResumeData, resumeDataToFormData } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -8,7 +8,6 @@ definePageMeta({
 
 const {
   resumes,
-  currentResume,
   loading,
   fetchResumes,
   getResume,
@@ -19,7 +18,6 @@ const {
   aiEnhance,
   aiScore,
 } = useResume();
-const router = useRouter();
 const route = useRoute();
 const { $toast } = useNuxtApp();
 
@@ -33,31 +31,6 @@ const creating = ref(false);
 const enhancing = ref(false);
 const scoring = ref(false);
 const scoreResult = ref<Record<string, unknown> | null>(null);
-
-interface ResumeExperience {
-  title: string;
-  company: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-}
-
-interface ResumeEducation {
-  degree: string;
-  school: string;
-  location: string;
-  graduationDate: string;
-  gpa: string;
-}
-
-interface ResumeProject {
-  name: string;
-  description: string;
-  technologies: string[];
-  url: string;
-}
 
 const formData = reactive<ResumeFormData>({
   name: "",

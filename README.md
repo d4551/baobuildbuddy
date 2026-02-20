@@ -28,7 +28,7 @@
 BaoBuildBuddy is a full-stack, Bun-first monorepo for building game-industry career automation workflows. It aggregates job listings from studios, helps build resumes and cover letters, runs AI-powered mock interviews, automates job applications via browser RPA, and tracks your progress with a gamification system.
 
 - `packages/server` -- Bun + Elysia API, Drizzle ORM, WebSocket endpoints, process orchestration
-- `packages/client` -- Nuxt 3 (SSR-first), Tailwind CSS v4, daisyUI v5
+- `packages/client` -- Nuxt 4 (SSR-first), Tailwind CSS v4, daisyUI v5
 - `packages/shared` -- shared types, contracts, constants, schemas, validation utilities
 - `packages/scraper` -- Python RPA scripts executed via Bun native subprocess I/O
 
@@ -56,11 +56,12 @@ This is the canonical local setup runbook for BaoBuildBuddy v1.0. It covers:
 
     Browser ──> Nuxt SSR ──> Elysia API ──> SQLite
        |                        |    |
-       |── WebSocket ──> /ws/chat    |── AI providers (5 adapters)
+       |── WebSocket ──> /ws/chat        |── AI providers (5 adapters)
        |── WebSocket ──> /ws/interview   |── RPA subprocess (Bun.spawn)
+       |── WebSocket ──> /ws/automation  |
                                     |
                           Job provider registry
-                          (Greenhouse, Lever, company boards)
+                          (ATS + gaming boards + company boards)
 ```
 
 ```mermaid
@@ -71,6 +72,7 @@ flowchart TD
 
   Browser -->|WebSocket| ChatWS["/api/ws/chat"]
   Browser -->|WebSocket| InterviewWS["/api/ws/interview"]
+  Browser -->|WebSocket| AutomationWS["/api/ws/automation"]
   Server -->|auth + error envelope| AuthMiddleware["auth middleware"]
   Server -->|contracts| Shared["packages/shared"]
 
@@ -91,6 +93,7 @@ flowchart TD
   RouteGroup --> SearchRoutes["searchRoutes"]
   RouteGroup --> StatsRoutes["statsRoutes"]
   RouteGroup --> AutomationRoutes["automationRoutes"]
+  RouteGroup --> AutomationScreenshotRoutes["automationScreenshotRoutes"]
 
   AuthRoutes --> AuthSvc["Auth service + authGuard policy"]
   JobsRoutes --> JobsSvc["jobs service"]
@@ -149,7 +152,7 @@ flowchart TD
 
 ## 3) Implementation principles
 
-Each Elysia route module owns its service directly -- routes call services, services call the database or external providers. Typed contracts in `packages/shared` are the source of truth for request/response shapes across client and server. Python automation runs in a Bun subprocess with JSON over stdin/stdout. All runtime values (ports, keys, endpoints) come from environment configuration.
+Each Elysia route module owns its service directly -- routes call services, services call the database or external providers. Typed contracts in `packages/shared` are the source of truth for request/response shapes across client and server. Python automation runs in a Bun subprocess with JSON over stdin/stdout. Runtime values are sourced from environment configuration and persisted settings in the `settings` table.
 
 ## 4) Python RPA subsystem
 
@@ -193,17 +196,21 @@ Python script must read JSON from `stdin`, produce JSON on `stdout`, and exit no
 {
   "jobUrl": "https://example.com/job/application",
   "resume": {
-    "fullName": "Player One",
-    "email": "player@example.com",
-    "phone": "+1 555 0100",
-    "location": "Remote",
-    "linkedin": "https://linkedin.com/in/player",
-    "github": "https://github.com/player",
-    "portfolio": "https://portfolio.example.com",
+    "personalInfo": {
+      "fullName": "Player One",
+      "email": "player@example.com",
+      "phone": "+1 555 0100",
+      "location": "Remote"
+    },
     "education": ["..."],
-    "experience": ["..."]
+    "experience": ["..."],
+    "skills": ["..."]
   },
-  "coverLetter": "This is a targeted application message.",
+  "coverLetter": {
+    "company": "Acme",
+    "position": "Senior Game Designer",
+    "content": {}
+  },
   "customAnswers": {
     "q_salary": "120000",
     "q_relocation": "No"
@@ -217,13 +224,19 @@ Python script must read JSON from `stdin`, produce JSON on `stdout`, and exit no
 {
   "success": true,
   "error": null,
-  "screenshots": ["/tmp/job-apply-step-01.png", "/tmp/job-apply-step-02.png"],
+  "screenshots": ["step-01.png", "step-02.png"],
   "steps": [
     { "action": "navigate", "status": "ok" },
     { "action": "fill_full_name", "status": "ok" },
     { "action": "submit", "status": "ok" }
   ]
 }
+```
+
+Screenshot names in `screenshots` are relative filenames. The client should request image bytes through:
+
+```text
+GET /api/automation/screenshots/:runId/:index
 ```
 
 **Failure response:**
@@ -233,7 +246,7 @@ Python script must read JSON from `stdin`, produce JSON on `stdout`, and exit no
   "success": false,
   "error": "No matching submit button",
   "screenshots": [],
-  "steps": [{ "action": "click_submit", "status": "failed" }]
+  "steps": [{ "action": "click_submit", "status": "error" }]
 }
 ```
 
@@ -248,12 +261,17 @@ The Python entry points use these RPA primitives:
 - `r.snap("page", outputPath)`
 - `r.close()`
 
-Three scripts exist in `packages/scraper/`:
+Current scripts in `packages/scraper/`:
 
 | Script | Purpose |
 |--------|---------|
 | `apply_job_rpa.py` | Automates job application form submission |
-| `job_scraper_gamedev.py` | Scrapes game industry job listings |
+| `job_scraper_gamedev.py` | Scrapes jobs from GameDev.net |
+| `job_scraper_grackle.py` | Scrapes jobs from GrackleHQ |
+| `job_scraper_workwithindies.py` | Scrapes jobs from Work With Indies |
+| `job_scraper_remotegamejobs.py` | Scrapes jobs from RemoteGameJobs |
+| `job_scraper_gamesjobsdirect.py` | Scrapes jobs from GamesJobsDirect |
+| `job_scraper_pocketgamer.py` | Scrapes jobs from PocketGamer.biz |
 | `studio_scraper.py` | Scrapes studio directory data |
 
 ### 4.4 Bun subprocess contract
@@ -292,8 +310,10 @@ The job aggregation system lives under `packages/server/src/services/jobs/` and 
 | `providers/greenhouse.ts` | Greenhouse ATS integration |
 | `providers/lever.ts` | Lever ATS integration |
 | `providers/company-board.ts` | Direct company career page scraping |
-| `providers/company-boards-config.ts` | Configuration for known company board URLs |
+| `services/jobs/providers/provider-settings.ts` | Settings-backed provider configuration for known company board URLs |
 | `providers/gaming-providers.ts` | Game-industry-specific board aggregation |
+
+The default provider set includes Greenhouse, Lever, Hitmarker, GameDev.net, GrackleHQ, Work With Indies, RemoteGameJobs, GamesJobsDirect, PocketGamer.biz, plus configured SmartRecruiters/Workday/Ashby company boards.
 
 The aggregator calls each registered provider, deduplicates results, runs matching against the user's resume/skills profile, and persists to the `jobs` schema in SQLite.
 
@@ -392,6 +412,10 @@ Beyond the route-specific services, the server includes:
 
 Optional: `curl` and `jq` for command-line diagnostics.
 
+Chrome/Chromium executable names checked by setup scripts:
+- macOS/Linux: `google-chrome`, `chromium`, `chromium-browser`, `/Applications/Google Chrome.app`
+- Windows: `chrome.exe` under `%ProgramFiles%`, `%ProgramFiles(x86)%`, or `%LOCALAPPDATA%`
+
 ### 8.2 Automated setup (recommended)
 
 One command handles prerequisites check, dependency install, Python venv, database setup, and verification:
@@ -447,6 +471,15 @@ python -m pip install --upgrade pip
 python -m pip install -r packages/scraper/requirements.txt
 ```
 
+Windows manual alternative:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r packages\scraper\requirements.txt
+```
+
 **Environment file:**
 
 ```bash
@@ -495,7 +528,7 @@ Edit `.env` with your environment-specific values. Defaults are already defined 
 | Key | Purpose |
 |-----|---------|
 | `NUXT_PUBLIC_API_BASE` | API base URL for `useFetch` / `$fetch` calls |
-| `NUXT_PUBLIC_WS_BASE` | WebSocket base URL for chat and interview |
+| `NUXT_PUBLIC_WS_BASE` | WebSocket base URL for chat, interview, and automation |
 | `NUXT_PUBLIC_API_PROXY` | Dev proxy target for API server |
 | `NUXT_PUBLIC_QUERY_STALE_TIME_MS` | TanStack Query stale time |
 | `NUXT_PUBLIC_QUERY_RETRY_COUNT` | TanStack Query retry budget |
@@ -511,6 +544,33 @@ Edit `.env` with your environment-specific values. Defaults are already defined 
 | `GEMINI_API_KEY` | Google Gemini cloud provider |
 | `CLAUDE_API_KEY` | Anthropic Claude cloud provider |
 | `HUGGINGFACE_TOKEN` | HuggingFace Inference API |
+
+### 9.4 Settings Table Runtime Configuration
+
+Runtime provider tuning for job ingestion is persisted in `settings.automationSettings.jobProviders` and read by:
+- `packages/server/src/services/jobs/providers/company-board.ts`
+- `packages/server/src/services/jobs/providers/gaming-providers.ts`
+
+Required `jobProviders` keys:
+- `providerTimeoutMs`
+- `companyBoardResultLimit`
+- `gamingBoardResultLimit`
+- `unknownLocationLabel`
+- `unknownCompanyLabel`
+- `hitmarkerApiBaseUrl`
+- `hitmarkerDefaultQuery`
+- `hitmarkerDefaultLocation`
+- `greenhouseApiBaseUrl`
+- `greenhouseMaxPages`
+- `greenhouseBoards[]` (`board`, `company`, `enabled`)
+- `leverApiBaseUrl`
+- `leverMaxPages`
+- `leverCompanies[]` (`slug`, `company`, `enabled`)
+- `companyBoardApiTemplates` (`greenhouse`, `lever`, `recruitee`, `workable`, `ashby`, `smartrecruiters`, `teamtailor`, `workday`)
+- `companyBoards[]` (`name`, `token`, `type`, `enabled`, `priority`)
+- `gamingPortals[]` (`id`, `name`, `source`, `fallbackUrl`, `enabled`)
+
+`automationSettings.jobProviders` is required for provider execution. The server does not inject runtime provider defaults. Populate this object via `PUT /settings` before running ingestion.
 
 ## 10) Start procedures
 
@@ -553,10 +613,13 @@ bun run dev:client
 
 | Endpoint | Default | Config key |
 |----------|---------|-----------|
-| API server | `http://localhost:3000` | `NUXT_PUBLIC_API_BASE` |
-| Client / UI | `http://localhost:3001` | `NUXT_PUBLIC_WS_BASE` |
-| Chat WebSocket | `ws://localhost:3000/api/ws/chat` | derived from API base |
-| Interview WebSocket | `ws://localhost:3000/api/ws/interview` | derived from API base |
+| API server | `http://localhost:3000` | `PORT` (server) |
+| Client / UI | `http://localhost:3001` | `packages/client` dev script (`nuxt dev --port 3001`) |
+| Client API base | `/` | `NUXT_PUBLIC_API_BASE` |
+| Client API proxy target | unset | `NUXT_PUBLIC_API_PROXY` |
+| Chat WebSocket | `ws://localhost:3000/api/ws/chat` | derived from `NUXT_PUBLIC_WS_BASE` |
+| Interview WebSocket | `ws://localhost:3000/api/ws/interview` | derived from `NUXT_PUBLIC_WS_BASE` |
+| Automation WebSocket | `ws://localhost:3000/api/ws/automation` | derived from `NUXT_PUBLIC_WS_BASE` |
 
 ### 10.4 All available scripts
 
@@ -565,14 +628,17 @@ bun run dev:client
 | Dev (full) | `bun run dev` | Start server + client in parallel |
 | Dev server | `bun run dev:server` | Start API server only |
 | Dev client | `bun run dev:client` | Start Nuxt client only |
-| Build | `bun run build` | Build shared, server, and client |
+| Build | `bun run build` | Build server and client packages |
+| Format | `bun run format` | Apply Biome formatter |
+| Format check | `bun run format:check` | Verify formatter output |
 | Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
 | Test | `bun run test` | Run test suites for server and client |
-| Lint | `bun run lint` | Biome linter check |
-| Lint fix | `bun run lint:fix` | Auto-fix lint issues |
+| Lint | `bun run lint` | Biome lint + client ESLint |
+| Lint fix | `bun run lint:fix` | Auto-fix lint issues in Biome and client ESLint |
 | DB generate | `bun run db:generate` | Generate Drizzle migration files |
 | DB push | `bun run db:push` | Push schema changes to SQLite |
 | DB studio | `bun run db:studio` | Open Drizzle Studio GUI for database inspection |
+| ASCII validation | `bun run scripts/validate-ascii-geometry.ts README.md` | Verify ASCII-art geometry constraints |
 
 ## 11) End-to-end verification
 
@@ -593,6 +659,8 @@ bun run typecheck
 bun run lint
 bun run test
 ```
+
+Client-side runtime tests for composables use `*.nuxt.spec.ts` and initialize Nuxt with a package-root `rootDir` so alias resolution stays deterministic in workspace runs. Keep those tests explicit about external dependencies (`useApi`) and avoid relying on unresolved auto-import side effects.
 
 ### 11.2 Database setup
 
@@ -617,7 +685,7 @@ curl -fsS "${API_BASE}/api/health"
 curl -fsS "${API_BASE}/api/auth/status"
 curl -fsS "${API_BASE}/api/jobs" | head
 curl -fsS "${API_BASE}/api/automation/runs" | head
-curl -fsS "${API_BASE}/api/stats" | head
+curl -fsS "${API_BASE}/api/stats/dashboard" | head
 ```
 
 ### 11.5 Route health matrix
@@ -626,18 +694,27 @@ curl -fsS "${API_BASE}/api/stats" | head
 |----------|---------|-------------------|
 | `/api/health` | Readiness probe | JSON with `status` and `database` fields |
 | `/api/auth/status` | Auth state | Whether auth system is initialized |
-| `/api/studio` | Studio data | Studio list structure |
+| `/api/studios` | Studio data | Studio list structure |
 | `/api/jobs` | Job search | Paginated job list |
-| `/api/resume` | Resume CRUD | Resume list or creation response |
-| `/api/cover-letter` | Cover letter CRUD | Cover letter list or creation response |
+| `/api/resumes` | Resume CRUD | Resume list or creation response |
+| `/api/cover-letters` | Cover letter CRUD | Cover letter list or creation response |
 | `/api/portfolio` | Portfolio CRUD | Portfolio project list |
-| `/api/interview` | Interview sessions | Interview history |
-| `/api/gamification` | XP and achievements | Gamification state payload |
-| `/api/skill-mapping` | Skill analysis | Skill mapping and gap analysis |
+| `/api/interview/sessions` | Interview sessions | Interview history |
+| `/api/skills/mappings` | Skill mapping CRUD | List, create, update, and delete mapped skills (`DELETE` returns `{ message, id }`) |
+| `/api/skills/pathways` | Career pathways | Ranked pathways by match score |
+| `/api/skills/readiness` | Career readiness | Readiness score and category breakdown |
+| `/api/skills/ai-analyze` | Skill analysis | Suggested mappings and recommendations |
+| `/api/automation/job-apply` | Start job application automation | `{ runId, status: "running" }` |
+| `/api/gamification/progress` | XP and level progression | Gamification progress payload |
 | `/api/automation/runs` | Automation audit | Persisted run records |
-| `/api/stats` | Usage statistics | Aggregate stat payload |
+| `/api/automation/runs/:id` | Run detail | Single run snapshot |
+| `/api/automation/screenshots/:runId/:index` | Run screenshot bytes | PNG/JPEG/WebP image stream |
+| `/api/stats/dashboard` | Usage statistics dashboard | Aggregate stat payload |
+| `/api/stats/weekly` | Weekly activity stats | Weekly metrics payload |
+| `/api/stats/career` | Career progress stats | Career progression payload |
 | `/api/ws/chat` | AI chat | WebSocket upgrade handshake |
 | `/api/ws/interview` | Mock interview | WebSocket upgrade handshake |
+| `/api/ws/automation` | Automation run progress events | WebSocket subscribe/unsubscribe event stream |
 
 ## 12) Project structure
 
@@ -652,7 +729,7 @@ curl -fsS "${API_BASE}/api/stats" | head
     +-- packages/
     |   +-- server/                 Bun + Elysia API server
     |   |   +-- src/
-    |   |   |   +-- routes/         16 route modules + test files
+    |   |   |   +-- routes/         17 route modules + test files
     |   |   |   |   +-- auth.routes.ts
     |   |   |   |   +-- user.routes.ts
     |   |   |   |   +-- settings.routes.ts
@@ -669,6 +746,7 @@ curl -fsS "${API_BASE}/api/stats" | head
     |   |   |   |   +-- search.routes.ts
     |   |   |   |   +-- stats.routes.ts
     |   |   |   |   +-- automation.routes.ts
+    |   |   |   |   +-- automation-screenshots.routes.ts
     |   |   |   +-- services/       Business logic layer
     |   |   |   |   +-- ai/         5 provider adapters + context manager + prompts
     |   |   |   |   +-- automation/ application-automation-service.ts, rpa-runner.ts
@@ -697,9 +775,9 @@ curl -fsS "${API_BASE}/api/stats" | head
     |   |   |   |   +-- seed/       Initial gaming data and studio records
     |   |   |   |   +-- client.ts, init.ts
     |   |   |   +-- middleware/     auth.ts, error-handler.ts, logger.ts
-    |   |   |   +-- ws/             chat.ws.ts, interview.ws.ts
+    |   |   |   +-- ws/             chat.ws.ts, interview.ws.ts, automation.ws.ts
     |   |   |   +-- config/         env.ts (validation), paths.ts
-    |   +-- client/                 Nuxt 3 SSR application
+    |   +-- client/                 Nuxt 4 SSR application
     |   |   +-- pages/              28 page components across 10 feature areas
     |   |   +-- components/         25 Vue components
     |   |   |   +-- ai/             AIChatBubble, AIStreamingResponse, BaoFairy
@@ -711,7 +789,7 @@ curl -fsS "${API_BASE}/api/stats" | head
     |   |   |   +-- portfolio/      PortfolioGrid, ProjectCard
     |   |   |   +-- layout/         AppNavbar, AppSidebar, AppDock
     |   |   |   +-- ui/             ConfirmDialog, LoadingSkeleton
-    |   |   +-- composables/        22 composables
+    |   |   +-- composables/        25 composables
     |   |   |   +-- useApi, useAuth, useUser, useSettings, useSettingsQuery
     |   |   |   +-- useTheme, useWebSocket, useSpeech, useTTS, useSTT
     |   |   |   +-- useJobs, useSearch, useResume, useCoverLetter
@@ -729,9 +807,10 @@ curl -fsS "${API_BASE}/api/stats" | head
     |   |   |   |   +-- user, ai, resume, interview, jobs, cover-letter
     |   |   |   |   +-- portfolio, studio, gamification, skill-mapping
     |   |   |   |   +-- settings, search
-    |   |   |   +-- schemas/        5 validation schemas
+    |   |   |   +-- schemas/        7 validation schemas
     |   |   |   |   +-- user.schema, resume.schema, job.schema
     |   |   |   |   +-- interview.schema, settings.schema
+    |   |   |   |   +-- portfolio.schema, skill-mapping.schema
     |   |   |   +-- constants/      7 constant files
     |   |   |   |   +-- ai, branding, gaming-roles, gaming-technologies
     |   |   |   |   +-- salary-ranges, state-keys, xp-levels
@@ -740,6 +819,11 @@ curl -fsS "${API_BASE}/api/stats" | head
     |   +-- scraper/                Python RPA scripts
     |       +-- apply_job_rpa.py
     |       +-- job_scraper_gamedev.py
+    |       +-- job_scraper_grackle.py
+    |       +-- job_scraper_workwithindies.py
+    |       +-- job_scraper_remotegamejobs.py
+    |       +-- job_scraper_gamesjobsdirect.py
+    |       +-- job_scraper_pocketgamer.py
     |       +-- studio_scraper.py
     |       +-- requirements.txt
     +-- scripts/
@@ -859,7 +943,7 @@ Migrations are in `packages/server/src/db/migrations/`. Seed data (`packages/ser
 | Check | Command / action |
 |-------|-----------------|
 | WS base correct? | Verify `NUXT_PUBLIC_WS_BASE` |
-| Routes registered? | Server logs should show `/api/ws/chat` and `/api/ws/interview` |
+| Routes registered? | Server logs should show `/api/ws/chat`, `/api/ws/interview`, and `/api/ws/automation` |
 | Firewall blocking? | Test with `wscat -c ws://localhost:3000/api/ws/chat` |
 
 ### 15.4 RPA automation fails
@@ -885,7 +969,7 @@ Migrations are in `packages/server/src/db/migrations/`. Seed data (`packages/ser
 | Check | Command / action |
 |-------|-----------------|
 | Providers registered? | Check server logs for provider registration on startup |
-| Network access? | Verify outbound HTTP to Greenhouse/Lever APIs |
+| Network access? | Verify outbound HTTP access to provider targets (Greenhouse, Lever, Hitmarker, company boards, gaming boards) |
 | DB seeded? | Run seed if studios table is empty |
 | Dedup too aggressive? | Check `deduplication.ts` thresholds |
 
@@ -929,6 +1013,7 @@ bun run scripts/validate-ascii-geometry.ts README.md
 - [ ] `/api/automation/runs` returns run records
 - [ ] `/api/ws/chat` WebSocket handshake succeeds
 - [ ] `/api/ws/interview` WebSocket handshake succeeds
+- [ ] `/api/ws/automation` WebSocket handshake succeeds
 - [ ] AI provider responds (local or cloud)
 - [ ] `bun run scripts/validate-ascii-geometry.ts README.md` passes
 

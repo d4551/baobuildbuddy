@@ -22,12 +22,12 @@ function toBoolean(value: unknown, fallback: boolean): boolean {
 
 export default defineNuxtPlugin((nuxtApp) => {
   const { public: publicConfig } = useRuntimeConfig();
-  const staleTime = toNonNegativeNumber(publicConfig.queryStaleTimeMs, QUERY_STALE_TIME_FALLBACK_MS);
-  const retryCount = toNonNegativeNumber(publicConfig.queryRetryCount, QUERY_RETRY_FALLBACK);
-  const refetchOnWindowFocus = toBoolean(
-    publicConfig.queryRefetchOnFocus,
-    QUERY_REFOCUS_FALLBACK,
+  const staleTime = toNonNegativeNumber(
+    publicConfig.queryStaleTimeMs,
+    QUERY_STALE_TIME_FALLBACK_MS,
   );
+  const retryCount = toNonNegativeNumber(publicConfig.queryRetryCount, QUERY_RETRY_FALLBACK);
+  const refetchOnWindowFocus = toBoolean(publicConfig.queryRefetchOnFocus, QUERY_REFOCUS_FALLBACK);
 
   const queryClient = new QueryClient({
     defaultOptions: {

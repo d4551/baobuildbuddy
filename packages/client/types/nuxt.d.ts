@@ -1,4 +1,5 @@
 import type { QueryClient } from "@tanstack/vue-query";
+import type { EdenApiNamespace } from "~/plugins/eden";
 
 interface ToastApi {
   success: (message: string) => void;
@@ -9,6 +10,7 @@ interface ToastApi {
 
 declare module "#app" {
   interface NuxtApp {
+    $api: EdenApiNamespace;
     $getStoredApiKey: () => string | null;
     $setStoredApiKey: (key: string | null) => void;
     $toast: ToastApi;
@@ -18,11 +20,10 @@ declare module "#app" {
 
 declare module "vue" {
   interface ComponentCustomProperties {
+    $api: EdenApiNamespace;
     $getStoredApiKey: () => string | null;
     $setStoredApiKey: (key: string | null) => void;
     $toast: ToastApi;
     $queryClient: QueryClient;
   }
 }
-
-export {};

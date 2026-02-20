@@ -33,17 +33,15 @@ const displayedStudioName = computed(() => selectedStudio.value?.name ?? studioN
 
 const canProceedTarget = computed(() => targetRole.value.trim().length > 0);
 
-const questionsComplete = computed(() =>
-  aiQuestions.value.length > 0 && aiQuestions.value.every((q) => (answers[q.id] ?? "").trim().length > 0),
-);
-
 const currentQuestion = computed(() => aiQuestions.value[currentQuestionIndex.value] ?? null);
 
 const progressValue = computed(() => {
   if (phase.value === "target") return 0;
   if (phase.value === "generating" || phase.value === "synthesizing") return 50;
   if (phase.value === "questions" && aiQuestions.value.length > 0) {
-    const answered = aiQuestions.value.filter((q) => (answers[q.id] ?? "").trim().length > 0).length;
+    const answered = aiQuestions.value.filter(
+      (q) => (answers[q.id] ?? "").trim().length > 0,
+    ).length;
     return 25 + (answered / aiQuestions.value.length) * 50;
   }
   return 25;

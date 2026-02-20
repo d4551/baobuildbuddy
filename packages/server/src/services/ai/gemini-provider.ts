@@ -1,5 +1,5 @@
-import { type GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import type { AIResponse, GenerateOptions } from "@bao/shared";
+import { type GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { BaseAIProvider } from "./provider-interface";
 
 /**

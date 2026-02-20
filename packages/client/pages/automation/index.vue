@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAutomation, type AutomationRun } from "~/composables/useAutomation";
+import { type AutomationRun, useAutomation } from "~/composables/useAutomation";
 
 const { fetchRuns } = useAutomation();
 const { data: runs } = fetchRuns();
@@ -22,8 +22,8 @@ const completedRuns = computed(() =>
   rows.value.filter((run) => run.status === "success" || run.status === "error"),
 );
 
-const successRuns = computed(() =>
-  completedRuns.value.filter((run) => run.status === "success").length,
+const successRuns = computed(
+  () => completedRuns.value.filter((run) => run.status === "success").length,
 );
 
 const successRate = computed(() => {

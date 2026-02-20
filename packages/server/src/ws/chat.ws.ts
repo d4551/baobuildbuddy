@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
-import { settings } from "../db/schema/settings";
+import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { contextManager } from "../services/ai/context-manager";
 
 export const chatWebSocket = new Elysia().ws("/ws/chat", {
@@ -41,7 +41,10 @@ export const chatWebSocket = new Elysia().ws("/ws/chat", {
 
     try {
       // Load settings to get AI provider config
-      const settingsRows = await db.select().from(settings).where(eq(settings.id, "default"));
+      const settingsRows = await db
+        .select()
+        .from(settings)
+        .where(eq(settings.id, DEFAULT_SETTINGS_ID));
       const config = settingsRows[0];
       const { AIService } = await import("../services/ai/ai-service");
       const aiService = AIService.fromSettings(config);
@@ -86,6 +89,37 @@ export const chatWebSocket = new Elysia().ws("/ws/chat", {
             followUps,
           }),
         );
+
+        // Detect automation action blocks in the AI response
+        const actionMatch = responseText.match(/\{"action"\s*:\s*"job_apply"[^{}]*\}/);
+        if (actionMatch) {
+          try {
+            const action = JSON.parse(actionMatch[0]) as {
+              action: string;
+              jobUrl?: string;
+              resumeId?: string;
+              coverLetterId?: string;
+            };
+            const isValidAction =
+              action.action === "job_apply" && !!action.jobUrl && !!action.resumeId;
+            ws.send(
+              JSON.stringify({
+                type: "automation_action_detected",
+                action: isValidAction ? action : null,
+                sessionId,
+              }),
+            );
+          } catch {
+            ws.send(
+              JSON.stringify({
+                type: "automation_action_detected",
+                action: null,
+                sessionId,
+                parseError: true,
+              }),
+            );
+          }
+        }
       } catch {
         // AI service not available, use fallback
         responseText = generateFallbackResponse(data.content);
@@ -131,6 +165,15 @@ function generateFallbackResponse(input: string): string {
   }
   if (lower.includes("interview")) {
     return "The Interview Prep section lets you practice with AI-powered mock interviews tailored to specific studios. Configure an AI provider to get started!";
+  }
+  if (
+    lower.includes("automate") ||
+    lower.includes("automation") ||
+    lower.includes("rpa") ||
+    lower.includes("auto-apply") ||
+    lower.includes("auto apply")
+  ) {
+    return "I can help automate job applications! Head to the Automation page to set up an RPA run, or configure an AI provider so I can guide you through the process right here in chat.";
   }
   if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
     return `Hello! I'm ${APP_BRAND.assistantName}, your AI career assistant for the game industry. I can help with resumes, job searching, interview prep, and skill mapping. What would you like to work on?`;

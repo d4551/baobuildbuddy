@@ -43,6 +43,8 @@ export interface PortfolioMetadata {
   author?: string;
   title?: string;
   description?: string;
+  bio?: string;
+  email?: string;
   website?: string;
   social?: Record<string, string>;
 }

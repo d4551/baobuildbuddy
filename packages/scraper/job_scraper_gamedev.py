@@ -7,6 +7,8 @@ import json
 import re
 import sys
 
+DEFAULT_SOURCE_URL = "https://www.gamedev.net/jobs/"
+
 try:
     import rpa as r
 except ImportError:
@@ -14,11 +16,24 @@ except ImportError:
     sys.exit(1)
 
 
+def resolve_source_url() -> str:
+    try:
+        payload = json.loads(sys.stdin.read() or "{}")
+        source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+        if isinstance(source_url, str) and source_url.strip():
+            return source_url.strip()
+    except Exception:
+        pass
+
+    return DEFAULT_SOURCE_URL
+
+
 def scrape_jobs() -> list[dict]:
     jobs = []
+    source_url = resolve_source_url()
     try:
         r.init(turbo_mode=True)
-        r.url("https://www.gamedev.net/jobs/")
+        r.url(source_url)
         r.wait(3)
         try:
             content = r.read("body") if hasattr(r, "read") else ""
@@ -37,7 +52,7 @@ def scrape_jobs() -> list[dict]:
                         "location": "Remote",
                         "remote": True,
                         "description": line,
-                        "url": "https://www.gamedev.net/jobs/",
+                        "url": source_url,
                         "source": "gamedev-net",
                         "postedDate": "",
                         "contentHash": f"gdn-{hash(line) % 10**10}",
@@ -49,7 +64,7 @@ def scrape_jobs() -> list[dict]:
                 "location": "Remote",
                 "remote": True,
                 "description": "Check GameDev.net for latest listings.",
-                "url": "https://www.gamedev.net/jobs/",
+                "url": source_url,
                 "source": "gamedev-net",
                 "postedDate": "",
                 "contentHash": "gdn-placeholder",
@@ -61,7 +76,7 @@ def scrape_jobs() -> list[dict]:
             "location": "",
             "remote": False,
             "description": str(e),
-            "url": "https://www.gamedev.net/jobs/",
+            "url": source_url,
             "source": "gamedev-net",
             "postedDate": "",
             "contentHash": f"gdn-err-{hash(str(e)) % 10**8}",

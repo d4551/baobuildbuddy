@@ -14,3 +14,4 @@ export { skillMappingRoutes } from "./skill-mapping.routes";
 export { searchRoutes } from "./search.routes";
 export { statsRoutes } from "./stats.routes";
 export { automationRoutes } from "./automation.routes";
+export { automationScreenshotRoutes } from "./automation-screenshots.routes";

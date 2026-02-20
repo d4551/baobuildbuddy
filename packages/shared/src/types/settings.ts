@@ -1,5 +1,5 @@
 /**
- * App settings types for single-user local-first app
+ * App settings types for single-user local-first app.
  */
 
 import type { AIProviderType } from "./ai";
@@ -9,31 +9,115 @@ import type { AIProviderType } from "./ai";
  */
 export type ProviderModelPreferences = Partial<Record<AIProviderType, string>>;
 
-export interface AppSettings {
-  id: string; // always "default"
-  // AI provider keys
-  geminiApiKey?: string;
-  openaiApiKey?: string;
-  claudeApiKey?: string;
-  huggingfaceToken?: string;
-  // Local model config
-  localModelEndpoint?: string;
-  localModelName?: string;
-  preferredModel?: string;
-  preferredModels?: ProviderModelPreferences;
-  // Preferences
-  preferredProvider: AIProviderType;
-  theme: "bao-light" | "bao-dark";
-  language: string;
-  notifications: NotificationPreferences;
-  // Computed credential presence flags
-  hasGeminiKey?: boolean;
-  hasOpenaiKey?: boolean;
-  hasClaudeKey?: boolean;
-  hasHuggingfaceToken?: boolean;
-  hasLocalKey?: boolean;
+/**
+ * Supported ATS types for company-board integrations.
+ */
+export type CompanyBoardATSType =
+  | "greenhouse"
+  | "lever"
+  | "recruitee"
+  | "workable"
+  | "ashby"
+  | "smartrecruiters"
+  | "teamtailor"
+  | "workday";
+
+/**
+ * Supported portal identifiers for gaming-board scraper providers.
+ */
+export type GamingPortalId =
+  | "gamedev-net"
+  | "grackle"
+  | "workwithindies"
+  | "remotegamejobs"
+  | "gamesjobsdirect"
+  | "pocketgamer";
+
+/**
+ * Company-board source configuration.
+ */
+export interface CompanyBoardConfig {
+  name: string;
+  token: string;
+  type: CompanyBoardATSType;
+  enabled: boolean;
+  priority: number;
 }
 
+/**
+ * Greenhouse board source configuration.
+ */
+export interface GreenhouseBoardConfig {
+  board: string;
+  company: string;
+  enabled: boolean;
+}
+
+/**
+ * Lever company source configuration.
+ */
+export interface LeverCompanyConfig {
+  slug: string;
+  company: string;
+  enabled: boolean;
+}
+
+/**
+ * RPA gaming-portal source configuration.
+ */
+export interface GamingPortalConfig {
+  id: GamingPortalId;
+  name: string;
+  source: string;
+  fallbackUrl: string;
+  enabled: boolean;
+}
+
+/**
+ * Runtime job-provider settings persisted in `settings.automationSettings.jobProviders`.
+ */
+export interface JobProviderSettings {
+  providerTimeoutMs: number;
+  companyBoardResultLimit: number;
+  gamingBoardResultLimit: number;
+  unknownLocationLabel: string;
+  unknownCompanyLabel: string;
+  hitmarkerApiBaseUrl: string;
+  hitmarkerDefaultQuery: string;
+  hitmarkerDefaultLocation: string;
+  greenhouseApiBaseUrl: string;
+  greenhouseMaxPages: number;
+  greenhouseBoards: GreenhouseBoardConfig[];
+  leverApiBaseUrl: string;
+  leverMaxPages: number;
+  leverCompanies: LeverCompanyConfig[];
+  companyBoardApiTemplates: Record<CompanyBoardATSType, string>;
+  companyBoards: CompanyBoardConfig[];
+  gamingPortals: GamingPortalConfig[];
+}
+
+/**
+ * Automation and browser runner settings.
+ */
+export interface AutomationSettings {
+  headless: boolean;
+  defaultTimeout: number;
+  screenshotRetention: number;
+  maxConcurrentRuns: number;
+  defaultBrowser: "chrome" | "chromium" | "edge";
+  enableSmartSelectors: boolean;
+  autoSaveScreenshots: boolean;
+  jobProviders?: JobProviderSettings;
+}
+
+/**
+ * Global settings row identifier.
+ */
+export const DEFAULT_SETTINGS_ID = "default";
+
+/**
+ * Notification preference settings.
+ */
 export interface NotificationPreferences {
   achievements: boolean;
   dailyChallenges: boolean;
@@ -41,6 +125,57 @@ export interface NotificationPreferences {
   jobAlerts: boolean;
 }
 
+/**
+ * Default notification preferences.
+ */
+export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
+  achievements: true,
+  dailyChallenges: true,
+  levelUp: true,
+  jobAlerts: true,
+};
+
+/**
+ * Default automation settings.
+ */
+export const DEFAULT_AUTOMATION_SETTINGS: AutomationSettings = {
+  headless: true,
+  defaultTimeout: 30,
+  screenshotRetention: 7,
+  maxConcurrentRuns: 1,
+  defaultBrowser: "chrome",
+  enableSmartSelectors: true,
+  autoSaveScreenshots: true,
+};
+
+/**
+ * Persisted application settings.
+ */
+export interface AppSettings {
+  id: string;
+  geminiApiKey?: string;
+  openaiApiKey?: string;
+  claudeApiKey?: string;
+  huggingfaceToken?: string;
+  localModelEndpoint?: string;
+  localModelName?: string;
+  preferredModel?: string;
+  preferredModels?: ProviderModelPreferences;
+  preferredProvider: AIProviderType;
+  theme: "bao-light" | "bao-dark";
+  language: string;
+  notifications: NotificationPreferences;
+  automationSettings?: AutomationSettings;
+  hasGeminiKey?: boolean;
+  hasOpenaiKey?: boolean;
+  hasClaudeKey?: boolean;
+  hasHuggingfaceToken?: boolean;
+  hasLocalKey?: boolean;
+}
+
+/**
+ * API key payload.
+ */
 export interface APIKeyConfig {
   provider: AIProviderType;
   key: string;

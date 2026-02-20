@@ -1,12 +1,9 @@
 import type { ResumeData } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { settings } from "../db/schema/settings";
+import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { AIService } from "./ai/ai-service";
-import {
-  cvQuestionnaireQuestionsPrompt,
-  cvQuestionnaireSynthesizePrompt,
-} from "./ai/prompts";
+import { cvQuestionnaireQuestionsPrompt, cvQuestionnaireSynthesizePrompt } from "./ai/prompts";
 
 export interface CvQuestion {
   id: string;
@@ -20,8 +17,17 @@ export interface CvQuestionnaireConfig {
   experienceLevel?: string;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isCvQuestion = (value: unknown): value is CvQuestion =>
+  isRecord(value) &&
+  typeof value.id === "string" &&
+  typeof value.question === "string" &&
+  typeof value.category === "string";
+
 async function getAIService(): Promise<AIService> {
-  const rows = await db.select().from(settings).where(eq(settings.id, "default"));
+  const rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
   return AIService.fromSettings(rows[0]);
 }
 
@@ -54,14 +60,7 @@ export class CvQuestionnaireService {
       if (!Array.isArray(raw)) return [];
 
       return raw
-        .filter(
-          (q: unknown): q is { id: string; question: string; category: string } =>
-            typeof q === "object" &&
-            q !== null &&
-            typeof (q as { id?: unknown }).id === "string" &&
-            typeof (q as { question?: unknown }).question === "string" &&
-            typeof (q as { category?: unknown }).category === "string",
-        )
+        .filter(isCvQuestion)
         .map((q) => ({
           id: q.id,
           question: q.question,

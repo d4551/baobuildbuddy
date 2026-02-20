@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import type { AppSettings } from "@bao/shared";
+import type { AppSettings, AutomationSettings } from "@bao/shared";
+import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared";
 import {
+  type AIProviderType,
   AI_PROVIDER_CATALOG,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
-} from "@bao/shared/constants/ai";
-import type { AIProviderType } from "@bao/shared/types/ai";
+} from "@bao/shared";
 
 type SettingsWithFlags = AppSettings & {
   hasGeminiKey?: boolean;
@@ -83,6 +84,9 @@ const testResults = reactive<Record<AIProviderType, { valid: boolean } | null>>(
 
 const testingProvider = ref<AIProviderType | null>(null);
 
+// Automation settings reactive state
+const automationForm = reactive<AutomationSettings>({ ...DEFAULT_AUTOMATION_SETTINGS });
+
 function getComputedSettings(): SettingsWithFlags | null {
   return settings.value as SettingsWithFlags | null;
 }
@@ -94,6 +98,11 @@ onMounted(async () => {
 
   apiKeys.localModelEndpoint = current.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT;
   apiKeys.localModelName = current.localModelName || LOCAL_AI_DEFAULT_MODEL;
+
+  // Load automation settings
+  if (current.automationSettings) {
+    Object.assign(automationForm, current.automationSettings);
+  }
 });
 
 function isProviderConfigured(providerId: AIProviderType): boolean {
@@ -166,6 +175,16 @@ async function handleToggleTheme() {
     $toast.success("Theme saved");
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to save theme";
+    $toast.error(message);
+  }
+}
+
+async function handleSaveAutomation() {
+  try {
+    await updateSettings({ automationSettings: { ...automationForm } });
+    $toast.success("Automation settings saved");
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to save automation settings";
     $toast.error(message);
   }
 }
@@ -251,6 +270,104 @@ async function handleToggleTheme() {
 
           <div class="card-actions mt-4">
             <button class="btn btn-primary" @click="handleSaveKeys">Save API keys</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Automation & RPA Settings -->
+      <div class="card bg-base-200">
+        <div class="card-body">
+          <h2 class="card-title">Automation & RPA</h2>
+          <p class="text-sm text-base-content/70 mb-4">
+            Configure browser automation settings for job application RPA workflows.
+          </p>
+
+          <div class="space-y-4">
+            <!-- Headless Mode -->
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-medium">Headless Mode</span>
+                <p class="text-sm text-base-content/60">Run browser automation without visible window</p>
+              </div>
+              <input v-model="automationForm.headless" type="checkbox" class="toggle toggle-primary" />
+            </div>
+
+            <!-- Smart AI Selectors -->
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-medium">Smart AI Selectors</span>
+                <p class="text-sm text-base-content/60">Use AI to detect form fields automatically</p>
+              </div>
+              <input v-model="automationForm.enableSmartSelectors" type="checkbox" class="toggle toggle-primary" />
+            </div>
+
+            <!-- Auto-save Screenshots -->
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-medium">Auto-save Screenshots</span>
+                <p class="text-sm text-base-content/60">Capture screenshots at each step of automation</p>
+              </div>
+              <input v-model="automationForm.autoSaveScreenshots" type="checkbox" class="toggle toggle-primary" />
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Default Timeout -->
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">Default Timeout (seconds)</legend>
+              <input
+                v-model.number="automationForm.defaultTimeout"
+                type="number"
+                class="input w-full"
+                min="5"
+                max="120"
+                placeholder="30"
+              />
+              <p class="text-xs text-base-content/50 mt-1">How long to wait for page elements (5-120 seconds)</p>
+            </fieldset>
+
+            <!-- Screenshot Retention -->
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">Screenshot Retention (days)</legend>
+              <input
+                v-model.number="automationForm.screenshotRetention"
+                type="number"
+                class="input w-full"
+                min="1"
+                max="30"
+                placeholder="7"
+              />
+              <p class="text-xs text-base-content/50 mt-1">How long to keep automation screenshots (1-30 days)</p>
+            </fieldset>
+
+            <!-- Max Concurrent Runs -->
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">Max Concurrent Runs</legend>
+              <input
+                v-model.number="automationForm.maxConcurrentRuns"
+                type="number"
+                class="input w-full"
+                min="1"
+                max="5"
+                placeholder="1"
+              />
+              <p class="text-xs text-base-content/50 mt-1">Maximum simultaneous automation runs (1-5)</p>
+            </fieldset>
+
+            <!-- Default Browser -->
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">Default Browser</legend>
+              <select v-model="automationForm.defaultBrowser" class="select w-full">
+                <option value="chrome">Chrome</option>
+                <option value="chromium">Chromium</option>
+                <option value="edge">Edge</option>
+              </select>
+              <p class="text-xs text-base-content/50 mt-1">Browser to use for RPA automation</p>
+            </fieldset>
+          </div>
+
+          <div class="card-actions mt-4">
+            <button class="btn btn-primary" @click="handleSaveAutomation">Save Automation Settings</button>
           </div>
         </div>
       </div>

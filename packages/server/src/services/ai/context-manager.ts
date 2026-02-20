@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
+import { automationRuns } from "../../db/schema/automation-runs";
 import { chatHistory } from "../../db/schema/chat-history";
 import { interviewSessions } from "../../db/schema/interviews";
 import { jobs, savedJobs } from "../../db/schema/jobs";
@@ -9,7 +10,14 @@ import { skillMappings } from "../../db/schema/skill-mappings";
 import { userProfile } from "../../db/schema/user";
 import { DOMAIN_SYSTEM_PROMPTS, GAMING_INDUSTRY_CONTEXT } from "./prompts";
 
-type ContextDomain = "resume" | "job_search" | "interview" | "portfolio" | "skills" | "general";
+type ContextDomain =
+  | "resume"
+  | "job_search"
+  | "interview"
+  | "portfolio"
+  | "skills"
+  | "automation"
+  | "general";
 
 interface ConversationContext {
   systemPrompt: string;
@@ -22,6 +30,9 @@ export class ConversationContextManager {
    */
   inferDomain(message: string): ContextDomain {
     const lower = message.toLowerCase();
+    // Automation must be checked BEFORE job_search since "apply" overlaps
+    if (/\b(automate|automation|rpa|auto[- ]?apply|fill.*form|run.*bot|bot.*apply)\b/i.test(lower))
+      return "automation";
     if (/\b(resume|cv|bullet|experience|education|summary)\b/.test(lower)) return "resume";
     if (/\b(job|apply|salary|remote|position|company|hiring|opening)\b/.test(lower))
       return "job_search";
@@ -128,6 +139,31 @@ export class ConversationContextManager {
           }
           return null;
         }
+        case "automation": {
+          const recentRuns = await db
+            .select()
+            .from(automationRuns)
+            .orderBy(desc(automationRuns.createdAt))
+            .limit(5);
+          const parts: string[] = [];
+          if (recentRuns.length > 0) {
+            parts.push(`Recent Automation Runs (${recentRuns.length}):`);
+            for (const run of recentRuns) {
+              parts.push(
+                `- [${run.status}] ${run.type} (${run.createdAt})${run.error ? ` Error: ${run.error}` : ""}`,
+              );
+            }
+          }
+          // List available resumes so the AI can offer choices
+          const availableResumes = await db.select().from(resumes).limit(10);
+          if (availableResumes.length > 0) {
+            parts.push("\nAvailable Resumes:");
+            for (const r of availableResumes) {
+              parts.push(`- "${r.name}" (ID: ${r.id})`);
+            }
+          }
+          return parts.length > 0 ? parts.join("\n") : null;
+        }
         default:
           return null;
       }
@@ -165,6 +201,11 @@ export class ConversationContextManager {
         "What skills am I missing for this career path?",
         "How do my gaming skills translate professionally?",
         "What should I learn next?",
+      ],
+      automation: [
+        "What's the status of my last application?",
+        "Show my automation run history",
+        "Apply to another job",
       ],
       general: [
         "Help me with my resume",

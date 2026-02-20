@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { AppSettings } from "@bao/shared";
-import { AI_PROVIDER_CATALOG } from "@bao/shared/constants/ai";
-import type { AIProviderType } from "@bao/shared/types/ai";
+import { type AIProviderType, AI_PROVIDER_CATALOG } from "@bao/shared";
 
 type SettingsWithFlags = AppSettings & {
   hasGeminiKey?: boolean;
@@ -149,7 +148,7 @@ async function fetchProviderStats() {
       selectedProvider.value = "local";
       selectedModel.value = providerModelsById.get("local")?.[0] || "";
     }
-  } catch (error) {
+  } catch {
     const { $toast } = useNuxtApp();
     $toast.error("Failed to load AI statistics");
 

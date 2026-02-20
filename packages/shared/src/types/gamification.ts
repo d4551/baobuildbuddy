@@ -44,6 +44,8 @@ export interface DailyChallenge {
   completed: boolean;
   requirements?: Record<string, number>;
   validUntil?: string;
+  progress?: number;
+  goal?: number;
 }
 
 export interface XPLevel {
@@ -64,6 +66,8 @@ export interface UserGamificationData {
   currentStreak: number;
   lastActiveDate?: string;
   stats: Partial<GamificationStats>;
+  xpForNextLevel?: number;
+  streak?: number;
 }
 
 export interface StreakInfo {

@@ -1,35 +1,73 @@
 import { generateId } from "@bao/shared";
-import type { PortfolioMetadata, PortfolioProject } from "@bao/shared";
-import { desc, eq, sql } from "drizzle-orm";
+import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
+import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { portfolioProjects, portfolios } from "../db/schema";
 
-export class PortfolioService {
-  /**
-   * Get or create the default portfolio
-   */
-  async getPortfolio(): Promise<{
-    id: string;
-    metadata?: PortfolioMetadata;
-    createdAt: string;
-    updatedAt: string;
-  }> {
-    const results = await db.select().from(portfolios).limit(1);
+type PortfolioRecord = {
+  id: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+};
 
-    if (results.length > 0) {
-      const row = results[0];
-      return {
-        id: row.id,
-        metadata: row.metadata || undefined,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      };
+export class PortfolioService {
+  private toMetadataOrDefault(metadata?: Record<string, unknown> | null): PortfolioMetadata {
+    return (metadata || {}) as PortfolioMetadata;
+  }
+
+  private toProject(row: {
+    id: string;
+    portfolioId: string;
+    title: string;
+    description: string;
+    technologies?: string[] | null;
+    image?: string | null;
+    liveUrl?: string | null;
+    githubUrl?: string | null;
+    tags?: string[] | null;
+    featured?: boolean | null;
+    role?: string | null;
+    platforms?: string[] | null;
+    engines?: string[] | null;
+    sortOrder?: number | null;
+  }): PortfolioProject {
+    return {
+      id: row.id,
+      portfolioId: row.portfolioId,
+      title: row.title,
+      description: row.description,
+      technologies: row.technologies || [],
+      image: row.image || undefined,
+      liveUrl: row.liveUrl || undefined,
+      githubUrl: row.githubUrl || undefined,
+      tags: row.tags || [],
+      featured: row.featured || false,
+      role: row.role || undefined,
+      platforms: row.platforms || undefined,
+      engines: row.engines || undefined,
+      sortOrder: row.sortOrder || 0,
+    };
+  }
+
+  private toPortfolioData(portfolio: PortfolioRecord, projects: PortfolioProject[]): PortfolioData {
+    return {
+      id: portfolio.id,
+      metadata: this.toMetadataOrDefault(portfolio.metadata),
+      projects,
+      createdAt: portfolio.createdAt,
+      updatedAt: portfolio.updatedAt,
+    };
+  }
+
+  private async getOrCreateDefaultPortfolio(): Promise<PortfolioRecord> {
+    const rows = await db.select().from(portfolios);
+    if (rows.length > 0) {
+      return rows[0] as PortfolioRecord;
     }
 
-    // Create default portfolio
-    const id = generateId();
     const now = new Date().toISOString();
-
+    const id = generateId();
     await db.insert(portfolios).values({
       id,
       metadata: {},
@@ -45,14 +83,30 @@ export class PortfolioService {
     };
   }
 
+  private async getPortfolioRecord(portfolioId?: string): Promise<PortfolioRecord | null> {
+    if (portfolioId) {
+      const rows = await db.select().from(portfolios).where(eq(portfolios.id, portfolioId));
+      return rows.length > 0 ? (rows[0] as PortfolioRecord) : null;
+    }
+
+    const rows = await db.select().from(portfolios);
+    return rows.length > 0 ? (rows[0] as PortfolioRecord) : null;
+  }
+
+  /**
+   * Get the full portfolio contract (header + projects).
+   */
+  async getPortfolio(): Promise<PortfolioData> {
+    const portfolio = await this.getPortfolioRecord();
+    const projects = await this.getProjects(portfolio.id);
+    return this.toPortfolioData(portfolio, projects);
+  }
+
   /**
    * Update portfolio metadata
    */
-  async updatePortfolio(data: { metadata?: PortfolioMetadata }): Promise<{
-    id: string;
-    metadata?: PortfolioMetadata;
-  }> {
-    const portfolio = await this.getPortfolio();
+  async updatePortfolio(data: { metadata?: PortfolioMetadata }): Promise<PortfolioData> {
+    const portfolio = await this.getOrCreateDefaultPortfolio();
     const now = new Date().toISOString();
 
     await db
@@ -63,9 +117,14 @@ export class PortfolioService {
       })
       .where(eq(portfolios.id, portfolio.id));
 
+    const updated = await this.getOrCreateDefaultPortfolio();
+    const projects = await this.getProjects(portfolio.id);
     return {
-      id: portfolio.id,
-      metadata: data.metadata,
+      id: updated.id,
+      metadata: this.toMetadataOrDefault(updated.metadata),
+      projects,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
     };
   }
 
@@ -79,22 +138,7 @@ export class PortfolioService {
       .where(eq(portfolioProjects.portfolioId, portfolioId))
       .orderBy(portfolioProjects.sortOrder, desc(portfolioProjects.createdAt));
 
-    return results.map((row) => ({
-      id: row.id,
-      portfolioId: row.portfolioId,
-      title: row.title,
-      description: row.description,
-      technologies: row.technologies || [],
-      image: row.image || undefined,
-      liveUrl: row.liveUrl || undefined,
-      githubUrl: row.githubUrl || undefined,
-      tags: row.tags || [],
-      featured: row.featured || false,
-      role: row.role || undefined,
-      platforms: row.platforms || undefined,
-      engines: row.engines || undefined,
-      sortOrder: row.sortOrder || 0,
-    }));
+    return results.map((row) => this.toProject(row));
   }
 
   /**
@@ -149,22 +193,7 @@ export class PortfolioService {
     }
 
     const row = results[0];
-    return {
-      id: row.id,
-      portfolioId: row.portfolioId,
-      title: row.title,
-      description: row.description,
-      technologies: row.technologies || [],
-      image: row.image || undefined,
-      liveUrl: row.liveUrl || undefined,
-      githubUrl: row.githubUrl || undefined,
-      tags: row.tags || [],
-      featured: row.featured || false,
-      role: row.role || undefined,
-      platforms: row.platforms || undefined,
-      engines: row.engines || undefined,
-      sortOrder: row.sortOrder || 0,
-    };
+    return this.toProject(row);
   }
 
   /**
@@ -206,15 +235,28 @@ export class PortfolioService {
    * Delete a project
    */
   async deleteProject(id: string): Promise<boolean> {
-    await db.delete(portfolioProjects).where(eq(portfolioProjects.id, id));
-    return true;
+    const existing = await db
+      .delete(portfolioProjects)
+      .where(eq(portfolioProjects.id, id))
+      .returning({ id: portfolioProjects.id });
+    return existing.length > 0;
   }
 
   /**
    * Reorder projects by updating their sortOrder
    */
   async reorderProjects(portfolioId: string, orderedIds: string[]): Promise<boolean> {
-    // Update each project's sortOrder based on its position in the array
+    const existing = await this.getProjects(portfolioId);
+    const validIds = existing.map((project) => project.id);
+    const hasInvalidIds = orderedIds.some((id) => !validIds.includes(id));
+    if (hasInvalidIds) {
+      throw new Error("Invalid project ID in reorder payload");
+    }
+
+    if (orderedIds.length === 0) {
+      return true;
+    }
+
     for (let i = 0; i < orderedIds.length; i++) {
       await db
         .update(portfolioProjects)
@@ -222,7 +264,40 @@ export class PortfolioService {
         .where(eq(portfolioProjects.id, orderedIds[i]));
     }
 
+    const remainingProjects = existing.filter((project) => !orderedIds.includes(project.id));
+    const nextIndex = orderedIds.length;
+    for (let i = 0; i < remainingProjects.length; i++) {
+      const project = remainingProjects[i];
+      if (!project.id) continue;
+      await db
+        .update(portfolioProjects)
+        .set({ sortOrder: nextIndex + i, updatedAt: new Date().toISOString() })
+        .where(eq(portfolioProjects.id, project.id));
+    }
+
     return true;
+  }
+
+  /**
+   * Fetch the canonical portfolio payload used by API responses.
+   */
+  async getPortfolioById(portfolioId: string): Promise<PortfolioData | null> {
+    const portfolio = await this.getPortfolioRecord(portfolioId);
+    if (!portfolio) {
+      return null;
+    }
+
+    const projects = await this.getProjects(portfolio.id);
+    return this.toPortfolioData(portfolio, projects);
+  }
+
+  /**
+   * Fetch or create the default portfolio and return the full portfolio payload.
+   */
+  async getPortfolioPayload(): Promise<PortfolioData> {
+    const portfolio = await this.getOrCreateDefaultPortfolio();
+    const projects = await this.getProjects(portfolio.id);
+    return this.toPortfolioData(portfolio, projects);
   }
 }
 

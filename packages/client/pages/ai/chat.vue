@@ -59,7 +59,7 @@ async function sendMessage() {
     };
 
     messages.value.push(assistantMessage);
-  } catch (error) {
+  } catch {
     messages.value.push({
       role: "assistant",
       content: "I apologize, but I encountered an error. Please try again.",

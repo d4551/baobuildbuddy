@@ -1,4 +1,4 @@
-import type { PortfolioData, PortfolioProject } from "@bao/shared";
+import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 
 /**
@@ -10,26 +10,30 @@ export function usePortfolio() {
   const projects = useState<PortfolioProject[]>(STATE_KEYS.PORTFOLIO_PROJECTS, () => []);
   const loading = useState(STATE_KEYS.PORTFOLIO_LOADING, () => false);
 
+  function hydratePortfolio(next: PortfolioData | null): void {
+    portfolio.value = next;
+    if (next && Array.isArray(next.projects)) {
+      projects.value = next.projects;
+    }
+  }
+
   async function fetchPortfolio() {
     loading.value = true;
     try {
       const { data, error } = await api.portfolio.get();
       if (error) throw new Error("Failed to fetch portfolio");
-      portfolio.value = data;
-      if (data && Array.isArray((data as PortfolioData).projects)) {
-        projects.value = (data as PortfolioData).projects;
-      }
+      hydratePortfolio(data as PortfolioData | null);
     } finally {
       loading.value = false;
     }
   }
 
-  async function updatePortfolio(updates: Partial<PortfolioData>) {
+  async function updatePortfolio(updates: Partial<PortfolioMetadata>) {
     loading.value = true;
     try {
-      const { data, error } = await api.portfolio.put(updates);
+      const { data, error } = await api.portfolio.put({ metadata: updates });
       if (error) throw new Error("Failed to update portfolio");
-      portfolio.value = data;
+      hydratePortfolio(data);
       return data;
     } finally {
       loading.value = false;
@@ -71,6 +75,18 @@ export function usePortfolio() {
     }
   }
 
+  async function reorderProjects(orderedIds: string[]) {
+    loading.value = true;
+    try {
+      const { data, error } = await api.portfolio.projects.reorder.post({ orderedIds });
+      if (error) throw new Error("Failed to reorder projects");
+      hydratePortfolio(data);
+      return data;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function exportPortfolio() {
     loading.value = true;
     try {
@@ -91,6 +107,7 @@ export function usePortfolio() {
     addProject,
     updateProject,
     deleteProject,
+    reorderProjects,
     exportPortfolio,
   };
 }

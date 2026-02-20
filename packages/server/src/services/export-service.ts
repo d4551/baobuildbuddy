@@ -1,5 +1,5 @@
 import type { PortfolioMetadata, PortfolioProject, ResumeData } from "@bao/shared";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { type Color, PDFDocument, type PDFFont, StandardFonts, rgb } from "pdf-lib";
 
 interface RGB {
   r: number;
@@ -82,8 +82,7 @@ export class ExportService {
    * Export resume as PDF
    */
   async exportResumePDF(resume: ResumeData, templateName?: string): Promise<Uint8Array> {
-    const template =
-      TEMPLATES[templateName || resume.template || "modern"] || TEMPLATES.modern;
+    const template = TEMPLATES[templateName || resume.template || "modern"] || TEMPLATES.modern;
     const { fonts, colors, spacing, layout } = template;
     const margin = spacing.margins.left;
 
@@ -137,8 +136,8 @@ export class ExportService {
       text: string,
       x: number,
       size: number,
-      color: unknown,
-      font: unknown,
+      color: Color,
+      font: PDFFont,
       maxWidth: number,
     ) => {
       const words = text.split(" ");
@@ -693,13 +692,15 @@ export class ExportService {
     // Body paragraphs
     const content = coverLetter.content;
     const paragraphs: string[] = [];
-    if (content.opening) paragraphs.push(content.opening);
+    if (content.opening) paragraphs.push(String(content.opening));
     if (content.body)
-      paragraphs.push(...(Array.isArray(content.body) ? content.body : [content.body]));
-    if (content.closing) paragraphs.push(content.closing);
+      paragraphs.push(
+        ...(Array.isArray(content.body) ? content.body.map(String) : [String(content.body)]),
+      );
+    if (content.closing) paragraphs.push(String(content.closing));
     // Fallback: if content is a plain string
     if (paragraphs.length === 0 && typeof content === "string") {
-      paragraphs.push(...content.split("\n\n"));
+      paragraphs.push(...(content as string).split("\n\n"));
     }
 
     for (const paragraph of paragraphs) {
@@ -830,8 +831,8 @@ export class ExportService {
       text: string,
       x: number,
       size: number,
-      color: unknown,
-      font: unknown,
+      color: Color,
+      font: PDFFont,
       maxWidth: number,
     ) => {
       const words = text.split(" ");

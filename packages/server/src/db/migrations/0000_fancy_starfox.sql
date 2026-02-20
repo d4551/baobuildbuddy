@@ -37,6 +37,7 @@ CREATE TABLE `settings` (
 	`theme` text DEFAULT 'bao-light',
 	`language` text DEFAULT 'en',
 	`notifications` text DEFAULT '{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}',
+	`automation_settings` text DEFAULT '{"headless":true,"defaultTimeout":30,"screenshotRetention":7,"maxConcurrentRuns":1,"defaultBrowser":"chrome","enableSmartSelectors":true,"autoSaveScreenshots":true}',
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
@@ -230,6 +231,11 @@ CREATE TABLE `automation_runs` (
 	`output` text,
 	`screenshots` text,
 	`error` text,
+	`progress` integer DEFAULT 0,
+	`current_step` integer,
+	`total_steps` integer,
+	`started_at` text,
+	`completed_at` text,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );

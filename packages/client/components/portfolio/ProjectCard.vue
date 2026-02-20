@@ -1,15 +1,8 @@
 <script setup lang="ts">
+import type { PortfolioProject } from "@bao/shared";
+
 const props = defineProps<{
-  project: {
-    id: string;
-    title: string;
-    description: string;
-    technologies: string[];
-    imageUrl?: string;
-    featured?: boolean;
-    liveUrl?: string;
-    githubUrl?: string;
-  };
+  project: PortfolioProject;
 }>();
 
 const emit = defineEmits<{
@@ -31,8 +24,8 @@ const truncatedDescription = computed(() => {
   <div class="card bg-base-100 shadow-md hover:shadow-xl transition-shadow">
     <figure class="h-48 bg-base-300">
       <NuxtImg
-        v-if="project.imageUrl"
-        :src="project.imageUrl"
+        v-if="project.image"
+        :src="project.image"
         :alt="project.title"
         class="w-full h-full object-cover"
         sizes="sm:100vw md:50vw lg:33vw"

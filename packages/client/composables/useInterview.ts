@@ -7,7 +7,10 @@ import { STATE_KEYS } from "@bao/shared";
 export function useInterview() {
   const api = useApi();
   const sessions = useState<InterviewSession[]>(STATE_KEYS.INTERVIEW_SESSIONS, () => []);
-  const currentSession = useState<InterviewSession | null>(STATE_KEYS.INTERVIEW_CURRENT_SESSION, () => null);
+  const currentSession = useState<InterviewSession | null>(
+    STATE_KEYS.INTERVIEW_CURRENT_SESSION,
+    () => null,
+  );
   const stats = useState<Record<string, number> | null>(STATE_KEYS.INTERVIEW_STATS, () => null);
   const loading = useState(STATE_KEYS.INTERVIEW_LOADING, () => false);
 

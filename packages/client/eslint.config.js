@@ -6,7 +6,7 @@ export default [
   ...pluginVue.configs["flat/recommended"],
   ...tseslint.configs.recommended,
   {
-    ignores: ["node_modules/**", ".nuxt/**", ".output/**", "dist/**"],
+    ignores: ["node_modules/**", ".nuxt/**", "**/.nuxt/**", ".output/**", "dist/**", ".data/**"],
   },
   {
     files: ["**/*.vue"],

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { jobs, loading, searchJobs, refreshJobs, filters } = useJobs();
+const { jobs, loading, searchJobs, refreshJobs } = useJobs();
 const router = useRouter();
 
 const searchQuery = ref("");

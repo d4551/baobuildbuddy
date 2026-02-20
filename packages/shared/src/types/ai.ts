@@ -2,7 +2,9 @@
  * AI provider and multi-modal types
  */
 
-export type AIProviderType = "gemini" | "claude" | "openai" | "huggingface" | "local";
+export const AI_PROVIDER_IDS = ["gemini", "claude", "openai", "huggingface", "local"] as const;
+
+export type AIProviderType = (typeof AI_PROVIDER_IDS)[number];
 
 export interface AIProviderConfig {
   provider: AIProviderType;
@@ -41,6 +43,7 @@ export interface GenerateOptions {
   topK?: number;
   timeout?: number;
   systemPrompt?: string;
+  messages?: ChatMessage[];
 }
 
 export interface StreamCallbacks {

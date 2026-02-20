@@ -69,8 +69,8 @@ async function handleGenerate() {
     if (letter?.id) {
       router.push(`/cover-letter/${letter.id}`);
     }
-    } catch (error: unknown) {
-      $toast.error(getErrorMessage(error, "Failed to generate cover letter"));
+  } catch (error: unknown) {
+    $toast.error(getErrorMessage(error, "Failed to generate cover letter"));
   } finally {
     generating.value = false;
   }

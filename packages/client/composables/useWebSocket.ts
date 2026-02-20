@@ -6,7 +6,10 @@ import { STATE_KEYS } from "@bao/shared";
 export function useWebSocket() {
   const config = useRuntimeConfig();
   const connected = useState(STATE_KEYS.WS_CONNECTED, () => false);
-  const lastMessage = useState<Record<string, unknown> | null>(STATE_KEYS.WS_LAST_MESSAGE, () => null);
+  const lastMessage = useState<Record<string, unknown> | null>(
+    STATE_KEYS.WS_LAST_MESSAGE,
+    () => null,
+  );
   const requestUrl = useRequestURL();
 
   let socket: WebSocket | null = null;

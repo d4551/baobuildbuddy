@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PortfolioProject } from "@bao/shared";
+import type { PortfolioMetadata, PortfolioProject } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -12,20 +12,26 @@ const {
   loading,
   fetchPortfolio,
   updatePortfolio,
+  reorderProjects,
   addProject,
   updateProject,
   deleteProject,
   exportPortfolio,
 } = usePortfolio();
-const router = useRouter();
 const { $toast } = useNuxtApp();
+
+type PortfolioProjectReadonlyView<T> = {
+  [K in keyof T]: T[K] extends Array<infer U> ? readonly Readonly<U>[] : T[K];
+};
+
+type PortfolioProjectView = PortfolioProjectReadonlyView<PortfolioProject>;
 
 const showAddModal = ref(false);
 const editingProject = ref<PortfolioProject | null>(null);
 const draggedIndex = ref<number | null>(null);
 const projectDialogRef = ref<HTMLDialogElement | null>(null);
 
-const portfolioForm = reactive({
+const portfolioForm = reactive<PortfolioMetadata>({
   title: "",
   bio: "",
   email: "",
@@ -33,23 +39,27 @@ const portfolioForm = reactive({
 });
 
 const projectForm = reactive({
-  name: "",
+  title: "",
   description: "",
   technologies: [] as string[],
-  imageUrl: "",
-  projectUrl: "",
+  image: "",
+  liveUrl: "",
   featured: false,
 });
 
 onMounted(async () => {
   await fetchPortfolio();
-  if (portfolio.value) {
-    portfolioForm.title = portfolio.value.title || "";
-    portfolioForm.bio = portfolio.value.bio || "";
-    portfolioForm.email = portfolio.value.email || "";
-    portfolioForm.website = portfolio.value.website || "";
+  if (portfolio.value?.metadata) {
+    portfolioForm.title = portfolio.value.metadata.title || "";
+    portfolioForm.bio = portfolio.value.metadata.bio || "";
+    portfolioForm.email = portfolio.value.metadata.email || "";
+    portfolioForm.website = portfolio.value.metadata.website || "";
   }
 });
+
+const displayProjects = computed(() =>
+  projects.value.map((project) => normalizePortfolioProject(project as PortfolioProjectView)),
+);
 
 watch(showAddModal, (isOpen) => {
   const dialog = projectDialogRef.value;
@@ -73,38 +83,67 @@ async function handleSavePortfolio() {
 
 function openAddModal() {
   editingProject.value = null;
-  projectForm.name = "";
+  projectForm.title = "";
   projectForm.description = "";
   projectForm.technologies = [];
-  projectForm.imageUrl = "";
-  projectForm.projectUrl = "";
+  projectForm.image = "";
+  projectForm.liveUrl = "";
   projectForm.featured = false;
   showAddModal.value = true;
 }
 
+function normalizePortfolioProject(
+  project: PortfolioProject | PortfolioProjectView,
+): PortfolioProject {
+  return {
+    ...project,
+    technologies: [...(project.technologies || [])],
+    links: project.links ? [...project.links] : undefined,
+    media: project.media ? [...project.media] : undefined,
+    tags: project.tags ? [...project.tags] : undefined,
+    responsibilities: project.responsibilities ? [...project.responsibilities] : undefined,
+    outcomes: project.outcomes ? [...project.outcomes] : undefined,
+    platforms: project.platforms ? [...project.platforms] : undefined,
+    engines: project.engines ? [...project.engines] : undefined,
+  };
+}
+
 function openEditModal(project: PortfolioProject) {
   editingProject.value = project;
-  projectForm.name = project.name || "";
+  projectForm.title = project.title;
   projectForm.description = project.description || "";
   projectForm.technologies = project.technologies || [];
-  projectForm.imageUrl = project.imageUrl || "";
-  projectForm.projectUrl = project.projectUrl || "";
+  projectForm.image = project.image || "";
+  projectForm.liveUrl = project.liveUrl || "";
   projectForm.featured = project.featured || false;
   showAddModal.value = true;
 }
 
 async function handleSaveProject() {
-  if (projectForm.name.trim().length < 2) {
+  if (projectForm.title.trim().length < 2) {
     $toast.error("Project title must be at least 2 characters");
     return;
   }
 
+  const payload = {
+    title: projectForm.title,
+    description: projectForm.description,
+    technologies: projectForm.technologies,
+    image: projectForm.image || undefined,
+    liveUrl: projectForm.liveUrl || undefined,
+    featured: projectForm.featured,
+  };
+
   try {
     if (editingProject.value) {
-      await updateProject(editingProject.value.id, projectForm);
+      if (!editingProject.value.id) {
+        $toast.error("Project ID is missing");
+        return;
+      }
+      await updateProject(editingProject.value.id, payload);
       $toast.success("Project updated");
     } else {
-      await addProject(projectForm);
+      await addProject(payload);
       $toast.success("Project added");
     }
     showAddModal.value = false;
@@ -113,7 +152,11 @@ async function handleSaveProject() {
   }
 }
 
-async function handleDeleteProject(id: string) {
+async function handleDeleteProject(id?: string) {
+  if (!id) {
+    $toast.error("Project ID is missing");
+    return;
+  }
   if (confirm("Are you sure you want to delete this project?")) {
     try {
       await deleteProject(id);
@@ -144,7 +187,9 @@ function handleDrop(targetIndex: number) {
   const [removed] = newProjects.splice(draggedIndex.value, 1);
   newProjects.splice(targetIndex, 0, removed);
 
-  updatePortfolio({ projects: newProjects });
+  void reorderProjects(
+    newProjects.map((project) => project.id).filter((id): id is string => Boolean(id)),
+  );
   draggedIndex.value = null;
 }
 
@@ -250,7 +295,7 @@ function removeTechnology(index: number) {
             </button>
           </div>
 
-          <div v-if="projects.length === 0" class="alert">
+          <div v-if="displayProjects.length === 0" class="alert">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -259,7 +304,7 @@ function removeTechnology(index: number) {
 
           <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div
-              v-for="(project, idx) in projects"
+              v-for="(project, idx) in displayProjects"
               :key="project.id"
               class="card bg-base-100 cursor-move"
               draggable="true"
@@ -267,10 +312,10 @@ function removeTechnology(index: number) {
               @dragover.prevent
               @drop="handleDrop(idx)"
             >
-              <figure v-if="project.imageUrl" class="h-48">
+              <figure v-if="project.image" class="h-48">
                 <NuxtImg
-                  :src="project.imageUrl"
-                  :alt="project.name"
+                  :src="project.image"
+                  :alt="project.title"
                   class="w-full h-full object-cover"
                   sizes="sm:100vw md:50vw lg:33vw"
                   format="webp"
@@ -278,7 +323,7 @@ function removeTechnology(index: number) {
               </figure>
               <div class="card-body">
                 <div class="flex items-start justify-between gap-2">
-                  <h3 class="card-title text-base">{{ project.name }}</h3>
+                  <h3 class="card-title text-base">{{ project.title }}</h3>
                   <svg class="w-5 h-5 text-base-content/40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
                   </svg>
@@ -303,7 +348,7 @@ function removeTechnology(index: number) {
                   <span v-if="project.featured" class="badge badge-primary badge-xs">
                     Featured
                   </span>
-                  <a v-if="project.projectUrl" :href="project.projectUrl" target="_blank" class="link link-primary text-xs">
+                  <a v-if="project.liveUrl" :href="project.liveUrl" target="_blank" class="link link-primary text-xs">
                     View Project
                   </a>
                 </div>
@@ -338,9 +383,9 @@ function removeTechnology(index: number) {
 
         <div class="space-y-4">
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Project Name</legend>
+            <legend class="fieldset-legend">Project Title</legend>
             <input
-              v-model="projectForm.name"
+              v-model="projectForm.title"
               type="text"
               placeholder="e.g. Dungeon Crawler RPG"
               class="input w-full"
@@ -360,7 +405,7 @@ function removeTechnology(index: number) {
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Project URL (Optional)</legend>
             <input
-              v-model="projectForm.projectUrl"
+              v-model="projectForm.liveUrl"
               type="url"
               placeholder="https://..."
               class="input w-full"
@@ -370,7 +415,7 @@ function removeTechnology(index: number) {
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Image URL (Optional)</legend>
             <input
-              v-model="projectForm.imageUrl"
+              v-model="projectForm.image"
               type="url"
               placeholder="https://..."
               class="input w-full"
@@ -428,7 +473,7 @@ function removeTechnology(index: number) {
           </button>
           <button
             class="btn btn-primary"
-            :disabled="!projectForm.name || !projectForm.description"
+            :disabled="!projectForm.title || !projectForm.description"
             @click="handleSaveProject"
           >
             {{ editingProject ? "Update" : "Add" }} Project

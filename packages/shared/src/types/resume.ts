@@ -67,7 +67,13 @@ export interface GamingExperience {
   shippedTitles?: string;
 }
 
-export type ResumeTemplate = "modern" | "classic" | "creative" | "minimal" | "gaming";
+export type ResumeTemplate =
+  | "modern"
+  | "classic"
+  | "creative"
+  | "minimal"
+  | "google-xyz"
+  | "gaming";
 
 export type ExportFormat = "pdf" | "docx" | "html" | "json" | "markdown";
 

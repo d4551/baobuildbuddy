@@ -2,6 +2,21 @@ import type { ResumeData } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { getStoredApiKey } from "~/plugins/eden";
 
+type ResumeSynthesisSuccess = Partial<ResumeData> & {
+  id: string;
+  name?: string;
+  personalInfo?: ResumeData["personalInfo"];
+};
+
+type ResumeSynthesisError = {
+  error?: string;
+  details?: string;
+};
+
+const isResumeSynthesisError = (
+  value: ResumeSynthesisSuccess | ResumeSynthesisError,
+): value is ResumeSynthesisError => "error" in value && typeof value.error === "string";
+
 /**
  * Resume management composable.
  */
@@ -127,30 +142,33 @@ export function useResume() {
     experienceLevel?: string;
   }) {
     const key = getStoredApiKey();
-    const res = await $fetch<{ questions?: Array<{ id: string; question: string; category: string }>; error?: string }>(
-      "/api/resumes/from-questions/generate",
-      {
-        method: "POST",
-        body: config,
-        headers: key ? { Authorization: `Bearer ${key}` } : {},
-      },
-    );
+    const res = await $fetch<{
+      questions?: Array<{ id: string; question: string; category: string }>;
+      error?: string;
+    }>("/api/resumes/from-questions/generate", {
+      method: "POST",
+      body: config,
+      headers: key ? { Authorization: `Bearer ${key}` } : {},
+    });
     if ("error" in res && res.error) throw new Error(res.error);
     return res.questions ?? [];
   }
 
-  async function synthesizeCvResume(questionsAndAnswers: Array<{ id: string; question: string; answer: string; category: string }>) {
+  async function synthesizeCvResume(
+    questionsAndAnswers: Array<{ id: string; question: string; answer: string; category: string }>,
+  ) {
     const key = getStoredApiKey();
-    const res = await $fetch<
-      | { id: string; name?: string; personalInfo?: unknown; [k: string]: unknown }
-      | { error?: string; details?: string }
-    >("/api/resumes/from-questions/synthesize", {
+    const res = await $fetch<ResumeSynthesisSuccess | ResumeSynthesisError>(
+      "/api/resumes/from-questions/synthesize",
+      {
       method: "POST",
       body: { questionsAndAnswers },
       headers: key ? { Authorization: `Bearer ${key}` } : {},
-    });
-    if ("error" in res && res.error) throw new Error(String(res.details ?? res.error ?? "Unknown error"));
-    return res as { id: string; name?: string; personalInfo?: unknown; [k: string]: unknown };
+      },
+    );
+    if (isResumeSynthesisError(res) && res.error)
+      throw new Error(String(res.details ?? res.error ?? "Unknown error"));
+    return res;
   }
 
   return {

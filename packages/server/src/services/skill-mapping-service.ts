@@ -115,6 +115,23 @@ export class SkillMappingService {
   }
 
   /**
+   * Delete a skill mapping by ID.
+   *
+   * @param id - The mapping identifier to remove
+   * @returns true when a row was deleted, false when nothing matched
+   */
+  async deleteMapping(id: string): Promise<boolean> {
+    const existing = await this.getMapping(id);
+    if (!existing) {
+      return false;
+    }
+
+    await db.delete(skillMappings).where(eq(skillMappings.id, id));
+
+    return true;
+  }
+
+  /**
    * Get career pathways grouped by category
    */
   async getPathways(): Promise<CareerPathway[]> {

@@ -27,8 +27,7 @@ export function useSpeech() {
     loadVoices();
 
     const SpeechRecognitionCtor =
-      typeof window !== "undefined" &&
-      (window.SpeechRecognition || window.webkitSpeechRecognition);
+      typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
     if (SpeechRecognitionCtor) {
       recognition = new (SpeechRecognitionCtor as new () => SpeechRecognition)();
       recognition.continuous = true;
@@ -62,7 +61,13 @@ export function useSpeech() {
 
   function speak(
     text: string,
-    opts?: { rate?: number; pitch?: number; volume?: number; voice?: SpeechSynthesisVoice; lang?: string },
+    opts?: {
+      rate?: number;
+      pitch?: number;
+      volume?: number;
+      voice?: SpeechSynthesisVoice;
+      lang?: string;
+    },
   ) {
     if (import.meta.server || !synthesis) return;
 
@@ -121,8 +126,7 @@ export function useSpeech() {
   const isSupported = computed(() => {
     if (import.meta.server) return false;
     const SR =
-      typeof window !== "undefined" &&
-      (window.SpeechRecognition || window.webkitSpeechRecognition);
+      typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
     return !!SR && !!speechSynthesis;
   });
 

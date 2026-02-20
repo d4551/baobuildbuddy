@@ -21,7 +21,9 @@ setInterval(async () => {
   try {
     const aggregator = new JobAggregator();
     const result = await aggregator.refreshJobs();
-    console.log(`[JobRefresh] ${result.new} new, ${result.updated} updated (${result.total} total)`);
+    console.log(
+      `[JobRefresh] ${result.new} new, ${result.updated} updated (${result.total} total)`,
+    );
   } catch (e) {
     console.error(`[JobRefresh] Failed: ${e instanceof Error ? e.message : e}`);
   }

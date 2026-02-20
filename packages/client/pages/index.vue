@@ -1,219 +1,401 @@
 <script setup lang="ts">
-import type { DailyChallenge, UserGamificationData } from "@bao/shared";
+import type {
+  DailyChallenge,
+  DashboardStats,
+  UserGamificationData,
+  UserProfile,
+} from "@bao/shared";
+import { APP_BRAND, getXPProgress } from "@bao/shared";
+import {
+  DASHBOARD_ASYNC_DATA_KEY,
+  DASHBOARD_COPY,
+  DASHBOARD_QUICK_ACTIONS,
+  DASHBOARD_RECENT_ACTIVITY_LIMIT,
+  DASHBOARD_STAT_CARDS,
+  DASHBOARD_TIME_CONSTANTS,
+  type DashboardStatKey,
+  getDashboardActivityEmoji,
+  getWelcomeHeading,
+} from "~/constants/dashboard";
+import { getErrorMessage } from "~/utils/errors";
 
-const { profile, fetchProfile, loading: userLoading } = useUser();
-const { jobs } = useJobs();
-const { resumes } = useResume();
-const { sessions } = useInterview();
+interface DashboardActivity {
+  readonly type: string;
+  readonly description: string;
+  readonly timestamp: Date;
+}
+
+interface DashboardChallengeViewModel {
+  readonly id: string;
+  readonly name: string;
+  readonly xpReward: number;
+  readonly completed: boolean;
+  readonly progress: number;
+  readonly goal: number;
+}
+
+interface DashboardMetrics {
+  readonly savedJobs: number;
+  readonly resumeCount: number;
+  readonly interviewSessionCount: number;
+}
+
+interface DashboardViewModel {
+  readonly profile: UserProfile | null;
+  readonly gamification: UserGamificationData | null;
+  readonly dailyChallenge: DashboardChallengeViewModel | null;
+  readonly recentActivity: readonly DashboardActivity[];
+  readonly metrics: DashboardMetrics;
+}
+
+interface DailyChallengesResponse {
+  readonly challenges: DailyChallenge[];
+  readonly completedCount: number;
+  readonly totalCount: number;
+  readonly date: string;
+}
+
+interface EdenErrorPayload {
+  readonly message?: string;
+}
+
+interface EdenErrorEnvelope {
+  readonly value?: EdenErrorPayload;
+}
+
+interface EdenResult<T> {
+  readonly data: T;
+  readonly error?: EdenErrorEnvelope | null;
+}
+
+type DashboardUiState = "idle" | "loading" | "error" | "empty" | "success";
+
 const api = useApi();
-
-const gamification = ref<UserGamificationData | null>(null);
-const recentActivity = ref<Array<{ type: string; description: string; timestamp: Date }>>([]);
-const dailyChallenge = ref<DailyChallenge | null>(null);
+const { $toast } = useNuxtApp();
 
 if (import.meta.server) {
   useServerSeoMeta({
-    title: "BaoBuildBuddy Dashboard",
-    description: "Track jobs, resumes, interview practice, and career progress in one dashboard.",
+    title: `${APP_BRAND.name} Dashboard`,
+    description: DASHBOARD_COPY.seoDescription,
   });
 }
 
-await useAsyncData("dashboard-bootstrap", async () => {
-  await fetchProfile();
-  await fetchGamification();
-  await fetchRecentActivity();
-  return true;
-}, { lazy: false });
+const { data, status, error, refresh } = await useAsyncData<DashboardViewModel>(
+  DASHBOARD_ASYNC_DATA_KEY,
+  fetchDashboardViewModel,
+  {
+    lazy: false,
+    server: true,
+  },
+);
 
-async function fetchGamification() {
-  try {
-    const { data, error } = await api.gamification.progress.get();
-    if (error) throw new Error("Failed to fetch gamification");
-    gamification.value = data;
+const dashboard = computed(() => data.value ?? null);
 
-    // Fetch daily challenges separately
-    const { data: challengeData } = await api.gamification.challenges.get();
-    if (challengeData?.challenges) {
-      dailyChallenge.value =
-        challengeData.challenges.find((c: DailyChallenge) => !c.completed) ||
-        challengeData.challenges[0];
-    }
-  } catch (e) {
-    const { $toast } = useNuxtApp();
-    $toast.error("Failed to load gamification data");
-  }
-}
+const uiState = computed<DashboardUiState>(() => {
+  if (status.value === "pending") return "loading";
+  if (status.value === "error") return "error";
+  if (status.value === "idle") return "idle";
+  if (!dashboard.value || isDashboardEmpty(dashboard.value)) return "empty";
+  return "success";
+});
 
-async function fetchRecentActivity() {
-  try {
-    const { data, error } = await api.gamification.progress.get();
-    if (error) throw new Error("Failed to fetch activity");
-    const stats = data?.stats as Record<string, unknown>;
-    const history = (stats?.actionHistory as Array<Record<string, unknown>>) || [];
-    recentActivity.value = history
-      .slice(-5)
-      .reverse()
-      .map((action: Record<string, unknown>) => ({
-        type: (action.type as string) || "activity",
-        description: (action.reason as string) || (action.type as string) || "Activity",
-        timestamp: new Date((action.timestamp as string) || Date.now()),
-      }));
-  } catch (e) {
-    recentActivity.value = [];
-  }
-}
-
-function formatTimeAgo(date: Date) {
-  const now = new Date();
-  const diffMs = now.getTime() - new Date(date).getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  return `${diffDays}d ago`;
-}
+const welcomeHeading = computed(() => getWelcomeHeading(dashboard.value?.profile?.name));
 
 const levelProgress = computed(() => {
-  if (!gamification.value) return 0;
-  return (gamification.value.xp / gamification.value.xpForNextLevel) * 100;
+  const gamification = dashboard.value?.gamification;
+  if (!gamification) return 0;
+  return Math.round(getXPProgress(gamification.xp).progress * 100);
 });
+
+const xpTarget = computed(() => {
+  const gamification = dashboard.value?.gamification;
+  if (!gamification) return 100;
+  const { nextLevel } = getXPProgress(gamification.xp);
+  return nextLevel ? nextLevel.minXP : gamification.xp;
+});
+
+watch(error, (nextError) => {
+  if (import.meta.client && nextError) {
+    $toast.error(getErrorMessage(nextError, DASHBOARD_COPY.loadErrorFallback));
+  }
+});
+
+async function retryDashboardLoad() {
+  await refresh();
+}
+
+function getMetricValue(statKey: DashboardStatKey): number {
+  const metrics = dashboard.value?.metrics;
+  if (!metrics) return 0;
+
+  switch (statKey) {
+    case "savedJobs":
+      return metrics.savedJobs;
+    case "resumeCount":
+      return metrics.resumeCount;
+    case "interviewSessionCount":
+      return metrics.interviewSessionCount;
+    default:
+      return 0;
+  }
+}
+
+function isDashboardEmpty(viewModel: DashboardViewModel): boolean {
+  return (
+    viewModel.metrics.savedJobs === 0 &&
+    viewModel.metrics.resumeCount === 0 &&
+    viewModel.metrics.interviewSessionCount === 0 &&
+    viewModel.dailyChallenge === null &&
+    viewModel.recentActivity.length === 0
+  );
+}
+
+function mapDailyChallenge(challenge: DailyChallenge): DashboardChallengeViewModel {
+  const goal = typeof challenge.goal === "number" && challenge.goal > 0 ? challenge.goal : 1;
+  const progress =
+    typeof challenge.progress === "number" ? challenge.progress : challenge.completed ? goal : 0;
+
+  return {
+    id: challenge.id,
+    name: challenge.name,
+    xpReward: challenge.xpReward,
+    completed: challenge.completed,
+    progress,
+    goal,
+  };
+}
+
+function pickDailyChallenge(
+  challenges: readonly DailyChallenge[],
+): DashboardChallengeViewModel | null {
+  if (challenges.length === 0) return null;
+  const currentChallenge = challenges.find((challenge) => !challenge.completed) ?? challenges[0];
+  return mapDailyChallenge(currentChallenge);
+}
+
+function resolveActivityType(action: string): string {
+  const normalizedAction = action.toLowerCase();
+  if (normalizedAction.includes("job")) return "job";
+  if (normalizedAction.includes("resume")) return "resume";
+  if (normalizedAction.includes("interview")) return "interview";
+  if (normalizedAction.includes("portfolio")) return "portfolio";
+  return "activity";
+}
+
+function getRecentActivity(progress: UserGamificationData | null): DashboardActivity[] {
+  if (!progress?.stats || typeof progress.stats !== "object") {
+    return [];
+  }
+
+  const actionHistory = (progress.stats as Record<string, unknown>).actionHistory;
+  if (!Array.isArray(actionHistory)) {
+    return [];
+  }
+
+  return actionHistory
+    .slice(-DASHBOARD_RECENT_ACTIVITY_LIMIT)
+    .reverse()
+    .map((entry): DashboardActivity | null => {
+      if (!entry || typeof entry !== "object") {
+        return null;
+      }
+
+      const normalizedEntry = entry as Record<string, unknown>;
+      const action =
+        typeof normalizedEntry.action === "string" ? normalizedEntry.action : "Activity";
+      const timestampRaw =
+        typeof normalizedEntry.timestamp === "string" ? normalizedEntry.timestamp : "";
+      const timestamp = timestampRaw ? new Date(timestampRaw) : new Date();
+      if (Number.isNaN(timestamp.getTime())) {
+        return null;
+      }
+
+      return {
+        type: resolveActivityType(action),
+        description: action,
+        timestamp,
+      };
+    })
+    .filter((entry): entry is DashboardActivity => entry !== null);
+}
+
+function formatTimeAgo(timestamp: Date): string {
+  const elapsed = Date.now() - timestamp.getTime();
+
+  if (elapsed < DASHBOARD_TIME_CONSTANTS.millisecondsPerHour) {
+    const minutes = Math.max(
+      1,
+      Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerMinute),
+    );
+    return `${minutes}m ago`;
+  }
+
+  if (elapsed < DASHBOARD_TIME_CONSTANTS.millisecondsPerDay) {
+    const hours = Math.max(1, Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerHour));
+    return `${hours}h ago`;
+  }
+
+  const days = Math.max(1, Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerDay));
+  return `${days}d ago`;
+}
+
+async function fetchDashboardViewModel(): Promise<DashboardViewModel> {
+  const [profile, stats, gamification, challengeResponse] = await Promise.all([
+    requestData<UserProfile>(
+      api.user.profile.get() as Promise<EdenResult<UserProfile>>,
+      "Failed to load user profile",
+    ),
+    requestData<DashboardStats>(
+      api.stats.dashboard.get() as Promise<EdenResult<DashboardStats>>,
+      "Failed to load dashboard metrics",
+    ),
+    requestData<UserGamificationData>(
+      api.gamification.progress.get() as Promise<EdenResult<UserGamificationData>>,
+      "Failed to load gamification progress",
+    ),
+    requestData<DailyChallengesResponse>(
+      api.gamification.challenges.get() as Promise<EdenResult<DailyChallengesResponse>>,
+      "Failed to load daily challenges",
+    ),
+  ]);
+
+  return {
+    profile,
+    gamification,
+    dailyChallenge: pickDailyChallenge(challengeResponse.challenges),
+    recentActivity: getRecentActivity(gamification),
+    metrics: {
+      savedJobs: stats.jobs.saved,
+      resumeCount: stats.resumes.count,
+      interviewSessionCount: stats.interviews.totalSessions,
+    },
+  };
+}
+
+async function requestData<T>(
+  request: Promise<EdenResult<T>>,
+  fallbackMessage: string,
+): Promise<T> {
+  const response = await request;
+  if (response.error) {
+    throw new Error(response.error.value?.message ?? fallbackMessage);
+  }
+  return response.data;
+}
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+  <section class="space-y-6" aria-labelledby="dashboard-title">
+    <header class="space-y-1">
+      <h1 id="dashboard-title" class="text-3xl font-bold">{{ DASHBOARD_COPY.pageTitle }}</h1>
+      <p class="text-sm text-base-content/60">{{ DASHBOARD_COPY.metricsSummaryLabel }}</p>
+    </header>
 
-    <LoadingSkeleton v-if="userLoading" :lines="5" />
+    <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" :lines="6" />
+
+    <div v-else-if="uiState === 'error'" class="alert alert-error" role="alert">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span>{{ getErrorMessage(error, DASHBOARD_COPY.loadErrorFallback) }}</span>
+      <button type="button" class="btn btn-sm" @click="retryDashboardLoad">
+        {{ DASHBOARD_COPY.retryButtonLabel }}
+      </button>
+    </div>
+
+    <div v-else-if="uiState === 'empty'" class="card bg-base-200 card-border">
+      <div class="card-body items-start gap-3">
+        <h2 class="card-title">{{ DASHBOARD_COPY.emptyStateTitle }}</h2>
+        <p class="text-sm text-base-content/70">{{ DASHBOARD_COPY.emptyStateDescription }}</p>
+        <div class="card-actions">
+          <NuxtLink to="/setup" class="btn btn-primary">{{ DASHBOARD_COPY.setupCtaLabel }}</NuxtLink>
+        </div>
+      </div>
+    </div>
 
     <div v-else class="space-y-6">
-      <!-- Welcome Card -->
-      <div class="card bg-gradient-to-br from-primary to-secondary text-primary-content">
-        <div class="card-body">
-          <h2 class="card-title text-2xl">
-            Welcome{{ profile?.name ? `, ${profile.name}` : "" }}!
-          </h2>
-          <p class="text-lg opacity-90">Your AI-powered career assistant for the video game industry.</p>
-          <div v-if="!profile?.name" class="card-actions mt-2">
-            <NuxtLink to="/setup" class="btn btn-primary-content">Complete Setup</NuxtLink>
+      <section class="card bg-gradient-to-br from-primary to-secondary text-primary-content">
+        <div class="card-body gap-3">
+          <h2 class="card-title text-2xl">{{ welcomeHeading }}</h2>
+          <p class="text-base opacity-90">{{ DASHBOARD_COPY.welcomeDescription }}</p>
+          <div v-if="!dashboard?.profile?.name" class="card-actions mt-2">
+            <NuxtLink to="/setup" class="btn btn-primary-content">{{ DASHBOARD_COPY.setupCtaLabel }}</NuxtLink>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- XP Widget -->
-      <div v-if="gamification" class="card bg-base-200">
+      <section v-if="dashboard?.gamification" class="card bg-base-200">
         <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <span class="text-2xl">🎮</span>
+          <div class="flex items-center justify-between gap-6">
+            <div class="flex-1 space-y-2">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl" aria-hidden="true">🎮</span>
                 <div>
-                  <p class="text-sm text-base-content/60">Level {{ gamification.level }}</p>
-                  <p class="font-bold">{{ gamification.xp }} / {{ gamification.xpForNextLevel }} XP</p>
+                  <p class="text-sm text-base-content/60">
+                    {{ DASHBOARD_COPY.levelLabel }} {{ dashboard.gamification.level }}
+                  </p>
+                  <p class="font-bold">{{ dashboard.gamification.xp }} / {{ xpTarget }} XP</p>
                 </div>
               </div>
-              <progress
-                class="progress progress-primary w-full"
-                :value="levelProgress"
-                max="100"
-              ></progress>
+              <progress class="progress progress-primary w-full" :value="levelProgress" max="100"></progress>
             </div>
 
-            <div v-if="gamification.currentStreak" class="text-center ml-6">
-              <div class="text-3xl">🔥</div>
-              <p class="text-2xl font-bold">{{ gamification.currentStreak }}</p>
-              <p class="text-xs text-base-content/60">day streak</p>
+            <div v-if="dashboard.gamification.currentStreak" class="text-center">
+              <div class="text-3xl" aria-hidden="true">🔥</div>
+              <p class="text-2xl font-bold">{{ dashboard.gamification.currentStreak }}</p>
+              <p class="text-xs text-base-content/60">{{ DASHBOARD_COPY.streakLabel }}</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Jobs -->
-        <div class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors" @click="$router.push('/jobs')">
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <NuxtLink
+          v-for="statCard in DASHBOARD_STAT_CARDS"
+          :key="statCard.id"
+          :to="statCard.to"
+          class="card bg-base-200 hover:bg-base-300 transition-colors"
+          :aria-label="`${statCard.title}: ${getMetricValue(statCard.statKey)}. ${statCard.ctaLabel}`"
+        >
           <div class="card-body">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-base-content/60 mb-1">Job Opportunities</p>
-                <p class="text-3xl font-bold">{{ jobs.length || 0 }}</p>
+                <p class="text-sm text-base-content/60 mb-1">{{ statCard.title }}</p>
+                <p class="text-3xl font-bold">{{ getMetricValue(statCard.statKey) }}</p>
               </div>
-              <svg class="w-12 h-12 text-primary opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              <svg class="w-12 h-12 opacity-20" :class="statCard.accentClass" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="statCard.iconPath" />
               </svg>
             </div>
-            <div class="flex items-center gap-2 mt-2">
-              <span class="text-xs text-success">View all jobs</span>
-              <svg class="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
+            <p class="text-xs mt-2" :class="statCard.accentClass">{{ statCard.ctaLabel }}</p>
           </div>
-        </div>
+        </NuxtLink>
+      </section>
 
-        <!-- Resumes -->
-        <div class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors" @click="$router.push('/resume')">
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div v-if="dashboard?.dailyChallenge" class="card bg-base-200">
           <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-base-content/60 mb-1">Resumes</p>
-                <p class="text-3xl font-bold">{{ resumes.length || 0 }}</p>
-              </div>
-              <svg class="w-12 h-12 text-secondary opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <div class="flex items-center gap-2 mt-2">
-              <span class="text-xs text-secondary">Build resume</span>
-              <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Interviews -->
-        <div class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors" @click="$router.push('/interview')">
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-base-content/60 mb-1">Practice Sessions</p>
-                <p class="text-3xl font-bold">{{ sessions.length || 0 }}</p>
-              </div>
-              <svg class="w-12 h-12 text-accent opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </div>
-            <div class="flex items-center gap-2 mt-2">
-              <span class="text-xs text-accent">Practice now</span>
-              <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Daily Challenge -->
-        <div v-if="dailyChallenge" class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title text-lg mb-3">Daily Challenge</h2>
+            <h2 class="card-title text-lg mb-3">{{ DASHBOARD_COPY.dailyChallengeTitle }}</h2>
             <div class="card bg-base-100">
-              <div class="card-body p-4">
-                <div class="flex items-center justify-between mb-2">
-                  <h3 class="font-semibold">{{ dailyChallenge.title }}</h3>
-                  <span class="badge badge-primary">+{{ dailyChallenge.xp }} XP</span>
+              <div class="card-body p-4 gap-3">
+                <div class="flex items-center justify-between gap-3">
+                  <h3 class="font-semibold">{{ dashboard.dailyChallenge.name }}</h3>
+                  <span class="badge badge-primary">+{{ dashboard.dailyChallenge.xpReward }} XP</span>
                 </div>
                 <div class="flex items-center gap-3">
                   <progress
-                    class="progress progress-primary flex-1"
-                    :value="dailyChallenge.progress"
-                    :max="dailyChallenge.goal"
+                    class="progress flex-1"
+                    :class="dashboard.dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
+                    :value="dashboard.dailyChallenge.progress"
+                    :max="dashboard.dailyChallenge.goal"
                   ></progress>
                   <span class="text-sm font-medium">
-                    {{ dailyChallenge.progress }} / {{ dailyChallenge.goal }}
+                    {{ dashboard.dailyChallenge.progress }} / {{ dashboard.dailyChallenge.goal }}
                   </span>
                 </div>
               </div>
@@ -221,21 +403,18 @@ const levelProgress = computed(() => {
           </div>
         </div>
 
-        <!-- Recent Activity -->
         <div class="card bg-base-200">
           <div class="card-body">
-            <h2 class="card-title text-lg mb-3">Recent Activity</h2>
+            <h2 class="card-title text-lg mb-3">{{ DASHBOARD_COPY.recentActivityTitle }}</h2>
             <div class="space-y-3">
               <div
-                v-for="(activity, idx) in recentActivity"
-                :key="idx"
+                v-for="(activity, index) in dashboard?.recentActivity"
+                :key="`${activity.timestamp.toISOString()}-${index}`"
                 class="flex items-start gap-3"
               >
                 <div class="avatar placeholder">
                   <div class="bg-primary text-primary-content rounded-full w-8">
-                    <span class="text-xs">
-                      {{ activity.type === 'job-application' ? '📝' : activity.type === 'resume' ? '📄' : '🎤' }}
-                    </span>
+                    <span class="text-xs">{{ getDashboardActivityEmoji(activity.type) }}</span>
                   </div>
                 </div>
                 <div class="flex-1">
@@ -244,49 +423,36 @@ const levelProgress = computed(() => {
                 </div>
               </div>
 
-              <div v-if="recentActivity.length === 0" class="text-center text-base-content/60 py-4">
-                <p class="text-sm">No recent activity</p>
-              </div>
+              <p
+                v-if="(dashboard?.recentActivity.length ?? 0) === 0"
+                class="text-sm text-center text-base-content/60 py-4"
+              >
+                {{ DASHBOARD_COPY.recentActivityEmptyLabel }}
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Quick Actions -->
-      <div class="card bg-base-200">
+      <section class="card bg-base-200">
         <div class="card-body">
-          <h2 class="card-title text-lg mb-4">Quick Actions</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <NuxtLink to="/jobs" class="btn btn-outline">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <h2 class="card-title text-lg mb-4">{{ DASHBOARD_COPY.quickActionsTitle }}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            <NuxtLink
+              v-for="action in DASHBOARD_QUICK_ACTIONS"
+              :key="action.id"
+              :to="action.to"
+              class="btn btn-outline justify-start sm:justify-center"
+              :aria-label="action.label"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.iconPath" />
               </svg>
-              Browse Jobs
-            </NuxtLink>
-
-            <NuxtLink to="/resume" class="btn btn-outline">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Build Resume
-            </NuxtLink>
-
-            <NuxtLink to="/interview" class="btn btn-outline">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              Practice Interview
-            </NuxtLink>
-
-            <NuxtLink to="/ai/chat" class="btn btn-outline">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              Chat with BaoBuildBuddy
+              {{ action.label }}
             </NuxtLink>
           </div>
         </div>
-      </div>
+      </section>
     </div>
-  </div>
+  </section>
 </template>

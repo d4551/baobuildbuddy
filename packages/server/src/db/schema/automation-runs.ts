@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 /**
  * Persisted audit trail for automation run execution and output.
@@ -14,6 +14,12 @@ export const automationRuns = sqliteTable("automation_runs", {
   output: text("output", { mode: "json" }).$type<Record<string, unknown>>(),
   screenshots: text("screenshots", { mode: "json" }).$type<string[]>(),
   error: text("error"),
+  // Progress tracking fields for WebSocket streaming
+  progress: integer("progress").default(0),
+  currentStep: integer("current_step"),
+  totalSteps: integer("total_steps"),
+  startedAt: text("started_at"),
+  completedAt: text("completed_at"),
   createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
 });

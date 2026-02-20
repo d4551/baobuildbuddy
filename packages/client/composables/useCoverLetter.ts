@@ -7,7 +7,10 @@ import { STATE_KEYS } from "@bao/shared";
 export function useCoverLetter() {
   const api = useApi();
   const coverLetters = useState<CoverLetterData[]>(STATE_KEYS.COVERLETTERS_LIST, () => []);
-  const currentLetter = useState<CoverLetterData | null>(STATE_KEYS.COVERLETTER_CURRENT, () => null);
+  const currentLetter = useState<CoverLetterData | null>(
+    STATE_KEYS.COVERLETTER_CURRENT,
+    () => null,
+  );
   const loading = useState(STATE_KEYS.COVERLETTER_LOADING, () => false);
 
   async function fetchCoverLetters() {

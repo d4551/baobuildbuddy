@@ -7,7 +7,7 @@ import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import { jobs } from "../db/schema/jobs";
 import { resumes } from "../db/schema/resumes";
-import { settings } from "../db/schema/settings";
+import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
 import {
@@ -17,12 +17,49 @@ import {
   resumeEnhancePrompt,
   resumeScorePrompt,
 } from "../services/ai/prompts";
+import {
+  AutomationConcurrencyLimitError,
+  AutomationDependencyMissingError,
+  AutomationValidationError,
+  applicationAutomationService,
+} from "../services/automation/application-automation-service";
+
+const HTTP_STATUS_BAD_REQUEST = 400;
+const HTTP_STATUS_NOT_FOUND = 404;
+const HTTP_STATUS_CONFLICT = 409;
+const HTTP_STATUS_UNPROCESSABLE_ENTITY = 422;
+const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
+
+const mapAutomationRouteError = (error: unknown) => {
+  if (error instanceof AutomationValidationError) {
+    return {
+      status: HTTP_STATUS_UNPROCESSABLE_ENTITY,
+      message: error.message,
+    };
+  }
+  if (error instanceof AutomationDependencyMissingError) {
+    return {
+      status: HTTP_STATUS_NOT_FOUND,
+      message: error.message,
+    };
+  }
+  if (error instanceof AutomationConcurrencyLimitError) {
+    return {
+      status: HTTP_STATUS_CONFLICT,
+      message: error.message,
+    };
+  }
+  return {
+    status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    message: error instanceof Error ? error.message : "Failed to start automation",
+  };
+};
 
 /**
  * Helper function to load settings and create AI service
  */
 async function getAIService() {
-  const settingsRows = await db.select().from(settings).where(eq(settings.id, "default"));
+  const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
 
   const settingsRow = settingsRows[0];
   const aiService = AIService.fromSettings(settingsRow);
@@ -46,10 +83,100 @@ function safeJSONParse<T>(jsonString: string, fallback: T): T {
   }
 }
 
+const jsonValueSchema = t.Recursive((Self) =>
+  t.Union([
+    t.String(),
+    t.Number(),
+    t.Boolean(),
+    t.Null(),
+    t.Array(Self),
+    t.Record(t.String(), Self),
+  ]),
+);
+
+interface ExperienceEntry {
+  title?: string;
+  company?: string;
+  duration?: string;
+  description?: string;
+  achievements?: string[];
+  [key: string]: unknown;
+}
+
+interface EducationEntry {
+  degree?: string;
+  institution?: string;
+  year?: string;
+  [key: string]: unknown;
+}
+
+interface ProjectEntry {
+  name?: string;
+  title?: string;
+  description?: string;
+  technologies?: string[];
+  [key: string]: unknown;
+}
+
+/**
+ * Loosely-typed resume record coming from the database.
+ * We deliberately keep this permissive so that `serializeResume` works
+ * regardless of the exact Drizzle row shape.
+ */
+interface ResumeRecord {
+  personalInfo?: Record<string, unknown> | null;
+  summary?: string | null;
+  experience?: unknown[] | null;
+  education?: unknown[] | null;
+  skills?: Record<string, unknown> | null;
+  projects?: unknown[] | null;
+  gamingExperience?: Record<string, unknown> | null;
+  [key: string]: unknown;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === "string" ? value : undefined;
+
+const collectStringArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+
+const parseExperienceEntries = (value: unknown[] | null | undefined): ExperienceEntry[] =>
+  Array.isArray(value)
+    ? value.filter(isRecord).map((entry) => ({
+        title: asString(entry.title),
+        company: asString(entry.company),
+        duration: asString(entry.duration),
+        description: asString(entry.description),
+        achievements: collectStringArray(entry.achievements),
+      }))
+    : [];
+
+const parseEducationEntries = (value: unknown[] | null | undefined): EducationEntry[] =>
+  Array.isArray(value)
+    ? value.filter(isRecord).map((entry) => ({
+        degree: asString(entry.degree),
+        institution: asString(entry.institution),
+        year: asString(entry.year),
+      }))
+    : [];
+
+const parseProjectEntries = (value: unknown[] | null | undefined): ProjectEntry[] =>
+  Array.isArray(value)
+    ? value.filter(isRecord).map((entry) => ({
+        name: asString(entry.name),
+        title: asString(entry.title),
+        description: asString(entry.description),
+        technologies: collectStringArray(entry.technologies),
+      }))
+    : [];
+
 /**
  * Serialize resume data to text for AI analysis
  */
-function serializeResume(resume: unknown): string {
+function serializeResume(resume: ResumeRecord): string {
   const sections: string[] = [];
 
   // Personal Info
@@ -65,14 +192,15 @@ function serializeResume(resume: unknown): string {
   }
 
   // Experience
-  if (resume.experience && resume.experience.length > 0) {
+  const experienceEntries = parseExperienceEntries(resume.experience);
+  if (experienceEntries.length > 0) {
     sections.push("\nWork Experience:");
-    for (const [idx, exp] of Object.entries(resume.experience)) {
+    for (const [idx, exp] of Object.entries(experienceEntries)) {
       const index = Number(idx);
       sections.push(`\n${index + 1}. ${exp.title || "Position"} at ${exp.company || "Company"}`);
       if (exp.duration) sections.push(`   Duration: ${exp.duration}`);
       if (exp.description) sections.push(`   ${exp.description}`);
-      if (exp.achievements) {
+      if (exp.achievements && exp.achievements.length > 0) {
         sections.push("   Achievements:");
         for (const ach of exp.achievements) {
           sections.push(`   - ${ach}`);
@@ -82,9 +210,10 @@ function serializeResume(resume: unknown): string {
   }
 
   // Education
-  if (resume.education && resume.education.length > 0) {
+  const educationEntries = parseEducationEntries(resume.education);
+  if (educationEntries.length > 0) {
     sections.push("\nEducation:");
-    for (const [idx, edu] of Object.entries(resume.education)) {
+    for (const [idx, edu] of Object.entries(educationEntries)) {
       const index = Number(idx);
       sections.push(
         `${index + 1}. ${edu.degree || "Degree"} - ${edu.institution || "Institution"}`,
@@ -100,12 +229,15 @@ function serializeResume(resume: unknown): string {
   }
 
   // Projects
-  if (resume.projects && resume.projects.length > 0) {
+  const projectEntries = parseProjectEntries(resume.projects);
+  if (projectEntries.length > 0) {
     sections.push("\nProjects:");
-    resume.projects.forEach((proj: unknown, idx: number) => {
-      sections.push(`\n${idx + 1}. ${proj.name || "Project"}`);
+    projectEntries.forEach((proj, idx: number) => {
+      sections.push(`\n${idx + 1}. ${proj.name || proj.title || "Project"}`);
       if (proj.description) sections.push(`   ${proj.description}`);
-      if (proj.technologies) sections.push(`   Technologies: ${proj.technologies.join(", ")}`);
+      if (proj.technologies && proj.technologies.length > 0) {
+        sections.push(`   Technologies: ${proj.technologies.join(", ")}`);
+      }
     });
   }
 
@@ -118,6 +250,9 @@ function serializeResume(resume: unknown): string {
   return sections.join("\n");
 }
 
+/**
+ * AI route group for chat, content generation, matching, and automation triggers.
+ */
 export const aiRoutes = new Elysia({ prefix: "/ai" })
   .use(rateLimit({ scoping: "scoped", duration: 60000, max: 25 }))
   .post(
@@ -178,7 +313,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
       body: t.Object({
         message: t.String({ maxLength: 10000 }),
         sessionId: t.Optional(t.String({ maxLength: 100 })),
-        context: t.Optional(t.Record(t.String(), t.Any())),
+        context: t.Optional(t.Record(t.String(), jsonValueSchema)),
       }),
     },
   )
@@ -302,11 +437,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
         const aiService = await getAIService();
 
         // Generate cover letter
-        const prompt = `${coverLetterPrompt(resumeText, {
-          title: position,
-          company,
-          description: jobDescription,
-        })}\n\nRespond with a JSON object containing: introduction (string), body (string), conclusion (string).`;
+        const prompt = coverLetterPrompt(company, position, jobDescription, resumeText);
 
         const response = await aiService.generate(prompt, {
           temperature: 0.7,
@@ -384,7 +515,9 @@ Technologies: ${job.technologies?.join(", ") || ""}
             const resume = resumeRows[0];
             if (resume.summary) experience = resume.summary;
             if (resume.skills) {
-              const resumeSkills = Object.values(resume.skills).flat() as string[];
+              const resumeSkills = Object.values(resume.skills).flatMap((value) =>
+                collectStringArray(value),
+              );
               userSkills = [...new Set([...userSkills, ...resumeSkills])];
             }
           }
@@ -500,7 +633,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
       body: t.Object({
         resumeId: t.Optional(t.String({ maxLength: 100 })),
         skills: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
-        preferences: t.Optional(t.Record(t.String(), t.Any())),
+        preferences: t.Optional(t.Record(t.String(), jsonValueSchema)),
       }),
     },
   )
@@ -568,4 +701,51 @@ Technologies: ${job.technologies?.join(", ") || ""}
         sessionId: m.sessionId,
       })),
     };
-  });
+  })
+  .post(
+    "/automation-action",
+    async ({ body, set }) => {
+      const { action, jobUrl, resumeId, coverLetterId, jobId } = body;
+
+      if (action !== "job_apply") {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return { error: `Unsupported automation action: ${action}` };
+      }
+
+      try {
+        const runId = await applicationAutomationService.createJobApplyRun(
+          { jobUrl, resumeId, coverLetterId, jobId },
+          { includeActionInPayload: true },
+        );
+
+        void applicationAutomationService.runJobApply(runId, {
+          jobUrl,
+          resumeId,
+          coverLetterId,
+          jobId,
+        });
+
+        return {
+          runId,
+          status: "running",
+          message:
+            "Job application automation started. Use GET /api/automation/runs/:id to check status.",
+        };
+      } catch (error) {
+        const mapped = mapAutomationRouteError(error);
+        set.status = mapped.status;
+        return {
+          error: mapped.message,
+        };
+      }
+    },
+    {
+      body: t.Object({
+        action: t.String({ maxLength: 50 }),
+        jobUrl: t.String({ minLength: 1, maxLength: 2000 }),
+        resumeId: t.String({ maxLength: 100 }),
+        coverLetterId: t.Optional(t.String({ maxLength: 100 })),
+        jobId: t.Optional(t.String({ maxLength: 100 })),
+      }),
+    },
+  );

@@ -1,16 +1,18 @@
-import type { AIProviderType } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { interviewSessions } from "../db/schema/interviews";
-import { settings } from "../db/schema/settings";
-import type { AIService as AIServiceType } from "../services/ai/ai-service";
+import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { interviewService } from "../services/interview-service";
 
-async function getAIService(): Promise<InstanceType<typeof AIServiceType>> {
+type AIServiceInstance = import("../services/ai/ai-service").AIService;
+type InterviewSocket = { send: (data: string) => void };
+type JsonRecord = Record<string, unknown>;
+
+async function getAIService(): Promise<AIServiceInstance> {
   const { AIService } = await import("../services/ai/ai-service");
-  const settingsRows = await db.select().from(settings).where(eq(settings.id, "default"));
-  return AIService.fromSettings(settingsRows[0]) as InstanceType<typeof AIServiceType>;
+  const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+  return AIService.fromSettings(settingsRows[0]);
 }
 
 type InterviewPayloadType = "start_session" | "submit_response" | "end_session";
@@ -35,6 +37,42 @@ type InterviewFeedback = {
   strengths: string[];
   improvements: string[];
   summary: string;
+};
+
+type FeedbackSummary = {
+  score: number;
+  strengths: string[];
+  improvements: string[];
+};
+
+const isRecord = (value: unknown): value is JsonRecord =>
+  typeof value === "object" && value !== null;
+
+const isQuestionRecord = (value: unknown): value is { id: string; question: string; type: string } =>
+  isRecord(value) &&
+  typeof value.id === "string" &&
+  typeof value.question === "string" &&
+  typeof value.type === "string";
+
+const getFeedbackSummary = (value: unknown): FeedbackSummary => {
+  if (!isRecord(value)) {
+    return { score: 0, strengths: [], improvements: [] };
+  }
+
+  const rawScore = value.score;
+  const score = typeof rawScore === "number" && Number.isFinite(rawScore) ? rawScore : 0;
+  const strengths = Array.isArray(value.strengths)
+    ? value.strengths.filter((entry): entry is string => typeof entry === "string")
+    : [];
+  const improvements = Array.isArray(value.improvements)
+    ? value.improvements.filter((entry): entry is string => typeof entry === "string")
+    : [];
+
+  return {
+    score,
+    strengths,
+    improvements,
+  };
 };
 
 export const interviewWebSocket = new Elysia().ws("/ws/interview", {
@@ -92,7 +130,8 @@ function createInterviewFeedbackSummary(feedback: Partial<InterviewFeedback>): I
 }
 
 function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<string, unknown> {
-  const role = typeof config.role === "string" && config.role.trim() ? config.role : "Game Developer";
+  const role =
+    typeof config.role === "string" && config.role.trim() ? config.role : "Game Developer";
   const level = typeof config.level === "string" && config.level.trim() ? config.level : "mid";
   let questionCount = 5;
   if (typeof config.questionCount === "number" && Number.isFinite(config.questionCount)) {
@@ -114,12 +153,17 @@ function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<s
   };
 }
 
-function toWsQuestions(questions: Array<{ id: string; question: string; type: string; difficulty: string }>): WsQuestion[] {
+function toWsQuestions(
+  questions: Array<{ id: string; question: string; type: string; difficulty: string }>,
+): WsQuestion[] {
   return questions.map((q) => ({
     id: q.id,
     question: q.question,
     category: q.type === "studio-specific" ? "cultural" : q.type,
-    difficulty: ["easy", "medium", "hard"].includes(q.difficulty) ? (q.difficulty as "easy" | "medium" | "hard") : "medium",
+    difficulty:
+      q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard"
+        ? q.difficulty
+        : "medium",
   }));
 }
 
@@ -141,9 +185,7 @@ function parseFeedback(response: string): InterviewFeedback {
   };
 }
 
-async function handleStartSession(ws: unknown, data: InterviewMessage) {
-  const socket = ws as { send: (data: string) => void };
-
+async function handleStartSession(socket: InterviewSocket, data: InterviewMessage) {
   const studioId = data.studioId;
   if (!studioId) {
     socket.send(JSON.stringify({ type: "error", message: "studioId is required" }));
@@ -179,10 +221,7 @@ async function handleStartSession(ws: unknown, data: InterviewMessage) {
   }
 }
 
-async function handleSubmitResponse(ws: unknown, data: InterviewMessage) {
-  const socket = ws as {
-    send: (data: string) => void;
-  };
+async function handleSubmitResponse(socket: InterviewSocket, data: InterviewMessage) {
   const sessionId = data.sessionId;
   const content = data.content;
 
@@ -201,8 +240,12 @@ async function handleSubmitResponse(ws: unknown, data: InterviewMessage) {
     return;
   }
 
-  const responses = (session.responses as Array<Record<string, unknown>>) || [];
-  const questions = (session.questions as Array<{ id: string; question: string; type: string }>) || [];
+  const responses: JsonRecord[] = Array.isArray(session.responses)
+    ? session.responses.filter(isRecord)
+    : [];
+  const questions = Array.isArray(session.questions)
+    ? session.questions.filter(isQuestionRecord)
+    : [];
   const questionIndex = responses.length;
   const currentQuestion = questions[questionIndex];
 
@@ -238,7 +281,7 @@ Only return the JSON object.`;
   }
 
   // Save response
-  const newResponse = {
+  const newResponse: JsonRecord = {
     questionIndex,
     question: currentQuestion?.question,
     answer: content,
@@ -246,17 +289,17 @@ Only return the JSON object.`;
     timestamp: new Date().toISOString(),
     questionCategory: currentQuestion?.type,
     preferredModel: undefined,
-    preferredProvider: "local" as AIProviderType,
+    preferredProvider: "local",
   };
 
-  const nextQuestion = questions[questionIndex + 1];
+  const nextQuestion = questions[questionIndex + 1] ?? null;
   const nextQuestionValue = questionIndex + 1;
   const isComplete = responses.length + 1 >= questions.length;
 
-  responses.push(newResponse as Record<string, unknown>);
+  responses.push(newResponse);
   await db
     .update(interviewSessions)
-    .set({ responses: responses as Record<string, unknown>[], updatedAt: new Date().toISOString() })
+    .set({ responses, updatedAt: new Date().toISOString() })
     .where(eq(interviewSessions.id, sessionId));
 
   socket.send(
@@ -272,11 +315,7 @@ Only return the JSON object.`;
   );
 }
 
-async function handleEndSession(ws: unknown, data: InterviewMessage) {
-  const socket = ws as {
-    send: (data: string) => void;
-  };
-
+async function handleEndSession(socket: InterviewSocket, data: InterviewMessage) {
   const sessionId = data.sessionId;
   if (!sessionId) {
     socket.send(JSON.stringify({ type: "error", message: "sessionId is required" }));
@@ -293,33 +332,24 @@ async function handleEndSession(ws: unknown, data: InterviewMessage) {
     return;
   }
 
-  const responses = (session.responses as Array<Record<string, unknown>>) || [];
+  const responses: JsonRecord[] = Array.isArray(session.responses)
+    ? session.responses.filter(isRecord)
+    : [];
   const totalScore = responses.reduce((sum, responseRecord) => {
-    const score =
-      typeof responseRecord.feedback === "object" && responseRecord.feedback
-        ? Number((responseRecord.feedback as { score?: unknown }).score)
-        : Number.NaN;
+    const { score } = getFeedbackSummary(responseRecord.feedback);
     return Number.isFinite(score) ? sum + score : sum;
   }, 0);
 
   const answeredQuestions = responses.length;
   const avgScore = answeredQuestions > 0 ? Math.round(totalScore / answeredQuestions) : 0;
   const responseStrengths = responses.flatMap((responseRecord) => {
-    const feedback = responseRecord.feedback;
-    return feedback &&
-      typeof feedback === "object" &&
-      Array.isArray((feedback as { strengths?: unknown }).strengths)
-      ? (feedback as { strengths?: unknown[] }).strengths || []
-      : [];
+    const { strengths } = getFeedbackSummary(responseRecord.feedback);
+    return strengths;
   });
 
   const responseImprovements = responses.flatMap((responseRecord) => {
-    const feedback = responseRecord.feedback;
-    return feedback &&
-      typeof feedback === "object" &&
-      Array.isArray((feedback as { improvements?: unknown }).improvements)
-      ? (feedback as { improvements?: unknown[] }).improvements || []
-      : [];
+    const { improvements } = getFeedbackSummary(responseRecord.feedback);
+    return improvements;
   });
 
   const totalQuestions = Array.isArray(session.questions) ? session.questions.length : 0;

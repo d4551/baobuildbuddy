@@ -1,7 +1,7 @@
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import { resolveDatabasePath } from "../config/paths";
 import { config } from "../config/env";
+import { resolveDatabasePath } from "../config/paths";
 import * as schema from "./schema";
 
 const dbPath = resolveDatabasePath(Bun.env.DB_PATH ?? config.dbPath);

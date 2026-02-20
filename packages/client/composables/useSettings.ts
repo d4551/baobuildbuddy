@@ -1,13 +1,30 @@
 import type { AppSettings } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { type Ref, readonly } from "vue";
+import { useNuxtState } from "./nuxtRuntime";
+import { useApi } from "./useApi";
 
 /**
  * Settings and API key management composable.
  */
+interface UseSettingsState {
+  settings: Readonly<Ref<AppSettings | null>>;
+  loading: Readonly<Ref<boolean>>;
+  fetchSettings: () => Promise<void>;
+  updateSettings: (updates: Partial<AppSettings>) => Promise<void>;
+  updateApiKeys: (keys: Record<string, string>) => Promise<void>;
+  testApiKey: (provider: string, key: string) => Promise<{ valid: boolean; provider: string }>;
+}
+
+/**
+ * Provides accessors and mutators for global app settings.
+ *
+ * @returns State and actions for reading/updating settings and API keys.
+ */
 export function useSettings() {
   const api = useApi();
-  const settings = useState<AppSettings | null>(STATE_KEYS.APP_SETTINGS, () => null);
-  const loading = useState(STATE_KEYS.SETTINGS_LOADING, () => false);
+  const settings = useNuxtState<AppSettings | null>(STATE_KEYS.APP_SETTINGS, () => null);
+  const loading = useNuxtState(STATE_KEYS.SETTINGS_LOADING, () => false);
 
   async function fetchSettings() {
     loading.value = true;
@@ -55,5 +72,5 @@ export function useSettings() {
     updateSettings,
     updateApiKeys,
     testApiKey,
-  };
+  } satisfies UseSettingsState;
 }

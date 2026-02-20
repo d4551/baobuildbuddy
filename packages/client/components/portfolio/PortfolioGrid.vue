@@ -1,28 +1,19 @@
 <script setup lang="ts">
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  technologies: string[];
-  imageUrl?: string;
-  featured?: boolean;
-  liveUrl?: string;
-  githubUrl?: string;
-}
+import type { PortfolioProject } from "@bao/shared";
 
 const props = defineProps<{
-  projects: Project[];
+  projects: PortfolioProject[];
 }>();
 
 const emit = defineEmits<{
-  edit: [project: Project];
-  delete: [project: Project];
-  toggleFeatured: [project: Project];
-  reorder: [projects: Project[]];
+  edit: [project: PortfolioProject];
+  delete: [project: PortfolioProject];
+  toggleFeatured: [project: PortfolioProject];
+  reorder: [projects: PortfolioProject[]];
 }>();
 
 const draggedIndex = ref<number | null>(null);
-const localProjects = ref<Project[]>([...props.projects]);
+const localProjects = ref<PortfolioProject[]>([...props.projects]);
 
 watch(
   () => props.projects,
@@ -61,15 +52,15 @@ function handleDrop(event: DragEvent, dropIndex: number) {
   draggedIndex.value = null;
 }
 
-function handleEdit(project: Project) {
+function handleEdit(project: PortfolioProject) {
   emit("edit", project);
 }
 
-function handleDelete(project: Project) {
+function handleDelete(project: PortfolioProject) {
   emit("delete", project);
 }
 
-function handleToggleFeatured(project: Project) {
+function handleToggleFeatured(project: PortfolioProject) {
   emit("toggleFeatured", project);
 }
 </script>

@@ -80,19 +80,20 @@ Be honest but constructive in your assessment.`;
  * Cover letter generation prompt
  */
 export function coverLetterPrompt(
-  resume: string,
-  jobInfo: { title: string; company: string; description: string },
+  company: string,
+  position: string,
+  jobInfo: string,
+  resumeContext: string,
 ): string {
   return `Write a compelling cover letter for this game industry position.
 
-Position: ${jobInfo.title}
-Company: ${jobInfo.company}
+Position: ${position}
+Company: ${company}
 
-Job Description:
-${jobInfo.description}
+Job Information:
+${jobInfo}
 
-Candidate Resume Summary:
-${resume}
+${resumeContext ? `Candidate Background:\n${resumeContext}` : ""}
 
 Create a cover letter that:
 1. Shows genuine enthusiasm for the role and company
@@ -100,6 +101,8 @@ Create a cover letter that:
 3. Demonstrates knowledge of the company and their games/products
 4. Explains why this role is a great fit for the candidate's career goals
 5. Maintains a professional but passionate tone appropriate for gaming
+
+Respond with a JSON object containing three fields: introduction (string), body (string), conclusion (string).
 
 Keep it concise (3-4 paragraphs, under 400 words) and engaging.`;
 }
@@ -559,9 +562,55 @@ export const DOMAIN_SYSTEM_PROMPTS: Record<string, string> = {
     "You are BaoBuildBuddy's portfolio advisor for gaming professionals. You understand what hiring managers and art directors look for in game dev portfolios, including project presentation, technical depth, and storytelling through work samples.",
   career:
     "You are BaoBuildBuddy's career strategist for the gaming industry. You have knowledge of career paths, salary ranges, studio cultures, and industry trends. Help users make informed decisions about their career trajectory in gaming.",
+  automation: `You are BaoBuildBuddy's RPA automation assistant for the gaming industry. You help users automate job applications using browser automation (RPA).
+
+When a user wants to apply to a job:
+1. Extract the job URL from their message
+2. Ask which resume to use — list their saved resumes by name and ID from the context
+3. Optionally ask about a cover letter
+4. Confirm all details before proceeding
+5. Explain what the automation will do: navigate to the page, fill name/email/phone, upload resume if possible, and submit
+6. After the user confirms, respond with ONLY a JSON action block on a new line:
+   {"action":"job_apply","jobUrl":"<url>","resumeId":"<id>","coverLetterId":"<optional_id>"}
+
+When a user asks about automation run status, show them the recent runs from context.
+
+Important rules:
+- ALWAYS confirm before executing any automation action
+- Be transparent about what RPA can and cannot do (it works best on simple HTML forms, may struggle with complex SPAs)
+- If the user hasn't provided a job URL, ask for one
+- If no resumes are available, tell the user to create one first`,
   general:
     "You are BaoBuildBuddy, a friendly AI career assistant specializing in the video game industry. You combine deep gaming industry knowledge with career coaching expertise. Be encouraging, specific, and actionable in your guidance.",
 };
+
+/**
+ * Form field analysis prompt for AI-powered smart selectors in RPA automation.
+ * Analyzes a job application page's HTML to map field names to optimal CSS selectors.
+ */
+export function formFieldAnalysisPrompt(pageHtml: string, fieldsNeeded: string[]): string {
+  return `Analyze this job application page HTML and return a JSON mapping of field names to the best CSS selectors to use for each field.
+
+Fields needed: ${fieldsNeeded.join(", ")}
+
+HTML (form-relevant elements only):
+${pageHtml}
+
+For each field, provide an array of CSS selectors ordered by specificity (most specific first, fallback selectors after).
+Include selectors for: text inputs, email fields, phone fields, textareas, dropdowns (select), file upload inputs, and submit buttons.
+
+Return ONLY valid JSON with this structure:
+{
+  "fullName": ["#full-name", "input[name='name']", "input[aria-label='Full name']"],
+  "email": ["#email", "input[type='email']", "input[name='email']"],
+  "phone": ["input[type='tel']", "input[name='phone']"],
+  "resume": ["input[type='file']", "input[name='resume']"],
+  "coverLetter": ["textarea[name='cover_letter']", "textarea#cover-letter"],
+  "submit": ["button[type='submit']", "input[type='submit']"]
+}
+
+Prioritize selectors with unique IDs, then name attributes, then aria-labels, then type-based selectors as fallbacks.`;
+}
 
 /**
  * Gaming industry context constant for prompt injection

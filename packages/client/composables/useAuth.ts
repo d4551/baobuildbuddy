@@ -1,9 +1,31 @@
-export function useAuth() {
+import { useNuxtRuntimeApp } from "./nuxtRuntime";
+import { useApi } from "./useApi";
+
+interface AuthStatus {
+  authRequired: boolean;
+  configured: boolean;
+}
+
+interface UseAuthState {
+  checkAuthStatus: () => Promise<AuthStatus>;
+  initAuth: () => Promise<Record<string, unknown>>;
+  getStoredApiKey: () => string | null;
+  setStoredApiKey: (key: string | null) => void;
+}
+
+/**
+ * Authentication composable.
+ *
+ * @returns Auth helpers used by navigation guards and setup flows.
+ */
+export function useAuth(): UseAuthState {
   const api = useApi();
+  const nuxtApp = useNuxtRuntimeApp();
+  const authNotConfigured: AuthStatus = { authRequired: false, configured: false };
 
   async function checkAuthStatus() {
     const { data, error } = await api.auth.status.get();
-    if (error) return { authRequired: false, configured: false };
+    if (error) return authNotConfigured;
     return data ?? { authRequired: false, configured: false };
   }
 
@@ -13,7 +35,6 @@ export function useAuth() {
     return data ?? {};
   }
 
-  const nuxtApp = useNuxtApp();
   return {
     checkAuthStatus,
     initAuth,

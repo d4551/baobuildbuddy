@@ -1,6 +1,7 @@
-import { generateId } from "@bao/shared";
-import { desc, eq, like } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import type { SkillCategory } from "@bao/shared";
+import { desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { Elysia, status, t } from "elysia";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { skillMappings } from "../db/schema/skill-mappings";
@@ -23,10 +24,11 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
 
       // Filter by search term
       if (search) {
+        const normalizedSearch = search.toLowerCase();
         results = results.filter(
           (m) =>
-            m.gameExpression?.toLowerCase().includes(search.toLowerCase()) ||
-            m.transferableSkill?.toLowerCase().includes(search.toLowerCase()),
+            m.gameExpression.toLowerCase().includes(normalizedSearch) ||
+            m.transferableSkill.toLowerCase().includes(normalizedSearch),
         );
       }
 
@@ -42,19 +44,17 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
   .post(
     "/mappings",
     async ({ body, set }) => {
-      const newMapping = {
-        id: generateId(),
+      const newMapping = await skillMappingService.createMapping({
         gameExpression: body.gameExpression,
         transferableSkill: body.transferableSkill,
         industryApplications: body.industryApplications || [],
         evidence: body.evidence || [],
         confidence: body.confidence || 50,
-        category: body.category || null,
+        category: (body.category as SkillCategory) || "technical",
         demandLevel: body.demandLevel || "medium",
         aiGenerated: body.aiGenerated || false,
-      };
-
-      await db.insert(skillMappings).values(newMapping);
+        verified: false,
+      });
       set.status = 201;
       return newMapping;
     },
@@ -74,29 +74,22 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
   .put(
     "/mappings/:id",
     async ({ params, body, set }) => {
-      const existing = await db.select().from(skillMappings).where(eq(skillMappings.id, params.id));
-      if (existing.length === 0) {
+      const updated = await skillMappingService.updateMapping(params.id, {
+        gameExpression: body.gameExpression,
+        transferableSkill: body.transferableSkill,
+        industryApplications: body.industryApplications,
+        evidence: body.evidence,
+        confidence: body.confidence,
+        category: body.category as SkillCategory | undefined,
+        demandLevel: body.demandLevel as "high" | "medium" | "low" | undefined,
+        aiGenerated: body.aiGenerated,
+      });
+      if (!updated) {
         set.status = 404;
         return { error: "Skill mapping not found" };
       }
 
-      const updates: Record<string, unknown> = {
-        updatedAt: new Date().toISOString(),
-      };
-
-      if (body.gameExpression !== undefined) updates.gameExpression = body.gameExpression;
-      if (body.transferableSkill !== undefined) updates.transferableSkill = body.transferableSkill;
-      if (body.industryApplications !== undefined)
-        updates.industryApplications = body.industryApplications;
-      if (body.evidence !== undefined) updates.evidence = body.evidence;
-      if (body.confidence !== undefined) updates.confidence = body.confidence;
-      if (body.category !== undefined) updates.category = body.category;
-      if (body.demandLevel !== undefined) updates.demandLevel = body.demandLevel;
-
-      await db.update(skillMappings).set(updates).where(eq(skillMappings.id, params.id));
-
-      const updated = await db.select().from(skillMappings).where(eq(skillMappings.id, params.id));
-      return updated[0];
+      return updated;
     },
     {
       params: t.Object({
@@ -110,6 +103,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
         category: t.Optional(t.String({ maxLength: 100 })),
         demandLevel: t.Optional(t.String({ maxLength: 50 })),
+        aiGenerated: t.Optional(t.Boolean()),
       }),
     },
   )
@@ -122,73 +116,39 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         return { error: "Skill mapping not found" };
       }
 
-      await db.delete(skillMappings).where(eq(skillMappings.id, params.id));
-      return { message: "Skill mapping deleted", id: params.id };
+      const deleted = await skillMappingService.deleteMapping(params.id);
+      if (!deleted) {
+        return status(410, { error: "Skill mapping already deleted", id: params.id });
+      }
+
+      return status(200, { message: "Skill mapping deleted", id: params.id });
     },
     {
       params: t.Object({ id: t.String({ maxLength: 100 }) }),
     },
   )
   .get("/pathways", async () => {
-    const mappings = await db.select().from(skillMappings);
-
-    // Group by category
-    const pathways: Record<string, unknown[]> = {};
-    for (const m of mappings) {
-      const cat = m.category || "general";
-      if (!pathways[cat]) pathways[cat] = [];
-      pathways[cat].push({
-        gameExpression: m.gameExpression,
-        transferableSkill: m.transferableSkill,
-        demandLevel: m.demandLevel,
-      });
-    }
-
-    return {
-      pathways: Object.entries(pathways).map(([category, skills]) => ({
-        category,
-        skills,
-        count: skills.length,
-      })),
-      totalMappings: mappings.length,
-    };
+    return await skillMappingService.getPathways();
   })
-  .get("/readiness", async () => {
-    // Stub: Career readiness assessment
-    const mappings = await db.select().from(skillMappings);
+  .get(
+    "/readiness",
+    async ({ query }) => {
+      const readiness = await skillMappingService.getReadiness();
+      if (query?.jobId) {
+        return {
+          ...readiness,
+          jobId: query.jobId,
+        };
+      }
 
-    const highConfidence = mappings.filter((m) => (m.confidence || 0) >= 70).length;
-    const mediumConfidence = mappings.filter(
-      (m) => (m.confidence || 0) >= 40 && (m.confidence || 0) < 70,
-    ).length;
-    const lowConfidence = mappings.filter((m) => (m.confidence || 0) < 40).length;
-
-    const highDemand = mappings.filter((m) => m.demandLevel === "high").length;
-    const mediumDemand = mappings.filter((m) => m.demandLevel === "medium").length;
-    const lowDemand = mappings.filter((m) => m.demandLevel === "low").length;
-
-    return {
-      totalSkills: mappings.length,
-      confidenceBreakdown: {
-        high: highConfidence,
-        medium: mediumConfidence,
-        low: lowConfidence,
-      },
-      demandBreakdown: {
-        high: highDemand,
-        medium: mediumDemand,
-        low: lowDemand,
-      },
-      readinessScore:
-        mappings.length > 0
-          ? Math.round(
-              ((highConfidence * 1.0 + mediumConfidence * 0.5 + lowConfidence * 0.25) /
-                mappings.length) *
-                100,
-            )
-          : 0,
-    };
-  })
+      return readiness;
+    },
+    {
+      query: t.Object({
+        jobId: t.Optional(t.String({ maxLength: 100 })),
+      }),
+    },
+  )
   .post(
     "/ai-analyze",
     async ({ body, set }) => {
@@ -248,7 +208,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
           };
         }
 
-        let analysisResult: unknown = {
+        let analysisResult: Record<string, unknown> = {
           detectedSkills: [],
           suggestedMappings: [],
           recommendations: [],
@@ -257,11 +217,11 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         try {
           const jsonMatch = response.content.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
-            analysisResult = JSON.parse(jsonMatch[0]);
+            analysisResult = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
           } else {
             analysisResult.recommendations = [response.content];
           }
-        } catch (parseError) {
+        } catch {
           analysisResult.recommendations = [response.content];
         }
 
@@ -271,7 +231,14 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
           analysisResult.suggestedMappings &&
           Array.isArray(analysisResult.suggestedMappings)
         ) {
-          for (const mapping of analysisResult.suggestedMappings) {
+          for (const mapping of analysisResult.suggestedMappings as Array<{
+            gameExpression: string;
+            transferableSkill: string;
+            industryApplications?: string[];
+            confidence?: number;
+            category?: SkillCategory;
+            demandLevel?: "high" | "medium" | "low";
+          }>) {
             if (mapping.gameExpression && mapping.transferableSkill) {
               try {
                 await skillMappingService.createMapping({
@@ -294,9 +261,10 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
 
         return {
           message: "AI skill analysis completed successfully",
-          detectedSkills: analysisResult.detectedSkills || [],
-          suggestedMappings: analysisResult.suggestedMappings || [],
-          recommendations: analysisResult.recommendations || [],
+          detectedSkills: (analysisResult.detectedSkills as string[]) || [],
+          suggestedMappings:
+            (analysisResult.suggestedMappings as Array<Record<string, unknown>>) || [],
+          recommendations: (analysisResult.recommendations as string[]) || [],
           provider: response.provider,
         };
       } catch (error) {
