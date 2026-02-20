@@ -2040,6 +2040,7 @@ const jaJP = {
   interviewSession: {
     title: "Práctica de Entrevista",
     timeLabel: "Tiempo",
+    timeAria: "経過した面接時間 {minutes}分 {seconds}秒",
     avatarLabelAi: "IA",
     progressLabel: "Pregunta {current} de {total}",
     progressAria: "Progreso de entrevista",

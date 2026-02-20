@@ -2040,6 +2040,7 @@ const esES = {
   interviewSession: {
     title: "Práctica de Entrevista",
     timeLabel: "Tiempo",
+    timeAria: "Tiempo transcurrido de entrevista {minutes} minutos y {seconds} segundos",
     avatarLabelAi: "IA",
     progressLabel: "Pregunta {current} de {total}",
     progressAria: "Progreso de entrevista",

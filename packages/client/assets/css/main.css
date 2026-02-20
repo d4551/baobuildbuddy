@@ -1,5 +1,7 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  exclude: countdown;
+}
 
 /* Centralized palette tokens with WCAG-oriented contrast pairs. */
 :root {

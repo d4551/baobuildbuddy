@@ -2028,6 +2028,7 @@ const enUS = {
   interviewSession: {
     title: "Interview Practice",
     timeLabel: "Time",
+    timeAria: "Elapsed interview time {minutes} minutes and {seconds} seconds",
     avatarLabelAi: "AI",
     progressLabel: "Question {current} of {total}",
     progressAria: "Interview progress",

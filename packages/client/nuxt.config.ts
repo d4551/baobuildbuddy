@@ -15,6 +15,15 @@ const DEFAULT_APP_DESCRIPTION = "AI-powered career assistant for the video game 
 const DEFAULT_I18N_LOCALE = DEFAULT_APP_LANGUAGE;
 const DEFAULT_I18N_LOCALE_COOKIE_KEY = "bao-locale";
 const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
+const MODULE_PATH_SEPARATOR = "/";
+const WINDOWS_PATH_SEPARATOR = "\\";
+const LOCALES_DIRECTORY_SEGMENT = "/locales/";
+const LOCALE_CHUNK_NAME_BY_FILE = {
+  "en-US.ts": "locale-en-US",
+  "es-ES.ts": "locale-es-ES",
+  "fr-FR.ts": "locale-fr-FR",
+  "ja-JP.ts": "locale-ja-JP",
+} as const;
 
 const parseSupportedLocales = (value: string | undefined): string[] => {
   const parsedLocales = value
@@ -22,6 +31,28 @@ const parseSupportedLocales = (value: string | undefined): string[] => {
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
   return parsedLocales && parsedLocales.length > 0 ? parsedLocales : DEFAULT_SUPPORTED_LOCALES;
+};
+
+const hasOwnKey = <T extends object>(
+  value: T,
+  key: PropertyKey,
+): key is keyof T => Object.hasOwn(value, key);
+
+const normalizeModuleId = (moduleId: string): string =>
+  moduleId.replaceAll(WINDOWS_PATH_SEPARATOR, MODULE_PATH_SEPARATOR);
+
+const resolveManualChunkName = (moduleId: string): string | undefined => {
+  const normalizedModuleId = normalizeModuleId(moduleId);
+  if (!normalizedModuleId.includes(LOCALES_DIRECTORY_SEGMENT)) {
+    return undefined;
+  }
+
+  const fileName = normalizedModuleId.split(MODULE_PATH_SEPARATOR).pop();
+  if (!fileName || !hasOwnKey(LOCALE_CHUNK_NAME_BY_FILE, fileName)) {
+    return undefined;
+  }
+
+  return LOCALE_CHUNK_NAME_BY_FILE[fileName];
 };
 
 const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
@@ -62,6 +93,11 @@ export default defineNuxtConfig({
     },
     build: {
       sourcemap: false,
+      rollupOptions: {
+        output: {
+          manualChunks: resolveManualChunkName,
+        },
+      },
     },
     optimizeDeps: {
       include: ["zod"],

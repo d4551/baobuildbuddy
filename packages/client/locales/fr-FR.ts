@@ -2040,6 +2040,7 @@ const frFR = {
   interviewSession: {
     title: "Práctica de Entrevista",
     timeLabel: "Tiempo",
+    timeAria: "Temps d'entretien écoulé : {minutes} minutes et {seconds} secondes",
     avatarLabelAi: "IA",
     progressLabel: "Pregunta {current} de {total}",
     progressAria: "Progreso de entrevista",

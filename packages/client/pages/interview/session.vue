@@ -15,7 +15,12 @@ type InterviewSessionFlowState =
   | "error";
 
 const SESSION_TIMER_INTERVAL_MS = 1000;
+const SECONDS_PER_MINUTE = 60;
 const DEFAULT_TIMER_VALUE = 0;
+const TIMER_DISPLAY_DIGITS = 2;
+const TIMER_DURATION_PREFIX = "PT";
+const TIMER_MINUTE_SUFFIX = "M";
+const TIMER_SECOND_SUFFIX = "S";
 
 const route = useRoute();
 const router = useRouter();
@@ -91,8 +96,27 @@ const canSubmit = computed(() => {
 });
 const canComplete = computed(() => activeSession.value !== null && !activeSessionComplete.value && !isBusy.value);
 const canUseVoice = computed(() => enableVoiceMode.value && stt.isSupported.value);
-const elapsedMinutes = computed(() => Math.floor(timeElapsed.value / 60));
-const elapsedSeconds = computed(() => timeElapsed.value % 60);
+const elapsedMinutes = computed(() => Math.floor(timeElapsed.value / SECONDS_PER_MINUTE));
+const elapsedSeconds = computed(() => timeElapsed.value % SECONDS_PER_MINUTE);
+const formattedElapsedMinutes = computed(() =>
+  String(elapsedMinutes.value).padStart(TIMER_DISPLAY_DIGITS, "0"),
+);
+const formattedElapsedSeconds = computed(() =>
+  String(elapsedSeconds.value).padStart(TIMER_DISPLAY_DIGITS, "0"),
+);
+const elapsedTimeText = computed(
+  () => `${formattedElapsedMinutes.value}:${formattedElapsedSeconds.value}`,
+);
+const elapsedTimeAriaLabel = computed(() =>
+  t("interviewSession.timeAria", {
+    minutes: elapsedMinutes.value,
+    seconds: elapsedSeconds.value,
+  }),
+);
+const elapsedTimeDuration = computed(
+  () =>
+    `${TIMER_DURATION_PREFIX}${elapsedMinutes.value}${TIMER_MINUTE_SUFFIX}${elapsedSeconds.value}${TIMER_SECOND_SUFFIX}`,
+);
 const displayQuestionIndex = computed(() =>
   totalQuestions.value === 0 ? 0 : Math.min(currentQuestionIndex.value + 1, totalQuestions.value),
 );
@@ -406,23 +430,14 @@ async function handleCompleteInterview() {
           <div class="stat py-3 px-6">
             <div class="stat-title text-xs">{{ t("interviewSession.timeLabel") }}</div>
             <div class="stat-value text-2xl">
-              <span class="countdown font-mono text-2xl">
-                <span
-                  :style="`--value:${elapsedMinutes}; --digits:2;`"
-                  aria-live="polite"
-                  :aria-label="String(elapsedMinutes)"
-                >
-                  {{ elapsedMinutes }}
-                </span>
-                :
-                <span
-                  :style="`--value:${elapsedSeconds}; --digits:2;`"
-                  aria-live="polite"
-                  :aria-label="String(elapsedSeconds)"
-                >
-                  {{ elapsedSeconds }}
-                </span>
-              </span>
+              <time
+                class="font-mono text-2xl tabular-nums"
+                :datetime="elapsedTimeDuration"
+                :aria-label="elapsedTimeAriaLabel"
+                aria-live="polite"
+              >
+                {{ elapsedTimeText }}
+              </time>
             </div>
           </div>
         </div>
