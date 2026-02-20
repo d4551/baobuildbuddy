@@ -1,12 +1,10 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { extname, join, relative } from "node:path";
-
 type Violation = {
   filePath: string;
   line: number;
 };
 
 const projectRoot = process.cwd();
+const scanRoots = ["packages", "scripts"] as const;
 const allowedExtensions = new Set([".ts", ".tsx", ".vue", ".js", ".mjs", ".cjs", ".ps1"]);
 const ignoredDirectoryNames = new Set([
   "node_modules",
@@ -17,31 +15,20 @@ const ignoredDirectoryNames = new Set([
   "dist-types",
   "coverage",
 ]);
-const tryPattern = /\btry\s*\{/g;
+const tryPattern = /\btry\s*\{/gu;
 
-const getFilesRecursively = (directoryPath: string): string[] => {
-  const children = readdirSync(directoryPath);
-  const files: string[] = [];
-
-  for (const child of children) {
-    const childPath = join(directoryPath, child);
-    const childStat = statSync(childPath);
-
-    if (childStat.isDirectory()) {
-      if (ignoredDirectoryNames.has(child)) {
-        continue;
-      }
-      files.push(...getFilesRecursively(childPath));
-      continue;
-    }
-
-    if (allowedExtensions.has(extname(childPath))) {
-      files.push(childPath);
+const hasAllowedExtension = (pathValue: string): boolean => {
+  const normalized = pathValue.toLowerCase();
+  for (const extension of allowedExtensions) {
+    if (normalized.endsWith(extension)) {
+      return true;
     }
   }
-
-  return files;
+  return false;
 };
+
+const shouldIgnorePath = (pathValue: string): boolean =>
+  pathValue.split("/").some((segment) => ignoredDirectoryNames.has(segment));
 
 const getLineFromOffset = (text: string, offset: number): number => {
   if (offset <= 0) {
@@ -58,13 +45,29 @@ const getLineFromOffset = (text: string, offset: number): number => {
   return line;
 };
 
-const collectViolations = (): Violation[] => {
-  const scanRoots = [join(projectRoot, "packages"), join(projectRoot, "scripts")];
-  const files = scanRoots.flatMap((scanRoot) => getFilesRecursively(scanRoot));
+const collectSourceFiles = async (): Promise<string[]> => {
+  const files: string[] = [];
+
+  for (const root of scanRoots) {
+    const glob = new Bun.Glob(`${root}/**/*`);
+    for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
+      const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
+      if (!hasAllowedExtension(normalizedPath) || shouldIgnorePath(normalizedPath)) {
+        continue;
+      }
+      files.push(normalizedPath);
+    }
+  }
+
+  return files;
+};
+
+const collectViolations = async (): Promise<Violation[]> => {
+  const files = await collectSourceFiles();
   const violations: Violation[] = [];
 
   for (const filePath of files) {
-    const fileContent = readFileSync(filePath, "utf8");
+    const fileContent = await Bun.file(filePath).text();
     tryPattern.lastIndex = 0;
     for (const match of fileContent.matchAll(tryPattern)) {
       violations.push({
@@ -77,8 +80,8 @@ const collectViolations = (): Violation[] => {
   return violations;
 };
 
-const main = (): void => {
-  const violations = collectViolations();
+const main = async (): Promise<void> => {
+  const violations = await collectViolations();
 
   if (violations.length === 0) {
     console.log("No try/catch blocks found.");
@@ -87,10 +90,10 @@ const main = (): void => {
 
   console.error("try/catch blocks are disallowed. Found:");
   for (const violation of violations) {
-    console.error(`- ${relative(projectRoot, violation.filePath)}:${violation.line}`);
+    console.error(`- ${violation.filePath}:${violation.line}`);
   }
 
   process.exit(1);
 };
 
-main();
+await main();

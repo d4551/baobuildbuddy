@@ -106,6 +106,24 @@ export const AI_CHAT_CONTEXT_SOURCE_IDS = ["floating-widget", "chat-page"] as co
 export type AIChatContextSource = (typeof AI_CHAT_CONTEXT_SOURCE_IDS)[number];
 
 /**
+ * Deterministic AI chat UI flow states used across chat surfaces.
+ */
+export const AI_CHAT_FLOW_STATES = [
+  "idle",
+  "loading",
+  "success",
+  "empty",
+  "error-retryable",
+  "error-non-retryable",
+  "unauthorized",
+] as const;
+
+/**
+ * AI chat UI flow state union.
+ */
+export type AIChatFlowState = (typeof AI_CHAT_FLOW_STATES)[number];
+
+/**
  * Entity types that can be attached to AI chat context.
  */
 export const AI_CHAT_CONTEXT_ENTITY_TYPE_IDS = [

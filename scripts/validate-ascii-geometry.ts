@@ -1,7 +1,5 @@
-import path from "node:path";
-
 const filePath = process.argv[2] ?? "README.md";
-const filePathName = path.resolve(process.cwd(), filePath);
+const filePathName = filePath;
 
 type Failure = {
   blockIndex: number;

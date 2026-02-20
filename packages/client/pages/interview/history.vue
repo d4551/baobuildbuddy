@@ -200,12 +200,6 @@ function questionScoreText(score: number | undefined): number {
   return score;
 }
 
-function getScoreBadgeClass(score: number): string {
-  if (score >= 80) return "badge-success";
-  if (score >= 60) return "badge-warning";
-  return "badge-error";
-}
-
 function getScoreColorClass(score: number): string {
   if (score >= 80) return "text-success";
   if (score >= 60) return "text-warning";

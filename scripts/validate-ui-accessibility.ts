@@ -1,6 +1,3 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { extname, join, relative } from "node:path";
-
 type OklchColor = {
   lightnessPercent: number;
   chroma: number;
@@ -16,19 +13,19 @@ type Violation = {
 };
 
 const projectRoot = process.cwd();
-const clientRoot = join(projectRoot, "packages", "client");
-const themeFilePath = join(clientRoot, "assets", "css", "main.css");
+const clientRoot = "packages/client";
+const themeFilePath = `${clientRoot}/assets/css/main.css`;
 
 const textContrastMinimum = 4.5;
 const hardcodedColorLiteralPattern =
-  /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b|\b(?:rgb|rgba|hsl|hsla|oklch|oklab|color)\(/g;
+  /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b|\b(?:rgb|rgba|hsl|hsla|oklch|oklab|color)\(/gu;
 const hardcodedPaletteClassPattern =
-  /\b(?:bg|text|border|from|to|via|ring|fill|stroke)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}\b/g;
+  /\b(?:bg|text|border|from|to|via|ring|fill|stroke)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}\b/gu;
 const hardcodedArbitraryColorClassPattern =
-  /\b(?:bg|text|border|from|to|via|ring|fill|stroke)-\[(?:#|rgb|hsl|oklch|oklab|color)[^\]]+\]/g;
+  /\b(?:bg|text|border|from|to|via|ring|fill|stroke)-\[(?:#|rgb|hsl|oklch|oklab|color)[^\]]+\]/gu;
 
 const tokenPattern =
-  /--bao-(light|dark)-([a-z0-9-]+):\s*oklch\(\s*([0-9.]+)%\s+([0-9.]+)\s+([0-9.]+)\s*\)\s*;/g;
+  /--bao-(light|dark)-([a-z0-9-]+):\s*oklch\(\s*([0-9.]+)%\s+([0-9.]+)\s+([0-9.]+)\s*\)\s*;/gu;
 
 const allowedColorLiteralFiles = new Set([themeFilePath]);
 const scannedExtensions = new Set([".vue", ".ts", ".tsx", ".js", ".mjs", ".cjs", ".css"]);
@@ -56,21 +53,29 @@ const contrastPairs: Array<readonly [string, string]> = [
   ["error", "error-content"],
 ];
 
-const getFilesRecursively = (directoryPath: string): string[] => {
-  const children = readdirSync(directoryPath);
-  const files: string[] = [];
+const hasScannedExtension = (pathValue: string): boolean => {
+  const normalizedPath = pathValue.toLowerCase();
+  for (const extension of scannedExtensions) {
+    if (normalizedPath.endsWith(extension)) {
+      return true;
+    }
+  }
+  return false;
+};
 
-  for (const child of children) {
-    const childPath = join(directoryPath, child);
-    const childStat = statSync(childPath);
-    if (childStat.isDirectory()) {
-      if (ignoredDirectoryNames.has(child)) {
-        continue;
-      }
-      files.push(...getFilesRecursively(childPath));
+const shouldIgnorePath = (pathValue: string): boolean =>
+  pathValue.split("/").some((segment) => ignoredDirectoryNames.has(segment));
+
+const collectScannableFiles = async (): Promise<string[]> => {
+  const files: string[] = [];
+  const glob = new Bun.Glob(`${clientRoot}/**/*`);
+
+  for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
+    const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
+    if (!hasScannedExtension(normalizedPath) || shouldIgnorePath(normalizedPath)) {
       continue;
     }
-    files.push(childPath);
+    files.push(normalizedPath);
   }
 
   return files;
@@ -80,12 +85,14 @@ const getLineFromOffset = (text: string, offset: number): number => {
   if (offset <= 0) {
     return 1;
   }
+
   let line = 1;
   for (let index = 0; index < offset; index += 1) {
     if (text.charCodeAt(index) === 10) {
       line += 1;
     }
   }
+
   return line;
 };
 
@@ -155,11 +162,8 @@ const getThemeColors = (css: string): Record<ThemeMode, Map<string, OklchColor>>
   return themes;
 };
 
-const collectHardcodedColorViolations = (): Violation[] => {
-  const files = getFilesRecursively(clientRoot).filter((filePath) => {
-    return scannedExtensions.has(extname(filePath));
-  });
-
+const collectHardcodedColorViolations = async (): Promise<Violation[]> => {
+  const files = await collectScannableFiles();
   const violations: Violation[] = [];
   const patterns = [
     {
@@ -178,7 +182,7 @@ const collectHardcodedColorViolations = (): Violation[] => {
   ];
 
   for (const filePath of files) {
-    const fileContent = readFileSync(filePath, "utf8");
+    const fileContent = await Bun.file(filePath).text();
 
     for (const pattern of patterns) {
       pattern.regex.lastIndex = 0;
@@ -227,24 +231,20 @@ const collectContrastViolations = (css: string): string[] => {
   return failures;
 };
 
-const main = (): void => {
-  const themeCss = readFileSync(themeFilePath, "utf8");
-  const hardcodedColorViolations = collectHardcodedColorViolations();
+const main = async (): Promise<void> => {
+  const themeCss = await Bun.file(themeFilePath).text();
+  const hardcodedColorViolations = await collectHardcodedColorViolations();
   const contrastViolations = collectContrastViolations(themeCss);
 
   if (hardcodedColorViolations.length === 0 && contrastViolations.length === 0) {
-    console.log(
-      "UI accessibility validation passed: WCAG contrast and tokenized colors are enforced.",
-    );
+    console.log("UI accessibility validation passed: WCAG contrast and tokenized colors are enforced.");
     return;
   }
 
   if (hardcodedColorViolations.length > 0) {
     console.error("\nHardcoded color violations:");
     for (const violation of hardcodedColorViolations) {
-      console.error(
-        `- ${relative(projectRoot, violation.filePath)}:${violation.line} ${violation.message}`,
-      );
+      console.error(`- ${violation.filePath}:${violation.line} ${violation.message}`);
     }
   }
 
@@ -258,4 +258,4 @@ const main = (): void => {
   process.exit(1);
 };
 
-main();
+await main();
