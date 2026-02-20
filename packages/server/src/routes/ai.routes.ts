@@ -1,5 +1,12 @@
-import { generateId } from "@bao/shared";
-import { AI_PROVIDER_CATALOG } from "@bao/shared";
+import type { AIChatContext } from "@bao/shared";
+import {
+  AI_CHAT_CONTEXT_DOMAIN_IDS,
+  AI_CHAT_CONTEXT_ENTITY_TYPE_IDS,
+  AI_CHAT_CONTEXT_SOURCE_IDS,
+  AI_PROVIDER_CATALOG,
+  generateId,
+  inferAIChatDomainFromRoutePath,
+} from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
@@ -10,6 +17,7 @@ import { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
+import { contextManager } from "../services/ai/context-manager";
 import {
   SYSTEM_PROMPT,
   coverLetterPrompt,
@@ -83,7 +91,141 @@ function safeJSONParse<T>(jsonString: string, fallback: T): T {
   }
 }
 
-const jsonObjectSchema = t.Record(t.String(), t.Any());
+const chatContextSchema = t.Object({
+  source: t.String({ maxLength: 32 }),
+  domain: t.Optional(t.String({ maxLength: 32 })),
+  route: t.Object({
+    path: t.String({ maxLength: 500 }),
+    name: t.Optional(t.String({ maxLength: 120 })),
+    params: t.Record(t.String(), t.String()),
+    query: t.Record(t.String(), t.String()),
+  }),
+  entity: t.Optional(
+    t.Object({
+      type: t.String({ maxLength: 64 }),
+      id: t.String({ maxLength: 100 }),
+      label: t.Optional(t.String({ maxLength: 200 })),
+    }),
+  ),
+  state: t.Object({
+    hasResumes: t.Boolean(),
+    hasJobs: t.Boolean(),
+    hasStudios: t.Boolean(),
+    hasInterviewSessions: t.Boolean(),
+    hasPortfolioProjects: t.Boolean(),
+  }),
+});
+
+const aiPreferenceSchema = t.Record(
+  t.String(),
+  t.Union([t.String(), t.Number(), t.Boolean()]),
+);
+
+type ChatContextPayload = typeof chatContextSchema.static;
+
+const isValidChatContextSource = (value: string): value is AIChatContext["source"] =>
+  AI_CHAT_CONTEXT_SOURCE_IDS.includes(value as AIChatContext["source"]);
+
+const isValidChatContextDomain = (value: string): value is NonNullable<AIChatContext["domain"]> =>
+  AI_CHAT_CONTEXT_DOMAIN_IDS.includes(value as NonNullable<AIChatContext["domain"]>);
+
+const isValidChatContextEntityType = (
+  value: string,
+): value is NonNullable<AIChatContext["entity"]>["type"] =>
+  AI_CHAT_CONTEXT_ENTITY_TYPE_IDS.includes(value as NonNullable<AIChatContext["entity"]>["type"]);
+
+/**
+ * Normalize optional client context payload into strict shared AIChatContext shape.
+ */
+function normalizeClientChatContext(context?: ChatContextPayload): AIChatContext | null {
+  if (!context || !isValidChatContextSource(context.source)) {
+    return null;
+  }
+
+  const fallbackDomain = inferAIChatDomainFromRoutePath(context.route.path);
+  const domain =
+    typeof context.domain === "string" && isValidChatContextDomain(context.domain)
+      ? context.domain
+      : fallbackDomain;
+
+  const routeName =
+    typeof context.route.name === "string" && context.route.name.trim().length > 0
+      ? context.route.name
+      : undefined;
+
+  const normalizedContext: AIChatContext = {
+    source: context.source,
+    domain,
+    route: {
+      path: context.route.path,
+      ...(routeName ? { name: routeName } : {}),
+      params: context.route.params,
+      query: context.route.query,
+    },
+    state: context.state,
+  };
+
+  if (context.entity && isValidChatContextEntityType(context.entity.type)) {
+    const normalizedLabel =
+      typeof context.entity.label === "string" && context.entity.label.trim().length > 0
+        ? context.entity.label
+        : undefined;
+
+    normalizedContext.entity = {
+      type: context.entity.type,
+      id: context.entity.id,
+      ...(normalizedLabel ? { label: normalizedLabel } : {}),
+    };
+  }
+
+  return normalizedContext;
+}
+
+/**
+ * Serialize client chat context for prompt injection.
+ */
+function serializeClientChatContext(context: AIChatContext): string {
+  const lines: string[] = [
+    `Client Source: ${context.source}`,
+    `Route Path: ${context.route.path}`,
+    `Route Domain: ${context.domain ?? inferAIChatDomainFromRoutePath(context.route.path)}`,
+    `State Snapshot: hasResumes=${context.state.hasResumes}, hasJobs=${context.state.hasJobs}, hasStudios=${context.state.hasStudios}, hasInterviewSessions=${context.state.hasInterviewSessions}, hasPortfolioProjects=${context.state.hasPortfolioProjects}`,
+  ];
+
+  if (context.route.name) {
+    lines.push(`Route Name: ${context.route.name}`);
+  }
+
+  if (Object.keys(context.route.params).length > 0) {
+    lines.push(`Route Params: ${JSON.stringify(context.route.params)}`);
+  }
+
+  if (Object.keys(context.route.query).length > 0) {
+    lines.push(`Route Query: ${JSON.stringify(context.route.query)}`);
+  }
+
+  if (context.entity) {
+    const baseEntityLine = `Focused Entity: ${context.entity.type} (${context.entity.id})`;
+    lines.push(context.entity.label ? `${baseEntityLine} - ${context.entity.label}` : baseEntityLine);
+  }
+
+  return lines.join("\n");
+}
+
+/**
+ * Build final system prompt using static prompt, server context, and optional client context.
+ */
+function composeChatSystemPrompt(
+  basePrompt: string,
+  contextualPrompt: string,
+  clientContext: AIChatContext | null,
+): string {
+  const promptSections = [basePrompt, contextualPrompt];
+  if (clientContext) {
+    promptSections.push(`Client UI Context:\n${serializeClientChatContext(clientContext)}`);
+  }
+  return promptSections.join("\n\n");
+}
 
 const resolveRateLimitClientKey = (request: Request): string => {
   const forwardedFor = request.headers.get("x-forwarded-for");
@@ -276,7 +418,8 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
   .post(
     "/chat",
     async ({ body, set }) => {
-      const { message, sessionId = "default" } = body;
+      const { message, context } = body;
+      const sessionId = body.sessionId ?? generateId();
 
       try {
         // Save user message
@@ -291,10 +434,24 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
 
         // Load AI service
         const aiService = await getAIService();
+        const clientContext = normalizeClientChatContext(context);
+        const preferredDomain =
+          clientContext?.domain ?? contextManager.inferDomain(message);
+        const contextualConversation = await contextManager.buildContext(
+          sessionId,
+          message,
+          preferredDomain,
+        );
+        const systemPrompt = composeChatSystemPrompt(
+          SYSTEM_PROMPT,
+          contextualConversation.systemPrompt,
+          clientContext,
+        );
 
         // Generate AI response
         const response = await aiService.generate(message, {
-          systemPrompt: SYSTEM_PROMPT,
+          systemPrompt,
+          messages: contextualConversation.messages,
           temperature: 0.7,
           maxTokens: 2000,
         });
@@ -313,12 +470,16 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
         };
         await db.insert(chatHistory).values(aiResponse);
 
+        const followUps = contextManager.generateFollowUps(preferredDomain);
+
         return {
           message: aiResponse.content,
           sessionId,
           timestamp: aiResponse.timestamp,
           provider: response.provider,
           model: response.model,
+          followUps,
+          contextDomain: preferredDomain,
         };
       } catch (error) {
         set.status = 500;
@@ -331,7 +492,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
       body: t.Object({
         message: t.String({ maxLength: 10000 }),
         sessionId: t.Optional(t.String({ maxLength: 100 })),
-        context: t.Optional(jsonObjectSchema),
+        context: t.Optional(chatContextSchema),
       }),
     },
   )
@@ -651,7 +812,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
       body: t.Object({
         resumeId: t.Optional(t.String({ maxLength: 100 })),
         skills: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
-        preferences: t.Optional(jsonObjectSchema),
+        preferences: t.Optional(aiPreferenceSchema),
       }),
     },
   )

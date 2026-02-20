@@ -1,6 +1,6 @@
 import type { AppSettings } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
-import { readonly } from "vue";
+import { computed, readonly } from "vue";
 import { toAppSettings } from "./api-normalizers";
 import { useNuxtState } from "./nuxtRuntime";
 import { useApi } from "./useApi";
@@ -19,6 +19,22 @@ export function useSettings() {
   const api = useApi();
   const settings = useNuxtState<AppSettings | null>(STATE_KEYS.APP_SETTINGS, () => null);
   const loading = useNuxtState(STATE_KEYS.SETTINGS_LOADING, () => false);
+  const isAiConfigurationIncomplete = computed(() => {
+    if (!settings.value) {
+      return false;
+    }
+
+    const hasLocalConfig =
+      settings.value.hasLocalKey ??
+      Boolean(settings.value.localModelEndpoint?.trim() && settings.value.localModelName?.trim());
+    const hasCloudProvider =
+      Boolean(settings.value.hasGeminiKey) ||
+      Boolean(settings.value.hasOpenaiKey) ||
+      Boolean(settings.value.hasClaudeKey) ||
+      Boolean(settings.value.hasHuggingfaceToken);
+
+    return !hasLocalConfig && !hasCloudProvider;
+  });
 
   async function fetchSettings() {
     loading.value = true;
@@ -67,6 +83,7 @@ export function useSettings() {
   return {
     settings: readonly(settings),
     loading: readonly(loading),
+    isAiConfigurationIncomplete: readonly(isAiConfigurationIncomplete),
     fetchSettings,
     updateSettings,
     updateApiKeys,

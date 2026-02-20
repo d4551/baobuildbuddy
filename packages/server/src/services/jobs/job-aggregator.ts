@@ -33,53 +33,80 @@ import {
   workWithIndiesProvider,
 } from "./providers";
 
+const STUDIO_TYPES: readonly StudioType[] = [
+  "AAA",
+  "Indie",
+  "Mobile",
+  "VR/AR",
+  "Platform",
+  "Esports",
+  "Unknown",
+];
+
+const GAME_GENRES: readonly GameGenre[] = [
+  "Action",
+  "RPG",
+  "Strategy",
+  "Puzzle",
+  "Simulation",
+  "Sports",
+  "Racing",
+  "Shooter",
+  "Platformer",
+  "Horror",
+  "MMORPG",
+  "MOBA",
+  "Battle Royale",
+  "Roguelike",
+  "Sandbox",
+  "Adventure",
+  "Fighting",
+  "Survival",
+  "Card Game",
+  "Casual",
+  "Indie",
+];
+
+const SUPPORTED_PLATFORMS: readonly Platform[] = [
+  "PC",
+  "Console",
+  "Mobile",
+  "VR",
+  "AR",
+  "Web",
+  "Switch",
+  "PlayStation",
+  "Xbox",
+  "Steam",
+];
+
+const JOB_EXPERIENCE_LEVELS: readonly JobExperienceLevel[] = [
+  "entry",
+  "junior",
+  "mid",
+  "senior",
+  "principal",
+  "director",
+];
+
+const JOB_TYPES: readonly JobType[] = [
+  "full-time",
+  "part-time",
+  "contract",
+  "internship",
+  "freelance",
+];
+
+const isOneOf = <T extends string>(values: readonly T[], value: unknown): value is T => {
+  if (typeof value !== "string") {
+    return false;
+  }
+  return values.some((entry) => entry === value);
+};
+
 export class JobAggregator {
   private providers: JobProvider[];
   private cacheExpiry: number; // milliseconds
-  private readonly studioTypes: ReadonlySet<StudioType> = new Set([
-    "AAA",
-    "Indie",
-    "Mobile",
-    "VR/AR",
-    "Platform",
-    "Esports",
-    "Unknown",
-  ]);
-  private readonly genres: ReadonlySet<GameGenre> = new Set([
-    "Action",
-    "RPG",
-    "Strategy",
-    "Puzzle",
-    "Simulation",
-    "Sports",
-    "Racing",
-    "Shooter",
-    "Platformer",
-    "Horror",
-    "MMORPG",
-    "MOBA",
-    "Battle Royale",
-    "Roguelike",
-    "Sandbox",
-    "Adventure",
-    "Fighting",
-    "Survival",
-    "Card Game",
-    "Casual",
-    "Indie",
-  ]);
-  private readonly platformsSet: ReadonlySet<Platform> = new Set([
-    "PC",
-    "Console",
-    "Mobile",
-    "VR",
-    "AR",
-    "Web",
-    "Switch",
-    "PlayStation",
-    "Xbox",
-    "Steam",
-  ]);
 
   constructor() {
     this.providers = [
@@ -580,30 +607,53 @@ export class JobAggregator {
    * Convert database row to Job format
    */
   private dbRowToJob(row: typeof jobs.$inferSelect): Job {
-    return {
+    const job: Job = {
       id: row.id,
       title: row.title,
       company: row.company,
       location: row.location,
       remote: row.remote ?? false,
-      hybrid: row.hybrid ?? undefined,
       salary: this.normalizeSalary(row.salary),
       description: row.description ?? "",
-      requirements: row.requirements ?? undefined,
-      technologies: row.technologies ?? undefined,
-      experienceLevel: (row.experienceLevel as JobExperienceLevel) ?? undefined,
-      type: (row.type || "full-time") as JobType,
+      type: this.normalizeJobType(row.type),
       postedDate: row.postedDate || new Date().toISOString(),
-      url: row.url ?? undefined,
-      source: row.source ?? undefined,
-      contentHash: row.contentHash ?? undefined,
       studioType: this.normalizeStudioType(row.studioType),
       gameGenres: this.normalizeGameGenres(row.gameGenres),
       platforms: this.normalizePlatforms(row.platforms),
-      tags: row.tags ?? undefined,
-      companyLogo: row.companyLogo ?? undefined,
-      applicationUrl: row.applicationUrl ?? undefined,
     };
+    if (row.hybrid !== null && row.hybrid !== undefined) {
+      job.hybrid = row.hybrid;
+    }
+    if (Array.isArray(row.requirements)) {
+      job.requirements = row.requirements;
+    }
+    if (Array.isArray(row.technologies)) {
+      job.technologies = row.technologies;
+    }
+    const experienceLevel = this.normalizeExperienceLevel(row.experienceLevel);
+    if (experienceLevel) {
+      job.experienceLevel = experienceLevel;
+    }
+    if (row.url !== null && row.url !== undefined) {
+      job.url = row.url;
+    }
+    if (row.source !== null && row.source !== undefined) {
+      job.source = row.source;
+    }
+    if (row.contentHash !== null && row.contentHash !== undefined) {
+      job.contentHash = row.contentHash;
+    }
+    if (Array.isArray(row.tags)) {
+      job.tags = row.tags;
+    }
+    if (row.companyLogo !== null && row.companyLogo !== undefined) {
+      job.companyLogo = row.companyLogo;
+    }
+    if (row.applicationUrl !== null && row.applicationUrl !== undefined) {
+      job.applicationUrl = row.applicationUrl;
+    }
+
+    return job;
   }
 
   private normalizeSalary(value: Record<string, unknown> | null): Job["salary"] | undefined {
@@ -642,20 +692,28 @@ export class JobAggregator {
   }
 
   private normalizeStudioType(value: string | null): StudioType | undefined {
-    if (!value) return undefined;
-    return this.studioTypes.has(value as StudioType) ? (value as StudioType) : undefined;
+    if (!isOneOf(STUDIO_TYPES, value)) return undefined;
+    return value;
   }
 
   private normalizeGameGenres(value: string[] | null): GameGenre[] | undefined {
     if (!Array.isArray(value)) return undefined;
-    return value.filter((genre): genre is GameGenre => this.genres.has(genre as GameGenre));
+    return value.filter((genre): genre is GameGenre => isOneOf(GAME_GENRES, genre));
   }
 
   private normalizePlatforms(value: string[] | null): Platform[] | undefined {
     if (!Array.isArray(value)) return undefined;
-    return value.filter((platform): platform is Platform =>
-      this.platformsSet.has(platform as Platform),
-    );
+    return value.filter((platform): platform is Platform => isOneOf(SUPPORTED_PLATFORMS, platform));
+  }
+
+  private normalizeExperienceLevel(value: string | null): JobExperienceLevel | undefined {
+    if (!isOneOf(JOB_EXPERIENCE_LEVELS, value)) return undefined;
+    return value;
+  }
+
+  private normalizeJobType(value: string | null): JobType {
+    if (!isOneOf(JOB_TYPES, value)) return "full-time";
+    return value;
   }
 
   private detectHybrid(location: string): boolean {

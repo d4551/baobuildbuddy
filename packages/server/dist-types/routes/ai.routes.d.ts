@@ -33,7 +33,32 @@ export declare const aiRoutes: Elysia<"/ai", {
             post: {
                 body: {
                     sessionId?: string | undefined;
-                    context?: {} | undefined;
+                    context?: {
+                        domain?: string | undefined;
+                        entity?: {
+                            label?: string | undefined;
+                            type: string;
+                            id: string;
+                        } | undefined;
+                        source: string;
+                        route: {
+                            name?: string | undefined;
+                            query: {
+                                [x: string]: string;
+                            };
+                            params: {
+                                [x: string]: string;
+                            };
+                            path: string;
+                        };
+                        state: {
+                            hasResumes: boolean;
+                            hasJobs: boolean;
+                            hasStudios: boolean;
+                            hasInterviewSessions: boolean;
+                            hasPortfolioProjects: boolean;
+                        };
+                    } | undefined;
                     message: string;
                 };
                 params: {};
@@ -46,6 +71,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                         timestamp: string;
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
+                        followUps: string[];
+                        contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
                         error?: undefined;
                     } | {
                         error: string;
@@ -54,6 +81,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                         timestamp?: undefined;
                         provider?: undefined;
                         model?: undefined;
+                        followUps?: undefined;
+                        contextDomain?: undefined;
                     };
                     422: {
                         type: "validation";
@@ -121,9 +150,9 @@ export declare const aiRoutes: Elysia<"/ai", {
             post: {
                 body: {
                     jobId?: string | undefined;
+                    resumeId: string;
                     company: string;
                     position: string;
-                    resumeId: string;
                 };
                 params: {};
                 query: unknown;

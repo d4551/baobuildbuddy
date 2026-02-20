@@ -185,10 +185,10 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         generate: {
             post: {
                 body: {
+                    resumeId?: string | undefined;
                     template?: string | undefined;
                     jobInfo?: {} | undefined;
                     save?: boolean | undefined;
-                    resumeId?: string | undefined;
                     company: string;
                     position: string;
                 };

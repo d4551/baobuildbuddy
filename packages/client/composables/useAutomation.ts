@@ -1,13 +1,21 @@
+import {
+  AUTOMATION_RUN_STATUSES,
+  type AutomationRunStatus,
+  type AutomationRunType,
+} from "@bao/shared";
 import type { MaybeRef } from "vue";
+
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+type JsonObject = { [key: string]: JsonValue };
 
 export interface AutomationRun {
   id: string;
-  type: string;
-  status: string;
+  type: AutomationRunType;
+  status: AutomationRunStatus;
   jobId: string | null;
   userId: string | null;
-  input: Record<string, unknown> | null;
-  output: Record<string, unknown> | null;
+  input: JsonObject | null;
+  output: JsonValue | null;
   screenshots: string[] | null;
   error: string | null;
   progress: number | null;
@@ -25,7 +33,7 @@ export interface AutomationProgressEvent {
   action?: string;
   step?: number;
   totalSteps?: number;
-  status?: string;
+  status?: AutomationRunStatus;
   message?: string;
   success?: boolean;
   error?: string | null;
@@ -35,17 +43,49 @@ interface JobApplyBody {
   jobUrl: string;
   resumeId: string;
   coverLetterId?: string;
+  jobId?: string;
+  customAnswers?: Record<string, string>;
 }
 
 interface UseAutomationResponse {
   runId: string;
-  status: string;
+  status: AutomationRunStatus;
 }
 
 interface FetchRunsParams {
-  type?: string;
-  status?: string;
+  type?: AutomationRunType;
+  status?: AutomationRunStatus;
 }
+
+const isJsonObject = (value: JsonValue): value is JsonObject =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isAutomationStatus = (value: string): value is AutomationRunStatus =>
+  AUTOMATION_RUN_STATUSES.some((status) => status === value);
+
+const toAutomationProgressEvent = (value: JsonValue): AutomationProgressEvent | null => {
+  if (!isJsonObject(value)) {
+    return null;
+  }
+
+  const runId = value.runId;
+  const type = value.type;
+  if (typeof runId !== "string" || typeof type !== "string") {
+    return null;
+  }
+
+  const nextEvent: AutomationProgressEvent = { runId, type };
+  if (typeof value.action === "string") nextEvent.action = value.action;
+  if (typeof value.step === "number") nextEvent.step = value.step;
+  if (typeof value.totalSteps === "number") nextEvent.totalSteps = value.totalSteps;
+  if (typeof value.status === "string" && isAutomationStatus(value.status)) {
+    nextEvent.status = value.status;
+  }
+  if (typeof value.message === "string") nextEvent.message = value.message;
+  if (typeof value.success === "boolean") nextEvent.success = value.success;
+  if (typeof value.error === "string" || value.error === null) nextEvent.error = value.error;
+  return nextEvent;
+};
 
 /**
  * Automation feature composable using Nuxt useFetch/$fetch without wrapper abstractions.
@@ -109,8 +149,11 @@ export function useAutomation() {
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data) as AutomationProgressEvent;
-        onProgress(data);
+        const parsed: JsonValue = JSON.parse(event.data);
+        const normalizedEvent = toAutomationProgressEvent(parsed);
+        if (normalizedEvent) {
+          onProgress(normalizedEvent);
+        }
       } catch {
         // Non-JSON message, ignore
       }

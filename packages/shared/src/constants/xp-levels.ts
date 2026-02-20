@@ -10,7 +10,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Novice Adventurer",
     minXP: 0,
     maxXP: 100,
-    color: "#9CA3AF",
+    accentColor: "neutral",
     features: ["Basic profile"],
   },
   {
@@ -18,7 +18,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Apprentice",
     minXP: 100,
     maxXP: 250,
-    color: "#6B7280",
+    accentColor: "base-content",
     features: ["Resume builder"],
   },
   {
@@ -26,7 +26,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Journeyman",
     minXP: 250,
     maxXP: 500,
-    color: "#10B981",
+    accentColor: "success",
     features: ["AI chat"],
   },
   {
@@ -34,7 +34,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Skilled Crafter",
     minXP: 500,
     maxXP: 850,
-    color: "#3B82F6",
+    accentColor: "info",
     features: ["Job matching"],
   },
   {
@@ -42,7 +42,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Expert",
     minXP: 850,
     maxXP: 1300,
-    color: "#6366F1",
+    accentColor: "primary",
     features: ["Interview prep"],
   },
   {
@@ -50,7 +50,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Master",
     minXP: 1300,
     maxXP: 1900,
-    color: "#8B5CF6",
+    accentColor: "secondary",
     features: ["Portfolio builder"],
   },
   {
@@ -58,7 +58,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Grandmaster",
     minXP: 1900,
     maxXP: 2700,
-    color: "#A855F7",
+    accentColor: "accent",
     features: ["Skill mapping"],
   },
   {
@@ -66,7 +66,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Legend",
     minXP: 2700,
     maxXP: 3800,
-    color: "#EC4899",
+    accentColor: "accent",
     features: ["Career pathways"],
   },
   {
@@ -74,7 +74,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Mythic",
     minXP: 3800,
     maxXP: 5200,
-    color: "#F59E0B",
+    accentColor: "warning",
     features: ["Advanced analytics"],
   },
   {
@@ -82,7 +82,7 @@ export const XP_LEVELS: XPLevel[] = [
     title: "Transcendent",
     minXP: 5200,
     maxXP: Number.POSITIVE_INFINITY,
-    color: "#EF4444",
+    accentColor: "error",
     features: ["Everything unlocked"],
   },
 ];

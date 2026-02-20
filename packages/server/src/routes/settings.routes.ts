@@ -1,4 +1,6 @@
 import {
+  APP_LANGUAGE_CODES,
+  AUTOMATION_BROWSER_OPTIONS,
   AI_PROVIDER_ID_LIST,
   AI_PROVIDER_TEST_STRATEGY_BY_ID,
   DEFAULT_NOTIFICATION_PREFERENCES,
@@ -19,7 +21,6 @@ const SETTINGS_RATE_LIMIT_DURATION_MS = 60_000;
 const SETTINGS_RATE_LIMIT_MAX_REQUESTS = 10;
 const KEY_MASK_VISIBLE_CHARS = 4;
 const MODEL_MAX_LENGTH = 200;
-const LANGUAGE_MAX_LENGTH = 10;
 const API_KEY_MAX_LENGTH = 500;
 const SETTINGS_LABEL_MAX_LENGTH = 120;
 const URL_MAX_LENGTH = 200;
@@ -43,6 +44,9 @@ const GAMING_PORTAL_IDS = [
   "gamesjobsdirect",
   "pocketgamer",
 ] as const;
+
+const LANGUAGE_CODES = APP_LANGUAGE_CODES;
+const AUTOMATION_BROWSER_IDS = AUTOMATION_BROWSER_OPTIONS;
 
 const companyBoardApiTemplatesBodySchema = t.Object({
   greenhouse: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
@@ -304,7 +308,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
         ),
         preferredModel: t.Optional(t.String({ maxLength: MODEL_MAX_LENGTH })),
         theme: t.Optional(t.Union([t.Literal("bao-light"), t.Literal("bao-dark")])),
-        language: t.Optional(t.String({ maxLength: LANGUAGE_MAX_LENGTH })),
+        language: t.Optional(t.Union(LANGUAGE_CODES.map((languageCode) => t.Literal(languageCode)))),
         notifications: t.Optional(
           t.Object({
             achievements: t.Optional(t.Boolean()),
@@ -320,7 +324,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
             screenshotRetention: t.Optional(t.Number({ minimum: 1, maximum: 30 })),
             maxConcurrentRuns: t.Optional(t.Number({ minimum: 1, maximum: 5 })),
             defaultBrowser: t.Optional(
-              t.Union([t.Literal("chrome"), t.Literal("chromium"), t.Literal("edge")]),
+              t.Union(AUTOMATION_BROWSER_IDS.map((browserId) => t.Literal(browserId))),
             ),
             enableSmartSelectors: t.Optional(t.Boolean()),
             autoSaveScreenshots: t.Optional(t.Boolean()),

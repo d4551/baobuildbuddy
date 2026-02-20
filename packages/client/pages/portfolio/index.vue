@@ -30,6 +30,9 @@ const showAddModal = ref(false);
 const editingProject = ref<PortfolioProject | null>(null);
 const draggedIndex = ref<number | null>(null);
 const projectDialogRef = ref<HTMLDialogElement | null>(null);
+useFocusTrap(projectDialogRef, () => showAddModal.value);
+const showDeleteProjectDialog = ref(false);
+const pendingDeleteProjectId = ref<string | null>(null);
 
 const portfolioForm = reactive<PortfolioMetadata>({
   title: "",
@@ -76,7 +79,7 @@ async function handleSavePortfolio() {
   try {
     await updatePortfolio(portfolioForm);
     $toast.success("Portfolio saved");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to save portfolio"));
   }
 }
@@ -129,9 +132,9 @@ async function handleSaveProject() {
     title: projectForm.title,
     description: projectForm.description,
     technologies: projectForm.technologies,
-    image: projectForm.image || undefined,
-    liveUrl: projectForm.liveUrl || undefined,
     featured: projectForm.featured,
+    ...(projectForm.image ? { image: projectForm.image } : {}),
+    ...(projectForm.liveUrl ? { liveUrl: projectForm.liveUrl } : {}),
   };
 
   try {
@@ -147,23 +150,36 @@ async function handleSaveProject() {
       $toast.success("Project added");
     }
     showAddModal.value = false;
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to save project"));
   }
 }
 
-async function handleDeleteProject(id?: string) {
+function requestDeleteProject(id?: string) {
   if (!id) {
     $toast.error("Project ID is missing");
     return;
   }
-  if (confirm("Are you sure you want to delete this project?")) {
-    try {
-      await deleteProject(id);
-      $toast.success("Project deleted");
-    } catch (error: unknown) {
-      $toast.error(getErrorMessage(error, "Failed to delete project"));
-    }
+  pendingDeleteProjectId.value = id;
+  showDeleteProjectDialog.value = true;
+}
+
+function clearDeleteProjectState() {
+  pendingDeleteProjectId.value = null;
+}
+
+async function handleDeleteProject() {
+  const id = pendingDeleteProjectId.value;
+  if (!id) return;
+
+  try {
+    await deleteProject(id);
+    $toast.success("Project deleted");
+  } catch (error) {
+    $toast.error(getErrorMessage(error, "Failed to delete project"));
+  } finally {
+    clearDeleteProjectState();
+    showDeleteProjectDialog.value = false;
   }
 }
 
@@ -171,7 +187,7 @@ async function handleExport() {
   try {
     await exportPortfolio();
     $toast.success("Portfolio exported");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to export portfolio"));
   }
 }
@@ -366,7 +382,7 @@ function removeTechnology(index: number) {
                   </button>
                   <button
                     class="btn btn-xs btn-error btn-outline"
-                    @click="handleDeleteProject(project.id)"
+                    @click="requestDeleteProject(project.id)"
                   >
                     Delete
                   </button>
@@ -379,7 +395,7 @@ function removeTechnology(index: number) {
     </div>
 
     <!-- Add/Edit Project Modal -->
-    <dialog ref="projectDialogRef" class="modal" @close="showAddModal = false">
+    <dialog ref="projectDialogRef" class="modal modal-bottom sm:modal-middle" @close="showAddModal = false">
       <div class="modal-box max-w-2xl">
         <h3 class="font-bold text-lg mb-4">
           {{ editingProject ? "Edit Project" : "Add Project" }}
@@ -488,5 +504,17 @@ function removeTechnology(index: number) {
         <button @click="showAddModal = false">close</button>
       </form>
     </dialog>
+
+    <ConfirmDialog
+      id="portfolio-delete-project-dialog"
+      v-model:open="showDeleteProjectDialog"
+      title="Delete project"
+      message="This project will be permanently deleted."
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      variant="danger"
+      @confirm="handleDeleteProject"
+      @cancel="clearDeleteProjectState"
+    />
   </div>
 </template>

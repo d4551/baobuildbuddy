@@ -7,9 +7,6 @@ import { applications } from "../../db/schema/jobs";
 export declare class JobAggregator {
     private providers;
     private cacheExpiry;
-    private readonly studioTypes;
-    private readonly genres;
-    private readonly platformsSet;
     constructor();
     /**
      * Refresh jobs from all providers and update cache
@@ -80,6 +77,8 @@ export declare class JobAggregator {
     private normalizeStudioType;
     private normalizeGameGenres;
     private normalizePlatforms;
+    private normalizeExperienceLevel;
+    private normalizeJobType;
     private detectHybrid;
     private detectExperienceLevel;
     private detectJobType;

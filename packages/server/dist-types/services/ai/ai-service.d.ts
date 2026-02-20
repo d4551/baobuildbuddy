@@ -41,6 +41,8 @@ export declare class AIService {
      * Get a specific provider by name
      */
     getProvider(name?: AIProviderType): AIProvider | null;
+    private static mergePromptWithContext;
+    private static toProviderOptions;
     /**
      * Generate a response with automatic fallback
      */

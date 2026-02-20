@@ -24,7 +24,7 @@ for arg in "$@"; do
       echo "Usage: bash scripts/setup.sh [OPTIONS]"
       echo ""
       echo "Options:"
-      echo "  --skip-checks   Skip typecheck and lint verification"
+      echo "  --skip-checks   Skip typecheck, lint, and test verification"
       echo "  --skip-python   Skip Python venv setup (Bun-only install)"
       echo "  --help, -h      Show this help message"
       exit 0
@@ -108,8 +108,11 @@ fi
 # ── 2. Install Bun dependencies ──────────────────────────────────────────────
 
 step "Installing Bun dependencies..."
-bun install
-ok "bun install complete"
+if bun install; then
+  ok "bun install complete"
+else
+  die "bun install failed"
+fi
 
 # ── 3. Python virtual environment ─────────────────────────────────────────────
 
@@ -185,7 +188,7 @@ if [ "$SKIP_CHECKS" = false ]; then
   fi
 
   if bun run lint 2>&1; then
-    ok "Lint passed"
+    ok "Lint passed (includes WCAG/token validation)"
   else
     fail "Lint failed -- run 'bun run lint' for details"
   fi
@@ -217,8 +220,8 @@ echo ""
 echo "  Next steps:"
 echo "    1. Review .env and set your values (API keys, ports, etc.)"
 echo "    2. Start the dev server:  bun run dev"
-echo "    3. Open the UI:           http://localhost:3001"
-echo "    4. Verify the API:        curl http://localhost:3000/api/health"
+echo "    3. Open the UI URL shown as 'Local:' in the Nuxt output (usually http://localhost:3001)"
+echo "    4. Open health check in browser: http://localhost:3000/api/health"
 echo ""
 echo -e "  ${DIM}\"It's dangerous to go alone! Take this.\"${RESET}"
 echo ""

@@ -66,7 +66,7 @@ export const app = new Elysia({ prefix: API_PREFIX, nativeStaticResponse: true }
     ErrorResponse: t.Object({
       error: t.String(),
       code: t.Optional(t.String()),
-      fields: t.Optional(t.Array(t.Any())),
+      fields: t.Optional(t.Array(t.Unknown())),
     }),
   })
   .use(rateLimit({ duration: GLOBAL_RATE_LIMIT_DURATION_MS, max: GLOBAL_RATE_LIMIT_MAX_REQUESTS }))

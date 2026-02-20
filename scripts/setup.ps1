@@ -172,7 +172,7 @@ if (-not $SkipChecks) {
     else { Fail "Typecheck failed -- run 'bun run typecheck' for details" }
 
     & bun run lint 2>&1
-    if ($LASTEXITCODE -eq 0) { Ok "Lint passed" }
+    if ($LASTEXITCODE -eq 0) { Ok "Lint passed (includes WCAG/token validation)" }
     else { Fail "Lint failed -- run 'bun run lint' for details" }
 
     & bun run test 2>&1
@@ -200,8 +200,8 @@ Write-Host ""
 Write-Host "  Next steps:"
 Write-Host "    1. Review .env and set your values (API keys, ports, etc.)"
 Write-Host "    2. Start the dev server:  bun run dev"
-Write-Host "    3. Open the UI:           http://localhost:3001"
-Write-Host "    4. Verify the API:        curl http://localhost:3000/api/health"
+Write-Host "    3. Open the UI URL shown as 'Local:' in the Nuxt output (usually http://localhost:3001)"
+Write-Host "    4. Open health check in browser: http://localhost:3000/api/health"
 Write-Host ""
 Write-Host '  "It''s dangerous to go alone! Take this."' -ForegroundColor DarkGray
 Write-Host ""

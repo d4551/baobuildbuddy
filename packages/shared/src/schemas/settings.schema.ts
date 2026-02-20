@@ -1,5 +1,10 @@
-import { z } from "zod";
+import * as z from "zod";
 import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
+import {
+  APP_LANGUAGE_CODES,
+  AUTOMATION_BROWSER_OPTIONS,
+  DEFAULT_APP_LANGUAGE,
+} from "../constants/settings";
 import type { AIProviderType } from "../types/ai";
 import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES } from "../types/settings";
 
@@ -106,7 +111,7 @@ export const automationSettingsSchema = z
     defaultTimeout: z.number().int().min(1).max(120).default(30),
     screenshotRetention: z.number().int().min(1).max(30).default(7),
     maxConcurrentRuns: z.number().int().min(1).max(5).default(1),
-    defaultBrowser: z.enum(["chrome", "chromium", "edge"]).default("chrome"),
+    defaultBrowser: z.enum(AUTOMATION_BROWSER_OPTIONS).default("chrome"),
     enableSmartSelectors: z.boolean().default(true),
     autoSaveScreenshots: z.boolean().default(true),
     jobProviders: jobProviderSettingsSchema.optional(),
@@ -124,7 +129,7 @@ export const settingsSchema = z.object({
   preferredModel: z.string().optional(),
   preferredModels: preferredModelsSchema.optional(),
   theme: z.enum(["bao-light", "bao-dark"]).default("bao-light"),
-  language: z.string().default("en"),
+  language: z.enum(APP_LANGUAGE_CODES).default(DEFAULT_APP_LANGUAGE),
   notifications: notificationPreferencesSchema,
   automationSettings: automationSettingsSchema,
 });

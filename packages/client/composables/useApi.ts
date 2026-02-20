@@ -1,5 +1,5 @@
 /**
- * Typed wrapper around the Eden Treaty $api instance.
+ * Typed access boundary for the Eden Treaty `$api` instance.
  * All composables use this to access the Elysia server.
  */
 import { useNuxtRuntimeApp } from "./nuxtRuntime";

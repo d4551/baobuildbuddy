@@ -20,8 +20,42 @@ export declare const interviewRoutes: Elysia<"/interview", {
         sessions: {
             post: {
                 body: {
-                    config?: {} | undefined;
-                    studioId: string;
+                    studioId?: string | undefined;
+                    config?: {
+                        experienceLevel?: string | undefined;
+                        technologies?: string[] | undefined;
+                        duration?: number | undefined;
+                        roleType?: string | undefined;
+                        roleCategory?: string | undefined;
+                        focusAreas?: string[] | undefined;
+                        questionCount?: number | undefined;
+                        includeTechnical?: boolean | undefined;
+                        includeBehavioral?: boolean | undefined;
+                        includeStudioSpecific?: boolean | undefined;
+                        enableVoiceMode?: boolean | undefined;
+                        interviewMode?: "job" | "studio" | undefined;
+                        targetJob?: {
+                            source?: string | undefined;
+                            url?: string | undefined;
+                            description?: string | undefined;
+                            technologies?: string[] | undefined;
+                            requirements?: string[] | undefined;
+                            postedDate?: string | undefined;
+                            location: string;
+                            id: string;
+                            company: string;
+                            title: string;
+                        } | undefined;
+                        voiceSettings?: {
+                            language?: string | undefined;
+                            microphoneId?: string | undefined;
+                            speakerId?: string | undefined;
+                            voiceId?: string | undefined;
+                            rate?: number | undefined;
+                            pitch?: number | undefined;
+                            volume?: number | undefined;
+                        } | undefined;
+                    } | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -92,9 +126,8 @@ export declare const interviewRoutes: Elysia<"/interview", {
                     post: {
                         body: {
                             questionId?: string | undefined;
-                            response?: string | undefined;
-                            answer?: string | undefined;
                             questionIndex?: number | undefined;
+                            response: string;
                         };
                         params: {
                             id: string;

@@ -1,4 +1,26 @@
+import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared";
+
 export const SEED_STUDIOS = [
+  {
+    id: INTERVIEW_FALLBACK_STUDIO_ID,
+    name: "General Interview Context",
+    logo: null,
+    website: null,
+    location: "Remote",
+    size: "N/A",
+    type: "General",
+    description:
+      "Default interview context used when a specific studio is not selected or does not exist.",
+    games: [],
+    technologies: [],
+    culture: {
+      workStyle: "hybrid",
+      benefits: [],
+      diversity: "Generalized interview profile",
+    },
+    interviewStyle: "balanced",
+    remoteWork: true,
+  },
   {
     id: "riot-games",
     name: "Riot Games",

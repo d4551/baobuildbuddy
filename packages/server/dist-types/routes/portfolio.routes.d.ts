@@ -31,7 +31,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         put: {
             body: {
                 metadata: {
-                    [x: string]: any;
+                    [x: string]: unknown;
                 };
             };
             params: {};

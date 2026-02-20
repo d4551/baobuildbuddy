@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared";
+import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
 
 const { $toast } = useNuxtApp();
@@ -9,6 +11,11 @@ const { studio, loading: studioLoading, fetchStudioById } = useStudio();
 const pageError = ref<string | null>(null);
 const studioId = computed(() => route.params.id as string);
 const loading = computed(() => studioLoading.value);
+const breadcrumbs = computed(() => [
+  { label: "Dashboard", to: APP_ROUTES.dashboard },
+  { label: "Studios", to: APP_ROUTES.studios },
+  { label: studio.value?.name || "Studio Detail" },
+]);
 
 onMounted(async () => {
   await loadStudio();
@@ -22,27 +29,20 @@ async function loadStudio() {
       pageError.value = "Studio not found";
       $toast.error(pageError.value);
     }
-  } catch (error: unknown) {
+  } catch (error) {
     pageError.value = getErrorMessage(error, "Failed to load studio details");
     $toast.error(pageError.value);
   }
 }
 
 function startPracticeInterview() {
-  router.push(`/interview?studio=${studioId.value}`);
+  router.push(buildInterviewStudioNavigation(studioId.value));
 }
 </script>
 
 <template>
   <div>
-    <div class="mb-6">
-      <button class="btn btn-ghost btn-sm" @click="router.back()">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to Studios
-      </button>
-    </div>
+    <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
 
     <div v-if="pageError" class="alert alert-error mb-6">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

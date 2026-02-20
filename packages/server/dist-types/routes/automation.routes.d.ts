@@ -62,25 +62,27 @@ export declare const automationRoutes: Elysia<"/automation", {
                 body: unknown;
                 params: {};
                 query: {
-                    type?: "email" | "job_apply" | "scrape" | undefined;
-                    status?: "pending" | "success" | "error" | "running" | undefined;
+                    type?: "email" | "scrape" | "job_apply" | undefined;
+                    status?: "success" | "error" | "pending" | "running" | undefined;
                 };
                 headers: unknown;
                 response: {
                     200: {
                         progress: number | null;
-                        type: "email" | "job_apply" | "scrape";
                         error: string | null;
-                        output: any;
+                        type: "email" | "scrape" | "job_apply";
+                        output: {
+                            [x: string]: unknown;
+                        } | null;
                         input: {
-                            [x: string]: any;
+                            [x: string]: unknown;
                         } | null;
                         id: string;
                         createdAt: string;
                         updatedAt: string;
                         screenshots: string[] | null;
                         jobId: string | null;
-                        status: "pending" | "success" | "error" | "running";
+                        status: "success" | "error" | "pending" | "running";
                         userId: string | null;
                         currentStep: number | null;
                         totalSteps: number | null;
@@ -114,18 +116,20 @@ export declare const automationRoutes: Elysia<"/automation", {
                     response: {
                         200: {
                             progress: number | null;
-                            type: "email" | "job_apply" | "scrape";
                             error: string | null;
-                            output: any;
+                            type: "email" | "scrape" | "job_apply";
+                            output: {
+                                [x: string]: unknown;
+                            } | null;
                             input: {
-                                [x: string]: any;
+                                [x: string]: unknown;
                             } | null;
                             id: string;
                             createdAt: string;
                             updatedAt: string;
                             screenshots: string[] | null;
                             jobId: string | null;
-                            status: "pending" | "success" | "error" | "running";
+                            status: "success" | "error" | "pending" | "running";
                             userId: string | null;
                             currentStep: number | null;
                             totalSteps: number | null;

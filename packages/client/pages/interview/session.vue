@@ -1,15 +1,21 @@
 <script setup lang="ts">
+import { APP_ROUTES, APP_ROUTE_QUERY_KEYS, INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
 const router = useRouter();
 const { currentSession, loading, getSession, submitResponse, completeSession } = useInterview();
 const { $toast } = useNuxtApp();
+const { t } = useI18n();
 const voiceSettings = computed(() => currentSession.value?.config?.voiceSettings);
 const tts = useTTS(voiceSettings);
 const stt = useSTT(voiceSettings);
 
-const sessionId = computed(() => route.query.id as string);
+const sessionId = computed(() => {
+  const routeSessionId = route.query[APP_ROUTE_QUERY_KEYS.id];
+  return typeof routeSessionId === "string" ? routeSessionId : "";
+});
 const currentQuestionIndex = ref(0);
 const response = ref("");
 const submitting = ref(false);
@@ -17,6 +23,7 @@ const timeElapsed = ref(0);
 const timer = ref<ReturnType<typeof setInterval> | null>(null);
 
 const enableVoiceMode = computed(() => currentSession.value?.config?.enableVoiceMode ?? false);
+const targetJob = computed(() => currentSession.value?.config?.targetJob);
 
 onMounted(async () => {
   if (sessionId.value) {
@@ -66,12 +73,16 @@ const progress = computed(() => {
   if (!currentSession.value?.questions?.length) return 0;
   return ((currentQuestionIndex.value + 1) / currentSession.value.questions.length) * 100;
 });
+const elapsedMinutes = computed(() => Math.floor(timeElapsed.value / 60));
+const elapsedSeconds = computed(() => timeElapsed.value % 60);
 
 async function handleSubmitResponse() {
   if (!response.value.trim() || !sessionId.value) return;
 
-  if (response.value.trim().length < 10) {
-    $toast.error("Response must be at least 10 characters");
+  if (response.value.trim().length < INTERVIEW_MIN_RESPONSE_LENGTH) {
+    $toast.error(
+      t("interviewSession.errors.minResponseLength", { count: INTERVIEW_MIN_RESPONSE_LENGTH }),
+    );
     return;
   }
 
@@ -82,7 +93,7 @@ async function handleSubmitResponse() {
       response: response.value,
     });
 
-    $toast.success("Response recorded");
+    $toast.success(t("interviewSession.toasts.responseRecorded"));
 
     if (currentQuestionIndex.value < (currentSession.value?.questions?.length || 0) - 1) {
       currentQuestionIndex.value++;
@@ -90,8 +101,8 @@ async function handleSubmitResponse() {
     } else {
       await handleCompleteInterview();
     }
-  } catch (error: unknown) {
-    $toast.error(getErrorMessage(error, "Failed to submit response"));
+  } catch (error) {
+    $toast.error(getErrorMessage(error, t("interviewSession.errors.submitFailed")));
   } finally {
     submitting.value = false;
   }
@@ -106,18 +117,18 @@ async function handleCompleteInterview() {
 
   try {
     await completeSession(sessionId.value);
-    $toast.success("Interview completed");
-    router.push(`/interview/history?session=${sessionId.value}`);
-  } catch (error: unknown) {
-    $toast.error(getErrorMessage(error, "Failed to complete interview"));
+    $toast.success(t("interviewSession.toasts.completed"));
+    router.push({
+      path: APP_ROUTES.interviewHistory,
+      query: {
+        [APP_ROUTE_QUERY_KEYS.sessionId]: sessionId.value,
+      },
+    });
+  } catch (error) {
+    $toast.error(getErrorMessage(error, t("interviewSession.errors.completeFailed")));
   }
 }
 
-function formatTime(seconds: number) {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
 </script>
 
 <template>
@@ -128,15 +139,25 @@ function formatTime(seconds: number) {
       <!-- Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold">Interview Practice</h1>
+          <h1 class="text-3xl font-bold">{{ t("interviewSession.title") }}</h1>
           <p class="text-base-content/70">
-            {{ currentSession.studioName }} - {{ currentSession.role }}
+            {{ targetJob?.company || currentSession.studioName }} - {{ targetJob?.title || currentSession.role }}
           </p>
         </div>
         <div class="stats bg-base-200">
           <div class="stat py-3 px-6">
-            <div class="stat-title text-xs">Time</div>
-            <div class="stat-value text-2xl">{{ formatTime(timeElapsed) }}</div>
+            <div class="stat-title text-xs">{{ t("interviewSession.timeLabel") }}</div>
+            <div class="stat-value text-2xl">
+              <span class="countdown font-mono text-2xl">
+                <span :style="`--value:${elapsedMinutes}; --digits:2;`" aria-live="polite" :aria-label="String(elapsedMinutes)">
+                  {{ elapsedMinutes }}
+                </span>
+                :
+                <span :style="`--value:${elapsedSeconds}; --digits:2;`" aria-live="polite" :aria-label="String(elapsedSeconds)">
+                  {{ elapsedSeconds }}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -146,11 +167,28 @@ function formatTime(seconds: number) {
         <div class="card-body">
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-medium">
-              Question {{ currentQuestionIndex + 1 }} of {{ currentSession.questions?.length || 0 }}
+              {{ t("interviewSession.progressLabel", { current: currentQuestionIndex + 1, total: currentSession.questions?.length || 0 }) }}
             </span>
             <span class="text-sm text-base-content/60">{{ Math.round(progress) }}%</span>
           </div>
-          <progress class="progress progress-primary w-full" :value="progress" max="100" aria-label="Progress progress"></progress>
+          <progress
+            class="progress progress-primary w-full"
+            :value="progress"
+            max="100"
+            :aria-label="t('interviewSession.progressAria')"
+          ></progress>
+        </div>
+      </div>
+
+      <div v-if="targetJob" class="card bg-base-200">
+        <div class="card-body">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="card-title text-lg">{{ targetJob.title }}</h2>
+              <p class="text-sm text-base-content/70">{{ targetJob.company }} · {{ targetJob.location }}</p>
+            </div>
+            <span class="badge badge-primary badge-outline">{{ t("interviewSession.jobTargetBadge") }}</span>
+          </div>
         </div>
       </div>
 
@@ -164,7 +202,7 @@ function formatTime(seconds: number) {
               </div>
             </div>
             <div class="flex-1">
-              <p class="font-semibold mb-2">Interviewer</p>
+              <p class="font-semibold mb-2">{{ t("interviewSession.interviewerLabel") }}</p>
               <div class="bg-base-100 p-4 rounded-lg">
                 <p class="text-lg">{{ currentQuestion.question }}</p>
               </div>
@@ -176,14 +214,14 @@ function formatTime(seconds: number) {
       <!-- Feedback (if answered) -->
       <div v-if="currentQuestion?.feedback" class="card bg-base-200">
         <div class="card-body">
-          <h3 class="card-title text-lg">Feedback</h3>
+          <h3 class="card-title text-lg">{{ t("interviewSession.feedbackTitle") }}</h3>
           <div class="alert" :class="{
             'alert-success': currentQuestion.score >= 80,
             'alert-warning': currentQuestion.score >= 60 && currentQuestion.score < 80,
             'alert-error': currentQuestion.score < 60
-          }">
+          }" aria-live="polite">
             <div>
-              <p class="font-semibold">Score: {{ currentQuestion.score }}%</p>
+              <p class="font-semibold">{{ t("interviewSession.feedbackScore", { score: currentQuestion.score }) }}</p>
               <p class="text-sm">{{ currentQuestion.feedback }}</p>
             </div>
           </div>
@@ -194,44 +232,61 @@ function formatTime(seconds: number) {
       <div class="card bg-base-200">
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="card-title text-lg">Your Response</h3>
+            <h3 class="card-title text-lg">{{ t("interviewSession.responseTitle") }}</h3>
             <div v-if="enableVoiceMode && stt.isSupported.value" class="flex items-center gap-2">
-              <span class="text-sm opacity-70">{{ stt.isListening.value ? "Listening..." : "Voice input" }}</span>
+              <span class="text-sm opacity-70">
+                {{ stt.isListening.value ? t("interviewSession.voice.listening") : t("interviewSession.voice.idle") }}
+              </span>
               <button
                 type="button"
                 class="btn btn-sm"
                 :class="stt.isListening.value ? 'btn-error' : 'btn-primary'"
-                :title="stt.isListening.value ? 'Stop listening' : 'Start voice input'"
+                :title="stt.isListening.value ? t('interviewSession.voice.stopTitle') : t('interviewSession.voice.startTitle')"
+                :aria-label="stt.isListening.value ? t('interviewSession.voice.stopAria') : t('interviewSession.voice.startAria')"
                 @click="stt.isListening.value ? stt.stopListening() : stt.startListening()"
               >
-                {{ stt.isListening.value ? "Stop" : "Mic" }}
+                {{ stt.isListening.value ? t("interviewSession.voice.stopButton") : t("interviewSession.voice.startButton") }}
               </button>
             </div>
           </div>
 
           <textarea
             v-model="response"
-            class="textarea textarea-bordered w-full"
+            required
+            :minlength="INTERVIEW_MIN_RESPONSE_LENGTH"
+            class="textarea textarea-bordered validator w-full"
             rows="8"
-            placeholder="Type your answer here..."
+            :placeholder="t('interviewSession.responsePlaceholder')"
             :disabled="submitting"
-            aria-label="Type your answer here..."></textarea>
+            :aria-label="t('interviewSession.responseAria')"
+          ></textarea>
+          <p class="validator-hint">
+            {{ t("interviewSession.minResponseHint", { count: INTERVIEW_MIN_RESPONSE_LENGTH }) }}
+          </p>
 
           <div class="card-actions justify-between mt-4">
             <button
+              type="button"
               class="btn btn-error btn-outline"
+              :aria-label="t('interviewSession.endAria')"
               @click="handleCompleteInterview"
             >
-              End Interview
+              {{ t("interviewSession.endButton") }}
             </button>
 
             <button
+              type="button"
               class="btn btn-primary"
+              :aria-label="t('interviewSession.submitAria')"
               :disabled="!response.trim() || submitting"
               @click="handleSubmitResponse"
             >
               <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
-              {{ currentQuestionIndex < (currentSession.questions?.length || 0) - 1 ? 'Submit & Next' : 'Submit & Finish' }}
+              {{
+                currentQuestionIndex < (currentSession.questions?.length || 0) - 1
+                  ? t("interviewSession.submitNextButton")
+                  : t("interviewSession.submitFinishButton")
+              }}
             </button>
           </div>
         </div>
@@ -242,7 +297,7 @@ function formatTime(seconds: number) {
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <span>Session not found. Please start a new interview.</span>
+      <span>{{ t("interviewSession.notFound") }}</span>
     </div>
   </div>
 </template>

@@ -1,24 +1,33 @@
 <script setup lang="ts">
 import { APP_BRAND } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 
 const { theme, toggleTheme } = useTheme();
+const { t } = useI18n();
 </script>
 
 <template>
   <div class="navbar bg-base-200">
     <div class="navbar-start">
-      <label for="bao-drawer" class="btn btn-ghost btn-circle drawer-button" aria-label="toggle sidebar">
+      <label
+        for="bao-drawer"
+        class="btn btn-ghost btn-circle drawer-button"
+        :aria-label="t('a11y.toggleSidebar')"
+      >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
         </svg>
       </label>
-      <NuxtLink to="/" class="btn btn-ghost text-xl font-bold text-primary">{{ APP_BRAND.name }}</NuxtLink>
+      <NuxtLink to="/" class="btn btn-ghost gap-2 text-xl font-bold text-primary">
+        <span class="text-lg leading-none" aria-hidden="true">{{ APP_BRAND.logoEmoji }}</span>
+        <span>{{ APP_BRAND.name }}</span>
+      </NuxtLink>
     </div>
     <div class="navbar-center hidden lg:flex">
-      <span class="text-sm text-base-content/60">AI Career Assistant for Game Dev</span>
+      <span class="text-sm text-base-content/60">{{ t("app.tagline") }}</span>
     </div>
     <div class="navbar-end">
-      <label class="swap swap-rotate btn btn-ghost btn-circle" aria-label="Toggle theme">
+      <label class="swap swap-rotate btn btn-ghost btn-circle" :aria-label="t('a11y.toggleTheme')">
         <input
           type="checkbox"
           class="theme-controller"
@@ -33,7 +42,7 @@ const { theme, toggleTheme } = useTheme();
           <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Z" />
         </svg>
       </label>
-      <NuxtLink to="/settings" class="btn btn-ghost btn-circle" aria-label="Open settings">
+      <NuxtLink to="/settings" class="btn btn-ghost btn-circle" :aria-label="t('a11y.openSettings')">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

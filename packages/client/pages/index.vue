@@ -5,17 +5,24 @@ import type {
   UserGamificationData,
   UserProfile,
 } from "@bao/shared";
-import { APP_BRAND, getXPProgress } from "@bao/shared";
+import { APP_BRAND, APP_ROUTES, getXPProgress } from "@bao/shared";
 import {
+  DASHBOARD_A11Y_KEYS,
+  DASHBOARD_ACTIVITY_FALLBACK_KEY,
   DASHBOARD_ASYNC_DATA_KEY,
-  DASHBOARD_COPY,
+  DASHBOARD_COPY_KEYS,
+  DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY,
+  DASHBOARD_ERROR_KEYS,
+  DASHBOARD_MOTIVATIONAL_PHRASE_KEYS,
+  DASHBOARD_ONBOARDING_STEPS,
   DASHBOARD_QUICK_ACTIONS,
   DASHBOARD_RECENT_ACTIVITY_LIMIT,
+  DASHBOARD_RELATIVE_TIME_KEYS,
   DASHBOARD_STAT_CARDS,
   DASHBOARD_TIME_CONSTANTS,
+  DASHBOARD_WELCOME_HEADING_KEYS,
   type DashboardStatKey,
   getDashboardActivityEmoji,
-  getWelcomeHeading,
 } from "~/constants/dashboard";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -72,11 +79,12 @@ type DashboardUiState = "idle" | "loading" | "error" | "empty" | "success";
 
 const api = useApi();
 const { $toast } = useNuxtApp();
+const { t } = useI18n();
 
 if (import.meta.server) {
   useServerSeoMeta({
     title: `${APP_BRAND.name} Dashboard`,
-    description: DASHBOARD_COPY.seoDescription,
+    description: t(DASHBOARD_COPY_KEYS.seoDescription),
   });
 }
 
@@ -99,7 +107,24 @@ const uiState = computed<DashboardUiState>(() => {
   return "success";
 });
 
-const welcomeHeading = computed(() => getWelcomeHeading(dashboard.value?.profile?.name));
+const welcomeHeading = computed(() => {
+  const profileName = dashboard.value?.profile?.name?.trim();
+  if (profileName) {
+    return t(DASHBOARD_WELCOME_HEADING_KEYS.named, { name: profileName });
+  }
+  return t(DASHBOARD_WELCOME_HEADING_KEYS.fallback);
+});
+const heroPhraseIndex = ref(0);
+const activeHeroPhrase = computed(
+  () => {
+    const phraseKey =
+      DASHBOARD_MOTIVATIONAL_PHRASE_KEYS[
+        heroPhraseIndex.value % DASHBOARD_MOTIVATIONAL_PHRASE_KEYS.length
+      ];
+    return t(phraseKey);
+  },
+);
+let heroPhraseTimer: ReturnType<typeof setInterval> | null = null;
 
 const levelProgress = computed(() => {
   const gamification = dashboard.value?.gamification;
@@ -114,9 +139,22 @@ const xpTarget = computed(() => {
   return nextLevel ? nextLevel.minXP : gamification.xp;
 });
 
+onMounted(() => {
+  heroPhraseTimer = setInterval(() => {
+    heroPhraseIndex.value += 1;
+  }, DASHBOARD_TIME_CONSTANTS.heroTextRotateIntervalMs);
+});
+
+onUnmounted(() => {
+  if (heroPhraseTimer) {
+    clearInterval(heroPhraseTimer);
+    heroPhraseTimer = null;
+  }
+});
+
 watch(error, (nextError) => {
   if (import.meta.client && nextError) {
-    $toast.error(getErrorMessage(nextError, DASHBOARD_COPY.loadErrorFallback));
+    $toast.error(getErrorMessage(nextError, t(DASHBOARD_COPY_KEYS.loadErrorFallback)));
   }
 });
 
@@ -182,12 +220,16 @@ function resolveActivityType(action: string): string {
   return "activity";
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 function getRecentActivity(progress: UserGamificationData | null): DashboardActivity[] {
-  if (!progress?.stats || typeof progress.stats !== "object") {
+  if (!isRecord(progress?.stats)) {
     return [];
   }
 
-  const actionHistory = (progress.stats as Record<string, unknown>).actionHistory;
+  const actionHistory = progress.stats.actionHistory;
   if (!Array.isArray(actionHistory)) {
     return [];
   }
@@ -196,15 +238,14 @@ function getRecentActivity(progress: UserGamificationData | null): DashboardActi
     .slice(-DASHBOARD_RECENT_ACTIVITY_LIMIT)
     .reverse()
     .map((entry): DashboardActivity | null => {
-      if (!entry || typeof entry !== "object") {
+      if (!isRecord(entry)) {
         return null;
       }
 
-      const normalizedEntry = entry as Record<string, unknown>;
       const action =
-        typeof normalizedEntry.action === "string" ? normalizedEntry.action : "Activity";
+        typeof entry.action === "string" ? entry.action : t(DASHBOARD_ACTIVITY_FALLBACK_KEY);
       const timestampRaw =
-        typeof normalizedEntry.timestamp === "string" ? normalizedEntry.timestamp : "";
+        typeof entry.timestamp === "string" ? entry.timestamp : "";
       const timestamp = timestampRaw ? new Date(timestampRaw) : new Date();
       if (Number.isNaN(timestamp.getTime())) {
         return null;
@@ -227,35 +268,32 @@ function formatTimeAgo(timestamp: Date): string {
       1,
       Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerMinute),
     );
-    return `${minutes}m ago`;
+    return t(DASHBOARD_RELATIVE_TIME_KEYS.minutesAgo, { count: minutes });
   }
 
   if (elapsed < DASHBOARD_TIME_CONSTANTS.millisecondsPerDay) {
     const hours = Math.max(1, Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerHour));
-    return `${hours}h ago`;
+    return t(DASHBOARD_RELATIVE_TIME_KEYS.hoursAgo, { count: hours });
   }
 
   const days = Math.max(1, Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerDay));
-  return `${days}d ago`;
+  return t(DASHBOARD_RELATIVE_TIME_KEYS.daysAgo, { count: days });
 }
 
 async function fetchDashboardViewModel(): Promise<DashboardViewModel> {
   const [profile, stats, gamification, challengeResponse] = await Promise.all([
-    requestData<UserProfile>(
-      api.user.profile.get() as Promise<EdenResult<UserProfile>>,
-      "Failed to load user profile",
-    ),
+    requestData<UserProfile>(api.user.profile.get(), t(DASHBOARD_ERROR_KEYS.profileLoadFallback)),
     requestData<DashboardStats>(
-      api.stats.dashboard.get() as Promise<EdenResult<DashboardStats>>,
-      "Failed to load dashboard metrics",
+      api.stats.dashboard.get(),
+      t(DASHBOARD_ERROR_KEYS.metricsLoadFallback),
     ),
     requestData<UserGamificationData>(
-      api.gamification.progress.get() as Promise<EdenResult<UserGamificationData>>,
-      "Failed to load gamification progress",
+      api.gamification.progress.get(),
+      t(DASHBOARD_ERROR_KEYS.gamificationLoadFallback),
     ),
     requestData<DailyChallengesResponse>(
-      api.gamification.challenges.get() as Promise<EdenResult<DailyChallengesResponse>>,
-      "Failed to load daily challenges",
+      api.gamification.challenges.get(),
+      t(DASHBOARD_ERROR_KEYS.challengesLoadFallback),
     ),
   ]);
 
@@ -287,11 +325,13 @@ async function requestData<T>(
 <template>
   <section class="space-y-6" aria-labelledby="dashboard-title">
     <header class="space-y-1">
-      <h1 id="dashboard-title" class="text-3xl font-bold">{{ DASHBOARD_COPY.pageTitle }}</h1>
-      <p class="text-sm text-base-content/60">{{ DASHBOARD_COPY.metricsSummaryLabel }}</p>
+      <h1 id="dashboard-title" class="text-3xl font-bold">{{ t(DASHBOARD_COPY_KEYS.pageTitle) }}</h1>
+      <p class="text-sm text-base-content/60">
+        {{ t(DASHBOARD_COPY_KEYS.metricsSummaryLabel, { brand: APP_BRAND.name }) }}
+      </p>
     </header>
 
-    <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" :lines="6" />
+    <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" variant="stats" :lines="6" />
 
     <div v-else-if="uiState === 'error'" class="alert alert-error" role="alert">
       <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -302,18 +342,28 @@ async function requestData<T>(
           d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
-      <span>{{ getErrorMessage(error, DASHBOARD_COPY.loadErrorFallback) }}</span>
+      <span>{{ getErrorMessage(error, t(DASHBOARD_COPY_KEYS.loadErrorFallback)) }}</span>
       <button type="button" class="btn btn-sm" @click="retryDashboardLoad">
-        {{ DASHBOARD_COPY.retryButtonLabel }}
+        {{ t(DASHBOARD_COPY_KEYS.retryButtonLabel) }}
       </button>
     </div>
 
-    <div v-else-if="uiState === 'empty'" class="card bg-base-200 card-border">
-      <div class="card-body items-start gap-3">
-        <h2 class="card-title">{{ DASHBOARD_COPY.emptyStateTitle }}</h2>
-        <p class="text-sm text-base-content/70">{{ DASHBOARD_COPY.emptyStateDescription }}</p>
+    <div v-else-if="uiState === 'empty'" class="card card-border bg-base-100">
+      <div class="card-body items-start gap-4">
+        <h2 class="card-title">{{ t(DASHBOARD_COPY_KEYS.emptyStateTitle) }}</h2>
+        <p class="text-sm text-base-content/70">{{ t(DASHBOARD_COPY_KEYS.emptyStateDescription) }}</p>
+        <h3 class="text-sm font-semibold">{{ t(DASHBOARD_COPY_KEYS.onboardingChecklistTitle) }}</h3>
+        <ul class="steps steps-vertical w-full lg:steps-horizontal">
+          <li v-for="step in DASHBOARD_ONBOARDING_STEPS" :key="step.id" class="step step-primary">
+            <NuxtLink :to="step.to" class="link link-hover">
+              {{ t(step.labelKey) }}
+            </NuxtLink>
+          </li>
+        </ul>
         <div class="card-actions">
-          <NuxtLink to="/setup" class="btn btn-primary">{{ DASHBOARD_COPY.setupCtaLabel }}</NuxtLink>
+          <NuxtLink :to="APP_ROUTES.setup" class="btn btn-primary">
+            {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -322,9 +372,16 @@ async function requestData<T>(
       <section class="card bg-gradient-to-br from-primary to-secondary text-primary-content">
         <div class="card-body gap-3">
           <h2 class="card-title text-2xl">{{ welcomeHeading }}</h2>
-          <p class="text-base opacity-90">{{ DASHBOARD_COPY.welcomeDescription }}</p>
+          <p class="text-base opacity-90">{{ t(DASHBOARD_COPY_KEYS.welcomeDescription) }}</p>
+          <div class="badge badge-outline badge-lg text-primary-content border-primary-content/40 text-rotate w-fit bg-transparent">
+            <Transition name="hero-text-rotate" mode="out-in">
+              <span :key="activeHeroPhrase">{{ activeHeroPhrase }}</span>
+            </Transition>
+          </div>
           <div v-if="!dashboard?.profile?.name" class="card-actions mt-2">
-            <NuxtLink to="/setup" class="btn btn-primary-content">{{ DASHBOARD_COPY.setupCtaLabel }}</NuxtLink>
+            <NuxtLink :to="APP_ROUTES.setup" class="btn btn-primary-content">
+              {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
+            </NuxtLink>
           </div>
         </div>
       </section>
@@ -337,55 +394,73 @@ async function requestData<T>(
                 <span class="text-2xl" aria-hidden="true">🎮</span>
                 <div>
                   <p class="text-sm text-base-content/60">
-                    {{ DASHBOARD_COPY.levelLabel }} {{ dashboard.gamification.level }}
+                    {{ t(DASHBOARD_COPY_KEYS.levelLabel) }} {{ dashboard.gamification.level }}
                   </p>
                   <p class="font-bold">{{ dashboard.gamification.xp }} / {{ xpTarget }} XP</p>
                 </div>
               </div>
-              <progress class="progress progress-primary w-full" :value="levelProgress" max="100" aria-label="Level Progress progress"></progress>
+              <progress
+                class="progress progress-primary w-full"
+                :value="levelProgress"
+                max="100"
+                :aria-label="t(DASHBOARD_A11Y_KEYS.levelProgressAria)"
+              ></progress>
             </div>
 
-            <div v-if="dashboard.gamification.currentStreak" class="text-center">
-              <div class="text-3xl" aria-hidden="true">🔥</div>
-              <p class="text-2xl font-bold">{{ dashboard.gamification.currentStreak }}</p>
-              <p class="text-xs text-base-content/60">{{ DASHBOARD_COPY.streakLabel }}</p>
+            <div class="flex items-center gap-6">
+              <div
+                class="radial-progress text-primary"
+                :style="`--value:${levelProgress}; --size:5.5rem; --thickness:0.4rem;`"
+                role="progressbar"
+                :aria-valuenow="levelProgress"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                <span class="text-sm font-bold">{{ levelProgress }}%</span>
+              </div>
+
+              <div v-if="dashboard.gamification.currentStreak" class="text-center">
+                <div class="text-3xl" aria-hidden="true">🔥</div>
+                <p class="text-2xl font-bold">{{ dashboard.gamification.currentStreak }}</p>
+                <p class="text-xs text-base-content/60">{{ t(DASHBOARD_COPY_KEYS.streakLabel) }}</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <NuxtLink
-          v-for="statCard in DASHBOARD_STAT_CARDS"
-          :key="statCard.id"
-          :to="statCard.to"
-          class="card bg-base-200 hover:bg-base-300 transition-colors"
-          :aria-label="`${statCard.title}: ${getMetricValue(statCard.statKey)}. ${statCard.ctaLabel}`"
-        >
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-base-content/60 mb-1">{{ statCard.title }}</p>
-                <p class="text-3xl font-bold">{{ getMetricValue(statCard.statKey) }}</p>
-              </div>
-              <svg class="w-12 h-12 opacity-20" :class="statCard.accentClass" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <section>
+        <div class="stats stats-vertical md:stats-horizontal w-full bg-base-100 shadow">
+          <NuxtLink
+            v-for="statCard in DASHBOARD_STAT_CARDS"
+            :key="statCard.id"
+            :to="statCard.to"
+            class="stat transition-colors hover:bg-base-200"
+            :aria-label="t(DASHBOARD_A11Y_KEYS.statCardAria, { title: t(statCard.titleKey), value: getMetricValue(statCard.statKey), cta: t(statCard.ctaLabelKey) })"
+          >
+            <div class="stat-figure" :class="statCard.accentClass">
+              <svg class="h-8 w-8 opacity-85" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="statCard.iconPath" />
               </svg>
             </div>
-            <p class="text-xs mt-2" :class="statCard.accentClass">{{ statCard.ctaLabel }}</p>
-          </div>
-        </NuxtLink>
+            <div class="stat-title">{{ t(statCard.titleKey) }}</div>
+            <div class="stat-value text-3xl">{{ getMetricValue(statCard.statKey) }}</div>
+            <div class="stat-desc" :class="statCard.accentClass">{{ t(statCard.ctaLabelKey) }}</div>
+          </NuxtLink>
+        </div>
       </section>
 
       <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div v-if="dashboard?.dailyChallenge" class="card bg-base-200">
           <div class="card-body">
-            <h2 class="card-title text-lg mb-3">{{ DASHBOARD_COPY.dailyChallengeTitle }}</h2>
+            <h2 class="card-title text-lg mb-3">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
             <div class="card bg-base-100">
               <div class="card-body p-4 gap-3">
                 <div class="flex items-center justify-between gap-3">
                   <h3 class="font-semibold">{{ dashboard.dailyChallenge.name }}</h3>
-                  <span class="badge badge-primary">+{{ dashboard.dailyChallenge.xpReward }} XP</span>
+                  <span class="badge badge-primary">
+                    {{ t(DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY, { xp: dashboard.dailyChallenge.xpReward }) }}
+                  </span>
                 </div>
                 <div class="flex items-center gap-3">
                   <progress
@@ -393,7 +468,7 @@ async function requestData<T>(
                     :class="dashboard.dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
                     :value="dashboard.dailyChallenge.progress"
                     :max="dashboard.dailyChallenge.goal"
-                    aria-label="Progress progress"></progress>
+                    :aria-label="t(DASHBOARD_A11Y_KEYS.challengeProgressAria)"></progress>
                   <span class="text-sm font-medium">
                     {{ dashboard.dailyChallenge.progress }} / {{ dashboard.dailyChallenge.goal }}
                   </span>
@@ -405,50 +480,50 @@ async function requestData<T>(
 
         <div class="card bg-base-200">
           <div class="card-body">
-            <h2 class="card-title text-lg mb-3">{{ DASHBOARD_COPY.recentActivityTitle }}</h2>
-            <div class="space-y-3">
-              <div
+            <h2 class="card-title text-lg mb-3">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
+            <ul class="list rounded-box bg-base-100">
+              <li
                 v-for="(activity, index) in dashboard?.recentActivity"
                 :key="`${activity.timestamp.toISOString()}-${index}`"
-                class="flex items-start gap-3"
+                class="list-row"
               >
                 <div class="avatar placeholder">
-                  <div class="bg-primary text-primary-content rounded-full w-8">
+                  <div class="bg-primary text-primary-content rounded-full w-10">
                     <span class="text-xs">{{ getDashboardActivityEmoji(activity.type) }}</span>
                   </div>
                 </div>
-                <div class="flex-1">
-                  <p class="text-sm">{{ activity.description }}</p>
+                <div class="list-col-grow">
+                  <p class="text-sm font-medium">{{ activity.description }}</p>
                   <p class="text-xs text-base-content/60">{{ formatTimeAgo(activity.timestamp) }}</p>
                 </div>
-              </div>
+              </li>
 
-              <p
+              <li
                 v-if="(dashboard?.recentActivity.length ?? 0) === 0"
-                class="text-sm text-center text-base-content/60 py-4"
+                class="list-row text-sm text-center text-base-content/60"
               >
-                {{ DASHBOARD_COPY.recentActivityEmptyLabel }}
-              </p>
-            </div>
+                {{ t(DASHBOARD_COPY_KEYS.recentActivityEmptyLabel) }}
+              </li>
+            </ul>
           </div>
         </div>
       </section>
 
       <section class="card bg-base-200">
         <div class="card-body">
-          <h2 class="card-title text-lg mb-4">{{ DASHBOARD_COPY.quickActionsTitle }}</h2>
+          <h2 class="card-title text-lg mb-4">{{ t(DASHBOARD_COPY_KEYS.quickActionsTitle) }}</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
             <NuxtLink
               v-for="action in DASHBOARD_QUICK_ACTIONS"
               :key="action.id"
               :to="action.to"
               class="btn btn-outline justify-start sm:justify-center"
-              :aria-label="action.label"
+              :aria-label="t(action.labelKey)"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.iconPath" />
               </svg>
-              {{ action.label }}
+              {{ t(action.labelKey) }}
             </NuxtLink>
           </div>
         </div>
@@ -456,3 +531,20 @@ async function requestData<T>(
     </div>
   </section>
 </template>
+
+<style scoped>
+.hero-text-rotate-enter-active,
+.hero-text-rotate-leave-active {
+  transition: all 0.18s ease;
+}
+
+.hero-text-rotate-enter-from {
+  opacity: 0;
+  transform: translateY(0.4rem);
+}
+
+.hero-text-rotate-leave-to {
+  opacity: 0;
+  transform: translateY(-0.4rem);
+}
+</style>

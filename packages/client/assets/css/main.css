@@ -1,31 +1,80 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* Centralized palette tokens with WCAG-oriented contrast pairs. */
+:root {
+  --bao-light-base-100: oklch(99% 0.005 255);
+  --bao-light-base-200: oklch(96% 0.008 255);
+  --bao-light-base-300: oklch(92% 0.012 255);
+  --bao-light-base-content: oklch(22% 0.025 255);
+
+  --bao-light-primary: oklch(42% 0.17 260);
+  --bao-light-primary-content: oklch(98% 0.01 260);
+  --bao-light-secondary: oklch(40% 0.11 210);
+  --bao-light-secondary-content: oklch(98% 0.01 210);
+  --bao-light-accent: oklch(45% 0.13 150);
+  --bao-light-accent-content: oklch(98% 0.01 150);
+  --bao-light-neutral: oklch(30% 0.02 260);
+  --bao-light-neutral-content: oklch(95% 0.01 260);
+
+  --bao-light-info: oklch(44% 0.13 240);
+  --bao-light-info-content: oklch(98% 0.01 240);
+  --bao-light-success: oklch(44% 0.12 155);
+  --bao-light-success-content: oklch(98% 0.01 155);
+  --bao-light-warning: oklch(78% 0.15 90);
+  --bao-light-warning-content: oklch(18% 0.035 90);
+  --bao-light-error: oklch(45% 0.16 30);
+  --bao-light-error-content: oklch(98% 0.01 30);
+
+  --bao-dark-base-100: oklch(14% 0.02 260);
+  --bao-dark-base-200: oklch(11% 0.024 260);
+  --bao-dark-base-300: oklch(8% 0.028 260);
+  --bao-dark-base-content: oklch(95% 0.015 260);
+
+  --bao-dark-primary: oklch(72% 0.16 260);
+  --bao-dark-primary-content: oklch(16% 0.02 260);
+  --bao-dark-secondary: oklch(70% 0.11 210);
+  --bao-dark-secondary-content: oklch(16% 0.02 210);
+  --bao-dark-accent: oklch(74% 0.13 150);
+  --bao-dark-accent-content: oklch(16% 0.02 150);
+  --bao-dark-neutral: oklch(26% 0.02 260);
+  --bao-dark-neutral-content: oklch(92% 0.01 260);
+
+  --bao-dark-info: oklch(72% 0.12 240);
+  --bao-dark-info-content: oklch(15% 0.02 240);
+  --bao-dark-success: oklch(74% 0.12 155);
+  --bao-dark-success-content: oklch(15% 0.02 155);
+  --bao-dark-warning: oklch(82% 0.14 90);
+  --bao-dark-warning-content: oklch(15% 0.03 90);
+  --bao-dark-error: oklch(72% 0.15 30);
+  --bao-dark-error-content: oklch(15% 0.03 30);
+}
+
 @plugin "daisyui/theme" {
   name: "bao-light";
   default: true;
   prefersdark: false;
   color-scheme: light;
-  --color-base-100: oklch(98% 0.01 240);
-  --color-base-200: oklch(95% 0.015 240);
-  --color-base-300: oklch(90% 0.02 240);
-  --color-base-content: oklch(20% 0.03 240);
-  --color-primary: oklch(55% 0.28 264);
-  --color-primary-content: oklch(98% 0.01 264);
-  --color-secondary: oklch(65% 0.25 310);
-  --color-secondary-content: oklch(98% 0.01 310);
-  --color-accent: oklch(75% 0.2 155);
-  --color-accent-content: oklch(15% 0.03 155);
-  --color-neutral: oklch(30% 0.02 260);
-  --color-neutral-content: oklch(95% 0.01 260);
-  --color-info: oklch(70% 0.18 230);
-  --color-info-content: oklch(98% 0.01 230);
-  --color-success: oklch(70% 0.2 145);
-  --color-success-content: oklch(98% 0.01 145);
-  --color-warning: oklch(80% 0.18 80);
-  --color-warning-content: oklch(20% 0.04 80);
-  --color-error: oklch(60% 0.25 25);
-  --color-error-content: oklch(98% 0.01 25);
+  --color-base-100: var(--bao-light-base-100);
+  --color-base-200: var(--bao-light-base-200);
+  --color-base-300: var(--bao-light-base-300);
+  --color-base-content: var(--bao-light-base-content);
+  --color-primary: var(--bao-light-primary);
+  --color-primary-content: var(--bao-light-primary-content);
+  --color-secondary: var(--bao-light-secondary);
+  --color-secondary-content: var(--bao-light-secondary-content);
+  --color-accent: var(--bao-light-accent);
+  --color-accent-content: var(--bao-light-accent-content);
+  --color-neutral: var(--bao-light-neutral);
+  --color-neutral-content: var(--bao-light-neutral-content);
+  --color-info: var(--bao-light-info);
+  --color-info-content: var(--bao-light-info-content);
+  --color-success: var(--bao-light-success);
+  --color-success-content: var(--bao-light-success-content);
+  --color-warning: var(--bao-light-warning);
+  --color-warning-content: var(--bao-light-warning-content);
+  --color-error: var(--bao-light-error);
+  --color-error-content: var(--bao-light-error-content);
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
   --radius-box: 1rem;
@@ -41,26 +90,26 @@
   default: false;
   prefersdark: true;
   color-scheme: dark;
-  --color-base-100: oklch(18% 0.02 260);
-  --color-base-200: oklch(14% 0.025 260);
-  --color-base-300: oklch(10% 0.03 260);
-  --color-base-content: oklch(92% 0.02 260);
-  --color-primary: oklch(65% 0.3 264);
-  --color-primary-content: oklch(10% 0.02 264);
-  --color-secondary: oklch(70% 0.28 310);
-  --color-secondary-content: oklch(10% 0.02 310);
-  --color-accent: oklch(80% 0.22 155);
-  --color-accent-content: oklch(10% 0.02 155);
-  --color-neutral: oklch(25% 0.02 260);
-  --color-neutral-content: oklch(90% 0.01 260);
-  --color-info: oklch(72% 0.18 230);
-  --color-info-content: oklch(10% 0.01 230);
-  --color-success: oklch(72% 0.2 145);
-  --color-success-content: oklch(10% 0.01 145);
-  --color-warning: oklch(82% 0.18 80);
-  --color-warning-content: oklch(15% 0.04 80);
-  --color-error: oklch(65% 0.25 25);
-  --color-error-content: oklch(98% 0.01 25);
+  --color-base-100: var(--bao-dark-base-100);
+  --color-base-200: var(--bao-dark-base-200);
+  --color-base-300: var(--bao-dark-base-300);
+  --color-base-content: var(--bao-dark-base-content);
+  --color-primary: var(--bao-dark-primary);
+  --color-primary-content: var(--bao-dark-primary-content);
+  --color-secondary: var(--bao-dark-secondary);
+  --color-secondary-content: var(--bao-dark-secondary-content);
+  --color-accent: var(--bao-dark-accent);
+  --color-accent-content: var(--bao-dark-accent-content);
+  --color-neutral: var(--bao-dark-neutral);
+  --color-neutral-content: var(--bao-dark-neutral-content);
+  --color-info: var(--bao-dark-info);
+  --color-info-content: var(--bao-dark-info-content);
+  --color-success: var(--bao-dark-success);
+  --color-success-content: var(--bao-dark-success-content);
+  --color-warning: var(--bao-dark-warning);
+  --color-warning-content: var(--bao-dark-warning-content);
+  --color-error: var(--bao-dark-error);
+  --color-error-content: var(--bao-dark-error-content);
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
   --radius-box: 1rem;
@@ -69,4 +118,17 @@
   --border: 1px;
   --depth: 1;
   --noise: 1;
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(0.5rem);
 }

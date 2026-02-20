@@ -3,6 +3,7 @@
  */
 
 import type { AIProviderType } from "./ai";
+import type { AppLanguageCode, AutomationBrowserOption } from "../constants/settings";
 
 /**
  * Per-provider model preferences.
@@ -104,7 +105,7 @@ export interface AutomationSettings {
   defaultTimeout: number;
   screenshotRetention: number;
   maxConcurrentRuns: number;
-  defaultBrowser: "chrome" | "chromium" | "edge";
+  defaultBrowser: AutomationBrowserOption;
   enableSmartSelectors: boolean;
   autoSaveScreenshots: boolean;
   jobProviders?: JobProviderSettings;
@@ -163,7 +164,7 @@ export interface AppSettings {
   preferredModels?: ProviderModelPreferences;
   preferredProvider: AIProviderType;
   theme: "bao-light" | "bao-dark";
-  language: string;
+  language: AppLanguageCode;
   notifications: NotificationPreferences;
   automationSettings?: AutomationSettings;
   hasGeminiKey?: boolean;

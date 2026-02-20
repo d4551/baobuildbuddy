@@ -51,7 +51,7 @@ export default [
       "vuejs-accessibility/no-static-element-interactions": "error",
       "vuejs-accessibility/tabindex-no-positive": "error",
       "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
     },
   },
 ];

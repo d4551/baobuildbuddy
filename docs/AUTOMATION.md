@@ -21,7 +21,7 @@ BaoBuildBuddy uses RPA-Python for browser automation workflows through direct su
   - `studio_scraper.py`
 - Automation runner on the server lives in `packages/server/src/services/automation/rpa-runner.ts` and launches Python with `Bun.spawn`.
 - Job application orchestration is implemented in `packages/server/src/services/automation/application-automation-service.ts`.
-- Job board scraper execution is implemented in `packages/server/src/services/scraper-service.ts` and now sends typed stdin payload to scripts (`{ sourceUrl?: string }`), so runtime source endpoints are settings-driven instead of script hardcoded.
+- Job board scraper execution is implemented in `packages/server/src/services/scraper-service.ts` and sends typed stdin payload to scripts (`{ sourceUrl?: string }`), so runtime source endpoints are settings-driven instead of script hardcoded.
 
 ```mermaid
 flowchart LR
@@ -147,6 +147,7 @@ Use `PUT /api/settings` with `automationSettings.jobProviders` to change any run
 Automation pages under `/automation` must pass the same UI wiring/accessibility gate as the rest of the client:
 
 ```bash
+bun run validate:ui
 bun run --filter '@bao/client' lint
 ```
 
@@ -156,6 +157,19 @@ Required behavior:
 2. Form controls must have programmatic labels (`label` association or ARIA label).
 3. Icon-only controls and anchor-only icon links must expose accessible names.
 4. Run actions (`start`, `retry`, history navigation, screenshot browsing) must remain reachable without pointer input.
+
+```mermaid
+flowchart LR
+  UI["Automation Vue pages"] --> ValidateUI["bun run validate:ui"]
+  ValidateUI --> ColorState{"WCAG contrast + token checks pass?"}
+  ColorState -->|No| ColorFix["Fix semantic classes or theme tokens"]
+  ColorFix --> ValidateUI
+  ColorState -->|Yes| A11yLint["Client lint (vuejs-accessibility)"]
+  A11yLint --> A11yState{"A11y errors = 0?"}
+  A11yState -->|No| A11yFix["Fix labels, keyboard behavior, control semantics"]
+  A11yFix --> A11yLint
+  A11yState -->|Yes| QA["Keyboard + flow QA"]
+```
 
 ## Verification commands
 
@@ -169,6 +183,18 @@ bun run test
 ```
 
 `bun run typecheck` generates `packages/server/dist-types` first so client-side Nuxt typechecking validates against the typed API contract surface.
+
+### Integration coverage
+
+Automation functionality is integrated across:
+
+1. API routes: `/api/automation/*`
+2. Service orchestration: `application-automation-service.ts`
+3. Python runner: `rpa-runner.ts` via `Bun.spawn`
+4. UI pages: `/automation`, `/automation/runs`, `/automation/runs/:id`
+5. Real-time progress: `WS /api/ws/automation`
+
+Route-level regression coverage exists in `packages/server/src/routes/automation.test.ts`.
 
 ## Environment
 

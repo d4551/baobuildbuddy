@@ -103,6 +103,11 @@ export declare const resumeRoutes: Elysia<"/resumes", {
     resumes: {
         post: {
             body: {
+                skills?: {
+                    gaming?: string[] | undefined;
+                    technical?: string[] | undefined;
+                    soft?: string[] | undefined;
+                } | undefined;
                 education?: {
                     gpa?: string | undefined;
                     degree: string;
@@ -126,6 +131,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     description: string;
                 }[] | undefined;
                 personalInfo?: {
+                    portfolio?: string | undefined;
                     website?: string | undefined;
                     name?: string | undefined;
                     email?: string | undefined;
@@ -133,7 +139,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     location?: string | undefined;
                     linkedIn?: string | undefined;
                     github?: string | undefined;
-                    portfolio?: string | undefined;
                 } | undefined;
                 experience?: {
                     location?: string | undefined;
@@ -145,11 +150,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     title: string;
                     startDate: string;
                 }[] | undefined;
-                skills?: {
-                    gaming?: string[] | undefined;
-                    technical?: string[] | undefined;
-                    soft?: string[] | undefined;
-                } | undefined;
                 template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | undefined;
                 isDefault?: boolean | undefined;
             };
@@ -202,6 +202,11 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         ":id": {
             put: {
                 body: {
+                    skills?: {
+                        gaming?: string[] | undefined;
+                        technical?: string[] | undefined;
+                        soft?: string[] | undefined;
+                    } | undefined;
                     education?: {
                         gpa?: string | undefined;
                         degree: string;
@@ -225,6 +230,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         description: string;
                     }[] | undefined;
                     personalInfo?: {
+                        portfolio?: string | undefined;
                         website?: string | undefined;
                         name?: string | undefined;
                         email?: string | undefined;
@@ -232,7 +238,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         location?: string | undefined;
                         linkedIn?: string | undefined;
                         github?: string | undefined;
-                        portfolio?: string | undefined;
                     } | undefined;
                     experience?: {
                         location?: string | undefined;
@@ -244,11 +249,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         title: string;
                         startDate: string;
                     }[] | undefined;
-                    skills?: {
-                        gaming?: string[] | undefined;
-                        technical?: string[] | undefined;
-                        soft?: string[] | undefined;
-                    } | undefined;
                     template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | undefined;
                     isDefault?: boolean | undefined;
                 };

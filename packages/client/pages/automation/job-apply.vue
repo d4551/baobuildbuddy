@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import type { AutomationRun } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";
 
+const { t } = useI18n();
 const { triggerJobApply } = useAutomation();
 const requestUrl = useRequestURL();
 const apiBase = String(useRuntimeConfig().public.apiBase || "/");
@@ -43,23 +45,26 @@ const pending = ref(false);
 const submitError = ref("");
 const lastRun = ref<AutomationRun | null>(null);
 
-async function submitJobApply() {
+async function submitJobApply(): Promise<void> {
   submitError.value = "";
   lastRun.value = null;
   pending.value = true;
   try {
+    const coverLetterId = form.coverLetterId.trim();
+    const jobId = form.jobId.trim();
     const body = {
       jobUrl: form.jobUrl.trim(),
       resumeId: form.resumeId,
-      coverLetterId: form.coverLetterId || undefined,
-      jobId: form.jobId || undefined,
+      ...(coverLetterId ? { coverLetterId } : {}),
+      ...(jobId ? { jobId } : {}),
     };
+
     const result = await triggerJobApply(body);
     lastRun.value = {
       id: result.runId,
       type: "job_apply",
       status: result.status,
-      jobId: body.jobId || null,
+      jobId: jobId || null,
       userId: null,
       input: body,
       output: null,
@@ -73,8 +78,8 @@ async function submitJobApply() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-  } catch (error: unknown) {
-    submitError.value = getErrorMessage(error, "Failed to start job application automation");
+  } catch (error) {
+    submitError.value = getErrorMessage(error, t("automation.jobApply.submitErrorFallback"));
   } finally {
     pending.value = false;
   }
@@ -83,48 +88,63 @@ async function submitJobApply() {
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">Job Application Automation</h1>
+    <h1 class="mb-6 text-3xl font-bold">{{ t("automation.jobApply.title") }}</h1>
 
-    <div class="card bg-base-100 shadow-sm max-w-3xl">
+    <div class="card bg-base-100 max-w-3xl shadow-sm">
       <div class="card-body">
         <div class="space-y-4">
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Job URL</legend>
+            <legend class="fieldset-legend">{{ t("automation.jobApply.jobUrlLegend") }}</legend>
             <input
               v-model="form.jobUrl"
               type="url"
               class="input input-bordered w-full"
-              placeholder="https://example.com/jobs/123"
-              aria-label="https://example.com/jobs/123"/>
+              :placeholder="t('automation.jobApply.jobUrlPlaceholder')"
+              :aria-label="t('automation.jobApply.jobUrlAria')"
+            />
           </fieldset>
 
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Resume</legend>
-            <select v-model="form.resumeId" class="select select-bordered w-full" aria-label="Resume Id">
-              <option value="" disabled>Select resume</option>
+            <legend class="fieldset-legend">{{ t("automation.jobApply.resumeLegend") }}</legend>
+            <select
+              v-model="form.resumeId"
+              class="select select-bordered w-full"
+              :aria-label="t('automation.jobApply.resumeAria')"
+            >
+              <option value="" disabled>{{ t("automation.jobApply.selectResumeOption") }}</option>
               <option v-for="resume in resumesData || []" :key="resume.id" :value="resume.id">
-                {{ resume.name || `Resume ${resume.id}` }}
+                {{ resume.name || t("automation.jobApply.resumeFallbackName", { id: resume.id }) }}
               </option>
             </select>
           </fieldset>
 
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Cover Letter (optional)</legend>
-            <select v-model="form.coverLetterId" class="select select-bordered w-full" aria-label="Cover Letter Id">
-              <option value="">No cover letter</option>
+            <legend class="fieldset-legend">{{ t("automation.jobApply.coverLetterLegend") }}</legend>
+            <select
+              v-model="form.coverLetterId"
+              class="select select-bordered w-full"
+              :aria-label="t('automation.jobApply.coverLetterAria')"
+            >
+              <option value="">{{ t("automation.jobApply.noCoverLetterOption") }}</option>
               <option v-for="letter in coverLettersData || []" :key="letter.id" :value="letter.id">
-                {{ letter.company || "Unknown" }} - {{ letter.position || "Position" }}
+                {{
+                  t("automation.jobApply.coverLetterOption", {
+                    company: letter.company || t("automation.jobApply.unknownCompany"),
+                    position: letter.position || t("automation.jobApply.unknownPosition"),
+                  })
+                }}
               </option>
             </select>
           </fieldset>
 
           <fieldset class="fieldset">
-            <legend class="fieldset-legend">Job ID (optional)</legend>
+            <legend class="fieldset-legend">{{ t("automation.jobApply.jobIdLegend") }}</legend>
             <input
               v-model="form.jobId"
               class="input input-bordered w-full"
-              placeholder="Optional job ID for correlation"
-              aria-label="Optional job ID for correlation"/>
+              :placeholder="t('automation.jobApply.jobIdPlaceholder')"
+              :aria-label="t('automation.jobApply.jobIdAria')"
+            />
           </fieldset>
         </div>
 
@@ -132,32 +152,34 @@ async function submitJobApply() {
           <button
             class="btn btn-primary"
             :disabled="pending || !form.jobUrl || !form.resumeId"
+            :aria-label="t('automation.jobApply.runButtonAria')"
             @click="submitJobApply"
           >
             <span v-if="pending" class="loading loading-spinner loading-sm"></span>
-            <span v-else>Run Application</span>
+            <span v-else>{{ t("automation.jobApply.runButton") }}</span>
           </button>
         </div>
       </div>
     </div>
 
     <div v-if="submitError" role="alert" class="alert alert-error mt-6">
-      <h3 class="font-semibold">Submission failed</h3>
+      <h3 class="font-semibold">{{ t("automation.jobApply.submitErrorTitle") }}</h3>
       <p>{{ submitError }}</p>
     </div>
 
     <div v-if="lastRun" class="card bg-base-100 shadow-sm mt-6">
       <div class="card-body">
         <div role="alert" class="alert alert-info">
-          <h3 class="font-semibold">Run started</h3>
+          <h3 class="font-semibold">{{ t("automation.jobApply.runStartedTitle") }}</h3>
           <div>
-            <p class="mb-1">Run ID: {{ lastRun.id }}</p>
-            <p class="text-sm">Status: {{ lastRun.status }}</p>
+            <p class="mb-1">{{ t("automation.jobApply.runIdLabel", { id: lastRun.id }) }}</p>
+            <p class="text-sm">{{ t("automation.jobApply.statusLabel", { status: lastRun.status }) }}</p>
             <NuxtLink
               :to="`/automation/runs/${encodeURIComponent(lastRun.id)}`"
               class="link link-primary link-hover"
+              :aria-label="t('automation.jobApply.openRunDetailAria', { id: lastRun.id })"
             >
-              Open run detail
+              {{ t("automation.jobApply.openRunDetailLink") }}
             </NuxtLink>
           </div>
         </div>

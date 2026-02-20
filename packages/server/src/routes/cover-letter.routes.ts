@@ -46,8 +46,8 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
       body: t.Object({
         company: t.String({ maxLength: 200 }),
         position: t.String({ maxLength: 200 }),
-        jobInfo: t.Optional(t.Record(t.String(), t.Any())),
-        content: t.Optional(t.Record(t.String(), t.Any())),
+        jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
+        content: t.Optional(t.Record(t.String(), t.Unknown())),
         template: t.Optional(t.String({ maxLength: 50 })),
       }),
     },
@@ -99,8 +99,8 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
       body: t.Object({
         company: t.Optional(t.String({ maxLength: 200 })),
         position: t.Optional(t.String({ maxLength: 200 })),
-        jobInfo: t.Optional(t.Record(t.String(), t.Any())),
-        content: t.Optional(t.Record(t.String(), t.Any())),
+        jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
+        content: t.Optional(t.Record(t.String(), t.Unknown())),
         template: t.Optional(t.String({ maxLength: 50 })),
       }),
     },
@@ -215,7 +215,7 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
       body: t.Object({
         company: t.String({ maxLength: 200 }),
         position: t.String({ maxLength: 200 }),
-        jobInfo: t.Optional(t.Record(t.String(), t.Any())),
+        jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
         resumeId: t.Optional(t.String({ maxLength: 100 })),
         template: t.Optional(t.String({ maxLength: 50 })),
         save: t.Optional(t.Boolean()),
@@ -236,6 +236,23 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
       // Load user profile for sender info
       const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
       const profile = profileRows[0];
+      const sender: {
+        name: string;
+        email?: string;
+        phone?: string;
+        location?: string;
+      } = {
+        name: profile?.name || "",
+      };
+      if (profile?.email) {
+        sender.email = profile.email;
+      }
+      if (profile?.phone) {
+        sender.phone = profile.phone;
+      }
+      if (profile?.location) {
+        sender.location = profile.location;
+      }
 
       try {
         const pdfBytes = await exportService.exportCoverLetterPDF(
@@ -244,12 +261,7 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
             position: letter.position,
             content: toJsonRecord(letter.content),
           },
-          {
-            name: profile?.name || "",
-            email: profile?.email || undefined,
-            phone: profile?.phone || undefined,
-            location: profile?.location || undefined,
-          },
+          sender,
         );
 
         return new Response(Buffer.from(pdfBytes), {

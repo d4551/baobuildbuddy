@@ -76,7 +76,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     defaultTimeout?: number | undefined;
                     screenshotRetention?: number | undefined;
                     maxConcurrentRuns?: number | undefined;
-                    defaultBrowser?: "chrome" | "chromium" | "edge" | undefined;
+                    defaultBrowser?: undefined;
                     enableSmartSelectors?: boolean | undefined;
                     autoSaveScreenshots?: boolean | undefined;
                     jobProviders?: {
@@ -122,8 +122,8 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         gamingPortals: {
                             source: string;
                             name: string;
-                            enabled: boolean;
                             id: never;
+                            enabled: boolean;
                             fallbackUrl: string;
                         }[];
                     } | undefined;
@@ -131,7 +131,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 preferredProvider?: undefined;
                 preferredModel?: string | undefined;
                 theme?: "bao-light" | "bao-dark" | undefined;
-                language?: string | undefined;
+                language?: undefined;
             };
             params: {};
             query: unknown;
@@ -241,10 +241,10 @@ export declare const settingsRoutes: Elysia<"/settings", {
         import: {
             post: {
                 body: {
-                    profile: string | number | boolean | never[] | {
+                    portfolio: string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null;
-                    portfolio: string | number | boolean | never[] | {
+                    profile: string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null;
                     settings: string | number | boolean | never[] | {

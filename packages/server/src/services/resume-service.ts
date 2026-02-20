@@ -24,26 +24,42 @@ const toGamingExperienceRecord = (
 ): Record<string, unknown> | undefined => (value ? toRecord(value) : undefined);
 
 export class ResumeService {
+  private toResumeData(row: typeof resumes.$inferSelect): ResumeData {
+    const resume: ResumeData = {
+      id: row.id,
+      experience: (row.experience || []) as ResumeData["experience"],
+      education: (row.education || []) as ResumeData["education"],
+      projects: (row.projects || []) as ResumeData["projects"],
+      template: this.normalizeTemplate(row.template),
+      theme: this.normalizeTheme(row.theme),
+      isDefault: row.isDefault || false,
+    };
+
+    if (row.name) {
+      resume.name = row.name;
+    }
+    if (row.personalInfo) {
+      resume.personalInfo = row.personalInfo;
+    }
+    if (row.summary) {
+      resume.summary = row.summary;
+    }
+    if (row.skills) {
+      resume.skills = row.skills;
+    }
+    if (row.gamingExperience) {
+      resume.gamingExperience = row.gamingExperience;
+    }
+
+    return resume;
+  }
+
   /**
    * Get all resumes
    */
   async getResumes(): Promise<ResumeData[]> {
     const results = await db.select().from(resumes);
-
-    return results.map((row) => ({
-      id: row.id,
-      name: row.name || undefined,
-      personalInfo: row.personalInfo || undefined,
-      summary: row.summary || undefined,
-      experience: (row.experience || []) as ResumeData["experience"],
-      education: (row.education || []) as ResumeData["education"],
-      skills: row.skills || undefined,
-      projects: (row.projects || []) as ResumeData["projects"],
-      gamingExperience: row.gamingExperience || undefined,
-      template: this.normalizeTemplate(row.template),
-      theme: this.normalizeTheme(row.theme),
-      isDefault: row.isDefault || false,
-    }));
+    return results.map((row) => this.toResumeData(row));
   }
 
   /**
@@ -56,21 +72,7 @@ export class ResumeService {
       return null;
     }
 
-    const row = results[0];
-    return {
-      id: row.id,
-      name: row.name || undefined,
-      personalInfo: row.personalInfo || undefined,
-      summary: row.summary || undefined,
-      experience: (row.experience || []) as ResumeData["experience"],
-      education: (row.education || []) as ResumeData["education"],
-      skills: row.skills || undefined,
-      projects: (row.projects || []) as ResumeData["projects"],
-      gamingExperience: row.gamingExperience || undefined,
-      template: this.normalizeTemplate(row.template),
-      theme: this.normalizeTheme(row.theme),
-      isDefault: row.isDefault || false,
-    };
+    return this.toResumeData(results[0]);
   }
 
   /**
@@ -84,7 +86,7 @@ export class ResumeService {
       id,
       name: data.name || "Untitled Resume",
       personalInfo: toPersonalInfoRecord(data.personalInfo),
-      summary: data.summary || undefined,
+      ...(data.summary ? { summary: data.summary } : {}),
       experience: data.experience || [],
       education: data.education || [],
       skills: toSkillsRecord(data.skills),

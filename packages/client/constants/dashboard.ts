@@ -1,9 +1,42 @@
-import { APP_BRAND } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared";
+import type { AppTranslationSchema } from "~/locales/en-US";
 
 /**
  * Primary stat identifiers rendered on dashboard hero tiles.
  */
 export type DashboardStatKey = "savedJobs" | "resumeCount" | "interviewSessionCount";
+
+type DashboardRootSchema = AppTranslationSchema["dashboard"];
+type DashboardTopLevelKey =
+  | "pageTitle"
+  | "seoDescription"
+  | "welcomeDescription"
+  | "emptyStateTitle"
+  | "emptyStateDescription"
+  | "recentActivityTitle"
+  | "recentActivityEmptyLabel"
+  | "dailyChallengeTitle"
+  | "quickActionsTitle"
+  | "levelLabel"
+  | "streakLabel"
+  | "retryButtonLabel"
+  | "loadErrorFallback"
+  | "setupCtaLabel"
+  | "onboardingChecklistTitle"
+  | "metricsSummaryLabel";
+type DashboardCopyKey = `dashboard.${DashboardTopLevelKey}`;
+type DashboardHeroPhraseKey = `dashboard.heroPhrases.${keyof DashboardRootSchema["heroPhrases"] & string}`;
+type DashboardOnboardingLabelKey = `dashboard.onboarding.${keyof DashboardRootSchema["onboarding"] & string}`;
+type DashboardStatLabelKey = `dashboard.stats.${keyof DashboardRootSchema["stats"] & string}`;
+type DashboardQuickActionLabelKey =
+  `dashboard.quickActions.actions.${keyof DashboardRootSchema["quickActions"]["actions"] & string}`;
+type DashboardRelativeTimeLabelKey =
+  `dashboard.relativeTime.${keyof DashboardRootSchema["relativeTime"] & string}`;
+type DashboardWelcomeHeadingKey =
+  `dashboard.welcomeHeading.${keyof DashboardRootSchema["welcomeHeading"] & string}`;
+type DashboardErrorKey = `dashboard.errors.${keyof DashboardRootSchema["errors"] & string}`;
+type DashboardActivityFallbackKey = "dashboard.activityFallback";
+type DashboardDailyChallengeXpKey = "dashboard.dailyChallengeXpLabel";
 
 /**
  * Dashboard quick-action configuration model.
@@ -11,12 +44,24 @@ export type DashboardStatKey = "savedJobs" | "resumeCount" | "interviewSessionCo
 export interface DashboardQuickAction {
   /** Stable item identifier for keyed rendering and tracking. */
   readonly id: string;
-  /** Action label displayed in the button. */
-  readonly label: string;
+  /** Translation key displayed in the action button. */
+  readonly labelKey: DashboardQuickActionLabelKey;
   /** Route destination. */
   readonly to: string;
   /** SVG path for the icon. */
   readonly iconPath: string;
+}
+
+/**
+ * Dashboard onboarding step configuration model.
+ */
+export interface DashboardOnboardingStep {
+  /** Stable identifier for keyed rendering. */
+  readonly id: string;
+  /** Translation key shown in the onboarding progress checklist. */
+  readonly labelKey: DashboardOnboardingLabelKey;
+  /** Destination path for the onboarding action. */
+  readonly to: string;
 }
 
 /**
@@ -25,8 +70,8 @@ export interface DashboardQuickAction {
 export interface DashboardStatCard {
   /** Stable identifier for rendering and testing hooks. */
   readonly id: string;
-  /** Human-readable stat title. */
-  readonly title: string;
+  /** Translation key for stat title. */
+  readonly titleKey: DashboardStatLabelKey;
   /** Destination route when card is clicked. */
   readonly to: string;
   /** Associated dashboard stat key. */
@@ -35,32 +80,98 @@ export interface DashboardStatCard {
   readonly iconPath: string;
   /** Accent utility class for icon and CTA color. */
   readonly accentClass: string;
-  /** Call-to-action helper text. */
-  readonly ctaLabel: string;
+  /** Translation key for helper CTA text. */
+  readonly ctaLabelKey: DashboardStatLabelKey;
 }
 
 /**
- * Static copy used by the dashboard page.
+ * Translation keys used by the dashboard page.
  */
-export const DASHBOARD_COPY = {
-  pageTitle: "Dashboard",
-  seoDescription:
-    "Track opportunities, resume progress, interview practice, and activity signals in one operational dashboard.",
-  welcomeDescription: "Your AI-powered career operating system for the video game industry.",
-  emptyStateTitle: "Kick off your career workspace",
-  emptyStateDescription:
-    "Complete setup, add your first resume, and start tracking opportunities to populate this dashboard.",
-  recentActivityTitle: "Recent Activity",
-  recentActivityEmptyLabel: "No recent activity",
-  dailyChallengeTitle: "Daily Challenge",
-  quickActionsTitle: "Quick Actions",
-  levelLabel: "Level",
-  streakLabel: "day streak",
-  retryButtonLabel: "Retry",
-  loadErrorFallback: "Failed to load dashboard data",
-  setupCtaLabel: "Complete Setup",
-  metricsSummaryLabel: `${APP_BRAND.name} snapshot`,
-} as const;
+export const DASHBOARD_COPY_KEYS = {
+  pageTitle: "dashboard.pageTitle",
+  seoDescription: "dashboard.seoDescription",
+  welcomeDescription: "dashboard.welcomeDescription",
+  emptyStateTitle: "dashboard.emptyStateTitle",
+  emptyStateDescription: "dashboard.emptyStateDescription",
+  recentActivityTitle: "dashboard.recentActivityTitle",
+  recentActivityEmptyLabel: "dashboard.recentActivityEmptyLabel",
+  dailyChallengeTitle: "dashboard.dailyChallengeTitle",
+  quickActionsTitle: "dashboard.quickActionsTitle",
+  levelLabel: "dashboard.levelLabel",
+  streakLabel: "dashboard.streakLabel",
+  retryButtonLabel: "dashboard.retryButtonLabel",
+  loadErrorFallback: "dashboard.loadErrorFallback",
+  setupCtaLabel: "dashboard.setupCtaLabel",
+  onboardingChecklistTitle: "dashboard.onboardingChecklistTitle",
+  metricsSummaryLabel: "dashboard.metricsSummaryLabel",
+} as const satisfies Record<DashboardTopLevelKey, DashboardCopyKey>;
+
+/**
+ * Translation keys used for personalized dashboard welcome headings.
+ */
+export const DASHBOARD_WELCOME_HEADING_KEYS = {
+  named: "dashboard.welcomeHeading.named",
+  fallback: "dashboard.welcomeHeading.fallback",
+} as const satisfies {
+  named: DashboardWelcomeHeadingKey;
+  fallback: DashboardWelcomeHeadingKey;
+};
+
+/**
+ * Rotating motivational phrase translation keys shown in the dashboard hero.
+ */
+export const DASHBOARD_MOTIVATIONAL_PHRASE_KEYS = [
+  "dashboard.heroPhrases.findDreamRole",
+  "dashboard.heroPhrases.buildPortfolio",
+  "dashboard.heroPhrases.prepareInterviews",
+  "dashboard.heroPhrases.levelUpSkills",
+] as const satisfies readonly DashboardHeroPhraseKey[];
+
+/**
+ * Translation keys for relative activity timestamps.
+ */
+export const DASHBOARD_RELATIVE_TIME_KEYS = {
+  minutesAgo: "dashboard.relativeTime.minutesAgo",
+  hoursAgo: "dashboard.relativeTime.hoursAgo",
+  daysAgo: "dashboard.relativeTime.daysAgo",
+} as const satisfies Record<"minutesAgo" | "hoursAgo" | "daysAgo", DashboardRelativeTimeLabelKey>;
+
+/**
+ * Translation keys for shared accessibility labels on dashboard cards and progress indicators.
+ */
+export const DASHBOARD_A11Y_KEYS = {
+  statCardAria: "dashboard.stats.cardAria",
+  levelProgressAria: "dashboard.stats.levelProgressAria",
+  challengeProgressAria: "dashboard.stats.challengeProgressAria",
+} as const satisfies Record<
+  "statCardAria" | "levelProgressAria" | "challengeProgressAria",
+  DashboardStatLabelKey
+>;
+
+/**
+ * Translation key for formatting challenge XP reward labels.
+ */
+export const DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY =
+  "dashboard.dailyChallengeXpLabel" as const satisfies DashboardDailyChallengeXpKey;
+
+/**
+ * Translation keys for dashboard data-load fallback errors.
+ */
+export const DASHBOARD_ERROR_KEYS = {
+  profileLoadFallback: "dashboard.errors.profileLoadFallback",
+  metricsLoadFallback: "dashboard.errors.metricsLoadFallback",
+  gamificationLoadFallback: "dashboard.errors.gamificationLoadFallback",
+  challengesLoadFallback: "dashboard.errors.challengesLoadFallback",
+} as const satisfies Record<
+  "profileLoadFallback" | "metricsLoadFallback" | "gamificationLoadFallback" | "challengesLoadFallback",
+  DashboardErrorKey
+>;
+
+/**
+ * Translation key for fallback activity labels when no action text is available.
+ */
+export const DASHBOARD_ACTIVITY_FALLBACK_KEY =
+  "dashboard.activityFallback" as const satisfies DashboardActivityFallbackKey;
 
 /**
  * useAsyncData key for SSR dashboard bootstrap.
@@ -79,7 +190,48 @@ export const DASHBOARD_TIME_CONSTANTS = {
   millisecondsPerMinute: 60_000,
   millisecondsPerHour: 3_600_000,
   millisecondsPerDay: 86_400_000,
+  heroTextRotateIntervalMs: 3_200,
 } as const;
+
+/**
+ * Suggested onboarding path for first-time dashboard users.
+ */
+export const DASHBOARD_ONBOARDING_STEPS: readonly DashboardOnboardingStep[] = [
+  { id: "profile", labelKey: "dashboard.onboarding.profile", to: APP_ROUTES.settings },
+  { id: "aiProvider", labelKey: "dashboard.onboarding.aiProvider", to: APP_ROUTES.settings },
+  { id: "resume", labelKey: "dashboard.onboarding.resume", to: APP_ROUTES.resume },
+  { id: "jobs", labelKey: "dashboard.onboarding.jobs", to: APP_ROUTES.jobs },
+] as const;
+
+const QUICK_ACTION_REGISTRY = {
+  jobs: {
+    id: "jobs",
+    labelKey: "dashboard.quickActions.actions.browseJobs",
+    to: APP_ROUTES.jobs,
+    iconPath: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
+  },
+  resume: {
+    id: "resume",
+    labelKey: "dashboard.quickActions.actions.buildResume",
+    to: APP_ROUTES.resume,
+    iconPath:
+      "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+  },
+  interview: {
+    id: "interview",
+    labelKey: "dashboard.quickActions.actions.practiceInterview",
+    to: APP_ROUTES.interview,
+    iconPath:
+      "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
+  },
+  aiChat: {
+    id: "ai-chat",
+    labelKey: "dashboard.quickActions.actions.aiChat",
+    to: APP_ROUTES.aiChat,
+    iconPath:
+      "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
+  },
+} as const satisfies Record<string, DashboardQuickAction>;
 
 /**
  * Shared card configuration for top-level dashboard metrics.
@@ -87,33 +239,33 @@ export const DASHBOARD_TIME_CONSTANTS = {
 export const DASHBOARD_STAT_CARDS: readonly DashboardStatCard[] = [
   {
     id: "saved-jobs",
-    title: "Saved Jobs",
-    to: "/jobs",
+    titleKey: "dashboard.stats.savedJobsTitle",
+    to: APP_ROUTES.jobs,
     statKey: "savedJobs",
     iconPath:
       "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
     accentClass: "text-primary",
-    ctaLabel: "Open jobs workspace",
+    ctaLabelKey: "dashboard.stats.savedJobsCta",
   },
   {
     id: "resumes",
-    title: "Resumes",
-    to: "/resume",
+    titleKey: "dashboard.stats.resumesTitle",
+    to: APP_ROUTES.resume,
     statKey: "resumeCount",
     iconPath:
       "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
     accentClass: "text-secondary",
-    ctaLabel: "Edit resume library",
+    ctaLabelKey: "dashboard.stats.resumesCta",
   },
   {
     id: "interview-sessions",
-    title: "Interview Sessions",
-    to: "/interview",
+    titleKey: "dashboard.stats.interviewSessionsTitle",
+    to: APP_ROUTES.interview,
     statKey: "interviewSessionCount",
     iconPath:
       "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
     accentClass: "text-accent",
-    ctaLabel: "Practice interview flow",
+    ctaLabelKey: "dashboard.stats.interviewSessionsCta",
   },
 ] as const;
 
@@ -121,44 +273,20 @@ export const DASHBOARD_STAT_CARDS: readonly DashboardStatCard[] = [
  * Quick actions rendered in the dashboard footer section.
  */
 export const DASHBOARD_QUICK_ACTIONS: readonly DashboardQuickAction[] = [
-  {
-    id: "jobs",
-    label: "Browse Jobs",
-    to: "/jobs",
-    iconPath: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
-  },
-  {
-    id: "resume",
-    label: "Build Resume",
-    to: "/resume",
-    iconPath:
-      "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
-  },
-  {
-    id: "interview",
-    label: "Practice Interview",
-    to: "/interview",
-    iconPath:
-      "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
-  },
-  {
-    id: "ai-chat",
-    label: `Chat with ${APP_BRAND.assistantName}`,
-    to: "/ai/chat",
-    iconPath:
-      "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
-  },
+  QUICK_ACTION_REGISTRY.jobs,
+  QUICK_ACTION_REGISTRY.resume,
+  QUICK_ACTION_REGISTRY.interview,
+  QUICK_ACTION_REGISTRY.aiChat,
 ] as const;
 
 /**
- * Builds the personalized dashboard welcome heading.
- *
- * @param profileName User profile display name.
- * @returns Welcome heading copy.
+ * Quick actions rendered in the floating action button speed dial.
  */
-export function getWelcomeHeading(profileName: string | null | undefined): string {
-  return profileName ? `Welcome, ${profileName}!` : "Welcome!";
-}
+export const FAB_QUICK_ACTIONS: readonly DashboardQuickAction[] = [
+  QUICK_ACTION_REGISTRY.resume,
+  QUICK_ACTION_REGISTRY.aiChat,
+  QUICK_ACTION_REGISTRY.jobs,
+] as const;
 
 /**
  * Maps activity categories to emoji glyphs for quick scanning.

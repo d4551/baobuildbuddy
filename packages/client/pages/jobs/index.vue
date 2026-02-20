@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
+
 const { jobs, loading, searchJobs, refreshJobs } = useJobs();
 const router = useRouter();
 
@@ -6,7 +8,7 @@ const searchQuery = ref("");
 const localFilters = reactive({
   location: "",
   remote: false,
-  experienceLevel: "",
+  experienceLevel: "all",
   studioType: "",
   platform: "",
   genre: "",
@@ -43,7 +45,7 @@ const filteredJobs = computed(() => {
     result = result.filter((job) => job.remote);
   }
 
-  if (localFilters.experienceLevel) {
+  if (localFilters.experienceLevel !== "all") {
     result = result.filter((job) => job.experienceLevel === localFilters.experienceLevel);
   }
 
@@ -56,7 +58,11 @@ const filteredJobs = computed(() => {
   }
 
   if (localFilters.genre) {
-    result = result.filter((job) => job.genres?.includes(localFilters.genre));
+    result = result.filter((job) =>
+      (job.gameGenres ?? []).some(
+        (genre) => genre.toLowerCase() === localFilters.genre.toLowerCase(),
+      ),
+    );
   }
 
   return result;
@@ -69,6 +75,32 @@ const paginatedJobs = computed(() => {
 });
 
 const totalPages = computed(() => Math.ceil(filteredJobs.value.length / pageSize));
+const pageNumbers = computed(() => Array.from({ length: totalPages.value }, (_, index) => index + 1));
+
+watch(
+  () => ({
+    search: searchQuery.value,
+    location: localFilters.location,
+    remote: localFilters.remote,
+    experienceLevel: localFilters.experienceLevel,
+    studioType: localFilters.studioType,
+    platform: localFilters.platform,
+    genre: localFilters.genre,
+  }),
+  () => {
+    currentPage.value = 1;
+  },
+);
+
+watch(totalPages, (nextTotal) => {
+  if (nextTotal === 0) {
+    currentPage.value = 1;
+    return;
+  }
+  if (currentPage.value > nextTotal) {
+    currentPage.value = nextTotal;
+  }
+});
 
 async function handleRefresh() {
   refreshing.value = true;
@@ -87,7 +119,7 @@ function clearFilters() {
   searchQuery.value = "";
   localFilters.location = "";
   localFilters.remote = false;
-  localFilters.experienceLevel = "";
+  localFilters.experienceLevel = "all";
   localFilters.studioType = "";
   localFilters.platform = "";
   localFilters.genre = "";
@@ -98,10 +130,14 @@ function viewJob(id: string) {
   router.push(`/jobs/${id}`);
 }
 
+function interviewJob(id: string) {
+  router.push(buildInterviewJobNavigation(id, "jobs-list"));
+}
+
 function getMatchScoreColor(score: number) {
-  if (score >= 80) return "badge-success";
-  if (score >= 60) return "badge-warning";
-  return "badge-error";
+  if (score >= 80) return "text-success";
+  if (score >= 60) return "text-warning";
+  return "text-error";
 }
 
 function formatDate(date: string) {
@@ -123,6 +159,7 @@ function formatDate(date: string) {
       <h1 class="text-3xl font-bold">Job Board</h1>
       <button
         class="btn btn-primary btn-sm"
+        aria-label="Refresh job feed"
         :disabled="refreshing"
         @click="handleRefresh"
       >
@@ -145,7 +182,7 @@ function formatDate(date: string) {
             class="input input-bordered flex-1"
             @keyup.enter="handleSearch"
             aria-label="Search jobs by title, company, or keywords..."/>
-          <button class="btn btn-primary" @click="handleSearch">
+          <button class="btn btn-primary" aria-label="Search jobs" @click="handleSearch">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -153,6 +190,7 @@ function formatDate(date: string) {
           </button>
           <button
             class="btn btn-outline sm:hidden"
+            aria-label="Toggle filter panel"
             @click="showFilters = !showFilters"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,6 +214,7 @@ function formatDate(date: string) {
               <h2 class="card-title text-lg">Filters</h2>
               <button
                 class="btn btn-ghost btn-xs"
+                aria-label="Clear all job filters"
                 @click="clearFilters"
               >
                 Clear
@@ -206,16 +245,48 @@ function formatDate(date: string) {
 
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">Experience Level</legend>
-                <select
-                  v-model="localFilters.experienceLevel"
-                  class="select select-sm w-full"
-                  aria-label="Experience Level">
-                  <option value="">All Levels</option>
-                  <option value="entry">Entry Level</option>
-                  <option value="mid">Mid Level</option>
-                  <option value="senior">Senior</option>
-                  <option value="lead">Lead</option>
-                </select>
+                <div class="filter">
+                  <input
+                    class="btn btn-sm filter-reset"
+                    type="radio"
+                    name="job-experience-level"
+                    aria-label="All"
+                    :checked="localFilters.experienceLevel === 'all'"
+                    @change="localFilters.experienceLevel = 'all'"
+                  />
+                  <input
+                    class="btn btn-sm"
+                    type="radio"
+                    name="job-experience-level"
+                    aria-label="Entry"
+                    :checked="localFilters.experienceLevel === 'entry'"
+                    @change="localFilters.experienceLevel = 'entry'"
+                  />
+                  <input
+                    class="btn btn-sm"
+                    type="radio"
+                    name="job-experience-level"
+                    aria-label="Mid"
+                    :checked="localFilters.experienceLevel === 'mid'"
+                    @change="localFilters.experienceLevel = 'mid'"
+                  />
+                  <input
+                    class="btn btn-sm"
+                    type="radio"
+                    name="job-experience-level"
+                    aria-label="Senior"
+                    :checked="localFilters.experienceLevel === 'senior'"
+                    @change="localFilters.experienceLevel = 'senior'"
+                  />
+                  <input
+                    class="btn btn-sm"
+                    type="radio"
+                    name="job-experience-level"
+                    aria-label="Lead"
+                    :checked="localFilters.experienceLevel === 'lead'"
+                    @change="localFilters.experienceLevel = 'lead'"
+                  />
+                </div>
               </fieldset>
 
               <fieldset class="fieldset">
@@ -267,9 +338,9 @@ function formatDate(date: string) {
 
       <!-- Jobs Grid -->
       <div class="flex-1">
-        <LoadingSkeleton v-if="loading" :lines="6" />
+        <LoadingSkeleton v-if="loading" variant="cards" />
 
-        <div v-else-if="paginatedJobs.length === 0" class="alert">
+        <div v-else-if="paginatedJobs.length === 0" class="alert alert-info alert-soft">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -281,8 +352,9 @@ function formatDate(date: string) {
             <div
               v-for="job in paginatedJobs"
               :key="job.id"
-              class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
+              class="card card-border bg-base-100 hover:bg-base-200 cursor-pointer transition-colors"
               role="button"
+              :aria-label="`Open job details for ${job.title} at ${job.company}`"
               tabindex="0"
               @click="viewJob(job.id)"
               @keydown.enter="viewJob(job.id)"
@@ -291,13 +363,18 @@ function formatDate(date: string) {
               <div class="card-body">
                 <div class="flex items-start justify-between gap-2">
                   <h3 class="card-title text-lg">{{ job.title }}</h3>
-                  <span
+                  <div
                     v-if="job.matchScore"
-                    class="badge badge-sm"
+                    class="radial-progress text-[0.65rem] font-bold"
                     :class="getMatchScoreColor(job.matchScore)"
+                    :style="`--value:${job.matchScore}; --size:2.5rem; --thickness:0.22rem;`"
+                    role="progressbar"
+                    :aria-valuenow="job.matchScore"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
                   >
                     {{ job.matchScore }}%
-                  </span>
+                  </div>
                 </div>
 
                 <p class="text-base-content/70 font-medium">{{ job.company }}</p>
@@ -326,11 +403,16 @@ function formatDate(date: string) {
 
                 <div class="card-actions justify-between items-center mt-2">
                   <span class="text-xs text-base-content/50">
-                    {{ formatDate(job.postedAt || job.createdAt) }}
+                    {{ formatDate(job.postedDate) }}
                   </span>
-                  <button class="btn btn-primary btn-sm" @click.stop="viewJob(job.id)">
-                    View Details
-                  </button>
+                  <div class="flex gap-2">
+                    <button class="btn btn-outline btn-sm" aria-label="Start interview for job" @click.stop="interviewJob(job.id)">
+                      Interview
+                    </button>
+                    <button class="btn btn-primary btn-sm" aria-label="View job details" @click.stop="viewJob(job.id)">
+                      View
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -341,16 +423,25 @@ function formatDate(date: string) {
             <div class="join">
               <button
                 class="join-item btn btn-sm"
+                aria-label="Previous page"
                 :disabled="currentPage === 1"
                 @click="currentPage--"
               >
                 «
               </button>
-              <button class="join-item btn btn-sm">
-                Page {{ currentPage }} of {{ totalPages }}
+              <button
+                v-for="page in pageNumbers"
+                :key="page"
+                class="join-item btn btn-sm"
+                :class="{ 'btn-active': page === currentPage }"
+                :aria-label="`Go to page ${page}`"
+                @click="currentPage = page"
+              >
+                {{ page }}
               </button>
               <button
                 class="join-item btn btn-sm"
+                aria-label="Next page"
                 :disabled="currentPage === totalPages"
                 @click="currentPage++"
               >

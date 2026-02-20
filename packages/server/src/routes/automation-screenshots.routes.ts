@@ -98,7 +98,7 @@ export const automationScreenshotRoutes = new Elysia({
       index: t.String({ minLength: 1, pattern: "^(0|[1-9][0-9]*)$" }),
     }),
     response: {
-      200: t.Any(),
+      200: t.Unknown(),
       400: t.Object({
         error: t.String(),
       }),

@@ -186,16 +186,21 @@ export class ApplicationAutomationService {
       throw new AutomationValidationError("resumeId is required");
     }
 
-    const jobId = payload.jobId?.trim() || undefined;
-    const coverLetterId = payload.coverLetterId?.trim() || undefined;
-
-    return {
+    const normalizedPayload: JobApplyExecutionPayload = {
       jobUrl,
       resumeId,
-      coverLetterId,
-      jobId,
       customAnswers,
     };
+    const jobId = payload.jobId?.trim();
+    if (jobId) {
+      normalizedPayload.jobId = jobId;
+    }
+    const coverLetterId = payload.coverLetterId?.trim();
+    if (coverLetterId) {
+      normalizedPayload.coverLetterId = coverLetterId;
+    }
+
+    return normalizedPayload;
   }
 
   /**
@@ -664,11 +669,16 @@ export class ApplicationAutomationService {
       };
 
       await this.markRunCompleted(runId, sanitizedResult, automationSettings);
-      broadcastProgress(runId, {
+      const completionPayload: Record<string, string> = {
         type: "complete",
         status: sanitizedResult.success ? "success" : "error",
         action: sanitizedResult.success ? "completed" : "failed",
-        message: sanitizedResult.error || undefined,
+      };
+      if (sanitizedResult.error) {
+        completionPayload.message = sanitizedResult.error;
+      }
+      broadcastProgress(runId, {
+        ...completionPayload,
       });
 
       if (!sanitizedResult.success) {

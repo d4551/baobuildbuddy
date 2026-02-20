@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import type { ResumeData } from "@bao/shared";
+import { APP_ROUTE_QUERY_KEYS, type ResumeData } from "@bao/shared";
 
 const route = useRoute();
 const router = useRouter();
 const { getResume, exportResume, loading } = useResume();
 
 const resume = ref<ResumeData | null>(null);
-const resumeId = computed(() => route.query.id as string);
+const resumeId = computed(() => {
+  const routeResumeId = route.query[APP_ROUTE_QUERY_KEYS.id];
+  return typeof routeResumeId === "string" ? routeResumeId : "";
+});
 
 const displaySkills = computed(() => {
   if (!resume.value?.skills) return [];
@@ -63,9 +66,12 @@ function handlePrint() {
 
     <LoadingSkeleton v-if="loading" :lines="10" />
 
-    <div v-else-if="resume" class="max-w-4xl mx-auto bg-white text-black p-8 shadow-lg print:shadow-none">
+    <div
+      v-else-if="resume"
+      class="resume-print-surface mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 p-8 text-base-content shadow-lg print:rounded-none print:border-0 print:shadow-none"
+    >
       <!-- Header -->
-      <div class="text-center mb-8 border-b-2 border-black pb-4">
+      <div class="resume-print-divider mb-8 border-b-2 border-base-content/30 pb-4 text-center">
         <h1 class="text-4xl font-bold mb-2">{{ resume.personalInfo?.name || "Your Name" }}</h1>
         <div class="flex flex-wrap justify-center gap-4 text-sm">
           <span v-if="resume.personalInfo?.email">{{ resume.personalInfo.email }}</span>
@@ -80,13 +86,13 @@ function handlePrint() {
 
       <!-- Summary -->
       <div v-if="resume.summary" class="mb-6">
-        <h2 class="text-2xl font-bold mb-3 border-b border-gray-300 pb-1">Professional Summary</h2>
+        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">Professional Summary</h2>
         <p class="text-sm leading-relaxed">{{ resume.summary }}</p>
       </div>
 
       <!-- Experience -->
       <div v-if="resume.experience?.length" class="mb-6">
-        <h2 class="text-2xl font-bold mb-3 border-b border-gray-300 pb-1">Work Experience</h2>
+        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">Work Experience</h2>
         <div
           v-for="(exp, idx) in resume.experience"
           :key="idx"
@@ -108,7 +114,7 @@ function handlePrint() {
 
       <!-- Education -->
       <div v-if="resume.education?.length" class="mb-6">
-        <h2 class="text-2xl font-bold mb-3 border-b border-gray-300 pb-1">Education</h2>
+        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">Education</h2>
         <div
           v-for="(edu, idx) in resume.education"
           :key="idx"
@@ -129,12 +135,12 @@ function handlePrint() {
 
       <!-- Skills -->
       <div v-if="displaySkills.length" class="mb-6">
-        <h2 class="text-2xl font-bold mb-3 border-b border-gray-300 pb-1">Skills</h2>
+        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">Skills</h2>
         <div class="flex flex-wrap gap-2">
           <span
             v-for="(skill, idx) in displaySkills"
             :key="idx"
-            class="px-3 py-1 bg-gray-200 text-black text-sm rounded"
+            class="resume-print-chip rounded bg-base-200 px-3 py-1 text-sm text-base-content"
           >
             {{ skill }}
           </span>
@@ -143,7 +149,7 @@ function handlePrint() {
 
       <!-- Projects -->
       <div v-if="resume.projects?.length" class="mb-6">
-        <h2 class="text-2xl font-bold mb-3 border-b border-gray-300 pb-1">Projects</h2>
+        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">Projects</h2>
         <div
           v-for="(project, idx) in resume.projects"
           :key="idx"
@@ -157,7 +163,7 @@ function handlePrint() {
 
       <!-- Gaming Experience -->
       <div v-if="hasGamingExperience" class="mb-6">
-        <h2 class="text-2xl font-bold mb-3 border-b border-gray-300 pb-1">Gaming Experience</h2>
+        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">Gaming Experience</h2>
         <div v-if="resume.gamingExperience?.gameEngines" class="mb-2">
           <p class="font-semibold text-sm">Roles:</p>
           <p class="text-sm">{{ resume.gamingExperience.gameEngines }}</p>
@@ -193,7 +199,22 @@ function handlePrint() {
   }
 
   body {
-    background: white;
+    background: var(--bao-light-base-100);
+  }
+
+  .resume-print-surface {
+    background: var(--bao-light-base-100) !important;
+    border-color: var(--bao-light-base-300) !important;
+    color: var(--bao-light-base-content) !important;
+  }
+
+  .resume-print-divider {
+    border-color: var(--bao-light-base-300) !important;
+  }
+
+  .resume-print-chip {
+    background: var(--bao-light-base-200) !important;
+    color: var(--bao-light-base-content) !important;
   }
 }
 </style>

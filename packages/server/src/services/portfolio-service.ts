@@ -66,22 +66,37 @@ export class PortfolioService {
     engines?: string[] | null;
     sortOrder?: number | null;
   }): PortfolioProject {
-    return {
+    const project: PortfolioProject = {
       id: row.id,
       portfolioId: row.portfolioId,
       title: row.title,
       description: row.description,
       technologies: row.technologies || [],
-      image: row.image || undefined,
-      liveUrl: row.liveUrl || undefined,
-      githubUrl: row.githubUrl || undefined,
       tags: row.tags || [],
       featured: row.featured || false,
-      role: row.role || undefined,
-      platforms: row.platforms || undefined,
-      engines: row.engines || undefined,
       sortOrder: row.sortOrder || 0,
     };
+
+    if (row.image) {
+      project.image = row.image;
+    }
+    if (row.liveUrl) {
+      project.liveUrl = row.liveUrl;
+    }
+    if (row.githubUrl) {
+      project.githubUrl = row.githubUrl;
+    }
+    if (row.role) {
+      project.role = row.role;
+    }
+    if (Array.isArray(row.platforms)) {
+      project.platforms = row.platforms;
+    }
+    if (Array.isArray(row.engines)) {
+      project.engines = row.engines;
+    }
+
+    return project;
   }
 
   private toPortfolioData(portfolio: PortfolioRecord, projects: PortfolioProject[]): PortfolioData {
@@ -196,14 +211,14 @@ export class PortfolioService {
       title: data.title,
       description: data.description,
       technologies: data.technologies || [],
-      image: data.image || undefined,
-      liveUrl: data.liveUrl || undefined,
-      githubUrl: data.githubUrl || undefined,
+      ...(data.image ? { image: data.image } : {}),
+      ...(data.liveUrl ? { liveUrl: data.liveUrl } : {}),
+      ...(data.githubUrl ? { githubUrl: data.githubUrl } : {}),
       tags: data.tags || [],
       featured: data.featured || false,
-      role: data.role || undefined,
-      platforms: data.platforms || undefined,
-      engines: data.engines || undefined,
+      ...(data.role ? { role: data.role } : {}),
+      ...(data.platforms !== undefined ? { platforms: data.platforms } : {}),
+      ...(data.engines !== undefined ? { engines: data.engines } : {}),
       sortOrder: data.sortOrder !== undefined ? data.sortOrder : maxSortOrder + 1,
       createdAt: now,
       updatedAt: now,

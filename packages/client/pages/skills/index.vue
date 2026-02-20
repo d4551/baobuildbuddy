@@ -12,6 +12,9 @@ const showAddModal = ref(false);
 const categoryFilter = ref("");
 const analyzing = ref(false);
 const addMappingDialogRef = ref<HTMLDialogElement | null>(null);
+useFocusTrap(addMappingDialogRef, () => showAddModal.value);
+const showDeleteMappingDialog = ref(false);
+const pendingDeleteMappingId = ref<string | null>(null);
 
 const newMapping = reactive({
   gameExpression: "",
@@ -55,7 +58,7 @@ async function fetchMappings() {
           .map((entry) => toSkillMapping(entry))
           .filter((entry): entry is SkillMapping => entry !== null)
       : [];
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to fetch skill mappings"));
   } finally {
     loading.value = false;
@@ -85,25 +88,37 @@ async function handleAddMapping() {
     showAddModal.value = false;
     resetForm();
     $toast.success("Skill mapping added");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to add skill mapping"));
   } finally {
     loading.value = false;
   }
 }
 
-async function handleDeleteMapping(id: string) {
-  if (!confirm("Are you sure you want to delete this mapping?")) return;
+function requestDeleteMapping(id: string) {
+  pendingDeleteMappingId.value = id;
+  showDeleteMappingDialog.value = true;
+}
+
+function clearDeleteMappingState() {
+  pendingDeleteMappingId.value = null;
+}
+
+async function handleDeleteMapping() {
+  const id = pendingDeleteMappingId.value;
+  if (!id) return;
 
   loading.value = true;
   try {
     await api.skills.mappings({ id }).delete();
     await fetchMappings();
     $toast.success("Skill mapping deleted");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to delete skill mapping"));
   } finally {
     loading.value = false;
+    clearDeleteMappingState();
+    showDeleteMappingDialog.value = false;
   }
 }
 
@@ -115,7 +130,7 @@ async function handleAIAnalyze() {
       await fetchMappings();
       $toast.success("Skills analyzed successfully");
     }
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to analyze skills"));
   } finally {
     analyzing.value = false;
@@ -179,7 +194,7 @@ function removeApplication(index: number) {
     </div>
 
     <!-- Category Filter -->
-    <div class="tabs tabs-boxed mb-6">
+    <div class="tabs tabs-border mb-6">
       <button
         class="tab"
         :class="{ 'tab-active': categoryFilter === '' }"
@@ -200,7 +215,7 @@ function removeApplication(index: number) {
 
     <LoadingSkeleton v-if="loading && !mappings.length" :lines="6" />
 
-    <div v-else-if="filteredMappings.length === 0" class="alert">
+    <div v-else-if="filteredMappings.length === 0" class="alert alert-info alert-soft">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -258,7 +273,7 @@ function removeApplication(index: number) {
             <td>
               <button
                 class="btn btn-ghost btn-xs btn-error"
-                @click="handleDeleteMapping(mapping.id)"
+                @click="requestDeleteMapping(mapping.id)"
               >
                 Delete
               </button>
@@ -269,7 +284,7 @@ function removeApplication(index: number) {
     </div>
 
     <!-- Add Mapping Modal -->
-    <dialog ref="addMappingDialogRef" class="modal" @close="showAddModal = false">
+    <dialog ref="addMappingDialogRef" class="modal modal-bottom sm:modal-middle" @close="showAddModal = false">
       <div class="modal-box max-w-2xl">
         <h3 class="font-bold text-lg mb-4">Add Skill Mapping</h3>
 
@@ -365,5 +380,17 @@ function removeApplication(index: number) {
         <button @click="showAddModal = false">close</button>
       </form>
     </dialog>
+
+    <ConfirmDialog
+      id="skills-delete-mapping-dialog"
+      v-model:open="showDeleteMappingDialog"
+      title="Delete mapping"
+      message="This skill mapping will be permanently deleted."
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      variant="danger"
+      @confirm="handleDeleteMapping"
+      @cancel="clearDeleteMappingState"
+    />
   </div>
 </template>

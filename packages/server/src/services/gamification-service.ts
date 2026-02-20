@@ -46,16 +46,19 @@ export class GamificationService {
 
     if (results.length > 0) {
       const row = results[0];
-      return {
+      const progress: UserGamificationData = {
         xp: row.xp || 0,
         level: row.level || 1,
         achievements: row.achievements || [],
         dailyChallenges: row.dailyChallenges || {},
         longestStreak: row.longestStreak || 0,
         currentStreak: row.currentStreak || 0,
-        lastActiveDate: row.lastActiveDate || undefined,
         stats: row.stats || {},
       };
+      if (row.lastActiveDate) {
+        progress.lastActiveDate = row.lastActiveDate;
+      }
+      return progress;
     }
 
     // Create default record
@@ -68,7 +71,6 @@ export class GamificationService {
       dailyChallenges: {},
       longestStreak: 0,
       currentStreak: 0,
-      lastActiveDate: undefined,
       stats: {},
       createdAt: now,
       updatedAt: now,

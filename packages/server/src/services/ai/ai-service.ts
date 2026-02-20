@@ -1,4 +1,4 @@
-import { AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared";
+import { AI_CHAT_CONTEXT_MESSAGE_LIMIT, AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared";
 import type {
   AIProviderConfig,
   AIProviderStatus,
@@ -200,14 +200,13 @@ export class AIService {
         ? settings.localModelName.trim()
         : null;
 
-    const configs: AIProviderConfig[] = [
-      {
-        provider: "local",
-        baseUrl: localModelEndpoint ?? undefined,
-        model: localModelName ?? undefined,
-        enabled: true,
-      },
-    ];
+    const localProviderConfig: AIProviderConfig = {
+      provider: "local",
+      enabled: true,
+      ...(localModelEndpoint ? { baseUrl: localModelEndpoint } : {}),
+      ...(localModelName ? { model: localModelName } : {}),
+    };
+    const configs: AIProviderConfig[] = [localProviderConfig];
 
     if (settings?.geminiApiKey) {
       configs.push({
@@ -234,11 +233,12 @@ export class AIService {
     }
 
     // HuggingFace free tier — always available, token optional
-    configs.push({
+    const huggingFaceProviderConfig: AIProviderConfig = {
       provider: "huggingface",
-      apiKey: settings?.huggingfaceToken || undefined,
       enabled: true,
-    });
+      ...(settings?.huggingfaceToken ? { apiKey: settings.huggingfaceToken } : {}),
+    };
+    configs.push(huggingFaceProviderConfig);
 
     const preferredProvider = AIService.resolvePreferredProvider(settings?.preferredProvider);
     return new AIService(configs, preferredProvider);
@@ -382,11 +382,44 @@ export class AIService {
     return this.providers.values().next().value || null;
   }
 
+  private static mergePromptWithContext(prompt: string, options?: GenerateOptions): string {
+    const messageHistory = options?.messages;
+    if (!messageHistory || messageHistory.length === 0) {
+      return prompt;
+    }
+
+    const historyLines = messageHistory
+      .slice(-AI_CHAT_CONTEXT_MESSAGE_LIMIT)
+      .map((message, index) => `${index + 1}. ${message.role.toUpperCase()}: ${message.content}`)
+      .join("\n");
+
+    return [
+      "Use the following conversation history to keep responses contextually consistent.",
+      "Conversation history:",
+      historyLines,
+      "Current user message:",
+      prompt,
+    ].join("\n\n");
+  }
+
+  private static toProviderOptions(
+    options?: GenerateOptions,
+  ): Omit<GenerateOptions, "messages"> | undefined {
+    if (!options) {
+      return undefined;
+    }
+
+    const { messages: _messages, ...providerOptions } = options;
+    return providerOptions;
+  }
+
   /**
    * Generate a response with automatic fallback
    */
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const errors: Array<{ provider: AIProviderType; error: string }> = [];
+    const contextualPrompt = AIService.mergePromptWithContext(prompt, options);
+    const providerOptions = AIService.toProviderOptions(options);
 
     // Try each provider in fallback order
     for (const providerName of this.fallbackOrder) {
@@ -405,7 +438,7 @@ export class AIService {
         }
 
         // Try to generate
-        const response = await provider.generate(prompt, options);
+        const response = await provider.generate(contextualPrompt, providerOptions);
 
         // If there's an error in the response, try next provider
         if (response.error) {
@@ -451,6 +484,8 @@ export class AIService {
     options?: GenerateOptions,
   ): AsyncGenerator<{ chunk: string; provider: AIProviderType }> {
     const errors: Array<{ provider: AIProviderType; error: string }> = [];
+    const contextualPrompt = AIService.mergePromptWithContext(prompt, options);
+    const providerOptions = AIService.toProviderOptions(options);
 
     // Try each provider in fallback order
     for (const providerName of this.fallbackOrder) {
@@ -470,7 +505,7 @@ export class AIService {
 
         // Try to stream
         let hasYielded = false;
-        for await (const chunk of provider.stream(prompt, options)) {
+        for await (const chunk of provider.stream(contextualPrompt, providerOptions)) {
           hasYielded = true;
           yield { chunk, provider: providerName };
         }

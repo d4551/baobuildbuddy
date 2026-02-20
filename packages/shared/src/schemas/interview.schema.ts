@@ -1,4 +1,17 @@
-import { z } from "zod";
+import * as z from "zod";
+
+export const interviewTargetJobSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  company: z.string().min(1),
+  location: z.string().min(1),
+  description: z.string().optional(),
+  requirements: z.array(z.string()).optional(),
+  technologies: z.array(z.string()).optional(),
+  source: z.string().optional(),
+  postedDate: z.string().optional(),
+  url: z.string().optional(),
+});
 
 export const interviewConfigSchema = z.object({
   roleType: z.string(),
@@ -12,6 +25,8 @@ export const interviewConfigSchema = z.object({
   includeStudioSpecific: z.boolean().default(true),
   enableVoiceMode: z.boolean().optional(),
   technologies: z.array(z.string()).optional(),
+  interviewMode: z.enum(["studio", "job"]).optional(),
+  targetJob: interviewTargetJobSchema.optional(),
 });
 
 export const interviewResponseSchema = z.object({

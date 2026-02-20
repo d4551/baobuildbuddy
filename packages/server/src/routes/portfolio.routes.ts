@@ -14,7 +14,7 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
     },
     {
       body: t.Object({
-        metadata: t.Record(t.String(), t.Any()),
+        metadata: t.Record(t.String(), t.Unknown()),
       }),
     },
   )

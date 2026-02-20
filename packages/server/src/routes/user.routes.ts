@@ -51,8 +51,8 @@ export const userRoutes = new Elysia({ prefix: "/user" })
         yearsExperience: t.Optional(t.Number({ minimum: 0, maximum: 80 })),
         technicalSkills: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
         softSkills: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 50 })),
-        gamingExperience: t.Optional(t.Record(t.String(), t.Any())),
-        careerGoals: t.Optional(t.Record(t.String(), t.Any())),
+        gamingExperience: t.Optional(t.Record(t.String(), t.Unknown())),
+        careerGoals: t.Optional(t.Record(t.String(), t.Unknown())),
       }),
     },
   );

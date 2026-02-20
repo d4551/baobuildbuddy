@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { APP_BRAND, APP_SEO } from "@bao/shared";
-import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared";
+import {
+  AI_PROVIDER_CATALOG,
+  APP_BRAND,
+  APP_SEO,
+  LOCAL_AI_DEFAULT_ENDPOINT,
+  LOCAL_AI_DEFAULT_MODEL,
+} from "@bao/shared";
+import { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   layout: "onboarding",
@@ -14,23 +21,42 @@ if (import.meta.server) {
 }
 
 type SetupProvider = "local" | "gemini" | "openai" | "claude" | "huggingface";
+type CloudProvider = Exclude<SetupProvider, "local">;
 type TestResult = { valid: boolean; provider: string };
+type SetupStep = 1 | 2 | 3;
 
+const CLOUD_PROVIDER_IDS: readonly CloudProvider[] = ["gemini", "openai", "claude", "huggingface"];
+const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
+  gemini: "geminiApiKey",
+  openai: "openaiApiKey",
+  claude: "claudeApiKey",
+  huggingface: "huggingfaceToken",
+};
+const isSetupProvider = (value: string): value is SetupProvider =>
+  value === "local" ||
+  value === "gemini" ||
+  value === "openai" ||
+  value === "claude" ||
+  value === "huggingface";
+
+const { t } = useI18n();
 const { updateProfile } = useUser();
 const { settings, fetchSettings, updateApiKeys, testApiKey } = useSettings();
 const router = useRouter();
 const { $toast } = useNuxtApp();
 
-const step = ref(1);
+const step = ref<SetupStep>(1);
 const name = ref("");
 const currentRole = ref("");
 
 const localModelEndpoint = ref(LOCAL_AI_DEFAULT_ENDPOINT);
 const localModelName = ref(LOCAL_AI_DEFAULT_MODEL);
-const geminiKey = ref("");
-const openaiKey = ref("");
-const claudeKey = ref("");
-const huggingFaceToken = ref("");
+const providerCredentials = reactive<Record<CloudProvider, string>>({
+  gemini: "",
+  openai: "",
+  claude: "",
+  huggingface: "",
+});
 
 const testing = ref(false);
 const saving = ref(false);
@@ -43,15 +69,34 @@ const testResults = ref<Record<SetupProvider, TestResult | null>>({
   huggingface: null,
 });
 
+const providerNameById = computed<Record<SetupProvider, string>>(() => {
+  const map: Record<SetupProvider, string> = {
+    local: "Local",
+    gemini: "Gemini",
+    openai: "OpenAI",
+    claude: "Claude",
+    huggingface: "Hugging Face",
+  };
+
+  for (const provider of AI_PROVIDER_CATALOG) {
+    if (isSetupProvider(provider.id)) {
+      map[provider.id] = provider.name;
+    }
+  }
+
+  return map;
+});
+
+function getProviderLabel(provider: SetupProvider): string {
+  return providerNameById.value[provider];
+}
+
 function getProviderTestKey(provider: SetupProvider): string {
   if (provider === "local") {
     return localModelEndpoint.value.trim() || LOCAL_AI_DEFAULT_ENDPOINT;
   }
 
-  if (provider === "gemini") return geminiKey.value.trim();
-  if (provider === "openai") return openaiKey.value.trim();
-  if (provider === "claude") return claudeKey.value.trim();
-  return huggingFaceToken.value.trim();
+  return providerCredentials[provider].trim();
 }
 
 onMounted(async () => {
@@ -65,9 +110,11 @@ onMounted(async () => {
   }
 });
 
-async function handleTestProvider(provider: SetupProvider) {
+async function handleTestProvider(provider: SetupProvider): Promise<void> {
   const key = getProviderTestKey(provider);
-  if (!key && provider !== "local") return;
+  if (!key && provider !== "local") {
+    return;
+  }
 
   testing.value = true;
   testingProvider.value = provider;
@@ -76,13 +123,12 @@ async function handleTestProvider(provider: SetupProvider) {
     const result = await testApiKey(provider, key);
     testResults.value[provider] = result;
     if (result?.valid) {
-      $toast.success(`${provider.toUpperCase()} is reachable`);
+      $toast.success(t("setup.providerReachable", { provider: getProviderLabel(provider) }));
     } else {
-      $toast.error(`${provider.toUpperCase()} test failed`);
+      $toast.error(t("setup.providerTestFailed", { provider: getProviderLabel(provider) }));
     }
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to test provider";
-    $toast.error(message);
+  } catch (error) {
+    $toast.error(getErrorMessage(error, t("setup.providerTestErrorFallback")));
     testResults.value[provider] = { valid: false, provider };
   } finally {
     testing.value = false;
@@ -92,13 +138,16 @@ async function handleTestProvider(provider: SetupProvider) {
   }
 }
 
-async function handleComplete() {
+async function handleComplete(): Promise<void> {
   saving.value = true;
   try {
-    if (name.value.trim()) {
+    const trimmedName = name.value.trim();
+    const trimmedRole = currentRole.value.trim();
+
+    if (trimmedName) {
       await updateProfile({
-        name: name.value.trim(),
-        currentRole: currentRole.value.trim() || undefined,
+        name: trimmedName,
+        ...(trimmedRole ? { currentRole: trimmedRole } : {}),
       });
     }
 
@@ -107,18 +156,19 @@ async function handleComplete() {
       localModelName: localModelName.value.trim() || LOCAL_AI_DEFAULT_MODEL,
     };
 
-    if (geminiKey.value.trim()) update.geminiApiKey = geminiKey.value.trim();
-    if (openaiKey.value.trim()) update.openaiApiKey = openaiKey.value.trim();
-    if (claudeKey.value.trim()) update.claudeApiKey = claudeKey.value.trim();
-    if (huggingFaceToken.value.trim()) update.huggingfaceToken = huggingFaceToken.value.trim();
+    for (const provider of CLOUD_PROVIDER_IDS) {
+      const credential = providerCredentials[provider].trim();
+      if (credential) {
+        update[API_KEY_FIELD_BY_PROVIDER[provider]] = credential;
+      }
+    }
 
     await updateApiKeys(update);
 
-    $toast.success("Setup complete!");
+    $toast.success(t("setup.completeToast"));
     router.push("/");
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to complete setup";
-    $toast.error(message);
+  } catch (error) {
+    $toast.error(getErrorMessage(error, t("setup.completeErrorFallback")));
   } finally {
     saving.value = false;
   }
@@ -128,115 +178,120 @@ async function handleComplete() {
 <template>
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <h1 class="card-title text-2xl text-primary mb-4">Welcome to {{ APP_BRAND.name }}</h1>
-      <ul class="steps steps-horizontal w-full mb-8">
-        <li class="step" :class="{ 'step-primary': step >= 1 }" :data-content="step > 1 ? '✓' : '1'">Profile</li>
-        <li class="step" :class="{ 'step-primary': step >= 2 }" :data-content="step > 2 ? '✓' : '2'">Local AI</li>
-        <li class="step" :class="{ 'step-primary': step >= 3 }" :data-content="step >= 3 ? '✓' : '3'">Done</li>
+      <h1 class="card-title text-2xl text-primary mb-4">{{ t("setup.title", { brand: APP_BRAND.name }) }}</h1>
+      <ul class="steps steps-horizontal w-full mb-8" :aria-label="t('setup.stepsAriaLabel')">
+        <li
+          class="step"
+          :class="{ 'step-primary': step >= 1 }"
+          :data-content="step > 1 ? '✓' : '1'"
+        >
+          {{ t("setup.steps.profile") }}
+        </li>
+        <li
+          class="step"
+          :class="{ 'step-primary': step >= 2 }"
+          :data-content="step > 2 ? '✓' : '2'"
+        >
+          {{ t("setup.steps.localAi") }}
+        </li>
+        <li
+          class="step"
+          :class="{ 'step-primary': step >= 3 }"
+          :data-content="step >= 3 ? '✓' : '3'"
+        >
+          {{ t("setup.steps.done") }}
+        </li>
       </ul>
 
-      <!-- Step 1: Profile -->
       <div v-if="step === 1" class="space-y-4">
-        <h2 class="text-lg font-semibold">Tell us about yourself</h2>
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Your Name</legend>
-          <input v-model="name" type="text" placeholder="Enter your name" class="input w-full" aria-label="Enter your name"/>
-        </fieldset>
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Current Role (optional)</legend>
+        <h2 class="text-lg font-semibold">{{ t("setup.profileTitle") }}</h2>
+        <label class="floating-label w-full">
+          <span>{{ t("setup.nameLegend") }}</span>
+          <input
+            v-model="name"
+            type="text"
+            :placeholder="t('setup.namePlaceholder')"
+            class="input w-full"
+            :aria-label="t('setup.nameAria')"
+          />
+        </label>
+        <label class="floating-label w-full">
+          <span>{{ t("setup.currentRoleLegend") }}</span>
           <input
             v-model="currentRole"
             type="text"
-            placeholder="e.g. Game Designer, 3D Artist"
+            :placeholder="t('setup.currentRolePlaceholder')"
             class="input w-full"
-            aria-label="e.g. Game Designer, 3D Artist"/>
-        </fieldset>
+            :aria-label="t('setup.currentRoleAria')"
+          />
+        </label>
 
         <div class="flex justify-end">
-          <button class="btn btn-primary" @click="step = 2">Next</button>
+          <button class="btn btn-primary" :aria-label="t('setup.nextToLocalAiAria')" @click="step = 2">
+            {{ t("setup.nextButton") }}
+          </button>
         </div>
       </div>
 
-      <!-- Step 2: Local-first AI setup -->
       <div v-if="step === 2" class="space-y-5">
-        <h2 class="text-lg font-semibold">Configure AI (Local-first)</h2>
+        <h2 class="text-lg font-semibold">{{ t("setup.aiConfigTitle") }}</h2>
         <div role="alert" class="alert alert-info alert-soft">
-          <span>
-            {{ APP_BRAND.name }} prefers local providers first. Use RamaLama or Ollama for private, offline usage, and add cloud keys only if you want a backup.
-          </span>
+          <span>{{ t("setup.localFirstInfo", { brand: APP_BRAND.name }) }}</span>
         </div>
 
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Local endpoint</legend>
-          <input v-model="localModelEndpoint" type="text" class="input w-full" aria-label="Local Model Endpoint"/>
-          <div class="label">Examples: RamaLama <code>/v1</code>, Ollama <code>/v1</code></div>
-        </fieldset>
+        <label class="floating-label w-full">
+          <span>{{ t("setup.localEndpointLegend") }}</span>
+          <input
+            v-model="localModelEndpoint"
+            type="text"
+            class="input w-full"
+            :aria-label="t('setup.localEndpointAria')"
+          />
+        </label>
+        <div class="label">{{ t("setup.localEndpointExamples") }}</div>
 
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">Local model name</legend>
-          <input v-model="localModelName" type="text" class="input w-full" aria-label="Local Model Name"/>
-        </fieldset>
+        <label class="floating-label w-full">
+          <span>{{ t("setup.localModelLegend") }}</span>
+          <input
+            v-model="localModelName"
+            type="text"
+            class="input w-full"
+            :aria-label="t('setup.localModelAria')"
+          />
+        </label>
 
-        <button class="btn btn-outline btn-sm" :disabled="testing && testingProvider === 'local'" @click="handleTestProvider('local')">
+        <button
+          class="btn btn-outline btn-sm"
+          :disabled="testing && testingProvider === 'local'"
+          :aria-label="t('setup.testLocalAria')"
+          @click="handleTestProvider('local')"
+        >
           <span v-if="testing && testingProvider === 'local'" class="loading loading-spinner loading-xs"></span>
-          Test Local Endpoint
+          {{ t("setup.testLocalButton") }}
         </button>
 
         <details class="collapse collapse-arrow bg-base-200">
-          <summary class="collapse-title font-medium">Cloud providers (optional)</summary>
+          <summary class="collapse-title font-medium">{{ t("setup.cloudOptionalTitle") }}</summary>
           <div class="collapse-content space-y-4">
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Gemini API key</legend>
+            <fieldset v-for="provider in CLOUD_PROVIDER_IDS" :key="provider" class="fieldset">
+              <legend class="fieldset-legend">
+                {{ t("setup.cloudProviderLegend", { provider: getProviderLabel(provider) }) }}
+              </legend>
               <div class="join w-full">
-                <input v-model="geminiKey" type="password" placeholder="Enter key" class="input join-item w-full" aria-label="Enter key"/>
+                <input
+                  v-model="providerCredentials[provider]"
+                  type="password"
+                  :placeholder="t('setup.cloudProviderPlaceholder', { provider: getProviderLabel(provider) })"
+                  class="input join-item w-full"
+                  :aria-label="t('setup.cloudProviderAria', { provider: getProviderLabel(provider) })"
+                />
                 <button
                   class="btn btn-outline join-item"
-                  :disabled="testing || !geminiKey.trim()"
-                  @click="handleTestProvider('gemini')"
+                  :disabled="testing || !providerCredentials[provider].trim()"
+                  :aria-label="t('setup.testProviderAria', { provider: getProviderLabel(provider) })"
+                  @click="handleTestProvider(provider)"
                 >
-                  Test
-                </button>
-              </div>
-            </fieldset>
-
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">OpenAI API key</legend>
-              <div class="join w-full">
-                <input v-model="openaiKey" type="password" placeholder="Enter key" class="input join-item w-full" aria-label="Enter key"/>
-                <button
-                  class="btn btn-outline join-item"
-                  :disabled="testing || !openaiKey.trim()"
-                  @click="handleTestProvider('openai')"
-                >
-                  Test
-                </button>
-              </div>
-            </fieldset>
-
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Claude API key</legend>
-              <div class="join w-full">
-                <input v-model="claudeKey" type="password" placeholder="Enter key" class="input join-item w-full" aria-label="Enter key"/>
-                <button
-                  class="btn btn-outline join-item"
-                  :disabled="testing || !claudeKey.trim()"
-                  @click="handleTestProvider('claude')"
-                >
-                  Test
-                </button>
-              </div>
-            </fieldset>
-
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">Hugging Face token</legend>
-              <div class="join w-full">
-                <input v-model="huggingFaceToken" type="password" placeholder="Enter token" class="input join-item w-full" aria-label="Enter token"/>
-                <button
-                  class="btn btn-outline join-item"
-                  :disabled="testing || !huggingFaceToken.trim()"
-                  @click="handleTestProvider('huggingface')"
-                >
-                  Test
+                  {{ t("setup.testButton") }}
                 </button>
               </div>
             </fieldset>
@@ -244,24 +299,29 @@ async function handleComplete() {
         </details>
 
         <div class="flex justify-between">
-          <button class="btn btn-ghost" @click="step = 1">Back</button>
-          <button class="btn btn-primary" @click="step = 3">Next</button>
+          <button class="btn btn-ghost" :aria-label="t('setup.backToProfileAria')" @click="step = 1">
+            {{ t("setup.backButton") }}
+          </button>
+          <button class="btn btn-primary" :aria-label="t('setup.nextToDoneAria')" @click="step = 3">
+            {{ t("setup.nextButton") }}
+          </button>
         </div>
       </div>
 
-      <!-- Step 3: Complete -->
       <div v-if="step === 3" class="space-y-4 text-center">
-        <div class="text-6xl mb-4">&#127918;</div>
-        <h2 class="text-lg font-semibold">You’re all set!</h2>
+        <div class="text-6xl mb-4" aria-hidden="true">OK</div>
+        <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
         <p class="text-base-content/70">
-          {{ APP_BRAND.assistantName }} is ready to help you with your game industry career.
+          {{ t("setup.doneDescription", { assistant: APP_BRAND.assistantName }) }}
         </p>
 
         <div class="flex justify-center gap-2">
-          <button class="btn btn-ghost" @click="step = 2">Back</button>
-          <button class="btn btn-primary" :disabled="saving" @click="handleComplete">
+          <button class="btn btn-ghost" :aria-label="t('setup.backToAiConfigAria')" @click="step = 2">
+            {{ t("setup.backButton") }}
+          </button>
+          <button class="btn btn-primary" :disabled="saving" :aria-label="t('setup.launchAria')" @click="handleComplete">
             <span v-if="saving" class="loading loading-spinner loading-xs"></span>
-            Launch {{ APP_BRAND.name }}
+            {{ t("setup.launchButton", { brand: APP_BRAND.name }) }}
           </button>
         </div>
       </div>

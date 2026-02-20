@@ -14,12 +14,13 @@
     "lint": "bun --bun run eslint ."
   },
   "dependencies": {
-    "@elysiajs/eden": "^1.4.8",
     "@bao/shared": "workspace:*",
+    "@elysiajs/eden": "^1.4.8",
     "@nuxt/image": "^2.0.0",
     "@tanstack/vue-query": "^5.92.9",
     "nuxt": "^4.3.1",
-    "vue": "^3.5.28"
+    "vue": "^3.5.28",
+    "vue-i18n": "^11.2.8"
   },
   "devDependencies": {
     "@bao/server": "workspace:*",

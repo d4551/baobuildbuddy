@@ -1,5 +1,6 @@
 import type { ResumeData } from "@bao/shared";
 export declare class ResumeService {
+    private toResumeData;
     /**
      * Get all resumes
      */

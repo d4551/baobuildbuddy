@@ -13,6 +13,9 @@ const { $toast } = useNuxtApp();
 const showGenerateModal = ref(false);
 const generating = ref(false);
 const generateDialogRef = ref<HTMLDialogElement | null>(null);
+useFocusTrap(generateDialogRef, () => showGenerateModal.value);
+const showDeleteCoverLetterDialog = ref(false);
+const pendingDeleteCoverLetterId = ref<string | null>(null);
 const generateForm = reactive({
   company: "",
   position: "",
@@ -35,14 +38,27 @@ watch(showGenerateModal, (isOpen) => {
   }
 });
 
-async function handleDelete(id: string) {
-  if (confirm("Are you sure you want to delete this cover letter?")) {
-    try {
-      await deleteCoverLetter(id);
-      $toast.success("Cover letter deleted");
-    } catch (error: unknown) {
-      $toast.error(getErrorMessage(error, "Failed to delete cover letter"));
-    }
+function requestDeleteCoverLetter(id: string) {
+  pendingDeleteCoverLetterId.value = id;
+  showDeleteCoverLetterDialog.value = true;
+}
+
+function clearDeleteCoverLetterState() {
+  pendingDeleteCoverLetterId.value = null;
+}
+
+async function handleDeleteCoverLetter() {
+  const id = pendingDeleteCoverLetterId.value;
+  if (!id) return;
+
+  try {
+    await deleteCoverLetter(id);
+    $toast.success("Cover letter deleted");
+  } catch (error) {
+    $toast.error(getErrorMessage(error, "Failed to delete cover letter"));
+  } finally {
+    clearDeleteCoverLetterState();
+    showDeleteCoverLetterDialog.value = false;
   }
 }
 
@@ -61,6 +77,11 @@ async function handleGenerate() {
     return;
   }
 
+  if (generateForm.jobDescription.trim().length > 0 && generateForm.jobDescription.trim().length < 50) {
+    $toast.error("Job description must be at least 50 characters when provided");
+    return;
+  }
+
   generating.value = true;
   try {
     const letter = await generateCoverLetter(generateForm);
@@ -69,7 +90,7 @@ async function handleGenerate() {
     if (letter?.id) {
       router.push(`/cover-letter/${letter.id}`);
     }
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to generate cover letter"));
   } finally {
     generating.value = false;
@@ -92,9 +113,9 @@ async function handleGenerate() {
       </button>
     </div>
 
-    <LoadingSkeleton v-if="loading && !coverLetters.length" :lines="6" />
+    <LoadingSkeleton v-if="loading && !coverLetters.length" variant="cards" :lines="6" />
 
-    <div v-else-if="coverLetters.length === 0" class="alert">
+    <div v-else-if="coverLetters.length === 0" class="alert alert-info alert-soft">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -105,7 +126,12 @@ async function handleGenerate() {
       <div
         v-for="letter in coverLetters"
         :key="letter.id"
-        class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
+        class="cursor-pointer transition-colors"
+        :class="
+          letter.content?.trim()
+            ? 'card card-border bg-base-100 hover:bg-base-200'
+            : 'card card-dash bg-base-100 hover:bg-base-200'
+        "
         role="button"
         tabindex="0"
         @click="editLetter(letter.id)"
@@ -136,7 +162,7 @@ async function handleGenerate() {
             </button>
             <button
               class="btn btn-sm btn-error btn-outline"
-              @click.stop="handleDelete(letter.id)"
+              @click.stop="requestDeleteCoverLetter(letter.id)"
             >
               Delete
             </button>
@@ -146,7 +172,7 @@ async function handleGenerate() {
     </div>
 
     <!-- Generate Modal -->
-    <dialog ref="generateDialogRef" class="modal" @close="showGenerateModal = false">
+    <dialog ref="generateDialogRef" class="modal modal-bottom sm:modal-middle" @close="showGenerateModal = false">
       <div class="modal-box max-w-2xl">
         <h3 class="font-bold text-lg mb-4">Generate Cover Letter with AI</h3>
 
@@ -156,9 +182,12 @@ async function handleGenerate() {
             <input
               v-model="generateForm.company"
               type="text"
+              required
+              minlength="2"
               placeholder="e.g. Riot Games"
-              class="input w-full"
+              class="input validator w-full"
               aria-label="e.g. Riot Games"/>
+            <p class="validator-hint">Company name must be at least 2 characters.</p>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -166,29 +195,35 @@ async function handleGenerate() {
             <input
               v-model="generateForm.position"
               type="text"
+              required
+              minlength="2"
               placeholder="e.g. Senior Game Designer"
-              class="input w-full"
+              class="input validator w-full"
               aria-label="e.g. Senior Game Designer"/>
+            <p class="validator-hint">Position must be at least 2 characters.</p>
           </fieldset>
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Job Description (Optional)</legend>
             <textarea
               v-model="generateForm.jobDescription"
-              class="textarea textarea-bordered w-full"
+              minlength="50"
+              class="textarea textarea-bordered validator w-full"
               rows="5"
               placeholder="Paste the job description here for a more tailored cover letter..."
               aria-label="Paste the job description here for a more tailored cover letter..."></textarea>
+            <p class="validator-hint">If provided, include at least 50 characters for better AI context.</p>
           </fieldset>
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Template Style</legend>
-            <select v-model="generateForm.template" class="select w-full" aria-label="Template">
+            <select v-model="generateForm.template" required class="select validator w-full" aria-label="Template">
               <option value="professional">Professional</option>
               <option value="creative">Creative</option>
               <option value="passionate">Passionate</option>
               <option value="technical">Technical</option>
             </select>
+            <p class="validator-hint">Select a template style before generating.</p>
           </fieldset>
         </div>
 
@@ -216,5 +251,17 @@ async function handleGenerate() {
         <button @click="showGenerateModal = false">close</button>
       </form>
     </dialog>
+
+    <ConfirmDialog
+      id="cover-letter-delete-dialog"
+      v-model:open="showDeleteCoverLetterDialog"
+      title="Delete cover letter"
+      message="This cover letter will be permanently deleted."
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      variant="danger"
+      @confirm="handleDeleteCoverLetter"
+      @cancel="clearDeleteCoverLetterState"
+    />
   </div>
 </template>

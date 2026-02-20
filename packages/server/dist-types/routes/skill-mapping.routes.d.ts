@@ -62,7 +62,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                     confidence?: number | undefined;
                     industryApplications?: string[] | undefined;
                     evidence?: {
-                        [x: string]: any;
+                        [x: string]: unknown;
                     }[] | undefined;
                     demandLevel?: string | undefined;
                     aiGenerated?: boolean | undefined;
@@ -99,7 +99,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                         transferableSkill?: string | undefined;
                         industryApplications?: string[] | undefined;
                         evidence?: {
-                            [x: string]: any;
+                            [x: string]: unknown;
                         }[] | undefined;
                         demandLevel?: string | undefined;
                         aiGenerated?: boolean | undefined;

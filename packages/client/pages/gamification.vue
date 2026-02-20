@@ -121,7 +121,7 @@ async function handleCompleteChallenge(challengeId: string) {
     );
     await retryPageLoad();
     $toast.success(GAMIFICATION_COPY.challengeCompletionToast);
-  } catch (actionError: unknown) {
+  } catch (actionError) {
     $toast.error(getErrorMessage(actionError, GAMIFICATION_COPY.challengeCompleteErrorFallback));
   } finally {
     completingChallenge.value = null;

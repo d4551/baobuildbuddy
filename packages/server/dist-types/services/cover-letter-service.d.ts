@@ -1,5 +1,6 @@
 import type { CoverLetterData } from "@bao/shared";
 export declare class CoverLetterService {
+    private toCoverLetterData;
     /**
      * Get all cover letters
      */

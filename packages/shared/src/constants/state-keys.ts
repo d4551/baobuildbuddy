@@ -48,6 +48,7 @@ export const STATE_KEYS = {
   AI_MESSAGES: "ai-messages",
   AI_STREAMING: "ai-streaming",
   AI_LOADING: "ai-loading",
+  AI_SESSION_ID: "ai-session-id",
 
   // User & Auth
   USER_PROFILE: "user-profile",
@@ -83,6 +84,9 @@ export const STATE_KEYS = {
   // WebSocket
   WS_CONNECTED: "ws-connected",
   WS_LAST_MESSAGE: "ws-last-message",
+
+  // UI
+  UI_TOASTS: "ui-toasts",
 } as const;
 
 export type StateKey = (typeof STATE_KEYS)[keyof typeof STATE_KEYS];

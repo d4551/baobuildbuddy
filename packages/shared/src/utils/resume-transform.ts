@@ -82,9 +82,9 @@ export function formDataToResumeData(form: Partial<ResumeFormData>): Partial<Res
     title: exp.title,
     company: exp.company,
     startDate: exp.startDate,
-    endDate: exp.current ? undefined : exp.endDate || undefined,
-    location: exp.location || undefined,
-    description: exp.description || undefined,
+    ...(!exp.current && exp.endDate ? { endDate: exp.endDate } : {}),
+    ...(exp.location ? { location: exp.location } : {}),
+    ...(exp.description ? { description: exp.description } : {}),
   }));
 
   const education: ResumeEducationItem[] = (form.education || []).map((edu) => ({
@@ -92,7 +92,7 @@ export function formDataToResumeData(form: Partial<ResumeFormData>): Partial<Res
     school: edu.school,
     field: "",
     year: edu.graduationDate,
-    gpa: edu.gpa || undefined,
+    ...(edu.gpa ? { gpa: edu.gpa } : {}),
   }));
 
   const skills: ResumeSkills = {};
@@ -100,11 +100,11 @@ export function formDataToResumeData(form: Partial<ResumeFormData>): Partial<Res
     skills.technical = form.skills;
   }
 
-  const projects: ResumeProject[] = (form.projects || []).map((p) => ({
-    title: p.name,
-    description: p.description,
-    technologies: p.technologies?.length ? p.technologies : undefined,
-    link: p.url || undefined,
+  const projects: ResumeProject[] = (form.projects || []).map((project) => ({
+    title: project.name,
+    description: project.description,
+    ...(project.technologies?.length ? { technologies: project.technologies } : {}),
+    ...(project.url ? { link: project.url } : {}),
   }));
 
   const gamingExperience: GamingExperience = {};
@@ -117,15 +117,30 @@ export function formDataToResumeData(form: Partial<ResumeFormData>): Partial<Res
     if (achievements.length) gamingExperience.shippedTitles = achievements.join("; ");
   }
 
-  return {
-    personalInfo: Object.keys(personalInfo).length ? personalInfo : undefined,
-    summary: form.summary || undefined,
-    experience: experience.length ? experience : undefined,
-    education: education.length ? education : undefined,
-    skills: Object.keys(skills).length ? skills : undefined,
-    projects: projects.length ? projects : undefined,
-    gamingExperience: Object.keys(gamingExperience).length ? gamingExperience : undefined,
-  };
+  const resumeData: Partial<ResumeData> = {};
+  if (Object.keys(personalInfo).length > 0) {
+    resumeData.personalInfo = personalInfo;
+  }
+  if (form.summary) {
+    resumeData.summary = form.summary;
+  }
+  if (experience.length > 0) {
+    resumeData.experience = experience;
+  }
+  if (education.length > 0) {
+    resumeData.education = education;
+  }
+  if (Object.keys(skills).length > 0) {
+    resumeData.skills = skills;
+  }
+  if (projects.length > 0) {
+    resumeData.projects = projects;
+  }
+  if (Object.keys(gamingExperience).length > 0) {
+    resumeData.gamingExperience = gamingExperience;
+  }
+
+  return resumeData;
 }
 
 /**

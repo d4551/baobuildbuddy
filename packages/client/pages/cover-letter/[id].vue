@@ -3,13 +3,18 @@ import type { CoverLetterData } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
-const router = useRouter();
 const { getCoverLetter, updateCoverLetter, generateCoverLetter, loading } = useCoverLetter();
 const { $toast } = useNuxtApp();
 
 const letter = ref<CoverLetterData | null>(null);
 const letterId = computed(() => route.params.id as string);
 const regenerating = ref(false);
+const showRegenerateDialog = ref(false);
+const breadcrumbs = computed(() => [
+  { label: "Dashboard", to: "/" },
+  { label: "Cover Letters", to: "/cover-letter" },
+  { label: letter.value?.position || "Cover Letter Detail" },
+]);
 
 const formData = reactive({
   company: "",
@@ -32,14 +37,12 @@ async function handleSave() {
   try {
     await updateCoverLetter(letterId.value, formData);
     $toast.success("Cover letter saved");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to save cover letter"));
   }
 }
 
 async function handleRegenerate() {
-  if (!confirm("This will replace your current content. Continue?")) return;
-
   regenerating.value = true;
   try {
     const regenerated = await generateCoverLetter({
@@ -51,11 +54,16 @@ async function handleRegenerate() {
       formData.content = regenerated.content;
       $toast.success("Cover letter regenerated");
     }
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to regenerate cover letter"));
   } finally {
     regenerating.value = false;
+    showRegenerateDialog.value = false;
   }
+}
+
+function requestRegenerate() {
+  showRegenerateDialog.value = true;
 }
 
 async function handleExport() {
@@ -68,7 +76,7 @@ async function handleExport() {
     a.click();
     URL.revokeObjectURL(url);
     $toast.success("Cover letter exported");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to export cover letter"));
   }
 }
@@ -76,19 +84,14 @@ async function handleExport() {
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <button class="btn btn-ghost btn-sm" @click="router.back()">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to Cover Letters
-      </button>
+    <div class="flex items-center justify-between mb-6 gap-3">
+      <AppBreadcrumbs :crumbs="breadcrumbs" />
 
       <div class="flex gap-2">
         <button
           class="btn btn-sm btn-outline"
           :disabled="regenerating"
-          @click="handleRegenerate"
+          @click="requestRegenerate"
         >
           <span v-if="regenerating" class="loading loading-spinner loading-xs"></span>
           <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,12 +194,23 @@ async function handleExport() {
         <div class="card-body">
           <h2 class="card-title mb-4">Preview</h2>
           <div class="prose max-w-none">
-            <div class="bg-white text-black p-8 rounded-lg shadow-inner">
+            <div class="rounded-lg border border-base-300 bg-base-100 p-8 text-base-content shadow-inner">
               <div class="whitespace-pre-wrap">{{ formData.content }}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <ConfirmDialog
+      id="cover-letter-regenerate-dialog"
+      v-model:open="showRegenerateDialog"
+      title="Regenerate content"
+      message="This will replace your current cover letter content."
+      confirm-text="Regenerate"
+      cancel-text="Cancel"
+      @confirm="handleRegenerate"
+      @cancel="showRegenerateDialog = false"
+    />
   </div>
 </template>

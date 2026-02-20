@@ -49,7 +49,7 @@ async function loadData() {
   pageError.value = null;
   try {
     await Promise.all([fetchPathways(), fetchReadiness()]);
-  } catch (error: unknown) {
+  } catch (error) {
     pageError.value = getErrorMessage(error, "Failed to load career pathways data");
     $toast.error(pageError.value);
   }

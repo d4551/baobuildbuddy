@@ -2,10 +2,10 @@ import type { QueryClient } from "@tanstack/vue-query";
 import type { EdenApiNamespace } from "~/plugins/eden";
 
 interface ToastApi {
-  success: (message: string) => void;
-  error: (message: string) => void;
-  info: (message: string) => void;
-  warning: (message: string) => void;
+  success: (message: string, options?: { title?: string; durationMs?: number }) => string;
+  error: (message: string, options?: { title?: string; durationMs?: number }) => string;
+  info: (message: string, options?: { title?: string; durationMs?: number }) => string;
+  warning: (message: string, options?: { title?: string; durationMs?: number }) => string;
 }
 
 declare module "#app" {

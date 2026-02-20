@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { AI_CHAT_API_ENDPOINT } from "@bao/shared";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -23,7 +24,7 @@ describe("ai routes", () => {
     const res = await requestJson<{ content?: string; error?: string }>(
       app,
       "POST",
-      "/api/ai/chat",
+      AI_CHAT_API_ENDPOINT,
       {
         message: "Hello, BaoBuildBuddy!",
         sessionId: "test-session",
@@ -34,7 +35,43 @@ describe("ai routes", () => {
   });
 
   test("POST /api/ai/chat requires message (validation error)", async () => {
-    const res = await requestJson<{ error?: string }>(app, "POST", "/api/ai/chat", {});
+    const res = await requestJson<{ error?: string }>(app, "POST", AI_CHAT_API_ENDPOINT, {});
     expect([400, 422]).toContain(res.status);
+  });
+
+  test("POST /api/ai/chat accepts contextual payload without validation drift", async () => {
+    const res = await requestJson<{ content?: string; error?: string }>(
+      app,
+      "POST",
+      AI_CHAT_API_ENDPOINT,
+      {
+        message: "Help me prep for this role.",
+        sessionId: "context-session",
+        context: {
+          source: "floating-widget",
+          domain: "interview",
+          route: {
+            path: "/interview",
+            name: "interview",
+            params: {},
+            query: { job: "job-123" },
+          },
+          entity: {
+            type: "job",
+            id: "job-123",
+            label: "Gameplay Engineer at Studio",
+          },
+          state: {
+            hasResumes: true,
+            hasJobs: true,
+            hasStudios: true,
+            hasInterviewSessions: true,
+            hasPortfolioProjects: false,
+          },
+        },
+      },
+    );
+    expect([200, 500]).toContain(res.status);
+    expect(res.body).toBeDefined();
   });
 });

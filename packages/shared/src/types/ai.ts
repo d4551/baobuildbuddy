@@ -75,3 +75,88 @@ export interface AIModelInfo {
   contextWindow?: number;
   maxTokens?: number;
 }
+
+/**
+ * Supported context domains for AI chat.
+ */
+export const AI_CHAT_CONTEXT_DOMAIN_IDS = [
+  "resume",
+  "job_search",
+  "interview",
+  "portfolio",
+  "skills",
+  "automation",
+  "general",
+] as const;
+
+/**
+ * AI chat context domain identifier.
+ */
+export type AIChatContextDomain = (typeof AI_CHAT_CONTEXT_DOMAIN_IDS)[number];
+
+/**
+ * Supported context sources for AI chat messages.
+ */
+export const AI_CHAT_CONTEXT_SOURCE_IDS = ["floating-widget", "chat-page"] as const;
+
+/**
+ * AI chat context source identifier.
+ */
+export type AIChatContextSource = (typeof AI_CHAT_CONTEXT_SOURCE_IDS)[number];
+
+/**
+ * Entity types that can be attached to AI chat context.
+ */
+export const AI_CHAT_CONTEXT_ENTITY_TYPE_IDS = [
+  "job",
+  "resume",
+  "studio",
+  "interview_session",
+  "automation_run",
+] as const;
+
+/**
+ * AI chat context entity identifier.
+ */
+export type AIChatContextEntityType = (typeof AI_CHAT_CONTEXT_ENTITY_TYPE_IDS)[number];
+
+/**
+ * Route snapshot attached to AI chat context payload.
+ */
+export interface AIChatContextRoute {
+  path: string;
+  name?: string;
+  params: Record<string, string>;
+  query: Record<string, string>;
+}
+
+/**
+ * Focused entity that the user is viewing when sending a message.
+ */
+export interface AIChatContextEntity {
+  type: AIChatContextEntityType;
+  id: string;
+  label?: string;
+}
+
+/**
+ * Lightweight application state indicators included with AI chat context.
+ */
+export interface AIChatContextState {
+  hasResumes: boolean;
+  hasJobs: boolean;
+  hasStudios: boolean;
+  hasInterviewSessions: boolean;
+  hasPortfolioProjects: boolean;
+}
+
+/**
+ * Typed contextual payload sent alongside AI chat messages.
+ */
+export interface AIChatContext {
+  source: AIChatContextSource;
+  domain?: AIChatContextDomain;
+  route: AIChatContextRoute;
+  entity?: AIChatContextEntity;
+  state: AIChatContextState;
+}

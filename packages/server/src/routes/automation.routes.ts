@@ -1,3 +1,10 @@
+import {
+  AUTOMATION_RUN_HISTORY_LIMIT,
+  AUTOMATION_RUN_STATUSES,
+  AUTOMATION_RUN_TYPES,
+  type AutomationRunStatus,
+  type AutomationRunType,
+} from "@bao/shared";
 import { and, desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 
@@ -17,23 +24,30 @@ const HTTP_STATUS_BAD_REQUEST = 400;
 const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
 const HTTP_STATUS_SUCCESS = 200;
 
-const AUTOMATION_TYPES = ["scrape", "job_apply", "email"] as const;
-const AUTOMATION_STATUSES = ["pending", "running", "success", "error"] as const;
+const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
+  AUTOMATION_RUN_TYPES;
+const [
+  AUTOMATION_STATUS_PENDING,
+  AUTOMATION_STATUS_RUNNING,
+  AUTOMATION_STATUS_SUCCESS,
+  AUTOMATION_STATUS_ERROR,
+] = AUTOMATION_RUN_STATUSES;
 const RUN_ID_MIN_LENGTH = 8;
 const AUTOMATION_TYPE_SCHEMA = t.Union([
-  t.Literal("scrape"),
-  t.Literal("job_apply"),
-  t.Literal("email"),
+  t.Literal(AUTOMATION_TYPE_SCRAPE),
+  t.Literal(AUTOMATION_TYPE_JOB_APPLY),
+  t.Literal(AUTOMATION_TYPE_EMAIL),
 ]);
 const AUTOMATION_STATUS_SCHEMA = t.Union([
-  t.Literal("pending"),
-  t.Literal("running"),
-  t.Literal("success"),
-  t.Literal("error"),
+  t.Literal(AUTOMATION_STATUS_PENDING),
+  t.Literal(AUTOMATION_STATUS_RUNNING),
+  t.Literal(AUTOMATION_STATUS_SUCCESS),
+  t.Literal(AUTOMATION_STATUS_ERROR),
 ]);
-type AutomationRunType = (typeof AUTOMATION_TYPES)[number];
-type AutomationRunStatus = (typeof AUTOMATION_STATUSES)[number];
+const nullableJsonRecordBodySchema = t.Union([t.Record(t.String(), t.Unknown()), t.Null()]);
 type AutomationDbRow = typeof automationRuns.$inferSelect;
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+type JsonObject = { [key: string]: JsonValue };
 
 type AutomationRun = {
   id: string;
@@ -41,8 +55,8 @@ type AutomationRun = {
   status: AutomationRunStatus;
   jobId: string | null;
   userId: string | null;
-  input: Record<string, unknown> | null;
-  output: Record<string, unknown> | null;
+  input: JsonObject | null;
+  output: JsonObject | null;
   screenshots: string[] | null;
   error: string | null;
   progress: number | null;
@@ -62,15 +76,59 @@ type JobApplyRequestBody = {
   customAnswers?: Record<string, string>;
 };
 
+const isAutomationRunType = (value: string): value is AutomationRunType =>
+  AUTOMATION_RUN_TYPES.some((runType) => runType === value);
+
+const isAutomationRunStatus = (value: string): value is AutomationRunStatus =>
+  AUTOMATION_RUN_STATUSES.some((runStatus) => runStatus === value);
+
+const toJsonValue = (value: unknown): JsonValue | null => {
+  if (value === null) return null;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    const normalizedArray: JsonValue[] = [];
+    for (const item of value) {
+      const normalizedItem = toJsonValue(item);
+      if (normalizedItem === null && item !== null) {
+        return null;
+      }
+      normalizedArray.push(normalizedItem);
+    }
+    return normalizedArray;
+  }
+  if (typeof value === "object") {
+    const normalizedObject: JsonObject = {};
+    for (const [key, entry] of Object.entries(value)) {
+      const normalizedEntry = toJsonValue(entry);
+      if (normalizedEntry === null && entry !== null) {
+        return null;
+      }
+      normalizedObject[key] = normalizedEntry;
+    }
+    return normalizedObject;
+  }
+
+  return null;
+};
+
+const toJsonObject = (value: unknown): JsonObject | null => {
+  const normalized = toJsonValue(value);
+  return normalized && typeof normalized === "object" && !Array.isArray(normalized)
+    ? normalized
+    : null;
+};
+
 function normalizeAutomationRun(run: AutomationDbRow): AutomationRun {
   return {
     id: run.id,
-    type: run.type as AutomationRunType,
-    status: run.status as AutomationRunStatus,
+    type: isAutomationRunType(run.type) ? run.type : AUTOMATION_TYPE_SCRAPE,
+    status: isAutomationRunStatus(run.status) ? run.status : AUTOMATION_STATUS_PENDING,
     jobId: run.jobId,
     userId: run.userId,
-    input: run.input ?? null,
-    output: run.output ?? null,
+    input: toJsonObject(run.input),
+    output: toJsonObject(run.output),
     screenshots: run.screenshots ?? null,
     error: run.error ?? null,
     progress: run.progress ?? null,
@@ -116,7 +174,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
     "/job-apply",
     async ({ body, set }) => {
       try {
-        const payload = body as JobApplyRequestBody;
+        const payload: JobApplyRequestBody = body;
         const runId = await applicationAutomationService.createJobApplyRun(payload);
 
         void applicationAutomationService.runJobApply(runId, payload).catch((error) => {
@@ -126,7 +184,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
         set.status = HTTP_STATUS_SUCCESS;
         return {
           runId,
-          status: "running",
+          status: AUTOMATION_STATUS_RUNNING,
         };
       } catch (error) {
         const mapped = mapAutomationRouteError(error);
@@ -147,7 +205,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
       response: {
         [HTTP_STATUS_SUCCESS]: t.Object({
           runId: t.String(),
-          status: t.Literal("running"),
+          status: t.Literal(AUTOMATION_STATUS_RUNNING),
         }),
         [HTTP_STATUS_BAD_REQUEST]: t.Object({
           error: t.String(),
@@ -185,8 +243,12 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
               .from(automationRuns)
               .where(and(...filterConditions))
               .orderBy(desc(automationRuns.createdAt))
-              .limit(50)
-          : db.select().from(automationRuns).orderBy(desc(automationRuns.createdAt)).limit(50);
+              .limit(AUTOMATION_RUN_HISTORY_LIMIT)
+          : db
+              .select()
+              .from(automationRuns)
+              .orderBy(desc(automationRuns.createdAt))
+              .limit(AUTOMATION_RUN_HISTORY_LIMIT);
 
       const rows = await runner;
       return rows.map(normalizeAutomationRun);
@@ -199,8 +261,8 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
           status: AUTOMATION_STATUS_SCHEMA,
           jobId: t.Nullable(t.String()),
           userId: t.Nullable(t.String()),
-          input: t.Nullable(t.Record(t.String(), t.Any())),
-          output: t.Nullable(t.Any()),
+          input: nullableJsonRecordBodySchema,
+          output: nullableJsonRecordBodySchema,
           screenshots: t.Nullable(t.Array(t.String())),
           error: t.Nullable(t.String()),
           progress: t.Nullable(t.Number()),
@@ -259,8 +321,8 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
           status: AUTOMATION_STATUS_SCHEMA,
           jobId: t.Nullable(t.String()),
           userId: t.Nullable(t.String()),
-          input: t.Nullable(t.Record(t.String(), t.Any())),
-          output: t.Nullable(t.Any()),
+          input: nullableJsonRecordBodySchema,
+          output: nullableJsonRecordBodySchema,
           screenshots: t.Nullable(t.Array(t.String())),
           error: t.Nullable(t.String()),
           progress: t.Nullable(t.Number()),

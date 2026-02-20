@@ -32,6 +32,8 @@ BaoBuildBuddy is a full-stack, Bun-first monorepo for building game-industry car
 - `packages/shared` -- shared types, contracts, constants, schemas, validation utilities
 - `packages/scraper` -- Python RPA scripts executed via Bun native subprocess I/O
 
+If you want the simplest path with minimal technical detail, use `docs/STARTER_GUIDE.md`.
+
 ## 1) Scope of this document
 
 This is the canonical local setup runbook for BaoBuildBuddy v1.0. It covers:
@@ -639,10 +641,11 @@ bun run dev:client
 | Server API type contract | `bun run --filter '@bao/server' build:types` | Generate `packages/server/dist-types` declarations used by client typecheck |
 | Format | `bun run format` | Apply Biome formatter |
 | Format check | `bun run format:check` | Verify formatter output |
+| UI accessibility + token checks | `bun run validate:ui` | Enforce WCAG contrast pairs and block hardcoded UI colors in client source |
 | Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
 | Test | `bun run test` | Run test suites for server and client |
-| Lint | `bun run lint` | Biome lint + client ESLint |
-| Lint fix | `bun run lint:fix` | Auto-fix lint issues in Biome and client ESLint |
+| Lint | `bun run lint` | `validate:ui` + Biome lint + client ESLint |
+| Lint fix | `bun run lint:fix` | `validate:ui` + auto-fix lint issues in Biome and client ESLint |
 | DB generate | `bun run db:generate` | Generate Drizzle migration files |
 | DB push | `bun run db:push` | Push schema changes to SQLite |
 | DB studio | `bun run db:studio` | Open Drizzle Studio GUI for database inspection |
@@ -664,15 +667,17 @@ bun run dev:client
 
 ```bash
 bun run format:check
+bun run validate:ui
 bun run typecheck
 bun run lint
 bun run test
 ```
 
 Client-side runtime tests for composables use `*.nuxt.spec.ts` and initialize Nuxt with a package-root `rootDir` so alias resolution stays deterministic in workspace runs. Keep those tests explicit about external dependencies (`useApi`) and avoid relying on unresolved auto-import side effects.
-`bun run typecheck` now generates server API declarations (`packages/server/dist-types`) before running package typechecks, so Nuxt client typechecking consumes contract types instead of server implementation internals.
+`bun run typecheck` generates server API declarations (`packages/server/dist-types`) before running package typechecks, so Nuxt client typechecking consumes contract types instead of server implementation internals.
 Server-side tests run with deterministic in-process AI behavior (`BAO_TEST_MODE=1`), so test execution does not depend on external AI providers or network availability.
 Rate-limited route groups use header-aware client-key generation (`x-forwarded-for` / `cf-connecting-ip` / `x-real-ip` fallback), which keeps behavior deterministic in local tests and proxy deployments.
+For a non-technical runbook with copy/paste steps only, use `docs/STARTER_GUIDE.md`.
 
 ### 11.2 Database setup
 
@@ -719,15 +724,26 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 | `/api/automation/job-apply` | Start job application automation | `{ runId, status: "running" }` |
 | `/api/gamification/progress` | XP and level progression | Gamification progress payload |
 | `/api/automation/runs` | Automation audit | Persisted run records |
+| `/api/automation/runs/:id` | Run detail | Single run snapshot |
+| `/api/automation/screenshots/:runId/:index` | Run screenshot bytes | PNG/JPEG/WebP image stream |
+| `/api/stats/dashboard` | Usage statistics dashboard | Aggregate stat payload |
+| `/api/stats/weekly` | Weekly activity stats | Weekly metrics payload |
+| `/api/stats/career` | Career progress stats | Career progression payload |
+| `/api/ws/chat` | AI chat | WebSocket upgrade handshake |
+| `/api/ws/interview` | Mock interview | WebSocket upgrade handshake |
+| `/api/ws/automation` | Automation run progress events | WebSocket subscribe/unsubscribe event stream |
 
 ### 11.6 UI wiring and accessibility verification
 
 ```bash
+bun run validate:ui
 bun run --filter '@bao/client' lint
 ```
 
-The client lint pipeline includes `eslint-plugin-vuejs-accessibility` in flat-config mode and validates:
+The UI verification pipeline enforces:
 
+- WCAG AA color contrast for configured daisyUI theme pairs (`*-content` on semantic backgrounds)
+- no hardcoded UI colors in client source (hex/rgb/hsl/oklch literals, Tailwind palette classes, arbitrary color literals)
 - form controls are programmatically labeled (`label` + `for`, nesting, or ARIA label)
 - clickable UI surfaces are keyboard-operable and focusable
 - anchor and icon-only controls expose accessible names
@@ -735,7 +751,11 @@ The client lint pipeline includes `eslint-plugin-vuejs-accessibility` in flat-co
 
 ```mermaid
 flowchart LR
-  Templates["Vue templates"] --> A11yLint["Client ESLint + vuejs-accessibility"]
+  Templates["Vue templates + CSS tokens"] --> UIValidate["bun run validate:ui"]
+  UIValidate --> UIState{"Contrast + token checks pass?"}
+  UIState -->|No| UIFixes["Fix theme token pairs or remove hardcoded colors"]
+  UIFixes --> UIValidate
+  UIState -->|Yes| A11yLint["Client ESLint + vuejs-accessibility"]
   A11yLint --> LintState{"A11y errors = 0?"}
   LintState -->|No| Fixes["Fix labels, keyboard handlers, control semantics"]
   Fixes --> A11yLint
@@ -749,14 +769,6 @@ Manual browser checklist for final sign-off:
 2. Verify keyboard-only navigation (`Tab`, `Shift+Tab`, `Enter`, `Space`) works on cards, menus, and dialogs.
 3. Verify icon-only controls have accessible names and visible focus states.
 4. Verify form submission and validation states are reachable without pointer input.
-| `/api/automation/runs/:id` | Run detail | Single run snapshot |
-| `/api/automation/screenshots/:runId/:index` | Run screenshot bytes | PNG/JPEG/WebP image stream |
-| `/api/stats/dashboard` | Usage statistics dashboard | Aggregate stat payload |
-| `/api/stats/weekly` | Weekly activity stats | Weekly metrics payload |
-| `/api/stats/career` | Career progress stats | Career progression payload |
-| `/api/ws/chat` | AI chat | WebSocket upgrade handshake |
-| `/api/ws/interview` | Mock interview | WebSocket upgrade handshake |
-| `/api/ws/automation` | Automation run progress events | WebSocket subscribe/unsubscribe event stream |
 
 ## 12) Project structure
 
@@ -872,6 +884,10 @@ Manual browser checklist for final sign-off:
     |   +-- setup.sh                    Automated setup for macOS / Linux
     |   +-- setup.ps1                   Automated setup for Windows (PowerShell)
     |   +-- validate-ascii-geometry.ts  ASCII art geometry checker
+    |   +-- validate-ui-accessibility.ts WCAG + hardcoded-color drift validator
+    +-- docs/
+    |   +-- STARTER_GUIDE.md            Non-technical getting-started guide
+    |   +-- AUTOMATION.md               Automation contracts and runtime behavior
     +-- .env.example
     +-- package.json
     +-- drizzle.config.ts

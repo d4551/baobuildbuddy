@@ -1,8 +1,12 @@
 import {
+  APP_LANGUAGE_CODES,
   AI_PROVIDER_DEFAULT,
+  DEFAULT_APP_LANGUAGE,
   type AIProviderType,
   type AppSettings,
+  type AutomationSettings,
   type CoverLetterData,
+  DEFAULT_AUTOMATION_SETTINGS,
   type GameStudio,
   type Job,
   type JobExperienceLevel,
@@ -84,6 +88,104 @@ const SKILL_CATEGORIES: readonly SkillMapping["category"][] = [
 
 const DEMAND_LEVELS: readonly SkillMapping["demandLevel"][] = ["high", "medium", "low"];
 
+const JOB_STUDIO_TYPES: readonly Exclude<Job["studioType"], undefined>[] = [
+  "AAA",
+  "Indie",
+  "Mobile",
+  "VR/AR",
+  "Platform",
+  "Esports",
+  "Unknown",
+];
+
+const JOB_GAME_GENRES: readonly Exclude<Job["gameGenres"], undefined>[number][] = [
+  "Action",
+  "RPG",
+  "Strategy",
+  "Puzzle",
+  "Simulation",
+  "Sports",
+  "Racing",
+  "Shooter",
+  "Platformer",
+  "Horror",
+  "MMORPG",
+  "MOBA",
+  "Battle Royale",
+  "Roguelike",
+  "Sandbox",
+  "Adventure",
+  "Fighting",
+  "Survival",
+  "Card Game",
+  "Casual",
+  "Indie",
+];
+
+const JOB_PLATFORMS: readonly Exclude<Job["platforms"], undefined>[number][] = [
+  "PC",
+  "Console",
+  "Mobile",
+  "VR",
+  "AR",
+  "Web",
+  "Switch",
+  "PlayStation",
+  "Xbox",
+  "Steam",
+];
+
+const STUDIO_CATEGORIES: readonly Exclude<GameStudio["category"], undefined>[] = [
+  "AAA",
+  "Indie",
+  "Mobile",
+  "VR/AR",
+  "Platform",
+  "Esports",
+  "International",
+];
+
+const USER_EXPERIENCE_LEVELS: readonly Exclude<
+  UserProfile["gamingExperience"]["experienceLevel"],
+  undefined
+>[] = ["entry", "junior", "mid", "senior", "lead", "principal", "director"];
+
+const USER_GAMING_SPECIALIZATIONS: readonly UserProfile["gamingExperience"]["specializations"][number][] =
+  [
+    "game-programming",
+    "gameplay-programming",
+    "engine-programming",
+    "graphics-programming",
+    "ai-programming",
+    "ui-programming",
+    "network-programming",
+    "tools-programming",
+    "game-design",
+    "level-design",
+    "narrative-design",
+    "systems-design",
+    "ui-ux-design",
+    "3d-art",
+    "2d-art",
+    "concept-art",
+    "character-art",
+    "environment-art",
+    "vfx-art",
+    "animation",
+    "rigging",
+    "technical-art",
+    "audio-design",
+    "sound-engineering",
+    "music-composition",
+    "quality-assurance",
+    "production",
+    "project-management",
+    "marketing",
+    "community-management",
+    "business-development",
+    "data-analytics",
+  ];
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -102,25 +204,25 @@ const asStringArray = (value: unknown): string[] =>
 const asRecord = (value: unknown): Record<string, unknown> | undefined =>
   isRecord(value) ? value : undefined;
 
+const isOneOf = <T extends string>(value: unknown, choices: readonly T[]): value is T =>
+  typeof value === "string" && choices.some((choice) => choice === value);
+
+const asEnum = <T extends string>(value: unknown, choices: readonly T[]): T | undefined =>
+  isOneOf(value, choices) ? value : undefined;
+
+const asEnumArray = <T extends string>(value: unknown, choices: readonly T[]): T[] =>
+  Array.isArray(value) ? value.filter((entry): entry is T => isOneOf(entry, choices)) : [];
+
 const normalizeResumeTemplate = (value: unknown): ResumeTemplate =>
-  typeof value === "string" && RESUME_TEMPLATES.includes(value as ResumeTemplate)
-    ? (value as ResumeTemplate)
-    : "modern";
+  asEnum(value, RESUME_TEMPLATES) ?? "modern";
 
 const normalizeJobExperienceLevel = (value: unknown): JobExperienceLevel | undefined =>
-  typeof value === "string" && JOB_EXPERIENCE_LEVELS.includes(value as JobExperienceLevel)
-    ? (value as JobExperienceLevel)
-    : undefined;
+  asEnum(value, JOB_EXPERIENCE_LEVELS);
 
-const normalizeJobType = (value: unknown): JobType =>
-  typeof value === "string" && JOB_TYPES.includes(value as JobType)
-    ? (value as JobType)
-    : "full-time";
+const normalizeJobType = (value: unknown): JobType => asEnum(value, JOB_TYPES) ?? "full-time";
 
 const normalizeAIProvider = (value: unknown): AIProviderType =>
-  typeof value === "string" && AI_PROVIDERS.includes(value as AIProviderType)
-    ? (value as AIProviderType)
-    : AI_PROVIDER_DEFAULT;
+  asEnum(value, AI_PROVIDERS) ?? AI_PROVIDER_DEFAULT;
 
 const normalizeStudioCulture = (value: unknown): StudioCulture => {
   if (!isRecord(value)) {
@@ -133,6 +235,27 @@ const normalizeStudioCulture = (value: unknown): StudioCulture => {
     values: asStringArray(value.values),
     workStyle: asString(value.workStyle) ?? "Not specified",
     environment: asString(value.environment),
+  };
+};
+
+const normalizeAutomationSettings = (value: unknown): AutomationSettings | undefined => {
+  if (!isRecord(value)) return undefined;
+
+  return {
+    headless: asBoolean(value.headless) ?? DEFAULT_AUTOMATION_SETTINGS.headless,
+    defaultTimeout: asNumber(value.defaultTimeout) ?? DEFAULT_AUTOMATION_SETTINGS.defaultTimeout,
+    screenshotRetention:
+      asNumber(value.screenshotRetention) ?? DEFAULT_AUTOMATION_SETTINGS.screenshotRetention,
+    maxConcurrentRuns:
+      asNumber(value.maxConcurrentRuns) ?? DEFAULT_AUTOMATION_SETTINGS.maxConcurrentRuns,
+    defaultBrowser:
+      value.defaultBrowser === "chromium" || value.defaultBrowser === "edge"
+        ? value.defaultBrowser
+        : DEFAULT_AUTOMATION_SETTINGS.defaultBrowser,
+    enableSmartSelectors:
+      asBoolean(value.enableSmartSelectors) ?? DEFAULT_AUTOMATION_SETTINGS.enableSmartSelectors,
+    autoSaveScreenshots:
+      asBoolean(value.autoSaveScreenshots) ?? DEFAULT_AUTOMATION_SETTINGS.autoSaveScreenshots,
   };
 };
 
@@ -150,15 +273,20 @@ const normalizeSalary = (value: unknown): Job["salary"] | undefined => {
     return undefined;
   }
 
-  return {
+  const frequency =
+    value.frequency === "yearly" || value.frequency === "monthly" || value.frequency === "hourly"
+      ? value.frequency
+      : null;
+  const salary: Exclude<Job["salary"], string | undefined> = {
     min,
     max,
     currency: asString(value.currency),
-    frequency:
-      value.frequency === "yearly" || value.frequency === "monthly" || value.frequency === "hourly"
-        ? value.frequency
-        : undefined,
   };
+  if (frequency) {
+    salary.frequency = frequency;
+  }
+
+  return salary;
 };
 
 /**
@@ -193,9 +321,9 @@ export const toJob = (value: unknown): Job | null => {
     companyLogo: asString(value.companyLogo),
     applicationUrl: asString(value.applicationUrl),
     contentHash: asString(value.contentHash),
-    studioType: asString(value.studioType) as Job["studioType"],
-    gameGenres: asStringArray(value.gameGenres) as Job["gameGenres"],
-    platforms: asStringArray(value.platforms) as Job["platforms"],
+    studioType: asEnum(value.studioType, JOB_STUDIO_TYPES),
+    gameGenres: asEnumArray(value.gameGenres, JOB_GAME_GENRES),
+    platforms: asEnumArray(value.platforms, JOB_PLATFORMS),
     gamingRelevance: asNumber(value.gamingRelevance),
   };
 };
@@ -430,35 +558,17 @@ export const toSkillMapping = (value: unknown): SkillMapping | null => {
 
       evidence.push({
         id: evidenceId,
-        type:
-          typeof entry.type === "string" &&
-          SKILL_EVIDENCE_TYPES.includes(entry.type as SkillEvidence["type"])
-            ? (entry.type as SkillEvidence["type"])
-            : "document",
+        type: asEnum(entry.type, SKILL_EVIDENCE_TYPES) ?? "document",
         title,
         description,
         url: asString(entry.url),
-        verificationStatus:
-          typeof entry.verificationStatus === "string" &&
-          SKILL_EVIDENCE_STATUSES.includes(
-            entry.verificationStatus as SkillEvidence["verificationStatus"],
-          )
-            ? (entry.verificationStatus as SkillEvidence["verificationStatus"])
-            : "pending",
+        verificationStatus: asEnum(entry.verificationStatus, SKILL_EVIDENCE_STATUSES) ?? "pending",
       });
     }
   }
 
-  const category =
-    typeof value.category === "string" &&
-    SKILL_CATEGORIES.includes(value.category as SkillMapping["category"])
-      ? (value.category as SkillMapping["category"])
-      : "technical";
-  const demandLevel =
-    typeof value.demandLevel === "string" &&
-    DEMAND_LEVELS.includes(value.demandLevel as SkillMapping["demandLevel"])
-      ? (value.demandLevel as SkillMapping["demandLevel"])
-      : "medium";
+  const category = asEnum(value.category, SKILL_CATEGORIES) ?? "technical";
+  const demandLevel = asEnum(value.demandLevel, DEMAND_LEVELS) ?? "medium";
 
   return {
     id,
@@ -499,7 +609,7 @@ export const toGameStudio = (value: unknown): GameStudio | null => {
     commonRoles: asStringArray(value.commonRoles),
     interviewStyle: asString(value.interviewStyle),
     remoteWork: asBoolean(value.remoteWork),
-    category: asString(value.category) as GameStudio["category"],
+    category: asEnum(value.category, STUDIO_CATEGORIES),
     region: asString(value.region),
     benefits: asStringArray(value.benefits),
   };
@@ -515,6 +625,23 @@ export const toUserProfile = (value: unknown): UserProfile | null => {
   const name = asString(value.name) ?? "";
   const gamingExperience = asRecord(value.gamingExperience) ?? {};
   const careerGoals = asRecord(value.careerGoals) ?? {};
+  const remotePreference =
+    careerGoals.remotePreference === "onsite" ||
+    careerGoals.remotePreference === "hybrid" ||
+    careerGoals.remotePreference === "remote" ||
+    careerGoals.remotePreference === "flexible"
+      ? careerGoals.remotePreference
+      : null;
+  const salaryRange =
+    isRecord(careerGoals.salaryRange) &&
+    typeof careerGoals.salaryRange.min === "number" &&
+    typeof careerGoals.salaryRange.max === "number"
+      ? {
+          min: careerGoals.salaryRange.min,
+          max: careerGoals.salaryRange.max,
+          currency: asString(careerGoals.salaryRange.currency),
+        }
+      : null;
 
   return {
     id,
@@ -533,12 +660,8 @@ export const toUserProfile = (value: unknown): UserProfile | null => {
     softSkills: asStringArray(value.softSkills),
     gamingExperience: {
       yearsInGaming: asNumber(gamingExperience.yearsInGaming),
-      experienceLevel: asString(
-        gamingExperience.experienceLevel,
-      ) as UserProfile["gamingExperience"]["experienceLevel"],
-      specializations: asStringArray(
-        gamingExperience.specializations,
-      ) as UserProfile["gamingExperience"]["specializations"],
+      experienceLevel: asEnum(gamingExperience.experienceLevel, USER_EXPERIENCE_LEVELS),
+      specializations: asEnumArray(gamingExperience.specializations, USER_GAMING_SPECIALIZATIONS),
       gameEngines: asStringArray(gamingExperience.gameEngines),
       platforms: asStringArray(gamingExperience.platforms),
       genres: asStringArray(gamingExperience.genres),
@@ -559,24 +682,9 @@ export const toUserProfile = (value: unknown): UserProfile | null => {
       desiredRoles: asStringArray(careerGoals.desiredRoles),
       preferredCompanySize: asStringArray(careerGoals.preferredCompanySize),
       preferredLocations: asStringArray(careerGoals.preferredLocations),
-      remotePreference:
-        careerGoals.remotePreference === "onsite" ||
-        careerGoals.remotePreference === "hybrid" ||
-        careerGoals.remotePreference === "remote" ||
-        careerGoals.remotePreference === "flexible"
-          ? careerGoals.remotePreference
-          : undefined,
-      salaryRange:
-        isRecord(careerGoals.salaryRange) &&
-        typeof careerGoals.salaryRange.min === "number" &&
-        typeof careerGoals.salaryRange.max === "number"
-          ? {
-              min: careerGoals.salaryRange.min,
-              max: careerGoals.salaryRange.max,
-              currency: asString(careerGoals.salaryRange.currency),
-            }
-          : undefined,
       willingToRelocate: asBoolean(careerGoals.willingToRelocate),
+      ...(remotePreference ? { remotePreference } : {}),
+      ...(salaryRange ? { salaryRange } : {}),
     },
   };
 };
@@ -601,13 +709,14 @@ export const toAppSettings = (value: unknown): AppSettings | null => {
     preferredModel: asString(value.preferredModel),
     preferredProvider: normalizeAIProvider(value.preferredProvider),
     theme: value.theme === "bao-dark" ? "bao-dark" : "bao-light",
-    language: asString(value.language) ?? "en",
+    language: asEnum(value.language, APP_LANGUAGE_CODES) ?? DEFAULT_APP_LANGUAGE,
     notifications: {
       achievements: asBoolean(notificationsRecord.achievements) ?? true,
       dailyChallenges: asBoolean(notificationsRecord.dailyChallenges) ?? true,
       levelUp: asBoolean(notificationsRecord.levelUp) ?? true,
       jobAlerts: asBoolean(notificationsRecord.jobAlerts) ?? true,
     },
+    automationSettings: normalizeAutomationSettings(value.automationSettings),
     hasGeminiKey: asBoolean(value.hasGeminiKey),
     hasOpenaiKey: asBoolean(value.hasOpenaiKey),
     hasClaudeKey: asBoolean(value.hasClaudeKey),

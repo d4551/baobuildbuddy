@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { type ResumeFormData, formDataToResumeData, resumeDataToFormData } from "@bao/shared";
+import {
+  APP_ROUTE_QUERY_KEYS,
+  type ResumeFormData,
+  formDataToResumeData,
+  resumeDataToFormData,
+} from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -25,12 +30,19 @@ const showCreateModal = ref(false);
 const newResumeName = ref("");
 const newResumeTemplate = ref("modern");
 const createDialogRef = ref<HTMLDialogElement | null>(null);
+useFocusTrap(createDialogRef, () => showCreateModal.value);
 const selectedResumeId = ref<string | null>(null);
+const showDeleteResumeDialog = ref(false);
+const pendingDeleteResumeId = ref<string | null>(null);
 const activeTab = ref("personal");
 const creating = ref(false);
 const enhancing = ref(false);
 const scoring = ref(false);
 const scoreResult = ref<Record<string, unknown> | null>(null);
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const aiEnhancementSteps = ["Analyzing", "Enhancing", "Finalizing"] as const;
+const aiEnhancementStepIndex = ref(0);
+let aiEnhancementTimer: ReturnType<typeof setInterval> | null = null;
 
 const formData = reactive<ResumeFormData>({
   name: "",
@@ -53,7 +65,7 @@ const formData = reactive<ResumeFormData>({
 
 onMounted(async () => {
   await fetchResumes();
-  const id = route.query.id;
+  const id = route.query[APP_ROUTE_QUERY_KEYS.id];
   if (typeof id === "string" && id.trim()) {
     selectedResumeId.value = id.trim();
   }
@@ -80,6 +92,33 @@ watch(showCreateModal, (isOpen) => {
   }
 });
 
+onUnmounted(() => {
+  if (aiEnhancementTimer) {
+    clearInterval(aiEnhancementTimer);
+    aiEnhancementTimer = null;
+  }
+});
+
+function startAiEnhancementProgress() {
+  aiEnhancementStepIndex.value = 0;
+  if (aiEnhancementTimer) {
+    clearInterval(aiEnhancementTimer);
+  }
+  aiEnhancementTimer = setInterval(() => {
+    if (aiEnhancementStepIndex.value < aiEnhancementSteps.length - 1) {
+      aiEnhancementStepIndex.value += 1;
+    }
+  }, 900);
+}
+
+function stopAiEnhancementProgress() {
+  if (aiEnhancementTimer) {
+    clearInterval(aiEnhancementTimer);
+    aiEnhancementTimer = null;
+  }
+  aiEnhancementStepIndex.value = 0;
+}
+
 async function handleCreate() {
   if (!newResumeName.value.trim()) return;
 
@@ -104,7 +143,7 @@ async function handleCreate() {
     newResumeName.value = "";
     selectedResumeId.value = resume.id;
     $toast.success("Resume created");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to create resume"));
   } finally {
     creating.value = false;
@@ -114,26 +153,81 @@ async function handleCreate() {
 async function handleSave() {
   if (!selectedResumeId.value) return;
 
+  if (formData.name.trim().length < 2) {
+    $toast.error("Name must be at least 2 characters");
+    return;
+  }
+
+  if (!emailPattern.test(formData.email.trim())) {
+    $toast.error("Enter a valid email address");
+    return;
+  }
+
+  if (formData.summary.trim().length < 50) {
+    $toast.error("Summary must be at least 50 characters");
+    return;
+  }
+
+  const hasInvalidExperience = formData.experience.some(
+    (item) =>
+      item.title.trim().length < 2 ||
+      item.company.trim().length < 2 ||
+      item.description.trim().length < 20,
+  );
+  if (hasInvalidExperience) {
+    $toast.error("Each experience entry needs title, company, and at least 20 characters of description");
+    return;
+  }
+
+  const hasInvalidEducation = formData.education.some(
+    (item) => item.degree.trim().length < 2 || item.school.trim().length < 2,
+  );
+  if (hasInvalidEducation) {
+    $toast.error("Each education entry needs both degree and school");
+    return;
+  }
+
+  const hasInvalidProjects = formData.projects.some(
+    (item) => item.name.trim().length < 2 || item.description.trim().length < 20,
+  );
+  if (hasInvalidProjects) {
+    $toast.error("Each project entry needs a name and at least 20 characters of description");
+    return;
+  }
+
   try {
     const updates = formDataToResumeData(formData);
     await updateResume(selectedResumeId.value, updates);
     $toast.success("Resume saved");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to save resume"));
   }
 }
 
-async function handleDelete(id: string) {
-  if (confirm("Are you sure you want to delete this resume?")) {
-    try {
-      await deleteResume(id);
-      if (selectedResumeId.value === id) {
-        selectedResumeId.value = null;
-      }
-      $toast.success("Resume deleted");
-    } catch (error: unknown) {
-      $toast.error(getErrorMessage(error, "Failed to delete resume"));
+function requestDeleteResume(id: string) {
+  pendingDeleteResumeId.value = id;
+  showDeleteResumeDialog.value = true;
+}
+
+function clearDeleteResumeState() {
+  pendingDeleteResumeId.value = null;
+}
+
+async function handleDeleteResume() {
+  const id = pendingDeleteResumeId.value;
+  if (!id) return;
+
+  try {
+    await deleteResume(id);
+    if (selectedResumeId.value === id) {
+      selectedResumeId.value = null;
     }
+    $toast.success("Resume deleted");
+  } catch (error) {
+    $toast.error(getErrorMessage(error, "Failed to delete resume"));
+  } finally {
+    clearDeleteResumeState();
+    showDeleteResumeDialog.value = false;
   }
 }
 
@@ -142,7 +236,7 @@ async function handleExport() {
   try {
     await exportResume(selectedResumeId.value);
     $toast.success("Resume exported");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to export resume"));
   }
 }
@@ -151,6 +245,7 @@ async function handleAIEnhance() {
   if (!selectedResumeId.value) return;
 
   enhancing.value = true;
+  startAiEnhancementProgress();
   try {
     const enhanced = await aiEnhance(selectedResumeId.value);
     if (enhanced?.resume) {
@@ -160,9 +255,10 @@ async function handleAIEnhance() {
     } else if (enhanced) {
       $toast.success("AI suggestions ready");
     }
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to enhance resume"));
   } finally {
+    stopAiEnhancementProgress();
     enhancing.value = false;
   }
 }
@@ -174,7 +270,7 @@ async function handleAIScore() {
   try {
     scoreResult.value = await aiScore(selectedResumeId.value, "");
     $toast.success("Resume scored");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to score resume"));
   } finally {
     scoring.value = false;
@@ -256,10 +352,10 @@ function removeSkill(index: number) {
       </NuxtLink>
     </div>
 
-    <LoadingSkeleton v-if="loading && !resumes.length" :lines="6" />
+    <LoadingSkeleton v-if="loading && !resumes.length" variant="cards" :lines="6" />
 
     <div v-else-if="!selectedResumeId" class="space-y-6">
-      <div v-if="resumes.length === 0" class="alert">
+      <div v-if="resumes.length === 0" class="alert alert-info alert-soft">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
@@ -270,7 +366,12 @@ function removeSkill(index: number) {
         <div
           v-for="resume in resumes"
           :key="resume.id"
-          class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
+          class="cursor-pointer transition-colors"
+          :class="
+            (resume.experience?.length ?? 0) > 0
+              ? 'card card-border bg-base-100 hover:bg-base-200'
+              : 'card card-dash bg-base-100 hover:bg-base-200'
+          "
           role="button"
           tabindex="0"
           @click="selectedResumeId = resume.id"
@@ -292,7 +393,7 @@ function removeSkill(index: number) {
               </button>
               <button
                 class="btn btn-sm btn-error btn-outline"
-                @click.stop="handleDelete(resume.id)"
+                @click.stop="requestDeleteResume(resume.id)"
               >
                 Delete
               </button>
@@ -344,7 +445,23 @@ function removeSkill(index: number) {
         </div>
       </div>
 
-      <div class="tabs tabs-boxed">
+      <div v-if="enhancing" class="card card-border bg-base-100">
+        <div class="card-body py-4">
+          <h3 class="mb-2 text-sm font-semibold">AI Enhancement Progress</h3>
+          <ul class="steps steps-horizontal w-full">
+            <li
+              v-for="(stepLabel, index) in aiEnhancementSteps"
+              :key="stepLabel"
+              class="step"
+              :class="{ 'step-primary': index <= aiEnhancementStepIndex }"
+            >
+              {{ stepLabel }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tabs tabs-lift">
         <button class="tab" :class="{ 'tab-active': activeTab === 'personal' }" @click="activeTab = 'personal'">Personal Info</button>
         <button class="tab" :class="{ 'tab-active': activeTab === 'experience' }" @click="activeTab = 'experience'">Experience</button>
         <button class="tab" :class="{ 'tab-active': activeTab === 'education' }" @click="activeTab = 'education'">Education</button>
@@ -360,15 +477,37 @@ function removeSkill(index: number) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Full Name</legend>
-              <input v-model="formData.name" type="text" class="input w-full" aria-label="Name"/>
+              <input
+                v-model="formData.name"
+                type="text"
+                required
+                minlength="2"
+                class="input validator w-full"
+                aria-label="Name"
+              />
+              <p class="validator-hint">Name must be at least 2 characters.</p>
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Email</legend>
-              <input v-model="formData.email" type="email" class="input w-full" aria-label="Email"/>
+              <input
+                v-model="formData.email"
+                type="email"
+                required
+                class="input validator w-full"
+                aria-label="Email"
+              />
+              <p class="validator-hint">Enter a valid email address.</p>
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Phone</legend>
-              <input v-model="formData.phone" type="tel" class="input w-full" aria-label="Phone"/>
+              <input
+                v-model="formData.phone"
+                type="tel"
+                pattern="^[+0-9()\\-\\s]{7,20}$"
+                class="input validator w-full"
+                aria-label="Phone"
+              />
+              <p class="validator-hint">Use 7-20 digits, spaces, or phone symbols.</p>
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">Location</legend>
@@ -385,7 +524,15 @@ function removeSkill(index: number) {
           </div>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">Professional Summary</legend>
-            <textarea v-model="formData.summary" class="textarea w-full" rows="4" aria-label="Summary"></textarea>
+            <textarea
+              v-model="formData.summary"
+              required
+              minlength="50"
+              class="textarea validator w-full"
+              rows="4"
+              aria-label="Summary"
+            ></textarea>
+            <p class="validator-hint">Summary must be at least 50 characters.</p>
           </fieldset>
         </div>
       </div>
@@ -411,11 +558,27 @@ function removeSkill(index: number) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Job Title</legend>
-                    <input v-model="exp.title" type="text" class="input w-full input-sm" aria-label="Title"/>
+                    <input
+                      v-model="exp.title"
+                      type="text"
+                      required
+                      minlength="2"
+                      class="input validator w-full input-sm"
+                      aria-label="Title"
+                    />
+                    <p class="validator-hint">Job title must be at least 2 characters.</p>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Company</legend>
-                    <input v-model="exp.company" type="text" class="input w-full input-sm" aria-label="Company"/>
+                    <input
+                      v-model="exp.company"
+                      type="text"
+                      required
+                      minlength="2"
+                      class="input validator w-full input-sm"
+                      aria-label="Company"
+                    />
+                    <p class="validator-hint">Company must be at least 2 characters.</p>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Location</legend>
@@ -440,7 +603,15 @@ function removeSkill(index: number) {
                 </div>
                 <fieldset class="fieldset">
                   <legend class="fieldset-legend">Description</legend>
-                  <textarea v-model="exp.description" class="textarea w-full" rows="3" aria-label="Description"></textarea>
+                  <textarea
+                    v-model="exp.description"
+                    required
+                    minlength="20"
+                    class="textarea validator w-full"
+                    rows="3"
+                    aria-label="Description"
+                  ></textarea>
+                  <p class="validator-hint">Description must be at least 20 characters.</p>
                 </fieldset>
               </div>
             </div>
@@ -469,11 +640,27 @@ function removeSkill(index: number) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Degree</legend>
-                    <input v-model="edu.degree" type="text" class="input w-full input-sm" aria-label="Degree"/>
+                    <input
+                      v-model="edu.degree"
+                      type="text"
+                      required
+                      minlength="2"
+                      class="input validator w-full input-sm"
+                      aria-label="Degree"
+                    />
+                    <p class="validator-hint">Degree must be at least 2 characters.</p>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">School</legend>
-                    <input v-model="edu.school" type="text" class="input w-full input-sm" aria-label="School"/>
+                    <input
+                      v-model="edu.school"
+                      type="text"
+                      required
+                      minlength="2"
+                      class="input validator w-full input-sm"
+                      aria-label="School"
+                    />
+                    <p class="validator-hint">School must be at least 2 characters.</p>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Location</legend>
@@ -548,7 +735,15 @@ function removeSkill(index: number) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">Project Name</legend>
-                    <input v-model="project.name" type="text" class="input w-full input-sm" aria-label="Name"/>
+                    <input
+                      v-model="project.name"
+                      type="text"
+                      required
+                      minlength="2"
+                      class="input validator w-full input-sm"
+                      aria-label="Name"
+                    />
+                    <p class="validator-hint">Project name must be at least 2 characters.</p>
                   </fieldset>
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">URL (Optional)</legend>
@@ -557,7 +752,15 @@ function removeSkill(index: number) {
                 </div>
                 <fieldset class="fieldset">
                   <legend class="fieldset-legend">Description</legend>
-                  <textarea v-model="project.description" class="textarea w-full" rows="3" aria-label="Description"></textarea>
+                  <textarea
+                    v-model="project.description"
+                    required
+                    minlength="20"
+                    class="textarea validator w-full"
+                    rows="3"
+                    aria-label="Description"
+                  ></textarea>
+                  <p class="validator-hint">Description must be at least 20 characters.</p>
                 </fieldset>
               </div>
             </div>
@@ -604,7 +807,7 @@ function removeSkill(index: number) {
     </div>
 
     <!-- Create Modal -->
-    <dialog ref="createDialogRef" class="modal" @close="showCreateModal = false">
+    <dialog ref="createDialogRef" class="modal modal-bottom sm:modal-middle" @close="showCreateModal = false">
       <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">Create New Resume</h3>
 
@@ -649,5 +852,17 @@ function removeSkill(index: number) {
         <button @click="showCreateModal = false">close</button>
       </form>
     </dialog>
+
+    <ConfirmDialog
+      id="resume-delete-dialog"
+      v-model:open="showDeleteResumeDialog"
+      title="Delete resume"
+      message="This resume will be permanently deleted."
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      variant="danger"
+      @confirm="handleDeleteResume"
+      @cancel="clearDeleteResumeState"
+    />
   </div>
 </template>

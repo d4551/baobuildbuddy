@@ -45,20 +45,28 @@ const normalizeTemplate = (value: string | null | undefined): CoverLetterTemplat
     : "professional";
 
 export class CoverLetterService {
+  private toCoverLetterData(row: typeof coverLetters.$inferSelect): CoverLetterData {
+    const result: CoverLetterData = {
+      id: row.id,
+      company: row.company,
+      position: row.position,
+      content: toCoverLetterContent(row.content),
+      template: normalizeTemplate(row.template),
+    };
+
+    if (row.jobInfo) {
+      result.jobInfo = row.jobInfo;
+    }
+
+    return result;
+  }
+
   /**
    * Get all cover letters
    */
   async getCoverLetters(): Promise<CoverLetterData[]> {
     const results = await db.select().from(coverLetters);
-
-    return results.map((row) => ({
-      id: row.id,
-      company: row.company,
-      position: row.position,
-      jobInfo: row.jobInfo || undefined,
-      content: toCoverLetterContent(row.content),
-      template: normalizeTemplate(row.template),
-    }));
+    return results.map((row) => this.toCoverLetterData(row));
   }
 
   /**
@@ -71,15 +79,7 @@ export class CoverLetterService {
       return null;
     }
 
-    const row = results[0];
-    return {
-      id: row.id,
-      company: row.company,
-      position: row.position,
-      jobInfo: row.jobInfo || undefined,
-      content: toCoverLetterContent(row.content),
-      template: normalizeTemplate(row.template),
-    };
+    return this.toCoverLetterData(results[0]);
   }
 
   /**
@@ -93,7 +93,7 @@ export class CoverLetterService {
       id,
       company: data.company,
       position: data.position,
-      jobInfo: data.jobInfo || undefined,
+      ...(data.jobInfo ? { jobInfo: data.jobInfo } : {}),
       content: toContentRecord(data.content),
       template: normalizeTemplate(data.template),
       createdAt: now,

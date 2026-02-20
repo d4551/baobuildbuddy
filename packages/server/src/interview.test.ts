@@ -102,7 +102,7 @@ describe("interview service", () => {
 });
 
 describe("interview API compatibility", () => {
-  test("POST /api/interview/sessions accepts legacy role field and returns created payload", async () => {
+  test("POST /api/interview/sessions accepts roleType and returns created payload", async () => {
     const response = await requestJson<{
       id: string;
       studioId: string;
@@ -112,7 +112,7 @@ describe("interview API compatibility", () => {
     }>(harness.app, "POST", "/api/interview/sessions", {
       studioId: "activision-blizzard",
       config: {
-        role: "Build Engineer",
+        roleType: "Build Engineer",
         questionCount: 1,
       },
     });
@@ -124,7 +124,7 @@ describe("interview API compatibility", () => {
     expect(response.body.message).toBe("Interview session created");
   });
 
-  test("POST /api/interview/sessions/:id/response accepts legacy answer payload", async () => {
+  test("POST /api/interview/sessions/:id/response accepts canonical response payload", async () => {
     const created = await requestJson<{
       id: string;
       totalQuestions: number;
@@ -142,7 +142,7 @@ describe("interview API compatibility", () => {
       totalResponses: number;
       message: string;
     }>(harness.app, "POST", `/api/interview/sessions/${created.body.id}/response`, {
-      answer: "I structured the interview by evaluating throughput, latency, and failure domains.",
+      response: "I structured the interview by evaluating throughput, latency, and failure domains.",
       questionIndex: 0,
     });
 
@@ -150,5 +150,40 @@ describe("interview API compatibility", () => {
     expect(response.body.status).toBe("completed");
     expect(response.body.totalResponses).toBe(1);
     expect(response.body.message).toBe("Response recorded");
+  });
+
+  test("POST /api/interview/sessions persists job interview context", async () => {
+    const response = await requestJson<{
+      id: string;
+      role: string;
+      studioName: string;
+      config: {
+        interviewMode: string;
+        targetJob?: {
+          id: string;
+          title: string;
+          company: string;
+          location: string;
+        };
+      };
+    }>(harness.app, "POST", "/api/interview/sessions", {
+      config: {
+        interviewMode: "job",
+        questionCount: 2,
+        targetJob: {
+          id: "job-123",
+          title: "Senior Gameplay Engineer",
+          company: "Supergiant Games",
+          location: "Remote",
+          technologies: ["C++", "Unreal"],
+        },
+      },
+    });
+
+    expect(response.status).toBe(201);
+    expect(response.body.config.interviewMode).toBe("job");
+    expect(response.body.config.targetJob?.id).toBe("job-123");
+    expect(response.body.role).toBe("Senior Gameplay Engineer");
+    expect(response.body.studioName).toBe("Supergiant Games");
   });
 });

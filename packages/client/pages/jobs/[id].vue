@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared";
 import type { Job } from "@bao/shared";
+import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
@@ -12,8 +14,14 @@ const showApplyModal = ref(false);
 const applicationNotes = ref("");
 const applying = ref(false);
 const applyDialogRef = ref<HTMLDialogElement | null>(null);
+useFocusTrap(applyDialogRef, () => showApplyModal.value);
 
 const jobId = computed(() => route.params.id as string);
+const breadcrumbs = computed(() => [
+  { label: "Dashboard", to: APP_ROUTES.dashboard },
+  { label: "Jobs", to: APP_ROUTES.jobs },
+  { label: job.value?.title || "Job Detail" },
+]);
 
 const isSaved = computed(() => {
   return savedJobs.value.some((j) => j.id === jobId.value);
@@ -43,7 +51,7 @@ async function handleSaveToggle() {
       await saveJob(jobId.value);
       $toast.success("Job saved");
     }
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to save job"));
   }
 }
@@ -55,7 +63,7 @@ async function handleApply() {
     showApplyModal.value = false;
     applicationNotes.value = "";
     $toast.success("Application submitted");
-  } catch (error: unknown) {
+  } catch (error) {
     $toast.error(getErrorMessage(error, "Failed to submit application"));
   } finally {
     applying.value = false;
@@ -75,18 +83,16 @@ function formatDate(date: string) {
     day: "numeric",
   });
 }
+
+function startJobInterview() {
+  if (!job.value) return;
+  router.push(buildInterviewJobNavigation(job.value.id, "jobs"));
+}
 </script>
 
 <template>
   <div>
-    <div class="mb-6">
-      <button class="btn btn-ghost btn-sm" @click="router.back()">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to Jobs
-      </button>
-    </div>
+    <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
 
     <LoadingSkeleton v-if="loading" :lines="10" />
 
@@ -133,8 +139,17 @@ function formatDate(date: string) {
             </div>
 
             <div class="card-actions mt-4">
+              <button class="btn btn-secondary btn-outline" aria-label="Start interview for current job" @click="startJobInterview">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Interview This Job
+              </button>
+
               <button
                 class="btn btn-primary"
+                aria-label="Apply to this job"
                 @click="showApplyModal = true"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,6 +161,7 @@ function formatDate(date: string) {
               <button
                 class="btn btn-outline"
                 :class="{ 'btn-success': isSaved }"
+                :aria-label="isSaved ? 'Unsave this job' : 'Save this job'"
                 @click="handleSaveToggle"
               >
                 <svg class="w-5 h-5" :stroke="isSaved ? 'currentColor' : 'currentColor'" :fill="isSaved ? 'currentColor' : 'none'" viewBox="0 0 24 24">
@@ -167,6 +183,8 @@ function formatDate(date: string) {
           </div>
         </div>
 
+        <div v-if="job.requirements?.length" class="divider divider-primary">Requirements</div>
+
         <!-- Requirements -->
         <div v-if="job.requirements?.length" class="card bg-base-200">
           <div class="card-body">
@@ -178,6 +196,8 @@ function formatDate(date: string) {
             </ul>
           </div>
         </div>
+
+        <div v-if="job.technologies?.length" class="divider divider-primary">Technologies</div>
 
         <!-- Technologies -->
         <div v-if="job.technologies?.length" class="card bg-base-200">
@@ -233,7 +253,7 @@ function formatDate(date: string) {
 
               <div v-if="job.website">
                 <p class="text-xs text-base-content/60">Website</p>
-                <a :href="job.website" target="_blank" class="link link-primary">
+                <a :href="job.website" target="_blank" rel="noopener noreferrer" class="link link-primary">
                   Visit Website
                 </a>
               </div>
@@ -296,7 +316,12 @@ function formatDate(date: string) {
     </div>
 
     <!-- Apply Modal -->
-    <dialog ref="applyDialogRef" class="modal" @close="showApplyModal = false">
+    <dialog
+      ref="applyDialogRef"
+      class="modal modal-bottom sm:modal-middle"
+      aria-label="Apply to job dialog"
+      @close="showApplyModal = false"
+    >
       <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">Apply to {{ job?.title }}</h3>
 
@@ -312,13 +337,17 @@ function formatDate(date: string) {
 
         <div class="modal-action">
           <button
+            type="button"
             class="btn btn-ghost"
+            aria-label="Cancel job application"
             @click="showApplyModal = false"
           >
             Cancel
           </button>
           <button
+            type="button"
             class="btn btn-primary"
+            aria-label="Submit job application"
             :disabled="applying"
             @click="handleApply"
           >
@@ -328,7 +357,7 @@ function formatDate(date: string) {
         </div>
       </div>
       <form method="dialog" class="modal-backdrop">
-        <button @click="showApplyModal = false">close</button>
+        <button aria-label="Close apply dialog" @click="showApplyModal = false">close</button>
       </form>
     </dialog>
   </div>

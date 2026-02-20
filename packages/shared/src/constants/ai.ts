@@ -1,5 +1,6 @@
-import type { AIProviderType } from "../types/ai";
+import type { AIChatContextDomain, AIProviderType } from "../types/ai";
 import { AI_PROVIDER_IDS } from "../types/ai";
+import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "./routes";
 
 const CLAUDE_TEST_MAX_TOKENS = 1;
 const ANTHROPIC_API_VERSION = "2023-06-01";
@@ -159,3 +160,76 @@ export const AI_PROVIDER_DEFAULT: AIProviderType =
   AI_PROVIDER_DEFAULT_ORDER[0] ?? AI_PROVIDER_IDS[0];
 
 export const AI_PROVIDER_LIST_FOR_FORMS = AI_PROVIDER_DEFAULT_ORDER as readonly AIProviderType[];
+
+/**
+ * Max number of historical chat messages included in AI prompt context.
+ */
+export const AI_CHAT_CONTEXT_MESSAGE_LIMIT = 12;
+
+/**
+ * Max number of stored chat messages loaded from persistence for context assembly.
+ */
+export const AI_CHAT_HISTORY_FETCH_LIMIT = 20;
+
+/**
+ * Canonical full-page AI chat route path.
+ */
+export const AI_CHAT_PAGE_PATH = APP_ROUTES.aiChat;
+
+/**
+ * Canonical API endpoint for chat completion requests.
+ */
+export const AI_CHAT_API_ENDPOINT = "/api/ai/chat";
+
+/**
+ * Canonical query keys consumed when inferring AI chat entity context.
+ */
+export const AI_CHAT_ROUTE_QUERY_KEYS = {
+  id: APP_ROUTE_QUERY_KEYS.id,
+  jobId: APP_ROUTE_QUERY_KEYS.jobId,
+  resumeId: APP_ROUTE_QUERY_KEYS.resumeId,
+  studioId: APP_ROUTE_QUERY_KEYS.studioId,
+} as const;
+
+/**
+ * Canonical route path prefixes used for AI chat entity inference.
+ */
+export const AI_CHAT_ENTITY_ROUTE_PATHS = {
+  jobs: APP_ROUTES.jobs,
+  resume: APP_ROUTES.resume,
+  studios: APP_ROUTES.studios,
+  interview: APP_ROUTES.interview,
+  interviewSession: APP_ROUTES.interviewSession,
+  automationRuns: APP_ROUTES.automationRuns,
+} as const;
+
+/**
+ * Route-prefix mapping used to infer chat domain from current page.
+ */
+export const AI_CHAT_ROUTE_DOMAIN_RULES: ReadonlyArray<{
+  readonly prefix: string;
+  readonly domain: AIChatContextDomain;
+}> = [
+  { prefix: APP_ROUTES.resume, domain: "resume" },
+  { prefix: APP_ROUTES.jobs, domain: "job_search" },
+  { prefix: APP_ROUTES.interview, domain: "interview" },
+  { prefix: APP_ROUTES.portfolio, domain: "portfolio" },
+  { prefix: APP_ROUTES.skills, domain: "skills" },
+  { prefix: APP_ROUTES.automation, domain: "automation" },
+];
+
+/**
+ * Fallback AI chat domain when no route rule matches.
+ */
+export const AI_CHAT_DEFAULT_DOMAIN: AIChatContextDomain = "general";
+
+/**
+ * Infers AI chat domain from route path.
+ *
+ * @param path Route path.
+ * @returns Matching domain or `general`.
+ */
+export function inferAIChatDomainFromRoutePath(path: string): AIChatContextDomain {
+  const matchedRule = AI_CHAT_ROUTE_DOMAIN_RULES.find((rule) => path.startsWith(rule.prefix));
+  return matchedRule?.domain ?? AI_CHAT_DEFAULT_DOMAIN;
+}

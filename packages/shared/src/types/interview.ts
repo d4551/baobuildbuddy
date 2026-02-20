@@ -42,6 +42,8 @@ export interface InterviewConfig {
   enableVoiceMode?: boolean;
   technologies?: string[];
   voiceSettings?: VoiceSettings;
+  interviewMode?: InterviewMode;
+  targetJob?: InterviewTargetJob;
 }
 
 export interface InterviewQuestion {
@@ -52,6 +54,9 @@ export interface InterviewQuestion {
   expectedDuration: number;
   difficulty: "easy" | "medium" | "hard";
   tags: string[];
+  score?: number;
+  feedback?: string;
+  response?: string;
 }
 
 export interface InterviewerPersona {
@@ -76,6 +81,14 @@ export interface InterviewSession {
   responses: InterviewResponse[];
   finalAnalysis?: InterviewAnalysis;
   interviewerPersona?: InterviewerPersona;
+  role?: string;
+  studioName?: string;
+  score?: number;
+  duration?: string;
+  overallFeedback?: string;
+  totalResponses?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface InterviewResponse {
@@ -118,4 +131,25 @@ export interface VoiceSettings {
   pitch: number;
   volume: number;
   language: string;
+}
+
+/**
+ * Interview setup mode.
+ */
+export type InterviewMode = "studio" | "job";
+
+/**
+ * Job context passed into an interview session.
+ */
+export interface InterviewTargetJob {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description?: string;
+  requirements?: string[];
+  technologies?: string[];
+  source?: string;
+  postedDate?: string;
+  url?: string;
 }

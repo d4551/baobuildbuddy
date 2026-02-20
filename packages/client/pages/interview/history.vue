@@ -1,123 +1,284 @@
 <script setup lang="ts">
-import type { InterviewSession } from "@bao/shared";
+import { APP_ROUTE_QUERY_KEYS, type InterviewSession } from "@bao/shared";
+import { useI18n } from "vue-i18n";
+import type { LocationQueryValue } from "vue-router";
+import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
+const router = useRouter();
+const { t } = useI18n();
+const { $toast } = useNuxtApp();
 const { sessions, loading, fetchSessions, getSession } = useInterview();
 
 const selectedSessionId = ref<string | null>(null);
 const selectedSession = ref<InterviewSession | null>(null);
 const studioFilter = ref("");
+const historyView = ref<"table" | "timeline">("table");
+const detailLoading = ref(false);
+const detailError = ref("");
+
+const normalizeQuerySession = (
+  value: LocationQueryValue | readonly LocationQueryValue[] | undefined,
+): string | null => {
+  if (Array.isArray(value)) {
+    const first = value[0];
+    return typeof first === "string" && first.trim().length > 0 ? first : null;
+  }
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
+};
 
 onMounted(async () => {
-  await fetchSessions();
-  if (route.query.session) {
-    selectedSessionId.value = route.query.session as string;
-    selectedSession.value = await getSession(selectedSessionId.value);
+  try {
+    await fetchSessions();
+  } catch (error) {
+    $toast.error(getErrorMessage(error, t("interviewHistory.fetchErrorFallback")));
   }
 });
 
+watch(
+  () => route.query[APP_ROUTE_QUERY_KEYS.sessionId],
+  async (nextSessionQuery) => {
+    const nextSessionId = normalizeQuerySession(nextSessionQuery);
+    detailError.value = "";
+
+    if (!nextSessionId) {
+      selectedSessionId.value = null;
+      selectedSession.value = null;
+      return;
+    }
+
+    if (selectedSessionId.value === nextSessionId && selectedSession.value) {
+      return;
+    }
+
+    selectedSessionId.value = nextSessionId;
+    detailLoading.value = true;
+    try {
+      selectedSession.value = await getSession(nextSessionId);
+      if (!selectedSession.value) {
+        detailError.value = t("interviewHistory.sessionNotFound");
+      }
+    } catch (error) {
+      detailError.value = getErrorMessage(error, t("interviewHistory.detailLoadErrorFallback"));
+      $toast.error(detailError.value);
+      selectedSession.value = null;
+    } finally {
+      detailLoading.value = false;
+    }
+  },
+  { immediate: true },
+);
+
 const filteredSessions = computed(() => {
-  if (!studioFilter.value) return sessions.value;
-  return sessions.value.filter((s) => s.studioName === studioFilter.value);
+  if (!studioFilter.value) {
+    return sessions.value;
+  }
+  return sessions.value.filter((session) => session.studioName === studioFilter.value);
 });
 
-const studios = computed(() => {
-  return [...new Set(sessions.value.map((s) => s.studioName))].filter(Boolean);
-});
+const studios = computed(() =>
+  [...new Set(sessions.value.map((session) => session.studioName))].filter(Boolean),
+);
 
-async function viewSessionDetail(id: string) {
-  selectedSessionId.value = id;
-  selectedSession.value = await getSession(id);
+async function viewSessionDetail(id: string): Promise<void> {
+  await router.replace({
+    query: {
+      ...route.query,
+      [APP_ROUTE_QUERY_KEYS.sessionId]: id,
+    },
+  });
 }
 
-function closeDetail() {
-  selectedSessionId.value = null;
-  selectedSession.value = null;
+async function closeDetail(): Promise<void> {
+  const nextQuery = { ...route.query };
+  delete nextQuery[APP_ROUTE_QUERY_KEYS.sessionId];
+  await router.replace({ query: nextQuery });
+}
+
+function formatDate(value: string): string {
+  return new Date(value).toLocaleDateString();
+}
+
+function formatDuration(value: number | null): string {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return t("interviewHistory.minutesLabel", { count: value });
+  }
+  return t("interviewHistory.notAvailable");
+}
+
+function getScoreBadgeClass(score: number): string {
+  if (score >= 80) return "badge-success";
+  if (score >= 60) return "badge-warning";
+  return "badge-error";
+}
+
+function getScoreColorClass(score: number): string {
+  if (score >= 80) return "text-success";
+  if (score >= 60) return "text-warning";
+  return "text-error";
+}
+
+function getTimelineLineClass(score: number): string {
+  if (score >= 80) return "bg-success";
+  if (score >= 60) return "bg-warning";
+  return "bg-error";
 }
 </script>
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">Interview History</h1>
+    <h1 class="text-3xl font-bold mb-6">{{ t("interviewHistory.title") }}</h1>
 
     <LoadingSkeleton v-if="loading && !sessions.length" :lines="8" />
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Sessions List -->
       <div class="lg:col-span-2 space-y-6">
         <div class="card bg-base-200">
           <div class="card-body">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="card-title">All Sessions</h2>
-              <select v-model="studioFilter" class="select select-sm" aria-label="Studio Filter">
-                <option value="">All Studios</option>
-                <option v-for="studio in studios" :key="studio" :value="studio">
-                  {{ studio }}
-                </option>
-              </select>
+              <h2 class="card-title">{{ t("interviewHistory.allSessionsTitle") }}</h2>
+              <div class="flex items-center gap-2">
+                <div class="join">
+                  <button
+                    class="join-item btn btn-sm"
+                    :class="{ 'btn-active': historyView === 'table' }"
+                    :aria-label="t('interviewHistory.tableAriaLabel')"
+                    @click="historyView = 'table'"
+                  >
+                    Table
+                  </button>
+                  <button
+                    class="join-item btn btn-sm"
+                    :class="{ 'btn-active': historyView === 'timeline' }"
+                    aria-label="Timeline view"
+                    @click="historyView = 'timeline'"
+                  >
+                    Timeline
+                  </button>
+                </div>
+                <select
+                  v-model="studioFilter"
+                  class="select select-sm"
+                  :aria-label="t('interviewHistory.studioFilterAria')"
+                >
+                  <option value="">{{ t("interviewHistory.allStudiosOption") }}</option>
+                  <option v-for="studio in studios" :key="studio" :value="studio">
+                    {{ studio }}
+                  </option>
+                </select>
+              </div>
             </div>
 
-            <div v-if="filteredSessions.length === 0" class="alert">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div v-if="filteredSessions.length === 0" class="alert" role="status" aria-live="polite">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
-              <span>No interview sessions found.</span>
+              <span>{{ t("interviewHistory.emptyState") }}</span>
             </div>
 
-            <div v-else class="overflow-x-auto">
-              <table class="table">
+            <div v-else-if="historyView === 'table'" class="overflow-x-auto">
+              <table class="table" :aria-label="t('interviewHistory.tableAriaLabel')">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Studio</th>
-                    <th>Role</th>
-                    <th>Score</th>
-                    <th>Duration</th>
-                    <th></th>
+                    <th>{{ t("interviewHistory.columns.date") }}</th>
+                    <th>{{ t("interviewHistory.columns.studio") }}</th>
+                    <th>{{ t("interviewHistory.columns.role") }}</th>
+                    <th>{{ t("interviewHistory.columns.score") }}</th>
+                    <th>{{ t("interviewHistory.columns.duration") }}</th>
+                    <th>{{ t("interviewHistory.columns.actions") }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr
-                    v-for="session in filteredSessions"
-                    :key="session.id"
-                    class="hover cursor-pointer"
-                    :class="{ 'bg-base-300': selectedSessionId === session.id }"
-                    @click="viewSessionDetail(session.id)"
-                  >
-                    <td>{{ new Date(session.createdAt).toLocaleDateString() }}</td>
+                  <tr v-for="session in filteredSessions" :key="session.id">
+                    <td>{{ formatDate(session.createdAt) }}</td>
                     <td>{{ session.studioName }}</td>
                     <td>{{ session.role }}</td>
                     <td>
-                      <span class="badge" :class="{
-                        'badge-success': session.score >= 80,
-                        'badge-warning': session.score >= 60 && session.score < 80,
-                        'badge-error': session.score < 60
-                      }">
+                      <span class="badge" :class="getScoreBadgeClass(session.score)">
                         {{ session.score }}%
                       </span>
                     </td>
-                    <td>{{ session.duration || 'N/A' }}</td>
+                    <td>{{ formatDuration(session.duration) }}</td>
                     <td>
-                      <button class="btn btn-ghost btn-xs" @click.stop="viewSessionDetail(session.id)">
-                        View
+                      <button
+                        class="btn btn-ghost btn-xs"
+                        :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
+                        @click="viewSessionDetail(session.id)"
+                      >
+                        {{ t("interviewHistory.viewButton") }}
                       </button>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
+
+            <div v-else class="overflow-x-auto py-2">
+              <ul class="timeline timeline-vertical timeline-compact w-full">
+                <li v-for="(session, index) in filteredSessions" :key="session.id">
+                  <hr v-if="index !== 0" :class="getTimelineLineClass(session.score)" />
+                  <div class="timeline-start text-sm text-base-content/70">
+                    {{ formatDate(session.createdAt) }}
+                  </div>
+                  <div class="timeline-middle">
+                    <div
+                      class="radial-progress text-xs font-semibold"
+                      :class="getScoreColorClass(session.score)"
+                      :style="`--value:${session.score}; --size:2.5rem; --thickness:0.18rem;`"
+                      role="progressbar"
+                      :aria-valuenow="session.score"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      {{ session.score }}%
+                    </div>
+                  </div>
+                  <div class="timeline-end timeline-box">
+                    <p class="font-semibold">{{ session.studioName }}</p>
+                    <p class="text-sm text-base-content/70">{{ session.role }}</p>
+                    <p class="text-xs text-base-content/60">{{ formatDuration(session.duration) }}</p>
+                    <button
+                      class="btn btn-ghost btn-xs mt-2"
+                      :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
+                      @click="viewSessionDetail(session.id)"
+                    >
+                      {{ t("interviewHistory.viewButton") }}
+                    </button>
+                  </div>
+                  <hr v-if="index !== filteredSessions.length - 1" :class="getTimelineLineClass(session.score)" />
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Session Detail -->
       <div class="lg:col-span-1">
-        <div v-if="selectedSession" class="card bg-base-200 sticky top-6">
+        <div v-if="detailError" class="alert alert-error mb-4" role="alert">
+          <span>{{ detailError }}</span>
+        </div>
+
+        <div v-if="detailLoading" class="card bg-base-200">
+          <div class="card-body">
+            <p role="status" aria-live="polite">{{ t("interviewHistory.loadingDetails") }}</p>
+          </div>
+        </div>
+
+        <div v-else-if="selectedSession" class="card bg-base-200 sticky top-6">
           <div class="card-body">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="card-title text-lg">Session Details</h3>
-              <button class="btn btn-ghost btn-xs btn-circle" @click="closeDetail">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h3 class="card-title text-lg">{{ t("interviewHistory.detailsTitle") }}</h3>
+              <button
+                class="btn btn-ghost btn-xs btn-circle"
+                :aria-label="t('interviewHistory.closeDetailsAria')"
+                @click="closeDetail"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -125,51 +286,55 @@ function closeDetail() {
 
             <div class="space-y-4">
               <div>
-                <p class="text-xs text-base-content/60">Studio</p>
+                <p class="text-xs text-base-content/60">{{ t("interviewHistory.detailStudioLabel") }}</p>
                 <p class="font-semibold">{{ selectedSession.studioName }}</p>
               </div>
 
               <div>
-                <p class="text-xs text-base-content/60">Role</p>
+                <p class="text-xs text-base-content/60">{{ t("interviewHistory.detailRoleLabel") }}</p>
                 <p class="font-semibold">{{ selectedSession.role }}</p>
               </div>
 
               <div>
-                <p class="text-xs text-base-content/60">Overall Score</p>
+                <p class="text-xs text-base-content/60">{{ t("interviewHistory.detailScoreLabel") }}</p>
                 <div class="flex items-center gap-2">
-                  <div class="radial-progress" :class="{
-                    'text-success': selectedSession.score >= 80,
-                    'text-warning': selectedSession.score >= 60 && selectedSession.score < 80,
-                    'text-error': selectedSession.score < 60
-                  }" :style="`--value:${selectedSession.score}; --size:3rem;`">
+                  <div
+                    class="radial-progress"
+                    :class="getScoreColorClass(selectedSession.score)"
+                    :style="{ '--value': selectedSession.score, '--size': '3rem' }"
+                  >
                     <span class="text-sm font-bold">{{ selectedSession.score }}%</span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <p class="text-xs text-base-content/60 mb-2">Questions</p>
+                <p class="text-xs text-base-content/60 mb-2">{{ t("interviewHistory.questionsLabel") }}</p>
                 <div class="space-y-2">
                   <div
-                    v-for="(q, idx) in selectedSession.questions"
+                    v-for="(question, idx) in selectedSession.questions"
                     :key="idx"
                     class="collapse collapse-arrow bg-base-100"
                   >
-                    <input type="radio" :name="`question-${selectedSession.id}`" aria-label="`question ${selected Session Id}`"/>
+                    <input
+                      type="radio"
+                      :name="`question-${selectedSession.id}`"
+                      :aria-label="t('interviewHistory.questionAria', { index: idx + 1 })"
+                    />
                     <div class="collapse-title text-sm font-medium">
-                      Q{{ idx + 1 }}: {{ q.score }}%
+                      {{ t("interviewHistory.questionHeader", { index: idx + 1, score: question.score }) }}
                     </div>
                     <div class="collapse-content text-xs">
-                      <p class="font-semibold mb-1">{{ q.question }}</p>
-                      <p class="text-base-content/60 mb-2">{{ q.response }}</p>
-                      <p class="text-base-content/80">{{ q.feedback }}</p>
+                      <p class="font-semibold mb-1">{{ question.question }}</p>
+                      <p class="text-base-content/60 mb-2">{{ question.response }}</p>
+                      <p class="text-base-content/80">{{ question.feedback }}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div v-if="selectedSession.overallFeedback">
-                <p class="text-xs text-base-content/60 mb-1">Overall Feedback</p>
+                <p class="text-xs text-base-content/60 mb-1">{{ t("interviewHistory.overallFeedbackLabel") }}</p>
                 <p class="text-sm">{{ selectedSession.overallFeedback }}</p>
               </div>
             </div>
@@ -178,10 +343,15 @@ function closeDetail() {
 
         <div v-else class="card bg-base-200">
           <div class="card-body text-center text-base-content/60">
-            <svg class="w-16 h-16 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg class="w-16 h-16 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
-            <p>Select a session to view details</p>
+            <p>{{ t("interviewHistory.selectPrompt") }}</p>
           </div>
         </div>
       </div>

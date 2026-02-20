@@ -23,7 +23,7 @@ async function loadStudios() {
   pageError.value = null;
   try {
     await fetchStudios();
-  } catch (error: unknown) {
+  } catch (error) {
     pageError.value = getErrorMessage(error, "Failed to load studios");
     $toast.error(pageError.value);
   }

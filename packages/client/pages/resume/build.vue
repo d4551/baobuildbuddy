@@ -52,11 +52,22 @@ async function generateQuestions() {
   if (!canProceedTarget.value) return;
   phase.value = "generating";
   try {
-    const questions = await generateCvQuestions({
+    const requestPayload: {
+      targetRole: string;
+      studioName?: string;
+      experienceLevel?: string;
+    } = {
       targetRole: targetRole.value.trim(),
-      studioName: displayedStudioName.value || undefined,
-      experienceLevel: experienceLevel.value.trim() || undefined,
-    });
+    };
+    const normalizedStudioName = displayedStudioName.value.trim();
+    if (normalizedStudioName) {
+      requestPayload.studioName = normalizedStudioName;
+    }
+    const normalizedExperienceLevel = experienceLevel.value.trim();
+    if (normalizedExperienceLevel) {
+      requestPayload.experienceLevel = normalizedExperienceLevel;
+    }
+    const questions = await generateCvQuestions(requestPayload);
     if (questions.length === 0) {
       errorMessage.value = "No questions were generated. Please try again.";
       phase.value = "target";
@@ -226,7 +237,7 @@ function backToTarget() {
             class="textarea textarea-bordered w-full"
             rows="4"
             :placeholder="`Your answer for: ${currentQuestion.question}`"
-            aria-label="`Your answer for: ${currentQuestion.question}`"/>
+            :aria-label="`Your answer for: ${currentQuestion.question}`"/>
         </fieldset>
 
         <p v-if="errorMessage" class="text-error text-sm mt-2">{{ errorMessage }}</p>

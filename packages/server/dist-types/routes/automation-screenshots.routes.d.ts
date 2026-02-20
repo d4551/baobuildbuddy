@@ -31,7 +31,7 @@ export declare const automationScreenshotRoutes: Elysia<"/automation/screenshots
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: any;
+                            200: unknown;
                             400: {
                                 error: string;
                             };

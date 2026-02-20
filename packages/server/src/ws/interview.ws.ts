@@ -1,3 +1,10 @@
+import {
+  INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
+  INTERVIEW_DEFAULT_FOCUS_AREAS,
+  INTERVIEW_DEFAULT_QUESTION_COUNT,
+  INTERVIEW_DEFAULT_ROLE_TYPE,
+  INTERVIEW_UNKNOWN_STUDIO_NAME,
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
@@ -81,7 +88,7 @@ export const interviewWebSocket = new Elysia().ws("/ws/interview", {
     sessionId: t.Optional(t.String({ maxLength: 100 })),
     content: t.Optional(t.String({ maxLength: 10000 })),
     studioId: t.Optional(t.String({ maxLength: 100 })),
-    config: t.Optional(t.Record(t.String(), t.Any())),
+    config: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
   async open(ws) {
     ws.send(
@@ -131,9 +138,12 @@ function createInterviewFeedbackSummary(feedback: Partial<InterviewFeedback>): I
 
 function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<string, unknown> {
   const role =
-    typeof config.role === "string" && config.role.trim() ? config.role : "Game Developer";
-  const level = typeof config.level === "string" && config.level.trim() ? config.level : "mid";
-  let questionCount = 5;
+    typeof config.role === "string" && config.role.trim() ? config.role : INTERVIEW_DEFAULT_ROLE_TYPE;
+  const level =
+    typeof config.level === "string" && config.level.trim()
+      ? config.level
+      : INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
+  let questionCount = INTERVIEW_DEFAULT_QUESTION_COUNT;
   if (typeof config.questionCount === "number" && Number.isFinite(config.questionCount)) {
     questionCount = Math.max(1, Math.min(Math.floor(config.questionCount), 20));
   } else if (typeof config.questionCount === "string") {
@@ -149,7 +159,7 @@ function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<s
     includeTechnical: true,
     includeBehavioral: true,
     includeStudioSpecific: true,
-    focusAreas: ["architecture", "communication", "problem-solving"],
+    focusAreas: [...INTERVIEW_DEFAULT_FOCUS_AREAS],
   };
 }
 
@@ -196,10 +206,10 @@ async function handleStartSession(socket: InterviewSocket, data: InterviewMessag
 
   try {
     const session = await interviewService.startSession(studioId, config);
-    const studioName = session.interviewerPersona?.studioName ?? "Unknown Studio";
-    const role = session.config.roleType ?? "Game Developer";
-    const level = session.config.experienceLevel ?? "mid";
-    const questionCount = session.config.questionCount ?? 5;
+    const studioName = session.interviewerPersona?.studioName ?? INTERVIEW_UNKNOWN_STUDIO_NAME;
+    const role = session.config.roleType ?? INTERVIEW_DEFAULT_ROLE_TYPE;
+    const level = session.config.experienceLevel ?? INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
+    const questionCount = session.config.questionCount ?? INTERVIEW_DEFAULT_QUESTION_COUNT;
     const wsQuestions = toWsQuestions(session.questions);
 
     socket.send(

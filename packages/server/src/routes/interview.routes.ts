@@ -1,8 +1,20 @@
 import type {
   InterviewAnalysis,
+  InterviewConfig,
   InterviewQuestion,
   InterviewResponse,
   InterviewSession,
+  InterviewTargetJob,
+  VoiceSettings,
+} from "@bao/shared";
+import {
+  INTERVIEW_DEFAULT_VOICE_SETTINGS,
+  INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
+  INTERVIEW_DEFAULT_FOCUS_AREAS,
+  INTERVIEW_DEFAULT_ROLE_CATEGORY,
+  INTERVIEW_DEFAULT_ROLE_TYPE,
+  INTERVIEW_DEFAULT_QUESTION_COUNT,
+  INTERVIEW_FALLBACK_STUDIO_ID,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -10,62 +22,185 @@ import { db } from "../db/client";
 import { studios } from "../db/schema";
 import { interviewService } from "../services/interview-service";
 
-type CreateSessionConfig = Record<string, unknown>;
+type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
+  voiceSettings?: Partial<VoiceSettings>;
+};
 type SessionPayload = Record<string, unknown>;
-type LegacySubmitResponse = {
-  questionId?: unknown;
-  questionIndex?: unknown;
-  answer?: unknown;
-  response?: unknown;
+type SubmitResponseBody = {
+  questionId?: string;
+  questionIndex?: number;
+  response: string;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+const interviewModeSchema = t.Union([t.Literal("studio"), t.Literal("job")]);
+const voiceSettingsSchema = t.Object({
+  microphoneId: t.Optional(t.String({ maxLength: 120 })),
+  speakerId: t.Optional(t.String({ maxLength: 120 })),
+  voiceId: t.Optional(t.String({ maxLength: 120 })),
+  rate: t.Optional(t.Number({ minimum: 0.25, maximum: 3 })),
+  pitch: t.Optional(t.Number({ minimum: 0.5, maximum: 2 })),
+  volume: t.Optional(t.Number({ minimum: 0, maximum: 2 })),
+  language: t.Optional(t.String({ maxLength: 20 })),
+});
+const targetJobSchema = t.Object({
+  id: t.String({ minLength: 1, maxLength: 120 }),
+  title: t.String({ minLength: 1, maxLength: 200 }),
+  company: t.String({ minLength: 1, maxLength: 200 }),
+  location: t.String({ minLength: 1, maxLength: 120 }),
+  description: t.Optional(t.String({ maxLength: 20_000 })),
+  requirements: t.Optional(t.Array(t.String({ maxLength: 500 }), { maxItems: 60 })),
+  technologies: t.Optional(t.Array(t.String({ maxLength: 120 }), { maxItems: 60 })),
+  source: t.Optional(t.String({ maxLength: 120 })),
+  postedDate: t.Optional(t.String({ maxLength: 120 })),
+  url: t.Optional(t.String({ maxLength: 2_000 })),
+});
+const sessionConfigSchema = t.Object({
+  roleType: t.Optional(t.String({ maxLength: 200 })),
+  roleCategory: t.Optional(t.String({ maxLength: 120 })),
+  experienceLevel: t.Optional(t.String({ maxLength: 120 })),
+  focusAreas: t.Optional(t.Array(t.String({ maxLength: 120 }), { maxItems: 30 })),
+  duration: t.Optional(t.Integer({ minimum: 5, maximum: 120 })),
+  questionCount: t.Optional(t.Integer({ minimum: 1, maximum: 20 })),
+  includeTechnical: t.Optional(t.Boolean()),
+  includeBehavioral: t.Optional(t.Boolean()),
+  includeStudioSpecific: t.Optional(t.Boolean()),
+  enableVoiceMode: t.Optional(t.Boolean()),
+  technologies: t.Optional(t.Array(t.String({ maxLength: 120 }), { maxItems: 60 })),
+  voiceSettings: t.Optional(voiceSettingsSchema),
+  interviewMode: t.Optional(interviewModeSchema),
+  targetJob: t.Optional(targetJobSchema),
+});
 
 function asString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function asNonNegativeInt(value: unknown): number | undefined {
+function asNonNegativeInt(value: number | undefined): number | undefined {
   if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
     return value;
   }
   return undefined;
 }
 
-function sessionConfigFromUi(config: Record<string, unknown>): CreateSessionConfig {
-  const voiceSettings =
-    config.voiceSettings && typeof config.voiceSettings === "object"
-      ? config.voiceSettings
-      : undefined;
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
+}
+
+function parseTargetJob(value: CreateSessionConfigInput["targetJob"]): InterviewTargetJob | undefined {
+  if (!value) return undefined;
+  const id = asString(value.id);
+  const title = asString(value.title);
+  const company = asString(value.company);
+  const location = asString(value.location);
+  if (!id || !title || !company || !location) {
+    return undefined;
+  }
+
+  const requirements = asStringArray(value.requirements);
+  const technologies = asStringArray(value.technologies);
+  const description = asString(value.description);
+  const source = asString(value.source);
+  const postedDate = asString(value.postedDate);
+  const url = asString(value.url);
+
+  const targetJob: InterviewTargetJob = {
+    id,
+    title,
+    company,
+    location,
+  };
+  if (description) {
+    targetJob.description = description;
+  }
+  if (requirements.length > 0) {
+    targetJob.requirements = requirements;
+  }
+  if (technologies.length > 0) {
+    targetJob.technologies = technologies;
+  }
+  if (source) {
+    targetJob.source = source;
+  }
+  if (postedDate) {
+    targetJob.postedDate = postedDate;
+  }
+  if (url) {
+    targetJob.url = url;
+  }
+
+  return targetJob;
+}
+
+function normalizeVoiceSettings(
+  value: CreateSessionConfigInput["voiceSettings"],
+): VoiceSettings | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const microphoneId = asString(value.microphoneId);
+  const speakerId = asString(value.speakerId);
+  const voiceId = asString(value.voiceId);
+  const normalized: VoiceSettings = {
+    rate:
+      typeof value.rate === "number"
+        ? value.rate
+        : INTERVIEW_DEFAULT_VOICE_SETTINGS.rate,
+    pitch:
+      typeof value.pitch === "number"
+        ? value.pitch
+        : INTERVIEW_DEFAULT_VOICE_SETTINGS.pitch,
+    volume:
+      typeof value.volume === "number"
+        ? value.volume
+        : INTERVIEW_DEFAULT_VOICE_SETTINGS.volume,
+    language: asString(value.language) || INTERVIEW_DEFAULT_VOICE_SETTINGS.language,
+  };
+  if (microphoneId) {
+    normalized.microphoneId = microphoneId;
+  }
+  if (speakerId) {
+    normalized.speakerId = speakerId;
+  }
+  if (voiceId) {
+    normalized.voiceId = voiceId;
+  }
+
+  return normalized;
+}
+
+function sessionConfigFromUi(config: CreateSessionConfigInput): CreateSessionConfigInput {
+  const targetJob = parseTargetJob(config.targetJob);
+  const roleTypeFromJob = asString(targetJob?.title);
+  const mode = config.interviewMode === "job" ? "job" : "studio";
+  const focusAreas = asStringArray(config.focusAreas);
+
   return {
-    roleType: asString(config.role) || asString(config.roleType) || "Game Developer",
-    roleCategory: asString(config.roleCategory) || "General",
-    experienceLevel: asString(config.experienceLevel) || asString(config.level) || "Mid-Level",
-    focusAreas: Array.isArray(config.focusAreas)
-      ? config.focusAreas.filter((value): value is string => typeof value === "string")
-      : ["architecture", "communication", "problem-solving"],
+    roleType: asString(config.roleType) || roleTypeFromJob || INTERVIEW_DEFAULT_ROLE_TYPE,
+    roleCategory: asString(config.roleCategory) || INTERVIEW_DEFAULT_ROLE_CATEGORY,
+    experienceLevel: asString(config.experienceLevel) || INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
+    focusAreas: focusAreas.length > 0 ? focusAreas : [...INTERVIEW_DEFAULT_FOCUS_AREAS],
     duration: config.duration,
-    questionCount: asNonNegativeInt(config.questionCount) ?? 6,
+    questionCount: asNonNegativeInt(config.questionCount) ?? INTERVIEW_DEFAULT_QUESTION_COUNT,
     includeTechnical: config.includeTechnical,
     includeBehavioral: config.includeBehavioral,
     includeStudioSpecific: config.includeStudioSpecific,
     enableVoiceMode: config.enableVoiceMode,
-    technologies: Array.isArray(config.technologies)
-      ? config.technologies.filter((value): value is string => typeof value === "string")
-      : [],
-    voiceSettings,
+    technologies: asStringArray(config.technologies),
+    voiceSettings: normalizeVoiceSettings(config.voiceSettings),
+    interviewMode: mode,
+    targetJob,
   };
 }
 
-function parseResponsePayload(body: LegacySubmitResponse): {
+function parseResponsePayload(body: SubmitResponseBody): {
   questionId: string;
-  answer: string;
+  response: string;
   questionIndex?: number;
 } | null {
-  const answer = asString(body.answer) || asString(body.response);
-  if (!answer) {
+  const response = asString(body.response);
+  if (!response) {
     return null;
   }
 
@@ -74,7 +209,7 @@ function parseResponsePayload(body: LegacySubmitResponse): {
   return {
     questionId: questionId ?? `index:${questionIndex ?? 0}`,
     questionIndex,
-    answer,
+    response,
   };
 }
 
@@ -96,18 +231,24 @@ function buildQuestionCard(question: InterviewQuestion, response?: InterviewResp
 }
 
 async function sessionWithDerivedFields(session: InterviewSession): Promise<SessionPayload> {
+  const targetJob = session.config.targetJob ?? null;
+  const targetJobCompany = asString(targetJob?.company);
+  const targetJobTitle = asString(targetJob?.title);
   const studioRows = await db.select().from(studios).where(eq(studios.id, session.studioId));
-  const studioName = studioRows[0]?.name || session.studioId;
+  const studioName =
+    session.config.interviewMode === "job"
+      ? targetJobCompany || studioRows[0]?.name || session.studioId
+      : studioRows[0]?.name || session.studioId;
   const questions = session.questions.map((question, index) =>
     buildQuestionCard(question, session.responses[index]),
   );
   const totalQuestions = questions.length;
   const score = Math.round(session.finalAnalysis?.overallScore || 0);
-  const analysis = (session.finalAnalysis as InterviewAnalysis | undefined) ?? null;
+  const analysis: InterviewAnalysis | null = session.finalAnalysis ?? null;
 
   return {
     ...session,
-    role: session.config.roleType || "General",
+    role: targetJobTitle || session.config.roleType || INTERVIEW_DEFAULT_ROLE_CATEGORY,
     studioName,
     questions,
     score,
@@ -147,8 +288,9 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
     "/sessions",
     async ({ body, set }) => {
       const { studioId, config = {} } = body;
-      const normalizedConfig = sessionConfigFromUi(isRecord(config) ? config : {});
-      const created = await interviewService.startSession(studioId, normalizedConfig);
+      const normalizedConfig = sessionConfigFromUi(config);
+      const resolvedStudioId = asString(studioId) || INTERVIEW_FALLBACK_STUDIO_ID;
+      const created = await interviewService.startSession(resolvedStudioId, normalizedConfig);
       const response = await sessionWithDerivedFields(created);
       set.status = 201;
       return {
@@ -158,8 +300,8 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
     },
     {
       body: t.Object({
-        studioId: t.String({ maxLength: 100 }),
-        config: t.Optional(t.Record(t.String(), t.Any())),
+        studioId: t.Optional(t.String({ maxLength: 100 })),
+        config: t.Optional(sessionConfigSchema),
       }),
     },
   )
@@ -204,7 +346,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
         return { error: "Unable to resolve question for this response" };
       }
 
-      const response = buildDefaultResponse(resolvedQuestionId, payload.answer);
+      const response = buildDefaultResponse(resolvedQuestionId, payload.response);
       const updated = await interviewService.addResponse(params.id, response);
       if (!updated) {
         set.status = 404;
@@ -223,8 +365,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
       body: t.Object({
         questionId: t.Optional(t.String({ maxLength: 100 })),
         questionIndex: t.Optional(t.Integer({ minimum: 0 })),
-        answer: t.Optional(t.String({ minLength: 1, maxLength: 10000 })),
-        response: t.Optional(t.String({ minLength: 1, maxLength: 10000 })),
+        response: t.String({ minLength: 1, maxLength: 10000 }),
       }),
     },
   )

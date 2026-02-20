@@ -18,7 +18,7 @@ async function fetchAnalytics() {
   try {
     const { data } = await api.studios.analytics.get();
     analytics.value = data;
-  } catch (error: unknown) {
+  } catch (error) {
     pageError.value = getErrorMessage(error, "Failed to load analytics data");
     $toast.error(pageError.value);
   } finally {

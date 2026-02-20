@@ -53,7 +53,16 @@ export interface XPLevel {
   title: string;
   minXP: number;
   maxXP: number;
-  color: string;
+  accentColor:
+    | "base-content"
+    | "neutral"
+    | "primary"
+    | "secondary"
+    | "accent"
+    | "info"
+    | "success"
+    | "warning"
+    | "error";
   features: string[];
 }
 

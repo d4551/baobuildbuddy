@@ -79,14 +79,18 @@ const normalizeSkillEvidence = (value: unknown): SkillEvidence[] => {
     const description = asNonEmptyString(entry.description);
     if (!title || !description) continue;
 
-    normalized.push({
+    const evidenceEntry: SkillEvidence = {
       id: asNonEmptyString(entry.id) ?? generateId(),
       type: normalizeEvidenceType(entry.type),
       title,
       description,
-      url: asNonEmptyString(entry.url) ?? undefined,
       verificationStatus: normalizeEvidenceVerificationStatus(entry.verificationStatus),
-    });
+    };
+    const url = asNonEmptyString(entry.url);
+    if (url) {
+      evidenceEntry.url = url;
+    }
+    normalized.push(evidenceEntry);
   }
 
   return normalized;
@@ -158,7 +162,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         gameExpression: t.String({ maxLength: 200 }),
         transferableSkill: t.String({ maxLength: 200 }),
         industryApplications: t.Optional(t.Array(t.String({ maxLength: 200 }), { maxItems: 50 })),
-        evidence: t.Optional(t.Array(t.Record(t.String(), t.Any()), { maxItems: 50 })),
+        evidence: t.Optional(t.Array(t.Record(t.String(), t.Unknown()), { maxItems: 50 })),
         confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
         category: t.Optional(t.String({ maxLength: 100 })),
         demandLevel: t.Optional(t.String({ maxLength: 50 })),
@@ -196,7 +200,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         gameExpression: t.Optional(t.String({ maxLength: 200 })),
         transferableSkill: t.Optional(t.String({ maxLength: 200 })),
         industryApplications: t.Optional(t.Array(t.String({ maxLength: 200 }), { maxItems: 50 })),
-        evidence: t.Optional(t.Array(t.Record(t.String(), t.Any()), { maxItems: 50 })),
+        evidence: t.Optional(t.Array(t.Record(t.String(), t.Unknown()), { maxItems: 50 })),
         confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
         category: t.Optional(t.String({ maxLength: 100 })),
         demandLevel: t.Optional(t.String({ maxLength: 50 })),
@@ -372,8 +376,8 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
     },
     {
       body: t.Object({
-        gameExperience: t.Optional(t.Record(t.String(), t.Any())),
-        resume: t.Optional(t.Record(t.String(), t.Any())),
+        gameExperience: t.Optional(t.Record(t.String(), t.Unknown())),
+        resume: t.Optional(t.Record(t.String(), t.Unknown())),
         autoCreateMappings: t.Optional(t.Boolean()),
       }),
     },

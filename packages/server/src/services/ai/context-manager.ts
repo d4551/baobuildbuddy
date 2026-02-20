@@ -1,4 +1,5 @@
-import type { ChatMessage } from "@bao/shared";
+import { AI_CHAT_HISTORY_FETCH_LIMIT } from "@bao/shared";
+import type { AIChatContextDomain, ChatMessage } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -10,15 +11,6 @@ import { resumes } from "../../db/schema/resumes";
 import { skillMappings } from "../../db/schema/skill-mappings";
 import { userProfile } from "../../db/schema/user";
 import { DOMAIN_SYSTEM_PROMPTS, GAMING_INDUSTRY_CONTEXT } from "./prompts";
-
-type ContextDomain =
-  | "resume"
-  | "job_search"
-  | "interview"
-  | "portfolio"
-  | "skills"
-  | "automation"
-  | "general";
 
 interface ConversationContext {
   systemPrompt: string;
@@ -33,7 +25,7 @@ export class ConversationContextManager {
   /**
    * Auto-detect domain from message content
    */
-  inferDomain(message: string): ContextDomain {
+  inferDomain(message: string): AIChatContextDomain {
     const lower = message.toLowerCase();
     // Automation must be checked BEFORE job_search since "apply" overlaps
     if (/\b(automate|automation|rpa|auto[- ]?apply|fill.*form|run.*bot|bot.*apply)\b/i.test(lower))
@@ -50,8 +42,12 @@ export class ConversationContextManager {
   /**
    * Build full context for AI call with conversation history and domain-specific data
    */
-  async buildContext(sessionId: string, currentMessage: string): Promise<ConversationContext> {
-    const domain = this.inferDomain(currentMessage);
+  async buildContext(
+    sessionId: string,
+    currentMessage: string,
+    preferredDomain?: AIChatContextDomain,
+  ): Promise<ConversationContext> {
+    const domain = preferredDomain ?? this.inferDomain(currentMessage);
 
     // Load conversation history (last 20 messages)
     const history = await db
@@ -59,7 +55,7 @@ export class ConversationContextManager {
       .from(chatHistory)
       .where(eq(chatHistory.sessionId, sessionId))
       .orderBy(desc(chatHistory.timestamp))
-      .limit(20);
+      .limit(AI_CHAT_HISTORY_FETCH_LIMIT);
 
     // Reverse to get chronological order
     const messages: Array<Pick<ChatMessage, "role" | "content">> = history
@@ -75,8 +71,13 @@ export class ConversationContextManager {
           : [],
       );
 
-    // Add current message
-    messages.push({ role: "user", content: currentMessage });
+    // Ensure current message is present once when context is assembled.
+    const lastMessage = messages[messages.length - 1];
+    const hasCurrentMessageAtTail =
+      lastMessage?.role === "user" && lastMessage.content === currentMessage;
+    if (!hasCurrentMessageAtTail) {
+      messages.push({ role: "user", content: currentMessage });
+    }
 
     // Load user profile
     const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
@@ -105,7 +106,7 @@ export class ConversationContextManager {
   /**
    * Load domain-specific data from DB
    */
-  private async loadDomainContext(domain: ContextDomain): Promise<string | null> {
+  private async loadDomainContext(domain: AIChatContextDomain): Promise<string | null> {
     try {
       switch (domain) {
         case "resume": {
@@ -188,8 +189,8 @@ export class ConversationContextManager {
   /**
    * Generate follow-up suggestions based on domain and last response
    */
-  generateFollowUps(domain: ContextDomain): string[] {
-    const followUps: Record<ContextDomain, string[]> = {
+  generateFollowUps(domain: AIChatContextDomain): string[] {
+    const followUps: Record<AIChatContextDomain, string[]> = {
       resume: [
         "Can you help me improve my summary section?",
         "What skills should I highlight for this role?",

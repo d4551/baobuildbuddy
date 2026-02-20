@@ -1,5 +1,4 @@
-import type { ChatMessage } from "@bao/shared";
-type ContextDomain = "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
+import type { AIChatContextDomain, ChatMessage } from "@bao/shared";
 interface ConversationContext {
     systemPrompt: string;
     messages: Array<Pick<ChatMessage, "role" | "content">>;
@@ -9,11 +8,11 @@ export declare class ConversationContextManager {
     /**
      * Auto-detect domain from message content
      */
-    inferDomain(message: string): ContextDomain;
+    inferDomain(message: string): AIChatContextDomain;
     /**
      * Build full context for AI call with conversation history and domain-specific data
      */
-    buildContext(sessionId: string, currentMessage: string): Promise<ConversationContext>;
+    buildContext(sessionId: string, currentMessage: string, preferredDomain?: AIChatContextDomain): Promise<ConversationContext>;
     /**
      * Load domain-specific data from DB
      */
@@ -21,7 +20,7 @@ export declare class ConversationContextManager {
     /**
      * Generate follow-up suggestions based on domain and last response
      */
-    generateFollowUps(domain: ContextDomain): string[];
+    generateFollowUps(domain: AIChatContextDomain): string[];
 }
 export declare const contextManager: ConversationContextManager;
 export {};
