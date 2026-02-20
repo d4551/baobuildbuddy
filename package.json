@@ -24,11 +24,12 @@
     "format": "bun --bun run biome format . --write",
     "format:check": "bun --bun run biome format .",
     "validate:ui": "bun run scripts/validate-ui-accessibility.ts",
+    "validate:aria": "bun run scripts/validate-ui-aria-labels.ts",
     "validate:no-try-catch": "bun run scripts/validate-no-try-catch.ts",
     "validate:no-unsafe-casts": "bun run scripts/validate-no-unsafe-casts.ts",
     "validate:locales": "bun run scripts/validate-locale-overrides.ts",
-    "lint": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:locales && bun run validate:ui && bun --bun run biome lint . && bun run --filter '@bao/client' lint",
-    "lint:fix": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:locales && bun run validate:ui && bun --bun run biome lint . --write && bun run --filter '@bao/client' lint --fix"
+    "lint": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:locales && bun run validate:aria && bun run validate:ui && bun --bun run biome lint . && bun run --filter '@bao/client' lint",
+    "lint:fix": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:locales && bun run validate:aria && bun run validate:ui && bun --bun run biome lint . --write && bun run --filter '@bao/client' lint --fix"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.3",

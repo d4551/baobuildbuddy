@@ -34,6 +34,7 @@ const esES = {
     notifications: "Notificaciones",
     dismissNotification: "Descartar notificación",
     localeSwitcher: "Cambiar idioma",
+    localeOptionAria: "Cambiar idioma a {locale}",
   },
   confirmDialog: {
     confirmButton: "Confirmar",
@@ -88,6 +89,7 @@ const esES = {
     levelLabel: "Nivel",
     streakLabel: "días seguidos",
     retryButtonLabel: "Reintentar",
+    retryAria: "Reintentar carga de datos del panel",
     loadErrorFallback: "Error al cargar datos del panel",
     activityFallback: "Actividad",
     heroPhrases: {
@@ -155,6 +157,7 @@ const esES = {
       "Seguimiento de progresión XP, completar desafíos diarios, rachas y desbloqueo de logros en una sola vista.",
     loadErrorFallback: "Error al cargar datos de gamificación",
     retryButtonLabel: "Reintentar",
+    retryAria: "Reintentar carga de datos de gamificación",
     emptyStateTitle: "Sin datos de progresión aún",
     emptyStateDescription:
       "Completa tareas de configuración, inicia la práctica de entrevistas y realiza desafíos diarios para ganar XP y desbloquear logros.",
@@ -169,6 +172,7 @@ const esES = {
     achievementsLockedLabel: "Bloqueados",
     dailyChallengesTitle: "Desafíos Diarios",
     challengeClaimLabel: "Reclamar Recompensa",
+    challengeClaimAria: "Reclamar recompensa para el desafío {challenge}",
     challengeDoneLabel: "Hecho",
     challengeCompletionToast: "Desafío completado",
     challengeCompleteErrorFallback: "Error al completar el desafío",
@@ -416,6 +420,7 @@ const esES = {
       createButton: "Añadir Mapeo",
       createAria: "Crear mapeo de habilidad",
       closeBackdropButton: "cerrar",
+      closeBackdropAria: "Cerrar diálogo de mapeo de habilidad",
     },
     deleteDialog: {
       title: "Eliminar mapeo",
@@ -448,6 +453,7 @@ const esES = {
     subtitle:
       "Sigue tu preparación y explora rutas generadas desde tu evidencia de habilidades mapeadas.",
     retryButtonLabel: "Reintentar",
+    retryAria: "Reintentar carga de rutas de carrera",
     gamification: {
       levelLabel: "Nvl {level}",
       xpLabel: "{xp} XP",
@@ -529,6 +535,7 @@ const esES = {
       skills: "Habilidades",
       projects: "Proyectos",
       gaming: "Juegos",
+      selectAria: "Seleccionar sección {tab}",
     },
     completion: {
       title: "Completado del Currículum",
@@ -683,6 +690,7 @@ const esES = {
       createButton: "Crear Currículum",
       createAria: "Crear currículum",
       closeBackdropButton: "Cerrar",
+      closeBackdropAria: "Cerrar diálogo de creación de currículum",
     },
     deleteDialog: {
       title: "Eliminar Currículum",
@@ -1444,6 +1452,7 @@ const esES = {
       pipelineNextStepLabel: "Siguiente hito del flujo: {step}",
       loadErrorFallback: "Error al cargar métricas del centro de automatización",
       retryButtonLabel: "Reintentar",
+      retryAria: "Reintentar carga de métricas del centro de automatización",
       stats: {
         totalRunsTitle: "Total de Ejecuciones",
         totalRunsDescription: "Ejecuciones de automatización registradas",
@@ -2262,6 +2271,7 @@ const esES = {
     searchPlaceholder: "Buscar estudios",
     searchAria: "Buscar estudios",
     emptyState: "No se encontraron estudios",
+    optionAria: "Seleccionar estudio {studio}",
     closeAria: "Cerrar selector de estudios",
     unknownType: "Tipo desconocido",
     unknownLocation: "Ubicación desconocida",
