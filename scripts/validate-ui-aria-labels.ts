@@ -37,8 +37,7 @@ const getLineFromOffset = (text: string, offset: number): number => {
 const hasAccessibleNameAttribute = (tagMarkup: string): boolean =>
   /(?:\s|:|v-bind:)aria-label\s*=|(?:\s|:|v-bind:)aria-labelledby\s*=/u.test(tagMarkup);
 
-const isHiddenInput = (tagMarkup: string): boolean =>
-  /type\s*=\s*["']hidden["']/u.test(tagMarkup);
+const isHiddenInput = (tagMarkup: string): boolean => /type\s*=\s*["']hidden["']/u.test(tagMarkup);
 
 const isAriaHiddenElement = (tagMarkup: string): boolean =>
   /aria-hidden\s*=\s*["']true["']/u.test(tagMarkup);
@@ -98,7 +97,9 @@ const main = async (): Promise<void> => {
     return;
   }
 
-  console.error("ARIA label validation failed. Interactive controls must include aria-label/aria-labelledby:");
+  console.error(
+    "ARIA label validation failed. Interactive controls must include aria-label/aria-labelledby:",
+  );
   for (const violation of violations) {
     console.error(`- ${violation.filePath}:${violation.line} <${violation.tagName}>`);
   }

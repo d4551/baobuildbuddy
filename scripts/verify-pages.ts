@@ -92,7 +92,9 @@ const main = async (): Promise<void> => {
 
   if (failures.length === 0) {
     console.log(lineSeparator);
-    console.log(`Verified ${successes.length} localized route renders with non-empty page headings.`);
+    console.log(
+      `Verified ${successes.length} localized route renders with non-empty page headings.`,
+    );
     return;
   }
 
