@@ -403,6 +403,10 @@ async function handleCompleteInterview() {
 
 <template>
   <div>
+    <header class="mb-4">
+      <h1 class="text-3xl font-bold">{{ t("interviewSession.title") }}</h1>
+    </header>
+
     <LoadingSkeleton v-if="completionState === 'loading'" :lines="8" />
 
     <div v-else-if="completionState === 'error'" role="alert" class="alert alert-error">
@@ -420,7 +424,7 @@ async function handleCompleteInterview() {
     <div v-else-if="activeSession">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold">{{ t("interviewSession.title") }}</h1>
+          <h2 class="text-2xl font-semibold">{{ t("interviewSession.progressLabel", { current: displayQuestionIndex, total: totalQuestions }) }}</h2>
           <p class="text-base-content/70">
             {{ targetJob?.company || activeSession?.studioName }} -
             {{ targetJob?.title || activeSession?.role }}

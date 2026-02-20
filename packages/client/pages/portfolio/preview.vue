@@ -16,6 +16,10 @@ async function handleExport() {
 
 <template>
   <div>
+    <header class="mb-4">
+      <h1 class="text-3xl font-bold">{{ t("portfolioPage.preview.pageTitle") }}</h1>
+    </header>
+
     <div class="flex items-center justify-between mb-6 no-print">
       <button class="btn btn-ghost btn-sm" :aria-label="t('portfolioPage.preview.backButtonAria')" @click="router.back()">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -38,7 +42,7 @@ async function handleExport() {
       <!-- Hero Section -->
       <div class="card bg-gradient-to-br from-primary to-secondary text-primary-content mb-8">
         <div class="card-body text-center py-12">
-          <h1 class="text-5xl font-bold mb-4">{{ portfolio.metadata?.title || t("portfolioPage.preview.defaultTitle") }}</h1>
+          <h2 class="text-5xl font-bold mb-4">{{ portfolio.metadata?.title || t("portfolioPage.preview.defaultTitle") }}</h2>
           <p class="text-xl max-w-2xl mx-auto mb-6">{{ portfolio.metadata?.bio }}</p>
           <div class="flex flex-wrap justify-center gap-4">
             <a
