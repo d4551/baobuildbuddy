@@ -1,30 +1,99 @@
 <script setup lang="ts">
+import type { ChatMessage } from "@bao/shared";
 import { APP_ROUTES, APP_ROUTE_QUERY_KEYS, INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { nextTick } from "vue";
 import { settlePromise } from "~/composables/async-flow";
+import { buildChatMessageRenderRows, createChatMessage } from "~/utils/chat";
 import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
 const router = useRouter();
 const { currentSession, loading, getSession, submitResponse, completeSession } = useInterview();
 const { $toast } = useNuxtApp();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const voiceSettings = computed(() => currentSession.value?.config?.voiceSettings);
 const tts = useTTS(voiceSettings);
 const stt = useSTT(voiceSettings);
+const conversationLogId = "interview-session-conversation-log";
+const responseHintId = "interview-session-response-hint";
+const currentLocale = computed(() => locale.value);
 
 const sessionId = computed(() => {
   const routeSessionId = route.query[APP_ROUTE_QUERY_KEYS.id];
   return typeof routeSessionId === "string" ? routeSessionId : "";
 });
-const currentQuestionIndex = ref(0);
+const currentQuestionIndex = computed(() => currentSession.value?.currentQuestionIndex ?? 0);
 const response = ref("");
 const submitting = ref(false);
 const timeElapsed = ref(0);
 const timer = ref<ReturnType<typeof setInterval> | null>(null);
+const conversationLogRef = ref<HTMLElement | null>(null);
 
 const enableVoiceMode = computed(() => currentSession.value?.config?.enableVoiceMode ?? false);
 const targetJob = computed(() => currentSession.value?.config?.targetJob);
+const totalQuestions = computed(() => currentSession.value?.questions.length ?? 0);
+const currentQuestion = computed(() =>
+  currentSession.value?.questions?.[currentQuestionIndex.value],
+);
+const hasCurrentQuestion = computed(() => Boolean(currentQuestion.value));
+const canSubmit = computed(() => {
+  return (
+    response.value.trim().length >= INTERVIEW_MIN_RESPONSE_LENGTH &&
+    !submitting.value &&
+    !loading.value &&
+    hasCurrentQuestion.value &&
+    sessionId.value.length > 0
+  );
+});
+const progress = computed(() => {
+  if (!totalQuestions.value) return 0;
+  return ((currentQuestionIndex.value + 1) / totalQuestions.value) * 100;
+});
+const isLastQuestion = computed(
+  () => hasCurrentQuestion.value && currentQuestionIndex.value >= totalQuestions.value - 1,
+);
+
+const conversationMessages = computed<ChatMessage[]>(() => {
+  const session = currentSession.value;
+  if (!session) return [];
+
+  const responseByQuestion = new Map<string, { transcript: string; timestamp: number }>();
+  for (const entry of session.responses) {
+    responseByQuestion.set(entry.questionId, {
+      transcript: entry.transcript,
+      timestamp: entry.timestamp,
+    });
+  }
+
+  return session.questions.flatMap((question) => {
+    const messages: ChatMessage[] = [
+      createChatMessage({
+        id: `interview-question-${question.id}`,
+        role: "assistant",
+        content: question.question,
+        timestamp: new Date(session.startTime).toISOString(),
+      }),
+    ];
+
+    const responseEntry = responseByQuestion.get(question.id) ?? null;
+    const responseText = responseEntry?.transcript ?? question.response;
+    if (responseText) {
+      messages.push(
+        createChatMessage({
+          id: `interview-response-${question.id}`,
+          role: "user",
+          content: responseText,
+          ...(responseEntry?.timestamp
+            ? { timestamp: new Date(responseEntry.timestamp).toISOString() }
+            : {}),
+        }),
+      );
+    }
+    return messages;
+  });
+});
+const renderedConversation = computed(() => buildChatMessageRenderRows(conversationMessages.value));
 
 onMounted(async () => {
   if (sessionId.value) {
@@ -32,6 +101,16 @@ onMounted(async () => {
     startTimer();
   }
 });
+
+watch(
+  renderedConversation,
+  async () => {
+    await nextTick();
+    if (!conversationLogRef.value) return;
+    conversationLogRef.value.scrollTop = conversationLogRef.value.scrollHeight;
+  },
+  { deep: true },
+);
 
 watch(
   () => currentQuestion.value?.question,
@@ -65,22 +144,14 @@ function startTimer() {
     timeElapsed.value++;
   }, 1000);
 }
-
-const currentQuestion = computed(() => {
-  return currentSession.value?.questions?.[currentQuestionIndex.value];
-});
-
-const progress = computed(() => {
-  if (!currentSession.value?.questions?.length) return 0;
-  return ((currentQuestionIndex.value + 1) / currentSession.value.questions.length) * 100;
-});
 const elapsedMinutes = computed(() => Math.floor(timeElapsed.value / 60));
 const elapsedSeconds = computed(() => timeElapsed.value % 60);
 
 async function handleSubmitResponse() {
-  if (!response.value.trim() || !sessionId.value) return;
+  if (!canSubmit.value) return;
 
-  if (response.value.trim().length < INTERVIEW_MIN_RESPONSE_LENGTH) {
+  const responseText = response.value.trim();
+  if (responseText.length < INTERVIEW_MIN_RESPONSE_LENGTH) {
     $toast.error(
       t("interviewSession.errors.minResponseLength", { count: INTERVIEW_MIN_RESPONSE_LENGTH }),
     );
@@ -91,7 +162,7 @@ async function handleSubmitResponse() {
   const submitResult = await settlePromise(
     submitResponse(sessionId.value, {
       questionIndex: currentQuestionIndex.value,
-      response: response.value,
+      response: responseText,
     }),
     t("interviewSession.errors.submitFailed"),
   );
@@ -103,12 +174,11 @@ async function handleSubmitResponse() {
   }
 
   $toast.success(t("interviewSession.toasts.responseRecorded"));
+  response.value = "";
 
-  if (currentQuestionIndex.value < (currentSession.value?.questions?.length || 0) - 1) {
-    currentQuestionIndex.value++;
-    response.value = "";
-  } else {
+  if (isLastQuestion.value) {
     await handleCompleteInterview();
+    return;
   }
 }
 
@@ -176,7 +246,7 @@ async function handleCompleteInterview() {
         <div class="card-body">
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-medium">
-              {{ t("interviewSession.progressLabel", { current: currentQuestionIndex + 1, total: currentSession.questions?.length || 0 }) }}
+              {{ t("interviewSession.progressLabel", { current: currentQuestionIndex + 1, total: totalQuestions || 0 }) }}
             </span>
             <span class="text-sm text-base-content/60">{{ Math.round(progress) }}%</span>
           </div>
@@ -201,21 +271,34 @@ async function handleCompleteInterview() {
         </div>
       </div>
 
-      <!-- Current Question -->
-      <div v-if="currentQuestion" class="card bg-base-200">
+      <!-- Transcript -->
+      <div class="card bg-base-200">
         <div class="card-body">
-          <div class="flex items-start gap-3">
-            <div class="avatar placeholder">
-              <div class="bg-primary text-primary-content rounded-full w-12 h-12">
-                <span class="text-xl">{{ t("interviewSession.avatarLabelAi") }}</span>
-              </div>
-            </div>
-            <div class="flex-1">
-              <p class="font-semibold mb-2">{{ t("interviewSession.interviewerLabel") }}</p>
-              <div class="bg-base-100 p-4 rounded-lg">
-                <p class="text-lg">{{ currentQuestion.question }}</p>
-              </div>
-            </div>
+          <h3 class="card-title text-lg">{{ t("interviewSession.responseTitle") }}</h3>
+          <div
+            :id="conversationLogId"
+            ref="conversationLogRef"
+            class="space-y-4 max-h-[20rem] overflow-y-auto pr-2"
+            role="log"
+            :aria-label="t('interviewSession.responseTitle')"
+            aria-live="polite"
+            :aria-busy="loading || submitting"
+          >
+            <AIChatBubble
+              v-for="(messageRow, index) in renderedConversation"
+              :key="messageRow.key"
+              :assistant-label="t('interviewSession.interviewerLabel')"
+              :is-latest-assistant-message="
+                index === renderedConversation.length - 1 && messageRow.message.role === 'assistant'
+              "
+              :is-streaming="false"
+              :locale="currentLocale"
+              :message="messageRow.message"
+              :user-label="t('aiChatPage.youLabel')"
+            />
+            <p v-if="!renderedConversation.length" class="text-sm text-base-content/70">
+              {{ t("interviewSession.minResponseHint", { count: INTERVIEW_MIN_RESPONSE_LENGTH }) }}
+            </p>
           </div>
         </div>
       </div>
@@ -224,11 +307,15 @@ async function handleCompleteInterview() {
       <div v-if="currentQuestion?.feedback" class="card bg-base-200">
         <div class="card-body">
           <h3 class="card-title text-lg">{{ t("interviewSession.feedbackTitle") }}</h3>
-          <div class="alert" :class="{
-            'alert-success': currentQuestion.score >= 80,
-            'alert-warning': currentQuestion.score >= 60 && currentQuestion.score < 80,
-            'alert-error': currentQuestion.score < 60
-          }" aria-live="polite">
+          <div
+            class="alert"
+            :class="{
+              'alert-success': currentQuestion.score >= 80,
+              'alert-warning': currentQuestion.score >= 60 && currentQuestion.score < 80,
+              'alert-error': currentQuestion.score < 60,
+            }"
+            aria-live="polite"
+          >
             <div>
               <p class="font-semibold">{{ t("interviewSession.feedbackScore", { score: currentQuestion.score }) }}</p>
               <p class="text-sm">{{ currentQuestion.feedback }}</p>
@@ -237,10 +324,10 @@ async function handleCompleteInterview() {
         </div>
       </div>
 
-      <!-- Response Area -->
+      <!-- Response Input -->
       <div class="card bg-base-200">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
+        <form class="card-body space-y-3" @submit.prevent="handleSubmitResponse">
+          <div class="flex items-center justify-between">
             <h3 class="card-title text-lg">{{ t("interviewSession.responseTitle") }}</h3>
             <div v-if="enableVoiceMode && stt.isSupported.value" class="flex items-center gap-2">
               <span class="text-sm opacity-70">
@@ -258,22 +345,30 @@ async function handleCompleteInterview() {
               </button>
             </div>
           </div>
-
+          <label :for="`${conversationLogId}-textarea`" class="label">
+            <span class="label-text">
+              {{ t("interviewSession.progressLabel", { current: currentQuestionIndex + 1, total: totalQuestions || 0 }) }}
+            </span>
+            <span class="label-text-alt">{{ t("interviewSession.progressAria") }}</span>
+          </label>
           <textarea
+            :id="`${conversationLogId}-textarea`"
             v-model="response"
             required
             :minlength="INTERVIEW_MIN_RESPONSE_LENGTH"
             class="textarea textarea-bordered validator w-full"
-            rows="8"
+            rows="6"
             :placeholder="t('interviewSession.responsePlaceholder')"
-            :disabled="submitting"
+            :disabled="submitting || loading"
             :aria-label="t('interviewSession.responseAria')"
+            :aria-describedby="responseHintId"
+            @keydown.ctrl.enter.prevent="handleSubmitResponse"
+            @keydown.meta.enter.prevent="handleSubmitResponse"
           ></textarea>
-          <p class="validator-hint">
+          <p :id="responseHintId" class="validator-hint">
             {{ t("interviewSession.minResponseHint", { count: INTERVIEW_MIN_RESPONSE_LENGTH }) }}
           </p>
-
-          <div class="card-actions justify-between mt-4">
+          <div class="card-actions justify-between">
             <button
               type="button"
               class="btn btn-error btn-outline"
@@ -282,23 +377,17 @@ async function handleCompleteInterview() {
             >
               {{ t("interviewSession.endButton") }}
             </button>
-
             <button
-              type="button"
+              type="submit"
               class="btn btn-primary"
               :aria-label="t('interviewSession.submitAria')"
-              :disabled="!response.trim() || submitting"
-              @click="handleSubmitResponse"
+              :disabled="!canSubmit"
             >
-              <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
-              {{
-                currentQuestionIndex < (currentSession.questions?.length || 0) - 1
-                  ? t("interviewSession.submitNextButton")
-                  : t("interviewSession.submitFinishButton")
-              }}
+              <span v-if="submitting || loading" class="loading loading-spinner loading-xs"></span>
+              {{ isLastQuestion ? t("interviewSession.submitFinishButton") : t("interviewSession.submitNextButton") }}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
 
