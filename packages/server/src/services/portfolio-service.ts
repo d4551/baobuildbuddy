@@ -131,7 +131,8 @@ export class PortfolioService {
    * Get the full portfolio contract (header + projects).
    */
   async getPortfolio(): Promise<PortfolioData> {
-    const portfolio = (await this.getPortfolioRecord()) ?? (await this.getOrCreateDefaultPortfolio());
+    const portfolio =
+      (await this.getPortfolioRecord()) ?? (await this.getOrCreateDefaultPortfolio());
     const projects = await this.getProjects(portfolio.id);
     return this.toPortfolioData(portfolio, projects);
   }
@@ -300,7 +301,9 @@ export class PortfolioService {
         .where(eq(portfolioProjects.id, orderedId));
     }
 
-    const remainingProjects = existing.filter((project) => !orderedIds.includes(project.id));
+    const remainingProjects = existing.filter(
+      (project) => !project.id || !orderedIds.includes(project.id),
+    );
     const nextIndex = orderedIds.length;
     for (let i = 0; i < remainingProjects.length; i++) {
       const project = remainingProjects[i];

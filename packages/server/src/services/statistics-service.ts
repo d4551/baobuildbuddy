@@ -1,3 +1,4 @@
+import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
 import { count, desc, eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -10,39 +11,6 @@ import { portfolioProjects } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { userProfile } from "../db/schema/user";
-
-interface AutomationStats {
-  totalRuns: number;
-  successfulRuns: number;
-  successRate: number;
-  todayRuns: number;
-  recentRuns: Array<{ id: string; type: string; status: string; createdAt: string }>;
-}
-
-interface DashboardStats {
-  profile: { completeness: number };
-  jobs: { saved: number; applied: number; interviewing: number; offered: number };
-  resumes: { count: number; lastUpdated: string | null };
-  coverLetters: { count: number };
-  portfolio: { projectCount: number };
-  interviews: { totalSessions: number; averageScore: number | null };
-  skills: { mappedCount: number };
-  ai: { chatMessages: number; chatSessions: number };
-  gamification: { level: number; xp: number; achievements: number; streak: number };
-  automation: AutomationStats;
-}
-
-interface WeeklyActivity {
-  days: Array<{ date: string; actions: number; xpEarned: number }>;
-  topCategory: string;
-  totalXP: number;
-}
-
-interface CareerProgress {
-  skillCoverage: number;
-  applicationSuccessRate: number;
-  interviewTrend: number[];
-}
 
 type ActionHistoryEntry = { action: string; xpGained: number; timestamp: string };
 

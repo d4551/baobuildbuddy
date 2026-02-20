@@ -1,5 +1,25 @@
 import type { CoverLetterData } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { toCoverLetterData } from "./api-normalizers";
+
+interface CreateCoverLetterInput {
+  company: string;
+  position: string;
+  jobInfo?: Record<string, unknown>;
+  content?: CoverLetterData["content"];
+  template?: CoverLetterData["template"];
+}
+
+type UpdateCoverLetterInput = Partial<CreateCoverLetterInput>;
+
+interface GenerateCoverLetterInput {
+  company: string;
+  position: string;
+  resumeId?: string;
+  template?: CoverLetterData["template"];
+  save?: boolean;
+  jobInfo?: Record<string, unknown>;
+}
 
 /**
  * Cover letter management composable.
@@ -18,7 +38,10 @@ export function useCoverLetter() {
     try {
       const { data, error } = await api["cover-letters"].get();
       if (error) throw new Error("Failed to fetch cover letters");
-      coverLetters.value = data as CoverLetterData[];
+      const rows = Array.isArray(data) ? data : [];
+      coverLetters.value = rows
+        .map((row) => toCoverLetterData(row))
+        .filter((row): row is CoverLetterData => row !== null);
     } finally {
       loading.value = false;
     }
@@ -27,16 +50,20 @@ export function useCoverLetter() {
   async function getCoverLetter(id: string) {
     loading.value = true;
     try {
-      const { data, error } = await api["cover-letters"][id].get();
-      if (error) throw new Error("Failed to fetch cover letter");
-      currentLetter.value = data;
-      return data;
+      const { data, error } = await api["cover-letters"]({ id }).get();
+      if (error || !data) throw new Error("Failed to fetch cover letter");
+      const normalized = toCoverLetterData(data);
+      if (!normalized) {
+        throw new Error("Invalid cover letter payload");
+      }
+      currentLetter.value = normalized;
+      return normalized;
     } finally {
       loading.value = false;
     }
   }
 
-  async function createCoverLetter(letterData: Partial<CoverLetterData>) {
+  async function createCoverLetter(letterData: CreateCoverLetterInput) {
     loading.value = true;
     try {
       const { data, error } = await api["cover-letters"].post(letterData);
@@ -48,12 +75,15 @@ export function useCoverLetter() {
     }
   }
 
-  async function updateCoverLetter(id: string, updates: Partial<CoverLetterData>) {
+  async function updateCoverLetter(id: string, updates: UpdateCoverLetterInput) {
     loading.value = true;
     try {
-      const { data, error } = await api["cover-letters"][id].put(updates);
-      if (error) throw new Error("Failed to update cover letter");
-      currentLetter.value = data;
+      const { data, error } = await api["cover-letters"]({ id }).put(updates);
+      if (error || !data) throw new Error("Failed to update cover letter");
+      const normalized = toCoverLetterData(data);
+      if (normalized) {
+        currentLetter.value = normalized;
+      }
       await fetchCoverLetters();
       return data;
     } finally {
@@ -64,7 +94,7 @@ export function useCoverLetter() {
   async function deleteCoverLetter(id: string) {
     loading.value = true;
     try {
-      const { error } = await api["cover-letters"][id].delete();
+      const { error } = await api["cover-letters"]({ id }).delete();
       if (error) throw new Error("Failed to delete cover letter");
       if (currentLetter.value?.id === id) {
         currentLetter.value = null;
@@ -75,12 +105,14 @@ export function useCoverLetter() {
     }
   }
 
-  async function generateCoverLetter(generationData: Record<string, unknown>) {
+  async function generateCoverLetter(generationData: GenerateCoverLetterInput) {
     loading.value = true;
     try {
       const { data, error } = await api["cover-letters"].generate.post(generationData);
       if (error) throw new Error("Failed to generate cover letter");
-      await fetchCoverLetters();
+      if (generationData.save) {
+        await fetchCoverLetters();
+      }
       return data;
     } finally {
       loading.value = false;
@@ -88,12 +120,12 @@ export function useCoverLetter() {
   }
 
   /**
-   * Export a cover letter as PDF
+   * Export a cover letter as PDF.
    */
   async function exportPdf(id: string) {
     loading.value = true;
     try {
-      const { data, error } = await api["cover-letters"][id].export.post();
+      const { data, error } = await api["cover-letters"]({ id }).export.post();
       if (error) throw new Error("Failed to export cover letter as PDF");
       return data;
     } finally {

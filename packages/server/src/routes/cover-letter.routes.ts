@@ -252,7 +252,7 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
           },
         );
 
-        return new Response(new Blob([pdfBytes], { type: "application/pdf" }), {
+        return new Response(Buffer.from(pdfBytes), {
           headers: {
             "content-type": "application/pdf",
             "content-disposition": `attachment; filename="cover-letter-${params.id}.pdf"`,

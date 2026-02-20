@@ -1,5 +1,12 @@
 import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { toPortfolioData } from "./api-normalizers";
+
+type ApiClient = ReturnType<typeof useApi>;
+type UpdatePortfolioPayload = NonNullable<Parameters<ApiClient["portfolio"]["put"]>[0]>;
+type CreateProjectPayload = NonNullable<Parameters<ApiClient["portfolio"]["projects"]["post"]>[0]>;
+type ProjectRoute = ReturnType<ApiClient["portfolio"]["projects"]>;
+type UpdateProjectPayload = NonNullable<Parameters<ProjectRoute["put"]>[0]>;
 
 /**
  * Portfolio management composable.
@@ -14,7 +21,9 @@ export function usePortfolio() {
     portfolio.value = next;
     if (next && Array.isArray(next.projects)) {
       projects.value = next.projects;
+      return;
     }
+    projects.value = [];
   }
 
   async function fetchPortfolio() {
@@ -22,7 +31,7 @@ export function usePortfolio() {
     try {
       const { data, error } = await api.portfolio.get();
       if (error) throw new Error("Failed to fetch portfolio");
-      hydratePortfolio(data as PortfolioData | null);
+      hydratePortfolio(toPortfolioData(data));
     } finally {
       loading.value = false;
     }
@@ -31,16 +40,18 @@ export function usePortfolio() {
   async function updatePortfolio(updates: Partial<PortfolioMetadata>) {
     loading.value = true;
     try {
-      const { data, error } = await api.portfolio.put({ metadata: updates });
+      const payload: UpdatePortfolioPayload = { metadata: updates };
+      const { data, error } = await api.portfolio.put(payload);
       if (error) throw new Error("Failed to update portfolio");
-      hydratePortfolio(data);
-      return data;
+      const normalized = toPortfolioData(data);
+      hydratePortfolio(normalized);
+      return normalized;
     } finally {
       loading.value = false;
     }
   }
 
-  async function addProject(projectData: Partial<PortfolioProject>) {
+  async function addProject(projectData: CreateProjectPayload) {
     loading.value = true;
     try {
       const { data, error } = await api.portfolio.projects.post(projectData);
@@ -52,10 +63,10 @@ export function usePortfolio() {
     }
   }
 
-  async function updateProject(id: string, updates: Partial<PortfolioProject>) {
+  async function updateProject(id: string, updates: UpdateProjectPayload) {
     loading.value = true;
     try {
-      const { data, error } = await api.portfolio.projects[id].put(updates);
+      const { data, error } = await api.portfolio.projects({ id }).put(updates);
       if (error) throw new Error("Failed to update project");
       await fetchPortfolio();
       return data;
@@ -67,7 +78,7 @@ export function usePortfolio() {
   async function deleteProject(id: string) {
     loading.value = true;
     try {
-      const { error } = await api.portfolio.projects[id].delete();
+      const { error } = await api.portfolio.projects({ id }).delete();
       if (error) throw new Error("Failed to delete project");
       await fetchPortfolio();
     } finally {
@@ -80,8 +91,9 @@ export function usePortfolio() {
     try {
       const { data, error } = await api.portfolio.projects.reorder.post({ orderedIds });
       if (error) throw new Error("Failed to reorder projects");
-      hydratePortfolio(data);
-      return data;
+      const normalized = toPortfolioData(data);
+      hydratePortfolio(normalized);
+      return normalized;
     } finally {
       loading.value = false;
     }

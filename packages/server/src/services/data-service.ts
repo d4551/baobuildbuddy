@@ -65,7 +65,8 @@ const asStringArray = (value: unknown): string[] | undefined =>
     ? value.filter((entry): entry is string => typeof entry === "string")
     : undefined;
 
-const asRecord = (value: unknown): Record<string, unknown> | undefined => (isRecord(value) ? value : undefined);
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  isRecord(value) ? value : undefined;
 
 const asStringArrayRecord = (value: unknown): Record<string, string[]> | undefined => {
   if (!isRecord(value)) return undefined;
@@ -418,10 +419,7 @@ export class DataService {
             if (!portfolioRow) {
               throw new Error("Invalid portfolio payload");
             }
-            await db
-              .insert(portfolios)
-              .values(portfolioRow)
-              .onConflictDoNothing();
+            await db.insert(portfolios).values(portfolioRow).onConflictDoNothing();
           } catch {
             /* ignore */
           }

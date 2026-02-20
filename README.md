@@ -67,7 +67,10 @@ This is the canonical local setup runbook for BaoBuildBuddy v1.0. It covers:
 ```mermaid
 flowchart TD
   Browser["Browser / Nuxt SSR"] -->|render + initial payload| Client["packages/client"]
-  Client -->|useFetch / $fetch| API_PREFIX["/api prefix (Nuxt config runtimeBase)"]
+  Client --> Composables["Nuxt composables (typed)"]
+  Composables --> Normalizers["api-normalizers.ts"]
+  Composables --> EdenClient["plugins/eden.ts (Eden Treaty client)"]
+  EdenClient -->|function-param route calls| API_PREFIX["/api prefix (Nuxt config runtimeBase)"]
   API_PREFIX --> Server["packages/server (Elysia)"]
 
   Browser -->|WebSocket| ChatWS["/api/ws/chat"]
@@ -629,6 +632,9 @@ bun run dev:client
 | Dev server | `bun run dev:server` | Start API server only |
 | Dev client | `bun run dev:client` | Start Nuxt client only |
 | Build | `bun run build` | Build server and client packages |
+| Build (macOS) | `bun run build:macos` | macOS entrypoint for CI/local build |
+| Build (Linux) | `bun run build:linux` | Linux entrypoint for CI/local build |
+| Build (Windows) | `bun run build:windows` | Windows entrypoint for CI/local build |
 | Format | `bun run format` | Apply Biome formatter |
 | Format check | `bun run format:check` | Verify formatter output |
 | Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
@@ -655,6 +661,7 @@ bun run dev:client
 ### 11.1 Build and lint checks
 
 ```bash
+bun run format:check
 bun run typecheck
 bun run lint
 bun run test
@@ -869,6 +876,8 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 - `useFetch` for route/page-level data, `$fetch` for user-triggered actions.
 - Async state (`idle`, `pending`, `success`, `error`) mapped to daisyUI components (`loading`, `alert`, `stat`, `card`, `table`).
 - The Elysia Eden client (`plugins/eden.ts`) provides end-to-end type safety between Nuxt and the API.
+- Dynamic API endpoints use Eden function-param invocation (for example `api.resumes({ id }).get()`), not string-index access.
+- API payloads are normalized in `packages/client/composables/api-normalizers.ts` before binding to shared domain state.
 - TanStack Vue Query (`plugins/vue-query.ts`) manages cache, stale time, and retry for all API calls.
 
 ### daisyUI component references

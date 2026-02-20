@@ -7,6 +7,13 @@ type AIChatResponse = {
   timestamp?: string;
 };
 
+interface CoverLetterGenerationInput {
+  company: string;
+  position: string;
+  resumeId: string;
+  jobId?: string;
+}
+
 /**
  * AI interaction composable for chat, analysis, and generation.
  */
@@ -55,7 +62,7 @@ export function useAI() {
     }
   }
 
-  async function generateCoverLetter(generationData: Record<string, unknown>) {
+  async function generateCoverLetter(generationData: CoverLetterGenerationInput) {
     loading.value = true;
     try {
       const { data, error } = await api.ai["generate-cover-letter"].post(generationData);

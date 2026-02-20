@@ -1,5 +1,11 @@
 import type { GameStudio } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { toGameStudio } from "./api-normalizers";
+
+type ApiClient = ReturnType<typeof useApi>;
+type CreateStudioInput = NonNullable<Parameters<ApiClient["studios"]["post"]>[0]>;
+type StudioRoute = ReturnType<ApiClient["studios"]>;
+type UpdateStudioInput = NonNullable<Parameters<StudioRoute["put"]>[0]>;
 
 /**
  * Interview studio discovery and analytics composable.
@@ -15,7 +21,11 @@ export function useStudio() {
     try {
       const { data, error } = await api.studios.get({ query: query || {} });
       if (error) throw new Error("Failed to search studios");
-      studios.value = data as GameStudio[];
+      studios.value = Array.isArray(data)
+        ? data
+            .map((entry) => toGameStudio(entry))
+            .filter((entry): entry is GameStudio => entry !== null)
+        : [];
     } finally {
       loading.value = false;
     }
@@ -24,10 +34,12 @@ export function useStudio() {
   async function getStudio(id: string) {
     loading.value = true;
     try {
-      const { data, error } = await api.studios[id].get();
+      const { data, error } = await api.studios({ id }).get();
       if (error) throw new Error("Failed to fetch studio");
-      currentStudio.value = data;
-      return data;
+      const normalized = toGameStudio(data);
+      if (!normalized) throw new Error("Invalid studio payload");
+      currentStudio.value = normalized;
+      return normalized;
     } finally {
       loading.value = false;
     }
@@ -44,7 +56,7 @@ export function useStudio() {
     }
   }
 
-  async function createStudio(studioData: Partial<GameStudio>) {
+  async function createStudio(studioData: CreateStudioInput) {
     loading.value = true;
     try {
       const { data, error } = await api.studios.post(studioData);
@@ -56,14 +68,16 @@ export function useStudio() {
     }
   }
 
-  async function updateStudio(id: string, updates: Partial<GameStudio>) {
+  async function updateStudio(id: string, updates: UpdateStudioInput) {
     loading.value = true;
     try {
-      const { data, error } = await api.studios[id].put(updates);
+      const { data, error } = await api.studios({ id }).put(updates);
       if (error) throw new Error("Failed to update studio");
-      currentStudio.value = data;
+      const normalized = toGameStudio(data);
+      if (!normalized) throw new Error("Invalid studio payload");
+      currentStudio.value = normalized;
       await searchStudios();
-      return data;
+      return normalized;
     } finally {
       loading.value = false;
     }
@@ -72,7 +86,7 @@ export function useStudio() {
   async function deleteStudio(id: string) {
     loading.value = true;
     try {
-      const { error } = await api.studios[id].delete();
+      const { error } = await api.studios({ id }).delete();
       if (error) throw new Error("Failed to delete studio");
       if (currentStudio.value?.id === id) {
         currentStudio.value = null;

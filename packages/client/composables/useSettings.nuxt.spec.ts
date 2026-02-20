@@ -47,7 +47,18 @@ describe("useSettings", () => {
 
     await fetchSettings();
     expect(loading.value).toBe(false);
-    expect(settings.value).toEqual(mockSettings);
+    expect(settings.value).toMatchObject({
+      id: "default",
+      theme: "bao-light",
+      language: "en",
+      notifications: {
+        achievements: true,
+        dailyChallenges: true,
+        levelUp: true,
+        jobAlerts: true,
+      },
+    });
+    expect(settings.value?.preferredProvider).toBeDefined();
   });
 
   it("fetchSettings keeps loading false when API errors", async () => {

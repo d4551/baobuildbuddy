@@ -1,5 +1,14 @@
 import type { Job } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { toJob } from "./api-normalizers";
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const toJobList = (value: unknown): Job[] =>
+  Array.isArray(value)
+    ? value.map((entry) => toJob(entry)).filter((entry): entry is Job => entry !== null)
+    : [];
 
 /**
  * Job search and application management composable.
@@ -20,7 +29,8 @@ export function useJobs() {
       }
       const { data, error } = await api.jobs.get({ query: filters.value });
       if (error) throw new Error("Failed to search jobs");
-      jobs.value = data as Job[];
+      jobs.value =
+        isRecord(data) && Array.isArray(data.jobs) ? toJobList(data.jobs) : toJobList(data);
     } finally {
       loading.value = false;
     }
@@ -29,9 +39,9 @@ export function useJobs() {
   async function getJob(id: string) {
     loading.value = true;
     try {
-      const { data, error } = await api.jobs[id].get();
+      const { data, error } = await api.jobs({ id }).get();
       if (error) throw new Error("Failed to fetch job");
-      return data;
+      return toJob(data);
     } finally {
       loading.value = false;
     }
@@ -52,7 +62,7 @@ export function useJobs() {
   async function unsaveJob(jobId: string) {
     loading.value = true;
     try {
-      const { error } = await api.jobs.save[jobId].delete();
+      const { error } = await api.jobs.save({ jobId }).delete();
       if (error) throw new Error("Failed to unsave job");
       await fetchSavedJobs();
     } finally {
@@ -65,7 +75,13 @@ export function useJobs() {
     try {
       const { data, error } = await api.jobs.saved.get();
       if (error) throw new Error("Failed to fetch saved jobs");
-      savedJobs.value = data as Job[];
+      if (!Array.isArray(data)) {
+        savedJobs.value = [];
+        return;
+      }
+      savedJobs.value = data
+        .map((entry) => (isRecord(entry) ? toJob(entry.job) : null))
+        .filter((entry): entry is Job => entry !== null);
     } finally {
       loading.value = false;
     }
@@ -86,7 +102,7 @@ export function useJobs() {
   async function updateApplication(id: string, status: string) {
     loading.value = true;
     try {
-      const { data, error } = await api.jobs.apply[id].put({ status });
+      const { data, error } = await api.jobs.apply({ id }).put({ status });
       if (error) throw new Error("Failed to update application");
       await fetchApplications();
       return data;
@@ -100,7 +116,13 @@ export function useJobs() {
     try {
       const { data, error } = await api.jobs.applications.get();
       if (error) throw new Error("Failed to fetch applications");
-      applications.value = data as Job[];
+      if (!Array.isArray(data)) {
+        applications.value = [];
+        return;
+      }
+      applications.value = data
+        .map((entry) => (isRecord(entry) ? toJob(entry.job) : null))
+        .filter((entry): entry is Job => entry !== null);
     } finally {
       loading.value = false;
     }
@@ -125,7 +147,11 @@ export function useJobs() {
     try {
       const { data, error } = await api.jobs.recommendations.get();
       if (error) throw new Error("Failed to fetch job recommendations");
-      recommendations.value = data as Job[];
+      if (isRecord(data) && Array.isArray(data.recommendations)) {
+        recommendations.value = toJobList(data.recommendations);
+        return;
+      }
+      recommendations.value = toJobList(data);
     } finally {
       loading.value = false;
     }

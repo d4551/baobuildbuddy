@@ -23,15 +23,18 @@ export function useAuth(): UseAuthState {
   const nuxtApp = useNuxtRuntimeApp();
   const authNotConfigured: AuthStatus = { authRequired: false, configured: false };
 
-  async function checkAuthStatus() {
+  async function checkAuthStatus(): Promise<AuthStatus> {
     const { data, error } = await api.auth.status.get();
     if (error) return authNotConfigured;
-    return data ?? { authRequired: false, configured: false };
+    return {
+      authRequired: data?.authRequired ?? true,
+      configured: data?.configured ?? false,
+    };
   }
 
   async function initAuth() {
     const { data, error } = await api.auth.init.post();
-    if (error) throw new Error(error.value?.message ?? "Failed to init auth");
+    if (error) throw new Error("Failed to init auth");
     return data ?? {};
   }
 

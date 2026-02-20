@@ -1,8 +1,27 @@
 import { generateId } from "@bao/shared";
-import type { ResumeData } from "@bao/shared";
+import type { GamingExperience, ResumeData, ResumePersonalInfo, ResumeSkills } from "@bao/shared";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { resumes } from "../db/schema";
+
+const toRecord = (value: object): Record<string, unknown> => {
+  const record: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    record[key] = entry;
+  }
+  return record;
+};
+
+const toPersonalInfoRecord = (
+  value: ResumePersonalInfo | undefined,
+): Record<string, unknown> | undefined => (value ? toRecord(value) : undefined);
+
+const toSkillsRecord = (value: ResumeSkills | undefined): Record<string, unknown> | undefined =>
+  value ? toRecord(value) : undefined;
+
+const toGamingExperienceRecord = (
+  value: GamingExperience | undefined,
+): Record<string, unknown> | undefined => (value ? toRecord(value) : undefined);
 
 export class ResumeService {
   /**
@@ -64,13 +83,13 @@ export class ResumeService {
     const insertPayload: typeof resumes.$inferInsert = {
       id,
       name: data.name || "Untitled Resume",
-      personalInfo: data.personalInfo || undefined,
+      personalInfo: toPersonalInfoRecord(data.personalInfo),
       summary: data.summary || undefined,
       experience: data.experience || [],
       education: data.education || [],
-      skills: data.skills || undefined,
+      skills: toSkillsRecord(data.skills),
       projects: data.projects || [],
-      gamingExperience: data.gamingExperience || undefined,
+      gamingExperience: toGamingExperienceRecord(data.gamingExperience),
       template: data.template || "modern",
       theme: data.theme || "light",
       isDefault: data.isDefault || false,
@@ -103,13 +122,17 @@ export class ResumeService {
     };
 
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.personalInfo !== undefined) updateData.personalInfo = data.personalInfo;
+    if (data.personalInfo !== undefined) {
+      updateData.personalInfo = toPersonalInfoRecord(data.personalInfo);
+    }
     if (data.summary !== undefined) updateData.summary = data.summary;
     if (data.experience !== undefined) updateData.experience = data.experience;
     if (data.education !== undefined) updateData.education = data.education;
-    if (data.skills !== undefined) updateData.skills = data.skills;
+    if (data.skills !== undefined) updateData.skills = toSkillsRecord(data.skills);
     if (data.projects !== undefined) updateData.projects = data.projects;
-    if (data.gamingExperience !== undefined) updateData.gamingExperience = data.gamingExperience;
+    if (data.gamingExperience !== undefined) {
+      updateData.gamingExperience = toGamingExperienceRecord(data.gamingExperience);
+    }
     if (data.template !== undefined) updateData.template = data.template;
     if (data.theme !== undefined) updateData.theme = data.theme;
     if (data.isDefault !== undefined) updateData.isDefault = data.isDefault;

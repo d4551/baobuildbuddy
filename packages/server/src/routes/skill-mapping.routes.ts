@@ -1,9 +1,4 @@
-import {
-  generateId,
-  type SkillCategory,
-  type SkillEvidence,
-  type SkillMapping,
-} from "@bao/shared";
+import { generateId, type SkillCategory, type SkillEvidence, type SkillMapping } from "@bao/shared";
 import { desc } from "drizzle-orm";
 import { eq } from "drizzle-orm";
 import { Elysia, status, t } from "elysia";

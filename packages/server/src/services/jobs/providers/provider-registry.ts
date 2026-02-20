@@ -80,7 +80,8 @@ export class JobProviderRegistry {
     const seen = new Set<string>();
     const uniqueJobs: RawJob[] = [];
     for (const job of allJobs) {
-      const key = job.contentHash || `${job.title}::${job.company}`.toLowerCase();
+      const contentHash = typeof job.contentHash === "string" ? job.contentHash : undefined;
+      const key = contentHash ?? `${job.title}::${job.company}`.toLowerCase();
       if (!seen.has(key)) {
         seen.add(key);
         uniqueJobs.push(job);

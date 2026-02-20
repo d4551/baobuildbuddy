@@ -1,20 +1,14 @@
 import type { AppSettings } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
-import { type Ref, readonly } from "vue";
+import { readonly } from "vue";
+import { toAppSettings } from "./api-normalizers";
 import { useNuxtState } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 
-/**
- * Settings and API key management composable.
- */
-interface UseSettingsState {
-  settings: Readonly<Ref<AppSettings | null>>;
-  loading: Readonly<Ref<boolean>>;
-  fetchSettings: () => Promise<void>;
-  updateSettings: (updates: Partial<AppSettings>) => Promise<void>;
-  updateApiKeys: (keys: Record<string, string>) => Promise<void>;
-  testApiKey: (provider: string, key: string) => Promise<{ valid: boolean; provider: string }>;
-}
+type ApiClient = ReturnType<typeof useApi>;
+type UpdateSettingsInput = NonNullable<Parameters<ApiClient["settings"]["put"]>[0]>;
+type UpdateApiKeysInput = NonNullable<Parameters<ApiClient["settings"]["api-keys"]["put"]>[0]>;
+type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
 
 /**
  * Provides accessors and mutators for global app settings.
@@ -31,13 +25,15 @@ export function useSettings() {
     try {
       const { data, error } = await api.settings.get();
       if (error) throw new Error("Failed to fetch settings");
-      settings.value = data as AppSettings;
+      const normalized = toAppSettings(data);
+      if (!normalized) throw new Error("Invalid settings payload");
+      settings.value = normalized;
     } finally {
       loading.value = false;
     }
   }
 
-  async function updateSettings(updates: Partial<AppSettings>) {
+  async function updateSettings(updates: UpdateSettingsInput) {
     loading.value = true;
     try {
       const { error } = await api.settings.put(updates);
@@ -48,7 +44,7 @@ export function useSettings() {
     }
   }
 
-  async function updateApiKeys(keys: Record<string, string>) {
+  async function updateApiKeys(keys: UpdateApiKeysInput) {
     loading.value = true;
     try {
       const { error } = await api.settings["api-keys"].put(keys);
@@ -59,10 +55,13 @@ export function useSettings() {
     }
   }
 
-  async function testApiKey(provider: string, key: string) {
+  async function testApiKey(provider: TestApiKeyInput["provider"], key: string) {
     const { data, error } = await api.settings["test-api-key"].post({ provider, key });
     if (error) return { valid: false, provider };
-    return data as { valid: boolean; provider: string };
+    if (!data || typeof data.valid !== "boolean") {
+      return { valid: false, provider };
+    }
+    return { valid: data.valid, provider };
   }
 
   return {
@@ -72,5 +71,5 @@ export function useSettings() {
     updateSettings,
     updateApiKeys,
     testApiKey,
-  } satisfies UseSettingsState;
+  };
 }

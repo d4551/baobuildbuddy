@@ -23,6 +23,19 @@ BaoBuildBuddy uses RPA-Python for browser automation workflows through direct su
 - Job application orchestration is implemented in `packages/server/src/services/automation/application-automation-service.ts`.
 - Job board scraper execution is implemented in `packages/server/src/services/scraper-service.ts` and now sends typed stdin payload to scripts (`{ sourceUrl?: string }`), so runtime source endpoints are settings-driven instead of script hardcoded.
 
+```mermaid
+flowchart LR
+  UI["Nuxt /automation pages"] --> API["POST /api/automation/job-apply"]
+  API --> Service["application-automation-service.ts"]
+  Service --> PersistStart["automation_runs: pending/running"]
+  Service --> Runner["rpa-runner.ts (Bun.spawn)"]
+  Runner --> Script["packages/scraper/apply_job_rpa.py"]
+  Script --> Runner
+  Runner --> PersistDone["automation_runs: success/error + output"]
+  PersistDone --> WS["WS /api/ws/automation progress events"]
+  PersistDone --> Screens["GET /api/automation/screenshots/:runId/:index"]
+```
+
 ### RPA input contract (`apply_job_rpa.py`)
 
 ```json
@@ -128,6 +141,17 @@ BaoBuildBuddy uses RPA-Python for browser automation workflows through direct su
 
 Use `PUT /api/settings` with `automationSettings.jobProviders` to change any runtime source without code changes or redeploys. The service does not auto-fill provider runtime defaults; a complete valid `jobProviders` object must be present before ingestion runs.
 `automationSettings` patch payloads are merged with persisted settings and revalidated against the full schema before commit, so invalid or incomplete updates are rejected with a deterministic `422` response.
+
+## Verification commands
+
+Run these before shipping automation changes:
+
+```bash
+bun run format:check
+bun run typecheck
+bun run lint
+bun run test
+```
 
 ## Environment
 

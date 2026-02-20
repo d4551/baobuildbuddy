@@ -1,6 +1,14 @@
-import type { ResumeData } from "@bao/shared";
+import type { ResumeData, ResumeTemplate } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { getStoredApiKey } from "~/plugins/eden";
+import { toResumeData } from "./api-normalizers";
+
+type ApiClient = ReturnType<typeof useApi>;
+type CreateResumeInput = NonNullable<Parameters<ApiClient["resumes"]["post"]>[0]>;
+type ResumeRoute = ReturnType<ApiClient["resumes"]>;
+type UpdateResumeInput = NonNullable<Parameters<ResumeRoute["put"]>[0]>;
+type ExportResumeInput = NonNullable<Parameters<ResumeRoute["export"]["post"]>[0]>;
+type ScoreResumeInput = NonNullable<Parameters<ResumeRoute["ai-score"]["post"]>[0]>;
 
 type ResumeSynthesisSuccess = Partial<ResumeData> & {
   id: string;
@@ -31,7 +39,11 @@ export function useResume() {
     try {
       const { data, error } = await api.resumes.get();
       if (error) throw new Error("Failed to fetch resumes");
-      resumes.value = data as ResumeData[];
+      resumes.value = Array.isArray(data)
+        ? data
+            .map((entry) => toResumeData(entry))
+            .filter((entry): entry is ResumeData => entry !== null)
+        : [];
     } finally {
       loading.value = false;
     }
@@ -40,16 +52,18 @@ export function useResume() {
   async function getResume(id: string) {
     loading.value = true;
     try {
-      const { data, error } = await api.resumes[id].get();
+      const { data, error } = await api.resumes({ id }).get();
       if (error) throw new Error("Failed to fetch resume");
-      currentResume.value = data;
-      return data;
+      const normalized = toResumeData(data);
+      if (!normalized) throw new Error("Invalid resume payload");
+      currentResume.value = normalized;
+      return normalized;
     } finally {
       loading.value = false;
     }
   }
 
-  async function createResume(resumeData: Partial<ResumeData>) {
+  async function createResume(resumeData: CreateResumeInput) {
     loading.value = true;
     try {
       const { data, error } = await api.resumes.post(resumeData);
@@ -61,14 +75,16 @@ export function useResume() {
     }
   }
 
-  async function updateResume(id: string, updates: Partial<ResumeData>) {
+  async function updateResume(id: string, updates: UpdateResumeInput) {
     loading.value = true;
     try {
-      const { data, error } = await api.resumes[id].put(updates);
+      const { data, error } = await api.resumes({ id }).put(updates);
       if (error) throw new Error("Failed to update resume");
-      currentResume.value = data;
+      const normalized = toResumeData(data);
+      if (!normalized) throw new Error("Invalid resume payload");
+      currentResume.value = normalized;
       await fetchResumes();
-      return data;
+      return normalized;
     } finally {
       loading.value = false;
     }
@@ -77,7 +93,7 @@ export function useResume() {
   async function deleteResume(id: string) {
     loading.value = true;
     try {
-      const { error } = await api.resumes[id].delete();
+      const { error } = await api.resumes({ id }).delete();
       if (error) throw new Error("Failed to delete resume");
       if (currentResume.value?.id === id) {
         currentResume.value = null;
@@ -88,11 +104,11 @@ export function useResume() {
     }
   }
 
-  async function exportResume(id: string, template?: "modern" | "google-xyz" | "gaming") {
+  async function exportResume(id: string, template?: ResumeTemplate) {
     loading.value = true;
     try {
-      const body = template ? { template } : {};
-      const { data, error } = await api.resumes[id].export.post(body);
+      const body: ExportResumeInput = template ? { template } : {};
+      const { data, error } = await api.resumes({ id }).export.post(body);
       if (error) throw new Error("Failed to export resume");
       return data;
     } finally {
@@ -100,11 +116,11 @@ export function useResume() {
     }
   }
 
-  async function exportResumeOnePage(id: string, template?: "modern" | "google-xyz" | "gaming") {
+  async function exportResumeOnePage(id: string, template?: ResumeTemplate) {
     loading.value = true;
     try {
-      const body = { template, onePage: true };
-      const { data, error } = await api.resumes[id].export.post(body);
+      const body: ExportResumeInput = template ? { template } : {};
+      const { data, error } = await api.resumes({ id }).export.post(body);
       if (error) throw new Error("Failed to export one-page resume");
       return data;
     } finally {
@@ -115,11 +131,13 @@ export function useResume() {
   async function aiEnhance(id: string) {
     loading.value = true;
     try {
-      const { data, error } = await api.resumes[id]["ai-enhance"].post();
+      const { data, error } = await api.resumes({ id })["ai-enhance"].post({});
       if (error) throw new Error("Failed to enhance resume");
-      currentResume.value = data;
+      const normalized = toResumeData(data);
+      if (!normalized) throw new Error("Invalid resume payload");
+      currentResume.value = normalized;
       await fetchResumes();
-      return data;
+      return normalized;
     } finally {
       loading.value = false;
     }
@@ -128,7 +146,8 @@ export function useResume() {
   async function aiScore(id: string, jobId: string) {
     loading.value = true;
     try {
-      const { data, error } = await api.resumes[id]["ai-score"].post({ jobId });
+      const payload: ScoreResumeInput = { jobId };
+      const { data, error } = await api.resumes({ id })["ai-score"].post(payload);
       if (error) throw new Error("Failed to score resume");
       return data;
     } finally {

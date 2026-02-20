@@ -602,7 +602,7 @@ export class JobAggregator {
       experienceLevel: (row.experienceLevel as JobExperienceLevel) ?? undefined,
       type: (row.type || "full-time") as JobType,
       postedDate: row.postedDate || new Date().toISOString(),
-      url: row.url,
+      url: row.url ?? undefined,
       source: row.source ?? undefined,
       contentHash: row.contentHash ?? undefined,
       studioType: this.normalizeStudioType(row.studioType),
@@ -629,7 +629,9 @@ export class JobAggregator {
         max,
         currency: typeof value.currency === "string" ? value.currency : undefined,
         frequency:
-          value.frequency === "yearly" || value.frequency === "monthly" || value.frequency === "hourly"
+          value.frequency === "yearly" ||
+          value.frequency === "monthly" ||
+          value.frequency === "hourly"
             ? value.frequency
             : undefined,
       };

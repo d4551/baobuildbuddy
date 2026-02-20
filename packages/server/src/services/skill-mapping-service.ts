@@ -54,7 +54,8 @@ const normalizeEvidenceType = (value: unknown): SkillEvidence["type"] =>
     : "document";
 
 const normalizeEvidenceStatus = (value: unknown): SkillEvidence["verificationStatus"] =>
-  typeof value === "string" && EVIDENCE_STATUSES.includes(value as SkillEvidence["verificationStatus"])
+  typeof value === "string" &&
+  EVIDENCE_STATUSES.includes(value as SkillEvidence["verificationStatus"])
     ? (value as SkillEvidence["verificationStatus"])
     : "pending";
 

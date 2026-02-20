@@ -16,7 +16,7 @@ interface SearchResult {
   relevance: number;
 }
 
-interface UnifiedSearchResult {
+export interface UnifiedSearchResult {
   query: string;
   results: SearchResult[];
   counts: Record<SearchType, number>;

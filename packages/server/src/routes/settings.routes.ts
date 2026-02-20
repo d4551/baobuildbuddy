@@ -245,7 +245,10 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       if (body.language !== undefined) update.language = body.language;
 
       if (body.notifications !== undefined) {
-        const mergedNotifications = mergeNotifications(existingRow.notifications, body.notifications);
+        const mergedNotifications = mergeNotifications(
+          existingRow.notifications,
+          body.notifications,
+        );
         update.notifications = toNotificationRecord(mergedNotifications);
       }
 
@@ -368,7 +371,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
 
       const endpointInput = body.provider === "local" ? body.key : "unused";
       const requestUrl = strategy.buildUrl(body.key, endpointInput);
-      const requestInit = strategy.buildInit(body.key, endpointInput);
+      const requestInit = strategy.buildInit(body.key);
 
       try {
         const response = await fetch(requestUrl, requestInit).catch(() => null);

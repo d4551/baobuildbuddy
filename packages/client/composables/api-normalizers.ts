@@ -1,0 +1,617 @@
+import {
+  AI_PROVIDER_DEFAULT_ORDER,
+  type AIProviderType,
+  type AppSettings,
+  type CoverLetterData,
+  type GameStudio,
+  type Job,
+  type JobExperienceLevel,
+  type JobType,
+  type PortfolioData,
+  type PortfolioMetadata,
+  type PortfolioProject,
+  type ResumeData,
+  type ResumeEducationItem,
+  type ResumeExperienceItem,
+  type ResumeProject,
+  type ResumeTemplate,
+  type SkillEvidence,
+  type SkillMapping,
+  type StudioCulture,
+  type UserProfile,
+} from "@bao/shared";
+
+const RESUME_TEMPLATES: readonly ResumeTemplate[] = [
+  "modern",
+  "classic",
+  "creative",
+  "minimal",
+  "google-xyz",
+  "gaming",
+];
+
+const JOB_EXPERIENCE_LEVELS: readonly JobExperienceLevel[] = [
+  "entry",
+  "junior",
+  "mid",
+  "senior",
+  "principal",
+  "director",
+];
+
+const JOB_TYPES: readonly JobType[] = [
+  "full-time",
+  "part-time",
+  "contract",
+  "internship",
+  "freelance",
+];
+
+const AI_PROVIDERS: readonly AIProviderType[] = [
+  "local",
+  "gemini",
+  "claude",
+  "openai",
+  "huggingface",
+];
+
+const SKILL_EVIDENCE_TYPES: readonly SkillEvidence["type"][] = [
+  "clip",
+  "stats",
+  "community",
+  "achievement",
+  "document",
+  "portfolio_piece",
+  "testimonial",
+  "certificate",
+];
+
+const SKILL_EVIDENCE_STATUSES: readonly SkillEvidence["verificationStatus"][] = [
+  "pending",
+  "verified",
+  "rejected",
+];
+
+const SKILL_CATEGORIES: readonly SkillMapping["category"][] = [
+  "leadership",
+  "community",
+  "technical",
+  "creative",
+  "analytical",
+  "communication",
+  "project_management",
+];
+
+const DEMAND_LEVELS: readonly SkillMapping["demandLevel"][] = ["high", "medium", "low"];
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim().length > 0 ? value : undefined;
+
+const asBoolean = (value: unknown): boolean | undefined =>
+  typeof value === "boolean" ? value : undefined;
+
+const asNumber = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) ? value : undefined;
+
+const asStringArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  isRecord(value) ? value : undefined;
+
+const normalizeResumeTemplate = (value: unknown): ResumeTemplate =>
+  typeof value === "string" && RESUME_TEMPLATES.includes(value as ResumeTemplate)
+    ? (value as ResumeTemplate)
+    : "modern";
+
+const normalizeJobExperienceLevel = (value: unknown): JobExperienceLevel | undefined =>
+  typeof value === "string" && JOB_EXPERIENCE_LEVELS.includes(value as JobExperienceLevel)
+    ? (value as JobExperienceLevel)
+    : undefined;
+
+const normalizeJobType = (value: unknown): JobType =>
+  typeof value === "string" && JOB_TYPES.includes(value as JobType)
+    ? (value as JobType)
+    : "full-time";
+
+const normalizeAIProvider = (value: unknown): AIProviderType =>
+  typeof value === "string" && AI_PROVIDERS.includes(value as AIProviderType)
+    ? (value as AIProviderType)
+    : AI_PROVIDER_DEFAULT_ORDER[0];
+
+const normalizeStudioCulture = (value: unknown): StudioCulture => {
+  if (!isRecord(value)) {
+    return {
+      values: [],
+      workStyle: "Not specified",
+    };
+  }
+  return {
+    values: asStringArray(value.values),
+    workStyle: asString(value.workStyle) ?? "Not specified",
+    environment: asString(value.environment),
+  };
+};
+
+const normalizeSalary = (value: unknown): Job["salary"] | undefined => {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const min = asNumber(value.min);
+  const max = asNumber(value.max);
+  if (min === undefined || max === undefined) {
+    return undefined;
+  }
+
+  return {
+    min,
+    max,
+    currency: asString(value.currency),
+    frequency:
+      value.frequency === "yearly" || value.frequency === "monthly" || value.frequency === "hourly"
+        ? value.frequency
+        : undefined,
+  };
+};
+
+/**
+ * Normalizes an unknown API payload into a shared `Job` contract.
+ */
+export const toJob = (value: unknown): Job | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  const title = asString(value.title);
+  const company = asString(value.company);
+  const location = asString(value.location);
+  if (!id || !title || !company || !location) return null;
+
+  return {
+    id,
+    title,
+    company,
+    location,
+    remote: asBoolean(value.remote) ?? false,
+    hybrid: asBoolean(value.hybrid),
+    salary: normalizeSalary(value.salary),
+    description: asString(value.description),
+    requirements: asStringArray(value.requirements),
+    technologies: asStringArray(value.technologies),
+    experienceLevel: normalizeJobExperienceLevel(value.experienceLevel),
+    type: normalizeJobType(value.type),
+    postedDate: asString(value.postedDate) ?? new Date().toISOString(),
+    url: asString(value.url),
+    source: asString(value.source),
+    featured: asBoolean(value.featured),
+    tags: asStringArray(value.tags),
+    companyLogo: asString(value.companyLogo),
+    applicationUrl: asString(value.applicationUrl),
+    contentHash: asString(value.contentHash),
+    studioType: asString(value.studioType) as Job["studioType"],
+    gameGenres: asStringArray(value.gameGenres) as Job["gameGenres"],
+    platforms: asStringArray(value.platforms) as Job["platforms"],
+    gamingRelevance: asNumber(value.gamingRelevance),
+  };
+};
+
+const toResumeExperience = (value: unknown): ResumeExperienceItem | null => {
+  if (!isRecord(value)) return null;
+  const title = asString(value.title);
+  const company = asString(value.company);
+  const startDate = asString(value.startDate);
+  if (!title || !company || !startDate) return null;
+  return {
+    title,
+    company,
+    startDate,
+    endDate: asString(value.endDate),
+    location: asString(value.location),
+    description: asString(value.description),
+    achievements: asStringArray(value.achievements),
+    technologies: asStringArray(value.technologies),
+  };
+};
+
+const toResumeEducation = (value: unknown): ResumeEducationItem | null => {
+  if (!isRecord(value)) return null;
+  const degree = asString(value.degree);
+  const field = asString(value.field);
+  const school = asString(value.school);
+  const year = asString(value.year);
+  if (!degree || !field || !school || !year) return null;
+  return {
+    degree,
+    field,
+    school,
+    year,
+    gpa: asString(value.gpa),
+  };
+};
+
+const toResumeProject = (value: unknown): ResumeProject | null => {
+  if (!isRecord(value)) return null;
+  const title = asString(value.title);
+  const description = asString(value.description);
+  if (!title || !description) return null;
+  return {
+    title,
+    description,
+    technologies: asStringArray(value.technologies),
+    link: asString(value.link),
+  };
+};
+
+/**
+ * Normalizes an unknown API payload into a shared `ResumeData` contract.
+ */
+export const toResumeData = (value: unknown): ResumeData | null => {
+  if (!isRecord(value)) return null;
+
+  const resume: ResumeData = {
+    id: asString(value.id),
+    name: asString(value.name),
+    summary: asString(value.summary),
+    template: normalizeResumeTemplate(value.template),
+    theme: value.theme === "dark" ? "dark" : "light",
+    isDefault: asBoolean(value.isDefault),
+  };
+
+  const personalInfo = asRecord(value.personalInfo);
+  if (personalInfo) {
+    resume.personalInfo = {
+      name: asString(personalInfo.name),
+      email: asString(personalInfo.email),
+      phone: asString(personalInfo.phone),
+      location: asString(personalInfo.location),
+      website: asString(personalInfo.website),
+      linkedIn: asString(personalInfo.linkedIn),
+      github: asString(personalInfo.github),
+      portfolio: asString(personalInfo.portfolio),
+    };
+  }
+
+  resume.experience = Array.isArray(value.experience)
+    ? value.experience
+        .map(toResumeExperience)
+        .filter((entry): entry is ResumeExperienceItem => entry !== null)
+    : [];
+  resume.education = Array.isArray(value.education)
+    ? value.education
+        .map(toResumeEducation)
+        .filter((entry): entry is ResumeEducationItem => entry !== null)
+    : [];
+  resume.projects = Array.isArray(value.projects)
+    ? value.projects.map(toResumeProject).filter((entry): entry is ResumeProject => entry !== null)
+    : [];
+
+  const skills = asRecord(value.skills);
+  if (skills) {
+    resume.skills = {
+      technical: asStringArray(skills.technical),
+      soft: asStringArray(skills.soft),
+      gaming: asStringArray(skills.gaming),
+    };
+  }
+
+  const gamingExperience = asRecord(value.gamingExperience);
+  if (gamingExperience) {
+    resume.gamingExperience = {
+      gameEngines: asString(gamingExperience.gameEngines),
+      platforms: asString(gamingExperience.platforms),
+      genres: asString(gamingExperience.genres),
+      shippedTitles: asString(gamingExperience.shippedTitles),
+    };
+  }
+
+  return resume;
+};
+
+/**
+ * Normalizes an unknown API payload into a shared `CoverLetterData` contract.
+ */
+export const toCoverLetterData = (value: unknown): CoverLetterData | null => {
+  if (!isRecord(value)) return null;
+  const company = asString(value.company);
+  const position = asString(value.position);
+  if (!company || !position) return null;
+
+  const contentRecord = asRecord(value.content) ?? {};
+  const content: CoverLetterData["content"] = {};
+  for (const [key, entry] of Object.entries(contentRecord)) {
+    if (typeof entry === "string") {
+      content[key] = entry;
+    }
+  }
+
+  return {
+    id: asString(value.id),
+    company,
+    position,
+    jobInfo: asRecord(value.jobInfo),
+    personalInfo: asRecord(value.personalInfo),
+    companyResearch: asRecord(value.companyResearch),
+    content,
+    template:
+      value.template === "professional" ||
+      value.template === "creative" ||
+      value.template === "gaming"
+        ? value.template
+        : "professional",
+  };
+};
+
+const toPortfolioProject = (value: unknown): PortfolioProject | null => {
+  if (!isRecord(value)) return null;
+  const title = asString(value.title);
+  const description = asString(value.description);
+  if (!title || !description) return null;
+
+  return {
+    id: asString(value.id),
+    portfolioId: asString(value.portfolioId),
+    title,
+    description,
+    technologies: asStringArray(value.technologies),
+    image: asString(value.image),
+    liveUrl: asString(value.liveUrl),
+    githubUrl: asString(value.githubUrl),
+    tags: asStringArray(value.tags),
+    featured: asBoolean(value.featured),
+    role: asString(value.role),
+    platforms: asStringArray(value.platforms),
+    engines: asStringArray(value.engines),
+    sortOrder: asNumber(value.sortOrder),
+  };
+};
+
+/**
+ * Normalizes an unknown API payload into a shared `PortfolioData` contract.
+ */
+export const toPortfolioData = (value: unknown): PortfolioData | null => {
+  if (!isRecord(value)) return null;
+
+  const metadataRecord = asRecord(value.metadata);
+  const metadata: PortfolioMetadata = {};
+  if (metadataRecord) {
+    metadata.author = asString(metadataRecord.author);
+    metadata.title = asString(metadataRecord.title);
+    metadata.description = asString(metadataRecord.description);
+    metadata.bio = asString(metadataRecord.bio);
+    metadata.email = asString(metadataRecord.email);
+    metadata.website = asString(metadataRecord.website);
+    if (isRecord(metadataRecord.social)) {
+      const social: Record<string, string> = {};
+      for (const [key, entry] of Object.entries(metadataRecord.social)) {
+        if (typeof entry === "string") {
+          social[key] = entry;
+        }
+      }
+      metadata.social = social;
+    }
+  }
+
+  return {
+    id: asString(value.id),
+    metadata,
+    projects: Array.isArray(value.projects)
+      ? value.projects
+          .map(toPortfolioProject)
+          .filter((entry): entry is PortfolioProject => entry !== null)
+      : [],
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
+  };
+};
+
+/**
+ * Normalizes an unknown API payload into a shared `SkillMapping` contract.
+ */
+export const toSkillMapping = (value: unknown): SkillMapping | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  const gameExpression = asString(value.gameExpression);
+  const transferableSkill = asString(value.transferableSkill);
+  if (!id || !gameExpression || !transferableSkill) return null;
+
+  const evidence: SkillEvidence[] = [];
+  if (Array.isArray(value.evidence)) {
+    for (const entry of value.evidence) {
+      if (!isRecord(entry)) continue;
+      const evidenceId = asString(entry.id);
+      const title = asString(entry.title);
+      const description = asString(entry.description);
+      if (!evidenceId || !title || !description) continue;
+
+      evidence.push({
+        id: evidenceId,
+        type:
+          typeof entry.type === "string" &&
+          SKILL_EVIDENCE_TYPES.includes(entry.type as SkillEvidence["type"])
+            ? (entry.type as SkillEvidence["type"])
+            : "document",
+        title,
+        description,
+        url: asString(entry.url),
+        verificationStatus:
+          typeof entry.verificationStatus === "string" &&
+          SKILL_EVIDENCE_STATUSES.includes(
+            entry.verificationStatus as SkillEvidence["verificationStatus"],
+          )
+            ? (entry.verificationStatus as SkillEvidence["verificationStatus"])
+            : "pending",
+      });
+    }
+  }
+
+  const category =
+    typeof value.category === "string" &&
+    SKILL_CATEGORIES.includes(value.category as SkillMapping["category"])
+      ? (value.category as SkillMapping["category"])
+      : "technical";
+  const demandLevel =
+    typeof value.demandLevel === "string" &&
+    DEMAND_LEVELS.includes(value.demandLevel as SkillMapping["demandLevel"])
+      ? (value.demandLevel as SkillMapping["demandLevel"])
+      : "medium";
+
+  return {
+    id,
+    gameExpression,
+    transferableSkill,
+    industryApplications: asStringArray(value.industryApplications),
+    evidence,
+    confidence: asNumber(value.confidence) ?? 50,
+    category,
+    demandLevel,
+    verified: asBoolean(value.verified) ?? false,
+    aiGenerated: asBoolean(value.aiGenerated),
+  };
+};
+
+/**
+ * Normalizes an unknown API payload into a shared `GameStudio` contract.
+ */
+export const toGameStudio = (value: unknown): GameStudio | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  const name = asString(value.name);
+  if (!id || !name) return null;
+
+  return {
+    id,
+    name,
+    logo: asString(value.logo),
+    website: asString(value.website),
+    location: asString(value.location) ?? "Unknown",
+    size: asString(value.size) ?? "Unknown",
+    type: asString(value.type) ?? "Unknown",
+    founded: asNumber(value.founded),
+    description: asString(value.description),
+    games: asStringArray(value.games),
+    technologies: asStringArray(value.technologies),
+    culture: normalizeStudioCulture(value.culture),
+    commonRoles: asStringArray(value.commonRoles),
+    interviewStyle: asString(value.interviewStyle),
+    remoteWork: asBoolean(value.remoteWork),
+    category: asString(value.category) as GameStudio["category"],
+    region: asString(value.region),
+    benefits: asStringArray(value.benefits),
+  };
+};
+
+/**
+ * Normalizes an unknown API payload into a shared `UserProfile` contract.
+ */
+export const toUserProfile = (value: unknown): UserProfile | null => {
+  if (!isRecord(value)) return null;
+
+  const id = asString(value.id) ?? "default";
+  const name = asString(value.name) ?? "";
+  const gamingExperience = asRecord(value.gamingExperience) ?? {};
+  const careerGoals = asRecord(value.careerGoals) ?? {};
+
+  return {
+    id,
+    name,
+    email: asString(value.email),
+    phone: asString(value.phone),
+    location: asString(value.location),
+    website: asString(value.website),
+    linkedin: asString(value.linkedin),
+    github: asString(value.github),
+    summary: asString(value.summary),
+    currentRole: asString(value.currentRole),
+    currentCompany: asString(value.currentCompany),
+    yearsExperience: asNumber(value.yearsExperience),
+    technicalSkills: asStringArray(value.technicalSkills),
+    softSkills: asStringArray(value.softSkills),
+    gamingExperience: {
+      yearsInGaming: asNumber(gamingExperience.yearsInGaming),
+      experienceLevel: asString(
+        gamingExperience.experienceLevel,
+      ) as UserProfile["gamingExperience"]["experienceLevel"],
+      specializations: asStringArray(
+        gamingExperience.specializations,
+      ) as UserProfile["gamingExperience"]["specializations"],
+      gameEngines: asStringArray(gamingExperience.gameEngines),
+      platforms: asStringArray(gamingExperience.platforms),
+      genres: asStringArray(gamingExperience.genres),
+      shippedTitles: Array.isArray(gamingExperience.shippedTitles)
+        ? gamingExperience.shippedTitles
+            .map((entry) => (isRecord(entry) ? entry : null))
+            .filter((entry): entry is Record<string, unknown> => entry !== null)
+            .map((entry) => ({
+              name: asString(entry.name) ?? "",
+              platforms: asStringArray(entry.platforms),
+              releaseDate: asString(entry.releaseDate),
+              role: asString(entry.role) ?? "",
+              teamSize: asNumber(entry.teamSize),
+            }))
+        : [],
+    },
+    careerGoals: {
+      desiredRoles: asStringArray(careerGoals.desiredRoles),
+      preferredCompanySize: asStringArray(careerGoals.preferredCompanySize),
+      preferredLocations: asStringArray(careerGoals.preferredLocations),
+      remotePreference:
+        careerGoals.remotePreference === "onsite" ||
+        careerGoals.remotePreference === "hybrid" ||
+        careerGoals.remotePreference === "remote" ||
+        careerGoals.remotePreference === "flexible"
+          ? careerGoals.remotePreference
+          : undefined,
+      salaryRange:
+        isRecord(careerGoals.salaryRange) &&
+        typeof careerGoals.salaryRange.min === "number" &&
+        typeof careerGoals.salaryRange.max === "number"
+          ? {
+              min: careerGoals.salaryRange.min,
+              max: careerGoals.salaryRange.max,
+              currency: asString(careerGoals.salaryRange.currency),
+            }
+          : undefined,
+      willingToRelocate: asBoolean(careerGoals.willingToRelocate),
+    },
+  };
+};
+
+/**
+ * Normalizes an unknown API payload into a shared `AppSettings` contract.
+ */
+export const toAppSettings = (value: unknown): AppSettings | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  if (!id) return null;
+
+  const notificationsRecord = asRecord(value.notifications) ?? {};
+  return {
+    id,
+    geminiApiKey: asString(value.geminiApiKey),
+    openaiApiKey: asString(value.openaiApiKey),
+    claudeApiKey: asString(value.claudeApiKey),
+    huggingfaceToken: asString(value.huggingfaceToken),
+    localModelEndpoint: asString(value.localModelEndpoint),
+    localModelName: asString(value.localModelName),
+    preferredModel: asString(value.preferredModel),
+    preferredProvider: normalizeAIProvider(value.preferredProvider),
+    theme: value.theme === "bao-dark" ? "bao-dark" : "bao-light",
+    language: asString(value.language) ?? "en",
+    notifications: {
+      achievements: asBoolean(notificationsRecord.achievements) ?? true,
+      dailyChallenges: asBoolean(notificationsRecord.dailyChallenges) ?? true,
+      levelUp: asBoolean(notificationsRecord.levelUp) ?? true,
+      jobAlerts: asBoolean(notificationsRecord.jobAlerts) ?? true,
+    },
+    hasGeminiKey: asBoolean(value.hasGeminiKey),
+    hasOpenaiKey: asBoolean(value.hasOpenaiKey),
+    hasClaudeKey: asBoolean(value.hasClaudeKey),
+    hasHuggingfaceToken: asBoolean(value.hasHuggingfaceToken),
+    hasLocalKey: asBoolean(value.hasLocalKey),
+  };
+};

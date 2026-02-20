@@ -6,9 +6,7 @@
 import { jobAggregator } from "./job-aggregator";
 import { type UserProfile, calculateMatchScore } from "./matching-service";
 
-function isTimelineEvent(
-  value: unknown,
-): value is { date: string; description: string } {
+function isTimelineEvent(value: unknown): value is { date: string; description: string } {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }

@@ -1,5 +1,9 @@
 import type { UserProfile } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { toUserProfile } from "./api-normalizers";
+
+type ApiClient = ReturnType<typeof useApi>;
+type UpdateUserProfileInput = NonNullable<Parameters<ApiClient["user"]["profile"]["put"]>[0]>;
 
 /**
  * User profile management composable.
@@ -14,18 +18,22 @@ export function useUser() {
     try {
       const { data, error } = await api.user.profile.get();
       if (error) throw new Error("Failed to fetch profile");
-      profile.value = data as UserProfile;
+      const normalized = toUserProfile(data);
+      if (!normalized) throw new Error("Invalid user profile payload");
+      profile.value = normalized;
     } finally {
       loading.value = false;
     }
   }
 
-  async function updateProfile(updates: Partial<UserProfile>) {
+  async function updateProfile(updates: UpdateUserProfileInput) {
     loading.value = true;
     try {
       const { data, error } = await api.user.profile.put(updates);
       if (error) throw new Error("Failed to update profile");
-      profile.value = data as UserProfile;
+      const normalized = toUserProfile(data);
+      if (!normalized) throw new Error("Invalid user profile payload");
+      profile.value = normalized;
     } finally {
       loading.value = false;
     }

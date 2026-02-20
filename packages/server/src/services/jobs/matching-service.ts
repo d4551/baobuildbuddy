@@ -348,10 +348,7 @@ function findMissingSkills(profile: UserProfile, job: Job): string[] {
 /**
  * Batch calculate match scores for multiple jobs
  */
-export function calculateMatchScores(
-  userProfile: UserProfile,
-  jobs: Job[],
-): MatchedJob[] {
+export function calculateMatchScores(userProfile: UserProfile, jobs: Job[]): MatchedJob[] {
   return jobs.map((job) => ({
     ...job,
     matchScore: calculateMatchScore(userProfile, job),

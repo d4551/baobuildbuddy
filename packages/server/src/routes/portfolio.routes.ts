@@ -150,20 +150,12 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
 
       try {
         const metadata: PortfolioMetadata = portfolio.metadata ?? {};
-        const pdfBytes = await exportService.exportPortfolioPDF(
-          metadata,
-          portfolio.projects,
-        );
+        const pdfBytes = await exportService.exportPortfolioPDF(metadata, portfolio.projects);
 
         set.headers["content-type"] = "application/pdf";
         set.headers["content-disposition"] = `attachment; filename="portfolio-${portfolio.id}.pdf"`;
 
-        const pdfBuffer = pdfBytes.buffer.slice(
-          pdfBytes.byteOffset,
-          pdfBytes.byteOffset + pdfBytes.byteLength,
-        );
-
-        return new Response(new Blob([pdfBuffer], { type: "application/pdf" }), {
+        return new Response(Buffer.from(pdfBytes), {
           headers: {
             "content-type": "application/pdf",
             "content-disposition": `attachment; filename="portfolio-${portfolio.id}.pdf"`,

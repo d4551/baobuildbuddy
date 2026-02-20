@@ -26,7 +26,9 @@ const toCoverLetterContent = (value: unknown): CoverLetterData["content"] => {
   return content;
 };
 
-const toContentRecord = (value: CoverLetterData["content"] | undefined): Record<string, unknown> => {
+const toContentRecord = (
+  value: CoverLetterData["content"] | undefined,
+): Record<string, unknown> => {
   const record: Record<string, unknown> = {};
   if (!value) return record;
   for (const [key, entry] of Object.entries(value)) {
