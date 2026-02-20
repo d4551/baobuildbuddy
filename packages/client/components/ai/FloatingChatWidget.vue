@@ -268,7 +268,7 @@ onUnmounted(() => {
                 index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
               "
               :is-streaming="false"
-              :locale="locale"
+              :locale="locale.value"
               :message="messageRow.message"
               :user-label="t('floatingChat.youLabel')"
             />
@@ -277,7 +277,7 @@ onUnmounted(() => {
               :assistant-label="APP_BRAND.assistantName"
               :is-latest-assistant-message="true"
               :is-streaming="true"
-              :locale="locale"
+              :locale="locale.value"
               :message="streamingBubble"
               :user-label="t('floatingChat.youLabel')"
             />

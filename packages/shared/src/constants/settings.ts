@@ -1,7 +1,7 @@
 /**
  * Supported runtime language codes.
  */
-export const APP_LANGUAGE_CODES = ["en"] as const;
+export const APP_LANGUAGE_CODES = ["en-US", "es-ES", "fr-FR", "ja-JP"] as const;
 
 /**
  * Language code union derived from `APP_LANGUAGE_CODES`.
@@ -11,15 +11,13 @@ export type AppLanguageCode = (typeof APP_LANGUAGE_CODES)[number];
 /**
  * Default language code used for app settings and preference fallbacks.
  */
-export const DEFAULT_APP_LANGUAGE: AppLanguageCode = "en";
+export const DEFAULT_APP_LANGUAGE: AppLanguageCode = "en-US";
 
 /**
  * Select-option model for language preference inputs.
  */
-export const APP_LANGUAGE_OPTIONS: ReadonlyArray<{
-  readonly value: AppLanguageCode;
-  readonly label: string;
-}> = [{ value: "en", label: "English" }];
+export const APP_LANGUAGE_OPTIONS: ReadonlyArray<{ readonly value: AppLanguageCode }> =
+  APP_LANGUAGE_CODES.map((value) => ({ value }));
 
 /**
  * Supported browser ids for automation defaults.

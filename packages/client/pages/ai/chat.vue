@@ -122,7 +122,7 @@ async function handleSendMessage() {
           index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
         "
         :is-streaming="false"
-        :locale="locale"
+        :locale="locale.value"
         :message="messageRow.message"
         :user-label="t('aiChatPage.youLabel')"
       />
@@ -131,7 +131,7 @@ async function handleSendMessage() {
         :assistant-label="APP_BRAND.assistantName"
         :is-latest-assistant-message="true"
         :is-streaming="true"
-        :locale="locale"
+        :locale="locale.value"
         :message="streamingBubble"
         :user-label="t('aiChatPage.youLabel')"
       />

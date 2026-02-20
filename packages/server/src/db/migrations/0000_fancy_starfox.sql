@@ -35,7 +35,7 @@ CREATE TABLE `settings` (
 	`preferred_provider` text DEFAULT 'local',
 	`preferred_model` text,
 	`theme` text DEFAULT 'bao-light',
-	`language` text DEFAULT 'en',
+	`language` text DEFAULT 'en-US',
 	`notifications` text DEFAULT '{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}',
 	`automation_settings` text DEFAULT '{"headless":true,"defaultTimeout":30,"screenshotRetention":7,"maxConcurrentRuns":1,"defaultBrowser":"chrome","enableSmartSelectors":true,"autoSaveScreenshots":true}',
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,

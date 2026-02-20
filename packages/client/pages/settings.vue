@@ -2,6 +2,7 @@
 import type { AppSettings, AutomationSettings, UserProfile } from "@bao/shared";
 import {
   APP_LANGUAGE_OPTIONS,
+  type AppLanguageCode,
   AUTOMATION_BROWSER_OPTIONS,
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_APP_LANGUAGE,
@@ -54,7 +55,7 @@ const {
 const { profile, fetchProfile, updateProfile, loading: profileLoading } = useUser();
 const { theme, toggleTheme } = useTheme();
 const { $toast } = useNuxtApp();
-const { t } = useI18n();
+const { locale, t } = useI18n();
 
 const providerFieldById = {
   local: "localModelEndpoint",
@@ -73,7 +74,21 @@ const providerInputs = computed<ProviderInputConfig[]>(() =>
   })),
 );
 
-const languageOptions = APP_LANGUAGE_OPTIONS;
+const buildLanguageLabel = (value: AppLanguageCode): string => {
+  if (typeof Intl.DisplayNames !== "function") {
+    return value;
+  }
+
+  const labels = new Intl.DisplayNames([locale.value], { type: "language" });
+  return labels.of(value) || value;
+};
+
+const languageOptions = computed(() =>
+  APP_LANGUAGE_OPTIONS.map((option) => ({
+    value: option.value,
+    label: buildLanguageLabel(option.value),
+  })),
+);
 const automationBrowserOptions = AUTOMATION_BROWSER_OPTIONS;
 
 const apiKeys = reactive<Record<ProviderField, string>>({

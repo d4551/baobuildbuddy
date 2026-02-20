@@ -179,6 +179,15 @@ Single source of truth:
 - `packages/client/nuxt.config.ts` defines default i18n runtime config (`NUXT_PUBLIC_I18N_*`).
 - Locale files follow the typed schema in `packages/client/locales/en-US.ts`.
 
+App settings also store a locale preference in `settings.language` using the same supported locales:
+
+- `en-US`
+- `es-ES`
+- `fr-FR`
+- `ja-JP`
+
+Default settings language is `en-US`, aligned with `DEFAULT_APP_LANGUAGE`.
+
 Locale resolution order:
 
 1. Saved cookie locale (from `NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY`).

@@ -1,4 +1,4 @@
-import { APP_BRAND } from "@bao/shared";
+import { APP_BRAND, APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared";
 
 const apiBaseProxy =
   process.env.NUXT_PUBLIC_API_PROXY ||
@@ -12,9 +12,9 @@ const QUERY_REFOCUS_DISABLED = "false";
 const NUXT_COMPATIBILITY_DATE = "2025-01-01";
 const DEFAULT_APP_TITLE = `${APP_BRAND.name} - AI Career Assistant`;
 const DEFAULT_APP_DESCRIPTION = "AI-powered career assistant for the video game industry";
-const DEFAULT_I18N_LOCALE = "en-US";
+const DEFAULT_I18N_LOCALE = DEFAULT_APP_LANGUAGE;
 const DEFAULT_I18N_LOCALE_COOKIE_KEY = "bao-locale";
-const DEFAULT_SUPPORTED_LOCALES = ["en-US", "es-ES", "fr-FR", "ja-JP"];
+const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
 
 const parseSupportedLocales = (value: string | undefined): string[] => {
   const parsedLocales = value

@@ -50,7 +50,7 @@ describe("useSettings", () => {
     expect(settings.value).toMatchObject({
       id: "default",
       theme: "bao-light",
-      language: "en",
+      language: "en-US",
       notifications: {
         achievements: true,
         dailyChallenges: true,

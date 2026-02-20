@@ -20,7 +20,7 @@ export const settings = sqliteTable("settings", {
   preferredProvider: text("preferred_provider").default(AI_PROVIDER_DEFAULT_ORDER[0]),
   preferredModel: text("preferred_model"),
   theme: text("theme").default(THEME_NAMES.light),
-  language: text("language").default("en"),
+  language: text("language").default("en-US"),
   notifications: text("notifications", { mode: "json" })
     .$type<Record<string, boolean>>()
     .default(sql`'{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}'`),

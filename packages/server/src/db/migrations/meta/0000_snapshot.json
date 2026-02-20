@@ -257,7 +257,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'en'"
+          "default": "'en-US'"
         },
         "notifications": {
           "name": "notifications",

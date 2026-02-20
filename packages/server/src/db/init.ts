@@ -33,7 +33,7 @@ const TABLE_DEFINITIONS = [
       preferred_model TEXT,
       preferred_models TEXT,
       theme TEXT DEFAULT 'bao-light',
-      language TEXT DEFAULT 'en',
+      language TEXT DEFAULT 'en-US',
       notifications TEXT DEFAULT '{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}',
       automation_settings TEXT DEFAULT '{"headless":true,"defaultTimeout":30,"screenshotRetention":7,"maxConcurrentRuns":1,"defaultBrowser":"chrome","enableSmartSelectors":true,"autoSaveScreenshots":true}',
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),

@@ -84,7 +84,12 @@ Then open:
 9. Language support and locale switcher:
    - Interface locales are available in `packages/client/locales`.
    - Current runtime locales: `en-US`, `es-ES`, `fr-FR`, `ja-JP`.
-   - Switch language from the navbar language menu (all locales with message catalogs are listed).
+- Switch language from the navbar language menu (all locales with message catalogs are listed).
+- Settings also persist a locale preference under `settings.language` for supported locales:
+  - `en-US`
+  - `es-ES`
+  - `fr-FR`
+  - `ja-JP`
 10. Pipeline gamification: searching jobs, running scrapers, and resume customization award XP in flow
 
 ## 6.1 Language support defaults

@@ -1,4 +1,5 @@
 import { createI18n } from "vue-i18n";
+import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
 import enUS from "~/locales/en-US";
 import esES from "~/locales/es-ES";
 import frFR from "~/locales/fr-FR";
@@ -13,7 +14,7 @@ const I18N_MESSAGE_CATALOG = {
 
 type AvailableLocale = keyof typeof I18N_MESSAGE_CATALOG;
 
-const DEFAULT_LOCALE: AvailableLocale = "en-US";
+const DEFAULT_LOCALE: AvailableLocale = DEFAULT_APP_LANGUAGE;
 const ACCEPT_LANGUAGE_SEPARATOR = ",";
 const ACCEPT_LANGUAGE_WEIGHT_SEPARATOR = ";";
 const ACCEPT_LANGUAGE_VARIANT_SEPARATOR = "-";
