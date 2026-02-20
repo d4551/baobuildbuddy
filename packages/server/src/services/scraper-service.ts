@@ -62,10 +62,7 @@ export interface ScrapedJob {
 
 export class ScraperService {
   private async scrapeJobBoard(scriptName: string, sourceUrl?: string): Promise<ScrapedJob[]> {
-    const output = await runPythonScript(
-      scriptName,
-      sourceUrl ? { sourceUrl } : undefined,
-    );
+    const output = await runPythonScript(scriptName, sourceUrl ? { sourceUrl } : undefined);
     const raw = JSON.parse(output);
     const items = Array.isArray(raw)
       ? raw

@@ -44,6 +44,25 @@ interface CareerProgress {
   interviewTrend: number[];
 }
 
+type ActionHistoryEntry = { action: string; xpGained: number; timestamp: string };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const parseActionHistory = (value: unknown): ActionHistoryEntry[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .filter(isRecord)
+    .map((entry) => ({
+      action: typeof entry.action === "string" ? entry.action : "other",
+      xpGained: typeof entry.xpGained === "number" ? entry.xpGained : 0,
+      timestamp: typeof entry.timestamp === "string" ? entry.timestamp : "",
+    }))
+    .filter((entry) => entry.timestamp.length > 0);
+};
+
 export class StatisticsService {
   async getDashboardStats(): Promise<DashboardStats> {
     // Profile completeness
@@ -195,9 +214,8 @@ export class StatisticsService {
   async getWeeklyActivity(): Promise<WeeklyActivity> {
     // Get gamification stats for action history
     const gamRows = await db.select().from(gamification).where(eq(gamification.id, "default"));
-    const stats = gamRows[0]?.stats || {};
-    const actionHistory: Array<{ action: string; xpGained: number; timestamp: string }> =
-      stats.actionHistory || [];
+    const stats = gamRows[0]?.stats;
+    const actionHistory = isRecord(stats) ? parseActionHistory(stats.actionHistory) : [];
 
     const now = new Date();
     const days: Array<{ date: string; actions: number; xpEarned: number }> = [];

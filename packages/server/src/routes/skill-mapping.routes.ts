@@ -1,4 +1,9 @@
-import type { SkillCategory } from "@bao/shared";
+import {
+  generateId,
+  type SkillCategory,
+  type SkillEvidence,
+  type SkillMapping,
+} from "@bao/shared";
 import { desc } from "drizzle-orm";
 import { eq } from "drizzle-orm";
 import { Elysia, status, t } from "elysia";
@@ -8,6 +13,97 @@ import { skillMappings } from "../db/schema/skill-mappings";
 import { AIService } from "../services/ai/ai-service";
 import { skillAnalysisPrompt } from "../services/ai/prompts";
 import { skillMappingService } from "../services/skill-mapping-service";
+
+type DemandLevel = SkillMapping["demandLevel"];
+type SkillEvidenceType = SkillEvidence["type"];
+type SkillEvidenceVerificationStatus = SkillEvidence["verificationStatus"];
+
+const SKILL_CATEGORIES: readonly SkillCategory[] = [
+  "leadership",
+  "community",
+  "technical",
+  "creative",
+  "analytical",
+  "communication",
+  "project_management",
+];
+
+const DEMAND_LEVELS: readonly DemandLevel[] = ["high", "medium", "low"];
+
+const SKILL_EVIDENCE_TYPES: readonly SkillEvidenceType[] = [
+  "clip",
+  "stats",
+  "community",
+  "achievement",
+  "document",
+  "portfolio_piece",
+  "testimonial",
+  "certificate",
+];
+
+const SKILL_EVIDENCE_VERIFICATION_STATUSES: readonly SkillEvidenceVerificationStatus[] = [
+  "pending",
+  "verified",
+  "rejected",
+];
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const asNonEmptyString = (value: unknown): string | null =>
+  typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+
+const normalizeCategory = (value: unknown): SkillCategory =>
+  typeof value === "string" && SKILL_CATEGORIES.includes(value as SkillCategory)
+    ? (value as SkillCategory)
+    : "technical";
+
+const normalizeDemandLevel = (value: unknown): DemandLevel =>
+  typeof value === "string" && DEMAND_LEVELS.includes(value as DemandLevel)
+    ? (value as DemandLevel)
+    : "medium";
+
+const normalizeEvidenceType = (value: unknown): SkillEvidenceType =>
+  typeof value === "string" && SKILL_EVIDENCE_TYPES.includes(value as SkillEvidenceType)
+    ? (value as SkillEvidenceType)
+    : "document";
+
+const normalizeEvidenceVerificationStatus = (value: unknown): SkillEvidenceVerificationStatus =>
+  typeof value === "string" &&
+  SKILL_EVIDENCE_VERIFICATION_STATUSES.includes(value as SkillEvidenceVerificationStatus)
+    ? (value as SkillEvidenceVerificationStatus)
+    : "pending";
+
+const normalizeSkillEvidence = (value: unknown): SkillEvidence[] => {
+  if (!Array.isArray(value)) return [];
+
+  const normalized: SkillEvidence[] = [];
+  for (const entry of value) {
+    if (!isRecord(entry)) continue;
+    const title = asNonEmptyString(entry.title);
+    const description = asNonEmptyString(entry.description);
+    if (!title || !description) continue;
+
+    normalized.push({
+      id: asNonEmptyString(entry.id) ?? generateId(),
+      type: normalizeEvidenceType(entry.type),
+      title,
+      description,
+      url: asNonEmptyString(entry.url) ?? undefined,
+      verificationStatus: normalizeEvidenceVerificationStatus(entry.verificationStatus),
+    });
+  }
+
+  return normalized;
+};
+
+const normalizeStringArray = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value
+        .filter((entry): entry is string => typeof entry === "string")
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0)
+    : [];
 
 export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
   .get(
@@ -44,15 +140,19 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
   .post(
     "/mappings",
     async ({ body, set }) => {
+      const confidence =
+        typeof body.confidence === "number" && Number.isFinite(body.confidence)
+          ? Math.max(0, Math.min(100, Math.round(body.confidence)))
+          : 50;
       const newMapping = await skillMappingService.createMapping({
         gameExpression: body.gameExpression,
         transferableSkill: body.transferableSkill,
-        industryApplications: body.industryApplications || [],
-        evidence: body.evidence || [],
-        confidence: body.confidence || 50,
-        category: (body.category as SkillCategory) || "technical",
-        demandLevel: body.demandLevel || "medium",
-        aiGenerated: body.aiGenerated || false,
+        industryApplications: normalizeStringArray(body.industryApplications),
+        evidence: normalizeSkillEvidence(body.evidence),
+        confidence,
+        category: normalizeCategory(body.category),
+        demandLevel: normalizeDemandLevel(body.demandLevel),
+        aiGenerated: body.aiGenerated === true,
         verified: false,
       });
       set.status = 201;
@@ -77,11 +177,13 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
       const updated = await skillMappingService.updateMapping(params.id, {
         gameExpression: body.gameExpression,
         transferableSkill: body.transferableSkill,
-        industryApplications: body.industryApplications,
-        evidence: body.evidence,
+        industryApplications: body.industryApplications
+          ? normalizeStringArray(body.industryApplications)
+          : undefined,
+        evidence: body.evidence ? normalizeSkillEvidence(body.evidence) : undefined,
         confidence: body.confidence,
-        category: body.category as SkillCategory | undefined,
-        demandLevel: body.demandLevel as "high" | "medium" | "low" | undefined,
+        category: body.category ? normalizeCategory(body.category) : undefined,
+        demandLevel: body.demandLevel ? normalizeDemandLevel(body.demandLevel) : undefined,
         aiGenerated: body.aiGenerated,
       });
       if (!updated) {
@@ -160,23 +262,15 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         const skillsToAnalyze: string[] = [];
 
         if (body.gameExperience) {
-          const exp = body.gameExperience as Record<string, unknown>;
-          if (exp.skills && Array.isArray(exp.skills)) {
-            skillsToAnalyze.push(...exp.skills);
-          }
-          if (exp.achievements && Array.isArray(exp.achievements)) {
-            skillsToAnalyze.push(...exp.achievements);
-          }
-          if (exp.roles && Array.isArray(exp.roles)) {
-            skillsToAnalyze.push(...exp.roles);
-          }
+          const exp = isRecord(body.gameExperience) ? body.gameExperience : {};
+          skillsToAnalyze.push(...normalizeStringArray(exp.skills));
+          skillsToAnalyze.push(...normalizeStringArray(exp.achievements));
+          skillsToAnalyze.push(...normalizeStringArray(exp.roles));
         }
 
         if (body.resume) {
-          const resume = body.resume as Record<string, unknown>;
-          if (resume.skills && Array.isArray(resume.skills)) {
-            skillsToAnalyze.push(...resume.skills);
-          }
+          const resume = isRecord(body.resume) ? body.resume : {};
+          skillsToAnalyze.push(...normalizeStringArray(resume.skills));
           if (resume.experience && typeof resume.experience === "string") {
             skillsToAnalyze.push(resume.experience);
           }
@@ -231,24 +325,26 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
           analysisResult.suggestedMappings &&
           Array.isArray(analysisResult.suggestedMappings)
         ) {
-          for (const mapping of analysisResult.suggestedMappings as Array<{
-            gameExpression: string;
-            transferableSkill: string;
-            industryApplications?: string[];
-            confidence?: number;
-            category?: SkillCategory;
-            demandLevel?: "high" | "medium" | "low";
-          }>) {
-            if (mapping.gameExpression && mapping.transferableSkill) {
+          for (const suggestedMapping of analysisResult.suggestedMappings) {
+            if (!isRecord(suggestedMapping)) {
+              continue;
+            }
+            const gameExpression = asNonEmptyString(suggestedMapping.gameExpression);
+            const transferableSkill = asNonEmptyString(suggestedMapping.transferableSkill);
+            if (gameExpression && transferableSkill) {
               try {
                 await skillMappingService.createMapping({
-                  gameExpression: mapping.gameExpression,
-                  transferableSkill: mapping.transferableSkill,
-                  industryApplications: mapping.industryApplications || [],
+                  gameExpression,
+                  transferableSkill,
+                  industryApplications: normalizeStringArray(suggestedMapping.industryApplications),
                   evidence: [],
-                  confidence: mapping.confidence || 60,
-                  category: mapping.category || "technical",
-                  demandLevel: mapping.demandLevel || "medium",
+                  confidence:
+                    typeof suggestedMapping.confidence === "number" &&
+                    Number.isFinite(suggestedMapping.confidence)
+                      ? Math.max(0, Math.min(100, Math.round(suggestedMapping.confidence)))
+                      : 60,
+                  category: normalizeCategory(suggestedMapping.category),
+                  demandLevel: normalizeDemandLevel(suggestedMapping.demandLevel),
                   verified: false,
                   aiGenerated: true,
                 });
@@ -261,10 +357,11 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
 
         return {
           message: "AI skill analysis completed successfully",
-          detectedSkills: (analysisResult.detectedSkills as string[]) || [],
-          suggestedMappings:
-            (analysisResult.suggestedMappings as Array<Record<string, unknown>>) || [],
-          recommendations: (analysisResult.recommendations as string[]) || [],
+          detectedSkills: normalizeStringArray(analysisResult.detectedSkills),
+          suggestedMappings: Array.isArray(analysisResult.suggestedMappings)
+            ? analysisResult.suggestedMappings.filter(isRecord)
+            : [],
+          recommendations: normalizeStringArray(analysisResult.recommendations),
           provider: response.provider,
         };
       } catch (error) {

@@ -1,4 +1,4 @@
-import type { Job, JobFilters, JobProvider } from "./provider-interface";
+import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 
 export class SimpleRateLimiter {
   private requests: Map<string, number[]> = new Map();
@@ -49,7 +49,7 @@ export class JobProviderRegistry {
     }));
   }
 
-  async fetchAllJobs(filters: JobFilters): Promise<Job[]> {
+  async fetchAllJobs(filters: JobFilters): Promise<RawJob[]> {
     const enabledProviders = this.getEnabledProviders();
 
     const results = await Promise.allSettled(
@@ -69,7 +69,7 @@ export class JobProviderRegistry {
     );
 
     // Flatten results
-    const allJobs: Job[] = [];
+    const allJobs: RawJob[] = [];
     for (const result of results) {
       if (result.status === "fulfilled") {
         allJobs.push(...result.value);
@@ -78,7 +78,7 @@ export class JobProviderRegistry {
 
     // Deduplicate by content hash or title+company
     const seen = new Set<string>();
-    const uniqueJobs: Job[] = [];
+    const uniqueJobs: RawJob[] = [];
     for (const job of allJobs) {
       const key = job.contentHash || `${job.title}::${job.company}`.toLowerCase();
       if (!seen.has(key)) {

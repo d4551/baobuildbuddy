@@ -1,3 +1,5 @@
+import type { ResumeData } from "@bao/shared";
+import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
@@ -7,6 +9,67 @@ import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { exportService } from "../services/export-service";
 import { resumeService } from "../services/resume-service";
+
+const resumeTemplateBodySchema = t.Union([
+  t.Literal("modern"),
+  t.Literal("classic"),
+  t.Literal("creative"),
+  t.Literal("minimal"),
+  t.Literal("google-xyz"),
+  t.Literal("gaming"),
+]);
+
+const resumeThemeBodySchema = t.Union([t.Literal("light"), t.Literal("dark")]);
+
+const resumePersonalInfoBodySchema = t.Object({
+  name: t.Optional(t.String({ maxLength: 200 })),
+  email: t.Optional(t.String({ maxLength: 320 })),
+  phone: t.Optional(t.String({ maxLength: 30 })),
+  location: t.Optional(t.String({ maxLength: 200 })),
+  website: t.Optional(t.String({ maxLength: 500 })),
+  linkedIn: t.Optional(t.String({ maxLength: 500 })),
+  github: t.Optional(t.String({ maxLength: 500 })),
+  portfolio: t.Optional(t.String({ maxLength: 500 })),
+});
+
+const resumeExperienceBodySchema = t.Object({
+  title: t.String({ maxLength: 200 }),
+  company: t.String({ maxLength: 200 }),
+  startDate: t.String({ maxLength: 80 }),
+  endDate: t.Optional(t.String({ maxLength: 80 })),
+  location: t.Optional(t.String({ maxLength: 200 })),
+  description: t.Optional(t.String({ maxLength: 5000 })),
+  achievements: t.Optional(t.Array(t.String({ maxLength: 300 }), { maxItems: 50 })),
+  technologies: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 50 })),
+});
+
+const resumeEducationBodySchema = t.Object({
+  degree: t.String({ maxLength: 200 }),
+  field: t.String({ maxLength: 200 }),
+  school: t.String({ maxLength: 200 }),
+  year: t.String({ maxLength: 50 }),
+  gpa: t.Optional(t.String({ maxLength: 20 })),
+});
+
+const resumeSkillsBodySchema = t.Object({
+  technical: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
+  soft: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
+  gaming: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
+});
+
+const resumeProjectBodySchema = t.Object({
+  title: t.String({ maxLength: 200 }),
+  description: t.String({ maxLength: 5000 }),
+  technologies: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 50 })),
+  link: t.Optional(t.String({ maxLength: 500 })),
+});
+
+const resumeGamingExperienceBodySchema = t.Object({
+  gameEngines: t.Optional(t.String({ maxLength: 500 })),
+  platforms: t.Optional(t.String({ maxLength: 500 })),
+  genres: t.Optional(t.String({ maxLength: 500 })),
+  shippedTitles: t.Optional(t.String({ maxLength: 1000 })),
+});
 
 export const resumeRoutes = new Elysia({ prefix: "/resumes" })
   .post(
@@ -73,7 +136,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
   .post(
     "/",
     async ({ body, set }) => {
-      const created = await resumeService.createResume({
+      const createPayload: Omit<ResumeData, "id"> = {
         name: body.name || "Untitled Resume",
         personalInfo: body.personalInfo || {},
         summary: body.summary || "",
@@ -84,23 +147,24 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         gamingExperience: body.gamingExperience || {},
         template: body.template || "modern",
         theme: body.theme || "light",
-        isDefault: body.isDefault || false,
-      });
+        isDefault: body.isDefault === true,
+      };
+      const created = await resumeService.createResume(createPayload);
       set.status = 201;
       return created;
     },
     {
       body: t.Object({
         name: t.Optional(t.String({ maxLength: 200 })),
-        personalInfo: t.Optional(t.Record(t.String(), t.Any())),
+        personalInfo: t.Optional(resumePersonalInfoBodySchema),
         summary: t.Optional(t.String({ maxLength: 5000 })),
-        experience: t.Optional(t.Array(t.Record(t.String(), t.Any()), { maxItems: 50 })),
-        education: t.Optional(t.Array(t.Record(t.String(), t.Any()), { maxItems: 20 })),
-        skills: t.Optional(t.Record(t.String(), t.Any())),
-        projects: t.Optional(t.Array(t.Record(t.String(), t.Any()), { maxItems: 50 })),
-        gamingExperience: t.Optional(t.Record(t.String(), t.Any())),
-        template: t.Optional(t.String({ maxLength: 50 })),
-        theme: t.Optional(t.String({ maxLength: 50 })),
+        experience: t.Optional(t.Array(resumeExperienceBodySchema, { maxItems: 50 })),
+        education: t.Optional(t.Array(resumeEducationBodySchema, { maxItems: 20 })),
+        skills: t.Optional(resumeSkillsBodySchema),
+        projects: t.Optional(t.Array(resumeProjectBodySchema, { maxItems: 50 })),
+        gamingExperience: t.Optional(resumeGamingExperienceBodySchema),
+        template: t.Optional(resumeTemplateBodySchema),
+        theme: t.Optional(resumeThemeBodySchema),
         isDefault: t.Optional(t.Boolean()),
       }),
     },
@@ -124,7 +188,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
   .put(
     "/:id",
     async ({ params, body, set }) => {
-      const updated = await resumeService.updateResume(params.id, {
+      const updatePayload: Partial<ResumeData> = {
         name: body.name,
         personalInfo: body.personalInfo,
         summary: body.summary,
@@ -136,7 +200,8 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         template: body.template,
         theme: body.theme,
         isDefault: body.isDefault,
-      });
+      };
+      const updated = await resumeService.updateResume(params.id, updatePayload);
       if (!updated) {
         set.status = 404;
         return { error: "Resume not found" };
@@ -149,15 +214,15 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
       }),
       body: t.Object({
         name: t.Optional(t.String({ maxLength: 200 })),
-        personalInfo: t.Optional(t.Record(t.String(), t.Any())),
+        personalInfo: t.Optional(resumePersonalInfoBodySchema),
         summary: t.Optional(t.String({ maxLength: 5000 })),
-        experience: t.Optional(t.Array(t.Record(t.String(), t.Any()), { maxItems: 50 })),
-        education: t.Optional(t.Array(t.Record(t.String(), t.Any()), { maxItems: 20 })),
-        skills: t.Optional(t.Record(t.String(), t.Any())),
-        projects: t.Optional(t.Array(t.Record(t.String(), t.Any()), { maxItems: 50 })),
-        gamingExperience: t.Optional(t.Record(t.String(), t.Any())),
-        template: t.Optional(t.String({ maxLength: 50 })),
-        theme: t.Optional(t.String({ maxLength: 50 })),
+        experience: t.Optional(t.Array(resumeExperienceBodySchema, { maxItems: 50 })),
+        education: t.Optional(t.Array(resumeEducationBodySchema, { maxItems: 20 })),
+        skills: t.Optional(resumeSkillsBodySchema),
+        projects: t.Optional(t.Array(resumeProjectBodySchema, { maxItems: 50 })),
+        gamingExperience: t.Optional(resumeGamingExperienceBodySchema),
+        template: t.Optional(resumeTemplateBodySchema),
+        theme: t.Optional(resumeThemeBodySchema),
         isDefault: t.Optional(t.Boolean()),
       }),
     },
@@ -195,7 +260,12 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         set.headers["content-type"] = "application/pdf";
         set.headers["content-disposition"] = `attachment; filename="resume-${params.id}.pdf"`;
 
-        return new Response(pdfBytes, {
+        const pdfBuffer = pdfBytes.buffer.slice(
+          pdfBytes.byteOffset,
+          pdfBytes.byteOffset + pdfBytes.byteLength,
+        );
+
+        return new Response(new Blob([pdfBuffer], { type: "application/pdf" }), {
           headers: {
             "content-type": "application/pdf",
             "content-disposition": `attachment; filename="resume-${params.id}.pdf"`,
@@ -215,7 +285,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
       }),
       body: t.Object({
         format: t.Optional(t.String({ maxLength: 20 })),
-        template: t.Optional(t.String({ maxLength: 50 })),
+        template: t.Optional(resumeTemplateBodySchema),
       }),
     },
   )

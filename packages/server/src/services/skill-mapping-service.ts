@@ -3,12 +3,85 @@ import type {
   CareerPathway,
   CategoryAssessment,
   ReadinessAssessment,
+  SkillEvidence,
   SkillCategory,
   SkillMapping,
 } from "@bao/shared";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { skillMappings } from "../db/schema";
+
+const SKILL_CATEGORIES: readonly SkillCategory[] = [
+  "leadership",
+  "community",
+  "technical",
+  "creative",
+  "analytical",
+  "communication",
+  "project_management",
+];
+
+const DEMAND_LEVELS: readonly SkillMapping["demandLevel"][] = ["high", "medium", "low"];
+
+const EVIDENCE_TYPES: readonly SkillEvidence["type"][] = [
+  "clip",
+  "stats",
+  "community",
+  "achievement",
+  "document",
+  "portfolio_piece",
+  "testimonial",
+  "certificate",
+];
+
+const EVIDENCE_STATUSES: readonly SkillEvidence["verificationStatus"][] = [
+  "pending",
+  "verified",
+  "rejected",
+];
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const normalizeSkillCategory = (value: string | null): SkillCategory =>
+  typeof value === "string" && SKILL_CATEGORIES.includes(value as SkillCategory)
+    ? (value as SkillCategory)
+    : "technical";
+
+const normalizeEvidenceType = (value: unknown): SkillEvidence["type"] =>
+  typeof value === "string" && EVIDENCE_TYPES.includes(value as SkillEvidence["type"])
+    ? (value as SkillEvidence["type"])
+    : "document";
+
+const normalizeEvidenceStatus = (value: unknown): SkillEvidence["verificationStatus"] =>
+  typeof value === "string" && EVIDENCE_STATUSES.includes(value as SkillEvidence["verificationStatus"])
+    ? (value as SkillEvidence["verificationStatus"])
+    : "pending";
+
+const normalizeEvidenceEntries = (value: unknown[] | null): SkillEvidence[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const entries: SkillEvidence[] = [];
+  for (const evidence of value) {
+    if (!isRecord(evidence)) continue;
+    if (typeof evidence.id !== "string") continue;
+    if (typeof evidence.title !== "string") continue;
+    if (typeof evidence.description !== "string") continue;
+
+    entries.push({
+      id: evidence.id,
+      type: normalizeEvidenceType(evidence.type),
+      title: evidence.title,
+      description: evidence.description,
+      url: typeof evidence.url === "string" ? evidence.url : undefined,
+      verificationStatus: normalizeEvidenceStatus(evidence.verificationStatus),
+    });
+  }
+
+  return entries;
+};
 
 export class SkillMappingService {
   /**
@@ -22,9 +95,9 @@ export class SkillMappingService {
       gameExpression: row.gameExpression,
       transferableSkill: row.transferableSkill,
       industryApplications: row.industryApplications || [],
-      evidence: row.evidence || [],
+      evidence: normalizeEvidenceEntries(row.evidence),
       confidence: row.confidence || 50,
-      category: (row.category as SkillCategory) || "technical",
+      category: normalizeSkillCategory(row.category),
       demandLevel: this.normalizeDemandLevel(row.demandLevel),
       verified: false,
       aiGenerated: row.aiGenerated || false,
@@ -76,9 +149,9 @@ export class SkillMappingService {
       gameExpression: row.gameExpression,
       transferableSkill: row.transferableSkill,
       industryApplications: row.industryApplications || [],
-      evidence: row.evidence || [],
+      evidence: normalizeEvidenceEntries(row.evidence),
       confidence: row.confidence || 50,
-      category: (row.category as SkillCategory) || "technical",
+      category: normalizeSkillCategory(row.category),
       demandLevel: this.normalizeDemandLevel(row.demandLevel),
       verified: false,
       aiGenerated: row.aiGenerated || false,
@@ -95,7 +168,7 @@ export class SkillMappingService {
     }
 
     const now = new Date().toISOString();
-    const updateData: Record<string, unknown> = {
+    const updateData: Partial<typeof skillMappings.$inferInsert> = {
       updatedAt: now,
     };
 

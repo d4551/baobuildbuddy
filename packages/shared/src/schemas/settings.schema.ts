@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod/v3";
 import { AI_PROVIDER_DEFAULT_ORDER, AI_PROVIDER_ID_LIST } from "../constants/ai";
 import type { AIProviderType } from "../types/ai";
 import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES } from "../types/settings";

@@ -59,13 +59,11 @@ export class CvQuestionnaireService {
       const raw = JSON.parse(extractJson(response.content));
       if (!Array.isArray(raw)) return [];
 
-      return raw
-        .filter(isCvQuestion)
-        .map((q) => ({
-          id: q.id,
-          question: q.question,
-          category: q.category,
-        }));
+      return raw.filter(isCvQuestion).map((q) => ({
+        id: q.id,
+        question: q.question,
+        category: q.category,
+      }));
     } catch {
       return [];
     }

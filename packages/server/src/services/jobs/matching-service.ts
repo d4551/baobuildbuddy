@@ -23,6 +23,18 @@ export interface UserProfile {
   yearsOfExperience?: number;
 }
 
+type MatchedJob = Omit<Job, "matchScore"> & { matchScore: MatchScore };
+
+function resolveMatchScore(value: number | MatchScore | undefined): number {
+  if (typeof value === "number") {
+    return value;
+  }
+  if (value && typeof value === "object") {
+    return value.overall;
+  }
+  return 0;
+}
+
 /**
  * Calculate a comprehensive match score between a user profile and a job
  * Returns a score from 0-100 with detailed breakdown
@@ -339,7 +351,7 @@ function findMissingSkills(profile: UserProfile, job: Job): string[] {
 export function calculateMatchScores(
   userProfile: UserProfile,
   jobs: Job[],
-): Array<Job & { matchScore: MatchScore }> {
+): MatchedJob[] {
   return jobs.map((job) => ({
     ...job,
     matchScore: calculateMatchScore(userProfile, job),
@@ -351,10 +363,10 @@ export function calculateMatchScores(
  */
 export function sortByMatchScore(
   jobs: Array<Job & { matchScore?: number | MatchScore }>,
-): typeof jobs {
+): Array<Job & { matchScore?: number | MatchScore }> {
   return jobs.sort((a, b) => {
-    const scoreA = typeof a.matchScore === "number" ? a.matchScore : a.matchScore?.overall || 0;
-    const scoreB = typeof b.matchScore === "number" ? b.matchScore : b.matchScore?.overall || 0;
+    const scoreA = resolveMatchScore(a.matchScore);
+    const scoreB = resolveMatchScore(b.matchScore);
     return scoreB - scoreA;
   });
 }

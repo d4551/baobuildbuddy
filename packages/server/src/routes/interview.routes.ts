@@ -19,6 +19,10 @@ type LegacySubmitResponse = {
   response?: unknown;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function asString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
@@ -147,7 +151,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
     "/sessions",
     async ({ body, set }) => {
       const { studioId, config = {} } = body;
-      const normalizedConfig = sessionConfigFromUi(config as Record<string, unknown>);
+      const normalizedConfig = sessionConfigFromUi(isRecord(config) ? config : {});
       const created = await interviewService.startSession(studioId, normalizedConfig);
       const response = await sessionWithDerivedFields(created);
       set.status = 201;
@@ -192,7 +196,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
         return { error: "Interview session not found" };
       }
 
-      const payload = parseResponsePayload(body as LegacySubmitResponse);
+      const payload = parseResponsePayload(body);
       if (!payload) {
         set.status = 400;
         return { error: "questionId or questionIndex and response are required" };

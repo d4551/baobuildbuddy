@@ -7,11 +7,25 @@ import json
 import hashlib
 import sys
 
+DEFAULT_SOURCE_URL = "https://remotegamejobs.com"
+
 try:
     import rpa as r
 except ImportError:
     print(json.dumps({"error": "RPA not installed. Run: pip install rpa"}), file=sys.stderr)
     sys.exit(1)
+
+
+def resolve_source_url() -> str:
+    try:
+        payload = json.loads(sys.stdin.read() or "{}")
+        source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+        if isinstance(source_url, str) and source_url.strip():
+            return source_url.strip()
+    except Exception:
+        pass
+
+    return DEFAULT_SOURCE_URL
 
 
 def content_hash(title: str, company: str, location: str) -> str:
@@ -21,9 +35,10 @@ def content_hash(title: str, company: str, location: str) -> str:
 
 def scrape_jobs() -> list[dict]:
     jobs = []
+    source_url = resolve_source_url()
     try:
         r.init(turbo_mode=True)
-        r.url("https://remotegamejobs.com")
+        r.url(source_url)
         r.wait(4)
 
         # Site uses .job-box containers with jQuery hover effects
@@ -87,7 +102,7 @@ def scrape_jobs() -> list[dict]:
                     "location": loc,
                     "remote": True,  # All jobs on this site are remote
                     "description": "",
-                    "url": item.get("url", "https://remotegamejobs.com"),
+                    "url": item.get("url", source_url),
                     "source": "remotegamejobs",
                     "postedDate": "",
                     "contentHash": content_hash(title, company, loc),

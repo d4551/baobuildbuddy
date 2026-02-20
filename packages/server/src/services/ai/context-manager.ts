@@ -1,3 +1,4 @@
+import type { ChatMessage } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -21,10 +22,14 @@ type ContextDomain =
 
 interface ConversationContext {
   systemPrompt: string;
-  messages: Array<{ role: string; content: string }>;
+  messages: Array<Pick<ChatMessage, "role" | "content">>;
 }
 
 export class ConversationContextManager {
+  private isChatRole(value: string): value is ChatMessage["role"] {
+    return value === "user" || value === "assistant" || value === "system";
+  }
+
   /**
    * Auto-detect domain from message content
    */
@@ -57,10 +62,18 @@ export class ConversationContextManager {
       .limit(20);
 
     // Reverse to get chronological order
-    const messages = history.reverse().map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-    }));
+    const messages: Array<Pick<ChatMessage, "role" | "content">> = history
+      .reverse()
+      .flatMap((msg) =>
+        this.isChatRole(msg.role)
+          ? [
+              {
+                role: msg.role,
+                content: msg.content,
+              },
+            ]
+          : [],
+      );
 
     // Add current message
     messages.push({ role: "user", content: currentMessage });

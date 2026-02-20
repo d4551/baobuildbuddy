@@ -1,8 +1,4 @@
-import {
-  AI_PROVIDER_DEFAULT_ORDER,
-  LOCAL_AI_DEFAULT_ENDPOINT,
-  LOCAL_AI_DEFAULT_MODEL,
-} from "@bao/shared";
+import { AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared";
 import type {
   AIProviderConfig,
   AIProviderStatus,
@@ -45,11 +41,20 @@ export class AIService {
     localModelName?: string | null;
     preferredProvider?: string | null;
   }): AIService {
+    const localModelEndpoint =
+      typeof settings?.localModelEndpoint === "string" && settings.localModelEndpoint.trim()
+        ? settings.localModelEndpoint.trim()
+        : null;
+    const localModelName =
+      typeof settings?.localModelName === "string" && settings.localModelName.trim()
+        ? settings.localModelName.trim()
+        : null;
+
     const configs: AIProviderConfig[] = [
       {
         provider: "local",
-        baseUrl: settings?.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT,
-        model: settings?.localModelName || LOCAL_AI_DEFAULT_MODEL,
+        baseUrl: localModelEndpoint ?? undefined,
+        model: localModelName ?? undefined,
         enabled: true,
       },
     ];
@@ -134,10 +139,14 @@ export class AIService {
             break;
 
           case "local":
-            provider = new LocalProvider(
-              config.baseUrl || LOCAL_AI_DEFAULT_ENDPOINT,
-              config.model || LOCAL_AI_DEFAULT_MODEL,
-            );
+            if (
+              typeof config.baseUrl === "string" &&
+              config.baseUrl.trim().length > 0 &&
+              typeof config.model === "string" &&
+              config.model.trim().length > 0
+            ) {
+              provider = new LocalProvider(config.baseUrl, config.model);
+            }
             break;
         }
 
@@ -400,10 +409,14 @@ export class AIService {
           break;
 
         case "local":
-          provider = new LocalProvider(
-            config.baseUrl || LOCAL_AI_DEFAULT_ENDPOINT,
-            config.model || LOCAL_AI_DEFAULT_MODEL,
-          );
+          if (
+            typeof config.baseUrl === "string" &&
+            config.baseUrl.trim().length > 0 &&
+            typeof config.model === "string" &&
+            config.model.trim().length > 0
+          ) {
+            provider = new LocalProvider(config.baseUrl, config.model);
+          }
           break;
       }
 

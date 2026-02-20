@@ -1,14 +1,13 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { generateId } from "@bao/shared";
 import { and, eq } from "drizzle-orm";
-import type { Elysia } from "elysia";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import { resumes } from "../db/schema/resumes";
 import { applicationAutomationService } from "../services/automation/application-automation-service";
 import { requestJson } from "../test-utils";
 
-let app: Elysia;
+let app: { handle: (request: Request) => Response | Promise<Response> };
 const resumeId = generateId();
 const createdRunIds: string[] = [];
 type RunJobApply = typeof applicationAutomationService.runJobApply;

@@ -1,8 +1,46 @@
 import { generateId } from "@bao/shared";
-import type { CoverLetterData } from "@bao/shared";
+import type { CoverLetterData, CoverLetterTemplate } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema";
+
+const COVER_LETTER_TEMPLATES: readonly CoverLetterTemplate[] = [
+  "professional",
+  "creative",
+  "gaming",
+];
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const toCoverLetterContent = (value: unknown): CoverLetterData["content"] => {
+  if (!isRecord(value)) {
+    return {};
+  }
+  const content: CoverLetterData["content"] = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry === "string") {
+      content[key] = entry;
+    }
+  }
+  return content;
+};
+
+const toContentRecord = (value: CoverLetterData["content"] | undefined): Record<string, unknown> => {
+  const record: Record<string, unknown> = {};
+  if (!value) return record;
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry === "string") {
+      record[key] = entry;
+    }
+  }
+  return record;
+};
+
+const normalizeTemplate = (value: string | null | undefined): CoverLetterTemplate =>
+  value && COVER_LETTER_TEMPLATES.includes(value as CoverLetterTemplate)
+    ? (value as CoverLetterTemplate)
+    : "professional";
 
 export class CoverLetterService {
   /**
@@ -16,8 +54,8 @@ export class CoverLetterService {
       company: row.company,
       position: row.position,
       jobInfo: row.jobInfo || undefined,
-      content: row.content || {},
-      template: row.template || "professional",
+      content: toCoverLetterContent(row.content),
+      template: normalizeTemplate(row.template),
     }));
   }
 
@@ -37,8 +75,8 @@ export class CoverLetterService {
       company: row.company,
       position: row.position,
       jobInfo: row.jobInfo || undefined,
-      content: row.content || {},
-      template: row.template || "professional",
+      content: toCoverLetterContent(row.content),
+      template: normalizeTemplate(row.template),
     };
   }
 
@@ -54,8 +92,8 @@ export class CoverLetterService {
       company: data.company,
       position: data.position,
       jobInfo: data.jobInfo || undefined,
-      content: data.content || {},
-      template: data.template || "professional",
+      content: toContentRecord(data.content),
+      template: normalizeTemplate(data.template),
       createdAt: now,
       updatedAt: now,
     });
@@ -81,15 +119,15 @@ export class CoverLetterService {
     }
 
     const now = new Date().toISOString();
-    const updateData: Record<string, unknown> = {
+    const updateData: Partial<typeof coverLetters.$inferInsert> = {
       updatedAt: now,
     };
 
     if (data.company !== undefined) updateData.company = data.company;
     if (data.position !== undefined) updateData.position = data.position;
     if (data.jobInfo !== undefined) updateData.jobInfo = data.jobInfo;
-    if (data.content !== undefined) updateData.content = data.content;
-    if (data.template !== undefined) updateData.template = data.template;
+    if (data.content !== undefined) updateData.content = toContentRecord(data.content);
+    if (data.template !== undefined) updateData.template = normalizeTemplate(data.template);
 
     await db.update(coverLetters).set(updateData).where(eq(coverLetters.id, id));
 

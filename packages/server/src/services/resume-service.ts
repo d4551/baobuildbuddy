@@ -61,7 +61,7 @@ export class ResumeService {
     const id = generateId();
     const now = new Date().toISOString();
 
-    await db.insert(resumes).values({
+    const insertPayload: typeof resumes.$inferInsert = {
       id,
       name: data.name || "Untitled Resume",
       personalInfo: data.personalInfo || undefined,
@@ -76,7 +76,9 @@ export class ResumeService {
       isDefault: data.isDefault || false,
       createdAt: now,
       updatedAt: now,
-    });
+    };
+
+    await db.insert(resumes).values(insertPayload);
 
     const created = await this.getResume(id);
     if (!created) {
@@ -96,7 +98,7 @@ export class ResumeService {
     }
 
     const now = new Date().toISOString();
-    const updateData: Record<string, unknown> = {
+    const updateData: Partial<typeof resumes.$inferInsert> = {
       updatedAt: now,
     };
 

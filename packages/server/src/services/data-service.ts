@@ -36,6 +36,207 @@ export interface ImportResult {
   errors: string[];
 }
 
+type ResumeInsert = typeof resumes.$inferInsert;
+type CoverLetterInsert = typeof coverLetters.$inferInsert;
+type PortfolioInsert = typeof portfolios.$inferInsert;
+type PortfolioProjectInsert = typeof portfolioProjects.$inferInsert;
+type InterviewSessionInsert = typeof interviewSessions.$inferInsert;
+type GamificationInsert = typeof gamification.$inferInsert;
+type SkillMappingInsert = typeof skillMappings.$inferInsert;
+type ChatHistoryInsert = typeof chatHistory.$inferInsert;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim().length > 0 ? value : undefined;
+
+const asBoolean = (value: unknown): boolean | undefined =>
+  typeof value === "boolean" ? value : undefined;
+
+const asNumber = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) ? value : undefined;
+
+const asUnknownArray = (value: unknown): unknown[] | undefined =>
+  Array.isArray(value) ? value : undefined;
+
+const asStringArray = (value: unknown): string[] | undefined =>
+  Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : undefined;
+
+const asRecord = (value: unknown): Record<string, unknown> | undefined => (isRecord(value) ? value : undefined);
+
+const asStringArrayRecord = (value: unknown): Record<string, string[]> | undefined => {
+  if (!isRecord(value)) return undefined;
+  const result: Record<string, string[]> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (!Array.isArray(entry)) continue;
+    result[key] = entry.filter((item): item is string => typeof item === "string");
+  }
+  return result;
+};
+
+const parseResumeInsert = (value: unknown): ResumeInsert | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  if (!id) return null;
+
+  return {
+    id,
+    name: asString(value.name),
+    personalInfo: asRecord(value.personalInfo),
+    summary: asString(value.summary),
+    experience: asUnknownArray(value.experience) ?? [],
+    education: asUnknownArray(value.education) ?? [],
+    skills: asRecord(value.skills),
+    projects: asUnknownArray(value.projects) ?? [],
+    gamingExperience: asRecord(value.gamingExperience),
+    template: asString(value.template),
+    theme: asString(value.theme),
+    isDefault: asBoolean(value.isDefault),
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
+  };
+};
+
+const parseCoverLetterInsert = (value: unknown): CoverLetterInsert | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  const company = asString(value.company);
+  const position = asString(value.position);
+  if (!id || !company || !position) return null;
+
+  return {
+    id,
+    company,
+    position,
+    jobInfo: asRecord(value.jobInfo),
+    content: asRecord(value.content) ?? {},
+    template: asString(value.template),
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
+  };
+};
+
+const parsePortfolioInsert = (value: unknown): PortfolioInsert | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  if (!id) return null;
+  return {
+    id,
+    metadata: asRecord(value.metadata),
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
+  };
+};
+
+const parsePortfolioProjectInsert = (value: unknown): PortfolioProjectInsert | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  const portfolioId = asString(value.portfolioId);
+  const title = asString(value.title);
+  const description = asString(value.description);
+  if (!id || !portfolioId || !title || !description) return null;
+
+  return {
+    id,
+    portfolioId,
+    title,
+    description,
+    technologies: asStringArray(value.technologies) ?? [],
+    image: asString(value.image),
+    liveUrl: asString(value.liveUrl),
+    githubUrl: asString(value.githubUrl),
+    tags: asStringArray(value.tags) ?? [],
+    featured: asBoolean(value.featured),
+    role: asString(value.role),
+    platforms: asStringArray(value.platforms),
+    engines: asStringArray(value.engines),
+    sortOrder: asNumber(value.sortOrder),
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
+  };
+};
+
+const parseInterviewSessionInsert = (value: unknown): InterviewSessionInsert | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  const studioId = asString(value.studioId);
+  if (!id || !studioId) return null;
+
+  return {
+    id,
+    studioId,
+    config: asRecord(value.config),
+    questions: asUnknownArray(value.questions) ?? [],
+    responses: asUnknownArray(value.responses) ?? [],
+    finalAnalysis: asRecord(value.finalAnalysis),
+    status: asString(value.status),
+    startTime: asNumber(value.startTime),
+    endTime: asNumber(value.endTime),
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
+  };
+};
+
+const parseGamificationInsert = (value: unknown): GamificationInsert | null => {
+  if (!isRecord(value)) return null;
+  return {
+    id: asString(value.id) ?? "default",
+    xp: asNumber(value.xp),
+    level: asNumber(value.level),
+    achievements: asStringArray(value.achievements) ?? [],
+    dailyChallenges: asStringArrayRecord(value.dailyChallenges),
+    longestStreak: asNumber(value.longestStreak),
+    currentStreak: asNumber(value.currentStreak),
+    lastActiveDate: asString(value.lastActiveDate),
+    stats: asRecord(value.stats),
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
+  };
+};
+
+const parseSkillMappingInsert = (value: unknown): SkillMappingInsert | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  const gameExpression = asString(value.gameExpression);
+  const transferableSkill = asString(value.transferableSkill);
+  if (!id || !gameExpression || !transferableSkill) return null;
+
+  return {
+    id,
+    gameExpression,
+    transferableSkill,
+    industryApplications: asStringArray(value.industryApplications) ?? [],
+    evidence: asUnknownArray(value.evidence) ?? [],
+    confidence: asNumber(value.confidence),
+    category: asString(value.category),
+    demandLevel: asString(value.demandLevel),
+    aiGenerated: asBoolean(value.aiGenerated),
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
+  };
+};
+
+const parseChatHistoryInsert = (value: unknown): ChatHistoryInsert | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id);
+  const role = asString(value.role);
+  const content = asString(value.content);
+  const timestamp = asString(value.timestamp);
+  if (!id || !role || !content || !timestamp) return null;
+
+  return {
+    id,
+    role,
+    content,
+    timestamp,
+    sessionId: asString(value.sessionId),
+    createdAt: asString(value.createdAt),
+  };
+};
+
 export class DataService {
   /**
    * Export all user data as JSON
@@ -160,7 +361,10 @@ export class DataService {
         let count = 0;
         for (const resume of data.resumes) {
           try {
-            const r = resume as Record<string, unknown>;
+            const r = parseResumeInsert(resume);
+            if (!r) {
+              throw new Error("Invalid resume payload");
+            }
             await db
               .insert(resumes)
               .values(r)
@@ -170,7 +374,7 @@ export class DataService {
               });
             count++;
           } catch (e) {
-            const r = resume as Record<string, unknown>;
+            const r = isRecord(resume) ? resume : {};
             errors.push(
               `Resume "${r.name}" import failed: ${e instanceof Error ? e.message : String(e)}`,
             );
@@ -184,7 +388,10 @@ export class DataService {
         let count = 0;
         for (const cl of data.coverLetters) {
           try {
-            const c = cl as Record<string, unknown>;
+            const c = parseCoverLetterInsert(cl);
+            if (!c) {
+              throw new Error("Invalid cover letter payload");
+            }
             await db
               .insert(coverLetters)
               .values(c)
@@ -207,9 +414,13 @@ export class DataService {
         // Ensure portfolio container exists
         if (data.portfolio) {
           try {
+            const portfolioRow = parsePortfolioInsert(data.portfolio);
+            if (!portfolioRow) {
+              throw new Error("Invalid portfolio payload");
+            }
             await db
               .insert(portfolios)
-              .values(data.portfolio as Record<string, unknown>)
+              .values(portfolioRow)
               .onConflictDoNothing();
           } catch {
             /* ignore */
@@ -219,7 +430,10 @@ export class DataService {
         let count = 0;
         for (const project of data.portfolioProjects) {
           try {
-            const p = project as Record<string, unknown>;
+            const p = parsePortfolioProjectInsert(project);
+            if (!p) {
+              throw new Error("Invalid portfolio project payload");
+            }
             await db
               .insert(portfolioProjects)
               .values(p)
@@ -229,7 +443,7 @@ export class DataService {
               });
             count++;
           } catch (e) {
-            const p = project as Record<string, unknown>;
+            const p = isRecord(project) ? project : {};
             errors.push(
               `Portfolio project "${p.title}" import failed: ${e instanceof Error ? e.message : String(e)}`,
             );
@@ -243,7 +457,10 @@ export class DataService {
         let count = 0;
         for (const session of data.interviewSessions) {
           try {
-            const sess = session as Record<string, unknown>;
+            const sess = parseInterviewSessionInsert(session);
+            if (!sess) {
+              throw new Error("Invalid interview session payload");
+            }
             await db
               .insert(interviewSessions)
               .values(sess)
@@ -268,15 +485,17 @@ export class DataService {
             .select()
             .from(gamification)
             .where(eq(gamification.id, "default"));
+          const gam = parseGamificationInsert(data.gamification);
+          if (!gam) {
+            throw new Error("Invalid gamification payload");
+          }
           if (existing.length > 0) {
-            const gam = data.gamification as Record<string, unknown>;
             const { id, createdAt, ...rest } = gam;
             await db
               .update(gamification)
               .set({ ...rest, updatedAt: new Date().toISOString() })
               .where(eq(gamification.id, "default"));
           } else {
-            const gam = data.gamification as Record<string, unknown>;
             await db.insert(gamification).values({ ...gam, id: "default" });
           }
           imported.gamification = 1;
@@ -290,7 +509,10 @@ export class DataService {
         let count = 0;
         for (const skill of data.skillMappings) {
           try {
-            const sk = skill as Record<string, unknown>;
+            const sk = parseSkillMappingInsert(skill);
+            if (!sk) {
+              throw new Error("Invalid skill mapping payload");
+            }
             await db
               .insert(skillMappings)
               .values(sk)
@@ -313,7 +535,10 @@ export class DataService {
         let count = 0;
         for (const msg of data.chatHistory) {
           try {
-            const m = msg as Record<string, unknown>;
+            const m = parseChatHistoryInsert(msg);
+            if (!m) {
+              continue;
+            }
             await db.insert(chatHistory).values(m).onConflictDoNothing();
             count++;
           } catch {

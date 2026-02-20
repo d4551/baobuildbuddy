@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import type { PortfolioMetadata } from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { exportService } from "../services/export-service";
 import { portfolioService } from "../services/portfolio-service";
@@ -22,6 +22,10 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
     "/projects",
     async ({ body, set }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
+      if (!portfolio.id) {
+        set.status = 500;
+        return { error: "Portfolio id is not available" };
+      }
       const newProject = await portfolioService.addProject(portfolio.id, {
         title: body.title,
         description: body.description,
@@ -58,8 +62,12 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
   )
   .post(
     "/projects/reorder",
-    async ({ body }) => {
+    async ({ body, set }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
+      if (!portfolio.id) {
+        set.status = 500;
+        return { error: "Portfolio id is not available" };
+      }
       await portfolioService.reorderProjects(portfolio.id, body.orderedIds);
       return await portfolioService.getPortfolioPayload();
     },
@@ -141,15 +149,21 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
       }
 
       try {
+        const metadata: PortfolioMetadata = portfolio.metadata ?? {};
         const pdfBytes = await exportService.exportPortfolioPDF(
-          portfolio.metadata,
+          metadata,
           portfolio.projects,
         );
 
         set.headers["content-type"] = "application/pdf";
         set.headers["content-disposition"] = `attachment; filename="portfolio-${portfolio.id}.pdf"`;
 
-        return new Response(pdfBytes, {
+        const pdfBuffer = pdfBytes.buffer.slice(
+          pdfBytes.byteOffset,
+          pdfBytes.byteOffset + pdfBytes.byteLength,
+        );
+
+        return new Response(new Blob([pdfBuffer], { type: "application/pdf" }), {
           headers: {
             "content-type": "application/pdf",
             "content-disposition": `attachment; filename="portfolio-${portfolio.id}.pdf"`,

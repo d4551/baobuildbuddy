@@ -39,7 +39,13 @@ interface StudioContext {
   remoteWork: boolean;
 }
 
-const toPersistedRecord = (value: Record<string, unknown>): Record<string, unknown> => value;
+const toPersistedRecord = (value: object): Record<string, unknown> => {
+  const record: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    record[key] = entry;
+  }
+  return record;
+};
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null;
 
@@ -693,10 +699,7 @@ function normalizeQuestionFeedback(
 
   return {
     score: normalizeScore(parsedScore),
-    feedback:
-      typeof raw.feedback === "string" && raw.feedback.trim()
-        ? raw.feedback.trim()
-        : "",
+    feedback: typeof raw.feedback === "string" && raw.feedback.trim() ? raw.feedback.trim() : "",
     strengths: parseStringArray(raw.strengths),
     improvements: parseStringArray(raw.improvements),
   };

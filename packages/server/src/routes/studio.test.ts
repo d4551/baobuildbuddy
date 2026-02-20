@@ -1,9 +1,8 @@
 import type { Database } from "bun:sqlite";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { Elysia } from "elysia";
 import { requestJson } from "../test-utils";
 
-let app: Elysia;
+let app: { handle: (request: Request) => Response | Promise<Response> };
 let sqlite: Database;
 
 beforeAll(async () => {

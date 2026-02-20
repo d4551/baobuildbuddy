@@ -15,10 +15,8 @@ async function getAIService(): Promise<AIServiceInstance> {
   return AIService.fromSettings(settingsRows[0]);
 }
 
-type InterviewPayloadType = "start_session" | "submit_response" | "end_session";
-
 type InterviewMessage = {
-  type: InterviewPayloadType;
+  type: string;
   sessionId?: string;
   content?: string;
   studioId?: string;
@@ -48,7 +46,9 @@ type FeedbackSummary = {
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null;
 
-const isQuestionRecord = (value: unknown): value is { id: string; question: string; type: string } =>
+const isQuestionRecord = (
+  value: unknown,
+): value is { id: string; question: string; type: string } =>
   isRecord(value) &&
   typeof value.id === "string" &&
   typeof value.question === "string" &&
@@ -288,8 +288,6 @@ Only return the JSON object.`;
     feedback,
     timestamp: new Date().toISOString(),
     questionCategory: currentQuestion?.type,
-    preferredModel: undefined,
-    preferredProvider: "local",
   };
 
   const nextQuestion = questions[questionIndex + 1] ?? null;

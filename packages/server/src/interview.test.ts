@@ -1,21 +1,17 @@
 import type { Database } from "bun:sqlite";
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import type { InterviewResponse, InterviewSession } from "@bao/shared";
-import type { Elysia } from "elysia";
+import type { AppRequestHandler } from "./test-utils";
+import { requestJson } from "./test-utils";
 
 interface TestHarness {
-  app: Elysia;
+  app: AppRequestHandler;
   sqlite: Database;
   interviewService: {
     startSession(studioId: string, rawConfig?: Record<string, unknown>): Promise<InterviewSession>;
     addResponse(sessionId: string, response: InterviewResponse): Promise<InterviewSession | null>;
     getSession(id: string): Promise<InterviewSession | null>;
   };
-}
-
-interface ApiResponseEnvelope<T> {
-  status: number;
-  body: T;
 }
 
 async function createTestHarness(): Promise<TestHarness> {
@@ -35,26 +31,6 @@ async function createTestHarness(): Promise<TestHarness> {
     app,
     sqlite: dbModule.sqlite,
     interviewService: interviewServiceModule.interviewService,
-  };
-}
-
-async function requestJson<T>(
-  app: Elysia,
-  method: string,
-  path: string,
-  body?: unknown,
-): Promise<ApiResponseEnvelope<T>> {
-  const response = await app.handle(
-    new Request(`http://localhost${path}`, {
-      method,
-      headers: body ? { "content-type": "application/json" } : {},
-      body: body ? JSON.stringify(body) : undefined,
-    }),
-  );
-
-  return {
-    status: response.status,
-    body: (await response.json()) as T,
   };
 }
 

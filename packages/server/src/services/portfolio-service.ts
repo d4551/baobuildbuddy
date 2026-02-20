@@ -13,7 +13,41 @@ type PortfolioRecord = {
 
 export class PortfolioService {
   private toMetadataOrDefault(metadata?: Record<string, unknown> | null): PortfolioMetadata {
-    return (metadata || {}) as PortfolioMetadata;
+    if (!metadata) {
+      return {};
+    }
+    const output: PortfolioMetadata = {};
+    if (typeof metadata.author === "string") output.author = metadata.author;
+    if (typeof metadata.title === "string") output.title = metadata.title;
+    if (typeof metadata.description === "string") output.description = metadata.description;
+    if (typeof metadata.bio === "string") output.bio = metadata.bio;
+    if (typeof metadata.email === "string") output.email = metadata.email;
+    if (typeof metadata.website === "string") output.website = metadata.website;
+    if (typeof metadata.social === "object" && metadata.social !== null) {
+      const social: Record<string, string> = {};
+      for (const [key, value] of Object.entries(metadata.social)) {
+        if (typeof value === "string") {
+          social[key] = value;
+        }
+      }
+      output.social = social;
+    }
+    return output;
+  }
+
+  private metadataToRecord(metadata?: PortfolioMetadata): Record<string, unknown> {
+    if (!metadata) {
+      return {};
+    }
+    const record: Record<string, unknown> = {};
+    if (metadata.author) record.author = metadata.author;
+    if (metadata.title) record.title = metadata.title;
+    if (metadata.description) record.description = metadata.description;
+    if (metadata.bio) record.bio = metadata.bio;
+    if (metadata.email) record.email = metadata.email;
+    if (metadata.website) record.website = metadata.website;
+    if (metadata.social) record.social = metadata.social;
+    return record;
   }
 
   private toProject(row: {
@@ -97,7 +131,7 @@ export class PortfolioService {
    * Get the full portfolio contract (header + projects).
    */
   async getPortfolio(): Promise<PortfolioData> {
-    const portfolio = await this.getPortfolioRecord();
+    const portfolio = (await this.getPortfolioRecord()) ?? (await this.getOrCreateDefaultPortfolio());
     const projects = await this.getProjects(portfolio.id);
     return this.toPortfolioData(portfolio, projects);
   }
@@ -112,7 +146,7 @@ export class PortfolioService {
     await db
       .update(portfolios)
       .set({
-        metadata: data.metadata || {},
+        metadata: this.metadataToRecord(data.metadata),
         updatedAt: now,
       })
       .where(eq(portfolios.id, portfolio.id));
@@ -209,7 +243,7 @@ export class PortfolioService {
     }
 
     const now = new Date().toISOString();
-    const updateData: Record<string, unknown> = {
+    const updateData: Partial<typeof portfolioProjects.$inferInsert> = {
       updatedAt: now,
     };
 
@@ -258,10 +292,12 @@ export class PortfolioService {
     }
 
     for (let i = 0; i < orderedIds.length; i++) {
+      const orderedId = orderedIds[i];
+      if (!orderedId) continue;
       await db
         .update(portfolioProjects)
         .set({ sortOrder: i, updatedAt: new Date().toISOString() })
-        .where(eq(portfolioProjects.id, orderedIds[i]));
+        .where(eq(portfolioProjects.id, orderedId));
     }
 
     const remainingProjects = existing.filter((project) => !orderedIds.includes(project.id));

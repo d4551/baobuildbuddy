@@ -10,6 +10,17 @@ import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts";
 import { exportService } from "../services/export-service";
 
+const toJsonRecord = (value: unknown): Record<string, unknown> => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return {};
+  }
+  const record: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    record[key] = entry;
+  }
+  return record;
+};
+
 export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
   .get("/", async () => {
     const all = await db.select().from(coverLetters).orderBy(desc(coverLetters.createdAt));
@@ -231,7 +242,7 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
           {
             company: letter.company,
             position: letter.position,
-            content: (letter.content || {}) as Record<string, unknown>,
+            content: toJsonRecord(letter.content),
           },
           {
             name: profile?.name || "",
@@ -241,7 +252,7 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
           },
         );
 
-        return new Response(pdfBytes, {
+        return new Response(new Blob([pdfBytes], { type: "application/pdf" }), {
           headers: {
             "content-type": "application/pdf",
             "content-disposition": `attachment; filename="cover-letter-${params.id}.pdf"`,

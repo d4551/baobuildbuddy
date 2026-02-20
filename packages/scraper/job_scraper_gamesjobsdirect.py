@@ -7,12 +7,34 @@ Covers UK, USA, Canada, and Australia gaming positions.
 import json
 import hashlib
 import sys
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+
+DEFAULT_SOURCE_URL = "https://www.gamesjobsdirect.com/results"
 
 try:
     import rpa as r
 except ImportError:
     print(json.dumps({"error": "RPA not installed. Run: pip install rpa"}), file=sys.stderr)
     sys.exit(1)
+
+
+def resolve_source_url() -> str:
+    try:
+        payload = json.loads(sys.stdin.read() or "{}")
+        source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+        if isinstance(source_url, str) and source_url.strip():
+            return source_url.strip()
+    except Exception:
+        pass
+
+    return DEFAULT_SOURCE_URL
+
+
+def with_page(base_url: str, page: int) -> str:
+    parsed = urlparse(base_url)
+    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    query["page"] = str(page)
+    return urlunparse(parsed._replace(query=urlencode(query)))
 
 
 def content_hash(title: str, company: str, location: str) -> str:
@@ -82,9 +104,10 @@ def scrape_page() -> list[dict]:
 
 def scrape_jobs() -> list[dict]:
     jobs = []
+    source_url = resolve_source_url()
     try:
         r.init(turbo_mode=True)
-        r.url("https://www.gamesjobsdirect.com/results")
+        r.url(source_url)
         r.wait(4)
 
         # Scrape first 2 pages
@@ -102,7 +125,7 @@ def scrape_jobs() -> list[dict]:
                     "location": loc,
                     "remote": "remote" in loc.lower(),
                     "description": "",
-                    "url": item.get("url", "https://www.gamesjobsdirect.com/results"),
+                    "url": item.get("url", source_url),
                     "source": "gamesjobsdirect",
                     "postedDate": "",
                     "contentHash": content_hash(title, company, loc),
@@ -111,7 +134,7 @@ def scrape_jobs() -> list[dict]:
             # Try to go to next page
             if page < 1:
                 try:
-                    r.url(f"https://www.gamesjobsdirect.com/results?page={page + 2}")
+                    r.url(with_page(source_url, page + 2))
                     r.wait(3)
                 except Exception:
                     break

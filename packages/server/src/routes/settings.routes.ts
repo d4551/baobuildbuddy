@@ -3,7 +3,6 @@ import {
   AI_PROVIDER_TEST_STRATEGY_BY_ID,
   DEFAULT_NOTIFICATION_PREFERENCES,
   DEFAULT_SETTINGS_ID,
-  LOCAL_AI_DEFAULT_ENDPOINT,
   automationSettingsSchema,
 } from "@bao/shared";
 import type { AIProviderType, AutomationSettings, NotificationPreferences } from "@bao/shared";
@@ -119,12 +118,41 @@ const nullableJsonValueBodySchema = t.Union([jsonValueBodySchema, t.Null()]);
 
 const automationSettingsPatchSchema = automationSettingsSchema.removeDefault().partial();
 
+const normalizeNotificationPreferences = (
+  current: Record<string, boolean> | NotificationPreferences | null | undefined,
+): NotificationPreferences => ({
+  ...DEFAULT_NOTIFICATION_PREFERENCES,
+  achievements:
+    typeof current?.achievements === "boolean"
+      ? current.achievements
+      : DEFAULT_NOTIFICATION_PREFERENCES.achievements,
+  dailyChallenges:
+    typeof current?.dailyChallenges === "boolean"
+      ? current.dailyChallenges
+      : DEFAULT_NOTIFICATION_PREFERENCES.dailyChallenges,
+  levelUp:
+    typeof current?.levelUp === "boolean"
+      ? current.levelUp
+      : DEFAULT_NOTIFICATION_PREFERENCES.levelUp,
+  jobAlerts:
+    typeof current?.jobAlerts === "boolean"
+      ? current.jobAlerts
+      : DEFAULT_NOTIFICATION_PREFERENCES.jobAlerts,
+});
+
+const toNotificationRecord = (value: NotificationPreferences): Record<string, boolean> => ({
+  achievements: value.achievements,
+  dailyChallenges: value.dailyChallenges,
+  levelUp: value.levelUp,
+  jobAlerts: value.jobAlerts,
+});
+
 const mergeNotifications = (
-  current: NotificationPreferences | null | undefined,
+  current: Record<string, boolean> | NotificationPreferences | null | undefined,
   patch: Partial<NotificationPreferences> | null | undefined,
 ): NotificationPreferences => ({
   ...DEFAULT_NOTIFICATION_PREFERENCES,
-  ...(current ?? {}),
+  ...normalizeNotificationPreferences(current),
   ...(patch ?? {}),
 });
 
@@ -217,7 +245,8 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       if (body.language !== undefined) update.language = body.language;
 
       if (body.notifications !== undefined) {
-        update.notifications = mergeNotifications(existingRow.notifications, body.notifications);
+        const mergedNotifications = mergeNotifications(existingRow.notifications, body.notifications);
+        update.notifications = toNotificationRecord(mergedNotifications);
       }
 
       if (body.automationSettings !== undefined) {
@@ -312,13 +341,32 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
   .post(
     "/test-api-key",
     async ({ body }) => {
-      const strategy = AI_PROVIDER_TEST_STRATEGY_BY_ID[body.provider];
+      const strategy = (() => {
+        switch (body.provider) {
+          case "gemini":
+            return AI_PROVIDER_TEST_STRATEGY_BY_ID.gemini;
+          case "openai":
+            return AI_PROVIDER_TEST_STRATEGY_BY_ID.openai;
+          case "claude":
+            return AI_PROVIDER_TEST_STRATEGY_BY_ID.claude;
+          case "local":
+            return AI_PROVIDER_TEST_STRATEGY_BY_ID.local;
+          case "huggingface":
+            return AI_PROVIDER_TEST_STRATEGY_BY_ID.huggingface;
+          default:
+            return null;
+        }
+      })();
+
       if (!strategy) {
-        return { valid: false, provider: body.provider, error: "Unknown provider" };
+        return {
+          valid: false,
+          provider: body.provider,
+          error: "Unknown provider",
+        };
       }
 
-      const endpointInput =
-        body.provider === "local" ? body.key || LOCAL_AI_DEFAULT_ENDPOINT : "unused";
+      const endpointInput = body.provider === "local" ? body.key : "unused";
       const requestUrl = strategy.buildUrl(body.key, endpointInput);
       const requestInit = strategy.buildInit(body.key, endpointInput);
 
@@ -335,7 +383,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
     {
       body: t.Object({
         provider: t.Union(VALID_PROVIDERS.map((provider) => t.Literal(provider))),
-        key: t.String({ maxLength: API_KEY_MAX_LENGTH }),
+        key: t.String({ minLength: 1, maxLength: API_KEY_MAX_LENGTH }),
       }),
     },
   )

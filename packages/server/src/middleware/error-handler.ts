@@ -11,11 +11,11 @@ const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
  * @returns Flattened field-level details when present.
  */
 function readValidationFields(error: unknown): unknown[] | undefined {
-  if (typeof error !== "object" || error === null || !("all" in error)) {
+  if (typeof error !== "object" || error === null) {
     return undefined;
   }
 
-  const details = (error as { all?: unknown }).all;
+  const details = Reflect.get(error, "all");
   if (Array.isArray(details)) return details;
   if (typeof details === "function") {
     const computed = details();

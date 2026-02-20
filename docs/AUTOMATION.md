@@ -21,6 +21,7 @@ BaoBuildBuddy uses RPA-Python for browser automation workflows through direct su
   - `studio_scraper.py`
 - Automation runner on the server lives in `packages/server/src/services/automation/rpa-runner.ts` and launches Python with `Bun.spawn`.
 - Job application orchestration is implemented in `packages/server/src/services/automation/application-automation-service.ts`.
+- Job board scraper execution is implemented in `packages/server/src/services/scraper-service.ts` and now sends typed stdin payload to scripts (`{ sourceUrl?: string }`), so runtime source endpoints are settings-driven instead of script hardcoded.
 
 ### RPA input contract (`apply_job_rpa.py`)
 
@@ -47,6 +48,16 @@ BaoBuildBuddy uses RPA-Python for browser automation workflows through direct su
   }
 }
 ```
+
+### Job board scraper input contract
+
+```json
+{
+  "sourceUrl": "https://example.com/jobs"
+}
+```
+
+`sourceUrl` is optional for scraper scripts and is resolved from `settings.automationSettings.jobProviders.gamingPortals[].fallbackUrl` by the provider layer.
 
 ### RPA output contract
 

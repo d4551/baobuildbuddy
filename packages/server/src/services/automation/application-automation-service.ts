@@ -71,7 +71,25 @@ const MAX_SCREENSHOT_RETENTION_DAYS = 30;
 const MS_PER_DAY = 86_400_000;
 const CLEANUP_LIMIT = 500;
 const MAX_CONCURRENT_RUNS = 5;
-const AUTOMATION_TERMINAL_STATUSES = ["success", "error"] as const;
+const AUTOMATION_TERMINAL_STATUSES = ["success", "error"];
+
+const toJsonRecord = (value: object): Record<string, unknown> => {
+  const record: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    record[key] = entry;
+  }
+  return record;
+};
+
+const toProgressRecord = (value: AutomationProgress): Record<string, unknown> => {
+  const record: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (entry !== undefined) {
+      record[key] = entry;
+    }
+  }
+  return record;
+};
 
 /**
  * Run-level error indicating the configured concurrency limit was exceeded.
@@ -512,7 +530,7 @@ export class ApplicationAutomationService {
       .update(automationRuns)
       .set({
         status: finalStatus,
-        output,
+        output: toJsonRecord(output),
         screenshots: output.screenshots,
         error: output.error,
         progress: FINISHED_PROGRESS,
@@ -611,7 +629,7 @@ export class ApplicationAutomationService {
         event.totalSteps = Math.max(0, Math.trunc(totalSteps));
       }
 
-      broadcastProgress(runId, event);
+      broadcastProgress(runId, toProgressRecord(event));
       onProgress?.(event);
     };
 

@@ -6,6 +6,16 @@
 import { jobAggregator } from "./job-aggregator";
 import { type UserProfile, calculateMatchScore } from "./matching-service";
 
+function isTimelineEvent(
+  value: unknown,
+): value is { date: string; description: string } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
+  return typeof candidate.date === "string" && typeof candidate.description === "string";
+}
+
 // Example 1: Refresh jobs from all providers
 async function refreshJobs() {
   console.log("Refreshing jobs from all providers...");
@@ -156,7 +166,9 @@ async function trackApplications() {
     if (app.timeline && app.timeline.length > 0) {
       console.log("  Timeline:");
       for (const event of app.timeline) {
-        console.log(`    - ${event.date}: ${event.description}`);
+        if (isTimelineEvent(event)) {
+          console.log(`    - ${event.date}: ${event.description}`);
+        }
       }
     }
   }

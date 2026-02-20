@@ -9,6 +9,7 @@ import type {
   JobExperienceLevel,
   JobFilters,
   JobSearchResult,
+  SalaryRange,
   JobType,
   Platform,
   StudioType,
@@ -557,6 +558,7 @@ export class JobAggregator {
    */
   private rawJobToJob(raw: RawJob): typeof jobs.$inferInsert {
     const contentHash = generateContentHash(raw);
+    const applyUrl = typeof raw.applyUrl === "string" && raw.applyUrl.trim() ? raw.applyUrl : null;
 
     return {
       id: crypto.randomUUID(),
@@ -578,7 +580,7 @@ export class JobAggregator {
       gameGenres: this.extractGenres(raw.description),
       platforms: this.extractPlatforms(raw.description),
       tags: this.generateTags(raw),
-      applicationUrl: (raw.applyUrl as string) || raw.url,
+      applicationUrl: applyUrl || raw.url,
     };
   }
 
@@ -593,7 +595,7 @@ export class JobAggregator {
       location: row.location,
       remote: row.remote ?? false,
       hybrid: row.hybrid ?? undefined,
-      salary: (row.salary as Job["salary"]) ?? undefined,
+      salary: this.normalizeSalary(row.salary),
       description: row.description ?? "",
       requirements: row.requirements ?? undefined,
       technologies: row.technologies ?? undefined,
@@ -601,7 +603,7 @@ export class JobAggregator {
       type: (row.type || "full-time") as JobType,
       postedDate: row.postedDate || new Date().toISOString(),
       url: row.url,
-      source: row.source,
+      source: row.source ?? undefined,
       contentHash: row.contentHash ?? undefined,
       studioType: this.normalizeStudioType(row.studioType),
       gameGenres: this.normalizeGameGenres(row.gameGenres),
@@ -610,6 +612,31 @@ export class JobAggregator {
       companyLogo: row.companyLogo ?? undefined,
       applicationUrl: row.applicationUrl ?? undefined,
     };
+  }
+
+  private normalizeSalary(value: Record<string, unknown> | null): Job["salary"] | undefined {
+    if (!value) return undefined;
+
+    if (typeof value.label === "string" && value.label.trim().length > 0) {
+      return value.label;
+    }
+
+    const min = typeof value.min === "number" ? value.min : undefined;
+    const max = typeof value.max === "number" ? value.max : undefined;
+    if (min !== undefined && max !== undefined) {
+      const normalized: SalaryRange = {
+        min,
+        max,
+        currency: typeof value.currency === "string" ? value.currency : undefined,
+        frequency:
+          value.frequency === "yearly" || value.frequency === "monthly" || value.frequency === "hourly"
+            ? value.frequency
+            : undefined,
+      };
+      return normalized;
+    }
+
+    return undefined;
   }
 
   // Helper methods for data enrichment

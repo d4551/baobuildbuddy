@@ -1,8 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { Elysia } from "elysia";
 import { requestJson } from "../test-utils";
 
-let app: Elysia;
+let app: { handle: (request: Request) => Response | Promise<Response> };
 let createdId: string;
 
 beforeAll(async () => {

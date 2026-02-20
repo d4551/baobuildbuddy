@@ -1,11 +1,10 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { generateId } from "@bao/shared";
-import type { Elysia } from "elysia";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { requestJson } from "../test-utils";
 
-let app: Elysia;
+let app: { handle: (request: Request) => Response | Promise<Response> };
 
 beforeAll(async () => {
   const initModule = await import("../db/init");

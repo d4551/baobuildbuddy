@@ -161,9 +161,9 @@ export function useResume() {
     const res = await $fetch<ResumeSynthesisSuccess | ResumeSynthesisError>(
       "/api/resumes/from-questions/synthesize",
       {
-      method: "POST",
-      body: { questionsAndAnswers },
-      headers: key ? { Authorization: `Bearer ${key}` } : {},
+        method: "POST",
+        body: { questionsAndAnswers },
+        headers: key ? { Authorization: `Bearer ${key}` } : {},
       },
     );
     if (isResumeSynthesisError(res) && res.error)

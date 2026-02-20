@@ -1,11 +1,14 @@
 import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import type { Elysia } from "elysia";
 
 export interface ApiResponseEnvelope<T> {
   status: number;
   body: T;
+}
+
+export interface AppRequestHandler {
+  handle(request: Request): Response | Promise<Response>;
 }
 
 export function createTestDbPath(prefix: string): string {
@@ -15,7 +18,7 @@ export function createTestDbPath(prefix: string): string {
 }
 
 export async function requestJson<T>(
-  app: Elysia,
+  app: AppRequestHandler,
   method: string,
   path: string,
   body?: unknown,
