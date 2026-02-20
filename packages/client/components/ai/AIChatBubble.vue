@@ -1,24 +1,29 @@
 <script setup lang="ts">
 import type { ChatMessage } from "@bao/shared";
+import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(
   defineProps<{
     message: ChatMessage;
-    locale: string;
+    locale?: string;
     isStreaming?: boolean;
     userLabel: string;
     assistantLabel: string;
     isLatestAssistantMessage?: boolean;
   }>(),
   {
+    locale: DEFAULT_APP_LANGUAGE,
     isStreaming: false,
     isLatestAssistantMessage: false,
   },
 );
 
 const { t } = useI18n();
+const CHAT_MESSAGE_WIDTH_CLASS = "w-fit min-w-36 max-w-md lg:max-w-2xl";
+const CHAT_BUBBLE_SIZE_CLASS =
+  "min-h-12 px-4 py-3 text-sm leading-relaxed sm:text-base";
 const isAssistant = computed(() => props.message.role === "assistant");
 const statusTextId = computed(() => (props.message.id ? `chat-status-${props.message.id}` : ""));
 const chatClass = computed(() => (isAssistant.value ? "chat-start" : "chat-end"));
@@ -62,7 +67,7 @@ const ariaLabel = computed(() => {
 
 <template>
   <article
-    class="chat"
+    class="chat w-full"
     :class="chatClass"
     role="listitem"
     :aria-label="ariaLabel"
@@ -104,7 +109,7 @@ const ariaLabel = computed(() => {
         <span class="text-xl">{{ userLabel }}</span>
       </div>
     </div>
-    <div class="chat-header mb-1">
+    <div class="chat-header mb-1" :class="CHAT_MESSAGE_WIDTH_CLASS">
       {{ messageTitle }}
       <time
         v-if="formattedTime"
@@ -114,7 +119,10 @@ const ariaLabel = computed(() => {
         {{ formattedTime }}
       </time>
     </div>
-    <div class="chat-bubble whitespace-pre-wrap break-words" :class="chatBubbleClass">
+    <div
+      class="chat-bubble whitespace-pre-wrap break-words"
+      :class="[chatBubbleClass, CHAT_BUBBLE_SIZE_CLASS, CHAT_MESSAGE_WIDTH_CLASS]"
+    >
       <span
         v-if="isStreaming && !message.content"
         class="loading loading-dots loading-sm"
