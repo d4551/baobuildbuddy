@@ -1,4 +1,5 @@
-import { APP_LANGUAGE_CODES, APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "../packages/shared/src/constants/routes";
+import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
 
 type RouteVerificationResult = {
   locale: string;
