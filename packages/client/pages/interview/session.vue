@@ -424,7 +424,7 @@ async function handleCompleteInterview() {
     <div v-else-if="activeSession">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-semibold">{{ t("interviewSession.progressLabel", { current: displayQuestionIndex, total: totalQuestions }) }}</h2>
+          <h2 class="text-2xl font-semibold">{{ sessionProgressLabel }}</h2>
           <p class="text-base-content/70">
             {{ targetJob?.company || activeSession?.studioName }} -
             {{ targetJob?.title || activeSession?.role }}
