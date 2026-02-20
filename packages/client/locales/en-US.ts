@@ -965,6 +965,7 @@ const enUS = {
       exportAria: "Export portfolio",
     },
     preview: {
+      pageTitle: "Portfolio Preview",
       backButton: "Back to Builder",
       backButtonAria: "Back to portfolio builder",
       exportPdfButton: "Export PDF",
