@@ -18,12 +18,8 @@ const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
 const MODULE_PATH_SEPARATOR = "/";
 const WINDOWS_PATH_SEPARATOR = "\\";
 const LOCALES_DIRECTORY_SEGMENT = "/locales/";
-const LOCALE_CHUNK_NAME_BY_FILE = {
-  "en-US.ts": "locale-en-US",
-  "es-ES.ts": "locale-es-ES",
-  "fr-FR.ts": "locale-fr-FR",
-  "ja-JP.ts": "locale-ja-JP",
-} as const;
+const LOCALE_FILE_EXTENSION = ".ts";
+const LOCALE_CHUNK_NAME_PREFIX = "locale-";
 
 const parseSupportedLocales = (value: string | undefined): string[] => {
   const parsedLocales = value
@@ -32,6 +28,16 @@ const parseSupportedLocales = (value: string | undefined): string[] => {
     .filter((entry) => entry.length > 0);
   return parsedLocales && parsedLocales.length > 0 ? parsedLocales : DEFAULT_SUPPORTED_LOCALES;
 };
+
+const createLocaleChunkMap = (localeCodes: readonly string[]): Record<string, string> => {
+  const localeChunkMap: Record<string, string> = {};
+  for (const localeCode of localeCodes) {
+    localeChunkMap[`${localeCode}${LOCALE_FILE_EXTENSION}`] = `${LOCALE_CHUNK_NAME_PREFIX}${localeCode}`;
+  }
+  return localeChunkMap;
+};
+
+const LOCALE_CHUNK_NAME_BY_FILE = createLocaleChunkMap(APP_LANGUAGE_CODES);
 
 const hasOwnKey = <T extends object>(
   value: T,

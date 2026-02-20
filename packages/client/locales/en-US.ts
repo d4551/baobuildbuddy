@@ -2335,6 +2335,21 @@ type LocaleMessageShape<T> = {
 export type AppTranslationSchema = LocaleMessageShape<typeof enUS>;
 
 /**
+ * Partial locale override schema layered on top of `AppTranslationSchema`.
+ */
+type LocaleMessageOverrides<T> = {
+  [K in keyof T]?: T[K] extends string
+    ? string
+    : T[K] extends readonly (infer U)[]
+      ? readonly LocaleMessageOverrides<U>[]
+      : T[K] extends Record<string, unknown>
+        ? LocaleMessageOverrides<T[K]>
+        : T[K];
+};
+
+export type AppTranslationOverrides = LocaleMessageOverrides<AppTranslationSchema>;
+
+/**
  * Default English locale message catalog.
  */
 export default enUS;
