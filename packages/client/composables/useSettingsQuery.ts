@@ -1,9 +1,7 @@
 import type { AppSettings } from "@bao/shared";
+import { isRecord } from "@bao/shared";
 import { useQuery } from "@tanstack/vue-query";
 import { toAppSettings } from "./api-normalizers";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const toErrorMessage = (value: unknown): string | undefined => {
   if (!isRecord(value)) return undefined;

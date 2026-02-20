@@ -3,6 +3,8 @@ import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
 import {
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
+  DEFAULT_SPEECH_SETTINGS,
+  SPEECH_PROVIDER_OPTIONS,
   DEFAULT_APP_LANGUAGE,
 } from "../constants/settings";
 import type { AIProviderType } from "../types/ai";
@@ -105,6 +107,28 @@ export const notificationPreferencesSchema = z
   })
   .default(DEFAULT_NOTIFICATION_PREFERENCES);
 
+const speechProviderSchema = z.enum(SPEECH_PROVIDER_OPTIONS);
+
+export const speechToTextSettingsSchema = z.object({
+  provider: speechProviderSchema.default(DEFAULT_SPEECH_SETTINGS.stt.provider),
+  model: z.string().trim().min(1).max(200).default(DEFAULT_SPEECH_SETTINGS.stt.model),
+  endpoint: z.string().trim().max(2000).default(DEFAULT_SPEECH_SETTINGS.stt.endpoint),
+});
+
+export const textToSpeechSettingsSchema = z.object({
+  provider: speechProviderSchema.default(DEFAULT_SPEECH_SETTINGS.tts.provider),
+  model: z.string().trim().min(1).max(200).default(DEFAULT_SPEECH_SETTINGS.tts.model),
+  endpoint: z.string().trim().max(2000).default(DEFAULT_SPEECH_SETTINGS.tts.endpoint),
+  voice: z.string().trim().min(1).max(120).default(DEFAULT_SPEECH_SETTINGS.tts.voice),
+  format: z.enum(["mp3", "wav"]).default(DEFAULT_SPEECH_SETTINGS.tts.format),
+});
+
+export const speechSettingsSchema = z.object({
+  locale: z.string().trim().min(2).max(20).default(DEFAULT_SPEECH_SETTINGS.locale),
+  stt: speechToTextSettingsSchema.default(DEFAULT_SPEECH_SETTINGS.stt),
+  tts: textToSpeechSettingsSchema.default(DEFAULT_SPEECH_SETTINGS.tts),
+});
+
 export const automationSettingsSchema = z
   .object({
     headless: z.boolean().default(true),
@@ -114,6 +138,7 @@ export const automationSettingsSchema = z
     defaultBrowser: z.enum(AUTOMATION_BROWSER_OPTIONS).default("chrome"),
     enableSmartSelectors: z.boolean().default(true),
     autoSaveScreenshots: z.boolean().default(true),
+    speech: speechSettingsSchema.default(DEFAULT_AUTOMATION_SETTINGS.speech),
     jobProviders: jobProviderSettingsSchema.optional(),
   })
   .default(DEFAULT_AUTOMATION_SETTINGS);

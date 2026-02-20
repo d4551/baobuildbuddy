@@ -198,7 +198,7 @@ async function handleCompleteInterview() {
           <div class="flex items-start gap-3">
             <div class="avatar placeholder">
               <div class="bg-primary text-primary-content rounded-full w-12 h-12">
-                <span class="text-xl">AI</span>
+                <span class="text-xl">{{ t("interviewSession.avatarLabelAi") }}</span>
               </div>
             </div>
             <div class="flex-1">

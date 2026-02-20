@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { APP_ROUTE_BUILDERS } from "@bao/shared";
+import { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 /**
  * AI-Driven CV Builder - wizard flow:
  * 1) Select target role/studio
@@ -10,6 +13,7 @@ const { generateCvQuestions, synthesizeCvResume } = useResume();
 const { studios, searchStudios } = useStudio();
 const router = useRouter();
 const { $toast } = useNuxtApp();
+const { t } = useI18n();
 
 const phase = ref<"target" | "generating" | "questions" | "synthesizing">("target");
 const targetRole = ref("");
@@ -20,6 +24,19 @@ const aiQuestions = ref<Array<{ id: string; question: string; category: string }
 const answers = reactive<Record<string, string>>({});
 const currentQuestionIndex = ref(0);
 const errorMessage = ref("");
+const experienceLevelOptions = [
+  { value: "Entry", labelKey: "resumeBuildPage.experienceLevels.entry" },
+  { value: "Mid", labelKey: "resumeBuildPage.experienceLevels.mid" },
+  { value: "Senior", labelKey: "resumeBuildPage.experienceLevels.senior" },
+  { value: "Lead", labelKey: "resumeBuildPage.experienceLevels.lead" },
+] as const;
+
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("resumeBuildPage.seoTitle"),
+    description: t("resumeBuildPage.seoDescription"),
+  });
+}
 
 onMounted(async () => {
   await searchStudios();
@@ -69,7 +86,7 @@ async function generateQuestions() {
     }
     const questions = await generateCvQuestions(requestPayload);
     if (questions.length === 0) {
-      errorMessage.value = "No questions were generated. Please try again.";
+      errorMessage.value = t("resumeBuildPage.errors.emptyQuestions");
       phase.value = "target";
       return;
     }
@@ -78,8 +95,8 @@ async function generateQuestions() {
     Object.keys(answers).forEach((k) => delete answers[k]);
     questions.forEach((q) => (answers[q.id] = ""));
     phase.value = "questions";
-  } catch (e) {
-    errorMessage.value = e instanceof Error ? e.message : "Failed to generate questions";
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, t("resumeBuildPage.errors.generateQuestions"));
     phase.value = "target";
     $toast.error(errorMessage.value);
   }
@@ -110,13 +127,13 @@ async function finishAndSynthesize() {
     const created = await synthesizeCvResume(questionsAndAnswers);
     const resumeId = created?.id;
     if (resumeId) {
-      $toast.success("Resume created");
-      router.push({ path: "/resume", query: { id: resumeId } });
+      $toast.success(t("resumeBuildPage.toasts.resumeCreated"));
+      router.push(APP_ROUTE_BUILDERS.resumeEditor(resumeId));
     } else {
-      throw new Error("Failed to create resume");
+      throw new Error(t("resumeBuildPage.errors.createResume"));
     }
-  } catch (e) {
-    errorMessage.value = e instanceof Error ? e.message : "Failed to create resume";
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, t("resumeBuildPage.errors.createResume"));
     phase.value = "questions";
     $toast.error(errorMessage.value);
   }
@@ -131,68 +148,79 @@ function backToTarget() {
 
 <template>
   <div class="container mx-auto max-w-3xl py-8">
-    <h1 class="text-3xl font-bold mb-2">Build Your CV with AI</h1>
+    <h1 class="text-3xl font-bold mb-2">{{ t("resumeBuildPage.title") }}</h1>
     <p class="text-base-content/70 mb-8">
-      Tell us your target role and studio. We'll generate tailored questions and create your resume.
+      {{ t("resumeBuildPage.subtitle") }}
     </p>
 
-    <progress class="progress progress-primary w-full mb-8" :value="progressValue" max="100" aria-label="Progress Value progress"></progress>
+    <progress
+      class="progress progress-primary w-full mb-8"
+      :value="progressValue"
+      max="100"
+      :aria-label="t('resumeBuildPage.progressAria')"
+    ></progress>
 
-    <!-- Phase: Target role/studio -->
     <div v-if="phase === 'target'" class="card bg-base-200">
       <div class="card-body">
-        <h2 class="card-title">Target Role &amp; Studio</h2>
+        <h2 class="card-title">{{ t("resumeBuildPage.target.title") }}</h2>
         <p class="text-sm text-base-content/70 mb-4">
-          What role are you targeting? Optionally select a studio to tailor the questions.
+          {{ t("resumeBuildPage.target.description") }}
         </p>
 
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">Target Role</legend>
-          <label for="target-role" class="label">e.g. Game Designer at AAA studio, Junior Programmer</label>
+          <legend class="fieldset-legend">{{ t("resumeBuildPage.target.roleLegend") }}</legend>
+          <label for="target-role" class="label">{{ t("resumeBuildPage.target.roleLabel") }}</label>
           <input
             id="target-role"
             v-model="targetRole"
             type="text"
             class="input input-bordered w-full"
-            placeholder="e.g. Game Designer at AAA studio"
-            aria-label="e.g. Game Designer at AAA studio"/>
+            :placeholder="t('resumeBuildPage.target.rolePlaceholder')"
+            :aria-label="t('resumeBuildPage.target.roleAria')"
+          />
         </fieldset>
 
         <fieldset class="fieldset mt-4">
-          <legend class="fieldset-legend">Studio (optional)</legend>
-          <label for="studio-select" class="label">Pick a studio to tailor questions</label>
+          <legend class="fieldset-legend">{{ t("resumeBuildPage.target.studioLegend") }}</legend>
+          <label for="studio-select" class="label">{{ t("resumeBuildPage.target.studioLabel") }}</label>
           <select
             id="studio-select"
             v-model="studioId"
             class="select select-bordered w-full"
-            aria-label="Studio Select">
-            <option value="">None selected</option>
+            :aria-label="t('resumeBuildPage.target.studioAria')"
+          >
+            <option value="">{{ t("resumeBuildPage.target.noStudioOption") }}</option>
             <option v-for="s in studios" :key="s.id" :value="s.id">
               {{ s.name }}
             </option>
           </select>
-          <label for="studio-name" class="label mt-2">Or type studio name</label>
+          <label for="studio-name" class="label mt-2">{{ t("resumeBuildPage.target.studioNameLabel") }}</label>
           <input
             id="studio-name"
             v-model="studioName"
             type="text"
             class="input input-bordered w-full"
-            placeholder="e.g. Epic Games"
-            aria-label="e.g. Epic Games"/>
+            :placeholder="t('resumeBuildPage.target.studioNamePlaceholder')"
+            :aria-label="t('resumeBuildPage.target.studioNameAria')"
+          />
         </fieldset>
 
         <fieldset class="fieldset mt-4">
-          <legend class="fieldset-legend">Experience Level (optional)</legend>
+          <legend class="fieldset-legend">{{ t("resumeBuildPage.target.experienceLegend") }}</legend>
           <select
             id="experience-level"
             v-model="experienceLevel"
             class="select select-bordered w-full"
-            aria-label="Experience Level">
-            <option value="">Any</option>
-            <option value="Entry">Entry</option>
-            <option value="Mid">Mid</option>
-            <option value="Senior">Senior</option>
-            <option value="Lead">Lead</option>
+            :aria-label="t('resumeBuildPage.target.experienceAria')"
+          >
+            <option value="">{{ t("resumeBuildPage.experienceLevels.any") }}</option>
+            <option
+              v-for="option in experienceLevelOptions"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ t(option.labelKey) }}
+            </option>
           </select>
         </fieldset>
 
@@ -202,30 +230,40 @@ function backToTarget() {
           <button
             class="btn btn-primary"
             :disabled="!canProceedTarget"
+            :aria-label="t('resumeBuildPage.target.generateAria')"
             @click="generateQuestions"
           >
-            Generate Questions
+            {{ t("resumeBuildPage.target.generateButton") }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Phase: Generating -->
     <div v-else-if="phase === 'generating'" class="card bg-base-200">
       <div class="card-body items-center justify-center min-h-48">
         <span class="loading loading-spinner loading-lg text-primary"></span>
-        <p class="text-base-content/70 mt-4">Generating tailored questions...</p>
+        <p class="text-base-content/70 mt-4">{{ t("resumeBuildPage.generatingLabel") }}</p>
       </div>
     </div>
 
-    <!-- Phase: Answer questions -->
     <div v-else-if="phase === 'questions'" class="card bg-base-200">
       <div class="card-body">
         <div class="flex justify-between items-center mb-4">
           <h2 class="card-title">
-            Question {{ currentQuestionIndex + 1 }} of {{ aiQuestions.length }}
+            {{
+              t("resumeBuildPage.questions.title", {
+                current: currentQuestionIndex + 1,
+                total: aiQuestions.length,
+              })
+            }}
           </h2>
-          <button class="btn btn-ghost btn-sm" @click="backToTarget">Change target</button>
+          <button
+            class="btn btn-ghost btn-sm"
+            :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
+            @click="backToTarget"
+          >
+            {{ t("resumeBuildPage.questions.changeTargetButton") }}
+          </button>
         </div>
 
         <fieldset v-if="currentQuestion" class="fieldset">
@@ -236,8 +274,9 @@ function backToTarget() {
             v-model="answers[currentQuestion.id]"
             class="textarea textarea-bordered w-full"
             rows="4"
-            :placeholder="`Your answer for: ${currentQuestion.question}`"
-            :aria-label="`Your answer for: ${currentQuestion.question}`"/>
+            :placeholder="t('resumeBuildPage.questions.answerPlaceholder', { question: currentQuestion.question })"
+            :aria-label="t('resumeBuildPage.questions.answerAria', { question: currentQuestion.question })"
+          />
         </fieldset>
 
         <p v-if="errorMessage" class="text-error text-sm mt-2">{{ errorMessage }}</p>
@@ -246,26 +285,31 @@ function backToTarget() {
           <button
             class="btn btn-ghost"
             :disabled="currentQuestionIndex === 0"
+            :aria-label="t('resumeBuildPage.questions.backAria')"
             @click="prevQuestion"
           >
-            Back
+            {{ t("resumeBuildPage.questions.backButton") }}
           </button>
           <button
             class="btn btn-primary"
             :disabled="!answers[currentQuestion?.id ?? '']?.trim()"
+            :aria-label="t('resumeBuildPage.questions.nextAria')"
             @click="nextQuestion"
           >
-            {{ currentQuestionIndex < aiQuestions.length - 1 ? "Next" : "Create Resume" }}
+            {{
+              currentQuestionIndex < aiQuestions.length - 1
+                ? t("resumeBuildPage.questions.nextButton")
+                : t("resumeBuildPage.questions.createResumeButton")
+            }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Phase: Synthesizing -->
     <div v-else-if="phase === 'synthesizing'" class="card bg-base-200">
       <div class="card-body items-center justify-center min-h-48">
         <span class="loading loading-spinner loading-lg text-primary"></span>
-        <p class="text-base-content/70 mt-4">Creating your resume...</p>
+        <p class="text-base-content/70 mt-4">{{ t("resumeBuildPage.synthesizingLabel") }}</p>
       </div>
     </div>
   </div>

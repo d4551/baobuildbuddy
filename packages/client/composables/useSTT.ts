@@ -1,4 +1,5 @@
 import type { VoiceSettings } from "@bao/shared";
+import { resolveSpeechLocale, resolveSpeechRecognitionConstructor } from "~/utils/speech";
 
 /**
  * Web Speech API Speech-to-Text composable.
@@ -14,87 +15,87 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
   let recognition: SpeechRecognition | null = null;
 
   onMounted(() => {
-    if (import.meta.server) return;
-
-    const SpeechRecognitionCtor =
-      typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
-
-    if (SpeechRecognitionCtor) {
-      recognition = new (SpeechRecognitionCtor as new () => SpeechRecognition)();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = settings?.value?.language ?? "en-US";
-
-      recognition.onresult = (event: Event) => {
-        const e = event as SpeechRecognitionEvent;
-        let final = "";
-        let interim = "";
-        let conf = 0;
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const result = e.results[i];
-          const firstAlternative = result?.[0];
-          if (!firstAlternative) {
-            continue;
-          }
-          const chunk = firstAlternative.transcript;
-          const c = firstAlternative.confidence ?? 0;
-          if (result.isFinal) {
-            final += chunk;
-            conf = Math.max(conf, c);
-          } else {
-            interim += chunk;
-          }
-        }
-        if (final) transcript.value += final;
-        interimTranscript.value = interim;
-        if (conf > 0) confidence.value = conf;
-      };
-
-      recognition.onerror = (ev: Event) => {
-        const err = ev as SpeechRecognitionErrorEvent;
-        error.value = `${err.error}: ${err.message || ""}`;
-      };
-
-      recognition.onend = () => {
-        isListening.value = false;
-      };
+    const speechRecognitionCtor = resolveSpeechRecognitionConstructor();
+    if (!speechRecognitionCtor) {
+      return;
     }
+
+    recognition = new speechRecognitionCtor();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = resolveSpeechLocale(settings?.value?.language);
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let finalTranscript = "";
+      let currentInterimTranscript = "";
+      let currentConfidence = 0;
+
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        const firstAlternative = result?.[0];
+        if (!firstAlternative) {
+          continue;
+        }
+
+        if (result.isFinal) {
+          finalTranscript += firstAlternative.transcript;
+          currentConfidence = Math.max(currentConfidence, firstAlternative.confidence ?? 0);
+          continue;
+        }
+
+        currentInterimTranscript += firstAlternative.transcript;
+      }
+
+      if (finalTranscript.length > 0) {
+        transcript.value += finalTranscript;
+      }
+      interimTranscript.value = currentInterimTranscript;
+      if (currentConfidence > 0) {
+        confidence.value = currentConfidence;
+      }
+    };
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      error.value = `${event.error}: ${event.message ?? ""}`;
+    };
+
+    recognition.onend = () => {
+      isListening.value = false;
+    };
   });
 
   const fullTranscript = computed(() => {
-    const t = transcript.value + (interimTranscript.value ? ` ${interimTranscript.value}` : "");
-    return t.trim();
+    const combinedTranscript =
+      transcript.value + (interimTranscript.value ? ` ${interimTranscript.value}` : "");
+    return combinedTranscript.trim();
   });
 
-  const isSupported = computed(() => {
-    if (import.meta.server) return false;
-    const SR =
-      typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
-    return !!SR;
-  });
+  const isSupported = computed(() => resolveSpeechRecognitionConstructor() !== null);
 
-  function startListening(lang?: string) {
+  function startListening(locale?: string): boolean {
     if (!recognition) {
       error.value = "Speech recognition not supported in this browser";
       return false;
     }
+
+    if (isListening.value) {
+      return true;
+    }
+
     error.value = null;
     transcript.value = "";
     interimTranscript.value = "";
     confidence.value = 0;
-    recognition.lang = lang ?? settings?.value?.language ?? "en-US";
-    try {
-      recognition.start();
-      isListening.value = true;
-      return true;
-    } catch (e) {
-      error.value = e instanceof Error ? e.message : "Failed to start";
-      return false;
-    }
+    recognition.lang = resolveSpeechLocale(locale ?? settings?.value?.language);
+    recognition.start();
+    isListening.value = true;
+    return true;
   }
 
-  function stopListening() {
-    if (recognition) recognition.stop();
+  function stopListening(): void {
+    if (recognition) {
+      recognition.stop();
+    }
     isListening.value = false;
   }
 

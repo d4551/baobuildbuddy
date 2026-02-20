@@ -1,4 +1,10 @@
-import { generateId } from "@bao/shared";
+import {
+  SKILL_CATEGORY_IDS,
+  SKILL_EVIDENCE_TYPE_IDS,
+  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
+  generateId,
+  isRecord,
+} from "@bao/shared";
 import type {
   CareerPathway,
   ReadinessAssessment,
@@ -10,51 +16,24 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { skillMappings } from "../db/schema";
 
-const SKILL_CATEGORIES: readonly SkillCategory[] = [
-  "leadership",
-  "community",
-  "technical",
-  "creative",
-  "analytical",
-  "communication",
-  "project_management",
-];
+const isSkillCategory = (value: string | null): value is SkillCategory =>
+  typeof value === "string" && SKILL_CATEGORY_IDS.some((categoryId) => categoryId === value);
 
-const EVIDENCE_TYPES: readonly SkillEvidence["type"][] = [
-  "clip",
-  "stats",
-  "community",
-  "achievement",
-  "document",
-  "portfolio_piece",
-  "testimonial",
-  "certificate",
-];
+const isEvidenceType = (value: unknown): value is SkillEvidence["type"] =>
+  typeof value === "string" && SKILL_EVIDENCE_TYPE_IDS.some((typeId) => typeId === value);
 
-const EVIDENCE_STATUSES: readonly SkillEvidence["verificationStatus"][] = [
-  "pending",
-  "verified",
-  "rejected",
-];
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+const isEvidenceStatus = (value: unknown): value is SkillEvidence["verificationStatus"] =>
+  typeof value === "string" &&
+  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS.some((statusId) => statusId === value);
 
 const normalizeSkillCategory = (value: string | null): SkillCategory =>
-  typeof value === "string" && SKILL_CATEGORIES.includes(value as SkillCategory)
-    ? (value as SkillCategory)
-    : "technical";
+  isSkillCategory(value) ? value : "technical";
 
 const normalizeEvidenceType = (value: unknown): SkillEvidence["type"] =>
-  typeof value === "string" && EVIDENCE_TYPES.includes(value as SkillEvidence["type"])
-    ? (value as SkillEvidence["type"])
-    : "document";
+  isEvidenceType(value) ? value : "document";
 
 const normalizeEvidenceStatus = (value: unknown): SkillEvidence["verificationStatus"] =>
-  typeof value === "string" &&
-  EVIDENCE_STATUSES.includes(value as SkillEvidence["verificationStatus"])
-    ? (value as SkillEvidence["verificationStatus"])
-    : "pending";
+  isEvidenceStatus(value) ? value : "pending";
 
 const normalizeEvidenceEntries = (value: unknown[] | null): SkillEvidence[] => {
   if (!Array.isArray(value)) {

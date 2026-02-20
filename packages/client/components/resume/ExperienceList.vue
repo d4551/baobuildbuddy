@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 interface ExperienceItem {
   id: string;
   company: string;
@@ -16,6 +18,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   "update:modelValue": [value: ExperienceItem[]];
 }>();
+const { t } = useI18n();
 
 const localValue = ref<ExperienceItem[]>([...props.modelValue]);
 const editingId = ref<string | null>(null);
@@ -106,11 +109,12 @@ function moveDown(index: number) {
       <div class="card-body">
         <div class="flex justify-between items-start">
           <h3 class="card-title text-base">
-            {{ item.title || 'New Experience' }}
+            {{ item.title || t("resumeComponentExperience.newItemTitle") }}
           </h3>
           <div class="flex gap-1">
             <button
               class="btn btn-ghost btn-xs btn-square"
+              :aria-label="t('resumeComponentExperience.moveUpAria')"
               @click="moveUp(index)"
               :disabled="index === 0"
             >
@@ -120,6 +124,7 @@ function moveDown(index: number) {
             </button>
             <button
               class="btn btn-ghost btn-xs btn-square"
+              :aria-label="t('resumeComponentExperience.moveDownAria')"
               @click="moveDown(index)"
               :disabled="index === localValue.length - 1"
             >
@@ -129,6 +134,7 @@ function moveDown(index: number) {
             </button>
             <button
               class="btn btn-ghost btn-xs btn-square"
+              :aria-label="t('resumeComponentExperience.toggleEditAria')"
               @click="toggleEdit(item.id)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -137,6 +143,7 @@ function moveDown(index: number) {
             </button>
             <button
               class="btn btn-ghost btn-xs btn-square text-error"
+              :aria-label="t('resumeComponentExperience.removeItemAria')"
               @click="removeItem(item.id)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,59 +156,59 @@ function moveDown(index: number) {
         <div v-if="editingId === item.id" class="space-y-3 mt-2">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="form-control">
-              <div class="label label-text-alt">Company</div>
+              <div class="label label-text-alt">{{ t("resumeComponentExperience.companyLabel") }}</div>
               <input
                 v-model="item.company"
                 type="text"
-                placeholder="Company Name"
+                :placeholder="t('resumeComponentExperience.companyPlaceholder')"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-                aria-label="Company Name"/>
+                :aria-label="t('resumeComponentExperience.companyAria')"/>
             </div>
             <div class="form-control">
-              <div class="label label-text-alt">Title</div>
+              <div class="label label-text-alt">{{ t("resumeComponentExperience.titleLabel") }}</div>
               <input
                 v-model="item.title"
                 type="text"
-                placeholder="Job Title"
+                :placeholder="t('resumeComponentExperience.titlePlaceholder')"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-                aria-label="Job Title"/>
+                :aria-label="t('resumeComponentExperience.titleAria')"/>
             </div>
             <div class="form-control">
-              <div class="label label-text-alt">Start Date</div>
+              <div class="label label-text-alt">{{ t("resumeComponentExperience.startDateLabel") }}</div>
               <input
                 v-model="item.startDate"
                 type="month"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-                aria-label="Start Date"/>
+                :aria-label="t('resumeComponentExperience.startDateAria')"/>
             </div>
             <div class="form-control">
-              <div class="label label-text-alt">End Date</div>
+              <div class="label label-text-alt">{{ t("resumeComponentExperience.endDateLabel") }}</div>
               <input
                 v-model="item.endDate"
                 type="month"
-                placeholder="Present"
+                :placeholder="t('resumeComponentExperience.endDatePlaceholder')"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-                aria-label="Present"/>
+                :aria-label="t('resumeComponentExperience.endDateAria')"/>
             </div>
           </div>
 
           <div class="form-control">
-            <div class="label label-text-alt">Description</div>
+            <div class="label label-text-alt">{{ t("resumeComponentExperience.descriptionLabel") }}</div>
             <textarea
               v-model="item.description"
               class="textarea textarea-bordered"
               rows="3"
-              placeholder="Brief description of your role..."
+              :placeholder="t('resumeComponentExperience.descriptionPlaceholder')"
               @input="updateValue"
-              aria-label="Brief description of your role..."></textarea>
+              :aria-label="t('resumeComponentExperience.descriptionAria')"></textarea>
           </div>
 
           <div class="form-control">
-            <div class="label label-text-alt">Key Highlights</div>
+            <div class="label label-text-alt">{{ t("resumeComponentExperience.highlightsLabel") }}</div>
             <div class="space-y-2">
               <div
                 v-for="(highlight, hIndex) in item.highlights"
@@ -211,6 +218,7 @@ function moveDown(index: number) {
                 <span class="text-sm flex-1">• {{ highlight }}</span>
                 <button
                   class="btn btn-ghost btn-xs btn-square"
+                  :aria-label="t('resumeComponentExperience.removeHighlightAria', { highlight })"
                   @click="removeHighlight(item.id, hIndex)"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -222,15 +230,16 @@ function moveDown(index: number) {
                 <input
                   v-model="newHighlight[item.id]"
                   type="text"
-                  placeholder="Add achievement or responsibility"
+                  :placeholder="t('resumeComponentExperience.newHighlightPlaceholder')"
                   class="input input-bordered input-sm flex-1"
                   @keyup.enter="addHighlight(item.id)"
-                  aria-label="Add achievement or responsibility"/>
+                  :aria-label="t('resumeComponentExperience.newHighlightAria')"/>
                 <button
                   class="btn btn-primary btn-sm"
+                  :aria-label="t('resumeComponentExperience.addHighlightAria')"
                   @click="addHighlight(item.id)"
                 >
-                  Add
+                  {{ t("resumeComponentExperience.addHighlightButton") }}
                 </button>
               </div>
             </div>
@@ -239,16 +248,16 @@ function moveDown(index: number) {
 
         <div v-else class="text-sm text-base-content/70 mt-2">
           <p class="font-medium">{{ item.company }}</p>
-          <p class="text-xs">{{ item.startDate }} - {{ item.endDate || 'Present' }}</p>
+          <p class="text-xs">{{ item.startDate }} - {{ item.endDate || t("resumeComponentExperience.presentValue") }}</p>
         </div>
       </div>
     </div>
 
-    <button class="btn btn-outline btn-block" @click="addItem">
+    <button class="btn btn-outline btn-block" :aria-label="t('resumeComponentExperience.addItemAria')" @click="addItem">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      Add Experience
+      {{ t("resumeComponentExperience.addItemButton") }}
     </button>
   </div>
 </template>

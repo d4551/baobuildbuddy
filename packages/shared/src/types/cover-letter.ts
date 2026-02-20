@@ -11,6 +11,8 @@ export interface CoverLetterData {
   companyResearch?: Record<string, unknown>;
   content: CoverLetterContent;
   template?: CoverLetterTemplate;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CoverLetterContent {

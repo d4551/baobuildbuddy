@@ -20,6 +20,7 @@
         "nuxt": "^4.3.1",
         "vue": "^3.5.28",
         "vue-i18n": "^11.2.8",
+        "zod": "^4.3.6",
       },
       "devDependencies": {
         "@bao/server": "workspace:*",

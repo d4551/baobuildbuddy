@@ -1,4 +1,5 @@
 import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
+import { isRecord } from "@bao/shared";
 import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -13,9 +14,6 @@ import { skillMappings } from "../db/schema/skill-mappings";
 import { userProfile } from "../db/schema/user";
 
 type ActionHistoryEntry = { action: string; xpGained: number; timestamp: string };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const parseActionHistory = (value: unknown): ActionHistoryEntry[] => {
   if (!Array.isArray(value)) {

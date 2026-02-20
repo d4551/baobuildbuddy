@@ -9,9 +9,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --parallel --filter '@bao/server' --filter '@bao/client' dev",
-    "dev:server": "bun run --filter '@bao/server' dev",
-    "dev:client": "bun run --filter '@bao/client' dev",
+    "dev": "NUXT_PUBLIC_API_BASE=http://localhost:3000 NUXT_PUBLIC_WS_BASE=http://localhost:3000 bun --env-file=.env run --parallel --filter '@bao/server' --filter '@bao/client' dev",
+    "dev:server": "bun --env-file=.env run --filter '@bao/server' dev",
+    "dev:client": "NUXT_PUBLIC_API_BASE=http://localhost:3000 NUXT_PUBLIC_WS_BASE=http://localhost:3000 bun --env-file=.env run --filter '@bao/client' dev",
     "build": "bun run --filter '@bao/server' build && bun run --filter '@bao/client' build",
     "build:macos": "bun run build",
     "build:linux": "bun run build",

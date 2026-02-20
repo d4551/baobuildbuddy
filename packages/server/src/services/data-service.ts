@@ -1,3 +1,12 @@
+import {
+  asBoolean,
+  asNumber,
+  asRecord,
+  asString,
+  asStringArray,
+  asUnknownArray,
+  isRecord,
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db, sqlite } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
@@ -44,29 +53,6 @@ type InterviewSessionInsert = typeof interviewSessions.$inferInsert;
 type GamificationInsert = typeof gamification.$inferInsert;
 type SkillMappingInsert = typeof skillMappings.$inferInsert;
 type ChatHistoryInsert = typeof chatHistory.$inferInsert;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" && value.trim().length > 0 ? value : undefined;
-
-const asBoolean = (value: unknown): boolean | undefined =>
-  typeof value === "boolean" ? value : undefined;
-
-const asNumber = (value: unknown): number | undefined =>
-  typeof value === "number" && Number.isFinite(value) ? value : undefined;
-
-const asUnknownArray = (value: unknown): unknown[] | undefined =>
-  Array.isArray(value) ? value : undefined;
-
-const asStringArray = (value: unknown): string[] | undefined =>
-  Array.isArray(value)
-    ? value.filter((entry): entry is string => typeof entry === "string")
-    : undefined;
-
-const asRecord = (value: unknown): Record<string, unknown> | undefined =>
-  isRecord(value) ? value : undefined;
 
 const asStringArrayRecord = (value: unknown): Record<string, string[]> | undefined => {
   if (!isRecord(value)) return undefined;
@@ -152,8 +138,8 @@ const parsePortfolioProjectInsert = (value: unknown): PortfolioProjectInsert | n
     tags: asStringArray(value.tags) ?? [],
     featured: asBoolean(value.featured),
     role: asString(value.role),
-    platforms: asStringArray(value.platforms),
-    engines: asStringArray(value.engines),
+    platforms: Array.isArray(value.platforms) ? asStringArray(value.platforms) : undefined,
+    engines: Array.isArray(value.engines) ? asStringArray(value.engines) : undefined,
     sortOrder: asNumber(value.sortOrder),
     createdAt: asString(value.createdAt),
     updatedAt: asString(value.updatedAt),

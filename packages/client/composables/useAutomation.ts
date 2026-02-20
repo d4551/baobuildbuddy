@@ -1,5 +1,6 @@
 import {
   AUTOMATION_RUN_STATUSES,
+  safeParseJson,
   type AutomationRunStatus,
   type AutomationRunType,
 } from "@bao/shared";
@@ -47,9 +48,36 @@ interface JobApplyBody {
   customAnswers?: Record<string, string>;
 }
 
+interface ScheduleJobApplyBody extends JobApplyBody {
+  runAt: string;
+}
+
+type EmailResponseTone = "professional" | "friendly" | "concise";
+
+interface EmailResponseBody {
+  subject: string;
+  message: string;
+  sender?: string;
+  tone?: EmailResponseTone;
+}
+
 interface UseAutomationResponse {
   runId: string;
   status: AutomationRunStatus;
+}
+
+interface ScheduleAutomationResponse {
+  runId: string;
+  status: Extract<AutomationRunStatus, "pending">;
+  scheduledFor: string;
+}
+
+interface EmailAutomationResponse {
+  runId: string;
+  status: Extract<AutomationRunStatus, "success">;
+  reply: string;
+  provider: string;
+  model: string;
 }
 
 interface FetchRunsParams {
@@ -118,6 +146,24 @@ export function useAutomation() {
   };
 
   /**
+   * Schedule a job-apply automation run for future execution.
+   */
+  const scheduleJobApply = (body: ScheduleJobApplyBody) =>
+    $fetch<ScheduleAutomationResponse>(resolveEndpoint("/api/automation/job-apply/schedule"), {
+      method: "POST",
+      body,
+    });
+
+  /**
+   * Generate an AI-assisted email response and persist the run output.
+   */
+  const triggerEmailResponse = (body: EmailResponseBody) =>
+    $fetch<EmailAutomationResponse>(resolveEndpoint("/api/automation/email-response"), {
+      method: "POST",
+      body,
+    });
+
+  /**
    * Fetch automation run history with optional type/status filters.
    */
   const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}) =>
@@ -148,14 +194,11 @@ export function useAutomation() {
     };
 
     ws.onmessage = (event) => {
-      try {
-        const parsed: JsonValue = JSON.parse(event.data);
-        const normalizedEvent = toAutomationProgressEvent(parsed);
-        if (normalizedEvent) {
-          onProgress(normalizedEvent);
-        }
-      } catch {
-        // Non-JSON message, ignore
+      const parsed = safeParseJson<JsonValue>(event.data);
+      if (parsed === null) return;
+      const normalizedEvent = toAutomationProgressEvent(parsed);
+      if (normalizedEvent) {
+        onProgress(normalizedEvent);
       }
     };
 
@@ -164,17 +207,17 @@ export function useAutomation() {
     };
 
     return () => {
-      try {
+      if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: "unsubscribe", runId }));
         ws.close();
-      } catch {
-        // Already closed
       }
     };
   };
 
   return {
     triggerJobApply,
+    scheduleJobApply,
+    triggerEmailResponse,
     fetchRuns,
     fetchRun,
     subscribeToRun,

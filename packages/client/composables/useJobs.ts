@@ -1,9 +1,6 @@
 import type { Job } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS, isRecord } from "@bao/shared";
 import { toJob } from "./api-normalizers";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const toJobList = (value: unknown): Job[] =>
   Array.isArray(value)

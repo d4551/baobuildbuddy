@@ -1,5 +1,13 @@
 import type { InterviewConfig, InterviewMode, InterviewSession, InterviewTargetJob } from "@bao/shared";
-import { INTERVIEW_FALLBACK_STUDIO_ID, STATE_KEYS } from "@bao/shared";
+import {
+  INTERVIEW_FALLBACK_STUDIO_ID,
+  STATE_KEYS,
+  asBoolean,
+  asNumber,
+  asString,
+  asStringArray,
+  isRecord,
+} from "@bao/shared";
 
 const INTERVIEW_STATUS_VALUES = [
   "preparing",
@@ -28,21 +36,6 @@ interface SubmitResponseInput {
   questionIndex?: number;
   response: string;
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" && value.trim().length > 0 ? value : undefined;
-
-const asBoolean = (value: unknown): boolean | undefined =>
-  typeof value === "boolean" ? value : undefined;
-
-const asNumber = (value: unknown): number | undefined =>
-  typeof value === "number" && Number.isFinite(value) ? value : undefined;
-
-const asStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
 
 const isOneOf = <T extends string>(values: readonly T[], value: unknown): value is T =>
   typeof value === "string" && values.some((entry) => entry === value);

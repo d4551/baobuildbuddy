@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import type { NavigationItem } from "~/constants/navigation";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
 
@@ -13,16 +14,37 @@ const shortcutByNavigationId = new Map(
   KEYBOARD_ROUTE_SHORTCUTS.map((shortcut) => [shortcut.id, shortcut]),
 );
 
-onMounted(async () => {
-  if (settings.value) {
-    return;
+const activeNavigationIds = computed(() => {
+  const activeIds = new Set<string>();
+  for (const item of sidebarItems) {
+    if (isRouteActive(route.path, item.to)) {
+      activeIds.add(item.id);
+    }
   }
+  return activeIds;
+});
 
-  try {
-    await fetchSettings();
-  } catch {
-    // Ignore sidebar hydration errors; settings page owns full recovery UX.
+const localizedSidebarLabels = computed(() => {
+  const labelsById = new Map<string, string>();
+  for (const item of sidebarItems) {
+    labelsById.set(item.id, t(item.labelKey));
   }
+  return labelsById;
+});
+
+function isSidebarItemActive(item: NavigationItem): boolean {
+  return activeNavigationIds.value.has(item.id);
+}
+
+function resolveSidebarLabel(item: NavigationItem): string {
+  return localizedSidebarLabels.value.get(item.id) ?? "";
+}
+
+onMounted(() => {
+  if (settings.value) return;
+  fetchSettings().catch(() => {
+    // Ignore sidebar hydration errors; settings page owns full recovery UX.
+  });
 });
 </script>
 
@@ -40,11 +62,11 @@ onMounted(async () => {
           :to="item.to"
           :class="[
             'flex items-center gap-2 rounded-box border-l-3 border-transparent pl-2 transition-all duration-200 is-drawer-close:tooltip is-drawer-close:tooltip-right',
-            { 'menu-active border-primary': isRouteActive(route.path, item.to) },
+            { 'menu-active border-primary': isSidebarItemActive(item) },
           ]"
-          :data-tip="t(item.labelKey)"
-          :aria-current="isRouteActive(route.path, item.to) ? 'page' : undefined"
-          :aria-label="t(item.labelKey)"
+          :data-tip="resolveSidebarLabel(item)"
+          :aria-current="isSidebarItemActive(item) ? 'page' : undefined"
+          :aria-label="resolveSidebarLabel(item)"
         >
           <span class="indicator">
             <span
@@ -55,7 +77,7 @@ onMounted(async () => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
             </svg>
           </span>
-          <span class="is-drawer-close:hidden">{{ t(item.labelKey) }}</span>
+          <span class="is-drawer-close:hidden">{{ resolveSidebarLabel(item) }}</span>
           <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ml-auto flex items-center gap-1 opacity-65">
             <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.prefix.toUpperCase() }}</kbd>
             <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.key.toUpperCase() }}</kbd>

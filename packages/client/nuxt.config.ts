@@ -1,6 +1,10 @@
 import { APP_BRAND } from "@bao/shared";
 
-const apiBaseProxy = process.env.NUXT_PUBLIC_API_BASE || process.env.NUXT_PUBLIC_API_PROXY;
+const apiBaseProxy =
+  process.env.NUXT_PUBLIC_API_PROXY ||
+  (process.env.NUXT_PUBLIC_API_BASE && process.env.NUXT_PUBLIC_API_BASE !== "/"
+    ? process.env.NUXT_PUBLIC_API_BASE
+    : undefined);
 const DECIMAL_RADIX = 10;
 const DEFAULT_QUERY_STALE_TIME_MS = 60_000;
 const DEFAULT_QUERY_RETRY_COUNT = 1;
@@ -10,7 +14,7 @@ const DEFAULT_APP_TITLE = `${APP_BRAND.name} - AI Career Assistant`;
 const DEFAULT_APP_DESCRIPTION = "AI-powered career assistant for the video game industry";
 const DEFAULT_I18N_LOCALE = "en-US";
 const DEFAULT_I18N_LOCALE_COOKIE_KEY = "bao-locale";
-const DEFAULT_SUPPORTED_LOCALES = [DEFAULT_I18N_LOCALE];
+const DEFAULT_SUPPORTED_LOCALES = ["en-US", "es-ES", "fr-FR", "ja-JP"];
 
 const parseSupportedLocales = (value: string | undefined): string[] => {
   const parsedLocales = value
@@ -19,6 +23,15 @@ const parseSupportedLocales = (value: string | undefined): string[] => {
     .filter((entry) => entry.length > 0);
   return parsedLocales && parsedLocales.length > 0 ? parsedLocales : DEFAULT_SUPPORTED_LOCALES;
 };
+
+const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
+const resolvedApiBase =
+  configuredApiBase && configuredApiBase !== "/"
+    ? configuredApiBase
+    : process.env.NUXT_PUBLIC_API_PROXY || "/";
+const configuredWsBase = process.env.NUXT_PUBLIC_WS_BASE;
+const resolvedWsBase =
+  configuredWsBase && configuredWsBase !== "/" ? configuredWsBase : resolvedApiBase;
 
 export default defineNuxtConfig({
   modules: ["@nuxt/image", "@nuxt/test-utils/module"],
@@ -83,8 +96,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "/",
-      wsBase: process.env.NUXT_PUBLIC_WS_BASE || "/",
+      apiBase: resolvedApiBase,
+      wsBase: resolvedWsBase,
       appTitle: process.env.NUXT_PUBLIC_APP_TITLE || DEFAULT_APP_TITLE,
       appDescription: process.env.NUXT_PUBLIC_APP_DESCRIPTION || DEFAULT_APP_DESCRIPTION,
       queryStaleTimeMs: Number.parseInt(

@@ -3,6 +3,7 @@ import {
   APP_ROUTES,
   APP_ROUTE_QUERY_KEYS,
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
+  INTERVIEW_DEFAULT_VOICE_SETTINGS,
   INTERVIEW_DEFAULT_QUESTION_COUNT,
   INTERVIEW_DEFAULT_ROLE_TYPE,
   type InterviewMode,
@@ -12,6 +13,7 @@ import {
   INTERVIEW_HUB_JOB_QUERY_LIMIT,
   INTERVIEW_HUB_QUESTION_COUNT_OPTIONS,
   INTERVIEW_HUB_ROLE_OPTIONS,
+  INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE,
   JOB_PREVIEW_LIMIT,
   type Job,
   type VoiceSettings,
@@ -22,6 +24,9 @@ import { getErrorMessage } from "~/utils/errors";
 const { sessions, stats, loading, startSession, fetchSessions, fetchStats } = useInterview();
 const { studios, searchStudios } = useStudio();
 const { jobs, searchJobs, getJob } = useJobs();
+const { resumes, fetchResumes } = useResume();
+const { coverLetters, fetchCoverLetters } = useCoverLetter();
+const { portfolio, fetchPortfolio } = usePortfolio();
 const tts = useTTS();
 const route = useRoute();
 const router = useRouter();
@@ -36,18 +41,41 @@ const selectedMode = ref<InterviewMode>("studio");
 const selectedJobId = ref("");
 const selectedJobFallback = ref<Job | null>(null);
 const jobSearchTerm = ref("");
-const interviewRoleOptions =
-  INTERVIEW_HUB_ROLE_OPTIONS?.length > 0
-    ? INTERVIEW_HUB_ROLE_OPTIONS
-    : [INTERVIEW_DEFAULT_ROLE_TYPE];
-const interviewExperienceOptions =
-  INTERVIEW_HUB_EXPERIENCE_OPTIONS?.length > 0
-    ? INTERVIEW_HUB_EXPERIENCE_OPTIONS
-    : [INTERVIEW_DEFAULT_EXPERIENCE_LEVEL];
-const interviewQuestionCountOptions =
-  INTERVIEW_HUB_QUESTION_COUNT_OPTIONS?.length > 0
-    ? INTERVIEW_HUB_QUESTION_COUNT_OPTIONS
-    : [INTERVIEW_DEFAULT_QUESTION_COUNT];
+const interviewRoleOptions = ensureOptions(
+  INTERVIEW_HUB_ROLE_OPTIONS,
+  [INTERVIEW_DEFAULT_ROLE_TYPE],
+);
+const interviewExperienceOptions = ensureOptions(
+  INTERVIEW_HUB_EXPERIENCE_OPTIONS,
+  [INTERVIEW_DEFAULT_EXPERIENCE_LEVEL],
+);
+const interviewQuestionCountOptions = ensureOptions(
+  INTERVIEW_HUB_QUESTION_COUNT_OPTIONS,
+  [INTERVIEW_DEFAULT_QUESTION_COUNT],
+);
+
+function ensureOptions<T>(options: readonly T[], fallbackOptions: readonly T[]): readonly T[] {
+  if (Array.isArray(options) && options.length > 0) return options;
+  return fallbackOptions;
+}
+
+function resolvePreferredOption<T>(
+  options: readonly T[],
+  preferredIndex: number,
+  fallback: T,
+): T {
+  const preferredValue = options[preferredIndex];
+  if (preferredValue !== undefined) {
+    return preferredValue;
+  }
+
+  const firstValue = options[0];
+  if (firstValue !== undefined) {
+    return firstValue;
+  }
+
+  return fallback;
+}
 
 function queryValueToString(
   value: string | string[] | null | undefined,
@@ -61,22 +89,21 @@ function queryValueToString(
 
 const sessionConfig = reactive({
   studioId: "",
-  role: interviewRoleOptions[0] ?? INTERVIEW_DEFAULT_ROLE_TYPE,
-  experienceLevel:
-    interviewExperienceOptions[1] ??
-    interviewExperienceOptions[0] ??
+  role: resolvePreferredOption(interviewRoleOptions, 0, INTERVIEW_DEFAULT_ROLE_TYPE),
+  experienceLevel: resolvePreferredOption(
+    interviewExperienceOptions,
+    1,
     INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
-  questionCount:
-    interviewQuestionCountOptions[1] ??
-    interviewQuestionCountOptions[0] ??
+  ),
+  questionCount: resolvePreferredOption(
+    interviewQuestionCountOptions,
+    1,
     INTERVIEW_DEFAULT_QUESTION_COUNT,
+  ),
   enableVoiceMode: false,
   voiceSettings: {
+    ...INTERVIEW_DEFAULT_VOICE_SETTINGS,
     voiceId: "",
-    rate: 1,
-    pitch: 1,
-    volume: 1,
-    language: "en-US",
   } satisfies VoiceSettings,
 });
 
@@ -95,7 +122,55 @@ const requestedMode = computed<InterviewMode>(() =>
 const totalSessions = computed(() => stats.value?.totalSessions ?? 0);
 const averageScore = computed(() => Math.round(stats.value?.averageScore ?? 0));
 const improvementTrend = computed(() => Math.round(stats.value?.improvementTrend ?? 0));
-const recentSessions = computed(() => sessions.value.slice(0, 6));
+const recentSessionPagination = usePagination(
+  computed(() => sessions.value),
+  INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE,
+);
+const recentSessions = computed(() => recentSessionPagination.items.value);
+const recentSessionsPaginationSummary = computed(() =>
+  t("interviewHub.recent.pagination.summary", {
+    start: recentSessionPagination.rangeStart.value,
+    end: recentSessionPagination.rangeEnd.value,
+    total: recentSessionPagination.totalItems.value,
+  }),
+);
+
+const prepChecklist = computed(() => [
+  {
+    id: "resume",
+    ready: resumes.value.length > 0,
+    title: t("interviewHub.prep.items.resume.title"),
+    description: t("interviewHub.prep.items.resume.description"),
+    ctaLabel: t("interviewHub.prep.items.resume.cta"),
+    route: APP_ROUTES.resume,
+  },
+  {
+    id: "coverLetter",
+    ready: coverLetters.value.length > 0,
+    title: t("interviewHub.prep.items.coverLetter.title"),
+    description: t("interviewHub.prep.items.coverLetter.description"),
+    ctaLabel: t("interviewHub.prep.items.coverLetter.cta"),
+    route: APP_ROUTES.coverLetter,
+  },
+  {
+    id: "portfolio",
+    ready: portfolio.value?.projects.length ? portfolio.value.projects.length > 0 : false,
+    title: t("interviewHub.prep.items.portfolio.title"),
+    description: t("interviewHub.prep.items.portfolio.description"),
+    ctaLabel: t("interviewHub.prep.items.portfolio.cta"),
+    route: APP_ROUTES.portfolio,
+  },
+]);
+
+const prepReadyCount = computed(
+  () => prepChecklist.value.filter((item) => item.ready).length,
+);
+
+const prepCompletionPercent = computed(() => {
+  const total = prepChecklist.value.length;
+  if (total === 0) return 0;
+  return Math.round((prepReadyCount.value / total) * 100);
+});
 
 const availableJobs = computed(() => {
   const unique = new Map<string, Job>();
@@ -105,10 +180,19 @@ const availableJobs = computed(() => {
   return [...unique.values()];
 });
 
-const filteredJobs = computed(() => {
+const studiosForSelector = computed(() =>
+  studios.value.map((studio) => ({
+    id: studio.id,
+    name: studio.name,
+    type: studio.type,
+    location: studio.location,
+  })),
+);
+
+const searchedJobs = computed(() => {
   const query = jobSearchTerm.value.trim().toLowerCase();
   if (!query) {
-    return availableJobs.value.slice(0, JOB_PREVIEW_LIMIT);
+    return availableJobs.value;
   }
 
   return availableJobs.value
@@ -117,9 +201,16 @@ const filteredJobs = computed(() => {
       const company = job.company.toLowerCase();
       const description = (job.description || "").toLowerCase();
       return title.includes(query) || company.includes(query) || description.includes(query);
-    })
-    .slice(0, JOB_PREVIEW_LIMIT);
+    });
 });
+const jobSelectionPagination = usePagination(searchedJobs, JOB_PREVIEW_LIMIT, [jobSearchTerm]);
+const jobSelectionPaginationSummary = computed(() =>
+  t("interviewHub.config.pagination.summary", {
+    start: jobSelectionPagination.rangeStart.value,
+    end: jobSelectionPagination.rangeEnd.value,
+    total: jobSelectionPagination.totalItems.value,
+  }),
+);
 
 const selectedJob = computed(() => {
   const fromList = availableJobs.value.find((job) => job.id === selectedJobId.value);
@@ -148,6 +239,9 @@ await useAsyncData("interview-hub-bootstrap", async () => {
     fetchStats(),
     searchStudios(),
     searchJobs({ limit: INTERVIEW_HUB_JOB_QUERY_LIMIT }),
+    fetchResumes(),
+    fetchCoverLetters(),
+    fetchPortfolio(),
   ]);
 
   selectedMode.value = requestedMode.value;
@@ -162,6 +256,18 @@ await useAsyncData("interview-hub-bootstrap", async () => {
 
   return true;
 });
+
+function prepStatusBadgeClass(ready: boolean): string {
+  return ready ? "badge-success" : "badge-ghost";
+}
+
+function interviewConfigPageAria(page: number): string {
+  return t("interviewHub.config.pagination.pageAria", { page });
+}
+
+function recentSessionPageAria(page: number): string {
+  return t("interviewHub.recent.pagination.pageAria", { page });
+}
 
 onMounted(() => {
   if (routeJobId.value || routeStudioId.value) {
@@ -216,8 +322,9 @@ async function selectJobById(jobId: string) {
       selectedJobFallback.value = fetched;
       sessionConfig.role = fetched.title;
     }
-  } catch {
+  } catch (error) {
     selectedJobFallback.value = null;
+    $toast.error(getErrorMessage(error, t("interviewHub.errors.jobLoadFailed")));
   }
 }
 
@@ -334,7 +441,7 @@ function viewSession(id: string) {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="mx-auto w-full max-w-7xl space-y-6">
     <section class="hero rounded-box bg-base-200 border border-base-300">
       <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div class="max-w-2xl space-y-3">
@@ -393,6 +500,50 @@ function viewSession(id: string) {
             {{ improvementTrend >= 0 ? '+' : '' }}{{ improvementTrend }}%
           </div>
           <div class="stat-desc">{{ t("interviewHub.stats.improvementDesc") }}</div>
+        </div>
+      </div>
+
+      <div class="card card-border bg-base-100">
+        <div class="card-body">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="card-title">{{ t("interviewHub.prep.title") }}</h2>
+              <p class="text-sm text-base-content/70">{{ t("interviewHub.prep.subtitle") }}</p>
+            </div>
+            <span class="badge badge-primary badge-outline">
+              {{ t("interviewHub.prep.progressLabel", { done: prepReadyCount, total: prepChecklist.length }) }}
+            </span>
+          </div>
+
+          <progress
+            class="progress progress-primary w-full"
+            :value="prepCompletionPercent"
+            max="100"
+            :aria-label="t('interviewHub.prep.progressAria')"
+          ></progress>
+
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <article v-for="item in prepChecklist" :key="item.id" class="card bg-base-200">
+              <div class="card-body p-4">
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="font-semibold">{{ item.title }}</h3>
+                  <span class="badge badge-sm" :class="prepStatusBadgeClass(item.ready)">
+                    {{ item.ready ? t("interviewHub.prep.readyBadge") : t("interviewHub.prep.pendingBadge") }}
+                  </span>
+                </div>
+                <p class="text-xs text-base-content/70">{{ item.description }}</p>
+                <div class="card-actions justify-end">
+                  <NuxtLink
+                    :to="item.route"
+                    class="btn btn-xs btn-outline"
+                    :aria-label="t('interviewHub.prep.openAria', { title: item.title })"
+                  >
+                    {{ item.ctaLabel }}
+                  </NuxtLink>
+                </div>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
 
@@ -464,52 +615,66 @@ function viewSession(id: string) {
             <span>{{ t("interviewHub.recent.emptyState") }}</span>
           </div>
 
-          <div v-else class="overflow-x-auto">
-            <table class="table" :aria-label="t('interviewHub.recent.tableAria')">
-              <thead>
-                <tr>
-                  <th>{{ t("interviewHub.recent.columns.context") }}</th>
-                  <th>{{ t("interviewHub.recent.columns.role") }}</th>
-                  <th>{{ t("interviewHub.recent.columns.mode") }}</th>
-                  <th>{{ t("interviewHub.recent.columns.score") }}</th>
-                  <th>{{ t("interviewHub.recent.columns.date") }}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="session in recentSessions" :key="session.id" class="hover:bg-base-200">
-                  <td>{{ session.studioName || session.studioId }}</td>
-                  <td>{{ session.role || session.config.roleType }}</td>
-                  <td>
-                    <span class="badge badge-sm" :class="session.config.interviewMode === 'job' ? 'badge-primary' : 'badge-ghost'">
-                      {{ modeLabel(session.config.interviewMode) }}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      class="badge"
-                      :class="{
-                        'badge-success': (session.score ?? 0) >= 80,
-                        'badge-warning': (session.score ?? 0) >= 60 && (session.score ?? 0) < 80,
-                        'badge-error': (session.score ?? 0) < 60,
-                      }"
-                    >
-                      {{ session.score ?? 0 }}%
-                    </span>
-                  </td>
-                  <td>{{ session.createdAt ? new Date(session.createdAt).toLocaleDateString() : t("interviewHub.recent.notAvailable") }}</td>
-                  <td>
-                    <button
-                      class="btn btn-ghost btn-xs"
-                      :aria-label="t('interviewHub.recent.viewSessionAria', { id: session.id })"
-                      @click.stop="viewSession(session.id)"
-                    >
-                      {{ t("interviewHub.recent.viewButton") }}
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-else class="space-y-4">
+            <div class="overflow-x-auto">
+              <table class="table" :aria-label="t('interviewHub.recent.tableAria')">
+                <thead>
+                  <tr>
+                    <th>{{ t("interviewHub.recent.columns.context") }}</th>
+                    <th>{{ t("interviewHub.recent.columns.role") }}</th>
+                    <th>{{ t("interviewHub.recent.columns.mode") }}</th>
+                    <th>{{ t("interviewHub.recent.columns.score") }}</th>
+                    <th>{{ t("interviewHub.recent.columns.date") }}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="session in recentSessions" :key="session.id" class="hover:bg-base-200">
+                    <td>{{ session.studioName || session.studioId }}</td>
+                    <td>{{ session.role || session.config.roleType }}</td>
+                    <td>
+                      <span class="badge badge-sm" :class="session.config.interviewMode === 'job' ? 'badge-primary' : 'badge-ghost'">
+                        {{ modeLabel(session.config.interviewMode) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        class="badge"
+                        :class="{
+                          'badge-success': (session.score ?? 0) >= 80,
+                          'badge-warning': (session.score ?? 0) >= 60 && (session.score ?? 0) < 80,
+                          'badge-error': (session.score ?? 0) < 60,
+                        }"
+                      >
+                        {{ session.score ?? 0 }}%
+                      </span>
+                    </td>
+                    <td>{{ session.createdAt ? new Date(session.createdAt).toLocaleDateString() : t("interviewHub.recent.notAvailable") }}</td>
+                    <td>
+                      <button
+                        class="btn btn-ghost btn-xs"
+                        :aria-label="t('interviewHub.recent.viewSessionAria', { id: session.id })"
+                        @click.stop="viewSession(session.id)"
+                      >
+                        {{ t("interviewHub.recent.viewButton") }}
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <AppPagination
+              :current-page="recentSessionPagination.currentPage"
+              :total-pages="recentSessionPagination.totalPages"
+              :page-numbers="recentSessionPagination.pageNumbers"
+              :summary="recentSessionsPaginationSummary"
+              :navigation-aria="t('interviewHub.recent.pagination.navigationAria')"
+              :previous-aria="t('interviewHub.recent.pagination.previousAria')"
+              :next-aria="t('interviewHub.recent.pagination.nextAria')"
+              :page-aria="recentSessionPageAria"
+              @update:current-page="recentSessionPagination.goToPage"
+            />
           </div>
         </div>
       </div>
@@ -561,33 +726,51 @@ function viewSession(id: string) {
               />
             </fieldset>
 
-            <div class="overflow-x-auto border border-base-300 rounded-box max-h-72">
-              <table class="table table-sm" :aria-label="t('interviewHub.config.jobsTableAria')">
-                <thead>
-                  <tr>
-                    <th>{{ t("interviewHub.config.jobsColumns.job") }}</th>
-                    <th>{{ t("interviewHub.config.jobsColumns.company") }}</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="job in filteredJobs" :key="job.id" class="hover:bg-base-200">
-                    <td class="max-w-[16rem] truncate">{{ job.title }}</td>
-                    <td>{{ job.company }}</td>
-                    <td class="text-right">
-                      <button
-                        type="button"
-                        class="btn btn-xs"
-                        :class="job.id === selectedJobId ? 'btn-primary' : 'btn-ghost'"
-                        :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
-                        @click="selectJobById(job.id)"
-                      >
-                        {{ job.id === selectedJobId ? t("interviewHub.config.selectedButton") : t("interviewHub.config.selectButton") }}
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div v-if="searchedJobs.length === 0" class="alert alert-soft" role="status">
+              <span>{{ t("interviewHub.config.noJobsState") }}</span>
+            </div>
+
+            <div v-else class="space-y-4">
+              <div class="overflow-x-auto border border-base-300 rounded-box max-h-72">
+                <table class="table table-sm" :aria-label="t('interviewHub.config.jobsTableAria')">
+                  <thead>
+                    <tr>
+                      <th>{{ t("interviewHub.config.jobsColumns.job") }}</th>
+                      <th>{{ t("interviewHub.config.jobsColumns.company") }}</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="job in jobSelectionPagination.items" :key="job.id" class="hover:bg-base-200">
+                      <td class="max-w-[16rem] truncate">{{ job.title }}</td>
+                      <td>{{ job.company }}</td>
+                      <td class="text-right">
+                        <button
+                          type="button"
+                          class="btn btn-xs"
+                          :class="job.id === selectedJobId ? 'btn-primary' : 'btn-ghost'"
+                          :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
+                          @click="selectJobById(job.id)"
+                        >
+                          {{ job.id === selectedJobId ? t("interviewHub.config.selectedButton") : t("interviewHub.config.selectButton") }}
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <AppPagination
+                :current-page="jobSelectionPagination.currentPage"
+                :total-pages="jobSelectionPagination.totalPages"
+                :page-numbers="jobSelectionPagination.pageNumbers"
+                :summary="jobSelectionPaginationSummary"
+                :navigation-aria="t('interviewHub.config.pagination.navigationAria')"
+                :previous-aria="t('interviewHub.config.pagination.previousAria')"
+                :next-aria="t('interviewHub.config.pagination.nextAria')"
+                :page-aria="interviewConfigPageAria"
+                @update:current-page="jobSelectionPagination.goToPage"
+              />
             </div>
 
             <div v-if="selectedJob" class="card bg-base-200" role="status" aria-live="polite">
@@ -606,16 +789,10 @@ function viewSession(id: string) {
           <div v-else class="space-y-4">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("interviewHub.config.studioLegend") }}</legend>
-              <select
-                v-model="sessionConfig.studioId"
-                class="select w-full"
-                :aria-label="t('interviewHub.config.studioAria')"
-              >
-                <option value="">{{ t("interviewHub.config.selectStudioOption") }}</option>
-                <option v-for="studio in studios" :key="studio.id" :value="studio.id">
-                  {{ studio.name }}
-                </option>
-              </select>
+              <StudioSelector v-model="sessionConfig.studioId" :studios="studiosForSelector" />
+              <p v-if="studiosForSelector.length === 0" class="text-xs text-base-content/60 mt-2">
+                {{ t("interviewHub.config.noStudiosHint") }}
+              </p>
             </fieldset>
           </div>
 

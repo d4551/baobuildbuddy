@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { ToastType } from "~/composables/useToast";
+import { useI18n } from "vue-i18n";
 
 const { toasts, removeToast } = useToast();
+const { t } = useI18n();
 
 const alertClassByType = {
   success: "alert-success",
@@ -31,7 +33,7 @@ function resolveIconPath(type: ToastType): string {
     class="toast toast-top toast-center z-[1000] pointer-events-none"
     aria-live="polite"
     aria-atomic="false"
-    aria-label="Notifications"
+    :aria-label="t('a11y.notifications')"
   >
     <TransitionGroup name="toast-motion" tag="div" class="flex w-full max-w-md flex-col gap-2">
       <div
@@ -60,7 +62,7 @@ function resolveIconPath(type: ToastType): string {
         <button
           type="button"
           class="btn btn-ghost btn-circle btn-xs"
-          aria-label="Dismiss notification"
+          :aria-label="t('a11y.dismissNotification')"
           @click="removeToast(toast.id)"
         >
           ×

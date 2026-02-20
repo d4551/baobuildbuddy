@@ -70,6 +70,8 @@ This is the canonical local setup runbook for BaoBuildBuddy v1.0. It covers:
 flowchart TD
   Browser["Browser / Nuxt SSR"] -->|render + initial payload| Client["packages/client"]
   Client --> Composables["Nuxt composables (typed)"]
+  Composables --> ChatVoice["useChatVoice + useSpeech"]
+  ChatVoice --> VoicePrefs["useState keys: AI_CHAT_AUTO_SPEAK + AI_CHAT_VOICE_ID"]
   Composables --> Normalizers["api-normalizers.ts"]
   Composables --> EdenClient["plugins/eden.ts (Eden Treaty client)"]
   ServerTypes["packages/server/dist-types (generated API type contract)"]
@@ -722,6 +724,8 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 | `/api/skills/readiness` | Career readiness | Readiness score and category breakdown |
 | `/api/skills/ai-analyze` | Skill analysis | Suggested mappings and recommendations |
 | `/api/automation/job-apply` | Start job application automation | `{ runId, status: "running" }` |
+| `/api/automation/job-apply/schedule` | Schedule job application automation | `{ runId, status: "pending", scheduledFor }` |
+| `/api/automation/email-response` | Generate AI email response | `{ runId, status: "success", reply, provider, model }` |
 | `/api/gamification/progress` | XP and level progression | Gamification progress payload |
 | `/api/automation/runs` | Automation audit | Persisted run records |
 | `/api/automation/runs/:id` | Run detail | Single run snapshot |
@@ -915,10 +919,10 @@ Manual browser checklist for final sign-off:
 | **Cover Letter** | `cover-letter/index`, `cover-letter/[id]` | `useCoverLetter` |
 | **Portfolio** | `portfolio/index`, `portfolio/preview` | `usePortfolio` |
 | **Interview** | `interview/index`, `interview/session`, `interview/history` | `useInterview`, `useWebSocket` |
-| **AI Chat** | `ai/dashboard`, `ai/chat` | `useAI`, `useSpeech`, `useTTS`, `useSTT` |
+| **AI Chat** | `ai/dashboard`, `ai/chat` | `useAI`, `useChatVoice`, `useSpeech`, `useTTS`, `useSTT` |
 | **Studios** | `studios/index`, `studios/[id]`, `studios/analytics` | `useStudio` |
 | **Jobs** | `jobs/index`, `jobs/[id]` | `useJobs`, `useSearch` |
-| **Automation** | `automation/index`, `automation/job-apply`, `automation/scraper`, `automation/runs`, `automation/runs/[id]` | `useAutomation` |
+| **Automation** | `automation/index`, `automation/job-apply`, `automation/email`, `automation/scraper`, `automation/runs`, `automation/runs/[id]` | `useAutomation` |
 | **Skills & XP** | `skills/index`, `skills/pathways`, `gamification.vue` | `useSkillMapping`, `useGamification` |
 
 ### UI implementation standards

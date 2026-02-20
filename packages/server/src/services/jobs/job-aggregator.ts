@@ -14,6 +14,13 @@ import type {
   Platform,
   StudioType,
 } from "@bao/shared";
+import {
+  JOB_EXPERIENCE_LEVELS,
+  JOB_GAME_GENRES,
+  JOB_STUDIO_TYPES,
+  JOB_SUPPORTED_PLATFORMS,
+  JOB_TYPES,
+} from "@bao/shared";
 import { and, desc, eq, gte, inArray, like, sql } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs, savedJobs } from "../../db/schema/jobs";
@@ -32,70 +39,6 @@ import {
   remoteGameJobsProvider,
   workWithIndiesProvider,
 } from "./providers";
-
-const STUDIO_TYPES: readonly StudioType[] = [
-  "AAA",
-  "Indie",
-  "Mobile",
-  "VR/AR",
-  "Platform",
-  "Esports",
-  "Unknown",
-];
-
-const GAME_GENRES: readonly GameGenre[] = [
-  "Action",
-  "RPG",
-  "Strategy",
-  "Puzzle",
-  "Simulation",
-  "Sports",
-  "Racing",
-  "Shooter",
-  "Platformer",
-  "Horror",
-  "MMORPG",
-  "MOBA",
-  "Battle Royale",
-  "Roguelike",
-  "Sandbox",
-  "Adventure",
-  "Fighting",
-  "Survival",
-  "Card Game",
-  "Casual",
-  "Indie",
-];
-
-const SUPPORTED_PLATFORMS: readonly Platform[] = [
-  "PC",
-  "Console",
-  "Mobile",
-  "VR",
-  "AR",
-  "Web",
-  "Switch",
-  "PlayStation",
-  "Xbox",
-  "Steam",
-];
-
-const JOB_EXPERIENCE_LEVELS: readonly JobExperienceLevel[] = [
-  "entry",
-  "junior",
-  "mid",
-  "senior",
-  "principal",
-  "director",
-];
-
-const JOB_TYPES: readonly JobType[] = [
-  "full-time",
-  "part-time",
-  "contract",
-  "internship",
-  "freelance",
-];
 
 const isOneOf = <T extends string>(values: readonly T[], value: unknown): value is T => {
   if (typeof value !== "string") {
@@ -692,18 +635,18 @@ export class JobAggregator {
   }
 
   private normalizeStudioType(value: string | null): StudioType | undefined {
-    if (!isOneOf(STUDIO_TYPES, value)) return undefined;
+    if (!isOneOf(JOB_STUDIO_TYPES, value)) return undefined;
     return value;
   }
 
   private normalizeGameGenres(value: string[] | null): GameGenre[] | undefined {
     if (!Array.isArray(value)) return undefined;
-    return value.filter((genre): genre is GameGenre => isOneOf(GAME_GENRES, genre));
+    return value.filter((genre): genre is GameGenre => isOneOf(JOB_GAME_GENRES, genre));
   }
 
   private normalizePlatforms(value: string[] | null): Platform[] | undefined {
     if (!Array.isArray(value)) return undefined;
-    return value.filter((platform): platform is Platform => isOneOf(SUPPORTED_PLATFORMS, platform));
+    return value.filter((platform): platform is Platform => isOneOf(JOB_SUPPORTED_PLATFORMS, platform));
   }
 
   private normalizeExperienceLevel(value: string | null): JobExperienceLevel | undefined {

@@ -1,17 +1,13 @@
-import { generateId } from "@bao/shared";
+import {
+  COVER_LETTER_DEFAULT_TEMPLATE,
+  generateId,
+  isCoverLetterTemplate,
+  isRecord,
+} from "@bao/shared";
 import type { CoverLetterData, CoverLetterTemplate } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema";
-
-const COVER_LETTER_TEMPLATES: readonly CoverLetterTemplate[] = [
-  "professional",
-  "creative",
-  "gaming",
-];
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const toCoverLetterContent = (value: unknown): CoverLetterData["content"] => {
   if (!isRecord(value)) {
@@ -40,9 +36,7 @@ const toContentRecord = (
 };
 
 const normalizeTemplate = (value: string | null | undefined): CoverLetterTemplate =>
-  value && COVER_LETTER_TEMPLATES.includes(value as CoverLetterTemplate)
-    ? (value as CoverLetterTemplate)
-    : "professional";
+  isCoverLetterTemplate(value) ? value : COVER_LETTER_DEFAULT_TEMPLATE;
 
 export class CoverLetterService {
   private toCoverLetterData(row: typeof coverLetters.$inferSelect): CoverLetterData {

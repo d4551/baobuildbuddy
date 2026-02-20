@@ -1,5 +1,6 @@
 import type { CoverLetterData } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { toCoverLetterData } from "./api-normalizers";
 
 interface CreateCoverLetterInput {
@@ -26,6 +27,8 @@ interface GenerateCoverLetterInput {
  */
 export function useCoverLetter() {
   const api = useApi();
+  const { $toast } = useNuxtApp();
+  const { t } = useI18n();
   const coverLetters = useState<CoverLetterData[]>(STATE_KEYS.COVERLETTERS_LIST, () => []);
   const currentLetter = useState<CoverLetterData | null>(
     STATE_KEYS.COVERLETTER_CURRENT,
@@ -35,88 +38,89 @@ export function useCoverLetter() {
 
   async function fetchCoverLetters() {
     loading.value = true;
-    try {
-      const { data, error } = await api["cover-letters"].get();
-      if (error) throw new Error("Failed to fetch cover letters");
-      const rows = Array.isArray(data) ? data : [];
-      coverLetters.value = rows
-        .map((row) => toCoverLetterData(row))
-        .filter((row): row is CoverLetterData => row !== null);
-    } finally {
-      loading.value = false;
+    const { data, error } = await api["cover-letters"].get();
+    loading.value = false;
+    if (error) {
+      $toast.error(t("coverLetterPage.toasts.fetchFailed"));
+      return;
     }
+    const rows = Array.isArray(data) ? data : [];
+    coverLetters.value = rows
+      .map((row) => toCoverLetterData(row))
+      .filter((row): row is CoverLetterData => row !== null);
   }
 
   async function getCoverLetter(id: string) {
     loading.value = true;
-    try {
-      const { data, error } = await api["cover-letters"]({ id }).get();
-      if (error || !data) throw new Error("Failed to fetch cover letter");
-      const normalized = toCoverLetterData(data);
-      if (!normalized) {
-        throw new Error("Invalid cover letter payload");
-      }
-      currentLetter.value = normalized;
-      return normalized;
-    } finally {
-      loading.value = false;
+    const { data, error } = await api["cover-letters"]({ id }).get();
+    loading.value = false;
+    if (error || !data) {
+      $toast.error(t("coverLetterDetailPage.toasts.loadFailed"));
+      return null;
     }
+    const normalized = toCoverLetterData(data);
+    if (!normalized) {
+      $toast.error(t("coverLetterDetailPage.toasts.loadFailed"));
+      return null;
+    }
+    currentLetter.value = normalized;
+    return normalized;
   }
 
   async function createCoverLetter(letterData: CreateCoverLetterInput) {
     loading.value = true;
-    try {
-      const { data, error } = await api["cover-letters"].post(letterData);
-      if (error) throw new Error("Failed to create cover letter");
-      await fetchCoverLetters();
-      return data;
-    } finally {
-      loading.value = false;
+    const { data, error } = await api["cover-letters"].post(letterData);
+    loading.value = false;
+    if (error) {
+      $toast.error(t("coverLetterPage.toasts.generateFailed"));
+      return null;
     }
+    await fetchCoverLetters();
+    return data;
   }
 
   async function updateCoverLetter(id: string, updates: UpdateCoverLetterInput) {
     loading.value = true;
-    try {
-      const { data, error } = await api["cover-letters"]({ id }).put(updates);
-      if (error || !data) throw new Error("Failed to update cover letter");
-      const normalized = toCoverLetterData(data);
-      if (normalized) {
-        currentLetter.value = normalized;
-      }
-      await fetchCoverLetters();
-      return data;
-    } finally {
-      loading.value = false;
+    const { data, error } = await api["cover-letters"]({ id }).put(updates);
+    loading.value = false;
+    if (error || !data) {
+      $toast.error(t("coverLetterDetailPage.toasts.saveFailed"));
+      return null;
     }
+    const normalized = toCoverLetterData(data);
+    if (normalized) {
+      currentLetter.value = normalized;
+    }
+    await fetchCoverLetters();
+    return data;
   }
 
   async function deleteCoverLetter(id: string) {
     loading.value = true;
-    try {
-      const { error } = await api["cover-letters"]({ id }).delete();
-      if (error) throw new Error("Failed to delete cover letter");
-      if (currentLetter.value?.id === id) {
-        currentLetter.value = null;
-      }
-      await fetchCoverLetters();
-    } finally {
-      loading.value = false;
+    const { error } = await api["cover-letters"]({ id }).delete();
+    loading.value = false;
+    if (error) {
+      $toast.error(t("coverLetterPage.toasts.deleteFailed"));
+      return;
     }
+    if (currentLetter.value?.id === id) {
+      currentLetter.value = null;
+    }
+    await fetchCoverLetters();
   }
 
   async function generateCoverLetter(generationData: GenerateCoverLetterInput) {
     loading.value = true;
-    try {
-      const { data, error } = await api["cover-letters"].generate.post(generationData);
-      if (error) throw new Error("Failed to generate cover letter");
-      if (generationData.save) {
-        await fetchCoverLetters();
-      }
-      return data;
-    } finally {
-      loading.value = false;
+    const { data, error } = await api["cover-letters"].generate.post(generationData);
+    loading.value = false;
+    if (error) {
+      $toast.error(t("coverLetterPage.toasts.generateFailed"));
+      return null;
     }
+    if (generationData.save) {
+      await fetchCoverLetters();
+    }
+    return data;
   }
 
   /**
@@ -124,13 +128,13 @@ export function useCoverLetter() {
    */
   async function exportPdf(id: string) {
     loading.value = true;
-    try {
-      const { data, error } = await api["cover-letters"]({ id }).export.post();
-      if (error) throw new Error("Failed to export cover letter as PDF");
-      return data;
-    } finally {
-      loading.value = false;
+    const { data, error } = await api["cover-letters"]({ id }).export.post();
+    loading.value = false;
+    if (error) {
+      $toast.error(t("coverLetterDetailPage.toasts.exportFailed"));
+      return null;
     }
+    return data;
   }
 
   return {

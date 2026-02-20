@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 interface BreadcrumbItem {
   readonly label: string;
   readonly to?: string;
@@ -16,12 +18,13 @@ const props = withDefaults(
 
 const crumbs = toRef(props, "crumbs");
 const sizeClass = toRef(props, "sizeClass");
+const { t } = useI18n();
 
 const lastCrumbIndex = computed(() => crumbs.value.length - 1);
 </script>
 
 <template>
-  <nav class="breadcrumbs" :class="sizeClass" aria-label="Breadcrumb">
+  <nav class="breadcrumbs" :class="sizeClass" :aria-label="t('a11y.breadcrumbs')">
     <ul>
       <li v-for="(crumb, index) in crumbs" :key="`${crumb.label}-${index}`">
         <NuxtLink v-if="crumb.to && index !== lastCrumbIndex" :to="crumb.to">

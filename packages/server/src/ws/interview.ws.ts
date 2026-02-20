@@ -4,6 +4,7 @@ import {
   INTERVIEW_DEFAULT_QUESTION_COUNT,
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_UNKNOWN_STUDIO_NAME,
+  isRecord,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -49,9 +50,6 @@ type FeedbackSummary = {
   strengths: string[];
   improvements: string[];
 };
-
-const isRecord = (value: unknown): value is JsonRecord =>
-  typeof value === "object" && value !== null;
 
 const isQuestionRecord = (
   value: unknown,

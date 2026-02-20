@@ -1,5 +1,5 @@
 import type { AutocompleteResult, SearchResult, SearchResults } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS, asNumber, asString, isRecord } from "@bao/shared";
 
 const SEARCH_RESULT_TYPE_MAP: Record<string, SearchResult["type"]> = {
   jobs: "job",
@@ -8,15 +8,6 @@ const SEARCH_RESULT_TYPE_MAP: Record<string, SearchResult["type"]> = {
   resumes: "resume",
   "cover-letters": "cover-letter",
 };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" && value.trim().length > 0 ? value : undefined;
-
-const asNumber = (value: unknown): number | undefined =>
-  typeof value === "number" && Number.isFinite(value) ? value : undefined;
 
 const debounceAsync = <TArgs extends unknown[]>(
   fn: (...args: TArgs) => Promise<void>,

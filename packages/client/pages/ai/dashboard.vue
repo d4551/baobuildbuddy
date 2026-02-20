@@ -1,36 +1,17 @@
 <script setup lang="ts">
-import type { AppSettings } from "@bao/shared";
-import { type AIProviderType, AI_PROVIDER_CATALOG } from "@bao/shared";
+import {
+  AI_PROVIDER_CATALOG,
+  AI_PROVIDER_DEFAULT_ORDER,
+  AI_PROVIDER_ID_LIST,
+  APP_ROUTES,
+  type AIProviderType,
+} from "@bao/shared";
+import { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 
-type SettingsWithFlags = AppSettings & {
-  hasGeminiKey?: boolean;
-  hasOpenaiKey?: boolean;
-  hasClaudeKey?: boolean;
-  hasHuggingfaceToken?: boolean;
-  hasLocalKey?: boolean;
-};
-
-type ModelProviderResponse = {
-  id: string;
-  name: string;
-  models: string[];
-  available: boolean;
-  health: "healthy" | "degraded" | "down" | "unconfigured";
-};
-
-type ModelsResponse = {
-  providers: ModelProviderResponse[];
-  preferredProvider?: AIProviderType;
-  configuredProviders?: AIProviderType[];
-};
-
-type UsageResponse = {
-  totalMessages: number;
-  userMessages: number;
-  assistantMessages: number;
-  sessions: number;
-  recentActivity: Array<{ timestamp: string; role: string; sessionId: string }>;
-};
+type ApiClient = ReturnType<typeof useApi>;
+type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
+type ProviderHealth = "healthy" | "degraded" | "down" | "unconfigured";
 
 type ProviderConfig = {
   id: AIProviderType;
@@ -39,25 +20,52 @@ type ProviderConfig = {
   icon: string;
   models: string[];
   available: boolean;
-  health: "healthy" | "degraded" | "down" | "unconfigured";
+  health: ProviderHealth;
 };
 
 type DashboardStats = {
   totalRequests: number;
   successRate: number;
-  averageResponseTime: number;
-  activeProvider: string;
+  averageResponseTimeSeconds: number;
+  activeProvider: AIProviderType;
   sessions: number;
 };
 
+type ProviderConnectivityResult = {
+  valid: boolean;
+  message: string;
+};
+
+const HEALTH_LABEL_KEY_BY_VALUE: Record<ProviderHealth, string> = {
+  healthy: "aiDashboard.health.healthy",
+  degraded: "aiDashboard.health.degraded",
+  down: "aiDashboard.health.down",
+  unconfigured: "aiDashboard.health.unconfigured",
+};
+
+const HEALTH_BADGE_CLASS_BY_VALUE: Record<ProviderHealth, string> = {
+  healthy: "badge-success",
+  degraded: "badge-warning",
+  down: "badge-error",
+  unconfigured: "badge-ghost",
+};
+
+const providerCatalogById = new Map(
+  AI_PROVIDER_CATALOG.map((provider) => [provider.id, provider] as const),
+);
+const providerIdSet = new Set<string>(AI_PROVIDER_ID_LIST);
+const providerHealthSet = new Set<string>(["healthy", "degraded", "down", "unconfigured"]);
+
+const { t } = useI18n();
 const { settings, fetchSettings } = useSettings();
+const { $toast } = useNuxtApp();
 const api = useApi();
 
 const providerStats = ref<DashboardStats | null>(null);
 const providers = ref<ProviderConfig[]>([]);
 const loading = ref(false);
 const testingProvider = ref<AIProviderType | null>(null);
-const testResults = reactive<Record<AIProviderType, { valid: boolean; message: string } | null>>({
+const testResults = reactive<Record<AIProviderType, ProviderConnectivityResult | null>>({
   local: null,
   gemini: null,
   openai: null,
@@ -65,111 +73,234 @@ const testResults = reactive<Record<AIProviderType, { valid: boolean; message: s
   huggingface: null,
 });
 
-const selectedProvider = ref<AIProviderType>("local");
+const selectedProvider = ref<AIProviderType>(AI_PROVIDER_DEFAULT_ORDER[0] ?? "local");
 const selectedModel = ref("");
+const selectedProviderModels = computed(() => {
+  const matchingProvider = providers.value.find((provider) => provider.id === selectedProvider.value);
+  return matchingProvider?.models ?? [];
+});
 
-const providerDescriptionById = new Map(
-  AI_PROVIDER_CATALOG.map((provider) => [provider.id, provider.description] as const),
-);
-const providerIconById = new Map(
-  AI_PROVIDER_CATALOG.map((provider) => [provider.id, provider.icon] as const),
-);
-const providerModelsById = new Map(
-  AI_PROVIDER_CATALOG.map((provider) => [provider.id, [...provider.modelHints]] as const),
-);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
-function getSettingsFlags(): SettingsWithFlags | null {
-  return settings.value as SettingsWithFlags | null;
+const asString = (value: unknown): string | undefined =>
+  typeof value === "string" ? value : undefined;
+
+const asNumber = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) ? value : undefined;
+
+const asBoolean = (value: unknown): boolean | undefined =>
+  typeof value === "boolean" ? value : undefined;
+
+const asStringArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+
+function isProviderId(value: string): value is AIProviderType {
+  return providerIdSet.has(value);
+}
+
+function isProviderHealth(value: string): value is ProviderHealth {
+  return providerHealthSet.has(value);
 }
 
 function isProviderConfigured(providerId: AIProviderType): boolean {
-  const current = getSettingsFlags();
-  if (!current) return false;
+  const currentSettings = settings.value;
+  if (!currentSettings) return false;
 
   if (providerId === "local") {
-    return current.hasLocalKey ?? true;
+    return currentSettings.hasLocalKey ?? true;
   }
-  if (providerId === "gemini") return !!current.hasGeminiKey;
-  if (providerId === "openai") return !!current.hasOpenaiKey;
-  if (providerId === "claude") return !!current.hasClaudeKey;
-  return !!current.hasHuggingfaceToken;
+  if (providerId === "gemini") return Boolean(currentSettings.hasGeminiKey);
+  if (providerId === "openai") return Boolean(currentSettings.hasOpenaiKey);
+  if (providerId === "claude") return Boolean(currentSettings.hasClaudeKey);
+  return Boolean(currentSettings.hasHuggingfaceToken);
 }
 
-onMounted(() => {
-  void fetchSettings();
-  void fetchProviderStats();
-});
+function providerAvailabilityLabel(available: boolean): string {
+  return available ? t("aiDashboard.availability.available") : t("aiDashboard.availability.unavailable");
+}
+
+function providerHealthLabel(health: ProviderHealth): string {
+  return t(HEALTH_LABEL_KEY_BY_VALUE[health]);
+}
+
+function providerHealthBadgeClass(health: ProviderHealth): string {
+  return HEALTH_BADGE_CLASS_BY_VALUE[health];
+}
+
+function providerSelectOptionLabel(provider: ProviderConfig): string {
+  if (isProviderConfigured(provider.id)) {
+    return provider.name;
+  }
+  return t("aiDashboard.preference.providerNotConfiguredOption", { provider: provider.name });
+}
+
+function normalizeProviderRow(value: unknown): ProviderConfig | null {
+  if (!isRecord(value)) return null;
+
+  const rawId = asString(value.id);
+  if (!rawId || !isProviderId(rawId)) return null;
+
+  const catalogEntry = providerCatalogById.get(rawId);
+  if (!catalogEntry) return null;
+
+  const rawHealth = asString(value.health);
+  const rawAvailable = asBoolean(value.available);
+  const available = rawAvailable ?? isProviderConfigured(rawId);
+  const health = rawHealth && isProviderHealth(rawHealth)
+    ? rawHealth
+    : available
+      ? "healthy"
+      : "unconfigured";
+  const models = asStringArray(value.models);
+
+  return {
+    id: rawId,
+    name: asString(value.name) ?? catalogEntry.name,
+    description: catalogEntry.description,
+    icon: catalogEntry.icon,
+    models: models.length > 0 ? models : [...catalogEntry.modelHints],
+    available,
+    health,
+  };
+}
+
+function buildFallbackProviders(): ProviderConfig[] {
+  return AI_PROVIDER_DEFAULT_ORDER.map((providerId) => {
+    const catalogEntry = providerCatalogById.get(providerId);
+    if (!catalogEntry) {
+      return {
+        id: providerId,
+        name: providerId,
+        description: "",
+        icon: "💠",
+        models: [],
+        available: false,
+        health: "unconfigured",
+      };
+    }
+
+    return {
+      id: providerId,
+      name: catalogEntry.name,
+      description: catalogEntry.description,
+      icon: catalogEntry.icon,
+      models: [...catalogEntry.modelHints],
+      available: isProviderConfigured(providerId),
+      health: isProviderConfigured(providerId) ? "degraded" : "unconfigured",
+    };
+  });
+}
+
+function resolveDefaultModel(providerId: AIProviderType): string {
+  const matchingProvider = providers.value.find((provider) => provider.id === providerId);
+  if (matchingProvider?.models[0]) {
+    return matchingProvider.models[0];
+  }
+
+  const catalogEntry = providerCatalogById.get(providerId);
+  return catalogEntry?.modelHints[0] ?? "";
+}
+
+function resolveProviderCredential(providerId: TestApiKeyInput["provider"]): string {
+  const currentSettings = settings.value;
+  if (!currentSettings) return "";
+  if (providerId === "gemini") return currentSettings.geminiApiKey ?? "";
+  if (providerId === "openai") return currentSettings.openaiApiKey ?? "";
+  if (providerId === "claude") return currentSettings.claudeApiKey ?? "";
+  if (providerId === "huggingface") return currentSettings.huggingfaceToken ?? "";
+  return "";
+}
+
+function resolvePreferredProvider(value: unknown): AIProviderType {
+  if (!isRecord(value)) {
+    return AI_PROVIDER_DEFAULT_ORDER[0] ?? "local";
+  }
+
+  const preferred = asString(value.preferredProvider);
+  if (preferred && isProviderId(preferred)) {
+    return preferred;
+  }
+
+  return AI_PROVIDER_DEFAULT_ORDER[0] ?? "local";
+}
+
+function normalizeProviders(value: unknown): ProviderConfig[] {
+  if (!isRecord(value)) return [];
+
+  const rows = Array.isArray(value.providers) ? value.providers : [];
+  return rows
+    .map((row) => normalizeProviderRow(row))
+    .filter((provider): provider is ProviderConfig => provider !== null);
+}
+
+function normalizeDashboardStats(usagePayload: unknown, activeProvider: AIProviderType): DashboardStats {
+  if (!isRecord(usagePayload)) {
+    return {
+      totalRequests: 0,
+      successRate: 0,
+      averageResponseTimeSeconds: 0,
+      activeProvider,
+      sessions: 0,
+    };
+  }
+
+  const totalMessages = asNumber(usagePayload.totalMessages) ?? 0;
+  const userMessages = asNumber(usagePayload.userMessages) ?? 0;
+  const assistantMessages = asNumber(usagePayload.assistantMessages) ?? 0;
+  const sessions = asNumber(usagePayload.sessions) ?? 0;
+
+  const successRate = userMessages > 0
+    ? Math.round((assistantMessages / userMessages) * 100)
+    : totalMessages > 0
+      ? 100
+      : 0;
+
+  return {
+    totalRequests: totalMessages,
+    successRate,
+    averageResponseTimeSeconds: 0,
+    activeProvider,
+    sessions,
+  };
+}
 
 async function fetchProviderStats() {
   loading.value = true;
+
   try {
+    await fetchSettings();
+
     const [usageResult, modelsResult] = await Promise.all([
-      api.ai.usage.get() as Promise<{ data: UsageResponse; error?: { message?: string } | null }>,
-      api.ai.models.get() as Promise<{ data: ModelsResponse; error?: { message?: string } | null }>,
+      api.ai.usage.get(),
+      api.ai.models.get(),
     ]);
 
     if (usageResult.error) {
-      throw new Error("Failed to fetch AI usage");
+      throw new Error(t("aiDashboard.errors.usageLoadFailed"));
+    }
+    if (modelsResult.error) {
+      throw new Error(t("aiDashboard.errors.modelsLoadFailed"));
     }
 
-    const usageData = usageResult.data;
-    providerStats.value = {
-      totalRequests: usageData.totalMessages || 0,
-      successRate: usageData.totalMessages
-        ? Math.round((usageData.assistantMessages / Math.max(usageData.userMessages, 1)) * 100)
-        : 0,
-      averageResponseTime: 0,
-      activeProvider: usageData.recentActivity ? "local" : "none",
-      sessions: usageData.sessions || 0,
-    };
+    const normalizedProviders = normalizeProviders(modelsResult.data);
+    providers.value = normalizedProviders.length > 0 ? normalizedProviders : buildFallbackProviders();
 
-    const modelData = modelsResult.data;
-    const activeProvider = modelData?.preferredProvider || "local";
+    const preferredProvider = resolvePreferredProvider(modelsResult.data);
+    const activeProvider = providers.value.some((provider) => provider.id === preferredProvider)
+      ? preferredProvider
+      : providers.value[0]?.id ?? "local";
 
-    providers.value = (modelData?.providers || []).map((provider) => ({
-      id: provider.id as AIProviderType,
-      name: provider.name || provider.id,
-      description: providerDescriptionById.get(provider.id as AIProviderType) || "",
-      icon: providerIconById.get(provider.id as AIProviderType) || "💠",
-      models: provider.models || providerModelsById.get(provider.id as AIProviderType) || [],
-      available: provider.available,
-      health: provider.health,
-    }));
-
-    if (!providerStats.value.activeProvider) {
-      providerStats.value.activeProvider = activeProvider;
-    }
-
-    const selected = providers.value.find((provider) => provider.id === activeProvider);
-    if (selected) {
-      selectedProvider.value = selected.id;
-      selectedModel.value = selected.models[0] || "";
-    } else {
-      selectedProvider.value = "local";
-      selectedModel.value = providerModelsById.get("local")?.[0] || "";
-    }
-  } catch {
-    const { $toast } = useNuxtApp();
-    $toast.error("Failed to load AI statistics");
-
-    providers.value = AI_PROVIDER_CATALOG.map((provider) => ({
-      id: provider.id,
-      name: provider.name,
-      description: provider.description,
-      icon: provider.icon,
-      models: [...provider.modelHints],
-      available: false,
-      health: "unconfigured",
-    }));
-    providerStats.value = {
-      totalRequests: 0,
-      successRate: 0,
-      averageResponseTime: 0,
-      activeProvider: "local",
-      sessions: 0,
-    };
-    selectedProvider.value = "local";
-    selectedModel.value = providerModelsById.get("local")?.[0] || "";
+    selectedProvider.value = activeProvider;
+    selectedModel.value = resolveDefaultModel(activeProvider);
+    providerStats.value = normalizeDashboardStats(usageResult.data, activeProvider);
+  } catch (error) {
+    providers.value = buildFallbackProviders();
+    const fallbackProvider = providers.value[0]?.id ?? "local";
+    selectedProvider.value = fallbackProvider;
+    selectedModel.value = resolveDefaultModel(fallbackProvider);
+    providerStats.value = normalizeDashboardStats(null, fallbackProvider);
+    $toast.error(getErrorMessage(error, t("aiDashboard.toasts.loadFailed")));
   } finally {
     loading.value = false;
   }
@@ -180,25 +311,60 @@ async function handleTestProvider(providerId: AIProviderType) {
   testResults[providerId] = null;
 
   try {
-    const { data, error } = await api.ai.chat.post({
-      message: "Hello, this is a connectivity test. Reply with OK.",
-      sessionId: `test-${providerId}-${Date.now()}`,
+    if (providerId === "local") {
+      const { data, error } = await api.ai.models.get();
+      if (error) {
+        throw new Error(t("aiDashboard.errors.localConnectivityFailed"));
+      }
+
+      const localProvider = normalizeProviders(data).find((provider) => provider.id === "local");
+      const localAvailable = localProvider?.available ?? false;
+      testResults[providerId] = {
+        valid: localAvailable,
+        message: localAvailable
+          ? t("aiDashboard.tests.localSuccess")
+          : t("aiDashboard.tests.localFailure"),
+      };
+      return;
+    }
+
+    const providerCredential = resolveProviderCredential(providerId);
+    if (!providerCredential.trim()) {
+      testResults[providerId] = {
+        valid: false,
+        message: t("aiDashboard.tests.missingCredential"),
+      };
+      return;
+    }
+
+    const { data, error } = await api.settings["test-api-key"].post({
+      provider: providerId,
+      key: providerCredential,
     });
-    const isSuccessful = !error && Boolean((data as { message?: string } | undefined)?.message);
+
+    if (error) {
+      throw new Error(t("aiDashboard.errors.providerTestFailed"));
+    }
+
+    const valid = isRecord(data) && data.valid === true;
     testResults[providerId] = {
-      valid: isSuccessful,
-      message: isSuccessful ? "Connection successful" : "Connection failed",
+      valid,
+      message: valid
+        ? t("aiDashboard.tests.connectionSuccess")
+        : t("aiDashboard.tests.connectionFailure"),
     };
-  } catch {
-    testResults[providerId] = { valid: false, message: "Connection failed" };
+  } catch (error) {
+    testResults[providerId] = {
+      valid: false,
+      message: getErrorMessage(error, t("aiDashboard.tests.connectionFailure")),
+    };
   } finally {
     testingProvider.value = null;
   }
 }
 
 async function handleSetPreference() {
-  if (!selectedProvider.value) return;
-  const { $toast } = useNuxtApp();
+  if (!selectedProvider.value || !selectedModel.value) return;
 
   try {
     const { error } = await api.settings.put({
@@ -206,138 +372,219 @@ async function handleSetPreference() {
       preferredModel: selectedModel.value,
     });
     if (error) {
-      throw new Error("Failed to save preference");
+      throw new Error(t("aiDashboard.errors.preferenceSaveFailed"));
     }
-    $toast.success("AI preference saved");
+
+    $toast.success(t("aiDashboard.toasts.preferenceSaved"));
     await fetchProviderStats();
-  } catch {
-    $toast.error("Failed to save AI preference");
+  } catch (error) {
+    $toast.error(getErrorMessage(error, t("aiDashboard.toasts.preferenceSaveFailed")));
   }
 }
 
-watch(selectedProvider, (provider) => {
-  const currentProvider = providers.value.find((item) => item.id === provider);
-  selectedModel.value = currentProvider?.models[0] || providerModelsById.get(provider)?.[0] || "";
+watch(selectedProvider, (providerId) => {
+  selectedModel.value = resolveDefaultModel(providerId);
+});
+
+onMounted(() => {
+  void fetchProviderStats();
 });
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-bold mb-6">AI Dashboard</h1>
+  <div class="space-y-6">
+    <section class="hero rounded-box border border-base-300 bg-base-200">
+      <div class="hero-content w-full flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-2xl space-y-2">
+          <h1 class="text-3xl font-bold md:text-4xl">{{ t("aiDashboard.title") }}</h1>
+          <p class="text-base-content/70">{{ t("aiDashboard.subtitle") }}</p>
+        </div>
+        <button
+          class="btn btn-outline btn-sm"
+          :disabled="loading"
+          :aria-label="t('aiDashboard.preference.refreshAria')"
+          @click="fetchProviderStats"
+        >
+          <span v-if="loading" class="loading loading-spinner loading-xs"></span>
+          <span>{{ t("aiDashboard.preference.refreshButton") }}</span>
+        </button>
+      </div>
+    </section>
 
     <LoadingSkeleton v-if="loading && !providerStats" :lines="8" />
 
     <div v-else class="space-y-6">
-      <div v-if="providerStats" class="stats stats-vertical lg:stats-horizontal w-full bg-base-200">
+      <div
+        v-if="providerStats"
+        class="stats stats-vertical lg:stats-horizontal w-full border border-base-300 bg-base-100 shadow-sm"
+      >
         <div class="stat">
-          <div class="stat-title">Total Requests</div>
+          <div class="stat-title">{{ t("aiDashboard.stats.totalRequestsTitle") }}</div>
           <div class="stat-value text-primary">{{ providerStats.totalRequests }}</div>
-          <div class="stat-desc">API calls made</div>
+          <div class="stat-desc">{{ t("aiDashboard.stats.totalRequestsDesc") }}</div>
         </div>
         <div class="stat">
-          <div class="stat-title">Success Rate</div>
+          <div class="stat-title">{{ t("aiDashboard.stats.successRateTitle") }}</div>
           <div class="stat-value text-success">{{ providerStats.successRate }}%</div>
-          <div class="stat-desc">Successful responses</div>
+          <div class="stat-desc">{{ t("aiDashboard.stats.successRateDesc") }}</div>
         </div>
         <div class="stat">
-          <div class="stat-title">Avg Response Time</div>
-          <div class="stat-value text-secondary">{{ providerStats.averageResponseTime }}s</div>
-          <div class="stat-desc">Time to complete</div>
+          <div class="stat-title">{{ t("aiDashboard.stats.averageResponseTitle") }}</div>
+          <div class="stat-value text-secondary">{{ providerStats.averageResponseTimeSeconds }}s</div>
+          <div class="stat-desc">{{ t("aiDashboard.stats.averageResponseDesc") }}</div>
         </div>
         <div class="stat">
-          <div class="stat-title">Active Provider</div>
-          <div class="stat-value text-accent text-xl">{{ providerStats.activeProvider }}</div>
-          <div class="stat-desc">Current default</div>
+          <div class="stat-title">{{ t("aiDashboard.stats.sessionsTitle") }}</div>
+          <div class="stat-value text-accent">{{ providerStats.sessions }}</div>
+          <div class="stat-desc">
+            {{ t("aiDashboard.stats.sessionsDesc", { provider: providerStats.activeProvider }) }}
+          </div>
         </div>
       </div>
 
-      <div class="card bg-base-200">
-        <div class="card-body">
-          <h2 class="card-title">Set Provider Preference</h2>
-          <p class="text-sm text-base-content/70 mb-4">Choose your preferred AI provider and model.</p>
+      <div class="card card-border bg-base-100 shadow-sm">
+        <div class="card-body gap-4">
+          <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
+          <p class="text-sm text-base-content/70">{{ t("aiDashboard.preference.description") }}</p>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <fieldset class="fieldset">
-              <legend class="fieldset-legend">Provider</legend>
-              <select v-model="selectedProvider" class="select w-full" aria-label="Selected Provider">
-                <option value="">Select provider</option>
+              <legend class="fieldset-legend">{{ t("aiDashboard.preference.providerLegend") }}</legend>
+              <select
+                v-model="selectedProvider"
+                class="select w-full"
+                :aria-label="t('aiDashboard.preference.providerAria')"
+              >
+                <option disabled value="">{{ t("aiDashboard.preference.selectProviderOption") }}</option>
                 <option
                   v-for="provider in providers"
                   :key="provider.id"
                   :value="provider.id"
                   :disabled="!isProviderConfigured(provider.id)"
                 >
-                  {{ provider.name }} {{ isProviderConfigured(provider.id) ? "" : "(Not configured)" }}
+                  {{ providerSelectOptionLabel(provider) }}
                 </option>
               </select>
             </fieldset>
 
             <fieldset class="fieldset">
-              <legend class="fieldset-legend">Model</legend>
-              <select v-model="selectedModel" class="select w-full" :disabled="!selectedProvider" aria-label="Selected Model">
-                <option value="">Select model</option>
-                <option v-for="model in providers.find((item) => item.id === selectedProvider)?.models || []" :key="model" :value="model">
+              <legend class="fieldset-legend">{{ t("aiDashboard.preference.modelLegend") }}</legend>
+              <select
+                v-model="selectedModel"
+                class="select w-full"
+                :aria-label="t('aiDashboard.preference.modelAria')"
+                :disabled="selectedProviderModels.length === 0"
+              >
+                <option disabled value="">{{ t("aiDashboard.preference.selectModelOption") }}</option>
+                <option v-for="model in selectedProviderModels" :key="model" :value="model">
                   {{ model }}
                 </option>
               </select>
             </fieldset>
           </div>
 
-          <div class="card-actions mt-4">
-            <button class="btn btn-primary" :disabled="!selectedProvider || !selectedModel" @click="handleSetPreference">
-              Save Preference
+          <div class="card-actions justify-end">
+            <button
+              class="btn btn-primary"
+              :disabled="!selectedProvider || !selectedModel || loading"
+              :aria-label="t('aiDashboard.preference.saveAria')"
+              @click="handleSetPreference"
+            >
+              <span v-if="loading" class="loading loading-spinner loading-xs"></span>
+              <span>{{ t("aiDashboard.preference.saveButton") }}</span>
             </button>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div v-for="provider in providers" :key="provider.id" class="card bg-base-200">
-          <div class="card-body">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-3">
-                <span class="text-3xl">{{ provider.icon }}</span>
+      <div
+        v-if="providers.length === 0"
+        role="alert"
+        class="alert alert-warning alert-vertical sm:alert-horizontal"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+        </svg>
+        <div>
+          <h3 class="font-bold">{{ t("aiDashboard.alerts.noProvidersTitle") }}</h3>
+          <p class="text-xs">{{ t("aiDashboard.alerts.noProvidersDescription") }}</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div
+          v-for="provider in providers"
+          :key="provider.id"
+          class="card card-border bg-base-100 shadow-sm"
+        >
+          <div class="card-body gap-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <span class="text-3xl" aria-hidden="true">{{ provider.icon }}</span>
                 <div>
                   <h3 class="card-title text-lg">{{ provider.name }}</h3>
-                  <p class="text-xs text-base-content/60">{{ provider.description }}</p>
+                  <p class="text-xs text-base-content/70">{{ provider.description }}</p>
                 </div>
               </div>
               <span
-                v-if="isProviderConfigured(provider.id)"
-                class="badge badge-success"
-              >
-                Configured
-              </span>
-              <span v-else class="badge badge-ghost">Not set</span>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <span
                 class="badge"
-                :class="provider.available ? 'badge-success' : 'badge-neutral'"
+                :class="isProviderConfigured(provider.id) ? 'badge-success' : 'badge-ghost'"
               >
-                {{ provider.available ? "Available" : "Unavailable" }}
-              </span>
-              <span class="badge badge-outline">
-                {{ provider.health }}
+                {{
+                  isProviderConfigured(provider.id)
+                    ? t("aiDashboard.providerCard.configuredBadge")
+                    : t("aiDashboard.providerCard.notConfiguredBadge")
+                }}
               </span>
             </div>
 
-            <div v-if="testResults[provider.id]" class="alert" :class="testResults[provider.id]?.valid ? 'alert-success' : 'alert-error'">
-              <span>{{ testResults[provider.id]?.message }}</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="badge" :class="provider.available ? 'badge-success' : 'badge-neutral'">
+                {{ providerAvailabilityLabel(provider.available) }}
+              </span>
+              <span class="badge badge-outline" :class="providerHealthBadgeClass(provider.health)">
+                {{ providerHealthLabel(provider.health) }}
+              </span>
+            </div>
+
+            <div
+              v-if="testResults[provider.id]"
+              role="status"
+              class="alert alert-vertical sm:alert-horizontal"
+              :class="testResults[provider.id]?.valid ? 'alert-success' : 'alert-error'"
+            >
+              <div>
+                <h4 class="font-semibold">
+                  {{
+                    testResults[provider.id]?.valid
+                      ? t("aiDashboard.alerts.testSuccessTitle")
+                      : t("aiDashboard.alerts.testErrorTitle")
+                  }}
+                </h4>
+                <p class="text-xs">{{ testResults[provider.id]?.message }}</p>
+              </div>
             </div>
 
             <div class="card-actions justify-end">
               <button
                 class="btn btn-outline btn-sm"
-                :disabled="!isProviderConfigured(provider.id) || testingProvider === provider.id"
+                :disabled="testingProvider === provider.id"
+                :aria-label="t('aiDashboard.providerCard.testAria', { provider: provider.name })"
                 @click="handleTestProvider(provider.id)"
               >
                 <span v-if="testingProvider === provider.id" class="loading loading-spinner loading-xs"></span>
-                Test Connection
+                <span>{{
+                  testingProvider === provider.id
+                    ? t("aiDashboard.providerCard.testingLabel")
+                    : t("aiDashboard.providerCard.testButton")
+                }}</span>
               </button>
-              <NuxtLink to="/settings" class="btn btn-primary btn-sm">
-                Configure
+              <NuxtLink
+                :to="APP_ROUTES.settings"
+                class="btn btn-primary btn-sm"
+                :aria-label="t('aiDashboard.providerCard.configureAria', { provider: provider.name })"
+              >
+                {{ t("aiDashboard.providerCard.configureButton") }}
               </NuxtLink>
             </div>
           </div>

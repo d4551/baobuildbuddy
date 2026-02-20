@@ -25,13 +25,22 @@ BaoBuildBuddy uses RPA-Python for browser automation workflows through direct su
 
 ```mermaid
 flowchart LR
-  UI["Nuxt /automation pages"] --> API["POST /api/automation/job-apply"]
-  API --> Service["application-automation-service.ts"]
+  UI["Nuxt /automation pages"] --> JobAPI["POST /api/automation/job-apply"]
+  UI --> ScheduleAPI["POST /api/automation/job-apply/schedule"]
+  UI --> EmailAPI["POST /api/automation/email-response"]
+  UI --> StatsAPI["GET /api/stats/dashboard"]
+  JobAPI --> Service["application-automation-service.ts"]
+  ScheduleAPI --> Service
+  EmailAPI --> Service
+  StatsAPI --> DashboardPipeline["Dashboard work-pipeline status"]
+  StatsAPI --> AutomationPipeline["Automation Hub work-pipeline status"]
   Service --> PersistStart["automation_runs: pending/running"]
   Service --> Runner["rpa-runner.ts (Bun.spawn)"]
   Runner --> Script["packages/scraper/apply_job_rpa.py"]
   Script --> Runner
-  Runner --> PersistDone["automation_runs: success/error + output"]
+  Service --> EmailGen["AIService.generate(emailResponsePrompt)"]
+  EmailGen --> PersistDone["automation_runs: success/error + output"]
+  Runner --> PersistDone
   PersistDone --> WS["WS /api/ws/automation progress events"]
   PersistDone --> Screens["GET /api/automation/screenshots/:runId/:index"]
 ```
@@ -95,8 +104,12 @@ flowchart LR
 ## API routes
 
 - `POST /api/automation/job-apply` — starts a job-application automation run.
+- `POST /api/automation/job-apply/schedule` — schedules a future job-application automation run.
+- `POST /api/automation/email-response` — generates an AI-assisted email response and persists it as a run.
 - `POST /api/automation/job-apply` response contract:
   - `200`: `{"runId": string, "status": "running"}`
+  - `POST /api/automation/job-apply/schedule` `200`: `{"runId": string, "status": "pending", "scheduledFor": string}`
+  - `POST /api/automation/email-response` `200`: `{"runId": string, "status": "success", "reply": string, "provider": string, "model": string}`
   - `400`: route-level validation rejection for malformed request envelopes
   - `404`: missing dependency (`resume` / `cover-letter`)
   - `409`: concurrency limit hit
@@ -110,21 +123,22 @@ flowchart LR
 
 ### Deterministic run status semantics
 
+- `pending`: queued for scheduled execution.
 - `running`: actively executing.
 - `success`: workflow completed successfully.
 - `error`: workflow failed.
-- `pending`: transient bootstrap state only.
 
 ## Operation
 
-1. Route inserts a row in `automation_runs` and returns `{ runId, status: "running" }`.
-2. Background job executes `apply_job_rpa.py` with typed JSON input.
-3. Output is written back into the same run row (`success`, `error`, `screenshots`, `output`).
-4. Screenshots are normalized to safe filename tokens and stored under the managed run directory.
-5. Settings-driven automation options (`headless`, `defaultTimeout`, `autoSaveScreenshots`, `defaultBrowser`) are validated, sanitized, and passed to the runner. Job-ingestion provider runtime controls are sourced from `settings.automationSettings.jobProviders`.
-6. Completed runs trigger a retention pass (`screenshotRetention`, capped 1–30 days) that deletes stale screenshot directories from disk.
-7. Temporary RPA working directories are removed after each script execution.
-8. UI pages under `/automation` track history, subscribe to `/api/ws/automation` for run updates, and request screenshot bytes from `GET /api/automation/screenshots/:runId/:index`.
+1. Routes insert a row in `automation_runs` and return run metadata (`running` for immediate, `pending` for scheduled).
+2. Immediate job-apply runs execute `apply_job_rpa.py` with typed JSON input; scheduled runs queue in-memory and recover on process boot.
+3. Email-response runs call `AIService.generate(emailResponsePrompt(...))` and persist deterministic output (`reply`, `provider`, `model`).
+4. Output is written back into the same run row (`success`, `error`, `screenshots`, `output`).
+5. Screenshots are normalized to safe filename tokens and stored under the managed run directory.
+6. Settings-driven automation options (`headless`, `defaultTimeout`, `autoSaveScreenshots`, `defaultBrowser`) are validated, sanitized, and passed to the runner. Job-ingestion provider runtime controls are sourced from `settings.automationSettings.jobProviders`.
+7. Completed runs trigger a retention pass (`screenshotRetention`, capped 1–30 days) that deletes stale screenshot directories from disk.
+8. Temporary RPA working directories are removed after each script execution.
+9. UI pages under `/automation` track history, subscribe to `/api/ws/automation` for run updates, and request screenshot bytes from `GET /api/automation/screenshots/:runId/:index`.
 
 ### Job provider runtime contract
 
@@ -191,8 +205,10 @@ Automation functionality is integrated across:
 1. API routes: `/api/automation/*`
 2. Service orchestration: `application-automation-service.ts`
 3. Python runner: `rpa-runner.ts` via `Bun.spawn`
-4. UI pages: `/automation`, `/automation/runs`, `/automation/runs/:id`
-5. Real-time progress: `WS /api/ws/automation`
+4. Dashboard stats contract: `/api/stats/dashboard` feeding shared `WorkPipeline` state on `/` and `/automation`
+5. UI pages: `/automation`, `/automation/job-apply`, `/automation/email`, `/automation/runs`, `/automation/runs/:id`
+6. Real-time progress: `WS /api/ws/automation`
+7. Pipeline gamification awards: `usePipelineGamification` for jobs search, scraper runs, and resume customization milestones
 
 Route-level regression coverage exists in `packages/server/src/routes/automation.test.ts`.
 

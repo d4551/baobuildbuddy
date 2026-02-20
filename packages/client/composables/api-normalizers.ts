@@ -2,10 +2,17 @@ import {
   APP_LANGUAGE_CODES,
   AI_PROVIDER_DEFAULT,
   DEFAULT_APP_LANGUAGE,
+  JOB_EXPERIENCE_LEVELS,
+  JOB_GAME_GENRES,
+  JOB_STUDIO_TYPES,
+  JOB_SUPPORTED_PLATFORMS,
+  JOB_TYPES,
   type AIProviderType,
   type AppSettings,
   type AutomationSettings,
   type CoverLetterData,
+  COVER_LETTER_DEFAULT_TEMPLATE,
+  isCoverLetterTemplate,
   DEFAULT_AUTOMATION_SETTINGS,
   type GameStudio,
   type Job,
@@ -19,10 +26,20 @@ import {
   type ResumeExperienceItem,
   type ResumeProject,
   type ResumeTemplate,
+  SKILL_CATEGORY_IDS,
+  SKILL_DEMAND_LEVEL_IDS,
+  SKILL_EVIDENCE_TYPE_IDS,
+  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
   type SkillEvidence,
   type SkillMapping,
   type StudioCulture,
   type UserProfile,
+  asBoolean,
+  asNumber,
+  asRecord,
+  asString,
+  asStringArray,
+  isRecord,
 } from "@bao/shared";
 
 const RESUME_TEMPLATES: readonly ResumeTemplate[] = [
@@ -34,23 +51,6 @@ const RESUME_TEMPLATES: readonly ResumeTemplate[] = [
   "gaming",
 ];
 
-const JOB_EXPERIENCE_LEVELS: readonly JobExperienceLevel[] = [
-  "entry",
-  "junior",
-  "mid",
-  "senior",
-  "principal",
-  "director",
-];
-
-const JOB_TYPES: readonly JobType[] = [
-  "full-time",
-  "part-time",
-  "contract",
-  "internship",
-  "freelance",
-];
-
 const AI_PROVIDERS: readonly AIProviderType[] = [
   "local",
   "gemini",
@@ -59,81 +59,14 @@ const AI_PROVIDERS: readonly AIProviderType[] = [
   "huggingface",
 ];
 
-const SKILL_EVIDENCE_TYPES: readonly SkillEvidence["type"][] = [
-  "clip",
-  "stats",
-  "community",
-  "achievement",
-  "document",
-  "portfolio_piece",
-  "testimonial",
-  "certificate",
-];
+const SKILL_EVIDENCE_TYPES: readonly SkillEvidence["type"][] = SKILL_EVIDENCE_TYPE_IDS;
 
-const SKILL_EVIDENCE_STATUSES: readonly SkillEvidence["verificationStatus"][] = [
-  "pending",
-  "verified",
-  "rejected",
-];
+const SKILL_EVIDENCE_STATUSES: readonly SkillEvidence["verificationStatus"][] =
+  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS;
 
-const SKILL_CATEGORIES: readonly SkillMapping["category"][] = [
-  "leadership",
-  "community",
-  "technical",
-  "creative",
-  "analytical",
-  "communication",
-  "project_management",
-];
+const SKILL_CATEGORIES: readonly SkillMapping["category"][] = SKILL_CATEGORY_IDS;
 
-const DEMAND_LEVELS: readonly SkillMapping["demandLevel"][] = ["high", "medium", "low"];
-
-const JOB_STUDIO_TYPES: readonly Exclude<Job["studioType"], undefined>[] = [
-  "AAA",
-  "Indie",
-  "Mobile",
-  "VR/AR",
-  "Platform",
-  "Esports",
-  "Unknown",
-];
-
-const JOB_GAME_GENRES: readonly Exclude<Job["gameGenres"], undefined>[number][] = [
-  "Action",
-  "RPG",
-  "Strategy",
-  "Puzzle",
-  "Simulation",
-  "Sports",
-  "Racing",
-  "Shooter",
-  "Platformer",
-  "Horror",
-  "MMORPG",
-  "MOBA",
-  "Battle Royale",
-  "Roguelike",
-  "Sandbox",
-  "Adventure",
-  "Fighting",
-  "Survival",
-  "Card Game",
-  "Casual",
-  "Indie",
-];
-
-const JOB_PLATFORMS: readonly Exclude<Job["platforms"], undefined>[number][] = [
-  "PC",
-  "Console",
-  "Mobile",
-  "VR",
-  "AR",
-  "Web",
-  "Switch",
-  "PlayStation",
-  "Xbox",
-  "Steam",
-];
+const DEMAND_LEVELS: readonly SkillMapping["demandLevel"][] = SKILL_DEMAND_LEVEL_IDS;
 
 const STUDIO_CATEGORIES: readonly Exclude<GameStudio["category"], undefined>[] = [
   "AAA",
@@ -186,24 +119,6 @@ const USER_GAMING_SPECIALIZATIONS: readonly UserProfile["gamingExperience"]["spe
     "data-analytics",
   ];
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" && value.trim().length > 0 ? value : undefined;
-
-const asBoolean = (value: unknown): boolean | undefined =>
-  typeof value === "boolean" ? value : undefined;
-
-const asNumber = (value: unknown): number | undefined =>
-  typeof value === "number" && Number.isFinite(value) ? value : undefined;
-
-const asStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
-
-const asRecord = (value: unknown): Record<string, unknown> | undefined =>
-  isRecord(value) ? value : undefined;
-
 const isOneOf = <T extends string>(value: unknown, choices: readonly T[]): value is T =>
   typeof value === "string" && choices.some((choice) => choice === value);
 
@@ -228,12 +143,12 @@ const normalizeStudioCulture = (value: unknown): StudioCulture => {
   if (!isRecord(value)) {
     return {
       values: [],
-      workStyle: "Not specified",
+      workStyle: "",
     };
   }
   return {
     values: asStringArray(value.values),
-    workStyle: asString(value.workStyle) ?? "Not specified",
+    workStyle: asString(value.workStyle) ?? "",
     environment: asString(value.environment),
   };
 };
@@ -323,7 +238,7 @@ export const toJob = (value: unknown): Job | null => {
     contentHash: asString(value.contentHash),
     studioType: asEnum(value.studioType, JOB_STUDIO_TYPES),
     gameGenres: asEnumArray(value.gameGenres, JOB_GAME_GENRES),
-    platforms: asEnumArray(value.platforms, JOB_PLATFORMS),
+    platforms: asEnumArray(value.platforms, JOB_SUPPORTED_PLATFORMS),
     gamingRelevance: asNumber(value.gamingRelevance),
   };
 };
@@ -456,6 +371,7 @@ export const toCoverLetterData = (value: unknown): CoverLetterData | null => {
       content[key] = entry;
     }
   }
+  const templateValue = asString(value.template);
 
   return {
     id: asString(value.id),
@@ -465,12 +381,9 @@ export const toCoverLetterData = (value: unknown): CoverLetterData | null => {
     personalInfo: asRecord(value.personalInfo),
     companyResearch: asRecord(value.companyResearch),
     content,
-    template:
-      value.template === "professional" ||
-      value.template === "creative" ||
-      value.template === "gaming"
-        ? value.template
-        : "professional",
+    template: isCoverLetterTemplate(templateValue) ? templateValue : COVER_LETTER_DEFAULT_TEMPLATE,
+    createdAt: asString(value.createdAt),
+    updatedAt: asString(value.updatedAt),
   };
 };
 
@@ -598,9 +511,9 @@ export const toGameStudio = (value: unknown): GameStudio | null => {
     name,
     logo: asString(value.logo),
     website: asString(value.website),
-    location: asString(value.location) ?? "Unknown",
-    size: asString(value.size) ?? "Unknown",
-    type: asString(value.type) ?? "Unknown",
+    location: asString(value.location) ?? "",
+    size: asString(value.size) ?? "",
+    type: asString(value.type) ?? "",
     founded: asNumber(value.founded),
     description: asString(value.description),
     games: asStringArray(value.games),

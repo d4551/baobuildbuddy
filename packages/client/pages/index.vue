@@ -6,6 +6,7 @@ import type {
   UserProfile,
 } from "@bao/shared";
 import { APP_BRAND, APP_ROUTES, getXPProgress } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_A11Y_KEYS,
   DASHBOARD_ACTIVITY_FALLBACK_KEY,
@@ -15,13 +16,16 @@ import {
   DASHBOARD_ERROR_KEYS,
   DASHBOARD_MOTIVATIONAL_PHRASE_KEYS,
   DASHBOARD_ONBOARDING_STEPS,
+  DASHBOARD_PIPELINE_STATUS_KEYS,
   DASHBOARD_QUICK_ACTIONS,
   DASHBOARD_RECENT_ACTIVITY_LIMIT,
   DASHBOARD_RELATIVE_TIME_KEYS,
   DASHBOARD_STAT_CARDS,
   DASHBOARD_TIME_CONSTANTS,
   DASHBOARD_WELCOME_HEADING_KEYS,
+  resolveDashboardPipelineSteps,
   type DashboardStatKey,
+  type DashboardPipelineStepViewModel,
   getDashboardActivityEmoji,
 } from "~/constants/dashboard";
 import { getErrorMessage } from "~/utils/errors";
@@ -43,7 +47,12 @@ interface DashboardChallengeViewModel {
 
 interface DashboardMetrics {
   readonly savedJobs: number;
+  readonly appliedJobs: number;
   readonly resumeCount: number;
+  readonly coverLetterCount: number;
+  readonly automationRuns: number;
+  readonly successfulAutomationRuns: number;
+  readonly mappedSkillsCount: number;
   readonly interviewSessionCount: number;
 }
 
@@ -115,15 +124,13 @@ const welcomeHeading = computed(() => {
   return t(DASHBOARD_WELCOME_HEADING_KEYS.fallback);
 });
 const heroPhraseIndex = ref(0);
-const activeHeroPhrase = computed(
-  () => {
-    const phraseKey =
-      DASHBOARD_MOTIVATIONAL_PHRASE_KEYS[
-        heroPhraseIndex.value % DASHBOARD_MOTIVATIONAL_PHRASE_KEYS.length
-      ];
-    return t(phraseKey);
-  },
-);
+const activeHeroPhrase = computed(() => {
+  const phraseKey =
+    DASHBOARD_MOTIVATIONAL_PHRASE_KEYS[
+      heroPhraseIndex.value % DASHBOARD_MOTIVATIONAL_PHRASE_KEYS.length
+    ];
+  return t(phraseKey);
+});
 let heroPhraseTimer: ReturnType<typeof setInterval> | null = null;
 
 const levelProgress = computed(() => {
@@ -137,6 +144,41 @@ const xpTarget = computed(() => {
   if (!gamification) return 100;
   const { nextLevel } = getXPProgress(gamification.xp);
   return nextLevel ? nextLevel.minXP : gamification.xp;
+});
+
+const pipelineSteps = computed<readonly DashboardPipelineStepViewModel[]>(() => {
+  const metrics = dashboard.value?.metrics;
+  if (!metrics) {
+    return resolveDashboardPipelineSteps({
+      savedJobs: 0,
+      appliedJobs: 0,
+      resumeCount: 0,
+      coverLetterCount: 0,
+      automationRuns: 0,
+      successfulAutomationRuns: 0,
+      mappedSkillsCount: 0,
+      gamificationXp: 0,
+    });
+  }
+
+  return resolveDashboardPipelineSteps({
+    savedJobs: metrics.savedJobs,
+    appliedJobs: metrics.appliedJobs,
+    resumeCount: metrics.resumeCount,
+    coverLetterCount: metrics.coverLetterCount,
+    automationRuns: metrics.automationRuns,
+    successfulAutomationRuns: metrics.successfulAutomationRuns,
+    mappedSkillsCount: metrics.mappedSkillsCount,
+    gamificationXp: dashboard.value?.gamification?.xp ?? 0,
+  });
+});
+
+const nextPipelineStepLabel = computed(() => {
+  const nextStep = pipelineSteps.value.find((step) => step.status !== "complete");
+  if (!nextStep) {
+    return t(DASHBOARD_PIPELINE_STATUS_KEYS.complete);
+  }
+  return t(DASHBOARD_COPY_KEYS.pipelineNextStepLabel, { step: t(nextStep.labelKey) });
 });
 
 onMounted(() => {
@@ -181,7 +223,11 @@ function getMetricValue(statKey: DashboardStatKey): number {
 function isDashboardEmpty(viewModel: DashboardViewModel): boolean {
   return (
     viewModel.metrics.savedJobs === 0 &&
+    viewModel.metrics.appliedJobs === 0 &&
     viewModel.metrics.resumeCount === 0 &&
+    viewModel.metrics.coverLetterCount === 0 &&
+    viewModel.metrics.automationRuns === 0 &&
+    viewModel.metrics.mappedSkillsCount === 0 &&
     viewModel.metrics.interviewSessionCount === 0 &&
     viewModel.dailyChallenge === null &&
     viewModel.recentActivity.length === 0
@@ -213,6 +259,15 @@ function pickDailyChallenge(
 
 function resolveActivityType(action: string): string {
   const normalizedAction = action.toLowerCase();
+  if (
+    normalizedAction.includes("automation") ||
+    normalizedAction.includes("apply") ||
+    normalizedAction.includes("scrape")
+  ) {
+    return "automation";
+  }
+  if (normalizedAction.includes("challenge") || normalizedAction.includes("xp"))
+    return "gamification";
   if (normalizedAction.includes("job")) return "job";
   if (normalizedAction.includes("resume")) return "resume";
   if (normalizedAction.includes("interview")) return "interview";
@@ -244,8 +299,7 @@ function getRecentActivity(progress: UserGamificationData | null): DashboardActi
 
       const action =
         typeof entry.action === "string" ? entry.action : t(DASHBOARD_ACTIVITY_FALLBACK_KEY);
-      const timestampRaw =
-        typeof entry.timestamp === "string" ? entry.timestamp : "";
+      const timestampRaw = typeof entry.timestamp === "string" ? entry.timestamp : "";
       const timestamp = timestampRaw ? new Date(timestampRaw) : new Date();
       if (Number.isNaN(timestamp.getTime())) {
         return null;
@@ -304,7 +358,12 @@ async function fetchDashboardViewModel(): Promise<DashboardViewModel> {
     recentActivity: getRecentActivity(gamification),
     metrics: {
       savedJobs: stats.jobs.saved,
+      appliedJobs: stats.jobs.applied,
       resumeCount: stats.resumes.count,
+      coverLetterCount: stats.coverLetters.count,
+      automationRuns: stats.automation.totalRuns,
+      successfulAutomationRuns: stats.automation.successfulRuns,
+      mappedSkillsCount: stats.skills.mappedCount,
       interviewSessionCount: stats.interviews.totalSessions,
     },
   };
@@ -528,6 +587,14 @@ async function requestData<T>(
           </div>
         </div>
       </section>
+
+      <WorkPipeline
+        :title="t(DASHBOARD_COPY_KEYS.pipelineTitle)"
+        :description="t(DASHBOARD_COPY_KEYS.pipelineDescription)"
+        :aria-label="t(DASHBOARD_COPY_KEYS.pipelineAria)"
+        :steps="pipelineSteps"
+        :next-step-label="nextPipelineStepLabel"
+      />
     </div>
   </section>
 </template>

@@ -19,6 +19,10 @@ export declare function resumeScorePrompt(resume: string, jobDescription: string
  */
 export declare function coverLetterPrompt(company: string, position: string, jobInfo: string, resumeContext: string): string;
 /**
+ * Email response generation prompt for automation email workflows.
+ */
+export declare function emailResponsePrompt(subject: string, message: string, tone: "professional" | "friendly" | "concise", sender?: string): string;
+/**
  * Job match analysis prompt
  */
 export declare function jobMatchPrompt(userProfile: {

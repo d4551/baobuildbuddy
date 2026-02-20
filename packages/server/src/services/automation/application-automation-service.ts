@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { extname, resolve } from "node:path";
-import { and, count, eq, inArray, sql } from "drizzle-orm";
+import { and, count, eq, inArray, ne, sql } from "drizzle-orm";
 
 import type { AutomationSettings } from "@bao/shared";
 import { DEFAULT_AUTOMATION_SETTINGS, automationSettingsSchema, generateId } from "@bao/shared";
@@ -11,6 +11,7 @@ import { automationRuns } from "../../db/schema/automation-runs";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { broadcastProgress } from "../../ws/automation.ws";
 import { AIService } from "../ai/ai-service";
+import { emailResponsePrompt } from "../ai/prompts";
 import { gamificationService } from "../gamification-service";
 import {
   MAX_CUSTOM_ANSWER_KEY_LENGTH,
@@ -35,6 +36,26 @@ interface JobApplyExecutionPayload {
   coverLetterId?: string;
   jobId?: string;
   customAnswers: Record<string, string>;
+}
+
+type EmailResponseTone = "professional" | "friendly" | "concise";
+
+interface EmailResponsePayload {
+  subject: string;
+  message: string;
+  sender?: string;
+  tone?: EmailResponseTone;
+}
+
+interface EmailResponseExecutionPayload {
+  subject: string;
+  message: string;
+  sender?: string;
+  tone: EmailResponseTone;
+}
+
+interface ScheduledRunMetadata {
+  runAt: string;
 }
 
 interface RunProgressPayload {
@@ -71,6 +92,21 @@ const MS_PER_DAY = 86_400_000;
 const CLEANUP_LIMIT = 500;
 const MAX_CONCURRENT_RUNS = 5;
 const AUTOMATION_TERMINAL_STATUSES = ["success", "error"];
+const MAX_EMAIL_SUBJECT_LENGTH = 200;
+const MAX_EMAIL_MESSAGE_LENGTH = 12_000;
+const MAX_EMAIL_SENDER_LENGTH = 200;
+const DEFAULT_EMAIL_RESPONSE_TONE: EmailResponseTone = "professional";
+const EMAIL_RESPONSE_TONES: readonly EmailResponseTone[] = [
+  "professional",
+  "friendly",
+  "concise",
+] as const;
+const MIN_SCHEDULE_LEAD_TIME_MS = 1_000;
+const MAX_SCHEDULE_LEAD_TIME_MS = 2_592_000_000;
+const SCHEDULE_RETRY_DELAY_MS = 30_000;
+const MAX_RECOVERABLE_SCHEDULED_RUNS = 500;
+
+type SchedulerTimer = ReturnType<typeof setTimeout>;
 
 const toJsonRecord = (value: object): Record<string, unknown> => {
   const record: Record<string, unknown> = {};
@@ -89,6 +125,9 @@ const toProgressRecord = (value: AutomationProgress): Record<string, unknown> =>
   }
   return record;
 };
+
+const isEmailResponseTone = (value: string): value is EmailResponseTone =>
+  EMAIL_RESPONSE_TONES.some((tone) => tone === value);
 
 /**
  * Run-level error indicating the configured concurrency limit was exceeded.
@@ -132,6 +171,13 @@ export class AutomationRunNotFoundError extends Error {
  * Contract-driven job application automation workflow service.
  */
 export class ApplicationAutomationService {
+  private readonly scheduledRunTimers = new Map<string, SchedulerTimer>();
+  private schedulerRecoveryInFlight = false;
+
+  constructor() {
+    void this.restoreScheduledRuns();
+  }
+
   /**
    * Resolve automation settings from persisted values and apply safe defaults.
    */
@@ -156,6 +202,17 @@ export class ApplicationAutomationService {
   }
 
   /**
+   * Clamp configured max-concurrency to safe runtime bounds.
+   */
+  private resolveMaxConcurrentRuns(settingsValue: AutomationSettings): number {
+    const configured = Number.isFinite(settingsValue.maxConcurrentRuns)
+      ? Math.trunc(settingsValue.maxConcurrentRuns)
+      : DEFAULT_AUTOMATION_SETTINGS.maxConcurrentRuns;
+
+    return Math.min(Math.max(MIN_CONCURRENT_RUNS, configured), MAX_CONCURRENT_RUNS);
+  }
+
+  /**
    * Resolve AI service for smart selector mapping when enabled.
    */
   private async tryLoadAIService(): Promise<AIService | null> {
@@ -165,9 +222,7 @@ export class ApplicationAutomationService {
         .from(settings)
         .where(eq(settings.id, DEFAULT_SETTINGS_ID))
         .limit(1);
-      if (!row) {
-        return null;
-      }
+
       return AIService.fromSettings(row);
     } catch {
       return null;
@@ -201,6 +256,93 @@ export class ApplicationAutomationService {
     }
 
     return normalizedPayload;
+  }
+
+  /**
+   * Validate linked resume/cover letter entities before run creation.
+   */
+  private async assertJobApplyDependencies(payload: JobApplyExecutionPayload): Promise<void> {
+    const resumeRows = await db
+      .select()
+      .from(resumes)
+      .where(eq(resumes.id, payload.resumeId))
+      .limit(1);
+    if (resumeRows.length === 0) {
+      throw new AutomationDependencyMissingError("resume", payload.resumeId);
+    }
+
+    if (!payload.coverLetterId) {
+      return;
+    }
+
+    const coverLetterRows = await db
+      .select()
+      .from(coverLetters)
+      .where(eq(coverLetters.id, payload.coverLetterId))
+      .limit(1);
+    if (coverLetterRows.length === 0) {
+      throw new AutomationDependencyMissingError("coverLetter", payload.coverLetterId);
+    }
+  }
+
+  /**
+   * Normalize and validate an email-response automation payload.
+   */
+  private normalizeEmailResponsePayload(
+    payload: EmailResponsePayload,
+  ): EmailResponseExecutionPayload {
+    const subject = payload.subject?.trim() ?? "";
+    const message = payload.message?.trim() ?? "";
+    const sender = payload.sender?.trim();
+    const toneRaw = payload.tone?.trim();
+
+    if (subject.length === 0 || subject.length > MAX_EMAIL_SUBJECT_LENGTH) {
+      throw new AutomationValidationError(
+        `subject is required and must be <= ${MAX_EMAIL_SUBJECT_LENGTH} characters`,
+      );
+    }
+
+    if (message.length === 0 || message.length > MAX_EMAIL_MESSAGE_LENGTH) {
+      throw new AutomationValidationError(
+        `message is required and must be <= ${MAX_EMAIL_MESSAGE_LENGTH} characters`,
+      );
+    }
+
+    if (sender && sender.length > MAX_EMAIL_SENDER_LENGTH) {
+      throw new AutomationValidationError(
+        `sender must be <= ${MAX_EMAIL_SENDER_LENGTH} characters`,
+      );
+    }
+
+    const tone = toneRaw && isEmailResponseTone(toneRaw) ? toneRaw : DEFAULT_EMAIL_RESPONSE_TONE;
+
+    return {
+      subject,
+      message,
+      tone,
+      ...(sender ? { sender } : {}),
+    };
+  }
+
+  /**
+   * Normalize a scheduled run datetime with strict bounds.
+   */
+  private normalizeScheduledRunAt(runAt: string): string {
+    const parsedRunAt = new Date(runAt);
+    const targetMs = parsedRunAt.getTime();
+    if (Number.isNaN(targetMs)) {
+      throw new AutomationValidationError("runAt must be a valid ISO timestamp");
+    }
+
+    const leadTimeMs = targetMs - Date.now();
+    if (leadTimeMs < MIN_SCHEDULE_LEAD_TIME_MS) {
+      throw new AutomationValidationError("runAt must be at least 1 second in the future");
+    }
+    if (leadTimeMs > MAX_SCHEDULE_LEAD_TIME_MS) {
+      throw new AutomationValidationError("runAt must be within 30 days");
+    }
+
+    return parsedRunAt.toISOString();
   }
 
   /**
@@ -336,33 +478,9 @@ export class ApplicationAutomationService {
   ): Promise<string> {
     const normalized = this.normalizePayload(payload);
     const settingsSnapshot = await this.loadAutomationSettings();
-    const configuredMaxConcurrentRuns = Number.isFinite(settingsSnapshot.maxConcurrentRuns)
-      ? Math.trunc(settingsSnapshot.maxConcurrentRuns)
-      : DEFAULT_AUTOMATION_SETTINGS.maxConcurrentRuns;
-    const maxConcurrentRuns = Math.min(
-      Math.max(MIN_CONCURRENT_RUNS, configuredMaxConcurrentRuns),
-      MAX_CONCURRENT_RUNS,
-    );
+    const maxConcurrentRuns = this.resolveMaxConcurrentRuns(settingsSnapshot);
 
-    const resumeRows = await db
-      .select()
-      .from(resumes)
-      .where(eq(resumes.id, normalized.resumeId))
-      .limit(1);
-    if (resumeRows.length === 0) {
-      throw new AutomationDependencyMissingError("resume", normalized.resumeId);
-    }
-
-    if (normalized.coverLetterId) {
-      const coverLetterRows = await db
-        .select()
-        .from(coverLetters)
-        .where(eq(coverLetters.id, normalized.coverLetterId))
-        .limit(1);
-      if (coverLetterRows.length === 0) {
-        throw new AutomationDependencyMissingError("coverLetter", normalized.coverLetterId);
-      }
-    }
+    await this.assertJobApplyDependencies(normalized);
 
     const now = new Date().toISOString();
 
@@ -395,6 +513,362 @@ export class ApplicationAutomationService {
 
       return runId;
     });
+  }
+
+  /**
+   * Parse schedule metadata from persisted run input.
+   */
+  private parseScheduledRunMetadata(input: Record<string, unknown> | null): ScheduledRunMetadata | null {
+    if (!input) {
+      return null;
+    }
+
+    const scheduleValue = input.schedule;
+    if (!scheduleValue || typeof scheduleValue !== "object" || Array.isArray(scheduleValue)) {
+      return null;
+    }
+
+    if (!("runAt" in scheduleValue)) {
+      return null;
+    }
+
+    const runAt = scheduleValue.runAt;
+    if (typeof runAt !== "string" || runAt.trim().length === 0) {
+      return null;
+    }
+
+    return { runAt: runAt.trim() };
+  }
+
+  /**
+   * Parse custom-answers payload from persisted JSON.
+   */
+  private parseCustomAnswers(input: Record<string, unknown> | null): Record<string, string> {
+    if (!input) {
+      return {};
+    }
+
+    const value = input.customAnswers;
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return {};
+    }
+
+    const parsedAnswers: Record<string, string> = {};
+    for (const [key, entry] of Object.entries(value)) {
+      if (typeof entry === "string" && entry.length > 0) {
+        parsedAnswers[key] = entry;
+      }
+    }
+    return parsedAnswers;
+  }
+
+  /**
+   * Rebuild a job-apply payload from persisted automation run input.
+   */
+  private parseScheduledJobApplyPayload(input: Record<string, unknown> | null): JobApplyPayload | null {
+    if (!input) {
+      return null;
+    }
+
+    const jobUrl = typeof input.jobUrl === "string" ? input.jobUrl.trim() : "";
+    const resumeId = typeof input.resumeId === "string" ? input.resumeId.trim() : "";
+    if (jobUrl.length === 0 || resumeId.length === 0) {
+      return null;
+    }
+
+    const payload: JobApplyPayload = {
+      jobUrl,
+      resumeId,
+    };
+
+    if (typeof input.coverLetterId === "string" && input.coverLetterId.trim().length > 0) {
+      payload.coverLetterId = input.coverLetterId.trim();
+    }
+    if (typeof input.jobId === "string" && input.jobId.trim().length > 0) {
+      payload.jobId = input.jobId.trim();
+    }
+
+    const customAnswers = this.parseCustomAnswers(input);
+    if (Object.keys(customAnswers).length > 0) {
+      payload.customAnswers = customAnswers;
+    }
+
+    return payload;
+  }
+
+  /**
+   * Queue a scheduled run in-memory and execute it when due.
+   */
+  private queueScheduledRun(runId: string, payload: JobApplyPayload, runAt: string): void {
+    this.clearScheduledRunTimer(runId);
+
+    const delayMs = Math.max(0, new Date(runAt).getTime() - Date.now());
+    const timer = setTimeout(() => {
+      this.scheduledRunTimers.delete(runId);
+      void this.executeScheduledRun(runId, payload);
+    }, delayMs);
+    if (typeof timer === "object" && timer !== null && "unref" in timer) {
+      const possibleUnref = timer.unref;
+      if (typeof possibleUnref === "function") {
+        possibleUnref.call(timer);
+      }
+    }
+
+    this.scheduledRunTimers.set(runId, timer);
+  }
+
+  /**
+   * Clear a queued scheduled run timer.
+   */
+  private clearScheduledRunTimer(runId: string): void {
+    const timer = this.scheduledRunTimers.get(runId);
+    if (!timer) {
+      return;
+    }
+
+    clearTimeout(timer);
+    this.scheduledRunTimers.delete(runId);
+  }
+
+  /**
+   * Load pending scheduled runs after process start and queue any future executions.
+   */
+  private async restoreScheduledRuns(): Promise<void> {
+    if (this.schedulerRecoveryInFlight) {
+      return;
+    }
+
+    this.schedulerRecoveryInFlight = true;
+    try {
+      const pendingRows = await db
+        .select()
+        .from(automationRuns)
+        .where(and(eq(automationRuns.status, "pending"), eq(automationRuns.type, "job_apply")))
+        .limit(MAX_RECOVERABLE_SCHEDULED_RUNS);
+
+      for (const row of pendingRows) {
+        const metadata = this.parseScheduledRunMetadata(row.input ?? null);
+        const payload = this.parseScheduledJobApplyPayload(row.input ?? null);
+        if (!metadata || !payload) {
+          continue;
+        }
+
+        this.queueScheduledRun(row.id, payload, metadata.runAt);
+      }
+    } finally {
+      this.schedulerRecoveryInFlight = false;
+    }
+  }
+
+  /**
+   * Schedule a new job-apply run for future execution.
+   */
+  async createScheduledJobApplyRun(
+    payload: JobApplyPayload,
+    runAt: string,
+  ): Promise<{ runId: string; scheduledFor: string }> {
+    const normalized = this.normalizePayload(payload);
+    const scheduledFor = this.normalizeScheduledRunAt(runAt);
+    await this.assertJobApplyDependencies(normalized);
+
+    const now = new Date().toISOString();
+    const runId = generateId();
+    const scheduleInput = {
+      ...this.buildAuditInput(normalized, true),
+      schedule: { runAt: scheduledFor },
+    } satisfies Record<string, unknown>;
+
+    await db.insert(automationRuns).values({
+      id: runId,
+      type: "job_apply",
+      status: "pending",
+      jobId: normalized.jobId || null,
+      userId: null,
+      input: scheduleInput,
+      progress: DEFAULT_PROGRESS,
+      currentStep: null,
+      totalSteps: null,
+      startedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    this.queueScheduledRun(runId, normalized, scheduledFor);
+    broadcastProgress(runId, {
+      type: "scheduled",
+      status: "pending",
+      action: "job_apply",
+      message: `Scheduled for ${scheduledFor}`,
+      runId,
+    });
+
+    return { runId, scheduledFor };
+  }
+
+  /**
+   * Execute a queued scheduled run, retrying when concurrency is saturated.
+   */
+  private async executeScheduledRun(runId: string, payload: JobApplyPayload): Promise<void> {
+    const row = await db
+      .select()
+      .from(automationRuns)
+      .where(eq(automationRuns.id, runId))
+      .limit(1);
+    if (row.length === 0 || row[0].status !== "pending") {
+      return;
+    }
+
+    try {
+      await this.runJobApply(runId, payload);
+    } catch (error) {
+      if (error instanceof AutomationConcurrencyLimitError) {
+        const nextRunAt = new Date(Date.now() + SCHEDULE_RETRY_DELAY_MS).toISOString();
+        await db
+          .update(automationRuns)
+          .set({
+            input: {
+              ...this.buildAuditInput(this.normalizePayload(payload), true),
+              schedule: { runAt: nextRunAt },
+            },
+            status: "pending",
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(automationRuns.id, runId));
+
+        this.queueScheduledRun(runId, payload, nextRunAt);
+        broadcastProgress(runId, {
+          type: "scheduled-retry",
+          status: "pending",
+          action: "job_apply",
+          message: `Concurrency limit reached, retrying at ${nextRunAt}`,
+          runId,
+        });
+        return;
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Run an AI-assisted email response and persist output as an automation run.
+   */
+  async runEmailResponse(payload: EmailResponsePayload): Promise<{
+    runId: string;
+    status: "success";
+    reply: string;
+    provider: string;
+    model: string;
+  }> {
+    const normalized = this.normalizeEmailResponsePayload(payload);
+    const now = new Date().toISOString();
+    const runId = generateId();
+
+    await db.insert(automationRuns).values({
+      id: runId,
+      type: "email",
+      status: "running",
+      jobId: null,
+      userId: null,
+      input: {
+        subject: normalized.subject,
+        message: normalized.message,
+        tone: normalized.tone,
+        ...(normalized.sender ? { sender: normalized.sender } : {}),
+      },
+      progress: DEFAULT_PROGRESS,
+      currentStep: 0,
+      totalSteps: 1,
+      startedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    try {
+      const aiService = await this.tryLoadAIService();
+      if (!aiService) {
+        throw new Error("No AI provider is available for email response generation");
+      }
+
+      const aiResult = await aiService.generate(
+        emailResponsePrompt(
+          normalized.subject,
+          normalized.message,
+          normalized.tone,
+          normalized.sender,
+        ),
+      );
+      const reply = aiResult.content.trim();
+      if (reply.length === 0) {
+        throw new Error("AI provider returned an empty email response");
+      }
+
+      const completedAt = new Date().toISOString();
+      await db
+        .update(automationRuns)
+        .set({
+          status: "success",
+          output: {
+            success: true,
+            reply,
+            provider: aiResult.provider,
+            model: aiResult.model,
+          },
+          error: null,
+          progress: FINISHED_PROGRESS,
+          currentStep: 1,
+          totalSteps: 1,
+          completedAt,
+          updatedAt: completedAt,
+        })
+        .where(eq(automationRuns.id, runId));
+
+      broadcastProgress(runId, {
+        type: "complete",
+        status: "success",
+        action: "email_response",
+        message: "Email response generated",
+        runId,
+      });
+
+      return {
+        runId,
+        status: "success",
+        reply,
+        provider: aiResult.provider,
+        model: aiResult.model,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to generate email response";
+      const completedAt = new Date().toISOString();
+
+      await db
+        .update(automationRuns)
+        .set({
+          status: "error",
+          output: {
+            success: false,
+            error: message,
+          },
+          error: message,
+          progress: FINISHED_PROGRESS,
+          currentStep: 1,
+          totalSteps: 1,
+          completedAt,
+          updatedAt: completedAt,
+        })
+        .where(eq(automationRuns.id, runId));
+
+      broadcastProgress(runId, {
+        type: "complete",
+        status: "error",
+        action: "email_response",
+        message,
+        runId,
+      });
+
+      throw error instanceof Error ? error : new Error(message);
+    }
   }
 
   /**
@@ -556,6 +1030,7 @@ export class ApplicationAutomationService {
     payload: JobApplyPayload,
     onProgress?: (data: AutomationProgress) => void,
   ): Promise<void> {
+    this.clearScheduledRunTimer(runId);
     const normalized = this.normalizePayload(payload);
 
     const runRows = await db
@@ -569,6 +1044,21 @@ export class ApplicationAutomationService {
     }
 
     const automationSettings = await this.loadAutomationSettings();
+    const maxConcurrentRuns = this.resolveMaxConcurrentRuns(automationSettings);
+    const runningRows = await db
+      .select({ count: count() })
+      .from(automationRuns)
+      .where(
+        and(
+          eq(automationRuns.status, "running"),
+          eq(automationRuns.type, "job_apply"),
+          ne(automationRuns.id, runId),
+        ),
+      );
+    const runningCount = runningRows[0]?.count || 0;
+    if (runningCount >= maxConcurrentRuns) {
+      throw new AutomationConcurrencyLimitError(runningCount, maxConcurrentRuns);
+    }
 
     const resumeRows = await db
       .select()

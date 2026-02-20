@@ -49,6 +49,8 @@ export const STATE_KEYS = {
   AI_STREAMING: "ai-streaming",
   AI_LOADING: "ai-loading",
   AI_SESSION_ID: "ai-session-id",
+  AI_CHAT_AUTO_SPEAK: "ai-chat-auto-speak",
+  AI_CHAT_VOICE_ID: "ai-chat-voice-id",
 
   // User & Auth
   USER_PROFILE: "user-profile",
@@ -74,6 +76,7 @@ export const STATE_KEYS = {
   GAMIFICATION_LOADING: "gamification-loading",
   GAMIFICATION_WEEKLY: "gamification-weekly",
   GAMIFICATION_MONTHLY: "gamification-monthly",
+  PIPELINE_GAMIFICATION_AWARDED: "pipeline-gamification-awarded",
 
   // Statistics
   STATS_DASHBOARD: "stats-dashboard",

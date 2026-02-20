@@ -131,4 +131,73 @@ describe("automation routes", () => {
       }
     }
   });
+
+  test("POST /api/automation/job-apply/schedule validates runAt", async () => {
+    const res = await requestJson<{ error: string }>(app, "POST", "/api/automation/job-apply/schedule", {
+      jobUrl: "https://example.com/careers/engineering",
+      resumeId,
+      runAt: "not-a-date",
+    });
+
+    expect(res.status).toBe(422);
+    expect(res.body.error).toContain("runAt");
+  });
+
+  test("POST /api/automation/job-apply/schedule creates a pending run", async () => {
+    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const res = await requestJson<{ runId: string; status: "pending"; scheduledFor: string }>(
+      app,
+      "POST",
+      "/api/automation/job-apply/schedule",
+      {
+        jobUrl: "https://example.com/careers/engineering",
+        resumeId,
+        runAt,
+      },
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("pending");
+    expect(res.body.scheduledFor).toBe(runAt);
+    createdRunIds.push(res.body.runId);
+
+    const run = await db
+      .select()
+      .from(automationRuns)
+      .where(and(eq(automationRuns.id, res.body.runId), eq(automationRuns.type, "job_apply")))
+      .limit(1);
+
+    expect(run.length).toBe(1);
+    expect(run[0].status).toBe("pending");
+    expect(run[0].input).not.toBeNull();
+  });
+
+  test("POST /api/automation/email-response creates a successful email run", async () => {
+    const res = await requestJson<{
+      runId: string;
+      status: "success";
+      reply: string;
+      provider: string;
+      model: string;
+    }>(app, "POST", "/api/automation/email-response", {
+      subject: "Interview follow-up",
+      message: "Thanks for the interview. Can we discuss next steps?",
+      tone: "professional",
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.reply.length).toBeGreaterThan(0);
+    createdRunIds.push(res.body.runId);
+
+    const run = await db
+      .select()
+      .from(automationRuns)
+      .where(and(eq(automationRuns.id, res.body.runId), eq(automationRuns.type, "email")))
+      .limit(1);
+
+    expect(run.length).toBe(1);
+    expect(run[0].status).toBe("success");
+    expect(run[0].output).not.toBeNull();
+  });
 });

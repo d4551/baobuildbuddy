@@ -1,26 +1,75 @@
 <script setup lang="ts">
-import { AI_CHAT_PAGE_PATH, APP_BRAND, inferAIChatDomainFromRoutePath } from "@bao/shared";
+import {
+  AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS,
+  AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS,
+  AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY,
+  AI_CHAT_PAGE_PATH,
+  APP_BRAND,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 
 const route = useRoute();
-const { messages, loading, streaming, sendMessage, clearMessages } = useAI();
-const { t } = useI18n();
+const { messages, loading, streaming, sendMessage, clearMessages, buildCurrentContext } = useAI();
+const { t, locale } = useI18n();
 
 const isOpen = ref(false);
 const draft = ref("");
 const unreadCount = ref(0);
-const panelBodyRef = ref<HTMLElement | null>(null);
-const inputRef = ref<HTMLInputElement | null>(null);
+const panelBodyRef = useTemplateRef<HTMLElement>("floatingChatPanelBody");
+const inputRef = useTemplateRef<HTMLInputElement>("floatingChatInput");
+const {
+  autoSpeakReplies,
+  canReplayAssistant,
+  errorMessageKey: voiceErrorMessageKey,
+  supportHintKey: voiceSupportHintKey,
+  isListening: isVoiceListening,
+  isSpeaking: isVoiceSpeaking,
+  supportsRecognition,
+  supportsSynthesis,
+  selectedVoiceId,
+  voices: availableVoices,
+  speakLatestAssistantMessage,
+  stopListening,
+  toggleListening,
+} = useChatVoice({
+  draft,
+  locale,
+  messages,
+});
 const chatPanelId = "floating-chat-panel";
+const voiceErrorLabel = computed(() => {
+  if (voiceErrorMessageKey.value.length === 0) {
+    return "";
+  }
+
+  return t("aiChatCommon.voice.errorLabel", { error: t(voiceErrorMessageKey.value) });
+});
+const chatContext = computed(() => buildCurrentContext("floating-widget"));
 const currentContextLabel = computed(() => {
-  const domain = inferAIChatDomainFromRoutePath(route.path);
-  if (domain === "resume") return t("floatingChat.contextDomain.resume");
-  if (domain === "job_search") return t("floatingChat.contextDomain.jobSearch");
-  if (domain === "interview") return t("floatingChat.contextDomain.interview");
-  if (domain === "portfolio") return t("floatingChat.contextDomain.portfolio");
-  if (domain === "skills") return t("floatingChat.contextDomain.skills");
-  if (domain === "automation") return t("floatingChat.contextDomain.automation");
-  return t("floatingChat.contextDomain.general");
+  const domain = chatContext.value.domain ?? "general";
+  return t(AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS[domain]);
+});
+const focusedEntityLabel = computed(() => {
+  const entity = chatContext.value.entity;
+  if (!entity) return "";
+  return entity.label || entity.id;
+});
+const contextualPrompts = computed(() => {
+  const target = focusedEntityLabel.value || currentContextLabel.value;
+  const domain = chatContext.value.domain ?? "general";
+  const prompts: string[] = [];
+
+  const pushPrompt = (key: string) => {
+    prompts.push(t(key, { target }));
+  };
+
+  if (focusedEntityLabel.value) {
+    pushPrompt(AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY);
+  }
+
+  pushPrompt(AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS[domain]);
+  pushPrompt(AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS.general);
+  return [...new Set(prompts)];
 });
 
 const showWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
@@ -87,10 +136,20 @@ function onFocusChatShortcut() {
 async function handleSendMessage() {
   if (!draft.value.trim() || loading.value) return;
 
+  if (isVoiceListening.value) {
+    stopListening();
+  }
+
   const content = draft.value.trim();
   draft.value = "";
   await sendMessage(content, { source: "floating-widget" });
   scrollToBottom();
+}
+
+async function handleSendSuggestion(prompt: string) {
+  if (loading.value) return;
+  draft.value = prompt;
+  await handleSendMessage();
 }
 
 function formatTime(date?: string): string {
@@ -137,6 +196,13 @@ onUnmounted(() => {
                 >
                   {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
                 </span>
+                <span
+                  v-if="focusedEntityLabel"
+                  class="badge badge-soft badge-primary badge-xs"
+                  :aria-label="t('floatingChat.focusedEntityAria', { entity: focusedEntityLabel })"
+                >
+                  {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
+                </span>
               </div>
             </div>
             <div class="flex items-center gap-1">
@@ -160,8 +226,24 @@ onUnmounted(() => {
             </div>
           </header>
 
+          <div class="border-b border-base-300 px-3 py-2">
+            <div class="flex flex-wrap gap-2" role="group" :aria-label="t('floatingChat.suggestionsAria')">
+              <button
+                v-for="prompt in contextualPrompts"
+                :key="prompt"
+                type="button"
+                class="btn btn-xs btn-soft"
+                :aria-label="t('floatingChat.suggestionAria', { prompt })"
+                :disabled="loading"
+                @click="handleSendSuggestion(prompt)"
+              >
+                {{ prompt }}
+              </button>
+            </div>
+          </div>
+
           <div
-            ref="panelBodyRef"
+            ref="floatingChatPanelBody"
             class="flex-1 overflow-y-auto p-3 space-y-3"
             role="log"
             aria-live="polite"
@@ -193,7 +275,7 @@ onUnmounted(() => {
           <div class="p-3 border-t border-base-300">
             <div class="join w-full">
               <input
-                ref="inputRef"
+                ref="floatingChatInput"
                 v-model="draft"
                 class="input input-bordered join-item w-full"
                 type="text"
@@ -201,6 +283,22 @@ onUnmounted(() => {
                 :aria-label="t('floatingChat.inputAria')"
                 :disabled="loading"
                 @keyup.enter="handleSendMessage"
+              />
+              <ChatVoiceControls
+                v-model:selected-voice-id="selectedVoiceId"
+                v-model:auto-speak-replies="autoSpeakReplies"
+                compact
+                :loading="loading"
+                :supports-recognition="supportsRecognition"
+                :supports-synthesis="supportsSynthesis"
+                :can-replay-assistant="canReplayAssistant"
+                :is-listening="isVoiceListening"
+                :is-speaking="isVoiceSpeaking"
+                :voices="availableVoices"
+                :support-hint-key="voiceSupportHintKey"
+                :error-label="voiceErrorLabel"
+                @toggle-listening="toggleListening"
+                @replay-assistant="speakLatestAssistantMessage"
               />
               <button
                 class="btn btn-primary join-item"
@@ -218,7 +316,14 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="relative">
+      <div class="indicator">
+        <span
+          v-if="unreadCount > 0 && !isOpen"
+          class="indicator-item badge badge-error badge-sm"
+          :aria-label="t('floatingChat.unreadAria', { count: unreadCount })"
+        >
+          {{ unreadCount }}
+        </span>
         <button
           class="btn btn-primary btn-circle shadow-lg"
           :aria-label="isOpen ? t('floatingChat.hideAria') : t('floatingChat.showAria')"
@@ -230,14 +335,6 @@ onUnmounted(() => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" />
           </svg>
         </button>
-
-        <span
-          v-if="unreadCount > 0 && !isOpen"
-          class="badge badge-error badge-sm absolute -top-1 -right-1"
-          :aria-label="t('floatingChat.unreadAria', { count: unreadCount })"
-        >
-          {{ unreadCount }}
-        </span>
       </div>
     </div>
   </Teleport>

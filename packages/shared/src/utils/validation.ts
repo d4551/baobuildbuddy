@@ -7,12 +7,8 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function isValidUrl(url: string): boolean {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
+  if (typeof url !== "string" || url.trim().length === 0) return false;
+  return URL.canParse(url);
 }
 
 export function slugify(text: string): string {

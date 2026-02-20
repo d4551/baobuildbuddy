@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 const props = defineProps<{
   modelValue: string;
 }>();
@@ -8,8 +10,9 @@ const emit = defineEmits<{
   search: [];
 }>();
 
+const { t } = useI18n();
 const searchValue = ref(props.modelValue);
-let debounceTimeout: NodeJS.Timeout | null = null;
+let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
 watch(
   () => props.modelValue,
@@ -55,13 +58,15 @@ function handleSubmit() {
       <input
         v-model="searchValue"
         type="text"
-        placeholder="Search jobs by title, company, or skills..."
+        :placeholder="t('jobsPage.searchPlaceholder')"
         class="input input-bordered w-full"
-        aria-label="Search jobs by title, company, or skills..."/>
+        :aria-label="t('jobsPage.searchAria')"
+      />
       <button
         v-if="searchValue"
         type="button"
         class="btn btn-ghost btn-square"
+        :aria-label="t('jobsPage.clearSearchAria')"
         @click="clearSearch"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

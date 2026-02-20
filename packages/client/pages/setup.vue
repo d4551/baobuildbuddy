@@ -2,6 +2,7 @@
 import {
   AI_PROVIDER_CATALOG,
   APP_BRAND,
+  APP_ROUTES,
   APP_SEO,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
@@ -166,7 +167,7 @@ async function handleComplete(): Promise<void> {
     await updateApiKeys(update);
 
     $toast.success(t("setup.completeToast"));
-    router.push("/");
+    router.push(APP_ROUTES.dashboard);
   } catch (error) {
     $toast.error(getErrorMessage(error, t("setup.completeErrorFallback")));
   } finally {
@@ -309,7 +310,7 @@ async function handleComplete(): Promise<void> {
       </div>
 
       <div v-if="step === 3" class="space-y-4 text-center">
-        <div class="text-6xl mb-4" aria-hidden="true">OK</div>
+        <div class="text-6xl mb-4" aria-hidden="true">{{ t("setup.successIconLabel") }}</div>
         <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
         <p class="text-base-content/70">
           {{ t("setup.doneDescription", { assistant: APP_BRAND.assistantName }) }}

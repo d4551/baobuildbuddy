@@ -1,8 +1,14 @@
 import { createI18n } from "vue-i18n";
 import enUS from "~/locales/en-US";
+import esES from "~/locales/es-ES";
+import frFR from "~/locales/fr-FR";
+import jaJP from "~/locales/ja-JP";
 
 const I18N_MESSAGE_CATALOG = {
   "en-US": enUS,
+  "es-ES": esES,
+  "fr-FR": frFR,
+  "ja-JP": jaJP,
 } as const;
 
 type AvailableLocale = keyof typeof I18N_MESSAGE_CATALOG;

@@ -15,6 +15,8 @@ import {
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_DEFAULT_QUESTION_COUNT,
   INTERVIEW_FALLBACK_STUDIO_ID,
+  asString,
+  asStringArray,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -71,10 +73,6 @@ const sessionConfigSchema = t.Object({
   targetJob: t.Optional(targetJobSchema),
 });
 
-function asString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim() ? value.trim() : undefined;
-}
-
 function asNonNegativeInt(value: number | undefined): number | undefined {
   if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
     return value;
@@ -82,9 +80,8 @@ function asNonNegativeInt(value: number | undefined): number | undefined {
   return undefined;
 }
 
-function asStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
+function asStringArrayTrimmed(value: unknown): string[] {
+  return asStringArray(value).map((s) => s.trim()).filter((s) => s.length > 0);
 }
 
 function parseTargetJob(value: CreateSessionConfigInput["targetJob"]): InterviewTargetJob | undefined {
@@ -97,8 +94,8 @@ function parseTargetJob(value: CreateSessionConfigInput["targetJob"]): Interview
     return undefined;
   }
 
-  const requirements = asStringArray(value.requirements);
-  const technologies = asStringArray(value.technologies);
+  const requirements = asStringArrayTrimmed(value.requirements);
+  const technologies = asStringArrayTrimmed(value.technologies);
   const description = asString(value.description);
   const source = asString(value.source);
   const postedDate = asString(value.postedDate);
@@ -174,7 +171,7 @@ function sessionConfigFromUi(config: CreateSessionConfigInput): CreateSessionCon
   const targetJob = parseTargetJob(config.targetJob);
   const roleTypeFromJob = asString(targetJob?.title);
   const mode = config.interviewMode === "job" ? "job" : "studio";
-  const focusAreas = asStringArray(config.focusAreas);
+  const focusAreas = asStringArrayTrimmed(config.focusAreas);
 
   return {
     roleType: asString(config.roleType) || roleTypeFromJob || INTERVIEW_DEFAULT_ROLE_TYPE,
@@ -187,7 +184,7 @@ function sessionConfigFromUi(config: CreateSessionConfigInput): CreateSessionCon
     includeBehavioral: config.includeBehavioral,
     includeStudioSpecific: config.includeStudioSpecific,
     enableVoiceMode: config.enableVoiceMode,
-    technologies: asStringArray(config.technologies),
+    technologies: asStringArrayTrimmed(config.technologies),
     voiceSettings: normalizeVoiceSettings(config.voiceSettings),
     interviewMode: mode,
     targetJob,

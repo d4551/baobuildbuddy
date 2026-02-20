@@ -72,6 +72,16 @@ export const SCRAPER_JOB_QUERY_LIMIT = "80";
 export const JOB_PREVIEW_LIMIT = 12;
 
 /**
+ * Maximum number of recent interview sessions shown on the interview hub dashboard.
+ */
+export const INTERVIEW_HUB_RECENT_SESSION_LIMIT = 6;
+
+/**
+ * Number of recent interview sessions rendered per page in the interview hub table.
+ */
+export const INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE = INTERVIEW_HUB_RECENT_SESSION_LIMIT;
+
+/**
  * Minimum response length required before submitting an interview answer.
  */
 export const INTERVIEW_MIN_RESPONSE_LENGTH = 10;

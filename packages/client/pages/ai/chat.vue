@@ -17,7 +17,33 @@ const { messages, loading, streaming, sendMessage, clearMessages } = useAI();
 const { t, locale } = useI18n();
 
 const input = ref("");
-const chatContainer = ref<HTMLElement | null>(null);
+const chatContainer = useTemplateRef<HTMLElement>("aiChatContainer");
+const {
+  autoSpeakReplies,
+  canReplayAssistant,
+  errorMessageKey: voiceErrorMessageKey,
+  supportHintKey: voiceSupportHintKey,
+  isListening: isVoiceListening,
+  isSpeaking: isVoiceSpeaking,
+  supportsRecognition,
+  supportsSynthesis,
+  selectedVoiceId,
+  voices: availableVoices,
+  speakLatestAssistantMessage,
+  stopListening,
+  toggleListening,
+} = useChatVoice({
+  draft: input,
+  locale,
+  messages,
+});
+const voiceErrorLabel = computed(() => {
+  if (voiceErrorMessageKey.value.length === 0) {
+    return "";
+  }
+
+  return t("aiChatCommon.voice.errorLabel", { error: t(voiceErrorMessageKey.value) });
+});
 
 watch(
   () => messages.value.length,
@@ -36,6 +62,11 @@ function scrollToBottom() {
 
 async function handleSendMessage() {
   if (!input.value.trim() || loading.value) return;
+
+  if (isVoiceListening.value) {
+    stopListening();
+  }
+
   const content = input.value.trim();
   input.value = "";
   await sendMessage(content, { source: "chat-page" });
@@ -65,7 +96,7 @@ function formatTime(date?: string) {
     </div>
 
     <div
-      ref="chatContainer"
+      ref="aiChatContainer"
       class="flex-1 overflow-y-auto bg-base-200 rounded-lg p-4 mb-4 space-y-4"
       role="log"
       aria-live="polite"
@@ -125,18 +156,33 @@ function formatTime(date?: string) {
 
     <div class="card bg-base-200">
       <div class="card-body p-4">
-        <div class="flex gap-2">
+        <div class="join w-full">
           <input
             v-model="input"
             type="text"
             :placeholder="t('aiChatPage.inputPlaceholder')"
-            class="input input-bordered flex-1"
+            class="input input-bordered join-item flex-1"
             :disabled="loading"
             :aria-label="t('aiChatPage.inputAria')"
             @keyup.enter="handleSendMessage"
           />
+          <ChatVoiceControls
+            v-model:selected-voice-id="selectedVoiceId"
+            v-model:auto-speak-replies="autoSpeakReplies"
+            :loading="loading"
+            :supports-recognition="supportsRecognition"
+            :supports-synthesis="supportsSynthesis"
+            :can-replay-assistant="canReplayAssistant"
+            :is-listening="isVoiceListening"
+            :is-speaking="isVoiceSpeaking"
+            :voices="availableVoices"
+            :support-hint-key="voiceSupportHintKey"
+            :error-label="voiceErrorLabel"
+            @toggle-listening="toggleListening"
+            @replay-assistant="speakLatestAssistantMessage"
+          />
           <button
-            class="btn btn-primary"
+            class="btn btn-primary join-item"
             :disabled="!input.trim() || loading"
             :aria-label="t('aiChatPage.sendAria')"
             @click="handleSendMessage"

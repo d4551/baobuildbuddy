@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {
+  APP_ROUTE_BUILDERS,
+  APP_ROUTES,
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
   type AutomationRunStatus,
@@ -71,7 +73,7 @@ function formatRunStatus(runStatus: AutomationRunStatus): string {
   <div>
     <div class="mb-6 flex items-center justify-between">
       <h1 class="text-3xl font-bold">{{ t("automation.runs.title") }}</h1>
-      <NuxtLink to="/automation" class="btn btn-outline" :aria-label="t('automation.runs.backToAutomation')">
+      <NuxtLink :to="APP_ROUTES.automation" class="btn btn-outline" :aria-label="t('automation.runs.backToAutomation')">
         {{ t("automation.runs.backButton") }}
       </NuxtLink>
     </div>
@@ -125,7 +127,7 @@ function formatRunStatus(runStatus: AutomationRunStatus): string {
           >
             <th>
               <NuxtLink
-                :to="`/automation/runs/${encodeURIComponent(run.id)}`"
+                :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
                 class="link link-hover"
                 :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
               >

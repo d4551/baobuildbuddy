@@ -1,28 +1,83 @@
 <script setup lang="ts">
+import { AI_CHAT_PAGE_PATH } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import {
+  LAYOUT_CONTENT_MAX_WIDTH_REM,
+  LAYOUT_DESKTOP_MEDIA_QUERY,
+} from "~/constants/layout";
 
 const { initTheme } = useTheme();
 const { t } = useI18n();
+const route = useRoute();
+const isDrawerOpen = ref(false);
+const isDesktopViewport = ref(false);
+let desktopMediaQueryList: MediaQueryList | null = null;
+let removeMediaQueryListener: (() => void) | null = null;
+
+const shellStyle = computed(() => ({
+  "--layout-content-max-width": `${LAYOUT_CONTENT_MAX_WIDTH_REM}rem`,
+}));
+
+const showFloatingChatWidget = computed(
+  () => !route.path.startsWith(AI_CHAT_PAGE_PATH),
+);
 
 useKeyboardShortcuts();
 
+function syncDrawerForViewport(isDesktop: boolean): void {
+  isDesktopViewport.value = isDesktop;
+  isDrawerOpen.value = isDesktop;
+}
+
 onMounted(() => {
   initTheme();
+
+  desktopMediaQueryList = window.matchMedia(LAYOUT_DESKTOP_MEDIA_QUERY);
+  const handleViewportChange = (event: MediaQueryListEvent) => {
+    syncDrawerForViewport(event.matches);
+  };
+
+  syncDrawerForViewport(desktopMediaQueryList.matches);
+  desktopMediaQueryList.addEventListener("change", handleViewportChange);
+  removeMediaQueryListener = () => {
+    desktopMediaQueryList?.removeEventListener("change", handleViewportChange);
+  };
+});
+
+watch(
+  () => route.fullPath,
+  () => {
+    if (!isDesktopViewport.value) {
+      isDrawerOpen.value = false;
+    }
+  },
+);
+
+onUnmounted(() => {
+  if (removeMediaQueryListener) {
+    removeMediaQueryListener();
+    removeMediaQueryListener = null;
+  }
+  desktopMediaQueryList = null;
 });
 </script>
 
 <template>
-  <div class="drawer lg:drawer-open">
+  <div class="drawer lg:drawer-open min-h-screen" :style="shellStyle">
     <input
       id="bao-drawer"
       type="checkbox"
       class="drawer-toggle"
+      v-model="isDrawerOpen"
       :aria-label="t('a11y.toggleSidebarNavigation')"
     />
-    <div class="drawer-content flex flex-col min-h-screen">
+    <div class="drawer-content flex min-h-screen flex-col">
       <a href="#app-main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn btn-primary btn-sm">{{ t("a11y.skipToContent") }}</a>
       <AppNavbar />
-      <main id="app-main-content" class="flex-1 p-4 lg:p-6 pb-20 lg:pb-6">
+      <main
+        id="app-main-content"
+        class="mx-auto flex-1 w-full max-w-[var(--layout-content-max-width)] px-4 pb-24 pt-4 sm:px-6 lg:px-8 lg:pb-8"
+      >
         <slot />
       </main>
       <ToastContainer />
@@ -33,8 +88,10 @@ onMounted(() => {
         <AppSidebar />
       </div>
     </aside>
-    <AppDock />
-    <QuickActionFab />
-    <FloatingChatWidget />
+    <ClientOnly>
+      <AppDock />
+      <LazyQuickActionFab />
+      <LazyFloatingChatWidget v-if="showFloatingChatWidget" />
+    </ClientOnly>
   </div>
 </template>

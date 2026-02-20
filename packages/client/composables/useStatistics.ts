@@ -1,14 +1,5 @@
 import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" && value.trim().length > 0 ? value : undefined;
-
-const asNumber = (value: unknown): number | undefined =>
-  typeof value === "number" && Number.isFinite(value) ? value : undefined;
+import { STATE_KEYS, asNumber, asString, isRecord } from "@bao/shared";
 
 const toDashboardStats = (value: unknown): DashboardStats | null => {
   if (!isRecord(value)) return null;

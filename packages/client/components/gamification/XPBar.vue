@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { XP_BAR_ANIMATION_DURATION_MS } from "~/constants/gamification";
+import { useI18n } from "vue-i18n";
+
 const props = defineProps<{
   xp: number;
   level: number;
   xpForNextLevel: number;
 }>();
+const { t } = useI18n();
 
 const xpProgress = computed(() => {
   return Math.min((props.xp / props.xpForNextLevel) * 100, 100);
@@ -21,7 +25,7 @@ watch(
     isAnimating.value = true;
     setTimeout(() => {
       isAnimating.value = false;
-    }, 500);
+    }, XP_BAR_ANIMATION_DURATION_MS);
   },
 );
 </script>
@@ -31,10 +35,10 @@ watch(
     <div class="flex justify-between items-center">
       <div class="flex items-center gap-2">
         <div class="badge badge-primary badge-lg font-bold">
-          Level {{ level }}
+          {{ t("xpBar.levelBadge", { level }) }}
         </div>
         <span class="text-sm font-medium">
-          {{ xp }} / {{ xpForNextLevel }} XP
+          {{ t("xpBar.progressLabel", { xp, xpForNextLevel }) }}
         </span>
       </div>
       <span class="text-sm text-base-content/70">
@@ -47,6 +51,6 @@ watch(
       :class="{ 'animate-pulse': isAnimating }"
       :value="xpProgress"
       max="100"
-      aria-label="Xp Progress progress"></progress>
+      :aria-label="t('xpBar.progressAria', { progress: xpPercentage })"></progress>
   </div>
 </template>

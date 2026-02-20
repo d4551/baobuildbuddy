@@ -1,8 +1,5 @@
 import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+import { STATE_KEYS, isRecord } from "@bao/shared";
 
 const normalizeProgress = (value: unknown): UserGamificationData | null => {
   if (!isRecord(value)) {

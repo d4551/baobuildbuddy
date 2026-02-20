@@ -4,8 +4,11 @@ import {
   AI_CHAT_CONTEXT_ENTITY_TYPE_IDS,
   AI_CHAT_CONTEXT_SOURCE_IDS,
   AI_PROVIDER_CATALOG,
+  asString,
+  asStringArray,
   generateId,
   inferAIChatDomainFromRoutePath,
+  isRecord,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -287,15 +290,6 @@ interface ResumeRecord {
   [key: string]: unknown;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" ? value : undefined;
-
-const collectStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
-
 const parseExperienceEntries = (value: unknown[] | null | undefined): ExperienceEntry[] =>
   Array.isArray(value)
     ? value.filter(isRecord).map((entry) => ({
@@ -303,7 +297,7 @@ const parseExperienceEntries = (value: unknown[] | null | undefined): Experience
         company: asString(entry.company),
         duration: asString(entry.duration),
         description: asString(entry.description),
-        achievements: collectStringArray(entry.achievements),
+        achievements: asStringArray(entry.achievements),
       }))
     : [];
 
@@ -322,7 +316,7 @@ const parseProjectEntries = (value: unknown[] | null | undefined): ProjectEntry[
         name: asString(entry.name),
         title: asString(entry.title),
         description: asString(entry.description),
-        technologies: collectStringArray(entry.technologies),
+        technologies: asStringArray(entry.technologies),
       }))
     : [];
 

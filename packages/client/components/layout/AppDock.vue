@@ -1,10 +1,25 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import type { NavigationItem } from "~/constants/navigation";
 import { getDockNavigationItems, isRouteActive } from "~/constants/navigation";
 
 const route = useRoute();
 const dockItems = getDockNavigationItems();
 const { t } = useI18n();
+
+const activeDockItemIds = computed(() => {
+  const activeIds = new Set<string>();
+  for (const item of dockItems) {
+    if (isRouteActive(route.path, item.to)) {
+      activeIds.add(item.id);
+    }
+  }
+  return activeIds;
+});
+
+function isDockItemActive(item: NavigationItem): boolean {
+  return activeDockItemIds.value.has(item.id);
+}
 </script>
 
 <template>
@@ -13,8 +28,8 @@ const { t } = useI18n();
       v-for="item in dockItems"
       :key="item.id"
       :to="item.to"
-      :class="{ 'dock-active': isRouteActive(route.path, item.to) }"
-      :aria-current="isRouteActive(route.path, item.to) ? 'page' : undefined"
+      :class="{ 'dock-active': isDockItemActive(item) }"
+      :aria-current="isDockItemActive(item) ? 'page' : undefined"
       :aria-label="t(item.labelKey)"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

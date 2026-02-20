@@ -1,4 +1,5 @@
 import type { VoiceSettings } from "@bao/shared";
+import { resolveSpeechLocale, resolveSpeechSynthesis } from "~/utils/speech";
 
 /**
  * Web Speech API Text-to-Speech composable.
@@ -13,15 +14,21 @@ export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
   let synthesis: SpeechSynthesis | null = null;
 
   function loadVoices(): SpeechSynthesisVoice[] {
-    if (import.meta.server) return [];
-    const v = speechSynthesis.getVoices();
-    voices.value = v;
-    return v;
+    const resolvedSynthesis = synthesis ?? resolveSpeechSynthesis();
+    if (!resolvedSynthesis) {
+      voices.value = [];
+      return [];
+    }
+    const availableVoices = resolvedSynthesis.getVoices();
+    voices.value = availableVoices;
+    return availableVoices;
   }
 
   onMounted(() => {
-    if (import.meta.server) return;
-    synthesis = speechSynthesis;
+    synthesis = resolveSpeechSynthesis();
+    if (!synthesis) {
+      return;
+    }
     synthesis.onvoiceschanged = () => loadVoices();
     loadVoices();
   });
@@ -32,22 +39,23 @@ export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
     );
 
   const isSupported = computed(() => {
-    if (import.meta.server) return false;
-    return typeof speechSynthesis !== "undefined";
+    return (synthesis ?? resolveSpeechSynthesis()) !== null;
   });
 
   function speak(
     text: string,
     opts?: Partial<Pick<VoiceSettings, "voiceId" | "rate" | "pitch" | "volume" | "language">>,
   ) {
-    if (import.meta.server || !synthesis) return;
+    const resolvedSynthesis = synthesis ?? resolveSpeechSynthesis();
+    if (!resolvedSynthesis) return;
+    synthesis = resolvedSynthesis;
 
-    synthesis.cancel();
+    resolvedSynthesis.cancel();
     const s: Partial<VoiceSettings> = settings?.value ?? {};
     const rate = opts?.rate ?? s.rate ?? 1;
     const pitch = opts?.pitch ?? s.pitch ?? 1;
     const volume = opts?.volume ?? s.volume ?? 1;
-    const lang = opts?.language ?? s.language ?? "en-US";
+    const lang = resolveSpeechLocale(opts?.language ?? s.language);
     const voiceId = opts?.voiceId ?? s.voiceId;
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -69,13 +77,13 @@ export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
       isSpeaking.value = false;
       isPaused.value = false;
     };
-    utterance.onerror = (e) => {
-      error.value = String(e);
+    utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
+      error.value = event.error;
       isSpeaking.value = false;
       isPaused.value = false;
     };
 
-    synthesis.speak(utterance);
+    resolvedSynthesis.speak(utterance);
   }
 
   function pause() {

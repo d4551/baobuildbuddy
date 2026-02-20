@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 interface Question {
   id: string;
   text: string;
@@ -18,6 +20,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   respond: [response: string];
 }>();
+const { t } = useI18n();
 
 const currentResponse = ref("");
 
@@ -75,12 +78,12 @@ function submitResponse() {
             class="w-10 rounded-full"
             :class="message.role === 'interviewer' ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content'"
           >
-            <span v-if="message.role === 'interviewer'">AI</span>
-            <span v-else>U</span>
+            <span v-if="message.role === 'interviewer'">{{ t("interviewChatComponent.avatarLabelAi") }}</span>
+            <span v-else>{{ t("interviewChatComponent.avatarLabelUser") }}</span>
           </div>
         </div>
         <div class="chat-header mb-1">
-          {{ message.role === 'interviewer' ? 'Interviewer' : 'You' }}
+          {{ message.role === 'interviewer' ? t("interviewChatComponent.interviewerLabel") : t("interviewChatComponent.userLabel") }}
         </div>
         <div
           class="chat-bubble"
@@ -98,30 +101,33 @@ function submitResponse() {
     <div v-if="currentQuestion" class="p-4 bg-base-100 rounded-b-lg border-t border-base-300">
       <div class="form-control">
         <div class="label">
-          <span class="label-text font-medium">Your Response</span>
-          <span class="label-text-alt">Question {{ currentIndex + 1 }} of {{ questions.length }}</span>
+          <span class="label-text font-medium">{{ t("interviewChatComponent.responseLabel") }}</span>
+          <span class="label-text-alt">
+            {{ t("interviewChatComponent.questionProgress", { current: currentIndex + 1, total: questions.length }) }}
+          </span>
         </div>
         <textarea
           v-model="currentResponse"
           class="textarea textarea-bordered h-24"
-          placeholder="Type your answer here..."
+          :placeholder="t('interviewChatComponent.responsePlaceholder')"
           @keyup.ctrl.enter="submitResponse"
-          aria-label="Type your answer here..."></textarea>
+          :aria-label="t('interviewChatComponent.responseAria')"></textarea>
         <div class="label">
-          <span class="label-text-alt">Press Ctrl+Enter to submit</span>
+          <span class="label-text-alt">{{ t("interviewChatComponent.submitHint") }}</span>
           <button
             class="btn btn-primary btn-sm"
+            :aria-label="t('interviewChatComponent.submitAria')"
             :disabled="!canSubmit"
             @click="submitResponse"
           >
-            Submit Response
+            {{ t("interviewChatComponent.submitButton") }}
           </button>
         </div>
       </div>
     </div>
 
     <div v-else class="p-4 text-center text-base-content/70">
-      <p>Interview complete. All questions have been answered.</p>
+      <p>{{ t("interviewChatComponent.completeMessage") }}</p>
     </div>
   </div>
 </template>

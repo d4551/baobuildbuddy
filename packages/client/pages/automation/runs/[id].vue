@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { useAutomation } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";
@@ -58,9 +59,9 @@ const formattedOutput = computed(() =>
     : t("automation.runDetail.noOutputPayload"),
 );
 const breadcrumbs = computed(() => [
-  { label: "Dashboard", to: "/" },
-  { label: "Automation Runs", to: "/automation/runs" },
-  { label: run.value?.id || runId.value || "Run Detail" },
+  { label: t("automation.runDetail.breadcrumbs.dashboard"), to: APP_ROUTES.dashboard },
+  { label: t("automation.runDetail.breadcrumbs.runs"), to: APP_ROUTES.automationRuns },
+  { label: run.value?.id || runId.value || t("automation.runDetail.breadcrumbs.detailFallback") },
 ]);
 </script>
 

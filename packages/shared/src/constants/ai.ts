@@ -224,6 +224,145 @@ export const AI_CHAT_ROUTE_DOMAIN_RULES: ReadonlyArray<{
 export const AI_CHAT_DEFAULT_DOMAIN: AIChatContextDomain = "general";
 
 /**
+ * i18n translation keys for floating chat domain badges by contextual domain.
+ */
+export const AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS: Readonly<
+  Record<AIChatContextDomain, string>
+> = {
+  resume: "floatingChat.contextDomain.resume",
+  job_search: "floatingChat.contextDomain.jobSearch",
+  interview: "floatingChat.contextDomain.interview",
+  portfolio: "floatingChat.contextDomain.portfolio",
+  skills: "floatingChat.contextDomain.skills",
+  automation: "floatingChat.contextDomain.automation",
+  general: "floatingChat.contextDomain.general",
+};
+
+/**
+ * i18n translation keys for floating chat suggested prompts by contextual domain.
+ */
+export const AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS: Readonly<Record<AIChatContextDomain, string>> = {
+  resume: "floatingChat.prompts.resume",
+  job_search: "floatingChat.prompts.jobSearch",
+  interview: "floatingChat.prompts.interview",
+  portfolio: "floatingChat.prompts.portfolio",
+  skills: "floatingChat.prompts.skills",
+  automation: "floatingChat.prompts.automation",
+  general: "floatingChat.prompts.general",
+};
+
+/**
+ * i18n translation key for focused-entity prompt suggestion in floating chat.
+ */
+export const AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY = "floatingChat.prompts.focusedEntity";
+
+/**
+ * Default BCP 47 locale used by browser voice APIs when no UI locale is provided.
+ */
+export const AI_CHAT_VOICE_DEFAULT_LOCALE = "en-US";
+
+/**
+ * Default auto-read preference for assistant replies in chat surfaces.
+ */
+export const AI_CHAT_VOICE_AUTO_SPEAK_DEFAULT = false;
+
+/**
+ * Persisted voice identifier used for AI chat text-to-speech playback.
+ * Empty string keeps browser/system default voice selection.
+ */
+export const AI_CHAT_VOICE_DEFAULT_ID = "";
+
+/**
+ * Canonical voice error codes surfaced to chat UI and i18n layers.
+ */
+export const AI_CHAT_VOICE_ERROR_CODES = {
+  unsupportedRecognition: "unsupportedRecognition",
+  unsupportedSynthesis: "unsupportedSynthesis",
+  startFailed: "startFailed",
+  noSpeech: "noSpeech",
+  aborted: "aborted",
+  audioCapture: "audioCapture",
+  network: "network",
+  notAllowed: "notAllowed",
+  serviceNotAllowed: "serviceNotAllowed",
+  badGrammar: "badGrammar",
+  languageNotSupported: "languageNotSupported",
+  canceled: "canceled",
+  interrupted: "interrupted",
+  audioBusy: "audioBusy",
+  audioHardware: "audioHardware",
+  synthesisUnavailable: "synthesisUnavailable",
+  synthesisFailed: "synthesisFailed",
+  languageUnavailable: "languageUnavailable",
+  voiceUnavailable: "voiceUnavailable",
+  textTooLong: "textTooLong",
+  invalidArgument: "invalidArgument",
+  unknown: "unknown",
+} as const;
+
+export type AIChatVoiceErrorCode =
+  (typeof AI_CHAT_VOICE_ERROR_CODES)[keyof typeof AI_CHAT_VOICE_ERROR_CODES];
+
+/**
+ * Canonical i18n message keys for each voice error code.
+ */
+export const AI_CHAT_VOICE_ERROR_MESSAGE_KEYS: Readonly<Record<AIChatVoiceErrorCode, string>> = {
+  unsupportedRecognition: "aiChatCommon.voice.errors.unsupportedRecognition",
+  unsupportedSynthesis: "aiChatCommon.voice.errors.unsupportedSynthesis",
+  startFailed: "aiChatCommon.voice.errors.startFailed",
+  noSpeech: "aiChatCommon.voice.errors.noSpeech",
+  aborted: "aiChatCommon.voice.errors.aborted",
+  audioCapture: "aiChatCommon.voice.errors.audioCapture",
+  network: "aiChatCommon.voice.errors.network",
+  notAllowed: "aiChatCommon.voice.errors.notAllowed",
+  serviceNotAllowed: "aiChatCommon.voice.errors.serviceNotAllowed",
+  badGrammar: "aiChatCommon.voice.errors.badGrammar",
+  languageNotSupported: "aiChatCommon.voice.errors.languageNotSupported",
+  canceled: "aiChatCommon.voice.errors.canceled",
+  interrupted: "aiChatCommon.voice.errors.interrupted",
+  audioBusy: "aiChatCommon.voice.errors.audioBusy",
+  audioHardware: "aiChatCommon.voice.errors.audioHardware",
+  synthesisUnavailable: "aiChatCommon.voice.errors.synthesisUnavailable",
+  synthesisFailed: "aiChatCommon.voice.errors.synthesisFailed",
+  languageUnavailable: "aiChatCommon.voice.errors.languageUnavailable",
+  voiceUnavailable: "aiChatCommon.voice.errors.voiceUnavailable",
+  textTooLong: "aiChatCommon.voice.errors.textTooLong",
+  invalidArgument: "aiChatCommon.voice.errors.invalidArgument",
+  unknown: "aiChatCommon.voice.errors.unknown",
+};
+
+/**
+ * Raw browser speech-recognition errors mapped to canonical voice error codes.
+ */
+export const AI_CHAT_VOICE_RECOGNITION_ERROR_CODE_MAP = {
+  "no-speech": AI_CHAT_VOICE_ERROR_CODES.noSpeech,
+  aborted: AI_CHAT_VOICE_ERROR_CODES.aborted,
+  "audio-capture": AI_CHAT_VOICE_ERROR_CODES.audioCapture,
+  network: AI_CHAT_VOICE_ERROR_CODES.network,
+  "not-allowed": AI_CHAT_VOICE_ERROR_CODES.notAllowed,
+  "service-not-allowed": AI_CHAT_VOICE_ERROR_CODES.serviceNotAllowed,
+  "bad-grammar": AI_CHAT_VOICE_ERROR_CODES.badGrammar,
+  "language-not-supported": AI_CHAT_VOICE_ERROR_CODES.languageNotSupported,
+} as const;
+
+/**
+ * Raw browser speech-synthesis errors mapped to canonical voice error codes.
+ */
+export const AI_CHAT_VOICE_SYNTHESIS_ERROR_CODE_MAP = {
+  canceled: AI_CHAT_VOICE_ERROR_CODES.canceled,
+  interrupted: AI_CHAT_VOICE_ERROR_CODES.interrupted,
+  "audio-busy": AI_CHAT_VOICE_ERROR_CODES.audioBusy,
+  "audio-hardware": AI_CHAT_VOICE_ERROR_CODES.audioHardware,
+  network: AI_CHAT_VOICE_ERROR_CODES.network,
+  "synthesis-unavailable": AI_CHAT_VOICE_ERROR_CODES.synthesisUnavailable,
+  "synthesis-failed": AI_CHAT_VOICE_ERROR_CODES.synthesisFailed,
+  "language-unavailable": AI_CHAT_VOICE_ERROR_CODES.languageUnavailable,
+  "voice-unavailable": AI_CHAT_VOICE_ERROR_CODES.voiceUnavailable,
+  "text-too-long": AI_CHAT_VOICE_ERROR_CODES.textTooLong,
+  "invalid-argument": AI_CHAT_VOICE_ERROR_CODES.invalidArgument,
+} as const;
+
+/**
  * Infers AI chat domain from route path.
  *
  * @param path Route path.

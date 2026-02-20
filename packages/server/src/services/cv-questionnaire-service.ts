@@ -1,4 +1,5 @@
 import type { ResumeData } from "@bao/shared";
+import { isRecord } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
@@ -16,9 +17,6 @@ export interface CvQuestionnaireConfig {
   studioName?: string;
   experienceLevel?: string;
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
 
 const isCvQuestion = (value: unknown): value is CvQuestion =>
   isRecord(value) &&

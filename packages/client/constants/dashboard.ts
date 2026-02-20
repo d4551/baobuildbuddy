@@ -23,13 +23,23 @@ type DashboardTopLevelKey =
   | "loadErrorFallback"
   | "setupCtaLabel"
   | "onboardingChecklistTitle"
-  | "metricsSummaryLabel";
+  | "metricsSummaryLabel"
+  | "pipelineTitle"
+  | "pipelineDescription"
+  | "pipelineAria"
+  | "pipelineNextStepLabel";
 type DashboardCopyKey = `dashboard.${DashboardTopLevelKey}`;
-type DashboardHeroPhraseKey = `dashboard.heroPhrases.${keyof DashboardRootSchema["heroPhrases"] & string}`;
-type DashboardOnboardingLabelKey = `dashboard.onboarding.${keyof DashboardRootSchema["onboarding"] & string}`;
+type DashboardHeroPhraseKey =
+  `dashboard.heroPhrases.${keyof DashboardRootSchema["heroPhrases"] & string}`;
+type DashboardOnboardingLabelKey =
+  `dashboard.onboarding.${keyof DashboardRootSchema["onboarding"] & string}`;
 type DashboardStatLabelKey = `dashboard.stats.${keyof DashboardRootSchema["stats"] & string}`;
 type DashboardQuickActionLabelKey =
   `dashboard.quickActions.actions.${keyof DashboardRootSchema["quickActions"]["actions"] & string}`;
+type DashboardPipelineStepLabelKey =
+  `dashboard.pipeline.steps.${keyof DashboardRootSchema["pipeline"]["steps"] & string}`;
+type DashboardPipelineStatusLabelKey =
+  `dashboard.pipeline.status.${keyof DashboardRootSchema["pipeline"]["status"] & string}`;
 type DashboardRelativeTimeLabelKey =
   `dashboard.relativeTime.${keyof DashboardRootSchema["relativeTime"] & string}`;
 type DashboardWelcomeHeadingKey =
@@ -85,6 +95,53 @@ export interface DashboardStatCard {
 }
 
 /**
+ * Dashboard end-to-end workflow pipeline metadata.
+ */
+export interface DashboardPipelineStep {
+  /** Stable item identifier for keyed rendering and status mapping. */
+  readonly id: "search" | "scrape" | "customize" | "apply" | "gamify";
+  /** Translation key for visible step label. */
+  readonly labelKey: DashboardPipelineStepLabelKey;
+  /** Route destination for this step. */
+  readonly to: string;
+}
+
+/**
+ * Workflow status for each pipeline step.
+ */
+export type DashboardPipelineStatus = "complete" | "inProgress" | "pending";
+
+/**
+ * Pipeline snapshot values used to compute workflow completion state.
+ */
+export interface DashboardPipelineSnapshot {
+  /** Saved jobs count from dashboard statistics. */
+  readonly savedJobs: number;
+  /** Applied jobs count from dashboard statistics. */
+  readonly appliedJobs: number;
+  /** Resume count from dashboard statistics. */
+  readonly resumeCount: number;
+  /** Cover-letter count from dashboard statistics. */
+  readonly coverLetterCount: number;
+  /** Total automation runs from dashboard statistics. */
+  readonly automationRuns: number;
+  /** Successful automation runs from dashboard statistics. */
+  readonly successfulAutomationRuns: number;
+  /** Skill mappings count from dashboard statistics. */
+  readonly mappedSkillsCount: number;
+  /** Current XP value from dashboard statistics. */
+  readonly gamificationXp: number;
+}
+
+/**
+ * Pipeline step model with resolved status for UI rendering.
+ */
+export interface DashboardPipelineStepViewModel extends DashboardPipelineStep {
+  /** Computed workflow status for this step. */
+  readonly status: DashboardPipelineStatus;
+}
+
+/**
  * Translation keys used by the dashboard page.
  */
 export const DASHBOARD_COPY_KEYS = {
@@ -104,6 +161,10 @@ export const DASHBOARD_COPY_KEYS = {
   setupCtaLabel: "dashboard.setupCtaLabel",
   onboardingChecklistTitle: "dashboard.onboardingChecklistTitle",
   metricsSummaryLabel: "dashboard.metricsSummaryLabel",
+  pipelineTitle: "dashboard.pipelineTitle",
+  pipelineDescription: "dashboard.pipelineDescription",
+  pipelineAria: "dashboard.pipelineAria",
+  pipelineNextStepLabel: "dashboard.pipelineNextStepLabel",
 } as const satisfies Record<DashboardTopLevelKey, DashboardCopyKey>;
 
 /**
@@ -149,6 +210,15 @@ export const DASHBOARD_A11Y_KEYS = {
 >;
 
 /**
+ * Translation keys for pipeline status badges.
+ */
+export const DASHBOARD_PIPELINE_STATUS_KEYS = {
+  complete: "dashboard.pipeline.status.complete",
+  inProgress: "dashboard.pipeline.status.inProgress",
+  pending: "dashboard.pipeline.status.pending",
+} as const satisfies Record<"complete" | "inProgress" | "pending", DashboardPipelineStatusLabelKey>;
+
+/**
  * Translation key for formatting challenge XP reward labels.
  */
 export const DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY =
@@ -163,7 +233,10 @@ export const DASHBOARD_ERROR_KEYS = {
   gamificationLoadFallback: "dashboard.errors.gamificationLoadFallback",
   challengesLoadFallback: "dashboard.errors.challengesLoadFallback",
 } as const satisfies Record<
-  "profileLoadFallback" | "metricsLoadFallback" | "gamificationLoadFallback" | "challengesLoadFallback",
+  | "profileLoadFallback"
+  | "metricsLoadFallback"
+  | "gamificationLoadFallback"
+  | "challengesLoadFallback",
   DashboardErrorKey
 >;
 
@@ -202,6 +275,60 @@ export const DASHBOARD_ONBOARDING_STEPS: readonly DashboardOnboardingStep[] = [
   { id: "resume", labelKey: "dashboard.onboarding.resume", to: APP_ROUTES.resume },
   { id: "jobs", labelKey: "dashboard.onboarding.jobs", to: APP_ROUTES.jobs },
 ] as const;
+
+/**
+ * End-to-end career workflow sequence shown on dashboard.
+ */
+export const DASHBOARD_PIPELINE_STEPS: readonly DashboardPipelineStep[] = [
+  { id: "search", labelKey: "dashboard.pipeline.steps.search", to: APP_ROUTES.jobs },
+  { id: "scrape", labelKey: "dashboard.pipeline.steps.scrape", to: APP_ROUTES.automationScraper },
+  { id: "customize", labelKey: "dashboard.pipeline.steps.customize", to: APP_ROUTES.resume },
+  { id: "apply", labelKey: "dashboard.pipeline.steps.apply", to: APP_ROUTES.automationJobApply },
+  { id: "gamify", labelKey: "dashboard.pipeline.steps.gamify", to: APP_ROUTES.gamification },
+] as const;
+
+/**
+ * Resolves pipeline step completion using cross-feature dashboard statistics.
+ *
+ * @param snapshot Dashboard metrics snapshot.
+ * @returns Pipeline steps with computed status values.
+ */
+export function resolveDashboardPipelineSteps(
+  snapshot: DashboardPipelineSnapshot,
+): readonly DashboardPipelineStepViewModel[] {
+  const completion = {
+    search: snapshot.savedJobs > 0 || snapshot.appliedJobs > 0,
+    scrape: snapshot.automationRuns > 0,
+    customize:
+      snapshot.resumeCount > 0 && (snapshot.coverLetterCount > 0 || snapshot.mappedSkillsCount > 0),
+    apply: snapshot.appliedJobs > 0 || snapshot.successfulAutomationRuns > 0,
+    gamify: snapshot.gamificationXp > 0,
+  } as const;
+
+  const firstIncompleteStep =
+    DASHBOARD_PIPELINE_STEPS.find((step) => !completion[step.id])?.id ?? null;
+
+  return DASHBOARD_PIPELINE_STEPS.map((step) => {
+    if (completion[step.id]) {
+      return {
+        ...step,
+        status: "complete",
+      };
+    }
+
+    if (step.id === firstIncompleteStep) {
+      return {
+        ...step,
+        status: "inProgress",
+      };
+    }
+
+    return {
+      ...step,
+      status: "pending",
+    };
+  });
+}
 
 const QUICK_ACTION_REGISTRY = {
   jobs: {

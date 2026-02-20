@@ -1,8 +1,20 @@
-import { generateId, type SkillCategory, type SkillEvidence, type SkillMapping } from "@bao/shared";
-import { desc } from "drizzle-orm";
-import { eq } from "drizzle-orm";
+import {
+  SKILL_CATEGORY_IDS,
+  SKILL_DEMAND_LEVEL_IDS,
+  SKILL_EVIDENCE_TYPE_IDS,
+  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
+  generateId,
+  isRecord,
+  parseJson,
+  type SkillCategory,
+  type SkillEvidence,
+  type SkillMapping,
+} from "@bao/shared";
+import { desc, eq } from "drizzle-orm";
 import { Elysia, status, t } from "elysia";
+import { z } from "zod";
 import { db } from "../db/client";
+import { skillAnalysisRateLimit } from "../utils/rate-limit";
 import { settings } from "../db/schema/settings";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { AIService } from "../services/ai/ai-service";
@@ -13,61 +25,39 @@ type DemandLevel = SkillMapping["demandLevel"];
 type SkillEvidenceType = SkillEvidence["type"];
 type SkillEvidenceVerificationStatus = SkillEvidence["verificationStatus"];
 
-const SKILL_CATEGORIES: readonly SkillCategory[] = [
-  "leadership",
-  "community",
-  "technical",
-  "creative",
-  "analytical",
-  "communication",
-  "project_management",
-];
-
-const DEMAND_LEVELS: readonly DemandLevel[] = ["high", "medium", "low"];
-
-const SKILL_EVIDENCE_TYPES: readonly SkillEvidenceType[] = [
-  "clip",
-  "stats",
-  "community",
-  "achievement",
-  "document",
-  "portfolio_piece",
-  "testimonial",
-  "certificate",
-];
-
-const SKILL_EVIDENCE_VERIFICATION_STATUSES: readonly SkillEvidenceVerificationStatus[] = [
-  "pending",
-  "verified",
-  "rejected",
-];
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
 const asNonEmptyString = (value: unknown): string | null =>
   typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 
+const isSkillCategory = (value: unknown): value is SkillCategory =>
+  typeof value === "string" && SKILL_CATEGORY_IDS.some((categoryId) => categoryId === value);
+
+const isDemandLevel = (value: unknown): value is DemandLevel =>
+  typeof value === "string" &&
+  SKILL_DEMAND_LEVEL_IDS.some((demandLevelId) => demandLevelId === value);
+
+const isSkillEvidenceType = (value: unknown): value is SkillEvidenceType =>
+  typeof value === "string" &&
+  SKILL_EVIDENCE_TYPE_IDS.some((evidenceTypeId) => evidenceTypeId === value);
+
+const isSkillEvidenceVerificationStatus = (
+  value: unknown,
+): value is SkillEvidenceVerificationStatus =>
+  typeof value === "string" &&
+  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS.some(
+    (verificationStatusId) => verificationStatusId === value,
+  );
+
 const normalizeCategory = (value: unknown): SkillCategory =>
-  typeof value === "string" && SKILL_CATEGORIES.includes(value as SkillCategory)
-    ? (value as SkillCategory)
-    : "technical";
+  isSkillCategory(value) ? value : "technical";
 
 const normalizeDemandLevel = (value: unknown): DemandLevel =>
-  typeof value === "string" && DEMAND_LEVELS.includes(value as DemandLevel)
-    ? (value as DemandLevel)
-    : "medium";
+  isDemandLevel(value) ? value : "medium";
 
 const normalizeEvidenceType = (value: unknown): SkillEvidenceType =>
-  typeof value === "string" && SKILL_EVIDENCE_TYPES.includes(value as SkillEvidenceType)
-    ? (value as SkillEvidenceType)
-    : "document";
+  isSkillEvidenceType(value) ? value : "document";
 
 const normalizeEvidenceVerificationStatus = (value: unknown): SkillEvidenceVerificationStatus =>
-  typeof value === "string" &&
-  SKILL_EVIDENCE_VERIFICATION_STATUSES.includes(value as SkillEvidenceVerificationStatus)
-    ? (value as SkillEvidenceVerificationStatus)
-    : "pending";
+  isSkillEvidenceVerificationStatus(value) ? value : "pending";
 
 const normalizeSkillEvidence = (value: unknown): SkillEvidence[] => {
   if (!Array.isArray(value)) return [];
@@ -105,6 +95,7 @@ const normalizeStringArray = (value: unknown): string[] =>
     : [];
 
 export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
+  .use(skillAnalysisRateLimit)
   .get(
     "/mappings",
     async ({ query }) => {
@@ -307,14 +298,15 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
           recommendations: [],
         };
 
-        try {
-          const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            analysisResult = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+        const jsonMatch = response.content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = parseJson(jsonMatch[0], z.record(z.unknown()));
+          if (parsed) {
+            analysisResult = parsed;
           } else {
             analysisResult.recommendations = [response.content];
           }
-        } catch {
+        } else {
           analysisResult.recommendations = [response.content];
         }
 
@@ -331,8 +323,8 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
             const gameExpression = asNonEmptyString(suggestedMapping.gameExpression);
             const transferableSkill = asNonEmptyString(suggestedMapping.transferableSkill);
             if (gameExpression && transferableSkill) {
-              try {
-                await skillMappingService.createMapping({
+              await skillMappingService
+                .createMapping({
                   gameExpression,
                   transferableSkill,
                   industryApplications: normalizeStringArray(suggestedMapping.industryApplications),
@@ -346,10 +338,10 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
                   demandLevel: normalizeDemandLevel(suggestedMapping.demandLevel),
                   verified: false,
                   aiGenerated: true,
+                })
+                .catch((error) => {
+                  console.error("Failed to auto-create mapping:", error);
                 });
-              } catch (error) {
-                console.error("Failed to auto-create mapping:", error);
-              }
             }
           }
         }

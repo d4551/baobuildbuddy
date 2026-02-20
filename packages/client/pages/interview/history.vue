@@ -6,7 +6,7 @@ import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { $toast } = useNuxtApp();
 const { sessions, loading, fetchSessions, getSession } = useInterview();
 
@@ -96,7 +96,7 @@ async function closeDetail(): Promise<void> {
 }
 
 function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString();
+  return new Date(value).toLocaleDateString(locale.value);
 }
 
 function formatDuration(value: number | null): string {
@@ -145,15 +145,15 @@ function getTimelineLineClass(score: number): string {
                     :aria-label="t('interviewHistory.tableAriaLabel')"
                     @click="historyView = 'table'"
                   >
-                    Table
+                    {{ t("interviewHistory.viewModes.table") }}
                   </button>
                   <button
                     class="join-item btn btn-sm"
                     :class="{ 'btn-active': historyView === 'timeline' }"
-                    aria-label="Timeline view"
+                    :aria-label="t('interviewHistory.timelineAriaLabel')"
                     @click="historyView = 'timeline'"
                   >
-                    Timeline
+                    {{ t("interviewHistory.viewModes.timeline") }}
                   </button>
                 </div>
                 <select

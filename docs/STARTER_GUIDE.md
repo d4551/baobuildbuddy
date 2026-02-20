@@ -74,7 +74,14 @@ Then open:
 2. Cover letters: `/cover-letter`
 3. Job search: `/jobs`
 4. Interview practice: `/interview`
-5. Automation run history: `/automation/runs`
+5. Voice chat:
+   - Floating assistant on every page (bottom-right bubble)
+   - Full chat page at `/ai/chat`
+   - Optional voice-output selection and auto-read toggles in both chat surfaces
+6. Automation job apply + scheduling: `/automation/job-apply`
+7. Automation email response: `/automation/email`
+8. Automation run history: `/automation/runs`
+9. Pipeline gamification: searching jobs, running scrapers, and resume customization award XP in flow
 
 ## 7) How the system flow works
 
@@ -85,7 +92,12 @@ flowchart LR
   Start --> UI["Open Nuxt UI"]
   UI --> Settings["Configure AI in Settings"]
   Settings --> Features["Use resume/jobs/interview/automation features"]
+  Features --> Voice["Use voice chat in floating chat + /ai/chat"]
+  Voice --> VoiceSelect["Use shared voice controls (input/playback/auto-read)"]
+  Features --> Email["Generate email responses via /automation/email"]
+  Features --> Schedule["Schedule job apply runs via /automation/job-apply"]
   Features --> Automation["Automation writes runs + screenshots"]
+  Features --> XP["Pipeline actions award XP (search/scrape/resume)"]
 ```
 
 ## 8) If something fails

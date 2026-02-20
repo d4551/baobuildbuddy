@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 const props = defineProps<{
   modelValue: {
     name?: string;
@@ -14,6 +16,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   "update:modelValue": [value: typeof props.modelValue];
 }>();
+const { t } = useI18n();
 
 const localValue = ref({ ...props.modelValue });
 
@@ -36,84 +39,84 @@ watch(
 
 <template>
   <fieldset class="fieldset border border-base-300 rounded-lg p-6">
-    <legend class="fieldset-legend">Personal Information</legend>
+    <legend class="fieldset-legend">{{ t("resumeComponentPersonalInfo.title") }}</legend>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label for="personal-name" class="label">Full Name</label>
+        <label for="personal-name" class="label">{{ t("resumeComponentPersonalInfo.nameLabel") }}</label>
         <input
           id="personal-name"
           v-model="localValue.name"
           type="text"
-          placeholder="John Doe"
+          :placeholder="t('resumeComponentPersonalInfo.namePlaceholder')"
           class="input input-bordered"
-          aria-label="John Doe"/>
+          :aria-label="t('resumeComponentPersonalInfo.nameAria')"/>
       </div>
 
       <div>
-        <label for="personal-email" class="label">Email</label>
+        <label for="personal-email" class="label">{{ t("resumeComponentPersonalInfo.emailLabel") }}</label>
         <input
           id="personal-email"
           v-model="localValue.email"
           type="email"
-          placeholder="john@example.com"
+          :placeholder="t('resumeComponentPersonalInfo.emailPlaceholder')"
           class="input input-bordered"
-          aria-label="john@example.com"/>
+          :aria-label="t('resumeComponentPersonalInfo.emailAria')"/>
       </div>
 
       <div>
-        <label for="personal-phone" class="label">Phone</label>
+        <label for="personal-phone" class="label">{{ t("resumeComponentPersonalInfo.phoneLabel") }}</label>
         <input
           id="personal-phone"
           v-model="localValue.phone"
           type="tel"
-          placeholder="+1 (555) 123-4567"
+          :placeholder="t('resumeComponentPersonalInfo.phonePlaceholder')"
           class="input input-bordered"
-          aria-label="+1 (555) 123-4567"/>
+          :aria-label="t('resumeComponentPersonalInfo.phoneAria')"/>
       </div>
 
       <div>
-        <label for="personal-location" class="label">Location</label>
+        <label for="personal-location" class="label">{{ t("resumeComponentPersonalInfo.locationLabel") }}</label>
         <input
           id="personal-location"
           v-model="localValue.location"
           type="text"
-          placeholder="San Francisco, CA"
+          :placeholder="t('resumeComponentPersonalInfo.locationPlaceholder')"
           class="input input-bordered"
-          aria-label="San Francisco, CA"/>
+          :aria-label="t('resumeComponentPersonalInfo.locationAria')"/>
       </div>
 
       <div>
-        <label for="personal-website" class="label">Website</label>
+        <label for="personal-website" class="label">{{ t("resumeComponentPersonalInfo.websiteLabel") }}</label>
         <input
           id="personal-website"
           v-model="localValue.website"
           type="url"
-          placeholder="https://yoursite.com"
+          :placeholder="t('resumeComponentPersonalInfo.websitePlaceholder')"
           class="input input-bordered"
-          aria-label="https://yoursite.com"/>
+          :aria-label="t('resumeComponentPersonalInfo.websiteAria')"/>
       </div>
 
       <div>
-        <label for="personal-linkedin" class="label">LinkedIn</label>
+        <label for="personal-linkedin" class="label">{{ t("resumeComponentPersonalInfo.linkedinLabel") }}</label>
         <input
           id="personal-linkedin"
           v-model="localValue.linkedin"
           type="url"
-          placeholder="https://linkedin.com/in/johndoe"
+          :placeholder="t('resumeComponentPersonalInfo.linkedinPlaceholder')"
           class="input input-bordered"
-          aria-label="https://linkedin.com/in/johndoe"/>
+          :aria-label="t('resumeComponentPersonalInfo.linkedinAria')"/>
       </div>
 
       <div class="md:col-span-2">
-        <label for="personal-github" class="label">GitHub</label>
+        <label for="personal-github" class="label">{{ t("resumeComponentPersonalInfo.githubLabel") }}</label>
         <input
           id="personal-github"
           v-model="localValue.github"
           type="url"
-          placeholder="https://github.com/johndoe"
+          :placeholder="t('resumeComponentPersonalInfo.githubPlaceholder')"
           class="input input-bordered"
-          aria-label="https://github.com/johndoe"/>
+          :aria-label="t('resumeComponentPersonalInfo.githubAria')"/>
       </div>
     </div>
   </fieldset>

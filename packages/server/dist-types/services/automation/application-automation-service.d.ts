@@ -5,6 +5,13 @@ interface JobApplyPayload {
     jobId?: string;
     customAnswers?: Record<string, string>;
 }
+type EmailResponseTone = "professional" | "friendly" | "concise";
+interface EmailResponsePayload {
+    subject: string;
+    message: string;
+    sender?: string;
+    tone?: EmailResponseTone;
+}
 interface AutomationProgress {
     type: string;
     step?: number;
@@ -45,10 +52,17 @@ export declare class AutomationRunNotFoundError extends Error {
  * Contract-driven job application automation workflow service.
  */
 export declare class ApplicationAutomationService {
+    private readonly scheduledRunTimers;
+    private schedulerRecoveryInFlight;
+    constructor();
     /**
      * Resolve automation settings from persisted values and apply safe defaults.
      */
     private loadAutomationSettings;
+    /**
+     * Clamp configured max-concurrency to safe runtime bounds.
+     */
+    private resolveMaxConcurrentRuns;
     /**
      * Resolve AI service for smart selector mapping when enabled.
      */
@@ -57,6 +71,18 @@ export declare class ApplicationAutomationService {
      * Normalize and validate the inbound execution payload.
      */
     private normalizePayload;
+    /**
+     * Validate linked resume/cover letter entities before run creation.
+     */
+    private assertJobApplyDependencies;
+    /**
+     * Normalize and validate an email-response automation payload.
+     */
+    private normalizeEmailResponsePayload;
+    /**
+     * Normalize a scheduled run datetime with strict bounds.
+     */
+    private normalizeScheduledRunAt;
     /**
      * Resolve the output directory for a single automation run.
      */
@@ -87,6 +113,51 @@ export declare class ApplicationAutomationService {
     createJobApplyRun(payload: JobApplyPayload, options?: {
         includeActionInPayload?: boolean;
     }): Promise<string>;
+    /**
+     * Parse schedule metadata from persisted run input.
+     */
+    private parseScheduledRunMetadata;
+    /**
+     * Parse custom-answers payload from persisted JSON.
+     */
+    private parseCustomAnswers;
+    /**
+     * Rebuild a job-apply payload from persisted automation run input.
+     */
+    private parseScheduledJobApplyPayload;
+    /**
+     * Queue a scheduled run in-memory and execute it when due.
+     */
+    private queueScheduledRun;
+    /**
+     * Clear a queued scheduled run timer.
+     */
+    private clearScheduledRunTimer;
+    /**
+     * Load pending scheduled runs after process start and queue any future executions.
+     */
+    private restoreScheduledRuns;
+    /**
+     * Schedule a new job-apply run for future execution.
+     */
+    createScheduledJobApplyRun(payload: JobApplyPayload, runAt: string): Promise<{
+        runId: string;
+        scheduledFor: string;
+    }>;
+    /**
+     * Execute a queued scheduled run, retrying when concurrency is saturated.
+     */
+    private executeScheduledRun;
+    /**
+     * Run an AI-assisted email response and persist output as an automation run.
+     */
+    runEmailResponse(payload: EmailResponsePayload): Promise<{
+        runId: string;
+        status: "success";
+        reply: string;
+        provider: string;
+        model: string;
+    }>;
     /**
      * Update run progress metrics from script progress events.
      */

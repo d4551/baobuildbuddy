@@ -2,24 +2,67 @@
  * Skill mapping types for gaming-to-career translation
  */
 
-export type SkillCategory =
-  | "leadership"
-  | "community"
-  | "technical"
-  | "creative"
-  | "analytical"
-  | "communication"
-  | "project_management";
+/**
+ * Canonical skill category identifiers shared by client and server.
+ */
+export const SKILL_CATEGORY_IDS = [
+  "leadership",
+  "community",
+  "technical",
+  "creative",
+  "analytical",
+  "communication",
+  "project_management",
+] as const;
 
-export type EvidenceType =
-  | "clip"
-  | "stats"
-  | "community"
-  | "achievement"
-  | "document"
-  | "portfolio_piece"
-  | "testimonial"
-  | "certificate";
+/**
+ * Skill category identifier.
+ */
+export type SkillCategory = (typeof SKILL_CATEGORY_IDS)[number];
+
+/**
+ * Canonical evidence type identifiers shared by client and server.
+ */
+export const SKILL_EVIDENCE_TYPE_IDS = [
+  "clip",
+  "stats",
+  "community",
+  "achievement",
+  "document",
+  "portfolio_piece",
+  "testimonial",
+  "certificate",
+] as const;
+
+/**
+ * Supported evidence type identifier.
+ */
+export type EvidenceType = (typeof SKILL_EVIDENCE_TYPE_IDS)[number];
+
+/**
+ * Canonical demand-level identifiers for skill mappings.
+ */
+export const SKILL_DEMAND_LEVEL_IDS = ["high", "medium", "low"] as const;
+
+/**
+ * Demand-level identifier for career relevance.
+ */
+export type SkillDemandLevel = (typeof SKILL_DEMAND_LEVEL_IDS)[number];
+
+/**
+ * Canonical evidence verification status identifiers.
+ */
+export const SKILL_EVIDENCE_VERIFICATION_STATUS_IDS = [
+  "pending",
+  "verified",
+  "rejected",
+] as const;
+
+/**
+ * Evidence verification state.
+ */
+export type SkillEvidenceVerificationStatus =
+  (typeof SKILL_EVIDENCE_VERIFICATION_STATUS_IDS)[number];
 
 export interface GameSkill {
   id: string;
@@ -39,7 +82,7 @@ export interface SkillMapping {
   evidence: SkillEvidence[];
   confidence: number;
   category: SkillCategory;
-  demandLevel: "high" | "medium" | "low";
+  demandLevel: SkillDemandLevel;
   verified: boolean;
   aiGenerated?: boolean;
 }
@@ -50,7 +93,7 @@ export interface SkillEvidence {
   title: string;
   description: string;
   url?: string;
-  verificationStatus: "pending" | "verified" | "rejected";
+  verificationStatus: SkillEvidenceVerificationStatus;
 }
 
 export interface CareerPathway {

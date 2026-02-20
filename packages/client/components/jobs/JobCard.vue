@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { APP_ROUTE_BUILDERS } from "@bao/shared";
+import { useI18n } from "vue-i18n";
+
 const props = defineProps<{
   job: {
     id: string;
@@ -18,6 +21,7 @@ const emit = defineEmits<{
   unsave: [];
 }>();
 
+const { t } = useI18n();
 const isSaved = ref(false);
 
 const visibleTechs = computed(() => props.job.technologies.slice(0, 5));
@@ -36,11 +40,11 @@ const relativeTime = computed(() => {
   const diffTime = Math.abs(now.getTime() - posted.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  return `${Math.floor(diffDays / 30)}mo ago`;
+  if (diffDays === 0) return t("jobCard.relativeTime.today");
+  if (diffDays === 1) return t("jobCard.relativeTime.yesterday");
+  if (diffDays < 7) return t("jobCard.relativeTime.daysAgo", { count: diffDays });
+  if (diffDays < 30) return t("jobCard.relativeTime.weeksAgo", { count: Math.floor(diffDays / 7) });
+  return t("jobCard.relativeTime.monthsAgo", { count: Math.floor(diffDays / 30) });
 });
 
 function toggleSave() {
@@ -49,7 +53,7 @@ function toggleSave() {
 }
 
 function navigateToJob() {
-  navigateTo(`/jobs/${props.job.id}`);
+  navigateTo(APP_ROUTE_BUILDERS.jobDetail(props.job.id));
 }
 </script>
 
@@ -59,6 +63,7 @@ function navigateToJob() {
       class="card-body"
       role="button"
       tabindex="0"
+      :aria-label="t('jobCard.viewAria', { title: job.title, company: job.company })"
       @click="navigateToJob"
       @keydown.enter="navigateToJob"
       @keydown.space.prevent="navigateToJob"
@@ -67,6 +72,8 @@ function navigateToJob() {
         <h2 class="card-title text-lg">{{ job.title }}</h2>
         <button
           class="btn btn-ghost btn-sm btn-circle"
+          :aria-label="isSaved ? t('jobCard.unsaveAria') : t('jobCard.saveAria')"
+          :aria-pressed="isSaved"
           @click.stop="toggleSave"
         >
           <svg

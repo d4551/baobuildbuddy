@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { APP_BRAND } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   message: {
@@ -9,6 +10,7 @@ const props = defineProps<{
   };
 }>();
 
+const { t } = useI18n();
 const isAssistant = computed(() => props.message.role === "assistant");
 const chatClass = computed(() => (isAssistant.value ? "chat-end" : "chat-start"));
 </script>
@@ -28,7 +30,7 @@ const chatClass = computed(() => (isAssistant.value ? "chat-end" : "chat-start")
       </div>
     </div>
     <div class="chat-header mb-1">
-      {{ isAssistant ? APP_BRAND.assistantName : 'You' }}
+      {{ isAssistant ? APP_BRAND.assistantName : t("aiChatCommon.youLabel") }}
       <time v-if="message.timestamp" class="text-xs opacity-50 ml-1">{{ message.timestamp }}</time>
     </div>
     <div class="chat-bubble" :class="isAssistant ? 'chat-bubble-primary' : ''">

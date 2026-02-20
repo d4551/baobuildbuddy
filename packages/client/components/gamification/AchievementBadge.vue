@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 defineProps<{
   achievement: {
     id: string;
@@ -8,6 +10,8 @@ defineProps<{
     unlocked: boolean;
   };
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -19,6 +23,7 @@ defineProps<{
         : 'opacity-50 grayscale'
     ]"
     :title="achievement.description"
+    :aria-label="t('gamificationPage.achievementBadgeAria', { name: achievement.name, description: achievement.description })"
   >
     <div class="card-body p-4">
       <div class="flex items-center gap-3">

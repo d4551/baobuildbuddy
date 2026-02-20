@@ -172,6 +172,7 @@ function resolveEntityContext(
 export function useAI() {
   const api = useApi();
   const route = useRoute();
+  const { $toast } = useNuxtApp();
   const { t } = useI18n();
   const defaultAssistantGreeting = () =>
     t("aiChatCommon.defaultGreeting", { brand: APP_BRAND.name });
@@ -236,6 +237,11 @@ export function useAI() {
     return baseContext;
   }
 
+  function buildCurrentContext(source?: AIChatContextSource): AIChatContext {
+    const resolvedSource = resolveAIChatSource(route.path, source);
+    return buildChatContext(resolvedSource);
+  }
+
   async function sendMessage(content: string, options: SendMessageOptions = {}) {
     loading.value = true;
     streaming.value = true;
@@ -248,8 +254,7 @@ export function useAI() {
       messages.value.push(userMessage);
 
       try {
-        const source = resolveAIChatSource(route.path, options.source);
-        const context = buildChatContext(source);
+        const context = buildCurrentContext(options.source);
         const { data, error } = await api.ai.chat.post({
           message: content,
           sessionId: sessionId.value,
@@ -270,6 +275,7 @@ export function useAI() {
         messages.value.push(assistantMessage);
         return data;
       } catch {
+        $toast.error(t("aiChatCommon.requestErrorToast"));
         messages.value.push({
           role: "assistant",
           content: requestErrorFallback(),
@@ -355,6 +361,7 @@ export function useAI() {
     streaming: readonly(streaming),
     loading: readonly(loading),
     sendMessage,
+    buildCurrentContext,
     analyzeResume,
     generateCoverLetter,
     matchJobs,

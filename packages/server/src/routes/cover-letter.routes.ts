@@ -1,10 +1,14 @@
-import { generateId } from "@bao/shared";
+import {
+  COVER_LETTER_DEFAULT_TEMPLATE,
+  generateId,
+  isCoverLetterTemplate,
+} from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema/cover-letters";
 import { resumes } from "../db/schema/resumes";
-import { settings } from "../db/schema/settings";
+import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts";
@@ -21,6 +25,10 @@ const toJsonRecord = (value: unknown): Record<string, unknown> => {
   return record;
 };
 
+const normalizeTemplate = (value: string | undefined): string => {
+  return isCoverLetterTemplate(value) ? value : COVER_LETTER_DEFAULT_TEMPLATE;
+};
+
 export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
   .get("/", async () => {
     const all = await db.select().from(coverLetters).orderBy(desc(coverLetters.createdAt));
@@ -35,7 +43,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
         position: body.position,
         jobInfo: body.jobInfo || {},
         content: body.content || {},
-        template: body.template || "professional",
+        template: normalizeTemplate(body.template),
       };
 
       await db.insert(coverLetters).values(newCoverLetter);
@@ -126,7 +134,18 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
   .post(
     "/generate",
     async ({ body, set }) => {
-      const settingsRows = await db.select().from(settings);
+      const settingsRows = await db
+        .select()
+        .from(settings)
+        .where(eq(settings.id, DEFAULT_SETTINGS_ID));
+
+      if (settingsRows.length === 0) {
+        set.status = 503;
+        return {
+          error: "AI settings not configured. Please complete setup in Settings.",
+        };
+      }
+
       const aiService = AIService.fromSettings(settingsRows[0]);
 
       let resumeContext = "";
@@ -188,7 +207,7 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
             position: body.position,
             jobInfo: body.jobInfo || {},
             content: content,
-            template: body.template || "professional",
+            template: normalizeTemplate(body.template),
           };
 
           await db.insert(coverLetters).values(newCoverLetter);

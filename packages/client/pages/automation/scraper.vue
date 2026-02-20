@@ -19,7 +19,9 @@ const jobsFetch = useFetch("/api/scraper/jobs/gamedev", {
 
 const { jobs, searchJobs, loading: jobsLoading } = useJobs();
 const router = useRouter();
+const { $toast } = useNuxtApp();
 const { t } = useI18n();
+const { awardForAction } = usePipelineGamification();
 
 const studioState = ref<RunState>("idle");
 const jobState = ref<RunState>("idle");
@@ -93,7 +95,13 @@ async function runStudios() {
 
   studioState.value = "success";
   studioLastRunAt.value = new Date().toISOString();
-  studioMessage.value = t("automation.scraper.messages.studioCompleted");
+  const studioReward = await resolvePipelineReward("scraperStudios");
+  studioMessage.value = studioReward
+    ? t("automation.scraper.messages.studioCompletedWithXp", { xp: studioReward })
+    : t("automation.scraper.messages.studioCompleted");
+  if (studioReward) {
+    $toast.success(t("automation.scraper.toasts.studioReward", { xp: studioReward }));
+  }
 }
 
 async function runJobs() {
@@ -114,11 +122,29 @@ async function runJobs() {
   await refreshJobsFeed();
   jobState.value = "success";
   jobLastRunAt.value = new Date().toISOString();
-  jobMessage.value = t("automation.scraper.messages.jobCompleted");
+  const jobReward = await resolvePipelineReward("scraperJobs");
+  jobMessage.value = jobReward
+    ? t("automation.scraper.messages.jobCompletedWithXp", { xp: jobReward })
+    : t("automation.scraper.messages.jobCompleted");
+  if (jobReward) {
+    $toast.success(t("automation.scraper.toasts.jobReward", { xp: jobReward }));
+  }
 }
 
 function startJobInterview(jobId: string) {
   router.push(buildInterviewJobNavigation(jobId, "scraper"));
+}
+
+async function resolvePipelineReward(
+  action: "scraperStudios" | "scraperJobs",
+): Promise<number | null> {
+  try {
+    const reward = await awardForAction(action);
+    return reward.awarded ? reward.amount : null;
+  } catch {
+    // Scraper completion feedback must remain stable without gamification.
+    return null;
+  }
 }
 </script>
 

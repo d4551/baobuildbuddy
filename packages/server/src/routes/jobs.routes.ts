@@ -1,4 +1,13 @@
-import { generateId } from "@bao/shared";
+import {
+  JOB_EXPERIENCE_LEVELS,
+  JOB_GAME_GENRES,
+  JOB_QUERY_DEFAULT_LIMIT,
+  JOB_QUERY_DEFAULT_PAGE,
+  JOB_QUERY_MAX_LIMIT,
+  JOB_STUDIO_TYPES,
+  JOB_SUPPORTED_PLATFORMS,
+  generateId,
+} from "@bao/shared";
 import { and, desc, eq, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
@@ -20,12 +29,13 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
         studioType,
         platform,
         genre,
-        page = "1",
-        limit = "20",
+        page = String(JOB_QUERY_DEFAULT_PAGE),
+        limit = String(JOB_QUERY_DEFAULT_LIMIT),
       } = query;
 
-      const pageNum = Number.parseInt(page, 10);
-      const limitNum = Number.parseInt(limit, 10);
+      const pageNum = parsePositiveInteger(page, JOB_QUERY_DEFAULT_PAGE);
+      const requestedLimit = parsePositiveInteger(limit, JOB_QUERY_DEFAULT_LIMIT);
+      const limitNum = Math.min(requestedLimit, JOB_QUERY_MAX_LIMIT);
       const offset = (pageNum - 1) * limitNum;
 
       const conditions = [];
@@ -48,11 +58,11 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
         conditions.push(eq(jobs.remote, true));
       }
 
-      if (experienceLevel) {
+      if (experienceLevel && isOneOf(JOB_EXPERIENCE_LEVELS, experienceLevel)) {
         conditions.push(eq(jobs.experienceLevel, experienceLevel));
       }
 
-      if (studioType) {
+      if (studioType && isOneOf(JOB_STUDIO_TYPES, studioType)) {
         conditions.push(eq(jobs.studioType, studioType));
       }
 
@@ -68,10 +78,10 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
 
       // Filter by platform/genre in memory since they're JSON arrays
       let filtered = results;
-      if (platform) {
+      if (platform && isOneOf(JOB_SUPPORTED_PLATFORMS, platform)) {
         filtered = filtered.filter((job) => job.platforms?.includes(platform));
       }
-      if (genre) {
+      if (genre && isOneOf(JOB_GAME_GENRES, genre)) {
         filtered = filtered.filter((job) => job.gameGenres?.includes(genre));
       }
 
@@ -458,3 +468,15 @@ Provide realistic scores based on skills match, experience level alignment, and 
       };
     }
   });
+
+function isOneOf<T extends string>(values: readonly T[], value: string): value is T {
+  return values.some((entry) => entry === value);
+}
+
+function parsePositiveInteger(value: string, fallback: number): number {
+  const parsedValue = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsedValue) || parsedValue < 1) {
+    return fallback;
+  }
+  return parsedValue;
+}

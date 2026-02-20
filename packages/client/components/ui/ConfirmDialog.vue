@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
+import { useI18n } from "vue-i18n";
 
 type ConfirmDialogVariant = "default" | "danger";
 
@@ -12,11 +13,14 @@ const props = withDefaults(
     confirmText?: string;
     cancelText?: string;
     variant?: ConfirmDialogVariant;
+    /** When true, focus the confirm button instead of cancel. Use for destructive flows. */
+    focusPrimary?: boolean;
   }>(),
   {
-    confirmText: "Confirm",
-    cancelText: "Cancel",
+    confirmText: "",
+    cancelText: "",
     variant: "default",
+    focusPrimary: false,
   },
 );
 
@@ -28,10 +32,18 @@ const emit = defineEmits<{
 
 const dialogRef = useTemplateRef<HTMLDialogElement>("confirmDialog");
 const cancelButtonRef = useTemplateRef<HTMLButtonElement>("cancelButton");
+const confirmButtonRef = useTemplateRef<HTMLButtonElement>("confirmButton");
+const { t } = useI18n();
 useFocusTrap(dialogRef, () => props.open);
 
 const confirmButtonClass = computed(() =>
   props.variant === "danger" ? "btn btn-error" : "btn btn-primary",
+);
+const resolvedConfirmText = computed(() =>
+  props.confirmText.trim().length > 0 ? props.confirmText : t("confirmDialog.confirmButton"),
+);
+const resolvedCancelText = computed(() =>
+  props.cancelText.trim().length > 0 ? props.cancelText : t("confirmDialog.cancelButton"),
 );
 
 watch(
@@ -43,7 +55,8 @@ watch(
     if (isOpen && !dialog.open) {
       dialog.showModal();
       nextTick(() => {
-        cancelButtonRef.value?.focus();
+        const target = props.focusPrimary ? confirmButtonRef.value : cancelButtonRef.value;
+        target?.focus();
       });
       return;
     }
@@ -77,21 +90,36 @@ function handleClose(): void {
 </script>
 
 <template>
-  <dialog :id="id" ref="confirmDialog" class="modal modal-bottom sm:modal-middle" @close="handleClose">
+  <dialog
+    :id="id"
+    ref="confirmDialog"
+    class="modal modal-bottom sm:modal-middle"
+    :aria-labelledby="`${id}-title`"
+    :aria-describedby="`${id}-message`"
+    aria-modal="true"
+    role="dialog"
+    @close="handleClose"
+  >
     <div class="modal-box">
-      <h3 class="text-lg font-bold">{{ title }}</h3>
-      <p class="py-4">{{ message }}</p>
+      <h3 :id="`${id}-title`" class="text-lg font-bold">{{ title }}</h3>
+      <p :id="`${id}-message`" class="py-4">{{ message }}</p>
       <div class="modal-action">
-        <button ref="cancelButton" type="button" class="btn" @click="handleCancel">
-          {{ cancelText }}
+        <button ref="cancelButton" type="button" class="btn" :aria-label="resolvedCancelText" @click="handleCancel">
+          {{ resolvedCancelText }}
         </button>
-        <button type="button" :class="confirmButtonClass" @click="handleConfirm">
-          {{ confirmText }}
+        <button
+          ref="confirmButton"
+          type="button"
+          :class="confirmButtonClass"
+          :aria-label="resolvedConfirmText"
+          @click="handleConfirm"
+        >
+          {{ resolvedConfirmText }}
         </button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
-      <button type="button" :aria-label="cancelText" @click="handleCancel"></button>
+      <button type="button" :aria-label="resolvedCancelText" @click="handleCancel"></button>
     </form>
   </dialog>
 </template>

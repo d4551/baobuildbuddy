@@ -1,6 +1,7 @@
 import {
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
+  SPEECH_PROVIDER_OPTIONS,
   AI_PROVIDER_ID_LIST,
   AI_PROVIDER_TEST_STRATEGY_BY_ID,
   DEFAULT_NOTIFICATION_PREFERENCES,
@@ -47,6 +48,7 @@ const GAMING_PORTAL_IDS = [
 
 const LANGUAGE_CODES = APP_LANGUAGE_CODES;
 const AUTOMATION_BROWSER_IDS = AUTOMATION_BROWSER_OPTIONS;
+const SPEECH_PROVIDER_IDS = SPEECH_PROVIDER_OPTIONS;
 
 const companyBoardApiTemplatesBodySchema = t.Object({
   greenhouse: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
@@ -105,6 +107,22 @@ const jobProviderSettingsBodySchema = t.Object({
   companyBoardApiTemplates: companyBoardApiTemplatesBodySchema,
   companyBoards: t.Array(companyBoardConfigBodySchema, { maxItems: 500 }),
   gamingPortals: t.Array(gamingPortalConfigBodySchema, { maxItems: 50 }),
+});
+
+const speechSettingsBodySchema = t.Object({
+  locale: t.String({ minLength: 2, maxLength: 20 }),
+  stt: t.Object({
+    provider: t.Union(SPEECH_PROVIDER_IDS.map((providerId) => t.Literal(providerId))),
+    model: t.String({ minLength: 1, maxLength: MODEL_MAX_LENGTH }),
+    endpoint: t.String({ maxLength: 2000 }),
+  }),
+  tts: t.Object({
+    provider: t.Union(SPEECH_PROVIDER_IDS.map((providerId) => t.Literal(providerId))),
+    model: t.String({ minLength: 1, maxLength: MODEL_MAX_LENGTH }),
+    endpoint: t.String({ maxLength: 2000 }),
+    voice: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+    format: t.Union([t.Literal("mp3"), t.Literal("wav")]),
+  }),
 });
 
 const jsonValueBodySchema = t.Recursive((Self) =>
@@ -328,6 +346,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
             ),
             enableSmartSelectors: t.Optional(t.Boolean()),
             autoSaveScreenshots: t.Optional(t.Boolean()),
+            speech: t.Optional(speechSettingsBodySchema),
             jobProviders: t.Optional(jobProviderSettingsBodySchema),
           }),
         ),

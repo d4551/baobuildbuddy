@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 const props = defineProps<{
   modelValue: {
     technical: string[];
@@ -10,6 +12,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   "update:modelValue": [value: typeof props.modelValue];
 }>();
+const { t } = useI18n();
 
 const localValue = ref({
   technical: [...(props.modelValue.technical || [])],
@@ -65,7 +68,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
     <!-- Technical Skills -->
     <div class="form-control">
       <div class="label">
-        <span class="label-text font-bold">Technical Skills</span>
+        <span class="label-text font-bold">{{ t("resumeComponentSkills.technicalTitle") }}</span>
       </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
@@ -76,6 +79,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           {{ skill }}
           <button
             class="btn btn-ghost btn-xs btn-circle"
+            :aria-label="t('resumeComponentSkills.removeSkillAria', { category: t('resumeComponentSkills.technicalTitle'), skill })"
             @click="removeSkill('technical', index)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,15 +92,16 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
         <input
           v-model="newSkill.technical"
           type="text"
-          placeholder="e.g., Unity, C#, Unreal Engine"
+          :placeholder="t('resumeComponentSkills.technicalPlaceholder')"
           class="input input-bordered flex-1"
           @keyup.enter="addSkill('technical')"
-          aria-label="e.g., Unity, C#, Unreal Engine"/>
+          :aria-label="t('resumeComponentSkills.technicalAria')"/>
         <button
           class="btn btn-primary"
+          :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.technicalTitle') })"
           @click="addSkill('technical')"
         >
-          Add
+          {{ t("resumeComponentSkills.addButton") }}
         </button>
       </div>
     </div>
@@ -104,7 +109,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
     <!-- Soft Skills -->
     <div class="form-control">
       <div class="label">
-        <span class="label-text font-bold">Soft Skills</span>
+        <span class="label-text font-bold">{{ t("resumeComponentSkills.softTitle") }}</span>
       </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
@@ -115,6 +120,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           {{ skill }}
           <button
             class="btn btn-ghost btn-xs btn-circle"
+            :aria-label="t('resumeComponentSkills.removeSkillAria', { category: t('resumeComponentSkills.softTitle'), skill })"
             @click="removeSkill('soft', index)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,15 +133,16 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
         <input
           v-model="newSkill.soft"
           type="text"
-          placeholder="e.g., Leadership, Communication, Problem Solving"
+          :placeholder="t('resumeComponentSkills.softPlaceholder')"
           class="input input-bordered flex-1"
           @keyup.enter="addSkill('soft')"
-          aria-label="e.g., Leadership, Communication, Problem Solving"/>
+          :aria-label="t('resumeComponentSkills.softAria')"/>
         <button
           class="btn btn-secondary"
+          :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.softTitle') })"
           @click="addSkill('soft')"
         >
-          Add
+          {{ t("resumeComponentSkills.addButton") }}
         </button>
       </div>
     </div>
@@ -143,7 +150,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
     <!-- Gaming Skills -->
     <div class="form-control">
       <div class="label">
-        <span class="label-text font-bold">Gaming Industry Skills</span>
+        <span class="label-text font-bold">{{ t("resumeComponentSkills.gamingTitle") }}</span>
       </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
@@ -154,6 +161,7 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           {{ skill }}
           <button
             class="btn btn-ghost btn-xs btn-circle"
+            :aria-label="t('resumeComponentSkills.removeSkillAria', { category: t('resumeComponentSkills.gamingTitle'), skill })"
             @click="removeSkill('gaming', index)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -166,15 +174,16 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
         <input
           v-model="newSkill.gaming"
           type="text"
-          placeholder="e.g., Game Design, Level Design, Multiplayer Systems"
+          :placeholder="t('resumeComponentSkills.gamingPlaceholder')"
           class="input input-bordered flex-1"
           @keyup.enter="addSkill('gaming')"
-          aria-label="e.g., Game Design, Level Design, Multiplayer Systems"/>
+          :aria-label="t('resumeComponentSkills.gamingAria')"/>
         <button
           class="btn btn-accent"
+          :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.gamingTitle') })"
           @click="addSkill('gaming')"
         >
-          Add
+          {{ t("resumeComponentSkills.addButton") }}
         </button>
       </div>
     </div>

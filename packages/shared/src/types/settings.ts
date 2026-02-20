@@ -3,7 +3,12 @@
  */
 
 import type { AIProviderType } from "./ai";
-import type { AppLanguageCode, AutomationBrowserOption } from "../constants/settings";
+import type {
+  AppLanguageCode,
+  AutomationBrowserOption,
+  SpeechProviderOption,
+} from "../constants/settings";
+import { DEFAULT_SPEECH_SETTINGS } from "../constants/settings";
 
 /**
  * Per-provider model preferences.
@@ -98,6 +103,35 @@ export interface JobProviderSettings {
 }
 
 /**
+ * STT engine configuration.
+ */
+export interface SpeechToTextSettings {
+  provider: SpeechProviderOption;
+  model: string;
+  endpoint: string;
+}
+
+/**
+ * TTS engine configuration.
+ */
+export interface TextToSpeechSettings {
+  provider: SpeechProviderOption;
+  model: string;
+  endpoint: string;
+  voice: string;
+  format: "mp3" | "wav";
+}
+
+/**
+ * Runtime voice settings used by chat/interview speech features.
+ */
+export interface SpeechSettings {
+  locale: string;
+  stt: SpeechToTextSettings;
+  tts: TextToSpeechSettings;
+}
+
+/**
  * Automation and browser runner settings.
  */
 export interface AutomationSettings {
@@ -108,6 +142,7 @@ export interface AutomationSettings {
   defaultBrowser: AutomationBrowserOption;
   enableSmartSelectors: boolean;
   autoSaveScreenshots: boolean;
+  speech: SpeechSettings;
   jobProviders?: JobProviderSettings;
 }
 
@@ -147,6 +182,21 @@ export const DEFAULT_AUTOMATION_SETTINGS: AutomationSettings = {
   defaultBrowser: "chrome",
   enableSmartSelectors: true,
   autoSaveScreenshots: true,
+  speech: {
+    locale: DEFAULT_SPEECH_SETTINGS.locale,
+    stt: {
+      provider: DEFAULT_SPEECH_SETTINGS.stt.provider,
+      model: DEFAULT_SPEECH_SETTINGS.stt.model,
+      endpoint: DEFAULT_SPEECH_SETTINGS.stt.endpoint,
+    },
+    tts: {
+      provider: DEFAULT_SPEECH_SETTINGS.tts.provider,
+      model: DEFAULT_SPEECH_SETTINGS.tts.model,
+      endpoint: DEFAULT_SPEECH_SETTINGS.tts.endpoint,
+      voice: DEFAULT_SPEECH_SETTINGS.tts.voice,
+      format: DEFAULT_SPEECH_SETTINGS.tts.format,
+    },
+  },
 };
 
 /**

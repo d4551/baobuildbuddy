@@ -1,23 +1,17 @@
 import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import {
+  STATE_KEYS,
+  asNumber,
+  asString,
+  asStringArray,
+  isRecord,
+} from "@bao/shared";
 import { toSkillMapping } from "./api-normalizers";
 
 type ApiClient = ReturnType<typeof useApi>;
 type CreateMappingInput = NonNullable<Parameters<ApiClient["skills"]["mappings"]["post"]>[0]>;
 type MappingRoute = ReturnType<ApiClient["skills"]["mappings"]>;
 type UpdateMappingInput = NonNullable<Parameters<MappingRoute["put"]>[0]>;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" && value.trim().length > 0 ? value : undefined;
-
-const asNumber = (value: unknown): number | undefined =>
-  typeof value === "number" && Number.isFinite(value) ? value : undefined;
-
-const asStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
 
 const toCareerPathway = (value: unknown): CareerPathway | null => {
   if (!isRecord(value)) return null;

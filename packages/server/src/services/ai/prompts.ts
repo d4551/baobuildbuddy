@@ -108,6 +108,30 @@ Keep it concise (3-4 paragraphs, under 400 words) and engaging.`;
 }
 
 /**
+ * Email response generation prompt for automation email workflows.
+ */
+export function emailResponsePrompt(
+  subject: string,
+  message: string,
+  tone: "professional" | "friendly" | "concise",
+  sender?: string,
+): string {
+  const senderContext = sender ? `Sender: ${sender}\n` : "";
+  return `Draft a ${tone} email response for a career-assistant workflow.
+
+${senderContext}Subject: ${subject}
+Incoming message:
+${message}
+
+Requirements:
+1. Keep the response concise and directly actionable.
+2. Preserve important context from the incoming message.
+3. Use a ${tone} tone throughout.
+4. Do not invent facts, names, or commitments not present in the message.
+5. Return only the reply body text with no markdown or analysis.`;
+}
+
+/**
  * Job match analysis prompt
  */
 export function jobMatchPrompt(

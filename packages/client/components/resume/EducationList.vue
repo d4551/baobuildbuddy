@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 interface EducationItem {
   id: string;
   institution: string;
@@ -15,6 +17,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   "update:modelValue": [value: EducationItem[]];
 }>();
+const { t } = useI18n();
 
 const localValue = ref<EducationItem[]>([...props.modelValue]);
 const editingId = ref<string | null>(null);
@@ -83,11 +86,12 @@ function moveDown(index: number) {
       <div class="card-body">
         <div class="flex justify-between items-start">
           <h3 class="card-title text-base">
-            {{ item.degree || 'New Education' }}
+            {{ item.degree || t("resumeComponentEducation.newItemTitle") }}
           </h3>
           <div class="flex gap-1">
             <button
               class="btn btn-ghost btn-xs btn-square"
+              :aria-label="t('resumeComponentEducation.moveUpAria')"
               @click="moveUp(index)"
               :disabled="index === 0"
             >
@@ -97,6 +101,7 @@ function moveDown(index: number) {
             </button>
             <button
               class="btn btn-ghost btn-xs btn-square"
+              :aria-label="t('resumeComponentEducation.moveDownAria')"
               @click="moveDown(index)"
               :disabled="index === localValue.length - 1"
             >
@@ -106,6 +111,7 @@ function moveDown(index: number) {
             </button>
             <button
               class="btn btn-ghost btn-xs btn-square"
+              :aria-label="t('resumeComponentEducation.toggleEditAria')"
               @click="toggleEdit(item.id)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,6 +120,7 @@ function moveDown(index: number) {
             </button>
             <button
               class="btn btn-ghost btn-xs btn-square text-error"
+              :aria-label="t('resumeComponentEducation.removeItemAria')"
               @click="removeItem(item.id)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,58 +132,58 @@ function moveDown(index: number) {
 
         <div v-if="editingId === item.id" class="space-y-3 mt-2">
           <div class="form-control">
-            <div class="label label-text-alt">Institution</div>
+            <div class="label label-text-alt">{{ t("resumeComponentEducation.institutionLabel") }}</div>
             <input
               v-model="item.institution"
               type="text"
-              placeholder="University Name"
+              :placeholder="t('resumeComponentEducation.institutionPlaceholder')"
               class="input input-bordered input-sm"
               @input="updateValue"
-              aria-label="University Name"/>
+              :aria-label="t('resumeComponentEducation.institutionAria')"/>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="form-control">
-              <div class="label label-text-alt">Degree</div>
+              <div class="label label-text-alt">{{ t("resumeComponentEducation.degreeLabel") }}</div>
               <input
                 v-model="item.degree"
                 type="text"
-                placeholder="Bachelor of Science"
+                :placeholder="t('resumeComponentEducation.degreePlaceholder')"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-                aria-label="Bachelor of Science"/>
+                :aria-label="t('resumeComponentEducation.degreeAria')"/>
             </div>
             <div class="form-control">
-              <div class="label label-text-alt">Field of Study</div>
+              <div class="label label-text-alt">{{ t("resumeComponentEducation.fieldLabel") }}</div>
               <input
                 v-model="item.field"
                 type="text"
-                placeholder="Computer Science"
+                :placeholder="t('resumeComponentEducation.fieldPlaceholder')"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-                aria-label="Computer Science"/>
+                :aria-label="t('resumeComponentEducation.fieldAria')"/>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="form-control">
-              <div class="label label-text-alt">Graduation Date</div>
+              <div class="label label-text-alt">{{ t("resumeComponentEducation.graduationDateLabel") }}</div>
               <input
                 v-model="item.graduationDate"
                 type="month"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-                aria-label="Graduation Date"/>
+                :aria-label="t('resumeComponentEducation.graduationDateAria')"/>
             </div>
             <div class="form-control">
-              <div class="label label-text-alt">GPA (optional)</div>
+              <div class="label label-text-alt">{{ t("resumeComponentEducation.gpaLabel") }}</div>
               <input
                 v-model="item.gpa"
                 type="text"
-                placeholder="3.8"
+                :placeholder="t('resumeComponentEducation.gpaPlaceholder')"
                 class="input input-bordered input-sm"
                 @input="updateValue"
-                aria-label="3.8"/>
+                :aria-label="t('resumeComponentEducation.gpaAria')"/>
             </div>
           </div>
         </div>
@@ -189,11 +196,11 @@ function moveDown(index: number) {
       </div>
     </div>
 
-    <button class="btn btn-outline btn-block" @click="addItem">
+    <button class="btn btn-outline btn-block" :aria-label="t('resumeComponentEducation.addItemAria')" @click="addItem">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      Add Education
+      {{ t("resumeComponentEducation.addItemButton") }}
     </button>
   </div>
 </template>

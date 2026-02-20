@@ -3289,6 +3289,88 @@ export declare const app: Elysia<"/api", {
         };
     } & {
         automation: {
+            "job-apply": {
+                schedule: {
+                    post: {
+                        body: {
+                            jobId?: string | undefined;
+                            customAnswers?: {} | undefined;
+                            coverLetterId?: string | undefined;
+                            resumeId: string;
+                            jobUrl: string;
+                            runAt: string;
+                        };
+                        params: {};
+                        query: unknown;
+                        headers: unknown;
+                        response: {
+                            200: {
+                                status: "pending";
+                                runId: string;
+                                scheduledFor: string;
+                            };
+                            500: {
+                                error: string;
+                            };
+                            400: {
+                                error: string;
+                            };
+                            404: {
+                                error: string;
+                            };
+                            409: {
+                                error: string;
+                            };
+                            422: {
+                                error: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    } & {
+        automation: {
+            "email-response": {
+                post: {
+                    body: {
+                        sender?: string | undefined;
+                        tone?: "professional" | "friendly" | "concise" | undefined;
+                        message: string;
+                        subject: string;
+                    };
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: {
+                            provider: string;
+                            model: string;
+                            status: "success";
+                            runId: string;
+                            reply: string;
+                        };
+                        500: {
+                            error: string;
+                        };
+                        400: {
+                            error: string;
+                        };
+                        404: {
+                            error: string;
+                        };
+                        409: {
+                            error: string;
+                        };
+                        422: {
+                            error: string;
+                        };
+                    };
+                };
+            };
+        };
+    } & {
+        automation: {
             runs: {
                 get: {
                     body: unknown;
