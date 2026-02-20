@@ -972,6 +972,7 @@ const esES = {
       exportAria: "Exportar portafolio",
     },
     preview: {
+      pageTitle: "Vista Previa del Portafolio",
       backButton: "Volver al Editor",
       backButtonAria: "Volver al editor del portafolio",
       exportPdfButton: "Exportar PDF",
