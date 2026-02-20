@@ -10,6 +10,11 @@
 
 # BaoBuildBuddy v1.0 Local Setup Guide
 
+## Quick links
+
+- [Getting Started (First-time setup)](docs/STARTER_GUIDE.md)
+- [Automation Guide](docs/AUTOMATION.md)
+
 ```text
                     ___________
                    |           |

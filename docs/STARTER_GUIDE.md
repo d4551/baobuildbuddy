@@ -1,5 +1,7 @@
 # BaoBuildBuddy First-Time Setup Guide
 
+If you need deeper architecture and runbook details, see the full runbook: [README.md](../README.md).
+
 Use this guide if this is your first time running BaoBuildBuddy locally.
 
 ## 1) Understand what is being started
