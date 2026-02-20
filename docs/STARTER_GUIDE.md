@@ -81,7 +81,24 @@ Then open:
 6. Automation job apply + scheduling: `/automation/job-apply`
 7. Automation email response: `/automation/email`
 8. Automation run history: `/automation/runs`
-9. Pipeline gamification: searching jobs, running scrapers, and resume customization award XP in flow
+9. Language support and locale switcher:
+   - Interface locales are available in `packages/client/locales`.
+   - Current runtime locales: `en-US`, `es-ES`, `fr-FR`, `ja-JP`.
+   - Switch language from the navbar language menu (all locales with message catalogs are listed).
+10. Pipeline gamification: searching jobs, running scrapers, and resume customization award XP in flow
+
+## 6.1 Language support defaults
+
+- Default locale: `NUXT_PUBLIC_I18N_DEFAULT_LOCALE`
+- Fallback locale: `NUXT_PUBLIC_I18N_FALLBACK_LOCALE`
+- Supported locales: `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES`
+- Cookie key: `NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY`
+
+You can add a new locale by:
+
+1. Creating `packages/client/locales/<locale>.ts` with the typed message schema.
+2. Registering it in `packages/client/plugins/i18n.ts`.
+3. Adding it to `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES`.
 
 ## 7) How the system flow works
 

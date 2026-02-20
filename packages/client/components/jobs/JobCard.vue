@@ -93,10 +93,15 @@ function navigateToJob() {
 
         <div class="flex flex-wrap gap-2 items-center">
           <div class="badge badge-ghost">{{ job.location }}</div>
-          <div v-if="job.remote" class="badge badge-primary">Remote</div>
-          <div v-if="job.hybrid" class="badge badge-secondary">Hybrid</div>
-          <div v-if="job.matchScore" class="badge" :class="matchScoreColor">
-            {{ job.matchScore }}% Match
+          <div v-if="job.remote" class="badge badge-primary">{{ t("jobCard.remoteBadge") }}</div>
+          <div v-if="job.hybrid" class="badge badge-secondary">{{ t("jobCard.hybridBadge") }}</div>
+          <div
+            v-if="job.matchScore"
+            class="badge"
+            :class="matchScoreColor"
+            :aria-label="t('jobCard.matchBadgeAria', { score: job.matchScore })"
+          >
+            {{ t("jobCard.matchBadge", { score: job.matchScore }) }}
           </div>
         </div>
 
@@ -109,7 +114,7 @@ function navigateToJob() {
             {{ tech }}
           </div>
           <div v-if="remainingCount > 0" class="badge badge-outline badge-sm">
-            +{{ remainingCount }} more
+            {{ t("jobCard.moreTechnologies", { count: remainingCount }) }}
           </div>
         </div>
 

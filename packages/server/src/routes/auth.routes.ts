@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { config } from "../config/env";
@@ -6,9 +5,19 @@ import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
 
 const AUTH_ID = "default";
+const API_KEY_PREFIX = "bao_";
+const API_KEY_RANDOM_BYTES = 24;
+
+const encodeBase64Url = (bytes: Uint8Array): string =>
+  btoa(String.fromCharCode(...bytes))
+    .replace(/\+/gu, "-")
+    .replace(/\//gu, "_")
+    .replace(/=+$/u, "");
 
 function generateApiKey(): string {
-  return `bao_${randomBytes(24).toString("base64url")}`;
+  const bytes = new Uint8Array(API_KEY_RANDOM_BYTES);
+  crypto.getRandomValues(bytes);
+  return `${API_KEY_PREFIX}${encodeBase64Url(bytes)}`;
 }
 
 export const authRoutes = new Elysia({ prefix: "/auth" })

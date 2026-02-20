@@ -111,6 +111,12 @@ type SchedulerTimer = ReturnType<typeof setTimeout>;
 const toErrorMessage = (error: unknown, fallback: string): string =>
   error instanceof Error ? error.message : fallback;
 
+const captureError = async (operation: Promise<unknown>): Promise<unknown | null> =>
+  operation.then(
+    () => null,
+    (error: unknown) => error,
+  );
+
 const toJsonRecord = (value: object): Record<string, unknown> => {
   const record: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(value)) {
@@ -721,10 +727,7 @@ export class ApplicationAutomationService {
       return;
     }
 
-    const executionError = await this.runJobApply(runId, payload).then(
-      () => null as unknown,
-      (error: unknown) => error,
-    );
+    const executionError = await captureError(this.runJobApply(runId, payload));
     if (!executionError) {
       return;
     }
@@ -1144,8 +1147,7 @@ export class ApplicationAutomationService {
         progress: DEFAULT_PROGRESS,
       })
       .where(eq(automationRuns.id, runId));
-    const executionError = await Promise.resolve()
-      .then(async () => {
+    const executionPromise = Promise.resolve().then(async () => {
         const rawResult = await runRpaScript(
           "apply_job_rpa.py",
           {
@@ -1192,11 +1194,8 @@ export class ApplicationAutomationService {
               // Gamification should not block the automation flow.
             });
         }
-      })
-      .then(
-        () => null as unknown,
-        (error: unknown) => error,
-      );
+      });
+    const executionError = await captureError(executionPromise);
     if (executionError) {
       const message = toErrorMessage(executionError, "Job application automation failed");
       await this.markRunFailed(runId, message, automationSettings);

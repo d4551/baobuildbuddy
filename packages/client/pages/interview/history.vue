@@ -106,15 +106,98 @@ async function closeDetail(): Promise<void> {
   await router.replace({ query: nextQuery });
 }
 
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString(locale.value);
+function formatDate(value: string | undefined): string {
+  if (!value) {
+    return t("interviewHistory.notAvailable");
+  }
+
+  if (value.length === 0) {
+    return t("interviewHistory.notAvailable");
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return t("interviewHistory.notAvailable");
+  }
+
+  return parsedDate.toLocaleDateString(locale.value);
 }
 
-function formatDuration(value: number | null): string {
+function parseDurationMinutes(value: string): number | null {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  const durationParts = [...normalized.matchAll(/(\d+)\s*([hms])/gi)];
+  if (durationParts.length === 0) {
+    return null;
+  }
+
+  let totalMinutes = 0;
+  for (const [, amountText, unitText] of durationParts) {
+    if (amountText === undefined || unitText === undefined) {
+      continue;
+    }
+
+    const amount = Number.parseInt(amountText, 10);
+    if (!Number.isFinite(amount)) {
+      continue;
+    }
+
+    if (unitText === "h") {
+      totalMinutes += amount * 60;
+      continue;
+    }
+
+    if (unitText === "m") {
+      totalMinutes += amount;
+      continue;
+    }
+
+    if (unitText === "s") {
+      totalMinutes += amount / 60;
+    }
+  }
+
+  return totalMinutes > 0 ? Math.round(totalMinutes) : null;
+}
+
+function formatDuration(value: number | string | null): string {
   if (typeof value === "number" && Number.isFinite(value)) {
     return t("interviewHistory.minutesLabel", { count: value });
   }
+  if (typeof value === "string") {
+    const parsedMinutes = parseDurationMinutes(value);
+    if (parsedMinutes !== null) {
+      return t("interviewHistory.minutesLabel", { count: parsedMinutes });
+    }
+  }
   return t("interviewHistory.notAvailable");
+}
+
+function formatScore(value: number | undefined): string {
+  if (!Number.isFinite(value ?? NaN)) {
+    return t("interviewHistory.notAvailable");
+  }
+  return `${value}%`;
+}
+
+function scoreBadgeClass(value: number | undefined): string {
+  if (!Number.isFinite(value ?? NaN)) {
+    return "badge-warning";
+  }
+
+  if (value >= 80) return "badge-success";
+  if (value >= 60) return "badge-warning";
+  return "badge-error";
+}
+
+function questionScoreText(score: number | undefined): number {
+  if (!Number.isFinite(score ?? NaN)) {
+    return 0;
+  }
+  return score;
 }
 
 function getScoreBadgeClass(score: number): string {
@@ -210,8 +293,8 @@ function getTimelineLineClass(score: number): string {
                     <td>{{ session.studioName }}</td>
                     <td>{{ session.role }}</td>
                     <td>
-                      <span class="badge" :class="getScoreBadgeClass(session.score)">
-                        {{ session.score }}%
+                      <span class="badge" :class="scoreBadgeClass(session.score)">
+                        {{ formatScore(session.score) }}
                       </span>
                     </td>
                     <td>{{ formatDuration(session.duration) }}</td>
@@ -239,14 +322,14 @@ function getTimelineLineClass(score: number): string {
                   <div class="timeline-middle">
                     <div
                       class="radial-progress text-xs font-semibold"
-                      :class="getScoreColorClass(session.score)"
-                      :style="`--value:${session.score}; --size:2.5rem; --thickness:0.18rem;`"
+                      :class="getScoreColorClass(session.score ?? 0)"
+                      :style="`--value:${session.score ?? 0}; --size:2.5rem; --thickness:0.18rem;`"
                       role="progressbar"
-                      :aria-valuenow="session.score"
+                      :aria-valuenow="session.score ?? 0"
                       aria-valuemin="0"
                       aria-valuemax="100"
                     >
-                      {{ session.score }}%
+                      {{ formatScore(session.score) }}
                     </div>
                   </div>
                   <div class="timeline-end timeline-box">
@@ -311,10 +394,10 @@ function getTimelineLineClass(score: number): string {
                 <div class="flex items-center gap-2">
                   <div
                     class="radial-progress"
-                    :class="getScoreColorClass(selectedSession.score)"
-                    :style="{ '--value': selectedSession.score, '--size': '3rem' }"
+                    :class="getScoreColorClass(selectedSession.score ?? 0)"
+                    :style="{ '--value': selectedSession.score ?? 0, '--size': '3rem' }"
                   >
-                    <span class="text-sm font-bold">{{ selectedSession.score }}%</span>
+                    <span class="text-sm font-bold">{{ formatScore(selectedSession.score) }}</span>
                   </div>
                 </div>
               </div>
@@ -333,7 +416,7 @@ function getTimelineLineClass(score: number): string {
                       :aria-label="t('interviewHistory.questionAria', { index: idx + 1 })"
                     />
                     <div class="collapse-title text-sm font-medium">
-                      {{ t("interviewHistory.questionHeader", { index: idx + 1, score: question.score }) }}
+                      {{ t("interviewHistory.questionHeader", { index: idx + 1, score: questionScoreText(question.score) }) }}
                     </div>
                     <div class="collapse-content text-xs">
                       <p class="font-semibold mb-1">{{ question.question }}</p>

@@ -164,6 +164,35 @@ flowchart TD
 
 Each Elysia route module owns its service directly -- routes call services, services call the database or external providers. Typed contracts in `packages/shared` are the source of truth for request/response shapes across client and server. Python automation runs in a Bun subprocess with JSON over stdin/stdout. Runtime values are sourced from environment configuration and persisted settings in the `settings` table.
 
+## 3.1 Internationalization and language support
+
+BaoBuildBuddy ships the following runtime UI locale packs:
+
+- `en-US` — `packages/client/locales/en-US.ts`
+- `es-ES` — `packages/client/locales/es-ES.ts`
+- `fr-FR` — `packages/client/locales/fr-FR.ts`
+- `ja-JP` — `packages/client/locales/ja-JP.ts`
+
+Single source of truth:
+
+- `packages/client/plugins/i18n.ts` registers locale catalogs in `I18N_MESSAGE_CATALOG`.
+- `packages/client/nuxt.config.ts` defines default i18n runtime config (`NUXT_PUBLIC_I18N_*`).
+- Locale files follow the typed schema in `packages/client/locales/en-US.ts`.
+
+Locale resolution order:
+
+1. Saved cookie locale (from `NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY`).
+2. `accept-language` header variants.
+3. Browser locale.
+4. Configured fallback locale.
+
+To add a new language:
+
+1. Add a new catalog file under `packages/client/locales`.
+2. Register it in `I18N_MESSAGE_CATALOG`.
+3. Add the locale to `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` at runtime (or environment variable).
+4. Add matching preference/voice mapping where required.
+
 ## 4) Python RPA subsystem
 
 ```text
@@ -541,6 +570,10 @@ Edit `.env` with your environment-specific values. Defaults are already defined 
 | `NUXT_PUBLIC_QUERY_STALE_TIME_MS` | TanStack Query stale time |
 | `NUXT_PUBLIC_QUERY_RETRY_COUNT` | TanStack Query retry budget |
 | `NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS` | Refetch on window focus |
+| `NUXT_PUBLIC_I18N_DEFAULT_LOCALE` | Initial locale to load (`en-US` default) |
+| `NUXT_PUBLIC_I18N_FALLBACK_LOCALE` | Locale fallback when missing translations are requested |
+| `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` | Comma-separated locale codes (`en-US,es-ES,fr-FR,ja-JP`) |
+| `NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY` | Cookie key for persisted user locale |
 
 ### 9.3 AI provider keys
 

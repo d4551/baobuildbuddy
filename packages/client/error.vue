@@ -25,11 +25,15 @@ const message = computed(() => {
           {{ message }}
         </p>
         <div role="alert" class="alert alert-info">
-          <span>Status: {{ error.statusCode || 500 }}</span>
+          <span>{{ t("errorPage.statusLabel") }}: {{ error.statusCode || 500 }}</span>
         </div>
         <div class="flex justify-center gap-2">
-          <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-primary">Back to dashboard</NuxtLink>
-          <button class="btn btn-ghost" @click="clearError({ redirect: APP_ROUTES.dashboard })">Reset</button>
+          <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-primary" :aria-label="t('errorPage.backToDashboardButton')">
+            {{ t("errorPage.backToDashboardButton") }}
+          </NuxtLink>
+          <button class="btn btn-ghost" :aria-label="t('errorPage.resetButton')" @click="clearError({ redirect: APP_ROUTES.dashboard })">
+            {{ t("errorPage.resetButton") }}
+          </button>
         </div>
       </div>
     </div>
