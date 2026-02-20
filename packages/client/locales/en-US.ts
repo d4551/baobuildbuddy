@@ -524,6 +524,7 @@ const enUS = {
       finalizing: "Finalizing",
     },
     tabs: {
+      tablistAria: "Resume editor sections",
       personal: "Personal",
       experience: "Experience",
       education: "Education",

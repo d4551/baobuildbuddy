@@ -768,11 +768,13 @@ async function resolvePipelineReward(
         </div>
       </div>
 
-      <div class="tabs tabs-lift">
+      <div class="tabs tabs-lift" role="tablist" :aria-label="t('resumePage.tabs.tablistAria')">
         <button
           type="button"
           class="tab"
+          role="tab"
           :class="{ 'tab-active': activeTab === 'personal' }"
+          :aria-selected="activeTab === 'personal'"
           :aria-label="resumeTabAriaLabel('personal')"
           @click="activeTab = 'personal'"
         >
@@ -781,7 +783,9 @@ async function resolvePipelineReward(
         <button
           type="button"
           class="tab"
+          role="tab"
           :class="{ 'tab-active': activeTab === 'experience' }"
+          :aria-selected="activeTab === 'experience'"
           :aria-label="resumeTabAriaLabel('experience')"
           @click="activeTab = 'experience'"
         >
@@ -790,7 +794,9 @@ async function resolvePipelineReward(
         <button
           type="button"
           class="tab"
+          role="tab"
           :class="{ 'tab-active': activeTab === 'education' }"
+          :aria-selected="activeTab === 'education'"
           :aria-label="resumeTabAriaLabel('education')"
           @click="activeTab = 'education'"
         >
@@ -799,7 +805,9 @@ async function resolvePipelineReward(
         <button
           type="button"
           class="tab"
+          role="tab"
           :class="{ 'tab-active': activeTab === 'skills' }"
+          :aria-selected="activeTab === 'skills'"
           :aria-label="resumeTabAriaLabel('skills')"
           @click="activeTab = 'skills'"
         >
@@ -808,7 +816,9 @@ async function resolvePipelineReward(
         <button
           type="button"
           class="tab"
+          role="tab"
           :class="{ 'tab-active': activeTab === 'projects' }"
+          :aria-selected="activeTab === 'projects'"
           :aria-label="resumeTabAriaLabel('projects')"
           @click="activeTab = 'projects'"
         >
@@ -817,7 +827,9 @@ async function resolvePipelineReward(
         <button
           type="button"
           class="tab"
+          role="tab"
           :class="{ 'tab-active': activeTab === 'gaming' }"
+          :aria-selected="activeTab === 'gaming'"
           :aria-label="resumeTabAriaLabel('gaming')"
           @click="activeTab = 'gaming'"
         >

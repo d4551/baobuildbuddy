@@ -529,6 +529,7 @@ const esES = {
       finalizing: "Finalizando",
     },
     tabs: {
+      tablistAria: "Secciones del editor de currículum",
       personal: "Personal",
       experience: "Experiencia",
       education: "Formación",
