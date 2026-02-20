@@ -444,7 +444,7 @@ function resolveTemplate(value: string): CoverLetterTemplate {
 
     <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       <article
-        v-for="letter in coverLetterPagination.items"
+        v-for="letter in coverLetterPagination.items.value"
         :key="letter.id"
         class="card card-border cursor-pointer bg-base-100 transition-colors hover:bg-base-200"
         role="button"
@@ -495,9 +495,9 @@ function resolveTemplate(value: string): CoverLetterTemplate {
     </div>
 
     <AppPagination
-      :current-page="coverLetterPagination.currentPage"
-      :total-pages="coverLetterPagination.totalPages"
-      :page-numbers="coverLetterPagination.pageNumbers"
+      :current-page="coverLetterPagination.currentPage.value"
+      :total-pages="coverLetterPagination.totalPages.value"
+      :page-numbers="coverLetterPagination.pageNumbers.value"
       :summary="coverLetterPaginationSummary"
       :navigation-aria="t('coverLetterPage.pagination.navigationAria')"
       :previous-aria="t('coverLetterPage.pagination.previousAria')"

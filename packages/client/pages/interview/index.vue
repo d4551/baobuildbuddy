@@ -651,9 +651,9 @@ function viewSession(id: string) {
             </div>
 
             <AppPagination
-              :current-page="recentSessionPagination.currentPage"
-              :total-pages="recentSessionPagination.totalPages"
-              :page-numbers="recentSessionPagination.pageNumbers"
+              :current-page="recentSessionPagination.currentPage.value"
+              :total-pages="recentSessionPagination.totalPages.value"
+              :page-numbers="recentSessionPagination.pageNumbers.value"
               :summary="recentSessionsPaginationSummary"
               :navigation-aria="t('interviewHub.recent.pagination.navigationAria')"
               :previous-aria="t('interviewHub.recent.pagination.previousAria')"
@@ -727,7 +727,7 @@ function viewSession(id: string) {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="job in jobSelectionPagination.items" :key="job.id" class="hover:bg-base-200">
+                    <tr v-for="job in jobSelectionPagination.items.value" :key="job.id" class="hover:bg-base-200">
                       <td class="max-w-[16rem] truncate">{{ job.title }}</td>
                       <td>{{ job.company }}</td>
                       <td class="text-right">
@@ -747,9 +747,9 @@ function viewSession(id: string) {
               </div>
 
               <AppPagination
-                :current-page="jobSelectionPagination.currentPage"
-                :total-pages="jobSelectionPagination.totalPages"
-                :page-numbers="jobSelectionPagination.pageNumbers"
+                :current-page="jobSelectionPagination.currentPage.value"
+                :total-pages="jobSelectionPagination.totalPages.value"
+                :page-numbers="jobSelectionPagination.pageNumbers.value"
                 :summary="jobSelectionPaginationSummary"
                 :navigation-aria="t('interviewHub.config.pagination.navigationAria')"
                 :previous-aria="t('interviewHub.config.pagination.previousAria')"

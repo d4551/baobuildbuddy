@@ -436,7 +436,7 @@ Beyond the route-specific services, the server includes:
 | Skill Extractor | `skill-extractor.ts` | Extracts and normalizes skills from job listings and resumes |
 | Skill Mapping | `skill-mapping-service.ts` | Maps user skills to job requirements for match scoring |
 
-## 8) Install and local setup
+## 8) First-Time Setup (Beginner Path)
 
 ```text
               ,    ,
@@ -446,10 +446,21 @@ Beyond the route-specific services, the server includes:
           /    ||||    \     inventory before proceeding.
          / ,   ||||   , \
         /  |   ||||   |  \   Missing items = Game Over.
-       /___|___||||___|___\
+             /___|___||||___|___\
 ```
 
-### 8.1 Prerequisites
+This section is the canonical first-run path for new developers. It starts from a fresh clone and ends with a fully running stack with validation checks.
+
+### 8.1 What happens during first setup
+
+1. Required tool checks (`bun`, `git`, optional Python 3.10+, optional Chrome).
+2. Dependency installation across workspace packages.
+3. Python virtual environment bootstrap and scraper dependency install.
+4. `.env` creation from `.env.example` if missing.
+5. SQLite schema generation and push (`db:generate`, `db:push`).
+6. Optional verification (`typecheck`, `lint`, `test`).
+
+### 8.2 Prerequisites
 
 | Required           | Purpose                                |
 |--------------------|----------------------------------------|
@@ -464,25 +475,38 @@ Chrome/Chromium executable names checked by setup scripts:
 - macOS/Linux: `google-chrome`, `chromium`, `chromium-browser`, `/Applications/Google Chrome.app`
 - Windows: `chrome.exe` under `%ProgramFiles%`, `%ProgramFiles(x86)%`, or `%LOCALAPPDATA%`
 
-### 8.2 Automated setup (recommended)
+### 8.3 Prepare your workspace
 
-One command handles prerequisites check, dependency install, Python venv, database setup, and verification:
-
-**macOS / Linux:**
 ```bash
 git clone https://github.com/d4551/baobuildbuddy.git
 cd baobuildbuddy
+```
+
+If you already have a checked-out copy, start at `git pull` and continue with section 8.4.
+
+### 8.4 Automated setup (recommended)
+
+One command handles dependency install, Python venv, database setup, and verification:
+
+**macOS / Linux:**
+```bash
 bash scripts/setup.sh
 ```
 
 **Windows (PowerShell):**
 ```powershell
-git clone https://github.com/d4551/baobuildbuddy.git
-cd baobuildbuddy
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
 
-**Setup script flags:**
+Expected flow and outputs:
+1. The script prints the OS and architecture.
+2. `bun install` completes without errors.
+3. `.venv` is created and Python packages from `packages/scraper/requirements.txt` install.
+4. `.env` is created from `.env.example` if missing.
+5. Database setup runs successfully.
+6. Type/lint/test checks pass (unless checks are skipped).
+
+### 8.5 Setup script options
 
 | Flag | Bash | PowerShell | Effect |
 |------|------|-----------|--------|
@@ -490,23 +514,11 @@ powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 | Skip Python | `--skip-python` | `-SkipPython` | Skip venv creation (Bun-only install) |
 | Help | `--help` | `-Help` | Print usage and exit |
 
-The setup scripts will:
-1. Detect OS and architecture, verify all prerequisites (Bun, Git, Python 3.10+, Chrome)
-2. Run `bun install`
-3. Create Python venv, install RPA dependencies, verify `rpa` module import
-4. Copy `.env.example` to `.env` if it doesn't exist
-5. Run `db:generate` and `db:push`
-6. Run typecheck, lint, and tests
-7. Print summary with error/warning counts
-
-### 8.3 Manual setup (step-by-step)
+### 8.6 Manual setup (for controlled environments)
 
 If you prefer manual control, follow these steps:
 
 ```bash
-cd /path/to/workspace
-git clone https://github.com/d4551/baobuildbuddy.git
-cd baobuildbuddy
 bun install
 ```
 
@@ -532,9 +544,42 @@ python -m pip install -r packages\scraper\requirements.txt
 cp .env.example .env
 ```
 
-Edit `.env` with your environment-specific values. Defaults are already defined in source config files.
+Edit `.env` before first run:
+1. Keep `NUXT_PUBLIC_API_BASE=/` and `NUXT_PUBLIC_WS_BASE=/` when running `bun run dev`.
+2. Set `BAO_DISABLE_AUTH=true` only for local development without API-key flow.
+3. Add provider keys only if you are using those providers.
+4. Set `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` only if using local inference.
+5. Update `DB_PATH` if you want a custom database location.
 
-### 8.5 Source-of-truth config files
+Then bootstrap the database:
+
+```bash
+bun run db:generate
+bun run db:push
+```
+
+Optional sanity checks:
+
+```bash
+bun run scripts/validate-ascii-geometry.ts README.md
+bun run typecheck
+bun run lint
+bun run test
+```
+
+If any checks fail, fix issues before opening the UI.
+
+### 8.7 First launch checklist
+
+```bash
+curl -fsS http://localhost:3000/api/health
+curl -fsS http://localhost:3000/api/auth/status
+curl -fsS http://localhost:3000/api/jobs?limit=1 | head
+```
+
+If all three requests respond, the API stack is reachable from defaults.
+
+### 8.8 Source-of-truth config files
 
 | File                                     | Governs                        |
 |------------------------------------------|-------------------------------|

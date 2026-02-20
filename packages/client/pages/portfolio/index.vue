@@ -553,7 +553,7 @@ function projectPageAria(page: number): string {
 
           <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div
-              v-for="(project, idx) in projectPagination.items"
+              v-for="(project, idx) in projectPagination.items.value"
               :key="project.id || `${project.title}-${idx}`"
               class="card bg-base-100"
             >
@@ -651,9 +651,9 @@ function projectPageAria(page: number): string {
           </div>
 
           <AppPagination
-            :current-page="projectPagination.currentPage"
-            :total-pages="projectPagination.totalPages"
-            :page-numbers="projectPagination.pageNumbers"
+            :current-page="projectPagination.currentPage.value"
+            :total-pages="projectPagination.totalPages.value"
+            :page-numbers="projectPagination.pageNumbers.value"
             :summary="projectPaginationSummary"
             :navigation-aria="t('portfolioPage.pagination.navigationAria')"
             :previous-aria="t('portfolioPage.pagination.previousAria')"

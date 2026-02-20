@@ -589,7 +589,7 @@ async function resolvePipelineReward(
       <div v-else class="space-y-4">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div
-            v-for="resume in resumePagination.items"
+            v-for="resume in resumePagination.items.value"
             :key="resume.id"
             class="cursor-pointer transition-colors"
             :class="
@@ -630,9 +630,9 @@ async function resolvePipelineReward(
         </div>
 
         <AppPagination
-          :current-page="resumePagination.currentPage"
-          :total-pages="resumePagination.totalPages"
-          :page-numbers="resumePagination.pageNumbers"
+          :current-page="resumePagination.currentPage.value"
+          :total-pages="resumePagination.totalPages.value"
+          :page-numbers="resumePagination.pageNumbers.value"
           :summary="resumePaginationSummary"
           :navigation-aria="t('resumePage.pagination.navigationAria')"
           :previous-aria="t('resumePage.pagination.previousAria')"
