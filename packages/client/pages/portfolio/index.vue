@@ -9,6 +9,7 @@ import {
   type PortfolioProject,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -156,12 +157,15 @@ function clearProjectForm() {
 }
 
 async function handleSavePortfolio() {
-  try {
-    await updatePortfolio(portfolioForm);
-    $toast.success(t("portfolioPage.toasts.saved"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("portfolioPage.toasts.saveFailed")));
+  const savePortfolioResult = await settlePromise(
+    updatePortfolio(portfolioForm),
+    t("portfolioPage.toasts.saveFailed"),
+  );
+  if (!savePortfolioResult.ok) {
+    $toast.error(getErrorMessage(savePortfolioResult.error, t("portfolioPage.toasts.saveFailed")));
+    return;
   }
+  $toast.success(t("portfolioPage.toasts.saved"));
 }
 
 function openAddModal() {
@@ -226,25 +230,38 @@ async function handleSaveProject() {
     ...(projectForm.liveUrl.trim() ? { liveUrl: projectForm.liveUrl.trim() } : {}),
   };
 
-  try {
-    if (editingProject.value) {
-      if (!editingProject.value.id) {
-        $toast.error(t("portfolioPage.toasts.projectIdMissing"));
-        return;
+  if (editingProject.value && !editingProject.value.id) {
+    $toast.error(t("portfolioPage.toasts.projectIdMissing"));
+    return;
+  }
+
+  const saveProjectResult = await settlePromise(
+    (async () => {
+      if (editingProject.value?.id) {
+        await updateProject(editingProject.value.id, payload);
+        return "updated" as const;
       }
 
-      await updateProject(editingProject.value.id, payload);
-      $toast.success(t("portfolioPage.toasts.projectUpdated"));
-    } else {
       await addProject(payload);
-      $toast.success(t("portfolioPage.toasts.projectAdded"));
-    }
+      return "added" as const;
+    })(),
+    t("portfolioPage.toasts.projectSaveFailed"),
+  );
 
-    showAddModal.value = false;
-    clearProjectForm();
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("portfolioPage.toasts.projectSaveFailed")));
+  if (!saveProjectResult.ok) {
+    $toast.error(
+      getErrorMessage(saveProjectResult.error, t("portfolioPage.toasts.projectSaveFailed")),
+    );
+    return;
   }
+
+  showAddModal.value = false;
+  clearProjectForm();
+  $toast.success(
+    saveProjectResult.value === "updated"
+      ? t("portfolioPage.toasts.projectUpdated")
+      : t("portfolioPage.toasts.projectAdded"),
+  );
 }
 
 function requestDeleteProject(id?: string) {
@@ -265,24 +282,33 @@ async function handleDeleteProject() {
   const id = pendingDeleteProjectId.value;
   if (!id) return;
 
-  try {
-    await deleteProject(id);
-    $toast.success(t("portfolioPage.toasts.projectDeleted"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("portfolioPage.toasts.projectDeleteFailed")));
-  } finally {
-    clearDeleteProjectState();
-    showDeleteProjectDialog.value = false;
+  const deleteProjectResult = await settlePromise(
+    deleteProject(id),
+    t("portfolioPage.toasts.projectDeleteFailed"),
+  );
+  clearDeleteProjectState();
+  showDeleteProjectDialog.value = false;
+
+  if (!deleteProjectResult.ok) {
+    $toast.error(
+      getErrorMessage(deleteProjectResult.error, t("portfolioPage.toasts.projectDeleteFailed")),
+    );
+    return;
   }
+
+  $toast.success(t("portfolioPage.toasts.projectDeleted"));
 }
 
 async function handleExport() {
-  try {
-    await exportPortfolio();
-    $toast.success(t("portfolioPage.toasts.exported"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("portfolioPage.toasts.exportFailed")));
+  const exportResult = await settlePromise(
+    exportPortfolio(),
+    t("portfolioPage.toasts.exportFailed"),
+  );
+  if (!exportResult.ok) {
+    $toast.error(getErrorMessage(exportResult.error, t("portfolioPage.toasts.exportFailed")));
+    return;
   }
+  $toast.success(t("portfolioPage.toasts.exported"));
 }
 
 function projectIndexById(projectId: string | undefined): number {
@@ -321,14 +347,18 @@ async function moveProject(projectId: string | undefined, direction: ProjectDire
     .filter((id): id is string => typeof id === "string" && id.trim().length > 0);
 
   reorderingProjectId.value = projectId;
-  try {
-    await reorderByIds(orderedIds);
-    $toast.success(t("portfolioPage.toasts.reordered"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("portfolioPage.toasts.reorderFailed")));
-  } finally {
-    reorderingProjectId.value = null;
+  const reorderResult = await settlePromise(
+    reorderByIds(orderedIds),
+    t("portfolioPage.toasts.reorderFailed"),
+  );
+  reorderingProjectId.value = null;
+
+  if (!reorderResult.ok) {
+    $toast.error(getErrorMessage(reorderResult.error, t("portfolioPage.toasts.reorderFailed")));
+    return;
   }
+
+  $toast.success(t("portfolioPage.toasts.reordered"));
 }
 
 function addTechnology() {

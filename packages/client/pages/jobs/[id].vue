@@ -2,6 +2,7 @@
 import { APP_ROUTES } from "@bao/shared";
 import type { Job } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -65,31 +66,43 @@ watch(showApplyModal, (isOpen) => {
 });
 
 async function handleSaveToggle() {
-  try {
-    if (isSaved.value) {
-      await unsaveJob(jobId.value);
-      $toast.success(t("jobDetail.toasts.unsaved"));
-    } else {
-      await saveJob(jobId.value);
-      $toast.success(t("jobDetail.toasts.saved"));
+  if (isSaved.value) {
+    const unsaveResult = await settlePromise(
+      unsaveJob(jobId.value),
+      t("jobDetail.errors.saveFailed"),
+    );
+    if (!unsaveResult.ok) {
+      $toast.error(getErrorMessage(unsaveResult.error, t("jobDetail.errors.saveFailed")));
+      return;
     }
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("jobDetail.errors.saveFailed")));
+    $toast.success(t("jobDetail.toasts.unsaved"));
+    return;
   }
+
+  const saveResult = await settlePromise(saveJob(jobId.value), t("jobDetail.errors.saveFailed"));
+  if (!saveResult.ok) {
+    $toast.error(getErrorMessage(saveResult.error, t("jobDetail.errors.saveFailed")));
+    return;
+  }
+  $toast.success(t("jobDetail.toasts.saved"));
 }
 
 async function handleApply() {
   applying.value = true;
-  try {
-    await applyToJob(jobId.value, applicationNotes.value);
-    showApplyModal.value = false;
-    applicationNotes.value = "";
-    $toast.success(t("jobDetail.toasts.applicationSubmitted"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("jobDetail.errors.applyFailed")));
-  } finally {
-    applying.value = false;
+  const applyResult = await settlePromise(
+    applyToJob(jobId.value, applicationNotes.value),
+    t("jobDetail.errors.applyFailed"),
+  );
+  applying.value = false;
+
+  if (!applyResult.ok) {
+    $toast.error(getErrorMessage(applyResult.error, t("jobDetail.errors.applyFailed")));
+    return;
   }
+
+  showApplyModal.value = false;
+  applicationNotes.value = "";
+  $toast.success(t("jobDetail.toasts.applicationSubmitted"));
 }
 
 function getMatchScoreColor(score: number) {

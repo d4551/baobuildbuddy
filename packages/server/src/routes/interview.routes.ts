@@ -81,10 +81,14 @@ function asNonNegativeInt(value: number | undefined): number | undefined {
 }
 
 function asStringArrayTrimmed(value: unknown): string[] {
-  return asStringArray(value).map((s) => s.trim()).filter((s) => s.length > 0);
+  return asStringArray(value)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 }
 
-function parseTargetJob(value: CreateSessionConfigInput["targetJob"]): InterviewTargetJob | undefined {
+function parseTargetJob(
+  value: CreateSessionConfigInput["targetJob"],
+): InterviewTargetJob | undefined {
   if (!value) return undefined;
   const id = asString(value.id);
   const title = asString(value.title);
@@ -140,18 +144,10 @@ function normalizeVoiceSettings(
   const speakerId = asString(value.speakerId);
   const voiceId = asString(value.voiceId);
   const normalized: VoiceSettings = {
-    rate:
-      typeof value.rate === "number"
-        ? value.rate
-        : INTERVIEW_DEFAULT_VOICE_SETTINGS.rate,
-    pitch:
-      typeof value.pitch === "number"
-        ? value.pitch
-        : INTERVIEW_DEFAULT_VOICE_SETTINGS.pitch,
+    rate: typeof value.rate === "number" ? value.rate : INTERVIEW_DEFAULT_VOICE_SETTINGS.rate,
+    pitch: typeof value.pitch === "number" ? value.pitch : INTERVIEW_DEFAULT_VOICE_SETTINGS.pitch,
     volume:
-      typeof value.volume === "number"
-        ? value.volume
-        : INTERVIEW_DEFAULT_VOICE_SETTINGS.volume,
+      typeof value.volume === "number" ? value.volume : INTERVIEW_DEFAULT_VOICE_SETTINGS.volume,
     language: asString(value.language) || INTERVIEW_DEFAULT_VOICE_SETTINGS.language,
   };
   if (microphoneId) {

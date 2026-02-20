@@ -53,18 +53,19 @@ export class JobProviderRegistry {
     const enabledProviders = this.getEnabledProviders();
 
     const results = await Promise.allSettled(
-      enabledProviders.map(async (provider) => {
+      enabledProviders.map((provider) => {
         if (!this.rateLimiter.canMakeRequest(provider.name)) {
           console.log(`Rate limited: ${provider.name}`);
-          return [];
+          return Promise.resolve<RawJob[]>([]);
         }
         this.rateLimiter.recordRequest(provider.name);
-        try {
-          return await provider.fetchJobs(filters);
-        } catch (e) {
-          console.error(`Provider ${provider.name} failed:`, e instanceof Error ? e.message : e);
-          return [];
-        }
+        return provider.fetchJobs(filters).then(
+          (jobs) => jobs,
+          (e: unknown) => {
+            console.error(`Provider ${provider.name} failed:`, e instanceof Error ? e.message : e);
+            return [];
+          },
+        );
       }),
     );
 

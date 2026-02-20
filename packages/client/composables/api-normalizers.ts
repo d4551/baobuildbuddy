@@ -2,11 +2,13 @@ import {
   APP_LANGUAGE_CODES,
   AI_PROVIDER_DEFAULT,
   DEFAULT_APP_LANGUAGE,
+  DEFAULT_SPEECH_SETTINGS,
   JOB_EXPERIENCE_LEVELS,
   JOB_GAME_GENRES,
   JOB_STUDIO_TYPES,
   JOB_SUPPORTED_PLATFORMS,
   JOB_TYPES,
+  SPEECH_PROVIDER_OPTIONS,
   type AIProviderType,
   type AppSettings,
   type AutomationSettings,
@@ -153,6 +155,54 @@ const normalizeStudioCulture = (value: unknown): StudioCulture => {
   };
 };
 
+const SPEECH_AUDIO_FORMATS: readonly AutomationSettings["speech"]["tts"]["format"][] = [
+  "mp3",
+  "wav",
+];
+
+const normalizeSpeechSettings = (value: unknown): AutomationSettings["speech"] => {
+  if (!isRecord(value)) {
+    return {
+      locale: DEFAULT_SPEECH_SETTINGS.locale,
+      stt: {
+        provider: DEFAULT_SPEECH_SETTINGS.stt.provider,
+        model: DEFAULT_SPEECH_SETTINGS.stt.model,
+        endpoint: DEFAULT_SPEECH_SETTINGS.stt.endpoint,
+      },
+      tts: {
+        provider: DEFAULT_SPEECH_SETTINGS.tts.provider,
+        model: DEFAULT_SPEECH_SETTINGS.tts.model,
+        endpoint: DEFAULT_SPEECH_SETTINGS.tts.endpoint,
+        voice: DEFAULT_SPEECH_SETTINGS.tts.voice,
+        format: DEFAULT_SPEECH_SETTINGS.tts.format,
+      },
+    };
+  }
+
+  const stt = isRecord(value.stt) ? value.stt : {};
+  const tts = isRecord(value.tts) ? value.tts : {};
+  const sttProvider =
+    asEnum(stt.provider, SPEECH_PROVIDER_OPTIONS) ?? DEFAULT_SPEECH_SETTINGS.stt.provider;
+  const ttsProvider =
+    asEnum(tts.provider, SPEECH_PROVIDER_OPTIONS) ?? DEFAULT_SPEECH_SETTINGS.tts.provider;
+
+  return {
+    locale: asString(value.locale) ?? DEFAULT_SPEECH_SETTINGS.locale,
+    stt: {
+      provider: sttProvider,
+      model: asString(stt.model) ?? DEFAULT_SPEECH_SETTINGS.stt.model,
+      endpoint: asString(stt.endpoint) ?? DEFAULT_SPEECH_SETTINGS.stt.endpoint,
+    },
+    tts: {
+      provider: ttsProvider,
+      model: asString(tts.model) ?? DEFAULT_SPEECH_SETTINGS.tts.model,
+      endpoint: asString(tts.endpoint) ?? DEFAULT_SPEECH_SETTINGS.tts.endpoint,
+      voice: asString(tts.voice) ?? DEFAULT_SPEECH_SETTINGS.tts.voice,
+      format: asEnum(tts.format, SPEECH_AUDIO_FORMATS) ?? DEFAULT_SPEECH_SETTINGS.tts.format,
+    },
+  };
+};
+
 const normalizeAutomationSettings = (value: unknown): AutomationSettings | undefined => {
   if (!isRecord(value)) return undefined;
 
@@ -171,6 +221,7 @@ const normalizeAutomationSettings = (value: unknown): AutomationSettings | undef
       asBoolean(value.enableSmartSelectors) ?? DEFAULT_AUTOMATION_SETTINGS.enableSmartSelectors,
     autoSaveScreenshots:
       asBoolean(value.autoSaveScreenshots) ?? DEFAULT_AUTOMATION_SETTINGS.autoSaveScreenshots,
+    speech: normalizeSpeechSettings(value.speech),
   };
 };
 

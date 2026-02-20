@@ -2,6 +2,7 @@ import type { AppSettings } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { computed, readonly } from "vue";
 import { toAppSettings } from "./api-normalizers";
+import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 import { useNuxtState } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 
@@ -37,38 +38,28 @@ export function useSettings() {
   });
 
   async function fetchSettings() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.settings.get();
-      if (error) throw new Error("Failed to fetch settings");
-      const normalized = toAppSettings(data);
-      if (!normalized) throw new Error("Invalid settings payload");
+      assertApiResponse(error, "Failed to fetch settings");
+      const normalized = requireValue(toAppSettings(data), "Invalid settings payload");
       settings.value = normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function updateSettings(updates: UpdateSettingsInput) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { error } = await api.settings.put(updates);
-      if (error) throw new Error("Failed to update settings");
+      assertApiResponse(error, "Failed to update settings");
       await fetchSettings();
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function updateApiKeys(keys: UpdateApiKeysInput) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { error } = await api.settings["api-keys"].put(keys);
-      if (error) throw new Error("Failed to update API keys");
+      assertApiResponse(error, "Failed to update API keys");
       await fetchSettings();
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function testApiKey(provider: TestApiKeyInput["provider"], key: string) {

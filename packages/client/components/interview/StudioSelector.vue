@@ -24,7 +24,9 @@ const searchInputRef = useTemplateRef<HTMLInputElement>("studioSelectorSearchInp
 const selectorId = useId();
 const listboxId = `studio-selector-listbox-${selectorId}`;
 
-const selectedStudio = computed(() => props.studios.find((studio) => studio.id === props.modelValue));
+const selectedStudio = computed(() =>
+  props.studios.find((studio) => studio.id === props.modelValue),
+);
 
 const filteredStudios = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();

@@ -326,7 +326,9 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
         ),
         preferredModel: t.Optional(t.String({ maxLength: MODEL_MAX_LENGTH })),
         theme: t.Optional(t.Union([t.Literal("bao-light"), t.Literal("bao-dark")])),
-        language: t.Optional(t.Union(LANGUAGE_CODES.map((languageCode) => t.Literal(languageCode)))),
+        language: t.Optional(
+          t.Union(LANGUAGE_CODES.map((languageCode) => t.Literal(languageCode))),
+        ),
         notifications: t.Optional(
           t.Object({
             achievements: t.Optional(t.Boolean()),
@@ -417,15 +419,14 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       const requestUrl = strategy.buildUrl(body.key, endpointInput);
       const requestInit = strategy.buildInit(body.key);
 
-      try {
-        const response = await fetch(requestUrl, requestInit).catch(() => null);
-        if (!response) {
-          return { valid: false, provider: body.provider };
-        }
-        return { valid: strategy.isSuccess(response.status), provider: body.provider };
-      } catch {
-        return { valid: false, provider: body.provider, error: "Connection failed" };
+      const response = await Promise.resolve()
+        .then(() => fetch(requestUrl, requestInit))
+        .catch(() => null);
+      if (!response) {
+        return { valid: false, provider: body.provider };
       }
+
+      return { valid: strategy.isSuccess(response.status), provider: body.provider };
     },
     {
       body: t.Object({

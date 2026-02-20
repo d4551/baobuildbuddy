@@ -194,7 +194,7 @@ export function useAutomation() {
     };
 
     ws.onmessage = (event) => {
-      const parsed = safeParseJson<JsonValue>(event.data);
+      const parsed = safeParseJson(event.data);
       if (parsed === null) return;
       const normalizedEvent = toAutomationProgressEvent(parsed);
       if (normalizedEvent) {

@@ -4,6 +4,21 @@ import { Elysia, t } from "elysia";
  * In-memory subscriber registry: runId → Set of connected WebSockets.
  */
 const subscribers = new Map<string, Set<unknown>>();
+const WS_READY_STATE_OPEN = 1;
+
+type SubscriberSocket = {
+  send: (msg: string) => void;
+  readyState?: number;
+};
+
+function isSubscriberSocket(value: unknown): value is SubscriberSocket {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "send" in value &&
+    typeof value.send === "function"
+  );
+}
 
 /**
  * Broadcast a progress/completion event to all WebSocket clients subscribed to a run.
@@ -14,11 +29,15 @@ export function broadcastProgress(runId: string, data: Record<string, unknown>):
 
   const msg = JSON.stringify({ ...data, runId });
   for (const ws of subs) {
-    try {
-      (ws as { send: (msg: string) => void }).send(msg);
-    } catch {
+    if (
+      !isSubscriberSocket(ws) ||
+      (typeof ws.readyState === "number" && ws.readyState !== WS_READY_STATE_OPEN)
+    ) {
       subs.delete(ws);
+      continue;
     }
+
+    ws.send(msg);
   }
 }
 

@@ -1,6 +1,8 @@
 /**
  * French (France) locale message catalog for the client application.
  */
+import type { AppTranslationSchema } from "~/locales/en-US";
+
 const frFR = {
   meta: {
     title: "BaoBuildBuddy - Assistant de Carrière IA",
@@ -170,6 +172,7 @@ const frFR = {
     streakDaysSuffix: "días seguidos",
     longestStreakDesc: "récord personal",
     noChallengesLabel: "No hay desafíos diarios disponibles.",
+    achievementBadgeAria: "Logro: {name}. {description}",
     a11y: {
       levelProgress: "Progresión de nivel",
       challengeProgress: "Progresión del desafío",
@@ -379,7 +382,8 @@ const frFR = {
     createModal: {
       title: "Añadir Mapeo de Habilidad",
       gameExpressionLegend: "Experiencia de Juego",
-      gameExpressionPlaceholder: "ej. Lideré un grupo de raid de 40 personas hasta un primer mundial",
+      gameExpressionPlaceholder:
+        "ej. Lideré un grupo de raid de 40 personas hasta un primer mundial",
       gameExpressionAria: "Experiencia de juego",
       gameExpressionHint: "La experiencia de juego debe tener al menos 2 caracteres.",
       transferableSkillLegend: "Habilidad Transferible",
@@ -430,7 +434,8 @@ const frFR = {
     seoDescription:
       "Evalúa tu preparación profesional y descubre rutas de rol según tus habilidades transferibles mapeadas.",
     title: "Rutas de Carrera",
-    subtitle: "Sigue tu preparación y explora rutas generadas desde tu evidencia de habilidades mapeadas.",
+    subtitle:
+      "Sigue tu preparación y explora rutas generadas desde tu evidencia de habilidades mapeadas.",
     retryButtonLabel: "Reintentar",
     gamification: {
       levelLabel: "Nvl {level}",
@@ -451,7 +456,8 @@ const frFR = {
       categoryScoreAria: "Puntuación de preparación {category} {score} por ciento",
       topImprovementsTitle: "Principales mejoras",
       nextStepsTitle: "Próximos pasos",
-      emptyState: "Los datos de preparación no están disponibles. Añade mapeos y ejecuta el análisis primero.",
+      emptyState:
+        "Los datos de preparación no están disponibles. Añade mapeos y ejecuta el análisis primero.",
     },
     pathways: {
       title: "Recomendaciones de Rutas",
@@ -465,7 +471,8 @@ const frFR = {
         stable: "Estable",
         declining: "En declive",
       },
-      emptyState: "Sin rutas disponibles. Añade más habilidades mapeadas para generar recomendaciones.",
+      emptyState:
+        "Sin rutas disponibles. Añade más habilidades mapeadas para generar recomendaciones.",
     },
     errors: {
       loadFailed: "Error al cargar datos de rutas de carrera",
@@ -635,7 +642,8 @@ const frFR = {
     },
     gaming: {
       title: "Contexto de Carrera en Juegos",
-      description: "Captura detalles del dominio de juegos para mejorar la personalización y puntuación IA del currículum.",
+      description:
+        "Captura detalles del dominio de juegos para mejorar la personalización y puntuación IA del currículum.",
       rolesLegend: "Roles Objetivo",
       rolesAria: "Roles objetivo en la industria del juego",
       rolesPlaceholder: "Ingeniero de Gameplay, Artista Técnico",
@@ -845,6 +853,7 @@ const frFR = {
     toasts: {
       deleted: "Carta eliminada",
       deleteFailed: "Error al eliminar carta",
+      fetchFailed: "Error al obtener cartas de presentación",
       companyMinLength: "El nombre de la empresa debe tener al menos {count} caracteres",
       positionMinLength: "El puesto debe tener al menos {count} caracteres",
       jobDescriptionMinLength:
@@ -894,8 +903,7 @@ const frFR = {
     },
     editor: {
       title: "Editor de Contenido",
-      info:
-        "Edita el borrador directamente. Regenera cuando quieras una versión nueva desde empresa, rol y plantilla actuales.",
+      info: "Edita el borrador directamente. Regenera cuando quieras una versión nueva desde empresa, rol y plantilla actuales.",
       placeholder: "El contenido de la carta aparece aquí...",
       aria: "Editor de contenido de la carta",
       characterCount: "{count} caracteres",
@@ -1051,7 +1059,8 @@ const frFR = {
       exported: "Portafolio exportado",
       exportFailed: "Error al exportar portafolio",
       projectTitleMinLength: "El título del proyecto debe tener al menos {count} caracteres",
-      projectDescriptionMinLength: "La descripción del proyecto debe tener al menos {count} caracteres",
+      projectDescriptionMinLength:
+        "La descripción del proyecto debe tener al menos {count} caracteres",
       projectIdMissing: "Falta el ID del proyecto",
       projectSaveFailed: "Error al guardar proyecto",
       projectDeleteFailed: "Error al eliminar proyecto",
@@ -1605,7 +1614,8 @@ const frFR = {
       },
       jobCard: {
         title: "Extractor de Empleos",
-        description: "Obtén las últimas ofertas de la industria del juego y sincronízalas con el tablón.",
+        description:
+          "Obtén las últimas ofertas de la industria del juego y sincronízalas con el tablón.",
         runAria: "Ejecutar extractor de empleos",
         runButton: "Ejecutar Extractor de Empleos",
       },
@@ -1635,7 +1645,8 @@ const frFR = {
       messages: {
         studioCompleted: "Extracción de estudios completada. Datos del directorio actualizados.",
         studioCompletedWithXp: "Extracción de estudios completada (+{xp} XP). Datos actualizados.",
-        jobCompleted: "Extracción de empleos completada. Feed actualizado y listo para entrevistas.",
+        jobCompleted:
+          "Extracción de empleos completada. Feed actualizado y listo para entrevistas.",
         jobCompletedWithXp:
           "Extracción de empleos completada (+{xp} XP). Feed actualizado y listo para entrevistas.",
       },
@@ -1686,7 +1697,8 @@ const frFR = {
     testProviderAria: "Probar credencial de API de {provider}",
     testButton: "Probar",
     doneTitle: "Todo listo",
-    doneDescription: "{assistant} está listo para ayudarte con tu carrera en la industria del juego.",
+    doneDescription:
+      "{assistant} está listo para ayudarte con tu carrera en la industria del juego.",
     successIconLabel: "OK",
     backToAiConfigAria: "Volver al paso de configuración de IA",
     launchAria: "Finalizar configuración y lanzar aplicación",
@@ -1858,7 +1870,8 @@ const frFR = {
         },
         portfolio: {
           title: "Portafolio",
-          description: "Muestra proyectos destacados para que tus ejemplos en entrevista sean concretos.",
+          description:
+            "Muestra proyectos destacados para que tus ejemplos en entrevista sean concretos.",
           cta: "Abrir Portafolio",
         },
       },
@@ -2025,7 +2038,8 @@ const frFR = {
   },
   settings: {
     title: "Configuración y Perfil",
-    subtitle: "Centraliza tu identidad, comportamiento del asistente y valores por defecto de automatización.",
+    subtitle:
+      "Centraliza tu identidad, comportamiento del asistente y valores por defecto de automatización.",
     saveState: {
       idle: "Inactivo",
       saving: "Guardando",
@@ -2273,6 +2287,6 @@ const frFR = {
       },
     },
   },
-} as const;
+} as const satisfies AppTranslationSchema;
 
 export default frFR;

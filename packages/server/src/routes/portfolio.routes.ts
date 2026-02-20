@@ -148,26 +148,28 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
         return { error: "Portfolio not found" };
       }
 
-      try {
-        const metadata: PortfolioMetadata = portfolio.metadata ?? {};
-        const pdfBytes = await exportService.exportPortfolioPDF(metadata, portfolio.projects);
+      const metadata: PortfolioMetadata = portfolio.metadata ?? {};
+      return exportService
+        .exportPortfolioPDF(metadata, portfolio.projects)
+        .then((pdfBytes) => {
+          set.headers["content-type"] = "application/pdf";
+          set.headers["content-disposition"] =
+            `attachment; filename="portfolio-${portfolio.id}.pdf"`;
 
-        set.headers["content-type"] = "application/pdf";
-        set.headers["content-disposition"] = `attachment; filename="portfolio-${portfolio.id}.pdf"`;
-
-        return new Response(Buffer.from(pdfBytes), {
-          headers: {
-            "content-type": "application/pdf",
-            "content-disposition": `attachment; filename="portfolio-${portfolio.id}.pdf"`,
-          },
+          return new Response(Buffer.from(pdfBytes), {
+            headers: {
+              "content-type": "application/pdf",
+              "content-disposition": `attachment; filename="portfolio-${portfolio.id}.pdf"`,
+            },
+          });
+        })
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: "Failed to export portfolio",
+            details: error instanceof Error ? error.message : "Unknown error",
+          };
         });
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: "Failed to export portfolio",
-          details: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
     },
     {
       body: t.Object({

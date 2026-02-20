@@ -142,7 +142,8 @@ describe("interview API compatibility", () => {
       totalResponses: number;
       message: string;
     }>(harness.app, "POST", `/api/interview/sessions/${created.body.id}/response`, {
-      response: "I structured the interview by evaluating throughput, latency, and failure domains.",
+      response:
+        "I structured the interview by evaluating throughput, latency, and failure domains.",
       questionIndex: 0,
     });
 

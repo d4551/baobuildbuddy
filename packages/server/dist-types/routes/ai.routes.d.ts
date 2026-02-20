@@ -73,16 +73,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                         model: string;
                         followUps: string[];
                         contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
-                        error?: undefined;
                     } | {
                         error: string;
-                        message?: undefined;
-                        sessionId?: undefined;
-                        timestamp?: undefined;
-                        provider?: undefined;
-                        model?: undefined;
-                        followUps?: undefined;
-                        contextDomain?: undefined;
                     };
                     422: {
                         type: "validation";
@@ -130,6 +122,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         error?: undefined;
+                    } | {
+                        error: string;
                     };
                     422: {
                         type: "validation";
@@ -174,6 +168,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         error?: undefined;
+                    } | {
+                        error: string;
                     };
                     422: {
                         type: "validation";
@@ -223,14 +219,18 @@ export declare const aiRoutes: Elysia<"/ai", {
                             strengths: never[];
                             concerns: never[];
                             highlightSkills: never[];
+                        } | {
+                            jobId: string;
+                            title: string;
+                            company: string;
+                            score: number;
+                            strengths: never[];
+                            concerns: never[];
+                            highlightSkills: never[];
                         })[];
                         recommendations: string[];
-                        error?: undefined;
                     } | {
                         error: string;
-                        message?: undefined;
-                        matches?: undefined;
-                        recommendations?: undefined;
                     };
                     422: {
                         type: "validation";
@@ -264,7 +264,6 @@ export declare const aiRoutes: Elysia<"/ai", {
                         }[];
                         preferredProvider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         configuredProviders: ("gemini" | "claude" | "openai" | "huggingface" | "local")[];
-                        error?: undefined;
                     } | {
                         providers: {
                             id: "gemini" | "claude" | "openai" | "huggingface" | "local";
@@ -274,8 +273,6 @@ export declare const aiRoutes: Elysia<"/ai", {
                             health: "unconfigured";
                         }[];
                         error: string;
-                        preferredProvider?: undefined;
-                        configuredProviders?: undefined;
                     };
                 };
             };
@@ -321,15 +318,11 @@ export declare const aiRoutes: Elysia<"/ai", {
                 headers: unknown;
                 response: {
                     200: {
-                        error: string;
-                        runId?: undefined;
-                        status?: undefined;
-                        message?: undefined;
-                    } | {
                         runId: string;
                         status: string;
                         message: string;
-                        error?: undefined;
+                    } | {
+                        error: string;
                     };
                     422: {
                         type: "validation";

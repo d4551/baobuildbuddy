@@ -27,105 +27,112 @@ export class LocalProvider extends BaseAIProvider {
 
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
 
-    try {
-      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-
-      // Add system message if provided
-      if (options?.systemPrompt) {
-        messages.push({
-          role: "system",
-          content: options.systemPrompt,
-        });
-      }
-
+    // Add system message if provided
+    if (options?.systemPrompt) {
       messages.push({
-        role: "user",
-        content: prompt,
+        role: "system",
+        content: options.systemPrompt,
       });
+    }
 
-      const response = await this.client.chat.completions.create({
+    messages.push({
+      role: "user",
+      content: prompt,
+    });
+
+    return this.client.chat.completions
+      .create({
         model: this.model,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: options?.temperature ?? 0.7,
         top_p: options?.topP ?? 1,
-      });
+      })
+      .then(
+        (response): AIResponse => {
+          const text = response.choices[0]?.message?.content || "";
 
-      const text = response.choices[0]?.message?.content || "";
-
-      return {
-        id: this.generateId(),
-        provider: this.name,
-        model: this.model,
-        content: text,
-        usage: response.usage
-          ? {
-              inputTokens: response.usage.prompt_tokens,
-              outputTokens: response.usage.completion_tokens,
-            }
-          : undefined,
-        timing: this.createTimingMetrics(startTime),
-      };
-    } catch (error) {
-      return {
-        id: this.generateId(),
-        provider: this.name,
-        model: this.model,
-        content: "",
-        error: error instanceof Error ? error.message : "Unknown error",
-        timing: this.createTimingMetrics(startTime),
-      };
-    }
+          return {
+            id: this.generateId(),
+            provider: this.name,
+            model: this.model,
+            content: text,
+            usage: response.usage
+              ? {
+                  inputTokens: response.usage.prompt_tokens,
+                  outputTokens: response.usage.completion_tokens,
+                }
+              : undefined,
+            timing: this.createTimingMetrics(startTime),
+          };
+        },
+        (error: unknown): AIResponse => ({
+          id: this.generateId(),
+          provider: this.name,
+          model: this.model,
+          content: "",
+          error: error instanceof Error ? error.message : "Unknown error",
+          timing: this.createTimingMetrics(startTime),
+        }),
+      );
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
-    try {
-      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
 
-      // Add system message if provided
-      if (options?.systemPrompt) {
-        messages.push({
-          role: "system",
-          content: options.systemPrompt,
-        });
-      }
-
+    // Add system message if provided
+    if (options?.systemPrompt) {
       messages.push({
-        role: "user",
-        content: prompt,
+        role: "system",
+        content: options.systemPrompt,
       });
+    }
 
-      const stream = await this.client.chat.completions.create({
+    messages.push({
+      role: "user",
+      content: prompt,
+    });
+
+    const stream = await this.client.chat.completions
+      .create({
         model: this.model,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: options?.temperature ?? 0.7,
         top_p: options?.topP ?? 1,
         stream: true,
+      })
+      .catch((error: unknown) => {
+        throw new Error(
+          `Local AI streaming error: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       });
 
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          yield content;
-        }
+    const iterator = stream[Symbol.asyncIterator]();
+    while (true) {
+      const nextChunk = await iterator.next().catch((error: unknown) => {
+        throw new Error(
+          `Local AI streaming error: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      });
+      if (nextChunk.done) {
+        break;
       }
-    } catch (error) {
-      throw new Error(
-        `Local AI streaming error: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
+      const content = nextChunk.value.choices[0]?.delta?.content;
+      if (content) {
+        yield content;
+      }
     }
   }
 
   async isAvailable(): Promise<boolean> {
-    try {
-      // Try to list models to verify the local server is running
-      await this.client.models.list();
-      return true;
-    } catch {
-      return false;
-    }
+    // Try to list models to verify the local server is running
+    return this.client.models.list().then(
+      () => true,
+      () => false,
+    );
   }
 
   /**
@@ -141,15 +148,15 @@ export class LocalProvider extends BaseAIProvider {
     }));
 
     const results = await Promise.all(
-      servers.map(async (server) => {
-        try {
-          const provider = new LocalProvider(server.baseUrl);
-          const available = await provider.isAvailable();
-          return { ...server, available };
-        } catch {
-          return { ...server, available: false };
-        }
-      }),
+      servers.map((server) =>
+        Promise.resolve()
+          .then(async () => {
+            const provider = new LocalProvider(server.baseUrl);
+            const available = await provider.isAvailable();
+            return { ...server, available };
+          })
+          .catch(() => ({ ...server, available: false })),
+      ),
     );
 
     return results;

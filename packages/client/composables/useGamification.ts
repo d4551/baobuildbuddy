@@ -1,5 +1,6 @@
 import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
 import { STATE_KEYS, isRecord } from "@bao/shared";
+import { assertApiResponse, withLoadingState } from "./async-flow";
 
 const normalizeProgress = (value: unknown): UserGamificationData | null => {
   if (!isRecord(value)) {
@@ -73,49 +74,39 @@ export function useGamification() {
   const loading = useState(STATE_KEYS.GAMIFICATION_LOADING, () => false);
 
   async function fetchProgress() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.progress.get();
-      if (error) throw new Error("Failed to fetch progress");
+      assertApiResponse(error, "Failed to fetch progress");
       const normalized = normalizeProgress(data);
       if (normalized) {
         progress.value = normalized;
       }
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function awardXP(amount: number, reason: string) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification["award-xp"].post({ amount, reason });
-      if (error) throw new Error("Failed to award XP");
+      assertApiResponse(error, "Failed to award XP");
       await fetchProgress();
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function fetchAchievements() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.achievements.get();
-      if (error) throw new Error("Failed to fetch achievements");
+      assertApiResponse(error, "Failed to fetch achievements");
       achievements.value = Array.isArray(data)
         ? data.filter((entry): entry is Achievement => isRecord(entry))
         : [];
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function fetchChallenges() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.challenges.get();
-      if (error) throw new Error("Failed to fetch challenges");
+      assertApiResponse(error, "Failed to fetch challenges");
       if (!isRecord(data) || !Array.isArray(data.challenges)) {
         challenges.value = [];
         return;
@@ -123,22 +114,17 @@ export function useGamification() {
       challenges.value = data.challenges.filter((entry): entry is DailyChallenge =>
         isRecord(entry),
       );
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function completeChallenge(id: string) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.challenges({ id }).complete.post();
-      if (error) throw new Error("Failed to complete challenge");
+      assertApiResponse(error, "Failed to complete challenge");
       await fetchChallenges();
       await fetchProgress();
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   const level = computed(() => {
@@ -177,25 +163,19 @@ export function useGamification() {
   );
 
   async function fetchWeeklyProgress() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.weekly.get();
-      if (error) throw new Error("Failed to fetch weekly progress");
+      assertApiResponse(error, "Failed to fetch weekly progress");
       weeklyProgress.value = isRecord(data) ? data : null;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function fetchMonthlyStats() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.monthly.get();
-      if (error) throw new Error("Failed to fetch monthly stats");
+      assertApiResponse(error, "Failed to fetch monthly stats");
       monthlyStats.value = isRecord(data) ? data : null;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   const actionHistory = computed(() => {

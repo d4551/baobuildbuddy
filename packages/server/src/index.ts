@@ -9,24 +9,24 @@ import { JobAggregator } from "./services/jobs/job-aggregator";
 initializeDatabase(sqlite);
 
 // Seed database with gaming studios (idempotent — only seeds if empty)
-try {
-  seedDatabase(db);
-} catch (e) {
-  console.error(`Seed failed: ${e instanceof Error ? e.message : e}`);
-}
+void seedDatabase(db).catch((error) => {
+  console.error(`Seed failed: ${error instanceof Error ? error.message : error}`);
+});
 
 // Job refresh: run every 6 hours (Bun-native, no cron deps)
 const JOB_REFRESH_MS = 6 * 60 * 60 * 1000;
-setInterval(async () => {
-  try {
-    const aggregator = new JobAggregator();
-    const result = await aggregator.refreshJobs();
-    console.log(
-      `[JobRefresh] ${result.new} new, ${result.updated} updated (${result.total} total)`,
-    );
-  } catch (e) {
-    console.error(`[JobRefresh] Failed: ${e instanceof Error ? e.message : e}`);
-  }
+setInterval(() => {
+  const aggregator = new JobAggregator();
+  void aggregator
+    .refreshJobs()
+    .then((result) => {
+      console.log(
+        `[JobRefresh] ${result.new} new, ${result.updated} updated (${result.total} total)`,
+      );
+    })
+    .catch((error) => {
+      console.error(`[JobRefresh] Failed: ${error instanceof Error ? error.message : error}`);
+    });
 }, JOB_REFRESH_MS);
 
 // Start server

@@ -79,6 +79,21 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     defaultBrowser?: undefined;
                     enableSmartSelectors?: boolean | undefined;
                     autoSaveScreenshots?: boolean | undefined;
+                    speech?: {
+                        locale: string;
+                        stt: {
+                            provider: never;
+                            model: string;
+                            endpoint: string;
+                        };
+                        tts: {
+                            format: "mp3" | "wav";
+                            provider: never;
+                            model: string;
+                            endpoint: string;
+                            voice: string;
+                        };
+                    } | undefined;
                     jobProviders?: {
                         companyBoardApiTemplates: {
                             greenhouse: string;

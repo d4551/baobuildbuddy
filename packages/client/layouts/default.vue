@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { AI_CHAT_PAGE_PATH } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import {
-  LAYOUT_CONTENT_MAX_WIDTH_REM,
-  LAYOUT_DESKTOP_MEDIA_QUERY,
-} from "~/constants/layout";
+import { LAYOUT_CONTENT_MAX_WIDTH_REM, LAYOUT_DESKTOP_MEDIA_QUERY } from "~/constants/layout";
 
 const { initTheme } = useTheme();
 const { t } = useI18n();
@@ -18,9 +15,7 @@ const shellStyle = computed(() => ({
   "--layout-content-max-width": `${LAYOUT_CONTENT_MAX_WIDTH_REM}rem`,
 }));
 
-const showFloatingChatWidget = computed(
-  () => !route.path.startsWith(AI_CHAT_PAGE_PATH),
-);
+const showFloatingChatWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
 
 useKeyboardShortcuts();
 

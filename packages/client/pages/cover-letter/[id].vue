@@ -20,12 +20,7 @@ definePageMeta({
 });
 
 const route = useRoute();
-const {
-  getCoverLetter,
-  updateCoverLetter,
-  generateCoverLetter,
-  loading,
-} = useCoverLetter();
+const { getCoverLetter, updateCoverLetter, generateCoverLetter, loading } = useCoverLetter();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
 

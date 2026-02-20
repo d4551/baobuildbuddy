@@ -16,7 +16,8 @@ const iconPathByType = {
   success: "M5 13l4 4L19 7",
   error: "M6 18L18 6M6 6l12 12",
   info: "M13 16h-1v-4h-1m1-4h.01",
-  warning: "M12 9v3m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z",
+  warning:
+    "M12 9v3m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z",
 } satisfies Record<ToastType, string>;
 
 function resolveAlertClass(type: ToastType): string {

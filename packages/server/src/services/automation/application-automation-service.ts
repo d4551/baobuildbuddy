@@ -108,6 +108,9 @@ const MAX_RECOVERABLE_SCHEDULED_RUNS = 500;
 
 type SchedulerTimer = ReturnType<typeof setTimeout>;
 
+const toErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback;
+
 const toJsonRecord = (value: object): Record<string, unknown> => {
   const record: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(value)) {
@@ -182,23 +185,24 @@ export class ApplicationAutomationService {
    * Resolve automation settings from persisted values and apply safe defaults.
    */
   private async loadAutomationSettings(): Promise<AutomationSettings> {
-    try {
-      const rows = await db
-        .select()
-        .from(settings)
-        .where(eq(settings.id, DEFAULT_SETTINGS_ID))
-        .limit(1);
-      if (rows.length > 0 && rows[0].automationSettings) {
-        const parsedSettings = automationSettingsSchema.safeParse(rows[0].automationSettings);
-        if (parsedSettings.success) {
-          return parsedSettings.data;
+    return db
+      .select()
+      .from(settings)
+      .where(eq(settings.id, DEFAULT_SETTINGS_ID))
+      .limit(1)
+      .then((rows) => {
+        if (rows.length > 0 && rows[0].automationSettings) {
+          const parsedSettings = automationSettingsSchema.safeParse(rows[0].automationSettings);
+          if (parsedSettings.success) {
+            return parsedSettings.data;
+          }
         }
-      }
-    } catch {
-      // Fallback to hard defaults if settings read fails.
-    }
-
-    return DEFAULT_AUTOMATION_SETTINGS;
+        return DEFAULT_AUTOMATION_SETTINGS;
+      })
+      .catch(() => {
+        // Fallback to hard defaults if settings read fails.
+        return DEFAULT_AUTOMATION_SETTINGS;
+      });
   }
 
   /**
@@ -216,17 +220,13 @@ export class ApplicationAutomationService {
    * Resolve AI service for smart selector mapping when enabled.
    */
   private async tryLoadAIService(): Promise<AIService | null> {
-    try {
-      const [row] = await db
-        .select()
-        .from(settings)
-        .where(eq(settings.id, DEFAULT_SETTINGS_ID))
-        .limit(1);
-
-      return AIService.fromSettings(row);
-    } catch {
-      return null;
-    }
+    return db
+      .select()
+      .from(settings)
+      .where(eq(settings.id, DEFAULT_SETTINGS_ID))
+      .limit(1)
+      .then(([row]) => AIService.fromSettings(row))
+      .catch(() => null);
   }
 
   /**
@@ -383,11 +383,14 @@ export class ApplicationAutomationService {
 
       const safeFileName = this.resolveScreenshotName(index, sourcePath);
       const destination = resolve(runDir, safeFileName);
-
-      try {
-        const bytes = await sourceFile.arrayBuffer();
-        await Bun.write(destination, bytes);
-      } catch {
+      const copied = await sourceFile
+        .arrayBuffer()
+        .then(async (bytes) => {
+          await Bun.write(destination, bytes);
+          return true;
+        })
+        .catch(() => false);
+      if (!copied) {
         continue;
       }
 
@@ -518,7 +521,9 @@ export class ApplicationAutomationService {
   /**
    * Parse schedule metadata from persisted run input.
    */
-  private parseScheduledRunMetadata(input: Record<string, unknown> | null): ScheduledRunMetadata | null {
+  private parseScheduledRunMetadata(
+    input: Record<string, unknown> | null,
+  ): ScheduledRunMetadata | null {
     if (!input) {
       return null;
     }
@@ -565,7 +570,9 @@ export class ApplicationAutomationService {
   /**
    * Rebuild a job-apply payload from persisted automation run input.
    */
-  private parseScheduledJobApplyPayload(input: Record<string, unknown> | null): JobApplyPayload | null {
+  private parseScheduledJobApplyPayload(
+    input: Record<string, unknown> | null,
+  ): JobApplyPayload | null {
     if (!input) {
       return null;
     }
@@ -639,25 +646,25 @@ export class ApplicationAutomationService {
     }
 
     this.schedulerRecoveryInFlight = true;
-    try {
-      const pendingRows = await db
-        .select()
-        .from(automationRuns)
-        .where(and(eq(automationRuns.status, "pending"), eq(automationRuns.type, "job_apply")))
-        .limit(MAX_RECOVERABLE_SCHEDULED_RUNS);
+    await db
+      .select()
+      .from(automationRuns)
+      .where(and(eq(automationRuns.status, "pending"), eq(automationRuns.type, "job_apply")))
+      .limit(MAX_RECOVERABLE_SCHEDULED_RUNS)
+      .then(async (pendingRows) => {
+        for (const row of pendingRows) {
+          const metadata = this.parseScheduledRunMetadata(row.input ?? null);
+          const payload = this.parseScheduledJobApplyPayload(row.input ?? null);
+          if (!metadata || !payload) {
+            continue;
+          }
 
-      for (const row of pendingRows) {
-        const metadata = this.parseScheduledRunMetadata(row.input ?? null);
-        const payload = this.parseScheduledJobApplyPayload(row.input ?? null);
-        if (!metadata || !payload) {
-          continue;
+          this.queueScheduledRun(row.id, payload, metadata.runAt);
         }
-
-        this.queueScheduledRun(row.id, payload, metadata.runAt);
-      }
-    } finally {
-      this.schedulerRecoveryInFlight = false;
-    }
+      })
+      .finally(() => {
+        this.schedulerRecoveryInFlight = false;
+      });
   }
 
   /**
@@ -709,45 +716,45 @@ export class ApplicationAutomationService {
    * Execute a queued scheduled run, retrying when concurrency is saturated.
    */
   private async executeScheduledRun(runId: string, payload: JobApplyPayload): Promise<void> {
-    const row = await db
-      .select()
-      .from(automationRuns)
-      .where(eq(automationRuns.id, runId))
-      .limit(1);
+    const row = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
     if (row.length === 0 || row[0].status !== "pending") {
       return;
     }
 
-    try {
-      await this.runJobApply(runId, payload);
-    } catch (error) {
-      if (error instanceof AutomationConcurrencyLimitError) {
-        const nextRunAt = new Date(Date.now() + SCHEDULE_RETRY_DELAY_MS).toISOString();
-        await db
-          .update(automationRuns)
-          .set({
-            input: {
-              ...this.buildAuditInput(this.normalizePayload(payload), true),
-              schedule: { runAt: nextRunAt },
-            },
-            status: "pending",
-            updatedAt: new Date().toISOString(),
-          })
-          .where(eq(automationRuns.id, runId));
-
-        this.queueScheduledRun(runId, payload, nextRunAt);
-        broadcastProgress(runId, {
-          type: "scheduled-retry",
-          status: "pending",
-          action: "job_apply",
-          message: `Concurrency limit reached, retrying at ${nextRunAt}`,
-          runId,
-        });
-        return;
-      }
-
-      throw error;
+    const executionError = await this.runJobApply(runId, payload).then(
+      () => null as unknown,
+      (error: unknown) => error,
+    );
+    if (!executionError) {
+      return;
     }
+
+    if (executionError instanceof AutomationConcurrencyLimitError) {
+      const nextRunAt = new Date(Date.now() + SCHEDULE_RETRY_DELAY_MS).toISOString();
+      await db
+        .update(automationRuns)
+        .set({
+          input: {
+            ...this.buildAuditInput(this.normalizePayload(payload), true),
+            schedule: { runAt: nextRunAt },
+          },
+          status: "pending",
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(automationRuns.id, runId));
+
+      this.queueScheduledRun(runId, payload, nextRunAt);
+      broadcastProgress(runId, {
+        type: "scheduled-retry",
+        status: "pending",
+        action: "job_apply",
+        message: `Concurrency limit reached, retrying at ${nextRunAt}`,
+        runId,
+      });
+      return;
+    }
+
+    throw executionError;
   }
 
   /**
@@ -784,91 +791,93 @@ export class ApplicationAutomationService {
       updatedAt: now,
     });
 
-    try {
-      const aiService = await this.tryLoadAIService();
-      if (!aiService) {
-        throw new Error("No AI provider is available for email response generation");
-      }
+    return Promise.resolve()
+      .then(async () => {
+        const aiService = await this.tryLoadAIService();
+        if (!aiService) {
+          throw new Error("No AI provider is available for email response generation");
+        }
 
-      const aiResult = await aiService.generate(
-        emailResponsePrompt(
-          normalized.subject,
-          normalized.message,
-          normalized.tone,
-          normalized.sender,
-        ),
-      );
-      const reply = aiResult.content.trim();
-      if (reply.length === 0) {
-        throw new Error("AI provider returned an empty email response");
-      }
+        const aiResult = await aiService.generate(
+          emailResponsePrompt(
+            normalized.subject,
+            normalized.message,
+            normalized.tone,
+            normalized.sender,
+          ),
+        );
+        const reply = aiResult.content.trim();
+        if (reply.length === 0) {
+          throw new Error("AI provider returned an empty email response");
+        }
 
-      const completedAt = new Date().toISOString();
-      await db
-        .update(automationRuns)
-        .set({
+        const completedAt = new Date().toISOString();
+        await db
+          .update(automationRuns)
+          .set({
+            status: "success",
+            output: {
+              success: true,
+              reply,
+              provider: aiResult.provider,
+              model: aiResult.model,
+            },
+            error: null,
+            progress: FINISHED_PROGRESS,
+            currentStep: 1,
+            totalSteps: 1,
+            completedAt,
+            updatedAt: completedAt,
+          })
+          .where(eq(automationRuns.id, runId));
+
+        broadcastProgress(runId, {
+          type: "complete",
           status: "success",
-          output: {
-            success: true,
-            reply,
-            provider: aiResult.provider,
-            model: aiResult.model,
-          },
-          error: null,
-          progress: FINISHED_PROGRESS,
-          currentStep: 1,
-          totalSteps: 1,
-          completedAt,
-          updatedAt: completedAt,
-        })
-        .where(eq(automationRuns.id, runId));
+          action: "email_response",
+          message: "Email response generated",
+          runId,
+        });
 
-      broadcastProgress(runId, {
-        type: "complete",
-        status: "success",
-        action: "email_response",
-        message: "Email response generated",
-        runId,
-      });
+        return {
+          runId,
+          status: "success" as const,
+          reply,
+          provider: aiResult.provider,
+          model: aiResult.model,
+        };
+      })
+      .catch(async (error: unknown) => {
+        const message = toErrorMessage(error, "Failed to generate email response");
+        const completedAt = new Date().toISOString();
 
-      return {
-        runId,
-        status: "success",
-        reply,
-        provider: aiResult.provider,
-        model: aiResult.model,
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to generate email response";
-      const completedAt = new Date().toISOString();
-
-      await db
-        .update(automationRuns)
-        .set({
-          status: "error",
-          output: {
-            success: false,
+        await db
+          .update(automationRuns)
+          .set({
+            status: "error",
+            output: {
+              success: false,
+              error: message,
+            },
             error: message,
-          },
-          error: message,
-          progress: FINISHED_PROGRESS,
-          currentStep: 1,
-          totalSteps: 1,
-          completedAt,
-          updatedAt: completedAt,
-        })
-        .where(eq(automationRuns.id, runId));
+            progress: FINISHED_PROGRESS,
+            currentStep: 1,
+            totalSteps: 1,
+            completedAt,
+            updatedAt: completedAt,
+          })
+          .where(eq(automationRuns.id, runId));
 
-      broadcastProgress(runId, {
-        type: "complete",
-        status: "error",
-        action: "email_response",
-        message,
-        runId,
+        broadcastProgress(runId, {
+          type: "complete",
+          status: "error",
+          action: "email_response",
+          message,
+          runId,
+        });
+
+        throw error instanceof Error ? error : new Error(message);
       });
-
-      throw error instanceof Error ? error : new Error(message);
-    }
   }
 
   /**
@@ -944,14 +953,16 @@ export class ApplicationAutomationService {
       .limit(CLEANUP_LIMIT);
 
     for (const run of staleRuns) {
-      try {
-        const runDir = resolve(AUTOMATION_SCREENSHOT_DIR, run.id);
-        if (existsSync(runDir)) {
-          rmSync(runDir, { recursive: true, force: true });
-        }
-      } catch {
-        // Best-effort retention cleanup should not break run state transitions.
-      }
+      await Promise.resolve()
+        .then(() => {
+          const runDir = resolve(AUTOMATION_SCREENSHOT_DIR, run.id);
+          if (existsSync(runDir)) {
+            rmSync(runDir, { recursive: true, force: true });
+          }
+        })
+        .catch(() => {
+          // Best-effort retention cleanup should not break run state transitions.
+        });
     }
   }
 
@@ -1091,15 +1102,13 @@ export class ApplicationAutomationService {
     if (automationSettings.enableSmartSelectors) {
       const aiService = await this.tryLoadAIService();
       if (aiService) {
-        try {
-          selectorMap = await smartFieldMapper.analyze(
+        selectorMap = await smartFieldMapper
+          .analyze(
             normalized.jobUrl,
             ["fullName", "email", "phone", "resume", "coverLetter", "submit"],
             aiService,
-          );
-        } catch {
-          selectorMap = {};
-        }
+          )
+          .catch(() => ({}));
       }
     }
 
@@ -1135,55 +1144,61 @@ export class ApplicationAutomationService {
         progress: DEFAULT_PROGRESS,
       })
       .where(eq(automationRuns.id, runId));
+    const executionError = await Promise.resolve()
+      .then(async () => {
+        const rawResult = await runRpaScript(
+          "apply_job_rpa.py",
+          {
+            jobUrl: normalized.jobUrl,
+            resume,
+            coverLetter: coverLetter ? { content: coverLetter.content || {} } : null,
+            customAnswers: normalized.customAnswers,
+            selectorMap,
+          },
+          automationSettings,
+          progressHandler,
+        );
 
-    try {
-      const rawResult = await runRpaScript(
-        "apply_job_rpa.py",
-        {
-          jobUrl: normalized.jobUrl,
-          resume,
-          coverLetter: coverLetter ? { content: coverLetter.content || {} } : null,
-          customAnswers: normalized.customAnswers,
-          selectorMap,
-        },
-        automationSettings,
-        progressHandler,
-      );
+        const copiedScreenshots = await this.copyAndIndexScreenshots(runId, rawResult.screenshots);
+        const sanitizedResult: RpaRunResult = {
+          success: rawResult.success,
+          error: rawResult.error,
+          screenshots: copiedScreenshots,
+          steps: sanitizeSteps(rawResult.steps),
+        };
 
-      const copiedScreenshots = await this.copyAndIndexScreenshots(runId, rawResult.screenshots);
-      const sanitizedResult: RpaRunResult = {
-        success: rawResult.success,
-        error: rawResult.error,
-        screenshots: copiedScreenshots,
-        steps: sanitizeSteps(rawResult.steps),
-      };
-
-      await this.markRunCompleted(runId, sanitizedResult, automationSettings);
-      const completionPayload: Record<string, string> = {
-        type: "complete",
-        status: sanitizedResult.success ? "success" : "error",
-        action: sanitizedResult.success ? "completed" : "failed",
-      };
-      if (sanitizedResult.error) {
-        completionPayload.message = sanitizedResult.error;
-      }
-      broadcastProgress(runId, {
-        ...completionPayload,
-      });
-
-      if (!sanitizedResult.success) {
-        throw new Error(sanitizedResult.error || "Job application automation failed");
-      }
-
-      if (sanitizedResult.success) {
-        try {
-          await gamificationService.awardXP(50, "automation_success");
-        } catch {
-          // Gamification should not block the automation flow.
+        await this.markRunCompleted(runId, sanitizedResult, automationSettings);
+        const completionPayload: Record<string, string> = {
+          type: "complete",
+          status: sanitizedResult.success ? "success" : "error",
+          action: sanitizedResult.success ? "completed" : "failed",
+        };
+        if (sanitizedResult.error) {
+          completionPayload.message = sanitizedResult.error;
         }
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Job application automation failed";
+        broadcastProgress(runId, {
+          ...completionPayload,
+        });
+
+        if (!sanitizedResult.success) {
+          throw new Error(sanitizedResult.error || "Job application automation failed");
+        }
+
+        if (sanitizedResult.success) {
+          await gamificationService
+            .awardXP(50, "automation_success")
+            .then(() => undefined)
+            .catch(() => {
+              // Gamification should not block the automation flow.
+            });
+        }
+      })
+      .then(
+        () => null as unknown,
+        (error: unknown) => error,
+      );
+    if (executionError) {
+      const message = toErrorMessage(executionError, "Job application automation failed");
       await this.markRunFailed(runId, message, automationSettings);
       broadcastProgress(runId, {
         type: "complete",
@@ -1191,7 +1206,7 @@ export class ApplicationAutomationService {
         action: "automation",
         message,
       });
-      throw error instanceof Error ? error : new Error(message);
+      throw executionError instanceof Error ? executionError : new Error(message);
     }
   }
 

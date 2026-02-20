@@ -2,6 +2,7 @@
 import { APP_ROUTES, JOB_PREVIEW_LIMIT, SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared";
 import type { Job } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -138,13 +139,12 @@ function startJobInterview(jobId: string) {
 async function resolvePipelineReward(
   action: "scraperStudios" | "scraperJobs",
 ): Promise<number | null> {
-  try {
-    const reward = await awardForAction(action);
-    return reward.awarded ? reward.amount : null;
-  } catch {
+  const rewardResult = await settlePromise(awardForAction(action), "Failed to award scraper XP");
+  if (!rewardResult.ok) {
     // Scraper completion feedback must remain stable without gamification.
     return null;
   }
+  return rewardResult.value.awarded ? rewardResult.value.amount : null;
 }
 </script>
 

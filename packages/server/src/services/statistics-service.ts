@@ -30,10 +30,17 @@ const parseActionHistory = (value: unknown): ActionHistoryEntry[] => {
 };
 
 export class StatisticsService {
+  private async runBestEffort(operation: () => Promise<void>): Promise<void> {
+    await operation().then(
+      () => undefined,
+      () => undefined,
+    );
+  }
+
   async getDashboardStats(): Promise<DashboardStats> {
     // Profile completeness
     let profileCompleteness = 0;
-    try {
+    await this.runBestEffort(async () => {
       const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
       if (profileRows.length > 0) {
         const p = profileRows[0];
@@ -41,13 +48,11 @@ export class StatisticsService {
         const filled = fields.filter((f) => f && String(f).trim().length > 0).length;
         profileCompleteness = Math.round((filled / fields.length) * 100);
       }
-    } catch {
-      /* */
-    }
+    });
 
     // Jobs stats
     const jobStats = { saved: 0, applied: 0, interviewing: 0, offered: 0 };
-    try {
+    await this.runBestEffort(async () => {
       const savedCount = await db.select({ count: count() }).from(savedJobs);
       jobStats.saved = savedCount[0]?.count || 0;
 
@@ -58,67 +63,53 @@ export class StatisticsService {
         else if (status === "interviewing") jobStats.interviewing++;
         else if (status === "offered") jobStats.offered++;
       }
-    } catch {
-      /* */
-    }
+    });
 
     // Resumes
     const resumeStats = { count: 0, lastUpdated: null as string | null };
-    try {
+    await this.runBestEffort(async () => {
       const resumeCount = await db.select({ count: count() }).from(resumes);
       resumeStats.count = resumeCount[0]?.count || 0;
-    } catch {
-      /* */
-    }
+    });
 
     // Cover letters
     let clCount = 0;
-    try {
+    await this.runBestEffort(async () => {
       const clResult = await db.select({ count: count() }).from(coverLetters);
       clCount = clResult[0]?.count || 0;
-    } catch {
-      /* */
-    }
+    });
 
     // Portfolio
     let projectCount = 0;
-    try {
+    await this.runBestEffort(async () => {
       const projResult = await db.select({ count: count() }).from(portfolioProjects);
       projectCount = projResult[0]?.count || 0;
-    } catch {
-      /* */
-    }
+    });
 
     // Interviews
     const interviewStats = { totalSessions: 0, averageScore: null as number | null };
-    try {
+    await this.runBestEffort(async () => {
       const intResult = await db.select({ count: count() }).from(interviewSessions);
       interviewStats.totalSessions = intResult[0]?.count || 0;
-    } catch {
-      /* */
-    }
+    });
 
     // Skills
     let mappedCount = 0;
-    try {
+    await this.runBestEffort(async () => {
       const skillResult = await db.select({ count: count() }).from(skillMappings);
       mappedCount = skillResult[0]?.count || 0;
-    } catch {
-      /* */
-    }
+    });
 
     // AI chat
     const aiStats = { chatMessages: 0, chatSessions: 0 };
-    try {
+    await this.runBestEffort(async () => {
       const msgResult = await db.select({ count: count() }).from(chatHistory);
       aiStats.chatMessages = msgResult[0]?.count || 0;
-    } catch {
-      /* */
-    }
+    });
 
     // Gamification
     const gamStats = { level: 1, xp: 0, achievements: 0, streak: 0 };
-    try {
+    await this.runBestEffort(async () => {
       const gamRows = await db.select().from(gamification).where(eq(gamification.id, "default"));
       if (gamRows.length > 0) {
         const g = gamRows[0];
@@ -127,9 +118,7 @@ export class StatisticsService {
         gamStats.achievements = Array.isArray(g.achievements) ? g.achievements.length : 0;
         gamStats.streak = g.currentStreak || 0;
       }
-    } catch {
-      /* */
-    }
+    });
 
     // Automation stats
     const autoStats: AutomationStats = {
@@ -139,7 +128,7 @@ export class StatisticsService {
       todayRuns: 0,
       recentRuns: [],
     };
-    try {
+    await this.runBestEffort(async () => {
       const allRuns = await db
         .select()
         .from(automationRuns)
@@ -159,9 +148,7 @@ export class StatisticsService {
         status: r.status,
         createdAt: r.createdAt,
       }));
-    } catch {
-      /* */
-    }
+    });
 
     return {
       profile: { completeness: profileCompleteness },
@@ -213,24 +200,20 @@ export class StatisticsService {
 
   async getCareerProgress(): Promise<CareerProgress> {
     let skillCoverage = 0;
-    try {
+    await this.runBestEffort(async () => {
       const skillResult = await db.select({ count: count() }).from(skillMappings);
       const mappedSkills = skillResult[0]?.count || 0;
       skillCoverage = Math.min(100, Math.round((mappedSkills / 20) * 100));
-    } catch {
-      /* */
-    }
+    });
 
     let applicationSuccessRate = 0;
-    try {
+    await this.runBestEffort(async () => {
       const allApps = await db.select().from(applications);
       const offered = allApps.filter((a) => a.status === "offered").length;
       if (allApps.length > 0) {
         applicationSuccessRate = Math.round((offered / allApps.length) * 100);
       }
-    } catch {
-      /* */
-    }
+    });
 
     return {
       skillCoverage,

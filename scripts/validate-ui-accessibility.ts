@@ -114,12 +114,8 @@ const oklchToRelativeLuminance = (color: OklchColor): number => {
   const sCube = sPrime ** 3;
 
   const redLinear = clamp01(4.0767416621 * lCube - 3.3077115913 * mCube + 0.2309699292 * sCube);
-  const greenLinear = clamp01(
-    -1.2684380046 * lCube + 2.6097574011 * mCube - 0.3413193965 * sCube,
-  );
-  const blueLinear = clamp01(
-    -0.0041960863 * lCube - 0.7034186147 * mCube + 1.707614701 * sCube,
-  );
+  const greenLinear = clamp01(-1.2684380046 * lCube + 2.6097574011 * mCube - 0.3413193965 * sCube);
+  const blueLinear = clamp01(-0.0041960863 * lCube - 0.7034186147 * mCube + 1.707614701 * sCube);
 
   return 0.2126 * redLinear + 0.7152 * greenLinear + 0.0722 * blueLinear;
 };
@@ -177,8 +173,7 @@ const collectHardcodedColorViolations = (): Violation[] => {
     },
     {
       regex: hardcodedArbitraryColorClassPattern,
-      message:
-        "Arbitrary color class found. Use semantic tokens instead of inline color literals.",
+      message: "Arbitrary color class found. Use semantic tokens instead of inline color literals.",
     },
   ];
 
@@ -214,7 +209,9 @@ const collectContrastViolations = (css: string): string[] => {
       const content = themes[mode].get(contentToken);
 
       if (!background || !content) {
-        failures.push(`Missing token pair: bao-${mode}-${backgroundToken} / bao-${mode}-${contentToken}`);
+        failures.push(
+          `Missing token pair: bao-${mode}-${backgroundToken} / bao-${mode}-${contentToken}`,
+        );
         continue;
       }
 
@@ -236,7 +233,9 @@ const main = (): void => {
   const contrastViolations = collectContrastViolations(themeCss);
 
   if (hardcodedColorViolations.length === 0 && contrastViolations.length === 0) {
-    console.log("UI accessibility validation passed: WCAG contrast and tokenized colors are enforced.");
+    console.log(
+      "UI accessibility validation passed: WCAG contrast and tokenized colors are enforced.",
+    );
     return;
   }
 

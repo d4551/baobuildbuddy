@@ -18,9 +18,7 @@ const isSpeaking = ref(false);
 const supportsRecognition = ref(true);
 const supportsSynthesis = ref(true);
 const voices = ref<SpeechSynthesisVoice[]>([]);
-const isSupported = computed(
-  () => supportsRecognition.value || supportsSynthesis.value,
-);
+const isSupported = computed(() => supportsRecognition.value || supportsSynthesis.value);
 
 const speak = vi.fn();
 const startListening = vi.fn(() => true);

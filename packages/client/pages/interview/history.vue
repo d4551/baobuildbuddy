@@ -2,6 +2,7 @@
 import { APP_ROUTE_QUERY_KEYS, type InterviewSession } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import type { LocationQueryValue } from "vue-router";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
@@ -28,10 +29,12 @@ const normalizeQuerySession = (
 };
 
 onMounted(async () => {
-  try {
-    await fetchSessions();
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("interviewHistory.fetchErrorFallback")));
+  const sessionsResult = await settlePromise(
+    fetchSessions(),
+    t("interviewHistory.fetchErrorFallback"),
+  );
+  if (!sessionsResult.ok) {
+    $toast.error(getErrorMessage(sessionsResult.error, t("interviewHistory.fetchErrorFallback")));
   }
 });
 
@@ -53,17 +56,25 @@ watch(
 
     selectedSessionId.value = nextSessionId;
     detailLoading.value = true;
-    try {
-      selectedSession.value = await getSession(nextSessionId);
-      if (!selectedSession.value) {
-        detailError.value = t("interviewHistory.sessionNotFound");
-      }
-    } catch (error) {
-      detailError.value = getErrorMessage(error, t("interviewHistory.detailLoadErrorFallback"));
+    const sessionResult = await settlePromise(
+      getSession(nextSessionId),
+      t("interviewHistory.detailLoadErrorFallback"),
+    );
+    detailLoading.value = false;
+
+    if (!sessionResult.ok) {
+      detailError.value = getErrorMessage(
+        sessionResult.error,
+        t("interviewHistory.detailLoadErrorFallback"),
+      );
       $toast.error(detailError.value);
       selectedSession.value = null;
-    } finally {
-      detailLoading.value = false;
+      return;
+    }
+
+    selectedSession.value = sessionResult.value;
+    if (!selectedSession.value) {
+      detailError.value = t("interviewHistory.sessionNotFound");
     }
   },
   { immediate: true },

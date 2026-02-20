@@ -48,7 +48,11 @@ export type ToastApi = {
 };
 
 function getToastDuration(type: ToastType, durationOverride?: number): number {
-  if (typeof durationOverride === "number" && Number.isFinite(durationOverride) && durationOverride >= 0) {
+  if (
+    typeof durationOverride === "number" &&
+    Number.isFinite(durationOverride) &&
+    durationOverride >= 0
+  ) {
     return durationOverride;
   }
   return type === "error" ? ERROR_TOAST_DURATION_MS : DEFAULT_TOAST_DURATION_MS;

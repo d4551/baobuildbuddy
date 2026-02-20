@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -23,7 +24,9 @@ const studioId = computed(() => {
 const loading = computed(() => bootstrapPending.value || studioLoading.value);
 const studioInitial = computed(() => studio.value?.name?.charAt(0) ?? "?");
 const cultureValues = computed(() => studio.value?.culture.values ?? []);
-const cultureWorkStyle = computed(() => studio.value?.culture.workStyle?.trim() || t("studioDetail.noCultureWorkStyle"));
+const cultureWorkStyle = computed(
+  () => studio.value?.culture.workStyle?.trim() || t("studioDetail.noCultureWorkStyle"),
+);
 const cultureEnvironment = computed(() => studio.value?.culture.environment?.trim() || "");
 const breadcrumbs = computed(() => [
   { label: t("studioDetail.breadcrumbs.dashboard"), to: APP_ROUTES.dashboard },
@@ -52,14 +55,18 @@ const { pending: bootstrapPending, refresh: refreshStudio } = await useAsyncData
 
 async function loadStudio() {
   pageError.value = null;
-  try {
-    await fetchStudioById(studioId.value);
-    if (!studio.value) {
-      pageError.value = t("studioDetail.errors.notFound");
-      showErrorToast(pageError.value);
-    }
-  } catch (error) {
-    pageError.value = getErrorMessage(error, t("studioDetail.errors.loadFailed"));
+  const studioResult = await settlePromise(
+    fetchStudioById(studioId.value),
+    t("studioDetail.errors.loadFailed"),
+  );
+  if (!studioResult.ok) {
+    pageError.value = getErrorMessage(studioResult.error, t("studioDetail.errors.loadFailed"));
+    showErrorToast(pageError.value);
+    return;
+  }
+
+  if (!studio.value) {
+    pageError.value = t("studioDetail.errors.notFound");
     showErrorToast(pageError.value);
   }
 }

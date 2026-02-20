@@ -1,6 +1,7 @@
 import type { UserProfile } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { toUserProfile } from "./api-normalizers";
+import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 
 type ApiClient = ReturnType<typeof useApi>;
 type UpdateUserProfileInput = NonNullable<Parameters<ApiClient["user"]["profile"]["put"]>[0]>;
@@ -14,29 +15,21 @@ export function useUser() {
   const loading = useState(STATE_KEYS.USER_LOADING, () => false);
 
   async function fetchProfile() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.user.profile.get();
-      if (error) throw new Error("Failed to fetch profile");
-      const normalized = toUserProfile(data);
-      if (!normalized) throw new Error("Invalid user profile payload");
+      assertApiResponse(error, "Failed to fetch profile");
+      const normalized = requireValue(toUserProfile(data), "Invalid user profile payload");
       profile.value = normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function updateProfile(updates: UpdateUserProfileInput) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.user.profile.put(updates);
-      if (error) throw new Error("Failed to update profile");
-      const normalized = toUserProfile(data);
-      if (!normalized) throw new Error("Invalid user profile payload");
+      assertApiResponse(error, "Failed to update profile");
+      const normalized = requireValue(toUserProfile(data), "Invalid user profile payload");
       profile.value = normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   return {

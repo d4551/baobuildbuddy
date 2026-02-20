@@ -12,11 +12,7 @@ definePageMeta({
   middleware: ["auth"],
 });
 
-type ReadinessCategoryKey =
-  | "technical"
-  | "softSkills"
-  | "industryKnowledge"
-  | "portfolio";
+type ReadinessCategoryKey = "technical" | "softSkills" | "industryKnowledge" | "portfolio";
 
 interface ReadinessCategoryStat {
   readonly key: ReadinessCategoryKey;

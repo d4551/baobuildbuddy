@@ -52,9 +52,7 @@ function resolveLatestAssistantMessage(messages: readonly ChatMessage[]): string
  * @param value Canonical voice error code.
  * @returns Translation key path or empty string.
  */
-function resolveSpeechErrorMessageKey(
-  value: AIChatVoiceErrorCode | null | undefined,
-): string {
+function resolveSpeechErrorMessageKey(value: AIChatVoiceErrorCode | null | undefined): string {
   if (value === null || value === undefined) {
     return "";
   }
@@ -156,10 +154,7 @@ export function useChatVoice(options: UseChatVoiceOptions) {
   );
   const errorMessageKey = computed(() => resolveSpeechErrorMessageKey(speech.error.value));
   const supportHintKey = computed(() =>
-    resolveVoiceSupportHintKey(
-      speech.supportsRecognition.value,
-      speech.supportsSynthesis.value,
-    ),
+    resolveVoiceSupportHintKey(speech.supportsRecognition.value, speech.supportsSynthesis.value),
   );
 
   watch(

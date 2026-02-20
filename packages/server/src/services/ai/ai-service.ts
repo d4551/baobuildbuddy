@@ -16,6 +16,10 @@ import type { AIProvider } from "./provider-interface";
 const TEST_AI_PROVIDER_NAME = "local" as const;
 const TEST_AI_MODEL_NAME = "deterministic-test-model";
 const TEST_AI_MAX_QUESTION_COUNT = 12;
+const UNKNOWN_ERROR_MESSAGE = "Unknown error";
+
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
 
 function parseQuestionCount(prompt: string): number {
   const exactMatch = prompt.match(/exactly\s+(\d+)\s+questions/i);
@@ -267,57 +271,47 @@ export class AIService {
       : AI_PROVIDER_DEFAULT_ORDER[0];
   }
 
+  private static canCreateLocalProvider(config: AIProviderConfig): boolean {
+    return (
+      config.provider === "local" &&
+      typeof config.baseUrl === "string" &&
+      config.baseUrl.trim().length > 0 &&
+      URL.canParse(config.baseUrl) &&
+      typeof config.model === "string" &&
+      config.model.trim().length > 0
+    );
+  }
+
+  private static createProvider(config: AIProviderConfig): AIProvider | null {
+    switch (config.provider) {
+      case "gemini":
+        return config.apiKey ? new GeminiProvider(config.apiKey, config.model) : null;
+      case "claude":
+        return config.apiKey ? new ClaudeProvider(config.apiKey, config.model) : null;
+      case "openai":
+        return config.apiKey ? new OpenAIProvider(config.apiKey, config.model) : null;
+      case "huggingface":
+        // HuggingFace works without API key (free tier)
+        return new HuggingFaceProvider(config.apiKey, config.model);
+      case "local":
+        if (!AIService.canCreateLocalProvider(config)) {
+          return null;
+        }
+        return new LocalProvider(config.baseUrl, config.model);
+      default:
+        return null;
+    }
+  }
+
   /**
    * Initialize AI providers based on configurations
    */
   private initializeProviders(configs: AIProviderConfig[]): void {
     for (const config of configs) {
       if (!config.enabled) continue;
-
-      try {
-        let provider: AIProvider | null = null;
-
-        switch (config.provider) {
-          case "gemini":
-            if (config.apiKey) {
-              provider = new GeminiProvider(config.apiKey, config.model);
-            }
-            break;
-
-          case "claude":
-            if (config.apiKey) {
-              provider = new ClaudeProvider(config.apiKey, config.model);
-            }
-            break;
-
-          case "openai":
-            if (config.apiKey) {
-              provider = new OpenAIProvider(config.apiKey, config.model);
-            }
-            break;
-
-          case "huggingface":
-            // HuggingFace works without API key (free tier)
-            provider = new HuggingFaceProvider(config.apiKey, config.model);
-            break;
-
-          case "local":
-            if (
-              typeof config.baseUrl === "string" &&
-              config.baseUrl.trim().length > 0 &&
-              typeof config.model === "string" &&
-              config.model.trim().length > 0
-            ) {
-              provider = new LocalProvider(config.baseUrl, config.model);
-            }
-            break;
-        }
-
-        if (provider) {
-          this.providers.set(config.provider, provider);
-        }
-      } catch (error) {
-        console.error(`Failed to initialize ${config.provider} provider:`, error);
+      const provider = AIService.createProvider(config);
+      if (provider) {
+        this.providers.set(config.provider, provider);
       }
     }
 
@@ -426,37 +420,53 @@ export class AIService {
       const provider = this.providers.get(providerName);
       if (!provider) continue;
 
-      try {
-        // Check if provider is available
-        const isAvailable = await provider.isAvailable();
-        if (!isAvailable) {
-          errors.push({
-            provider: providerName,
-            error: "Provider not available",
-          });
-          continue;
-        }
-
-        // Try to generate
-        const response = await provider.generate(contextualPrompt, providerOptions);
-
-        // If there's an error in the response, try next provider
-        if (response.error) {
-          errors.push({
-            provider: providerName,
-            error: response.error,
-          });
-          continue;
-        }
-
-        // Success!
-        return response;
-      } catch (error) {
+      const availability = await provider.isAvailable().then(
+        (isAvailable) => ({ isAvailable, error: null as string | null }),
+        (error: unknown) => ({ isAvailable: false, error: toErrorMessage(error) }),
+      );
+      if (availability.error) {
         errors.push({
           provider: providerName,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: availability.error,
         });
+        continue;
       }
+      if (!availability.isAvailable) {
+        errors.push({
+          provider: providerName,
+          error: "Provider not available",
+        });
+        continue;
+      }
+
+      const generationResult = await provider.generate(contextualPrompt, providerOptions).then(
+        (response) => ({ response, error: null as string | null }),
+        (error: unknown) => ({ response: null as AIResponse | null, error: toErrorMessage(error) }),
+      );
+      if (generationResult.error) {
+        errors.push({
+          provider: providerName,
+          error: generationResult.error,
+        });
+        continue;
+      }
+
+      const response = generationResult.response;
+      if (!response) {
+        continue;
+      }
+
+      // If there's an error in the response, try next provider
+      if (response.error) {
+        errors.push({
+          provider: providerName,
+          error: response.error,
+        });
+        continue;
+      }
+
+      // Success!
+      return response;
     }
 
     // All providers failed
@@ -492,33 +502,62 @@ export class AIService {
       const provider = this.providers.get(providerName);
       if (!provider) continue;
 
-      try {
-        // Check if provider is available
-        const isAvailable = await provider.isAvailable();
-        if (!isAvailable) {
-          errors.push({
-            provider: providerName,
-            error: "Provider not available",
-          });
-          continue;
-        }
-
-        // Try to stream
-        let hasYielded = false;
-        for await (const chunk of provider.stream(contextualPrompt, providerOptions)) {
-          hasYielded = true;
-          yield { chunk, provider: providerName };
-        }
-
-        // If we successfully yielded at least one chunk, we're done
-        if (hasYielded) {
-          return;
-        }
-      } catch (error) {
+      const availability = await provider.isAvailable().then(
+        (isAvailable) => ({ isAvailable, error: null as string | null }),
+        (error: unknown) => ({ isAvailable: false, error: toErrorMessage(error) }),
+      );
+      if (availability.error) {
         errors.push({
           provider: providerName,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: availability.error,
         });
+        continue;
+      }
+      if (!availability.isAvailable) {
+        errors.push({
+          provider: providerName,
+          error: "Provider not available",
+        });
+        continue;
+      }
+
+      // Try to stream
+      let hasYielded = false;
+      const iterator = provider.stream(contextualPrompt, providerOptions)[Symbol.asyncIterator]();
+      let streamFailed = false;
+      while (true) {
+        const nextChunk = await iterator.next().then(
+          (result) => ({ result, error: null as string | null }),
+          (error: unknown) => ({
+            result: null as IteratorResult<string> | null,
+            error: toErrorMessage(error),
+          }),
+        );
+
+        if (nextChunk.error) {
+          errors.push({
+            provider: providerName,
+            error: nextChunk.error,
+          });
+          streamFailed = true;
+          break;
+        }
+
+        if (!nextChunk.result || nextChunk.result.done) {
+          break;
+        }
+
+        hasYielded = true;
+        yield { chunk: nextChunk.result.value, provider: providerName };
+      }
+
+      if (streamFailed) {
+        continue;
+      }
+
+      // If we successfully yielded at least one chunk, we're done
+      if (hasYielded) {
+        return;
       }
     }
 
@@ -535,23 +574,25 @@ export class AIService {
     const statuses: AIProviderStatus[] = [];
 
     for (const [providerName, provider] of this.providers) {
-      try {
-        const available = await provider.isAvailable();
-        statuses.push({
-          provider: providerName,
-          available,
-          health: available ? "healthy" : "down",
-          lastCheck: Date.now(),
-        });
-      } catch (error) {
-        statuses.push({
-          provider: providerName,
-          available: false,
-          health: "down",
-          lastCheck: Date.now(),
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
-      }
+      await provider.isAvailable().then(
+        (available) => {
+          statuses.push({
+            provider: providerName,
+            available,
+            health: available ? "healthy" : "down",
+            lastCheck: Date.now(),
+          });
+        },
+        (error: unknown) => {
+          statuses.push({
+            provider: providerName,
+            available: false,
+            health: "down",
+            lastCheck: Date.now(),
+            error: toErrorMessage(error),
+          });
+        },
+      );
     }
 
     return statuses;
@@ -580,55 +621,14 @@ export class AIService {
    * Add a new provider at runtime
    */
   addProvider(config: AIProviderConfig): boolean {
-    try {
-      let provider: AIProvider | null = null;
-
-      switch (config.provider) {
-        case "gemini":
-          if (config.apiKey) {
-            provider = new GeminiProvider(config.apiKey, config.model);
-          }
-          break;
-
-        case "claude":
-          if (config.apiKey) {
-            provider = new ClaudeProvider(config.apiKey, config.model);
-          }
-          break;
-
-        case "openai":
-          if (config.apiKey) {
-            provider = new OpenAIProvider(config.apiKey, config.model);
-          }
-          break;
-
-        case "huggingface":
-          provider = new HuggingFaceProvider(config.apiKey, config.model);
-          break;
-
-        case "local":
-          if (
-            typeof config.baseUrl === "string" &&
-            config.baseUrl.trim().length > 0 &&
-            typeof config.model === "string" &&
-            config.model.trim().length > 0
-          ) {
-            provider = new LocalProvider(config.baseUrl, config.model);
-          }
-          break;
-      }
-
-      if (provider) {
-        this.providers.set(config.provider, provider);
-        this.refreshFallbackOrder();
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      console.error(`Failed to add ${config.provider} provider:`, error);
+    const provider = AIService.createProvider(config);
+    if (!provider) {
       return false;
     }
+
+    this.providers.set(config.provider, provider);
+    this.refreshFallbackOrder();
+    return true;
   }
 
   /**

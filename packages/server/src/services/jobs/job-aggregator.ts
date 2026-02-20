@@ -106,36 +106,41 @@ export class JobAggregator {
     let updatedCount = 0;
 
     for (const rawJob of uniqueJobs) {
-      try {
-        const job = this.rawJobToJob(rawJob);
-        if (!job.contentHash) {
-          continue;
-        }
+      await Promise.resolve()
+        .then(async () => {
+          const job = this.rawJobToJob(rawJob);
+          if (!job.contentHash) {
+            return;
+          }
 
-        const existing = await db
-          .select()
-          .from(jobs)
-          .where(eq(jobs.contentHash, job.contentHash))
-          .limit(1);
+          const existing = await db
+            .select()
+            .from(jobs)
+            .where(eq(jobs.contentHash, job.contentHash))
+            .limit(1);
 
-        if (existing.length === 0) {
-          // Insert new job
-          await db.insert(jobs).values(job);
-          newCount++;
-        } else {
-          // Update existing job
-          await db
-            .update(jobs)
-            .set({
-              ...job,
-              updatedAt: new Date().toISOString(),
-            })
-            .where(eq(jobs.id, existing[0].id));
-          updatedCount++;
-        }
-      } catch (error) {
-        console.error("Failed to save job:", error);
-      }
+          if (existing.length === 0) {
+            // Insert new job
+            await db.insert(jobs).values(job);
+            newCount++;
+          } else {
+            // Update existing job
+            await db
+              .update(jobs)
+              .set({
+                ...job,
+                updatedAt: new Date().toISOString(),
+              })
+              .where(eq(jobs.id, existing[0].id));
+            updatedCount++;
+          }
+        })
+        .then(
+          () => undefined,
+          (error: unknown) => {
+            console.error("Failed to save job:", error);
+          },
+        );
     }
 
     console.log(`Refresh complete: ${newCount} new, ${updatedCount} updated`);
@@ -646,7 +651,9 @@ export class JobAggregator {
 
   private normalizePlatforms(value: string[] | null): Platform[] | undefined {
     if (!Array.isArray(value)) return undefined;
-    return value.filter((platform): platform is Platform => isOneOf(JOB_SUPPORTED_PLATFORMS, platform));
+    return value.filter((platform): platform is Platform =>
+      isOneOf(JOB_SUPPORTED_PLATFORMS, platform),
+    );
   }
 
   private normalizeExperienceLevel(value: string | null): JobExperienceLevel | undefined {

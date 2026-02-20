@@ -208,10 +208,9 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                 response: {
                     200: Response | {
                         error: string;
-                        details?: undefined;
+                        details: string;
                     } | {
                         error: string;
-                        details: string;
                     };
                     422: {
                         type: "validation";

@@ -233,21 +233,23 @@ async function maintainCache() {
 
 // Main execution function
 async function main() {
-  try {
-    // Uncomment the examples you want to run
+  await Promise.resolve()
+    .then(async () => {
+      // Uncomment the examples you want to run
 
-    // await refreshJobs()
-    // await searchUnityJobs()
-    // await calculateMatches()
-    // await trackApplications()
-    // await advancedSearch()
-    // await maintainCache()
+      // await refreshJobs()
+      // await searchUnityJobs()
+      // await calculateMatches()
+      // await trackApplications()
+      // await advancedSearch()
+      // await maintainCache()
 
-    console.log("\n✓ All examples completed successfully");
-  } catch (error) {
-    console.error("Error running examples:", error);
-    throw error;
-  }
+      console.log("\n✓ All examples completed successfully");
+    })
+    .catch((error: unknown) => {
+      console.error("Error running examples:", error);
+      throw error;
+    });
 }
 
 // Run if executed directly

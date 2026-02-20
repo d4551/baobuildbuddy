@@ -197,12 +197,6 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                 headers: unknown;
                 response: {
                     200: {
-                        error: string;
-                        details: string;
-                        message?: undefined;
-                        coverLetter?: undefined;
-                        content?: undefined;
-                    } | {
                         message: string;
                         coverLetter: {
                             id: string;
@@ -229,6 +223,11 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                         error?: undefined;
                         details?: undefined;
                         coverLetter?: undefined;
+                    } | {
+                        error: string;
+                        details: string;
+                    } | {
+                        error: string;
                     };
                     422: {
                         type: "validation";
@@ -257,10 +256,9 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                     response: {
                         200: Response | {
                             error: string;
-                            details?: undefined;
+                            details: string;
                         } | {
                             error: string;
-                            details: string;
                         };
                         422: {
                             type: "validation";

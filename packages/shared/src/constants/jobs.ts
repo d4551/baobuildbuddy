@@ -1,10 +1,4 @@
-import type {
-  GameGenre,
-  JobExperienceLevel,
-  JobType,
-  Platform,
-  StudioType,
-} from "../types/jobs";
+import type { GameGenre, JobExperienceLevel, JobType, Platform, StudioType } from "../types/jobs";
 
 /**
  * Sentinel value used by UI filters to represent "no active filter".

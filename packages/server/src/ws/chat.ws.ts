@@ -1,10 +1,38 @@
-import { APP_BRAND, generateId } from "@bao/shared";
+import { APP_BRAND, generateId, safeParseJson } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { contextManager } from "../services/ai/context-manager";
+
+type AutomationActionPayload = {
+  action: string;
+  jobUrl?: string;
+  resumeId?: string;
+  coverLetterId?: string;
+};
+
+function parseAutomationActionPayload(raw: string): AutomationActionPayload | null {
+  const parsed = safeParseJson(raw);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return null;
+  }
+  const parsedRecord = parsed as Record<string, unknown>;
+
+  if (typeof parsedRecord.action !== "string") {
+    return null;
+  }
+
+  return {
+    action: parsedRecord.action,
+    ...(typeof parsedRecord.jobUrl === "string" ? { jobUrl: parsedRecord.jobUrl } : {}),
+    ...(typeof parsedRecord.resumeId === "string" ? { resumeId: parsedRecord.resumeId } : {}),
+    ...(typeof parsedRecord.coverLetterId === "string"
+      ? { coverLetterId: parsedRecord.coverLetterId }
+      : {}),
+  };
+}
 
 export const chatWebSocket = new Elysia().ws("/ws/chat", {
   body: t.Object({
@@ -39,116 +67,107 @@ export const chatWebSocket = new Elysia().ws("/ws/chat", {
       }),
     );
 
-    try {
-      // Load settings to get AI provider config
-      const settingsRows = await db
-        .select()
-        .from(settings)
-        .where(eq(settings.id, DEFAULT_SETTINGS_ID));
-      const config = settingsRows[0];
-      const { AIService } = await import("../services/ai/ai-service");
-      const aiService = AIService.fromSettings(config);
-      let responseText = "";
+    return db
+      .select()
+      .from(settings)
+      .where(eq(settings.id, DEFAULT_SETTINGS_ID))
+      .then(async (settingsRows) => {
+        const config = settingsRows[0];
+        const { AIService } = await import("../services/ai/ai-service");
+        const aiService = AIService.fromSettings(config);
 
-      try {
-        // Build context-aware prompt using ConversationContextManager
-        const { systemPrompt, messages } = await contextManager.buildContext(
+        return contextManager
+          .buildContext(sessionId, data.content)
+          .then(async ({ systemPrompt, messages }) => {
+            let responseText = "";
+            ws.send(JSON.stringify({ type: "stream_start", sessionId }));
+
+            const generator = aiService.stream(data.content, {
+              systemPrompt,
+              messages,
+              temperature: 0.7,
+              maxTokens: 2048,
+            });
+
+            for await (const { chunk } of generator) {
+              responseText += chunk;
+              ws.send(
+                JSON.stringify({
+                  type: "stream_chunk",
+                  chunk,
+                  sessionId,
+                }),
+              );
+            }
+
+            const domain = contextManager.inferDomain(data.content);
+            const followUps = contextManager.generateFollowUps(domain);
+
+            ws.send(
+              JSON.stringify({
+                type: "stream_end",
+                sessionId,
+                followUps,
+              }),
+            );
+
+            const actionMatch = responseText.match(/\{"action"\s*:\s*"job_apply"[^{}]*\}/);
+            if (actionMatch) {
+              const action = parseAutomationActionPayload(actionMatch[0]);
+              if (!action) {
+                ws.send(
+                  JSON.stringify({
+                    type: "automation_action_detected",
+                    action: null,
+                    sessionId,
+                    parseError: true,
+                  }),
+                );
+              } else {
+                const isValidAction =
+                  action.action === "job_apply" && !!action.jobUrl && !!action.resumeId;
+                ws.send(
+                  JSON.stringify({
+                    type: "automation_action_detected",
+                    action: isValidAction ? action : null,
+                    sessionId,
+                  }),
+                );
+              }
+            }
+
+            return responseText;
+          })
+          .catch(() => {
+            const fallback = generateFallbackResponse(data.content);
+            ws.send(
+              JSON.stringify({
+                type: "response",
+                content: fallback,
+                sessionId,
+              }),
+            );
+            return fallback;
+          });
+      })
+      .then(async (responseText) => {
+        await db.insert(chatHistory).values({
+          id: generateId(),
+          role: "assistant",
+          content: responseText,
+          timestamp: new Date().toISOString(),
           sessionId,
-          data.content,
-        );
-
-        // Stream response
-        ws.send(JSON.stringify({ type: "stream_start", sessionId }));
-
-        const generator = aiService.stream(data.content, {
-          systemPrompt,
-          messages,
-          temperature: 0.7,
-          maxTokens: 2048,
         });
-
-        for await (const { chunk } of generator) {
-          responseText += chunk;
-          ws.send(
-            JSON.stringify({
-              type: "stream_chunk",
-              chunk,
-              sessionId,
-            }),
-          );
-        }
-
-        // Include follow-up suggestions
-        const domain = contextManager.inferDomain(data.content);
-        const followUps = contextManager.generateFollowUps(domain);
-
+      })
+      .catch(() => {
         ws.send(
           JSON.stringify({
-            type: "stream_end",
-            sessionId,
-            followUps,
-          }),
-        );
-
-        // Detect automation action blocks in the AI response
-        const actionMatch = responseText.match(/\{"action"\s*:\s*"job_apply"[^{}]*\}/);
-        if (actionMatch) {
-          try {
-            const action = JSON.parse(actionMatch[0]) as {
-              action: string;
-              jobUrl?: string;
-              resumeId?: string;
-              coverLetterId?: string;
-            };
-            const isValidAction =
-              action.action === "job_apply" && !!action.jobUrl && !!action.resumeId;
-            ws.send(
-              JSON.stringify({
-                type: "automation_action_detected",
-                action: isValidAction ? action : null,
-                sessionId,
-              }),
-            );
-          } catch {
-            ws.send(
-              JSON.stringify({
-                type: "automation_action_detected",
-                action: null,
-                sessionId,
-                parseError: true,
-              }),
-            );
-          }
-        }
-      } catch {
-        // AI service not available, use fallback
-        responseText = generateFallbackResponse(data.content);
-        ws.send(
-          JSON.stringify({
-            type: "response",
-            content: responseText,
+            type: "error",
+            message: "Failed to generate response",
             sessionId,
           }),
         );
-      }
-
-      // Save assistant response
-      await db.insert(chatHistory).values({
-        id: generateId(),
-        role: "assistant",
-        content: responseText,
-        timestamp: new Date().toISOString(),
-        sessionId,
       });
-    } catch {
-      ws.send(
-        JSON.stringify({
-          type: "error",
-          message: "Failed to generate response",
-          sessionId,
-        }),
-      );
-    }
   },
   close() {
     // Connection closed

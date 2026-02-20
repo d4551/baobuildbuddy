@@ -235,18 +235,10 @@ const INDEXES = [
  */
 export function initializeDatabase(sqlite: Database): void {
   for (const ddl of TABLE_DEFINITIONS) {
-    try {
-      sqlite.exec(ddl);
-    } catch (error) {
-      console.error(`Failed to create table: ${error instanceof Error ? error.message : error}`);
-    }
+    sqlite.exec(ddl);
   }
 
   for (const indexSql of INDEXES) {
-    try {
-      sqlite.exec(indexSql);
-    } catch (error) {
-      console.error(`Failed to create index: ${error instanceof Error ? error.message : error}`);
-    }
+    sqlite.exec(indexSql);
   }
 }

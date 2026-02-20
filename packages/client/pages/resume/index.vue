@@ -8,6 +8,7 @@ import {
   resumeDataToFormData,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -149,9 +150,7 @@ const filteredResumes = computed(() => {
 
 const hasResumeFiltersApplied = computed(() => resumeSearchQuery.value.trim().length > 0);
 
-const resumePagination = usePagination(filteredResumes, RESUME_LIST_PAGE_SIZE, [
-  resumeSearchQuery,
-]);
+const resumePagination = usePagination(filteredResumes, RESUME_LIST_PAGE_SIZE, [resumeSearchQuery]);
 
 const resumePaginationSummary = computed(() =>
   t("resumePage.pagination.summary", {
@@ -254,8 +253,8 @@ async function handleCreate() {
   }
 
   creating.value = true;
-  try {
-    const resume = await createResume({
+  const createResult = await settlePromise(
+    createResume({
       name: newResumeName.value,
       template: newResumeTemplate.value,
       personalInfo: {},
@@ -264,16 +263,20 @@ async function handleCreate() {
       skills: {},
       projects: [],
       gamingExperience: {},
-    });
-    showCreateModal.value = false;
-    newResumeName.value = "";
-    selectedResumeId.value = resume.id;
-    $toast.success(t("resumePage.toasts.resumeCreated"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("resumePage.toasts.resumeCreateFailed")));
-  } finally {
-    creating.value = false;
+    }),
+    t("resumePage.toasts.resumeCreateFailed"),
+  );
+  creating.value = false;
+
+  if (!createResult.ok) {
+    $toast.error(getErrorMessage(createResult.error, t("resumePage.toasts.resumeCreateFailed")));
+    return;
   }
+
+  showCreateModal.value = false;
+  newResumeName.value = "";
+  selectedResumeId.value = createResult.value.id;
+  $toast.success(t("resumePage.toasts.resumeCreated"));
 }
 
 async function handleSave() {
@@ -321,18 +324,25 @@ async function handleSave() {
     return;
   }
 
-  try {
-    const updates = formDataToResumeData(formData);
-    await updateResume(selectedResumeId.value, updates);
-    const reward = await resolvePipelineReward("resumeSave");
-    $toast.success(
-      reward
-        ? t("resumePage.toasts.resumeSavedWithXp", { xp: reward })
-        : t("resumePage.toasts.resumeSaved"),
-    );
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("resumePage.toasts.resumeSaveFailed")));
+  const saveResult = await settlePromise(
+    (async () => {
+      const updates = formDataToResumeData(formData);
+      await updateResume(selectedResumeId.value, updates);
+      return resolvePipelineReward("resumeSave");
+    })(),
+    t("resumePage.toasts.resumeSaveFailed"),
+  );
+  if (!saveResult.ok) {
+    $toast.error(getErrorMessage(saveResult.error, t("resumePage.toasts.resumeSaveFailed")));
+    return;
   }
+
+  const reward = saveResult.value;
+  $toast.success(
+    reward
+      ? t("resumePage.toasts.resumeSavedWithXp", { xp: reward })
+      : t("resumePage.toasts.resumeSaved"),
+  );
 }
 
 function requestDeleteResume(id: string) {
@@ -348,28 +358,35 @@ async function handleDeleteResume() {
   const id = pendingDeleteResumeId.value;
   if (!id) return;
 
-  try {
-    await deleteResume(id);
-    if (selectedResumeId.value === id) {
-      selectedResumeId.value = null;
-    }
-    $toast.success(t("resumePage.toasts.resumeDeleted"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("resumePage.toasts.resumeDeleteFailed")));
-  } finally {
-    clearDeleteResumeState();
-    showDeleteResumeDialog.value = false;
+  const deleteResult = await settlePromise(
+    deleteResume(id),
+    t("resumePage.toasts.resumeDeleteFailed"),
+  );
+  clearDeleteResumeState();
+  showDeleteResumeDialog.value = false;
+
+  if (!deleteResult.ok) {
+    $toast.error(getErrorMessage(deleteResult.error, t("resumePage.toasts.resumeDeleteFailed")));
+    return;
   }
+
+  if (selectedResumeId.value === id) {
+    selectedResumeId.value = null;
+  }
+  $toast.success(t("resumePage.toasts.resumeDeleted"));
 }
 
 async function handleExport() {
   if (!selectedResumeId.value) return;
-  try {
-    await exportResume(selectedResumeId.value);
-    $toast.success(t("resumePage.toasts.resumeExported"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("resumePage.toasts.resumeExportFailed")));
+  const exportResult = await settlePromise(
+    exportResume(selectedResumeId.value),
+    t("resumePage.toasts.resumeExportFailed"),
+  );
+  if (!exportResult.ok) {
+    $toast.error(getErrorMessage(exportResult.error, t("resumePage.toasts.resumeExportFailed")));
+    return;
   }
+  $toast.success(t("resumePage.toasts.resumeExported"));
 }
 
 async function handleAIEnhance() {
@@ -377,30 +394,35 @@ async function handleAIEnhance() {
 
   enhancing.value = true;
   startAiEnhancementProgress();
-  try {
-    const enhanced = await aiEnhance(selectedResumeId.value);
-    if (enhanced?.resume) {
-      const form = resumeDataToFormData(enhanced.resume);
-      Object.assign(formData, form);
-      const reward = await resolvePipelineReward("resumeEnhance");
-      $toast.success(
-        reward
-          ? t("resumePage.toasts.resumeEnhancedWithXp", { xp: reward })
-          : t("resumePage.toasts.resumeEnhanced"),
-      );
-    } else if (enhanced) {
-      const reward = await resolvePipelineReward("resumeEnhance");
-      $toast.success(
-        reward
-          ? t("resumePage.toasts.aiSuggestionsReadyWithXp", { xp: reward })
-          : t("resumePage.toasts.aiSuggestionsReady"),
-      );
-    }
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("resumePage.toasts.resumeEnhanceFailed")));
-  } finally {
-    stopAiEnhancementProgress();
-    enhancing.value = false;
+  const enhanceResult = await settlePromise(
+    aiEnhance(selectedResumeId.value),
+    t("resumePage.toasts.resumeEnhanceFailed"),
+  );
+  stopAiEnhancementProgress();
+  enhancing.value = false;
+
+  if (!enhanceResult.ok) {
+    $toast.error(getErrorMessage(enhanceResult.error, t("resumePage.toasts.resumeEnhanceFailed")));
+    return;
+  }
+
+  const enhanced = enhanceResult.value;
+  if (enhanced?.resume) {
+    const form = resumeDataToFormData(enhanced.resume);
+    Object.assign(formData, form);
+    const reward = await resolvePipelineReward("resumeEnhance");
+    $toast.success(
+      reward
+        ? t("resumePage.toasts.resumeEnhancedWithXp", { xp: reward })
+        : t("resumePage.toasts.resumeEnhanced"),
+    );
+  } else if (enhanced) {
+    const reward = await resolvePipelineReward("resumeEnhance");
+    $toast.success(
+      reward
+        ? t("resumePage.toasts.aiSuggestionsReadyWithXp", { xp: reward })
+        : t("resumePage.toasts.aiSuggestionsReady"),
+    );
   }
 }
 
@@ -408,14 +430,19 @@ async function handleAIScore() {
   if (!selectedResumeId.value) return;
 
   scoring.value = true;
-  try {
-    scoreResult.value = await aiScore(selectedResumeId.value, "");
-    $toast.success(t("resumePage.toasts.resumeScored"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("resumePage.toasts.resumeScoreFailed")));
-  } finally {
-    scoring.value = false;
+  const scoreSubmission = await settlePromise(
+    aiScore(selectedResumeId.value, ""),
+    t("resumePage.toasts.resumeScoreFailed"),
+  );
+  scoring.value = false;
+
+  if (!scoreSubmission.ok) {
+    $toast.error(getErrorMessage(scoreSubmission.error, t("resumePage.toasts.resumeScoreFailed")));
+    return;
   }
+
+  scoreResult.value = scoreSubmission.value;
+  $toast.success(t("resumePage.toasts.resumeScored"));
 }
 
 function addExperience() {
@@ -477,13 +504,12 @@ function removeSkill(index: number) {
 async function resolvePipelineReward(
   action: "resumeSave" | "resumeEnhance",
 ): Promise<number | null> {
-  try {
-    const reward = await awardForAction(action);
-    return reward.awarded ? reward.amount : null;
-  } catch {
+  const rewardResult = await settlePromise(awardForAction(action), "Failed to award resume XP");
+  if (!rewardResult.ok) {
     // Resume save/enhance should succeed even when gamification is unavailable.
     return null;
   }
+  return rewardResult.value.awarded ? rewardResult.value.amount : null;
 }
 </script>
 

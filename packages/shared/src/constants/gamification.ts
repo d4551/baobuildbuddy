@@ -12,8 +12,7 @@ export const PIPELINE_GAMIFICATION_ACTIONS = [
 /**
  * Pipeline gamification action union.
  */
-export type PipelineGamificationAction =
-  (typeof PIPELINE_GAMIFICATION_ACTIONS)[number];
+export type PipelineGamificationAction = (typeof PIPELINE_GAMIFICATION_ACTIONS)[number];
 
 /**
  * XP amounts for each pipeline action.

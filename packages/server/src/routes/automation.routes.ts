@@ -196,26 +196,27 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
   .post(
     "/job-apply",
     async ({ body, set }) => {
-      try {
-        const payload: JobApplyRequestBody = body;
-        const runId = await applicationAutomationService.createJobApplyRun(payload);
+      const payload: JobApplyRequestBody = body;
+      return applicationAutomationService
+        .createJobApplyRun(payload)
+        .then((runId) => {
+          void applicationAutomationService.runJobApply(runId, payload).catch((error) => {
+            console.error(`[automation] job-apply execution failed for runId=${runId}`, error);
+          });
 
-        void applicationAutomationService.runJobApply(runId, payload).catch((error) => {
-          console.error(`[automation] job-apply execution failed for runId=${runId}`, error);
+          set.status = HTTP_STATUS_SUCCESS;
+          return {
+            runId,
+            status: AUTOMATION_STATUS_RUNNING,
+          };
+        })
+        .catch((error: unknown) => {
+          const mapped = mapAutomationRouteError(error);
+          set.status = mapped.status;
+          return {
+            error: mapped.message,
+          };
         });
-
-        set.status = HTTP_STATUS_SUCCESS;
-        return {
-          runId,
-          status: AUTOMATION_STATUS_RUNNING,
-        };
-      } catch (error) {
-        const mapped = mapAutomationRouteError(error);
-        set.status = mapped.status;
-        return {
-          error: mapped.message,
-        };
-      }
     },
     {
       body: t.Object({
@@ -251,9 +252,9 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
   .post(
     "/job-apply/schedule",
     async ({ body, set }) => {
-      try {
-        const payload: ScheduleJobApplyRequestBody = body;
-        const { runId, scheduledFor } = await applicationAutomationService.createScheduledJobApplyRun(
+      const payload: ScheduleJobApplyRequestBody = body;
+      return applicationAutomationService
+        .createScheduledJobApplyRun(
           {
             jobUrl: payload.jobUrl,
             resumeId: payload.resumeId,
@@ -262,21 +263,22 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
             ...(payload.customAnswers ? { customAnswers: payload.customAnswers } : {}),
           },
           payload.runAt,
-        );
-
-        set.status = HTTP_STATUS_SUCCESS;
-        return {
-          runId,
-          status: AUTOMATION_STATUS_PENDING,
-          scheduledFor,
-        };
-      } catch (error) {
-        const mapped = mapAutomationRouteError(error);
-        set.status = mapped.status;
-        return {
-          error: mapped.message,
-        };
-      }
+        )
+        .then(({ runId, scheduledFor }) => {
+          set.status = HTTP_STATUS_SUCCESS;
+          return {
+            runId,
+            status: AUTOMATION_STATUS_PENDING,
+            scheduledFor,
+          };
+        })
+        .catch((error: unknown) => {
+          const mapped = mapAutomationRouteError(error);
+          set.status = mapped.status;
+          return {
+            error: mapped.message,
+          };
+        });
     },
     {
       body: t.Object({
@@ -314,18 +316,20 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
   .post(
     "/email-response",
     async ({ body, set }) => {
-      try {
-        const payload: EmailResponseRequestBody = body;
-        const result = await applicationAutomationService.runEmailResponse(payload);
-        set.status = HTTP_STATUS_SUCCESS;
-        return result;
-      } catch (error) {
-        const mapped = mapAutomationRouteError(error);
-        set.status = mapped.status;
-        return {
-          error: mapped.message,
-        };
-      }
+      const payload: EmailResponseRequestBody = body;
+      return applicationAutomationService
+        .runEmailResponse(payload)
+        .then((result) => {
+          set.status = HTTP_STATUS_SUCCESS;
+          return result;
+        })
+        .catch((error: unknown) => {
+          const mapped = mapAutomationRouteError(error);
+          set.status = mapped.status;
+          return {
+            error: mapped.message,
+          };
+        });
     },
     {
       body: t.Object({

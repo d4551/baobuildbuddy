@@ -1,5 +1,6 @@
 import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
 import { STATE_KEYS, asNumber, asString, isRecord } from "@bao/shared";
+import { assertApiResponse, withLoadingState } from "./async-flow";
 
 const toDashboardStats = (value: unknown): DashboardStats | null => {
   if (!isRecord(value)) return null;
@@ -124,36 +125,27 @@ export function useStatistics() {
   const loading = useState(STATE_KEYS.STATS_LOADING, () => false);
 
   async function fetchDashboard() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.stats.dashboard.get();
-      if (error) throw new Error("Failed to fetch dashboard stats");
+      assertApiResponse(error, "Failed to fetch dashboard stats");
       dashboard.value = toDashboardStats(data);
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function fetchWeekly() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.stats.weekly.get();
-      if (error) throw new Error("Failed to fetch weekly activity");
+      assertApiResponse(error, "Failed to fetch weekly activity");
       weekly.value = toWeeklyActivity(data);
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function fetchCareerProgress() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.stats.career.get();
-      if (error) throw new Error("Failed to fetch career progress");
+      assertApiResponse(error, "Failed to fetch career progress");
       career.value = toCareerProgress(data);
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function refreshAll() {

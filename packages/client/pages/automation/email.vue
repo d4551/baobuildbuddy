@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 type EmailResponseTone = "professional" | "friendly" | "concise";
@@ -38,25 +39,32 @@ async function submitEmailResponse(): Promise<void> {
   lastResult.value = null;
   pending.value = true;
 
-  try {
-    const response = await triggerEmailResponse({
+  const responseResult = await settlePromise(
+    triggerEmailResponse({
       subject: form.subject.trim(),
       message: form.message.trim(),
       tone: form.tone,
       ...(form.sender.trim() ? { sender: form.sender.trim() } : {}),
-    });
+    }),
+    t("automation.email.submitErrorFallback"),
+  );
+  pending.value = false;
 
-    lastResult.value = {
-      runId: response.runId,
-      reply: response.reply,
-      provider: response.provider,
-      model: response.model,
-    };
-  } catch (error) {
-    submitError.value = getErrorMessage(error, t("automation.email.submitErrorFallback"));
-  } finally {
-    pending.value = false;
+  if (!responseResult.ok) {
+    submitError.value = getErrorMessage(
+      responseResult.error,
+      t("automation.email.submitErrorFallback"),
+    );
+    return;
   }
+
+  const response = responseResult.value;
+  lastResult.value = {
+    runId: response.runId,
+    reply: response.reply,
+    provider: response.provider,
+    model: response.model,
+  };
 }
 
 if (import.meta.server) {

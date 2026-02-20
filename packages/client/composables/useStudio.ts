@@ -1,6 +1,7 @@
 import type { GameStudio } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { toGameStudio } from "./api-normalizers";
+import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 
 type ApiClient = ReturnType<typeof useApi>;
 type CreateStudioInput = NonNullable<Parameters<ApiClient["studios"]["post"]>[0]>;
@@ -17,84 +18,64 @@ export function useStudio() {
   const loading = useState(STATE_KEYS.STUDIO_LOADING, () => false);
 
   async function searchStudios(query?: Record<string, string>) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.studios.get({ query: query || {} });
-      if (error) throw new Error("Failed to search studios");
+      assertApiResponse(error, "Failed to search studios");
       studios.value = Array.isArray(data)
         ? data
             .map((entry) => toGameStudio(entry))
             .filter((entry): entry is GameStudio => entry !== null)
         : [];
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function getStudio(id: string) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.studios({ id }).get();
-      if (error) throw new Error("Failed to fetch studio");
-      const normalized = toGameStudio(data);
-      if (!normalized) throw new Error("Invalid studio payload");
+      assertApiResponse(error, "Failed to fetch studio");
+      const normalized = requireValue(toGameStudio(data), "Invalid studio payload");
       currentStudio.value = normalized;
       return normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function getAnalytics() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.studios.analytics.get();
-      if (error) throw new Error("Failed to fetch studio analytics");
+      assertApiResponse(error, "Failed to fetch studio analytics");
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function createStudio(studioData: CreateStudioInput) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.studios.post(studioData);
-      if (error) throw new Error("Failed to create studio");
+      assertApiResponse(error, "Failed to create studio");
       await searchStudios();
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function updateStudio(id: string, updates: UpdateStudioInput) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.studios({ id }).put(updates);
-      if (error) throw new Error("Failed to update studio");
-      const normalized = toGameStudio(data);
-      if (!normalized) throw new Error("Invalid studio payload");
+      assertApiResponse(error, "Failed to update studio");
+      const normalized = requireValue(toGameStudio(data), "Invalid studio payload");
       currentStudio.value = normalized;
       await searchStudios();
       return normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function deleteStudio(id: string) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { error } = await api.studios({ id }).delete();
-      if (error) throw new Error("Failed to delete studio");
+      assertApiResponse(error, "Failed to delete studio");
       if (currentStudio.value?.id === id) {
         currentStudio.value = null;
       }
       await searchStudios();
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   return {

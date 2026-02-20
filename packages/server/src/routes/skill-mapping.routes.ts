@@ -246,125 +246,129 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
     async ({ body, set }) => {
       const settingsRows = await db.select().from(settings).limit(1);
 
-      try {
-        const aiService = AIService.fromSettings(settingsRows[0]);
+      return Promise.resolve()
+        .then(async () => {
+          const aiService = AIService.fromSettings(settingsRows[0]);
 
-        const skillsToAnalyze: string[] = [];
+          const skillsToAnalyze: string[] = [];
 
-        if (body.gameExperience) {
-          const exp = isRecord(body.gameExperience) ? body.gameExperience : {};
-          skillsToAnalyze.push(...normalizeStringArray(exp.skills));
-          skillsToAnalyze.push(...normalizeStringArray(exp.achievements));
-          skillsToAnalyze.push(...normalizeStringArray(exp.roles));
-        }
-
-        if (body.resume) {
-          const resume = isRecord(body.resume) ? body.resume : {};
-          skillsToAnalyze.push(...normalizeStringArray(resume.skills));
-          if (resume.experience && typeof resume.experience === "string") {
-            skillsToAnalyze.push(resume.experience);
+          if (body.gameExperience) {
+            const exp = isRecord(body.gameExperience) ? body.gameExperience : {};
+            skillsToAnalyze.push(...normalizeStringArray(exp.skills));
+            skillsToAnalyze.push(...normalizeStringArray(exp.achievements));
+            skillsToAnalyze.push(...normalizeStringArray(exp.roles));
           }
-        }
 
-        if (skillsToAnalyze.length === 0) {
-          return {
-            message: "No skills found in the provided data",
+          if (body.resume) {
+            const resume = isRecord(body.resume) ? body.resume : {};
+            skillsToAnalyze.push(...normalizeStringArray(resume.skills));
+            if (resume.experience && typeof resume.experience === "string") {
+              skillsToAnalyze.push(resume.experience);
+            }
+          }
+
+          if (skillsToAnalyze.length === 0) {
+            return {
+              message: "No skills found in the provided data",
+              detectedSkills: [],
+              suggestedMappings: [],
+              recommendations: [],
+            };
+          }
+
+          const prompt = skillAnalysisPrompt(skillsToAnalyze);
+
+          const response = await aiService.generate(prompt, {
+            temperature: 0.7,
+            maxTokens: 2000,
+          });
+
+          if (response.error) {
+            set.status = 500;
+            return {
+              message: `AI analysis failed: ${response.error}`,
+              detectedSkills: [],
+              suggestedMappings: [],
+              recommendations: [],
+            };
+          }
+
+          let analysisResult: Record<string, unknown> = {
             detectedSkills: [],
             suggestedMappings: [],
             recommendations: [],
           };
-        }
 
-        const prompt = skillAnalysisPrompt(skillsToAnalyze);
-
-        const response = await aiService.generate(prompt, {
-          temperature: 0.7,
-          maxTokens: 2000,
-        });
-
-        if (response.error) {
-          set.status = 500;
-          return {
-            message: `AI analysis failed: ${response.error}`,
-            detectedSkills: [],
-            suggestedMappings: [],
-            recommendations: [],
-          };
-        }
-
-        let analysisResult: Record<string, unknown> = {
-          detectedSkills: [],
-          suggestedMappings: [],
-          recommendations: [],
-        };
-
-        const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = parseJson(jsonMatch[0], z.record(z.unknown()));
-          if (parsed) {
-            analysisResult = parsed;
+          const jsonMatch = response.content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = parseJson(jsonMatch[0], z.record(z.string(), z.unknown()));
+            if (parsed) {
+              analysisResult = parsed;
+            } else {
+              analysisResult.recommendations = [response.content];
+            }
           } else {
             analysisResult.recommendations = [response.content];
           }
-        } else {
-          analysisResult.recommendations = [response.content];
-        }
 
-        const autoCreate = body.autoCreateMappings || false;
-        if (
-          autoCreate &&
-          analysisResult.suggestedMappings &&
-          Array.isArray(analysisResult.suggestedMappings)
-        ) {
-          for (const suggestedMapping of analysisResult.suggestedMappings) {
-            if (!isRecord(suggestedMapping)) {
-              continue;
-            }
-            const gameExpression = asNonEmptyString(suggestedMapping.gameExpression);
-            const transferableSkill = asNonEmptyString(suggestedMapping.transferableSkill);
-            if (gameExpression && transferableSkill) {
-              await skillMappingService
-                .createMapping({
-                  gameExpression,
-                  transferableSkill,
-                  industryApplications: normalizeStringArray(suggestedMapping.industryApplications),
-                  evidence: [],
-                  confidence:
-                    typeof suggestedMapping.confidence === "number" &&
-                    Number.isFinite(suggestedMapping.confidence)
-                      ? Math.max(0, Math.min(100, Math.round(suggestedMapping.confidence)))
-                      : 60,
-                  category: normalizeCategory(suggestedMapping.category),
-                  demandLevel: normalizeDemandLevel(suggestedMapping.demandLevel),
-                  verified: false,
-                  aiGenerated: true,
-                })
-                .catch((error) => {
-                  console.error("Failed to auto-create mapping:", error);
-                });
+          const autoCreate = body.autoCreateMappings || false;
+          if (
+            autoCreate &&
+            analysisResult.suggestedMappings &&
+            Array.isArray(analysisResult.suggestedMappings)
+          ) {
+            for (const suggestedMapping of analysisResult.suggestedMappings) {
+              if (!isRecord(suggestedMapping)) {
+                continue;
+              }
+              const gameExpression = asNonEmptyString(suggestedMapping.gameExpression);
+              const transferableSkill = asNonEmptyString(suggestedMapping.transferableSkill);
+              if (gameExpression && transferableSkill) {
+                await skillMappingService
+                  .createMapping({
+                    gameExpression,
+                    transferableSkill,
+                    industryApplications: normalizeStringArray(
+                      suggestedMapping.industryApplications,
+                    ),
+                    evidence: [],
+                    confidence:
+                      typeof suggestedMapping.confidence === "number" &&
+                      Number.isFinite(suggestedMapping.confidence)
+                        ? Math.max(0, Math.min(100, Math.round(suggestedMapping.confidence)))
+                        : 60,
+                    category: normalizeCategory(suggestedMapping.category),
+                    demandLevel: normalizeDemandLevel(suggestedMapping.demandLevel),
+                    verified: false,
+                    aiGenerated: true,
+                  })
+                  .catch((error) => {
+                    console.error("Failed to auto-create mapping:", error);
+                  });
+              }
             }
           }
-        }
 
-        return {
-          message: "AI skill analysis completed successfully",
-          detectedSkills: normalizeStringArray(analysisResult.detectedSkills),
-          suggestedMappings: Array.isArray(analysisResult.suggestedMappings)
-            ? analysisResult.suggestedMappings.filter(isRecord)
-            : [],
-          recommendations: normalizeStringArray(analysisResult.recommendations),
-          provider: response.provider,
-        };
-      } catch (error) {
-        console.error("AI analysis error:", error);
-        set.status = 500;
-        return {
-          message: `Error during AI analysis: ${error instanceof Error ? error.message : "Unknown error"}`,
-          detectedSkills: [],
-          suggestedMappings: [],
-          recommendations: [],
-        };
-      }
+          return {
+            message: "AI skill analysis completed successfully",
+            detectedSkills: normalizeStringArray(analysisResult.detectedSkills),
+            suggestedMappings: Array.isArray(analysisResult.suggestedMappings)
+              ? analysisResult.suggestedMappings.filter(isRecord)
+              : [],
+            recommendations: normalizeStringArray(analysisResult.recommendations),
+            provider: response.provider,
+          };
+        })
+        .catch((error: unknown) => {
+          console.error("AI analysis error:", error);
+          set.status = 500;
+          return {
+            message: `Error during AI analysis: ${error instanceof Error ? error.message : "Unknown error"}`,
+            detectedSkills: [],
+            suggestedMappings: [],
+            recommendations: [],
+          };
+        });
     },
     {
       body: t.Object({

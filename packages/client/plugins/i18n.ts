@@ -29,9 +29,12 @@ interface LocaleResolutionInput {
 const normalizeLocaleCandidate = (value: string): string =>
   value.trim().toLowerCase().replace("_", ACCEPT_LANGUAGE_VARIANT_SEPARATOR);
 
-const isAvailableLocale = (value: string): value is AvailableLocale => value in I18N_MESSAGE_CATALOG;
+const isAvailableLocale = (value: string): value is AvailableLocale =>
+  value in I18N_MESSAGE_CATALOG;
 
-const parseSupportedLocales = (configuredLocales: readonly string[]): readonly AvailableLocale[] => {
+const parseSupportedLocales = (
+  configuredLocales: readonly string[],
+): readonly AvailableLocale[] => {
   const normalizedConfigured = new Set(configuredLocales.map(normalizeLocaleCandidate));
   const availableLocales = Object.keys(I18N_MESSAGE_CATALOG).filter(isAvailableLocale);
   const configuredAvailableLocales = availableLocales.filter((locale) =>
@@ -61,7 +64,9 @@ const resolveFromCandidates = (
 
     const baseLanguage = normalizedCandidate.split(ACCEPT_LANGUAGE_VARIANT_SEPARATOR)[0];
     const languageMatch = supportedLocales.find((locale) =>
-      normalizeLocaleCandidate(locale).startsWith(`${baseLanguage}${ACCEPT_LANGUAGE_VARIANT_SEPARATOR}`),
+      normalizeLocaleCandidate(locale).startsWith(
+        `${baseLanguage}${ACCEPT_LANGUAGE_VARIANT_SEPARATOR}`,
+      ),
     );
     if (languageMatch) {
       return languageMatch;

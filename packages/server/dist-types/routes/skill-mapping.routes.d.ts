@@ -8,6 +8,9 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
 }, {
     typebox: {};
     error: {};
+} & {
+    error: {};
+    typebox: import("@sinclair/typebox").TModule<{}, {}>;
 }, {
     schema: {};
     standaloneSchema: {};
@@ -15,7 +18,14 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
     macroFn: {};
     parser: {};
     response: {};
+} & {
+    schema: {};
+    macro: {};
+    macroFn: {};
+    parser: {};
 }, {
+    skills: {};
+} & {
     skills: {
         mappings: {
             get: {
@@ -242,6 +252,11 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                         suggestedMappings: Record<string, unknown>[];
                         recommendations: string[];
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    } | {
+                        message: string;
+                        detectedSkills: never[];
+                        suggestedMappings: never[];
+                        recommendations: never[];
                     };
                     422: {
                         type: "validation";
@@ -262,10 +277,18 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
     schema: {};
     standaloneSchema: {};
     response: {};
+} & {
+    derive: {};
+    resolve: {};
+    schema: {};
 }, {
     derive: {};
     resolve: {};
     schema: {};
     standaloneSchema: {};
     response: {};
+} & {
+    derive: {};
+    resolve: {};
+    schema: {};
 }>;

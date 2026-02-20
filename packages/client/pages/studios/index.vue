@@ -6,6 +6,7 @@ import {
   STUDIO_INDEX_INITIAL_VISIBLE_COUNT,
   STUDIO_INDEX_VISIBLE_INCREMENT,
 } from "~/constants/studios";
+import { settlePromise } from "~/composables/async-flow";
 import { useDebouncedValue } from "~/composables/useDebouncedValue";
 import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
@@ -18,10 +19,7 @@ const { studios, loading: studioLoading, fetchStudios } = useStudio();
 
 const pageError = ref<string | null>(null);
 const searchQuery = ref("");
-const debouncedSearchQuery = useDebouncedValue(
-  searchQuery,
-  STUDIO_INDEX_FILTER_DEBOUNCE_MS,
-);
+const debouncedSearchQuery = useDebouncedValue(searchQuery, STUDIO_INDEX_FILTER_DEBOUNCE_MS);
 const previewDialogRef = ref<HTMLDialogElement | null>(null);
 useFocusTrap(previewDialogRef, () => showPreviewModal.value);
 const showPreviewModal = ref(false);
@@ -41,10 +39,9 @@ function showErrorToast(message: string) {
 
 async function loadStudios() {
   pageError.value = null;
-  try {
-    await fetchStudios();
-  } catch (error) {
-    pageError.value = getErrorMessage(error, t("studiosIndex.errors.loadFailed"));
+  const studiosResult = await settlePromise(fetchStudios(), t("studiosIndex.errors.loadFailed"));
+  if (!studiosResult.ok) {
+    pageError.value = getErrorMessage(studiosResult.error, t("studiosIndex.errors.loadFailed"));
     showErrorToast(pageError.value);
   }
 }
@@ -60,21 +57,27 @@ const { pending: bootstrapPending, refresh: refreshStudios } = await useAsyncDat
 const loading = computed(() => bootstrapPending.value || studioLoading.value);
 
 const studioTypeOptions = computed(() =>
-  [...new Set(studios.value.map((studio) => studio.type).filter((value) => value.trim().length > 0))]
-    .sort((left, right) => left.localeCompare(right)),
+  [
+    ...new Set(
+      studios.value.map((studio) => studio.type).filter((value) => value.trim().length > 0),
+    ),
+  ].sort((left, right) => left.localeCompare(right)),
 );
 
 const studioSizeOptions = computed(() =>
-  [...new Set(studios.value.map((studio) => studio.size).filter((value) => value.trim().length > 0))]
-    .sort((left, right) => left.localeCompare(right)),
+  [
+    ...new Set(
+      studios.value.map((studio) => studio.size).filter((value) => value.trim().length > 0),
+    ),
+  ].sort((left, right) => left.localeCompare(right)),
 );
 
 const totalStudios = computed(() => studios.value.length);
 const remoteFriendlyStudios = computed(
   () => studios.value.filter((studio) => studio.remoteWork).length,
 );
-const previewStudio = computed(() =>
-  studios.value.find((studio) => studio.id === previewStudioId.value) ?? null,
+const previewStudio = computed(
+  () => studios.value.find((studio) => studio.id === previewStudioId.value) ?? null,
 );
 const routeStudioId = computed(() =>
   queryValueToString(route.query[APP_ROUTE_QUERY_KEYS.studioId]),
@@ -82,8 +85,7 @@ const routeStudioId = computed(() =>
 const searchableStudios = computed(() =>
   studios.value.map((studio) => ({
     studio,
-    searchableText:
-      `${studio.name} ${studio.description ?? ""} ${studio.location}`.toLowerCase(),
+    searchableText: `${studio.name} ${studio.description ?? ""} ${studio.location}`.toLowerCase(),
   })),
 );
 
@@ -110,9 +112,7 @@ const filteredStudios = computed(() => {
   return result.map((entry) => entry.studio);
 });
 
-const visibleStudios = computed(() =>
-  filteredStudios.value.slice(0, visibleStudioCount.value),
-);
+const visibleStudios = computed(() => filteredStudios.value.slice(0, visibleStudioCount.value));
 const hasAdditionalStudios = computed(
   () => visibleStudios.value.length < filteredStudios.value.length,
 );
@@ -154,9 +154,7 @@ function showMoreStudios() {
   );
 }
 
-function queryValueToString(
-  value: string | string[] | null | undefined,
-): string {
+function queryValueToString(value: string | string[] | null | undefined): string {
   if (Array.isArray(value)) {
     const [firstValue] = value;
     return typeof firstValue === "string" ? firstValue : "";

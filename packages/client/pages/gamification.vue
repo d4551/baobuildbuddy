@@ -3,6 +3,7 @@ import { APP_BRAND, APP_ROUTES } from "@bao/shared";
 import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
 import { getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import {
   GAMIFICATION_ASYNC_DATA_KEY,
   GAMIFICATION_DEFAULT_CHALLENGE_GOAL,
@@ -116,19 +117,26 @@ async function retryPageLoad() {
 
 async function handleCompleteChallenge(challengeId: string) {
   completingChallenge.value = challengeId;
+  const completionResult = await settlePromise(
+    (async () => {
+      await requestData(
+        api.gamification.challenges({ id: challengeId }).complete.post(),
+        t("gamificationPage.challengeCompleteErrorFallback"),
+      );
+      await retryPageLoad();
+    })(),
+    t("gamificationPage.challengeCompleteErrorFallback"),
+  );
+  completingChallenge.value = null;
 
-  try {
-    await requestData(
-      api.gamification.challenges({ id: challengeId }).complete.post(),
-      t("gamificationPage.challengeCompleteErrorFallback"),
+  if (!completionResult.ok) {
+    $toast.error(
+      getErrorMessage(completionResult.error, t("gamificationPage.challengeCompleteErrorFallback")),
     );
-    await retryPageLoad();
-    $toast.success(t("gamificationPage.challengeCompletionToast"));
-  } catch (actionError) {
-    $toast.error(getErrorMessage(actionError, t("gamificationPage.challengeCompleteErrorFallback")));
-  } finally {
-    completingChallenge.value = null;
+    return;
   }
+
+  $toast.success(t("gamificationPage.challengeCompletionToast"));
 }
 
 async function fetchGamificationHubData(): Promise<GamificationHubData> {

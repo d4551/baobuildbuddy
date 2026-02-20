@@ -5,6 +5,7 @@ import {
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_UNKNOWN_STUDIO_NAME,
   isRecord,
+  safeParseJson,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -136,7 +137,9 @@ function createInterviewFeedbackSummary(feedback: Partial<InterviewFeedback>): I
 
 function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<string, unknown> {
   const role =
-    typeof config.role === "string" && config.role.trim() ? config.role : INTERVIEW_DEFAULT_ROLE_TYPE;
+    typeof config.role === "string" && config.role.trim()
+      ? config.role
+      : INTERVIEW_DEFAULT_ROLE_TYPE;
   const level =
     typeof config.level === "string" && config.level.trim()
       ? config.level
@@ -176,13 +179,19 @@ function toWsQuestions(
 }
 
 function parseFeedback(response: string): InterviewFeedback {
-  try {
-    const parsed = JSON.parse(response);
-    if (parsed && typeof parsed === "object") {
-      return createInterviewFeedbackSummary(parsed as Partial<InterviewFeedback>);
-    }
-  } catch {
-    // Ignore parse errors and use fallback below
+  const parsed = safeParseJson(response);
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+    const parsedRecord = parsed as Record<string, unknown>;
+    return createInterviewFeedbackSummary({
+      score: typeof parsedRecord.score === "number" ? parsedRecord.score : undefined,
+      strengths: Array.isArray(parsedRecord.strengths)
+        ? parsedRecord.strengths.filter((entry): entry is string => typeof entry === "string")
+        : undefined,
+      improvements: Array.isArray(parsedRecord.improvements)
+        ? parsedRecord.improvements.filter((entry): entry is string => typeof entry === "string")
+        : undefined,
+      summary: typeof parsedRecord.summary === "string" ? parsedRecord.summary : undefined,
+    });
   }
 
   return {
@@ -201,32 +210,33 @@ async function handleStartSession(socket: InterviewSocket, data: InterviewMessag
   }
 
   const config = mapWsConfigToInterviewConfig(data.config || {});
+  return interviewService
+    .startSession(studioId, config)
+    .then((session) => {
+      const studioName = session.interviewerPersona?.studioName ?? INTERVIEW_UNKNOWN_STUDIO_NAME;
+      const role = session.config.roleType ?? INTERVIEW_DEFAULT_ROLE_TYPE;
+      const level = session.config.experienceLevel ?? INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
+      const questionCount = session.config.questionCount ?? INTERVIEW_DEFAULT_QUESTION_COUNT;
+      const wsQuestions = toWsQuestions(session.questions);
 
-  try {
-    const session = await interviewService.startSession(studioId, config);
-    const studioName = session.interviewerPersona?.studioName ?? INTERVIEW_UNKNOWN_STUDIO_NAME;
-    const role = session.config.roleType ?? INTERVIEW_DEFAULT_ROLE_TYPE;
-    const level = session.config.experienceLevel ?? INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
-    const questionCount = session.config.questionCount ?? INTERVIEW_DEFAULT_QUESTION_COUNT;
-    const wsQuestions = toWsQuestions(session.questions);
-
-    socket.send(
-      JSON.stringify({
-        type: "session_started",
-        sessionId: session.id,
-        studioName,
-        questions: wsQuestions,
-        config: { role, level, questionCount },
-      }),
-    );
-  } catch (err) {
-    socket.send(
-      JSON.stringify({
-        type: "error",
-        message: err instanceof Error ? err.message : "Failed to start interview session",
-      }),
-    );
-  }
+      socket.send(
+        JSON.stringify({
+          type: "session_started",
+          sessionId: session.id,
+          studioName,
+          questions: wsQuestions,
+          config: { role, level, questionCount },
+        }),
+      );
+    })
+    .catch((err: unknown) => {
+      socket.send(
+        JSON.stringify({
+          type: "error",
+          message: err instanceof Error ? err.message : "Failed to start interview session",
+        }),
+      );
+    });
 }
 
 async function handleSubmitResponse(socket: InterviewSocket, data: InterviewMessage) {
@@ -264,9 +274,9 @@ async function handleSubmitResponse(socket: InterviewSocket, data: InterviewMess
     summary: "Response recorded. Configure an AI provider for detailed feedback.",
   };
 
-  try {
-    const aiService = await getAIService();
-    const prompt = `You are an interview coach. Evaluate this interview response.
+  feedback = await getAIService()
+    .then((aiService) => {
+      const prompt = `You are an interview coach. Evaluate this interview response.
 
 Question: ${currentQuestion?.question || "Unknown question"}
 Category: ${currentQuestion?.type || "general"}
@@ -277,16 +287,17 @@ Return a JSON object:
 
 Only return the JSON object.`;
 
-    const response = await aiService.generate(prompt, { temperature: 0.3 });
-    feedback = parseFeedback(response.content);
-  } catch {
-    feedback = {
-      score: 65,
-      strengths: ["Attempted answer"],
-      improvements: ["More detail needed"],
-      summary: "Response recorded.",
-    };
-  }
+      return aiService.generate(prompt, { temperature: 0.3 });
+    })
+    .then((response) => parseFeedback(response.content))
+    .catch(() => {
+      return {
+        score: 65,
+        strengths: ["Attempted answer"],
+        improvements: ["More detail needed"],
+        summary: "Response recorded.",
+      };
+    });
 
   // Save response
   const newResponse: JsonRecord = {

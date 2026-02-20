@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTES, APP_ROUTE_QUERY_KEYS, INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
@@ -87,24 +88,27 @@ async function handleSubmitResponse() {
   }
 
   submitting.value = true;
-  try {
-    await submitResponse(sessionId.value, {
+  const submitResult = await settlePromise(
+    submitResponse(sessionId.value, {
       questionIndex: currentQuestionIndex.value,
       response: response.value,
-    });
+    }),
+    t("interviewSession.errors.submitFailed"),
+  );
+  submitting.value = false;
 
-    $toast.success(t("interviewSession.toasts.responseRecorded"));
+  if (!submitResult.ok) {
+    $toast.error(getErrorMessage(submitResult.error, t("interviewSession.errors.submitFailed")));
+    return;
+  }
 
-    if (currentQuestionIndex.value < (currentSession.value?.questions?.length || 0) - 1) {
-      currentQuestionIndex.value++;
-      response.value = "";
-    } else {
-      await handleCompleteInterview();
-    }
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("interviewSession.errors.submitFailed")));
-  } finally {
-    submitting.value = false;
+  $toast.success(t("interviewSession.toasts.responseRecorded"));
+
+  if (currentQuestionIndex.value < (currentSession.value?.questions?.length || 0) - 1) {
+    currentQuestionIndex.value++;
+    response.value = "";
+  } else {
+    await handleCompleteInterview();
   }
 }
 
@@ -115,20 +119,25 @@ async function handleCompleteInterview() {
     clearInterval(timer.value);
   }
 
-  try {
-    await completeSession(sessionId.value);
-    $toast.success(t("interviewSession.toasts.completed"));
-    router.push({
-      path: APP_ROUTES.interviewHistory,
-      query: {
-        [APP_ROUTE_QUERY_KEYS.sessionId]: sessionId.value,
-      },
-    });
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("interviewSession.errors.completeFailed")));
+  const completionResult = await settlePromise(
+    completeSession(sessionId.value),
+    t("interviewSession.errors.completeFailed"),
+  );
+  if (!completionResult.ok) {
+    $toast.error(
+      getErrorMessage(completionResult.error, t("interviewSession.errors.completeFailed")),
+    );
+    return;
   }
-}
 
+  $toast.success(t("interviewSession.toasts.completed"));
+  router.push({
+    path: APP_ROUTES.interviewHistory,
+    query: {
+      [APP_ROUTE_QUERY_KEYS.sessionId]: sessionId.value,
+    },
+  });
+}
 </script>
 
 <template>

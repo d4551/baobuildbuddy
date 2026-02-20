@@ -6,18 +6,18 @@ const AUTH_KEY = "bao_api_key";
 type TreatyClient = ReturnType<typeof treaty<App>>;
 export type EdenApiNamespace = TreatyClient["api"];
 
+function hasBrowserStorage(): boolean {
+  return import.meta.client && typeof window !== "undefined" && "localStorage" in window;
+}
+
 /**
  * Reads API key from browser storage.
  *
  * @returns Stored API key when available.
  */
 export function getStoredApiKey(): string | null {
-  if (import.meta.server) return null;
-  try {
-    return localStorage.getItem(AUTH_KEY);
-  } catch {
-    return null;
-  }
+  if (!hasBrowserStorage()) return null;
+  return window.localStorage.getItem(AUTH_KEY);
 }
 
 /**
@@ -26,13 +26,9 @@ export function getStoredApiKey(): string | null {
  * @param key API key value.
  */
 export function setStoredApiKey(key: string | null): void {
-  if (import.meta.server) return;
-  try {
-    if (key) localStorage.setItem(AUTH_KEY, key);
-    else localStorage.removeItem(AUTH_KEY);
-  } catch {
-    // Ignore storage errors
-  }
+  if (!hasBrowserStorage()) return;
+  if (key) window.localStorage.setItem(AUTH_KEY, key);
+  else window.localStorage.removeItem(AUTH_KEY);
 }
 
 /**

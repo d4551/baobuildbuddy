@@ -19,6 +19,7 @@ import {
   type VoiceSettings,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 const { sessions, stats, loading, startSession, fetchSessions, fetchStats } = useInterview();
@@ -41,29 +42,22 @@ const selectedMode = ref<InterviewMode>("studio");
 const selectedJobId = ref("");
 const selectedJobFallback = ref<Job | null>(null);
 const jobSearchTerm = ref("");
-const interviewRoleOptions = ensureOptions(
-  INTERVIEW_HUB_ROLE_OPTIONS,
-  [INTERVIEW_DEFAULT_ROLE_TYPE],
-);
-const interviewExperienceOptions = ensureOptions(
-  INTERVIEW_HUB_EXPERIENCE_OPTIONS,
-  [INTERVIEW_DEFAULT_EXPERIENCE_LEVEL],
-);
-const interviewQuestionCountOptions = ensureOptions(
-  INTERVIEW_HUB_QUESTION_COUNT_OPTIONS,
-  [INTERVIEW_DEFAULT_QUESTION_COUNT],
-);
+const interviewRoleOptions = ensureOptions(INTERVIEW_HUB_ROLE_OPTIONS, [
+  INTERVIEW_DEFAULT_ROLE_TYPE,
+]);
+const interviewExperienceOptions = ensureOptions(INTERVIEW_HUB_EXPERIENCE_OPTIONS, [
+  INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
+]);
+const interviewQuestionCountOptions = ensureOptions(INTERVIEW_HUB_QUESTION_COUNT_OPTIONS, [
+  INTERVIEW_DEFAULT_QUESTION_COUNT,
+]);
 
 function ensureOptions<T>(options: readonly T[], fallbackOptions: readonly T[]): readonly T[] {
   if (Array.isArray(options) && options.length > 0) return options;
   return fallbackOptions;
 }
 
-function resolvePreferredOption<T>(
-  options: readonly T[],
-  preferredIndex: number,
-  fallback: T,
-): T {
+function resolvePreferredOption<T>(options: readonly T[], preferredIndex: number, fallback: T): T {
   const preferredValue = options[preferredIndex];
   if (preferredValue !== undefined) {
     return preferredValue;
@@ -77,9 +71,7 @@ function resolvePreferredOption<T>(
   return fallback;
 }
 
-function queryValueToString(
-  value: string | string[] | null | undefined,
-): string {
+function queryValueToString(value: string | string[] | null | undefined): string {
   if (Array.isArray(value)) {
     const [firstValue] = value;
     return typeof firstValue === "string" ? firstValue : "";
@@ -107,16 +99,12 @@ const sessionConfig = reactive({
   } satisfies VoiceSettings,
 });
 
-const routeJobId = computed(() =>
-  queryValueToString(route.query[APP_ROUTE_QUERY_KEYS.jobId]),
-);
+const routeJobId = computed(() => queryValueToString(route.query[APP_ROUTE_QUERY_KEYS.jobId]));
 const routeStudioId = computed(() =>
   queryValueToString(route.query[APP_ROUTE_QUERY_KEYS.studioId]),
 );
 const requestedMode = computed<InterviewMode>(() =>
-  route.query[APP_ROUTE_QUERY_KEYS.mode] === "job" || routeJobId.value
-    ? "job"
-    : "studio",
+  route.query[APP_ROUTE_QUERY_KEYS.mode] === "job" || routeJobId.value ? "job" : "studio",
 );
 
 const totalSessions = computed(() => stats.value?.totalSessions ?? 0);
@@ -162,9 +150,7 @@ const prepChecklist = computed(() => [
   },
 ]);
 
-const prepReadyCount = computed(
-  () => prepChecklist.value.filter((item) => item.ready).length,
-);
+const prepReadyCount = computed(() => prepChecklist.value.filter((item) => item.ready).length);
 
 const prepCompletionPercent = computed(() => {
   const total = prepChecklist.value.length;
@@ -195,13 +181,12 @@ const searchedJobs = computed(() => {
     return availableJobs.value;
   }
 
-  return availableJobs.value
-    .filter((job) => {
-      const title = job.title.toLowerCase();
-      const company = job.company.toLowerCase();
-      const description = (job.description || "").toLowerCase();
-      return title.includes(query) || company.includes(query) || description.includes(query);
-    });
+  return availableJobs.value.filter((job) => {
+    const title = job.title.toLowerCase();
+    const company = job.company.toLowerCase();
+    const description = (job.description || "").toLowerCase();
+    return title.includes(query) || company.includes(query) || description.includes(query);
+  });
 });
 const jobSelectionPagination = usePagination(searchedJobs, JOB_PREVIEW_LIMIT, [jobSearchTerm]);
 const jobSelectionPaginationSummary = computed(() =>
@@ -298,14 +283,11 @@ watch(routeStudioId, (studioId) => {
   }
 });
 
-watch(
-  routeJobId,
-  async (jobId) => {
-    if (!jobId) return;
-    selectedMode.value = "job";
-    await selectJobById(jobId);
-  },
-);
+watch(routeJobId, async (jobId) => {
+  if (!jobId) return;
+  selectedMode.value = "job";
+  await selectJobById(jobId);
+});
 
 async function selectJobById(jobId: string) {
   selectedJobId.value = jobId;
@@ -316,15 +298,19 @@ async function selectJobById(jobId: string) {
     return;
   }
 
-  try {
-    const fetched = await getJob(jobId);
-    if (fetched) {
-      selectedJobFallback.value = fetched;
-      sessionConfig.role = fetched.title;
-    }
-  } catch (error) {
+  const fetchedJobResult = await settlePromise(
+    getJob(jobId),
+    t("interviewHub.errors.jobLoadFailed"),
+  );
+  if (!fetchedJobResult.ok) {
     selectedJobFallback.value = null;
-    $toast.error(getErrorMessage(error, t("interviewHub.errors.jobLoadFailed")));
+    $toast.error(getErrorMessage(fetchedJobResult.error, t("interviewHub.errors.jobLoadFailed")));
+    return;
+  }
+
+  if (fetchedJobResult.value) {
+    selectedJobFallback.value = fetchedJobResult.value;
+    sessionConfig.role = fetchedJobResult.value.title;
   }
 }
 
@@ -337,11 +323,7 @@ function resolveStudioIdForJob(job: Job): string {
   const company = job.company.trim().toLowerCase();
   const matchedStudio = studios.value.find((studio) => {
     const studioName = studio.name.trim().toLowerCase();
-    return (
-      studioName === company ||
-      studioName.includes(company) ||
-      company.includes(studioName)
-    );
+    return studioName === company || studioName.includes(company) || company.includes(studioName);
   });
 
   return matchedStudio?.id || INTERVIEW_FALLBACK_STUDIO_ID;
@@ -394,41 +376,45 @@ async function handleStartInterview() {
   if (isStartDisabled.value) return;
 
   starting.value = true;
+  const startResult = await settlePromise(
+    (async () => {
+      const activeJob = selectedMode.value === "job" ? selectedJob.value : null;
+      const studioId =
+        selectedMode.value === "job" && activeJob
+          ? resolveStudioIdForJob(activeJob)
+          : sessionConfig.studioId;
+      const sessionRequestConfig = {
+        roleType: activeJob?.title || sessionConfig.role,
+        experienceLevel: sessionConfig.experienceLevel,
+        questionCount: sessionConfig.questionCount,
+        includeTechnical: true,
+        includeBehavioral: true,
+        includeStudioSpecific: true,
+        technologies: activeJob?.technologies || [],
+        enableVoiceMode: sessionConfig.enableVoiceMode,
+        interviewMode: selectedMode.value,
+        ...(sessionConfig.enableVoiceMode ? { voiceSettings: sessionConfig.voiceSettings } : {}),
+        ...(activeJob ? { targetJob: toTargetJob(activeJob) } : {}),
+      } as const;
 
-  try {
-    const activeJob = selectedMode.value === "job" ? selectedJob.value : null;
-    const studioId =
-      selectedMode.value === "job" && activeJob
-        ? resolveStudioIdForJob(activeJob)
-        : sessionConfig.studioId;
-    const sessionRequestConfig = {
-      roleType: activeJob?.title || sessionConfig.role,
-      experienceLevel: sessionConfig.experienceLevel,
-      questionCount: sessionConfig.questionCount,
-      includeTechnical: true,
-      includeBehavioral: true,
-      includeStudioSpecific: true,
-      technologies: activeJob?.technologies || [],
-      enableVoiceMode: sessionConfig.enableVoiceMode,
-      interviewMode: selectedMode.value,
-      ...(sessionConfig.enableVoiceMode ? { voiceSettings: sessionConfig.voiceSettings } : {}),
-      ...(activeJob ? { targetJob: toTargetJob(activeJob) } : {}),
-    } as const;
+      return startSession(studioId, sessionRequestConfig);
+    })(),
+    t("interviewHub.errors.startFailed"),
+  );
+  starting.value = false;
 
-    const session = await startSession(studioId, sessionRequestConfig);
+  if (!startResult.ok) {
+    $toast.error(getErrorMessage(startResult.error, t("interviewHub.errors.startFailed")));
+    return;
+  }
 
-    if (session?.id) {
-      showConfigModal.value = false;
-      $toast.success(t("interviewHub.toasts.started"));
-      router.push({
-        path: APP_ROUTES.interviewSession,
-        query: { [APP_ROUTE_QUERY_KEYS.id]: session.id },
-      });
-    }
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("interviewHub.errors.startFailed")));
-  } finally {
-    starting.value = false;
+  if (startResult.value?.id) {
+    showConfigModal.value = false;
+    $toast.success(t("interviewHub.toasts.started"));
+    router.push({
+      path: APP_ROUTES.interviewSession,
+      query: { [APP_ROUTE_QUERY_KEYS.id]: startResult.value.id },
+    });
   }
 }
 

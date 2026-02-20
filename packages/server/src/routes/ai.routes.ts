@@ -9,6 +9,7 @@ import {
   generateId,
   inferAIChatDomainFromRoutePath,
   isRecord,
+  safeParseJson,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -81,18 +82,27 @@ async function getAIService() {
  * Helper to safely parse JSON from AI responses
  */
 function safeJSONParse<T>(jsonString: string, fallback: T): T {
-  try {
-    // Strip markdown code blocks if present
-    const cleaned = jsonString
-      .replace(/```json\n?/g, "")
-      .replace(/```\n?/g, "")
-      .trim();
-    return JSON.parse(cleaned);
-  } catch (error) {
-    console.error("Failed to parse AI JSON response:", error);
+  const cleaned = jsonString
+    .replace(/```json\n?/g, "")
+    .replace(/```\n?/g, "")
+    .trim();
+  const parsed = safeParseJson(cleaned);
+  if (parsed === null) {
+    console.error("Failed to parse AI JSON response");
     return fallback;
   }
+  return parsed as T;
 }
+
+const collectStringArray = (value: unknown): string[] => {
+  if (typeof value === "string") {
+    return [value];
+  }
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.flatMap((entry) => collectStringArray(entry));
+};
 
 const chatContextSchema = t.Object({
   source: t.String({ maxLength: 32 }),
@@ -119,10 +129,7 @@ const chatContextSchema = t.Object({
   }),
 });
 
-const aiPreferenceSchema = t.Record(
-  t.String(),
-  t.Union([t.String(), t.Number(), t.Boolean()]),
-);
+const aiPreferenceSchema = t.Record(t.String(), t.Union([t.String(), t.Number(), t.Boolean()]));
 
 type ChatContextPayload = typeof chatContextSchema.static;
 
@@ -209,7 +216,9 @@ function serializeClientChatContext(context: AIChatContext): string {
 
   if (context.entity) {
     const baseEntityLine = `Focused Entity: ${context.entity.type} (${context.entity.id})`;
-    lines.push(context.entity.label ? `${baseEntityLine} - ${context.entity.label}` : baseEntityLine);
+    lines.push(
+      context.entity.label ? `${baseEntityLine} - ${context.entity.label}` : baseEntityLine,
+    );
   }
 
   return lines.join("\n");
@@ -415,72 +424,70 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
       const { message, context } = body;
       const sessionId = body.sessionId ?? generateId();
 
-      try {
-        // Save user message
-        const userMsg = {
-          id: generateId(),
-          role: "user",
-          content: message,
-          timestamp: new Date().toISOString(),
-          sessionId,
-        };
-        await db.insert(chatHistory).values(userMsg);
+      const userMsg = {
+        id: generateId(),
+        role: "user",
+        content: message,
+        timestamp: new Date().toISOString(),
+        sessionId,
+      };
 
-        // Load AI service
-        const aiService = await getAIService();
-        const clientContext = normalizeClientChatContext(context);
-        const preferredDomain =
-          clientContext?.domain ?? contextManager.inferDomain(message);
-        const contextualConversation = await contextManager.buildContext(
-          sessionId,
-          message,
-          preferredDomain,
-        );
-        const systemPrompt = composeChatSystemPrompt(
-          SYSTEM_PROMPT,
-          contextualConversation.systemPrompt,
-          clientContext,
-        );
+      return db
+        .insert(chatHistory)
+        .values(userMsg)
+        .then(async () => {
+          const aiService = await getAIService();
+          const clientContext = normalizeClientChatContext(context);
+          const preferredDomain = clientContext?.domain ?? contextManager.inferDomain(message);
+          const contextualConversation = await contextManager.buildContext(
+            sessionId,
+            message,
+            preferredDomain,
+          );
+          const systemPrompt = composeChatSystemPrompt(
+            SYSTEM_PROMPT,
+            contextualConversation.systemPrompt,
+            clientContext,
+          );
 
-        // Generate AI response
-        const response = await aiService.generate(message, {
-          systemPrompt,
-          messages: contextualConversation.messages,
-          temperature: 0.7,
-          maxTokens: 2000,
+          const response = await aiService.generate(message, {
+            systemPrompt,
+            messages: contextualConversation.messages,
+            temperature: 0.7,
+            maxTokens: 2000,
+          });
+
+          if (response.error) {
+            return Promise.reject(new Error(response.error));
+          }
+
+          const aiResponse = {
+            id: generateId(),
+            role: "assistant",
+            content: response.content,
+            timestamp: new Date().toISOString(),
+            sessionId,
+          };
+          await db.insert(chatHistory).values(aiResponse);
+
+          const followUps = contextManager.generateFollowUps(preferredDomain);
+
+          return {
+            message: aiResponse.content,
+            sessionId,
+            timestamp: aiResponse.timestamp,
+            provider: response.provider,
+            model: response.model,
+            followUps,
+            contextDomain: preferredDomain,
+          };
+        })
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: error instanceof Error ? error.message : "Failed to generate AI response",
+          };
         });
-
-        if (response.error) {
-          throw new Error(response.error);
-        }
-
-        // Save AI response
-        const aiResponse = {
-          id: generateId(),
-          role: "assistant",
-          content: response.content,
-          timestamp: new Date().toISOString(),
-          sessionId,
-        };
-        await db.insert(chatHistory).values(aiResponse);
-
-        const followUps = contextManager.generateFollowUps(preferredDomain);
-
-        return {
-          message: aiResponse.content,
-          sessionId,
-          timestamp: aiResponse.timestamp,
-          provider: response.provider,
-          model: response.model,
-          followUps,
-          contextDomain: preferredDomain,
-        };
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: error instanceof Error ? error.message : "Failed to generate AI response",
-        };
-      }
     },
     {
       body: t.Object({
@@ -495,81 +502,77 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
     async ({ body, set }) => {
       const { resumeId, jobId } = body;
 
-      try {
-        // Load resume
-        const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
+      return Promise.resolve()
+        .then(async () => {
+          const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
 
-        if (resumeRows.length === 0) {
-          set.status = 404;
-          return { error: "Resume not found" };
-        }
+          if (resumeRows.length === 0) {
+            set.status = 404;
+            return { error: "Resume not found" };
+          }
 
-        const resume = resumeRows[0];
-        const resumeText = serializeResume(resume);
+          const resume = resumeRows[0];
+          const resumeText = serializeResume(resume);
 
-        // Load job if provided
-        let jobDescription = "";
-        if (jobId) {
-          const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
+          let jobDescription = "";
+          if (jobId) {
+            const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
 
-          if (jobRows.length > 0) {
-            const job = jobRows[0];
-            jobDescription = `
+            if (jobRows.length > 0) {
+              const job = jobRows[0];
+              jobDescription = `
 Title: ${job.title}
 Company: ${job.company}
 Description: ${job.description || ""}
 Requirements: ${job.requirements?.join(", ") || ""}
 Technologies: ${job.technologies?.join(", ") || ""}
-          `.trim();
+            `.trim();
+            }
           }
-        }
 
-        // Load AI service
-        const aiService = await getAIService();
+          const aiService = await getAIService();
 
-        // Choose prompt based on whether we have a job
-        const prompt =
-          jobId && jobDescription
-            ? `${resumeScorePrompt(resumeText, jobDescription)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`
-            : `${resumeEnhancePrompt(resumeText)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`;
+          const prompt =
+            jobId && jobDescription
+              ? `${resumeScorePrompt(resumeText, jobDescription)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`
+              : `${resumeEnhancePrompt(resumeText)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`;
 
-        // Generate analysis
-        const response = await aiService.generate(prompt, {
-          temperature: 0.3,
-          maxTokens: 2000,
+          const response = await aiService.generate(prompt, {
+            temperature: 0.3,
+            maxTokens: 2000,
+          });
+
+          if (response.error) {
+            return Promise.reject(new Error(response.error));
+          }
+
+          const analysis = safeJSONParse(response.content, {
+            score: 70,
+            strengths: ["Well-formatted resume"],
+            improvements: ["Add more specific achievements", "Include relevant keywords"],
+            keywords: [],
+          });
+
+          return {
+            message: "Resume analysis complete",
+            resumeId,
+            jobId: jobId || null,
+            analysis: {
+              score: analysis.score || 70,
+              strengths: analysis.strengths || [],
+              improvements: analysis.improvements || [],
+              keywords: analysis.keywords || [],
+            },
+            provider: response.provider,
+            model: response.model,
+          };
+        })
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: error instanceof Error ? error.message : "Failed to analyze resume",
+          };
         });
-
-        if (response.error) {
-          throw new Error(response.error);
-        }
-
-        // Parse JSON response
-        const analysis = safeJSONParse(response.content, {
-          score: 70,
-          strengths: ["Well-formatted resume"],
-          improvements: ["Add more specific achievements", "Include relevant keywords"],
-          keywords: [],
-        });
-
-        return {
-          message: "Resume analysis complete",
-          resumeId,
-          jobId: jobId || null,
-          analysis: {
-            score: analysis.score || 70,
-            strengths: analysis.strengths || [],
-            improvements: analysis.improvements || [],
-            keywords: analysis.keywords || [],
-          },
-          provider: response.provider,
-          model: response.model,
-        };
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: error instanceof Error ? error.message : "Failed to analyze resume",
-        };
-      }
     },
     {
       body: t.Object({
@@ -583,67 +586,64 @@ Technologies: ${job.technologies?.join(", ") || ""}
     async ({ body, set }) => {
       const { resumeId, jobId, company, position } = body;
 
-      try {
-        // Load resume
-        const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
+      return Promise.resolve()
+        .then(async () => {
+          const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
 
-        if (resumeRows.length === 0) {
-          set.status = 404;
-          return { error: "Resume not found" };
-        }
-
-        const resume = resumeRows[0];
-        const resumeText = serializeResume(resume);
-
-        // Load job description if provided
-        let jobDescription = "No specific job description provided.";
-        if (jobId) {
-          const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
-
-          if (jobRows.length > 0) {
-            const job = jobRows[0];
-            jobDescription = job.description || jobDescription;
+          if (resumeRows.length === 0) {
+            set.status = 404;
+            return { error: "Resume not found" };
           }
-        }
 
-        // Load AI service
-        const aiService = await getAIService();
+          const resume = resumeRows[0];
+          const resumeText = serializeResume(resume);
 
-        // Generate cover letter
-        const prompt = coverLetterPrompt(company, position, jobDescription, resumeText);
+          let jobDescription = "No specific job description provided.";
+          if (jobId) {
+            const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
 
-        const response = await aiService.generate(prompt, {
-          temperature: 0.7,
-          maxTokens: 2000,
+            if (jobRows.length > 0) {
+              const job = jobRows[0];
+              jobDescription = job.description || jobDescription;
+            }
+          }
+
+          const aiService = await getAIService();
+          const prompt = coverLetterPrompt(company, position, jobDescription, resumeText);
+
+          const response = await aiService.generate(prompt, {
+            temperature: 0.7,
+            maxTokens: 2000,
+          });
+
+          if (response.error) {
+            return Promise.reject(new Error(response.error));
+          }
+
+          const coverLetter = safeJSONParse(response.content, {
+            introduction: "I am excited to apply for this position.",
+            body: "My experience and skills make me a strong candidate for this role.",
+            conclusion: "I look forward to discussing this opportunity with you.",
+          });
+
+          return {
+            message: "Cover letter generated successfully",
+            content: {
+              introduction: coverLetter.introduction || "I am excited to apply for this position.",
+              body: coverLetter.body || "My experience and skills make me a strong candidate.",
+              conclusion:
+                coverLetter.conclusion || "I look forward to discussing this opportunity.",
+            },
+            provider: response.provider,
+            model: response.model,
+          };
+        })
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: error instanceof Error ? error.message : "Failed to generate cover letter",
+          };
         });
-
-        if (response.error) {
-          throw new Error(response.error);
-        }
-
-        // Parse JSON response
-        const coverLetter = safeJSONParse(response.content, {
-          introduction: "I am excited to apply for this position.",
-          body: "My experience and skills make me a strong candidate for this role.",
-          conclusion: "I look forward to discussing this opportunity with you.",
-        });
-
-        return {
-          message: "Cover letter generated successfully",
-          content: {
-            introduction: coverLetter.introduction || "I am excited to apply for this position.",
-            body: coverLetter.body || "My experience and skills make me a strong candidate.",
-            conclusion: coverLetter.conclusion || "I look forward to discussing this opportunity.",
-          },
-          provider: response.provider,
-          model: response.model,
-        };
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: error instanceof Error ? error.message : "Failed to generate cover letter",
-        };
-      }
     },
     {
       body: t.Object({
@@ -659,148 +659,144 @@ Technologies: ${job.technologies?.join(", ") || ""}
     async ({ body, set }) => {
       const { resumeId, skills } = body;
 
-      try {
-        // Load user profile
-        const profileRows = await db
-          .select()
-          .from(userProfile)
-          .where(eq(userProfile.id, "default"));
+      return Promise.resolve()
+        .then(async () => {
+          const profileRows = await db
+            .select()
+            .from(userProfile)
+            .where(eq(userProfile.id, "default"));
 
-        let userSkills: string[] = skills || [];
-        let experience = "";
-        let goals = "";
+          let userSkills: string[] = skills || [];
+          let experience = "";
+          let goals = "";
 
-        if (profileRows.length > 0) {
-          const profile = profileRows[0];
-          userSkills = skills || [
-            ...(profile.technicalSkills || []),
-            ...(profile.softSkills || []),
-          ];
-          experience = profile.summary || "";
-          goals = profile.careerGoals ? JSON.stringify(profile.careerGoals) : "";
-        }
+          if (profileRows.length > 0) {
+            const profile = profileRows[0];
+            userSkills = skills || [
+              ...(profile.technicalSkills || []),
+              ...(profile.softSkills || []),
+            ];
+            experience = profile.summary || "";
+            goals = profile.careerGoals ? JSON.stringify(profile.careerGoals) : "";
+          }
 
-        // If resume is provided, load it for more context
-        if (resumeId) {
-          const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
+          if (resumeId) {
+            const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
 
-          if (resumeRows.length > 0) {
-            const resume = resumeRows[0];
-            if (resume.summary) experience = resume.summary;
-            if (resume.skills) {
-              const resumeSkills = Object.values(resume.skills).flatMap((value) =>
-                collectStringArray(value),
-              );
-              userSkills = [...new Set([...userSkills, ...resumeSkills])];
+            if (resumeRows.length > 0) {
+              const resume = resumeRows[0];
+              if (resume.summary) experience = resume.summary;
+              if (resume.skills) {
+                const resumeSkills = Object.values(resume.skills).flatMap((value) =>
+                  collectStringArray(value),
+                );
+                userSkills = [...new Set([...userSkills, ...resumeSkills])];
+              }
             }
           }
-        }
 
-        // Load recent jobs (limit to 10 for performance)
-        const recentJobs = await db.select().from(jobs).orderBy(desc(jobs.postedDate)).limit(10);
+          const recentJobs = await db.select().from(jobs).orderBy(desc(jobs.postedDate)).limit(10);
 
-        if (recentJobs.length === 0) {
-          return {
-            message: "No jobs available for matching",
-            matches: [],
-            recommendations: [],
-          };
-        }
+          if (recentJobs.length === 0) {
+            return {
+              message: "No jobs available for matching",
+              matches: [],
+              recommendations: [],
+            };
+          }
 
-        // Load AI service
-        const aiService = await getAIService();
+          const aiService = await getAIService();
 
-        // Analyze matches for each job
-        const matches = await Promise.all(
-          recentJobs.slice(0, 5).map(async (job) => {
-            const prompt = `${jobMatchPrompt(
-              {
-                skills: userSkills,
-                experience,
-                goals,
-              },
-              {
-                title: job.title,
-                company: job.company,
-                description: job.description || "",
-                requirements: job.requirements || [],
-              },
-            )}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), concerns (string[]), highlightSkills (string[]).`;
-
-            try {
-              const response = await aiService.generate(prompt, {
-                temperature: 0.3,
-                maxTokens: 1000,
-              });
-
-              if (response.error) {
-                return {
-                  jobId: job.id,
+          const matches = await Promise.all(
+            recentJobs.slice(0, 5).map(async (job) => {
+              const prompt = `${jobMatchPrompt(
+                {
+                  skills: userSkills,
+                  experience,
+                  goals,
+                },
+                {
                   title: job.title,
                   company: job.company,
-                  score: 50,
-                  strengths: [],
-                  concerns: [],
-                  highlightSkills: [],
-                };
-              }
+                  description: job.description || "",
+                  requirements: job.requirements || [],
+                },
+              )}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), concerns (string[]), highlightSkills (string[]).`;
 
-              const analysis = safeJSONParse(response.content, {
-                score: 50,
-                strengths: [],
-                concerns: [],
-                highlightSkills: [],
-              });
+              return aiService
+                .generate(prompt, {
+                  temperature: 0.3,
+                  maxTokens: 1000,
+                })
+                .then((response) => {
+                  if (response.error) {
+                    return {
+                      jobId: job.id,
+                      title: job.title,
+                      company: job.company,
+                      score: 50,
+                      strengths: [],
+                      concerns: [],
+                      highlightSkills: [],
+                    };
+                  }
 
-              return {
-                jobId: job.id,
-                title: job.title,
-                company: job.company,
-                location: job.location,
-                remote: job.remote,
-                score: analysis.score || 50,
-                strengths: analysis.strengths || [],
-                concerns: analysis.concerns || [],
-                highlightSkills: analysis.highlightSkills || [],
-              };
-            } catch (error) {
-              console.error(`Failed to analyze job ${job.id}:`, error);
-              return {
-                jobId: job.id,
-                title: job.title,
-                company: job.company,
-                score: 50,
-                strengths: [],
-                concerns: [],
-                highlightSkills: [],
-              };
-            }
-          }),
-        );
+                  const analysis = safeJSONParse(response.content, {
+                    score: 50,
+                    strengths: [],
+                    concerns: [],
+                    highlightSkills: [],
+                  });
 
-        // Sort by score
-        matches.sort((a, b) => b.score - a.score);
+                  return {
+                    jobId: job.id,
+                    title: job.title,
+                    company: job.company,
+                    location: job.location,
+                    remote: job.remote,
+                    score: analysis.score || 50,
+                    strengths: analysis.strengths || [],
+                    concerns: analysis.concerns || [],
+                    highlightSkills: analysis.highlightSkills || [],
+                  };
+                })
+                .catch((error: unknown) => {
+                  console.error(`Failed to analyze job ${job.id}:`, error);
+                  return {
+                    jobId: job.id,
+                    title: job.title,
+                    company: job.company,
+                    score: 50,
+                    strengths: [],
+                    concerns: [],
+                    highlightSkills: [],
+                  };
+                });
+            }),
+          );
 
-        // Generate recommendations
-        const topMatch = matches[0];
-        const recommendations = topMatch
-          ? [
-              `Apply to ${topMatch.title} at ${topMatch.company} (${topMatch.score}% match)`,
-              ...topMatch.strengths.slice(0, 2),
-            ]
-          : [];
+          matches.sort((a, b) => b.score - a.score);
 
-        return {
-          message: "Job matching complete",
-          matches,
-          recommendations,
-        };
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: error instanceof Error ? error.message : "Failed to match jobs",
-        };
-      }
+          const topMatch = matches[0];
+          const recommendations = topMatch
+            ? [
+                `Apply to ${topMatch.title} at ${topMatch.company} (${topMatch.score}% match)`,
+                ...topMatch.strengths.slice(0, 2),
+              ]
+            : [];
+
+          return {
+            message: "Job matching complete",
+            matches,
+            recommendations,
+          };
+        })
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: error instanceof Error ? error.message : "Failed to match jobs",
+          };
+        });
     },
     {
       body: t.Object({
@@ -811,54 +807,51 @@ Technologies: ${job.technologies?.join(", ") || ""}
     },
   )
   .get("/models", async () => {
-    try {
-      // Load AI service to get real provider status
-      const aiService = await getAIService();
+    return getAIService()
+      .then(async (aiService) => {
+        const providerStatuses = await aiService.getAvailableProviders();
+        const statusByProvider = new Map(
+          providerStatuses.map((status) => [status.provider, status]),
+        );
 
-      // Get provider statuses
-      const providerStatuses = await aiService.getAvailableProviders();
-      const statusByProvider = new Map(providerStatuses.map((status) => [status.provider, status]));
+        const localProviders = await aiService.detectLocalProviders();
+        const localProviderAvailable = localProviders.some((provider) => provider.available);
 
-      // Detect local provider connectivity by attempting to list local models.
-      const localProviders = await aiService.detectLocalProviders();
-      const localProviderAvailable = localProviders.some((provider) => provider.available);
+        const providers = AI_PROVIDER_CATALOG.map((provider) => {
+          const status = statusByProvider.get(provider.id);
+          const available =
+            provider.id === "local"
+              ? (status?.available ?? localProviderAvailable)
+              : status?.available;
 
-      // Map providers from shared catalog to response format
-      const providers = AI_PROVIDER_CATALOG.map((provider) => {
-        const status = statusByProvider.get(provider.id);
-        const available =
-          provider.id === "local"
-            ? (status?.available ?? localProviderAvailable)
-            : status?.available;
+          return {
+            id: provider.id,
+            name: provider.name,
+            models: [...provider.modelHints],
+            available: available ?? false,
+            health: status?.health ?? (available ? "healthy" : "unconfigured"),
+          };
+        });
 
         return {
+          providers,
+          preferredProvider: aiService.getFallbackOrder()[0],
+          configuredProviders: aiService.getConfiguredProviders(),
+        };
+      })
+      .catch(() => {
+        const providers = AI_PROVIDER_CATALOG.map((provider) => ({
           id: provider.id,
           name: provider.name,
           models: [...provider.modelHints],
-          available: available ?? false,
-          health: status?.health ?? (available ? "healthy" : "unconfigured"),
+          available: false,
+          health: "unconfigured" as const,
+        }));
+        return {
+          providers,
+          error: "No AI providers configured. Please add API keys in settings.",
         };
       });
-
-      return {
-        providers,
-        preferredProvider: aiService.getFallbackOrder()[0],
-        configuredProviders: aiService.getConfiguredProviders(),
-      };
-    } catch {
-      // If settings not found or no providers configured, return default list
-      const providers = AI_PROVIDER_CATALOG.map((provider) => ({
-        id: provider.id,
-        name: provider.name,
-        models: [...provider.modelHints],
-        available: false,
-        health: "unconfigured" as const,
-      }));
-      return {
-        providers,
-        error: "No AI providers configured. Please add API keys in settings.",
-      };
-    }
   })
   .get("/usage", async () => {
     const chatMessages = await db.select().from(chatHistory);
@@ -885,32 +878,33 @@ Technologies: ${job.technologies?.join(", ") || ""}
         return { error: `Unsupported automation action: ${action}` };
       }
 
-      try {
-        const runId = await applicationAutomationService.createJobApplyRun(
+      return applicationAutomationService
+        .createJobApplyRun(
           { jobUrl, resumeId, coverLetterId, jobId },
           { includeActionInPayload: true },
-        );
+        )
+        .then((runId) => {
+          void applicationAutomationService.runJobApply(runId, {
+            jobUrl,
+            resumeId,
+            coverLetterId,
+            jobId,
+          });
 
-        void applicationAutomationService.runJobApply(runId, {
-          jobUrl,
-          resumeId,
-          coverLetterId,
-          jobId,
+          return {
+            runId,
+            status: "running",
+            message:
+              "Job application automation started. Use GET /api/automation/runs/:id to check status.",
+          };
+        })
+        .catch((error: unknown) => {
+          const mapped = mapAutomationRouteError(error);
+          set.status = mapped.status;
+          return {
+            error: mapped.message,
+          };
         });
-
-        return {
-          runId,
-          status: "running",
-          message:
-            "Job application automation started. Use GET /api/automation/runs/:id to check status.",
-        };
-      } catch (error) {
-        const mapped = mapAutomationRouteError(error);
-        set.status = mapped.status;
-        return {
-          error: mapped.message,
-        };
-      }
     },
     {
       body: t.Object({

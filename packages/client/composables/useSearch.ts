@@ -1,5 +1,6 @@
 import type { AutocompleteResult, SearchResult, SearchResults } from "@bao/shared";
 import { STATE_KEYS, asNumber, asString, isRecord } from "@bao/shared";
+import { assertApiResponse, settlePromise, withLoadingState } from "./async-flow";
 
 const SEARCH_RESULT_TYPE_MAP: Record<string, SearchResult["type"]> = {
   jobs: "job",
@@ -103,16 +104,13 @@ export function useSearch() {
       results.value = null;
       return;
     }
-    loading.value = true;
-    try {
+    await withLoadingState(loading, async () => {
       const queryParams: Record<string, string> = { q };
       if (types?.length) queryParams.types = types.join(",");
       const { data, error } = await api.search.get({ query: queryParams });
-      if (error) throw new Error("Failed to search");
+      assertApiResponse(error, "Failed to search");
       results.value = toSearchResults(data, q, types);
-    } finally {
-      loading.value = false;
-    }
+    });
   }, 300);
 
   const autocomplete = debounceAsync(async (prefix: string) => {
@@ -120,13 +118,20 @@ export function useSearch() {
       suggestions.value = [];
       return;
     }
-    try {
-      const { data, error } = await api.search.autocomplete.get({ query: { prefix } });
-      if (error) return;
-      suggestions.value = toAutocompleteResults(data);
-    } catch {
+    const settled = await settlePromise(
+      api.search.autocomplete.get({ query: { prefix } }),
+      "Failed to fetch autocomplete suggestions",
+    );
+    if (!settled.ok) {
       suggestions.value = [];
+      return;
     }
+    const { data, error } = settled.value;
+    if (error) {
+      suggestions.value = [];
+      return;
+    }
+    suggestions.value = toAutocompleteResults(data);
   }, 150);
 
   function clearSearch() {

@@ -224,6 +224,28 @@ const parseChatHistoryInsert = (value: unknown): ChatHistoryInsert | null => {
   };
 };
 
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+const runWithErrorHandler = async (
+  operation: () => Promise<void>,
+  onError: (message: string) => void,
+): Promise<void> => {
+  await operation().then(
+    () => undefined,
+    (error: unknown) => {
+      onError(toErrorMessage(error));
+    },
+  );
+};
+
+const runIgnoringErrors = async (operation: () => Promise<void>): Promise<void> => {
+  await operation().then(
+    () => undefined,
+    () => undefined,
+  );
+};
+
 export class DataService {
   /**
    * Export all user data as JSON
@@ -289,254 +311,268 @@ export class DataService {
       return { imported, skipped, errors };
     }
 
-    try {
-      sqlite.exec("BEGIN");
-
-      // Import profile
-      if (data.profile) {
-        try {
-          const existing = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
-          if (existing.length > 0) {
-            const profile = data.profile as Record<string, unknown>;
-            const { id, createdAt, ...rest } = profile;
-            await db
-              .update(userProfile)
-              .set({ ...rest, updatedAt: new Date().toISOString() })
-              .where(eq(userProfile.id, "default"));
-          } else {
-            const profile = data.profile as Record<string, unknown>;
-            await db.insert(userProfile).values({ ...profile, id: "default" });
-          }
-          imported.profile = 1;
-        } catch (e) {
-          errors.push(`Profile import failed: ${e instanceof Error ? e.message : String(e)}`);
+    sqlite.exec("BEGIN");
+    await Promise.resolve()
+      .then(async () => {
+        // Import profile
+        if (data.profile) {
+          await runWithErrorHandler(
+            async () => {
+              const existing = await db
+                .select()
+                .from(userProfile)
+                .where(eq(userProfile.id, "default"));
+              if (existing.length > 0) {
+                const profile = data.profile as Record<string, unknown>;
+                const { id, createdAt, ...rest } = profile;
+                await db
+                  .update(userProfile)
+                  .set({ ...rest, updatedAt: new Date().toISOString() })
+                  .where(eq(userProfile.id, "default"));
+              } else {
+                const profile = data.profile as Record<string, unknown>;
+                await db.insert(userProfile).values({ ...profile, id: "default" });
+              }
+              imported.profile = 1;
+            },
+            (message) => {
+              errors.push(`Profile import failed: ${message}`);
+            },
+          );
         }
-      }
 
-      // Import settings (skip redacted API keys)
-      if (data.settings) {
-        try {
-          const s = { ...(data.settings as Record<string, unknown>) };
-          // Don't overwrite API keys with redacted values
-          if (s.geminiApiKey === "***REDACTED***") s.geminiApiKey = undefined;
-          if (s.openaiApiKey === "***REDACTED***") s.openaiApiKey = undefined;
-          if (s.claudeApiKey === "***REDACTED***") s.claudeApiKey = undefined;
-          if (s.huggingfaceToken === "***REDACTED***") s.huggingfaceToken = undefined;
-          s.id = undefined;
-          s.createdAt = undefined;
+        // Import settings (skip redacted API keys)
+        if (data.settings) {
+          await runWithErrorHandler(
+            async () => {
+              const s = { ...(data.settings as Record<string, unknown>) };
+              // Don't overwrite API keys with redacted values
+              if (s.geminiApiKey === "***REDACTED***") s.geminiApiKey = undefined;
+              if (s.openaiApiKey === "***REDACTED***") s.openaiApiKey = undefined;
+              if (s.claudeApiKey === "***REDACTED***") s.claudeApiKey = undefined;
+              if (s.huggingfaceToken === "***REDACTED***") s.huggingfaceToken = undefined;
+              s.id = undefined;
+              s.createdAt = undefined;
 
-          const existing = await db
-            .select()
-            .from(settings)
-            .where(eq(settings.id, DEFAULT_SETTINGS_ID));
-          if (existing.length > 0) {
-            await db
-              .update(settings)
-              .set({ ...s, updatedAt: new Date().toISOString() })
-              .where(eq(settings.id, DEFAULT_SETTINGS_ID));
-          } else {
-            await db.insert(settings).values({ ...s, id: DEFAULT_SETTINGS_ID });
-          }
-          imported.settings = 1;
-        } catch (e) {
-          errors.push(`Settings import failed: ${e instanceof Error ? e.message : String(e)}`);
+              const existing = await db
+                .select()
+                .from(settings)
+                .where(eq(settings.id, DEFAULT_SETTINGS_ID));
+              if (existing.length > 0) {
+                await db
+                  .update(settings)
+                  .set({ ...s, updatedAt: new Date().toISOString() })
+                  .where(eq(settings.id, DEFAULT_SETTINGS_ID));
+              } else {
+                await db.insert(settings).values({ ...s, id: DEFAULT_SETTINGS_ID });
+              }
+              imported.settings = 1;
+            },
+            (message) => {
+              errors.push(`Settings import failed: ${message}`);
+            },
+          );
         }
-      }
 
-      // Import resumes
-      if (data.resumes?.length > 0) {
-        let count = 0;
-        for (const resume of data.resumes) {
-          try {
-            const r = parseResumeInsert(resume);
-            if (!r) {
-              throw new Error("Invalid resume payload");
-            }
-            await db
-              .insert(resumes)
-              .values(r)
-              .onConflictDoUpdate({
-                target: resumes.id,
-                set: { ...r, updatedAt: new Date().toISOString() },
-              });
-            count++;
-          } catch (e) {
-            const r = isRecord(resume) ? resume : {};
-            errors.push(
-              `Resume "${r.name}" import failed: ${e instanceof Error ? e.message : String(e)}`,
+        // Import resumes
+        if (data.resumes?.length > 0) {
+          let count = 0;
+          for (const resume of data.resumes) {
+            await runWithErrorHandler(
+              async () => {
+                const parsedResume = parseResumeInsert(resume);
+                if (!parsedResume) {
+                  throw new Error("Invalid resume payload");
+                }
+                await db
+                  .insert(resumes)
+                  .values(parsedResume)
+                  .onConflictDoUpdate({
+                    target: resumes.id,
+                    set: { ...parsedResume, updatedAt: new Date().toISOString() },
+                  });
+                count++;
+              },
+              (message) => {
+                const r = isRecord(resume) ? resume : {};
+                errors.push(`Resume "${r.name}" import failed: ${message}`);
+              },
             );
           }
+          imported.resumes = count;
         }
-        imported.resumes = count;
-      }
 
-      // Import cover letters
-      if (data.coverLetters?.length > 0) {
-        let count = 0;
-        for (const cl of data.coverLetters) {
-          try {
-            const c = parseCoverLetterInsert(cl);
-            if (!c) {
-              throw new Error("Invalid cover letter payload");
-            }
-            await db
-              .insert(coverLetters)
-              .values(c)
-              .onConflictDoUpdate({
-                target: coverLetters.id,
-                set: { ...c, updatedAt: new Date().toISOString() },
-              });
-            count++;
-          } catch (e) {
-            errors.push(
-              `Cover letter import failed: ${e instanceof Error ? e.message : String(e)}`,
+        // Import cover letters
+        if (data.coverLetters?.length > 0) {
+          let count = 0;
+          for (const cl of data.coverLetters) {
+            await runWithErrorHandler(
+              async () => {
+                const parsedCoverLetter = parseCoverLetterInsert(cl);
+                if (!parsedCoverLetter) {
+                  throw new Error("Invalid cover letter payload");
+                }
+                await db
+                  .insert(coverLetters)
+                  .values(parsedCoverLetter)
+                  .onConflictDoUpdate({
+                    target: coverLetters.id,
+                    set: { ...parsedCoverLetter, updatedAt: new Date().toISOString() },
+                  });
+                count++;
+              },
+              (message) => {
+                errors.push(`Cover letter import failed: ${message}`);
+              },
             );
           }
+          imported.coverLetters = count;
         }
-        imported.coverLetters = count;
-      }
 
-      // Import portfolio projects
-      if (data.portfolioProjects?.length > 0) {
-        // Ensure portfolio container exists
-        if (data.portfolio) {
-          try {
-            const portfolioRow = parsePortfolioInsert(data.portfolio);
-            if (!portfolioRow) {
-              throw new Error("Invalid portfolio payload");
-            }
-            await db.insert(portfolios).values(portfolioRow).onConflictDoNothing();
-          } catch {
-            /* ignore */
+        // Import portfolio projects
+        if (data.portfolioProjects?.length > 0) {
+          // Ensure portfolio container exists
+          if (data.portfolio) {
+            await runIgnoringErrors(async () => {
+              const portfolioRow = parsePortfolioInsert(data.portfolio);
+              if (!portfolioRow) {
+                throw new Error("Invalid portfolio payload");
+              }
+              await db.insert(portfolios).values(portfolioRow).onConflictDoNothing();
+            });
           }
-        }
 
-        let count = 0;
-        for (const project of data.portfolioProjects) {
-          try {
-            const p = parsePortfolioProjectInsert(project);
-            if (!p) {
-              throw new Error("Invalid portfolio project payload");
-            }
-            await db
-              .insert(portfolioProjects)
-              .values(p)
-              .onConflictDoUpdate({
-                target: portfolioProjects.id,
-                set: { ...p, updatedAt: new Date().toISOString() },
-              });
-            count++;
-          } catch (e) {
-            const p = isRecord(project) ? project : {};
-            errors.push(
-              `Portfolio project "${p.title}" import failed: ${e instanceof Error ? e.message : String(e)}`,
+          let count = 0;
+          for (const project of data.portfolioProjects) {
+            await runWithErrorHandler(
+              async () => {
+                const parsedProject = parsePortfolioProjectInsert(project);
+                if (!parsedProject) {
+                  throw new Error("Invalid portfolio project payload");
+                }
+                await db
+                  .insert(portfolioProjects)
+                  .values(parsedProject)
+                  .onConflictDoUpdate({
+                    target: portfolioProjects.id,
+                    set: { ...parsedProject, updatedAt: new Date().toISOString() },
+                  });
+                count++;
+              },
+              (message) => {
+                const p = isRecord(project) ? project : {};
+                errors.push(`Portfolio project "${p.title}" import failed: ${message}`);
+              },
             );
           }
+          imported.portfolioProjects = count;
         }
-        imported.portfolioProjects = count;
-      }
 
-      // Import interview sessions
-      if (data.interviewSessions?.length > 0) {
-        let count = 0;
-        for (const session of data.interviewSessions) {
-          try {
-            const sess = parseInterviewSessionInsert(session);
-            if (!sess) {
-              throw new Error("Invalid interview session payload");
-            }
-            await db
-              .insert(interviewSessions)
-              .values(sess)
-              .onConflictDoUpdate({
-                target: interviewSessions.id,
-                set: { ...sess, updatedAt: new Date().toISOString() },
-              });
-            count++;
-          } catch (e) {
-            errors.push(
-              `Interview session import failed: ${e instanceof Error ? e.message : String(e)}`,
+        // Import interview sessions
+        if (data.interviewSessions?.length > 0) {
+          let count = 0;
+          for (const session of data.interviewSessions) {
+            await runWithErrorHandler(
+              async () => {
+                const parsedSession = parseInterviewSessionInsert(session);
+                if (!parsedSession) {
+                  throw new Error("Invalid interview session payload");
+                }
+                await db
+                  .insert(interviewSessions)
+                  .values(parsedSession)
+                  .onConflictDoUpdate({
+                    target: interviewSessions.id,
+                    set: { ...parsedSession, updatedAt: new Date().toISOString() },
+                  });
+                count++;
+              },
+              (message) => {
+                errors.push(`Interview session import failed: ${message}`);
+              },
             );
           }
+          imported.interviewSessions = count;
         }
-        imported.interviewSessions = count;
-      }
 
-      // Import gamification
-      if (data.gamification) {
-        try {
-          const existing = await db
-            .select()
-            .from(gamification)
-            .where(eq(gamification.id, "default"));
-          const gam = parseGamificationInsert(data.gamification);
-          if (!gam) {
-            throw new Error("Invalid gamification payload");
-          }
-          if (existing.length > 0) {
-            const { id, createdAt, ...rest } = gam;
-            await db
-              .update(gamification)
-              .set({ ...rest, updatedAt: new Date().toISOString() })
-              .where(eq(gamification.id, "default"));
-          } else {
-            await db.insert(gamification).values({ ...gam, id: "default" });
-          }
-          imported.gamification = 1;
-        } catch (e) {
-          errors.push(`Gamification import failed: ${e instanceof Error ? e.message : String(e)}`);
+        // Import gamification
+        if (data.gamification) {
+          await runWithErrorHandler(
+            async () => {
+              const existing = await db
+                .select()
+                .from(gamification)
+                .where(eq(gamification.id, "default"));
+              const gam = parseGamificationInsert(data.gamification);
+              if (!gam) {
+                throw new Error("Invalid gamification payload");
+              }
+              if (existing.length > 0) {
+                const { id, createdAt, ...rest } = gam;
+                await db
+                  .update(gamification)
+                  .set({ ...rest, updatedAt: new Date().toISOString() })
+                  .where(eq(gamification.id, "default"));
+              } else {
+                await db.insert(gamification).values({ ...gam, id: "default" });
+              }
+              imported.gamification = 1;
+            },
+            (message) => {
+              errors.push(`Gamification import failed: ${message}`);
+            },
+          );
         }
-      }
 
-      // Import skill mappings
-      if (data.skillMappings?.length > 0) {
-        let count = 0;
-        for (const skill of data.skillMappings) {
-          try {
-            const sk = parseSkillMappingInsert(skill);
-            if (!sk) {
-              throw new Error("Invalid skill mapping payload");
-            }
-            await db
-              .insert(skillMappings)
-              .values(sk)
-              .onConflictDoUpdate({
-                target: skillMappings.id,
-                set: { ...sk, updatedAt: new Date().toISOString() },
-              });
-            count++;
-          } catch (e) {
-            errors.push(
-              `Skill mapping import failed: ${e instanceof Error ? e.message : String(e)}`,
+        // Import skill mappings
+        if (data.skillMappings?.length > 0) {
+          let count = 0;
+          for (const skill of data.skillMappings) {
+            await runWithErrorHandler(
+              async () => {
+                const parsedSkill = parseSkillMappingInsert(skill);
+                if (!parsedSkill) {
+                  throw new Error("Invalid skill mapping payload");
+                }
+                await db
+                  .insert(skillMappings)
+                  .values(parsedSkill)
+                  .onConflictDoUpdate({
+                    target: skillMappings.id,
+                    set: { ...parsedSkill, updatedAt: new Date().toISOString() },
+                  });
+                count++;
+              },
+              (message) => {
+                errors.push(`Skill mapping import failed: ${message}`);
+              },
             );
           }
+          imported.skillMappings = count;
         }
-        imported.skillMappings = count;
-      }
 
-      // Import chat history
-      if (data.chatHistory?.length > 0) {
-        let count = 0;
-        for (const msg of data.chatHistory) {
-          try {
-            const m = parseChatHistoryInsert(msg);
-            if (!m) {
-              continue;
-            }
-            await db.insert(chatHistory).values(m).onConflictDoNothing();
-            count++;
-          } catch {
-            /* skip duplicates silently */
+        // Import chat history
+        if (data.chatHistory?.length > 0) {
+          let count = 0;
+          for (const msg of data.chatHistory) {
+            await runIgnoringErrors(async () => {
+              const parsedMessage = parseChatHistoryInsert(msg);
+              if (!parsedMessage) {
+                return;
+              }
+              await db.insert(chatHistory).values(parsedMessage).onConflictDoNothing();
+              count++;
+            });
           }
+          imported.chatHistory = count;
         }
-        imported.chatHistory = count;
-      }
 
-      sqlite.exec("COMMIT");
-    } catch (e) {
-      sqlite.exec("ROLLBACK");
-      errors.push(`Transaction failed: ${e instanceof Error ? e.message : String(e)}`);
-    }
+        sqlite.exec("COMMIT");
+      })
+      .catch((error: unknown) => {
+        sqlite.exec("ROLLBACK");
+        errors.push(`Transaction failed: ${toErrorMessage(error)}`);
+      });
 
     return { imported, skipped, errors };
   }

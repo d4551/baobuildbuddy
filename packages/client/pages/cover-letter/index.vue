@@ -13,6 +13,7 @@ import {
   isCoverLetterTemplate,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { coverLetterContentToPlainText } from "~/utils/cover-letter-content";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -198,15 +199,19 @@ async function handleDeleteCoverLetter() {
   const id = pendingDeleteCoverLetterId.value;
   if (!id) return;
 
-  try {
-    await deleteCoverLetter(id);
-    $toast.success(t("coverLetterPage.toasts.deleted"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("coverLetterPage.toasts.deleteFailed")));
-  } finally {
-    clearDeleteCoverLetterState();
-    showDeleteCoverLetterDialog.value = false;
+  const deleteResult = await settlePromise(
+    deleteCoverLetter(id),
+    t("coverLetterPage.toasts.deleteFailed"),
+  );
+  clearDeleteCoverLetterState();
+  showDeleteCoverLetterDialog.value = false;
+
+  if (!deleteResult.ok) {
+    $toast.error(getErrorMessage(deleteResult.error, t("coverLetterPage.toasts.deleteFailed")));
+    return;
   }
+
+  $toast.success(t("coverLetterPage.toasts.deleted"));
 }
 
 function editLetter(id: string) {
@@ -258,8 +263,8 @@ async function handleGenerate() {
   }
 
   generating.value = true;
-  try {
-    const generated = await generateCoverLetter({
+  const generateResult = await settlePromise(
+    generateCoverLetter({
       company: generateForm.company.trim(),
       position: generateForm.position.trim(),
       resumeId: generateForm.resumeId.trim().length > 0 ? generateForm.resumeId.trim() : undefined,
@@ -268,24 +273,27 @@ async function handleGenerate() {
       ...(generateForm.jobDescription.trim().length > 0
         ? { jobInfo: { description: generateForm.jobDescription.trim() } }
         : {}),
-    });
+    }),
+    t("coverLetterPage.toasts.generateFailed"),
+  );
+  generating.value = false;
 
-    showGenerateModal.value = false;
-    resetGenerateForm();
-
-    const generatedId = resolveGeneratedCoverLetterId(generated);
-    if (generatedId) {
-      $toast.success(t("coverLetterPage.toasts.generated"));
-      router.push(APP_ROUTE_BUILDERS.coverLetterDetail(generatedId));
-      return;
-    }
-
-    $toast.success(t("coverLetterPage.toasts.generatedWithoutRedirect"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("coverLetterPage.toasts.generateFailed")));
-  } finally {
-    generating.value = false;
+  if (!generateResult.ok) {
+    $toast.error(getErrorMessage(generateResult.error, t("coverLetterPage.toasts.generateFailed")));
+    return;
   }
+
+  showGenerateModal.value = false;
+  resetGenerateForm();
+
+  const generatedId = resolveGeneratedCoverLetterId(generateResult.value);
+  if (generatedId) {
+    $toast.success(t("coverLetterPage.toasts.generated"));
+    router.push(APP_ROUTE_BUILDERS.coverLetterDetail(generatedId));
+    return;
+  }
+
+  $toast.success(t("coverLetterPage.toasts.generatedWithoutRedirect"));
 }
 
 const templateFilterOptions = computed(() => {

@@ -52,11 +52,7 @@ export type SkillDemandLevel = (typeof SKILL_DEMAND_LEVEL_IDS)[number];
 /**
  * Canonical evidence verification status identifiers.
  */
-export const SKILL_EVIDENCE_VERIFICATION_STATUS_IDS = [
-  "pending",
-  "verified",
-  "rejected",
-] as const;
+export const SKILL_EVIDENCE_VERIFICATION_STATUS_IDS = ["pending", "verified", "rejected"] as const;
 
 /**
  * Evidence verification state.

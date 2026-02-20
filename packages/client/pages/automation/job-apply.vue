@@ -2,6 +2,7 @@
 import { APP_ROUTE_BUILDERS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import type { AutomationRun } from "~/composables/useAutomation";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
@@ -58,40 +59,48 @@ async function submitJobApply(): Promise<void> {
   lastRun.value = null;
   scheduledRun.value = null;
   pending.value = true;
-  try {
-    const coverLetterId = form.coverLetterId.trim();
-    const jobId = form.jobId.trim();
-    const body = {
-      jobUrl: form.jobUrl.trim(),
-      resumeId: form.resumeId,
-      ...(coverLetterId ? { coverLetterId } : {}),
-      ...(jobId ? { jobId } : {}),
-    };
+  const coverLetterId = form.coverLetterId.trim();
+  const jobId = form.jobId.trim();
+  const body = {
+    jobUrl: form.jobUrl.trim(),
+    resumeId: form.resumeId,
+    ...(coverLetterId ? { coverLetterId } : {}),
+    ...(jobId ? { jobId } : {}),
+  };
 
-    const result = await triggerJobApply(body);
-    lastRun.value = {
-      id: result.runId,
-      type: "job_apply",
-      status: result.status,
-      jobId: jobId || null,
-      userId: null,
-      input: body,
-      output: null,
-      screenshots: [],
-      error: null,
-      progress: 0,
-      currentStep: null,
-      totalSteps: null,
-      startedAt: null,
-      completedAt: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-  } catch (error) {
-    submitError.value = getErrorMessage(error, t("automation.jobApply.submitErrorFallback"));
-  } finally {
-    pending.value = false;
+  const submitResult = await settlePromise(
+    triggerJobApply(body),
+    t("automation.jobApply.submitErrorFallback"),
+  );
+  pending.value = false;
+
+  if (!submitResult.ok) {
+    submitError.value = getErrorMessage(
+      submitResult.error,
+      t("automation.jobApply.submitErrorFallback"),
+    );
+    return;
   }
+
+  const result = submitResult.value;
+  lastRun.value = {
+    id: result.runId,
+    type: "job_apply",
+    status: result.status,
+    jobId: jobId || null,
+    userId: null,
+    input: body,
+    output: null,
+    screenshots: [],
+    error: null,
+    progress: 0,
+    currentStep: null,
+    totalSteps: null,
+    startedAt: null,
+    completedAt: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 function toIsoTimestamp(dateTimeLocal: string): string | null {
@@ -108,33 +117,43 @@ async function submitScheduledJobApply(): Promise<void> {
   scheduledRun.value = null;
   pending.value = true;
 
-  try {
-    const runAt = toIsoTimestamp(form.runAt);
-    if (!runAt) {
-      throw new Error(t("automation.jobApply.schedule.invalidRunAt"));
-    }
-
-    const coverLetterId = form.coverLetterId.trim();
-    const jobId = form.jobId.trim();
-    const body = {
-      jobUrl: form.jobUrl.trim(),
-      resumeId: form.resumeId,
-      ...(coverLetterId ? { coverLetterId } : {}),
-      ...(jobId ? { jobId } : {}),
-      runAt,
-    };
-
-    const result = await scheduleJobApply(body);
-    scheduledRun.value = {
-      id: result.runId,
-      scheduledFor: result.scheduledFor,
-      status: result.status,
-    };
-  } catch (error) {
-    submitError.value = getErrorMessage(error, t("automation.jobApply.submitErrorFallback"));
-  } finally {
+  const runAt = toIsoTimestamp(form.runAt);
+  if (!runAt) {
+    submitError.value = t("automation.jobApply.schedule.invalidRunAt");
     pending.value = false;
+    return;
   }
+
+  const coverLetterId = form.coverLetterId.trim();
+  const jobId = form.jobId.trim();
+  const body = {
+    jobUrl: form.jobUrl.trim(),
+    resumeId: form.resumeId,
+    ...(coverLetterId ? { coverLetterId } : {}),
+    ...(jobId ? { jobId } : {}),
+    runAt,
+  };
+
+  const scheduledResult = await settlePromise(
+    scheduleJobApply(body),
+    t("automation.jobApply.submitErrorFallback"),
+  );
+  pending.value = false;
+
+  if (!scheduledResult.ok) {
+    submitError.value = getErrorMessage(
+      scheduledResult.error,
+      t("automation.jobApply.submitErrorFallback"),
+    );
+    return;
+  }
+
+  const result = scheduledResult.value;
+  scheduledRun.value = {
+    id: result.runId,
+    scheduledFor: result.scheduledFor,
+    status: result.status,
+  };
 }
 </script>
 

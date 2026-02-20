@@ -13,10 +13,14 @@ export function formatRelativeTime(date: string | Date, t: RelativeTimeTranslato
   const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
 
   if (seconds < 60) return t("common.relativeTime.justNow");
-  if (seconds < 3600) return t("common.relativeTime.minutesAgo", { count: Math.floor(seconds / 60) });
-  if (seconds < 86400) return t("common.relativeTime.hoursAgo", { count: Math.floor(seconds / 3600) });
-  if (seconds < 604800) return t("common.relativeTime.daysAgo", { count: Math.floor(seconds / 86400) });
-  if (seconds < 2592000) return t("common.relativeTime.weeksAgo", { count: Math.floor(seconds / 604800) });
+  if (seconds < 3600)
+    return t("common.relativeTime.minutesAgo", { count: Math.floor(seconds / 60) });
+  if (seconds < 86400)
+    return t("common.relativeTime.hoursAgo", { count: Math.floor(seconds / 3600) });
+  if (seconds < 604800)
+    return t("common.relativeTime.daysAgo", { count: Math.floor(seconds / 86400) });
+  if (seconds < 2592000)
+    return t("common.relativeTime.weeksAgo", { count: Math.floor(seconds / 604800) });
   return d.toLocaleDateString();
 }
 
@@ -35,7 +39,11 @@ export function timeAgo(date: string | Date): string {
 
 export function formatDate(date: string | Date, locale?: string): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  return d.toLocaleDateString(locale ?? "en-US", { year: "numeric", month: "short", day: "numeric" });
+  return d.toLocaleDateString(locale ?? "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export function isToday(date: string | Date): boolean {

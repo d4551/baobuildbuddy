@@ -5,10 +5,6 @@ import { SEED_STUDIOS } from "./studios";
 
 export async function seedDatabase(db: BunSQLiteDatabase<typeof schema>) {
   for (const studio of SEED_STUDIOS) {
-    try {
-      db.insert(studios).values(studio).onConflictDoNothing().run();
-    } catch {
-      // Skip duplicates
-    }
+    db.insert(studios).values(studio).onConflictDoNothing().run();
   }
 }

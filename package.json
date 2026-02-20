@@ -24,8 +24,9 @@
     "format": "bun --bun run biome format . --write",
     "format:check": "bun --bun run biome format .",
     "validate:ui": "bun run scripts/validate-ui-accessibility.ts",
-    "lint": "bun run validate:ui && bun --bun run biome lint . && bun run --filter '@bao/client' lint",
-    "lint:fix": "bun run validate:ui && bun --bun run biome lint . --write && bun run --filter '@bao/client' lint --fix"
+    "validate:no-try-catch": "bun run scripts/validate-no-try-catch.ts",
+    "lint": "bun run validate:no-try-catch && bun run validate:ui && bun --bun run biome lint . && bun run --filter '@bao/client' lint",
+    "lint:fix": "bun run validate:no-try-catch && bun run validate:ui && bun --bun run biome lint . --write && bun run --filter '@bao/client' lint --fix"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.3",

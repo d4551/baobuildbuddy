@@ -1,4 +1,9 @@
-import type { InterviewConfig, InterviewMode, InterviewSession, InterviewTargetJob } from "@bao/shared";
+import type {
+  InterviewConfig,
+  InterviewMode,
+  InterviewSession,
+  InterviewTargetJob,
+} from "@bao/shared";
 import {
   INTERVIEW_FALLBACK_STUDIO_ID,
   STATE_KEYS,
@@ -8,6 +13,7 @@ import {
   asStringArray,
   isRecord,
 } from "@bao/shared";
+import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 
 const INTERVIEW_STATUS_VALUES = [
   "preparing",
@@ -261,87 +267,80 @@ export function useInterview() {
   const loading = useState(STATE_KEYS.INTERVIEW_LOADING, () => false);
 
   async function startSession(studioId?: string, config?: Partial<InterviewConfig>) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const resolvedStudioId = studioId?.trim().length ? studioId : INTERVIEW_FALLBACK_STUDIO_ID;
-      const { data, error } = await api.interview.sessions.post({ studioId: resolvedStudioId, config });
-      if (error) throw new Error("Failed to start interview session");
-      const normalized = toInterviewSession(data);
-      if (!normalized) throw new Error("Invalid interview session payload");
+      const { data, error } = await api.interview.sessions.post({
+        studioId: resolvedStudioId,
+        config,
+      });
+      assertApiResponse(error, "Failed to start interview session");
+      const normalized = requireValue(
+        toInterviewSession(data),
+        "Invalid interview session payload",
+      );
       currentSession.value = normalized;
       await fetchSessions();
       return normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function fetchSessions() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.interview.sessions.get();
-      if (error) throw new Error("Failed to fetch interview sessions");
+      assertApiResponse(error, "Failed to fetch interview sessions");
       sessions.value = toInterviewSessions(data);
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function getSession(id: string) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.interview.sessions({ id }).get();
-      if (error) throw new Error("Failed to fetch interview session");
-      const normalized = toInterviewSession(data);
-      if (!normalized) throw new Error("Invalid interview session payload");
+      assertApiResponse(error, "Failed to fetch interview session");
+      const normalized = requireValue(
+        toInterviewSession(data),
+        "Invalid interview session payload",
+      );
       currentSession.value = normalized;
       return normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function submitResponse(sessionId: string, response: SubmitResponseInput) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.interview
         .sessions({ id: sessionId })
         .response.post(response);
-      if (error) throw new Error("Failed to submit response");
-      const normalized = toInterviewSession(data);
-      if (!normalized) throw new Error("Invalid interview session payload");
+      assertApiResponse(error, "Failed to submit response");
+      const normalized = requireValue(
+        toInterviewSession(data),
+        "Invalid interview session payload",
+      );
       currentSession.value = normalized;
       return normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function completeSession(id: string) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.interview.sessions({ id }).complete.post();
-      if (error) throw new Error("Failed to complete session");
-      const normalized = toInterviewSession(data);
-      if (!normalized) throw new Error("Invalid interview session payload");
+      assertApiResponse(error, "Failed to complete session");
+      const normalized = requireValue(
+        toInterviewSession(data),
+        "Invalid interview session payload",
+      );
       currentSession.value = normalized;
       await fetchSessions();
       await fetchStats();
       return normalized;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function fetchStats() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.interview.stats.get();
-      if (error) throw new Error("Failed to fetch interview stats");
+      assertApiResponse(error, "Failed to fetch interview stats");
       stats.value = toNumericRecord(data);
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   return {

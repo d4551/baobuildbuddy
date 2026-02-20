@@ -12,6 +12,7 @@ import {
   LOCAL_AI_DEFAULT_MODEL,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 type SettingsWithFlags = AppSettings & {
@@ -42,8 +43,14 @@ type ProviderInputConfig = {
 type ProfileUpdatePayload = Partial<UserProfile> &
   Pick<UserProfile, "name" | "technicalSkills" | "softSkills">;
 
-const { settings, fetchSettings, updateSettings, updateApiKeys, testApiKey, loading: settingsLoading } =
-  useSettings();
+const {
+  settings,
+  fetchSettings,
+  updateSettings,
+  updateApiKeys,
+  testApiKey,
+  loading: settingsLoading,
+} = useSettings();
 const { profile, fetchProfile, updateProfile, loading: profileLoading } = useUser();
 const { theme, toggleTheme } = useTheme();
 const { $toast } = useNuxtApp();
@@ -163,7 +170,8 @@ watch(
   { immediate: true },
 );
 
-const getComputedSettings = (): SettingsWithFlags | null => settings.value as SettingsWithFlags | null;
+const getComputedSettings = (): SettingsWithFlags | null =>
+  settings.value as SettingsWithFlags | null;
 
 function parseDelimitedList(raw: string): string[] {
   return raw
@@ -230,19 +238,24 @@ async function handleTest(providerId: AIProviderType) {
   testingProvider.value = providerId;
   testResults[providerId] = null;
 
-  try {
-    const result = await testApiKey(providerId, testInput);
-    testResults[providerId] = result;
-    if (result?.valid) {
-      $toast.success(t("settings.aiProviders.connectionSuccessful"));
-    } else {
-      $toast.error(t("settings.aiProviders.connectionFailed"));
-    }
-  } catch (error) {
-    showToastError(error, t("settings.errors.failedToTestProvider"));
+  const providerTestResult = await settlePromise(
+    testApiKey(providerId, testInput),
+    t("settings.errors.failedToTestProvider"),
+  );
+  testingProvider.value = null;
+
+  if (!providerTestResult.ok) {
+    showToastError(providerTestResult.error, t("settings.errors.failedToTestProvider"));
     testResults[providerId] = { valid: false };
-  } finally {
-    testingProvider.value = null;
+    return;
+  }
+
+  const result = providerTestResult.value;
+  testResults[providerId] = result;
+  if (result?.valid) {
+    $toast.success(t("settings.aiProviders.connectionSuccessful"));
+  } else {
+    $toast.error(t("settings.aiProviders.connectionFailed"));
   }
 }
 
@@ -257,31 +270,37 @@ async function handleSaveKeys() {
   if (apiKeys.claudeApiKey.trim()) payload.claudeApiKey = apiKeys.claudeApiKey.trim();
   if (apiKeys.huggingfaceToken.trim()) payload.huggingfaceToken = apiKeys.huggingfaceToken.trim();
 
-  try {
-    await updateApiKeys(payload);
-    $toast.success(t("settings.toasts.apiKeysSaved"));
-  } catch (error) {
-    showToastError(error, t("settings.errors.failedToSaveApiKeys"));
+  const saveKeysResult = await settlePromise(
+    updateApiKeys(payload),
+    t("settings.errors.failedToSaveApiKeys"),
+  );
+  if (!saveKeysResult.ok) {
+    showToastError(saveKeysResult.error, t("settings.errors.failedToSaveApiKeys"));
+    return;
   }
+  $toast.success(t("settings.toasts.apiKeysSaved"));
 }
 
 async function handleToggleTheme() {
   const nextTheme = theme.value === "bao-light" ? "bao-dark" : "bao-light";
   toggleTheme();
 
-  try {
-    await updateSettings({ theme: nextTheme });
-    $toast.success(t("settings.toasts.themeSaved"));
-  } catch (error) {
-    showToastError(error, t("settings.errors.failedToSaveTheme"));
+  const themeSaveResult = await settlePromise(
+    updateSettings({ theme: nextTheme }),
+    t("settings.errors.failedToSaveTheme"),
+  );
+  if (!themeSaveResult.ok) {
+    showToastError(themeSaveResult.error, t("settings.errors.failedToSaveTheme"));
+    return;
   }
+  $toast.success(t("settings.toasts.themeSaved"));
 }
 
 async function handleSavePreferences() {
   preferencesSaveState.value = "saving";
 
-  try {
-    await updateSettings({
+  const preferenceSaveResult = await settlePromise(
+    updateSettings({
       language: preferencesLanguage.value || DEFAULT_APP_LANGUAGE,
       notifications: {
         achievements: notificationForm.achievements,
@@ -289,14 +308,18 @@ async function handleSavePreferences() {
         levelUp: notificationForm.levelUp,
         jobAlerts: notificationForm.jobAlerts,
       },
-    });
+    }),
+    t("settings.errors.failedToSavePreferences"),
+  );
 
-    preferencesSaveState.value = "success";
-    $toast.success(t("settings.toasts.preferencesSaved"));
-  } catch (error) {
+  if (!preferenceSaveResult.ok) {
     preferencesSaveState.value = "error";
-    showToastError(error, t("settings.errors.failedToSavePreferences"));
+    showToastError(preferenceSaveResult.error, t("settings.errors.failedToSavePreferences"));
+    return;
   }
+
+  preferencesSaveState.value = "success";
+  $toast.success(t("settings.toasts.preferencesSaved"));
 }
 
 async function handleSaveProfile() {
@@ -316,59 +339,65 @@ async function handleSaveProfile() {
 
   profileSaveState.value = "saving";
 
-  try {
-    const profilePayload: ProfileUpdatePayload = {
-      name,
-      technicalSkills: parseDelimitedList(profileForm.technicalSkillsText),
-      softSkills: parseDelimitedList(profileForm.softSkillsText),
-      email,
-    };
+  const profilePayload: ProfileUpdatePayload = {
+    name,
+    technicalSkills: parseDelimitedList(profileForm.technicalSkillsText),
+    softSkills: parseDelimitedList(profileForm.softSkillsText),
+    email,
+  };
 
-    const phone = profileForm.phone.trim();
-    if (phone) profilePayload.phone = phone;
+  const phone = profileForm.phone.trim();
+  if (phone) profilePayload.phone = phone;
 
-    const location = profileForm.location.trim();
-    if (location) profilePayload.location = location;
+  const location = profileForm.location.trim();
+  if (location) profilePayload.location = location;
 
-    const website = profileForm.website.trim();
-    if (website) profilePayload.website = website;
+  const website = profileForm.website.trim();
+  if (website) profilePayload.website = website;
 
-    const linkedin = profileForm.linkedin.trim();
-    if (linkedin) profilePayload.linkedin = linkedin;
+  const linkedin = profileForm.linkedin.trim();
+  if (linkedin) profilePayload.linkedin = linkedin;
 
-    const github = profileForm.github.trim();
-    if (github) profilePayload.github = github;
+  const github = profileForm.github.trim();
+  if (github) profilePayload.github = github;
 
-    const summary = profileForm.summary.trim();
-    if (summary) profilePayload.summary = summary;
+  const summary = profileForm.summary.trim();
+  if (summary) profilePayload.summary = summary;
 
-    const currentRole = profileForm.currentRole.trim();
-    if (currentRole) profilePayload.currentRole = currentRole;
+  const currentRole = profileForm.currentRole.trim();
+  if (currentRole) profilePayload.currentRole = currentRole;
 
-    const currentCompany = profileForm.currentCompany.trim();
-    if (currentCompany) profilePayload.currentCompany = currentCompany;
+  const currentCompany = profileForm.currentCompany.trim();
+  if (currentCompany) profilePayload.currentCompany = currentCompany;
 
-    if (Number.isFinite(profileForm.yearsExperience)) {
-      profilePayload.yearsExperience = profileForm.yearsExperience;
-    }
-
-    await updateProfile(profilePayload);
-
-    profileSaveState.value = "success";
-    $toast.success(t("settings.toasts.profileSaved"));
-  } catch (error) {
-    profileSaveState.value = "error";
-    showToastError(error, t("settings.errors.failedToSaveProfile"));
+  if (Number.isFinite(profileForm.yearsExperience)) {
+    profilePayload.yearsExperience = profileForm.yearsExperience;
   }
+
+  const profileSaveResult = await settlePromise(
+    updateProfile(profilePayload),
+    t("settings.errors.failedToSaveProfile"),
+  );
+  if (!profileSaveResult.ok) {
+    profileSaveState.value = "error";
+    showToastError(profileSaveResult.error, t("settings.errors.failedToSaveProfile"));
+    return;
+  }
+
+  profileSaveState.value = "success";
+  $toast.success(t("settings.toasts.profileSaved"));
 }
 
 async function handleSaveAutomation() {
-  try {
-    await updateSettings({ automationSettings: { ...automationForm } });
-    $toast.success(t("settings.toasts.automationSaved"));
-  } catch (error) {
-    showToastError(error, t("settings.errors.failedToSaveAutomation"));
+  const automationSaveResult = await settlePromise(
+    updateSettings({ automationSettings: { ...automationForm } }),
+    t("settings.errors.failedToSaveAutomation"),
+  );
+  if (!automationSaveResult.ok) {
+    showToastError(automationSaveResult.error, t("settings.errors.failedToSaveAutomation"));
+    return;
   }
+  $toast.success(t("settings.toasts.automationSaved"));
 }
 </script>
 

@@ -1,4 +1,10 @@
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS, safeParseJson, type JsonObject, type JsonValue } from "@bao/shared";
+import { settlePromise } from "~/composables/async-flow";
+
+const isJsonObject = (value: JsonValue): value is JsonObject =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isPongMessage = (value: Record<string, unknown>): boolean => value.type === "pong";
 
 /**
  * WebSocket connection manager with auto-reconnect, timeout, and keep-alive.
@@ -59,16 +65,46 @@ export function useWebSocket() {
     }
   }
 
+  function runHandlerTask(task: () => void, errorPrefix: string): void {
+    void settlePromise(Promise.resolve().then(task), errorPrefix).then((result) => {
+      if (!result.ok) {
+        console.error(errorPrefix, result.error);
+      }
+    });
+  }
+
+  function containsCircularOrBigInt(value: unknown, seen: WeakSet<object>): boolean {
+    if (typeof value === "bigint") {
+      return true;
+    }
+    if (typeof value !== "object" || value === null) {
+      return false;
+    }
+    if (seen.has(value)) {
+      return true;
+    }
+    seen.add(value);
+
+    if (Array.isArray(value)) {
+      return value.some((entry) => containsCircularOrBigInt(entry, seen));
+    }
+
+    return Object.values(value).some((entry) => containsCircularOrBigInt(entry, seen));
+  }
+
   function startPingInterval() {
     if (pingInterval) clearInterval(pingInterval);
     pingInterval = setInterval(() => {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        try {
-          socket.send(JSON.stringify({ type: "ping" }));
-        } catch {
-          // Connection lost, will be handled by onclose
-        }
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        return;
       }
+
+      void settlePromise(
+        Promise.resolve().then(() => {
+          socket?.send(JSON.stringify({ type: "ping" }));
+        }),
+        "WebSocket ping failed",
+      );
     }, PING_INTERVAL);
   }
 
@@ -83,8 +119,17 @@ export function useWebSocket() {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
     const wsUrl = `${normalizedBase}${normalizedPath}`;
 
-    try {
-      socket = new WebSocket(wsUrl);
+    void settlePromise(
+      Promise.resolve().then(() => new WebSocket(wsUrl)),
+      "Failed to create WebSocket connection",
+    ).then((connectionResult) => {
+      if (!connectionResult.ok) {
+        console.error("Failed to create WebSocket connection:", connectionResult.error);
+        connected.value = false;
+        return;
+      }
+
+      socket = connectionResult.value;
 
       // Connection timeout — if socket doesn't open in 10s, abort
       connectionTimeout = setTimeout(() => {
@@ -105,19 +150,22 @@ export function useWebSocket() {
       };
 
       socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data) as Record<string, unknown>;
-          if (data.type === "pong") return; // Ignore keep-alive responses
-          lastMessage.value = data;
-          for (const handler of messageHandlers) {
-            try {
-              handler(data);
-            } catch (err) {
-              console.error("Error in WebSocket message handler:", err);
-            }
-          }
-        } catch (err) {
-          console.error("Failed to parse WebSocket message:", err);
+        if (typeof event.data !== "string") {
+          return;
+        }
+
+        const parsed = safeParseJson(event.data);
+        if (!parsed || !isJsonObject(parsed)) {
+          console.error("Failed to parse WebSocket message");
+          return;
+        }
+        if (isPongMessage(parsed)) return;
+
+        lastMessage.value = parsed;
+        for (const handler of messageHandlers) {
+          runHandlerTask(() => {
+            handler(parsed);
+          }, "Error in WebSocket message handler");
         }
       };
 
@@ -129,19 +177,13 @@ export function useWebSocket() {
         connected.value = false;
         clearTimers();
 
-        // Notify disconnect handlers
         for (const handler of disconnectHandlers) {
-          try {
-            handler();
-          } catch (err) {
-            console.error("Error in disconnect handler:", err);
-          }
+          runHandlerTask(handler, "Error in disconnect handler");
         }
 
-        // Auto-reconnect with exponential backoff (up to max attempts)
         if (currentPath && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
           const delay = getReconnectDelay();
-          reconnectAttempts++;
+          reconnectAttempts += 1;
           console.log(
             `WebSocket reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`,
           );
@@ -153,10 +195,7 @@ export function useWebSocket() {
           console.error(`WebSocket gave up after ${MAX_RECONNECT_ATTEMPTS} reconnection attempts`);
         }
       };
-    } catch (err) {
-      console.error("Failed to create WebSocket connection:", err);
-      connected.value = false;
-    }
+    });
   }
 
   function send(data: Record<string, unknown> | string): boolean {
@@ -165,14 +204,14 @@ export function useWebSocket() {
       return false;
     }
 
-    try {
-      const message = typeof data === "string" ? data : JSON.stringify(data);
-      socket.send(message);
-      return true;
-    } catch (err) {
-      console.error("Failed to send WebSocket message:", err);
+    if (typeof data !== "string" && containsCircularOrBigInt(data, new WeakSet<object>())) {
+      console.error("WebSocket message contains unsupported JSON payload");
       return false;
     }
+
+    const message = typeof data === "string" ? data : JSON.stringify(data);
+    socket.send(message);
+    return true;
   }
 
   function onMessage(callback: (data: Record<string, unknown>) => void): () => void {
@@ -194,7 +233,7 @@ export function useWebSocket() {
     clearTimers();
 
     if (socket) {
-      socket.onclose = null; // Prevent auto-reconnect on intentional disconnect
+      socket.onclose = null;
       socket.close();
       socket = null;
     }
@@ -205,7 +244,6 @@ export function useWebSocket() {
     disconnectHandlers = [];
   }
 
-  // Cleanup on component unmount
   if (import.meta.client) {
     onUnmounted(() => {
       disconnect();

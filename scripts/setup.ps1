@@ -46,25 +46,24 @@ Write-Host ""
 
 Step "Checking prerequisites..."
 
-try {
-    $bunVer = & bun --version 2>$null
-    if ($LASTEXITCODE -eq 0) { Ok "Bun $bunVer" }
-    else { Die "Bun returned exit code $LASTEXITCODE" }
-} catch {
-    Die "Bun is not installed. Install from https://bun.sh"
+$bunVer = & bun --version 2>$null
+if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($bunVer)) {
+    Ok "Bun $bunVer"
+} else {
+    Die "Bun is not installed or not available in PATH. Install from https://bun.sh"
 }
 
-try {
-    $gitVer = & git --version 2>$null
+$gitVer = & git --version 2>$null
+if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($gitVer)) {
     Ok $gitVer
-} catch {
-    Die "Git is not installed."
+} else {
+    Die "Git is not installed or not available in PATH."
 }
 
 $pythonAvailable = $false
 if (-not $SkipPython) {
-    try {
-        $pyOutput = & python --version 2>&1
+    $pyOutput = & python --version 2>&1
+    if ($LASTEXITCODE -eq 0) {
         if ($pyOutput -match "(\d+)\.(\d+)\.(\d+)") {
             $major = [int]$Matches[1]
             $minor = [int]$Matches[2]
@@ -74,8 +73,10 @@ if (-not $SkipPython) {
             } else {
                 Warn "Python $($Matches[0]) found but 3.10+ required for RPA scripts"
             }
+        } else {
+            Warn "Python version output could not be parsed: $pyOutput"
         }
-    } catch {
+    } else {
         Warn "Python not found -- RPA/scraper features will be unavailable"
     }
 }
@@ -117,18 +118,26 @@ if (-not $SkipPython -and $pythonAvailable) {
         else { Fail "Failed to create Python venv" }
     }
 
-    try {
-        & .venv\Scripts\Activate.ps1
+    & .venv\Scripts\Activate.ps1
+    if ($LASTEXITCODE -ne 0) {
+        Fail "Python virtual environment activation failed"
+    } else {
         & python -m pip install --upgrade pip --quiet 2>$null
-        & python -m pip install -r packages\scraper\requirements.txt --quiet 2>$null
-        Ok "Python dependencies installed"
+        if ($LASTEXITCODE -ne 0) {
+            Fail "Failed to upgrade pip"
+        } else {
+            & python -m pip install -r packages\scraper\requirements.txt --quiet 2>$null
+            if ($LASTEXITCODE -eq 0) {
+                Ok "Python dependencies installed"
 
-        # Verify rpa is importable
-        & python -c "import rpa" 2>$null
-        if ($LASTEXITCODE -eq 0) { Ok "rpa module verified" }
-        else { Warn "rpa module could not be imported -- check requirements.txt" }
-    } catch {
-        Fail "Python dependency installation failed: $_"
+                # Verify rpa is importable
+                & python -c "import rpa" 2>$null
+                if ($LASTEXITCODE -eq 0) { Ok "rpa module verified" }
+                else { Warn "rpa module could not be imported -- check requirements.txt" }
+            } else {
+                Fail "Python dependency installation failed"
+            }
+        }
     }
 } elseif ($SkipPython) {
     Write-Host "`n  Skipping Python setup (-SkipPython)" -ForegroundColor DarkGray

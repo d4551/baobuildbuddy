@@ -10,6 +10,21 @@ type ScriptInputPayload = {
   sourceUrl?: string;
 };
 
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+const runWithErrorCollection = async (
+  operation: () => Promise<void>,
+  errors: string[],
+): Promise<void> => {
+  await operation().then(
+    () => undefined,
+    (error: unknown) => {
+      errors.push(toErrorMessage(error));
+    },
+  );
+};
+
 async function runPythonScript(scriptName: string, payload?: ScriptInputPayload): Promise<string> {
   const scriptPath = join(SCRAPER_DIR, scriptName);
   const python = process.platform === "win32" ? "python" : "python3";
@@ -79,7 +94,8 @@ export class ScraperService {
     const errors: string[] = [];
     let scraped = 0;
     let upserted = 0;
-    try {
+    await Promise.resolve()
+      .then(async () => {
       const output = await runPythonScript("studio_scraper.py");
       const raw = JSON.parse(output);
       const items = Array.isArray(raw)
@@ -94,7 +110,7 @@ export class ScraperService {
       scraped = list.length;
       const now = new Date().toISOString();
       for (const s of list) {
-        try {
+        await runWithErrorCollection(async () => {
           const id = String(s.id || generateId()).trim() || generateId();
           const studioData = {
             name: String(s.name || "").slice(0, 200),
@@ -124,13 +140,12 @@ export class ScraperService {
               set: { ...studioData, updatedAt: now },
             });
           upserted++;
-        } catch (e) {
-          errors.push(e instanceof Error ? e.message : String(e));
-        }
+        }, errors);
       }
-    } catch (e) {
-      errors.push(e instanceof Error ? e.message : String(e));
-    }
+      })
+      .catch((error: unknown) => {
+        errors.push(toErrorMessage(error));
+      });
     return { scraped, upserted, errors };
   }
 
@@ -162,15 +177,16 @@ export class ScraperService {
     const errors: string[] = [];
     let scraped = 0;
     let upserted = 0;
-    try {
+    await Promise.resolve()
+      .then(async () => {
       const list = await this.scrapeGameDevNetJobsRaw();
       scraped = list.length;
       const now = new Date().toISOString();
       for (const j of list) {
-        try {
+        await runWithErrorCollection(async () => {
           const contentHash = String(j.contentHash || `gdn-${generateId()}`).slice(0, 100);
           const existing = await db.select().from(jobs).where(eq(jobs.contentHash, contentHash));
-          if (existing.length > 0) continue; // dedupe by contentHash
+          if (existing.length > 0) return; // dedupe by contentHash
           const id = generateId();
           await db.insert(jobs).values({
             id,
@@ -189,13 +205,12 @@ export class ScraperService {
             updatedAt: now,
           });
           upserted++;
-        } catch (e) {
-          errors.push(e instanceof Error ? e.message : String(e));
-        }
+        }, errors);
       }
-    } catch (e) {
-      errors.push(e instanceof Error ? e.message : String(e));
-    }
+      })
+      .catch((error: unknown) => {
+        errors.push(toErrorMessage(error));
+      });
     return { scraped, upserted, errors };
   }
 }

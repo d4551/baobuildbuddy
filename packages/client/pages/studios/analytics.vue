@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 type ApiClient = ReturnType<typeof useApi>;
@@ -69,14 +70,27 @@ function showErrorToast(message: string) {
 
 async function fetchAnalytics() {
   pageError.value = null;
-  try {
-    const { data, error } = await api.studios.analytics.get();
-    if (error) throw error;
-    analytics.value = mapAnalyticsResponse(data);
-  } catch (error) {
+  const analyticsResult = await settlePromise(
+    api.studios.analytics.get(),
+    t("studioAnalytics.errors.loadFailed"),
+  );
+  if (!analyticsResult.ok) {
+    pageError.value = getErrorMessage(
+      analyticsResult.error,
+      t("studioAnalytics.errors.loadFailed"),
+    );
+    showErrorToast(pageError.value);
+    return;
+  }
+
+  const { data, error } = analyticsResult.value;
+  if (error) {
     pageError.value = getErrorMessage(error, t("studioAnalytics.errors.loadFailed"));
     showErrorToast(pageError.value);
+    return;
   }
+
+  analytics.value = mapAnalyticsResponse(data);
 }
 
 function getMaxCount(items: readonly AnalyticsTechnology[]) {

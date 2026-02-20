@@ -1,4 +1,4 @@
-import type { ResumeData } from "@bao/shared";
+import { type ResumeData } from "@bao/shared";
 import { Elysia } from "elysia";
 export declare const resumeRoutes: Elysia<"/resumes", {
     decorator: {};
@@ -31,12 +31,9 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     response: {
                         200: {
                             questions: import("../services/cv-questionnaire-service").CvQuestion[];
-                            error?: undefined;
-                            details?: undefined;
                         } | {
                             error: string;
                             details: string;
-                            questions?: undefined;
                         };
                         422: {
                             type: "validation";
@@ -324,10 +321,9 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     response: {
                         200: Response | {
                             error: string;
-                            details?: undefined;
+                            details: string;
                         } | {
                             error: string;
-                            details: string;
                         };
                         422: {
                             type: "validation";
@@ -358,23 +354,16 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     headers: unknown;
                     response: {
                         200: {
-                            error: string;
-                            details?: undefined;
-                            resume?: undefined;
-                            suggestions?: undefined;
-                            section?: undefined;
-                        } | {
-                            error: string;
-                            details: string;
-                            resume?: undefined;
-                            suggestions?: undefined;
-                            section?: undefined;
-                        } | {
                             resume: ResumeData;
-                            suggestions: unknown[];
+                            suggestions: import("@bao/shared").JsonArray;
                             section: string;
                             error?: undefined;
                             details?: undefined;
+                        } | {
+                            error: string;
+                            details: string;
+                        } | {
+                            error: string;
                         };
                         422: {
                             type: "validation";
@@ -405,26 +394,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     headers: unknown;
                     response: {
                         200: {
-                            error: string;
-                            details?: undefined;
-                            resumeId?: undefined;
-                            jobId?: undefined;
-                            score?: undefined;
-                            strengths?: undefined;
-                            improvements?: undefined;
-                            keywords?: undefined;
-                            analysis?: undefined;
-                        } | {
-                            error: string;
-                            details: string;
-                            resumeId?: undefined;
-                            jobId?: undefined;
-                            score?: undefined;
-                            strengths?: undefined;
-                            improvements?: undefined;
-                            keywords?: undefined;
-                            analysis?: undefined;
-                        } | {
                             resumeId: string;
                             jobId: string;
                             score: number;
@@ -434,6 +403,11 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                             analysis: Record<string, unknown>;
                             error?: undefined;
                             details?: undefined;
+                        } | {
+                            error: string;
+                            details: string;
+                        } | {
+                            error: string;
                         };
                         422: {
                             type: "validation";

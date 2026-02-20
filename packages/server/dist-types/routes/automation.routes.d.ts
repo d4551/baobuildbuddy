@@ -10,6 +10,9 @@ export declare const automationRoutes: Elysia<"/automation", {
 }, {
     typebox: {};
     error: {};
+} & {
+    error: {};
+    typebox: import("@sinclair/typebox").TModule<{}, {}>;
 }, {
     schema: {};
     standaloneSchema: {};
@@ -17,7 +20,14 @@ export declare const automationRoutes: Elysia<"/automation", {
     macroFn: {};
     parser: {};
     response: {};
+} & {
+    schema: {};
+    macro: {};
+    macroFn: {};
+    parser: {};
 }, {
+    automation: {};
+} & {
     automation: {
         "job-apply": {
             post: {
@@ -244,10 +254,18 @@ export declare const automationRoutes: Elysia<"/automation", {
     schema: {};
     standaloneSchema: {};
     response: {};
+} & {
+    derive: {};
+    resolve: {};
+    schema: {};
 }, {
     derive: {};
     resolve: {};
     schema: {};
     standaloneSchema: {};
     response: {};
+} & {
+    derive: {};
+    resolve: {};
+    schema: {};
 }>;

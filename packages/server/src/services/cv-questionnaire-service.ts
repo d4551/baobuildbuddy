@@ -1,5 +1,6 @@
 import type { ResumeData } from "@bao/shared";
 import { isRecord } from "@bao/shared";
+import { safeParseJson } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
@@ -53,18 +54,23 @@ export class CvQuestionnaireService {
       throw new Error(response.error);
     }
 
-    try {
-      const raw = JSON.parse(extractJson(response.content));
-      if (!Array.isArray(raw)) return [];
-
-      return raw.filter(isCvQuestion).map((q) => ({
-        id: q.id,
-        question: q.question,
-        category: q.category,
-      }));
-    } catch {
+    const raw = safeParseJson(extractJson(response.content));
+    if (!Array.isArray(raw)) {
       return [];
     }
+
+    const questions: CvQuestion[] = [];
+    for (const candidate of raw) {
+      if (!isCvQuestion(candidate)) {
+        continue;
+      }
+      questions.push({
+        id: candidate.id,
+        question: candidate.question,
+        category: candidate.category,
+      });
+    }
+    return questions;
   }
 
   async synthesizeResume(
@@ -78,12 +84,11 @@ export class CvQuestionnaireService {
       throw new Error(response.error);
     }
 
-    try {
-      const parsed = JSON.parse(extractJson(response.content)) as Partial<ResumeData>;
-      return parsed;
-    } catch {
+    const parsed = safeParseJson(extractJson(response.content));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error("Failed to parse AI resume synthesis");
     }
+    return parsed as Partial<ResumeData>;
   }
 }
 

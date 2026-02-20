@@ -97,7 +97,6 @@ function handleClose(): void {
     :aria-labelledby="`${id}-title`"
     :aria-describedby="`${id}-message`"
     aria-modal="true"
-    role="dialog"
     @close="handleClose"
   >
     <div class="modal-box">

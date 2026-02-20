@@ -5,11 +5,17 @@ import { useI18n } from "vue-i18n";
 const { theme, toggleTheme } = useTheme();
 const { t, locale, availableLocales } = useI18n();
 
-const localeLabels: Record<string, string> = {
-  "en-US": "English",
-  "es-ES": "Español",
-  "fr-FR": "Français",
-  "ja-JP": "日本語",
+const localeDisplayNames = computed(
+  () =>
+    new Intl.DisplayNames([locale.value], {
+      type: "language",
+    }),
+);
+
+const getLocaleLabel = (localeCode: string): string => {
+  const [languageCode] = localeCode.split("-");
+  const displayName = languageCode ? localeDisplayNames.value.of(languageCode) : undefined;
+  return displayName ?? localeCode;
 };
 </script>
 
@@ -50,21 +56,22 @@ const localeLabels: Record<string, string> = {
         </svg>
       </label>
       <div class="dropdown dropdown-end">
-        <label tabindex="0" class="btn btn-ghost btn-circle" :aria-label="t('a11y.localeSwitcher')">
+        <button type="button" class="btn btn-ghost btn-circle" :aria-label="t('a11y.localeSwitcher')">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12 6a3 3 0 110-6 3 3 0 010 6z" />
           </svg>
-        </label>
+        </button>
         <ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-50 mt-2 w-40 p-2 shadow-lg" role="listbox" :aria-label="t('a11y.localeSwitcher')">
-          <li v-for="loc in availableLocales" :key="loc" role="option">
+          <li v-for="loc in availableLocales" :key="loc">
             <button
               type="button"
               class="w-full text-left"
               :class="{ 'active': locale === loc }"
+              role="option"
               :aria-selected="locale === loc"
               @click="locale = loc"
             >
-              {{ localeLabels[loc] ?? loc }}
+              {{ getLocaleLabel(loc) }}
             </button>
           </li>
         </ul>

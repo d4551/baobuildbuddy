@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import {
-  APP_ROUTES,
-  SKILL_CATEGORY_IDS,
-  type SkillCategory,
-  type SkillMapping,
-} from "@bao/shared";
+import { APP_ROUTES, SKILL_CATEGORY_IDS, type SkillCategory, type SkillMapping } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { toSkillMapping } from "~/composables/api-normalizers";
+import { settlePromise } from "~/composables/async-flow";
 import {
   SKILLS_CATEGORY_LABEL_KEYS,
   SKILLS_CONFIDENCE_MAX,
@@ -104,8 +100,7 @@ const filteredMappings = computed(() => {
 });
 
 const hasActiveFilters = computed(
-  () =>
-    categoryFilter.value !== SKILLS_FILTER_ALL_VALUE || searchFilter.value.trim().length > 0,
+  () => categoryFilter.value !== SKILLS_FILTER_ALL_VALUE || searchFilter.value.trim().length > 0,
 );
 
 const mappingMetrics = computed(() => {
@@ -178,42 +173,42 @@ function resetForm(): void {
 
 async function fetchMappings(): Promise<void> {
   loading.value = true;
-  try {
-    const { data } = await api.skills.mappings.get();
-    mappings.value = Array.isArray(data)
-      ? data
-          .map((entry) => toSkillMapping(entry))
-          .filter((entry): entry is SkillMapping => entry !== null)
-      : [];
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("skillsPage.errors.fetchFailed")));
-  } finally {
-    loading.value = false;
+  const mappingsResult = await settlePromise(
+    api.skills.mappings.get(),
+    t("skillsPage.errors.fetchFailed"),
+  );
+  loading.value = false;
+
+  if (!mappingsResult.ok) {
+    $toast.error(getErrorMessage(mappingsResult.error, t("skillsPage.errors.fetchFailed")));
+    return;
   }
+
+  const { data } = mappingsResult.value;
+  mappings.value = Array.isArray(data)
+    ? data
+        .map((entry) => toSkillMapping(entry))
+        .filter((entry): entry is SkillMapping => entry !== null)
+    : [];
 }
 
 async function initializeSkillsPage(): Promise<void> {
   await fetchMappings();
 
-  try {
-    await fetchProgress();
-  } catch (error) {
+  const progressResult = await settlePromise(
+    fetchProgress(),
+    t("skillsPage.errors.gamificationLoadFailed"),
+  );
+  if (!progressResult.ok) {
     $toast.warning(
-      getErrorMessage(error, t("skillsPage.errors.gamificationLoadFailed")),
+      getErrorMessage(progressResult.error, t("skillsPage.errors.gamificationLoadFailed")),
     );
   }
 }
 
-async function tryAwardSkillXp(
-  amount: number,
-  reason: SkillsGamificationReason,
-): Promise<boolean> {
-  try {
-    await awardXP(amount, reason);
-    return true;
-  } catch {
-    return false;
-  }
+async function tryAwardSkillXp(amount: number, reason: SkillsGamificationReason): Promise<boolean> {
+  const awardResult = await settlePromise(awardXP(amount, reason), "Failed to award skills XP");
+  return awardResult.ok;
 }
 
 async function handleAddMapping(): Promise<void> {
@@ -230,34 +225,41 @@ async function handleAddMapping(): Promise<void> {
   }
 
   loading.value = true;
-  try {
-    await api.skills.mappings.post({
-      gameExpression: normalizedGameExpression,
-      transferableSkill: normalizedTransferableSkill,
-      industryApplications: newMapping.industryApplications,
-      confidence: newMapping.confidence,
-      category: newMapping.category,
-      demandLevel: SKILLS_DEFAULT_DEMAND_LEVEL,
-    });
-    await fetchMappings();
-    showAddModal.value = false;
-    resetForm();
-    const awardedXp = await tryAwardSkillXp(
-      SKILLS_GAMIFICATION_XP.mappingAdded,
-      SKILLS_GAMIFICATION_REASONS.mappingAdded,
-    );
-    $toast.success(
-      awardedXp
-        ? t("skillsPage.toasts.mappingAddedWithXp", {
-            xp: SKILLS_GAMIFICATION_XP.mappingAdded,
-          })
-        : t("skillsPage.toasts.mappingAdded"),
-    );
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("skillsPage.errors.addFailed")));
-  } finally {
-    loading.value = false;
+  const addMappingResult = await settlePromise(
+    (async () => {
+      await api.skills.mappings.post({
+        gameExpression: normalizedGameExpression,
+        transferableSkill: normalizedTransferableSkill,
+        industryApplications: newMapping.industryApplications,
+        confidence: newMapping.confidence,
+        category: newMapping.category,
+        demandLevel: SKILLS_DEFAULT_DEMAND_LEVEL,
+      });
+      await fetchMappings();
+      showAddModal.value = false;
+      resetForm();
+      return tryAwardSkillXp(
+        SKILLS_GAMIFICATION_XP.mappingAdded,
+        SKILLS_GAMIFICATION_REASONS.mappingAdded,
+      );
+    })(),
+    t("skillsPage.errors.addFailed"),
+  );
+  loading.value = false;
+
+  if (!addMappingResult.ok) {
+    $toast.error(getErrorMessage(addMappingResult.error, t("skillsPage.errors.addFailed")));
+    return;
   }
+
+  const awardedXp = addMappingResult.value;
+  $toast.success(
+    awardedXp
+      ? t("skillsPage.toasts.mappingAddedWithXp", {
+          xp: SKILLS_GAMIFICATION_XP.mappingAdded,
+        })
+      : t("skillsPage.toasts.mappingAdded"),
+  );
 }
 
 function requestDeleteMapping(id: string): void {
@@ -274,41 +276,51 @@ async function handleDeleteMapping(): Promise<void> {
   if (!id) return;
 
   loading.value = true;
-  try {
-    await api.skills.mappings({ id }).delete();
-    await fetchMappings();
-    $toast.success(t("skillsPage.toasts.mappingDeleted"));
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("skillsPage.errors.deleteFailed")));
-  } finally {
-    loading.value = false;
-    clearDeleteMappingState();
-    showDeleteMappingDialog.value = false;
+  const deleteResult = await settlePromise(
+    (async () => {
+      await api.skills.mappings({ id }).delete();
+      await fetchMappings();
+    })(),
+    t("skillsPage.errors.deleteFailed"),
+  );
+  loading.value = false;
+  clearDeleteMappingState();
+  showDeleteMappingDialog.value = false;
+
+  if (!deleteResult.ok) {
+    $toast.error(getErrorMessage(deleteResult.error, t("skillsPage.errors.deleteFailed")));
+    return;
   }
+
+  $toast.success(t("skillsPage.toasts.mappingDeleted"));
 }
 
 async function handleAIAnalyze(): Promise<void> {
   analyzing.value = true;
-  try {
-    const { data } = await api.skills["ai-analyze"].post({});
-    if (data) {
-      await fetchMappings();
-      const awardedXp = await tryAwardSkillXp(
-        SKILLS_GAMIFICATION_XP.aiAnalysisCompleted,
-        SKILLS_GAMIFICATION_REASONS.aiAnalysisCompleted,
-      );
-      $toast.success(
-        awardedXp
-          ? t("skillsPage.toasts.analysisCompletedWithXp", {
-              xp: SKILLS_GAMIFICATION_XP.aiAnalysisCompleted,
-            })
-          : t("skillsPage.toasts.analysisCompleted"),
-      );
-    }
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("skillsPage.errors.analysisFailed")));
-  } finally {
-    analyzing.value = false;
+  const analysisResult = await settlePromise(
+    api.skills["ai-analyze"].post({}),
+    t("skillsPage.errors.analysisFailed"),
+  );
+  analyzing.value = false;
+
+  if (!analysisResult.ok) {
+    $toast.error(getErrorMessage(analysisResult.error, t("skillsPage.errors.analysisFailed")));
+    return;
+  }
+
+  if (analysisResult.value.data) {
+    await fetchMappings();
+    const awardedXp = await tryAwardSkillXp(
+      SKILLS_GAMIFICATION_XP.aiAnalysisCompleted,
+      SKILLS_GAMIFICATION_REASONS.aiAnalysisCompleted,
+    );
+    $toast.success(
+      awardedXp
+        ? t("skillsPage.toasts.analysisCompletedWithXp", {
+            xp: SKILLS_GAMIFICATION_XP.aiAnalysisCompleted,
+          })
+        : t("skillsPage.toasts.analysisCompleted"),
+    );
   }
 }
 

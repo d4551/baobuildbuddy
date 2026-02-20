@@ -44,12 +44,10 @@ export function sanitizeAndValidateJobUrl(rawJobUrl: string): string {
     throw new Error(`jobUrl exceeds ${MAX_JOB_URL_LENGTH} characters`);
   }
 
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(jobUrl);
-  } catch {
+  if (!URL.canParse(jobUrl)) {
     throw new Error("jobUrl must be an absolute URL");
   }
+  const parsedUrl = new URL(jobUrl);
 
   if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
     throw new Error("Only http and https job URLs are allowed");

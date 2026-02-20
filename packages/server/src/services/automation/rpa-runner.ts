@@ -1,9 +1,21 @@
 import { join } from "node:path";
 
 import type { AutomationSettings } from "@bao/shared";
+import { safeParseJson } from "@bao/shared";
 import { SCRAPER_DIR } from "../../config/paths";
 
 const PYTHON = process.platform === "win32" ? "python" : "python3";
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const tryParseJson = (payload: string): { ok: true; value: unknown } | { ok: false } => {
+  const parsed = safeParseJson(payload);
+  if (parsed !== null || payload.trim() === "null") {
+    return { ok: true, value: parsed };
+  }
+  return { ok: false };
+};
 
 /**
  * Standard result shape for RPA-Python scripts.
@@ -60,25 +72,28 @@ export async function runRpaScript(
   const decoder = new TextDecoder();
   const stderrReader = proc.stderr.getReader();
   const stderrParsePromise = (async () => {
-    try {
-      while (true) {
-        const { done, value } = await stderrReader.read();
-        if (done) break;
-        const lines = decoder.decode(value).split("\n").filter(Boolean);
-        for (const line of lines) {
-          try {
-            const progress = JSON.parse(line) as Record<string, unknown>;
-            if (progress.type === "progress" && onProgress) {
-              onProgress(progress);
-            }
-          } catch {
-            // Non-JSON stderr line — collect for error reporting
-            stderrLines.push(line);
-          }
+    while (true) {
+      const { done, value } = await stderrReader.read().then(
+        (result) => result,
+        () => ({ done: true, value: undefined as Uint8Array | undefined }),
+      );
+      if (done || !value) break;
+      const lines = decoder.decode(value).split("\n").filter(Boolean);
+      for (const line of lines) {
+        const parsedLine = tryParseJson(line);
+        if (!parsedLine.ok) {
+          // Non-JSON stderr line — collect for error reporting
+          stderrLines.push(line);
+          continue;
+        }
+        const progress = parsedLine.value;
+        if (!isRecord(progress)) {
+          continue;
+        }
+        if (progress.type === "progress" && onProgress) {
+          onProgress(progress);
         }
       }
-    } catch {
-      // stderr reader closed
     }
   })();
 
@@ -100,21 +115,20 @@ export async function runRpaScript(
     .map((line) => line.trim())
     .filter((line) => line.startsWith("{") && line.endsWith("}"))
     .reverse();
-  let parsed: unknown;
+  let parsed: unknown = null;
   for (const candidate of candidateLines) {
-    try {
-      parsed = JSON.parse(candidate);
+    const candidateParsed = tryParseJson(candidate);
+    if (candidateParsed.ok) {
+      parsed = candidateParsed.value;
       break;
-    } catch {
-      // Continue scanning for valid JSON on earlier lines.
     }
   }
-  if (parsed === undefined) {
-    try {
-      parsed = JSON.parse(output);
-    } catch {
+  if (parsed === null) {
+    const outputParsed = tryParseJson(output);
+    if (!outputParsed.ok) {
       throw new Error(`RPA script returned unparsable output. ${stderr}`);
     }
+    parsed = outputParsed.value;
   }
   if (
     typeof parsed !== "object" ||

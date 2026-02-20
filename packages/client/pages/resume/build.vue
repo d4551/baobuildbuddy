@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 /**
  * AI-Driven CV Builder - wizard flow:
@@ -68,38 +69,48 @@ async function generateQuestions() {
   errorMessage.value = "";
   if (!canProceedTarget.value) return;
   phase.value = "generating";
-  try {
-    const requestPayload: {
-      targetRole: string;
-      studioName?: string;
-      experienceLevel?: string;
-    } = {
-      targetRole: targetRole.value.trim(),
-    };
-    const normalizedStudioName = displayedStudioName.value.trim();
-    if (normalizedStudioName) {
-      requestPayload.studioName = normalizedStudioName;
-    }
-    const normalizedExperienceLevel = experienceLevel.value.trim();
-    if (normalizedExperienceLevel) {
-      requestPayload.experienceLevel = normalizedExperienceLevel;
-    }
-    const questions = await generateCvQuestions(requestPayload);
-    if (questions.length === 0) {
-      errorMessage.value = t("resumeBuildPage.errors.emptyQuestions");
-      phase.value = "target";
-      return;
-    }
-    aiQuestions.value = questions;
-    currentQuestionIndex.value = 0;
-    Object.keys(answers).forEach((k) => delete answers[k]);
-    questions.forEach((q) => (answers[q.id] = ""));
-    phase.value = "questions";
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error, t("resumeBuildPage.errors.generateQuestions"));
+  const requestPayload: {
+    targetRole: string;
+    studioName?: string;
+    experienceLevel?: string;
+  } = {
+    targetRole: targetRole.value.trim(),
+  };
+  const normalizedStudioName = displayedStudioName.value.trim();
+  if (normalizedStudioName) {
+    requestPayload.studioName = normalizedStudioName;
+  }
+  const normalizedExperienceLevel = experienceLevel.value.trim();
+  if (normalizedExperienceLevel) {
+    requestPayload.experienceLevel = normalizedExperienceLevel;
+  }
+
+  const questionsResult = await settlePromise(
+    generateCvQuestions(requestPayload),
+    t("resumeBuildPage.errors.generateQuestions"),
+  );
+  if (!questionsResult.ok) {
+    errorMessage.value = getErrorMessage(
+      questionsResult.error,
+      t("resumeBuildPage.errors.generateQuestions"),
+    );
     phase.value = "target";
     $toast.error(errorMessage.value);
+    return;
   }
+
+  const questions = questionsResult.value;
+  if (questions.length === 0) {
+    errorMessage.value = t("resumeBuildPage.errors.emptyQuestions");
+    phase.value = "target";
+    return;
+  }
+
+  aiQuestions.value = questions;
+  currentQuestionIndex.value = 0;
+  Object.keys(answers).forEach((k) => delete answers[k]);
+  questions.forEach((q) => (answers[q.id] = ""));
+  phase.value = "questions";
 }
 
 function prevQuestion() {
@@ -117,26 +128,37 @@ function nextQuestion() {
 async function finishAndSynthesize() {
   errorMessage.value = "";
   phase.value = "synthesizing";
-  try {
-    const questionsAndAnswers = aiQuestions.value.map((q) => ({
-      id: q.id,
-      question: q.question,
-      answer: (answers[q.id] ?? "").trim(),
-      category: q.category,
-    }));
-    const created = await synthesizeCvResume(questionsAndAnswers);
-    const resumeId = created?.id;
-    if (resumeId) {
-      $toast.success(t("resumeBuildPage.toasts.resumeCreated"));
-      router.push(APP_ROUTE_BUILDERS.resumeEditor(resumeId));
-    } else {
-      throw new Error(t("resumeBuildPage.errors.createResume"));
-    }
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error, t("resumeBuildPage.errors.createResume"));
+  const questionsAndAnswers = aiQuestions.value.map((q) => ({
+    id: q.id,
+    question: q.question,
+    answer: (answers[q.id] ?? "").trim(),
+    category: q.category,
+  }));
+
+  const synthesizeResult = await settlePromise(
+    synthesizeCvResume(questionsAndAnswers),
+    t("resumeBuildPage.errors.createResume"),
+  );
+  if (!synthesizeResult.ok) {
+    errorMessage.value = getErrorMessage(
+      synthesizeResult.error,
+      t("resumeBuildPage.errors.createResume"),
+    );
     phase.value = "questions";
     $toast.error(errorMessage.value);
+    return;
   }
+
+  const resumeId = synthesizeResult.value?.id;
+  if (resumeId) {
+    $toast.success(t("resumeBuildPage.toasts.resumeCreated"));
+    router.push(APP_ROUTE_BUILDERS.resumeEditor(resumeId));
+    return;
+  }
+
+  errorMessage.value = t("resumeBuildPage.errors.createResume");
+  phase.value = "questions";
+  $toast.error(errorMessage.value);
 }
 
 function backToTarget() {

@@ -32,17 +32,21 @@ const requestStatusBody = async <T>(
     }),
   );
   const payload = await response.text();
-  try {
+  const parsedPayload = await Promise.resolve(payload)
+    .then((content) => ({ ok: true as const, value: JSON.parse(content) as T }))
+    .catch(() => ({ ok: false as const }));
+
+  if (parsedPayload.ok) {
     return {
       status: response.status,
-      body: JSON.parse(payload) as T,
-    };
-  } catch {
-    return {
-      status: response.status,
-      body: payload,
+      body: parsedPayload.value,
     };
   }
+
+  return {
+    status: response.status,
+    body: payload,
+  };
 };
 
 beforeAll(async () => {
@@ -99,45 +103,52 @@ describe("automation routes", () => {
     originalRunJobApply = applicationAutomationService.runJobApply;
     applicationAutomationService.runJobApply = runJobApplyStub;
 
-    try {
-      const res = await requestJson<{ runId: string; status: "running" }>(
-        app,
-        "POST",
-        "/api/automation/job-apply",
-        {
-          jobUrl: "https://example.com/careers/engineering",
-          resumeId,
-        },
-      );
-      expect(res.status).toBe(200);
-      expect(res.body.status).toBe("running");
-      expect(typeof res.body.runId).toBe("string");
-      expect(res.body.runId.length).toBeGreaterThan(0);
+    await Promise.resolve()
+      .then(async () => {
+        const res = await requestJson<{ runId: string; status: "running" }>(
+          app,
+          "POST",
+          "/api/automation/job-apply",
+          {
+            jobUrl: "https://example.com/careers/engineering",
+            resumeId,
+          },
+        );
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe("running");
+        expect(typeof res.body.runId).toBe("string");
+        expect(res.body.runId.length).toBeGreaterThan(0);
 
-      createdRunIds.push(res.body.runId);
-      const run = await db
-        .select()
-        .from(automationRuns)
-        .where(and(eq(automationRuns.id, res.body.runId), eq(automationRuns.type, "job_apply")))
-        .limit(1);
-      expect(run.length).toBe(1);
-      expect(run[0].status).toBe("running");
-      expect(run[0].jobId).toBeNull();
-      expect(run[0].input).not.toBeNull();
-    } finally {
-      if (originalRunJobApply) {
-        applicationAutomationService.runJobApply = originalRunJobApply;
-        originalRunJobApply = undefined;
-      }
-    }
+        createdRunIds.push(res.body.runId);
+        const run = await db
+          .select()
+          .from(automationRuns)
+          .where(and(eq(automationRuns.id, res.body.runId), eq(automationRuns.type, "job_apply")))
+          .limit(1);
+        expect(run.length).toBe(1);
+        expect(run[0].status).toBe("running");
+        expect(run[0].jobId).toBeNull();
+        expect(run[0].input).not.toBeNull();
+      })
+      .finally(() => {
+        if (originalRunJobApply) {
+          applicationAutomationService.runJobApply = originalRunJobApply;
+          originalRunJobApply = undefined;
+        }
+      });
   });
 
   test("POST /api/automation/job-apply/schedule validates runAt", async () => {
-    const res = await requestJson<{ error: string }>(app, "POST", "/api/automation/job-apply/schedule", {
-      jobUrl: "https://example.com/careers/engineering",
-      resumeId,
-      runAt: "not-a-date",
-    });
+    const res = await requestJson<{ error: string }>(
+      app,
+      "POST",
+      "/api/automation/job-apply/schedule",
+      {
+        jobUrl: "https://example.com/careers/engineering",
+        resumeId,
+        runAt: "not-a-date",
+      },
+    );
 
     expect(res.status).toBe(422);
     expect(res.body.error).toContain("runAt");

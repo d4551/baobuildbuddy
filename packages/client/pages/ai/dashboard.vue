@@ -7,6 +7,7 @@ import {
   type AIProviderType,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 type ApiClient = ReturnType<typeof useApi>;
@@ -76,7 +77,9 @@ const testResults = reactive<Record<AIProviderType, ProviderConnectivityResult |
 const selectedProvider = ref<AIProviderType>(AI_PROVIDER_DEFAULT_ORDER[0] ?? "local");
 const selectedModel = ref("");
 const selectedProviderModels = computed(() => {
-  const matchingProvider = providers.value.find((provider) => provider.id === selectedProvider.value);
+  const matchingProvider = providers.value.find(
+    (provider) => provider.id === selectedProvider.value,
+  );
   return matchingProvider?.models ?? [];
 });
 
@@ -117,7 +120,9 @@ function isProviderConfigured(providerId: AIProviderType): boolean {
 }
 
 function providerAvailabilityLabel(available: boolean): string {
-  return available ? t("aiDashboard.availability.available") : t("aiDashboard.availability.unavailable");
+  return available
+    ? t("aiDashboard.availability.available")
+    : t("aiDashboard.availability.unavailable");
 }
 
 function providerHealthLabel(health: ProviderHealth): string {
@@ -147,11 +152,8 @@ function normalizeProviderRow(value: unknown): ProviderConfig | null {
   const rawHealth = asString(value.health);
   const rawAvailable = asBoolean(value.available);
   const available = rawAvailable ?? isProviderConfigured(rawId);
-  const health = rawHealth && isProviderHealth(rawHealth)
-    ? rawHealth
-    : available
-      ? "healthy"
-      : "unconfigured";
+  const health =
+    rawHealth && isProviderHealth(rawHealth) ? rawHealth : available ? "healthy" : "unconfigured";
   const models = asStringArray(value.models);
 
   return {
@@ -234,7 +236,10 @@ function normalizeProviders(value: unknown): ProviderConfig[] {
     .filter((provider): provider is ProviderConfig => provider !== null);
 }
 
-function normalizeDashboardStats(usagePayload: unknown, activeProvider: AIProviderType): DashboardStats {
+function normalizeDashboardStats(
+  usagePayload: unknown,
+  activeProvider: AIProviderType,
+): DashboardStats {
   if (!isRecord(usagePayload)) {
     return {
       totalRequests: 0,
@@ -250,11 +255,12 @@ function normalizeDashboardStats(usagePayload: unknown, activeProvider: AIProvid
   const assistantMessages = asNumber(usagePayload.assistantMessages) ?? 0;
   const sessions = asNumber(usagePayload.sessions) ?? 0;
 
-  const successRate = userMessages > 0
-    ? Math.round((assistantMessages / userMessages) * 100)
-    : totalMessages > 0
-      ? 100
-      : 0;
+  const successRate =
+    userMessages > 0
+      ? Math.round((assistantMessages / userMessages) * 100)
+      : totalMessages > 0
+        ? 100
+        : 0;
 
   return {
     totalRequests: totalMessages,
@@ -267,119 +273,142 @@ function normalizeDashboardStats(usagePayload: unknown, activeProvider: AIProvid
 
 async function fetchProviderStats() {
   loading.value = true;
+  const statsResult = await settlePromise(
+    (async () => {
+      await fetchSettings();
 
-  try {
-    await fetchSettings();
+      const [usageResult, modelsResult] = await Promise.all([
+        api.ai.usage.get(),
+        api.ai.models.get(),
+      ]);
 
-    const [usageResult, modelsResult] = await Promise.all([
-      api.ai.usage.get(),
-      api.ai.models.get(),
-    ]);
+      if (usageResult.error) {
+        throw new Error(t("aiDashboard.errors.usageLoadFailed"));
+      }
+      if (modelsResult.error) {
+        throw new Error(t("aiDashboard.errors.modelsLoadFailed"));
+      }
 
-    if (usageResult.error) {
-      throw new Error(t("aiDashboard.errors.usageLoadFailed"));
-    }
-    if (modelsResult.error) {
-      throw new Error(t("aiDashboard.errors.modelsLoadFailed"));
-    }
+      const normalizedProviders = normalizeProviders(modelsResult.data);
+      const resolvedProviders =
+        normalizedProviders.length > 0 ? normalizedProviders : buildFallbackProviders();
+      const preferredProvider = resolvePreferredProvider(modelsResult.data);
+      const activeProvider = resolvedProviders.some((provider) => provider.id === preferredProvider)
+        ? preferredProvider
+        : (resolvedProviders[0]?.id ?? "local");
 
-    const normalizedProviders = normalizeProviders(modelsResult.data);
-    providers.value = normalizedProviders.length > 0 ? normalizedProviders : buildFallbackProviders();
+      return {
+        resolvedProviders,
+        activeProvider,
+        normalizedStats: normalizeDashboardStats(usageResult.data, activeProvider),
+      };
+    })(),
+    t("aiDashboard.toasts.loadFailed"),
+  );
+  loading.value = false;
 
-    const preferredProvider = resolvePreferredProvider(modelsResult.data);
-    const activeProvider = providers.value.some((provider) => provider.id === preferredProvider)
-      ? preferredProvider
-      : providers.value[0]?.id ?? "local";
-
-    selectedProvider.value = activeProvider;
-    selectedModel.value = resolveDefaultModel(activeProvider);
-    providerStats.value = normalizeDashboardStats(usageResult.data, activeProvider);
-  } catch (error) {
+  if (!statsResult.ok) {
     providers.value = buildFallbackProviders();
     const fallbackProvider = providers.value[0]?.id ?? "local";
     selectedProvider.value = fallbackProvider;
     selectedModel.value = resolveDefaultModel(fallbackProvider);
     providerStats.value = normalizeDashboardStats(null, fallbackProvider);
-    $toast.error(getErrorMessage(error, t("aiDashboard.toasts.loadFailed")));
-  } finally {
-    loading.value = false;
+    $toast.error(getErrorMessage(statsResult.error, t("aiDashboard.toasts.loadFailed")));
+    return;
   }
+
+  providers.value = statsResult.value.resolvedProviders;
+  selectedProvider.value = statsResult.value.activeProvider;
+  selectedModel.value = resolveDefaultModel(statsResult.value.activeProvider);
+  providerStats.value = statsResult.value.normalizedStats;
 }
 
 async function handleTestProvider(providerId: AIProviderType) {
   testingProvider.value = providerId;
   testResults[providerId] = null;
 
-  try {
-    if (providerId === "local") {
-      const { data, error } = await api.ai.models.get();
-      if (error) {
-        throw new Error(t("aiDashboard.errors.localConnectivityFailed"));
+  const providerTestResult = await settlePromise(
+    (async (): Promise<ProviderConnectivityResult> => {
+      if (providerId === "local") {
+        const { data, error } = await api.ai.models.get();
+        if (error) {
+          throw new Error(t("aiDashboard.errors.localConnectivityFailed"));
+        }
+
+        const localProvider = normalizeProviders(data).find((provider) => provider.id === "local");
+        const localAvailable = localProvider?.available ?? false;
+        return {
+          valid: localAvailable,
+          message: localAvailable
+            ? t("aiDashboard.tests.localSuccess")
+            : t("aiDashboard.tests.localFailure"),
+        };
       }
 
-      const localProvider = normalizeProviders(data).find((provider) => provider.id === "local");
-      const localAvailable = localProvider?.available ?? false;
-      testResults[providerId] = {
-        valid: localAvailable,
-        message: localAvailable
-          ? t("aiDashboard.tests.localSuccess")
-          : t("aiDashboard.tests.localFailure"),
+      const providerCredential = resolveProviderCredential(providerId);
+      if (!providerCredential.trim()) {
+        return {
+          valid: false,
+          message: t("aiDashboard.tests.missingCredential"),
+        };
+      }
+
+      const { data, error } = await api.settings["test-api-key"].post({
+        provider: providerId,
+        key: providerCredential,
+      });
+
+      if (error) {
+        throw new Error(t("aiDashboard.errors.providerTestFailed"));
+      }
+
+      const valid = isRecord(data) && data.valid === true;
+      return {
+        valid,
+        message: valid
+          ? t("aiDashboard.tests.connectionSuccess")
+          : t("aiDashboard.tests.connectionFailure"),
       };
-      return;
-    }
+    })(),
+    t("aiDashboard.tests.connectionFailure"),
+  );
+  testingProvider.value = null;
 
-    const providerCredential = resolveProviderCredential(providerId);
-    if (!providerCredential.trim()) {
-      testResults[providerId] = {
-        valid: false,
-        message: t("aiDashboard.tests.missingCredential"),
-      };
-      return;
-    }
-
-    const { data, error } = await api.settings["test-api-key"].post({
-      provider: providerId,
-      key: providerCredential,
-    });
-
-    if (error) {
-      throw new Error(t("aiDashboard.errors.providerTestFailed"));
-    }
-
-    const valid = isRecord(data) && data.valid === true;
-    testResults[providerId] = {
-      valid,
-      message: valid
-        ? t("aiDashboard.tests.connectionSuccess")
-        : t("aiDashboard.tests.connectionFailure"),
-    };
-  } catch (error) {
+  if (!providerTestResult.ok) {
     testResults[providerId] = {
       valid: false,
-      message: getErrorMessage(error, t("aiDashboard.tests.connectionFailure")),
+      message: getErrorMessage(providerTestResult.error, t("aiDashboard.tests.connectionFailure")),
     };
-  } finally {
-    testingProvider.value = null;
+    return;
   }
+
+  testResults[providerId] = providerTestResult.value;
 }
 
 async function handleSetPreference() {
   if (!selectedProvider.value || !selectedModel.value) return;
 
-  try {
-    const { error } = await api.settings.put({
-      preferredProvider: selectedProvider.value,
-      preferredModel: selectedModel.value,
-    });
-    if (error) {
-      throw new Error(t("aiDashboard.errors.preferenceSaveFailed"));
-    }
-
-    $toast.success(t("aiDashboard.toasts.preferenceSaved"));
-    await fetchProviderStats();
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("aiDashboard.toasts.preferenceSaveFailed")));
+  const preferenceResult = await settlePromise(
+    (async () => {
+      const { error } = await api.settings.put({
+        preferredProvider: selectedProvider.value,
+        preferredModel: selectedModel.value,
+      });
+      if (error) {
+        throw new Error(t("aiDashboard.errors.preferenceSaveFailed"));
+      }
+    })(),
+    t("aiDashboard.toasts.preferenceSaveFailed"),
+  );
+  if (!preferenceResult.ok) {
+    $toast.error(
+      getErrorMessage(preferenceResult.error, t("aiDashboard.toasts.preferenceSaveFailed")),
+    );
+    return;
   }
+
+  $toast.success(t("aiDashboard.toasts.preferenceSaved"));
+  await fetchProviderStats();
 }
 
 watch(selectedProvider, (providerId) => {

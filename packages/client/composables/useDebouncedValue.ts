@@ -8,10 +8,7 @@ import { onScopeDispose, ref, watch } from "vue";
  * @param delayMs Debounce duration in milliseconds.
  * @returns Debounced ref that updates after the provided delay.
  */
-export function useDebouncedValue<T>(
-  source: Readonly<Ref<T>>,
-  delayMs: number,
-): Ref<T> {
+export function useDebouncedValue<T>(source: Readonly<Ref<T>>, delayMs: number): Ref<T> {
   const debouncedValue = ref(source.value) as Ref<T>;
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 

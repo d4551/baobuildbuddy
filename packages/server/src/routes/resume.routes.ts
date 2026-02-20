@@ -1,4 +1,4 @@
-import type { ResumeData } from "@bao/shared";
+import { safeParseJson, type ResumeData } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
@@ -75,20 +75,20 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
   .post(
     "/from-questions/generate",
     async ({ body, set }) => {
-      try {
-        const questions = await cvQuestionnaireService.generateQuestions({
+      return cvQuestionnaireService
+        .generateQuestions({
           targetRole: body.targetRole,
           studioName: body.studioName,
           experienceLevel: body.experienceLevel,
+        })
+        .then((questions) => ({ questions }))
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: "Failed to generate questions",
+            details: error instanceof Error ? error.message : "Unknown error",
+          };
         });
-        return { questions };
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: "Failed to generate questions",
-          details: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
     },
     {
       body: t.Object({
@@ -101,21 +101,25 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
   .post(
     "/from-questions/synthesize",
     async ({ body, set }) => {
-      try {
-        const resumeData = await cvQuestionnaireService.synthesizeResume(body.questionsAndAnswers);
-        const created = await resumeService.createResume({
-          name: "Resume from Questionnaire",
-          ...resumeData,
+      return cvQuestionnaireService
+        .synthesizeResume(body.questionsAndAnswers)
+        .then((resumeData) =>
+          resumeService.createResume({
+            name: "Resume from Questionnaire",
+            ...resumeData,
+          }),
+        )
+        .then((created) => {
+          set.status = 201;
+          return created;
+        })
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: "Failed to synthesize resume",
+            details: error instanceof Error ? error.message : "Unknown error",
+          };
         });
-        set.status = 201;
-        return created;
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: "Failed to synthesize resume",
-          details: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
     },
     {
       body: t.Object({
@@ -175,7 +179,9 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
         set.status = 404;
-        return { error: "Resume not found" };
+        return {
+          error: "Resume not found",
+        };
       }
       return resume;
     },
@@ -253,26 +259,27 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         return { error: "Resume not found" };
       }
 
-      try {
-        const templateName = body.template || resume.template || "modern";
-        const pdfBytes = await exportService.exportResumePDF(resume, templateName);
+      const templateName = body.template || resume.template || "modern";
+      return exportService
+        .exportResumePDF(resume, templateName)
+        .then((pdfBytes) => {
+          set.headers["content-type"] = "application/pdf";
+          set.headers["content-disposition"] = `attachment; filename="resume-${params.id}.pdf"`;
 
-        set.headers["content-type"] = "application/pdf";
-        set.headers["content-disposition"] = `attachment; filename="resume-${params.id}.pdf"`;
-
-        return new Response(Buffer.from(pdfBytes), {
-          headers: {
-            "content-type": "application/pdf",
-            "content-disposition": `attachment; filename="resume-${params.id}.pdf"`,
-          },
+          return new Response(Buffer.from(pdfBytes), {
+            headers: {
+              "content-type": "application/pdf",
+              "content-disposition": `attachment; filename="resume-${params.id}.pdf"`,
+            },
+          });
+        })
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: "Failed to export resume",
+            details: error instanceof Error ? error.message : "Unknown error",
+          };
         });
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: "Failed to export resume",
-          details: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
     },
     {
       params: t.Object({
@@ -309,34 +316,37 @@ ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingEx
       const section = body.section || "all";
       const prompt = resumeEnhancePrompt(resumeText, section);
 
-      try {
-        const response = await aiService.generate(prompt, { temperature: 0.7, maxTokens: 2000 });
+      return aiService
+        .generate(prompt, { temperature: 0.7, maxTokens: 2000 })
+        .then((response) => {
+          if (response.error) {
+            set.status = 500;
+            return { error: "AI enhancement failed", details: response.error };
+          }
 
-        if (response.error) {
+          const parsed = safeParseJson(response.content);
+          const parsedRecord =
+            parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+          const suggestions =
+            parsedRecord && Array.isArray(parsedRecord.suggestions)
+              ? parsedRecord.suggestions
+              : parsedRecord
+                ? [parsedRecord]
+                : [{ text: response.content, section: section }];
+
+          return {
+            resume: resume,
+            suggestions: suggestions,
+            section: section,
+          };
+        })
+        .catch((error: unknown) => {
           set.status = 500;
-          return { error: "AI enhancement failed", details: response.error };
-        }
-
-        let suggestions: unknown[] = [];
-        try {
-          const parsed = JSON.parse(response.content);
-          suggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions : [parsed];
-        } catch {
-          suggestions = [{ text: response.content, section: section }];
-        }
-
-        return {
-          resume: resume,
-          suggestions: suggestions,
-          section: section,
-        };
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: "AI enhancement failed",
-          details: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
+          return {
+            error: "AI enhancement failed",
+            details: error instanceof Error ? error.message : "Unknown error",
+          };
+        });
     },
     {
       params: t.Object({
@@ -387,42 +397,54 @@ Type: ${job.type || "Not specified"}
 
       const prompt = resumeScorePrompt(resumeText, jobText);
 
-      try {
-        const response = await aiService.generate(prompt, { temperature: 0.3, maxTokens: 1500 });
+      return aiService
+        .generate(prompt, { temperature: 0.3, maxTokens: 1500 })
+        .then((response) => {
+          if (response.error) {
+            set.status = 500;
+            return { error: "AI scoring failed", details: response.error };
+          }
 
-        if (response.error) {
-          set.status = 500;
-          return { error: "AI scoring failed", details: response.error };
-        }
+          const parsedAnalysis = safeParseJson(response.content);
+          const analysisRecord: Record<string, unknown> =
+            parsedAnalysis && typeof parsedAnalysis === "object" && !Array.isArray(parsedAnalysis)
+              ? parsedAnalysis
+              : {
+                  score: 50,
+                  strengths: ["Unable to parse AI response"],
+                  improvements: ["Please try again"],
+                  keywords: [],
+                };
+          const score = typeof analysisRecord.score === "number" ? analysisRecord.score : 0;
+          const strengths = Array.isArray(analysisRecord.strengths)
+            ? analysisRecord.strengths.filter((entry): entry is string => typeof entry === "string")
+            : [];
+          const improvements = Array.isArray(analysisRecord.improvements)
+            ? analysisRecord.improvements.filter(
+                (entry): entry is string => typeof entry === "string",
+              )
+            : [];
+          const keywords = Array.isArray(analysisRecord.keywords)
+            ? analysisRecord.keywords.filter((entry): entry is string => typeof entry === "string")
+            : [];
 
-        let analysis: Record<string, unknown>;
-        try {
-          analysis = JSON.parse(response.content);
-        } catch {
-          analysis = {
-            score: 50,
-            strengths: ["Unable to parse AI response"],
-            improvements: ["Please try again"],
-            keywords: [],
+          return {
+            resumeId: params.id,
+            jobId: body.jobId,
+            score,
+            strengths,
+            improvements,
+            keywords,
+            analysis: analysisRecord,
           };
-        }
-
-        return {
-          resumeId: params.id,
-          jobId: body.jobId,
-          score: (analysis.score as number) || 0,
-          strengths: (analysis.strengths as string[]) || [],
-          improvements: (analysis.improvements as string[]) || [],
-          keywords: (analysis.keywords as string[]) || [],
-          analysis: analysis,
-        };
-      } catch (error) {
-        set.status = 500;
-        return {
-          error: "AI scoring failed",
-          details: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
+        })
+        .catch((error: unknown) => {
+          set.status = 500;
+          return {
+            error: "AI scoring failed",
+            details: error instanceof Error ? error.message : "Unknown error",
+          };
+        });
     },
     {
       params: t.Object({

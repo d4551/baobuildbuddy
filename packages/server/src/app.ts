@@ -74,15 +74,13 @@ export const app = new Elysia({ prefix: API_PREFIX, nativeStaticResponse: true }
   .use(errorHandler)
   .get(
     "/health",
-    () => {
-      const dbOk = (() => {
-        try {
+    async () => {
+      const dbOk = await Promise.resolve()
+        .then(() => {
           sqlite.exec(HEALTHCHECK_PROBE_SQL);
           return true;
-        } catch {
-          return false;
-        }
-      })();
+        })
+        .catch(() => false);
       return {
         status: dbOk ? "healthy" : "degraded",
         timestamp: new Date().toISOString(),

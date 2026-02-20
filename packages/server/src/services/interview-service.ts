@@ -17,6 +17,7 @@ import {
   INTERVIEW_DEFAULT_VOICE_SETTINGS,
   INTERVIEW_FALLBACK_STUDIO_ID,
   generateId,
+  safeParseJson,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -142,20 +143,21 @@ async function withAiOperationTimeout<T>(
   timeoutMs = AI_OPERATION_TIMEOUT_MS,
 ): Promise<T | null> {
   let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    return await Promise.race([
-      operation(),
-      new Promise<T>((_, reject) => {
-        timer = setTimeout(() => {
-          reject(new Error(`AI operation timed out after ${timeoutMs}ms`));
-        }, timeoutMs);
-      }),
-    ]);
-  } catch {
-    return null;
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
+  return Promise.race([
+    operation(),
+    new Promise<T>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`AI operation timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+    }),
+  ])
+    .then(
+      (value) => value,
+      () => null,
+    )
+    .finally(() => {
+      if (timer) clearTimeout(timer);
+    });
 }
 
 function buildFallbackQuestions(config: InterviewConfig, studioName: string): InterviewQuestion[] {
@@ -548,11 +550,7 @@ function extractJSON(text: string): string {
 function safeParseJSON(payload: unknown): unknown {
   if (typeof payload !== "string") return null;
   const extracted = extractJSON(payload);
-  try {
-    return JSON.parse(extracted);
-  } catch {
-    return null;
-  }
+  return safeParseJson(extracted);
 }
 
 function normalizeScore(value: number): number {
@@ -643,7 +641,8 @@ function toStudioContext(studio: StudioRow, fallbackStudio?: StudioRow): StudioC
     location: firstPopulatedText(studio.location, fallbackStudio?.location),
     type: firstPopulatedText(studio.type, fallbackStudio?.type),
     remoteWork:
-      studio.remoteWork === true || (studio.remoteWork !== false && fallbackStudio?.remoteWork === true),
+      studio.remoteWork === true ||
+      (studio.remoteWork !== false && fallbackStudio?.remoteWork === true),
   };
 }
 
@@ -702,11 +701,7 @@ function buildQuestionGenerationPrompt(studio: StudioContext, config: InterviewC
     config.experienceLevel === "lead"
       ? config.experienceLevel
       : INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
-  const base = interviewQuestionPrompt(
-    interviewEntity,
-    roleTarget,
-    promptLevel,
-  );
+  const base = interviewQuestionPrompt(interviewEntity, roleTarget, promptLevel);
 
   return `${base}\n\nInterview mode: ${config.interviewMode || DEFAULT_INTERVIEW_MODE}
 
@@ -778,23 +773,21 @@ async function generateQuestions(
     return parsed.slice(0, config.questionCount);
   };
 
-  try {
-    return await tryGenerate(fullPrompt);
-  } catch (firstErr) {
+  return tryGenerate(fullPrompt).catch((firstErr: unknown) => {
     console.warn(
       "AI question generation failed on primary prompt, attempting fallback prompt.",
       firstErr instanceof Error ? firstErr.message : "Unknown error",
     );
-    try {
-      return await tryGenerate(buildSimpleQuestionPrompt(role, level, config.questionCount));
-    } catch (secondErr) {
-      console.warn(
-        "AI question generation failed on fallback prompt, using deterministic local questions.",
-        secondErr instanceof Error ? secondErr.message : "Unknown error",
-      );
-      return buildFallbackQuestions(config, config.targetJob?.company || studio.name);
-    }
-  }
+    return tryGenerate(buildSimpleQuestionPrompt(role, level, config.questionCount)).catch(
+      (secondErr: unknown) => {
+        console.warn(
+          "AI question generation failed on fallback prompt, using deterministic local questions.",
+          secondErr instanceof Error ? secondErr.message : "Unknown error",
+        );
+        return buildFallbackQuestions(config, config.targetJob?.company || studio.name);
+      },
+    );
+  });
 }
 
 function buildResponseFeedbackPrompt(
@@ -866,41 +859,40 @@ async function generateResponseFeedback(
 
   const persona = buildInterviewerPersona(studio, session.config);
   const prompt = buildResponseFeedbackPrompt(studio, session.config, persona, question, transcript);
-  try {
-    const aiService = await createAIService();
-    const response = (await withAiOperationTimeout(() =>
-      aiService.generate(prompt, {
-        temperature: 0.35,
-        maxTokens: 500,
-      }),
-    )) ?? {
-      error: "AI operation timed out",
-      content: "",
-      provider: "none",
-      id: "",
-      timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
-    };
+  return createAIService()
+    .then(async (aiService) => {
+      const response = (await withAiOperationTimeout(() =>
+        aiService.generate(prompt, {
+          temperature: 0.35,
+          maxTokens: 500,
+        }),
+      )) ?? {
+        error: "AI operation timed out",
+        content: "",
+        provider: "none",
+        id: "",
+        timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
+      };
 
-    if (response.error) {
-      return fallbackResponseFeedback(transcript, question);
-    }
+      if (response.error) {
+        return fallbackResponseFeedback(transcript, question);
+      }
 
-    const parsedPayload = safeParseJSON(response.content) ?? {
-      score: Number.NaN,
-      feedback: "",
-      strengths: [],
-      improvements: [],
-    };
-    const parsed = normalizeQuestionFeedback(parsedPayload);
-    if (!parsed) return fallbackResponseFeedback(transcript, question);
-    if (parsed.feedback === "") {
-      parsed.feedback = "Good response with room for greater specificity.";
-    }
+      const parsedPayload = safeParseJSON(response.content) ?? {
+        score: Number.NaN,
+        feedback: "",
+        strengths: [],
+        improvements: [],
+      };
+      const parsed = normalizeQuestionFeedback(parsedPayload);
+      if (!parsed) return fallbackResponseFeedback(transcript, question);
+      if (parsed.feedback === "") {
+        parsed.feedback = "Good response with room for greater specificity.";
+      }
 
-    return parsed;
-  } catch {
-    return fallbackResponseFeedback(transcript, question);
-  }
+      return parsed;
+    })
+    .catch(() => fallbackResponseFeedback(transcript, question));
 }
 
 function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnalysis {
@@ -983,13 +975,12 @@ Return strict JSON only:
 }
 
 function normalizeFinalFromAI(raw: unknown): InterviewAnalysis | null {
-  const parsed =
-    safeParseJSON(raw) ?? {
-      overallScore: Number.NaN,
-      strengths: [],
-      improvements: [],
-      recommendations: [],
-    };
+  const parsed = safeParseJSON(raw) ?? {
+    overallScore: Number.NaN,
+    strengths: [],
+    improvements: [],
+    recommendations: [],
+  };
 
   if (!isRecord(parsed)) return null;
 
@@ -1014,26 +1005,23 @@ async function generateFinalAnalysis(
 ): Promise<InterviewAnalysis> {
   const persona = buildInterviewerPersona(studio, session.config);
   const prompt = buildFinalAnalysisPrompt(studio, session.config, session.responses, persona);
+  return createAIService()
+    .then(async (aiService) => {
+      const response =
+        (await withAiOperationTimeout(() =>
+          aiService.generate(prompt, {
+            temperature: 0.35,
+            maxTokens: 900,
+          }),
+        )) ?? null;
 
-  try {
-    const aiService = await createAIService();
-    const response =
-      (await withAiOperationTimeout(() =>
-        aiService.generate(prompt, {
-          temperature: 0.35,
-          maxTokens: 900,
-        }),
-      )) ?? null;
+      if (!response || response.error) return calculateDefaultAnalysis(session.responses);
 
-    if (!response || response.error) return calculateDefaultAnalysis(session.responses);
-
-    const parsed = normalizeFinalFromAI(response.content);
-    if (parsed) return parsed;
-  } catch {
-    return calculateDefaultAnalysis(session.responses);
-  }
-
-  return calculateDefaultAnalysis(session.responses);
+      const parsed = normalizeFinalFromAI(response.content);
+      if (parsed) return parsed;
+      return calculateDefaultAnalysis(session.responses);
+    })
+    .catch(() => calculateDefaultAnalysis(session.responses));
 }
 
 function normalizeSessionConfig(row: DBInterviewSession): InterviewConfig {

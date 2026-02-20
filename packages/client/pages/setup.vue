@@ -8,6 +8,7 @@ import {
   LOCAL_AI_DEFAULT_MODEL,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -120,59 +121,74 @@ async function handleTestProvider(provider: SetupProvider): Promise<void> {
   testing.value = true;
   testingProvider.value = provider;
   testResults.value[provider] = null;
-  try {
-    const result = await testApiKey(provider, key);
-    testResults.value[provider] = result;
-    if (result?.valid) {
-      $toast.success(t("setup.providerReachable", { provider: getProviderLabel(provider) }));
-    } else {
-      $toast.error(t("setup.providerTestFailed", { provider: getProviderLabel(provider) }));
-    }
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("setup.providerTestErrorFallback")));
+  const providerTestResult = await settlePromise(
+    testApiKey(provider, key),
+    t("setup.providerTestErrorFallback"),
+  );
+  testing.value = false;
+  if (testingProvider.value === provider) {
+    testingProvider.value = null;
+  }
+
+  if (!providerTestResult.ok) {
+    $toast.error(getErrorMessage(providerTestResult.error, t("setup.providerTestErrorFallback")));
     testResults.value[provider] = { valid: false, provider };
-  } finally {
-    testing.value = false;
-    if (testingProvider.value === provider) {
-      testingProvider.value = null;
-    }
+    return;
+  }
+
+  const result = providerTestResult.value;
+  testResults.value[provider] = result;
+  if (result?.valid) {
+    $toast.success(t("setup.providerReachable", { provider: getProviderLabel(provider) }));
+  } else {
+    $toast.error(t("setup.providerTestFailed", { provider: getProviderLabel(provider) }));
   }
 }
 
 async function handleComplete(): Promise<void> {
   saving.value = true;
-  try {
-    const trimmedName = name.value.trim();
-    const trimmedRole = currentRole.value.trim();
+  const trimmedName = name.value.trim();
+  const trimmedRole = currentRole.value.trim();
 
-    if (trimmedName) {
-      await updateProfile({
+  if (trimmedName) {
+    const profileUpdateResult = await settlePromise(
+      updateProfile({
         name: trimmedName,
         ...(trimmedRole ? { currentRole: trimmedRole } : {}),
-      });
+      }),
+      t("setup.completeErrorFallback"),
+    );
+    if (!profileUpdateResult.ok) {
+      saving.value = false;
+      $toast.error(getErrorMessage(profileUpdateResult.error, t("setup.completeErrorFallback")));
+      return;
     }
-
-    const update: Record<string, string> = {
-      localModelEndpoint: localModelEndpoint.value.trim() || LOCAL_AI_DEFAULT_ENDPOINT,
-      localModelName: localModelName.value.trim() || LOCAL_AI_DEFAULT_MODEL,
-    };
-
-    for (const provider of CLOUD_PROVIDER_IDS) {
-      const credential = providerCredentials[provider].trim();
-      if (credential) {
-        update[API_KEY_FIELD_BY_PROVIDER[provider]] = credential;
-      }
-    }
-
-    await updateApiKeys(update);
-
-    $toast.success(t("setup.completeToast"));
-    router.push(APP_ROUTES.dashboard);
-  } catch (error) {
-    $toast.error(getErrorMessage(error, t("setup.completeErrorFallback")));
-  } finally {
-    saving.value = false;
   }
+
+  const update: Record<string, string> = {
+    localModelEndpoint: localModelEndpoint.value.trim() || LOCAL_AI_DEFAULT_ENDPOINT,
+    localModelName: localModelName.value.trim() || LOCAL_AI_DEFAULT_MODEL,
+  };
+
+  for (const provider of CLOUD_PROVIDER_IDS) {
+    const credential = providerCredentials[provider].trim();
+    if (credential) {
+      update[API_KEY_FIELD_BY_PROVIDER[provider]] = credential;
+    }
+  }
+
+  const apiKeyUpdateResult = await settlePromise(
+    updateApiKeys(update),
+    t("setup.completeErrorFallback"),
+  );
+  saving.value = false;
+  if (!apiKeyUpdateResult.ok) {
+    $toast.error(getErrorMessage(apiKeyUpdateResult.error, t("setup.completeErrorFallback")));
+    return;
+  }
+
+  $toast.success(t("setup.completeToast"));
+  router.push(APP_ROUTES.dashboard);
 }
 </script>
 

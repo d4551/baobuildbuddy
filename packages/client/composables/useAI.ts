@@ -21,6 +21,7 @@ import {
 } from "@bao/shared";
 import type { LocationQueryValue } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { assertApiResponse, settlePromise, withLoadingState } from "~/composables/async-flow";
 
 type AIChatResponse = {
   message?: string;
@@ -243,105 +244,102 @@ export function useAI() {
   }
 
   async function sendMessage(content: string, options: SendMessageOptions = {}) {
-    loading.value = true;
     streaming.value = true;
-    try {
-      const userMessage: ChatMessage = {
-        role: "user",
-        content,
-        timestamp: new Date().toISOString(),
-      };
-      messages.value.push(userMessage);
+    const sendResult = await settlePromise(
+      withLoadingState(loading, async () => {
+        const userMessage: ChatMessage = {
+          role: "user",
+          content,
+          timestamp: new Date().toISOString(),
+        };
+        messages.value.push(userMessage);
 
-      try {
         const context = buildCurrentContext(options.source);
         const { data, error } = await api.ai.chat.post({
           message: content,
           sessionId: sessionId.value,
           context,
         });
-        if (error) throw new Error("Failed to send message");
+        assertApiResponse(error, "Failed to send message");
 
-        if (typeof data?.sessionId === "string" && data.sessionId.length > 0) {
-          sessionId.value = data.sessionId;
+        const response: AIChatResponse = {};
+        if (data && typeof data === "object") {
+          if ("message" in data && typeof data.message === "string") {
+            response.message = data.message;
+          }
+          if ("sessionId" in data && typeof data.sessionId === "string") {
+            response.sessionId = data.sessionId;
+          }
+          if ("timestamp" in data && typeof data.timestamp === "string") {
+            response.timestamp = data.timestamp;
+          }
         }
-
-        const response: AIChatResponse = data ?? {};
+        if (typeof response.sessionId === "string" && response.sessionId.length > 0) {
+          sessionId.value = response.sessionId;
+        }
         const assistantMessage: ChatMessage = {
           role: "assistant",
           content: response.message || unableToProcessFallback(),
           timestamp: new Date().toISOString(),
         };
         messages.value.push(assistantMessage);
-        return data;
-      } catch {
-        $toast.error(t("aiChatCommon.requestErrorToast"));
-        messages.value.push({
-          role: "assistant",
-          content: requestErrorFallback(),
-          timestamp: new Date().toISOString(),
-        });
-        return null;
-      }
-    } finally {
-      loading.value = false;
-      streaming.value = false;
+        return response;
+      }),
+      t("aiChatCommon.requestErrorToast"),
+    );
+    streaming.value = false;
+
+    if (!sendResult.ok) {
+      $toast.error(t("aiChatCommon.requestErrorToast"));
+      messages.value.push({
+        role: "assistant",
+        content: requestErrorFallback(),
+        timestamp: new Date().toISOString(),
+      });
+      return null;
     }
+
+    return sendResult.value;
   }
 
   async function analyzeResume(resumeId: string) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.ai["analyze-resume"].post({ resumeId });
-      if (error) throw new Error("Failed to analyze resume");
+      assertApiResponse(error, "Failed to analyze resume");
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function generateCoverLetter(generationData: CoverLetterGenerationInput) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.ai["generate-cover-letter"].post(generationData);
-      if (error) throw new Error("Failed to generate cover letter");
+      assertApiResponse(error, "Failed to generate cover letter");
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function matchJobs(resumeId: string) {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.ai["match-jobs"].post({ resumeId });
-      if (error) throw new Error("Failed to match jobs");
+      assertApiResponse(error, "Failed to match jobs");
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function getModels() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.ai.models.get();
-      if (error) throw new Error("Failed to fetch AI models");
+      assertApiResponse(error, "Failed to fetch AI models");
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   async function getUsage() {
-    loading.value = true;
-    try {
+    return withLoadingState(loading, async () => {
       const { data, error } = await api.ai.usage.get();
-      if (error) throw new Error("Failed to fetch AI usage");
+      assertApiResponse(error, "Failed to fetch AI usage");
       return data;
-    } finally {
-      loading.value = false;
-    }
+    });
   }
 
   function clearMessages() {

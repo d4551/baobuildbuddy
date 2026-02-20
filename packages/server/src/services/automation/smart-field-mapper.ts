@@ -1,3 +1,4 @@
+import { safeParseJson } from "@bao/shared";
 import type { AIService } from "../ai/ai-service";
 import { formFieldAnalysisPrompt } from "../ai/prompts";
 
@@ -18,65 +19,60 @@ export class SmartFieldMapper {
     fieldsNeeded: string[],
     aiService: AIService,
   ): Promise<Record<string, string[]>> {
-    try {
-      const html = await this.fetchPage(jobUrl);
-      const stripped = this.stripToFormElements(html);
+    return this.fetchPage(jobUrl)
+      .then(async (html) => {
+        const stripped = this.stripToFormElements(html);
 
-      if (!stripped || stripped.length < 20) {
-        return {}; // Page has no recognizable form elements
-      }
-
-      const prompt = formFieldAnalysisPrompt(stripped, fieldsNeeded);
-      const response = await aiService.generate(prompt, {
-        temperature: 0.1,
-        maxTokens: 1000,
-      });
-
-      if (response.error || !response.content) {
-        return {};
-      }
-
-      // Parse the AI response — strip markdown code fences if present
-      const cleaned = response.content
-        .replace(/```json\n?/g, "")
-        .replace(/```\n?/g, "")
-        .trim();
-
-      const parsed = JSON.parse(cleaned) as Record<string, unknown>;
-
-      // Validate and normalize the result
-      const result: Record<string, string[]> = {};
-      for (const [key, value] of Object.entries(parsed)) {
-        if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
-          result[key] = value as string[];
+        if (!stripped || stripped.length < 20) {
+          return {}; // Page has no recognizable form elements
         }
-      }
 
-      return result;
-    } catch {
-      // Graceful fallback — hardcoded selectors in the Python script still work
-      return {};
-    }
+        const prompt = formFieldAnalysisPrompt(stripped, fieldsNeeded);
+        const response = await aiService.generate(prompt, {
+          temperature: 0.1,
+          maxTokens: 1000,
+        });
+
+        if (response.error || !response.content) {
+          return {};
+        }
+
+        // Parse the AI response — strip markdown code fences if present
+        const cleaned = response.content
+          .replace(/```json\n?/g, "")
+          .replace(/```\n?/g, "")
+          .trim();
+        const parsedValue = safeParseJson(cleaned);
+        if (!parsedValue || typeof parsedValue !== "object" || Array.isArray(parsedValue)) {
+          return {};
+        }
+        const parsed = parsedValue as Record<string, unknown>;
+
+        // Validate and normalize the result
+        const result: Record<string, string[]> = {};
+        for (const [key, value] of Object.entries(parsed)) {
+          if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+            result[key] = value;
+          }
+        }
+
+        return result;
+      })
+      .catch(() => ({}));
   }
 
   /**
    * Fetch page HTML with a short timeout.
    */
   private async fetchPage(url: string): Promise<string> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10_000);
-    try {
-      const res = await fetch(url, {
-        signal: controller.signal,
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        },
-      });
-      return await res.text();
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10_000),
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    });
+    return await res.text();
   }
 
   /**

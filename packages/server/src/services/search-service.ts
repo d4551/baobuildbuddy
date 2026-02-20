@@ -30,10 +30,15 @@ export class SearchService {
     const results: SearchResult[] = [];
     const counts: Record<SearchType, number> = { jobs: 0, studios: 0, skills: 0, resumes: 0 };
     const pattern = `%${query}%`;
+    const runTableQuery = async <T>(operation: () => Promise<T>): Promise<T | null> =>
+      operation().then(
+        (value) => value,
+        () => null,
+      );
 
     if (searchTypes.includes("jobs")) {
-      try {
-        const jobResults = await db
+      const jobResults = await runTableQuery(() =>
+        db
           .select()
           .from(jobs)
           .where(
@@ -43,8 +48,9 @@ export class SearchService {
               like(jobs.description, pattern),
             ),
           )
-          .limit(20);
-
+          .limit(20),
+      );
+      if (jobResults) {
         for (const job of jobResults) {
           const titleMatch = job.title?.toLowerCase().includes(query.toLowerCase());
           results.push({
@@ -57,14 +63,12 @@ export class SearchService {
           });
         }
         counts.jobs = jobResults.length;
-      } catch {
-        /* table may not exist yet */
       }
     }
 
     if (searchTypes.includes("studios")) {
-      try {
-        const studioResults = await db
+      const studioResults = await runTableQuery(() =>
+        db
           .select()
           .from(studios)
           .where(
@@ -74,8 +78,9 @@ export class SearchService {
               like(studios.location, pattern),
             ),
           )
-          .limit(20);
-
+          .limit(20),
+      );
+      if (studioResults) {
         for (const studio of studioResults) {
           const nameMatch = studio.name?.toLowerCase().includes(query.toLowerCase());
           results.push({
@@ -88,14 +93,12 @@ export class SearchService {
           });
         }
         counts.studios = studioResults.length;
-      } catch {
-        /* table may not exist yet */
       }
     }
 
     if (searchTypes.includes("skills")) {
-      try {
-        const skillResults = await db
+      const skillResults = await runTableQuery(() =>
+        db
           .select()
           .from(skillMappings)
           .where(
@@ -104,8 +107,9 @@ export class SearchService {
               like(skillMappings.transferableSkill, pattern),
             ),
           )
-          .limit(20);
-
+          .limit(20),
+      );
+      if (skillResults) {
         for (const skill of skillResults) {
           results.push({
             type: "skills",
@@ -117,19 +121,18 @@ export class SearchService {
           });
         }
         counts.skills = skillResults.length;
-      } catch {
-        /* table may not exist yet */
       }
     }
 
     if (searchTypes.includes("resumes")) {
-      try {
-        const resumeResults = await db
+      const resumeResults = await runTableQuery(() =>
+        db
           .select()
           .from(resumes)
           .where(or(like(resumes.name, pattern), like(resumes.summary, pattern)))
-          .limit(20);
-
+          .limit(20),
+      );
+      if (resumeResults) {
         for (const resume of resumeResults) {
           results.push({
             type: "resumes",
@@ -141,8 +144,6 @@ export class SearchService {
           });
         }
         counts.resumes = resumeResults.length;
-      } catch {
-        /* table may not exist yet */
       }
     }
 

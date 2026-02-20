@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import type {
-  GameGenre,
-  JobExperienceLevel,
-  Platform,
-  StudioType,
-} from "@bao/shared";
+import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared";
 import {
   APP_ROUTE_BUILDERS,
   JOB_DISCOVERY_DEFAULT_PAGE_SIZE,
@@ -15,6 +10,7 @@ import {
   JOB_SUPPORTED_PLATFORMS,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
@@ -141,11 +137,14 @@ watch(totalPages, (nextTotal) => {
 
 async function handleRefresh() {
   refreshing.value = true;
-  try {
-    await refreshJobs();
+  const refreshResult = await settlePromise(refreshJobs(), "Failed to refresh jobs");
+  if (refreshResult.ok) {
     await maybeAwardSearchXp();
-  } finally {
-    refreshing.value = false;
+  }
+  refreshing.value = false;
+
+  if (!refreshResult.ok) {
+    throw refreshResult.error;
   }
 }
 
@@ -252,13 +251,17 @@ function hasSearchCriteria(): boolean {
 }
 
 async function maybeAwardSearchXp(): Promise<void> {
-  try {
-    const reward = await awardForAction("jobSearch");
-    if (reward.awarded) {
-      $toast.success(t("jobsPage.toasts.searchReward", { xp: reward.amount }));
-    }
-  } catch {
+  const rewardResult = await settlePromise(
+    awardForAction("jobSearch"),
+    "Failed to award job-search XP",
+  );
+  if (!rewardResult.ok) {
     // Search UX must not fail if gamification awarding is unavailable.
+    return;
+  }
+
+  if (rewardResult.value.awarded) {
+    $toast.success(t("jobsPage.toasts.searchReward", { xp: rewardResult.value.amount }));
   }
 }
 </script>

@@ -431,7 +431,8 @@ const enUS = {
     seoDescription:
       "Evaluate career readiness and discover role pathways based on your mapped transferable skills.",
     title: "Career Pathways",
-    subtitle: "Track readiness and explore role pathways generated from your mapped skill evidence.",
+    subtitle:
+      "Track readiness and explore role pathways generated from your mapped skill evidence.",
     retryButtonLabel: "Retry",
     gamification: {
       levelLabel: "Lvl {level}",
@@ -849,8 +850,7 @@ const enUS = {
       fetchFailed: "Failed to fetch cover letters",
       companyMinLength: "Company name must be at least {count} characters",
       positionMinLength: "Position must be at least {count} characters",
-      jobDescriptionMinLength:
-        "Job description must be at least {count} characters when provided",
+      jobDescriptionMinLength: "Job description must be at least {count} characters when provided",
       generated: "Cover letter generated",
       generatedWithoutRedirect: "Cover letter generated",
       generateFailed: "Failed to generate cover letter",
@@ -896,8 +896,7 @@ const enUS = {
     },
     editor: {
       title: "Content Editor",
-      info:
-        "Edit the draft directly. Regenerate when you want a fresh version from the current company, role, and template inputs.",
+      info: "Edit the draft directly. Regenerate when you want a fresh version from the current company, role, and template inputs.",
       placeholder: "Cover-letter content appears here...",
       aria: "Cover-letter content editor",
       characterCount: "{count} characters",
@@ -2280,7 +2279,17 @@ const enUS = {
 /**
  * Strongly-typed locale message schema used by `vue-i18n`.
  */
-export type AppTranslationSchema = typeof enUS;
+type LocaleMessageShape<T> = {
+  [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends readonly (infer U)[]
+      ? readonly LocaleMessageShape<U>[]
+      : T[K] extends Record<string, unknown>
+        ? LocaleMessageShape<T[K]>
+        : T[K];
+};
+
+export type AppTranslationSchema = LocaleMessageShape<typeof enUS>;
 
 /**
  * Default English locale message catalog.

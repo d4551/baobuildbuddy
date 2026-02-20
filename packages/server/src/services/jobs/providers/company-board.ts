@@ -128,22 +128,19 @@ export class CompanyBoardProvider implements JobProvider {
     }
 
     const url = resolveBoardUrl(this.config.type, this.config.token, providerSettings);
+    return fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return [];
+        }
 
-    try {
-      const response = await fetch(url, {
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
-      });
-
-      if (!response.ok) {
-        return [];
-      }
-
-      const data = (await response.json()) as ATSResponse;
-      return this.parseJobs(data, providerSettings);
-    } catch {
-      return [];
-    }
+        const data = (await response.json()) as ATSResponse;
+        return this.parseJobs(data, providerSettings);
+      })
+      .catch(() => []);
   }
 
   private parseJobs(data: ATSResponse, providerSettings: JobProviderSettings): RawJob[] {

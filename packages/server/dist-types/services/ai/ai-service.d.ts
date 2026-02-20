@@ -28,6 +28,8 @@ export declare class AIService {
      * Resolve preferred provider to a known supported provider.
      */
     private static resolvePreferredProvider;
+    private static canCreateLocalProvider;
+    private static createProvider;
     /**
      * Initialize AI providers based on configurations
      */

@@ -107,83 +107,83 @@ export class ConversationContextManager {
    * Load domain-specific data from DB
    */
   private async loadDomainContext(domain: AIChatContextDomain): Promise<string | null> {
-    try {
-      switch (domain) {
-        case "resume": {
-          const defaultResume = await db.select().from(resumes).limit(1);
-          if (defaultResume.length > 0) {
-            const r = defaultResume[0];
-            return `User's Resume: "${r.name}"\nSummary: ${r.summary || "Not set"}\nSkills: ${JSON.stringify(r.skills || {})}`;
-          }
-          return null;
-        }
-        case "job_search": {
-          const saved = await db
-            .select({ title: jobs.title, company: jobs.company })
-            .from(savedJobs)
-            .leftJoin(jobs, eq(savedJobs.jobId, jobs.id))
-            .limit(10);
-          if (saved.length > 0) {
-            return `Saved Jobs:\n${saved.map((j) => `- ${j.title} at ${j.company}`).join("\n")}`;
-          }
-          return null;
-        }
-        case "interview": {
-          const sessions = await db
-            .select()
-            .from(interviewSessions)
-            .orderBy(desc(interviewSessions.createdAt))
-            .limit(3);
-          if (sessions.length > 0) {
-            return `Recent Interview Sessions: ${sessions.length} completed`;
-          }
-          return null;
-        }
-        case "portfolio": {
-          const projects = await db.select().from(portfolioProjects).limit(10);
-          if (projects.length > 0) {
-            return `Portfolio Projects:\n${projects.map((p) => `- ${p.title}: ${p.technologies?.join(", ") || "No tech listed"}`).join("\n")}`;
-          }
-          return null;
-        }
-        case "skills": {
-          const mappings = await db.select().from(skillMappings).limit(20);
-          if (mappings.length > 0) {
-            return `Skill Mappings:\n${mappings.map((m) => `- ${m.gameExpression} → ${m.transferableSkill}`).join("\n")}`;
-          }
-          return null;
-        }
-        case "automation": {
-          const recentRuns = await db
-            .select()
-            .from(automationRuns)
-            .orderBy(desc(automationRuns.createdAt))
-            .limit(5);
-          const parts: string[] = [];
-          if (recentRuns.length > 0) {
-            parts.push(`Recent Automation Runs (${recentRuns.length}):`);
-            for (const run of recentRuns) {
-              parts.push(
-                `- [${run.status}] ${run.type} (${run.createdAt})${run.error ? ` Error: ${run.error}` : ""}`,
-              );
+    return Promise.resolve()
+      .then(async () => {
+        switch (domain) {
+          case "resume": {
+            const defaultResume = await db.select().from(resumes).limit(1);
+            if (defaultResume.length > 0) {
+              const r = defaultResume[0];
+              return `User's Resume: "${r.name}"\nSummary: ${r.summary || "Not set"}\nSkills: ${JSON.stringify(r.skills || {})}`;
             }
+            return null;
           }
-          // List available resumes so the AI can offer choices
-          const availableResumes = await db.select().from(resumes).limit(10);
-          if (availableResumes.length > 0) {
-            parts.push("\nAvailable Resumes:");
-            for (const r of availableResumes) {
-              parts.push(`- "${r.name}" (ID: ${r.id})`);
+          case "job_search": {
+            const saved = await db
+              .select({ title: jobs.title, company: jobs.company })
+              .from(savedJobs)
+              .leftJoin(jobs, eq(savedJobs.jobId, jobs.id))
+              .limit(10);
+            if (saved.length > 0) {
+              return `Saved Jobs:\n${saved.map((j) => `- ${j.title} at ${j.company}`).join("\n")}`;
             }
+            return null;
           }
-          return parts.length > 0 ? parts.join("\n") : null;
+          case "interview": {
+            const sessions = await db
+              .select()
+              .from(interviewSessions)
+              .orderBy(desc(interviewSessions.createdAt))
+              .limit(3);
+            if (sessions.length > 0) {
+              return `Recent Interview Sessions: ${sessions.length} completed`;
+            }
+            return null;
+          }
+          case "portfolio": {
+            const projects = await db.select().from(portfolioProjects).limit(10);
+            if (projects.length > 0) {
+              return `Portfolio Projects:\n${projects.map((p) => `- ${p.title}: ${p.technologies?.join(", ") || "No tech listed"}`).join("\n")}`;
+            }
+            return null;
+          }
+          case "skills": {
+            const mappings = await db.select().from(skillMappings).limit(20);
+            if (mappings.length > 0) {
+              return `Skill Mappings:\n${mappings.map((m) => `- ${m.gameExpression} → ${m.transferableSkill}`).join("\n")}`;
+            }
+            return null;
+          }
+          case "automation": {
+            const recentRuns = await db
+              .select()
+              .from(automationRuns)
+              .orderBy(desc(automationRuns.createdAt))
+              .limit(5);
+            const parts: string[] = [];
+            if (recentRuns.length > 0) {
+              parts.push(`Recent Automation Runs (${recentRuns.length}):`);
+              for (const run of recentRuns) {
+                parts.push(
+                  `- [${run.status}] ${run.type} (${run.createdAt})${run.error ? ` Error: ${run.error}` : ""}`,
+                );
+              }
+            }
+            // List available resumes so the AI can offer choices
+            const availableResumes = await db.select().from(resumes).limit(10);
+            if (availableResumes.length > 0) {
+              parts.push("\nAvailable Resumes:");
+              for (const r of availableResumes) {
+                parts.push(`- "${r.name}" (ID: ${r.id})`);
+              }
+            }
+            return parts.length > 0 ? parts.join("\n") : null;
+          }
+          default:
+            return null;
         }
-        default:
-          return null;
-      }
-    } catch {
-      return null;
-    }
+      })
+      .catch(() => null);
   }
 
   /**
