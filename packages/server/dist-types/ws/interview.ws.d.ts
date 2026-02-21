@@ -15,29 +15,27 @@ export declare const interviewWebSocket: Elysia<"", {
     parser: {};
     response: {};
 }, {
-    ws: {
-        interview: {
-            subscribe: {
-                body: {
-                    content?: string | undefined;
-                    studioId?: string | undefined;
-                    config?: {} | undefined;
-                    sessionId?: string | undefined;
-                    type: string;
-                };
-                params: {};
-                query: {};
-                headers: {};
-                response: {
-                    422: {
-                        type: "validation";
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
+    [x: string]: {
+        subscribe: {
+            body: {
+                content?: string | undefined;
+                studioId?: string | undefined;
+                config?: {} | undefined;
+                sessionId?: string | undefined;
+                type: string;
+            };
+            params: {};
+            query: {};
+            headers: {};
+            response: {
+                422: {
+                    type: "validation";
+                    on: string;
+                    summary?: string;
+                    message?: string;
+                    found?: unknown;
+                    property?: string;
+                    expected?: string;
                 };
             };
         };

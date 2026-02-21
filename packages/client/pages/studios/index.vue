@@ -10,6 +10,7 @@ import { settlePromise } from "~/composables/async-flow";
 import { useDebouncedValue } from "~/composables/useDebouncedValue";
 import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 const { $toast } = useNuxtApp();
 const route = useRoute();
@@ -442,7 +443,7 @@ onMounted(syncPreviewDialog);
             :aria-label="t('studiosIndex.preview.closeButtonAria')"
             @click="closeStudioPreview"
           >
-            ✕
+            <CloseIcon class="h-4 w-4" />
           </button>
         </form>
 

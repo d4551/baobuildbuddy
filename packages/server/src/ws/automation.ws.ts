@@ -1,3 +1,4 @@
+import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared";
 import { Elysia, t } from "elysia";
 
 /**
@@ -51,7 +52,7 @@ function cleanup(runId: string): void {
   }
 }
 
-export const automationWebSocket = new Elysia().ws("/ws/automation", {
+export const automationWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.automation), {
   body: t.Object({
     type: t.String({ maxLength: 50 }),
     runId: t.Optional(t.String({ maxLength: 100 })),

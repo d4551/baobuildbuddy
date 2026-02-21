@@ -19,26 +19,24 @@ export declare const automationWebSocket: Elysia<"", {
     parser: {};
     response: {};
 }, {
-    ws: {
-        automation: {
-            subscribe: {
-                body: {
-                    runId?: string | undefined;
-                    type: string;
-                };
-                params: {};
-                query: {};
-                headers: {};
-                response: {
-                    422: {
-                        type: "validation";
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
+    [x: string]: {
+        subscribe: {
+            body: {
+                runId?: string | undefined;
+                type: string;
+            };
+            params: {};
+            query: {};
+            headers: {};
+            response: {
+                422: {
+                    type: "validation";
+                    on: string;
+                    summary?: string;
+                    message?: string;
+                    found?: unknown;
+                    property?: string;
+                    expected?: string;
                 };
             };
         };

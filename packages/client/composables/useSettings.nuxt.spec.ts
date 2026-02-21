@@ -31,6 +31,12 @@ vi.mock("./useApi", () => ({
   useApi: () => mockApi,
 }));
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 const { useSettings } = await import("./useSettings");
 
 beforeEach(() => {
@@ -66,7 +72,7 @@ describe("useSettings", () => {
 
     const { fetchSettings, loading } = useSettings();
 
-    await expect(fetchSettings()).rejects.toThrow("Failed to fetch settings");
+    await expect(fetchSettings()).rejects.toThrow("apiErrors.settings.fetchFailed");
     expect(loading.value).toBe(false);
   });
 });

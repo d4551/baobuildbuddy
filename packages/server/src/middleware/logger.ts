@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@bao/shared";
 import { createPinoLogger } from "@bogeychan/elysia-logger";
 
 export const log = createPinoLogger({
@@ -14,7 +15,7 @@ export const log = createPinoLogger({
 export const logger = log.into({
   autoLogging: {
     ignore(ctx) {
-      return new URL(ctx.request.url).pathname === "/api/health";
+      return new URL(ctx.request.url).pathname === API_ENDPOINTS.health;
     },
   },
 });

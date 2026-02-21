@@ -27,8 +27,7 @@ const isEvidenceStatus = (value: unknown): value is SkillEvidence["verificationS
   typeof value === "string" &&
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS.some((statusId) => statusId === value);
 
-const resolvePathwayIcon = (pathwayId: string): string =>
-  getGamificationPathwayIcon(pathwayId);
+const resolvePathwayIcon = (pathwayId: string): string => getGamificationPathwayIcon(pathwayId);
 
 const normalizeSkillCategory = (value: string | null): SkillCategory =>
   isSkillCategory(value) ? value : "technical";

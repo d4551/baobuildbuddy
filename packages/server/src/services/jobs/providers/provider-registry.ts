@@ -1,4 +1,5 @@
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
+import { createServerLogger } from "../../../utils/logger";
 
 export class SimpleRateLimiter {
   private requests: Map<string, number[]> = new Map();
@@ -24,6 +25,7 @@ export class SimpleRateLimiter {
 export class JobProviderRegistry {
   private providers = new Map<string, JobProvider>();
   private rateLimiter = new SimpleRateLimiter(15);
+  private logger = createServerLogger("job-provider-registry");
 
   register(provider: JobProvider): void {
     this.providers.set(provider.name, provider);
@@ -55,14 +57,17 @@ export class JobProviderRegistry {
     const results = await Promise.allSettled(
       enabledProviders.map((provider) => {
         if (!this.rateLimiter.canMakeRequest(provider.name)) {
-          console.log(`Rate limited: ${provider.name}`);
+          this.logger.warn(`Rate limited: ${provider.name}`);
           return Promise.resolve<RawJob[]>([]);
         }
         this.rateLimiter.recordRequest(provider.name);
         return provider.fetchJobs(filters).then(
           (jobs) => jobs,
           (e: unknown) => {
-            console.error(`Provider ${provider.name} failed:`, e instanceof Error ? e.message : e);
+            this.logger.error(
+              `Provider ${provider.name} failed`,
+              e instanceof Error ? e.message : e,
+            );
             return [];
           },
         );

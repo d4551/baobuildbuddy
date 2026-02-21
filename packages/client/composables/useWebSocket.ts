@@ -1,5 +1,6 @@
 import { STATE_KEYS, safeParseJson, type JsonObject, type JsonValue } from "@bao/shared";
 import { settlePromise } from "~/composables/async-flow";
+import { createClientLogger } from "~/utils/client-logger";
 
 const isJsonObject = (value: JsonValue): value is JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -17,6 +18,7 @@ export function useWebSocket() {
     () => null,
   );
   const requestUrl = useRequestURL();
+  const logger = createClientLogger("use-web-socket");
 
   let socket: WebSocket | null = null;
   let reconnectAttempts = 0;
@@ -68,7 +70,7 @@ export function useWebSocket() {
   function runHandlerTask(task: () => void, errorPrefix: string): void {
     void settlePromise(Promise.resolve().then(task), errorPrefix).then((result) => {
       if (!result.ok) {
-        console.error(errorPrefix, result.error);
+        logger.error(errorPrefix, result.error);
       }
     });
   }
@@ -124,7 +126,7 @@ export function useWebSocket() {
       "Failed to create WebSocket connection",
     ).then((connectionResult) => {
       if (!connectionResult.ok) {
-        console.error("Failed to create WebSocket connection:", connectionResult.error);
+        logger.error("Failed to create WebSocket connection:", connectionResult.error);
         connected.value = false;
         return;
       }
@@ -134,7 +136,7 @@ export function useWebSocket() {
       // Connection timeout — if socket doesn't open in 10s, abort
       connectionTimeout = setTimeout(() => {
         if (socket && socket.readyState !== WebSocket.OPEN) {
-          console.warn("WebSocket connection timeout, closing");
+          logger.warn("WebSocket connection timeout, closing");
           socket.close();
         }
       }, CONNECTION_TIMEOUT);
@@ -156,7 +158,7 @@ export function useWebSocket() {
 
         const parsed = safeParseJson(event.data);
         if (!parsed || !isJsonObject(parsed)) {
-          console.error("Failed to parse WebSocket message");
+          logger.error("Failed to parse WebSocket message");
           return;
         }
         if (isPongMessage(parsed)) return;
@@ -170,7 +172,7 @@ export function useWebSocket() {
       };
 
       socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
+        logger.error("WebSocket error:", error);
       };
 
       socket.onclose = () => {
@@ -184,7 +186,7 @@ export function useWebSocket() {
         if (currentPath && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
           const delay = getReconnectDelay();
           reconnectAttempts += 1;
-          console.log(
+          logger.debug(
             `WebSocket reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`,
           );
 
@@ -192,7 +194,7 @@ export function useWebSocket() {
             if (currentPath) connect(currentPath);
           }, delay);
         } else if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-          console.error(`WebSocket gave up after ${MAX_RECONNECT_ATTEMPTS} reconnection attempts`);
+          logger.error(`WebSocket gave up after ${MAX_RECONNECT_ATTEMPTS} reconnection attempts`);
         }
       };
     });
@@ -200,12 +202,12 @@ export function useWebSocket() {
 
   function send(data: Record<string, unknown> | string): boolean {
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      console.error("WebSocket not connected");
+      logger.error("WebSocket not connected");
       return false;
     }
 
     if (typeof data !== "string" && containsCircularOrBigInt(data, new WeakSet<object>())) {
-      console.error("WebSocket message contains unsupported JSON payload");
+      logger.error("WebSocket message contains unsupported JSON payload");
       return false;
     }
 

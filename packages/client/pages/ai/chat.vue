@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_BRAND, APP_SEO } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { CHAT_PAGE_CONTAINER_CLASS } from "~/constants/chat";
 import { getErrorMessage } from "~/utils/errors";
 import {
   buildChatMessageRenderRows,
@@ -102,9 +103,7 @@ async function handleSendMessage() {
 }
 
 async function handleSaveSpeechConfig(): Promise<void> {
-  const saveSpeechResult = await saveSpeechConfig(
-    t("aiChatPage.voiceSettings.saveErrorFallback"),
-  );
+  const saveSpeechResult = await saveSpeechConfig(t("aiChatPage.voiceSettings.saveErrorFallback"));
   if (!saveSpeechResult.ok) {
     $toast.error(
       getErrorMessage(saveSpeechResult.error, t("aiChatPage.voiceSettings.saveErrorFallback")),
@@ -125,7 +124,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-[24rem] h-[calc(100dvh-12rem)]">
+  <div :class="CHAT_PAGE_CONTAINER_CLASS">
     <div class="mb-4 flex items-center justify-between gap-3">
       <div>
         <h1 class="text-3xl font-bold">{{ t("aiChatPage.title", { brand: APP_BRAND.name }) }}</h1>
@@ -183,30 +182,6 @@ onMounted(() => {
             :disabled="loading"
             :aria-label="t('aiChatPage.inputAria')"
           />
-          <ChatVoiceControls
-            v-model:selected-voice-id="selectedVoiceId"
-            v-model:auto-speak-replies="autoSpeakReplies"
-            v-model:stt-provider="speechConfig.sttProvider"
-            v-model:stt-model="speechConfig.sttModel"
-            v-model:tts-provider="speechConfig.ttsProvider"
-            v-model:tts-model="speechConfig.ttsModel"
-            :loading="loading"
-            :supports-recognition="supportsRecognition"
-            :supports-synthesis="supportsSynthesis"
-            :can-replay-assistant="canReplayAssistant"
-            :is-listening="isVoiceListening"
-            :is-speaking="isVoiceSpeaking"
-            :voices="availableVoices"
-            :speech-provider-options="speechProviderOptions"
-            :stt-model-options="sttModelOptions"
-            :tts-model-options="ttsModelOptions"
-            :speech-config-saving="speechConfigSaving"
-            :support-hint-key="voiceSupportHintKey"
-            :error-label="voiceErrorLabel"
-            @save-speech-settings="handleSaveSpeechConfig"
-            @toggle-listening="toggleListening"
-            @replay-assistant="speakLatestAssistantMessage"
-          />
           <button
             type="submit"
             class="btn btn-primary join-item"
@@ -219,6 +194,32 @@ onMounted(() => {
             </svg>
           </button>
         </div>
+
+        <ChatVoiceControls
+          v-model:selected-voice-id="selectedVoiceId"
+          v-model:auto-speak-replies="autoSpeakReplies"
+          v-model:stt-provider="speechConfig.sttProvider"
+          v-model:stt-model="speechConfig.sttModel"
+          v-model:tts-provider="speechConfig.ttsProvider"
+          v-model:tts-model="speechConfig.ttsModel"
+          :loading="loading"
+          :supports-recognition="supportsRecognition"
+          :supports-synthesis="supportsSynthesis"
+          :can-replay-assistant="canReplayAssistant"
+          :is-listening="isVoiceListening"
+          :is-speaking="isVoiceSpeaking"
+          :voices="availableVoices"
+          :speech-provider-options="speechProviderOptions"
+          :stt-model-options="sttModelOptions"
+          :tts-model-options="ttsModelOptions"
+          :speech-config-saving="speechConfigSaving"
+          :support-hint-key="voiceSupportHintKey"
+          :error-label="voiceErrorLabel"
+          @save-speech-settings="handleSaveSpeechConfig"
+          @toggle-listening="toggleListening"
+          @replay-assistant="speakLatestAssistantMessage"
+        />
+
         <p v-if="isSpeechConfigDirty" class="text-xs text-base-content/60">
           {{ t("aiChatPage.voiceSettings.unsavedHint") }}
         </p>

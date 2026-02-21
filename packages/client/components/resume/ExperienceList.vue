@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 interface ExperienceItem {
   id: string;
@@ -217,13 +218,12 @@ function moveDown(index: number) {
               >
                 <span class="text-sm flex-1">• {{ highlight }}</span>
                 <button
+                  type="button"
                   class="btn btn-ghost btn-xs btn-square"
                   :aria-label="t('resumeComponentExperience.removeHighlightAria', { highlight })"
                   @click="removeHighlight(item.id, hIndex)"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <CloseIcon class="h-3 w-3" />
                 </button>
               </div>
               <div class="input-group input-group-sm">

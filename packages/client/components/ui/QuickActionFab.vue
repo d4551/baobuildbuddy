@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { QUICK_ACTION_MENU_ID } from "~/constants/layout";
 import { FAB_QUICK_ACTIONS } from "~/constants/dashboard";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 const { t } = useI18n();
 const route = useRoute();
 const isOpen = ref(false);
-const quickActionMenuId = "quick-actions-menu";
+const quickActionMenuId = QUICK_ACTION_MENU_ID;
 
 watch(
   () => route.path,
@@ -45,11 +47,10 @@ onUnmounted(() => {
       :aria-label="isOpen ? t('quickFab.collapseAria') : t('quickFab.expandAria')"
       :aria-expanded="isOpen"
       :aria-controls="quickActionMenuId"
+      type="button"
       @click="toggleQuickActions"
     >
-      <svg v-if="isOpen" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
-      </svg>
+      <CloseIcon v-if="isOpen" class="h-6 w-6" />
       <svg v-else class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>

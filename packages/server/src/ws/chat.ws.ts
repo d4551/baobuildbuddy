@@ -1,4 +1,4 @@
-import { APP_BRAND, generateId, safeParseJson } from "@bao/shared";
+import { APP_BRAND, WS_ENDPOINTS, generateId, safeParseJson, toApiScopedPath } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
@@ -34,7 +34,7 @@ function parseAutomationActionPayload(raw: string): AutomationActionPayload | nu
   };
 }
 
-export const chatWebSocket = new Elysia().ws("/ws/chat", {
+export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat), {
   body: t.Object({
     content: t.String({ maxLength: 10000 }),
     sessionId: t.Optional(t.String({ maxLength: 100 })),

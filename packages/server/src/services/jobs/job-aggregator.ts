@@ -25,6 +25,7 @@ import { and, desc, eq, gte, inArray, like, sql } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs, savedJobs } from "../../db/schema/jobs";
 import { deduplicateJobs, generateContentHash } from "./deduplication";
+import { createServerLogger } from "../../utils/logger";
 import {
   CompanyBoardsProvider,
   GreenhouseProvider,
@@ -50,6 +51,7 @@ const isOneOf = <T extends string>(values: readonly T[], value: unknown): value 
 export class JobAggregator {
   private providers: JobProvider[];
   private cacheExpiry: number; // milliseconds
+  private logger = createServerLogger("job-aggregator");
 
   constructor() {
     this.providers = [
@@ -78,7 +80,7 @@ export class JobAggregator {
    * Refresh jobs from all providers and update cache
    */
   async refreshJobs(): Promise<{ total: number; new: number; updated: number }> {
-    console.log("Starting job refresh from all providers...");
+    this.logger.info("Starting job refresh from all providers");
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
@@ -91,15 +93,15 @@ export class JobAggregator {
       const result = results[i];
       if (result.status === "fulfilled") {
         allRawJobs.push(...result.value);
-        console.log(`${this.providers[i].name}: fetched ${result.value.length} jobs`);
+        this.logger.info(`${this.providers[i].name}: fetched ${result.value.length} jobs`);
       } else {
-        console.error(`${this.providers[i].name}: failed -`, result.reason);
+        this.logger.error(`${this.providers[i].name}: failed`, result.reason);
       }
     }
 
     // Deduplicate across providers
     const uniqueJobs = deduplicateJobs(allRawJobs);
-    console.log(`Deduplicated: ${allRawJobs.length} -> ${uniqueJobs.length} jobs`);
+    this.logger.debug(`Deduplicated: ${allRawJobs.length} -> ${uniqueJobs.length} jobs`);
 
     // Convert to Job format and save to database
     let newCount = 0;
@@ -138,12 +140,12 @@ export class JobAggregator {
         .then(
           () => undefined,
           (error: unknown) => {
-            console.error("Failed to save job:", error);
+            this.logger.error("Failed to save job:", error);
           },
         );
     }
 
-    console.log(`Refresh complete: ${newCount} new, ${updatedCount} updated`);
+    this.logger.info(`Refresh complete: ${newCount} new, ${updatedCount} updated`);
 
     return {
       total: uniqueJobs.length,

@@ -19,6 +19,7 @@ import {
   SKILLS_TOP_MAPPINGS_PREVIEW_LIMIT,
 } from "~/constants/skills";
 import { getErrorMessage } from "~/utils/errors";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 definePageMeta({
   middleware: ["auth"],
@@ -714,13 +715,12 @@ function removeApplication(index: number): void {
               >
                 {{ application }}
                 <button
+                  type="button"
                   class="btn btn-ghost btn-xs btn-circle"
                   :aria-label="t('skillsPage.createModal.removeApplicationAria', { application })"
                   @click="removeApplication(index)"
                 >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <CloseIcon class="w-3 h-3" />
                 </button>
               </div>
             </div>

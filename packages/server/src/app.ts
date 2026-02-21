@@ -1,4 +1,4 @@
-import { APP_BRAND } from "@bao/shared";
+import { API_ENDPOINT_PREFIX, API_ENDPOINTS, APP_BRAND, toApiScopedPath } from "@bao/shared";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia, t } from "elysia";
@@ -31,14 +31,13 @@ import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
 
-const API_PREFIX = "/api" as const;
 const OPENAPI_VERSION = "0.1.0" as const;
 const HTTP_STATUS_OK = 200;
 const GLOBAL_RATE_LIMIT_DURATION_MS = 60_000;
 const GLOBAL_RATE_LIMIT_MAX_REQUESTS = 100;
 const HEALTHCHECK_PROBE_SQL = "SELECT 1";
 
-export const app = new Elysia({ prefix: API_PREFIX, nativeStaticResponse: true })
+export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticResponse: true })
   .use(
     cors({
       origin: config.corsOrigins,
@@ -73,7 +72,7 @@ export const app = new Elysia({ prefix: API_PREFIX, nativeStaticResponse: true }
   .use(logger)
   .use(errorHandler)
   .get(
-    "/health",
+    toApiScopedPath(API_ENDPOINTS.health),
     async () => {
       const dbOk = await Promise.resolve()
         .then(() => {

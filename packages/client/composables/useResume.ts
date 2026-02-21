@@ -1,7 +1,7 @@
-import type { ResumeData, ResumeTemplate } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { API_ENDPOINTS, STATE_KEYS, type ResumeData, type ResumeTemplate } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { getStoredApiKey } from "~/plugins/eden";
+import { resolveApiEndpoint } from "~/utils/endpoints";
 import { toResumeData } from "./api-normalizers";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 
@@ -33,6 +33,8 @@ const isResumeSynthesisError = (
 export function useResume() {
   const api = useApi();
   const { t } = useI18n();
+  const requestUrl = useRequestURL();
+  const apiBase = String(useRuntimeConfig().public.apiBase || "/");
   const resumes = useState<ResumeData[]>(STATE_KEYS.RESUME_LIST, () => []);
   const currentResume = useState<ResumeData | null>(STATE_KEYS.RESUME_CURRENT, () => null);
   const loading = useState(STATE_KEYS.RESUME_LOADING, () => false);
@@ -137,7 +139,7 @@ export function useResume() {
     const res = await $fetch<{
       questions?: Array<{ id: string; question: string; category: string }>;
       error?: string;
-    }>("/api/resumes/from-questions/generate", {
+    }>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.resumesFromQuestionsGenerate), {
       method: "POST",
       body: config,
       headers: key ? { Authorization: `Bearer ${key}` } : {},
@@ -151,7 +153,7 @@ export function useResume() {
   ) {
     const key = getStoredApiKey();
     const res = await $fetch<ResumeSynthesisSuccess | ResumeSynthesisError>(
-      "/api/resumes/from-questions/synthesize",
+      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.resumesFromQuestionsSynthesize),
       {
         method: "POST",
         body: { questionsAndAnswers },

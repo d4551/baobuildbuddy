@@ -2,6 +2,7 @@
 import type { ChatMessage } from "@bao/shared";
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { CHAT_BUBBLE_SIZE_CLASS, CHAT_MESSAGE_WIDTH_CLASS } from "~/constants/chat";
 import { formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(
@@ -21,8 +22,6 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
-const CHAT_MESSAGE_WIDTH_CLASS = "w-fit min-w-36 max-w-md lg:max-w-2xl";
-const CHAT_BUBBLE_SIZE_CLASS = "min-h-12 px-4 py-3 text-sm leading-relaxed sm:text-base";
 const isAssistant = computed(() => props.message.role === "assistant");
 const statusTextId = computed(() => (props.message.id ? `chat-status-${props.message.id}` : ""));
 const chatClass = computed(() => (isAssistant.value ? "chat-start" : "chat-end"));

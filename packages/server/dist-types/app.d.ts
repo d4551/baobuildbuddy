@@ -60,7 +60,7 @@ export declare const app: Elysia<"/api", {
     api: {};
 } & {
     api: {
-        health: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -300,7 +300,7 @@ export declare const app: Elysia<"/api", {
                         defaultTimeout?: number | undefined;
                         screenshotRetention?: number | undefined;
                         maxConcurrentRuns?: number | undefined;
-                        defaultBrowser?: undefined;
+                        defaultBrowser?: "chrome" | "chromium" | "edge" | undefined;
                         enableSmartSelectors?: boolean | undefined;
                         autoSaveScreenshots?: boolean | undefined;
                         speech?: {
@@ -353,7 +353,7 @@ export declare const app: Elysia<"/api", {
                             }[];
                             companyBoards: {
                                 name: string;
-                                type: never;
+                                type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
                                 token: string;
                                 enabled: boolean;
                                 priority: number;
@@ -361,16 +361,16 @@ export declare const app: Elysia<"/api", {
                             gamingPortals: {
                                 source: string;
                                 name: string;
-                                id: never;
+                                id: "gamedev-net" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
                                 enabled: boolean;
                                 fallbackUrl: string;
                             }[];
                         } | undefined;
                     } | undefined;
-                    preferredProvider?: undefined;
+                    preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                     preferredModel?: string | undefined;
                     theme?: "bao-light" | "bao-dark" | undefined;
-                    language?: undefined;
+                    language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -432,7 +432,7 @@ export declare const app: Elysia<"/api", {
             "test-api-key": {
                 post: {
                     body: {
-                        provider: never;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         key: string;
                     };
                     params: {};
@@ -441,11 +441,11 @@ export declare const app: Elysia<"/api", {
                     response: {
                         200: {
                             valid: boolean;
-                            provider: never;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             error: string;
                         } | {
                             valid: boolean;
-                            provider: never;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             error?: undefined;
                         };
                         422: {
@@ -3504,26 +3504,24 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        ws: {
-            automation: {
-                subscribe: {
-                    body: {
-                        runId?: string | undefined;
-                        type: string;
-                    };
-                    params: {};
-                    query: {};
-                    headers: {};
-                    response: {
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+        [x: string]: {
+            subscribe: {
+                body: {
+                    runId?: string | undefined;
+                    type: string;
+                };
+                params: {};
+                query: {};
+                headers: {};
+                response: {
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };
@@ -3531,26 +3529,24 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        ws: {
-            chat: {
-                subscribe: {
-                    body: {
-                        sessionId?: string | undefined;
-                        content: string;
-                    };
-                    params: {};
-                    query: {};
-                    headers: {};
-                    response: {
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+        [x: string]: {
+            subscribe: {
+                body: {
+                    sessionId?: string | undefined;
+                    content: string;
+                };
+                params: {};
+                query: {};
+                headers: {};
+                response: {
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };
@@ -3558,29 +3554,27 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        ws: {
-            interview: {
-                subscribe: {
-                    body: {
-                        content?: string | undefined;
-                        studioId?: string | undefined;
-                        config?: {} | undefined;
-                        sessionId?: string | undefined;
-                        type: string;
-                    };
-                    params: {};
-                    query: {};
-                    headers: {};
-                    response: {
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+        [x: string]: {
+            subscribe: {
+                body: {
+                    content?: string | undefined;
+                    studioId?: string | undefined;
+                    config?: {} | undefined;
+                    sessionId?: string | undefined;
+                    type: string;
+                };
+                params: {};
+                query: {};
+                headers: {};
+                response: {
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };

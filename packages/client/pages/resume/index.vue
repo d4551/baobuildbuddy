@@ -8,6 +8,7 @@ import {
   resumeDataToFormData,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -1072,10 +1073,13 @@ async function resolvePipelineReward(
               class="badge badge-lg gap-2"
             >
               {{ skill }}
-              <button class="btn btn-ghost btn-xs btn-circle" :aria-label="t('resumePage.skills.removeButtonAria', { index: idx + 1 })" @click="removeSkill(idx)">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+              <button
+                type="button"
+                class="btn btn-ghost btn-xs btn-circle"
+                :aria-label="t('resumePage.skills.removeButtonAria', { index: idx + 1 })"
+                @click="removeSkill(idx)"
+              >
+                <CloseIcon class="w-3 h-3" />
               </button>
             </div>
           </div>

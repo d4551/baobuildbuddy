@@ -27,6 +27,7 @@ interface ChatVoiceControlsProps {
   readonly ttsModelOptions?: readonly string[];
   readonly speechConfigSaving?: boolean;
   readonly compact?: boolean;
+  readonly joinItem?: boolean;
 }
 
 const props = withDefaults(defineProps<ChatVoiceControlsProps>(), {
@@ -39,6 +40,7 @@ const props = withDefaults(defineProps<ChatVoiceControlsProps>(), {
   ttsModel: DEFAULT_SPEECH_SETTINGS.tts.model,
   ttsModelOptions: () => [],
   speechConfigSaving: false,
+  joinItem: false,
 });
 
 const emit = defineEmits<{
@@ -89,8 +91,8 @@ function handleAutoSpeakChange(event: Event): void {
 <template>
   <button
     v-if="props.supportsRecognition"
-    class="btn btn-ghost join-item"
-    :class="props.isListening ? 'btn-warning' : ''"
+    class="btn btn-ghost"
+    :class="{ 'join-item': props.joinItem, 'btn-warning': props.isListening }"
     :title="
       props.isListening
         ? t('aiChatCommon.voice.stopTitle')
@@ -132,7 +134,8 @@ function handleAutoSpeakChange(event: Event): void {
   </button>
   <button
     v-if="props.supportsSynthesis"
-    class="btn btn-ghost join-item"
+    class="btn btn-ghost"
+    :class="{ 'join-item': props.joinItem }"
     :aria-label="t('aiChatCommon.voice.replayAria')"
     :title="t('aiChatCommon.voice.replayTitle')"
     :disabled="!props.canReplayAssistant || props.loading"

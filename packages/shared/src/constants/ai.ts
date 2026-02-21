@@ -1,5 +1,6 @@
 import type { AIChatContextDomain, AIProviderType } from "../types/ai";
 import { AI_PROVIDER_IDS } from "../types/ai";
+import { API_ENDPOINTS } from "./endpoints";
 import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "./routes";
 
 const CLAUDE_TEST_MAX_TOKENS = 1;
@@ -179,7 +180,7 @@ export const AI_CHAT_PAGE_PATH = APP_ROUTES.aiChat;
 /**
  * Canonical API endpoint for chat completion requests.
  */
-export const AI_CHAT_API_ENDPOINT = "/api/ai/chat";
+export const AI_CHAT_API_ENDPOINT = API_ENDPOINTS.aiChat;
 
 /**
  * Canonical query keys consumed when inferring AI chat entity context.

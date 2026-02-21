@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_BRAND, APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { APP_DRAWER_ID } from "~/constants/layout";
 
 const { theme, toggleTheme } = useTheme();
 const { t, locale, availableLocales } = useI18n();
@@ -23,15 +24,15 @@ const getLocaleLabel = (localeCode: string): string => {
   <div class="navbar sticky top-0 z-30 border-b border-base-300 bg-base-200/95 backdrop-blur supports-[backdrop-filter]:bg-base-200/80">
     <div class="navbar-start">
       <label
-        for="bao-drawer"
+        :for="APP_DRAWER_ID"
         class="btn btn-ghost btn-circle drawer-button lg:hidden"
         :aria-label="t('a11y.toggleSidebar')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </label>
-      <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-ghost gap-2 text-xl font-bold text-primary">
+      <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-ghost gap-2 text-xl font-bold text-primary lg:hidden">
         <span class="text-lg leading-none" aria-hidden="true">{{ APP_BRAND.logoEmoji }}</span>
         <span>{{ APP_BRAND.name }}</span>
       </NuxtLink>

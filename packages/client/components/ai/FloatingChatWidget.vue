@@ -7,7 +7,10 @@ import {
   APP_BRAND,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
+import { FLOATING_CHAT_PANEL_ID } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
   buildChatMessageRenderRows,
   createStreamingAssistantMessage,
@@ -54,7 +57,7 @@ const {
   locale,
   messages,
 });
-const chatPanelId = "floating-chat-panel";
+const chatPanelId = FLOATING_CHAT_PANEL_ID;
 const voiceErrorLabel = computed(() => {
   if (voiceErrorMessageKey.value.length === 0) {
     return "";
@@ -194,10 +197,7 @@ async function handleSaveSpeechConfig(): Promise<void> {
   );
   if (!saveSpeechResult.ok) {
     $toast.error(
-      getErrorMessage(
-        saveSpeechResult.error,
-        t("floatingChat.voiceSettings.saveErrorFallback"),
-      ),
+      getErrorMessage(saveSpeechResult.error, t("floatingChat.voiceSettings.saveErrorFallback")),
     );
     return;
   }
@@ -228,7 +228,8 @@ onUnmounted(() => {
       <div
         v-if="isOpen"
         :id="chatPanelId"
-        class="card border border-base-300 bg-base-100 shadow-xl w-[min(24rem,calc(100vw-2rem))] h-[28rem]"
+        class="card border border-base-300 bg-base-100 shadow-xl"
+        :class="FLOATING_CHAT_PANEL_SIZE_CLASS"
       >
         <div class="card-body p-0 h-full">
           <header class="flex items-center justify-between p-3 border-b border-base-300">
@@ -282,7 +283,7 @@ onUnmounted(() => {
                 :aria-label="t('floatingChat.closeAria')"
                 @click="closeWidget"
               >
-                ✕
+                <CloseIcon class="h-4 w-4" />
               </button>
             </div>
           </header>
@@ -350,6 +351,7 @@ onUnmounted(() => {
                 v-model:selected-voice-id="selectedVoiceId"
                 v-model:auto-speak-replies="autoSpeakReplies"
                 compact
+                join-item
                 :loading="loading"
                 :supports-recognition="supportsRecognition"
                 :supports-synthesis="supportsSynthesis"

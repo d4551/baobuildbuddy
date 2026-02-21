@@ -337,12 +337,14 @@ function getReadinessDialStyle(score: number): Record<string, string> {
                     <span class="font-semibold">{{ pathway.matchScore }}%</span>
                   </div>
                   <progress
-                  class="progress w-full"
-                  :class="getReadinessColor(pathway.matchScore)"
-                  :value="pathway.matchScore"
-                  :max="SKILLS_READINESS_MAX"
-                  :aria-label="t('skillsPathwaysPage.pathways.matchScoreAria', { score: pathway.matchScore, title: pathway.title })"
-                ></progress>
+                    class="progress w-full"
+                    :class="getReadinessColor(pathway.matchScore)"
+                    :value="pathway.matchScore"
+                    :max="SKILLS_READINESS_MAX"
+                    :aria-label="
+                      t('skillsPathwaysPage.pathways.matchScoreAria', { score: pathway.matchScore, title: pathway.title })
+                    "
+                  ></progress>
                 </div>
 
                 <p class="text-xs">

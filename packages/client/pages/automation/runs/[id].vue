@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES, buildAutomationScreenshotEndpoint } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { useAutomation } from "~/composables/useAutomation";
+import { resolveApiEndpoint } from "~/utils/endpoints";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
@@ -14,15 +15,17 @@ const runId = computed(() => {
 const { data: run, error } = await fetchRun(runId.value);
 const requestUrl = useRequestURL();
 const apiBase = String(useRuntimeConfig().public.apiBase || "/");
-const resolvedApiBase = new URL(apiBase, requestUrl).toString().replace(/\/$/, "");
-const isApiBase = /\/api\/?$/i.test(new URL(resolvedApiBase).pathname);
 
 const screenshotUrls = computed(() =>
   (run.value?.screenshots || []).filter((value) => typeof value === "string" && value.length > 0),
 );
 const screenshotEndpoint = (index: number): string => {
-  const resolvedPath = `/automation/screenshots/${encodeURIComponent(run.value?.id || runId.value)}/${index}`;
-  return isApiBase ? `${resolvedApiBase}${resolvedPath}` : `/api${resolvedPath}`;
+  const currentRunId = run.value?.id || runId.value;
+  return resolveApiEndpoint(
+    apiBase,
+    requestUrl,
+    buildAutomationScreenshotEndpoint(currentRunId, index),
+  );
 };
 const statusText = computed(() => {
   if (!run.value) {

@@ -16,7 +16,9 @@ type RouteVerificationFailure = {
   reason: string;
 };
 
-const defaultBaseUrl = "http://127.0.0.1:3001";
+const defaultVerifyHost = process.env.VERIFY_HOST || "localhost";
+const defaultVerifyPort = process.env.VERIFY_PORT || "3001";
+const defaultBaseUrl = `http://${defaultVerifyHost}:${defaultVerifyPort}`;
 const baseUrl = (process.env.VERIFY_BASE_URL || defaultBaseUrl).replace(/\/$/u, "");
 const htmlHeadingPattern = /<h1\b[^>]*>([\s\S]*?)<\/h1>/iu;
 const htmlTitlePattern = /<title\b[^>]*>([\s\S]*?)<\/title>/iu;

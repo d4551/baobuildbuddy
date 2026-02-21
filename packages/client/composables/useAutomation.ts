@@ -1,10 +1,14 @@
 import {
+  API_ENDPOINTS,
+  WS_ENDPOINTS,
   AUTOMATION_RUN_STATUSES,
+  buildAutomationRunEndpoint,
   safeParseJson,
   type AutomationRunStatus,
   type AutomationRunType,
 } from "@bao/shared";
 import type { MaybeRef } from "vue";
+import { resolveApiEndpoint, resolveWebSocketEndpoint } from "~/utils/endpoints";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 type JsonObject = { [key: string]: JsonValue };
@@ -122,60 +126,63 @@ export function useAutomation() {
   const config = useRuntimeConfig();
   const requestUrl = useRequestURL();
   const apiBase = String(config.public.apiBase || "/");
-  const resolvedApiBase = new URL(apiBase, requestUrl).toString().replace(/\/$/, "");
-
-  const resolveEndpoint = (path: string): string => {
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    const baseIsApi = /\/api\/?$/i.test(new URL(resolvedApiBase).pathname);
-    const normalizedTarget =
-      baseIsApi && normalizedPath.startsWith("/api/")
-        ? normalizedPath.replace(/^\/api/, "")
-        : normalizedPath;
-
-    return `${resolvedApiBase}${normalizedTarget}`;
-  };
+  const wsBase = String(config.public.wsBase || config.public.apiBase || "/");
 
   /**
    * Start a job-apply automation run.
    */
   const triggerJobApply = (body: JobApplyBody) => {
-    return $fetch<UseAutomationResponse>(resolveEndpoint("/api/automation/job-apply"), {
-      method: "POST",
-      body,
-    });
+    return $fetch<UseAutomationResponse>(
+      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationJobApply),
+      {
+        method: "POST",
+        body,
+      },
+    );
   };
 
   /**
    * Schedule a job-apply automation run for future execution.
    */
   const scheduleJobApply = (body: ScheduleJobApplyBody) =>
-    $fetch<ScheduleAutomationResponse>(resolveEndpoint("/api/automation/job-apply/schedule"), {
-      method: "POST",
-      body,
-    });
+    $fetch<ScheduleAutomationResponse>(
+      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationJobApplySchedule),
+      {
+        method: "POST",
+        body,
+      },
+    );
 
   /**
    * Generate an AI-assisted email response and persist the run output.
    */
   const triggerEmailResponse = (body: EmailResponseBody) =>
-    $fetch<EmailAutomationResponse>(resolveEndpoint("/api/automation/email-response"), {
-      method: "POST",
-      body,
-    });
+    $fetch<EmailAutomationResponse>(
+      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationEmailResponse),
+      {
+        method: "POST",
+        body,
+      },
+    );
 
   /**
    * Fetch automation run history with optional type/status filters.
    */
   const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}) =>
-    useFetch<AutomationRun[]>(resolveEndpoint("/api/automation/runs"), {
-      query: params,
-    });
+    useFetch<AutomationRun[]>(
+      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationRuns),
+      {
+        query: params,
+      },
+    );
 
   /**
    * Fetch a single automation run by ID.
    */
   const fetchRun = (id: string) =>
-    useFetch<AutomationRun>(resolveEndpoint(`/api/automation/runs/${encodeURIComponent(id)}`));
+    useFetch<AutomationRun>(
+      resolveApiEndpoint(apiBase, requestUrl, buildAutomationRunEndpoint(id)),
+    );
 
   /**
    * Subscribe to real-time progress events for an automation run via WebSocket.
@@ -185,8 +192,7 @@ export function useAutomation() {
     runId: string,
     onProgress: (event: AutomationProgressEvent) => void,
   ): (() => void) => {
-    const wsProtocol = location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${wsProtocol}//${location.host}/api/ws/automation`;
+    const wsUrl = resolveWebSocketEndpoint(wsBase, requestUrl, WS_ENDPOINTS.automation);
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {

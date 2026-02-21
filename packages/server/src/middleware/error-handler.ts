@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { createServerLogger } from "../utils/logger";
 
 const HTTP_STATUS_BAD_REQUEST = 400;
 const HTTP_STATUS_NOT_FOUND = 404;
@@ -28,6 +29,8 @@ function readValidationFields(error: unknown): unknown[] | undefined {
 /**
  * Centralized Elysia error envelope for deterministic API responses.
  */
+const logger = createServerLogger("error-handler");
+
 export const errorHandler = new Elysia({ name: "error-handler" }).onError(
   ({ code, error, set }) => {
     if (code === "NOT_FOUND") {
@@ -45,7 +48,7 @@ export const errorHandler = new Elysia({ name: "error-handler" }).onError(
     }
 
     // Log internally but don't leak raw error details to the client
-    console.error(`[${code}]`, error instanceof Error ? error.message : error);
+    logger.error(`[${code}]`, error instanceof Error ? error.message : error);
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return { error: "Internal server error", code };
   },

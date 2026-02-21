@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import type { LocationQueryValue } from "vue-router";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -362,13 +363,12 @@ function getTimelineLineClass(score: number): string {
             <div class="flex items-center justify-between mb-4">
               <h3 class="card-title text-lg">{{ t("interviewHistory.detailsTitle") }}</h3>
               <button
+                type="button"
                 class="btn btn-ghost btn-xs btn-circle"
                 :aria-label="t('interviewHistory.closeDetailsAria')"
                 @click="closeDetail"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <CloseIcon class="h-4 w-4" />
               </button>
             </div>
 

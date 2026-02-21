@@ -8,12 +8,7 @@ import {
   DEFAULT_SETTINGS_ID,
   automationSettingsSchema,
 } from "@bao/shared";
-import type {
-  AIProviderType,
-  AutomationSettings,
-  NotificationPreferences,
-  SpeechProviderOption,
-} from "@bao/shared";
+import type { AIProviderType, AutomationSettings, NotificationPreferences } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
@@ -54,11 +49,89 @@ const GAMING_PORTAL_IDS = [
 const LANGUAGE_CODES = APP_LANGUAGE_CODES;
 const AUTOMATION_BROWSER_IDS = AUTOMATION_BROWSER_OPTIONS;
 const SPEECH_PROVIDER_IDS = SPEECH_PROVIDER_OPTIONS;
-type SpeechProviderLiteralSchema = ReturnType<typeof t.Literal<SpeechProviderOption>>;
-const speechProviderLiteralSchemas = SPEECH_PROVIDER_IDS.map((providerId) =>
-  t.Literal(providerId),
-) as [SpeechProviderLiteralSchema, ...SpeechProviderLiteralSchema[]];
-const speechProviderBodySchema = t.Union(speechProviderLiteralSchemas);
+
+const [
+  SPEECH_PROVIDER_BROWSER,
+  SPEECH_PROVIDER_OPENAI,
+  SPEECH_PROVIDER_HUGGINGFACE,
+  SPEECH_PROVIDER_LOCAL,
+  SPEECH_PROVIDER_CUSTOM,
+] = SPEECH_PROVIDER_IDS;
+const [
+  COMPANY_BOARD_GREENHOUSE,
+  COMPANY_BOARD_LEVER,
+  COMPANY_BOARD_RECRUITEE,
+  COMPANY_BOARD_WORKABLE,
+  COMPANY_BOARD_ASHBY,
+  COMPANY_BOARD_SMARTRECRUITERS,
+  COMPANY_BOARD_TEAMTAILOR,
+  COMPANY_BOARD_WORKDAY,
+] = COMPANY_BOARD_PROVIDER_TYPES;
+const [
+  GAMING_PORTAL_GAMDEVO_NET,
+  GAMING_PORTAL_GRACKLE,
+  GAMING_PORTAL_WORKWITHINDIES,
+  GAMING_PORTAL_REMOTEGAMEJOBS,
+  GAMING_PORTAL_GAMESJOBS_DIRECT,
+  GAMING_PORTAL_POCKETGAMER,
+] = GAMING_PORTAL_IDS;
+const [PROVIDER_GEMINI, PROVIDER_CLAUDE, PROVIDER_OPENAI, PROVIDER_HUGGINGFACE, PROVIDER_LOCAL] =
+  VALID_PROVIDERS;
+const [AUTOMATION_BROWSER_CHROME, AUTOMATION_BROWSER_CHROMIUM, AUTOMATION_BROWSER_EDGE] =
+  AUTOMATION_BROWSER_IDS;
+const [APP_LANGUAGE_EN_US, APP_LANGUAGE_ES_ES, APP_LANGUAGE_FR_FR, APP_LANGUAGE_JA_JP] =
+  LANGUAGE_CODES;
+
+const speechProviderBodySchema = t.Union([
+  t.Literal(SPEECH_PROVIDER_BROWSER),
+  t.Literal(SPEECH_PROVIDER_OPENAI),
+  t.Literal(SPEECH_PROVIDER_HUGGINGFACE),
+  t.Literal(SPEECH_PROVIDER_LOCAL),
+  t.Literal(SPEECH_PROVIDER_CUSTOM),
+]);
+
+const companyBoardTypeBodySchema = t.Union([
+  t.Literal(COMPANY_BOARD_GREENHOUSE),
+  t.Literal(COMPANY_BOARD_LEVER),
+  t.Literal(COMPANY_BOARD_RECRUITEE),
+  t.Literal(COMPANY_BOARD_WORKABLE),
+  t.Literal(COMPANY_BOARD_ASHBY),
+  t.Literal(COMPANY_BOARD_SMARTRECRUITERS),
+  t.Literal(COMPANY_BOARD_TEAMTAILOR),
+  t.Literal(COMPANY_BOARD_WORKDAY),
+]);
+
+const gamingPortalIdBodySchema = t.Union([
+  t.Literal(GAMING_PORTAL_GAMDEVO_NET),
+  t.Literal(GAMING_PORTAL_GRACKLE),
+  t.Literal(GAMING_PORTAL_WORKWITHINDIES),
+  t.Literal(GAMING_PORTAL_REMOTEGAMEJOBS),
+  t.Literal(GAMING_PORTAL_GAMESJOBS_DIRECT),
+  t.Literal(GAMING_PORTAL_POCKETGAMER),
+]);
+
+const preferredProviderBodySchema = t.Union([
+  t.Literal(PROVIDER_GEMINI),
+  t.Literal(PROVIDER_CLAUDE),
+  t.Literal(PROVIDER_OPENAI),
+  t.Literal(PROVIDER_HUGGINGFACE),
+  t.Literal(PROVIDER_LOCAL),
+]);
+
+const browserBodySchema = t.Union([
+  t.Literal(AUTOMATION_BROWSER_CHROME),
+  t.Literal(AUTOMATION_BROWSER_CHROMIUM),
+  t.Literal(AUTOMATION_BROWSER_EDGE),
+]);
+
+const languageBodySchema = t.Union([
+  t.Literal(APP_LANGUAGE_EN_US),
+  t.Literal(APP_LANGUAGE_ES_ES),
+  t.Literal(APP_LANGUAGE_FR_FR),
+  t.Literal(APP_LANGUAGE_JA_JP),
+]);
+
+const apiProviderBodySchema = preferredProviderBodySchema;
 
 const companyBoardApiTemplatesBodySchema = t.Object({
   greenhouse: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
@@ -74,7 +147,7 @@ const companyBoardApiTemplatesBodySchema = t.Object({
 const companyBoardConfigBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
   token: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
-  type: t.Union(COMPANY_BOARD_PROVIDER_TYPES.map((providerType) => t.Literal(providerType))),
+  type: companyBoardTypeBodySchema,
   enabled: t.Boolean(),
   priority: t.Number({ minimum: 0, maximum: 1000 }),
 });
@@ -92,7 +165,7 @@ const leverCompanyConfigBodySchema = t.Object({
 });
 
 const gamingPortalConfigBodySchema = t.Object({
-  id: t.Union(GAMING_PORTAL_IDS.map((portalId) => t.Literal(portalId))),
+  id: gamingPortalIdBodySchema,
   name: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
   source: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
   fallbackUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
@@ -331,14 +404,10 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
     },
     {
       body: t.Object({
-        preferredProvider: t.Optional(
-          t.Union(VALID_PROVIDERS.map((provider) => t.Literal(provider))),
-        ),
+        preferredProvider: t.Optional(preferredProviderBodySchema),
         preferredModel: t.Optional(t.String({ maxLength: MODEL_MAX_LENGTH })),
         theme: t.Optional(t.Union([t.Literal("bao-light"), t.Literal("bao-dark")])),
-        language: t.Optional(
-          t.Union(LANGUAGE_CODES.map((languageCode) => t.Literal(languageCode))),
-        ),
+        language: t.Optional(languageBodySchema),
         notifications: t.Optional(
           t.Object({
             achievements: t.Optional(t.Boolean()),
@@ -353,9 +422,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
             defaultTimeout: t.Optional(t.Number({ minimum: 1, maximum: 120 })),
             screenshotRetention: t.Optional(t.Number({ minimum: 1, maximum: 30 })),
             maxConcurrentRuns: t.Optional(t.Number({ minimum: 1, maximum: 5 })),
-            defaultBrowser: t.Optional(
-              t.Union(AUTOMATION_BROWSER_IDS.map((browserId) => t.Literal(browserId))),
-            ),
+            defaultBrowser: t.Optional(browserBodySchema),
             enableSmartSelectors: t.Optional(t.Boolean()),
             autoSaveScreenshots: t.Optional(t.Boolean()),
             speech: t.Optional(speechSettingsBodySchema),
@@ -440,7 +507,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
     },
     {
       body: t.Object({
-        provider: t.Union(VALID_PROVIDERS.map((provider) => t.Literal(provider))),
+        provider: apiProviderBodySchema,
         key: t.String({ minLength: 1, maxLength: API_KEY_MAX_LENGTH }),
       }),
     },

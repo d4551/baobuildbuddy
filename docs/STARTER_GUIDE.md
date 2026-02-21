@@ -1,10 +1,10 @@
 # BaoBuildBuddy First-Time Setup Guide
 
-```text
- .--------------------------.
- |      CAREER QUEST MODE    |
- |         PRESS START       |
- '--------------------------'
+```text ascii-box
++--------------------------+
+|      CAREER QUEST MODE   |
+|       PRESS START        |
++--------------------------+
 ```
 
 If you need deeper architecture and runbook details, see the full runbook: [README.md](../README.md).
@@ -31,16 +31,37 @@ This is the recommended path for first-time setup.
 
 Install these before running setup:
 
-```text
 Required:
+
 - bun 1.3.x
 - Git
 - Python 3.10+
 - Chrome or Chromium
 
 Optional but recommended:
+
 - curl
 - jq
+
+### 2.1 Installables (quick install commands)
+
+| Tool | macOS (Homebrew) | Ubuntu / Debian | Windows (winget) |
+|------|-------------------|------------------|------------------|
+| Bun 1.3.x | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
+| Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
+| Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
+| Chrome | `brew install --cask google-chrome` | `sudo apt-get update && sudo apt-get install -y chromium-browser` | `winget install --id Google.Chrome -e` |
+
+If your Linux distro does not provide `chromium-browser`, install `google-chrome-stable` from Google's official repository.
+
+Pin Bun to the workspace baseline explicitly when needed:
+
+```bash
+curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.9"
+```
+
+```powershell
+iex "& {$(irm https://bun.sh/install.ps1)} -Version 1.3.9"
 ```
 
 Verify each tool is on `PATH`:
@@ -58,6 +79,13 @@ On Windows use `python --version` and check Chrome with:
 (Get-Command python).Source
 (Get-Item "$env:ProgramFiles\Google\Chrome\Application\chrome.exe").FullName
 ```
+
+Expected pre-flight state before running setup:
+
+- ✅ bun 1.3.x installed
+- ✅ Git available
+- ✅ Python 3.10+ available
+- ✅ Chrome or Chromium available
 
 ## 3) Get the code
 
@@ -95,6 +123,15 @@ The setup script:
 5. Generates and pushes DB schema.
 6. Runs `typecheck`, `lint`, and `test` unless skipped.
 
+After a successful run, you should be able to confirm:
+
+```text
+✅ Bun workspace install complete
+✅ Python environment configured for scraper scripts
+✅ SQLite schema generated and ready for local runs
+✅ Initial validation checks pass
+```
+
 ### 4.3 Script flags
 
 | Command | Meaning |
@@ -114,6 +151,14 @@ Common fixes:
 - Update bun to the latest 1.3.x.
 - Install Python 3.10+ and ensure it is in `PATH`.
 - Install Chrome from the official package for your OS.
+
+### 4.5 Keep bootstrap deterministic
+
+To prevent environment drift:
+
+1. Start from `./.env.example` each time.
+2. Keep local overrides in your shell or editor profiles, not source files.
+3. Re-run bootstrap checks after changing system tool versions.
 
 ## 5) Manual setup path (full control)
 
@@ -160,6 +205,8 @@ Then add these when you are ready:
 - `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` for local model.
 - `OPENAI_API_KEY`, `GEMINI_API_KEY`, `CLAUDE_API_KEY`, `HUGGINGFACE_TOKEN` as needed.
 
+Treat `.env.example` as the canonical base.
+
 ## 7) Start the stack
 
 ### 7.1 Recommended local mode (single command)
@@ -195,6 +242,7 @@ Then open `http://localhost:3001` in your browser and confirm:
 1. Home loads without runtime errors.
 2. Settings page is reachable.
 3. A basic API-backed feature returns data (jobs or resumes).
+4. Browser dev tools show no hard errors on initial page load.
 
 ## 9) Complete first-user configuration in UI
 
@@ -223,6 +271,14 @@ bun run test
 
 This validates repository health and the public/client contract generation path.
 
+For day-one confidence, run this minimal set first:
+
+```bash
+bun run typecheck
+bun run lint
+bun run test
+```
+
 ## 11) Troubleshooting quick path
 
 - Server starts but UI cannot connect:
@@ -236,6 +292,8 @@ This validates repository health and the public/client contract generation path.
   - Confirm server terminal shows `Listening on ...` and no startup errors.
 - RPA automation unavailable:
   - Ensure Chrome is installed and Python virtual env dependencies are installed.
+- Locales missing or duplicated:
+  - Verify `.env` locales match keys under `packages/client/locales`.
 
 ## 12) Optional Desktop installer path (Tauri)
 
@@ -261,6 +319,17 @@ This does three things:
 2. Checks whether `PORT=3000` and `CLIENT_PORT=3001` are already responding.
 3. Starts `bun run dev` if required and opens the app window at `http://127.0.0.1:3001`.
 
+Why Tauri is preferred for this repo:
+
+1. Bun-native startup can stay the same for web and desktop.
+2. Native runtime is thin; less install size than Electron.
+3. No extra JavaScript runtime layer in the desktop wrapper.
+
+If your org requires Electron-specific tooling, Electron remains viable but is intentionally non-default:
+
+- Electron gives you Node process access inside the desktop shell, at the cost of a larger bundle and extra runtime maintenance.
+- Tauri is the faster path for this repo because it reuses the same Bun runtime setup already defined by the web stack.
+
 ### 12.3 Build desktop installer
 
 ```bash
@@ -271,6 +340,12 @@ Output goes to:
 
 - `packages/desktop/src-tauri/target/release/bundle`
 
+Typical installables generated there:
+
+- macOS: `.app` and `.dmg`
+- Linux: `.AppImage`, `.deb`, `.rpm`
+- Windows: `.exe` and `.msi`
+
 ### 12.4 Tauri-specific environment knobs
 
 - `BAO_STACK_HOST` (default `127.0.0.1`) to change health-check host.
@@ -278,6 +353,7 @@ Output goes to:
 - `CLIENT_PORT` (default `3001`) for readiness checks.
 - `BAO_DISABLE_AUTH` passed through to the same process launch.
 - `PORT` (default `3000`) used by the Bun backend start command.
+- `HOST` inherited from `BAO_STACK_HOST` and used for local readiness probes.
 
 ## 13) Next step
 

@@ -20,6 +20,7 @@ import { skillMappings } from "../db/schema/skill-mappings";
 import { AIService } from "../services/ai/ai-service";
 import { skillAnalysisPrompt } from "../services/ai/prompts";
 import { skillMappingService } from "../services/skill-mapping-service";
+import { createServerLogger } from "../utils/logger";
 
 type DemandLevel = SkillMapping["demandLevel"];
 type SkillEvidenceType = SkillEvidence["type"];
@@ -93,6 +94,8 @@ const normalizeStringArray = (value: unknown): string[] =>
         .map((entry) => entry.trim())
         .filter((entry) => entry.length > 0)
     : [];
+
+const skillMappingRoutesLogger = createServerLogger("skill-mapping-routes");
 
 export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
   .use(skillAnalysisRateLimit)
@@ -343,7 +346,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
                     aiGenerated: true,
                   })
                   .catch((error) => {
-                    console.error("Failed to auto-create mapping:", error);
+                    skillMappingRoutesLogger.error("Failed to auto-create mapping:", error);
                   });
               }
             }
@@ -360,7 +363,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
           };
         })
         .catch((error: unknown) => {
-          console.error("AI analysis error:", error);
+          skillMappingRoutesLogger.error("AI analysis error:", error);
           set.status = 500;
           return {
             message: `Error during AI analysis: ${error instanceof Error ? error.message : "Unknown error"}`,

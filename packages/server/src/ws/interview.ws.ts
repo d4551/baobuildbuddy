@@ -4,8 +4,10 @@ import {
   INTERVIEW_DEFAULT_QUESTION_COUNT,
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_UNKNOWN_STUDIO_NAME,
+  WS_ENDPOINTS,
   isRecord,
   safeParseJson,
+  toApiScopedPath,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -81,7 +83,7 @@ const getFeedbackSummary = (value: unknown): FeedbackSummary => {
   };
 };
 
-export const interviewWebSocket = new Elysia().ws("/ws/interview", {
+export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
   body: t.Object({
     type: t.String({ maxLength: 50 }),
     sessionId: t.Optional(t.String({ maxLength: 100 })),

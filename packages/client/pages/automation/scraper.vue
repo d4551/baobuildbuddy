@@ -1,22 +1,32 @@
 <script setup lang="ts">
-import { APP_ROUTES, JOB_PREVIEW_LIMIT, SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared";
+import { API_ENDPOINTS, APP_ROUTES, JOB_PREVIEW_LIMIT, SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared";
 import type { Job } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { resolveApiEndpoint } from "~/utils/endpoints";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
 
 type RunState = "idle" | "running" | "success" | "error";
 
-const studiosFetch = useFetch("/api/scraper/studios", {
-  method: "POST",
-  immediate: false,
-});
+const requestUrl = useRequestURL();
+const apiBase = String(useRuntimeConfig().public.apiBase || "/");
 
-const jobsFetch = useFetch("/api/scraper/jobs/gamedev", {
-  method: "POST",
-  immediate: false,
-});
+const studiosFetch = useFetch(
+  resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.scraperStudios),
+  {
+    method: "POST",
+    immediate: false,
+  },
+);
+
+const jobsFetch = useFetch(
+  resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.scraperJobsGamedev),
+  {
+    method: "POST",
+    immediate: false,
+  },
+);
 
 const { jobs, searchJobs, loading: jobsLoading } = useJobs();
 const router = useRouter();

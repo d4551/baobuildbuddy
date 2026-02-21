@@ -6,10 +6,7 @@ import type {
   LevelUpResult,
   UserGamificationData,
 } from "@bao/shared";
-import {
-  getGamificationAchievementIcon,
-  getGamificationChallengeIcon,
-} from "@bao/shared";
+import { getGamificationAchievementIcon, getGamificationChallengeIcon } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { gamification } from "../db/schema";

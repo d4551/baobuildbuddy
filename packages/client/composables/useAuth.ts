@@ -1,4 +1,3 @@
-import { useI18n } from "vue-i18n";
 import { useNuxtRuntimeApp } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 
@@ -14,6 +13,8 @@ interface UseAuthState {
   setStoredApiKey: (key: string | null) => void;
 }
 
+const AUTH_INIT_FAILED_ERROR_KEY = "apiErrors.auth.initFailed";
+
 /**
  * Authentication composable.
  *
@@ -22,7 +23,6 @@ interface UseAuthState {
 export function useAuth(): UseAuthState {
   const api = useApi();
   const nuxtApp = useNuxtRuntimeApp();
-  const { t } = useI18n();
   const authNotConfigured: AuthStatus = { authRequired: false, configured: false };
 
   async function checkAuthStatus(): Promise<AuthStatus> {
@@ -36,7 +36,7 @@ export function useAuth(): UseAuthState {
 
   async function initAuth() {
     const { data, error } = await api.auth.init.post();
-    if (error) throw new Error(t("apiErrors.auth.initFailed"));
+    if (error) throw new Error(AUTH_INIT_FAILED_ERROR_KEY);
     return data ?? {};
   }
 

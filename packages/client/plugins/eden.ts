@@ -1,5 +1,6 @@
 import type { App } from "@bao/server/app";
 import { treaty } from "@elysiajs/eden";
+import { resolveApiBase } from "~/utils/endpoints";
 
 const AUTH_KEY = "bao_api_key";
 
@@ -29,19 +30,6 @@ export function setStoredApiKey(key: string | null): void {
   if (!hasBrowserStorage()) return;
   if (key) window.localStorage.setItem(AUTH_KEY, key);
   else window.localStorage.removeItem(AUTH_KEY);
-}
-
-/**
- * Resolves runtime API base from public config and current request URL.
- *
- * @param configuredBase Runtime-configured API base.
- * @param requestUrl Current request URL.
- * @returns Absolute, normalized base URL without trailing slash.
- */
-function resolveApiBase(configuredBase: string, requestUrl: URL): string {
-  const isAbsolute = /^https?:\/\//i.test(configuredBase);
-  const baseUrl = isAbsolute ? configuredBase : new URL(configuredBase, requestUrl).toString();
-  return baseUrl.replace(/\/$/, "");
 }
 
 export default defineNuxtPlugin(() => {

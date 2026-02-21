@@ -35,6 +35,7 @@ import {
   AutomationValidationError,
   applicationAutomationService,
 } from "../services/automation/application-automation-service";
+import { createServerLogger } from "../utils/logger";
 
 const HTTP_STATUS_BAD_REQUEST = 400;
 const HTTP_STATUS_NOT_FOUND = 404;
@@ -67,6 +68,8 @@ const mapAutomationRouteError = (error: unknown) => {
   };
 };
 
+const aiRoutesLogger = createServerLogger("ai-routes");
+
 /**
  * Helper function to load settings and create AI service
  */
@@ -88,7 +91,7 @@ function safeJSONParse<T>(jsonString: string, fallback: T): T {
     .trim();
   const parsed = safeParseJson(cleaned);
   if (parsed === null) {
-    console.error("Failed to parse AI JSON response");
+    aiRoutesLogger.error("Failed to parse AI JSON response");
     return fallback;
   }
   return parsed as T;
@@ -761,7 +764,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
                   };
                 })
                 .catch((error: unknown) => {
-                  console.error(`Failed to analyze job ${job.id}:`, error);
+                  aiRoutesLogger.error(`Failed to analyze job ${job.id}:`, error);
                   return {
                     jobId: job.id,
                     title: job.title,

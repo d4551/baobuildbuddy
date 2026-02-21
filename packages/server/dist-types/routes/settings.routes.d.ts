@@ -76,7 +76,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     defaultTimeout?: number | undefined;
                     screenshotRetention?: number | undefined;
                     maxConcurrentRuns?: number | undefined;
-                    defaultBrowser?: undefined;
+                    defaultBrowser?: "chrome" | "chromium" | "edge" | undefined;
                     enableSmartSelectors?: boolean | undefined;
                     autoSaveScreenshots?: boolean | undefined;
                     speech?: {
@@ -129,7 +129,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         }[];
                         companyBoards: {
                             name: string;
-                            type: never;
+                            type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
                             token: string;
                             enabled: boolean;
                             priority: number;
@@ -137,16 +137,16 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         gamingPortals: {
                             source: string;
                             name: string;
-                            id: never;
+                            id: "gamedev-net" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
                             enabled: boolean;
                             fallbackUrl: string;
                         }[];
                     } | undefined;
                 } | undefined;
-                preferredProvider?: undefined;
+                preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                 preferredModel?: string | undefined;
                 theme?: "bao-light" | "bao-dark" | undefined;
-                language?: undefined;
+                language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
             };
             params: {};
             query: unknown;
@@ -208,7 +208,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
         "test-api-key": {
             post: {
                 body: {
-                    provider: never;
+                    provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                     key: string;
                 };
                 params: {};
@@ -217,11 +217,11 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 response: {
                     200: {
                         valid: boolean;
-                        provider: never;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         error: string;
                     } | {
                         valid: boolean;
-                        provider: never;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         error?: undefined;
                     };
                     422: {

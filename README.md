@@ -1,4 +1,4 @@
-```text
+```text ascii-box
     ____              ____        _ _     _ ____            _     _
    | __ )  __ _  ___ | __ ) _   _(_) | __| | __ ) _   _  __| | __| |_   _
    |  _ \ / _` |/ _ \|  _ \| | | | | |/ _` |  _ \| | | |/ _` |/ _` | | | |
@@ -22,31 +22,33 @@
 - [Automation Guide](docs/AUTOMATION.md)
 - [Desktop (Tauri) Packaging](#89-desktop-tauri-installer-path)
 
-```text
-                    .---------------------.
-                   /       [ BAO WORLD ]    \
-                  /  Press START to begin!   \
-                 /---------------------------\
-                 | 1) Prepare environment    |
-                 | 2) Configure services     |
-                 | 3) Start server + client  |
-                 | 4) Verify contracts       |
-                 | 5) Run your automation    |
-                 \---------------------------/
-          .---.                             .---.
-         / o o \                           / o o \
-         \  v  /                           \  v  /
-          '---'                             '---'
+### Documentation index
 
-     "It's dangerous to go alone!"
-       + press continue for your setup quest.
+- [First-time Setup Guide](docs/STARTER_GUIDE.md)
+- [Automation and RPA Guide](docs/AUTOMATION.md)
+- [Server routes and contracts in `packages/server`](packages/server/src/routes)
+- [UI and accessibility standards](#ui-implementation-standards)
+
+```text ascii-box
+/------------------------------\
+|           BAO WORLD          |
+|     Press START to begin!     |
+|------------------------------|
+| 1) Prepare environment       |
+| 2) Configure services        |
+| 3) Start server and client   |
+| 4) Verify contracts          |
+| 5) Run your automation       |
+\------------------------------/
 ```
 
 BaoBuildBuddy is a full-stack, Bun-first monorepo for building game-industry career automation workflows. It aggregates job listings from studios, helps build resumes and cover letters, runs AI-powered mock interviews, automates job applications via browser RPA, and tracks your progress with a gamification system.
 
+Treat this file as the campaign handbook for your first setup quest; once you master it, you can unlock the deeper sections.
+
 This readme is your in-game tutorial before the main campaign.
 
-- `packages/server` -- Bun + Elysia API, Drizzle ORM, WebSocket endpoints, process orchestration
+- `packages/server` -- Bun + Elysia API, drizzle-orm ORM, WebSocket endpoints, process orchestration
 - `packages/client` -- Nuxt 4 (SSR-first), Tailwind CSS v4, daisyUI v5
 - `packages/shared` -- shared types, contracts, constants, schemas, validation utilities
 - `packages/scraper` -- Python RPA scripts executed via Bun native subprocess I/O
@@ -494,6 +496,29 @@ Chrome/Chromium executable names checked by setup scripts:
 - macOS/Linux: `google-chrome`, `chromium`, `chromium-browser`, `/Applications/Google Chrome.app`
 - Windows: `chrome.exe` under `%ProgramFiles%`, `%ProgramFiles(x86)%`, or `%LOCALAPPDATA%`
 
+#### 8.2.1 Installables (OS package commands)
+
+Use one command per tool based on your platform:
+
+| Tool | macOS (Homebrew) | Ubuntu / Debian | Windows (winget) |
+|------|-------------------|------------------|------------------|
+| Bun 1.3.x | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
+| Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
+| Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
+| Chrome | `brew install --cask google-chrome` | `sudo apt-get update && sudo apt-get install -y chromium-browser` | `winget install --id Google.Chrome -e` |
+
+If your Linux distro does not ship `chromium-browser`, install `google-chrome-stable` from Google's official package repository.
+
+Pin Bun to the workspace baseline explicitly when needed:
+
+```bash
+curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.9"
+```
+
+```powershell
+iex "& {$(irm https://bun.sh/install.ps1)} -Version 1.3.9"
+```
+
 ### 8.3 Prepare your workspace
 
 ```bash
@@ -580,7 +605,7 @@ bun run db:push
 Optional sanity checks:
 
 ```bash
-bun run scripts/validate-ascii-geometry.ts README.md
+bun run scripts/validate-ascii-geometry.ts README.md docs/STARTER_GUIDE.md
 bun run typecheck
 bun run lint
 bun run test
@@ -629,6 +654,10 @@ For this repository, Tauri is the best fit for desktop installers because:
 2. Tauri bundles a tiny native shell around existing web UI.
 3. You avoid the duplicate runtime overhead and heavier package size of Electron.
 
+If Electron is a hard requirement (for example, due an internal Electron-specific plugin), use
+`bunx electron-builder` only for a separate packaging target.
+This is not the default path because it adds Chromium + Node as a permanent UI runtime dependency.
+
 #### 8.9.1 Prerequisites (desktop)
 
 - Rust + `cargo` (for Tauri binary generation)
@@ -657,6 +686,18 @@ bun run build:desktop
 ```
 
 Build outputs are placed under `packages/desktop/src-tauri/target`.
+
+Expected installer artifacts by platform:
+
+- macOS: `packages/desktop/src-tauri/target/release/bundle/macos/*.app`, `packages/desktop/src-tauri/target/release/bundle/dmg/*.dmg`
+- Linux: `packages/desktop/src-tauri/target/release/bundle/appimage/*.AppImage`, `packages/desktop/src-tauri/target/release/bundle/deb/*.deb`, `packages/desktop/src-tauri/target/release/bundle/rpm/*.rpm`
+- Windows: `packages/desktop/src-tauri/target/release/bundle/nsis/*.exe`, `packages/desktop/src-tauri/target/release/bundle/msi/*.msi`
+
+Install locally after building:
+
+- macOS: open the generated `.dmg` and drag the `.app` into `Applications`
+- Linux: `chmod +x` for `.AppImage` and run directly, or install `.deb`/`.rpm` with your package manager
+- Windows: run the generated `.exe` or `.msi` installer as a normal desktop installer
 
 #### 8.9.4 Environment overrides for desktop
 

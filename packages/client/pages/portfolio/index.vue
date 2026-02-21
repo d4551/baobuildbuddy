@@ -11,6 +11,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 definePageMeta({
   middleware: ["auth"],
@@ -753,13 +754,12 @@ function projectPageAria(page: number): string {
               >
                 {{ tech }}
                 <button
+                  type="button"
                   class="btn btn-ghost btn-xs btn-circle"
                   :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
                   @click="removeTechnology(idx)"
                 >
-                  <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <CloseIcon class="h-3 w-3" />
                 </button>
               </div>
             </div>

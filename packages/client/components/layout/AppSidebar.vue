@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { APP_DRAWER_ID } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
+import { settlePromise } from "~/composables/async-flow";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
 
@@ -40,11 +42,15 @@ function resolveSidebarLabel(item: NavigationItem): string {
   return localizedSidebarLabels.value.get(item.id) ?? "";
 }
 
+async function hydrateSidebarSettings(): Promise<void> {
+  if (settings.value) {
+    return;
+  }
+  await settlePromise(fetchSettings(), "sidebar.settingsHydrationFailed");
+}
+
 onMounted(() => {
-  if (settings.value) return;
-  fetchSettings().catch(() => {
-    // Ignore sidebar hydration errors; settings page owns full recovery UX.
-  });
+  void hydrateSidebarSettings();
 });
 </script>
 
@@ -86,7 +92,7 @@ onMounted(() => {
       </li>
       <li class="mt-auto pt-4">
         <label
-          for="bao-drawer"
+          :for="APP_DRAWER_ID"
           class="btn btn-ghost btn-sm w-full justify-start is-drawer-close:btn-square"
           :aria-label="t('a11y.toggleSidebarNavigation')"
         >

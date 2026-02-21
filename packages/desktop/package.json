@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bunx --bun tauri dev",
-    "build": "bunx --bun tauri build",
-    "build:debug": "bunx --bun tauri build --debug",
+    "dev": "bunx --bun @tauri-apps/cli dev",
+    "build": "bunx --bun @tauri-apps/cli build",
+    "build:debug": "bunx --bun @tauri-apps/cli build --debug",
     "format": "bunx --bun biome format .",
     "typecheck": "echo \"No JS/TS typecheck output; managed by Rust tooling in src-tauri\"",
     "lint": "echo \"No separate desktop lint task\""

@@ -17,12 +17,15 @@ import { settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
 import { JobAggregator } from "../services/jobs/job-aggregator";
+import { createServerLogger } from "../utils/logger";
 
 type JobRecommendationMatch = {
   jobIndex: number;
   matchScore: number;
   matchReason: string;
 };
+
+const jobsRoutesLogger = createServerLogger("jobs-routes");
 
 function isJobRecommendationMatch(value: unknown): value is JobRecommendationMatch {
   return (
@@ -451,7 +454,7 @@ Provide realistic scores based on skills match, experience level alignment, and 
         };
       })
       .catch((error: unknown) => {
-        console.error("Job recommendations error:", error);
+        jobsRoutesLogger.error("Job recommendations error:", error);
         return {
           recommendations: recentJobs.map((job, index) => ({
             ...job,
@@ -479,7 +482,7 @@ Provide realistic scores based on skills match, experience level alignment, and 
         };
       })
       .catch((error: unknown) => {
-        console.error("Job refresh error:", error);
+        jobsRoutesLogger.error("Job refresh error:", error);
         set.status = 500;
         return {
           message: `Job refresh failed: ${error instanceof Error ? error.message : "Unknown error"}`,

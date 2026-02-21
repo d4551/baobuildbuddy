@@ -17,6 +17,7 @@ import {
   AutomationValidationError,
   applicationAutomationService,
 } from "../services/automation/application-automation-service";
+import { createServerLogger } from "../utils/logger";
 
 const HTTP_STATUS_NOT_FOUND = 404;
 const HTTP_STATUS_CONFLICT = 409;
@@ -54,6 +55,7 @@ const EMAIL_RESPONSE_TONE_SCHEMA = t.Union([
   t.Literal("concise"),
 ]);
 const nullableJsonRecordBodySchema = t.Union([t.Record(t.String(), t.Unknown()), t.Null()]);
+const automationRoutesLogger = createServerLogger("automation-routes");
 type AutomationDbRow = typeof automationRuns.$inferSelect;
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 type JsonObject = { [key: string]: JsonValue };
@@ -201,7 +203,10 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
         .createJobApplyRun(payload)
         .then((runId) => {
           void applicationAutomationService.runJobApply(runId, payload).catch((error) => {
-            console.error(`[automation] job-apply execution failed for runId=${runId}`, error);
+            automationRoutesLogger.error(
+              `[automation] job-apply execution failed for runId=${runId}`,
+              error,
+            );
           });
 
           set.status = HTTP_STATUS_SUCCESS;

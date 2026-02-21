@@ -538,16 +538,16 @@ async function requestData<T>(
                   </span>
                 </div>
                 <div class="flex items-center gap-3">
-              <progress
-                class="progress flex-1"
-                :class="dashboard.dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
-                :value="dashboard.dailyChallenge.progress"
-                :max="dashboard.dailyChallenge.goal"
-                :aria-valuenow="dashboard.dailyChallenge.progress"
-                :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
-                :aria-valuemax="dashboard.dailyChallenge.goal"
-                :aria-label="t(DASHBOARD_A11Y_KEYS.challengeProgressAria)"
-              ></progress>
+                  <progress
+                    class="progress flex-1"
+                    :class="dashboard.dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
+                    :value="dashboard.dailyChallenge.progress"
+                    :max="dashboard.dailyChallenge.goal"
+                    :aria-valuenow="dashboard.dailyChallenge.progress"
+                    :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
+                    :aria-valuemax="dashboard.dailyChallenge.goal"
+                    :aria-label="t(DASHBOARD_A11Y_KEYS.challengeProgressAria)"
+                  ></progress>
                   <span class="text-sm font-medium">
                     {{ dashboard.dailyChallenge.progress }} / {{ dashboard.dailyChallenge.goal }}
                   </span>

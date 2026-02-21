@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ToastType } from "~/composables/useToast";
 import { useI18n } from "vue-i18n";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 const { toasts, removeToast } = useToast();
 const { t } = useI18n();
@@ -66,7 +67,7 @@ function resolveIconPath(type: ToastType): string {
           :aria-label="t('a11y.dismissNotification')"
           @click="removeToast(toast.id)"
         >
-          ×
+          <CloseIcon />
         </button>
       </div>
     </TransitionGroup>

@@ -24,6 +24,7 @@ import { db } from "../db/client";
 import { interviewSessions } from "../db/schema/interviews";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { studios } from "../db/schema/studios";
+import { createServerLogger } from "../utils/logger";
 import { AIService } from "./ai/ai-service";
 import {
   interviewFeedbackPrompt,
@@ -61,6 +62,7 @@ const isRecord = (value: unknown): value is JsonRecord =>
 const MAX_QUESTION_COUNT = 12;
 const DEFAULT_INTERVIEW_MODE: InterviewMode = "studio";
 const AI_OPERATION_TIMEOUT_MS = 1200;
+const interviewServiceLogger = createServerLogger("interview-service");
 const FALLBACK_INTERVIEW_QUESTIONS: Array<Omit<InterviewQuestion, "id">> = [
   {
     type: "intro",
@@ -774,13 +776,13 @@ async function generateQuestions(
   };
 
   return tryGenerate(fullPrompt).catch((firstErr: unknown) => {
-    console.warn(
+    interviewServiceLogger.warn(
       "AI question generation failed on primary prompt, attempting fallback prompt.",
       firstErr instanceof Error ? firstErr.message : "Unknown error",
     );
     return tryGenerate(buildSimpleQuestionPrompt(role, level, config.questionCount)).catch(
       (secondErr: unknown) => {
-        console.warn(
+        interviewServiceLogger.warn(
           "AI question generation failed on fallback prompt, using deterministic local questions.",
           secondErr instanceof Error ? secondErr.message : "Unknown error",
         );

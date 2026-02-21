@@ -1,22 +1,15 @@
 <script setup lang="ts">
-import { APP_ROUTE_BUILDERS } from "@bao/shared";
+import { API_ENDPOINTS, APP_ROUTE_BUILDERS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import type { AutomationRun } from "~/composables/useAutomation";
 import { settlePromise } from "~/composables/async-flow";
+import { resolveApiEndpoint } from "~/utils/endpoints";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 const { triggerJobApply, scheduleJobApply } = useAutomation();
 const requestUrl = useRequestURL();
 const apiBase = String(useRuntimeConfig().public.apiBase || "/");
-const resolvedApiBase = new URL(apiBase, requestUrl).toString().replace(/\/$/, "");
-const baseIsApi = /\/api\/?$/i.test(new URL(resolvedApiBase).pathname);
-const resolveEndpoint = (path: string): string => {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return baseIsApi && normalizedPath.startsWith("/api/")
-    ? `${resolvedApiBase}${normalizedPath.replace(/^\/api/, "")}`
-    : `${resolvedApiBase}${normalizedPath}`;
-};
 
 interface FormState {
   jobUrl: string;
@@ -27,7 +20,7 @@ interface FormState {
 }
 
 const { data: resumesData } = await useFetch<{ id: string; name?: string }[]>(
-  resolveEndpoint("/api/resumes"),
+  resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.resumes),
   {
     method: "GET",
   },
@@ -35,7 +28,7 @@ const { data: resumesData } = await useFetch<{ id: string; name?: string }[]>(
 
 const { data: coverLettersData } = await useFetch<
   { id: string; company?: string; position?: string }[]
->(resolveEndpoint("/api/cover-letters"), { method: "GET" });
+>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.coverLetters), { method: "GET" });
 
 const form = reactive<FormState>({
   jobUrl: "",

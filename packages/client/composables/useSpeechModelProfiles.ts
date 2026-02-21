@@ -41,7 +41,10 @@ const resolveProviderModels = (
   provider: SpeechProviderOption,
 ): readonly string[] => SPEECH_MODEL_OPTIONS[kind][provider];
 
-const resolveDefaultModel = (kind: SpeechModelProfileKind, provider: SpeechProviderOption): string => {
+const resolveDefaultModel = (
+  kind: SpeechModelProfileKind,
+  provider: SpeechProviderOption,
+): string => {
   const configuredModels = resolveProviderModels(kind, provider);
   if (configuredModels.length === 0) {
     return kind === "stt" ? DEFAULT_SPEECH_SETTINGS.stt.model : DEFAULT_SPEECH_SETTINGS.tts.model;
@@ -65,12 +68,8 @@ export function useSpeechModelProfiles(options: UseSpeechModelProfilesOptions) {
     ttsModel: DEFAULT_SPEECH_SETTINGS.tts.model,
   });
 
-  const sttModelOptions = computed(() =>
-    resolveProviderModels("stt", speechConfig.sttProvider),
-  );
-  const ttsModelOptions = computed(() =>
-    resolveProviderModels("tts", speechConfig.ttsProvider),
-  );
+  const sttModelOptions = computed(() => resolveProviderModels("stt", speechConfig.sttProvider));
+  const ttsModelOptions = computed(() => resolveProviderModels("tts", speechConfig.ttsProvider));
   const persistedSpeechConfig = computed<SpeechModelProfileState>(() => {
     const persistedSpeech =
       settings.value?.automationSettings?.speech ?? DEFAULT_AUTOMATION_SETTINGS.speech;
@@ -131,9 +130,7 @@ export function useSpeechModelProfiles(options: UseSpeechModelProfilesOptions) {
     await fetchSettings();
   }
 
-  async function saveSpeechConfig(
-    fallbackMessage: string,
-  ): Promise<SpeechModelProfileSaveResult> {
+  async function saveSpeechConfig(fallbackMessage: string): Promise<SpeechModelProfileSaveResult> {
     if (!isSpeechConfigDirty.value || speechConfigSaving.value) {
       return { ok: true, saved: false };
     }

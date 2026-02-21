@@ -1,5 +1,7 @@
-const filePath = process.argv[2] ?? "README.md";
-const filePathName = filePath;
+const args = process.argv.slice(2);
+const validateAllTextBlocks = args.includes("--all");
+const filePaths = args.filter((arg) => arg !== "--all");
+const filesToValidate = filePaths.length > 0 ? filePaths : ["README.md"];
 
 type Failure = {
   blockIndex: number;
@@ -18,9 +20,6 @@ type Component = {
   hasPlus: boolean;
   cells: Coord[];
 };
-
-const fileText = await Bun.file(filePathName).text();
-const lines = fileText.split("\n");
 
 const GRAPH_CHARS = new Set(["+", "-", "|"]);
 const HORIZONTAL_ENDPOINTS = new Set(["+", "|"]);
@@ -261,7 +260,7 @@ const analyzeBlock = (
         const bottom = runEnd + 1 < height ? grid[runEnd + 1][col] : " ";
 
         if (!VERTICAL_ENDPOINTS.has(top)) {
-          lineInBlock(runStart, "|", "vertical run start must connect at the top", runStart);
+          lineInBlock(runStart, "|", "vertical run start must connect at the top", col);
         }
         if (!VERTICAL_ENDPOINTS.has(bottom)) {
           lineInBlock(runEnd, "|", "vertical run end must connect at the bottom", col);
@@ -283,7 +282,17 @@ const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
   let blockLines: string[] = [];
 
   for (const [index, line] of linesToAnalyze.entries()) {
-    if (line === "```text") {
+    const trimmedLine = line.trim();
+    const isAsciiBoxStart =
+      trimmedLine === "```ascii-box" ||
+      trimmedLine === "```text ascii-box" ||
+      trimmedLine === "```txt ascii-box";
+    const isDefaultTextStart = trimmedLine === "```text";
+    const shouldStartBlock = validateAllTextBlocks
+      ? isDefaultTextStart || isAsciiBoxStart
+      : isAsciiBoxStart;
+
+    if (shouldStartBlock) {
       if (!inBlock) {
         inBlock = true;
         currentBlock += 1;
@@ -293,7 +302,7 @@ const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
       continue;
     }
 
-    if (line === "```" && inBlock) {
+    if (trimmedLine === "```" && inBlock) {
       diagnostics.push(...analyzeBlock(blockLines, currentBlock, blockStartLine));
       inBlock = false;
       blockLines = [];
@@ -312,17 +321,27 @@ const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
   return diagnostics;
 };
 
-const diagnostics = collectDiagnostics(lines);
+let failedFileCount = 0;
 
-if (diagnostics.length === 0) {
-  console.log(`✅ geometry pass for README art blocks in ${filePath}`);
-  process.exit(0);
+for (const filePath of filesToValidate) {
+  const fileText = await Bun.file(filePath).text();
+  const lines = fileText.split("\n");
+  const diagnostics = collectDiagnostics(lines);
+
+  if (diagnostics.length === 0) {
+    console.log(`✅ geometry pass in ${filePath}`);
+    continue;
+  }
+
+  failedFileCount += 1;
+  console.log(`❌ geometry issues found in ${filePath}: ${diagnostics.length}`);
+  for (const d of diagnostics) {
+    console.log(
+      `block #${d.blockIndex} line ${d.lineNumber} col ${d.columnNumber} char ${JSON.stringify(d.ch)} :: ${d.reason}`,
+    );
+  }
 }
 
-console.log(`❌ geometry issues found: ${diagnostics.length}`);
-for (const d of diagnostics) {
-  console.log(
-    `block #${d.blockIndex} line ${d.lineNumber} col ${d.columnNumber} char ${JSON.stringify(d.ch)} :: ${d.reason}`,
-  );
+if (failedFileCount > 0) {
+  process.exit(1);
 }
-process.exit(1);

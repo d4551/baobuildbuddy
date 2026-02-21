@@ -5,6 +5,7 @@
 
 import { jobAggregator } from "./job-aggregator";
 import { type UserProfile, calculateMatchScore } from "./matching-service";
+import { createServerLogger } from "../../utils/logger";
 
 function isTimelineEvent(value: unknown): value is { date: string; description: string } {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -14,29 +15,31 @@ function isTimelineEvent(value: unknown): value is { date: string; description: 
   return typeof candidate.date === "string" && typeof candidate.description === "string";
 }
 
+const jobsExampleLogger = createServerLogger("jobs-example-usage");
+
 // Example 1: Refresh jobs from all providers
 async function refreshJobs() {
-  console.log("Refreshing jobs from all providers...");
+  jobsExampleLogger.info("Refreshing jobs from all providers...");
 
   const result = await jobAggregator.refreshJobs();
 
-  console.log(`✓ Total jobs fetched: ${result.total}`);
-  console.log(`✓ New jobs added: ${result.new}`);
-  console.log(`✓ Jobs updated: ${result.updated}`);
+  jobsExampleLogger.info(`✓ Total jobs fetched: ${result.total}`);
+  jobsExampleLogger.info(`✓ New jobs added: ${result.new}`);
+  jobsExampleLogger.info(`✓ Jobs updated: ${result.updated}`);
 
   // Get statistics
   const stats = await jobAggregator.getStats();
-  console.log("\nJob Statistics:");
-  console.log(`- Total in cache: ${stats.total}`);
-  console.log(`- Remote jobs: ${stats.remoteCount}`);
-  console.log(`- Last updated: ${stats.lastUpdated}`);
-  console.log("\nBy source:", stats.bySource);
-  console.log("By experience level:", stats.byExperienceLevel);
+  jobsExampleLogger.info("\nJob Statistics:");
+  jobsExampleLogger.info(`- Total in cache: ${stats.total}`);
+  jobsExampleLogger.info(`- Remote jobs: ${stats.remoteCount}`);
+  jobsExampleLogger.info(`- Last updated: ${stats.lastUpdated}`);
+  jobsExampleLogger.info("\nBy source:", stats.bySource);
+  jobsExampleLogger.info("By experience level:", stats.byExperienceLevel);
 }
 
 // Example 2: Search for specific jobs
 async function searchUnityJobs() {
-  console.log("\nSearching for Unity developer positions...");
+  jobsExampleLogger.info("\nSearching for Unity developer positions...");
 
   const results = await jobAggregator.searchJobs({
     query: "Unity",
@@ -46,22 +49,22 @@ async function searchUnityJobs() {
     limit: 10,
   });
 
-  console.log(`\nFound ${results.total} jobs:\n`);
+  jobsExampleLogger.info(`\nFound ${results.total} jobs:\n`);
 
   for (const job of results.jobs) {
-    console.log(`${job.title}`);
-    console.log(`  Company: ${job.company}`);
-    console.log(`  Location: ${job.location}`);
-    console.log(`  Remote: ${job.remote ? "Yes" : "No"}`);
-    console.log(`  Technologies: ${job.technologies?.join(", ") || "N/A"}`);
-    console.log(`  URL: ${job.url}`);
-    console.log();
+    jobsExampleLogger.info(`${job.title}`);
+    jobsExampleLogger.info(`  Company: ${job.company}`);
+    jobsExampleLogger.info(`  Location: ${job.location}`);
+    jobsExampleLogger.info(`  Remote: ${job.remote ? "Yes" : "No"}`);
+    jobsExampleLogger.info(`  Technologies: ${job.technologies?.join(", ") || "N/A"}`);
+    jobsExampleLogger.info(`  URL: ${job.url}`);
+    jobsExampleLogger.info();
   }
 }
 
 // Example 3: Calculate match scores
 async function calculateMatches() {
-  console.log("\nCalculating match scores...");
+  jobsExampleLogger.info("\nCalculating match scores...");
 
   // Define user profile
   const userProfile: UserProfile = {
@@ -87,36 +90,36 @@ async function calculateMatches() {
     limit: 5,
   });
 
-  console.log(`\nMatch scores for ${results.jobs.length} jobs:\n`);
+  jobsExampleLogger.info(`\nMatch scores for ${results.jobs.length} jobs:\n`);
 
   for (const job of results.jobs) {
     const matchScore = calculateMatchScore(userProfile, job);
 
-    console.log(`${job.title} at ${job.company}`);
-    console.log(`  Overall Match: ${matchScore.overall}/100`);
-    console.log("  Breakdown:");
-    console.log(`    - Skills: ${matchScore.breakdown.skills}/100`);
-    console.log(`    - Experience: ${matchScore.breakdown.experience}/100`);
-    console.log(`    - Location: ${matchScore.breakdown.location}/100`);
-    console.log(`    - Technology: ${matchScore.breakdown.technology}/100`);
-    console.log(`    - Salary: ${matchScore.breakdown.salary}/100`);
-    console.log(`    - Culture: ${matchScore.breakdown.culture}/100`);
+    jobsExampleLogger.info(`${job.title} at ${job.company}`);
+    jobsExampleLogger.info(`  Overall Match: ${matchScore.overall}/100`);
+    jobsExampleLogger.info("  Breakdown:");
+    jobsExampleLogger.info(`    - Skills: ${matchScore.breakdown.skills}/100`);
+    jobsExampleLogger.info(`    - Experience: ${matchScore.breakdown.experience}/100`);
+    jobsExampleLogger.info(`    - Location: ${matchScore.breakdown.location}/100`);
+    jobsExampleLogger.info(`    - Technology: ${matchScore.breakdown.technology}/100`);
+    jobsExampleLogger.info(`    - Salary: ${matchScore.breakdown.salary}/100`);
+    jobsExampleLogger.info(`    - Culture: ${matchScore.breakdown.culture}/100`);
 
     if (matchScore.strengths.length > 0) {
-      console.log(`  Strengths: ${matchScore.strengths.join(", ")}`);
+      jobsExampleLogger.info(`  Strengths: ${matchScore.strengths.join(", ")}`);
     }
 
     if (matchScore.missingSkills.length > 0) {
-      console.log(`  Missing Skills: ${matchScore.missingSkills.join(", ")}`);
+      jobsExampleLogger.info(`  Missing Skills: ${matchScore.missingSkills.join(", ")}`);
     }
 
-    console.log();
+    jobsExampleLogger.info();
   }
 }
 
 // Example 4: Save and track applications
 async function trackApplications() {
-  console.log("\nApplication tracking example...");
+  jobsExampleLogger.info("\nApplication tracking example...");
 
   // Search for a job
   const results = await jobAggregator.searchJobs({
@@ -125,23 +128,23 @@ async function trackApplications() {
   });
 
   if (results.jobs.length === 0) {
-    console.log("No jobs found");
+    jobsExampleLogger.info("No jobs found");
     return;
   }
 
   const job = results.jobs[0];
-  console.log(`\nApplying to: ${job.title} at ${job.company}`);
+  jobsExampleLogger.info(`\nApplying to: ${job.title} at ${job.company}`);
 
   // Save the job first
   await jobAggregator.saveJob(job.id);
-  console.log("✓ Job saved for later review");
+  jobsExampleLogger.info("✓ Job saved for later review");
 
   // Apply to the job
   const applicationId = await jobAggregator.applyToJob(
     job.id,
     "Applied via company website on 2025-01-15",
   );
-  console.log(`✓ Application created (ID: ${applicationId})`);
+  jobsExampleLogger.info(`✓ Application created (ID: ${applicationId})`);
 
   // Update application status
   await jobAggregator.updateApplicationStatus(
@@ -149,23 +152,23 @@ async function trackApplications() {
     "reviewing",
     "Resume was reviewed by HR",
   );
-  console.log("✓ Application status updated to 'reviewing'");
+  jobsExampleLogger.info("✓ Application status updated to 'reviewing'");
 
   // Get all applications
   const applications = await jobAggregator.getApplications();
-  console.log(`\nYou have ${applications.length} applications:`);
+  jobsExampleLogger.info(`\nYou have ${applications.length} applications:`);
 
   for (const app of applications) {
-    console.log(`\n${app.job.title} at ${app.job.company}`);
-    console.log(`  Status: ${app.status}`);
-    console.log(`  Applied: ${app.appliedDate}`);
-    console.log(`  Notes: ${app.notes}`);
+    jobsExampleLogger.info(`\n${app.job.title} at ${app.job.company}`);
+    jobsExampleLogger.info(`  Status: ${app.status}`);
+    jobsExampleLogger.info(`  Applied: ${app.appliedDate}`);
+    jobsExampleLogger.info(`  Notes: ${app.notes}`);
 
     if (app.timeline && app.timeline.length > 0) {
-      console.log("  Timeline:");
+      jobsExampleLogger.info("  Timeline:");
       for (const event of app.timeline) {
         if (isTimelineEvent(event)) {
-          console.log(`    - ${event.date}: ${event.description}`);
+          jobsExampleLogger.info(`    - ${event.date}: ${event.description}`);
         }
       }
     }
@@ -173,12 +176,12 @@ async function trackApplications() {
 
   // Get saved jobs
   const savedJobs = await jobAggregator.getSavedJobs();
-  console.log(`\nYou have ${savedJobs.length} saved jobs`);
+  jobsExampleLogger.info(`\nYou have ${savedJobs.length} saved jobs`);
 }
 
 // Example 5: Advanced filtering
 async function advancedSearch() {
-  console.log("\nAdvanced search example...");
+  jobsExampleLogger.info("\nAdvanced search example...");
 
   const results = await jobAggregator.searchJobs({
     query: "programmer",
@@ -192,43 +195,43 @@ async function advancedSearch() {
     page: 1,
   });
 
-  console.log(`\nFound ${results.total} jobs matching criteria:`);
-  console.log("- Remote: Yes");
-  console.log("- Experience: Senior");
-  console.log("- Studio Types: AAA, Indie");
-  console.log("- Platforms: PC, Console");
-  console.log("- Technologies: Unreal Engine, C++");
-  console.log("- Posted within: 30 days");
+  jobsExampleLogger.info(`\nFound ${results.total} jobs matching criteria:`);
+  jobsExampleLogger.info("- Remote: Yes");
+  jobsExampleLogger.info("- Experience: Senior");
+  jobsExampleLogger.info("- Studio Types: AAA, Indie");
+  jobsExampleLogger.info("- Platforms: PC, Console");
+  jobsExampleLogger.info("- Technologies: Unreal Engine, C++");
+  jobsExampleLogger.info("- Posted within: 30 days");
 
-  console.log(`\nTop ${Math.min(5, results.jobs.length)} results:\n`);
+  jobsExampleLogger.info(`\nTop ${Math.min(5, results.jobs.length)} results:\n`);
 
   for (const job of results.jobs.slice(0, 5)) {
-    console.log(`${job.title} - ${job.company}`);
-    console.log(`  ${job.location} | ${job.experienceLevel || "N/A"}`);
-    console.log(`  Studio: ${job.studioType || "Unknown"}`);
-    console.log(`  Platforms: ${job.platforms?.join(", ") || "N/A"}`);
-    console.log(`  Posted: ${new Date(job.postedDate).toLocaleDateString()}`);
-    console.log();
+    jobsExampleLogger.info(`${job.title} - ${job.company}`);
+    jobsExampleLogger.info(`  ${job.location} | ${job.experienceLevel || "N/A"}`);
+    jobsExampleLogger.info(`  Studio: ${job.studioType || "Unknown"}`);
+    jobsExampleLogger.info(`  Platforms: ${job.platforms?.join(", ") || "N/A"}`);
+    jobsExampleLogger.info(`  Posted: ${new Date(job.postedDate).toLocaleDateString()}`);
+    jobsExampleLogger.info();
   }
 }
 
 // Example 6: Check cache and refresh if needed
 async function maintainCache() {
-  console.log("\nCache maintenance...");
+  jobsExampleLogger.info("\nCache maintenance...");
 
   const needsRefresh = await jobAggregator.needsRefresh();
 
   if (needsRefresh) {
-    console.log("Cache is stale, refreshing...");
+    jobsExampleLogger.info("Cache is stale, refreshing...");
     await jobAggregator.refreshJobs();
   } else {
-    console.log("Cache is fresh, no refresh needed");
+    jobsExampleLogger.info("Cache is fresh, no refresh needed");
   }
 
   const stats = await jobAggregator.getStats();
-  console.log("\nCurrent cache statistics:");
-  console.log(`- Total jobs: ${stats.total}`);
-  console.log(`- Last updated: ${stats.lastUpdated}`);
+  jobsExampleLogger.info("\nCurrent cache statistics:");
+  jobsExampleLogger.info(`- Total jobs: ${stats.total}`);
+  jobsExampleLogger.info(`- Last updated: ${stats.lastUpdated}`);
 }
 
 // Main execution function
@@ -244,10 +247,10 @@ async function main() {
       // await advancedSearch()
       // await maintainCache()
 
-      console.log("\n✓ All examples completed successfully");
+      jobsExampleLogger.info("\n✓ All examples completed successfully");
     })
     .catch((error: unknown) => {
-      console.error("Error running examples:", error);
+      jobsExampleLogger.error("Error running examples:", error);
       throw error;
     });
 }
