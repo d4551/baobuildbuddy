@@ -102,19 +102,19 @@ const collectViolations = (): Violation[] => {
   return violations;
 };
 
-const main = (): void => {
+const main = async (): Promise<void> => {
   const violations = collectViolations();
 
   if (violations.length === 0) {
-    void writeOutput(
+    await writeOutput(
       "Locale override validation passed: no schema drift or cross-locale copy detected.",
     );
     return;
   }
 
-  void writeError("Locale override validation failed:");
+  await writeError("Locale override validation failed:");
   for (const violation of violations) {
-    void writeError(`- [${violation.locale}] ${violation.key}: ${violation.message}`);
+    await writeError(`- [${violation.locale}] ${violation.key}: ${violation.message}`);
   }
   process.exit(1);
 };

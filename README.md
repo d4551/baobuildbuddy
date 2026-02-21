@@ -665,6 +665,13 @@ This is not the default path because it adds Chromium + Node as a permanent UI r
 - Windows: Visual C++ build tools via Visual Studio Build Tools
 - Existing Bun workspace prerequisites from section 8.2
 
+Verify Rust toolchain before running desktop builds:
+
+```bash
+rustc --version
+cargo --version
+```
+
 #### 8.9.2 Start desktop wrapper (development mode)
 
 From the repo root:
@@ -698,6 +705,12 @@ Install locally after building:
 - macOS: open the generated `.dmg` and drag the `.app` into `Applications`
 - Linux: `chmod +x` for `.AppImage` and run directly, or install `.deb`/`.rpm` with your package manager
 - Windows: run the generated `.exe` or `.msi` installer as a normal desktop installer
+
+If desktop build fails with `failed to run 'cargo metadata'`, install Rust using:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
 
 #### 8.9.4 Environment overrides for desktop
 

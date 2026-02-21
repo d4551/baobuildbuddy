@@ -305,6 +305,13 @@ If you need a desktop shell instead of a browser tab, use Tauri.
 - macOS/Linux: system C/C++ build tools for Rust crates.
 - Windows: Visual C++ Build Tools installed with your `MSVC` workload.
 
+Verify toolchain in your shell before packaging:
+
+```bash
+rustc --version
+cargo --version
+```
+
 ### 12.2 Start the desktop wrapper
 
 From repo root:
@@ -345,6 +352,12 @@ Typical installables generated there:
 - macOS: `.app` and `.dmg`
 - Linux: `.AppImage`, `.deb`, `.rpm`
 - Windows: `.exe` and `.msi`
+
+If `bun run build:desktop` fails with `failed to run 'cargo metadata'`, install Rust and reopen your shell:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
 
 ### 12.4 Tauri-specific environment knobs
 
