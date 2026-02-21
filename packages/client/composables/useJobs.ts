@@ -75,7 +75,7 @@ export function useJobs() {
   async function applyToJob(jobId: string, notes?: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.jobs.apply.post({ jobId, notes });
-      assertApiResponse(error, "Failed to apply to job");
+      assertApiResponse(error, t("apiErrors.jobs.applyFailed"));
       await fetchApplications();
       return data;
     });
@@ -84,7 +84,7 @@ export function useJobs() {
   async function updateApplication(id: string, status: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.jobs.apply({ id }).put({ status });
-      assertApiResponse(error, "Failed to update application");
+      assertApiResponse(error, t("apiErrors.jobs.updateApplicationFailed"));
       await fetchApplications();
       return data;
     });
@@ -93,7 +93,7 @@ export function useJobs() {
   async function fetchApplications() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.jobs.applications.get();
-      assertApiResponse(error, "Failed to fetch applications");
+      assertApiResponse(error, t("apiErrors.jobs.fetchApplicationsFailed"));
       if (!Array.isArray(data)) {
         applications.value = [];
         return;
@@ -107,7 +107,7 @@ export function useJobs() {
   async function refreshJobs() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.jobs.refresh.post();
-      assertApiResponse(error, "Failed to refresh jobs");
+      assertApiResponse(error, t("apiErrors.jobs.refreshFailed"));
       await searchJobs();
       return data;
     });
@@ -118,7 +118,7 @@ export function useJobs() {
   async function fetchRecommendations() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.jobs.recommendations.get();
-      assertApiResponse(error, "Failed to fetch job recommendations");
+      assertApiResponse(error, t("apiErrors.jobs.fetchRecommendationsFailed"));
       if (isRecord(data) && Array.isArray(data.recommendations)) {
         recommendations.value = toJobList(data.recommendations);
         return;

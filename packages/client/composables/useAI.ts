@@ -266,7 +266,7 @@ export function useAI() {
           sessionId: sessionId.value,
           context,
         });
-        assertApiResponse(error, "Failed to send message");
+        assertApiResponse(error, t("apiErrors.ai.sendMessageFailed"));
 
         const response: AIChatResponse = {};
         if (data && typeof data === "object") {
@@ -319,7 +319,7 @@ export function useAI() {
   async function analyzeResume(resumeId: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.ai["analyze-resume"].post({ resumeId });
-      assertApiResponse(error, "Failed to analyze resume");
+      assertApiResponse(error, t("apiErrors.ai.analyzeResumeFailed"));
       return data;
     });
   }
@@ -327,7 +327,7 @@ export function useAI() {
   async function generateCoverLetter(generationData: CoverLetterGenerationInput) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.ai["generate-cover-letter"].post(generationData);
-      assertApiResponse(error, "Failed to generate cover letter");
+      assertApiResponse(error, t("apiErrors.ai.generateCoverLetterFailed"));
       return data;
     });
   }
@@ -335,7 +335,7 @@ export function useAI() {
   async function matchJobs(resumeId: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.ai["match-jobs"].post({ resumeId });
-      assertApiResponse(error, "Failed to match jobs");
+      assertApiResponse(error, t("apiErrors.ai.matchJobsFailed"));
       return data;
     });
   }
@@ -343,7 +343,7 @@ export function useAI() {
   async function getModels() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.ai.models.get();
-      assertApiResponse(error, "Failed to fetch AI models");
+      assertApiResponse(error, t("apiErrors.ai.fetchModelsFailed"));
       return data;
     });
   }
@@ -351,7 +351,7 @@ export function useAI() {
   async function getUsage() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.ai.usage.get();
-      assertApiResponse(error, "Failed to fetch AI usage");
+      assertApiResponse(error, t("apiErrors.ai.fetchUsageFailed"));
       return data;
     });
   }

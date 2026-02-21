@@ -169,9 +169,6 @@ const frFROverrides = {
       unsavedHint: "Vous avez des modifications de profil de voix non enregistrées.",
       providers: {
         browser: "Navigateur",
-        openai: "OpenAI",
-        huggingface: "Hugging Face",
-        local: "Local",
         custom: "Personnalisé",
       },
     },

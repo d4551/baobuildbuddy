@@ -7,6 +7,7 @@ import {
   APP_BRAND,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 import {
   buildChatMessageRenderRows,
   createStreamingAssistantMessage,
@@ -15,9 +16,21 @@ import {
 
 const route = useRoute();
 const { messages, loading, streaming, sendMessage, clearMessages, buildCurrentContext } = useAI();
+const { $toast } = useNuxtApp();
 const { t, locale } = useI18n();
+const {
+  speechProviderOptions,
+  speechConfig,
+  sttModelOptions,
+  ttsModelOptions,
+  speechConfigSaving,
+  isSpeechConfigDirty,
+  ensureSpeechConfigLoaded,
+  saveSpeechConfig,
+} = useSpeechModelProfiles({ locale });
 
 const isOpen = ref(false);
+const isSpeechSettingsOpen = ref(false);
 const draft = ref("");
 const unreadCount = ref(0);
 const panelBodyRef = useTemplateRef<HTMLElement>("floatingChatPanelBody");
@@ -87,6 +100,7 @@ const showWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
 watch(showWidget, (visible) => {
   if (!visible) {
     isOpen.value = false;
+    isSpeechSettingsOpen.value = false;
     unreadCount.value = 0;
   }
 });
@@ -112,7 +126,10 @@ watch(streaming, () => {
 });
 
 watch(isOpen, (open) => {
-  if (!open) return;
+  if (!open) {
+    isSpeechSettingsOpen.value = false;
+    return;
+  }
   unreadCount.value = 0;
   scrollToBottom();
   nextTick(() => {
@@ -134,6 +151,10 @@ function toggleWidget() {
 
 function closeWidget() {
   isOpen.value = false;
+}
+
+function toggleSpeechSettings(): void {
+  isSpeechSettingsOpen.value = !isSpeechSettingsOpen.value;
 }
 
 function handleFocusChatShortcut() {
@@ -167,7 +188,29 @@ async function handleSendSuggestion(prompt: string) {
   await handleSendMessage();
 }
 
+async function handleSaveSpeechConfig(): Promise<void> {
+  const saveSpeechResult = await saveSpeechConfig(
+    t("floatingChat.voiceSettings.saveErrorFallback"),
+  );
+  if (!saveSpeechResult.ok) {
+    $toast.error(
+      getErrorMessage(
+        saveSpeechResult.error,
+        t("floatingChat.voiceSettings.saveErrorFallback"),
+      ),
+    );
+    return;
+  }
+
+  if (!saveSpeechResult.saved) {
+    return;
+  }
+
+  $toast.success(t("floatingChat.voiceSettings.saveSuccess"));
+}
+
 onMounted(() => {
+  void ensureSpeechConfigLoaded();
   window.addEventListener("bao:focus-chat", onFocusChatShortcut);
 });
 
@@ -216,6 +259,15 @@ onUnmounted(() => {
               >
                 {{ t("floatingChat.expandButton") }}
               </NuxtLink>
+              <button
+                type="button"
+                class="btn btn-ghost btn-xs"
+                :aria-label="t('floatingChat.voiceSettings.toggleAria')"
+                :aria-expanded="isSpeechSettingsOpen"
+                @click="toggleSpeechSettings"
+              >
+                {{ t("floatingChat.voiceSettings.toggleButton") }}
+              </button>
               <button
                 type="button"
                 class="btn btn-ghost btn-xs"
@@ -288,7 +340,7 @@ onUnmounted(() => {
               <input
                 ref="floatingChatInput"
                 v-model="draft"
-                class="input input-bordered join-item w-full"
+                class="input input-bordered input-lg join-item w-full"
                 type="text"
                 :placeholder="t('floatingChat.inputPlaceholder')"
                 :aria-label="t('floatingChat.inputAria')"
@@ -334,6 +386,42 @@ onUnmounted(() => {
                 </svg>
               </button>
             </form>
+            <p
+              v-if="voiceSupportHintKey"
+              class="mt-2 text-xs text-base-content/70"
+              role="status"
+              aria-live="polite"
+            >
+              {{ t(voiceSupportHintKey) }}
+            </p>
+            <p
+              v-if="voiceErrorLabel"
+              class="mt-1 text-xs text-error"
+              role="status"
+              aria-live="assertive"
+            >
+              {{ voiceErrorLabel }}
+            </p>
+            <p v-if="isSpeechConfigDirty && isSpeechSettingsOpen" class="mt-2 text-xs text-base-content/60">
+              {{ t("aiChatPage.voiceSettings.unsavedHint") }}
+            </p>
+            <SpeechModelProfileFields
+              v-if="isSpeechSettingsOpen"
+              class="mt-2"
+              :provider-options="speechProviderOptions"
+              :stt-provider="speechConfig.sttProvider"
+              :stt-model="speechConfig.sttModel"
+              :tts-provider="speechConfig.ttsProvider"
+              :tts-model="speechConfig.ttsModel"
+              :stt-model-options="sttModelOptions"
+              :tts-model-options="ttsModelOptions"
+              :saving="speechConfigSaving"
+              @update:stt-provider="speechConfig.sttProvider = $event"
+              @update:stt-model="speechConfig.sttModel = $event"
+              @update:tts-provider="speechConfig.ttsProvider = $event"
+              @update:tts-model="speechConfig.ttsModel = $event"
+              @save="handleSaveSpeechConfig"
+            />
           </div>
         </div>
       </div>

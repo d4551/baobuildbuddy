@@ -1,5 +1,6 @@
 import type { AutocompleteResult, SearchResult, SearchResults } from "@bao/shared";
 import { STATE_KEYS, asNumber, asString, isRecord } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { assertApiResponse, settlePromise, withLoadingState } from "./async-flow";
 
 const SEARCH_RESULT_TYPE_MAP: Record<string, SearchResult["type"]> = {
@@ -94,6 +95,7 @@ const toAutocompleteResults = (value: unknown): AutocompleteResult[] => {
  */
 export function useSearch() {
   const api = useApi();
+  const { t } = useI18n();
   const query = useState(STATE_KEYS.SEARCH_QUERY, () => "");
   const results = useState<SearchResults | null>(STATE_KEYS.SEARCH_RESULTS, () => null);
   const suggestions = useState<AutocompleteResult[]>(STATE_KEYS.SEARCH_SUGGESTIONS, () => []);
@@ -108,7 +110,7 @@ export function useSearch() {
       const queryParams: Record<string, string> = { q };
       if (types?.length) queryParams.types = types.join(",");
       const { data, error } = await api.search.get({ query: queryParams });
-      assertApiResponse(error, "Failed to search");
+      assertApiResponse(error, t("apiErrors.search.searchFailed"));
       results.value = toSearchResults(data, q, types);
     });
   }, 300);
@@ -120,7 +122,7 @@ export function useSearch() {
     }
     const settled = await settlePromise(
       api.search.autocomplete.get({ query: { prefix } }),
-      "Failed to fetch autocomplete suggestions",
+      t("apiErrors.search.autocompleteFailed"),
     );
     if (!settled.ok) {
       suggestions.value = [];

@@ -1,5 +1,6 @@
 import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { toPortfolioData } from "./api-normalizers";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
@@ -14,6 +15,7 @@ type UpdateProjectPayload = NonNullable<Parameters<ProjectRoute["put"]>[0]>;
  */
 export function usePortfolio() {
   const api = useApi();
+  const { t } = useI18n();
   const portfolio = useState<PortfolioData | null>(STATE_KEYS.PORTFOLIO_DATA, () => null);
   const projects = useState<PortfolioProject[]>(STATE_KEYS.PORTFOLIO_PROJECTS, () => []);
   const loading = useState(STATE_KEYS.PORTFOLIO_LOADING, () => false);
@@ -30,7 +32,7 @@ export function usePortfolio() {
   async function fetchPortfolio() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.portfolio.get();
-      assertApiResponse(error, "Failed to fetch portfolio");
+      assertApiResponse(error, t("apiErrors.portfolio.fetchFailed"));
       hydratePortfolio(toPortfolioData(data));
     });
   }
@@ -39,7 +41,7 @@ export function usePortfolio() {
     return withLoadingState(loading, async () => {
       const payload: UpdatePortfolioPayload = { metadata: updates };
       const { data, error } = await api.portfolio.put(payload);
-      assertApiResponse(error, "Failed to update portfolio");
+      assertApiResponse(error, t("apiErrors.portfolio.updateFailed"));
       const normalized = toPortfolioData(data);
       hydratePortfolio(normalized);
       return normalized;
@@ -49,7 +51,7 @@ export function usePortfolio() {
   async function addProject(projectData: CreateProjectPayload) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.portfolio.projects.post(projectData);
-      assertApiResponse(error, "Failed to add project");
+      assertApiResponse(error, t("apiErrors.portfolio.addProjectFailed"));
       await fetchPortfolio();
       return data;
     });
@@ -58,7 +60,7 @@ export function usePortfolio() {
   async function updateProject(id: string, updates: UpdateProjectPayload) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.portfolio.projects({ id }).put(updates);
-      assertApiResponse(error, "Failed to update project");
+      assertApiResponse(error, t("apiErrors.portfolio.updateProjectFailed"));
       await fetchPortfolio();
       return data;
     });
@@ -67,7 +69,7 @@ export function usePortfolio() {
   async function deleteProject(id: string) {
     return withLoadingState(loading, async () => {
       const { error } = await api.portfolio.projects({ id }).delete();
-      assertApiResponse(error, "Failed to delete project");
+      assertApiResponse(error, t("apiErrors.portfolio.deleteProjectFailed"));
       await fetchPortfolio();
     });
   }
@@ -75,7 +77,7 @@ export function usePortfolio() {
   async function reorderProjects(orderedIds: string[]) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.portfolio.projects.reorder.post({ orderedIds });
-      assertApiResponse(error, "Failed to reorder projects");
+      assertApiResponse(error, t("apiErrors.portfolio.reorderFailed"));
       const normalized = toPortfolioData(data);
       hydratePortfolio(normalized);
       return normalized;
@@ -85,7 +87,7 @@ export function usePortfolio() {
   async function exportPortfolio() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.portfolio.export.post();
-      assertApiResponse(error, "Failed to export portfolio");
+      assertApiResponse(error, t("apiErrors.portfolio.exportFailed"));
       return data;
     });
   }

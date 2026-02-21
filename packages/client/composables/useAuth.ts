@@ -1,3 +1,4 @@
+import { useI18n } from "vue-i18n";
 import { useNuxtRuntimeApp } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 
@@ -21,6 +22,7 @@ interface UseAuthState {
 export function useAuth(): UseAuthState {
   const api = useApi();
   const nuxtApp = useNuxtRuntimeApp();
+  const { t } = useI18n();
   const authNotConfigured: AuthStatus = { authRequired: false, configured: false };
 
   async function checkAuthStatus(): Promise<AuthStatus> {
@@ -34,7 +36,7 @@ export function useAuth(): UseAuthState {
 
   async function initAuth() {
     const { data, error } = await api.auth.init.post();
-    if (error) throw new Error("Failed to init auth");
+    if (error) throw new Error(t("apiErrors.auth.initFailed"));
     return data ?? {};
   }
 

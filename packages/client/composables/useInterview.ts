@@ -13,6 +13,7 @@ import {
   asStringArray,
   isRecord,
 } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 
 const INTERVIEW_STATUS_VALUES = [
@@ -258,6 +259,7 @@ const toNumericRecord = (value: unknown): Record<string, number> | null => {
  */
 export function useInterview() {
   const api = useApi();
+  const { t } = useI18n();
   const sessions = useState<InterviewSession[]>(STATE_KEYS.INTERVIEW_SESSIONS, () => []);
   const currentSession = useState<InterviewSession | null>(
     STATE_KEYS.INTERVIEW_CURRENT_SESSION,
@@ -273,10 +275,10 @@ export function useInterview() {
         studioId: resolvedStudioId,
         config,
       });
-      assertApiResponse(error, "Failed to start interview session");
+      assertApiResponse(error, t("apiErrors.interview.startFailed"));
       const normalized = requireValue(
         toInterviewSession(data),
-        "Invalid interview session payload",
+        t("apiErrors.interview.invalidPayload"),
       );
       currentSession.value = normalized;
       await fetchSessions();
@@ -287,7 +289,7 @@ export function useInterview() {
   async function fetchSessions() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.interview.sessions.get();
-      assertApiResponse(error, "Failed to fetch interview sessions");
+      assertApiResponse(error, t("apiErrors.interview.fetchSessionsFailed"));
       sessions.value = toInterviewSessions(data);
     });
   }
@@ -295,10 +297,10 @@ export function useInterview() {
   async function getSession(id: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.interview.sessions({ id }).get();
-      assertApiResponse(error, "Failed to fetch interview session");
+      assertApiResponse(error, t("apiErrors.interview.fetchSessionFailed"));
       const normalized = requireValue(
         toInterviewSession(data),
-        "Invalid interview session payload",
+        t("apiErrors.interview.invalidPayload"),
       );
       currentSession.value = normalized;
       return normalized;
@@ -310,10 +312,10 @@ export function useInterview() {
       const { data, error } = await api.interview
         .sessions({ id: sessionId })
         .response.post(response);
-      assertApiResponse(error, "Failed to submit response");
+      assertApiResponse(error, t("apiErrors.interview.submitResponseFailed"));
       const normalized = requireValue(
         toInterviewSession(data),
-        "Invalid interview session payload",
+        t("apiErrors.interview.invalidPayload"),
       );
       currentSession.value = normalized;
       return normalized;
@@ -323,10 +325,10 @@ export function useInterview() {
   async function completeSession(id: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.interview.sessions({ id }).complete.post();
-      assertApiResponse(error, "Failed to complete session");
+      assertApiResponse(error, t("apiErrors.interview.completeFailed"));
       const normalized = requireValue(
         toInterviewSession(data),
-        "Invalid interview session payload",
+        t("apiErrors.interview.invalidPayload"),
       );
       currentSession.value = normalized;
       await fetchSessions();
@@ -338,7 +340,7 @@ export function useInterview() {
   async function fetchStats() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.interview.stats.get();
-      assertApiResponse(error, "Failed to fetch interview stats");
+      assertApiResponse(error, t("apiErrors.interview.fetchStatsFailed"));
       stats.value = toNumericRecord(data);
     });
   }

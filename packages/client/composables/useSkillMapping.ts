@@ -1,5 +1,6 @@
 import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@bao/shared";
 import { STATE_KEYS, asNumber, asString, asStringArray, isRecord } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { toSkillMapping } from "./api-normalizers";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
@@ -157,6 +158,7 @@ const toReadinessAssessment = (value: unknown): ReadinessAssessment | null => {
  */
 export function useSkillMapping() {
   const api = useApi();
+  const { t } = useI18n();
   const mappings = useState<SkillMapping[]>(STATE_KEYS.SKILLS_MAPPINGS, () => []);
   const pathways = useState<CareerPathway[]>(STATE_KEYS.SKILLS_PATHWAYS, () => []);
   const readiness = useState<ReadinessAssessment | null>(STATE_KEYS.SKILLS_READINESS, () => null);
@@ -165,7 +167,7 @@ export function useSkillMapping() {
   async function fetchMappings() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.skills.mappings.get();
-      assertApiResponse(error, "Failed to fetch skill mappings");
+      assertApiResponse(error, t("apiErrors.skills.fetchMappingsFailed"));
       mappings.value = Array.isArray(data)
         ? data
             .map((entry) => toSkillMapping(entry))
@@ -177,7 +179,7 @@ export function useSkillMapping() {
   async function createMapping(mappingData: CreateMappingInput) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.skills.mappings.post(mappingData);
-      assertApiResponse(error, "Failed to create skill mapping");
+      assertApiResponse(error, t("apiErrors.skills.createMappingFailed"));
       await fetchMappings();
       return data;
     });
@@ -186,7 +188,7 @@ export function useSkillMapping() {
   async function updateMapping(id: string, updates: UpdateMappingInput) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.skills.mappings({ id }).put(updates);
-      assertApiResponse(error, "Failed to update skill mapping");
+      assertApiResponse(error, t("apiErrors.skills.updateMappingFailed"));
       await fetchMappings();
       return data;
     });
@@ -195,7 +197,7 @@ export function useSkillMapping() {
   async function deleteMapping(id: string) {
     return withLoadingState(loading, async () => {
       const { error } = await api.skills.mappings({ id }).delete();
-      assertApiResponse(error, "Failed to delete skill mapping");
+      assertApiResponse(error, t("apiErrors.skills.deleteMappingFailed"));
       await fetchMappings();
     });
   }
@@ -203,7 +205,7 @@ export function useSkillMapping() {
   async function fetchPathways() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.skills.pathways.get();
-      assertApiResponse(error, "Failed to fetch learning pathways");
+      assertApiResponse(error, t("apiErrors.skills.fetchPathwaysFailed"));
       pathways.value = Array.isArray(data)
         ? data
             .map((entry) => toCareerPathway(entry))
@@ -215,7 +217,7 @@ export function useSkillMapping() {
   async function fetchReadiness() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.skills.readiness.get();
-      assertApiResponse(error, "Failed to fetch job readiness");
+      assertApiResponse(error, t("apiErrors.skills.fetchReadinessFailed"));
       readiness.value = toReadinessAssessment(data);
     });
   }
@@ -223,7 +225,7 @@ export function useSkillMapping() {
   async function aiAnalyze(skills: string[]) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.skills["ai-analyze"].post({ gameExperience: { skills } });
-      assertApiResponse(error, "Failed to analyze skills");
+      assertApiResponse(error, t("apiErrors.skills.analyzeFailed"));
       return data;
     });
   }
@@ -234,7 +236,7 @@ export function useSkillMapping() {
   async function extractFromText(text: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.skills["ai-analyze"].post({ resume: { experience: text } });
-      assertApiResponse(error, "Failed to extract skills from text");
+      assertApiResponse(error, t("apiErrors.skills.extractFailed"));
       return data;
     });
   }
@@ -245,7 +247,7 @@ export function useSkillMapping() {
   async function compareWithJob(jobId: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.skills.readiness.get({ query: { jobId } });
-      assertApiResponse(error, "Failed to compare skills with job");
+      assertApiResponse(error, t("apiErrors.skills.compareFailed"));
       return data;
     });
   }

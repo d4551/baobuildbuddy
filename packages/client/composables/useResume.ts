@@ -53,7 +53,7 @@ export function useResume() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.resumes({ id }).get();
       assertApiResponse(error, t("apiErrors.resumes.fetchFailed"));
-      const normalized = requireValue(toResumeData(data), "Invalid resume payload");
+      const normalized = requireValue(toResumeData(data), t("apiErrors.resumes.invalidPayload"));
       currentResume.value = normalized;
       return normalized;
     });
@@ -72,7 +72,7 @@ export function useResume() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.resumes({ id }).put(updates);
       assertApiResponse(error, t("apiErrors.resumes.updateFailed"));
-      const normalized = requireValue(toResumeData(data), "Invalid resume payload");
+      const normalized = requireValue(toResumeData(data), t("apiErrors.resumes.invalidPayload"));
       currentResume.value = normalized;
       await fetchResumes();
       return normalized;
@@ -82,7 +82,7 @@ export function useResume() {
   async function deleteResume(id: string) {
     return withLoadingState(loading, async () => {
       const { error } = await api.resumes({ id }).delete();
-      assertApiResponse(error, "Failed to delete resume");
+      assertApiResponse(error, t("apiErrors.resumes.deleteFailed"));
       if (currentResume.value?.id === id) {
         currentResume.value = null;
       }
@@ -94,7 +94,7 @@ export function useResume() {
     return withLoadingState(loading, async () => {
       const body: ExportResumeInput = template ? { template } : {};
       const { data, error } = await api.resumes({ id }).export.post(body);
-      assertApiResponse(error, "Failed to export resume");
+      assertApiResponse(error, t("apiErrors.resumes.exportFailed"));
       return data;
     });
   }
@@ -103,7 +103,7 @@ export function useResume() {
     return withLoadingState(loading, async () => {
       const body: ExportResumeInput = template ? { template } : {};
       const { data, error } = await api.resumes({ id }).export.post(body);
-      assertApiResponse(error, "Failed to export one-page resume");
+      assertApiResponse(error, t("apiErrors.resumes.exportOnePageFailed"));
       return data;
     });
   }
@@ -111,8 +111,8 @@ export function useResume() {
   async function aiEnhance(id: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.resumes({ id })["ai-enhance"].post({});
-      assertApiResponse(error, "Failed to enhance resume");
-      const normalized = requireValue(toResumeData(data), "Invalid resume payload");
+      assertApiResponse(error, t("apiErrors.resumes.enhanceFailed"));
+      const normalized = requireValue(toResumeData(data), t("apiErrors.resumes.invalidPayload"));
       currentResume.value = normalized;
       await fetchResumes();
       return normalized;
@@ -123,7 +123,7 @@ export function useResume() {
     return withLoadingState(loading, async () => {
       const payload: ScoreResumeInput = { jobId };
       const { data, error } = await api.resumes({ id })["ai-score"].post(payload);
-      assertApiResponse(error, "Failed to score resume");
+      assertApiResponse(error, t("apiErrors.resumes.scoreFailed"));
       return data;
     });
   }

@@ -163,7 +163,6 @@ export function useSpeechModelProfiles(options: UseSpeechModelProfilesOptions) {
     const saveSpeechResult = await settlePromise(
       updateSettings({
         automationSettings: {
-          ...existingAutomationSettings,
           speech: nextSpeechConfig,
         },
       }),

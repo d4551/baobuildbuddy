@@ -2358,6 +2358,12 @@ const enUS = {
     hideAria: "Hide floating chat assistant",
     showAria: "Show floating chat assistant",
     unreadAria: "{count} unread assistant messages",
+    voiceSettings: {
+      toggleButton: "Speech",
+      toggleAria: "Toggle speech model profile settings",
+      saveSuccess: "Speech profile saved",
+      saveErrorFallback: "Failed to save speech profile",
+    },
   },
   studioSelector: {
     toggleAria: "Open studio selector",

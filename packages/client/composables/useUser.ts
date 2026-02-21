@@ -1,5 +1,6 @@
 import type { UserProfile } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { toUserProfile } from "./api-normalizers";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 
@@ -11,14 +12,15 @@ type UpdateUserProfileInput = NonNullable<Parameters<ApiClient["user"]["profile"
  */
 export function useUser() {
   const api = useApi();
+  const { t } = useI18n();
   const profile = useState<UserProfile | null>(STATE_KEYS.USER_PROFILE, () => null);
   const loading = useState(STATE_KEYS.USER_LOADING, () => false);
 
   async function fetchProfile() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.user.profile.get();
-      assertApiResponse(error, "Failed to fetch profile");
-      const normalized = requireValue(toUserProfile(data), "Invalid user profile payload");
+      assertApiResponse(error, t("apiErrors.user.fetchProfileFailed"));
+      const normalized = requireValue(toUserProfile(data), t("apiErrors.user.invalidPayload"));
       profile.value = normalized;
     });
   }
@@ -26,8 +28,8 @@ export function useUser() {
   async function updateProfile(updates: UpdateUserProfileInput) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.user.profile.put(updates);
-      assertApiResponse(error, "Failed to update profile");
-      const normalized = requireValue(toUserProfile(data), "Invalid user profile payload");
+      assertApiResponse(error, t("apiErrors.user.updateProfileFailed"));
+      const normalized = requireValue(toUserProfile(data), t("apiErrors.user.invalidPayload"));
       profile.value = normalized;
     });
   }

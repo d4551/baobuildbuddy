@@ -1,5 +1,6 @@
 import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
 import { STATE_KEYS, isRecord } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
 const normalizeProgress = (value: unknown): UserGamificationData | null => {
@@ -65,6 +66,7 @@ const normalizeProgress = (value: unknown): UserGamificationData | null => {
  */
 export function useGamification() {
   const api = useApi();
+  const { t } = useI18n();
   const progress = useState<UserGamificationData | null>(
     STATE_KEYS.GAMIFICATION_PROGRESS,
     () => null,
@@ -76,7 +78,7 @@ export function useGamification() {
   async function fetchProgress() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.progress.get();
-      assertApiResponse(error, "Failed to fetch progress");
+      assertApiResponse(error, t("apiErrors.gamification.fetchProgressFailed"));
       const normalized = normalizeProgress(data);
       if (normalized) {
         progress.value = normalized;
@@ -87,7 +89,7 @@ export function useGamification() {
   async function awardXP(amount: number, reason: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification["award-xp"].post({ amount, reason });
-      assertApiResponse(error, "Failed to award XP");
+      assertApiResponse(error, t("apiErrors.gamification.awardXPFailed"));
       await fetchProgress();
       return data;
     });
@@ -96,7 +98,7 @@ export function useGamification() {
   async function fetchAchievements() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.achievements.get();
-      assertApiResponse(error, "Failed to fetch achievements");
+      assertApiResponse(error, t("apiErrors.gamification.fetchAchievementsFailed"));
       achievements.value = Array.isArray(data)
         ? data.filter((entry): entry is Achievement => isRecord(entry))
         : [];
@@ -106,7 +108,7 @@ export function useGamification() {
   async function fetchChallenges() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.challenges.get();
-      assertApiResponse(error, "Failed to fetch challenges");
+      assertApiResponse(error, t("apiErrors.gamification.fetchChallengesFailed"));
       if (!isRecord(data) || !Array.isArray(data.challenges)) {
         challenges.value = [];
         return;
@@ -120,7 +122,7 @@ export function useGamification() {
   async function completeChallenge(id: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.challenges({ id }).complete.post();
-      assertApiResponse(error, "Failed to complete challenge");
+      assertApiResponse(error, t("apiErrors.gamification.completeChallengeFailed"));
       await fetchChallenges();
       await fetchProgress();
       return data;
@@ -165,7 +167,7 @@ export function useGamification() {
   async function fetchWeeklyProgress() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.weekly.get();
-      assertApiResponse(error, "Failed to fetch weekly progress");
+      assertApiResponse(error, t("apiErrors.gamification.fetchWeeklyFailed"));
       weeklyProgress.value = isRecord(data) ? data : null;
     });
   }
@@ -173,7 +175,7 @@ export function useGamification() {
   async function fetchMonthlyStats() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.gamification.monthly.get();
-      assertApiResponse(error, "Failed to fetch monthly stats");
+      assertApiResponse(error, t("apiErrors.gamification.fetchMonthlyFailed"));
       monthlyStats.value = isRecord(data) ? data : null;
     });
   }

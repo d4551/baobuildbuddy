@@ -1,5 +1,6 @@
 import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
 import { STATE_KEYS, asNumber, asString, isRecord } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
 const toDashboardStats = (value: unknown): DashboardStats | null => {
@@ -119,6 +120,7 @@ const toCareerProgress = (value: unknown): CareerProgress | null => {
  */
 export function useStatistics() {
   const api = useApi();
+  const { t } = useI18n();
   const dashboard = useState<DashboardStats | null>(STATE_KEYS.STATS_DASHBOARD, () => null);
   const weekly = useState<WeeklyActivity | null>(STATE_KEYS.STATS_WEEKLY, () => null);
   const career = useState<CareerProgress | null>(STATE_KEYS.STATS_CAREER, () => null);
@@ -127,7 +129,7 @@ export function useStatistics() {
   async function fetchDashboard() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.stats.dashboard.get();
-      assertApiResponse(error, "Failed to fetch dashboard stats");
+      assertApiResponse(error, t("apiErrors.statistics.fetchDashboardFailed"));
       dashboard.value = toDashboardStats(data);
     });
   }
@@ -135,7 +137,7 @@ export function useStatistics() {
   async function fetchWeekly() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.stats.weekly.get();
-      assertApiResponse(error, "Failed to fetch weekly activity");
+      assertApiResponse(error, t("apiErrors.statistics.fetchWeeklyFailed"));
       weekly.value = toWeeklyActivity(data);
     });
   }
@@ -143,7 +145,7 @@ export function useStatistics() {
   async function fetchCareerProgress() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.stats.career.get();
-      assertApiResponse(error, "Failed to fetch career progress");
+      assertApiResponse(error, t("apiErrors.statistics.fetchCareerFailed"));
       career.value = toCareerProgress(data);
     });
   }

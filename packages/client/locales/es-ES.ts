@@ -2371,6 +2371,12 @@ const esES = {
     hideAria: "Ocultar asistente de chat flotante",
     showAria: "Mostrar asistente de chat flotante",
     unreadAria: "{count} mensajes del asistente sin leer",
+    voiceSettings: {
+      toggleButton: "Voz",
+      toggleAria: "Alternar configuración de perfil de modelos de voz",
+      saveSuccess: "Perfil de voz guardado",
+      saveErrorFallback: "No se pudo guardar el perfil de voz",
+    },
   },
   studioSelector: {
     toggleAria: "Abrir selector de estudios",

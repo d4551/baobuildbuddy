@@ -306,13 +306,13 @@ export declare const app: Elysia<"/api", {
                         speech?: {
                             locale: string;
                             stt: {
-                                provider: never;
+                                provider: "openai" | "huggingface" | "local" | "custom" | "browser";
                                 model: string;
                                 endpoint: string;
                             };
                             tts: {
                                 format: "mp3" | "wav";
-                                provider: never;
+                                provider: "openai" | "huggingface" | "local" | "custom" | "browser";
                                 model: string;
                                 endpoint: string;
                                 voice: string;

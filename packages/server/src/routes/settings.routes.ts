@@ -8,7 +8,12 @@ import {
   DEFAULT_SETTINGS_ID,
   automationSettingsSchema,
 } from "@bao/shared";
-import type { AIProviderType, AutomationSettings, NotificationPreferences } from "@bao/shared";
+import type {
+  AIProviderType,
+  AutomationSettings,
+  NotificationPreferences,
+  SpeechProviderOption,
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
@@ -49,6 +54,11 @@ const GAMING_PORTAL_IDS = [
 const LANGUAGE_CODES = APP_LANGUAGE_CODES;
 const AUTOMATION_BROWSER_IDS = AUTOMATION_BROWSER_OPTIONS;
 const SPEECH_PROVIDER_IDS = SPEECH_PROVIDER_OPTIONS;
+type SpeechProviderLiteralSchema = ReturnType<typeof t.Literal<SpeechProviderOption>>;
+const speechProviderLiteralSchemas = SPEECH_PROVIDER_IDS.map((providerId) =>
+  t.Literal(providerId),
+) as [SpeechProviderLiteralSchema, ...SpeechProviderLiteralSchema[]];
+const speechProviderBodySchema = t.Union(speechProviderLiteralSchemas);
 
 const companyBoardApiTemplatesBodySchema = t.Object({
   greenhouse: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
@@ -112,12 +122,12 @@ const jobProviderSettingsBodySchema = t.Object({
 const speechSettingsBodySchema = t.Object({
   locale: t.String({ minLength: 2, maxLength: 20 }),
   stt: t.Object({
-    provider: t.Union(SPEECH_PROVIDER_IDS.map((providerId) => t.Literal(providerId))),
+    provider: speechProviderBodySchema,
     model: t.String({ minLength: 1, maxLength: MODEL_MAX_LENGTH }),
     endpoint: t.String({ maxLength: 2000 }),
   }),
   tts: t.Object({
-    provider: t.Union(SPEECH_PROVIDER_IDS.map((providerId) => t.Literal(providerId))),
+    provider: speechProviderBodySchema,
     model: t.String({ minLength: 1, maxLength: MODEL_MAX_LENGTH }),
     endpoint: t.String({ maxLength: 2000 }),
     voice: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),

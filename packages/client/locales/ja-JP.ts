@@ -175,8 +175,6 @@ const jaJPOverrides = {
       unsavedHint: "音声プロフィールに保存されていない変更があります。",
       providers: {
         browser: "ブラウザ",
-        openai: "OpenAI",
-        huggingface: "Hugging Face",
         local: "ローカル",
         custom: "カスタム",
       },
