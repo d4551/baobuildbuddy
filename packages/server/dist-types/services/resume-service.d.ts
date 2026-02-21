@@ -1,4 +1,7 @@
 import type { ResumeData } from "@bao/shared";
+/**
+ * Resume persistence service with validation and normalization from storage records.
+ */
 export declare class ResumeService {
     private toResumeData;
     /**
@@ -28,4 +31,7 @@ export declare class ResumeService {
     private normalizeTemplate;
     private normalizeTheme;
 }
+/**
+ * Shared singleton instance for resume CRUD operations.
+ */
 export declare const resumeService: ResumeService;

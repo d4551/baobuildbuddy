@@ -468,7 +468,14 @@ async function requestData<T>(
                   <p class="text-sm text-base-content/60">
                     {{ t(DASHBOARD_COPY_KEYS.levelLabel) }} {{ dashboard.gamification.level }}
                   </p>
-                  <p class="font-bold">{{ dashboard.gamification.xp }} / {{ xpTarget }} XP</p>
+                  <p class="font-bold">
+                    {{
+                      t("xpBar.progressLabel", {
+                        xp: dashboard.gamification.xp,
+                        xpForNextLevel: xpTarget,
+                      })
+                    }}
+                  </p>
                 </div>
               </div>
               <progress

@@ -1150,7 +1150,7 @@ export declare const app: Elysia<"/api", {
                         title: string;
                         startDate: string;
                     }[] | undefined;
-                    template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | undefined;
+                    template?: string | undefined;
                     isDefault?: boolean | undefined;
                 };
                 params: {};
@@ -1249,7 +1249,7 @@ export declare const app: Elysia<"/api", {
                             title: string;
                             startDate: string;
                         }[] | undefined;
-                        template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | undefined;
+                        template?: string | undefined;
                         isDefault?: boolean | undefined;
                     };
                     params: {
@@ -1314,7 +1314,7 @@ export declare const app: Elysia<"/api", {
                     post: {
                         body: {
                             format?: string | undefined;
-                            template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | undefined;
+                            template?: string | undefined;
                         };
                         params: {
                             id: string;
@@ -1469,7 +1469,7 @@ export declare const app: Elysia<"/api", {
                         position: string;
                         jobInfo: {};
                         content: {};
-                        template: string;
+                        template: "creative" | "gaming" | "executive" | "technical" | "professional";
                     };
                     422: {
                         type: "validation";
@@ -1622,7 +1622,7 @@ export declare const app: Elysia<"/api", {
                                     body: string;
                                     conclusion: string;
                                 };
-                                template: string;
+                                template: "creative" | "gaming" | "executive" | "technical" | "professional";
                             };
                             error?: undefined;
                             details?: undefined;

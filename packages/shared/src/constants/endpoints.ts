@@ -23,6 +23,26 @@ export const API_ENDPOINTS = {
 } as const;
 
 /**
+ * Builds the resume export endpoint for a resume identifier.
+ *
+ * @param resumeId Resume identifier.
+ * @returns Resume export endpoint path.
+ */
+export function buildResumeExportEndpoint(resumeId: string): string {
+  return `${API_ENDPOINTS.resumes}/${encodeURIComponent(resumeId.trim())}/export`;
+}
+
+/**
+ * Builds the cover-letter export endpoint for a cover-letter identifier.
+ *
+ * @param coverLetterId Cover-letter identifier.
+ * @returns Cover-letter export endpoint path.
+ */
+export function buildCoverLetterExportEndpoint(coverLetterId: string): string {
+  return `${API_ENDPOINTS.coverLetters}/${encodeURIComponent(coverLetterId.trim())}/export`;
+}
+
+/**
  * Canonical WebSocket endpoints used by real-time UI flows.
  */
 export const WS_ENDPOINTS = {

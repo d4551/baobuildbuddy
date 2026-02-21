@@ -1,5 +1,3 @@
-import type { CoverLetterTemplate } from "../types/cover-letter";
-
 /**
  * Canonical cover-letter template options shared across client and server layers.
  */
@@ -7,7 +5,14 @@ export const COVER_LETTER_TEMPLATE_OPTIONS = [
   "professional",
   "creative",
   "gaming",
-] as const satisfies readonly CoverLetterTemplate[];
+  "executive",
+  "technical",
+] as const;
+
+/**
+ * Cover-letter template union derived from canonical options.
+ */
+export type CoverLetterTemplate = (typeof COVER_LETTER_TEMPLATE_OPTIONS)[number];
 
 /**
  * Default cover-letter template used when no explicit template is selected.

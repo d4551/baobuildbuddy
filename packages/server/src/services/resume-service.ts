@@ -1,8 +1,32 @@
-import { generateId } from "@bao/shared";
+import {
+  RESUME_TEMPLATE_DEFAULT,
+  RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_THEME,
+  generateId,
+  isResumeTemplate,
+  resumeEducationSchema,
+  resumeExperienceSchema,
+  resumeGamingExperienceSchema,
+  resumePersonalInfoSchema,
+  resumeProjectSchema,
+  resumeSkillsSchema,
+} from "@bao/shared";
 import type { GamingExperience, ResumeData, ResumePersonalInfo, ResumeSkills } from "@bao/shared";
+import * as z from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { resumes } from "../db/schema";
+
+const resumeExperienceArraySchema = z.array(resumeExperienceSchema);
+const resumeEducationArraySchema = z.array(resumeEducationSchema);
+const resumeProjectArraySchema = z.array(resumeProjectSchema);
+
+const toResumeSummary = (value: string | null | undefined): string => value ?? "";
+
+const parseOrDefault = <T>(schema: z.ZodType<T>, value: unknown, fallback: T): T => {
+  const parsed = schema.safeParse(value);
+  return parsed.success ? parsed.data : fallback;
+};
 
 const toRecord = (value: object): Record<string, unknown> => {
   const record: Record<string, unknown> = {};
@@ -23,35 +47,49 @@ const toGamingExperienceRecord = (
   value: GamingExperience | undefined,
 ): Record<string, unknown> | undefined => (value ? toRecord(value) : undefined);
 
+/**
+ * Resume persistence service with validation and normalization from storage records.
+ */
 export class ResumeService {
   private toResumeData(row: typeof resumes.$inferSelect): ResumeData {
-    const resume: ResumeData = {
+    const experience: ResumeData["experience"] = parseOrDefault(
+      resumeExperienceArraySchema,
+      row.experience,
+      [],
+    );
+    const education: ResumeData["education"] = parseOrDefault(
+      resumeEducationArraySchema,
+      row.education,
+      [],
+    );
+    const projects: ResumeData["projects"] = parseOrDefault(
+      resumeProjectArraySchema,
+      row.projects,
+      [],
+    );
+
+    return {
       id: row.id,
-      experience: (row.experience || []) as ResumeData["experience"],
-      education: (row.education || []) as ResumeData["education"],
-      projects: (row.projects || []) as ResumeData["projects"],
+      name: parseOrDefault(z.string().min(1), row.name, RESUME_DEFAULT_NAME),
+      personalInfo: parseOrDefault(
+        resumePersonalInfoSchema.optional(),
+        row.personalInfo,
+        undefined,
+      ),
+      summary: toResumeSummary(row.summary),
+      experience,
+      education,
+      skills: parseOrDefault(resumeSkillsSchema.optional(), row.skills, undefined),
+      projects,
+      gamingExperience: parseOrDefault(
+        resumeGamingExperienceSchema.optional(),
+        row.gamingExperience,
+        undefined,
+      ),
       template: this.normalizeTemplate(row.template),
       theme: this.normalizeTheme(row.theme),
-      isDefault: row.isDefault || false,
+      isDefault: parseOrDefault(z.boolean(), row.isDefault, false),
     };
-
-    if (row.name) {
-      resume.name = row.name;
-    }
-    if (row.personalInfo) {
-      resume.personalInfo = row.personalInfo;
-    }
-    if (row.summary) {
-      resume.summary = row.summary;
-    }
-    if (row.skills) {
-      resume.skills = row.skills;
-    }
-    if (row.gamingExperience) {
-      resume.gamingExperience = row.gamingExperience;
-    }
-
-    return resume;
   }
 
   /**
@@ -84,7 +122,7 @@ export class ResumeService {
 
     const insertPayload: typeof resumes.$inferInsert = {
       id,
-      name: data.name || "Untitled Resume",
+      name: data.name || RESUME_DEFAULT_NAME,
       personalInfo: toPersonalInfoRecord(data.personalInfo),
       ...(data.summary ? { summary: data.summary } : {}),
       experience: data.experience || [],
@@ -92,8 +130,8 @@ export class ResumeService {
       skills: toSkillsRecord(data.skills),
       projects: data.projects || [],
       gamingExperience: toGamingExperienceRecord(data.gamingExperience),
-      template: data.template || "modern",
-      theme: data.theme || "light",
+      template: data.template || RESUME_TEMPLATE_DEFAULT,
+      theme: data.theme || RESUME_DEFAULT_THEME,
       isDefault: data.isDefault || false,
       createdAt: now,
       updatedAt: now,
@@ -174,17 +212,16 @@ export class ResumeService {
   }
 
   private normalizeTemplate(template: string | null): ResumeData["template"] {
-    if (!template) return "modern";
-    const valid = ["modern", "classic", "creative", "minimal", "gaming"] as const;
-    return valid.includes(template as (typeof valid)[number])
-      ? (template as (typeof valid)[number])
-      : "modern";
+    return isResumeTemplate(template) ? template : RESUME_TEMPLATE_DEFAULT;
   }
 
   private normalizeTheme(theme: string | null): ResumeData["theme"] {
     if (theme === "dark") return "dark";
-    return "light";
+    return RESUME_DEFAULT_THEME;
   }
 }
 
+/**
+ * Shared singleton instance for resume CRUD operations.
+ */
 export const resumeService = new ResumeService();

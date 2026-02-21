@@ -1,4 +1,12 @@
-import { safeParseJson, type ResumeData } from "@bao/shared";
+import {
+  RESUME_TEMPLATE_DEFAULT,
+  RESUME_TEMPLATE_OPTIONS,
+  RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_THEME,
+  isResumeTemplate,
+  safeParseJson,
+  type ResumeData,
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
@@ -10,14 +18,9 @@ import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { exportService } from "../services/export-service";
 import { resumeService } from "../services/resume-service";
 
-const resumeTemplateBodySchema = t.Union([
-  t.Literal("modern"),
-  t.Literal("classic"),
-  t.Literal("creative"),
-  t.Literal("minimal"),
-  t.Literal("google-xyz"),
-  t.Literal("gaming"),
-]);
+const resumeTemplateBodySchema = t.String({
+  enum: RESUME_TEMPLATE_OPTIONS,
+});
 
 const resumeThemeBodySchema = t.Union([t.Literal("light"), t.Literal("dark")]);
 
@@ -70,6 +73,13 @@ const resumeGamingExperienceBodySchema = t.Object({
   genres: t.Optional(t.String({ maxLength: 500 })),
   shippedTitles: t.Optional(t.String({ maxLength: 1000 })),
 });
+
+const toResumeTemplateOrDefault = (value: string | undefined): ResumeData["template"] =>
+  isResumeTemplate(value) ? value : RESUME_TEMPLATE_DEFAULT;
+
+const toResumeTemplateOrUndefined = (
+  value: string | undefined,
+): ResumeData["template"] | undefined => (isResumeTemplate(value) ? value : undefined);
 
 export const resumeRoutes = new Elysia({ prefix: "/resumes" })
   .post(
@@ -141,7 +151,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
     "/",
     async ({ body, set }) => {
       const createPayload: Omit<ResumeData, "id"> = {
-        name: body.name || "Untitled Resume",
+        name: body.name || RESUME_DEFAULT_NAME,
         personalInfo: body.personalInfo || {},
         summary: body.summary || "",
         experience: body.experience || [],
@@ -149,8 +159,8 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         skills: body.skills || {},
         projects: body.projects || [],
         gamingExperience: body.gamingExperience || {},
-        template: body.template || "modern",
-        theme: body.theme || "light",
+        template: toResumeTemplateOrDefault(body.template),
+        theme: body.theme || RESUME_DEFAULT_THEME,
         isDefault: body.isDefault === true,
       };
       const created = await resumeService.createResume(createPayload);
@@ -203,7 +213,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         skills: body.skills,
         projects: body.projects,
         gamingExperience: body.gamingExperience,
-        template: body.template,
+        template: toResumeTemplateOrUndefined(body.template),
         theme: body.theme,
         isDefault: body.isDefault,
       };
@@ -259,7 +269,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         return { error: "Resume not found" };
       }
 
-      const templateName = body.template || resume.template || "modern";
+      const templateName = body.template || resume.template || RESUME_TEMPLATE_DEFAULT;
       return exportService
         .exportResumePDF(resume, templateName)
         .then((pdfBytes) => {

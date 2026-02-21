@@ -10,6 +10,7 @@ dist-electron/
 build/
 target/
 .tauri/
+packages/desktop/src-tauri/gen/
 
 # Cache
 .vite/

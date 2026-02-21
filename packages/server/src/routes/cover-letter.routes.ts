@@ -1,7 +1,9 @@
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
+  COVER_LETTER_TEMPLATE_OPTIONS,
   generateId,
   isCoverLetterTemplate,
+  type CoverLetterTemplate,
   safeParseJson,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
@@ -15,6 +17,10 @@ import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts";
 import { exportService } from "../services/export-service";
 
+const coverLetterTemplateBodySchema = t.String({
+  enum: COVER_LETTER_TEMPLATE_OPTIONS,
+});
+
 const toJsonRecord = (value: unknown): Record<string, unknown> => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return {};
@@ -26,7 +32,7 @@ const toJsonRecord = (value: unknown): Record<string, unknown> => {
   return record;
 };
 
-const normalizeTemplate = (value: string | undefined): string => {
+const normalizeTemplate = (value: string | undefined): CoverLetterTemplate => {
   return isCoverLetterTemplate(value) ? value : COVER_LETTER_DEFAULT_TEMPLATE;
 };
 
@@ -71,7 +77,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
         position: t.String({ maxLength: 200 }),
         jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
         content: t.Optional(t.Record(t.String(), t.Unknown())),
-        template: t.Optional(t.String({ maxLength: 50 })),
+        template: t.Optional(coverLetterTemplateBodySchema),
       }),
     },
   )
@@ -108,7 +114,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
       if (body.position !== undefined) updates.position = body.position;
       if (body.jobInfo !== undefined) updates.jobInfo = body.jobInfo;
       if (body.content !== undefined) updates.content = body.content;
-      if (body.template !== undefined) updates.template = body.template;
+      if (body.template !== undefined) updates.template = normalizeTemplate(body.template);
 
       await db.update(coverLetters).set(updates).where(eq(coverLetters.id, params.id));
 
@@ -124,7 +130,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
         position: t.Optional(t.String({ maxLength: 200 })),
         jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
         content: t.Optional(t.Record(t.String(), t.Unknown())),
-        template: t.Optional(t.String({ maxLength: 50 })),
+        template: t.Optional(coverLetterTemplateBodySchema),
       }),
     },
   )
@@ -240,7 +246,7 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
         position: t.String({ maxLength: 200 }),
         jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
         resumeId: t.Optional(t.String({ maxLength: 100 })),
-        template: t.Optional(t.String({ maxLength: 50 })),
+        template: t.Optional(coverLetterTemplateBodySchema),
         save: t.Optional(t.Boolean()),
       }),
     },

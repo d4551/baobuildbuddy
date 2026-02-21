@@ -1,3 +1,5 @@
+import type { CoverLetterTemplate } from "../constants/cover-letter";
+
 /**
  * Cover letter types
  */
@@ -23,5 +25,3 @@ export interface CoverLetterContent {
   // Alternate: full sections keyed by name
   [section: string]: string | undefined;
 }
-
-export type CoverLetterTemplate = "professional" | "creative" | "gaming";

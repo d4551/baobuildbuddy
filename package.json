@@ -32,9 +32,10 @@
     "validate:no-unsafe-casts": "bun run scripts/validate-no-unsafe-casts.ts",
     "validate:no-hardcoded-paths": "bun run scripts/validate-no-hardcoded-paths.ts",
     "validate:locales": "bun run scripts/validate-locale-overrides.ts",
+    "validate:i18n-ui": "bun run scripts/validate-ui-i18n.ts",
     "verify:pages": "bun run scripts/verify-pages.ts",
-    "lint": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:aria && bun run validate:ui && bun --bun run biome lint . && bun run --filter '@bao/client' lint",
-    "lint:fix": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:aria && bun run validate:ui && bun --bun run biome lint . --write && bun run --filter '@bao/client' lint --fix"
+    "lint": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun --bun run biome lint . && bun run --filter '@bao/client' lint",
+    "lint:fix": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun --bun run biome lint . --write && bun run --filter '@bao/client' lint --fix"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.3",

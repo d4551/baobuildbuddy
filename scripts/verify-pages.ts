@@ -1,5 +1,6 @@
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
+import { APP_BRAND } from "../packages/shared/src/constants/branding";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type RouteVerificationResult = {
@@ -27,6 +28,7 @@ const htmlMainPattern = /<main\b[^>]*>/iu;
 const htmlTagPattern = /<[^>]+>/gu;
 const whitespacePattern = /\s+/gu;
 const lineSeparator = "-".repeat(72);
+const expectedBrandToken = APP_BRAND.name.toLowerCase();
 
 const routePaths = Array.from(new Set(Object.values(APP_ROUTES)));
 
@@ -54,6 +56,15 @@ const verifyRoute = async (
   }
 
   const html = await response.text();
+  if (route === "/" && !html.toLowerCase().includes(expectedBrandToken)) {
+    return {
+      locale,
+      route,
+      status: response.status,
+      reason: `Root route did not include expected brand token "${APP_BRAND.name}". Verify VERIFY_HOST/VERIFY_PORT target the BaoBuildBuddy app.`,
+    };
+  }
+
   const headingMatch = html.match(htmlHeadingPattern);
   const heading = normalizeText(headingMatch?.[1] ?? "");
 

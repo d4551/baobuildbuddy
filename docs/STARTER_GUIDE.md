@@ -263,7 +263,9 @@ If this is your very first time and you want full confidence:
 ```bash
 bun run format:check
 bun run validate:no-try-catch
+bun run validate:i18n-ui
 bun run validate:ui
+bun run verify:pages
 bun run typecheck
 bun run lint
 bun run test
@@ -343,15 +345,21 @@ If your org requires Electron-specific tooling, Electron remains viable but is i
 bun run build:desktop
 ```
 
-Output goes to:
+Raw output is generated under:
 
 - `packages/desktop/src-tauri/target/release/bundle`
 
-Typical installables generated there:
+Canonical release artifacts are organized under:
 
-- macOS: `.app` and `.dmg`
-- Linux: `.AppImage`, `.deb`, `.rpm`
-- Windows: `.exe` and `.msi`
+- `packages/desktop/releases/macos`
+- `packages/desktop/releases/linux`
+- `packages/desktop/releases/windows`
+
+Current installables in this repository:
+
+- macOS: `BaoBuildBuddy_0.1.0_aarch64.dmg`
+- Linux: `BaoBuildBuddy_0.1.0_aarch64.AppImage`, `BaoBuildBuddy_0.1.0_arm64.deb`, `BaoBuildBuddy-0.1.0-1.aarch64.rpm`
+- Windows: `BaoBuildBuddy_0.1.0_x64-setup.exe`, `BaoBuildBuddy_0.1.0_x64-portable.exe`
 
 If `bun run build:desktop` fails with `failed to run 'cargo metadata'`, install Rust and reopen your shell:
 

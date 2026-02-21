@@ -33,7 +33,7 @@ const getLocaleLabel = (localeCode: string): string => {
         </svg>
       </label>
       <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-ghost gap-2 text-xl font-bold text-primary lg:hidden">
-        <span class="text-lg leading-none" aria-hidden="true">{{ APP_BRAND.logoEmoji }}</span>
+        <img :src="APP_BRAND.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
         <span>{{ APP_BRAND.name }}</span>
       </NuxtLink>
     </div>

@@ -147,7 +147,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     title: string;
                     startDate: string;
                 }[] | undefined;
-                template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | undefined;
+                template?: string | undefined;
                 isDefault?: boolean | undefined;
             };
             params: {};
@@ -246,7 +246,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         title: string;
                         startDate: string;
                     }[] | undefined;
-                    template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | undefined;
+                    template?: string | undefined;
                     isDefault?: boolean | undefined;
                 };
                 params: {
@@ -311,7 +311,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 post: {
                     body: {
                         format?: string | undefined;
-                        template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | undefined;
+                        template?: string | undefined;
                     };
                     params: {
                         id: string;

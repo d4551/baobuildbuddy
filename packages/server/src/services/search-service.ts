@@ -4,6 +4,7 @@ import { jobs } from "../db/schema/jobs";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { studios } from "../db/schema/studios";
+import { RESUME_DEFAULT_NAME, RESUME_TEMPLATE_DEFAULT, isResumeTemplate } from "@bao/shared";
 
 type SearchType = "jobs" | "studios" | "skills" | "resumes";
 
@@ -137,8 +138,9 @@ export class SearchService {
           results.push({
             type: "resumes",
             id: resume.id,
-            title: resume.name || "Untitled",
-            subtitle: resume.template || "modern",
+            title: resume.name || RESUME_DEFAULT_NAME,
+            subtitle:
+              isResumeTemplate(resume.template) ? resume.template : RESUME_TEMPLATE_DEFAULT,
             snippet: resume.summary?.slice(0, 150) || "",
             relevance: 0.7,
           });

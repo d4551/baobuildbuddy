@@ -2,7 +2,7 @@ export const APP_BRAND = {
   name: "BaoBuildBuddy",
   assistantName: "BaoBuildBuddy",
   apiName: "BaoBuildBuddy API",
-  logoEmoji: "🥟",
+  logoPath: "/favicon.svg",
 } as const;
 
 export const APP_SEO = {

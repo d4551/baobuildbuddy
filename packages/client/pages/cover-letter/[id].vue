@@ -64,9 +64,7 @@ const contentSectionCount = computed(() => {
 const hasUnsavedChanges = computed(() => buildFormFingerprint() !== lastSavedFingerprint.value);
 
 function templateLabel(template: CoverLetterTemplate): string {
-  if (template === "professional") return t("coverLetterDetailPage.templates.professional");
-  if (template === "creative") return t("coverLetterDetailPage.templates.creative");
-  return t("coverLetterDetailPage.templates.gaming");
+  return t(`coverLetterDetailPage.templates.${template}`);
 }
 
 function resolveTemplate(value: string | undefined): CoverLetterTemplate {

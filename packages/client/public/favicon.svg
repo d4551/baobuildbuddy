@@ -1,3 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dumpling">
-  <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle" font-size="52">🥟</text>
+  <defs>
+    <linearGradient id="bao-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff7ed" />
+      <stop offset="100%" stop-color="#ffedd5" />
+    </linearGradient>
+    <linearGradient id="bao-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fde68a" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+  </defs>
+
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bao-bg)" />
+
+  <path
+    d="M10 40c0-13.255 9.85-23 22-23s22 9.745 22 23c0 6.4-4.2 12-22 12S10 46.4 10 40Z"
+    fill="url(#bao-fill)"
+    stroke="#9a3412"
+    stroke-width="2.25"
+    stroke-linejoin="round"
+  />
+
+  <path d="M20 27c1.2 3.4 1.2 6.8 0 10.2" stroke="#9a3412" stroke-width="1.8" stroke-linecap="round" />
+  <path d="M27 23.8c1.2 4 1.2 7.8 0 11.8" stroke="#9a3412" stroke-width="1.8" stroke-linecap="round" />
+  <path d="M34 22.5c1 4.2 1 8.3 0 12.5" stroke="#9a3412" stroke-width="1.8" stroke-linecap="round" />
+  <path d="M41 23.8c1.2 4 1.2 7.8 0 11.8" stroke="#9a3412" stroke-width="1.8" stroke-linecap="round" />
+  <path d="M48 27c1.2 3.4 1.2 6.8 0 10.2" stroke="#9a3412" stroke-width="1.8" stroke-linecap="round" />
 </svg>

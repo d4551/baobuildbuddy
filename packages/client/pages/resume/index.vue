@@ -3,7 +3,10 @@ import {
   APP_ROUTES,
   APP_ROUTE_QUERY_KEYS,
   RESUME_LIST_PAGE_SIZE,
+  RESUME_TEMPLATE_DEFAULT,
+  RESUME_TEMPLATE_OPTIONS,
   type ResumeFormData,
+  type ResumeTemplate,
   formDataToResumeData,
   resumeDataToFormData,
 } from "@bao/shared";
@@ -35,7 +38,7 @@ const { awardForAction } = usePipelineGamification();
 
 const showCreateModal = ref(false);
 const newResumeName = ref("");
-const newResumeTemplate = ref("modern");
+const newResumeTemplate = ref<ResumeTemplate>(RESUME_TEMPLATE_DEFAULT);
 const createDialogRef = ref<HTMLDialogElement | null>(null);
 useFocusTrap(createDialogRef, () => showCreateModal.value);
 const selectedResumeId = ref<string | null>(null);
@@ -49,6 +52,22 @@ const scoring = ref(false);
 const scoreResult = ref<Record<string, unknown> | null>(null);
 const resumeSearchQuery = ref("");
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const templateLabelMap = computed<Record<ResumeTemplate, string>>(() => {
+  const templates = t("resumePage.createModal.templates") as Record<
+    string,
+    string
+  >;
+  return RESUME_TEMPLATE_OPTIONS.reduce((acc, template) => {
+    acc[template] = templates[template] ?? template;
+    return acc;
+  }, {} as Record<ResumeTemplate, string>);
+});
+const createResumeTemplateOptions = computed(() =>
+  RESUME_TEMPLATE_OPTIONS.map((template) => ({
+    value: template,
+    label: templateLabelMap.value[template],
+  })),
+);
 const aiEnhancementStepLabels = computed(
   () =>
     [
@@ -183,6 +202,13 @@ function resumeTabLabel(tab: ResumeTabId): string {
 
 function resumeTabAriaLabel(tab: ResumeTabId): string {
   return t("resumePage.tabs.selectAria", { tab: resumeTabLabel(tab) });
+}
+
+function resumeTemplateLabel(template?: string): string {
+  if (!template) {
+    return templateLabelMap.value[RESUME_TEMPLATE_DEFAULT];
+  }
+  return templateLabelMap.value[template as ResumeTemplate] ?? template;
 }
 
 function clearResumeFilters() {
@@ -607,7 +633,7 @@ async function resolvePipelineReward(
             <div class="card-body">
               <h3 class="card-title">{{ resume.name }}</h3>
               <div class="flex gap-2 mt-2">
-                <span class="badge badge-sm">{{ resume.template }}</span>
+                <span class="badge badge-sm">{{ resumeTemplateLabel(resume.template) }}</span>
                 <span v-if="resume.isDefault" class="badge badge-primary badge-sm">{{ t("resumePage.defaultBadge") }}</span>
               </div>
               <div class="card-actions justify-end mt-4">
@@ -1200,10 +1226,13 @@ async function resolvePipelineReward(
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("resumePage.createModal.templateLegend") }}</legend>
           <select v-model="newResumeTemplate" class="select w-full" :aria-label="t('resumePage.createModal.templateAria')">
-            <option value="modern">{{ t("resumePage.createModal.templates.modern") }}</option>
-            <option value="classic">{{ t("resumePage.createModal.templates.classic") }}</option>
-            <option value="creative">{{ t("resumePage.createModal.templates.creative") }}</option>
-            <option value="minimal">{{ t("resumePage.createModal.templates.minimal") }}</option>
+            <option
+              v-for="templateOption in createResumeTemplateOptions"
+              :key="templateOption.value"
+              :value="templateOption.value"
+            >
+              {{ templateOption.label }}
+            </option>
           </select>
         </fieldset>
 

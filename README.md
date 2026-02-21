@@ -692,19 +692,25 @@ This command:
 bun run build:desktop
 ```
 
-Build outputs are placed under `packages/desktop/src-tauri/target`.
+Build outputs are generated under `packages/desktop/src-tauri/target/release/bundle` and then organized into the canonical release directory:
 
-Expected installer artifacts by platform:
+- `packages/desktop/releases/macos`
+- `packages/desktop/releases/linux`
+- `packages/desktop/releases/windows`
 
-- macOS: `packages/desktop/src-tauri/target/release/bundle/macos/*.app`, `packages/desktop/src-tauri/target/release/bundle/dmg/*.dmg`
-- Linux: `packages/desktop/src-tauri/target/release/bundle/appimage/*.AppImage`, `packages/desktop/src-tauri/target/release/bundle/deb/*.deb`, `packages/desktop/src-tauri/target/release/bundle/rpm/*.rpm`
-- Windows: `packages/desktop/src-tauri/target/release/bundle/nsis/*.exe`, `packages/desktop/src-tauri/target/release/bundle/msi/*.msi`
+Current verified artifacts:
+
+- macOS: `packages/desktop/releases/macos/BaoBuildBuddy_0.1.0_aarch64.dmg`
+- Linux: `packages/desktop/releases/linux/BaoBuildBuddy_0.1.0_aarch64.AppImage`, `packages/desktop/releases/linux/BaoBuildBuddy_0.1.0_arm64.deb`, `packages/desktop/releases/linux/BaoBuildBuddy-0.1.0-1.aarch64.rpm`
+- Windows: `packages/desktop/releases/windows/BaoBuildBuddy_0.1.0_x64-setup.exe`, `packages/desktop/releases/windows/BaoBuildBuddy_0.1.0_x64-portable.exe`
+
+Release checksums are generated in `packages/desktop/releases/sha256.txt`.
 
 Install locally after building:
 
 - macOS: open the generated `.dmg` and drag the `.app` into `Applications`
 - Linux: `chmod +x` for `.AppImage` and run directly, or install `.deb`/`.rpm` with your package manager
-- Windows: run the generated `.exe` or `.msi` installer as a normal desktop installer
+- Windows: run the generated `.exe` installer (or portable `.exe`) as a normal desktop install flow
 
 If desktop build fails with `failed to run 'cargo metadata'`, install Rust using:
 
@@ -861,15 +867,17 @@ bun run dev:client
 | Build (Windows) | `bun run build:windows` | Windows entrypoint for CI/local build |
 | Build desktop | `bun run build:desktop` | Build Tauri installer artifacts |
 | Build desktop (debug) | `bun run build:desktop:debug` | Build Tauri debug installer artifacts |
+| Verify SSR pages | `bun run verify:pages` | Validate localized routes return SSR HTML with `<title>`, `<h1>`, and `<main>` |
 | Server API type contract | `bun run --filter '@bao/server' build:types` | Generate `packages/server/dist-types` declarations used by client typecheck |
 | Format | `bun run format` | Apply Biome formatter |
 | Format check | `bun run format:check` | Verify formatter output |
 | UI accessibility + token checks | `bun run validate:ui` | Enforce WCAG contrast pairs and block hardcoded UI colors in client source |
+| UI i18n coverage checks | `bun run validate:i18n-ui` | Reject static template copy/attributes and missing `t('...')` keys |
 | No try/catch validation | `bun run validate:no-try-catch` | Enforce repository-wide no-`try/catch` policy in source files |
 | Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
 | Test | `bun run test` | Run test suites for server and client |
-| Lint | `bun run lint` | `validate:no-try-catch` + `validate:ui` + Biome lint + client ESLint |
-| Lint fix | `bun run lint:fix` | `validate:no-try-catch` + `validate:ui` + auto-fix lint issues in Biome and client ESLint |
+| Lint | `bun run lint` | `validate:no-try-catch` + `validate:i18n-ui` + `validate:ui` + Biome lint + client ESLint |
+| Lint fix | `bun run lint:fix` | `validate:no-try-catch` + `validate:i18n-ui` + `validate:ui` + auto-fix lint issues in Biome and client ESLint |
 | DB generate | `bun run db:generate` | Generate Drizzle migration files |
 | DB push | `bun run db:push` | Push schema changes to SQLite |
 | DB studio | `bun run db:studio` | Open Drizzle Studio GUI for database inspection |
@@ -892,7 +900,9 @@ bun run dev:client
 ```bash
 bun run format:check
 bun run validate:no-try-catch
+bun run validate:i18n-ui
 bun run validate:ui
+bun run verify:pages
 bun run typecheck
 bun run lint
 bun run test
@@ -900,7 +910,8 @@ bun run test
 
 Client-side runtime tests for composables use `*.nuxt.spec.ts` and initialize Nuxt with a package-root `rootDir` so alias resolution stays deterministic in workspace runs. Keep those tests explicit about external dependencies (`useApi`) and avoid relying on unresolved auto-import side effects.
 `bun run typecheck` generates server API declarations (`packages/server/dist-types`) before running package typechecks, so Nuxt client typechecking consumes contract types instead of server implementation internals.
-`bun run lint` includes `validate:no-try-catch`, which fails when `try/catch` blocks appear in source. Error handling should follow Elysia/Eden typed response contracts and shared settled-result helpers.
+`bun run lint` includes `validate:no-try-catch` and `validate:i18n-ui`, which fail when `try/catch` blocks or static non-localized UI copy appear in source. Error handling should follow Elysia/Eden typed response contracts and shared settled-result helpers.
+If `3001` is occupied locally, run page verification against an alternate UI port via `VERIFY_HOST` and `VERIFY_PORT`.
 Server-side tests run with deterministic in-process AI behavior (`BAO_TEST_MODE=1`), so test execution does not depend on external AI providers or network availability.
 Rate-limited route groups use header-aware client-key generation (`x-forwarded-for` / `cf-connecting-ip` / `x-real-ip` fallback), which keeps behavior deterministic in local tests and proxy deployments.
 For a non-technical runbook with copy/paste steps only, use `docs/STARTER_GUIDE.md`.
@@ -964,6 +975,7 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 ### 11.6 UI wiring and accessibility verification
 
 ```bash
+bun run validate:i18n-ui
 bun run validate:ui
 bun run --filter '@bao/client' lint
 ```
@@ -972,6 +984,8 @@ The UI verification pipeline enforces:
 
 - WCAG AA color contrast for configured daisyUI theme pairs (`*-content` on semantic backgrounds)
 - no hardcoded UI colors in client source (hex/rgb/hsl/oklch literals, Tailwind palette classes, arbitrary color literals)
+- no static user-facing template copy or static ARIA/placeholder/title attributes in Vue templates
+- all statically referenced `t('...')` keys resolve in the base `en-US` locale schema
 - form controls are programmatically labeled (`label` + `for`, nesting, or ARIA label)
 - clickable UI surfaces are keyboard-operable and focusable
 - anchor and icon-only controls expose accessible names
@@ -979,7 +993,7 @@ The UI verification pipeline enforces:
 
 ```mermaid
 flowchart LR
-  Templates["Vue templates + CSS tokens"] --> UIValidate["bun run validate:ui"]
+  Templates["Vue templates + CSS tokens"] --> UIValidate["bun run validate:i18n-ui + validate:ui"]
   UIValidate --> UIState{"Contrast + token checks pass?"}
   UIState -->|No| UIFixes["Fix theme token pairs or remove hardcoded colors"]
   UIFixes --> UIValidate
@@ -1299,6 +1313,7 @@ bun run scripts/validate-ascii-geometry.ts README.md
 - [ ] `.env` populated from `.env.example` with environment-specific values
 - [ ] `bun run typecheck` passes
 - [ ] `bun run validate:no-try-catch` passes
+- [ ] `bun run validate:i18n-ui` passes
 - [ ] `bun run lint` passes
 - [ ] `bun run test` passes
 - [ ] `bun run db:generate` + `bun run db:push` complete

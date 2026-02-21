@@ -103,7 +103,9 @@ defineProps<{
             </div>
             <div class="text-right">
               <span class="text-sm text-base-content/70">{{ edu.graduationDate }}</span>
-              <p v-if="edu.gpa" class="text-sm text-base-content/70">GPA: {{ edu.gpa }}</p>
+              <p v-if="edu.gpa" class="text-sm text-base-content/70">
+                {{ t("resumePreview.gpaLabel", { gpa: edu.gpa }) }}
+              </p>
             </div>
           </div>
         </div>

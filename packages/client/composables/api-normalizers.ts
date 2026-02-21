@@ -15,6 +15,8 @@ import {
   type CoverLetterData,
   COVER_LETTER_DEFAULT_TEMPLATE,
   isCoverLetterTemplate,
+  RESUME_TEMPLATE_DEFAULT,
+  RESUME_TEMPLATE_OPTIONS,
   DEFAULT_AUTOMATION_SETTINGS,
   type GameStudio,
   type Job,
@@ -43,15 +45,6 @@ import {
   asStringArray,
   isRecord,
 } from "@bao/shared";
-
-const RESUME_TEMPLATES: readonly ResumeTemplate[] = [
-  "modern",
-  "classic",
-  "creative",
-  "minimal",
-  "google-xyz",
-  "gaming",
-];
 
 const AI_PROVIDERS: readonly AIProviderType[] = [
   "local",
@@ -131,7 +124,7 @@ const asEnumArray = <T extends string>(value: unknown, choices: readonly T[]): T
   Array.isArray(value) ? value.filter((entry): entry is T => isOneOf(entry, choices)) : [];
 
 const normalizeResumeTemplate = (value: unknown): ResumeTemplate =>
-  asEnum(value, RESUME_TEMPLATES) ?? "modern";
+  asEnum(value, RESUME_TEMPLATE_OPTIONS) ?? RESUME_TEMPLATE_DEFAULT;
 
 const normalizeJobExperienceLevel = (value: unknown): JobExperienceLevel | undefined =>
   asEnum(value, JOB_EXPERIENCE_LEVELS);

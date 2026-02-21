@@ -1,3 +1,5 @@
+import type { ResumeTemplate, ResumeExportFormat } from "../constants/resume";
+
 /**
  * Resume types for builder, exports, and AI services
  */
@@ -67,15 +69,7 @@ export interface GamingExperience {
   shippedTitles?: string;
 }
 
-export type ResumeTemplate =
-  | "modern"
-  | "classic"
-  | "creative"
-  | "minimal"
-  | "google-xyz"
-  | "gaming";
-
-export type ExportFormat = "pdf" | "docx" | "html" | "json" | "markdown";
+export type ExportFormat = ResumeExportFormat;
 
 export interface ExportOptions {
   template?: ResumeTemplate;

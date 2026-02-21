@@ -1,4 +1,12 @@
 import type { Database } from "bun:sqlite";
+import {
+  COVER_LETTER_DEFAULT_TEMPLATE,
+  RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_THEME,
+  RESUME_TEMPLATE_DEFAULT,
+} from "@bao/shared";
+
+const escapeSqlString = (value: string): string => value.replaceAll("'", "''");
 
 const TABLE_DEFINITIONS = [
   `CREATE TABLE IF NOT EXISTS user_profile (
@@ -86,7 +94,7 @@ const TABLE_DEFINITIONS = [
     )`,
   `CREATE TABLE IF NOT EXISTS resumes (
       id TEXT PRIMARY KEY,
-      name TEXT DEFAULT 'Untitled Resume',
+      name TEXT DEFAULT '${escapeSqlString(RESUME_DEFAULT_NAME)}',
       personal_info TEXT,
       summary TEXT,
       experience TEXT DEFAULT '[]',
@@ -94,8 +102,8 @@ const TABLE_DEFINITIONS = [
       skills TEXT,
       projects TEXT DEFAULT '[]',
       gaming_experience TEXT,
-      template TEXT DEFAULT 'modern',
-      theme TEXT DEFAULT 'light',
+      template TEXT DEFAULT '${escapeSqlString(RESUME_TEMPLATE_DEFAULT)}',
+      theme TEXT DEFAULT '${escapeSqlString(RESUME_DEFAULT_THEME)}',
       is_default INTEGER DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
@@ -106,7 +114,7 @@ const TABLE_DEFINITIONS = [
       position TEXT NOT NULL,
       job_info TEXT,
       content TEXT DEFAULT '{}',
-      template TEXT DEFAULT 'professional',
+      template TEXT DEFAULT '${escapeSqlString(COVER_LETTER_DEFAULT_TEMPLATE)}',
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,

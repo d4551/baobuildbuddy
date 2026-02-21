@@ -288,13 +288,19 @@ Jobs are cached in SQLite using Drizzle ORM:
 
 ### Cache Expiry
 
-Jobs are cached for 6 hours by default. Modify in constructor:
+Jobs are cached for 6 hours by default (`job-aggregator.ts`, `cacheExpiry`):
 
 ```typescript
 constructor() {
   this.cacheExpiry = 6 * 60 * 60 * 1000 // 6 hours
 }
 ```
+
+### Provider runtime source of truth
+
+Provider runtime settings are loaded from `settings.automationSettings.jobProviders` through `providers/provider-settings.ts`.
+If this object is missing or invalid, provider initialization fails with a deterministic configuration error.
+Use `PUT /api/settings` to update provider runtime configuration without code changes.
 
 ### Adding Custom Providers
 

@@ -163,6 +163,7 @@ Automation pages under `/automation` must pass the same UI wiring/accessibility 
 
 ```bash
 bun run validate:no-try-catch
+bun run validate:i18n-ui
 bun run validate:ui
 bun run --filter '@bao/client' lint
 ```
@@ -176,7 +177,7 @@ Required behavior:
 
 ```mermaid
 flowchart LR
-  UI["Automation Vue pages"] --> ValidateUI["bun run validate:ui"]
+  UI["Automation Vue pages"] --> ValidateUI["bun run validate:i18n-ui + validate:ui"]
   ValidateUI --> ColorState{"WCAG contrast + token checks pass?"}
   ColorState -->|No| ColorFix["Fix semantic classes or theme tokens"]
   ColorFix --> ValidateUI
@@ -200,7 +201,7 @@ bun run test
 ```
 
 `bun run typecheck` generates `packages/server/dist-types` first so client-side Nuxt typechecking validates against the typed API contract surface.
-`bun run lint` includes `validate:no-try-catch`, which enforces the repository no-`try/catch` rule in source files.
+`bun run lint` includes `validate:no-try-catch` and `validate:i18n-ui`, which enforce the no-`try/catch` rule and i18n-safe UI copy standards in source files.
 
 ### Integration coverage
 

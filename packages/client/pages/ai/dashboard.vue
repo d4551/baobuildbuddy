@@ -459,7 +459,13 @@ onMounted(() => {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("aiDashboard.stats.averageResponseTitle") }}</div>
-          <div class="stat-value text-secondary">{{ providerStats.averageResponseTimeSeconds }}s</div>
+          <div class="stat-value text-secondary">
+            {{
+              t("aiDashboard.stats.averageResponseValue", {
+                seconds: providerStats.averageResponseTimeSeconds,
+              })
+            }}
+          </div>
           <div class="stat-desc">{{ t("aiDashboard.stats.averageResponseDesc") }}</div>
         </div>
         <div class="stat">

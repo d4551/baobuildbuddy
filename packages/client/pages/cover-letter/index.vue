@@ -141,9 +141,7 @@ watch(showGenerateModal, (isOpen) => {
 });
 
 function templateLabel(template: CoverLetterTemplate): string {
-  if (template === "professional") return t("coverLetterPage.templates.professional");
-  if (template === "creative") return t("coverLetterPage.templates.creative");
-  return t("coverLetterPage.templates.gaming");
+  return t(`coverLetterPage.templates.${template}`);
 }
 
 function formatCreatedAt(value: string | undefined): string {

@@ -1,5 +1,6 @@
-import type { PortfolioMetadata, PortfolioProject, ResumeData } from "@bao/shared";
+import { type PortfolioMetadata, type PortfolioProject, type ResumeData } from "@bao/shared";
 export declare class ExportService {
+    private resolveTemplate;
     /**
      * Export resume as PDF
      */

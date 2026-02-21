@@ -59,7 +59,7 @@ onMounted(() => {
     <ul class="menu min-h-full w-full p-4 pt-6 gap-1">
       <li class="menu-title px-2 pb-4">
         <span class="flex items-center gap-2 text-lg font-bold text-primary is-drawer-close:hidden">
-          <span aria-hidden="true">{{ APP_BRAND.logoEmoji }}</span>
+          <img :src="APP_BRAND.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
           <span>{{ APP_BRAND.name }}</span>
         </span>
       </li>

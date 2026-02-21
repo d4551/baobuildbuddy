@@ -55,7 +55,7 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                     position: string;
                     jobInfo: {};
                     content: {};
-                    template: string;
+                    template: "creative" | "gaming" | "executive" | "technical" | "professional";
                 };
                 422: {
                     type: "validation";
@@ -208,7 +208,7 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                                 body: string;
                                 conclusion: string;
                             };
-                            template: string;
+                            template: "creative" | "gaming" | "executive" | "technical" | "professional";
                         };
                         error?: undefined;
                         details?: undefined;

@@ -1,4 +1,11 @@
-import type { PortfolioMetadata, PortfolioProject, ResumeData } from "@bao/shared";
+import {
+  RESUME_TEMPLATE_DEFAULT,
+  isResumeTemplate,
+  type PortfolioMetadata,
+  type PortfolioProject,
+  type ResumeData,
+  type ResumeTemplate,
+} from "@bao/shared";
 import { type Color, PDFDocument, type PDFFont, StandardFonts, rgb } from "pdf-lib";
 
 interface RGB {
@@ -7,7 +14,7 @@ interface RGB {
   b: number;
 }
 
-interface ResumeTemplate {
+interface ResumeTemplateDefinition {
   name: string;
   fonts: { name: number; header: number; body: number; accent: number };
   colors: { primary: RGB; secondary: RGB; accent: RGB; text: RGB; bg: RGB };
@@ -23,7 +30,7 @@ interface ResumeTemplate {
   };
 }
 
-const TEMPLATES: Record<string, ResumeTemplate> = {
+const RESUME_TEMPLATES: Partial<Record<ResumeTemplate, ResumeTemplateDefinition>> = {
   modern: {
     name: "Modern",
     fonts: { name: 24, header: 14, body: 10.5, accent: 9 },
@@ -78,11 +85,25 @@ const TEMPLATES: Record<string, ResumeTemplate> = {
 };
 
 export class ExportService {
+  private resolveTemplate(templateName?: string, resumeTemplate?: string): ResumeTemplate {
+    if (isResumeTemplate(templateName)) {
+      return templateName;
+    }
+    if (isResumeTemplate(resumeTemplate)) {
+      return resumeTemplate;
+    }
+    return RESUME_TEMPLATE_DEFAULT;
+  }
+
   /**
    * Export resume as PDF
    */
   async exportResumePDF(resume: ResumeData, templateName?: string): Promise<Uint8Array> {
-    const template = TEMPLATES[templateName || resume.template || "modern"] || TEMPLATES.modern;
+    const resolvedTemplate = this.resolveTemplate(templateName, resume.template);
+    const template = RESUME_TEMPLATES[resolvedTemplate] ?? RESUME_TEMPLATES[RESUME_TEMPLATE_DEFAULT];
+    if (!template) {
+      throw new Error(`Unsupported resume template: ${resolvedTemplate}`);
+    }
     const { fonts, colors, spacing, layout } = template;
     const margin = spacing.margins.left;
 

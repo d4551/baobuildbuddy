@@ -1,4 +1,7 @@
 import * as z from "zod";
+import { RESUME_TEMPLATE_OPTIONS } from "../constants/resume";
+
+const resumeTemplateValues = RESUME_TEMPLATE_OPTIONS;
 
 export const resumePersonalInfoSchema = z.object({
   name: z.string().optional(),
@@ -43,6 +46,13 @@ export const resumeProjectSchema = z.object({
   link: z.string().optional(),
 });
 
+export const resumeGamingExperienceSchema = z.object({
+  gameEngines: z.string().optional(),
+  platforms: z.string().optional(),
+  genres: z.string().optional(),
+  shippedTitles: z.string().optional(),
+});
+
 export const resumeDataSchema = z.object({
   name: z.string().optional(),
   personalInfo: resumePersonalInfoSchema.optional(),
@@ -51,15 +61,8 @@ export const resumeDataSchema = z.object({
   education: z.array(resumeEducationSchema).optional(),
   skills: resumeSkillsSchema.optional(),
   projects: z.array(resumeProjectSchema).optional(),
-  gamingExperience: z
-    .object({
-      gameEngines: z.string().optional(),
-      platforms: z.string().optional(),
-      genres: z.string().optional(),
-      shippedTitles: z.string().optional(),
-    })
-    .optional(),
-  template: z.enum(["modern", "classic", "gaming", "creative", "minimal"]).optional(),
+  gamingExperience: resumeGamingExperienceSchema.optional(),
+  template: z.enum(resumeTemplateValues).optional(),
   theme: z.enum(["light", "dark"]).optional(),
   isDefault: z.boolean().optional(),
 });
