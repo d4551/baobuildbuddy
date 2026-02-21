@@ -2,6 +2,7 @@ import enUS, { type AppTranslationOverrides } from "../packages/client/locales/e
 import esES from "../packages/client/locales/es-ES";
 import frFR from "../packages/client/locales/fr-FR";
 import jaJP from "../packages/client/locales/ja-JP";
+import { writeError, writeOutput } from "./utils/cli-output";
 
 type Violation = {
   locale: string;
@@ -105,15 +106,15 @@ const main = (): void => {
   const violations = collectViolations();
 
   if (violations.length === 0) {
-    console.log(
+    void writeOutput(
       "Locale override validation passed: no schema drift or cross-locale copy detected.",
     );
     return;
   }
 
-  console.error("Locale override validation failed:");
+  void writeError("Locale override validation failed:");
   for (const violation of violations) {
-    console.error(`- [${violation.locale}] ${violation.key}: ${violation.message}`);
+    void writeError(`- [${violation.locale}] ${violation.key}: ${violation.message}`);
   }
   process.exit(1);
 };

@@ -1,7 +1,4 @@
 import { Elysia } from "elysia";
-/**
- * Centralized Elysia error envelope for deterministic API responses.
- */
 export declare const errorHandler: Elysia<"", {
     decorator: {};
     store: {};

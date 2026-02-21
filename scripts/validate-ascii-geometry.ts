@@ -1,3 +1,5 @@
+import { writeOutput } from "./utils/cli-output";
+
 const args = process.argv.slice(2);
 const validateAllTextBlocks = args.includes("--all");
 const filePaths = args.filter((arg) => arg !== "--all");
@@ -329,14 +331,14 @@ for (const filePath of filesToValidate) {
   const diagnostics = collectDiagnostics(lines);
 
   if (diagnostics.length === 0) {
-    console.log(`✅ geometry pass in ${filePath}`);
+    await writeOutput(`✅ geometry pass in ${filePath}`);
     continue;
   }
 
   failedFileCount += 1;
-  console.log(`❌ geometry issues found in ${filePath}: ${diagnostics.length}`);
+  await writeOutput(`❌ geometry issues found in ${filePath}: ${diagnostics.length}`);
   for (const d of diagnostics) {
-    console.log(
+    await writeOutput(
       `block #${d.blockIndex} line ${d.lineNumber} col ${d.columnNumber} char ${JSON.stringify(d.ch)} :: ${d.reason}`,
     );
   }

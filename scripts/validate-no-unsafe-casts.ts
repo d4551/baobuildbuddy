@@ -1,3 +1,5 @@
+import { writeError, writeOutput } from "./utils/cli-output";
+
 type Violation = {
   filePath: string;
   line: number;
@@ -91,13 +93,13 @@ const main = async (): Promise<void> => {
   const violations = await collectViolations();
 
   if (violations.length === 0) {
-    console.log("No unsafe type casts (`as-any` / `as-unknown`) found.");
+    await writeOutput("No unsafe type casts (`as-any` / `as-unknown`) found.");
     return;
   }
 
-  console.error("Unsafe type casts are disallowed. Found:");
+  await writeError("Unsafe type casts are disallowed. Found:");
   for (const violation of violations) {
-    console.error(`- ${violation.filePath}:${violation.line} uses \`as ${violation.castType}\``);
+    await writeError(`- ${violation.filePath}:${violation.line} uses \`as ${violation.castType}\``);
   }
 
   process.exit(1);

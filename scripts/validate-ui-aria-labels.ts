@@ -1,3 +1,5 @@
+import { writeError, writeOutput } from "./utils/cli-output";
+
 type Violation = {
   filePath: string;
   line: number;
@@ -93,15 +95,15 @@ const main = async (): Promise<void> => {
   const violations = await collectViolations();
 
   if (violations.length === 0) {
-    console.log("ARIA label validation passed for interactive controls.");
+    await writeOutput("ARIA label validation passed for interactive controls.");
     return;
   }
 
-  console.error(
+  await writeError(
     "ARIA label validation failed. Interactive controls must include aria-label/aria-labelledby:",
   );
   for (const violation of violations) {
-    console.error(`- ${violation.filePath}:${violation.line} <${violation.tagName}>`);
+    await writeError(`- ${violation.filePath}:${violation.line} <${violation.tagName}>`);
   }
 
   process.exit(1);

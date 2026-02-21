@@ -1,3 +1,5 @@
+import { writeError, writeOutput } from "./utils/cli-output";
+
 type OklchColor = {
   lightnessPercent: number;
   chroma: number;
@@ -237,23 +239,23 @@ const main = async (): Promise<void> => {
   const contrastViolations = collectContrastViolations(themeCss);
 
   if (hardcodedColorViolations.length === 0 && contrastViolations.length === 0) {
-    console.log(
+    await writeOutput(
       "UI accessibility validation passed: WCAG contrast and tokenized colors are enforced.",
     );
     return;
   }
 
   if (hardcodedColorViolations.length > 0) {
-    console.error("\nHardcoded color violations:");
+    await writeError("\nHardcoded color violations:");
     for (const violation of hardcodedColorViolations) {
-      console.error(`- ${violation.filePath}:${violation.line} ${violation.message}`);
+      await writeError(`- ${violation.filePath}:${violation.line} ${violation.message}`);
     }
   }
 
   if (contrastViolations.length > 0) {
-    console.error("\nWCAG contrast violations:");
+    await writeError("\nWCAG contrast violations:");
     for (const violation of contrastViolations) {
-      console.error(`- ${violation}`);
+      await writeError(`- ${violation}`);
     }
   }
 

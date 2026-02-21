@@ -1,3 +1,5 @@
+import { writeError, writeOutput } from "./utils/cli-output";
+
 type Violation = {
   filePath: string;
   line: number;
@@ -84,13 +86,13 @@ const main = async (): Promise<void> => {
   const violations = await collectViolations();
 
   if (violations.length === 0) {
-    console.log("No try/catch blocks found.");
+    await writeOutput("No try/catch blocks found.");
     return;
   }
 
-  console.error("try/catch blocks are disallowed. Found:");
+  await writeError("try/catch blocks are disallowed. Found:");
   for (const violation of violations) {
-    console.error(`- ${violation.filePath}:${violation.line}`);
+    await writeError(`- ${violation.filePath}:${violation.line}`);
   }
 
   process.exit(1);

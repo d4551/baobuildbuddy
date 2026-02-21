@@ -9,6 +9,7 @@ export declare class SimpleRateLimiter {
 export declare class JobProviderRegistry {
     private providers;
     private rateLimiter;
+    private logger;
     register(provider: JobProvider): void;
     unregister(name: string): void;
     getProvider(name: string): JobProvider | undefined;

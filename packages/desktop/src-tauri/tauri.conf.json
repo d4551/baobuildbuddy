@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "identifier": "com.baobuildbuddy.desktop",
   "build": {
-    "beforeBuildCommand": "bun run build",
-    "frontendDist": "../packages/client/.output/public",
+    "beforeBuildCommand": "bun --cwd ../../.. run build",
+    "frontendDist": "../../client/.output/public",
     "devUrl": "http://127.0.0.1:3001"
   },
   "app": {
@@ -25,7 +25,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["all"],
+    "targets": "all",
     "category": "DeveloperTools"
   }
 }

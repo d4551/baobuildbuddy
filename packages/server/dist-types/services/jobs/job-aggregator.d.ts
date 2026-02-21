@@ -7,6 +7,7 @@ import { applications } from "../../db/schema/jobs";
 export declare class JobAggregator {
     private providers;
     private cacheExpiry;
+    private logger;
     constructor();
     /**
      * Refresh jobs from all providers and update cache

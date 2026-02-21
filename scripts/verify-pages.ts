@@ -1,5 +1,6 @@
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
+import { writeError, writeOutput } from "./utils/cli-output";
 
 type RouteVerificationResult = {
   locale: string;
@@ -111,26 +112,26 @@ const main = async (): Promise<void> => {
     }
   }
 
-  console.log(`Route/content verification against ${baseUrl}`);
-  console.log(lineSeparator);
+  await writeOutput(`Route/content verification against ${baseUrl}`);
+  await writeOutput(lineSeparator);
   for (const success of successes) {
-    console.log(
+    await writeOutput(
       `[ok] ${success.locale.padEnd(5)} ${success.status} ${success.route.padEnd(26)} ${success.heading} | ${success.title}`,
     );
   }
 
   if (failures.length === 0) {
-    console.log(lineSeparator);
-    console.log(
+    await writeOutput(lineSeparator);
+    await writeOutput(
       `Verified ${successes.length} localized route renders with non-empty page title, heading, and main landmark.`,
     );
     return;
   }
 
-  console.error(lineSeparator);
-  console.error("Route/content verification failures:");
+  await writeError(lineSeparator);
+  await writeError("Route/content verification failures:");
   for (const failure of failures) {
-    console.error(
+    await writeError(
       `[fail] ${failure.locale.padEnd(5)} ${failure.status} ${failure.route.padEnd(26)} ${failure.reason}`,
     );
   }

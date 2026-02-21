@@ -1,18 +1,15 @@
 import { log } from "../middleware/logger";
 
-/**
- * Structured logging levels supported by the server logger.
- */
-export type ServerLogLevel = "debug" | "info" | "warn" | "error";
+type ServerLogLevel = "debug" | "info" | "warn" | "error";
 
 /**
  * Minimal logger contract used by runtime modules to avoid direct console usage.
  */
 export type ServerLogger = {
-  debug: (...values: unknown[]) => void;
-  info: (...values: unknown[]) => void;
-  warn: (...values: unknown[]) => void;
-  error: (...values: unknown[]) => void;
+  debug: (...values: readonly unknown[]) => void;
+  info: (...values: readonly unknown[]) => void;
+  warn: (...values: readonly unknown[]) => void;
+  error: (...values: readonly unknown[]) => void;
 };
 
 /**
@@ -23,18 +20,44 @@ export type ServerLogger = {
  */
 export const createServerLogger = (component: string): ServerLogger => {
   const scopedLogger = log.child({ component });
+
+  const emit = (level: ServerLogLevel, values: readonly unknown[]): void => {
+    if (values.length === 0) {
+      return;
+    }
+
+    const [primary, ...rest] = values;
+
+    if (typeof primary === "string") {
+      if (rest.length === 0) {
+        scopedLogger[level](primary);
+        return;
+      }
+
+      scopedLogger[level](rest.length === 1 ? { details: rest[0] } : { details: rest }, primary);
+      return;
+    }
+
+    if (values.length === 1) {
+      scopedLogger[level](primary);
+      return;
+    }
+
+    scopedLogger[level]({ details: values });
+  };
+
   return {
     debug: (...values: unknown[]) => {
-      scopedLogger.debug(...values);
+      emit("debug", values);
     },
     info: (...values: unknown[]) => {
-      scopedLogger.info(...values);
+      emit("info", values);
     },
     warn: (...values: unknown[]) => {
-      scopedLogger.warn(...values);
+      emit("warn", values);
     },
     error: (...values: unknown[]) => {
-      scopedLogger.error(...values);
+      emit("error", values);
     },
   };
 };
