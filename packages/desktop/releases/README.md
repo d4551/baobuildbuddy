@@ -1,6 +1,6 @@
 # Desktop Release Manifest
 
-Generated: 2026-02-21T17:45:00Z
+Generated: synchronized with current release artifacts
 
 ## Canonical release directories
 
@@ -14,18 +14,18 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 
 ### macOS
 
-- `macos/BaoBuildBuddy_0.1.0_aarch64.dmg`
+- `macos/BaoBuildBuddy_<VERSION>_aarch64.dmg`
 
 ### Linux
 
-- `linux/BaoBuildBuddy_0.1.0_aarch64.AppImage`
-- `linux/BaoBuildBuddy_0.1.0_arm64.deb`
-- `linux/BaoBuildBuddy-0.1.0-1.aarch64.rpm`
+- `linux/BaoBuildBuddy_<VERSION>_aarch64.AppImage`
+- `linux/BaoBuildBuddy_<VERSION>_arm64.deb`
+- `linux/BaoBuildBuddy-<VERSION>-1.aarch64.rpm`
 
 ### Windows
 
-- `windows/BaoBuildBuddy_0.1.0_x64-setup.exe`
-- `windows/BaoBuildBuddy_0.1.0_x64-portable.exe`
+- `windows/BaoBuildBuddy_<VERSION>_x64-setup.exe`
+- `windows/BaoBuildBuddy_<VERSION>_x64-portable.exe`
 
 ## Integrity
 

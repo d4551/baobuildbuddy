@@ -18,9 +18,28 @@
 
 ## Quick links
 
+- [Non-Technical Install (Pick Your OS)](#non-technical-install-pick-your-os)
 - [Getting Started (First-time setup)](docs/STARTER_GUIDE.md)
 - [Automation Guide](docs/AUTOMATION.md)
 - [Desktop (Tauri) Packaging](#89-desktop-tauri-installer-path)
+
+## Non-Technical Install (Pick Your OS)
+
+Use the packaged desktop installers in `packages/desktop/releases` when you want an install path without setting up local development dependencies.
+
+1. Open `packages/desktop/releases`.
+2. Open the folder for your operating system.
+3. Run the matching installer file for your architecture (see `packages/desktop/releases/README.md` for the current canonical artifact naming).
+
+> A wild installer appeared. Choose your OS in `packages/desktop/releases`.
+
+| Operating system | Artifact pattern |
+|------------------|--------------|
+| macOS (Apple Silicon) | `BaoBuildBuddy_<VERSION>_aarch64.dmg` |
+| Windows (x64) | `BaoBuildBuddy_<VERSION>_x64-setup.exe` |
+| Linux (ARM64) | `BaoBuildBuddy_<VERSION>_aarch64.AppImage` or `BaoBuildBuddy_<VERSION>_arm64.deb` |
+
+If you are on a different CPU architecture, use the matching artifact for that architecture when available in releases.
 
 ### Documentation index
 
@@ -698,11 +717,7 @@ Build outputs are generated under `packages/desktop/src-tauri/target/release/bun
 - `packages/desktop/releases/linux`
 - `packages/desktop/releases/windows`
 
-Current verified artifacts:
-
-- macOS: `packages/desktop/releases/macos/BaoBuildBuddy_0.1.0_aarch64.dmg`
-- Linux: `packages/desktop/releases/linux/BaoBuildBuddy_0.1.0_aarch64.AppImage`, `packages/desktop/releases/linux/BaoBuildBuddy_0.1.0_arm64.deb`, `packages/desktop/releases/linux/BaoBuildBuddy-0.1.0-1.aarch64.rpm`
-- Windows: `packages/desktop/releases/windows/BaoBuildBuddy_0.1.0_x64-setup.exe`, `packages/desktop/releases/windows/BaoBuildBuddy_0.1.0_x64-portable.exe`
+Current verified artifacts are cataloged in `packages/desktop/releases/README.md` and checksummed in `packages/desktop/releases/sha256.txt`.
 
 Release checksums are generated in `packages/desktop/releases/sha256.txt`.
 

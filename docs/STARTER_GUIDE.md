@@ -355,11 +355,7 @@ Canonical release artifacts are organized under:
 - `packages/desktop/releases/linux`
 - `packages/desktop/releases/windows`
 
-Current installables in this repository:
-
-- macOS: `BaoBuildBuddy_0.1.0_aarch64.dmg`
-- Linux: `BaoBuildBuddy_0.1.0_aarch64.AppImage`, `BaoBuildBuddy_0.1.0_arm64.deb`, `BaoBuildBuddy-0.1.0-1.aarch64.rpm`
-- Windows: `BaoBuildBuddy_0.1.0_x64-setup.exe`, `BaoBuildBuddy_0.1.0_x64-portable.exe`
+Current installables are documented in `packages/desktop/releases/README.md`; `packages/desktop/releases/sha256.txt` contains matching checksums.
 
 If `bun run build:desktop` fails with `failed to run 'cargo metadata'`, install Rust and reopen your shell:
 
