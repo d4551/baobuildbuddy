@@ -34,6 +34,17 @@ export const SKILLS_READINESS_THRESHOLD_HIGH = 80;
 export const SKILLS_READINESS_THRESHOLD_MEDIUM = 60;
 
 /**
+ * Reusable radial dial sizing for readiness visuals.
+ */
+export const SKILLS_READINESS_DIAL_SIZE_REM = 7;
+
+/**
+ * Readiness percentage bounds used in radial and bar-style readiness components.
+ */
+export const SKILLS_READINESS_MIN = 0;
+export const SKILLS_READINESS_MAX = 100;
+
+/**
  * XP rewards for skill-mapper user actions.
  */
 export const SKILLS_GAMIFICATION_XP = {

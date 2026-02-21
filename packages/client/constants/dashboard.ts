@@ -243,6 +243,28 @@ export const DASHBOARD_ERROR_KEYS = {
 >;
 
 /**
+ * Progress and dial limits for dashboard gamification visuals.
+ */
+export const DASHBOARD_GAMIFICATION_PROGRESS_MIN = 0;
+export const DASHBOARD_GAMIFICATION_PROGRESS_MAX = 100;
+export const DASHBOARD_GAMIFICATION_LEVEL_DIAL_SIZE_REM = 5.5;
+export const DASHBOARD_GAMIFICATION_LEVEL_DIAL_THICKNESS_REM = 0.4;
+
+/**
+ * Builds a radial dial style object for dashboard-level XP ring rendering.
+ *
+ * @param percentage Percentage value to visualize.
+ * @returns Radial progress style tokens.
+ */
+export function getDashboardGamificationDialStyle(percentage: number): Record<string, string> {
+  return {
+    "--value": String(percentage),
+    "--size": `${DASHBOARD_GAMIFICATION_LEVEL_DIAL_SIZE_REM}rem`,
+    "--thickness": `${DASHBOARD_GAMIFICATION_LEVEL_DIAL_THICKNESS_REM}rem`,
+  };
+}
+
+/**
  * Translation key for fallback activity labels when no action text is available.
  */
 export const DASHBOARD_ACTIVITY_FALLBACK_KEY =

@@ -1148,53 +1148,53 @@ export class ApplicationAutomationService {
       })
       .where(eq(automationRuns.id, runId));
     const executionPromise = Promise.resolve().then(async () => {
-        const rawResult = await runRpaScript(
-          "apply_job_rpa.py",
-          {
-            jobUrl: normalized.jobUrl,
-            resume,
-            coverLetter: coverLetter ? { content: coverLetter.content || {} } : null,
-            customAnswers: normalized.customAnswers,
-            selectorMap,
-          },
-          automationSettings,
-          progressHandler,
-        );
+      const rawResult = await runRpaScript(
+        "apply_job_rpa.py",
+        {
+          jobUrl: normalized.jobUrl,
+          resume,
+          coverLetter: coverLetter ? { content: coverLetter.content || {} } : null,
+          customAnswers: normalized.customAnswers,
+          selectorMap,
+        },
+        automationSettings,
+        progressHandler,
+      );
 
-        const copiedScreenshots = await this.copyAndIndexScreenshots(runId, rawResult.screenshots);
-        const sanitizedResult: RpaRunResult = {
-          success: rawResult.success,
-          error: rawResult.error,
-          screenshots: copiedScreenshots,
-          steps: sanitizeSteps(rawResult.steps),
-        };
+      const copiedScreenshots = await this.copyAndIndexScreenshots(runId, rawResult.screenshots);
+      const sanitizedResult: RpaRunResult = {
+        success: rawResult.success,
+        error: rawResult.error,
+        screenshots: copiedScreenshots,
+        steps: sanitizeSteps(rawResult.steps),
+      };
 
-        await this.markRunCompleted(runId, sanitizedResult, automationSettings);
-        const completionPayload: Record<string, string> = {
-          type: "complete",
-          status: sanitizedResult.success ? "success" : "error",
-          action: sanitizedResult.success ? "completed" : "failed",
-        };
-        if (sanitizedResult.error) {
-          completionPayload.message = sanitizedResult.error;
-        }
-        broadcastProgress(runId, {
-          ...completionPayload,
-        });
-
-        if (!sanitizedResult.success) {
-          throw new Error(sanitizedResult.error || "Job application automation failed");
-        }
-
-        if (sanitizedResult.success) {
-          await gamificationService
-            .awardXP(50, "automation_success")
-            .then(() => undefined)
-            .catch(() => {
-              // Gamification should not block the automation flow.
-            });
-        }
+      await this.markRunCompleted(runId, sanitizedResult, automationSettings);
+      const completionPayload: Record<string, string> = {
+        type: "complete",
+        status: sanitizedResult.success ? "success" : "error",
+        action: sanitizedResult.success ? "completed" : "failed",
+      };
+      if (sanitizedResult.error) {
+        completionPayload.message = sanitizedResult.error;
+      }
+      broadcastProgress(runId, {
+        ...completionPayload,
       });
+
+      if (!sanitizedResult.success) {
+        throw new Error(sanitizedResult.error || "Job application automation failed");
+      }
+
+      if (sanitizedResult.success) {
+        await gamificationService
+          .awardXP(50, "automation_success")
+          .then(() => undefined)
+          .catch(() => {
+            // Gamification should not block the automation flow.
+          });
+      }
+    });
     const executionError = await captureError(executionPromise);
     if (executionError) {
       const message = toErrorMessage(executionError, "Job application automation failed");

@@ -23,7 +23,7 @@ export interface Achievement {
   name: string;
   description: string;
   icon: string;
-  iconType: "mdi" | "emoji" | "custom";
+  iconType: "emoji" | "custom";
   category: "progress" | "social" | "skill" | "special" | "milestone";
   xpReward: number;
   requirements: Record<string, number>;
@@ -38,7 +38,7 @@ export interface DailyChallenge {
   name: string;
   description: string;
   icon: string;
-  iconType: "mdi" | "emoji" | "custom";
+  iconType: "emoji" | "custom";
   xpReward: number;
   category: "profile" | "job_search" | "skill_building" | "social" | "engagement";
   completed: boolean;

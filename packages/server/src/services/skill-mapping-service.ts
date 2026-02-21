@@ -2,6 +2,7 @@ import {
   SKILL_CATEGORY_IDS,
   SKILL_EVIDENCE_TYPE_IDS,
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
+  getGamificationPathwayIcon,
   generateId,
   isRecord,
 } from "@bao/shared";
@@ -25,6 +26,9 @@ const isEvidenceType = (value: unknown): value is SkillEvidence["type"] =>
 const isEvidenceStatus = (value: unknown): value is SkillEvidence["verificationStatus"] =>
   typeof value === "string" &&
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS.some((statusId) => statusId === value);
+
+const resolvePathwayIcon = (pathwayId: string): string =>
+  getGamificationPathwayIcon(pathwayId);
 
 const normalizeSkillCategory = (value: string | null): SkillCategory =>
   isSkillCategory(value) ? value : "technical";
@@ -235,7 +239,7 @@ export class SkillMappingService {
         ],
         requiredSkills: ["Programming", "Problem Solving", "Game Engines", "Version Control"],
         estimatedTimeToEntry: "6-12 months",
-        icon: "mdi-code-braces",
+        icon: resolvePathwayIcon("technical"),
         averageSalary: { min: 70000, max: 120000, currency: "USD" },
         jobMarketTrend: "growing",
       },
@@ -278,7 +282,7 @@ export class SkillMappingService {
           "Strategic Planning",
         ],
         estimatedTimeToEntry: "8-12 months",
-        icon: "mdi-account-group",
+        icon: resolvePathwayIcon("leadership"),
         averageSalary: { min: 80000, max: 140000, currency: "USD" },
         jobMarketTrend: "stable",
       },
@@ -317,7 +321,7 @@ export class SkillMappingService {
         ],
         requiredSkills: ["Community Building", "Moderation", "Social Media", "Content Creation"],
         estimatedTimeToEntry: "6-9 months",
-        icon: "mdi-account-multiple",
+        icon: resolvePathwayIcon("community"),
         averageSalary: { min: 50000, max: 90000, currency: "USD" },
         jobMarketTrend: "growing",
       },
@@ -356,7 +360,7 @@ export class SkillMappingService {
         ],
         requiredSkills: ["Design Thinking", "Visual Design", "User Experience", "Creative Tools"],
         estimatedTimeToEntry: "10-18 months",
-        icon: "mdi-palette",
+        icon: resolvePathwayIcon("creative"),
         averageSalary: { min: 60000, max: 110000, currency: "USD" },
         jobMarketTrend: "stable",
       },
@@ -395,7 +399,7 @@ export class SkillMappingService {
         ],
         requiredSkills: ["Data Analysis", "Statistical Thinking", "SQL", "Visualization"],
         estimatedTimeToEntry: "8-12 months",
-        icon: "mdi-chart-line",
+        icon: resolvePathwayIcon("analytical"),
         averageSalary: { min: 65000, max: 105000, currency: "USD" },
         jobMarketTrend: "growing",
       },
@@ -434,7 +438,7 @@ export class SkillMappingService {
         ],
         requiredSkills: ["Written Communication", "Content Strategy", "Storytelling", "Editing"],
         estimatedTimeToEntry: "6-10 months",
-        icon: "mdi-comment-text",
+        icon: resolvePathwayIcon("communication"),
         averageSalary: { min: 50000, max: 85000, currency: "USD" },
         jobMarketTrend: "stable",
       },
@@ -478,7 +482,7 @@ export class SkillMappingService {
           "Agile/Scrum",
         ],
         estimatedTimeToEntry: "10-16 months",
-        icon: "mdi-clipboard-check",
+        icon: resolvePathwayIcon("project_management"),
         averageSalary: { min: 75000, max: 130000, currency: "USD" },
         jobMarketTrend: "growing",
       },

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "BaoBuildBuddy",
+  "version": "0.1.0",
+  "identifier": "com.baobuildbuddy.desktop",
+  "build": {
+    "beforeBuildCommand": "bun run build",
+    "frontendDist": "../packages/client/.output/public",
+    "devUrl": "http://127.0.0.1:3001"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "BaoBuildBuddy",
+        "width": 1440,
+        "height": 960,
+        "resizable": true,
+        "url": "http://127.0.0.1:3001"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["all"],
+    "category": "DeveloperTools"
+  }
+}

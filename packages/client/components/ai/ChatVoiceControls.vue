@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { AI_CHAT_VOICE_DEFAULT_ID } from "@bao/shared";
+import {
+  AI_CHAT_VOICE_DEFAULT_ID,
+  DEFAULT_SPEECH_SETTINGS,
+  type SpeechProviderOption,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 
 interface ChatVoiceControlsProps {
@@ -14,16 +18,37 @@ interface ChatVoiceControlsProps {
   readonly autoSpeakReplies: boolean;
   readonly supportHintKey: string;
   readonly errorLabel: string;
+  readonly speechProviderOptions?: readonly SpeechProviderOption[];
+  readonly sttProvider?: SpeechProviderOption;
+  readonly sttModel?: string;
+  readonly sttModelOptions?: readonly string[];
+  readonly ttsProvider?: SpeechProviderOption;
+  readonly ttsModel?: string;
+  readonly ttsModelOptions?: readonly string[];
+  readonly speechConfigSaving?: boolean;
   readonly compact?: boolean;
 }
 
 const props = withDefaults(defineProps<ChatVoiceControlsProps>(), {
   compact: false,
+  speechProviderOptions: () => [],
+  sttProvider: DEFAULT_SPEECH_SETTINGS.stt.provider,
+  sttModel: DEFAULT_SPEECH_SETTINGS.stt.model,
+  sttModelOptions: () => [],
+  ttsProvider: DEFAULT_SPEECH_SETTINGS.tts.provider,
+  ttsModel: DEFAULT_SPEECH_SETTINGS.tts.model,
+  ttsModelOptions: () => [],
+  speechConfigSaving: false,
 });
 
 const emit = defineEmits<{
   "update:selectedVoiceId": [value: string];
   "update:autoSpeakReplies": [value: boolean];
+  "update:sttProvider": [value: SpeechProviderOption];
+  "update:sttModel": [value: string];
+  "update:ttsProvider": [value: SpeechProviderOption];
+  "update:ttsModel": [value: string];
+  "save-speech-settings": [];
   "toggle-listening": [];
   "replay-assistant": [];
 }>();
@@ -31,6 +56,16 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const iconClass = computed(() => (props.compact ? "h-4 w-4" : "h-5 w-5"));
+const showAdvancedSpeechConfig = computed(
+  () =>
+    !props.compact &&
+    Array.isArray(props.speechProviderOptions) &&
+    props.speechProviderOptions.length > 0 &&
+    typeof props.sttProvider === "string" &&
+    typeof props.ttsProvider === "string" &&
+    typeof props.sttModel === "string" &&
+    typeof props.ttsModel === "string",
+);
 
 function handleVoiceSelectionChange(event: Event): void {
   const target = event.target;
@@ -120,10 +155,7 @@ function handleAutoSpeakChange(event: Event): void {
     </svg>
   </button>
 
-  <fieldset
-    v-if="props.supportsSynthesis && props.voices.length > 0"
-    class="fieldset mt-2"
-  >
+  <fieldset v-if="!props.compact && props.supportsSynthesis && props.voices.length > 0" class="fieldset mt-2">
     <legend class="fieldset-legend text-xs">{{ t("aiChatCommon.voice.voiceLegend") }}</legend>
     <select
       :value="props.selectedVoiceId"
@@ -138,7 +170,7 @@ function handleAutoSpeakChange(event: Event): void {
     </select>
   </fieldset>
 
-  <div v-if="props.supportsSynthesis" class="mt-2 flex items-center justify-between gap-2">
+  <div v-if="!props.compact && props.supportsSynthesis" class="mt-2 flex items-center justify-between gap-2">
     <label class="label cursor-pointer gap-2 py-0">
       <span class="label-text text-xs">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
       <input
@@ -161,7 +193,7 @@ function handleAutoSpeakChange(event: Event): void {
   </div>
 
   <p
-    v-if="props.supportHintKey"
+    v-if="!props.compact && props.supportHintKey"
     class="mt-2 text-xs text-base-content/70"
     role="status"
     aria-live="polite"
@@ -170,11 +202,29 @@ function handleAutoSpeakChange(event: Event): void {
   </p>
 
   <p
-    v-if="props.errorLabel"
+    v-if="!props.compact && props.errorLabel"
     class="mt-1 text-xs text-error"
     role="status"
     aria-live="assertive"
   >
     {{ props.errorLabel }}
   </p>
+
+  <SpeechModelProfileFields
+    v-if="showAdvancedSpeechConfig"
+    class="mt-3"
+    :provider-options="props.speechProviderOptions ?? []"
+    :stt-provider="props.sttProvider"
+    :stt-model="props.sttModel"
+    :tts-provider="props.ttsProvider"
+    :tts-model="props.ttsModel"
+    :stt-model-options="props.sttModelOptions ?? []"
+    :tts-model-options="props.ttsModelOptions ?? []"
+    :saving="props.speechConfigSaving === true"
+    @update:stt-provider="emit('update:sttProvider', $event)"
+    @update:stt-model="emit('update:sttModel', $event)"
+    @update:tts-provider="emit('update:ttsProvider', $event)"
+    @update:tts-model="emit('update:ttsModel', $event)"
+    @save="emit('save-speech-settings')"
+  />
 </template>

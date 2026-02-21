@@ -20,23 +20,31 @@
 
 - [Getting Started (First-time setup)](docs/STARTER_GUIDE.md)
 - [Automation Guide](docs/AUTOMATION.md)
+- [Desktop (Tauri) Packaging](#89-desktop-tauri-installer-path)
 
 ```text
-                    ___________
-                   |           |
-                   | NEW GAME  |     ~~~ QUEST LOG ~~~
-                   | CONTINUE  |
-                   | OPTIONS   |     1) Prepare environment
-                   |___________|     2) Configure services
-                                     3) Start server + client
-         .-----.                     4) Verify contracts
-        / /   \ \                    5) Run automation paths
-       | | O O | |
-        \ \   / /        "It's dangerous to go alone!
-         '-----'          Take this setup guide."
+                    .---------------------.
+                   /       [ BAO WORLD ]    \
+                  /  Press START to begin!   \
+                 /---------------------------\
+                 | 1) Prepare environment    |
+                 | 2) Configure services     |
+                 | 3) Start server + client  |
+                 | 4) Verify contracts       |
+                 | 5) Run your automation    |
+                 \---------------------------/
+          .---.                             .---.
+         / o o \                           / o o \
+         \  v  /                           \  v  /
+          '---'                             '---'
+
+     "It's dangerous to go alone!"
+       + press continue for your setup quest.
 ```
 
 BaoBuildBuddy is a full-stack, Bun-first monorepo for building game-industry career automation workflows. It aggregates job listings from studios, helps build resumes and cover letters, runs AI-powered mock interviews, automates job applications via browser RPA, and tracks your progress with a gamification system.
+
+This readme is your in-game tutorial before the main campaign.
 
 - `packages/server` -- Bun + Elysia API, Drizzle ORM, WebSocket endpoints, process orchestration
 - `packages/client` -- Nuxt 4 (SSR-first), Tailwind CSS v4, daisyUI v5
@@ -600,6 +608,64 @@ If all three requests respond, the API stack is reachable from defaults.
 | `packages/scraper/requirements.txt`      | Python RPA dependencies        |
 | `.env.example`                           | Template for all env vars      |
 
+### 8.9 Desktop (Tauri) installer path
+
+```text
+     ______________________
+    /|                     |\     Desktop packaging uses a native shell and
+   / |        TAURI        | \    no separate Electron runtime.
+  /__|_____________________|\    It launches the existing Bun stack and opens
+  |  |                     |  it in a desktop window.
+  |__|  .-.\           .-. |  This keeps one codebase for web + desktop.
+  |  |  |o|           |o| |
+  |  |  '-'           '-' |
+  |  |_____________________|
+  |___________________________|
+```
+
+For this repository, Tauri is the best fit for desktop installers because:
+
+1. You already use Bun tooling and `bun run dev` for the entire stack.
+2. Tauri bundles a tiny native shell around existing web UI.
+3. You avoid the duplicate runtime overhead and heavier package size of Electron.
+
+#### 8.9.1 Prerequisites (desktop)
+
+- Rust + `cargo` (for Tauri binary generation)
+- macOS / Linux: `rustup` + system build tools
+- Windows: Visual C++ build tools via Visual Studio Build Tools
+- Existing Bun workspace prerequisites from section 8.2
+
+#### 8.9.2 Start desktop wrapper (development mode)
+
+From the repo root:
+
+```bash
+bun run dev:desktop
+```
+
+This command:
+
+1. Starts `packages/desktop`.
+2. Auto-starts `bun run dev` when server/client services are not already running.
+3. Opens the app at `http://127.0.0.1:3001` inside a Tauri window.
+
+#### 8.9.3 Build desktop installers
+
+```bash
+bun run build:desktop
+```
+
+Build outputs are placed under `packages/desktop/src-tauri/target`.
+
+#### 8.9.4 Environment overrides for desktop
+
+- `BAO_STACK_BOOTSTRAP_COMMAND` — command to execute for the background stack (default `bun`)
+- `BAO_STACK_HOST` — host checked for readiness (default `127.0.0.1`)
+- `PORT` — API port (default `3000`)
+- `CLIENT_PORT` — client port expectation for readiness checks (default `3001`)
+- `BAO_DISABLE_AUTH` — pass through to stack startup
+
 ## 9) Configuration reference
 
 ```text
@@ -734,10 +800,13 @@ bun run dev:client
 | Dev (full) | `bun run dev` | Start server + client in parallel |
 | Dev server | `bun run dev:server` | Start API server only |
 | Dev client | `bun run dev:client` | Start Nuxt client only |
+| Dev desktop | `bun run dev:desktop` | Start Tauri desktop wrapper (auto-starts server + client) |
 | Build | `bun run build` | Build server and client packages |
 | Build (macOS) | `bun run build:macos` | macOS entrypoint for CI/local build |
 | Build (Linux) | `bun run build:linux` | Linux entrypoint for CI/local build |
 | Build (Windows) | `bun run build:windows` | Windows entrypoint for CI/local build |
+| Build desktop | `bun run build:desktop` | Build Tauri installer artifacts |
+| Build desktop (debug) | `bun run build:desktop:debug` | Build Tauri debug installer artifacts |
 | Server API type contract | `bun run --filter '@bao/server' build:types` | Generate `packages/server/dist-types` declarations used by client typecheck |
 | Format | `bun run format` | Apply Biome formatter |
 | Format check | `bun run format:check` | Verify formatter output |

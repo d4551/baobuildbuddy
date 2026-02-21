@@ -60,12 +60,12 @@ export function createStreamingAssistantMessage(context: ChatStreamingContext): 
  * Build chat rows with stable keys for deterministic rendering and no drift during
  * streaming or rerender cycles.
  */
-export function buildChatMessageRenderRows(messages: readonly ChatMessage[]): ChatMessageRenderRow[] {
+export function buildChatMessageRenderRows(
+  messages: readonly ChatMessage[],
+): ChatMessageRenderRow[] {
   return messages.map((message, index) => ({
     message,
-    key:
-      message.id ??
-      `${message.role}-${message.timestamp ?? "no-timestamp"}-${index}`,
+    key: message.id ?? `${message.role}-${message.timestamp ?? "no-timestamp"}-${index}`,
   }));
 }
 

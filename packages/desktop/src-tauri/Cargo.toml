@@ -1,0 +1,10 @@
+[package]
+name = "bao-build-buddy-desktop"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = "2"
+
+[dependencies]
+tauri = "2"

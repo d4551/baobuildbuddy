@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS, INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared";
+import {
+  APP_ROUTES,
+  APP_ROUTE_QUERY_KEYS,
+  INTERVIEW_MIN_RESPONSE_LENGTH,
+  INTERVIEW_PROGRESS_MAX,
+  INTERVIEW_PROGRESS_MIN,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { onUnmounted } from "vue";
 import { settlePromise } from "~/composables/async-flow";
@@ -53,15 +59,16 @@ const enableVoiceMode = computed(() => activeSession.value?.config?.enableVoiceM
 const targetJob = computed(() => activeSession.value?.config?.targetJob);
 const totalQuestions = computed(() => activeSession.value?.questions.length ?? 0);
 const currentQuestionIndex = computed(() => activeSession.value?.currentQuestionIndex ?? 0);
-const currentQuestion = computed(() =>
-  activeSession.value?.questions?.[Math.max(0, currentQuestionIndex.value)],
+const currentQuestion = computed(
+  () => activeSession.value?.questions?.[Math.max(0, currentQuestionIndex.value)],
 );
 const hasCurrentQuestion = computed(() => Boolean(currentQuestion.value));
 const activeSessionComplete = computed(() => activeSession.value?.status === "completed");
-const activeSessionReady = computed(() =>
-  activeSession.value !== null &&
-  activeSession.value.status !== "cancelled" &&
-  activeSession.value.status !== "completed",
+const activeSessionReady = computed(
+  () =>
+    activeSession.value !== null &&
+    activeSession.value.status !== "cancelled" &&
+    activeSession.value.status !== "completed",
 );
 const isBusy = computed(
   () => loading.value || submitting.value || completing.value || stt.isListening.value,
@@ -94,7 +101,9 @@ const canSubmit = computed(() => {
     activeSessionReady.value
   );
 });
-const canComplete = computed(() => activeSession.value !== null && !activeSessionComplete.value && !isBusy.value);
+const canComplete = computed(
+  () => activeSession.value !== null && !activeSessionComplete.value && !isBusy.value,
+);
 const canUseVoice = computed(() => enableVoiceMode.value && stt.isSupported.value);
 const elapsedMinutes = computed(() => Math.floor(timeElapsed.value / SECONDS_PER_MINUTE));
 const elapsedSeconds = computed(() => timeElapsed.value % SECONDS_PER_MINUTE);
@@ -159,7 +168,9 @@ const chatResponses = computed(() => {
   return responses;
 });
 const submitButtonLabelKey = computed(() =>
-  isLastQuestion.value ? "interviewSession.submitFinishButton" : "interviewSession.submitNextButton",
+  isLastQuestion.value
+    ? "interviewSession.submitFinishButton"
+    : "interviewSession.submitNextButton",
 );
 const chatSubmitHint = computed(() =>
   t("interviewSession.minResponseHint", {
@@ -211,7 +222,11 @@ async function loadSession(nextSessionId: string) {
 
   if (loadedSession.status === "completed" || loadedSession.status === "cancelled") {
     stopTimer();
-    timeElapsed.value = estimateElapsedTime(DEFAULT_TIMER_VALUE, loadedSession.startTime, loadedSession.endTime);
+    timeElapsed.value = estimateElapsedTime(
+      DEFAULT_TIMER_VALUE,
+      loadedSession.startTime,
+      loadedSession.endTime,
+    );
     return;
   }
 
@@ -316,7 +331,11 @@ function startTimer() {
     }
 
     if (current.status === "completed" || current.status === "cancelled") {
-      timeElapsed.value = estimateElapsedTime(DEFAULT_TIMER_VALUE, current.startTime, current.endTime);
+      timeElapsed.value = estimateElapsedTime(
+        DEFAULT_TIMER_VALUE,
+        current.startTime,
+        current.endTime,
+      );
       stopTimer();
       return;
     }
@@ -387,10 +406,7 @@ async function handleCompleteInterview() {
 
   if (!completionResult.ok) {
     $toast.error(
-      getErrorMessage(
-        completionResult.error,
-        t("interviewSession.errors.completeFailed"),
-      ),
+      getErrorMessage(completionResult.error, t("interviewSession.errors.completeFailed")),
     );
     startTimer();
     return;
@@ -483,11 +499,11 @@ async function handleCompleteInterview() {
           <progress
             class="progress progress-primary w-full"
             :value="progress"
-            max="100"
+            :max="INTERVIEW_PROGRESS_MAX"
             :aria-label="t('interviewSession.progressAria')"
             :aria-valuenow="Math.round(progress)"
-            aria-valuemin="0"
-            aria-valuemax="100"
+            :aria-valuemin="INTERVIEW_PROGRESS_MIN"
+            :aria-valuemax="INTERVIEW_PROGRESS_MAX"
           ></progress>
         </div>
       </div>

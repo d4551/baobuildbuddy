@@ -22,8 +22,7 @@ const props = withDefaults(
 
 const { t } = useI18n();
 const CHAT_MESSAGE_WIDTH_CLASS = "w-fit min-w-36 max-w-md lg:max-w-2xl";
-const CHAT_BUBBLE_SIZE_CLASS =
-  "min-h-12 px-4 py-3 text-sm leading-relaxed sm:text-base";
+const CHAT_BUBBLE_SIZE_CLASS = "min-h-12 px-4 py-3 text-sm leading-relaxed sm:text-base";
 const isAssistant = computed(() => props.message.role === "assistant");
 const statusTextId = computed(() => (props.message.id ? `chat-status-${props.message.id}` : ""));
 const chatClass = computed(() => (isAssistant.value ? "chat-start" : "chat-end"));
@@ -44,9 +43,7 @@ const chatBubbleClass = computed(() =>
   isAssistant.value ? "chat-bubble-secondary" : "chat-bubble-primary",
 );
 const formattedTime = computed(() => formatChatTimestamp(props.message.timestamp, props.locale));
-const messageTitle = computed(() =>
-  isAssistant.value ? props.assistantLabel : props.userLabel,
-);
+const messageTitle = computed(() => (isAssistant.value ? props.assistantLabel : props.userLabel));
 const isStreamingStatusVisible = computed(
   () => isAssistant.value && props.isLatestAssistantMessage && props.isStreaming,
 );

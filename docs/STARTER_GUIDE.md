@@ -1,8 +1,16 @@
 # BaoBuildBuddy First-Time Setup Guide
 
+```text
+ .--------------------------.
+ |      CAREER QUEST MODE    |
+ |         PRESS START       |
+ '--------------------------'
+```
+
 If you need deeper architecture and runbook details, see the full runbook: [README.md](../README.md).
 
 Use this guide if this is your first time running BaoBuildBuddy locally.
+Think of it as the tutorial level: follow each checkpoint in order before unlocking the rest of the project.
 
 ## 1) Understand what is being started
 
@@ -229,6 +237,48 @@ This validates repository health and the public/client contract generation path.
 - RPA automation unavailable:
   - Ensure Chrome is installed and Python virtual env dependencies are installed.
 
-## 12) Next step
+## 12) Optional Desktop installer path (Tauri)
+
+If you need a desktop shell instead of a browser tab, use Tauri.
+
+### 12.1 Add desktop prerequisites
+
+- Rust toolchain (`rustup`) and `cargo` must be available.
+- macOS/Linux: system C/C++ build tools for Rust crates.
+- Windows: Visual C++ Build Tools installed with your `MSVC` workload.
+
+### 12.2 Start the desktop wrapper
+
+From repo root:
+
+```bash
+bun run dev:desktop
+```
+
+This does three things:
+
+1. Runs the full stack bootstrap logic in `packages/desktop/src-tauri/src/main.rs`.
+2. Checks whether `PORT=3000` and `CLIENT_PORT=3001` are already responding.
+3. Starts `bun run dev` if required and opens the app window at `http://127.0.0.1:3001`.
+
+### 12.3 Build desktop installer
+
+```bash
+bun run build:desktop
+```
+
+Output goes to:
+
+- `packages/desktop/src-tauri/target/release/bundle`
+
+### 12.4 Tauri-specific environment knobs
+
+- `BAO_STACK_HOST` (default `127.0.0.1`) to change health-check host.
+- `BAO_STACK_BOOTSTRAP_COMMAND` (default `bun`) to replace the stack command.
+- `CLIENT_PORT` (default `3001`) for readiness checks.
+- `BAO_DISABLE_AUTH` passed through to the same process launch.
+- `PORT` (default `3000`) used by the Bun backend start command.
+
+## 13) Next step
 
 Use `README.md` section 9 onward for deep architecture, schema, API routes, and endpoint-level troubleshooting.

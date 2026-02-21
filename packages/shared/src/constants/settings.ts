@@ -82,3 +82,26 @@ export const DEFAULT_SPEECH_SETTINGS = {
     format: "mp3" | "wav";
   };
 };
+
+/**
+ * Curated speech model options by provider for chat/interview selectors.
+ */
+export const SPEECH_MODEL_OPTIONS = {
+  stt: {
+    browser: ["browser-default"],
+    openai: ["gpt-4o-mini-transcribe", "gpt-4o-transcribe"],
+    huggingface: ["openai/whisper-large-v3-turbo"],
+    local: ["whisper-large-v3-turbo", "whisper-small", "distil-whisper-large-v3"],
+    custom: ["custom-stt-model"],
+  },
+  tts: {
+    browser: ["browser-default"],
+    openai: ["gpt-4o-mini-tts", "gpt-4o-audio-preview"],
+    huggingface: ["suno/bark", "hexgrad/Kokoro-82M"],
+    local: ["kokoro", "piper", "xtts-v2"],
+    custom: ["custom-tts-model"],
+  },
+} as const satisfies {
+  stt: Record<SpeechProviderOption, readonly string[]>;
+  tts: Record<SpeechProviderOption, readonly string[]>;
+};

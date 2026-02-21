@@ -188,7 +188,9 @@ export function useAI() {
       timestamp: new Date().toISOString(),
     });
   }
-  const messages = useState<ChatMessage[]>(STATE_KEYS.AI_MESSAGES, () => [buildAssistantGreetingMessage()]);
+  const messages = useState<ChatMessage[]>(STATE_KEYS.AI_MESSAGES, () => [
+    buildAssistantGreetingMessage(),
+  ]);
   const sessionId = useState<string>(STATE_KEYS.AI_SESSION_ID, () => generateId());
   const streaming = useState(STATE_KEYS.AI_STREAMING, () => false);
   const loading = useState(STATE_KEYS.AI_LOADING, () => false);

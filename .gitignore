@@ -8,6 +8,8 @@ node_modules
 dist/
 dist-electron/
 build/
+target/
+.tauri/
 
 # Cache
 .vite/

@@ -37,6 +37,7 @@ export * from "./constants/cover-letter";
 export * from "./constants/portfolio";
 export * from "./constants/resume";
 export * from "./constants/gamification";
+export * from "./constants/gamification-icons";
 
 // Utils
 export * from "./utils/salary-parser";

@@ -1,0 +1,20 @@
+{
+  "name": "@bao/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bunx --bun tauri dev",
+    "build": "bunx --bun tauri build",
+    "build:debug": "bunx --bun tauri build --debug",
+    "format": "bunx --bun biome format .",
+    "typecheck": "echo \"No JS/TS typecheck output; managed by Rust tooling in src-tauri\"",
+    "lint": "echo \"No separate desktop lint task\""
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0"
+  }
+}

@@ -1,5 +1,6 @@
 import type { ResumeData, ResumeTemplate } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { getStoredApiKey } from "~/plugins/eden";
 import { toResumeData } from "./api-normalizers";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
@@ -31,6 +32,7 @@ const isResumeSynthesisError = (
  */
 export function useResume() {
   const api = useApi();
+  const { t } = useI18n();
   const resumes = useState<ResumeData[]>(STATE_KEYS.RESUME_LIST, () => []);
   const currentResume = useState<ResumeData | null>(STATE_KEYS.RESUME_CURRENT, () => null);
   const loading = useState(STATE_KEYS.RESUME_LOADING, () => false);
@@ -38,7 +40,7 @@ export function useResume() {
   async function fetchResumes() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.resumes.get();
-      assertApiResponse(error, "Failed to fetch resumes");
+      assertApiResponse(error, t("apiErrors.resumes.fetchListFailed"));
       resumes.value = Array.isArray(data)
         ? data
             .map((entry) => toResumeData(entry))
@@ -50,7 +52,7 @@ export function useResume() {
   async function getResume(id: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.resumes({ id }).get();
-      assertApiResponse(error, "Failed to fetch resume");
+      assertApiResponse(error, t("apiErrors.resumes.fetchFailed"));
       const normalized = requireValue(toResumeData(data), "Invalid resume payload");
       currentResume.value = normalized;
       return normalized;
@@ -60,7 +62,7 @@ export function useResume() {
   async function createResume(resumeData: CreateResumeInput) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.resumes.post(resumeData);
-      assertApiResponse(error, "Failed to create resume");
+      assertApiResponse(error, t("apiErrors.resumes.createFailed"));
       await fetchResumes();
       return data;
     });
@@ -69,7 +71,7 @@ export function useResume() {
   async function updateResume(id: string, updates: UpdateResumeInput) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.resumes({ id }).put(updates);
-      assertApiResponse(error, "Failed to update resume");
+      assertApiResponse(error, t("apiErrors.resumes.updateFailed"));
       const normalized = requireValue(toResumeData(data), "Invalid resume payload");
       currentResume.value = normalized;
       await fetchResumes();

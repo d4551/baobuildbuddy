@@ -1,5 +1,6 @@
 import type { Job } from "@bao/shared";
 import { STATE_KEYS, isRecord } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import { toJob } from "./api-normalizers";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
@@ -13,6 +14,7 @@ const toJobList = (value: unknown): Job[] =>
  */
 export function useJobs() {
   const api = useApi();
+  const { t } = useI18n();
   const jobs = useState<Job[]>(STATE_KEYS.JOBS_LIST, () => []);
   const savedJobs = useState<Job[]>(STATE_KEYS.JOBS_SAVED, () => []);
   const applications = useState<Job[]>(STATE_KEYS.JOBS_APPLICATIONS, () => []);
@@ -25,7 +27,7 @@ export function useJobs() {
         filters.value = searchFilters;
       }
       const { data, error } = await api.jobs.get({ query: filters.value });
-      assertApiResponse(error, "Failed to search jobs");
+      assertApiResponse(error, t("apiErrors.jobs.searchFailed"));
       jobs.value =
         isRecord(data) && Array.isArray(data.jobs) ? toJobList(data.jobs) : toJobList(data);
     });
@@ -34,7 +36,7 @@ export function useJobs() {
   async function getJob(id: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.jobs({ id }).get();
-      assertApiResponse(error, "Failed to fetch job");
+      assertApiResponse(error, t("apiErrors.jobs.fetchFailed"));
       return toJob(data);
     });
   }
@@ -42,7 +44,7 @@ export function useJobs() {
   async function saveJob(jobId: string) {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.jobs.save.post({ jobId });
-      assertApiResponse(error, "Failed to save job");
+      assertApiResponse(error, t("apiErrors.jobs.saveFailed"));
       await fetchSavedJobs();
       return data;
     });
@@ -51,7 +53,7 @@ export function useJobs() {
   async function unsaveJob(jobId: string) {
     return withLoadingState(loading, async () => {
       const { error } = await api.jobs.save({ jobId }).delete();
-      assertApiResponse(error, "Failed to unsave job");
+      assertApiResponse(error, t("apiErrors.jobs.unsaveFailed"));
       await fetchSavedJobs();
     });
   }
@@ -59,7 +61,7 @@ export function useJobs() {
   async function fetchSavedJobs() {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.jobs.saved.get();
-      assertApiResponse(error, "Failed to fetch saved jobs");
+      assertApiResponse(error, t("apiErrors.jobs.fetchSavedFailed"));
       if (!Array.isArray(data)) {
         savedJobs.value = [];
         return;

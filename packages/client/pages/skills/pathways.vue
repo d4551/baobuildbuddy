@@ -2,9 +2,13 @@
 import type { ReadinessAssessment } from "@bao/shared";
 import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { getGamificationPathwayIcon } from "@bao/shared";
 import {
   SKILLS_READINESS_THRESHOLD_HIGH,
   SKILLS_READINESS_THRESHOLD_MEDIUM,
+  SKILLS_READINESS_DIAL_SIZE_REM,
+  SKILLS_READINESS_MAX,
+  SKILLS_READINESS_MIN,
 } from "~/constants/skills";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -152,6 +156,17 @@ function getReadinessBadgeColor(percentage: number): string {
 function getCategoryLabel(key: ReadinessCategoryKey): string {
   return t(READINESS_CATEGORY_LABEL_KEYS[key]);
 }
+
+function getPathwayIcon(pathwayId: string): string {
+  return getGamificationPathwayIcon(pathwayId);
+}
+
+function getReadinessDialStyle(score: number): Record<string, string> {
+  return {
+    "--value": String(score),
+    "--size": `${SKILLS_READINESS_DIAL_SIZE_REM}rem`,
+  };
+}
 </script>
 
 <template>
@@ -210,11 +225,11 @@ function getCategoryLabel(key: ReadinessCategoryKey): string {
               <p class="text-sm opacity-85">{{ t("skillsPathwaysPage.readiness.overallReadinessLabel") }}</p>
               <div
                 class="radial-progress bg-primary-content/20 text-primary-content border-4 border-primary-content/20"
-                :style="`--value:${readinessAssessment.overallScore}; --size:7rem;`"
+                :style="getReadinessDialStyle(readinessAssessment.overallScore)"
                 role="progressbar"
                 :aria-valuenow="readinessAssessment.overallScore"
-                aria-valuemin="0"
-                aria-valuemax="100"
+                :aria-valuemin="SKILLS_READINESS_MIN"
+                :aria-valuemax="SKILLS_READINESS_MAX"
                 :aria-label="t('skillsPathwaysPage.readiness.overallReadinessAria', { score: readinessAssessment.overallScore })"
               >
                 <span class="text-2xl font-bold">{{ readinessAssessment.overallScore }}%</span>
@@ -235,7 +250,7 @@ function getCategoryLabel(key: ReadinessCategoryKey): string {
                   class="progress w-full"
                   :class="getReadinessColor(category.score)"
                   :value="category.score"
-                  max="100"
+                  :max="SKILLS_READINESS_MAX"
                   :aria-label="t('skillsPathwaysPage.readiness.categoryScoreAria', { category: getCategoryLabel(category.key), score: category.score })"
                 ></progress>
                 <p class="text-xs opacity-85">{{ category.feedback }}</p>
@@ -293,7 +308,10 @@ function getCategoryLabel(key: ReadinessCategoryKey): string {
             >
               <div class="card-body gap-3">
                 <div class="flex items-start justify-between gap-2">
-                  <h3 class="card-title text-base">{{ pathway.title }}</h3>
+                  <div class="flex items-center gap-2">
+                    <span class="text-2xl" aria-hidden="true">{{ getPathwayIcon(pathway.id) }}</span>
+                    <h3 class="card-title text-base">{{ pathway.title }}</h3>
+                  </div>
                   <span class="badge badge-sm" :class="getReadinessBadgeColor(pathway.matchScore)">
                     {{ pathway.matchScore }}%
                   </span>
@@ -319,12 +337,12 @@ function getCategoryLabel(key: ReadinessCategoryKey): string {
                     <span class="font-semibold">{{ pathway.matchScore }}%</span>
                   </div>
                   <progress
-                    class="progress w-full"
-                    :class="getReadinessColor(pathway.matchScore)"
-                    :value="pathway.matchScore"
-                    max="100"
-                    :aria-label="t('skillsPathwaysPage.pathways.matchScoreAria', { score: pathway.matchScore, title: pathway.title })"
-                  ></progress>
+                  class="progress w-full"
+                  :class="getReadinessColor(pathway.matchScore)"
+                  :value="pathway.matchScore"
+                  :max="SKILLS_READINESS_MAX"
+                  :aria-label="t('skillsPathwaysPage.pathways.matchScoreAria', { score: pathway.matchScore, title: pathway.title })"
+                ></progress>
                 </div>
 
                 <p class="text-xs">

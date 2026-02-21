@@ -21,6 +21,9 @@ import {
   DASHBOARD_RECENT_ACTIVITY_LIMIT,
   DASHBOARD_RELATIVE_TIME_KEYS,
   DASHBOARD_STAT_CARDS,
+  DASHBOARD_GAMIFICATION_PROGRESS_MAX,
+  DASHBOARD_GAMIFICATION_PROGRESS_MIN,
+  getDashboardGamificationDialStyle,
   DASHBOARD_TIME_CONSTANTS,
   DASHBOARD_WELCOME_HEADING_KEYS,
   resolveDashboardPipelineSteps,
@@ -28,6 +31,11 @@ import {
   type DashboardPipelineStepViewModel,
   getDashboardActivityEmoji,
 } from "~/constants/dashboard";
+import {
+  GAMIFICATION_CURRENT_STREAK_ICON,
+  GAMIFICATION_LEVEL_ICON,
+  GAMIFICATION_XP_TARGET_FALLBACK,
+} from "~/constants/gamification";
 import { getErrorMessage } from "~/utils/errors";
 
 interface DashboardActivity {
@@ -141,7 +149,7 @@ const levelProgress = computed(() => {
 
 const xpTarget = computed(() => {
   const gamification = dashboard.value?.gamification;
-  if (!gamification) return 100;
+  if (!gamification) return GAMIFICATION_XP_TARGET_FALLBACK;
   const { nextLevel } = getXPProgress(gamification.xp);
   return nextLevel ? nextLevel.minXP : gamification.xp;
 });
@@ -455,7 +463,7 @@ async function requestData<T>(
           <div class="flex items-center justify-between gap-6">
             <div class="flex-1 space-y-2">
               <div class="flex items-center gap-3">
-                <span class="text-2xl" aria-hidden="true">🎮</span>
+                <span class="text-2xl" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</span>
                 <div>
                   <p class="text-sm text-base-content/60">
                     {{ t(DASHBOARD_COPY_KEYS.levelLabel) }} {{ dashboard.gamification.level }}
@@ -466,7 +474,10 @@ async function requestData<T>(
               <progress
                 class="progress progress-primary w-full"
                 :value="levelProgress"
-                max="100"
+                :max="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
+                :aria-valuenow="levelProgress"
+                :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
+                :aria-valuemax="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
                 :aria-label="t(DASHBOARD_A11Y_KEYS.levelProgressAria)"
               ></progress>
             </div>
@@ -474,17 +485,17 @@ async function requestData<T>(
             <div class="flex items-center gap-6">
               <div
                 class="radial-progress text-primary"
-                :style="`--value:${levelProgress}; --size:5.5rem; --thickness:0.4rem;`"
+                :style="getDashboardGamificationDialStyle(levelProgress)"
                 role="progressbar"
                 :aria-valuenow="levelProgress"
-                aria-valuemin="0"
-                aria-valuemax="100"
+                :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
+                :aria-valuemax="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
               >
                 <span class="text-sm font-bold">{{ levelProgress }}%</span>
               </div>
 
               <div v-if="dashboard.gamification.currentStreak" class="text-center">
-                <div class="text-3xl" aria-hidden="true">🔥</div>
+                <div class="text-3xl" aria-hidden="true">{{ GAMIFICATION_CURRENT_STREAK_ICON }}</div>
                 <p class="text-2xl font-bold">{{ dashboard.gamification.currentStreak }}</p>
                 <p class="text-xs text-base-content/60">{{ t(DASHBOARD_COPY_KEYS.streakLabel) }}</p>
               </div>
@@ -527,12 +538,16 @@ async function requestData<T>(
                   </span>
                 </div>
                 <div class="flex items-center gap-3">
-                  <progress
-                    class="progress flex-1"
-                    :class="dashboard.dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
-                    :value="dashboard.dailyChallenge.progress"
-                    :max="dashboard.dailyChallenge.goal"
-                    :aria-label="t(DASHBOARD_A11Y_KEYS.challengeProgressAria)"></progress>
+              <progress
+                class="progress flex-1"
+                :class="dashboard.dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
+                :value="dashboard.dailyChallenge.progress"
+                :max="dashboard.dailyChallenge.goal"
+                :aria-valuenow="dashboard.dailyChallenge.progress"
+                :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
+                :aria-valuemax="dashboard.dailyChallenge.goal"
+                :aria-label="t(DASHBOARD_A11Y_KEYS.challengeProgressAria)"
+              ></progress>
                   <span class="text-sm font-medium">
                     {{ dashboard.dailyChallenge.progress }} / {{ dashboard.dailyChallenge.goal }}
                   </span>

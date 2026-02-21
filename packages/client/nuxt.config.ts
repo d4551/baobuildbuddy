@@ -32,17 +32,16 @@ const parseSupportedLocales = (value: string | undefined): string[] => {
 const createLocaleChunkMap = (localeCodes: readonly string[]): Record<string, string> => {
   const localeChunkMap: Record<string, string> = {};
   for (const localeCode of localeCodes) {
-    localeChunkMap[`${localeCode}${LOCALE_FILE_EXTENSION}`] = `${LOCALE_CHUNK_NAME_PREFIX}${localeCode}`;
+    localeChunkMap[`${localeCode}${LOCALE_FILE_EXTENSION}`] =
+      `${LOCALE_CHUNK_NAME_PREFIX}${localeCode}`;
   }
   return localeChunkMap;
 };
 
 const LOCALE_CHUNK_NAME_BY_FILE = createLocaleChunkMap(APP_LANGUAGE_CODES);
 
-const hasOwnKey = <T extends object>(
-  value: T,
-  key: PropertyKey,
-): key is keyof T => Object.hasOwn(value, key);
+const hasOwnKey = <T extends object>(value: T, key: PropertyKey): key is keyof T =>
+  Object.hasOwn(value, key);
 
 const normalizeModuleId = (moduleId: string): string =>
   moduleId.replaceAll(WINDOWS_PATH_SEPARATOR, MODULE_PATH_SEPARATOR);

@@ -237,7 +237,9 @@ const main = async (): Promise<void> => {
   const contrastViolations = collectContrastViolations(themeCss);
 
   if (hardcodedColorViolations.length === 0 && contrastViolations.length === 0) {
-    console.log("UI accessibility validation passed: WCAG contrast and tokenized colors are enforced.");
+    console.log(
+      "UI accessibility validation passed: WCAG contrast and tokenized colors are enforced.",
+    );
     return;
   }
 
