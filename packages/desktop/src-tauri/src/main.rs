@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::io;
 use std::net::TcpStream;
 use std::path::{Path, PathBuf};
@@ -5,7 +7,7 @@ use std::process::{Child, Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use tauri::RunEvent;
+use tauri::{Manager, RunEvent};
 
 const DEFAULT_HOST: &str = "127.0.0.1";
 const DEFAULT_SERVER_PORT: u16 = 3000;
@@ -75,7 +77,6 @@ impl StackStartup {
   }
 }
 
-#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 fn main() {
   let manager = ProcessManager::default();
 

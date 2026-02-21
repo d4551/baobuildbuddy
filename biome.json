@@ -8,7 +8,10 @@
       "!**/dist-types",
       "!**/.nuxt",
       "!**/.output",
-      "!**/bun.lock"
+      "!**/bun.lock",
+      "!**/packages/desktop/src-tauri/target",
+      "!**/packages/desktop/src-tauri/gen",
+      "!**/packages/desktop/src-tauri/icons"
     ]
   },
   "formatter": {

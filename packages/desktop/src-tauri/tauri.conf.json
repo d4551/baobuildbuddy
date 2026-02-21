@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.baobuildbuddy.desktop",
   "build": {
-    "beforeBuildCommand": "bun --cwd ../../.. run build",
+    "beforeBuildCommand": "bun run --cwd ../.. build",
     "frontendDist": "../../client/.output/public",
     "devUrl": "http://127.0.0.1:3001"
   },
@@ -26,6 +26,14 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "category": "DeveloperTools"
+    "category": "DeveloperTools",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico",
+      "icons/icon.png"
+    ]
   }
 }
