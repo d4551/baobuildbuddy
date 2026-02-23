@@ -19,6 +19,9 @@ export * from "./schemas/skill-mapping.schema";
 export * from "./schemas/resume.schema";
 export * from "./schemas/job.schema";
 export * from "./schemas/interview.schema";
+export * from "./schemas/error-envelope.schema";
+export * from "./schemas/rpa-protocol.schema";
+export * from "./schemas/rpa-events.schema";
 
 // Constants
 export * from "./constants/gaming-roles";

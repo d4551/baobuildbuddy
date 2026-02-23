@@ -1,98 +1,220 @@
 import { safeParseJson } from "@bao/shared";
-import type { AIService } from "../ai/ai-service";
+import type { AIResponse } from "@bao/shared";
+import * as z from "zod";
+import { config } from "../../config/env";
 import { formFieldAnalysisPrompt } from "../ai/prompts";
 
+const MAX_STRIPPED_FORM_HTML_CHARS = 4_000;
+const FETCH_TIMEOUT_MS = 10_000;
+const DEFAULT_BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+const selectorMapSchema = z.record(
+  z.string().trim().min(1).max(120),
+  z.array(z.string().trim().min(1).max(500)).min(1).max(20),
+);
+
+const wait = (delayMs: number): Promise<void> =>
+  new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(), delayMs);
+    if (typeof timer === "object" && timer !== null && "unref" in timer) {
+      const maybeUnref = timer.unref;
+      if (typeof maybeUnref === "function") {
+        maybeUnref.call(timer);
+      }
+    }
+  });
+
+type FetchPageResult =
+  | {
+      ok: true;
+      html: string;
+    }
+  | {
+      ok: false;
+      statusCode?: number;
+      message: string;
+    };
+
 /**
- * AI-powered form field analyzer that maps job application form fields
- * to optimal CSS selectors. Falls back gracefully when AI is unavailable.
+ * Minimal AI client contract required by smart field mapping.
+ */
+export interface FieldMapperAIClient {
+  generate: (
+    prompt: string,
+    options?: { temperature?: number; maxTokens?: number },
+  ) => Promise<AIResponse>;
+}
+
+/**
+ * AI-powered selector mapper for job-application form fields.
  */
 export class SmartFieldMapper {
   /**
-   * Fetch a job page, strip it to form-relevant elements, and use AI to
-   * map field names to CSS selectors.
-   *
-   * @returns A mapping of field names to prioritized selector arrays,
-   *          or an empty object if analysis fails (hardcoded selectors still work).
+   * Analyzes a job page and returns validated selector candidates for requested fields.
    */
   async analyze(
     jobUrl: string,
     fieldsNeeded: string[],
-    aiService: AIService,
+    aiService: FieldMapperAIClient,
   ): Promise<Record<string, string[]>> {
-    return this.fetchPage(jobUrl)
-      .then(async (html) => {
-        const stripped = this.stripToFormElements(html);
+    const uniqueFields = Array.from(
+      new Set(
+        fieldsNeeded
+          .map((field) => field.trim())
+          .filter((field) => field.length > 0),
+      ),
+    );
 
-        if (!stripped || stripped.length < 20) {
-          return {}; // Page has no recognizable form elements
+    if (uniqueFields.length === 0) {
+      return {};
+    }
+
+    return this.fetchPage(jobUrl).then(
+      async (pageResult) => {
+        if (!pageResult.ok) {
+          return {};
         }
 
-        const prompt = formFieldAnalysisPrompt(stripped, fieldsNeeded);
-        const response = await aiService.generate(prompt, {
-          temperature: 0.1,
-          maxTokens: 1000,
+        const stripped = this.stripToFormElements(pageResult.html);
+        if (stripped.length < 20) {
+          return {};
+        }
+
+        return this.generateSelectorMapWithRetry({
+          aiService,
+          strippedHtml: stripped,
+          fieldsNeeded: uniqueFields,
+          attemptsRemaining: config.smartFieldMapperRetries,
+          delayMs: config.smartFieldMapperRetryDelayMs,
         });
-
-        if (response.error || !response.content) {
-          return {};
-        }
-
-        // Parse the AI response — strip markdown code fences if present
-        const cleaned = response.content
-          .replace(/```json\n?/g, "")
-          .replace(/```\n?/g, "")
-          .trim();
-        const parsedValue = safeParseJson(cleaned);
-        if (!parsedValue || typeof parsedValue !== "object" || Array.isArray(parsedValue)) {
-          return {};
-        }
-        const parsed = parsedValue as Record<string, unknown>;
-
-        // Validate and normalize the result
-        const result: Record<string, string[]> = {};
-        for (const [key, value] of Object.entries(parsed)) {
-          if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
-            result[key] = value;
-          }
-        }
-
-        return result;
-      })
-      .catch(() => ({}));
-  }
-
-  /**
-   * Fetch page HTML with a short timeout.
-   */
-  private async fetchPage(url: string): Promise<string> {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(10_000),
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
-    });
-    return await res.text();
+      () => ({}),
+    );
   }
 
   /**
-   * Strip an HTML document down to only form-relevant elements:
-   * <form>, <input>, <textarea>, <select>, <label>, <button>.
-   *
-   * Truncates to ~4000 chars to keep AI prompt costs low.
+   * Fetches page HTML with a deterministic timeout and status checks.
+   */
+  private fetchPage(url: string): Promise<FetchPageResult> {
+    return fetch(url, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      headers: {
+        "User-Agent": DEFAULT_BROWSER_USER_AGENT,
+      },
+    }).then(
+      async (response) => {
+        if (!response.ok) {
+          return {
+            ok: false,
+            statusCode: response.status,
+            message: `HTTP ${response.status}`,
+          } satisfies FetchPageResult;
+        }
+
+        return {
+          ok: true,
+          html: await response.text(),
+        } satisfies FetchPageResult;
+      },
+      () =>
+        ({
+          ok: false,
+          message: "Network request failed",
+        }) satisfies FetchPageResult,
+    );
+  }
+
+  /**
+   * Executes AI analysis with bounded retries and exponential backoff.
+   */
+  private generateSelectorMapWithRetry(params: {
+    aiService: FieldMapperAIClient;
+    strippedHtml: string;
+    fieldsNeeded: string[];
+    attemptsRemaining: number;
+    delayMs: number;
+  }): Promise<Record<string, string[]>> {
+    const prompt = formFieldAnalysisPrompt(params.strippedHtml, params.fieldsNeeded);
+    return params.aiService
+      .generate(prompt, {
+        temperature: 0.1,
+        maxTokens: 1000,
+      })
+      .then(
+        async (response) => {
+          if (response.error || !response.content) {
+            if (params.attemptsRemaining > 1) {
+              await wait(params.delayMs);
+              return this.generateSelectorMapWithRetry({
+                ...params,
+                attemptsRemaining: params.attemptsRemaining - 1,
+                delayMs: params.delayMs * 2,
+              });
+            }
+            return {};
+          }
+
+          const parsedMap = this.parseSelectorResponse(response.content);
+          if (Object.keys(parsedMap).length > 0) {
+            return parsedMap;
+          }
+
+          if (params.attemptsRemaining > 1) {
+            await wait(params.delayMs);
+            return this.generateSelectorMapWithRetry({
+              ...params,
+              attemptsRemaining: params.attemptsRemaining - 1,
+              delayMs: params.delayMs * 2,
+            });
+          }
+
+          return {};
+        },
+        async () => {
+          if (params.attemptsRemaining > 1) {
+            await wait(params.delayMs);
+            return this.generateSelectorMapWithRetry({
+              ...params,
+              attemptsRemaining: params.attemptsRemaining - 1,
+              delayMs: params.delayMs * 2,
+            });
+          }
+          return {};
+        },
+      );
+  }
+
+  /**
+   * Parses and validates selector-map JSON emitted by the AI provider.
+   */
+  private parseSelectorResponse(content: string): Record<string, string[]> {
+    const cleaned = content.replace(/```json\n?/gu, "").replace(/```\n?/gu, "").trim();
+    const parsedValue = safeParseJson(cleaned);
+    const parsedSelectors = selectorMapSchema.safeParse(parsedValue);
+    if (!parsedSelectors.success) {
+      return {};
+    }
+    return parsedSelectors.data;
+  }
+
+  /**
+   * Strips an HTML document to form-relevant elements only.
    */
   private stripToFormElements(html: string): string {
     const formElementRegex =
-      /<(?:form|input|textarea|select|option|label|button|fieldset|legend)\b[^>]*(?:\/>|>(?:[\s\S]*?)<\/(?:form|input|textarea|select|option|label|button|fieldset|legend)>|>)/gi;
+      /<(?:form|input|textarea|select|option|label|button|fieldset|legend)\b[^>]*(?:\/>|>(?:[\s\S]*?)<\/(?:form|input|textarea|select|option|label|button|fieldset|legend)>|>)/giu;
 
     const matches = html.match(formElementRegex);
-    if (!matches) return "";
+    if (!matches) {
+      return "";
+    }
 
-    // Join matches and truncate
-    const MAX_CHARS = 4000;
     let result = "";
     for (const match of matches) {
-      if (result.length + match.length > MAX_CHARS) break;
+      if (result.length + match.length > MAX_STRIPPED_FORM_HTML_CHARS) {
+        break;
+      }
       result += `${match}\n`;
     }
 

@@ -6,4 +6,8 @@ export declare const config: {
     corsOrigins: string[];
     /** When true, skip API key auth (local dev only) */
     disableAuth: boolean;
+    automationScriptTimeoutMs: number;
+    automationStdioBufferLimit: number;
+    smartFieldMapperRetries: number;
+    smartFieldMapperRetryDelayMs: number;
 };

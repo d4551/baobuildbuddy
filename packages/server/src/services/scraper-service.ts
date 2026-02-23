@@ -1,13 +1,56 @@
-import { join } from "node:path";
-import { generateId } from "@bao/shared";
+import { generateId, safeParseJson, type JobSearchResult } from "@bao/shared";
+import * as z from "zod";
 import { eq } from "drizzle-orm";
-import { SCRAPER_DIR } from "../config/paths";
+import { config } from "../config/env";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { studios } from "../db/schema/studios";
+import { runPythonScript } from "./automation/rpa-runner";
 
 type ScriptInputPayload = {
   sourceUrl?: string;
+};
+
+const GAMEDEV_SCRIPT_NAME = "job_scraper_gamedev.py";
+const GRACKLE_SCRIPT_NAME = "job_scraper_grackle.py";
+const WORKWITHINDIES_SCRIPT_NAME = "job_scraper_workwithindies.py";
+const REMOTEGAMEJOBS_SCRIPT_NAME = "job_scraper_remotegamejobs.py";
+const GAMESJOBSDIRECT_SCRIPT_NAME = "job_scraper_gamesjobsdirect.py";
+const POCKETGAMER_SCRIPT_NAME = "job_scraper_pocketgamer.py";
+
+const scrapedStudioSchema = z.object({
+  id: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1),
+  website: z.string().trim().min(1).optional(),
+  location: z.string().trim().min(1).optional(),
+  size: z.string().trim().min(1).optional(),
+  type: z.string().trim().min(1).optional(),
+  description: z.string().trim().min(1).optional(),
+  games: z.array(z.string().trim().min(1)).optional(),
+  technologies: z.array(z.string().trim().min(1)).optional(),
+  interviewStyle: z.string().trim().min(1).optional(),
+  remoteWork: z.boolean().nullable().optional(),
+});
+
+const scrapedJobSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  company: z.string().trim().min(1).max(200),
+  location: z.string().trim().min(1).max(200),
+  remote: z.boolean().optional(),
+  description: z.string().trim().max(5_000).optional(),
+  url: z.string().trim().max(500).optional(),
+  source: z.string().trim().max(120).optional(),
+  contentHash: z.string().trim().max(200).optional(),
+  postDate: z.string().trim().max(80).optional(),
+  postedDate: z.string().trim().max(80).optional(),
+});
+
+type ScrapedStudio = z.infer<typeof scrapedStudioSchema>;
+export type ScrapedJob = z.infer<typeof scrapedJobSchema>;
+
+type ScriptRows<T> = {
+  rows: T[];
+  rowErrors: string[];
 };
 
 const toErrorMessage = (error: unknown): string =>
@@ -25,104 +68,170 @@ const runWithErrorCollection = async (
   );
 };
 
-async function runPythonScript(scriptName: string, payload?: ScriptInputPayload): Promise<string> {
-  const scriptPath = join(SCRAPER_DIR, scriptName);
-  const python = process.platform === "win32" ? "python" : "python3";
-  const proc = Bun.spawn([python, scriptPath], {
-    cwd: SCRAPER_DIR,
-    stdin: "pipe",
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+    ? Object.fromEntries(Object.entries(value))
+    : null;
 
-  if (proc.stdin) {
-    proc.stdin.write(JSON.stringify(payload ?? {}));
-    proc.stdin.end();
+const parseJsonRows = (raw: unknown): unknown[] => {
+  if (Array.isArray(raw)) {
+    return raw;
   }
 
-  const stdout = await new Response(proc.stdout).text();
-  const stderr = await new Response(proc.stderr).text();
-  const exitCode = await proc.exited;
-  if (exitCode !== 0) {
-    throw new Error(`Script exited ${exitCode}: ${stderr || stdout}`);
+  const asObject = asRecord(raw);
+  if (!asObject) {
+    return [];
   }
-  return stdout;
-}
 
-export interface ScrapedStudio {
-  id: string;
-  name: string;
-  website?: string;
-  location?: string;
-  size?: string;
-  type?: string;
-  description?: string;
-  games?: string[];
-  technologies?: string[];
-  interviewStyle?: string;
-  remoteWork?: boolean | null;
-}
+  const items = asObject.items;
+  if (Array.isArray(items)) {
+    return items;
+  }
 
-export interface ScrapedJob {
-  title: string;
-  company: string;
-  location: string;
-  remote?: boolean;
-  description?: string;
-  url?: string;
-  source?: string;
-  postedDate?: string;
-  contentHash?: string;
-}
+  const rows = asObject.rows;
+  if (Array.isArray(rows)) {
+    return rows;
+  }
 
+  return [raw];
+};
+
+const toJobSearchResult = (rows: ScrapedJob[]): JobSearchResult => ({
+  jobs: rows.map((row) => ({
+    id: row.contentHash || generateId(),
+    title: row.title,
+    company: row.company,
+    location: row.location,
+    remote: Boolean(row.remote),
+    description: row.description,
+    url: row.url,
+    source: row.source,
+    contentHash: row.contentHash,
+    postedDate: row.postDate || row.postedDate || "",
+    type: "full-time",
+  })),
+  total: rows.length,
+  page: 1,
+  limit: rows.length,
+  filters: {},
+});
+
+/**
+ * Scraper service for studio/job ingestion via Python scripts.
+ */
 export class ScraperService {
-  private async scrapeJobBoard(scriptName: string, sourceUrl?: string): Promise<ScrapedJob[]> {
-    const output = await runPythonScript(scriptName, sourceUrl ? { sourceUrl } : undefined);
-    const raw = JSON.parse(output);
-    const items = Array.isArray(raw)
-      ? raw
-      : raw && typeof raw === "object" && "error" in raw
-        ? []
-        : [raw];
-    return items.filter(
-      (x): x is ScrapedJob =>
-        x && typeof x === "object" && typeof (x as ScrapedJob).title === "string",
-    );
+  /**
+   * Runs a Python scraper script and returns parsed JSON payload.
+   */
+  private async runScraperScript(
+    scriptName: string,
+    payload: ScriptInputPayload = {},
+  ): Promise<{
+    parsed: unknown;
+    stderrLines: string[];
+  }> {
+    const execution = await runPythonScript({
+      scriptName,
+      scriptInput: payload,
+      runId: generateId(),
+      timeoutMs: config.automationScriptTimeoutMs,
+      stdoutLineLimit: config.automationStdioBufferLimit,
+      stderrLineLimit: config.automationStdioBufferLimit,
+    });
+
+    if (execution.exitCode !== 0) {
+      throw new Error(
+        `Script exited ${execution.exitCode}: ${execution.stderrLines.join("\n") || execution.stdoutLines.join("\n")}`,
+      );
+    }
+
+    const outputText = execution.stdoutLines.join("\n").trim();
+    const parsed = safeParseJson(outputText);
+    if (parsed === null && outputText !== "null") {
+      throw new Error("Scraper script returned invalid JSON");
+    }
+
+    return {
+      parsed,
+      stderrLines: execution.stderrLines,
+    };
   }
 
+  /**
+   * Parses studio rows and collects row-level schema validation errors.
+   */
+  private parseStudioRows(raw: unknown): ScriptRows<ScrapedStudio> {
+    const rows = parseJsonRows(raw);
+    const parsedRows: ScrapedStudio[] = [];
+    const rowErrors: string[] = [];
+
+    rows.forEach((row, index) => {
+      const parsed = scrapedStudioSchema.safeParse(row);
+      if (!parsed.success) {
+        rowErrors.push(`studio_row_${index}: invalid payload`);
+        return;
+      }
+      parsedRows.push(parsed.data);
+    });
+
+    return {
+      rows: parsedRows,
+      rowErrors,
+    };
+  }
+
+  /**
+   * Parses job rows and collects row-level schema validation errors.
+   */
+  private parseJobRows(raw: unknown): ScriptRows<ScrapedJob> {
+    const rows = parseJsonRows(raw);
+    const parsedRows: ScrapedJob[] = [];
+    const rowErrors: string[] = [];
+
+    rows.forEach((row, index) => {
+      const parsed = scrapedJobSchema.safeParse(row);
+      if (!parsed.success) {
+        rowErrors.push(`job_row_${index}: invalid payload`);
+        return;
+      }
+      parsedRows.push(parsed.data);
+    });
+
+    return {
+      rows: parsedRows,
+      rowErrors,
+    };
+  }
+
+  /**
+   * Scrapes and upserts studio data.
+   */
   async scrapeStudios(): Promise<{ scraped: number; upserted: number; errors: string[] }> {
     const errors: string[] = [];
     let scraped = 0;
     let upserted = 0;
-    await Promise.resolve()
-      .then(async () => {
-        const output = await runPythonScript("studio_scraper.py");
-        const raw = JSON.parse(output);
-        const items = Array.isArray(raw)
-          ? raw
-          : raw && typeof raw === "object" && "error" in raw
-            ? []
-            : [raw];
-        const list = items.filter(
-          (x): x is ScrapedStudio =>
-            x && typeof x === "object" && typeof (x as ScrapedStudio).name === "string",
-        );
-        scraped = list.length;
+
+    await this.runScraperScript("studio_scraper.py")
+      .then(async ({ parsed }) => {
+        const parsedRows = this.parseStudioRows(parsed);
+        scraped = parsedRows.rows.length;
+        errors.push(...parsedRows.rowErrors);
+
         const now = new Date().toISOString();
-        for (const s of list) {
+        for (const studioRow of parsedRows.rows) {
           await runWithErrorCollection(async () => {
-            const id = String(s.id || generateId()).trim() || generateId();
+            const id = studioRow.id || generateId();
             const studioData = {
-              name: String(s.name || "").slice(0, 200),
-              website: s.website ? String(s.website).slice(0, 500) : null,
-              location: s.location ? String(s.location).slice(0, 200) : null,
-              size: s.size ? String(s.size).slice(0, 50) : null,
-              type: s.type ? String(s.type).slice(0, 50) : null,
-              description: s.description ? String(s.description).slice(0, 2000) : null,
-              games: Array.isArray(s.games) ? s.games : [],
-              technologies: Array.isArray(s.technologies) ? s.technologies : [],
-              interviewStyle: s.interviewStyle ? String(s.interviewStyle).slice(0, 500) : null,
-              remoteWork: s.remoteWork ?? null,
+              name: studioRow.name,
+              website: studioRow.website ?? null,
+              location: studioRow.location ?? null,
+              size: studioRow.size ?? null,
+              type: studioRow.type ?? null,
+              description: studioRow.description ?? null,
+              games: studioRow.games ?? [],
+              technologies: studioRow.technologies ?? [],
+              interviewStyle: studioRow.interviewStyle ?? null,
+              remoteWork: studioRow.remoteWork ?? null,
             };
 
             await db
@@ -137,80 +246,148 @@ export class ScraperService {
               })
               .onConflictDoUpdate({
                 target: studios.id,
-                set: { ...studioData, updatedAt: now },
+                set: {
+                  ...studioData,
+                  updatedAt: now,
+                },
               });
-            upserted++;
+            upserted += 1;
           }, errors);
         }
       })
-      .catch((error: unknown) => {
-        errors.push(toErrorMessage(error));
-      });
+      .then(
+        () => undefined,
+        (error: unknown) => {
+          errors.push(toErrorMessage(error));
+        },
+      );
+
     return { scraped, upserted, errors };
   }
 
-  async scrapeGameDevNetJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    return this.scrapeJobBoard("job_scraper_gamedev.py", sourceUrl);
+  /**
+   * Scrapes jobs from GameDev.net and validates normalized output shape.
+   */
+  async scrapeGameDevNetJobsRaw(
+    sourceUrl?: string,
+    scriptName: string = GAMEDEV_SCRIPT_NAME,
+  ): Promise<ScrapedJob[]> {
+    const { parsed } = await this.runScraperScript(
+      scriptName,
+      sourceUrl ? { sourceUrl } : {},
+    );
+    return this.parseJobRows(parsed).rows;
   }
 
+  /**
+   * Scrapes jobs from Grackle and validates normalized output shape.
+   */
   async scrapeGrackleJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    return this.scrapeJobBoard("job_scraper_grackle.py", sourceUrl);
+    const { parsed } = await this.runScraperScript(
+      GRACKLE_SCRIPT_NAME,
+      sourceUrl ? { sourceUrl } : {},
+    );
+    return this.parseJobRows(parsed).rows;
   }
 
+  /**
+   * Scrapes jobs from WorkWithIndies and validates normalized output shape.
+   */
   async scrapeWorkWithIndiesJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    return this.scrapeJobBoard("job_scraper_workwithindies.py", sourceUrl);
+    const { parsed } = await this.runScraperScript(
+      WORKWITHINDIES_SCRIPT_NAME,
+      sourceUrl ? { sourceUrl } : {},
+    );
+    return this.parseJobRows(parsed).rows;
   }
 
+  /**
+   * Scrapes jobs from RemoteGameJobs and validates normalized output shape.
+   */
   async scrapeRemoteGameJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    return this.scrapeJobBoard("job_scraper_remotegamejobs.py", sourceUrl);
+    const { parsed } = await this.runScraperScript(
+      REMOTEGAMEJOBS_SCRIPT_NAME,
+      sourceUrl ? { sourceUrl } : {},
+    );
+    return this.parseJobRows(parsed).rows;
   }
 
+  /**
+   * Scrapes jobs from GamesJobsDirect and validates normalized output shape.
+   */
   async scrapeGamesJobsDirectRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    return this.scrapeJobBoard("job_scraper_gamesjobsdirect.py", sourceUrl);
+    const { parsed } = await this.runScraperScript(
+      GAMESJOBSDIRECT_SCRIPT_NAME,
+      sourceUrl ? { sourceUrl } : {},
+    );
+    return this.parseJobRows(parsed).rows;
   }
 
+  /**
+   * Scrapes jobs from PocketGamer and validates normalized output shape.
+   */
   async scrapePocketGamerJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    return this.scrapeJobBoard("job_scraper_pocketgamer.py", sourceUrl);
+    const { parsed } = await this.runScraperScript(
+      POCKETGAMER_SCRIPT_NAME,
+      sourceUrl ? { sourceUrl } : {},
+    );
+    return this.parseJobRows(parsed).rows;
   }
 
-  async scrapeGameDevNetJobs(): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+  /**
+   * Scrapes and upserts GameDev.net jobs with row-level error reporting.
+   */
+  async scrapeGameDevNetJobs(
+    scriptName: string = GAMEDEV_SCRIPT_NAME,
+  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
     const errors: string[] = [];
     let scraped = 0;
     let upserted = 0;
-    await Promise.resolve()
-      .then(async () => {
-        const list = await this.scrapeGameDevNetJobsRaw();
-        scraped = list.length;
+
+    await this.runScraperScript(scriptName)
+      .then(async ({ parsed }) => {
+        const parsedRows = this.parseJobRows(parsed);
+        scraped = parsedRows.rows.length;
+        errors.push(...parsedRows.rowErrors);
+
+        const normalizedResult = toJobSearchResult(parsedRows.rows);
         const now = new Date().toISOString();
-        for (const j of list) {
+
+        for (const job of normalizedResult.jobs) {
           await runWithErrorCollection(async () => {
-            const contentHash = String(j.contentHash || `gdn-${generateId()}`).slice(0, 100);
+            const contentHash = String(job.contentHash || `gdn-${generateId()}`).slice(0, 100);
             const existing = await db.select().from(jobs).where(eq(jobs.contentHash, contentHash));
-            if (existing.length > 0) return; // dedupe by contentHash
-            const id = generateId();
+            if (existing.length > 0) {
+              return;
+            }
+
             await db.insert(jobs).values({
-              id,
-              title: String(j.title || "").slice(0, 200),
-              company: String(j.company || "Unknown").slice(0, 200),
-              location: String(j.location || "Unknown").slice(0, 200),
-              remote: !!j.remote,
+              id: generateId(),
+              title: job.title,
+              company: job.company,
+              location: job.location,
+              remote: Boolean(job.remote),
               hybrid: false,
-              description: j.description ? String(j.description).slice(0, 5000) : null,
-              url: j.url ? String(j.url).slice(0, 500) : null,
-              source: j.source || "gamedev-net",
+              description: job.description ?? null,
+              url: job.url ?? null,
+              source: job.source || "gamedev-net",
               contentHash,
-              postedDate: j.postedDate ? String(j.postedDate).slice(0, 50) : null,
+              postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
               type: "full-time",
               createdAt: now,
               updatedAt: now,
             });
-            upserted++;
+            upserted += 1;
           }, errors);
         }
       })
-      .catch((error: unknown) => {
-        errors.push(toErrorMessage(error));
-      });
+      .then(
+        () => undefined,
+        (error: unknown) => {
+          errors.push(toErrorMessage(error));
+        },
+      );
+
     return { scraped, upserted, errors };
   }
 }

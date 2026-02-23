@@ -6,6 +6,8 @@ import {
   AUTOMATION_RUN_TYPES,
   type AutomationRunStatus,
   type AutomationRunType,
+  type RpaRunEvent,
+  type RpaRunExecutionEnvelope,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { useAutomation } from "~/composables/useAutomation";
@@ -13,12 +15,29 @@ import { getErrorMessage } from "~/utils/errors";
 
 type RunFilterType = "" | AutomationRunType;
 type RunFilterStatus = "" | AutomationRunStatus;
-const RUNNING_STATUS = AUTOMATION_RUN_STATUSES[1];
+
+const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
+  AUTOMATION_RUN_STATUSES;
+const RUN_STATUS_ORDER: Record<AutomationRunStatus, number> = {
+  [RUN_STATUS_RUNNING]: 0,
+  [RUN_STATUS_PENDING]: 1,
+  [RUN_STATUS_ERROR]: 2,
+  [RUN_STATUS_SUCCESS]: 3,
+};
+
+const EMPTY_VALUE = "—";
+const DATE_FORMAT_OPTIONS = {
+  dateStyle: "medium",
+  timeStyle: "short",
+} as const satisfies Intl.DateTimeFormatOptions;
 
 const { t } = useI18n();
 const statusFilter = ref<RunFilterStatus>("");
 const typeFilter = ref<RunFilterType>("");
-const { fetchRuns } = useAutomation();
+const { fetchRuns, subscribeToRun } = useAutomation();
+
+const activeSubscriptions = new Map<string, () => void>();
+const liveRunById = ref<Record<string, RpaRunExecutionEnvelope>>({});
 
 const typeOptions = computed(() =>
   AUTOMATION_RUN_TYPES.map((runType) => ({
@@ -56,24 +75,175 @@ const errorMessage = computed(() =>
   error.value ? getErrorMessage(error.value, t("automation.runs.loadErrorFallback")) : "",
 );
 
-function formatDate(value: string): string {
-  return new Date(value).toLocaleString();
-}
+const isLiveRun = (run: RpaRunExecutionEnvelope): boolean =>
+  run.status === RUN_STATUS_PENDING || run.status === RUN_STATUS_RUNNING;
 
-function formatRunType(runType: AutomationRunType): string {
-  return t(`automation.runs.typeOptions.${runType}`);
-}
+const computeProgressFromSteps = (currentStep: number | null, totalSteps: number | null): number => {
+  if (
+    typeof currentStep !== "number" ||
+    typeof totalSteps !== "number" ||
+    totalSteps <= 0 ||
+    !Number.isFinite(currentStep) ||
+    !Number.isFinite(totalSteps)
+  ) {
+    return 0;
+  }
+  return Math.max(0, Math.min(100, Math.round((currentStep / totalSteps) * 100)));
+};
 
-function formatRunStatus(runStatus: AutomationRunStatus): string {
-  return t(`automation.runs.statusOptions.${runStatus}`);
-}
+const mergeRunWithEvent = (
+  run: RpaRunExecutionEnvelope,
+  event: RpaRunEvent,
+): RpaRunExecutionEnvelope => {
+  if (event.eventType === "progress") {
+    const currentStep = typeof event.step === "number" ? event.step : run.currentStep;
+    const totalSteps = typeof event.totalSteps === "number" ? event.totalSteps : run.totalSteps;
+    const progress =
+      typeof run.progress === "number" && Number.isFinite(run.progress)
+        ? run.progress
+        : computeProgressFromSteps(currentStep ?? null, totalSteps ?? null);
+    return {
+      ...run,
+      status: event.status,
+      currentStep: currentStep ?? null,
+      totalSteps: totalSteps ?? null,
+      progress,
+      updatedAt: event.timestamp,
+    };
+  }
+
+  if (event.eventType === "result") {
+    const outputSteps = event.result.steps.length;
+    return {
+      ...run,
+      status: event.result.success ? RUN_STATUS_SUCCESS : RUN_STATUS_ERROR,
+      output: event.result,
+      error: event.result.success ? null : event.result.error,
+      progress: 100,
+      currentStep: outputSteps,
+      totalSteps: outputSteps,
+      completedAt: event.timestamp,
+      updatedAt: event.timestamp,
+    };
+  }
+
+  return {
+    ...run,
+    status: RUN_STATUS_ERROR,
+    error: event.error,
+    completedAt: event.timestamp,
+    updatedAt: event.timestamp,
+  };
+};
+
+const unsubscribeRun = (runId: string): void => {
+  const unsubscribe = activeSubscriptions.get(runId);
+  if (!unsubscribe) {
+    return;
+  }
+  unsubscribe();
+  activeSubscriptions.delete(runId);
+};
+
+const clearSubscriptions = (): void => {
+  for (const [runId, unsubscribe] of activeSubscriptions.entries()) {
+    unsubscribe();
+    activeSubscriptions.delete(runId);
+  }
+};
+
+const subscribeRun = (run: RpaRunExecutionEnvelope): void => {
+  if (!isLiveRun(run) || activeSubscriptions.has(run.id)) {
+    return;
+  }
+  const unsubscribe = subscribeToRun(run.id, (event) => {
+    const currentRun = liveRunById.value[event.runId] || runs.value?.find((item) => item.id === event.runId);
+    if (!currentRun) {
+      return;
+    }
+    const mergedRun = mergeRunWithEvent(currentRun, event);
+    liveRunById.value = {
+      ...liveRunById.value,
+      [event.runId]: mergedRun,
+    };
+    if (!isLiveRun(mergedRun)) {
+      unsubscribeRun(event.runId);
+    }
+  });
+  activeSubscriptions.set(run.id, unsubscribe);
+};
+
+const mergedRuns = computed<RpaRunExecutionEnvelope[]>(() =>
+  (runs.value || []).map((run) => liveRunById.value[run.id] || run),
+);
+
+watch(
+  mergedRuns,
+  (nextRuns) => {
+    const liveRunIds = new Set(nextRuns.filter((run) => isLiveRun(run)).map((run) => run.id));
+    for (const runId of activeSubscriptions.keys()) {
+      if (!liveRunIds.has(runId)) {
+        unsubscribeRun(runId);
+      }
+    }
+    for (const run of nextRuns) {
+      subscribeRun(run);
+    }
+  },
+  { immediate: true },
+);
+
+onBeforeUnmount(() => {
+  clearSubscriptions();
+});
+
+const sortedRuns = computed<RpaRunExecutionEnvelope[]>(() =>
+  [...mergedRuns.value].sort((left, right) => {
+    const statusDiff = RUN_STATUS_ORDER[left.status] - RUN_STATUS_ORDER[right.status];
+    if (statusDiff !== 0) {
+      return statusDiff;
+    }
+    const createdDiff = Date.parse(right.createdAt) - Date.parse(left.createdAt);
+    if (Number.isFinite(createdDiff) && createdDiff !== 0) {
+      return createdDiff;
+    }
+    return left.id.localeCompare(right.id);
+  }),
+);
+
+const formatDate = (value: string): string => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+  return new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).format(parsed);
+};
+
+const formatRunType = (runType: AutomationRunType): string => t(`automation.runs.typeOptions.${runType}`);
+const formatRunStatus = (runStatus: AutomationRunStatus): string =>
+  t(`automation.runs.statusOptions.${runStatus}`);
+
+const formatRunProgress = (run: RpaRunExecutionEnvelope): string => {
+  if (typeof run.progress === "number" && Number.isFinite(run.progress)) {
+    return `${Math.max(0, Math.min(100, Math.round(run.progress)))}%`;
+  }
+  return EMPTY_VALUE;
+};
+
+const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> => ({
+  "bg-base-200": isLiveRun(run),
+});
 </script>
 
 <template>
   <div>
     <div class="mb-6 flex items-center justify-between">
       <h1 class="text-3xl font-bold">{{ t("automation.runs.title") }}</h1>
-      <NuxtLink :to="APP_ROUTES.automation" class="btn btn-outline" :aria-label="t('automation.runs.backToAutomation')">
+      <NuxtLink
+        :to="APP_ROUTES.automation"
+        class="btn btn-outline"
+        :aria-label="t('automation.runs.backToAutomation')"
+      >
         {{ t("automation.runs.backButton") }}
       </NuxtLink>
     </div>
@@ -115,32 +285,43 @@ function formatRunStatus(runStatus: AutomationRunStatus): string {
             <th>{{ t("automation.runs.columns.id") }}</th>
             <th>{{ t("automation.runs.columns.type") }}</th>
             <th>{{ t("automation.runs.columns.status") }}</th>
+            <th>{{ t("automation.runs.columns.progress") }}</th>
             <th>{{ t("automation.runs.columns.job") }}</th>
-            <th>{{ t("automation.runs.columns.created") }}</th>
+            <th>{{ t("automation.runs.columns.updated") }}</th>
+            <th>{{ t("automation.runs.columns.actions") }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="run in runs || []"
-            :key="run.id"
-            :class="{ 'bg-base-200': run.status === RUNNING_STATUS }"
-          >
-            <th>
+          <tr v-for="run in sortedRuns" :key="run.id" :class="resolveRowClass(run)">
+            <th>{{ run.id }}</th>
+            <td>{{ formatRunType(run.type) }}</td>
+            <td>
+              <div class="flex items-center gap-2">
+                <span>{{ formatRunStatus(run.status) }}</span>
+                <span
+                  v-if="isLiveRun(run)"
+                  class="badge badge-info badge-outline"
+                  :aria-label="t('automation.runs.liveBadgeAria')"
+                >
+                  {{ t("automation.runs.liveBadge") }}
+                </span>
+              </div>
+            </td>
+            <td>{{ formatRunProgress(run) }}</td>
+            <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
+            <td>{{ formatDate(run.updatedAt) }}</td>
+            <td>
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
-                class="link link-hover"
+                class="btn btn-xs btn-ghost"
                 :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
               >
-                {{ run.id }}
+                {{ t("automation.runs.openButton") }}
               </NuxtLink>
-            </th>
-            <td>{{ formatRunType(run.type) }}</td>
-            <td>{{ formatRunStatus(run.status) }}</td>
-            <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
-            <td>{{ formatDate(run.createdAt) }}</td>
+            </td>
           </tr>
-          <tr v-if="!isLoading && (!runs || runs.length === 0)">
-            <td colspan="5" class="text-center opacity-60">{{ t("automation.runs.emptyState") }}</td>
+          <tr v-if="!isLoading && sortedRuns.length === 0">
+            <td colspan="7" class="text-center opacity-60">{{ t("automation.runs.emptyState") }}</td>
           </tr>
         </tbody>
       </table>

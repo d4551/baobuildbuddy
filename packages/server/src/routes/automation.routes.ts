@@ -2,8 +2,10 @@ import {
   AUTOMATION_RUN_HISTORY_LIMIT,
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
-  type AutomationRunStatus,
-  type AutomationRunType,
+  rpaRunExecutionEnvelopeSchema,
+  type ErrorEnvelope,
+  type RpaRunExecutionEnvelope,
+  type RpaRunErrorCode,
 } from "@bao/shared";
 import { and, desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -14,30 +16,33 @@ import { automationRuns } from "../db/schema/automation-runs";
 import {
   AutomationConcurrencyLimitError,
   AutomationDependencyMissingError,
+  AutomationRunNotFoundError,
   AutomationValidationError,
   applicationAutomationService,
 } from "../services/automation/application-automation-service";
 import { createServerLogger } from "../utils/logger";
 
+const HTTP_STATUS_SUCCESS = 200;
+const HTTP_STATUS_BAD_REQUEST = 400;
 const HTTP_STATUS_NOT_FOUND = 404;
 const HTTP_STATUS_CONFLICT = 409;
 const HTTP_STATUS_UNPROCESSABLE_ENTITY = 422;
-const HTTP_STATUS_BAD_REQUEST = 400;
 const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
-const HTTP_STATUS_SUCCESS = 200;
-
-const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
-  AUTOMATION_RUN_TYPES;
-const [
-  AUTOMATION_STATUS_PENDING,
-  AUTOMATION_STATUS_RUNNING,
-  AUTOMATION_STATUS_SUCCESS,
-  AUTOMATION_STATUS_ERROR,
-] = AUTOMATION_RUN_STATUSES;
 const RUN_ID_MIN_LENGTH = 8;
 const EMAIL_RESPONSE_MAX_SUBJECT_LENGTH = 200;
 const EMAIL_RESPONSE_MAX_MESSAGE_LENGTH = 12_000;
 const EMAIL_RESPONSE_MAX_SENDER_LENGTH = 200;
+
+const [
+  AUTOMATION_TYPE_SCRAPE,
+  AUTOMATION_TYPE_JOB_APPLY,
+  AUTOMATION_TYPE_EMAIL,
+] = AUTOMATION_RUN_TYPES;
+const [AUTOMATION_STATUS_PENDING, AUTOMATION_STATUS_RUNNING, AUTOMATION_STATUS_SUCCESS, AUTOMATION_STATUS_ERROR] =
+  AUTOMATION_RUN_STATUSES;
+
+const automationRoutesLogger = createServerLogger("automation-routes");
+
 const AUTOMATION_TYPE_SCHEMA = t.Union([
   t.Literal(AUTOMATION_TYPE_SCRAPE),
   t.Literal(AUTOMATION_TYPE_JOB_APPLY),
@@ -55,30 +60,47 @@ const EMAIL_RESPONSE_TONE_SCHEMA = t.Union([
   t.Literal("concise"),
 ]);
 const nullableJsonRecordBodySchema = t.Union([t.Record(t.String(), t.Unknown()), t.Null()]);
-const automationRoutesLogger = createServerLogger("automation-routes");
+const nullableRunErrorSchema = t.Union([
+  t.String({ minLength: 1 }),
+  t.Object({
+    code: t.String({ minLength: 1 }),
+    message: t.String({ minLength: 1 }),
+    details: t.Optional(t.Record(t.String(), t.Unknown())),
+  }),
+  t.Null(),
+]);
+const automationRunEnvelopeBodySchema = t.Object({
+  id: t.String(),
+  type: AUTOMATION_TYPE_SCHEMA,
+  status: AUTOMATION_STATUS_SCHEMA,
+  jobId: t.Nullable(t.String()),
+  userId: t.Nullable(t.String()),
+  input: nullableJsonRecordBodySchema,
+  output: t.Union([nullableJsonRecordBodySchema, t.Null()]),
+  screenshots: t.Nullable(t.Array(t.String())),
+  error: nullableRunErrorSchema,
+  progress: t.Nullable(t.Number()),
+  currentStep: t.Nullable(t.Number()),
+  totalSteps: t.Nullable(t.Number()),
+  startedAt: t.Nullable(t.String()),
+  completedAt: t.Nullable(t.String()),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+  exitCode: t.Nullable(t.Number()),
+  timedOut: t.Boolean(),
+  aborted: t.Boolean(),
+  executionMs: t.Nullable(t.Number()),
+});
+
+const routeErrorBodySchema = t.Object({
+  error: t.Object({
+    code: t.String({ minLength: 1 }),
+    message: t.String({ minLength: 1 }),
+    details: t.Optional(t.Record(t.String(), t.Unknown())),
+  }),
+});
+
 type AutomationDbRow = typeof automationRuns.$inferSelect;
-type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
-type JsonObject = { [key: string]: JsonValue };
-
-type AutomationRun = {
-  id: string;
-  type: AutomationRunType;
-  status: AutomationRunStatus;
-  jobId: string | null;
-  userId: string | null;
-  input: JsonObject | null;
-  output: JsonObject | null;
-  screenshots: string[] | null;
-  error: string | null;
-  progress: number | null;
-  currentStep: number | null;
-  totalSteps: number | null;
-  startedAt: string | null;
-  completedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
 type JobApplyRequestBody = {
   jobUrl: string;
   resumeId: string;
@@ -86,13 +108,10 @@ type JobApplyRequestBody = {
   jobId?: string;
   customAnswers?: Record<string, string>;
 };
-
 type ScheduleJobApplyRequestBody = JobApplyRequestBody & {
   runAt: string;
 };
-
 type EmailResponseTone = "professional" | "friendly" | "concise";
-
 type EmailResponseRequestBody = {
   subject: string;
   message: string;
@@ -100,52 +119,64 @@ type EmailResponseRequestBody = {
   tone?: EmailResponseTone;
 };
 
-const isAutomationRunType = (value: string): value is AutomationRunType =>
+const toRouteError = (code: RpaRunErrorCode, message: string, details?: Record<string, unknown>) =>
+  ({
+    error: {
+      code,
+      message,
+      ...(details ? { details } : {}),
+    },
+  }) satisfies { error: ErrorEnvelope };
+
+const mapAutomationRouteError = (
+  error: unknown,
+): { status: number; body: { error: ErrorEnvelope } } => {
+  if (error instanceof AutomationValidationError) {
+    return {
+      status: HTTP_STATUS_UNPROCESSABLE_ENTITY,
+      body: toRouteError("OUTPUT_VALIDATION_ERROR", error.message),
+    };
+  }
+  if (error instanceof AutomationDependencyMissingError || error instanceof AutomationRunNotFoundError) {
+    return {
+      status: HTTP_STATUS_NOT_FOUND,
+      body: toRouteError("OUTPUT_VALIDATION_ERROR", error.message),
+    };
+  }
+  if (error instanceof AutomationConcurrencyLimitError) {
+    return {
+      status: HTTP_STATUS_CONFLICT,
+      body: toRouteError("NETWORK_ERROR", error.message, {
+        runningRuns: error.runningRuns,
+        maxConcurrentRuns: error.maxConcurrentRuns,
+      }),
+    };
+  }
+
+  return {
+    status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+    body: toRouteError(
+      "UNKNOWN_ERROR",
+      error instanceof Error ? error.message : "Failed to process automation request",
+    ),
+  };
+};
+
+const isAutomationRunType = (value: string): value is (typeof AUTOMATION_RUN_TYPES)[number] =>
   AUTOMATION_RUN_TYPES.some((runType) => runType === value);
 
-const isAutomationRunStatus = (value: string): value is AutomationRunStatus =>
+const isAutomationRunStatus = (value: string): value is (typeof AUTOMATION_RUN_STATUSES)[number] =>
   AUTOMATION_RUN_STATUSES.some((runStatus) => runStatus === value);
 
-const toJsonValue = (value: unknown): JsonValue | null => {
-  if (value === null) return null;
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    return value;
-  }
-  if (Array.isArray(value)) {
-    const normalizedArray: JsonValue[] = [];
-    for (const item of value) {
-      const normalizedItem = toJsonValue(item);
-      if (normalizedItem === null && item !== null) {
-        return null;
-      }
-      normalizedArray.push(normalizedItem);
-    }
-    return normalizedArray;
-  }
-  if (typeof value === "object") {
-    const normalizedObject: JsonObject = {};
-    for (const [key, entry] of Object.entries(value)) {
-      const normalizedEntry = toJsonValue(entry);
-      if (normalizedEntry === null && entry !== null) {
-        return null;
-      }
-      normalizedObject[key] = normalizedEntry;
-    }
-    return normalizedObject;
-  }
-
-  return null;
-};
-
-const toJsonObject = (value: unknown): JsonObject | null => {
-  const normalized = toJsonValue(value);
-  return normalized && typeof normalized === "object" && !Array.isArray(normalized)
-    ? normalized
+const toJsonObject = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+    ? Object.fromEntries(Object.entries(value))
     : null;
-};
 
-function normalizeAutomationRun(run: AutomationDbRow): AutomationRun {
-  return {
+const toBooleanFlag = (value: unknown): boolean => value === true || value === 1 || value === "1";
+
+const normalizeAutomationRun = (run: AutomationDbRow): RpaRunExecutionEnvelope => {
+  const normalizedCandidate = {
     id: run.id,
     type: isAutomationRunType(run.type) ? run.type : AUTOMATION_TYPE_SCRAPE,
     status: isAutomationRunStatus(run.status) ? run.status : AUTOMATION_STATUS_PENDING,
@@ -162,32 +193,37 @@ function normalizeAutomationRun(run: AutomationDbRow): AutomationRun {
     completedAt: run.completedAt ?? null,
     createdAt: run.createdAt,
     updatedAt: run.updatedAt,
-  };
-}
+    exitCode: run.exitCode ?? null,
+    timedOut: toBooleanFlag(run.timedOut),
+    aborted: toBooleanFlag(run.aborted),
+    executionMs: run.executionMs ?? null,
+  } satisfies RpaRunExecutionEnvelope;
 
-const mapAutomationRouteError = (error: unknown) => {
-  if (error instanceof AutomationValidationError) {
-    return {
-      status: HTTP_STATUS_UNPROCESSABLE_ENTITY,
-      message: error.message,
-    };
+  const parsed = rpaRunExecutionEnvelopeSchema.safeParse(normalizedCandidate);
+  if (parsed.success) {
+    return parsed.data;
   }
-  if (error instanceof AutomationDependencyMissingError) {
-    return {
-      status: HTTP_STATUS_NOT_FOUND,
-      message: error.message,
-    };
-  }
-  if (error instanceof AutomationConcurrencyLimitError) {
-    return {
-      status: HTTP_STATUS_CONFLICT,
-      message: error.message,
-    };
-  }
+
   return {
-    status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
-    message: error instanceof Error ? error.message : "Failed to start automation",
+    ...normalizedCandidate,
+    status: AUTOMATION_STATUS_ERROR,
+    error: {
+      code: "OUTPUT_VALIDATION_ERROR",
+      message: "Automation run payload failed schema validation",
+      source: "automation-routes",
+      details: {
+        issueCount: parsed.error.issues.length,
+      },
+    },
   };
+};
+
+const readAutomationRunById = async (runId: string): Promise<RpaRunExecutionEnvelope | null> => {
+  const rows = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
+  if (rows.length === 0) {
+    return null;
+  }
+  return normalizeAutomationRun(rows[0]);
 };
 
 /**
@@ -201,26 +237,30 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
       const payload: JobApplyRequestBody = body;
       return applicationAutomationService
         .createJobApplyRun(payload)
-        .then((runId) => {
-          void applicationAutomationService.runJobApply(runId, payload).catch((error) => {
-            automationRoutesLogger.error(
-              `[automation] job-apply execution failed for runId=${runId}`,
-              error,
-            );
-          });
+        .then(async (runId) => {
+          void applicationAutomationService.runJobApply(runId, payload).then(
+            () => undefined,
+            (error: unknown) => {
+              automationRoutesLogger.error(
+                `[automation] job-apply execution failed for runId=${runId}`,
+                error,
+              );
+            },
+          );
+
+          const run = await readAutomationRunById(runId);
+          if (!run) {
+            set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+            return toRouteError("SCRIPT_OUTPUT_INVALID", "Automation run was created but not found");
+          }
 
           set.status = HTTP_STATUS_SUCCESS;
-          return {
-            runId,
-            status: AUTOMATION_STATUS_RUNNING,
-          };
+          return run;
         })
         .catch((error: unknown) => {
           const mapped = mapAutomationRouteError(error);
           set.status = mapped.status;
-          return {
-            error: mapped.message,
-          };
+          return mapped.body;
         });
     },
     {
@@ -232,25 +272,12 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
         customAnswers: t.Optional(t.Record(t.String(), t.String())),
       }),
       response: {
-        [HTTP_STATUS_SUCCESS]: t.Object({
-          runId: t.String(),
-          status: t.Literal(AUTOMATION_STATUS_RUNNING),
-        }),
-        [HTTP_STATUS_BAD_REQUEST]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_NOT_FOUND]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_CONFLICT]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Object({
-          error: t.String(),
-        }),
+        [HTTP_STATUS_SUCCESS]: automationRunEnvelopeBodySchema,
+        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
       },
     },
   )
@@ -269,20 +296,19 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
           },
           payload.runAt,
         )
-        .then(({ runId, scheduledFor }) => {
+        .then(async ({ runId }) => {
+          const run = await readAutomationRunById(runId);
+          if (!run) {
+            set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+            return toRouteError("SCRIPT_OUTPUT_INVALID", "Scheduled automation run not found");
+          }
           set.status = HTTP_STATUS_SUCCESS;
-          return {
-            runId,
-            status: AUTOMATION_STATUS_PENDING,
-            scheduledFor,
-          };
+          return run;
         })
         .catch((error: unknown) => {
           const mapped = mapAutomationRouteError(error);
           set.status = mapped.status;
-          return {
-            error: mapped.message,
-          };
+          return mapped.body;
         });
     },
     {
@@ -295,26 +321,12 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
         runAt: t.String({ minLength: 1 }),
       }),
       response: {
-        [HTTP_STATUS_SUCCESS]: t.Object({
-          runId: t.String(),
-          status: t.Literal(AUTOMATION_STATUS_PENDING),
-          scheduledFor: t.String(),
-        }),
-        [HTTP_STATUS_BAD_REQUEST]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_NOT_FOUND]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_CONFLICT]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Object({
-          error: t.String(),
-        }),
+        [HTTP_STATUS_SUCCESS]: automationRunEnvelopeBodySchema,
+        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
       },
     },
   )
@@ -331,9 +343,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
         .catch((error: unknown) => {
           const mapped = mapAutomationRouteError(error);
           set.status = mapped.status;
-          return {
-            error: mapped.message,
-          };
+          return mapped.body;
         });
     },
     {
@@ -351,21 +361,11 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
           provider: t.String(),
           model: t.String(),
         }),
-        [HTTP_STATUS_BAD_REQUEST]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_NOT_FOUND]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_CONFLICT]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Object({
-          error: t.String(),
-        }),
+        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
       },
     },
   )
@@ -380,44 +380,24 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
         filterConditions.push(eq(automationRuns.status, query.status));
       }
 
-      const runner =
+      const rows =
         filterConditions.length > 0
-          ? db
+          ? await db
               .select()
               .from(automationRuns)
               .where(and(...filterConditions))
               .orderBy(desc(automationRuns.createdAt))
               .limit(AUTOMATION_RUN_HISTORY_LIMIT)
-          : db
+          : await db
               .select()
               .from(automationRuns)
               .orderBy(desc(automationRuns.createdAt))
               .limit(AUTOMATION_RUN_HISTORY_LIMIT);
 
-      const rows = await runner;
       return rows.map(normalizeAutomationRun);
     },
     {
-      response: t.Array(
-        t.Object({
-          id: t.String(),
-          type: AUTOMATION_TYPE_SCHEMA,
-          status: AUTOMATION_STATUS_SCHEMA,
-          jobId: t.Nullable(t.String()),
-          userId: t.Nullable(t.String()),
-          input: nullableJsonRecordBodySchema,
-          output: nullableJsonRecordBodySchema,
-          screenshots: t.Nullable(t.Array(t.String())),
-          error: t.Nullable(t.String()),
-          progress: t.Nullable(t.Number()),
-          currentStep: t.Nullable(t.Number()),
-          totalSteps: t.Nullable(t.Number()),
-          startedAt: t.Nullable(t.String()),
-          completedAt: t.Nullable(t.String()),
-          createdAt: t.String(),
-          updatedAt: t.String(),
-        }),
-      ),
+      response: t.Array(automationRunEnvelopeBodySchema),
       query: t.Object({
         type: t.Optional(AUTOMATION_TYPE_SCHEMA),
         status: t.Optional(AUTOMATION_STATUS_SCHEMA),
@@ -429,54 +409,26 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
     async ({ params, set }) => {
       if (params.id.length < RUN_ID_MIN_LENGTH || !/^[0-9a-fA-F-]+$/.test(params.id)) {
         set.status = HTTP_STATUS_BAD_REQUEST;
-        return {
-          error: "Invalid run ID format",
-        };
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "Invalid run ID format");
       }
 
-      const result = await db
-        .select()
-        .from(automationRuns)
-        .where(eq(automationRuns.id, params.id))
-        .limit(1);
-      if (result.length === 0) {
+      const run = await readAutomationRunById(params.id);
+      if (!run) {
         set.status = HTTP_STATUS_NOT_FOUND;
-        return {
-          error: "Run not found",
-        };
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "Run not found");
       }
+
       set.status = HTTP_STATUS_SUCCESS;
-      return normalizeAutomationRun(result[0]);
+      return run;
     },
     {
       params: t.Object({
         id: t.String({ minLength: RUN_ID_MIN_LENGTH, pattern: "^[0-9a-fA-F-]+$" }),
       }),
       response: {
-        [HTTP_STATUS_BAD_REQUEST]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_NOT_FOUND]: t.Object({
-          error: t.String(),
-        }),
-        [HTTP_STATUS_SUCCESS]: t.Object({
-          id: t.String(),
-          type: AUTOMATION_TYPE_SCHEMA,
-          status: AUTOMATION_STATUS_SCHEMA,
-          jobId: t.Nullable(t.String()),
-          userId: t.Nullable(t.String()),
-          input: nullableJsonRecordBodySchema,
-          output: nullableJsonRecordBodySchema,
-          screenshots: t.Nullable(t.Array(t.String())),
-          error: t.Nullable(t.String()),
-          progress: t.Nullable(t.Number()),
-          currentStep: t.Nullable(t.Number()),
-          totalSteps: t.Nullable(t.Number()),
-          startedAt: t.Nullable(t.String()),
-          completedAt: t.Nullable(t.String()),
-          createdAt: t.String(),
-          updatedAt: t.String(),
-        }),
+        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+        [HTTP_STATUS_SUCCESS]: automationRunEnvelopeBodySchema,
       },
     },
   );

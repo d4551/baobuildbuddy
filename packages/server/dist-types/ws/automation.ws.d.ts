@@ -1,8 +1,12 @@
+import { type RpaRunEvent } from "@bao/shared";
 import { Elysia } from "elysia";
 /**
- * Broadcast a progress/completion event to all WebSocket clients subscribed to a run.
+ * Broadcasts a validated automation event to subscribers of the matching run.
  */
-export declare function broadcastProgress(runId: string, data: Record<string, unknown>): void;
+export declare function broadcastAutomationEvent(event: RpaRunEvent): void;
+/**
+ * Automation websocket endpoint for run-scoped event subscriptions.
+ */
 export declare const automationWebSocket: Elysia<"", {
     decorator: {};
     store: {};
@@ -23,7 +27,7 @@ export declare const automationWebSocket: Elysia<"", {
         subscribe: {
             body: {
                 runId?: string | undefined;
-                type: string;
+                type: "subscribe" | "unsubscribe";
             };
             params: {};
             query: {};

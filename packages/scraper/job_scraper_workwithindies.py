@@ -106,7 +106,7 @@ def scrape_jobs() -> list[dict]:
                     "description": "",
                     "url": item.get("url", source_url),
                     "source": "workwithindies",
-                    "postedDate": "",
+                    "postDate": "",
                     "contentHash": content_hash(title, company, loc),
                 })
     except Exception as e:

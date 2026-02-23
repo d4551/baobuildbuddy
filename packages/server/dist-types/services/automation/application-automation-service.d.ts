@@ -1,3 +1,4 @@
+import type { RpaRunEvent } from "@bao/shared";
 interface JobApplyPayload {
     jobUrl: string;
     resumeId: string;
@@ -11,15 +12,6 @@ interface EmailResponsePayload {
     message: string;
     sender?: string;
     tone?: EmailResponseTone;
-}
-interface AutomationProgress {
-    type: string;
-    step?: number;
-    totalSteps?: number;
-    status?: string;
-    action?: string;
-    message?: string;
-    runId?: string;
 }
 /**
  * Run-level error indicating the configured concurrency limit was exceeded.
@@ -53,8 +45,17 @@ export declare class AutomationRunNotFoundError extends Error {
  */
 export declare class ApplicationAutomationService {
     private readonly scheduledRunTimers;
+    private readonly runEventSequences;
     private schedulerRecoveryInFlight;
     constructor();
+    /**
+     * Returns the next monotonic event sequence for a run.
+     */
+    private nextRunEventSequence;
+    /**
+     * Builds a protocol-compliant progress event for websocket broadcasting.
+     */
+    private createProgressEvent;
     /**
      * Resolve automation settings from persisted values and apply safe defaults.
      */
@@ -91,6 +92,10 @@ export declare class ApplicationAutomationService {
      * Copy screenshots from the Python process into the managed run directory.
      */
     private copyAndIndexScreenshots;
+    /**
+     * Normalizes runner execution output into persisted run-result contract.
+     */
+    private normalizeExecutionResult;
     /**
      * Build safe, deterministic screenshot names from script output paths.
      */
@@ -177,7 +182,7 @@ export declare class ApplicationAutomationService {
     /**
      * Run full job-application automation for an existing run.
      */
-    runJobApply(runId: string, payload: JobApplyPayload, onProgress?: (data: AutomationProgress) => void): Promise<void>;
+    runJobApply(runId: string, payload: JobApplyPayload, onProgress?: (event: RpaRunEvent) => void): Promise<void>;
     private sanitizeRunId;
     private toFiniteNumber;
 }

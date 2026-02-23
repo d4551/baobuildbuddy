@@ -165,19 +165,32 @@ export function getDockNavigationItems(): readonly NavigationItem[] {
 }
 
 /**
+ * Normalizes route paths for deterministic active-route matching.
+ */
+export function normalizeRoutePath(pathValue: string): string {
+  const [pathWithoutQueryRaw] = pathValue.split(/[?#]/u);
+  const pathWithoutQuery = pathWithoutQueryRaw ?? "";
+  const prefixed = pathWithoutQuery.startsWith("/") ? pathWithoutQuery : `/${pathWithoutQuery}`;
+  const collapsed = prefixed.replace(/\/{2,}/gu, "/");
+  if (collapsed.length > 1 && collapsed.endsWith("/")) {
+    return collapsed.slice(0, -1);
+  }
+  return collapsed || "/";
+}
+
+const toPathSegments = (pathValue: string): string[] =>
+  normalizeRoutePath(pathValue).split("/").filter((segment) => segment.length > 0);
+
+/**
  * Determines if a route should be considered active for navigation UI.
  *
  * @param currentPath Current route path.
  * @param targetPath Navigation target path.
- * @returns True when the target matches exactly or as a parent prefix.
+ * @returns True when the target matches exactly or as a parent section.
  */
 export function isRouteActive(currentPath: string, targetPath: string): boolean {
-  const normalizedCurrentPath = currentPath.endsWith("/") && currentPath.length > 1
-    ? currentPath.slice(0, -1)
-    : currentPath;
-  const normalizedTargetPath = targetPath.endsWith("/") && targetPath.length > 1
-    ? targetPath.slice(0, -1)
-    : targetPath;
+  const normalizedCurrentPath = normalizeRoutePath(currentPath);
+  const normalizedTargetPath = normalizeRoutePath(targetPath);
 
   if (normalizedCurrentPath === normalizedTargetPath) {
     return true;
@@ -187,9 +200,17 @@ export function isRouteActive(currentPath: string, targetPath: string): boolean 
     return normalizedCurrentPath === "/";
   }
 
-  if (!normalizedCurrentPath.startsWith(`${normalizedTargetPath}/`)) {
+  const currentSegments = toPathSegments(normalizedCurrentPath);
+  const targetSegments = toPathSegments(normalizedTargetPath);
+  if (targetSegments.length === 0 || currentSegments.length < targetSegments.length) {
     return false;
   }
 
-  return normalizedCurrentPath.length > normalizedTargetPath.length;
+  for (let index = 0; index < targetSegments.length; index += 1) {
+    if (currentSegments[index] !== targetSegments[index]) {
+      return false;
+    }
+  }
+
+  return true;
 }

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Apply a job application using RPA-Python with JSON input/output over stdin/stdout.
+Apply a job application using RPA-Python with contract-first NDJSON I/O.
 
-Supports smart AI-generated selectors, progress streaming via stderr,
-and expanded TagUI capabilities: select, upload, dom, present, keyboard.
+- Progress events are emitted to stderr.
+- One terminal result (or error) event is emitted to stdout.
+- Artifacts are written into `outputDir` supplied by the caller.
 """
 from __future__ import annotations
 
@@ -11,45 +12,55 @@ import json
 import os
 import sys
 import tempfile
-import shutil
+from pathlib import Path
+from typing import Any
+
+from _protocol import ProtocolEmitter
 
 try:
     import rpa as r
-except ImportError as exc:
-    print(json.dumps({"success": False, "error": "RPA not installed. pip install rpa", "screenshots": [], "steps": [{"action": "import", "status": "error", "message": str(exc)}]}))
+except ImportError:
+    sys.stdout.write(
+        json.dumps(
+            {
+                "protocolVersion": "1.0",
+                "runId": "missing-run",
+                "sequence": 0,
+                "timestamp": "1970-01-01T00:00:00+00:00",
+                "eventType": "error",
+                "error": {
+                    "code": "PYTHON_RUNTIME_ERROR",
+                    "message": "RPA not installed. pip install rpa",
+                    "source": "python-script",
+                },
+            }
+        )
+        + "\n"
+    )
     raise SystemExit(1)
 
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
 ALLOWED_BROWSERS = {"chrome", "chromium", "edge"}
+TOTAL_STEPS = 10
 
 
-def read_payload() -> dict[str, object]:
+def read_payload() -> dict[str, Any]:
     raw = sys.stdin.read()
     if not raw.strip():
-        raise ValueError("No JSON input received")
+        return {}
     return json.loads(raw)
 
 
-def emit_progress(action: str, step: int, total: int, status: str = "ok", message: str | None = None) -> None:
-    """Stream real-time progress to TypeScript via stderr as newline-delimited JSON."""
-    progress: dict[str, object] = {
-        "type": "progress",
-        "action": action,
-        "step": step,
-        "totalSteps": total,
-        "status": status,
-    }
-    if message:
-        progress["message"] = message
-    sys.stderr.write(json.dumps(progress) + "\n")
-    sys.stderr.flush()
+def ensure_output_dir(payload: dict[str, Any], run_id: str) -> str:
+    output_dir = payload.get("outputDir")
+    if isinstance(output_dir, str) and output_dir.strip():
+        target = Path(output_dir.strip())
+    else:
+        target = Path(tempfile.mkdtemp(prefix=f"bao-rpa-{run_id}-"))
+    target.mkdir(parents=True, exist_ok=True)
+    return str(target.resolve())
 
 
-def field_candidates(value: object, keys: list[str]) -> list[str]:
+def field_candidates(value: Any, keys: list[str]) -> list[str]:
     if not isinstance(value, dict):
         return []
     values: list[str] = []
@@ -60,37 +71,30 @@ def field_candidates(value: object, keys: list[str]) -> list[str]:
     return values
 
 
-def collect_candidates(payload: dict[str, object], resume: dict[str, object]) -> dict[str, str]:
-    personal_info = resume.get("personalInfo", {})
-    if not isinstance(personal_info, dict):
-        personal_info = {}
-
-    fields = {
-        "fullName": field_candidates(personal_info, ["fullName", "name", "full_name", "firstName"]),
-        "email": field_candidates(personal_info, ["email", "emailAddress"]),
-        "phone": field_candidates(personal_info, ["phone", "phoneNumber", "mobile"]),
-    }
-
+def collect_candidates(resume: dict[str, Any]) -> dict[str, str]:
+    personal_info_raw = resume.get("personalInfo")
+    personal_info = personal_info_raw if isinstance(personal_info_raw, dict) else {}
+    full_name = field_candidates(personal_info, ["fullName", "name", "full_name", "firstName"])
+    email = field_candidates(personal_info, ["email", "emailAddress"])
+    phone = field_candidates(personal_info, ["phone", "phoneNumber", "mobile"])
     return {
-        "fullName": fields["fullName"][0] if fields["fullName"] else "",
-        "email": fields["email"][0] if fields["email"] else "",
-        "phone": fields["phone"][0] if fields["phone"] else "",
+        "fullName": full_name[0] if full_name else "",
+        "email": email[0] if email else "",
+        "phone": phone[0] if phone else "",
     }
 
 
 def present_any(selectors: list[str]) -> str | None:
-    """Check if any of the given selectors are present on the page."""
-    for sel in selectors:
+    for selector in selectors:
         try:
-            if r.present(sel):
-                return sel
+            if r.present(selector):
+                return selector
         except Exception:
             continue
     return None
 
 
 def type_if_available(selectors: list[str], text: str) -> bool:
-    """Try to type into the first available matching element."""
     for selector in selectors:
         try:
             if r.present(selector):
@@ -102,7 +106,6 @@ def type_if_available(selectors: list[str], text: str) -> bool:
 
 
 def click_if_available(selectors: list[str]) -> bool:
-    """Try to click the first available matching element."""
     for selector in selectors:
         try:
             if r.present(selector):
@@ -114,11 +117,10 @@ def click_if_available(selectors: list[str]) -> bool:
 
 
 def select_if_available(selectors: list[str], value: str) -> bool:
-    """Try to select a dropdown option using the first available selector."""
-    for sel in selectors:
+    for selector in selectors:
         try:
-            if r.present(sel):
-                r.select(sel, value)
+            if r.present(selector):
+                r.select(selector, value)
                 return True
         except Exception:
             continue
@@ -126,11 +128,10 @@ def select_if_available(selectors: list[str], value: str) -> bool:
 
 
 def upload_if_available(selectors: list[str], file_path: str) -> bool:
-    """Try to upload a file to the first available file input."""
-    for sel in selectors:
+    for selector in selectors:
         try:
-            if r.present(sel):
-                r.upload(sel, file_path)
+            if r.present(selector):
+                r.upload(selector, file_path)
                 return True
         except Exception:
             continue
@@ -138,7 +139,6 @@ def upload_if_available(selectors: list[str], file_path: str) -> bool:
 
 
 def get_form_fields_via_dom() -> list[dict[str, str]]:
-    """Use JavaScript DOM introspection to discover all form fields on the page."""
     try:
         js_code = (
             "return JSON.stringify("
@@ -149,22 +149,35 @@ def get_form_fields_via_dom() -> list[dict[str, str]]:
         )
         r.dom(js_code)
         result = r.dom_result
-        if result and isinstance(result, str):
-            return json.loads(result)
+        if isinstance(result, str) and result.strip():
+            loaded = json.loads(result)
+            return loaded if isinstance(loaded, list) else []
     except Exception:
-        pass
+        return []
     return []
 
 
-def add_step(steps: list[dict[str, object]], action: str, status: str, message: str | None = None) -> None:
-    entry: dict[str, object] = {"action": action, "status": status}
-    if message:
-        entry["message"] = message
-    steps.append(entry)
+def verify_submission() -> bool:
+    try:
+        page_text = r.read("page")
+        if isinstance(page_text, str):
+            lower = page_text.lower()
+            confirmation_phrases = [
+                "thank you",
+                "application received",
+                "application submitted",
+                "successfully submitted",
+                "we received your application",
+                "application complete",
+                "submission confirmed",
+            ]
+            return any(phrase in lower for phrase in confirmation_phrases)
+    except Exception:
+        return False
+    return False
 
 
 def init_browser(headless: bool, timeout: int, browser: str) -> None:
-    """Initialize RPA browser with a resilient browser argument strategy."""
     base_kwargs = {"turbo_mode": True, "headless_mode": headless}
     preferred_kwargs = dict(base_kwargs)
     if browser:
@@ -173,309 +186,242 @@ def init_browser(headless: bool, timeout: int, browser: str) -> None:
     try:
         r.init(**preferred_kwargs)
     except TypeError:
-        # Browser argument may not be supported by older versions.
         r.init(**base_kwargs)
 
     r.timeout(timeout)
 
 
-def verify_submission() -> bool:
-    """Read page text to check for common submission confirmation patterns."""
-    try:
-        page_text = r.read("page")
-        if isinstance(page_text, str):
-            lower = page_text.lower()
-            confirmation_phrases = [
-                "thank you", "application received", "application submitted",
-                "successfully submitted", "we received your application",
-                "application complete", "submission confirmed",
-            ]
-            return any(phrase in lower for phrase in confirmation_phrases)
-    except Exception:
-        pass
-    return False
+def add_step(steps: list[dict[str, Any]], action: str, status: str, message: str | None = None) -> None:
+    entry: dict[str, Any] = {"action": action, "status": status}
+    if message:
+        entry["message"] = message
+    steps.append(entry)
 
 
-# ---------------------------------------------------------------------------
-# Main flow
-# ---------------------------------------------------------------------------
-
-TOTAL_STEPS = 10
+def create_artifacts(screenshots: list[str]) -> list[dict[str, str]]:
+    return [
+        {
+            "id": f"screenshot-{index + 1:02d}",
+            "kind": "screenshot",
+            "path": path,
+        }
+        for index, path in enumerate(screenshots)
+    ]
 
 
 def main() -> int:
     payload = read_payload()
+    run_id_raw = payload.get("runId")
+    run_id = run_id_raw.strip() if isinstance(run_id_raw, str) and run_id_raw.strip() else "run-missing-id"
+    emitter = ProtocolEmitter(run_id=run_id)
+
     job_url = payload.get("jobUrl")
-    if not isinstance(job_url, str) or not job_url.strip():
-        print(json.dumps({"success": False, "error": "Missing jobUrl", "screenshots": [], "steps": [{"action": "validate", "status": "error", "message": "Missing jobUrl"}]}))
-        return 1
-
     resume = payload.get("resume")
+    if not isinstance(job_url, str) or not job_url.strip():
+        emitter.emit_error("OUTPUT_VALIDATION_ERROR", "Missing jobUrl")
+        return 1
     if not isinstance(resume, dict):
-        print(json.dumps({"success": False, "error": "Missing resume payload", "screenshots": [], "steps": [{"action": "validate", "status": "error", "message": "Missing resume payload"}]}))
+        emitter.emit_error("OUTPUT_VALIDATION_ERROR", "Missing resume payload")
         return 1
 
-    candidates = collect_candidates(payload, resume)
-    custom_answers = payload.get("customAnswers", {})
-    screenshots_dir = tempfile.mkdtemp(prefix="bao-build-buddy-")
+    candidates = collect_candidates(resume)
+    output_dir = ensure_output_dir(payload, run_id)
     screenshots: list[str] = []
-    steps: list[dict[str, object]] = []
+    steps: list[dict[str, Any]] = []
+    selector_map = payload.get("selectorMap")
+    selectors = selector_map if isinstance(selector_map, dict) else {}
+    custom_answers_raw = payload.get("customAnswers")
+    custom_answers = custom_answers_raw if isinstance(custom_answers_raw, dict) else {}
 
-    if not isinstance(custom_answers, dict):
-        custom_answers = {}
+    settings_raw = payload.get("settings")
+    settings = settings_raw if isinstance(settings_raw, dict) else {}
+    headless = bool(settings.get("headless", True))
+    timeout = int(settings.get("defaultTimeout", 30)) if isinstance(settings.get("defaultTimeout"), (int, float)) else 30
+    auto_screenshots = bool(settings.get("autoSaveScreenshots", True))
+    browser_raw = settings.get("defaultBrowser")
+    browser = browser_raw.strip().lower() if isinstance(browser_raw, str) and browser_raw.strip() else "chrome"
+    if browser not in ALLOWED_BROWSERS:
+        browser = "chrome"
 
-    # AI-generated smart selectors (merged from TypeScript side)
-    selector_map: dict[str, list[str]] = payload.get("selectorMap", {})
-    if not isinstance(selector_map, dict):
-        selector_map = {}
+    step_number = 0
 
-    # Read automation settings
-    rpa_settings = payload.get("settings", {})
-    if not isinstance(rpa_settings, dict):
-        rpa_settings = {}
-    headless = rpa_settings.get("headless", True)
-    timeout = rpa_settings.get("defaultTimeout", 30)
-    auto_screenshots = rpa_settings.get("autoSaveScreenshots", True)
-    default_browser = rpa_settings.get("defaultBrowser", "chrome")
-    if not isinstance(default_browser, str) or not default_browser.strip():
-        default_browser = "chrome"
-    default_browser = default_browser.strip().lower()
-    if default_browser not in ALLOWED_BROWSERS:
-        default_browser = "chrome"
-
-    step_num = 0
+    def emit_progress(action: str, message: str | None = None, status: str = "running") -> None:
+        emitter.emit_progress(
+            {
+                "action": action,
+                "status": status,
+                "step": step_number,
+                "totalSteps": TOTAL_STEPS,
+                **({"message": message} if message else {}),
+            }
+        )
 
     def snap(label: str) -> None:
-        """Capture a screenshot if auto-save is enabled."""
         if not auto_screenshots:
             return
-        idx = len(screenshots) + 1
-        path = f"{screenshots_dir}/step{idx}.png"
+        path = os.path.join(output_dir, f"step-{len(screenshots) + 1:02d}.png")
         try:
             r.snap("page", path)
             screenshots.append(path)
             add_step(steps, "screenshot", "ok", label)
         except Exception:
-            pass
+            add_step(steps, "screenshot", "error", "Failed to capture screenshot")
 
     try:
-        # Step 1: Init browser
-        step_num += 1
-        emit_progress("Initializing browser", step_num, TOTAL_STEPS)
-        init_browser(
-            bool(headless),
-            int(timeout) if isinstance(timeout, (int, float)) and int(timeout) > 0 else 30,
-            str(default_browser),
-        )
+        step_number += 1
+        emit_progress("init_browser")
+        init_browser(headless, timeout if timeout > 0 else 30, browser)
         add_step(steps, "init", "ok", f"headless={headless}, timeout={timeout}s")
 
-        # Step 2: Navigate to job page
-        step_num += 1
-        emit_progress("Navigating to job page", step_num, TOTAL_STEPS)
+        step_number += 1
+        emit_progress("navigate")
         r.url(job_url.strip())
-        add_step(steps, "navigate", "ok", f"Loaded {job_url}")
         r.wait(2)
+        add_step(steps, "navigate", "ok", f"Loaded {job_url.strip()}")
+        snap("Loaded job page")
 
-        # Verify we actually loaded the page
-        try:
-            current_url = r.url()
-            if current_url:
-                add_step(steps, "url_verify", "ok", f"Current URL: {current_url}")
-        except Exception:
-            pass
-
-        snap("Captured job page")
-
-        # Step 3: Detect form fields via DOM
-        step_num += 1
-        emit_progress("Detecting form fields", step_num, TOTAL_STEPS)
+        step_number += 1
+        emit_progress("detect_fields")
         form_fields = get_form_fields_via_dom()
-        if form_fields:
-            add_step(steps, "detect_fields", "ok", f"Found {len(form_fields)} form elements")
+        add_step(steps, "detect_fields", "ok", f"Detected {len(form_fields)} form fields")
+
+        name_selectors = (selectors.get("fullName", []) if isinstance(selectors.get("fullName"), list) else []) + [
+            "input[name='fullName']",
+            "input[name='name']",
+            "input[name='first_name']",
+            "input[name='firstName']",
+        ]
+        email_selectors = (selectors.get("email", []) if isinstance(selectors.get("email"), list) else []) + [
+            "input[type='email']",
+            "input[name='email']",
+        ]
+        phone_selectors = (selectors.get("phone", []) if isinstance(selectors.get("phone"), list) else []) + [
+            "input[type='tel']",
+            "input[name='phone']",
+        ]
+        resume_selectors = (selectors.get("resume", []) if isinstance(selectors.get("resume"), list) else []) + [
+            "input[type='file']",
+            "input[name='resume']",
+            "input[name='cv']",
+        ]
+        cover_letter_selectors = (
+            selectors.get("coverLetter", []) if isinstance(selectors.get("coverLetter"), list) else []
+        ) + [
+            "textarea[name='cover_letter']",
+            "textarea[name='coverLetter']",
+        ]
+        submit_selectors = (selectors.get("submit", []) if isinstance(selectors.get("submit"), list) else []) + [
+            "button[type='submit']",
+            "input[type='submit']",
+        ]
+
+        step_number += 1
+        emit_progress("fill_name")
+        if candidates["fullName"] and type_if_available(name_selectors, candidates["fullName"]):
+            add_step(steps, "fill_name", "ok")
         else:
-            add_step(steps, "detect_fields", "ok", "No form fields detected via DOM, using selectors")
+            add_step(steps, "fill_name", "error", "Name field not found")
 
-        # Build selector lists: AI smart selectors first, then hardcoded fallbacks
-        name_selectors = selector_map.get("fullName", []) + [
-            "input[name='fullName']", "input[name='name']",
-            "input[aria-label='Full name']", "input#full-name",
-            "input[name='first_name']", "input[name='firstName']",
-        ]
-        email_selectors = selector_map.get("email", []) + [
-            "input[type='email']", "input[name='email']",
-            "input[aria-label='Email']", "input#email",
-        ]
-        phone_selectors = selector_map.get("phone", []) + [
-            "input[type='tel']", "input[name='phone']",
-            "input[aria-label='Phone']", "input#phone",
-            "input[name='phoneNumber']",
-        ]
-        resume_selectors = selector_map.get("resume", []) + [
-            "input[type='file']", "input[name='resume']",
-            "input[name='cv']", "input[accept='.pdf,.doc,.docx']",
-        ]
-        cover_letter_selectors = selector_map.get("coverLetter", []) + [
-            "textarea[name='cover_letter']", "textarea#cover-letter",
-            "textarea[name='coverLetter']", "textarea[aria-label='Cover letter']",
-        ]
-        submit_selectors = selector_map.get("submit", []) + [
-            "button[type='submit']", "input[type='submit']",
-            "button[type='button'][value='Submit']",
-            "button.submit-btn", "button#submit",
-        ]
+        step_number += 1
+        emit_progress("fill_email")
+        if candidates["email"] and type_if_available(email_selectors, candidates["email"]):
+            add_step(steps, "fill_email", "ok")
+        else:
+            add_step(steps, "fill_email", "error", "Email field not found")
 
-        # Step 4: Fill name
-        step_num += 1
-        emit_progress("Filling name field", step_num, TOTAL_STEPS)
-        if candidates["fullName"]:
-            if type_if_available(name_selectors, candidates["fullName"]):
-                add_step(steps, "fill_name", "ok", f"Filled name: {candidates['fullName']}")
+        step_number += 1
+        emit_progress("fill_phone")
+        if candidates["phone"] and type_if_available(phone_selectors, candidates["phone"]):
+            add_step(steps, "fill_phone", "ok")
+        else:
+            add_step(steps, "fill_phone", "error", "Phone field not found")
+
+        step_number += 1
+        emit_progress("upload_resume")
+        if present_any(resume_selectors):
+            resume_path = os.path.join(output_dir, "resume.json")
+            with open(resume_path, "w", encoding="utf-8") as handle:
+                handle.write(json.dumps(resume, ensure_ascii=False, indent=2))
+            if upload_if_available(resume_selectors, resume_path):
+                add_step(steps, "upload_resume", "ok")
             else:
-                add_step(steps, "fill_name", "error", "Name field not found")
+                add_step(steps, "upload_resume", "error", "Resume upload failed")
         else:
-            add_step(steps, "fill_name", "ok", "No name available, skipped")
+            add_step(steps, "upload_resume", "ok", "No file input found")
 
-        # Step 5: Fill email
-        step_num += 1
-        emit_progress("Filling email field", step_num, TOTAL_STEPS)
-        if candidates["email"]:
-            if type_if_available(email_selectors, candidates["email"]):
-                add_step(steps, "fill_email", "ok", f"Filled email: {candidates['email']}")
-            else:
-                add_step(steps, "fill_email", "error", "Email field not found")
-        else:
-            add_step(steps, "fill_email", "ok", "No email available, skipped")
-
-        # Step 6: Fill phone
-        step_num += 1
-        emit_progress("Filling phone field", step_num, TOTAL_STEPS)
-        if candidates["phone"]:
-            if type_if_available(phone_selectors, candidates["phone"]):
-                add_step(steps, "fill_phone", "ok", f"Filled phone: {candidates['phone']}")
-            else:
-                add_step(steps, "fill_phone", "error", "Phone field not found")
-        else:
-            add_step(steps, "fill_phone", "ok", "No phone available, skipped")
-
-        # Step 7: Handle file upload (resume)
-        step_num += 1
-        emit_progress("Uploading resume", step_num, TOTAL_STEPS)
-        file_input_present = present_any(resume_selectors)
-        if file_input_present:
-            # Write resume data to a temp file for upload
-            try:
-                resume_text = json.dumps(resume, indent=2)
-                resume_path = os.path.join(screenshots_dir, "resume.txt")
-                with open(resume_path, "w") as f:
-                    f.write(resume_text)
-                if upload_if_available(resume_selectors, resume_path):
-                    add_step(steps, "upload_resume", "ok", "Resume file uploaded")
-                else:
-                    add_step(steps, "upload_resume", "error", "Upload failed")
-            except Exception as exc:
-                add_step(steps, "upload_resume", "error", f"Upload error: {exc}")
-        else:
-            add_step(steps, "upload_resume", "ok", "No file input found, skipped")
-
-        # Fill cover letter text if available
         cover_letter = payload.get("coverLetter")
         if isinstance(cover_letter, dict):
-            content = cover_letter.get("content", {})
+            content = cover_letter.get("content")
             if isinstance(content, dict):
-                cl_text = "\n\n".join(filter(None, [
-                    content.get("introduction", ""),
-                    content.get("body", ""),
-                    content.get("conclusion", ""),
-                ]))
-                if cl_text.strip():
-                    if type_if_available(cover_letter_selectors, cl_text):
-                        add_step(steps, "fill_cover_letter", "ok", "Cover letter filled")
-                    else:
-                        add_step(steps, "fill_cover_letter", "ok", "Cover letter field not found, skipped")
-
-        # Step 8: Fill custom answers and handle dropdowns
-        step_num += 1
-        emit_progress("Filling custom fields", step_num, TOTAL_STEPS)
-        if isinstance(custom_answers, dict):
-            for key, value in custom_answers.items():
-                if not isinstance(key, str) or not isinstance(value, str):
-                    continue
-                # Try textarea first, then input, then select (dropdown)
-                text_selectors = [
-                    f"textarea[name='{key}']",
-                    f"input[name='{key}']",
-                    f"textarea[id='{key}']",
-                    f"input[id='{key}']",
-                ]
-                if type_if_available(text_selectors, value):
-                    add_step(steps, f"fill_{key}", "ok", f"Filled {key}")
-                else:
-                    # Try as dropdown select
-                    dropdown_selectors = [
-                        f"select[name='{key}']",
-                        f"select[id='{key}']",
+                text = "\n\n".join(
+                    [
+                        str(content.get("introduction", "")),
+                        str(content.get("body", "")),
+                        str(content.get("conclusion", "")),
                     ]
-                    if select_if_available(dropdown_selectors, value):
-                        add_step(steps, f"select_{key}", "ok", f"Selected {key}={value}")
+                ).strip()
+                if text:
+                    if type_if_available(cover_letter_selectors, text):
+                        add_step(steps, "fill_cover_letter", "ok")
                     else:
-                        add_step(steps, f"fill_{key}", "error", f"Field {key} not found")
+                        add_step(steps, "fill_cover_letter", "error", "Cover letter field not found")
 
-        snap("Captured form filled state")
+        step_number += 1
+        emit_progress("fill_custom_fields")
+        for key, value in custom_answers.items():
+            if not isinstance(key, str) or not isinstance(value, str):
+                continue
+            field_selectors = [
+                f"textarea[name='{key}']",
+                f"input[name='{key}']",
+                f"select[name='{key}']",
+                f"textarea[id='{key}']",
+                f"input[id='{key}']",
+                f"select[id='{key}']",
+            ]
+            if type_if_available(field_selectors, value) or select_if_available(field_selectors, value):
+                add_step(steps, f"fill_{key}", "ok")
+            else:
+                add_step(steps, f"fill_{key}", "error", f"Field {key} not found")
+        snap("Filled form fields")
 
-        # Step 9: Submit
-        step_num += 1
-        emit_progress("Submitting application", step_num, TOTAL_STEPS)
+        step_number += 1
+        emit_progress("submit")
         if click_if_available(submit_selectors):
             add_step(steps, "submit", "ok")
         else:
-            # Try keyboard submit as fallback
             try:
                 r.keyboard("[enter]")
-                add_step(steps, "submit", "ok", "Submitted via keyboard Enter")
+                add_step(steps, "submit", "ok", "Submitted via keyboard")
             except Exception:
                 add_step(steps, "submit", "error", "Submit control not found")
-
         r.wait(3)
 
-        # Step 10: Verify submission
-        step_num += 1
-        emit_progress("Verifying submission", step_num, TOTAL_STEPS)
-        snap("Captured final state")
-
+        step_number += 1
+        emit_progress("verify_submission")
+        snap("Final state")
         if verify_submission():
-            add_step(steps, "verify", "ok", "Submission confirmation detected on page")
+            add_step(steps, "verify", "ok", "Submission confirmation detected")
         else:
-            add_step(steps, "verify", "ok", "No confirmation text detected (may still have succeeded)")
+            add_step(steps, "verify", "ok", "No confirmation text detected")
 
-        emit_progress("Complete", step_num, TOTAL_STEPS, "ok", "Automation finished")
-
-        return_result = {
-            "success": True,
-            "error": None,
-            "screenshots": screenshots,
-            "steps": steps,
-        }
-        print(json.dumps(return_result))
+        emitter.emit_result(
+            {
+                "success": True,
+                "error": None,
+                "screenshots": screenshots,
+                "artifacts": create_artifacts(screenshots),
+                "steps": steps,
+            }
+        )
         return 0
     except Exception as exc:
-        emit_progress("Error", step_num, TOTAL_STEPS, "error", str(exc))
         add_step(steps, "automation", "error", str(exc))
-        return_result = {
-            "success": False,
-            "error": str(exc),
-            "screenshots": screenshots,
-            "steps": steps,
-        }
-        print(json.dumps(return_result))
+        emitter.emit_error("PYTHON_RUNTIME_ERROR", str(exc), {"step": step_number, "steps": steps})
         return 1
     finally:
         try:
             r.close()
-            add_step(steps, "cleanup", "ok")
-        except Exception:
-            pass
-        try:
-            shutil.rmtree(screenshots_dir, ignore_errors=True)
         except Exception:
             pass
 

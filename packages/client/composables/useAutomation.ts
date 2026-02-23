@@ -1,48 +1,16 @@
 import {
   API_ENDPOINTS,
   WS_ENDPOINTS,
-  AUTOMATION_RUN_STATUSES,
   buildAutomationRunEndpoint,
+  rpaRunEventSchema,
   safeParseJson,
   type AutomationRunStatus,
   type AutomationRunType,
+  type RpaRunEvent,
+  type RpaRunExecutionEnvelope,
 } from "@bao/shared";
 import type { MaybeRef } from "vue";
 import { resolveApiEndpoint, resolveWebSocketEndpoint } from "~/utils/endpoints";
-
-type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
-type JsonObject = { [key: string]: JsonValue };
-
-export interface AutomationRun {
-  id: string;
-  type: AutomationRunType;
-  status: AutomationRunStatus;
-  jobId: string | null;
-  userId: string | null;
-  input: JsonObject | null;
-  output: JsonValue | null;
-  screenshots: string[] | null;
-  error: string | null;
-  progress: number | null;
-  currentStep: number | null;
-  totalSteps: number | null;
-  startedAt: string | null;
-  completedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AutomationProgressEvent {
-  type: string;
-  runId: string;
-  action?: string;
-  step?: number;
-  totalSteps?: number;
-  status?: AutomationRunStatus;
-  message?: string;
-  success?: boolean;
-  error?: string | null;
-}
 
 interface JobApplyBody {
   jobUrl: string;
@@ -65,17 +33,6 @@ interface EmailResponseBody {
   tone?: EmailResponseTone;
 }
 
-interface UseAutomationResponse {
-  runId: string;
-  status: AutomationRunStatus;
-}
-
-interface ScheduleAutomationResponse {
-  runId: string;
-  status: Extract<AutomationRunStatus, "pending">;
-  scheduledFor: string;
-}
-
 interface EmailAutomationResponse {
   runId: string;
   status: Extract<AutomationRunStatus, "success">;
@@ -89,38 +46,8 @@ interface FetchRunsParams {
   status?: AutomationRunStatus;
 }
 
-const isJsonObject = (value: JsonValue): value is JsonObject =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const isAutomationStatus = (value: string): value is AutomationRunStatus =>
-  AUTOMATION_RUN_STATUSES.some((status) => status === value);
-
-const toAutomationProgressEvent = (value: JsonValue): AutomationProgressEvent | null => {
-  if (!isJsonObject(value)) {
-    return null;
-  }
-
-  const runId = value.runId;
-  const type = value.type;
-  if (typeof runId !== "string" || typeof type !== "string") {
-    return null;
-  }
-
-  const nextEvent: AutomationProgressEvent = { runId, type };
-  if (typeof value.action === "string") nextEvent.action = value.action;
-  if (typeof value.step === "number") nextEvent.step = value.step;
-  if (typeof value.totalSteps === "number") nextEvent.totalSteps = value.totalSteps;
-  if (typeof value.status === "string" && isAutomationStatus(value.status)) {
-    nextEvent.status = value.status;
-  }
-  if (typeof value.message === "string") nextEvent.message = value.message;
-  if (typeof value.success === "boolean") nextEvent.success = value.success;
-  if (typeof value.error === "string" || value.error === null) nextEvent.error = value.error;
-  return nextEvent;
-};
-
 /**
- * Automation feature composable using Nuxt useFetch/$fetch without wrapper abstractions.
+ * Automation feature composable using shared run/event contracts.
  */
 export function useAutomation() {
   const config = useRuntimeConfig();
@@ -129,10 +56,10 @@ export function useAutomation() {
   const wsBase = String(config.public.wsBase || config.public.apiBase || "/");
 
   /**
-   * Start a job-apply automation run.
+   * Starts a job-apply automation run.
    */
   const triggerJobApply = (body: JobApplyBody) => {
-    return $fetch<UseAutomationResponse>(
+    return $fetch<RpaRunExecutionEnvelope>(
       resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationJobApply),
       {
         method: "POST",
@@ -142,10 +69,10 @@ export function useAutomation() {
   };
 
   /**
-   * Schedule a job-apply automation run for future execution.
+   * Schedules a job-apply automation run.
    */
   const scheduleJobApply = (body: ScheduleJobApplyBody) =>
-    $fetch<ScheduleAutomationResponse>(
+    $fetch<RpaRunExecutionEnvelope>(
       resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationJobApplySchedule),
       {
         method: "POST",
@@ -154,7 +81,7 @@ export function useAutomation() {
     );
 
   /**
-   * Generate an AI-assisted email response and persist the run output.
+   * Generates an AI-assisted email response run.
    */
   const triggerEmailResponse = (body: EmailResponseBody) =>
     $fetch<EmailAutomationResponse>(
@@ -166,10 +93,10 @@ export function useAutomation() {
     );
 
   /**
-   * Fetch automation run history with optional type/status filters.
+   * Fetches run history with optional type/status filters.
    */
   const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}) =>
-    useFetch<AutomationRun[]>(
+    useFetch<RpaRunExecutionEnvelope[]>(
       resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationRuns),
       {
         query: params,
@@ -177,46 +104,70 @@ export function useAutomation() {
     );
 
   /**
-   * Fetch a single automation run by ID.
+   * Fetches one run by id as reactive async data.
    */
   const fetchRun = (id: string) =>
-    useFetch<AutomationRun>(
+    useFetch<RpaRunExecutionEnvelope>(
       resolveApiEndpoint(apiBase, requestUrl, buildAutomationRunEndpoint(id)),
     );
 
   /**
-   * Subscribe to real-time progress events for an automation run via WebSocket.
-   * Returns an unsubscribe function to close the connection.
+   * Fetches one run by id as an imperative request.
+   */
+  const getRun = (id: string) =>
+    $fetch<RpaRunExecutionEnvelope>(
+      resolveApiEndpoint(apiBase, requestUrl, buildAutomationRunEndpoint(id)),
+    );
+
+  /**
+   * Fetches run history as an imperative request.
+   */
+  const getRuns = (params: FetchRunsParams = {}) =>
+    $fetch<RpaRunExecutionEnvelope[]>(
+      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationRuns),
+      {
+        query: params,
+      },
+    );
+
+  /**
+   * Subscribes to run-scoped websocket events.
    */
   const subscribeToRun = (
     runId: string,
-    onProgress: (event: AutomationProgressEvent) => void,
+    onEvent: (event: RpaRunEvent) => void,
   ): (() => void) => {
     const wsUrl = resolveWebSocketEndpoint(wsBase, requestUrl, WS_ENDPOINTS.automation);
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: "subscribe", runId }));
+      ws.send(
+        JSON.stringify({
+          type: "subscribe",
+          runId,
+        }),
+      );
     };
 
     ws.onmessage = (event) => {
-      const parsed = safeParseJson(event.data);
-      if (parsed === null) return;
-      const normalizedEvent = toAutomationProgressEvent(parsed);
-      if (normalizedEvent) {
-        onProgress(normalizedEvent);
+      const parsedPayload = safeParseJson(event.data);
+      const parsedEvent = rpaRunEventSchema.safeParse(parsedPayload);
+      if (!parsedEvent.success) {
+        return;
       }
-    };
-
-    ws.onerror = () => {
-      // WebSocket error — silent fallback, client can still poll
+      onEvent(parsedEvent.data);
     };
 
     return () => {
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: "unsubscribe", runId }));
-        ws.close();
+        ws.send(
+          JSON.stringify({
+            type: "unsubscribe",
+            runId,
+          }),
+        );
       }
+      ws.close();
     };
   };
 
@@ -226,6 +177,8 @@ export function useAutomation() {
     triggerEmailResponse,
     fetchRuns,
     fetchRun,
+    getRun,
+    getRuns,
     subscribeToRun,
   };
 }

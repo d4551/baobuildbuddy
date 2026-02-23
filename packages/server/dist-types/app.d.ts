@@ -2431,10 +2431,10 @@ export declare const app: Elysia<"/api", {
                                 query: {
                                     [x: string]: string;
                                 };
+                                path: string;
                                 params: {
                                     [x: string]: string;
                                 };
-                                path: string;
                             };
                             state: {
                                 hasResumes: boolean;
@@ -2695,8 +2695,8 @@ export declare const app: Elysia<"/api", {
                         jobId?: string | undefined;
                         coverLetterId?: string | undefined;
                         resumeId: string;
-                        jobUrl: string;
                         action: string;
+                        jobUrl: string;
                     };
                     params: {};
                     query: unknown;
@@ -3258,23 +3258,69 @@ export declare const app: Elysia<"/api", {
                     headers: unknown;
                     response: {
                         200: {
-                            status: "running";
-                            runId: string;
+                            progress: number | null;
+                            error: string | {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            } | null;
+                            type: "email" | "scrape" | "job_apply";
+                            output: {
+                                [x: string]: unknown;
+                            } | null;
+                            input: {
+                                [x: string]: unknown;
+                            } | null;
+                            id: string;
+                            aborted: boolean;
+                            createdAt: string;
+                            updatedAt: string;
+                            status: "success" | "error" | "pending" | "running";
+                            screenshots: string[] | null;
+                            totalSteps: number | null;
+                            jobId: string | null;
+                            userId: string | null;
+                            currentStep: number | null;
+                            startedAt: string | null;
+                            completedAt: string | null;
+                            exitCode: number | null;
+                            timedOut: boolean;
+                            executionMs: number | null;
                         };
                         500: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                         400: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                         404: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                         409: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                         422: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                     };
                 };
@@ -3298,24 +3344,69 @@ export declare const app: Elysia<"/api", {
                         headers: unknown;
                         response: {
                             200: {
-                                status: "pending";
-                                runId: string;
-                                scheduledFor: string;
+                                progress: number | null;
+                                error: string | {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                } | null;
+                                type: "email" | "scrape" | "job_apply";
+                                output: {
+                                    [x: string]: unknown;
+                                } | null;
+                                input: {
+                                    [x: string]: unknown;
+                                } | null;
+                                id: string;
+                                aborted: boolean;
+                                createdAt: string;
+                                updatedAt: string;
+                                status: "success" | "error" | "pending" | "running";
+                                screenshots: string[] | null;
+                                totalSteps: number | null;
+                                jobId: string | null;
+                                userId: string | null;
+                                currentStep: number | null;
+                                startedAt: string | null;
+                                completedAt: string | null;
+                                exitCode: number | null;
+                                timedOut: boolean;
+                                executionMs: number | null;
                             };
                             500: {
-                                error: string;
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
                             };
                             400: {
-                                error: string;
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
                             };
                             404: {
-                                error: string;
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
                             };
                             409: {
-                                error: string;
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
                             };
                             422: {
-                                error: string;
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
                             };
                         };
                     };
@@ -3344,19 +3435,39 @@ export declare const app: Elysia<"/api", {
                             reply: string;
                         };
                         500: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                         400: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                         404: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                         409: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                         422: {
-                            error: string;
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
                         };
                     };
                 };
@@ -3376,7 +3487,11 @@ export declare const app: Elysia<"/api", {
                     response: {
                         200: {
                             progress: number | null;
-                            error: string | null;
+                            error: string | {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            } | null;
                             type: "email" | "scrape" | "job_apply";
                             output: {
                                 [x: string]: unknown;
@@ -3385,16 +3500,20 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             id: string;
+                            aborted: boolean;
                             createdAt: string;
                             updatedAt: string;
-                            screenshots: string[] | null;
-                            jobId: string | null;
                             status: "success" | "error" | "pending" | "running";
+                            screenshots: string[] | null;
+                            totalSteps: number | null;
+                            jobId: string | null;
                             userId: string | null;
                             currentStep: number | null;
-                            totalSteps: number | null;
                             startedAt: string | null;
                             completedAt: string | null;
+                            exitCode: number | null;
+                            timedOut: boolean;
+                            executionMs: number | null;
                         }[];
                         422: {
                             type: "validation";
@@ -3423,7 +3542,11 @@ export declare const app: Elysia<"/api", {
                         response: {
                             200: {
                                 progress: number | null;
-                                error: string | null;
+                                error: string | {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                } | null;
                                 type: "email" | "scrape" | "job_apply";
                                 output: {
                                     [x: string]: unknown;
@@ -3432,22 +3555,34 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 id: string;
+                                aborted: boolean;
                                 createdAt: string;
                                 updatedAt: string;
-                                screenshots: string[] | null;
-                                jobId: string | null;
                                 status: "success" | "error" | "pending" | "running";
+                                screenshots: string[] | null;
+                                totalSteps: number | null;
+                                jobId: string | null;
                                 userId: string | null;
                                 currentStep: number | null;
-                                totalSteps: number | null;
                                 startedAt: string | null;
                                 completedAt: string | null;
+                                exitCode: number | null;
+                                timedOut: boolean;
+                                executionMs: number | null;
                             };
                             400: {
-                                error: string;
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
                             };
                             404: {
-                                error: string;
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
                             };
                             422: {
                                 type: "validation";
@@ -3508,7 +3643,7 @@ export declare const app: Elysia<"/api", {
             subscribe: {
                 body: {
                     runId?: string | undefined;
-                    type: string;
+                    type: "subscribe" | "unsubscribe";
                 };
                 params: {};
                 query: {};

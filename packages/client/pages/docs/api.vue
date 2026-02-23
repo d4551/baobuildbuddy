@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useTemplateRef } from "vue";
-import {
-  API_ENDPOINTS,
-  safeParseJson,
-  type JsonObject,
-  type JsonValue,
-} from "@bao/shared";
+import { API_ENDPOINTS, safeParseJson, type JsonObject, type JsonValue } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { getErrorMessage } from "~/utils/errors";
-import { resolveApiEndpoint } from "~/utils/endpoints";
 import { useAuth } from "~/composables/useAuth";
+import { useFocusTrap } from "~/composables/useFocusTrap";
+import { useScrollSpy } from "~/composables/useScrollSpy";
+import { useToast } from "~/composables/useToast";
+import { resolveApiEndpoint } from "~/utils/endpoints";
+import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
+const auth = useAuth();
+const toast = useToast();
 
 definePageMeta({
   middleware: ["auth"],
@@ -26,8 +26,22 @@ if (import.meta.server) {
 }
 
 type ApiHttpMethod = "get" | "post" | "put" | "delete" | "patch" | "head" | "options" | "trace";
-type ApiDocsUiState = "idle" | "loading" | "success" | "empty" | "errorRetryable" | "errorNonRetryable" | "unauthorized";
-type ApiTesterState = "idle" | "loading" | "success" | "errorRetryable" | "errorNonRetryable" | "unauthorized";
+type ApiDocsUiState =
+  | "idle"
+  | "loading"
+  | "success"
+  | "empty"
+  | "errorRetryable"
+  | "errorNonRetryable"
+  | "unauthorized";
+type ApiTesterState =
+  | "idle"
+  | "loading"
+  | "success"
+  | "empty"
+  | "errorRetryable"
+  | "errorNonRetryable"
+  | "unauthorized";
 
 interface OpenApiInfo {
   title?: string;
@@ -76,8 +90,6 @@ interface OpenApiSpec {
   paths?: Record<string, Record<string, unknown>>;
 }
 
-type OpenApiPaths = Record<string, Record<string, unknown>>;
-
 interface ApiEndpoint {
   readonly id: string;
   readonly path: string;
@@ -96,8 +108,6 @@ interface ApiEndpointGroup {
   readonly endpoints: readonly ApiEndpoint[];
 }
 
-type ApiDocsTextKey = `apiDocs.${string}`;
-
 interface FetchEndpointResultOk {
   readonly ok: true;
   readonly statusCode: number;
@@ -115,7 +125,7 @@ interface FetchEndpointResultErr {
 type FetchEndpointResult = FetchEndpointResultOk | FetchEndpointResultErr;
 
 const API_DOCS_ASYNC_DATA_KEY = "api-docs-json";
-const UNKNOWN_TAG_LABEL_KEY: ApiDocsTextKey = "apiDocs.groups.untagged";
+const UNKNOWN_TAG_LABEL_KEY = "apiDocs.groups.untagged" as const;
 const HTTP_METHODS_ORDER = ["get", "post", "put", "patch", "delete", "head", "options", "trace"] as const;
 const HTTP_METHOD_CLASSES: Record<ApiHttpMethod, string> = {
   get: "badge-success",
@@ -127,16 +137,27 @@ const HTTP_METHOD_CLASSES: Record<ApiHttpMethod, string> = {
   options: "badge-neutral",
   trace: "badge-neutral",
 };
-
-const HASH_PREFIX = "#";
 const EMPTY_TEXT_LABEL = "—";
 
 const route = useRoute();
 const config = useRuntimeConfig();
 const requestUrl = useRequestURL();
-const auth = useAuth();
-
 const apiBase = String(config.public.apiBase || "/");
+
+const endpointTesterDialogRef = useTemplateRef<HTMLDialogElement>("apiEndpointTesterDialog");
+const lastFocusedElement = ref<HTMLElement | null>(null);
+useFocusTrap(endpointTesterDialogRef, computed(() => Boolean(endpointTesterDialogRef.value?.open)));
+
+const {
+  activeSectionId,
+  setSectionRef,
+  scrollToSection,
+  syncFromHash,
+  startObserver,
+  refreshObserver,
+  stopObserver,
+} = useScrollSpy();
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -153,70 +174,52 @@ const normalizePathForId = (path: string): string =>
     .replace(/(^-|-$)/gu, "") || "root";
 
 const dedupeCaseInsensitiveStrings = (values: readonly string[]): string[] => {
-  const seen = new Map<string, string>();
+  const seen = new Set<string>();
   const output: string[] = [];
   for (const value of values) {
     const normalized = value.trim();
-    if (!normalized) continue;
+    if (!normalized) {
+      continue;
+    }
     const key = normalized.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.set(key, normalized);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
     output.push(normalized);
   }
   return output;
 };
 
-const normalizeSectionHash = (hashValue: string): string => hashValue.replace(new RegExp(`^\\${HASH_PREFIX}`), "").trim();
-
 const readOpenApiSpec = (value: unknown): OpenApiSpec | null => {
-  if (!isRecord(value)) return null;
+  if (!isRecord(value)) {
+    return null;
+  }
 
-  const openapi = typeof value.openapi === "string" ? value.openapi : undefined;
   const infoRaw = isRecord(value.info) ? value.info : undefined;
-  const info: OpenApiInfo = {
-    title: typeof infoRaw?.title === "string" ? infoRaw.title : undefined,
-    description: typeof infoRaw?.description === "string" ? infoRaw.description : undefined,
-    version: typeof infoRaw?.version === "string" ? infoRaw.version : undefined,
-  };
-
-  const paths = isRecord(value.paths) ? (value.paths as OpenApiPaths) : {};
-
   return {
-    openapi,
-    info,
-    paths,
+    openapi: typeof value.openapi === "string" ? value.openapi : undefined,
+    info: {
+      title: typeof infoRaw?.title === "string" ? infoRaw.title : undefined,
+      description: typeof infoRaw?.description === "string" ? infoRaw.description : undefined,
+      version: typeof infoRaw?.version === "string" ? infoRaw.version : undefined,
+    },
+    paths: isRecord(value.paths) ? value.paths : {},
   };
 };
 
-const getOperation = (
-  value: unknown,
-  pathParameters: readonly OpenApiParameter[],
-): OpenApiOperation | null => {
-  if (!isRecord(value)) return null;
-
-  const parameters = Array.isArray(value.parameters) ? value.parameters : [];
-  const operationParameters = parameters.filter((parameter): parameter is OpenApiParameter => {
-    if (!isRecord(parameter)) return false;
-    if (typeof parameter.name !== "string") return false;
-    if (!isOpenApiParameterIn(parameter.in)) return false;
-    return true;
-  });
-  const safeParameters = dedupeParameters([...pathParameters, ...operationParameters]);
-
-  const requestBody = isRecord(value.requestBody) ? (value.requestBody as OpenApiRequestBody) : undefined;
-  const responses = isRecord(value.responses) ? (value.responses as Record<string, OpenApiResponse>) : undefined;
-  const tags = Array.isArray(value.tags) ? value.tags.filter((tag): tag is string => typeof tag === "string") : undefined;
-
-  return {
-    operationId: typeof value.operationId === "string" ? value.operationId : undefined,
-    summary: typeof value.summary === "string" ? value.summary : undefined,
-    description: typeof value.description === "string" ? value.description : undefined,
-    tags,
-    deprecated: typeof value.deprecated === "boolean" ? value.deprecated : undefined,
-    parameters: safeParameters,
-    requestBody,
-    responses,
-  };
+const dedupeParameters = (parameters: readonly OpenApiParameter[]): OpenApiParameter[] => {
+  const unique = new Map<string, OpenApiParameter>();
+  for (const parameter of parameters) {
+    const key = `${parameter.in}:${parameter.name.toLowerCase()}`;
+    if (!unique.has(key)) {
+      unique.set(key, {
+        ...parameter,
+        name: parameter.name.trim(),
+      });
+    }
+  }
+  return Array.from(unique.values()).filter((parameter) => parameter.name.length > 0);
 };
 
 const collectPathParameters = (path: string): string[] => {
@@ -231,64 +234,94 @@ const collectPathParameters = (path: string): string[] => {
   return names;
 };
 
-const dedupeParameters = (parameters: readonly OpenApiParameter[]): OpenApiParameter[] => {
-  const unique = new Map<string, OpenApiParameter>();
-  for (const parameter of parameters) {
-    const parameterName = parameter.name.trim();
-    if (!parameterName) continue;
-
-    const key = `${parameter.in}:${parameterName.toLowerCase()}`;
-    if (!unique.has(key)) {
-      unique.set(key, {
-        ...parameter,
-        name: parameterName,
-      });
-    }
-  }
-  return Array.from(unique.values());
-};
-
-const getParameterValueDefault = (value: unknown): string => {
-  if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-  return "";
-};
-
-const collectParameters = (parameters: readonly OpenApiParameter[], inValue: OpenApiParameter["in"]): OpenApiParameter[] =>
-  dedupeParameters(parameters.filter((param) => param.in === inValue));
-
 const getPathParameters = (pathItem: Record<string, unknown>): OpenApiParameter[] => {
-  const rawParameters = Array.isArray((pathItem as { parameters?: unknown }).parameters)
-    ? ((pathItem as { parameters?: unknown }).parameters as unknown[])
-    : [];
-  const normalizedParameters = rawParameters
+  const rawParameters = Array.isArray(pathItem.parameters) ? pathItem.parameters : [];
+  const normalized = rawParameters
     .filter((parameter): parameter is OpenApiParameter => {
-      if (!isRecord(parameter)) return false;
-      if (typeof parameter.name !== "string") return false;
-      if (!isOpenApiParameterIn(parameter.in)) return false;
-      return true;
+      if (!isRecord(parameter)) {
+        return false;
+      }
+      if (typeof parameter.name !== "string") {
+        return false;
+      }
+      return isOpenApiParameterIn(parameter.in);
     })
     .map((parameter) => ({
       ...parameter,
       name: parameter.name.trim(),
-    }))
-    .filter((parameter) => parameter.name.trim().length > 0);
-  return dedupeParameters(normalizedParameters);
+    }));
+  return dedupeParameters(normalized);
+};
+
+const getOperation = (
+  value: unknown,
+  pathParameters: readonly OpenApiParameter[],
+): OpenApiOperation | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const parameters = Array.isArray(value.parameters) ? value.parameters : [];
+  const operationParameters = parameters.filter((parameter): parameter is OpenApiParameter => {
+    if (!isRecord(parameter)) {
+      return false;
+    }
+    if (typeof parameter.name !== "string") {
+      return false;
+    }
+    return isOpenApiParameterIn(parameter.in);
+  });
+
+  const mergedParameters = dedupeParameters([...pathParameters, ...operationParameters]);
+  return {
+    operationId: typeof value.operationId === "string" ? value.operationId : undefined,
+    summary: typeof value.summary === "string" ? value.summary : undefined,
+    description: typeof value.description === "string" ? value.description : undefined,
+    tags: Array.isArray(value.tags)
+      ? value.tags.filter((tag): tag is string => typeof tag === "string")
+      : undefined,
+    deprecated: typeof value.deprecated === "boolean" ? value.deprecated : undefined,
+    parameters: mergedParameters,
+    requestBody: isRecord(value.requestBody) ? (value.requestBody as OpenApiRequestBody) : undefined,
+    responses: isRecord(value.responses)
+      ? (value.responses as Record<string, OpenApiResponse>)
+      : undefined,
+  };
+};
+
+const collectParameters = (
+  parameters: readonly OpenApiParameter[],
+  inValue: OpenApiParameter["in"],
+): OpenApiParameter[] => dedupeParameters(parameters.filter((parameter) => parameter.in === inValue));
+
+const getParameterValueDefault = (value: unknown): string => {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  return "";
 };
 
 const requestBodyTemplate = (requestBody: OpenApiRequestBody | undefined): string => {
   const content = isRecord(requestBody?.content) ? requestBody.content : undefined;
-  if (!content) return "";
-
+  if (!content) {
+    return "";
+  }
   const jsonBody = content["application/json"];
-  if (!isRecord(jsonBody)) return "";
+  if (!isRecord(jsonBody)) {
+    return "";
+  }
 
   const candidate =
-    (jsonBody as OpenApiMediaType).example ??
-    Object.values((jsonBody as OpenApiMediaType).examples ?? {})[0]?.value;
-
-  if (candidate === undefined) return "";
-  if (typeof candidate === "string") return candidate;
+    jsonBody.example ?? Object.values(jsonBody.examples ?? {})[0]?.value;
+  if (candidate === undefined) {
+    return "";
+  }
+  if (typeof candidate === "string") {
+    return candidate;
+  }
   return JSON.stringify(candidate, null, 2);
 };
 
@@ -299,9 +332,7 @@ const {
   refresh: refreshApiSpec,
 } = await useAsyncData(
   API_DOCS_ASYNC_DATA_KEY,
-  async () => {
-    return $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJson));
-  },
+  async () => $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJson)),
   { server: true, lazy: false },
 );
 
@@ -310,92 +341,97 @@ const openApiSpec = computed<OpenApiSpec | null>(() => readOpenApiSpec(rawApiSpe
 const endpointGroups = computed<ApiEndpointGroup[]>(() => {
   const paths = openApiSpec.value?.paths ?? {};
   const grouped = new Map<string, ApiEndpoint[]>();
+  const methodOrder = new Map<ApiHttpMethod, number>(
+    HTTP_METHODS_ORDER.map((method, index) => [method, index]),
+  );
 
   for (const [path, pathItem] of Object.entries(paths)) {
-    if (!isRecord(pathItem)) continue;
-    const pathParameters = getPathParameters(pathItem);
-
+    if (!isRecord(pathItem)) {
+      continue;
+    }
+    const inheritedPathParameters = getPathParameters(pathItem);
     for (const [rawMethod, rawOperation] of Object.entries(pathItem)) {
-      if (!isApiHttpMethod(rawMethod)) continue;
-
-      const operation = getOperation(rawOperation, pathParameters);
-      if (!operation) continue;
+      if (!isApiHttpMethod(rawMethod)) {
+        continue;
+      }
+      const operation = getOperation(rawOperation, inheritedPathParameters);
+      if (!operation) {
+        continue;
+      }
 
       const pathParameters = dedupeCaseInsensitiveStrings([
         ...collectPathParameters(path),
-        ...collectParameters(operation.parameters ?? [], "path").map((param) => param.name),
+        ...collectParameters(operation.parameters ?? [], "path").map((parameter) => parameter.name),
       ]);
-
       const queryParameters = collectParameters(operation.parameters ?? [], "query");
       const requestBody = operation.requestBody;
-      const label = operation.tags?.[0] ?? t(UNKNOWN_TAG_LABEL_KEY);
-      const groupEndpoints = grouped.get(label) ?? [];
-      groupEndpoints.push({
+      const groupLabel = operation.tags?.[0] ?? t(UNKNOWN_TAG_LABEL_KEY);
+      const currentGroup = grouped.get(groupLabel) ?? [];
+      currentGroup.push({
         id: `${rawMethod}-${normalizePathForId(path)}`,
         path,
         method: rawMethod,
         operation,
-        groupLabel: label,
+        groupLabel,
         pathParameters,
         queryParameters,
         requestBodyTemplate: requestBodyTemplate(requestBody),
         requestBodyRequired: Boolean(requestBody?.required),
       });
-      grouped.set(label, groupEndpoints);
+      grouped.set(groupLabel, currentGroup);
     }
   }
 
-  const sortedGroups = Array.from(grouped.entries()).sort(([first], [second]) =>
-    first.localeCompare(second, "en"),
-  );
-  const methodOrder = new Map<ApiHttpMethod, number>(HTTP_METHODS_ORDER.map((method, index) => [method, index]));
-
-  return sortedGroups.map(([label, endpoints]) => {
-    const sortedEndpoints = endpoints.sort((left, right) => {
-      const pathCompare = left.path.localeCompare(right.path, "en");
-      if (pathCompare !== 0) return pathCompare;
-      return methodOrder.get(left.method)! - methodOrder.get(right.method)!;
-    });
-
-    return {
+  return Array.from(grouped.entries())
+    .sort(([left], [right]) => left.localeCompare(right, "en"))
+    .map(([label, endpoints]) => ({
       id: `group-${normalizePathForId(label)}`,
       label,
-      endpoints: sortedEndpoints,
-    };
-  });
+      endpoints: endpoints.sort((left, right) => {
+        const pathCompare = left.path.localeCompare(right.path, "en");
+        if (pathCompare !== 0) {
+          return pathCompare;
+        }
+        return (methodOrder.get(left.method) ?? 0) - (methodOrder.get(right.method) ?? 0);
+      }),
+    }));
 });
 
 const apiDocsUiState = computed<ApiDocsUiState>(() => {
-  if (apiSpecStatus.value === "pending") return "loading";
-  if (apiSpecStatus.value === "idle") return "idle";
+  if (apiSpecStatus.value === "pending") {
+    return "loading";
+  }
+  if (apiSpecStatus.value === "idle") {
+    return "idle";
+  }
   if (apiSpecError.value) {
-    const statusValue = (() => {
-      const nextError = apiSpecError.value as { status?: number; statusCode?: number };
-      const status = nextError.status ?? nextError.statusCode;
-      return typeof status === "number" ? status : null;
-    })();
-
-    if (statusValue === 401) return "unauthorized";
-    if (statusValue === null || statusValue >= 500) return "errorRetryable";
+    const errorObject = apiSpecError.value as { status?: number; statusCode?: number };
+    const statusCode =
+      typeof errorObject.status === "number"
+        ? errorObject.status
+        : typeof errorObject.statusCode === "number"
+          ? errorObject.statusCode
+          : null;
+    if (statusCode === 401) {
+      return "unauthorized";
+    }
+    if (statusCode === null || statusCode >= 500) {
+      return "errorRetryable";
+    }
     return "errorNonRetryable";
   }
-  if (endpointGroups.value.length === 0) return "empty";
+  if (endpointGroups.value.length === 0) {
+    return "empty";
+  }
   return "success";
 });
-
-const isRetryableStatus = (statusCode: number): boolean =>
-  statusCode === 408 || statusCode === 429 || statusCode >= 500;
 
 const apiDocsTitle = computed<string>(() => {
   const infoTitle = openApiSpec.value?.info?.title;
   return infoTitle?.trim().length ? infoTitle : t("apiDocs.title");
 });
 
-const activeSectionId = ref<string>("");
-const sectionNodes = new Map<string, HTMLElement>();
-const endpointTesterDialogRef = useTemplateRef<HTMLDialogElement>("apiEndpointTesterDialog");
 const selectedEndpoint = ref<ApiEndpoint | null>(null);
-const sectionObserver = ref<IntersectionObserver | null>(null);
 const testerState = ref<ApiTesterState>("idle");
 const pathParameterValues = ref<Record<string, string>>({});
 const queryParameterValues = ref<Record<string, string>>({});
@@ -409,38 +445,28 @@ const testErrorMessage = ref("");
 const testRequestMethod = ref<ApiHttpMethod | null>(null);
 const testRequestUrl = ref("");
 
-const canRunEndpoint = computed<boolean>(() => {
-  const endpoint = selectedEndpoint.value;
-  if (!endpoint) return false;
-  if (endpoint.pathParameters.some((name) => pathParameterValues.value[name]?.trim().length === 0)) {
-    return false;
-  }
-
-  if (!endpoint.requestBodyRequired) {
-    if (endpoint.requestBodyTemplate.length > 0 && requestBodyText.value.trim().length > 0) {
-      const parsedBody = safeParseJson(requestBodyText.value);
-      return parsedBody !== null;
-    }
-    return true;
-  }
-
-  if (requestBodyText.value.trim().length === 0) return false;
-  return safeParseJson(requestBodyText.value) !== null;
-});
-
 const endpointMethodClass = (method: ApiHttpMethod): string => HTTP_METHOD_CLASSES[method];
+const formatMethodLabel = (method: ApiHttpMethod): string => method.toUpperCase();
 
 const selectedOperationDescription = computed<string>(() => {
   const endpoint = selectedEndpoint.value;
-  if (!endpoint) return "";
-  return endpoint.operation.description?.trim() || endpoint.operation.summary?.trim() || t("apiDocs.endpoint.noDescription");
+  if (!endpoint) {
+    return "";
+  }
+  return (
+    endpoint.operation.description?.trim() ||
+    endpoint.operation.summary?.trim() ||
+    t("apiDocs.endpoint.noDescription")
+  );
 });
 
 const selectedPathParameters = computed<string[]>(() => selectedEndpoint.value?.pathParameters ?? []);
 const selectedQueryParameters = computed<readonly OpenApiParameter[]>(
   () => selectedEndpoint.value?.queryParameters ?? [],
 );
-const selectedRequestBodyTemplate = computed<string>(() => selectedEndpoint.value?.requestBodyTemplate ?? "");
+const selectedRequestBodyTemplate = computed<string>(
+  () => selectedEndpoint.value?.requestBodyTemplate ?? "",
+);
 const responseHeaderEntries = computed<readonly [string, string][]>(
   () => Object.entries(testResponseHeaders.value),
 );
@@ -448,67 +474,79 @@ const hasResponseHeaders = computed<boolean>(() => responseHeaderEntries.value.l
 const hasSelectedEndpointRequestTrace = computed<boolean>(
   () => testRequestMethod.value !== null && testRequestUrl.value.length > 0,
 );
-
 const endpointHasBody = computed<boolean>(
-  () => selectedEndpoint.value?.requestBodyTemplate?.length > 0 || (selectedEndpoint.value?.requestBodyRequired ?? false),
+  () =>
+    (selectedEndpoint.value?.requestBodyTemplate?.length ?? 0) > 0 ||
+    Boolean(selectedEndpoint.value?.requestBodyRequired),
 );
 
-const focusEndpointTesterFirstInput = () => {
-  const dialog = endpointTesterDialogRef.value;
-  if (!dialog) {
-    return;
+const canRunEndpoint = computed<boolean>(() => {
+  const endpoint = selectedEndpoint.value;
+  if (!endpoint) {
+    return false;
   }
-
-  const firstFocusable = dialog.querySelector<HTMLElement>(
-    "input:not([disabled]), textarea:not([disabled]), button:not([disabled])",
-  );
-  if (firstFocusable) {
-    firstFocusable.focus();
+  if (endpoint.pathParameters.some((name) => pathParameterValues.value[name]?.trim().length === 0)) {
+    return false;
   }
-};
-
-const setSectionRef = (sectionId: string, element: Element | null) => {
-  if (!element) {
-    sectionNodes.delete(sectionId);
-    return;
+  if (!endpoint.requestBodyRequired) {
+    if (endpoint.requestBodyTemplate.length > 0 && requestBodyText.value.trim().length > 0) {
+      return safeParseJson(requestBodyText.value) !== null;
+    }
+    return true;
   }
-  sectionNodes.set(sectionId, element as HTMLElement);
-};
-
-const resolveTesterPath = (endpoint: ApiEndpoint): string => {
-  let path = endpoint.path;
-  for (const parameter of endpoint.pathParameters) {
-    const value = pathParameterValues.value[parameter]?.trim();
-    if (!value) return "";
-    path = path.replaceAll(`{${parameter}}`, encodeURIComponent(value));
+  if (requestBodyText.value.trim().length === 0) {
+    return false;
   }
-  return path;
-};
-
-const buildTesterUrl = (endpoint: ApiEndpoint, basePath: string): string => {
-  const query = new URLSearchParams();
-  for (const parameter of endpoint.queryParameters) {
-    const value = queryParameterValues.value[parameter.name]?.trim();
-    if (!value) continue;
-    query.set(parameter.name, value);
-  }
-
-  const queryString = query.toString();
-  return queryString.length > 0 ? `${basePath}${basePath.includes("?") ? "&" : "?"}${queryString}` : basePath;
-};
+  return safeParseJson(requestBodyText.value) !== null;
+});
 
 const requestBodyDisplay = computed<string>(() => {
-  if (testResponseBody.value.length === 0) return "";
+  if (testResponseBody.value.length === 0) {
+    return "";
+  }
   const parsedResponse = safeParseJson(testResponseBody.value);
   return parsedResponse === null ? testResponseBody.value : JSON.stringify(parsedResponse, null, 2);
 });
+
+const showTesterResponsePanel = computed<boolean>(
+  () =>
+    testerState.value === "success" ||
+    testerState.value === "empty" ||
+    testerState.value === "errorRetryable" ||
+    testerState.value === "errorNonRetryable" ||
+    testerState.value === "unauthorized",
+);
 
 const responseStatusText = computed<{ status: number | string; text: string }>(() => ({
   status: testStatusCode.value ?? EMPTY_TEXT_LABEL,
   text: testStatusText.value || EMPTY_TEXT_LABEL,
 }));
 
-const resetEndpointTesterState = () => {
+const lifecycleStepClasses = computed<[string, string, string]>(() => {
+  const configureClass = "step step-primary";
+  const sendClass =
+    testerState.value === "loading" ||
+    testerState.value === "success" ||
+    testerState.value === "empty" ||
+    testerState.value === "errorRetryable" ||
+    testerState.value === "errorNonRetryable" ||
+    testerState.value === "unauthorized"
+      ? "step step-primary"
+      : "step";
+  const responseClass =
+    testerState.value === "success"
+      ? "step step-success"
+      : testerState.value === "empty"
+        ? "step step-warning"
+        : testerState.value === "errorRetryable" ||
+            testerState.value === "errorNonRetryable" ||
+            testerState.value === "unauthorized"
+          ? "step step-error"
+          : "step";
+  return [configureClass, sendClass, responseClass];
+});
+
+const resetEndpointTesterState = (): void => {
   testerState.value = "idle";
   testStatusCode.value = null;
   testStatusText.value = "";
@@ -520,126 +558,94 @@ const resetEndpointTesterState = () => {
   testRequestUrl.value = "";
 };
 
-const hydrateEndpointInputs = (endpoint: ApiEndpoint) => {
+const hydrateEndpointInputs = (endpoint: ApiEndpoint): void => {
   const pathDefaults: Record<string, string> = {};
-  for (const parameterName of endpoint.pathParameters) {
+  endpoint.pathParameters.forEach((parameterName) => {
     pathDefaults[parameterName] = "";
-  }
+  });
 
   const queryDefaults: Record<string, string> = {};
-  for (const parameter of endpoint.queryParameters) {
+  endpoint.queryParameters.forEach((parameter) => {
     queryDefaults[parameter.name] = getParameterValueDefault(parameter.example);
-  }
+  });
 
   pathParameterValues.value = pathDefaults;
   queryParameterValues.value = queryDefaults;
   requestBodyText.value = endpoint.requestBodyTemplate;
 };
 
-const openEndpointTester = (endpoint: ApiEndpoint) => {
+const openEndpointTester = (endpoint: ApiEndpoint): void => {
   selectedEndpoint.value = endpoint;
   hydrateEndpointInputs(endpoint);
   resetEndpointTesterState();
+  if (import.meta.client && document.activeElement instanceof HTMLElement) {
+    lastFocusedElement.value = document.activeElement;
+  }
   nextTick(() => {
     const dialog = endpointTesterDialogRef.value;
     if (dialog && !dialog.open) {
       dialog.showModal();
     }
-    focusEndpointTesterFirstInput();
   });
 };
 
-const handleEndpointTesterClose = () => {
+const handleEndpointTesterClose = (): void => {
   selectedEndpoint.value = null;
   resetEndpointTesterState();
-};
-
-const formatMethodLabel = (method: ApiHttpMethod): string => method.toUpperCase();
-
-const sectionObserverCallback: IntersectionObserverCallback = (entries) => {
-  const nextEntry = entries
-    .filter((entry) => entry.isIntersecting)
-    .sort((a, b) => {
-      const comparison = b.intersectionRatio - a.intersectionRatio;
-      if (comparison !== 0) return comparison;
-      return a.boundingClientRect.top - b.boundingClientRect.top;
-    })[0];
-
-  if (!nextEntry?.target.id) return;
-  activeSectionId.value = nextEntry.target.id;
-  if (typeof window !== "undefined") {
-    window.history.replaceState({}, "", `#${nextEntry.target.id}`);
-  }
-};
-
-const refreshSectionObserver = () => {
-  const observer = sectionObserver.value;
-  if (!observer) return;
-
-  observer.disconnect();
-  for (const sectionNode of sectionNodes.values()) {
-    observer.observe(sectionNode);
-  }
-};
-
-const setupSectionObserver = () => {
-  if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
-    return;
-  }
-
-  if (!sectionObserver.value) {
-    sectionObserver.value = new IntersectionObserver(sectionObserverCallback, {
-      root: null,
-      threshold: [0.1, 0.3, 0.5, 0.8],
-      rootMargin: "-20% 0px -60% 0px",
-    });
-  }
-
-  refreshSectionObserver();
-};
-
-type ScrollOptions = {
-  focus?: boolean;
-  smooth?: boolean;
-  updateHash?: boolean;
-};
-
-const scrollToEndpoint = (sectionId: string, options: ScrollOptions = {}) => {
-  const { focus = true, smooth = true, updateHash = true } = options;
-  const section = sectionNodes.get(sectionId);
-  if (!section) return;
-
-  activeSectionId.value = sectionId;
-  section.scrollIntoView({
-    behavior: smooth ? "smooth" : "auto",
-    block: "start",
+  nextTick(() => {
+    lastFocusedElement.value?.focus();
   });
-  if (updateHash && typeof window !== "undefined") {
-    window.history.replaceState({}, "", `#${sectionId}`);
-  }
-  if (focus) {
-    section.focus({ preventScroll: true });
+};
+
+const closeEndpointTester = (): void => {
+  const dialog = endpointTesterDialogRef.value;
+  if (dialog?.open) {
+    dialog.close();
+  } else {
+    handleEndpointTesterClose();
   }
 };
 
-const setActiveSectionByHash = (hashValue: string): boolean => {
-  const candidate = normalizeSectionHash(hashValue);
-  if (!candidate || activeSectionId.value === candidate || !sectionNodes.has(candidate)) {
-    return false;
+const resolveTesterPath = (endpoint: ApiEndpoint): string => {
+  let path = endpoint.path;
+  for (const parameterName of endpoint.pathParameters) {
+    const value = pathParameterValues.value[parameterName]?.trim();
+    if (!value) {
+      return "";
+    }
+    path = path.replaceAll(`{${parameterName}}`, encodeURIComponent(value));
   }
-
-  scrollToEndpoint(candidate, { smooth: false, updateHash: false, focus: false });
-  return true;
+  return path;
 };
+
+const buildTesterUrl = (endpoint: ApiEndpoint, basePath: string): string => {
+  const query = new URLSearchParams();
+  endpoint.queryParameters.forEach((parameter) => {
+    const value = queryParameterValues.value[parameter.name]?.trim();
+    if (value) {
+      query.set(parameter.name, value);
+    }
+  });
+  const queryString = query.toString();
+  return queryString.length > 0
+    ? `${basePath}${basePath.includes("?") ? "&" : "?"}${queryString}`
+    : basePath;
+};
+
+const isRetryableStatus = (statusCode: number): boolean =>
+  statusCode === 408 || statusCode === 429 || statusCode >= 500;
 
 const executeEndpointRequest = async (): Promise<void> => {
   const endpoint = selectedEndpoint.value;
-  if (!endpoint || testerState.value === "loading" || !canRunEndpoint.value) return;
+  if (!endpoint || testerState.value === "loading" || !canRunEndpoint.value) {
+    return;
+  }
 
   const resolvedPath = resolveTesterPath(endpoint);
   if (!resolvedPath) {
     testerState.value = "errorNonRetryable";
     testErrorMessage.value = t("apiDocs.tester.invalidPath");
+    toast.warning(t("apiDocs.tester.requestErrorToast"));
     return;
   }
 
@@ -654,44 +660,48 @@ const executeEndpointRequest = async (): Promise<void> => {
   const endpointUrl = buildTesterUrl(endpoint, resolveApiEndpoint(apiBase, requestUrl, resolvedPath));
   testRequestUrl.value = endpointUrl;
   const headers: Record<string, string> = {};
-  const authorization = auth.getStoredApiKey();
-  if (authorization) headers.Authorization = `Bearer ${authorization}`;
+  const apiKey = auth.getStoredApiKey();
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
 
   const requestBody = endpointHasBody.value ? requestBodyText.value.trim() : "";
-  if (requestBody.length > 0) headers["Content-Type"] = "application/json";
+  if (requestBody.length > 0) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const startedAt = Date.now();
-  const body = requestBody.length > 0 ? requestBody : undefined;
-  const fetchResult = await fetch(endpointUrl, {
+  const fetchResult: FetchEndpointResult = await fetch(endpointUrl, {
     method: formatMethodLabel(endpoint.method),
     headers,
-    body,
-  })
-    .then(async (response) => {
-      const responseText = await response.text();
-      const durationMs = Date.now() - startedAt;
-      const headers: Record<string, string> = {};
+    body: requestBody.length > 0 ? requestBody : undefined,
+  }).then(
+    async (response) => {
+      const body = await response.text();
+      const responseHeaders: Record<string, string> = {};
       response.headers.forEach((value, key) => {
-        headers[key] = value;
+        responseHeaders[key] = value;
       });
       return {
-        ok: true as const,
+        ok: true,
         statusCode: response.status,
         statusText: response.statusText,
-        headers,
-        body: responseText,
-        durationMs,
+        headers: responseHeaders,
+        body,
+        durationMs: Date.now() - startedAt,
       };
-    })
-    .catch((error: unknown) => ({
-      ok: false as const,
+    },
+    (error: unknown) => ({
+      ok: false,
       errorMessage: getErrorMessage(error, t("apiDocs.tester.requestFailure")),
-    }));
+    }),
+  );
 
   if (!fetchResult.ok) {
     testerState.value = "errorRetryable";
     testErrorMessage.value = fetchResult.errorMessage;
     testDurationMs.value = Date.now() - startedAt;
+    toast.error(t("apiDocs.tester.requestErrorToast"));
     return;
   }
 
@@ -703,6 +713,7 @@ const executeEndpointRequest = async (): Promise<void> => {
 
   if (fetchResult.statusCode === 401) {
     testerState.value = "unauthorized";
+    toast.error(t("apiDocs.tester.requestErrorToast"));
     return;
   }
 
@@ -710,21 +721,34 @@ const executeEndpointRequest = async (): Promise<void> => {
     testerState.value = isRetryableStatus(fetchResult.statusCode)
       ? "errorRetryable"
       : "errorNonRetryable";
+    toast.error(t("apiDocs.tester.requestErrorToast"));
+    return;
+  }
+
+  if (fetchResult.body.trim().length === 0) {
+    testerState.value = "empty";
+    toast.info(t("apiDocs.tester.emptyResponseToast"));
     return;
   }
 
   testerState.value = "success";
+  toast.success(t("apiDocs.tester.requestSuccessToast"));
 };
 
 watch(
   endpointGroups,
   () => {
     nextTick(() => {
-      setupSectionObserver();
+      startObserver();
+      refreshObserver();
       const firstEndpoint = endpointGroups.value.flatMap((group) => group.endpoints)[0];
-      const didRestoreFromHash = setActiveSectionByHash(route.hash);
-      if (!didRestoreFromHash && !activeSectionId.value && firstEndpoint) {
-        activeSectionId.value = firstEndpoint.id;
+      const restoredFromHash = syncFromHash(route.hash);
+      if (!restoredFromHash && firstEndpoint) {
+        scrollToSection(firstEndpoint.id, {
+          smooth: false,
+          focus: false,
+          updateHash: false,
+        });
       }
     });
   },
@@ -734,24 +758,25 @@ watch(
 watch(
   () => route.hash,
   (hash) => {
-    setActiveSectionByHash(hash);
+    syncFromHash(hash);
   },
 );
 
 onMounted(() => {
-  if (route.hash) {
-    const didNavigate = setActiveSectionByHash(route.hash);
-    if (!didNavigate && endpointGroups.value.flatMap((group) => group.endpoints)[0]) {
-      activeSectionId.value = endpointGroups.value.flatMap((group) => group.endpoints)[0].id;
-    }
+  const firstEndpoint = endpointGroups.value.flatMap((group) => group.endpoints)[0];
+  const restoredFromHash = syncFromHash(route.hash);
+  if (!restoredFromHash && firstEndpoint) {
+    scrollToSection(firstEndpoint.id, {
+      smooth: false,
+      focus: false,
+      updateHash: false,
+    });
   }
-
-  setupSectionObserver();
+  startObserver();
 });
 
 onBeforeUnmount(() => {
-  sectionObserver.value?.disconnect();
-  sectionObserver.value = null;
+  stopObserver();
 });
 
 const uiStateMessageKey = computed(() => {
@@ -798,6 +823,7 @@ const uiStateMessageKey = computed(() => {
           type="button"
           class="btn btn-sm btn-outline"
           :disabled="apiSpecStatus === 'pending'"
+          :aria-label="t('apiDocs.actions.retry')"
           @click="refreshApiSpec()"
         >
           {{ t("apiDocs.actions.retry") }}
@@ -818,8 +844,8 @@ const uiStateMessageKey = computed(() => {
                     type="button"
                     :aria-label="t('apiDocs.endpoint.openTesterAria', { method: endpoint.method.toUpperCase(), path: endpoint.path })"
                     :aria-current="activeSectionId === endpoint.id ? 'location' : undefined"
-                    :class="{ 'active': activeSectionId === endpoint.id }"
-                    @click="scrollToEndpoint(endpoint.id)"
+                    :class="{ active: activeSectionId === endpoint.id }"
+                    @click="scrollToSection(endpoint.id)"
                   >
                     <span :class="`badge badge-sm ${endpointMethodClass(endpoint.method)}`">
                       {{ endpoint.method.toUpperCase() }}
@@ -846,7 +872,7 @@ const uiStateMessageKey = computed(() => {
             v-for="endpoint in group.endpoints"
             :id="endpoint.id"
             :key="endpoint.id"
-            :ref="(element) => setSectionRef(endpoint.id, element as Element)"
+            :ref="(element) => setSectionRef(endpoint.id, element)"
             tabindex="-1"
             class="scroll-mt-20 rounded-box border border-base-300 bg-base-200 p-4"
           >
@@ -882,101 +908,160 @@ const uiStateMessageKey = computed(() => {
     </div>
 
     <dialog ref="apiEndpointTesterDialog" class="modal modal-bottom sm:modal-middle" @close="handleEndpointTesterClose">
-      <div class="modal-box max-w-5xl">
-        <h3 class="text-lg font-bold">{{ t('apiDocs.tester.title') }}</h3>
+      <div class="modal-box max-w-5xl" role="dialog" :aria-label="t('apiDocs.tester.title')" aria-modal="true">
+        <h3 class="text-lg font-bold">{{ t("apiDocs.tester.title") }}</h3>
         <p v-if="selectedEndpoint" class="mt-1 text-sm text-base-content/75">
           {{ selectedOperationDescription }}
         </p>
-        <p v-if="selectedPathParameters.length > 0" class="mt-3 text-sm text-base-content/80">
-          {{ t('apiDocs.tester.pathParametersIntro') }}
-        </p>
-          <div v-if="selectedEndpoint && selectedPathParameters.length > 0" class="mt-3 grid gap-3 sm:grid-cols-2">
+
+        <section class="mt-4">
+          <h4 class="text-sm font-semibold">{{ t("apiDocs.tester.lifecycleTitle") }}</h4>
+          <ul class="steps steps-vertical mt-2 w-full lg:steps-horizontal">
+            <li :class="lifecycleStepClasses[0]">{{ t("apiDocs.tester.steps.configure") }}</li>
+            <li :class="lifecycleStepClasses[1]">{{ t("apiDocs.tester.steps.send") }}</li>
+            <li :class="lifecycleStepClasses[2]">{{ t("apiDocs.tester.steps.response") }}</li>
+          </ul>
+        </section>
+
+        <section v-if="selectedPathParameters.length > 0" class="mt-4" :aria-label="t('apiDocs.tester.pathParametersIntro')">
+          <p class="text-sm text-base-content/80">{{ t("apiDocs.tester.pathParametersIntro") }}</p>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
             <label
               v-for="pathParameter in selectedPathParameters"
-              :key="`${selectedEndpoint.id}-${pathParameter}`"
+              :key="`${selectedEndpoint?.id}-${pathParameter}`"
               class="form-control"
             >
-              <span class="label text-xs">{{ t('apiDocs.tester.parameterLabel', { name: pathParameter }) }}</span>
+              <span class="label text-xs">{{ t("apiDocs.tester.parameterLabel", { name: pathParameter }) }}</span>
               <input
-                :aria-label="t('apiDocs.tester.parameterLabel', { name: pathParameter })"
+                v-model="pathParameterValues[pathParameter]"
                 class="input input-bordered input-sm"
                 type="text"
-                v-model="pathParameterValues[pathParameter]"
+                :aria-label="t('apiDocs.tester.parameterLabel', { name: pathParameter })"
               />
             </label>
           </div>
+        </section>
 
-        <div v-if="selectedEndpoint?.queryParameters && selectedEndpoint.queryParameters.length > 0" class="mt-4">
-          <p class="text-sm text-base-content/80">{{ t('apiDocs.tester.queryParametersIntro') }}</p>
-            <div class="mt-3 grid gap-3 sm:grid-cols-2">
-              <label v-for="parameter in selectedQueryParameters" :key="`${selectedEndpoint?.id}-${parameter.name}`" class="form-control">
-              <span class="label-text text-xs">{{ t('apiDocs.tester.parameterLabel', { name: parameter.name }) }}</span>
+        <section
+          v-if="selectedEndpoint?.queryParameters && selectedEndpoint.queryParameters.length > 0"
+          class="mt-4"
+          :aria-label="t('apiDocs.tester.queryParametersIntro')"
+        >
+          <p class="text-sm text-base-content/80">{{ t("apiDocs.tester.queryParametersIntro") }}</p>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            <label
+              v-for="parameter in selectedQueryParameters"
+              :key="`${selectedEndpoint?.id}-${parameter.name}`"
+              class="form-control"
+            >
+              <span class="label-text text-xs">{{ t("apiDocs.tester.parameterLabel", { name: parameter.name }) }}</span>
               <input
+                v-model="queryParameterValues[parameter.name]"
                 class="input input-bordered input-sm"
                 :aria-label="t('apiDocs.tester.parameterLabel', { name: parameter.name })"
                 type="text"
-                v-model="queryParameterValues[parameter.name]"
               />
             </label>
           </div>
-        </div>
+        </section>
 
-        <div v-if="selectedEndpoint && endpointHasBody" class="mt-4">
-          <p class="text-sm text-base-content/80">{{ t('apiDocs.tester.requestBodyIntro') }}</p>
+        <section v-if="selectedEndpoint && endpointHasBody" class="mt-4" :aria-label="t('apiDocs.tester.requestBodyIntro')">
+          <p class="text-sm text-base-content/80">{{ t("apiDocs.tester.requestBodyIntro") }}</p>
           <textarea
             v-model="requestBodyText"
-            class="textarea textarea-bordered w-full min-h-28 font-mono text-sm mt-2"
+            class="textarea textarea-bordered mt-2 min-h-28 w-full font-mono text-sm"
             :aria-label="t('apiDocs.tester.requestBodyAria')"
             spellcheck="false"
             :placeholder="t('apiDocs.tester.bodyPlaceholder')"
           />
           <p v-if="selectedRequestBodyTemplate.length === 0" class="mt-1 text-xs text-base-content/50">
-            {{ t('apiDocs.tester.noRequestBodyTemplate') }}
+            {{ t("apiDocs.tester.noRequestBodyTemplate") }}
           </p>
-        </div>
+        </section>
 
         <div class="modal-action">
           <button
             type="button"
-            class="btn"
+            class="btn btn-primary"
             :disabled="!canRunEndpoint || testerState === 'loading'"
+            :aria-label="t('apiDocs.tester.send')"
             @click="executeEndpointRequest"
           >
-            <span v-if="testerState === 'loading'" class="loading loading-spinner loading-xs"></span>
-            {{ testerState === 'loading' ? t('apiDocs.tester.sending') : t('apiDocs.tester.send') }}
+            <span v-if="testerState === 'loading'" class="loading loading-spinner loading-xs" aria-hidden="true"></span>
+            <span>{{ testerState === "loading" ? t("apiDocs.tester.sending") : t("apiDocs.tester.send") }}</span>
           </button>
-          <button class="btn btn-ghost" type="button" @click="handleEndpointTesterClose">
-            {{ t('apiDocs.tester.close') }}
+          <button
+            class="btn btn-ghost"
+            type="button"
+            :aria-label="t('apiDocs.tester.closeAria')"
+            @click="closeEndpointTester"
+          >
+            {{ t("apiDocs.tester.close") }}
           </button>
         </div>
 
-        <section class="mt-4">
-          <h4 class="font-semibold">{{ t('apiDocs.tester.requestTraceTitle') }}</h4>
+        <section class="mt-4" :aria-label="t('apiDocs.tester.requestTraceTitle')">
+          <h4 class="font-semibold">{{ t("apiDocs.tester.requestTraceTitle") }}</h4>
           <div class="mt-2 rounded-box bg-base-300 p-3 text-xs">
             <p class="break-words">
-              <span class="font-semibold">{{ t('apiDocs.tester.requestMethodLabel') }}:</span>
+              <span class="font-semibold">{{ t("apiDocs.tester.requestMethodLabel") }}:</span>
               {{ hasSelectedEndpointRequestTrace ? testRequestMethod : EMPTY_TEXT_LABEL }}
             </p>
             <p class="break-words">
-              <span class="font-semibold">{{ t('apiDocs.tester.requestUrlLabel') }}:</span>
+              <span class="font-semibold">{{ t("apiDocs.tester.requestUrlLabel") }}:</span>
               {{ hasSelectedEndpointRequestTrace ? testRequestUrl : EMPTY_TEXT_LABEL }}
             </p>
           </div>
         </section>
 
-        <section class="mt-4">
-          <h4 class="font-semibold">{{ t('apiDocs.tester.responseTitle') }}</h4>
-          <div
-            v-if="testerState === 'success' || testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'"
-            class="mt-2 space-y-2"
-          >
-            <div class="rounded-box bg-base-300 p-3 text-sm">
-              <p>{{ t('apiDocs.tester.responseStatusLabel', responseStatusText) }}</p>
-              <p v-if="testDurationMs !== null">{{ t('apiDocs.tester.durationLabel', { duration: testDurationMs }) }}</p>
+        <section class="mt-4" :aria-label="t('apiDocs.tester.metadataTitle')">
+          <h4 class="font-semibold">{{ t("apiDocs.tester.metadataTitle") }}</h4>
+          <div class="overflow-x-auto mt-2">
+            <table class="table table-zebra table-sm">
+              <thead>
+                <tr>
+                  <th>{{ t("apiDocs.tester.metadata.columns.label") }}</th>
+                  <th>{{ t("apiDocs.tester.metadata.columns.value") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ t("apiDocs.tester.metadata.responseStatus") }}</td>
+                  <td>{{ responseStatusText.status }} {{ responseStatusText.text }}</td>
+                </tr>
+                <tr>
+                  <td>{{ t("apiDocs.tester.metadata.duration") }}</td>
+                  <td>{{ testDurationMs !== null ? `${testDurationMs} ms` : EMPTY_TEXT_LABEL }}</td>
+                </tr>
+                <tr>
+                  <td>{{ t("apiDocs.tester.metadata.responseHeaders") }}</td>
+                  <td>{{ hasResponseHeaders ? responseHeaderEntries.length : 0 }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="mt-4" :aria-label="t('apiDocs.tester.responseTitle')">
+          <h4 class="font-semibold">{{ t("apiDocs.tester.responseTitle") }}</h4>
+          <div v-if="showTesterResponsePanel" class="mt-2 space-y-2">
+            <div
+              v-if="testerState === 'empty'"
+              class="alert alert-info"
+              role="status"
+            >
+              {{ t("apiDocs.tester.emptyResponse") }}
+            </div>
+            <div
+              v-if="testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'"
+              class="alert alert-error"
+              role="alert"
+            >
+              {{ testErrorMessage || t("apiDocs.tester.errorFallback") }}
             </div>
             <div class="rounded-box bg-base-300 p-3 text-xs">
-              <p class="font-semibold">{{ t('apiDocs.tester.responseHeadersLabel') }}</p>
-              <p v-if="!hasResponseHeaders" class="mt-1 text-base-content/60">{{ t('apiDocs.tester.noResponseHeaders') }}</p>
+              <p class="font-semibold">{{ t("apiDocs.tester.responseHeadersLabel") }}</p>
+              <p v-if="!hasResponseHeaders" class="mt-1 text-base-content/60">{{ t("apiDocs.tester.noResponseHeaders") }}</p>
               <ul v-else class="mt-1 space-y-1">
                 <li v-for="[name, value] in responseHeaderEntries" :key="name" class="break-words">
                   {{ name }}: {{ value }}
@@ -984,9 +1069,6 @@ const uiStateMessageKey = computed(() => {
               </ul>
             </div>
             <pre class="max-h-72 overflow-auto rounded-box bg-base-300 p-3 text-xs whitespace-pre-wrap">{{ requestBodyDisplay }}</pre>
-          </div>
-          <div v-if="testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'" class="alert alert-error mt-3">
-            {{ testErrorMessage || t('apiDocs.tester.errorFallback') }}
           </div>
         </section>
       </div>

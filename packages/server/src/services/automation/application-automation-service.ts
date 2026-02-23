@@ -2,14 +2,21 @@ import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { extname, resolve } from "node:path";
 import { and, count, eq, inArray, ne, sql } from "drizzle-orm";
 
-import type { AutomationSettings } from "@bao/shared";
-import { DEFAULT_AUTOMATION_SETTINGS, automationSettingsSchema, generateId } from "@bao/shared";
+import type { AutomationSettings, ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
+import {
+  DEFAULT_AUTOMATION_SETTINGS,
+  RPA_PROTOCOL_VERSION,
+  automationSettingsSchema,
+  generateId,
+  rpaProgressEventSchema,
+} from "@bao/shared";
+import { config } from "../../config/env";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
 import { db } from "../../db/client";
 import { coverLetters, resumes } from "../../db/schema";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
-import { broadcastProgress } from "../../ws/automation.ws";
+import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { AIService } from "../ai/ai-service";
 import { emailResponsePrompt } from "../ai/prompts";
 import { gamificationService } from "../gamification-service";
@@ -19,7 +26,7 @@ import {
   sanitizeAndValidateJobUrl,
   sanitizeCustomAnswers,
 } from "./automation-validation";
-import { type RpaRunResult, runRpaScript } from "./rpa-runner";
+import { type RpaScriptExecutionResult, runRpaScript } from "./rpa-runner";
 import { smartFieldMapper } from "./smart-field-mapper";
 
 interface JobApplyPayload {
@@ -56,25 +63,6 @@ interface EmailResponseExecutionPayload {
 
 interface ScheduledRunMetadata {
   runAt: string;
-}
-
-interface RunProgressPayload {
-  type?: unknown;
-  step?: unknown;
-  totalSteps?: unknown;
-  status?: unknown;
-  action?: unknown;
-  message?: unknown;
-}
-
-interface AutomationProgress {
-  type: string;
-  step?: number;
-  totalSteps?: number;
-  status?: string;
-  action?: string;
-  message?: string;
-  runId?: string;
 }
 
 const DEFAULT_PROGRESS = 0;
@@ -125,16 +113,6 @@ const toJsonRecord = (value: object): Record<string, unknown> => {
   return record;
 };
 
-const toProgressRecord = (value: AutomationProgress): Record<string, unknown> => {
-  const record: Record<string, unknown> = {};
-  for (const [key, entry] of Object.entries(value)) {
-    if (entry !== undefined) {
-      record[key] = entry;
-    }
-  }
-  return record;
-};
-
 const isEmailResponseTone = (value: string): value is EmailResponseTone =>
   EMAIL_RESPONSE_TONES.some((tone) => tone === value);
 
@@ -181,10 +159,48 @@ export class AutomationRunNotFoundError extends Error {
  */
 export class ApplicationAutomationService {
   private readonly scheduledRunTimers = new Map<string, SchedulerTimer>();
+  private readonly runEventSequences = new Map<string, number>();
   private schedulerRecoveryInFlight = false;
 
   constructor() {
     void this.restoreScheduledRuns();
+  }
+
+  /**
+   * Returns the next monotonic event sequence for a run.
+   */
+  private nextRunEventSequence(runId: string): number {
+    const current = this.runEventSequences.get(runId) ?? 0;
+    this.runEventSequences.set(runId, current + 1);
+    return current;
+  }
+
+  /**
+   * Builds a protocol-compliant progress event for websocket broadcasting.
+   */
+  private createProgressEvent(params: {
+    runId: string;
+    action: string;
+    status: "pending" | "running" | "success" | "error";
+    message?: string;
+    step?: number;
+    totalSteps?: number;
+  }): RpaRunEvent {
+    const event = {
+      protocolVersion: RPA_PROTOCOL_VERSION,
+      runId: params.runId,
+      sequence: this.nextRunEventSequence(params.runId),
+      timestamp: new Date().toISOString(),
+      eventType: "progress",
+      action: params.action,
+      status: params.status,
+      ...(params.message ? { message: params.message } : {}),
+      ...(typeof params.step === "number" ? { step: params.step } : {}),
+      ...(typeof params.totalSteps === "number" ? { totalSteps: params.totalSteps } : {}),
+    } as const;
+
+    const validated = rpaProgressEventSchema.parse(event);
+    return validated;
   }
 
   /**
@@ -389,6 +405,11 @@ export class ApplicationAutomationService {
 
       const safeFileName = this.resolveScreenshotName(index, sourcePath);
       const destination = resolve(runDir, safeFileName);
+      const sourceResolvedPath = resolve(sourcePath);
+      if (sourceResolvedPath === destination) {
+        result.push(safeFileName);
+        continue;
+      }
       const copied = await sourceFile
         .arrayBuffer()
         .then(async (bytes) => {
@@ -404,6 +425,33 @@ export class ApplicationAutomationService {
     }
 
     return result;
+  }
+
+  /**
+   * Normalizes runner execution output into persisted run-result contract.
+   */
+  private async normalizeExecutionResult(
+    runId: string,
+    execution: RpaScriptExecutionResult,
+  ): Promise<RpaRunResult> {
+    const terminalResult = execution.result;
+    const copiedScreenshots = await this.copyAndIndexScreenshots(runId, terminalResult?.screenshots);
+    const mergedArtifacts = [
+      ...(terminalResult?.artifacts ?? []),
+      ...copiedScreenshots.map((fileName, index) => ({
+        id: `screenshot-${String(index + 1).padStart(2, "0")}`,
+        kind: "screenshot" as const,
+        path: fileName,
+      })),
+    ];
+
+    return {
+      success: terminalResult?.success ?? false,
+      error: terminalResult?.error ?? execution.error?.message ?? null,
+      screenshots: copiedScreenshots,
+      artifacts: mergedArtifacts,
+      steps: sanitizeSteps(terminalResult?.steps ?? []),
+    };
   }
 
   /**
@@ -515,6 +563,10 @@ export class ApplicationAutomationService {
         progress: DEFAULT_PROGRESS,
         currentStep: null,
         totalSteps: null,
+        exitCode: null,
+        timedOut: false,
+        aborted: false,
+        executionMs: null,
         startedAt: now,
         createdAt: now,
         updatedAt: now,
@@ -701,19 +753,24 @@ export class ApplicationAutomationService {
       progress: DEFAULT_PROGRESS,
       currentStep: null,
       totalSteps: null,
+      exitCode: null,
+      timedOut: false,
+      aborted: false,
+      executionMs: null,
       startedAt: null,
       createdAt: now,
       updatedAt: now,
     });
 
     this.queueScheduledRun(runId, normalized, scheduledFor);
-    broadcastProgress(runId, {
-      type: "scheduled",
-      status: "pending",
-      action: "job_apply",
-      message: `Scheduled for ${scheduledFor}`,
-      runId,
-    });
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: "job_apply",
+        status: "pending",
+        message: `Scheduled for ${scheduledFor}`,
+      }),
+    );
 
     return { runId, scheduledFor };
   }
@@ -747,13 +804,14 @@ export class ApplicationAutomationService {
         .where(eq(automationRuns.id, runId));
 
       this.queueScheduledRun(runId, payload, nextRunAt);
-      broadcastProgress(runId, {
-        type: "scheduled-retry",
-        status: "pending",
-        action: "job_apply",
-        message: `Concurrency limit reached, retrying at ${nextRunAt}`,
-        runId,
-      });
+      broadcastAutomationEvent(
+        this.createProgressEvent({
+          runId,
+          action: "job_apply",
+          status: "pending",
+          message: `Concurrency limit reached, retrying at ${nextRunAt}`,
+        }),
+      );
       return;
     }
 
@@ -789,6 +847,10 @@ export class ApplicationAutomationService {
       progress: DEFAULT_PROGRESS,
       currentStep: 0,
       totalSteps: 1,
+      exitCode: 0,
+      timedOut: false,
+      aborted: false,
+      executionMs: null,
       startedAt: now,
       createdAt: now,
       updatedAt: now,
@@ -834,13 +896,16 @@ export class ApplicationAutomationService {
           })
           .where(eq(automationRuns.id, runId));
 
-        broadcastProgress(runId, {
-          type: "complete",
-          status: "success",
-          action: "email_response",
-          message: "Email response generated",
-          runId,
-        });
+        broadcastAutomationEvent(
+          this.createProgressEvent({
+            runId,
+            action: "email_response",
+            status: "success",
+            message: "Email response generated",
+            step: 1,
+            totalSteps: 1,
+          }),
+        );
 
         return {
           runId,
@@ -871,13 +936,16 @@ export class ApplicationAutomationService {
           })
           .where(eq(automationRuns.id, runId));
 
-        broadcastProgress(runId, {
-          type: "complete",
-          status: "error",
-          action: "email_response",
-          message,
-          runId,
-        });
+        broadcastAutomationEvent(
+          this.createProgressEvent({
+            runId,
+            action: "email_response",
+            status: "error",
+            message,
+            step: 1,
+            totalSteps: 1,
+          }),
+        );
 
         throw error instanceof Error ? error : new Error(message);
       });
@@ -886,9 +954,13 @@ export class ApplicationAutomationService {
   /**
    * Update run progress metrics from script progress events.
    */
-  private async persistProgress(runId: string, data: RunProgressPayload): Promise<void> {
-    const step = this.toFiniteNumber(data.step);
-    const totalSteps = this.toFiniteNumber(data.totalSteps);
+  private async persistProgress(event: RpaRunEvent): Promise<void> {
+    if (event.eventType !== "progress") {
+      return;
+    }
+
+    const step = this.toFiniteNumber(event.step);
+    const totalSteps = this.toFiniteNumber(event.totalSteps);
 
     const updates: {
       status?: string;
@@ -918,15 +990,15 @@ export class ApplicationAutomationService {
       }
     }
 
-    if (typeof data.status === "string") {
-      updates.status = data.status;
+    if (typeof event.status === "string") {
+      updates.status = event.status;
     }
 
     if (!updates.status) {
       updates.status = "running";
     }
 
-    await db.update(automationRuns).set(updates).where(eq(automationRuns.id, runId));
+    await db.update(automationRuns).set(updates).where(eq(automationRuns.id, event.runId));
   }
 
   /**
@@ -976,6 +1048,13 @@ export class ApplicationAutomationService {
     runId: string,
     errorMessage: string,
     automationSettings: AutomationSettings,
+    execution?: {
+      exitCode?: number | null;
+      timedOut?: boolean;
+      aborted?: boolean;
+      executionMs?: number | null;
+      errorEnvelope?: ErrorEnvelope | null;
+    },
   ): Promise<void> {
     const now = new Date().toISOString();
     await db
@@ -993,11 +1072,16 @@ export class ApplicationAutomationService {
               message: errorMessage,
             },
           ],
+          errorEnvelope: execution?.errorEnvelope ?? null,
         },
         error: errorMessage,
         progress: FINISHED_PROGRESS,
         currentStep: 0,
         totalSteps: 0,
+        exitCode: execution?.exitCode ?? null,
+        timedOut: execution?.timedOut ?? false,
+        aborted: execution?.aborted ?? false,
+        executionMs: execution?.executionMs ?? null,
         completedAt: now,
         updatedAt: now,
       })
@@ -1013,6 +1097,7 @@ export class ApplicationAutomationService {
     runId: string,
     output: RpaRunResult,
     automationSettings: AutomationSettings,
+    execution: Pick<RpaScriptExecutionResult, "exitCode" | "timedOut" | "aborted" | "executionMs">,
   ): Promise<void> {
     const now = new Date().toISOString();
     const finalStatus = output.success ? "success" : "error";
@@ -1028,6 +1113,10 @@ export class ApplicationAutomationService {
         progress: FINISHED_PROGRESS,
         currentStep: finalStep,
         totalSteps: finalStep,
+        exitCode: execution.exitCode,
+        timedOut: execution.timedOut,
+        aborted: execution.aborted,
+        executionMs: execution.executionMs,
         completedAt: now,
         updatedAt: now,
       })
@@ -1042,7 +1131,7 @@ export class ApplicationAutomationService {
   async runJobApply(
     runId: string,
     payload: JobApplyPayload,
-    onProgress?: (data: AutomationProgress) => void,
+    onProgress?: (event: RpaRunEvent) => void,
   ): Promise<void> {
     this.clearScheduledRunTimer(runId);
     const normalized = this.normalizePayload(payload);
@@ -1105,106 +1194,117 @@ export class ApplicationAutomationService {
     if (automationSettings.enableSmartSelectors) {
       const aiService = await this.tryLoadAIService();
       if (aiService) {
-        selectorMap = await smartFieldMapper
-          .analyze(
-            normalized.jobUrl,
-            ["fullName", "email", "phone", "resume", "coverLetter", "submit"],
-            aiService,
-          )
-          .catch(() => ({}));
+        selectorMap = await smartFieldMapper.analyze(
+          normalized.jobUrl,
+          ["fullName", "email", "phone", "resume", "coverLetter", "submit"],
+          aiService,
+        );
       }
     }
 
-    const progressHandler = (data: RunProgressPayload): void => {
-      void this.persistProgress(runId, data);
-
-      const step = this.toFiniteNumber(data.step);
-      const totalSteps = this.toFiniteNumber(data.totalSteps);
-      const event: AutomationProgress = {
-        type: typeof data.type === "string" ? data.type : "progress",
-        action: typeof data.action === "string" ? data.action : undefined,
-        status: typeof data.status === "string" ? data.status : "running",
-        message: typeof data.message === "string" ? data.message : undefined,
-        runId,
-      };
-
-      if (Number.isFinite(step)) {
-        event.step = Math.max(0, Math.trunc(step));
-      }
-      if (Number.isFinite(totalSteps)) {
-        event.totalSteps = Math.max(0, Math.trunc(totalSteps));
+    const progressHandler = (event: RpaRunEvent): void => {
+      if (event.eventType !== "progress") {
+        return;
       }
 
-      broadcastProgress(runId, toProgressRecord(event));
+      void this.persistProgress(event);
+      broadcastAutomationEvent(event);
       onProgress?.(event);
     };
 
+    const runArtifactDir = this.resolveRunArtifactDir(runId);
     await db
       .update(automationRuns)
       .set({
         startedAt: new Date().toISOString(),
         status: "running",
         progress: DEFAULT_PROGRESS,
+        exitCode: null,
+        timedOut: false,
+        aborted: false,
+        executionMs: null,
       })
       .where(eq(automationRuns.id, runId));
+
+    let lastExitCode: number | null = null;
+    let lastTimedOut = false;
+    let lastAborted = false;
+    let lastExecutionMs: number | null = null;
+    let lastErrorEnvelope: ErrorEnvelope | null = null;
+    let terminalPersisted = false;
     const executionPromise = Promise.resolve().then(async () => {
-      const rawResult = await runRpaScript(
-        "apply_job_rpa.py",
-        {
+      const execution = await runRpaScript({
+        scriptName: "apply_job_rpa.py",
+        scriptInput: {
           jobUrl: normalized.jobUrl,
           resume,
           coverLetter: coverLetter ? { content: coverLetter.content || {} } : null,
           customAnswers: normalized.customAnswers,
           selectorMap,
         },
+        executionContext: {
+          runId,
+          timeoutMs:
+            Number.isFinite(automationSettings.defaultTimeout) && automationSettings.defaultTimeout > 0
+              ? Math.trunc(automationSettings.defaultTimeout * 1_000)
+              : config.automationScriptTimeoutMs,
+          outputDir: runArtifactDir,
+        },
         automationSettings,
-        progressHandler,
+        onEvent: progressHandler,
+      });
+      lastExitCode = execution.exitCode;
+      lastTimedOut = execution.timedOut;
+      lastAborted = execution.aborted;
+      lastExecutionMs = execution.executionMs;
+      lastErrorEnvelope = execution.error;
+      if (execution.error) {
+        throw new Error(execution.error.message);
+      }
+
+      const normalizedResult = await this.normalizeExecutionResult(runId, execution);
+      await this.markRunCompleted(runId, normalizedResult, automationSettings, execution);
+      terminalPersisted = true;
+      if (!normalizedResult.success) {
+        throw new Error(normalizedResult.error || "Job application automation failed");
+      }
+
+      broadcastAutomationEvent(
+        this.createProgressEvent({
+          runId,
+          action: "completed",
+          status: "success",
+          message: "Job application automation completed",
+        }),
       );
 
-      const copiedScreenshots = await this.copyAndIndexScreenshots(runId, rawResult.screenshots);
-      const sanitizedResult: RpaRunResult = {
-        success: rawResult.success,
-        error: rawResult.error,
-        screenshots: copiedScreenshots,
-        steps: sanitizeSteps(rawResult.steps),
-      };
-
-      await this.markRunCompleted(runId, sanitizedResult, automationSettings);
-      const completionPayload: Record<string, string> = {
-        type: "complete",
-        status: sanitizedResult.success ? "success" : "error",
-        action: sanitizedResult.success ? "completed" : "failed",
-      };
-      if (sanitizedResult.error) {
-        completionPayload.message = sanitizedResult.error;
-      }
-      broadcastProgress(runId, {
-        ...completionPayload,
-      });
-
-      if (!sanitizedResult.success) {
-        throw new Error(sanitizedResult.error || "Job application automation failed");
-      }
-
-      if (sanitizedResult.success) {
-        await gamificationService
-          .awardXP(50, "automation_success")
-          .then(() => undefined)
-          .catch(() => {
-            // Gamification should not block the automation flow.
-          });
-      }
+      await gamificationService
+        .awardXP(50, "automation_success")
+        .then(() => undefined)
+        .catch(() => {
+          // Gamification should not block the automation flow.
+        });
     });
     const executionError = await captureError(executionPromise);
     if (executionError) {
       const message = toErrorMessage(executionError, "Job application automation failed");
-      await this.markRunFailed(runId, message, automationSettings);
-      broadcastProgress(runId, {
-        type: "complete",
-        status: "error",
-        action: "automation",
-        message,
-      });
+      if (!terminalPersisted) {
+        await this.markRunFailed(runId, message, automationSettings, {
+          exitCode: lastExitCode,
+          timedOut: lastTimedOut,
+          aborted: lastAborted,
+          executionMs: lastExecutionMs,
+          errorEnvelope: lastErrorEnvelope,
+        });
+      }
+      broadcastAutomationEvent(
+        this.createProgressEvent({
+          runId,
+          action: "automation",
+          status: "error",
+          message,
+        }),
+      );
       throw executionError instanceof Error ? executionError : new Error(message);
     }
   }

@@ -1,89 +1,92 @@
 #!/usr/bin/env python3
 """
 GameDev.net job scraper using RPA-Python.
-Scrapes job listings and outputs JSON for upsert.
+Outputs normalized rows for server-side ingestion.
 """
+from __future__ import annotations
+
+import hashlib
 import json
-import re
 import sys
+from typing import Any
 
 DEFAULT_SOURCE_URL = "https://www.gamedev.net/jobs/"
+SOURCE_NAME = "gamedev-net"
 
 try:
     import rpa as r
 except ImportError:
     print(json.dumps({"error": "RPA not installed. Run: pip install rpa"}), file=sys.stderr)
-    sys.exit(1)
+    raise SystemExit(1)
 
 
 def resolve_source_url() -> str:
-    try:
-        payload = json.loads(sys.stdin.read() or "{}")
-        source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
-        if isinstance(source_url, str) and source_url.strip():
-            return source_url.strip()
-    except Exception:
-        pass
-
+    payload_raw = sys.stdin.read() or "{}"
+    payload = json.loads(payload_raw)
+    source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+    if isinstance(source_url, str) and source_url.strip():
+        return source_url.strip()
     return DEFAULT_SOURCE_URL
 
 
-def scrape_jobs() -> list[dict]:
-    jobs = []
-    source_url = resolve_source_url()
-    try:
-        r.init(turbo_mode=True)
-        r.url(source_url)
-        r.wait(3)
-        try:
-            content = r.read("body") if hasattr(r, "read") else ""
-        except Exception:
-            content = ""
-        r.close()
+def make_content_hash(title: str, company: str, location: str, url: str) -> str:
+    canonical = f"{title}|{company}|{location}|{url}|{SOURCE_NAME}".strip().lower()
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
+    return f"{SOURCE_NAME}-{digest}"
 
-        if isinstance(content, str) and len(content) > 100:
-            lines = [l.strip() for l in content.split("\n") if l.strip()]
-            for i, line in enumerate(lines[:30]):
-                if len(line) > 15 and "job" in content.lower():
-                    title = line[:120] if len(line) > 120 else line
-                    jobs.append({
-                        "title": title,
-                        "company": "GameDev.net",
-                        "location": "Remote",
-                        "remote": True,
-                        "description": line,
-                        "url": source_url,
-                        "source": "gamedev-net",
-                        "postedDate": "",
-                        "contentHash": f"gdn-{hash(line) % 10**10}",
-                    })
-        if not jobs:
-            jobs = [{
-                "title": "Game Developer",
-                "company": "GameDev.net",
-                "location": "Remote",
-                "remote": True,
-                "description": "Check GameDev.net for latest listings.",
-                "url": source_url,
-                "source": "gamedev-net",
-                "postedDate": "",
-                "contentHash": "gdn-placeholder",
-            }]
-    except Exception as e:
-        jobs = [{
-            "title": "Scraper Error",
-            "company": "GameDev.net",
-            "location": "",
-            "remote": False,
-            "description": str(e),
-            "url": source_url,
-            "source": "gamedev-net",
-            "postedDate": "",
-            "contentHash": f"gdn-err-{hash(str(e)) % 10**8}",
-        }]
+
+def normalize_row(title: str, description: str, source_url: str) -> dict[str, Any]:
+    clean_title = title.strip()[:200]
+    clean_description = description.strip()[:5000]
+    company = "GameDev.net"
+    location = "Remote"
+    return {
+        "title": clean_title,
+        "company": company,
+        "location": location,
+        "url": source_url,
+        "source": SOURCE_NAME,
+        "contentHash": make_content_hash(clean_title, company, location, source_url),
+        "description": clean_description,
+        "postDate": "",
+        "remote": True,
+    }
+
+
+def scrape_jobs() -> list[dict[str, Any]]:
+    source_url = resolve_source_url()
+    jobs: list[dict[str, Any]] = []
+
+    r.init(turbo_mode=True)
+    r.url(source_url)
+    r.wait(3)
+    page_text = r.read("body") if hasattr(r, "read") else ""
+    r.close()
+
+    if isinstance(page_text, str) and len(page_text) > 100:
+        lines = [line.strip() for line in page_text.split("\n") if line.strip()]
+        for line in lines[:60]:
+            if len(line) < 15:
+                continue
+            if "job" not in line.lower() and "engineer" not in line.lower() and "developer" not in line.lower():
+                continue
+            jobs.append(normalize_row(line[:120], line, source_url))
+            if len(jobs) >= 40:
+                break
+
+    if len(jobs) == 0:
+        fallback_title = "Game Developer"
+        jobs.append(
+            normalize_row(
+                fallback_title,
+                "Visit GameDev.net jobs to review current openings.",
+                source_url,
+            )
+        )
+
     return jobs
 
 
 if __name__ == "__main__":
     result = scrape_jobs()
-    print(json.dumps(result, indent=2))
+    print(json.dumps(result, ensure_ascii=False, indent=2))

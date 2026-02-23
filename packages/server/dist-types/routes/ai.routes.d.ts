@@ -46,10 +46,10 @@ export declare const aiRoutes: Elysia<"/ai", {
                             query: {
                                 [x: string]: string;
                             };
+                            path: string;
                             params: {
                                 [x: string]: string;
                             };
-                            path: string;
                         };
                         state: {
                             hasResumes: boolean;
@@ -310,8 +310,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                     jobId?: string | undefined;
                     coverLetterId?: string | undefined;
                     resumeId: string;
-                    jobUrl: string;
                     action: string;
+                    jobUrl: string;
                 };
                 params: {};
                 query: unknown;

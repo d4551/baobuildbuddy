@@ -1,26 +1,35 @@
-import type { AIService } from "../ai/ai-service";
+import type { AIResponse } from "@bao/shared";
 /**
- * AI-powered form field analyzer that maps job application form fields
- * to optimal CSS selectors. Falls back gracefully when AI is unavailable.
+ * Minimal AI client contract required by smart field mapping.
+ */
+export interface FieldMapperAIClient {
+    generate: (prompt: string, options?: {
+        temperature?: number;
+        maxTokens?: number;
+    }) => Promise<AIResponse>;
+}
+/**
+ * AI-powered selector mapper for job-application form fields.
  */
 export declare class SmartFieldMapper {
     /**
-     * Fetch a job page, strip it to form-relevant elements, and use AI to
-     * map field names to CSS selectors.
-     *
-     * @returns A mapping of field names to prioritized selector arrays,
-     *          or an empty object if analysis fails (hardcoded selectors still work).
+     * Analyzes a job page and returns validated selector candidates for requested fields.
      */
-    analyze(jobUrl: string, fieldsNeeded: string[], aiService: AIService): Promise<Record<string, string[]>>;
+    analyze(jobUrl: string, fieldsNeeded: string[], aiService: FieldMapperAIClient): Promise<Record<string, string[]>>;
     /**
-     * Fetch page HTML with a short timeout.
+     * Fetches page HTML with a deterministic timeout and status checks.
      */
     private fetchPage;
     /**
-     * Strip an HTML document down to only form-relevant elements:
-     * <form>, <input>, <textarea>, <select>, <label>, <button>.
-     *
-     * Truncates to ~4000 chars to keep AI prompt costs low.
+     * Executes AI analysis with bounded retries and exponential backoff.
+     */
+    private generateSelectorMapWithRetry;
+    /**
+     * Parses and validates selector-map JSON emitted by the AI provider.
+     */
+    private parseSelectorResponse;
+    /**
+     * Strips an HTML document to form-relevant elements only.
      */
     private stripToFormElements;
 }

@@ -1,0 +1,121 @@
+import * as z from "zod";
+import { rpaErrorEnvelopeSchema } from "./error-envelope.schema";
+import {
+  rpaArtifactMetadataSchema,
+  rpaEventTypeSchema,
+  rpaProtocolVersionSchema,
+  rpaRunIdentifierSchema,
+  rpaRunSequenceSchema,
+  rpaRunStatusSchema,
+  rpaRunTypeSchema,
+  rpaStepStatusSchema,
+  rpaTimestampSchema,
+} from "./rpa-protocol.schema";
+
+/**
+ * Step-level execution result emitted by the automation script.
+ */
+export const rpaRunStepSchema = z.object({
+  action: z.string().trim().min(1).max(200),
+  status: z.enum(["ok", "error"]),
+  message: z.string().trim().min(1).max(2_000).optional(),
+});
+
+/**
+ * Terminal script result contract emitted by the Python runner.
+ */
+export const rpaRunResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().trim().min(1).max(2_000).nullable(),
+  screenshots: z.array(z.string().trim().min(1).max(2_000)).default([]),
+  artifacts: z.array(rpaArtifactMetadataSchema).default([]),
+  steps: z.array(rpaRunStepSchema).default([]),
+});
+
+/**
+ * Common metadata present in all protocol events.
+ */
+export const rpaRunEventBaseSchema = z.object({
+  protocolVersion: rpaProtocolVersionSchema,
+  runId: rpaRunIdentifierSchema,
+  sequence: rpaRunSequenceSchema,
+  timestamp: rpaTimestampSchema,
+});
+
+/**
+ * Progress event payload for in-flight execution updates.
+ */
+export const rpaProgressEventSchema = rpaRunEventBaseSchema.extend({
+  eventType: z.literal(rpaEventTypeSchema.enum.progress),
+  action: z.string().trim().min(1).max(200),
+  status: rpaStepStatusSchema,
+  message: z.string().trim().min(1).max(2_000).optional(),
+  step: z.number().int().nonnegative().optional(),
+  totalSteps: z.number().int().positive().optional(),
+});
+
+/**
+ * Terminal success or business-level failure event from the script.
+ */
+export const rpaResultEventSchema = rpaRunEventBaseSchema.extend({
+  eventType: z.literal(rpaEventTypeSchema.enum.result),
+  result: rpaRunResultSchema,
+});
+
+/**
+ * Terminal protocol/runtime error event from the script.
+ */
+export const rpaErrorEventSchema = rpaRunEventBaseSchema.extend({
+  eventType: z.literal(rpaEventTypeSchema.enum.error),
+  error: rpaErrorEnvelopeSchema,
+});
+
+/**
+ * Discriminated union of all supported RPA protocol events.
+ */
+export const rpaRunEventSchema = z.discriminatedUnion("eventType", [
+  rpaProgressEventSchema,
+  rpaResultEventSchema,
+  rpaErrorEventSchema,
+]);
+
+/**
+ * Shared run envelope persisted and returned by automation APIs.
+ */
+export const rpaRunExecutionEnvelopeSchema = z.object({
+  id: rpaRunIdentifierSchema,
+  type: rpaRunTypeSchema,
+  status: rpaRunStatusSchema,
+  jobId: z.string().trim().min(1).max(120).nullable(),
+  userId: z.string().trim().min(1).max(120).nullable(),
+  input: z.record(z.string(), z.unknown()).nullable(),
+  output: z.union([rpaRunResultSchema, z.record(z.string(), z.unknown())]).nullable(),
+  screenshots: z.array(z.string().trim().min(1).max(2_000)).nullable(),
+  error: z.union([z.string().trim().min(1).max(2_000), rpaErrorEnvelopeSchema]).nullable(),
+  progress: z.number().int().nonnegative().nullable(),
+  currentStep: z.number().int().nonnegative().nullable(),
+  totalSteps: z.number().int().nonnegative().nullable(),
+  startedAt: rpaTimestampSchema.nullable(),
+  completedAt: rpaTimestampSchema.nullable(),
+  createdAt: rpaTimestampSchema,
+  updatedAt: rpaTimestampSchema,
+  exitCode: z.number().int().nullable(),
+  timedOut: z.boolean(),
+  aborted: z.boolean(),
+  executionMs: z.number().int().nonnegative().nullable(),
+});
+
+/**
+ * Union type for every supported protocol event.
+ */
+export type RpaRunEvent = z.infer<typeof rpaRunEventSchema>;
+
+/**
+ * Result payload type emitted by scripts and stored by server services.
+ */
+export type RpaRunResult = z.infer<typeof rpaRunResultSchema>;
+
+/**
+ * Persisted API envelope for an automation run record.
+ */
+export type RpaRunExecutionEnvelope = z.infer<typeof rpaRunExecutionEnvelopeSchema>;

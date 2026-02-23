@@ -11,13 +11,58 @@ let app: { handle: (request: Request) => Response | Promise<Response> };
 const resumeId = generateId();
 const createdRunIds: string[] = [];
 type RunJobApply = typeof applicationAutomationService.runJobApply;
+type RunEmailResponse = typeof applicationAutomationService.runEmailResponse;
 const runJobApplyStub: RunJobApply = async (_runId, _payload, _onProgress) => {
   void _runId;
   void _payload;
   void _onProgress;
 };
+const runEmailResponseStub: RunEmailResponse = async (_payload) => {
+  const now = new Date().toISOString();
+  const runId = generateId();
+  await db.insert(automationRuns).values({
+    id: runId,
+    type: "email",
+    status: "success",
+    jobId: null,
+    userId: null,
+    input: {
+      subject: _payload.subject,
+      message: _payload.message,
+      tone: _payload.tone ?? "professional",
+      ...(typeof _payload.sender === "string" && _payload.sender.length > 0
+        ? { sender: _payload.sender }
+        : {}),
+    },
+    output: {
+      success: true,
+      reply: "Stubbed email response",
+      provider: "stub-provider",
+      model: "stub-model",
+    },
+    progress: 100,
+    currentStep: 1,
+    totalSteps: 1,
+    startedAt: now,
+    completedAt: now,
+    createdAt: now,
+    updatedAt: now,
+    exitCode: 0,
+    timedOut: false,
+    aborted: false,
+    executionMs: 1,
+  });
+  return {
+    runId,
+    status: "success",
+    reply: "Stubbed email response",
+    provider: "stub-provider",
+    model: "stub-model",
+  };
+};
 
 let originalRunJobApply: RunJobApply | undefined;
+let originalRunEmailResponse: RunEmailResponse | undefined;
 
 const requestStatusBody = async <T>(
   method: string,
@@ -74,29 +119,42 @@ afterAll(async () => {
     applicationAutomationService.runJobApply = originalRunJobApply;
     originalRunJobApply = undefined;
   }
+  if (originalRunEmailResponse) {
+    applicationAutomationService.runEmailResponse = originalRunEmailResponse;
+    originalRunEmailResponse = undefined;
+  }
 });
 
 describe("automation routes", () => {
   test("POST /api/automation/job-apply validates required fields", async () => {
-    const res = await requestStatusBody<{ error: string }>("POST", "/api/automation/job-apply", {
-      resumeId,
-    });
+    const res = await requestStatusBody<{ error: { code: string; message: string } }>(
+      "POST",
+      "/api/automation/job-apply",
+      {
+        resumeId,
+      },
+    );
     expect(res.status).toBe(422);
     if (typeof res.body === "string") {
       expect(res.body).toContain("Job URL is required");
     } else {
       expect(typeof res.body).toBe("object");
-      expect(typeof res.body.error).toBe("string");
+      expect(typeof res.body.error.message).toBe("string");
     }
   });
 
   test("POST /api/automation/job-apply rejects missing resume", async () => {
-    const res = await requestJson<{ error: string }>(app, "POST", "/api/automation/job-apply", {
-      jobUrl: "https://example.com/career/role",
-      resumeId: "not-found-resume-id",
-    });
+    const res = await requestJson<{ error: { code: string; message: string } }>(
+      app,
+      "POST",
+      "/api/automation/job-apply",
+      {
+        jobUrl: "https://example.com/career/role",
+        resumeId: "not-found-resume-id",
+      },
+    );
     expect(res.status).toBe(404);
-    expect(res.body.error).toBe("resume not found: not-found-resume-id");
+    expect(res.body.error.message).toBe("resume not found: not-found-resume-id");
   });
 
   test("POST /api/automation/job-apply enqueues a run and returns run contract", async () => {
@@ -105,7 +163,7 @@ describe("automation routes", () => {
 
     await Promise.resolve()
       .then(async () => {
-        const res = await requestJson<{ runId: string; status: "running" }>(
+        const res = await requestJson<{ id: string; status: "running" }>(
           app,
           "POST",
           "/api/automation/job-apply",
@@ -116,14 +174,14 @@ describe("automation routes", () => {
         );
         expect(res.status).toBe(200);
         expect(res.body.status).toBe("running");
-        expect(typeof res.body.runId).toBe("string");
-        expect(res.body.runId.length).toBeGreaterThan(0);
+        expect(typeof res.body.id).toBe("string");
+        expect(res.body.id.length).toBeGreaterThan(0);
 
-        createdRunIds.push(res.body.runId);
+        createdRunIds.push(res.body.id);
         const run = await db
           .select()
           .from(automationRuns)
-          .where(and(eq(automationRuns.id, res.body.runId), eq(automationRuns.type, "job_apply")))
+          .where(and(eq(automationRuns.id, res.body.id), eq(automationRuns.type, "job_apply")))
           .limit(1);
         expect(run.length).toBe(1);
         expect(run[0].status).toBe("running");
@@ -139,7 +197,7 @@ describe("automation routes", () => {
   });
 
   test("POST /api/automation/job-apply/schedule validates runAt", async () => {
-    const res = await requestJson<{ error: string }>(
+    const res = await requestJson<{ error: { code: string; message: string } }>(
       app,
       "POST",
       "/api/automation/job-apply/schedule",
@@ -151,12 +209,12 @@ describe("automation routes", () => {
     );
 
     expect(res.status).toBe(422);
-    expect(res.body.error).toContain("runAt");
+    expect(res.body.error.message).toContain("runAt");
   });
 
   test("POST /api/automation/job-apply/schedule creates a pending run", async () => {
     const runAt = new Date(Date.now() + 300_000).toISOString();
-    const res = await requestJson<{ runId: string; status: "pending"; scheduledFor: string }>(
+    const res = await requestJson<{ id: string; status: "pending"; input: Record<string, unknown> | null }>(
       app,
       "POST",
       "/api/automation/job-apply/schedule",
@@ -169,13 +227,21 @@ describe("automation routes", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe("pending");
-    expect(res.body.scheduledFor).toBe(runAt);
-    createdRunIds.push(res.body.runId);
+    const scheduleValue =
+      res.body.input && typeof res.body.input === "object" && "schedule" in res.body.input
+        ? res.body.input.schedule
+        : null;
+    const scheduledRunAt =
+      scheduleValue && typeof scheduleValue === "object" && "runAt" in scheduleValue
+        ? scheduleValue.runAt
+        : null;
+    expect(scheduledRunAt).toBe(runAt);
+    createdRunIds.push(res.body.id);
 
     const run = await db
       .select()
       .from(automationRuns)
-      .where(and(eq(automationRuns.id, res.body.runId), eq(automationRuns.type, "job_apply")))
+      .where(and(eq(automationRuns.id, res.body.id), eq(automationRuns.type, "job_apply")))
       .limit(1);
 
     expect(run.length).toBe(1);
@@ -184,6 +250,9 @@ describe("automation routes", () => {
   });
 
   test("POST /api/automation/email-response creates a successful email run", async () => {
+    originalRunEmailResponse = applicationAutomationService.runEmailResponse;
+    applicationAutomationService.runEmailResponse = runEmailResponseStub;
+
     const res = await requestJson<{
       runId: string;
       status: "success";
@@ -194,6 +263,11 @@ describe("automation routes", () => {
       subject: "Interview follow-up",
       message: "Thanks for the interview. Can we discuss next steps?",
       tone: "professional",
+    }).finally(() => {
+      if (originalRunEmailResponse) {
+        applicationAutomationService.runEmailResponse = originalRunEmailResponse;
+        originalRunEmailResponse = undefined;
+      }
     });
 
     expect(res.status).toBe(200);

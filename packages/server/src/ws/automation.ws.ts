@@ -1,89 +1,119 @@
-import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared";
+import { WS_ENDPOINTS, rpaRunEventSchema, toApiScopedPath, type RpaRunEvent } from "@bao/shared";
 import { Elysia, t } from "elysia";
 
-/**
- * In-memory subscriber registry: runId → Set of connected WebSockets.
- */
-const subscribers = new Map<string, Set<unknown>>();
 const WS_READY_STATE_OPEN = 1;
 
 type SubscriberSocket = {
-  send: (msg: string) => void;
+  send: (message: string) => void;
   readyState?: number;
 };
 
-function isSubscriberSocket(value: unknown): value is SubscriberSocket {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "send" in value &&
-    typeof value.send === "function"
-  );
-}
+const subscribers = new Map<string, Set<SubscriberSocket>>();
 
-/**
- * Broadcast a progress/completion event to all WebSocket clients subscribed to a run.
- */
-export function broadcastProgress(runId: string, data: Record<string, unknown>): void {
-  const subs = subscribers.get(runId);
-  if (!subs || subs.size === 0) return;
-
-  const msg = JSON.stringify({ ...data, runId });
-  for (const ws of subs) {
-    if (
-      !isSubscriberSocket(ws) ||
-      (typeof ws.readyState === "number" && ws.readyState !== WS_READY_STATE_OPEN)
-    ) {
-      subs.delete(ws);
-      continue;
-    }
-
-    ws.send(msg);
+const subscribeSocket = (runId: string, socket: SubscriberSocket): void => {
+  const existing = subscribers.get(runId);
+  if (existing) {
+    existing.add(socket);
+    return;
   }
-}
+  subscribers.set(runId, new Set([socket]));
+};
 
-/**
- * Clean up empty subscriber sets to prevent memory leaks.
- */
-function cleanup(runId: string): void {
-  const subs = subscribers.get(runId);
-  if (subs && subs.size === 0) {
+const unsubscribeSocket = (runId: string, socket: SubscriberSocket): void => {
+  const existing = subscribers.get(runId);
+  if (!existing) {
+    return;
+  }
+
+  existing.delete(socket);
+  if (existing.size === 0) {
     subscribers.delete(runId);
   }
+};
+
+const unsubscribeSocketEverywhere = (socket: SubscriberSocket): void => {
+  for (const [runId, set] of subscribers.entries()) {
+    set.delete(socket);
+    if (set.size === 0) {
+      subscribers.delete(runId);
+    }
+  }
+};
+
+const isSocketOpen = (socket: SubscriberSocket): boolean =>
+  typeof socket.readyState !== "number" || socket.readyState === WS_READY_STATE_OPEN;
+
+/**
+ * Broadcasts a validated automation event to subscribers of the matching run.
+ */
+export function broadcastAutomationEvent(event: RpaRunEvent): void {
+  const validatedEvent = rpaRunEventSchema.safeParse(event);
+  if (!validatedEvent.success) {
+    return;
+  }
+
+  const runSubscribers = subscribers.get(validatedEvent.data.runId);
+  if (!runSubscribers || runSubscribers.size === 0) {
+    return;
+  }
+
+  const payload = JSON.stringify(validatedEvent.data);
+  for (const socket of runSubscribers) {
+    if (!isSocketOpen(socket)) {
+      runSubscribers.delete(socket);
+      continue;
+    }
+    socket.send(payload);
+  }
+
+  if (runSubscribers.size === 0) {
+    subscribers.delete(validatedEvent.data.runId);
+  }
 }
 
+/**
+ * Automation websocket endpoint for run-scoped event subscriptions.
+ */
 export const automationWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.automation), {
   body: t.Object({
-    type: t.String({ maxLength: 50 }),
-    runId: t.Optional(t.String({ maxLength: 100 })),
+    type: t.Union([t.Literal("subscribe"), t.Literal("unsubscribe")]),
+    runId: t.Optional(t.String({ minLength: 8, maxLength: 128 })),
   }),
 
   open(ws) {
-    ws.send(JSON.stringify({ type: "connected" }));
+    ws.send(
+      JSON.stringify({
+        type: "connected",
+      }),
+    );
   },
 
-  message(ws, { type, runId }) {
-    if (type === "subscribe" && runId) {
-      if (!subscribers.has(runId)) {
-        subscribers.set(runId, new Set());
-      }
-      subscribers.get(runId)?.add(ws);
-      ws.send(JSON.stringify({ type: "subscribed", runId }));
+  message(ws, payload) {
+    if (!payload.runId) {
+      return;
     }
 
-    if (type === "unsubscribe" && runId) {
-      subscribers.get(runId)?.delete(ws);
-      cleanup(runId);
+    if (payload.type === "subscribe") {
+      subscribeSocket(payload.runId, ws);
+      ws.send(
+        JSON.stringify({
+          type: "subscribed",
+          runId: payload.runId,
+        }),
+      );
+      return;
     }
+
+    unsubscribeSocket(payload.runId, ws);
+    ws.send(
+      JSON.stringify({
+        type: "unsubscribed",
+        runId: payload.runId,
+      }),
+    );
   },
 
   close(ws) {
-    // Remove this WebSocket from all subscriber sets
-    for (const [runId, subs] of subscribers) {
-      subs.delete(ws);
-      if (subs.size === 0) {
-        subscribers.delete(runId);
-      }
-    }
+    unsubscribeSocketEverywhere(ws);
   },
 });
