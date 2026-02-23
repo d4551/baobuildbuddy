@@ -20,6 +20,10 @@ export const API_ENDPOINTS = {
   automationEmailResponse: `${API_ENDPOINT_PREFIX}/automation/email-response`,
   automationRuns: `${API_ENDPOINT_PREFIX}/automation/runs`,
   automationScreenshotsBase: `${API_ENDPOINT_PREFIX}/automation/screenshots`,
+  apiDocsUi: `${API_ENDPOINT_PREFIX}/docs/api`,
+  apiDocsUiLegacy: `${API_ENDPOINT_PREFIX}/swagger`,
+  apiDocsJson: `${API_ENDPOINT_PREFIX}/docs/api/json`,
+  apiDocsJsonLegacy: `${API_ENDPOINT_PREFIX}/swagger/json`,
 } as const;
 
 /**

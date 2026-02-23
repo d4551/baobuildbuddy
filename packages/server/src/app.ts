@@ -46,6 +46,8 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
   )
   .use(
     swagger({
+      path: toApiScopedPath(API_ENDPOINTS.apiDocsUi),
+      specPath: toApiScopedPath(API_ENDPOINTS.apiDocsJson),
       documentation: {
         info: {
           title: APP_BRAND.apiName,

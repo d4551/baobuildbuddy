@@ -23,6 +23,7 @@ export const APP_ROUTES = {
   automationEmail: "/automation/email",
   automationRuns: "/automation/runs",
   gamification: "/gamification",
+  apiDocs: "/docs/api",
   settings: "/settings",
   setup: "/setup",
 } as const;

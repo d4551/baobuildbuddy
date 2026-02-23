@@ -118,6 +118,15 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     includeInDock: true,
   },
   {
+    id: "apiDocs",
+    labelKey: "nav.apiDocs",
+    iconPath:
+      "M19 2H9a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8l-7-7z M9 2h5l5 5v13a1 1 0 01-1 1H9a1 1 0 01-1-1V3a1 1 0 01 1-1z",
+    to: APP_ROUTES.apiDocs,
+    includeInSidebar: true,
+    includeInDock: true,
+  },
+  {
     id: "gamification",
     labelKey: "nav.gamification",
     iconPath:
@@ -163,5 +172,24 @@ export function getDockNavigationItems(): readonly NavigationItem[] {
  * @returns True when the target matches exactly or as a parent prefix.
  */
 export function isRouteActive(currentPath: string, targetPath: string): boolean {
-  return currentPath === targetPath || (targetPath !== "/" && currentPath.startsWith(targetPath));
+  const normalizedCurrentPath = currentPath.endsWith("/") && currentPath.length > 1
+    ? currentPath.slice(0, -1)
+    : currentPath;
+  const normalizedTargetPath = targetPath.endsWith("/") && targetPath.length > 1
+    ? targetPath.slice(0, -1)
+    : targetPath;
+
+  if (normalizedCurrentPath === normalizedTargetPath) {
+    return true;
+  }
+
+  if (normalizedTargetPath === "/") {
+    return normalizedCurrentPath === "/";
+  }
+
+  if (!normalizedCurrentPath.startsWith(`${normalizedTargetPath}/`)) {
+    return false;
+  }
+
+  return normalizedCurrentPath.length > normalizedTargetPath.length;
 }

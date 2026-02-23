@@ -1,9 +1,9 @@
 /**
  * Spanish (Spain) locale message catalog for the client application.
  */
-import type { AppTranslationSchema } from "~/locales/en-US";
+import type { AppTranslationOverrides } from "~/locales/en-US";
 
-const esES = {
+const esES: AppTranslationOverrides = {
   meta: {
     title: "BaoBuildBuddy - Asistente de Carrera con IA",
     description: "Asistente de carrera con IA para la industria de videojuegos",
@@ -166,6 +166,63 @@ const esES = {
     automation: "Automatización",
     gamification: "Gamificación",
     settings: "Configuración",
+    apiDocs: "Documentación de API",
+  },
+  apiDocs: {
+    seoTitle: "Documentación de API",
+    seoDescription: "Explora los endpoints disponibles y prueba solicitudes directamente desde la aplicación.",
+    title: "Referencia de API",
+    intro: "Revisa la superficie de tu API y ejecuta comprobaciones de endpoints en el probador integrado.",
+    endpointNavigator: "Navegación de endpoints",
+    groups: {
+      untagged: "Sin etiqueta",
+    },
+    state: {
+      loading: "Cargando especificación de API",
+      errorRetryable: "El servicio no está disponible temporalmente. Reintenta.",
+      errorNonRetryable: "No se pudo cargar la documentación de la API.",
+      unauthorized: "No tienes autorización para ver la documentación de la API.",
+      empty: "No se encontraron endpoints de API.",
+    },
+    actions: {
+      retry: "Reintentar",
+    },
+    a11y: {
+      endpointNavigation: "Navegación de endpoints",
+    },
+    endpoint: {
+      noDescription: "No se proporcionó descripción.",
+      deprecated: "Obsoleto",
+      methodLabel: "Método",
+      operationIdLabel: "ID de operación",
+      openTester: "Abrir probador",
+      openTesterAria: "Abrir probador para {method} {path}",
+    },
+    tester: {
+      title: "Probador de endpoint",
+      pathParametersIntro: "Parámetros de ruta",
+      queryParametersIntro: "Parámetros de consulta",
+      requestBodyIntro: "Cuerpo de solicitud",
+      requestBodyAria: "Carga JSON del cuerpo de solicitud",
+      bodyPlaceholder: "{\n  \"example\": \"value\"\n}",
+      noRequestBodyTemplate: "La especificación de OpenAPI no proporcionó una plantilla de cuerpo.",
+      parameterLabel: "Parámetro {name}",
+      send: "Enviar solicitud",
+      sending: "Enviando",
+      close: "Cerrar",
+      closeAria: "Cerrar probador de endpoint",
+      responseTitle: "Respuesta",
+      responseStatusLabel: "Estado {status}: {text}",
+      durationLabel: "Duración {duration} ms",
+      errorFallback: "La solicitud falló sin un error detallado.",
+      invalidPath: "Todos los parámetros de ruta son obligatorios.",
+      requestFailure: "No se pudo ejecutar la solicitud.",
+      requestTraceTitle: "Seguimiento de solicitud",
+      requestMethodLabel: "Método",
+      requestUrlLabel: "URL",
+      responseHeadersLabel: "Encabezados de respuesta",
+      noResponseHeaders: "No hay encabezados de respuesta.",
+    },
   },
   dashboard: {
     pageTitle: "Panel",
@@ -2488,6 +2545,6 @@ const esES = {
       },
     },
   },
-} as const satisfies AppTranslationSchema;
+} as const satisfies AppTranslationOverrides;
 
 export default esES;

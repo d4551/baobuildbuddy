@@ -23,6 +23,7 @@ export const KEYBOARD_ROUTE_SHORTCUTS: readonly KeyboardRouteShortcut[] = [
   { id: "jobs", prefix: "g", key: "j", to: APP_ROUTES.jobs },
   { id: "resume", prefix: "g", key: "r", to: APP_ROUTES.resume },
   { id: "interview", prefix: "g", key: "i", to: APP_ROUTES.interview },
+  { id: "apiDocs", prefix: "g", key: "a", to: APP_ROUTES.apiDocs },
   { id: "settings", prefix: "g", key: "s", to: APP_ROUTES.settings },
 ] as const;
 
