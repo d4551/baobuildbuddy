@@ -98,6 +98,13 @@ const formData = reactive<ResumeFormData>({
   },
 });
 
+function hasNonEmptyGamingValue(value: string | string[]): boolean {
+  if (Array.isArray(value)) {
+    return value.some((entry) => typeof entry === "string" && entry.trim().length > 0);
+  }
+  return value.trim().length > 0;
+}
+
 const resumeSectionCompletion = computed<
   {
     id: ResumeTabId;
@@ -128,9 +135,9 @@ const resumeSectionCompletion = computed<
       (item) => item.name.trim().length > 0 && item.description.trim().length > 0,
     );
   const gamingComplete =
-    formData.gaming.roles.trim().length > 0 ||
-    formData.gaming.genres.trim().length > 0 ||
-    formData.gaming.achievements.trim().length > 0;
+    hasNonEmptyGamingValue(formData.gaming.roles) ||
+    hasNonEmptyGamingValue(formData.gaming.genres) ||
+    hasNonEmptyGamingValue(formData.gaming.achievements);
 
   return [
     { id: "personal", completed: personalComplete },
@@ -437,24 +444,15 @@ async function handleAIEnhance() {
     return;
   }
 
-  const enhanced = enhanceResult.value;
-  if (enhanced?.resume) {
-    const form = resumeDataToFormData(enhanced.resume);
-    Object.assign(formData, form);
-    const reward = await resolvePipelineReward("resumeEnhance");
-    $toast.success(
-      reward
-        ? t("resumePage.toasts.resumeEnhancedWithXp", { xp: reward })
-        : t("resumePage.toasts.resumeEnhanced"),
-    );
-  } else if (enhanced) {
-    const reward = await resolvePipelineReward("resumeEnhance");
-    $toast.success(
-      reward
-        ? t("resumePage.toasts.aiSuggestionsReadyWithXp", { xp: reward })
-        : t("resumePage.toasts.aiSuggestionsReady"),
-    );
-  }
+  const enhancedResume = enhanceResult.value;
+  const form = resumeDataToFormData(enhancedResume);
+  Object.assign(formData, form);
+  const reward = await resolvePipelineReward("resumeEnhance");
+  $toast.success(
+    reward
+      ? t("resumePage.toasts.resumeEnhancedWithXp", { xp: reward })
+      : t("resumePage.toasts.resumeEnhanced"),
+  );
 }
 
 async function handleAIScore() {

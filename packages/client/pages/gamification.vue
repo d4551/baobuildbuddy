@@ -159,21 +159,13 @@ async function fetchGamificationHubData(): Promise<GamificationHubData> {
   };
 }
 
-function toEdenErrorMessage(error: unknown): string | undefined {
-  if (!error || typeof error !== "object") return undefined;
-  const value = Reflect.get(error, "value");
-  if (!value || typeof value !== "object") return undefined;
-  const message = Reflect.get(value, "message");
-  return typeof message === "string" ? message : undefined;
-}
-
 async function requestData<T>(
   request: Promise<{ readonly data: T; readonly error?: unknown }>,
   fallbackMessage: string,
 ): Promise<T> {
   const response = await request;
   if (response.error) {
-    throw new Error(toEdenErrorMessage(response.error) ?? fallbackMessage);
+    throw new Error(getErrorMessage(response.error, fallbackMessage));
   }
   return response.data;
 }

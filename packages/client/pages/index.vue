@@ -383,7 +383,7 @@ async function requestData<T>(
 ): Promise<T> {
   const response = await request;
   if (response.error) {
-    throw new Error(response.error.value?.message ?? fallbackMessage);
+    throw new Error(getErrorMessage(response.error, fallbackMessage));
   }
   return response.data;
 }

@@ -147,6 +147,9 @@ export function useAutomation() {
     };
 
     ws.onmessage = (event) => {
+      if (typeof event.data !== "string") {
+        return;
+      }
       const parsedPayload = safeParseJson(event.data);
       const parsedEvent = rpaRunEventSchema.safeParse(parsedPayload);
       if (!parsedEvent.success) {

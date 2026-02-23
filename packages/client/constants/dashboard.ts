@@ -31,21 +31,19 @@ type DashboardTopLevelKey =
   | "pipelineNextStepLabel";
 type DashboardCopyKey = `dashboard.${DashboardTopLevelKey}`;
 type DashboardHeroPhraseKey =
-  `dashboard.heroPhrases.${keyof DashboardRootSchema["heroPhrases"] & string}`;
-type DashboardOnboardingLabelKey =
-  `dashboard.onboarding.${keyof DashboardRootSchema["onboarding"] & string}`;
-type DashboardStatLabelKey = `dashboard.stats.${keyof DashboardRootSchema["stats"] & string}`;
+  `dashboard.heroPhrases.${keyof DashboardRootSchema["heroPhrases"]}`;
+type DashboardOnboardingLabelKey = `dashboard.onboarding.${keyof DashboardRootSchema["onboarding"]}`;
+type DashboardStatLabelKey = `dashboard.stats.${keyof DashboardRootSchema["stats"]}`;
 type DashboardQuickActionLabelKey =
-  `dashboard.quickActions.actions.${keyof DashboardRootSchema["quickActions"]["actions"] & string}`;
+  `dashboard.quickActions.actions.${keyof DashboardRootSchema["quickActions"]["actions"]}`;
 type DashboardPipelineStepLabelKey =
-  `dashboard.pipeline.steps.${keyof DashboardRootSchema["pipeline"]["steps"] & string}`;
+  `dashboard.pipeline.steps.${keyof DashboardRootSchema["pipeline"]["steps"]}`;
 type DashboardPipelineStatusLabelKey =
-  `dashboard.pipeline.status.${keyof DashboardRootSchema["pipeline"]["status"] & string}`;
-type DashboardRelativeTimeLabelKey =
-  `dashboard.relativeTime.${keyof DashboardRootSchema["relativeTime"] & string}`;
+  `dashboard.pipeline.status.${keyof DashboardRootSchema["pipeline"]["status"]}`;
+type DashboardRelativeTimeLabelKey = `dashboard.relativeTime.${keyof DashboardRootSchema["relativeTime"]}`;
 type DashboardWelcomeHeadingKey =
-  `dashboard.welcomeHeading.${keyof DashboardRootSchema["welcomeHeading"] & string}`;
-type DashboardErrorKey = `dashboard.errors.${keyof DashboardRootSchema["errors"] & string}`;
+  `dashboard.welcomeHeading.${keyof DashboardRootSchema["welcomeHeading"]}`;
+type DashboardErrorKey = `dashboard.errors.${keyof DashboardRootSchema["errors"]}`;
 type DashboardActivityFallbackKey = "dashboard.activityFallback";
 type DashboardDailyChallengeXpKey = "dashboard.dailyChallengeXpLabel";
 

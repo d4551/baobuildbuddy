@@ -1,7 +1,7 @@
 /**
  * Spanish (Spain) locale message catalog for the client application.
  */
-import type { AppTranslationOverrides } from "~/locales/en-US";
+import type { AppTranslationOverrides } from "./en-US";
 
 const esES: AppTranslationOverrides = {
   meta: {

@@ -45,7 +45,7 @@ export default defineNuxtPlugin(() => {
       const key = getStoredApiKey();
       return key ? { Authorization: `Bearer ${key}` } : {};
     },
-    onResponse: async (response) => {
+    onResponse: (response) => {
       if (response.status === 401) {
         setStoredApiKey(null);
       }

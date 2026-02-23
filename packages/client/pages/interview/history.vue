@@ -23,7 +23,7 @@ const normalizeQuerySession = (
   value: LocationQueryValue | readonly LocationQueryValue[] | undefined,
 ): string | null => {
   if (Array.isArray(value)) {
-    const first = value[0];
+    const [first] = value.filter((entry): entry is string => typeof entry === "string");
     return typeof first === "string" && first.trim().length > 0 ? first : null;
   }
   return typeof value === "string" && value.trim().length > 0 ? value : null;

@@ -45,6 +45,7 @@ export default [
   },
   {
     rules: {
+      "no-undef": "off",
       "vue/max-attributes-per-line": "off",
       "vue/html-self-closing": "off",
       "vue/singleline-html-element-content-newline": "off",

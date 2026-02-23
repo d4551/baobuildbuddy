@@ -4,7 +4,7 @@ import type { AppTranslationSchema } from "~/locales/en-US";
 /**
  * Translation keys available for navigation labels.
  */
-type NavigationLabelKey = `nav.${keyof AppTranslationSchema["nav"] & string}`;
+type NavigationLabelKey = `nav.${keyof AppTranslationSchema["nav"]}`;
 
 /**
  * Shared navigation item contract for app chrome components.

@@ -67,18 +67,21 @@ describe("useScrollSpy", () => {
 
     const section = document.createElement("section");
     section.id = "overview";
-    section.scrollIntoView = vi.fn();
-    section.focus = vi.fn();
+    const scrollIntoViewMock = vi.fn();
+    const focusMock = vi.fn();
+    section.scrollIntoView = scrollIntoViewMock;
+    section.focus = focusMock;
 
     scrollSpy.setSectionRef("overview", section);
     const restored = scrollSpy.syncFromHash("#overview");
 
     expect(restored).toBe(true);
     expect(scrollSpy.activeSectionId.value).toBe("overview");
-    expect(section.scrollIntoView).toHaveBeenCalledWith({
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({
       behavior: "auto",
       block: "start",
     });
+    expect(focusMock).not.toHaveBeenCalled();
     expect(spy).not.toHaveBeenCalled();
 
     scope.stop();

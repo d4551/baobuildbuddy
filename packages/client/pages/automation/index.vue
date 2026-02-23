@@ -28,7 +28,7 @@ const { data, status, error, refresh } = await useAsyncData<DashboardStats>(
   async () => {
     const response = await api.stats.dashboard.get();
     if (response.error) {
-      throw new Error(response.error.value?.message ?? t("automation.hub.loadErrorFallback"));
+      throw new Error(getErrorMessage(response.error, t("automation.hub.loadErrorFallback")));
     }
     return response.data;
   },

@@ -148,7 +148,7 @@ describe("useChatVoice", () => {
       "Latest assistant reply",
       expect.objectContaining({
         lang: "en-US",
-        voice: expect.objectContaining({ voiceURI: "voice-en-us" }),
+        voice: fallbackVoice,
       }),
     );
   });

@@ -180,12 +180,15 @@ export function useGamification() {
     });
   }
 
-  const actionHistory = computed(() => {
+  const actionHistory = computed<unknown[]>(() => {
     if (!isRecord(weeklyProgress.value)) {
       return [];
     }
     const entries = weeklyProgress.value.actionHistory;
-    return Array.isArray(entries) ? entries : [];
+    if (!Array.isArray(entries)) {
+      return [];
+    }
+    return entries.filter((entry): entry is unknown => entry !== undefined || entry === undefined);
   });
 
   return {

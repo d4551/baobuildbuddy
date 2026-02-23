@@ -150,8 +150,15 @@ async function finishAndSynthesize() {
     return;
   }
 
-  const resumeId = synthesizeResult.value?.id;
-  if (resumeId) {
+  const synthesizedResume = synthesizeResult.value;
+  const resumeId =
+    typeof synthesizedResume === "object" &&
+    synthesizedResume !== null &&
+    "id" in synthesizedResume &&
+    typeof synthesizedResume.id === "string"
+      ? synthesizedResume.id
+      : "";
+  if (resumeId.length > 0) {
     $toast.success(t("resumeBuildPage.toasts.resumeCreated"));
     router.push(APP_ROUTE_BUILDERS.resumeEditor(resumeId));
     return;

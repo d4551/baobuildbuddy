@@ -18,11 +18,14 @@ type StreamError = {
   statusCode?: number;
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
 const toStreamError = (error: unknown): StreamError => {
-  if (typeof error === "object" && error !== null) {
-    const maybeStatus = Reflect.get(error, "status");
-    const maybeStatusCode = Reflect.get(error, "statusCode");
-    const maybeMessage = Reflect.get(error, "message");
+  if (isRecord(error)) {
+    const maybeStatus = error.status;
+    const maybeStatusCode = error.statusCode;
+    const maybeMessage = error.message;
     return {
       message:
         typeof maybeMessage === "string" && maybeMessage.length > 0

@@ -337,15 +337,19 @@ const getParameterValueDefault = (value: unknown): string => {
 };
 
 const requestBodyTemplate = (requestBody: OpenApiRequestBody | undefined): string => {
-  const content = isRecord(requestBody?.content) ? requestBody.content : undefined;
+  const content = requestBody?.content;
   if (!content) {
     return "";
   }
   const jsonBody = content["application/json"];
-  if (!isRecord(jsonBody)) {
+  if (!(jsonBody && typeof jsonBody === "object")) {
     return "";
   }
-  const candidate = jsonBody.example ?? Object.values(jsonBody.examples ?? {})[0]?.value;
+  const firstExample =
+    jsonBody.examples && typeof jsonBody.examples === "object"
+      ? Object.values(jsonBody.examples)[0]
+      : undefined;
+  const candidate = jsonBody.example ?? firstExample?.value;
   if (candidate === undefined) {
     return "";
   }

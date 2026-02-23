@@ -165,7 +165,7 @@ export function useScrollSpy(options: ScrollSpyOptions = {}) {
    */
   const syncFromHash = (hashValue: string): boolean => {
     const normalizedHash = normalizeHashValue(hashValue, hashPrefix);
-    if (!normalizedHash || !sectionNodes.has(normalizedHash)) {
+    if (!(normalizedHash && sectionNodes.has(normalizedHash))) {
       return false;
     }
     scrollToSection(normalizedHash, {

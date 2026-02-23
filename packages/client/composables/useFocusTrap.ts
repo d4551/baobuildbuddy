@@ -102,7 +102,7 @@ export function useFocusTrap(
     }
 
     const dialog = dialogRef.value;
-    if (!(dialog && dialog.open)) {
+    if (!dialog?.open) {
       return;
     }
 
@@ -125,7 +125,7 @@ export function useFocusTrap(
       detachTrap();
 
       const dialog = dialogRef.value;
-      if (!active || !dialog) {
+      if (!(active && dialog)) {
         return;
       }
 

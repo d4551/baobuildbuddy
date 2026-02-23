@@ -3,7 +3,7 @@
  *
  * Maintains a single source of truth in the English catalog and avoids cross-locale drift.
  */
-import type { AppTranslationOverrides } from "~/locales/en-US";
+import type { AppTranslationOverrides } from "./en-US";
 
 const jaJPOverrides = {
   meta: {

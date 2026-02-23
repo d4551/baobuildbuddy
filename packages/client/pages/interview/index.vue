@@ -53,7 +53,7 @@ const interviewQuestionCountOptions = ensureOptions(INTERVIEW_HUB_QUESTION_COUNT
 ]);
 
 function ensureOptions<T>(options: readonly T[], fallbackOptions: readonly T[]): readonly T[] {
-  if (Array.isArray(options) && options.length > 0) return options;
+  if (options.length > 0) return options;
   return fallbackOptions;
 }
 
