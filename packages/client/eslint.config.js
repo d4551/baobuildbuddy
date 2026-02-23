@@ -10,7 +10,15 @@ export default [
   ...pluginVueA11y.configs["flat/recommended"],
   ...tseslint.configs.recommendedTypeChecked,
   {
-    ignores: ["node_modules/**", ".nuxt/**", "**/.nuxt/**", ".output/**", "dist/**", ".data/**"],
+    ignores: [
+      "node_modules/**",
+      ".nuxt/**",
+      "**/.nuxt/**",
+      ".output/**",
+      "dist/**",
+      ".data/**",
+      "eslint.config.js",
+    ],
   },
   {
     files: ["**/*.{ts,tsx,vue}"],

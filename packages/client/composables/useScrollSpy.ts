@@ -1,4 +1,4 @@
-import { onBeforeUnmount, readonly, ref } from "vue";
+import { getCurrentScope, onScopeDispose, readonly, ref } from "vue";
 
 type ScrollSpyOptions = {
   rootMargin?: string;
@@ -176,9 +176,9 @@ export function useScrollSpy(options: ScrollSpyOptions = {}) {
     return true;
   };
 
-  onBeforeUnmount(() => {
-    stopObserver();
-  });
+  if (getCurrentScope()) {
+    onScopeDispose(stopObserver);
+  }
 
   return {
     activeSectionId: readonly(activeSectionId),

@@ -3,6 +3,12 @@ import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 let mappingId: string;
+const SKILL_MAPPINGS_ROUTE = "/api/skills/mappings";
+
+const buildSkillMappingsCategoryPath = (category: string): string => {
+  const query = new URLSearchParams({ category });
+  return `${SKILL_MAPPINGS_ROUTE}?${query.toString()}`;
+};
 
 beforeAll(async () => {
   const dbModule = await import("../db/client");
@@ -21,7 +27,7 @@ afterAll(() => {});
 
 describe("skill-mapping routes", () => {
   test("GET /api/skills/mappings returns list", async () => {
-    const res = await requestJson<unknown[]>(app, "GET", "/api/skills/mappings");
+    const res = await requestJson<unknown[]>(app, "GET", SKILL_MAPPINGS_ROUTE);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
@@ -31,7 +37,7 @@ describe("skill-mapping routes", () => {
       id: string;
       gameExpression: string;
       transferableSkill: string;
-    }>(app, "POST", "/api/skills/mappings", {
+    }>(app, "POST", SKILL_MAPPINGS_ROUTE, {
       gameExpression: "Optimized rendering pipeline",
       transferableSkill: "Performance optimization",
       category: "technical",
@@ -44,7 +50,11 @@ describe("skill-mapping routes", () => {
   });
 
   test("GET /api/skills/mappings?category=technical filters", async () => {
-    const res = await requestJson<unknown[]>(app, "GET", "/api/skills/mappings?category=technical");
+    const res = await requestJson<unknown[]>(
+      app,
+      "GET",
+      buildSkillMappingsCategoryPath("technical"),
+    );
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });

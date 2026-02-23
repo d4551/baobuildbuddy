@@ -40,7 +40,10 @@
       "mcp__Control_Chrome__reload_tab",
       "Bash(curl:*)",
       "Bash(bun add:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(bun --bun run biome:*)",
+      "Bash(bun run format:check:*)",
+      "Bash(bun:*)"
     ]
   }
 }

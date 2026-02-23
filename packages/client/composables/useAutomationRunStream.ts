@@ -1,5 +1,5 @@
 import type { AutomationRunUiState, RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared";
-import { onBeforeUnmount, readonly, ref } from "vue";
+import { getCurrentScope, onScopeDispose, readonly, ref } from "vue";
 import { useAutomation } from "./useAutomation";
 
 const TERMINAL_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>(["success", "error"]);
@@ -256,10 +256,14 @@ export function useAutomationRunStream() {
     }
   };
 
-  onBeforeUnmount(() => {
+  const cleanup = (): void => {
     requestToken += 1;
     stopSubscription();
-  });
+  };
+
+  if (getCurrentScope()) {
+    onScopeDispose(cleanup);
+  }
 
   return {
     state: readonly(state),

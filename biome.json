@@ -66,6 +66,29 @@
           }
         }
       }
+    },
+    {
+      "includes": ["**/packages/client/locales/*.ts"],
+      "linter": {
+        "rules": {
+          "security": {
+            "noSecrets": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/packages/client/composables/useFocusTrap.ts",
+        "**/packages/client/constants/dashboard.ts"
+      ],
+      "linter": {
+        "rules": {
+          "security": {
+            "noSecrets": "off"
+          }
+        }
+      }
     }
   ]
 }

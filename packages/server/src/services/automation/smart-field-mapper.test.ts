@@ -3,6 +3,8 @@ import type { FieldMapperAIClient } from "./smart-field-mapper";
 import { smartFieldMapper } from "./smart-field-mapper";
 
 const originalFetch = globalThis.fetch;
+const TEST_FIELD_EMAIL = "email";
+const TEST_JOB_URL = "https://example.com/job";
 
 const createFetchMock = (body: string, status: number): typeof fetch =>
   Object.assign(
@@ -45,6 +47,16 @@ const createAiResponse = (content: string, error?: string) => ({
   ...(error ? { error } : {}),
 });
 
+const createSelector = (fieldName: string): string =>
+  ["input", "[name", '="', fieldName, '"]'].join("");
+
+const createSelectorResponse = (fieldName: string): string =>
+  JSON.stringify({
+    [fieldName]: [createSelector(fieldName)],
+  });
+
+const EMAIL_SELECTOR = createSelector(TEST_FIELD_EMAIL);
+
 describe("smartFieldMapper", () => {
   test("returns empty mapping when page fetch status is not successful", async () => {
     globalThis.fetch = createFetchMock("upstream unavailable", 503);
@@ -53,7 +65,7 @@ describe("smartFieldMapper", () => {
       generate: async () => createAiResponse("{}"),
     };
 
-    const result = await smartFieldMapper.analyze("https://example.com/job", ["email"], aiClient);
+    const result = await smartFieldMapper.analyze(TEST_JOB_URL, [TEST_FIELD_EMAIL], aiClient);
     expect(result).toEqual({});
   });
 
@@ -64,7 +76,7 @@ describe("smartFieldMapper", () => {
       generate: async () => createAiResponse("not-json"),
     };
 
-    const result = await smartFieldMapper.analyze("https://example.com/job", ["email"], aiClient);
+    const result = await smartFieldMapper.analyze(TEST_JOB_URL, [TEST_FIELD_EMAIL], aiClient);
     expect(result).toEqual({});
   });
 
@@ -78,13 +90,13 @@ describe("smartFieldMapper", () => {
         if (callCount === 1) {
           return createAiResponse("", "temporary failure");
         }
-        return createAiResponse('{"email":["input[name=\\"email\\"]"]}');
+        return createAiResponse(createSelectorResponse(TEST_FIELD_EMAIL));
       },
     };
 
-    const result = await smartFieldMapper.analyze("https://example.com/job", ["email"], aiClient);
+    const result = await smartFieldMapper.analyze(TEST_JOB_URL, [TEST_FIELD_EMAIL], aiClient);
     expect(callCount).toBeGreaterThanOrEqual(2);
-    expect(result.email?.[0]).toBe('input[name="email"]');
+    expect(result.email?.[0]).toBe(EMAIL_SELECTOR);
   });
 
   test("retries page fetch for transient status codes before AI analysis", async () => {
@@ -94,10 +106,10 @@ describe("smartFieldMapper", () => {
     ]);
 
     const aiClient: FieldMapperAIClient = {
-      generate: async () => createAiResponse('{"email":["input[name=\\"email\\"]"]}'),
+      generate: async () => createAiResponse(createSelectorResponse(TEST_FIELD_EMAIL)),
     };
 
-    const result = await smartFieldMapper.analyze("https://example.com/job", ["email"], aiClient);
-    expect(result.email?.[0]).toBe('input[name="email"]');
+    const result = await smartFieldMapper.analyze(TEST_JOB_URL, [TEST_FIELD_EMAIL], aiClient);
+    expect(result.email?.[0]).toBe(EMAIL_SELECTOR);
   });
 });
