@@ -288,11 +288,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function getRecentActivity(progress: UserGamificationData | null): DashboardActivity[] {
-  if (!isRecord(progress?.stats)) {
+  const stats = progress?.stats;
+  if (!isRecord(stats)) {
     return [];
   }
 
-  const actionHistory = progress.stats.actionHistory;
+  const actionHistory = stats.actionHistory;
   if (!Array.isArray(actionHistory)) {
     return [];
   }

@@ -43,7 +43,8 @@
       "Bash(wc:*)",
       "Bash(bun --bun run biome:*)",
       "Bash(bun run format:check:*)",
-      "Bash(bun:*)"
+      "Bash(bun:*)",
+      "Bash(head:*)"
     ]
   }
 }

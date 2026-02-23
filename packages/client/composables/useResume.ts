@@ -23,9 +23,16 @@ type ResumeSynthesisError = {
   details?: string;
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
 const isResumeSynthesisError = (
   value: ResumeSynthesisSuccess | ResumeSynthesisError,
 ): value is ResumeSynthesisError => "error" in value && typeof value.error === "string";
+
+const isResumeSynthesisSuccess = (
+  value: ResumeSynthesisSuccess | ResumeSynthesisError,
+): value is ResumeSynthesisSuccess => isRecord(value) && typeof value.id === "string";
 
 /**
  * Resume management composable.
@@ -110,7 +117,7 @@ export function useResume() {
     });
   }
 
-  async function aiEnhance(id: string) {
+  async function aiEnhance(id: string): Promise<ResumeData> {
     return withLoadingState(loading, async () => {
       const { data, error } = await api.resumes({ id })["ai-enhance"].post({});
       assertApiResponse(error, t("apiErrors.resumes.enhanceFailed"));
@@ -134,7 +141,7 @@ export function useResume() {
     targetRole: string;
     studioName?: string;
     experienceLevel?: string;
-  }) {
+  }): Promise<Array<{ id: string; question: string; category: string }>> {
     const key = getStoredApiKey();
     const res = await $fetch<{
       questions?: Array<{ id: string; question: string; category: string }>;
@@ -150,7 +157,7 @@ export function useResume() {
 
   async function synthesizeCvResume(
     questionsAndAnswers: Array<{ id: string; question: string; answer: string; category: string }>,
-  ) {
+  ): Promise<ResumeSynthesisSuccess> {
     const key = getStoredApiKey();
     const res = await $fetch<ResumeSynthesisSuccess | ResumeSynthesisError>(
       resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.resumesFromQuestionsSynthesize),
@@ -162,6 +169,9 @@ export function useResume() {
     );
     if (isResumeSynthesisError(res) && res.error)
       throw new Error(String(res.details ?? res.error ?? "Unknown error"));
+    if (!isResumeSynthesisSuccess(res)) {
+      throw new Error("Resume synthesis payload is missing an id");
+    }
     return res;
   }
 
