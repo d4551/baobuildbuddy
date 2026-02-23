@@ -9,9 +9,9 @@ import type {
   JobExperienceLevel,
   JobFilters,
   JobSearchResult,
-  SalaryRange,
   JobType,
   Platform,
+  SalaryRange,
   StudioType,
 } from "@bao/shared";
 import {
@@ -24,19 +24,19 @@ import {
 import { and, desc, eq, gte, inArray, like, sql } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs, savedJobs } from "../../db/schema/jobs";
-import { deduplicateJobs, generateContentHash } from "./deduplication";
 import { createServerLogger } from "../../utils/logger";
+import { deduplicateJobs, generateContentHash } from "./deduplication";
 import {
   CompanyBoardsProvider,
   GreenhouseProvider,
-  type JobProvider,
-  LeverProvider,
-  type RawJob,
   gameDevNetProvider,
   gamesJobsDirectProvider,
   grackleProvider,
   hitmarkerProvider,
+  type JobProvider,
+  LeverProvider,
   pocketGamerProvider,
+  type RawJob,
   remoteGameJobsProvider,
   workWithIndiesProvider,
 } from "./providers";

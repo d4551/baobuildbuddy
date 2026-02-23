@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ChatMessage } from "@bao/shared";
-import { useI18n } from "vue-i18n";
 import { computed, nextTick, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { buildChatMessageRenderRows, resolveLatestAssistantMessageIndex } from "~/utils/chat";
 
 interface Question {

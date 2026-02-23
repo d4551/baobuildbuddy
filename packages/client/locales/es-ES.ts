@@ -170,9 +170,11 @@ const esES: AppTranslationOverrides = {
   },
   apiDocs: {
     seoTitle: "Documentación de API",
-    seoDescription: "Explora los endpoints disponibles y prueba solicitudes directamente desde la aplicación.",
+    seoDescription:
+      "Explora los endpoints disponibles y prueba solicitudes directamente desde la aplicación.",
     title: "Referencia de API",
-    intro: "Revisa la superficie de tu API y ejecuta comprobaciones de endpoints en el probador integrado.",
+    intro:
+      "Revisa la superficie de tu API y ejecuta comprobaciones de endpoints en el probador integrado.",
     endpointNavigator: "Navegación de endpoints",
     groups: {
       untagged: "Sin etiqueta",
@@ -196,6 +198,7 @@ const esES: AppTranslationOverrides = {
       methodLabel: "Método",
       operationIdLabel: "ID de operación",
       openTester: "Abrir probador",
+      navigateAria: "Navegar a {method} {path}",
       openTesterAria: "Abrir probador para {method} {path}",
     },
     tester: {
@@ -205,7 +208,7 @@ const esES: AppTranslationOverrides = {
       queryParametersIntro: "Parámetros de consulta",
       requestBodyIntro: "Cuerpo de solicitud",
       requestBodyAria: "Carga JSON del cuerpo de solicitud",
-      bodyPlaceholder: "{\n  \"example\": \"value\"\n}",
+      bodyPlaceholder: '{\n  "example": "value"\n}',
       noRequestBodyTemplate: "La especificación de OpenAPI no proporcionó una plantilla de cuerpo.",
       parameterLabel: "Parámetro {name}",
       send: "Enviar solicitud",

@@ -1,4 +1,4 @@
-import { WS_ENDPOINTS, rpaRunEventSchema, toApiScopedPath, type RpaRunEvent } from "@bao/shared";
+import { type RpaRunEvent, rpaRunEventSchema, toApiScopedPath, WS_ENDPOINTS } from "@bao/shared";
 import { Elysia, t } from "elysia";
 
 const WS_READY_STATE_OPEN = 1;
@@ -80,14 +80,6 @@ export const automationWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.
     runId: t.Optional(t.String({ minLength: 8, maxLength: 128 })),
   }),
 
-  open(ws) {
-    ws.send(
-      JSON.stringify({
-        type: "connected",
-      }),
-    );
-  },
-
   message(ws, payload) {
     if (!payload.runId) {
       return;
@@ -95,22 +87,10 @@ export const automationWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.
 
     if (payload.type === "subscribe") {
       subscribeSocket(payload.runId, ws);
-      ws.send(
-        JSON.stringify({
-          type: "subscribed",
-          runId: payload.runId,
-        }),
-      );
       return;
     }
 
     unsubscribeSocket(payload.runId, ws);
-    ws.send(
-      JSON.stringify({
-        type: "unsubscribed",
-        runId: payload.runId,
-      }),
-    );
   },
 
   close(ws) {

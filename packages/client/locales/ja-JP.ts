@@ -65,7 +65,8 @@ const jaJPOverrides = {
   },
   apiDocs: {
     seoTitle: "APIドキュメント",
-    seoDescription: "利用可能なエンドポイントを確認し、アプリから直接エンドポイントのリクエストをテストできます。",
+    seoDescription:
+      "利用可能なエンドポイントを確認し、アプリから直接エンドポイントのリクエストをテストできます。",
     title: "APIリファレンス",
     intro: "APIの公開範囲を確認し、統合テスターでエンドポイントチェックを実行します。",
     endpointNavigator: "エンドポイント一覧",
@@ -91,6 +92,7 @@ const jaJPOverrides = {
       methodLabel: "メソッド",
       operationIdLabel: "オペレーションID",
       openTester: "テスターを開く",
+      navigateAria: "{method} {path} に移動",
       openTesterAria: "{method} {path} のテスターを開く",
     },
     tester: {
@@ -100,7 +102,7 @@ const jaJPOverrides = {
       queryParametersIntro: "クエリパラメータ",
       requestBodyIntro: "リクエストボディ",
       requestBodyAria: "JSON リクエストボディ",
-      bodyPlaceholder: "{\n  \"サンプル\": \"値\"\n}",
+      bodyPlaceholder: '{\n  "サンプル": "値"\n}',
       noRequestBodyTemplate: "OpenAPI仕様にリクエストボディテンプレートがありません。",
       parameterLabel: "パラメータ {name}",
       send: "リクエストを送信",

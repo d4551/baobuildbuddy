@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { XP_BAR_ANIMATION_DURATION_MS } from "~/constants/gamification";
 import { useI18n } from "vue-i18n";
+import { XP_BAR_ANIMATION_DURATION_MS } from "~/constants/gamification";
 
 const props = defineProps<{
   xp: number;

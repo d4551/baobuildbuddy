@@ -3,20 +3,30 @@ import { scraperService } from "../services/scraper-service";
 
 export const scraperRoutes = new Elysia({ prefix: "/scraper" })
   .post("/studios", async ({ set }) => {
-    return scraperService.scrapeStudios().catch((error: unknown) => {
+    const [scrapeStudiosResult] = await Promise.allSettled([scraperService.scrapeStudios()]);
+    if (scrapeStudiosResult.status === "rejected") {
       set.status = 500;
       return {
         error: "Studio scrape failed",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details:
+          scrapeStudiosResult.reason instanceof Error
+            ? scrapeStudiosResult.reason.message
+            : "Unknown error",
       };
-    });
+    }
+    return scrapeStudiosResult.value;
   })
   .post("/jobs/gamedev", async ({ set }) => {
-    return scraperService.scrapeGameDevNetJobs().catch((error: unknown) => {
+    const [scrapeJobsResult] = await Promise.allSettled([scraperService.scrapeGameDevNetJobs()]);
+    if (scrapeJobsResult.status === "rejected") {
       set.status = 500;
       return {
         error: "Job scrape failed",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details:
+          scrapeJobsResult.reason instanceof Error
+            ? scrapeJobsResult.reason.message
+            : "Unknown error",
       };
-    });
+    }
+    return scrapeJobsResult.value;
   });

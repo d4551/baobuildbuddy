@@ -79,4 +79,42 @@ sys.exit(0)
     expect(result.upserted).toBe(0);
     expect(result.errors.some((entry) => entry.includes("invalid JSON"))).toBe(true);
   });
+
+  test("derives deterministic content hashes when scraper rows omit contentHash", async () => {
+    await Bun.write(
+      TEST_SCRIPT_PATH,
+      `#!/usr/bin/env python3
+import json
+import sys
+
+sys.stdout.write(json.dumps([
+  {
+    "title": "AI Gameplay Engineer",
+    "company": "Studio Hash",
+    "location": "Remote",
+    "url": "https://example.com/jobs/hash",
+    "source": "contract-source",
+    "description": "Build deterministic systems",
+    "postDate": "2026-02-23",
+    "remote": True
+  }
+]))
+sys.exit(0)
+`,
+    );
+
+    const firstRun = await scraperService.scrapeGameDevNetJobs(TEST_SCRIPT_NAME);
+    expect(firstRun.upserted).toBe(1);
+    const firstRows = await db.select().from(jobs);
+    const firstHash = firstRows[0]?.contentHash ?? "";
+    expect(firstHash.startsWith("job-")).toBe(true);
+
+    await db.delete(jobs);
+
+    const secondRun = await scraperService.scrapeGameDevNetJobs(TEST_SCRIPT_NAME);
+    expect(secondRun.upserted).toBe(1);
+    const secondRows = await db.select().from(jobs);
+    const secondHash = secondRows[0]?.contentHash ?? "";
+    expect(secondHash).toBe(firstHash);
+  });
 });

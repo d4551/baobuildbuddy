@@ -17,6 +17,10 @@ export declare class SmartFieldMapper {
      */
     analyze(jobUrl: string, fieldsNeeded: string[], aiService: FieldMapperAIClient): Promise<Record<string, string[]>>;
     /**
+     * Fetches page HTML and retries for transient failures.
+     */
+    private fetchPageWithRetry;
+    /**
      * Fetches page HTML with a deterministic timeout and status checks.
      */
     private fetchPage;

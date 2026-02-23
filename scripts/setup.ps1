@@ -1,8 +1,10 @@
 # BaoBuildBuddy - Automated setup for Windows (PowerShell)
-# Usage: powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 [-SkipChecks] [-SkipPython]
+# Usage: powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 [-SkipChecks] [-SkipPython] [-IncludeBuild] [-IncludeDesktopBuild]
 param(
     [switch]$SkipChecks,
     [switch]$SkipPython,
+    [switch]$IncludeBuild,
+    [switch]$IncludeDesktopBuild,
     [switch]$Help
 )
 
@@ -22,6 +24,8 @@ if ($Help) {
     Write-Host "Options:"
     Write-Host "  -SkipChecks   Skip typecheck, lint, and test verification"
     Write-Host "  -SkipPython   Skip Python venv setup (Bun-only install)"
+    Write-Host "  -IncludeBuild Run bun run build after checks"
+    Write-Host "  -IncludeDesktopBuild Run bun run build:desktop after checks/build"
     Write-Host "  -Help         Show this help message"
     exit 0
 }
@@ -51,6 +55,16 @@ if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($bunVer)) {
     Ok "Bun $bunVer"
 } else {
     Die "Bun is not installed or not available in PATH. Install from https://bun.sh"
+}
+
+if ($bunVer -match "^(\d+)\.(\d+)\.(\d+)") {
+    $bunMajor = [int]$Matches[1]
+    $bunMinor = [int]$Matches[2]
+    if ($bunMajor -ne 1 -or $bunMinor -ne 3) {
+        Die "Bun $bunVer detected. Workspace requires Bun 1.3.x."
+    }
+} else {
+    Die "Unable to parse Bun version: $bunVer"
 }
 
 $gitVer = & git --version 2>$null
@@ -189,6 +203,36 @@ if (-not $SkipChecks) {
     else { Fail "Tests failed -- run 'bun run test' for details" }
 } else {
     Write-Host "`n  Skipping verification (-SkipChecks)" -ForegroundColor DarkGray
+}
+
+if ($IncludeBuild) {
+    Step "Building applications..."
+    & bun run build 2>&1
+    if ($LASTEXITCODE -eq 0) { Ok "Build passed" }
+    else { Fail "Build failed -- run 'bun run build' for details" }
+} else {
+    Write-Host "`n  Skipping build (-IncludeBuild not set)" -ForegroundColor DarkGray
+}
+
+if ($IncludeDesktopBuild) {
+    Step "Building desktop application (Tauri)..."
+    $rustc = & rustc --version 2>$null
+    $cargo = & cargo --version 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($rustc) -or [string]::IsNullOrWhiteSpace($cargo)) {
+        Fail "Desktop build requested but Rust toolchain is unavailable (rustc/cargo missing)"
+    } else {
+        $previousLang = $env:LANG
+        $previousLcAll = $env:LC_ALL
+        $env:LANG = "en_US.UTF-8"
+        $env:LC_ALL = "en_US.UTF-8"
+        & bun run build:desktop 2>&1
+        if ($LASTEXITCODE -eq 0) { Ok "Desktop build passed" }
+        else { Fail "Desktop build failed -- run '$env:LANG=en_US.UTF-8; $env:LC_ALL=en_US.UTF-8; bun run build:desktop' for details" }
+        $env:LANG = $previousLang
+        $env:LC_ALL = $previousLcAll
+    }
+} else {
+    Write-Host "`n  Skipping desktop build (-IncludeDesktopBuild not set)" -ForegroundColor DarkGray
 }
 
 # -- Summary --------------------------------------------------------------------

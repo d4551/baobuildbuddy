@@ -1,5 +1,5 @@
-import { createI18n } from "vue-i18n";
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
+import { createI18n } from "vue-i18n";
 import enUS from "~/locales/en-US";
 import esES from "~/locales/es-ES";
 import frFR from "~/locales/fr-FR";

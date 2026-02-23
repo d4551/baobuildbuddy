@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
+import { settlePromise } from "~/composables/async-flow";
+import { useDebouncedValue } from "~/composables/useDebouncedValue";
 import {
   STUDIO_INDEX_FILTER_DEBOUNCE_MS,
   STUDIO_INDEX_INITIAL_VISIBLE_COUNT,
   STUDIO_INDEX_VISIBLE_INCREMENT,
 } from "~/constants/studios";
-import { settlePromise } from "~/composables/async-flow";
-import { useDebouncedValue } from "~/composables/useDebouncedValue";
-import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
-import CloseIcon from "~/components/ui/CloseIcon.vue";
+import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 
 const { $toast } = useNuxtApp();
 const route = useRoute();

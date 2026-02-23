@@ -2,9 +2,9 @@
 import { APP_ROUTE_QUERY_KEYS, type InterviewSession } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import type { LocationQueryValue } from "vue-router";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
-import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 const route = useRoute();
 const router = useRouter();

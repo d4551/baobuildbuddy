@@ -5,16 +5,17 @@ import {
   COVER_LETTER_DEFAULT_TEMPLATE,
   COVER_LETTER_POSITION_MIN_LENGTH,
   COVER_LETTER_TEMPLATE_OPTIONS,
-  isRecord,
   type CoverLetterData,
   type CoverLetterTemplate,
   isCoverLetterTemplate,
+  isRecord,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
 } from "~/utils/cover-letter-content";
+
 definePageMeta({
   middleware: ["auth"],
 });

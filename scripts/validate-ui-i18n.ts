@@ -188,9 +188,7 @@ const collectTemplateTags = (templateContent: string): TemplateTag[] => {
   return tags;
 };
 
-const collectTemplateTextSegments = (
-  templateContent: string,
-): TemplateTextSegment[] => {
+const collectTemplateTextSegments = (templateContent: string): TemplateTextSegment[] => {
   const segments: TemplateTextSegment[] = [];
   const contentLength = templateContent.length;
   let inTag = false;
@@ -267,10 +265,7 @@ const collectTemplateTextSegments = (
 const hasHumanText = (value: string): boolean => humanTextPattern.test(value);
 
 const normalizeTemplateText = (value: string): string =>
-  value
-    .replace(templateInterpolationPattern, " ")
-    .replace(whitespacePattern, " ")
-    .trim();
+  value.replace(templateInterpolationPattern, " ").replace(whitespacePattern, " ").trim();
 
 const isIgnoredTemplateText = (value: string): boolean => {
   if (value.length === 0) {
@@ -311,10 +306,7 @@ const collectMissingTranslationKeyViolations = (
   return violations;
 };
 
-const collectStaticTemplateViolations = (
-  filePath: string,
-  fileContent: string,
-): Violation[] => {
+const collectStaticTemplateViolations = (filePath: string, fileContent: string): Violation[] => {
   const blocks = extractTemplateBlocks(fileContent);
   const violations: Violation[] = [];
 
@@ -330,10 +322,7 @@ const collectStaticTemplateViolations = (
 
         violations.push({
           filePath,
-          line: getLineFromOffset(
-            fileContent,
-            block.offset + tag.offset + (match.index ?? 0),
-          ),
+          line: getLineFromOffset(fileContent, block.offset + tag.offset + (match.index ?? 0)),
           message: `Static template attribute "${attributeName}" contains user-visible text. Use i18n binding (for example :${attributeName}="t('...')").`,
         });
       }
@@ -349,8 +338,7 @@ const collectStaticTemplateViolations = (
       violations.push({
         filePath,
         line: getLineFromOffset(fileContent, block.offset + segment.offset),
-        message:
-          `Static template text "${normalizedText}" detected. Use translation keys with t('...') for user-visible copy.`,
+        message: `Static template text "${normalizedText}" detected. Use translation keys with t('...') for user-visible copy.`,
       });
     }
   }
@@ -365,9 +353,7 @@ const collectViolations = async (): Promise<Violation[]> => {
 
   for (const filePath of files) {
     const fileContent = await Bun.file(filePath).text();
-    violations.push(
-      ...collectMissingTranslationKeyViolations(filePath, fileContent, localeKeys),
-    );
+    violations.push(...collectMissingTranslationKeyViolations(filePath, fileContent, localeKeys));
 
     if (filePath.endsWith(".vue")) {
       violations.push(...collectStaticTemplateViolations(filePath, fileContent));

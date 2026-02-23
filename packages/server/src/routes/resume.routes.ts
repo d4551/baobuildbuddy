@@ -1,11 +1,11 @@
 import {
-  RESUME_TEMPLATE_DEFAULT,
-  RESUME_TEMPLATE_OPTIONS,
+  isResumeTemplate,
   RESUME_DEFAULT_NAME,
   RESUME_DEFAULT_THEME,
-  isResumeTemplate,
-  safeParseJson,
+  RESUME_TEMPLATE_DEFAULT,
+  RESUME_TEMPLATE_OPTIONS,
   type ResumeData,
+  safeParseJson,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -81,24 +81,30 @@ const toResumeTemplateOrUndefined = (
   value: string | undefined,
 ): ResumeData["template"] | undefined => (isResumeTemplate(value) ? value : undefined);
 
+const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
+
 export const resumeRoutes = new Elysia({ prefix: "/resumes" })
   .post(
     "/from-questions/generate",
     async ({ body, set }) => {
-      return cvQuestionnaireService
-        .generateQuestions({
+      const result = await settle(
+        cvQuestionnaireService.generateQuestions({
           targetRole: body.targetRole,
           studioName: body.studioName,
           experienceLevel: body.experienceLevel,
-        })
-        .then((questions) => ({ questions }))
-        .catch((error: unknown) => {
-          set.status = 500;
-          return {
-            error: "Failed to generate questions",
-            details: error instanceof Error ? error.message : "Unknown error",
-          };
-        });
+        }),
+      );
+      if (result.status === "rejected") {
+        set.status = 500;
+        return {
+          error: "Failed to generate questions",
+          details: result.reason instanceof Error ? result.reason.message : "Unknown error",
+        };
+      }
+      return { questions: result.value };
     },
     {
       body: t.Object({
@@ -111,25 +117,33 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
   .post(
     "/from-questions/synthesize",
     async ({ body, set }) => {
-      return cvQuestionnaireService
-        .synthesizeResume(body.questionsAndAnswers)
-        .then((resumeData) =>
-          resumeService.createResume({
-            name: "Resume from Questionnaire",
-            ...resumeData,
-          }),
-        )
-        .then((created) => {
-          set.status = 201;
-          return created;
-        })
-        .catch((error: unknown) => {
-          set.status = 500;
-          return {
-            error: "Failed to synthesize resume",
-            details: error instanceof Error ? error.message : "Unknown error",
-          };
-        });
+      const synthesizeResult = await settle(
+        cvQuestionnaireService.synthesizeResume(body.questionsAndAnswers),
+      );
+      if (synthesizeResult.status === "rejected") {
+        set.status = 500;
+        return {
+          error: "Failed to synthesize resume",
+          details: synthesizeResult.reason instanceof Error ? synthesizeResult.reason.message : "Unknown error",
+        };
+      }
+
+      const createResult = await settle(
+        resumeService.createResume({
+          name: "Resume from Questionnaire",
+          ...synthesizeResult.value,
+        }),
+      );
+      if (createResult.status === "rejected") {
+        set.status = 500;
+        return {
+          error: "Failed to synthesize resume",
+          details: createResult.reason instanceof Error ? createResult.reason.message : "Unknown error",
+        };
+      }
+
+      set.status = 201;
+      return createResult.value;
     },
     {
       body: t.Object({
@@ -270,26 +284,24 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
       }
 
       const templateName = body.template || resume.template || RESUME_TEMPLATE_DEFAULT;
-      return exportService
-        .exportResumePDF(resume, templateName)
-        .then((pdfBytes) => {
-          set.headers["content-type"] = "application/pdf";
-          set.headers["content-disposition"] = `attachment; filename="resume-${params.id}.pdf"`;
+      const exportResult = await settle(exportService.exportResumePDF(resume, templateName));
+      if (exportResult.status === "rejected") {
+        set.status = 500;
+        return {
+          error: "Failed to export resume",
+          details: exportResult.reason instanceof Error ? exportResult.reason.message : "Unknown error",
+        };
+      }
 
-          return new Response(Buffer.from(pdfBytes), {
-            headers: {
-              "content-type": "application/pdf",
-              "content-disposition": `attachment; filename="resume-${params.id}.pdf"`,
-            },
-          });
-        })
-        .catch((error: unknown) => {
-          set.status = 500;
-          return {
-            error: "Failed to export resume",
-            details: error instanceof Error ? error.message : "Unknown error",
-          };
-        });
+      set.headers["content-type"] = "application/pdf";
+      set.headers["content-disposition"] = `attachment; filename="resume-${params.id}.pdf"`;
+
+      return new Response(Buffer.from(exportResult.value), {
+        headers: {
+          "content-type": "application/pdf",
+          "content-disposition": `attachment; filename="resume-${params.id}.pdf"`,
+        },
+      });
     },
     {
       params: t.Object({
@@ -326,37 +338,34 @@ ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingEx
       const section = body.section || "all";
       const prompt = resumeEnhancePrompt(resumeText, section);
 
-      return aiService
-        .generate(prompt, { temperature: 0.7, maxTokens: 2000 })
-        .then((response) => {
-          if (response.error) {
-            set.status = 500;
-            return { error: "AI enhancement failed", details: response.error };
-          }
+      const aiResult = await settle(aiService.generate(prompt, { temperature: 0.7, maxTokens: 2000 }));
+      if (aiResult.status === "rejected") {
+        set.status = 500;
+        return {
+          error: "AI enhancement failed",
+          details: aiResult.reason instanceof Error ? aiResult.reason.message : "Unknown error",
+        };
+      }
 
-          const parsed = safeParseJson(response.content);
-          const parsedRecord =
-            parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
-          const suggestions =
-            parsedRecord && Array.isArray(parsedRecord.suggestions)
-              ? parsedRecord.suggestions
-              : parsedRecord
-                ? [parsedRecord]
-                : [{ text: response.content, section: section }];
+      const response = aiResult.value;
+      if (response.error) {
+        set.status = 500;
+        return { error: "AI enhancement failed", details: response.error };
+      }
 
-          return {
-            resume: resume,
-            suggestions: suggestions,
-            section: section,
-          };
-        })
-        .catch((error: unknown) => {
-          set.status = 500;
-          return {
-            error: "AI enhancement failed",
-            details: error instanceof Error ? error.message : "Unknown error",
-          };
-        });
+      const parsed = safeParseJson(response.content);
+      const parsedRecord = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+      const suggestions = parsedRecord && Array.isArray(parsedRecord.suggestions)
+        ? parsedRecord.suggestions
+        : parsedRecord
+          ? [parsedRecord]
+          : [{ text: response.content, section }];
+
+      return {
+        resume,
+        suggestions,
+        section,
+      };
     },
     {
       params: t.Object({
@@ -407,54 +416,51 @@ Type: ${job.type || "Not specified"}
 
       const prompt = resumeScorePrompt(resumeText, jobText);
 
-      return aiService
-        .generate(prompt, { temperature: 0.3, maxTokens: 1500 })
-        .then((response) => {
-          if (response.error) {
-            set.status = 500;
-            return { error: "AI scoring failed", details: response.error };
-          }
+      const aiResult = await settle(aiService.generate(prompt, { temperature: 0.3, maxTokens: 1500 }));
+      if (aiResult.status === "rejected") {
+        set.status = 500;
+        return {
+          error: "AI scoring failed",
+          details: aiResult.reason instanceof Error ? aiResult.reason.message : "Unknown error",
+        };
+      }
 
-          const parsedAnalysis = safeParseJson(response.content);
-          const analysisRecord: Record<string, unknown> =
-            parsedAnalysis && typeof parsedAnalysis === "object" && !Array.isArray(parsedAnalysis)
-              ? parsedAnalysis
-              : {
-                  score: 50,
-                  strengths: ["Unable to parse AI response"],
-                  improvements: ["Please try again"],
-                  keywords: [],
-                };
-          const score = typeof analysisRecord.score === "number" ? analysisRecord.score : 0;
-          const strengths = Array.isArray(analysisRecord.strengths)
-            ? analysisRecord.strengths.filter((entry): entry is string => typeof entry === "string")
-            : [];
-          const improvements = Array.isArray(analysisRecord.improvements)
-            ? analysisRecord.improvements.filter(
-                (entry): entry is string => typeof entry === "string",
-              )
-            : [];
-          const keywords = Array.isArray(analysisRecord.keywords)
-            ? analysisRecord.keywords.filter((entry): entry is string => typeof entry === "string")
-            : [];
+      const response = aiResult.value;
+      if (response.error) {
+        set.status = 500;
+        return { error: "AI scoring failed", details: response.error };
+      }
 
-          return {
-            resumeId: params.id,
-            jobId: body.jobId,
-            score,
-            strengths,
-            improvements,
-            keywords,
-            analysis: analysisRecord,
-          };
-        })
-        .catch((error: unknown) => {
-          set.status = 500;
-          return {
-            error: "AI scoring failed",
-            details: error instanceof Error ? error.message : "Unknown error",
-          };
-        });
+      const parsedAnalysis = safeParseJson(response.content);
+      const analysisRecord: Record<string, unknown> =
+        parsedAnalysis && typeof parsedAnalysis === "object" && !Array.isArray(parsedAnalysis)
+          ? parsedAnalysis
+          : {
+              score: 50,
+              strengths: ["Unable to parse AI response"],
+              improvements: ["Please try again"],
+              keywords: [],
+            };
+      const score = typeof analysisRecord.score === "number" ? analysisRecord.score : 0;
+      const strengths = Array.isArray(analysisRecord.strengths)
+        ? analysisRecord.strengths.filter((entry): entry is string => typeof entry === "string")
+        : [];
+      const improvements = Array.isArray(analysisRecord.improvements)
+        ? analysisRecord.improvements.filter((entry): entry is string => typeof entry === "string")
+        : [];
+      const keywords = Array.isArray(analysisRecord.keywords)
+        ? analysisRecord.keywords.filter((entry): entry is string => typeof entry === "string")
+        : [];
+
+      return {
+        resumeId: params.id,
+        jobId: body.jobId,
+        score,
+        strengths,
+        improvements,
+        keywords,
+        analysis: analysisRecord,
+      };
     },
     {
       params: t.Object({

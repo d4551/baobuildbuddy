@@ -242,6 +242,48 @@ const INDEXES = [
   "CREATE INDEX IF NOT EXISTS chat_history_timestamp_idx ON chat_history(timestamp)",
 ] as const;
 
+const AUTOMATION_RUNS_TABLE_NAME = "automation_runs";
+
+const AUTOMATION_RUNS_REQUIRED_COLUMNS = {
+  exit_code: "INTEGER",
+  timed_out: "INTEGER NOT NULL DEFAULT 0",
+  aborted: "INTEGER NOT NULL DEFAULT 0",
+  execution_ms: "INTEGER",
+} as const;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const readTableColumnNames = (sqlite: Database, tableName: string): Set<string> => {
+  const rows = sqlite.query(`PRAGMA table_info(${tableName})`).all();
+  const names = new Set<string>();
+
+  for (const row of rows) {
+    if (!isRecord(row)) {
+      continue;
+    }
+    const name = row.name;
+    if (typeof name === "string" && name.length > 0) {
+      names.add(name);
+    }
+  }
+
+  return names;
+};
+
+const ensureAutomationRunColumns = (sqlite: Database): void => {
+  const existingColumns = readTableColumnNames(sqlite, AUTOMATION_RUNS_TABLE_NAME);
+
+  for (const [columnName, columnDefinition] of Object.entries(AUTOMATION_RUNS_REQUIRED_COLUMNS)) {
+    if (existingColumns.has(columnName)) {
+      continue;
+    }
+    sqlite.exec(
+      `ALTER TABLE ${AUTOMATION_RUNS_TABLE_NAME} ADD COLUMN ${columnName} ${columnDefinition}`,
+    );
+  }
+};
+
 /**
  * Initialize SQLite schema for all supported tables.
  */
@@ -249,6 +291,8 @@ export function initializeDatabase(sqlite: Database): void {
   for (const ddl of TABLE_DEFINITIONS) {
     sqlite.exec(ddl);
   }
+
+  ensureAutomationRunColumns(sqlite);
 
   for (const indexSql of INDEXES) {
     sqlite.exec(indexSql);

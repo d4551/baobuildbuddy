@@ -2,8 +2,8 @@
 import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
-import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
+import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 
 const { $toast } = useNuxtApp();
 const route = useRoute();

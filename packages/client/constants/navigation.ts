@@ -179,7 +179,15 @@ export function normalizeRoutePath(pathValue: string): string {
 }
 
 const toPathSegments = (pathValue: string): string[] =>
-  normalizeRoutePath(pathValue).split("/").filter((segment) => segment.length > 0);
+  normalizeRoutePath(pathValue)
+    .split("/")
+    .filter((segment) => segment.length > 0);
+
+const isDynamicSegment = (segment: string): boolean =>
+  segment.startsWith(":") || (segment.startsWith("[") && segment.endsWith("]"));
+
+const segmentMatches = (targetSegment: string, currentSegment: string): boolean =>
+  targetSegment === currentSegment || isDynamicSegment(targetSegment);
 
 /**
  * Determines if a route should be considered active for navigation UI.
@@ -207,7 +215,9 @@ export function isRouteActive(currentPath: string, targetPath: string): boolean 
   }
 
   for (let index = 0; index < targetSegments.length; index += 1) {
-    if (currentSegments[index] !== targetSegments[index]) {
+    const targetSegment = targetSegments[index];
+    const currentSegment = currentSegments[index];
+    if (!targetSegment || !currentSegment || !segmentMatches(targetSegment, currentSegment)) {
       return false;
     }
   }

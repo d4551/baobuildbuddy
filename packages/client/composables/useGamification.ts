@@ -1,5 +1,5 @@
 import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
-import { STATE_KEYS, isRecord } from "@bao/shared";
+import { isRecord, STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 

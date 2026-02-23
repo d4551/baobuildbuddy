@@ -1,4 +1,5 @@
 import {
+  generateId,
   JOB_EXPERIENCE_LEVELS,
   JOB_GAME_GENRES,
   JOB_QUERY_DEFAULT_LIMIT,
@@ -6,7 +7,6 @@ import {
   JOB_QUERY_MAX_LIMIT,
   JOB_STUDIO_TYPES,
   JOB_SUPPORTED_PLATFORMS,
-  generateId,
   safeParseJson,
 } from "@bao/shared";
 import { and, desc, eq, like, or } from "drizzle-orm";
@@ -26,6 +26,11 @@ type JobRecommendationMatch = {
 };
 
 const jobsRoutesLogger = createServerLogger("jobs-routes");
+
+const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
 
 function isJobRecommendationMatch(value: unknown): value is JobRecommendationMatch {
   return (
@@ -337,35 +342,44 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
       };
     }
 
-    return db
-      .select()
-      .from(settings)
-      .limit(1)
-      .then(async (settingsRows) => {
-        const aiService = AIService.fromSettings(settingsRows[0]);
+    const settingsResult = await settle(db.select().from(settings).limit(1));
+    if (settingsResult.status === "rejected") {
+      jobsRoutesLogger.error("Job recommendations error:", settingsResult.reason);
+      return {
+        recommendations: recentJobs.map((job, index) => ({
+          ...job,
+          matchScore: 50,
+          matchReason: "Recent posting",
+          rank: index + 1,
+        })),
+        reason: `Error generating recommendations: ${settingsResult.reason instanceof Error ? settingsResult.reason.message : "Unknown error"}`,
+        aiPowered: false,
+      };
+    }
+    const aiService = AIService.fromSettings(settingsResult.value[0]);
 
-        const userSkills = [...(profile.technicalSkills || []), ...(profile.softSkills || [])].join(
-          ", ",
-        );
+    const userSkills = [...(profile.technicalSkills || []), ...(profile.softSkills || [])].join(
+      ", ",
+    );
 
-        const userExperience =
-          profile.currentRole && profile.currentCompany
-            ? `${profile.currentRole} at ${profile.currentCompany}`
-            : profile.summary || "Gaming professional";
+    const userExperience =
+      profile.currentRole && profile.currentCompany
+        ? `${profile.currentRole} at ${profile.currentCompany}`
+        : profile.summary || "Gaming professional";
 
-        const userGoals =
-          typeof profile.careerGoals === "object" && profile.careerGoals !== null
-            ? JSON.stringify(profile.careerGoals)
-            : "Career growth in gaming industry";
+    const userGoals =
+      typeof profile.careerGoals === "object" && profile.careerGoals !== null
+        ? JSON.stringify(profile.careerGoals)
+        : "Career growth in gaming industry";
 
-        const jobsSummary = recentJobs
-          .map(
-            (job, idx) =>
-              `Job ${idx + 1}: ${job.title} at ${job.company} - ${job.location} - ${job.experienceLevel || "Not specified"}`,
-          )
-          .join("\n");
+    const jobsSummary = recentJobs
+      .map(
+        (job, idx) =>
+          `Job ${idx + 1}: ${job.title} at ${job.company} - ${job.location} - ${job.experienceLevel || "Not specified"}`,
+      )
+      .join("\n");
 
-        const prompt = `You are a career matching AI assistant. Analyze these jobs against the user profile and score each job from 0-100 based on match quality.
+    const prompt = `You are a career matching AI assistant. Analyze these jobs against the user profile and score each job from 0-100 based on match quality.
 
 User Profile:
 - Skills: ${userSkills || "Not specified"}
@@ -387,111 +401,94 @@ Return a JSON array with match analysis for each job. Format:
 
 Provide realistic scores based on skills match, experience level alignment, and career goals fit.`;
 
-        const response = await aiService.generate(prompt, {
-          temperature: 0.3,
-          maxTokens: 1500,
-        });
+    const response = await aiService.generate(prompt, {
+      temperature: 0.3,
+      maxTokens: 1500,
+    });
 
-        if (response.error) {
-          return {
-            recommendations: recentJobs.map((job, index) => ({
-              ...job,
-              matchScore: 50,
-              matchReason: "AI analysis unavailable",
-              rank: index + 1,
-            })),
-            reason: `AI recommendations failed: ${response.error}`,
-            aiPowered: false,
-          };
-        }
+    if (response.error) {
+      return {
+        recommendations: recentJobs.map((job, index) => ({
+          ...job,
+          matchScore: 50,
+          matchReason: "AI analysis unavailable",
+          rank: index + 1,
+        })),
+        reason: `AI recommendations failed: ${response.error}`,
+        aiPowered: false,
+      };
+    }
 
-        let matchedJobs: JobRecommendationMatch[] = [];
+    let matchedJobs: JobRecommendationMatch[] = [];
 
-        const jsonMatch = response.content.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          const parsed = safeParseJson(jsonMatch[0]);
-          if (Array.isArray(parsed)) {
-            matchedJobs = parsed.filter(isJobRecommendationMatch);
-          }
-        }
+    const jsonMatch = response.content.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const parsed = safeParseJson(jsonMatch[0]);
+      if (Array.isArray(parsed)) {
+        matchedJobs = parsed.filter(isJobRecommendationMatch);
+      }
+    }
 
-        if (matchedJobs.length === 0) {
-          return {
-            recommendations: recentJobs.map((job, index) => ({
-              ...job,
-              matchScore: 50,
-              matchReason: "Recent posting",
-              rank: index + 1,
-            })),
-            reason: "AI analysis completed but no matches found",
-            aiPowered: false,
-          };
-        }
+    if (matchedJobs.length === 0) {
+      return {
+        recommendations: recentJobs.map((job, index) => ({
+          ...job,
+          matchScore: 50,
+          matchReason: "Recent posting",
+          rank: index + 1,
+        })),
+        reason: "AI analysis completed but no matches found",
+        aiPowered: false,
+      };
+    }
 
-        const recommendations = matchedJobs
-          .map((match) => {
-            const job = recentJobs[match.jobIndex];
-            if (!job) return null;
-            return {
-              ...job,
-              matchScore: match.matchScore,
-              matchReason: match.matchReason,
-              rank: 0,
-            };
-          })
-          .filter((job) => job !== null)
-          .sort((a, b) => (b?.matchScore || 0) - (a?.matchScore || 0))
-          .map((job, index) => ({
-            ...job,
-            rank: index + 1,
-          }));
-
+    const recommendations = matchedJobs
+      .map((match) => {
+        const job = recentJobs[match.jobIndex];
+        if (!job) return null;
         return {
-          recommendations,
-          reason: "AI-powered personalized job recommendations",
-          aiPowered: true,
-          provider: response.provider,
+          ...job,
+          matchScore: match.matchScore,
+          matchReason: match.matchReason,
+          rank: 0,
         };
       })
-      .catch((error: unknown) => {
-        jobsRoutesLogger.error("Job recommendations error:", error);
-        return {
-          recommendations: recentJobs.map((job, index) => ({
-            ...job,
-            matchScore: 50,
-            matchReason: "Recent posting",
-            rank: index + 1,
-          })),
-          reason: `Error generating recommendations: ${error instanceof Error ? error.message : "Unknown error"}`,
-          aiPowered: false,
-        };
-      });
+      .filter((job) => job !== null)
+      .sort((a, b) => (b?.matchScore || 0) - (a?.matchScore || 0))
+      .map((job, index) => ({
+        ...job,
+        rank: index + 1,
+      }));
+
+    return {
+      recommendations,
+      reason: "AI-powered personalized job recommendations",
+      aiPowered: true,
+      provider: response.provider,
+    };
   })
   .post("/refresh", async ({ set }) => {
     const aggregator = new JobAggregator();
+    const refreshResult = await settle(aggregator.refreshJobs());
+    if (refreshResult.status === "rejected") {
+      jobsRoutesLogger.error("Job refresh error:", refreshResult.reason);
+      set.status = 500;
+      return {
+        message: `Job refresh failed: ${refreshResult.reason instanceof Error ? refreshResult.reason.message : "Unknown error"}`,
+        status: "failed",
+        totalJobs: 0,
+        newJobs: 0,
+        updatedJobs: 0,
+      };
+    }
 
-    return aggregator
-      .refreshJobs()
-      .then((result) => {
-        return {
-          message: "Job refresh completed successfully",
-          status: "completed",
-          totalJobs: result.total,
-          newJobs: result.new,
-          updatedJobs: result.updated,
-        };
-      })
-      .catch((error: unknown) => {
-        jobsRoutesLogger.error("Job refresh error:", error);
-        set.status = 500;
-        return {
-          message: `Job refresh failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-          status: "failed",
-          totalJobs: 0,
-          newJobs: 0,
-          updatedJobs: 0,
-        };
-      });
+    return {
+      message: "Job refresh completed successfully",
+      status: "completed",
+      totalJobs: refreshResult.value.total,
+      newJobs: refreshResult.value.new,
+      updatedJobs: refreshResult.value.updated,
+    };
   });
 
 function isOneOf<T extends string>(values: readonly T[], value: string): value is T {

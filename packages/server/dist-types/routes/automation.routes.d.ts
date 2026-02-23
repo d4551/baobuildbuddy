@@ -43,24 +43,25 @@ export declare const automationRoutes: Elysia<"/automation", {
                 headers: unknown;
                 response: {
                     200: {
-                        progress: number | null;
+                        id: string;
+                        aborted: boolean;
                         error: string | {
                             details?: {} | undefined;
+                            source: string;
                             message: string;
                             code: string;
                         } | null;
-                        type: "email" | "scrape" | "job_apply";
-                        output: {
-                            [x: string]: unknown;
-                        } | null;
+                        progress: number | null;
                         input: {
                             [x: string]: unknown;
                         } | null;
-                        id: string;
-                        aborted: boolean;
+                        output: {
+                            [x: string]: unknown;
+                        } | null;
+                        type: "scrape" | "job_apply" | "email";
                         createdAt: string;
                         updatedAt: string;
-                        status: "success" | "error" | "pending" | "running";
+                        status: "success" | "pending" | "running" | "error";
                         screenshots: string[] | null;
                         totalSteps: number | null;
                         jobId: string | null;
@@ -129,24 +130,25 @@ export declare const automationRoutes: Elysia<"/automation", {
                     headers: unknown;
                     response: {
                         200: {
-                            progress: number | null;
+                            id: string;
+                            aborted: boolean;
                             error: string | {
                                 details?: {} | undefined;
+                                source: string;
                                 message: string;
                                 code: string;
                             } | null;
-                            type: "email" | "scrape" | "job_apply";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
+                            progress: number | null;
                             input: {
                                 [x: string]: unknown;
                             } | null;
-                            id: string;
-                            aborted: boolean;
+                            output: {
+                                [x: string]: unknown;
+                            } | null;
+                            type: "scrape" | "job_apply" | "email";
                             createdAt: string;
                             updatedAt: string;
-                            status: "success" | "error" | "pending" | "running";
+                            status: "success" | "pending" | "running" | "error";
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -213,10 +215,10 @@ export declare const automationRoutes: Elysia<"/automation", {
                 headers: unknown;
                 response: {
                     200: {
-                        provider: string;
-                        model: string;
                         status: "success";
                         runId: string;
+                        provider: string;
+                        model: string;
                         reply: string;
                     };
                     500: {
@@ -265,30 +267,31 @@ export declare const automationRoutes: Elysia<"/automation", {
                 body: unknown;
                 params: {};
                 query: {
-                    type?: "email" | "scrape" | "job_apply" | undefined;
-                    status?: "success" | "error" | "pending" | "running" | undefined;
+                    type?: "scrape" | "job_apply" | "email" | undefined;
+                    status?: "success" | "pending" | "running" | "error" | undefined;
                 };
                 headers: unknown;
                 response: {
                     200: {
-                        progress: number | null;
+                        id: string;
+                        aborted: boolean;
                         error: string | {
                             details?: {} | undefined;
+                            source: string;
                             message: string;
                             code: string;
                         } | null;
-                        type: "email" | "scrape" | "job_apply";
-                        output: {
-                            [x: string]: unknown;
-                        } | null;
+                        progress: number | null;
                         input: {
                             [x: string]: unknown;
                         } | null;
-                        id: string;
-                        aborted: boolean;
+                        output: {
+                            [x: string]: unknown;
+                        } | null;
+                        type: "scrape" | "job_apply" | "email";
                         createdAt: string;
                         updatedAt: string;
-                        status: "success" | "error" | "pending" | "running";
+                        status: "success" | "pending" | "running" | "error";
                         screenshots: string[] | null;
                         totalSteps: number | null;
                         jobId: string | null;
@@ -326,24 +329,25 @@ export declare const automationRoutes: Elysia<"/automation", {
                     headers: unknown;
                     response: {
                         200: {
-                            progress: number | null;
+                            id: string;
+                            aborted: boolean;
                             error: string | {
                                 details?: {} | undefined;
+                                source: string;
                                 message: string;
                                 code: string;
                             } | null;
-                            type: "email" | "scrape" | "job_apply";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
+                            progress: number | null;
                             input: {
                                 [x: string]: unknown;
                             } | null;
-                            id: string;
-                            aborted: boolean;
+                            output: {
+                                [x: string]: unknown;
+                            } | null;
+                            type: "scrape" | "job_apply" | "email";
                             createdAt: string;
                             updatedAt: string;
-                            status: "success" | "error" | "pending" | "running";
+                            status: "success" | "pending" | "running" | "error";
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;

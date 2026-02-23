@@ -1,6 +1,6 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { generateId } from "@bao/shared";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import { resumes } from "../db/schema/resumes";
@@ -63,6 +63,11 @@ const runEmailResponseStub: RunEmailResponse = async (_payload) => {
 
 let originalRunJobApply: RunJobApply | undefined;
 let originalRunEmailResponse: RunEmailResponse | undefined;
+const CLEANUP_AUTOMATION_TYPES = ["job_apply", "email"] as const;
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
 
 const requestStatusBody = async <T>(
   method: string,
@@ -77,14 +82,14 @@ const requestStatusBody = async <T>(
     }),
   );
   const payload = await response.text();
-  const parsedPayload = await Promise.resolve(payload)
-    .then((content) => ({ ok: true as const, value: JSON.parse(content) as T }))
-    .catch(() => ({ ok: false as const }));
+  const parsedPayloadResult = await settlePromise(
+    Promise.resolve(payload).then((content) => JSON.parse(content) as T),
+  );
 
-  if (parsedPayload.ok) {
+  if (parsedPayloadResult.status === "fulfilled") {
     return {
       status: response.status,
-      body: parsedPayload.value,
+      body: parsedPayloadResult.value,
     };
   }
 
@@ -106,6 +111,13 @@ beforeAll(async () => {
 
   await db.insert(resumes).values({ id: resumeId });
   app = new Elysia({ prefix: "/api" }).use(routesModule.automationRoutes);
+});
+
+beforeEach(async () => {
+  await db
+    .delete(automationRuns)
+    .where(inArray(automationRuns.type, [...CLEANUP_AUTOMATION_TYPES]));
+  createdRunIds.length = 0;
 });
 
 afterAll(async () => {
@@ -214,16 +226,15 @@ describe("automation routes", () => {
 
   test("POST /api/automation/job-apply/schedule creates a pending run", async () => {
     const runAt = new Date(Date.now() + 300_000).toISOString();
-    const res = await requestJson<{ id: string; status: "pending"; input: Record<string, unknown> | null }>(
-      app,
-      "POST",
-      "/api/automation/job-apply/schedule",
-      {
-        jobUrl: "https://example.com/careers/engineering",
-        resumeId,
-        runAt,
-      },
-    );
+    const res = await requestJson<{
+      id: string;
+      status: "pending";
+      input: Record<string, unknown> | null;
+    }>(app, "POST", "/api/automation/job-apply/schedule", {
+      jobUrl: "https://example.com/careers/engineering",
+      resumeId,
+      runAt,
+    });
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe("pending");

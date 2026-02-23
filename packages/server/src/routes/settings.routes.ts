@@ -1,14 +1,14 @@
+import type { AIProviderType, AutomationSettings, NotificationPreferences } from "@bao/shared";
 import {
-  APP_LANGUAGE_CODES,
-  AUTOMATION_BROWSER_OPTIONS,
-  SPEECH_PROVIDER_OPTIONS,
   AI_PROVIDER_ID_LIST,
   AI_PROVIDER_TEST_STRATEGY_BY_ID,
+  APP_LANGUAGE_CODES,
+  AUTOMATION_BROWSER_OPTIONS,
+  automationSettingsSchema,
   DEFAULT_NOTIFICATION_PREFERENCES,
   DEFAULT_SETTINGS_ID,
-  automationSettingsSchema,
+  SPEECH_PROVIDER_OPTIONS,
 } from "@bao/shared";
-import type { AIProviderType, AutomationSettings, NotificationPreferences } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
@@ -81,6 +81,11 @@ const [AUTOMATION_BROWSER_CHROME, AUTOMATION_BROWSER_CHROMIUM, AUTOMATION_BROWSE
   AUTOMATION_BROWSER_IDS;
 const [APP_LANGUAGE_EN_US, APP_LANGUAGE_ES_ES, APP_LANGUAGE_FR_FR, APP_LANGUAGE_JA_JP] =
   LANGUAGE_CODES;
+
+const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
 
 const speechProviderBodySchema = t.Union([
   t.Literal(SPEECH_PROVIDER_BROWSER),
@@ -496,14 +501,12 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       const requestUrl = strategy.buildUrl(body.key, endpointInput);
       const requestInit = strategy.buildInit(body.key);
 
-      const response = await Promise.resolve()
-        .then(() => fetch(requestUrl, requestInit))
-        .catch(() => null);
-      if (!response) {
+      const responseResult = await settle(fetch(requestUrl, requestInit));
+      if (responseResult.status === "rejected") {
         return { valid: false, provider: body.provider };
       }
 
-      return { valid: strategy.isSuccess(response.status), provider: body.provider };
+      return { valid: strategy.isSuccess(responseResult.value.status), provider: body.provider };
     },
     {
       body: t.Object({

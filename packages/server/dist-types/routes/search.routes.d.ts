@@ -20,8 +20,8 @@ export declare const searchRoutes: Elysia<"/search", {
             body: unknown;
             params: {};
             query: {
-                q?: string | undefined;
                 types?: string | undefined;
+                q?: string | undefined;
             };
             headers: unknown;
             response: {

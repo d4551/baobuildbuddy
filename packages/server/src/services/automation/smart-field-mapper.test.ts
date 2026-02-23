@@ -15,6 +15,24 @@ const createFetchMock = (body: string, status: number): typeof fetch =>
     },
   );
 
+const createSequencedFetchMock = (
+  responses: Array<{ body: string; status: number }>,
+): typeof fetch => {
+  let index = 0;
+  return Object.assign(
+    async (_input: string | URL | Request, _init?: RequestInit) => {
+      const response = responses[Math.min(index, responses.length - 1)];
+      index += 1;
+      return new Response(response.body, {
+        status: response.status,
+      });
+    },
+    {
+      preconnect: originalFetch.preconnect,
+    },
+  );
+};
+
 afterEach(() => {
   globalThis.fetch = originalFetch;
 });
@@ -66,6 +84,20 @@ describe("smartFieldMapper", () => {
 
     const result = await smartFieldMapper.analyze("https://example.com/job", ["email"], aiClient);
     expect(callCount).toBeGreaterThanOrEqual(2);
+    expect(result.email?.[0]).toBe('input[name="email"]');
+  });
+
+  test("retries page fetch for transient status codes before AI analysis", async () => {
+    globalThis.fetch = createSequencedFetchMock([
+      { body: "service unavailable", status: 503 },
+      { body: "<form><input name='email' /></form>", status: 200 },
+    ]);
+
+    const aiClient: FieldMapperAIClient = {
+      generate: async () => createAiResponse('{"email":["input[name=\\"email\\"]"]}'),
+    };
+
+    const result = await smartFieldMapper.analyze("https://example.com/job", ["email"], aiClient);
     expect(result.email?.[0]).toBe('input[name="email"]');
   });
 });

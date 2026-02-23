@@ -3,6 +3,7 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
+
 /**
  * AI-Driven CV Builder - wizard flow:
  * 1) Select target role/studio

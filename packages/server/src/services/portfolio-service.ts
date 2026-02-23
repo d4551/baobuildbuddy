@@ -1,5 +1,5 @@
-import { generateId } from "@bao/shared";
 import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
+import { generateId } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { portfolioProjects, portfolios } from "../db/schema";

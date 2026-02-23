@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { useTemplateRef } from "vue";
-import { API_ENDPOINTS, safeParseJson, type JsonObject, type JsonValue } from "@bao/shared";
+import { API_ENDPOINTS, type JsonObject, type JsonValue, safeParseJson } from "@bao/shared";
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useAuth } from "~/composables/useAuth";
 import { useFocusTrap } from "~/composables/useFocusTrap";
 import { useScrollSpy } from "~/composables/useScrollSpy";
 import { useToast } from "~/composables/useToast";
 import { resolveApiEndpoint } from "~/utils/endpoints";
-import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
-const auth = useAuth();
 const toast = useToast();
 
 definePageMeta({
@@ -109,24 +105,29 @@ interface ApiEndpointGroup {
 }
 
 interface FetchEndpointResultOk {
-  readonly ok: true;
   readonly statusCode: number;
   readonly statusText: string;
   readonly headers: Record<string, string>;
   readonly body: string;
   readonly durationMs: number;
+  readonly url: string;
+  readonly method: string;
 }
-
-interface FetchEndpointResultErr {
-  readonly ok: false;
-  readonly errorMessage: string;
-}
-
-type FetchEndpointResult = FetchEndpointResultOk | FetchEndpointResultErr;
 
 const API_DOCS_ASYNC_DATA_KEY = "api-docs-json";
 const UNKNOWN_TAG_LABEL_KEY = "apiDocs.groups.untagged" as const;
-const HTTP_METHODS_ORDER = ["get", "post", "put", "patch", "delete", "head", "options", "trace"] as const;
+const API_TESTER_DIALOG_TITLE_ID = "api-endpoint-tester-title";
+const API_TESTER_DIALOG_DESCRIPTION_ID = "api-endpoint-tester-description";
+const HTTP_METHODS_ORDER = [
+  "get",
+  "post",
+  "put",
+  "patch",
+  "delete",
+  "head",
+  "options",
+  "trace",
+] as const;
 const HTTP_METHOD_CLASSES: Record<ApiHttpMethod, string> = {
   get: "badge-success",
   post: "badge-info",
@@ -137,7 +138,6 @@ const HTTP_METHOD_CLASSES: Record<ApiHttpMethod, string> = {
   options: "badge-neutral",
   trace: "badge-neutral",
 };
-const EMPTY_TEXT_LABEL = "—";
 
 const route = useRoute();
 const config = useRuntimeConfig();
@@ -145,8 +145,12 @@ const requestUrl = useRequestURL();
 const apiBase = String(config.public.apiBase || "/");
 
 const endpointTesterDialogRef = useTemplateRef<HTMLDialogElement>("apiEndpointTesterDialog");
-const lastFocusedElement = ref<HTMLElement | null>(null);
-useFocusTrap(endpointTesterDialogRef, computed(() => Boolean(endpointTesterDialogRef.value?.open)));
+const testerInvoker = ref<HTMLElement | null>(null);
+const testerDialogOpen = ref(false);
+useFocusTrap(
+  endpointTesterDialogRef,
+  computed(() => testerDialogOpen.value),
+);
 
 const {
   activeSectionId,
@@ -166,6 +170,31 @@ const isOpenApiParameterIn = (value: unknown): value is OpenApiParameter["in"] =
 
 const isApiHttpMethod = (value: string): value is ApiHttpMethod =>
   HTTP_METHODS_ORDER.includes(value as ApiHttpMethod);
+
+const toErrorStatusCode = (error: unknown): number | null => {
+  if (!isRecord(error)) {
+    return null;
+  }
+  const status = error.status;
+  if (typeof status === "number") {
+    return status;
+  }
+  const statusCode = error.statusCode;
+  if (typeof statusCode === "number") {
+    return statusCode;
+  }
+  return null;
+};
+
+const toUiStateFromStatusCode = (statusCode: number | null): ApiDocsUiState => {
+  if (statusCode === 401) {
+    return "unauthorized";
+  }
+  if (statusCode === null || statusCode >= 500 || statusCode === 429) {
+    return "errorRetryable";
+  }
+  return "errorNonRetryable";
+};
 
 const normalizePathForId = (path: string): string =>
   path
@@ -282,7 +311,9 @@ const getOperation = (
       : undefined,
     deprecated: typeof value.deprecated === "boolean" ? value.deprecated : undefined,
     parameters: mergedParameters,
-    requestBody: isRecord(value.requestBody) ? (value.requestBody as OpenApiRequestBody) : undefined,
+    requestBody: isRecord(value.requestBody)
+      ? (value.requestBody as OpenApiRequestBody)
+      : undefined,
     responses: isRecord(value.responses)
       ? (value.responses as Record<string, OpenApiResponse>)
       : undefined,
@@ -292,7 +323,8 @@ const getOperation = (
 const collectParameters = (
   parameters: readonly OpenApiParameter[],
   inValue: OpenApiParameter["in"],
-): OpenApiParameter[] => dedupeParameters(parameters.filter((parameter) => parameter.in === inValue));
+): OpenApiParameter[] =>
+  dedupeParameters(parameters.filter((parameter) => parameter.in === inValue));
 
 const getParameterValueDefault = (value: unknown): string => {
   if (typeof value === "string") {
@@ -313,419 +345,349 @@ const requestBodyTemplate = (requestBody: OpenApiRequestBody | undefined): strin
   if (!isRecord(jsonBody)) {
     return "";
   }
-
-  const candidate =
-    jsonBody.example ?? Object.values(jsonBody.examples ?? {})[0]?.value;
+  const candidate = jsonBody.example ?? Object.values(jsonBody.examples ?? {})[0]?.value;
   if (candidate === undefined) {
     return "";
-  }
-  if (typeof candidate === "string") {
-    return candidate;
   }
   return JSON.stringify(candidate, null, 2);
 };
 
-const {
-  data: rawApiSpecData,
-  status: apiSpecStatus,
-  error: apiSpecError,
-  refresh: refreshApiSpec,
-} = await useAsyncData(
-  API_DOCS_ASYNC_DATA_KEY,
-  async () => $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJson)),
-  { server: true, lazy: false },
-);
-
-const openApiSpec = computed<OpenApiSpec | null>(() => readOpenApiSpec(rawApiSpecData.value));
-
-const endpointGroups = computed<ApiEndpointGroup[]>(() => {
-  const paths = openApiSpec.value?.paths ?? {};
-  const grouped = new Map<string, ApiEndpoint[]>();
-  const methodOrder = new Map<ApiHttpMethod, number>(
-    HTTP_METHODS_ORDER.map((method, index) => [method, index]),
+const fetchOpenApiSpec = (): Promise<unknown> =>
+  $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJson)).then(
+    (value) => value,
+    () => $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJsonLegacy)),
   );
 
-  for (const [path, pathItem] of Object.entries(paths)) {
+const {
+  data: rawSpec,
+  status: rawSpecStatus,
+  error: rawSpecError,
+  refresh: refreshSpec,
+} = await useAsyncData<unknown>(API_DOCS_ASYNC_DATA_KEY, fetchOpenApiSpec, {
+  server: true,
+  default: () => null,
+});
+
+const parsedSpec = computed(() => readOpenApiSpec(rawSpec.value));
+const endpointGroups = computed<ApiEndpointGroup[]>(() => {
+  const spec = parsedSpec.value;
+  if (!spec?.paths) {
+    return [];
+  }
+
+  const grouped = new Map<string, ApiEndpoint[]>();
+  for (const [path, pathItem] of Object.entries(spec.paths)) {
     if (!isRecord(pathItem)) {
       continue;
     }
-    const inheritedPathParameters = getPathParameters(pathItem);
-    for (const [rawMethod, rawOperation] of Object.entries(pathItem)) {
-      if (!isApiHttpMethod(rawMethod)) {
-        continue;
-      }
-      const operation = getOperation(rawOperation, inheritedPathParameters);
-      if (!operation) {
+
+    const pathParameters = getPathParameters(pathItem);
+    for (const method of HTTP_METHODS_ORDER) {
+      const operation = getOperation(pathItem[method], pathParameters);
+      if (!operation || !isApiHttpMethod(method)) {
         continue;
       }
 
-      const pathParameters = dedupeCaseInsensitiveStrings([
-        ...collectPathParameters(path),
-        ...collectParameters(operation.parameters ?? [], "path").map((parameter) => parameter.name),
-      ]);
+      const endpointTags = dedupeCaseInsensitiveStrings(operation.tags ?? []);
+      const groupLabel = endpointTags[0] ?? t(UNKNOWN_TAG_LABEL_KEY);
+      const pathParameterNames = dedupeCaseInsensitiveStrings(collectPathParameters(path));
       const queryParameters = collectParameters(operation.parameters ?? [], "query");
-      const requestBody = operation.requestBody;
-      const groupLabel = operation.tags?.[0] ?? t(UNKNOWN_TAG_LABEL_KEY);
-      const currentGroup = grouped.get(groupLabel) ?? [];
-      currentGroup.push({
-        id: `${rawMethod}-${normalizePathForId(path)}`,
+      const endpoint: ApiEndpoint = {
+        id: `${groupLabel.toLowerCase().replace(/\s+/gu, "-")}-${method}-${normalizePathForId(path)}`,
         path,
-        method: rawMethod,
+        method,
         operation,
         groupLabel,
-        pathParameters,
+        pathParameters: pathParameterNames,
         queryParameters,
-        requestBodyTemplate: requestBodyTemplate(requestBody),
-        requestBodyRequired: Boolean(requestBody?.required),
-      });
-      grouped.set(groupLabel, currentGroup);
+        requestBodyTemplate: requestBodyTemplate(operation.requestBody),
+        requestBodyRequired: Boolean(operation.requestBody?.required),
+      };
+
+      const groupEndpoints = grouped.get(groupLabel);
+      if (groupEndpoints) {
+        groupEndpoints.push(endpoint);
+      } else {
+        grouped.set(groupLabel, [endpoint]);
+      }
     }
   }
 
   return Array.from(grouped.entries())
-    .sort(([left], [right]) => left.localeCompare(right, "en"))
+    .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([label, endpoints]) => ({
-      id: `group-${normalizePathForId(label)}`,
+      id: normalizePathForId(label),
       label,
       endpoints: endpoints.sort((left, right) => {
-        const pathCompare = left.path.localeCompare(right.path, "en");
-        if (pathCompare !== 0) {
-          return pathCompare;
+        const methodOrder =
+          HTTP_METHODS_ORDER.indexOf(left.method) - HTTP_METHODS_ORDER.indexOf(right.method);
+        if (methodOrder !== 0) {
+          return methodOrder;
         }
-        return (methodOrder.get(left.method) ?? 0) - (methodOrder.get(right.method) ?? 0);
+        return left.path.localeCompare(right.path);
       }),
     }));
 });
 
-const apiDocsUiState = computed<ApiDocsUiState>(() => {
-  if (apiSpecStatus.value === "pending") {
+const endpointCount = computed(() =>
+  endpointGroups.value.reduce((count, group) => count + group.endpoints.length, 0),
+);
+
+const docsUiState = computed<ApiDocsUiState>(() => {
+  if (rawSpecStatus.value === "pending") {
     return "loading";
   }
-  if (apiSpecStatus.value === "idle") {
-    return "idle";
+  if (rawSpecError.value) {
+    return toUiStateFromStatusCode(toErrorStatusCode(rawSpecError.value));
   }
-  if (apiSpecError.value) {
-    const errorObject = apiSpecError.value as { status?: number; statusCode?: number };
-    const statusCode =
-      typeof errorObject.status === "number"
-        ? errorObject.status
-        : typeof errorObject.statusCode === "number"
-          ? errorObject.statusCode
-          : null;
-    if (statusCode === 401) {
-      return "unauthorized";
-    }
-    if (statusCode === null || statusCode >= 500) {
-      return "errorRetryable";
-    }
-    return "errorNonRetryable";
-  }
-  if (endpointGroups.value.length === 0) {
+  if (endpointCount.value === 0) {
     return "empty";
   }
   return "success";
 });
 
-const apiDocsTitle = computed<string>(() => {
-  const infoTitle = openApiSpec.value?.info?.title;
-  return infoTitle?.trim().length ? infoTitle : t("apiDocs.title");
-});
-
 const selectedEndpoint = ref<ApiEndpoint | null>(null);
 const testerState = ref<ApiTesterState>("idle");
+const testerErrorMessage = ref("");
+const testerResponse = ref<FetchEndpointResultOk | null>(null);
 const pathParameterValues = ref<Record<string, string>>({});
 const queryParameterValues = ref<Record<string, string>>({});
-const requestBodyText = ref("");
-const testStatusCode = ref<number | null>(null);
-const testStatusText = ref("");
-const testDurationMs = ref<number | null>(null);
-const testResponseBody = ref("");
-const testResponseHeaders = ref<Record<string, string>>({});
-const testErrorMessage = ref("");
-const testRequestMethod = ref<ApiHttpMethod | null>(null);
-const testRequestUrl = ref("");
+const requestBodyValue = ref("");
 
-const endpointMethodClass = (method: ApiHttpMethod): string => HTTP_METHOD_CLASSES[method];
-const formatMethodLabel = (method: ApiHttpMethod): string => method.toUpperCase();
-
-const selectedOperationDescription = computed<string>(() => {
-  const endpoint = selectedEndpoint.value;
-  if (!endpoint) {
+const testerStateLabel = computed(() => {
+  if (testerState.value === "idle") {
+    return t("apiDocs.tester.steps.configure");
+  }
+  if (testerState.value === "success") {
+    return t("apiDocs.tester.requestSuccessToast");
+  }
+  if (testerState.value === "loading") {
+    return t("apiDocs.state.loading");
+  }
+  if (testerState.value === "empty") {
+    return t("apiDocs.state.empty");
+  }
+  return t(`apiDocs.state.${testerState.value}`);
+});
+const activeEndpointId = computed(() => {
+  if (activeSectionId.value.length > 0) {
+    return activeSectionId.value;
+  }
+  const firstGroup = endpointGroups.value[0];
+  if (!firstGroup) {
     return "";
   }
-  return (
-    endpoint.operation.description?.trim() ||
-    endpoint.operation.summary?.trim() ||
-    t("apiDocs.endpoint.noDescription")
-  );
+  return firstGroup.endpoints[0]?.id ?? "";
 });
 
-const selectedPathParameters = computed<string[]>(() => selectedEndpoint.value?.pathParameters ?? []);
-const selectedQueryParameters = computed<readonly OpenApiParameter[]>(
-  () => selectedEndpoint.value?.queryParameters ?? [],
-);
-const selectedRequestBodyTemplate = computed<string>(
-  () => selectedEndpoint.value?.requestBodyTemplate ?? "",
-);
-const responseHeaderEntries = computed<readonly [string, string][]>(
-  () => Object.entries(testResponseHeaders.value),
-);
-const hasResponseHeaders = computed<boolean>(() => responseHeaderEntries.value.length > 0);
-const hasSelectedEndpointRequestTrace = computed<boolean>(
-  () => testRequestMethod.value !== null && testRequestUrl.value.length > 0,
-);
-const endpointHasBody = computed<boolean>(
-  () =>
-    (selectedEndpoint.value?.requestBodyTemplate?.length ?? 0) > 0 ||
-    Boolean(selectedEndpoint.value?.requestBodyRequired),
-);
+const methodBadgeClass = (method: ApiHttpMethod): string =>
+  `badge badge-sm ${HTTP_METHOD_CLASSES[method]} font-semibold`;
 
-const canRunEndpoint = computed<boolean>(() => {
-  const endpoint = selectedEndpoint.value;
-  if (!endpoint) {
-    return false;
-  }
-  if (endpoint.pathParameters.some((name) => pathParameterValues.value[name]?.trim().length === 0)) {
-    return false;
-  }
-  if (!endpoint.requestBodyRequired) {
-    if (endpoint.requestBodyTemplate.length > 0 && requestBodyText.value.trim().length > 0) {
-      return safeParseJson(requestBodyText.value) !== null;
+const methodLabel = (method: ApiHttpMethod): string => method.toUpperCase();
+
+const scrollToEndpoint = (sectionId: string): void => {
+  scrollToSection(sectionId, {
+    smooth: true,
+    focus: true,
+    updateHash: true,
+  });
+};
+
+const syncScrollSpyFromCurrentHash = (): void => {
+  if (!syncFromHash(route.hash)) {
+    const firstGroup = endpointGroups.value[0];
+    const firstEndpointId = firstGroup?.endpoints[0]?.id;
+    if (firstEndpointId) {
+      scrollToSection(firstEndpointId, {
+        smooth: false,
+        focus: false,
+        updateHash: false,
+      });
     }
-    return true;
   }
-  if (requestBodyText.value.trim().length === 0) {
-    return false;
-  }
-  return safeParseJson(requestBodyText.value) !== null;
-});
-
-const requestBodyDisplay = computed<string>(() => {
-  if (testResponseBody.value.length === 0) {
-    return "";
-  }
-  const parsedResponse = safeParseJson(testResponseBody.value);
-  return parsedResponse === null ? testResponseBody.value : JSON.stringify(parsedResponse, null, 2);
-});
-
-const showTesterResponsePanel = computed<boolean>(
-  () =>
-    testerState.value === "success" ||
-    testerState.value === "empty" ||
-    testerState.value === "errorRetryable" ||
-    testerState.value === "errorNonRetryable" ||
-    testerState.value === "unauthorized",
-);
-
-const responseStatusText = computed<{ status: number | string; text: string }>(() => ({
-  status: testStatusCode.value ?? EMPTY_TEXT_LABEL,
-  text: testStatusText.value || EMPTY_TEXT_LABEL,
-}));
-
-const lifecycleStepClasses = computed<[string, string, string]>(() => {
-  const configureClass = "step step-primary";
-  const sendClass =
-    testerState.value === "loading" ||
-    testerState.value === "success" ||
-    testerState.value === "empty" ||
-    testerState.value === "errorRetryable" ||
-    testerState.value === "errorNonRetryable" ||
-    testerState.value === "unauthorized"
-      ? "step step-primary"
-      : "step";
-  const responseClass =
-    testerState.value === "success"
-      ? "step step-success"
-      : testerState.value === "empty"
-        ? "step step-warning"
-        : testerState.value === "errorRetryable" ||
-            testerState.value === "errorNonRetryable" ||
-            testerState.value === "unauthorized"
-          ? "step step-error"
-          : "step";
-  return [configureClass, sendClass, responseClass];
-});
-
-const resetEndpointTesterState = (): void => {
-  testerState.value = "idle";
-  testStatusCode.value = null;
-  testStatusText.value = "";
-  testDurationMs.value = null;
-  testResponseBody.value = "";
-  testResponseHeaders.value = {};
-  testErrorMessage.value = "";
-  testRequestMethod.value = null;
-  testRequestUrl.value = "";
 };
 
-const hydrateEndpointInputs = (endpoint: ApiEndpoint): void => {
-  const pathDefaults: Record<string, string> = {};
-  endpoint.pathParameters.forEach((parameterName) => {
-    pathDefaults[parameterName] = "";
-  });
-
-  const queryDefaults: Record<string, string> = {};
-  endpoint.queryParameters.forEach((parameter) => {
-    queryDefaults[parameter.name] = getParameterValueDefault(parameter.example);
-  });
-
-  pathParameterValues.value = pathDefaults;
-  queryParameterValues.value = queryDefaults;
-  requestBodyText.value = endpoint.requestBodyTemplate;
+const resolvePathWithParameters = (
+  endpoint: ApiEndpoint,
+  values: Record<string, string>,
+): string | null => {
+  let outputPath = endpoint.path;
+  for (const name of endpoint.pathParameters) {
+    const value = values[name]?.trim() ?? "";
+    if (value.length === 0) {
+      return null;
+    }
+    outputPath = outputPath.replace(`{${name}}`, encodeURIComponent(value));
+  }
+  return outputPath;
 };
 
-const openEndpointTester = (endpoint: ApiEndpoint): void => {
+const buildQueryString = (
+  queryParameters: readonly OpenApiParameter[],
+  values: Record<string, string>,
+): string => {
+  const urlSearch = new URLSearchParams();
+  for (const parameter of queryParameters) {
+    const value = values[parameter.name]?.trim();
+    if (!value) {
+      continue;
+    }
+    urlSearch.append(parameter.name, value);
+  }
+  const serialized = urlSearch.toString();
+  return serialized.length > 0 ? `?${serialized}` : "";
+};
+
+const isRetryableStatusCode = (statusCode: number): boolean =>
+  statusCode === 429 || statusCode >= 500;
+
+const openEndpointTester = (endpoint: ApiEndpoint, invoker: EventTarget | null): void => {
   selectedEndpoint.value = endpoint;
-  hydrateEndpointInputs(endpoint);
-  resetEndpointTesterState();
-  if (import.meta.client && document.activeElement instanceof HTMLElement) {
-    lastFocusedElement.value = document.activeElement;
-  }
-  nextTick(() => {
-    const dialog = endpointTesterDialogRef.value;
-    if (dialog && !dialog.open) {
-      dialog.showModal();
-    }
-  });
-};
+  testerState.value = "idle";
+  testerErrorMessage.value = "";
+  testerResponse.value = null;
+  testerInvoker.value = invoker instanceof HTMLElement ? invoker : null;
 
-const handleEndpointTesterClose = (): void => {
-  selectedEndpoint.value = null;
-  resetEndpointTesterState();
-  nextTick(() => {
-    lastFocusedElement.value?.focus();
+  const initialPathValues: Record<string, string> = {};
+  for (const name of endpoint.pathParameters) {
+    initialPathValues[name] = "";
+  }
+  pathParameterValues.value = initialPathValues;
+
+  const initialQueryValues: Record<string, string> = {};
+  for (const parameter of endpoint.queryParameters) {
+    initialQueryValues[parameter.name] = getParameterValueDefault(parameter.example);
+  }
+  queryParameterValues.value = initialQueryValues;
+  requestBodyValue.value = endpoint.requestBodyTemplate;
+
+  void nextTick(() => {
+    const dialog = endpointTesterDialogRef.value;
+    if (!dialog || dialog.open) {
+      return;
+    }
+    dialog.showModal();
+    testerDialogOpen.value = true;
   });
 };
 
 const closeEndpointTester = (): void => {
   const dialog = endpointTesterDialogRef.value;
-  if (dialog?.open) {
+  if (!dialog) {
+    testerDialogOpen.value = false;
+    return;
+  }
+  if (dialog.open) {
     dialog.close();
-  } else {
-    handleEndpointTesterClose();
+    return;
   }
+  testerDialogOpen.value = false;
 };
 
-const resolveTesterPath = (endpoint: ApiEndpoint): string => {
-  let path = endpoint.path;
-  for (const parameterName of endpoint.pathParameters) {
-    const value = pathParameterValues.value[parameterName]?.trim();
-    if (!value) {
-      return "";
-    }
-    path = path.replaceAll(`{${parameterName}}`, encodeURIComponent(value));
+const handleEndpointTesterClosed = (): void => {
+  testerDialogOpen.value = false;
+  const invoker = testerInvoker.value;
+  testerInvoker.value = null;
+  if (!invoker) {
+    return;
   }
-  return path;
-};
-
-const buildTesterUrl = (endpoint: ApiEndpoint, basePath: string): string => {
-  const query = new URLSearchParams();
-  endpoint.queryParameters.forEach((parameter) => {
-    const value = queryParameterValues.value[parameter.name]?.trim();
-    if (value) {
-      query.set(parameter.name, value);
-    }
+  void nextTick(() => {
+    invoker.focus();
   });
-  const queryString = query.toString();
-  return queryString.length > 0
-    ? `${basePath}${basePath.includes("?") ? "&" : "?"}${queryString}`
-    : basePath;
 };
-
-const isRetryableStatus = (statusCode: number): boolean =>
-  statusCode === 408 || statusCode === 429 || statusCode >= 500;
 
 const executeEndpointRequest = async (): Promise<void> => {
   const endpoint = selectedEndpoint.value;
-  if (!endpoint || testerState.value === "loading" || !canRunEndpoint.value) {
+  if (!endpoint) {
     return;
   }
 
-  const resolvedPath = resolveTesterPath(endpoint);
+  const resolvedPath = resolvePathWithParameters(endpoint, pathParameterValues.value);
   if (!resolvedPath) {
     testerState.value = "errorNonRetryable";
-    testErrorMessage.value = t("apiDocs.tester.invalidPath");
-    toast.warning(t("apiDocs.tester.requestErrorToast"));
+    testerErrorMessage.value = t("apiDocs.tester.invalidPath");
+    toast.error(t("apiDocs.tester.requestErrorToast"));
+    return;
+  }
+
+  const queryString = buildQueryString(endpoint.queryParameters, queryParameterValues.value);
+  const requestPath = `${resolvedPath}${queryString}`;
+  const endpointUrl = resolveApiEndpoint(apiBase, requestUrl, requestPath);
+  const payloadText = requestBodyValue.value.trim();
+  const shouldSendBody = endpoint.requestBodyRequired || payloadText.length > 0;
+  const parsedBody = shouldSendBody
+    ? safeParseJson(payloadText.length > 0 ? payloadText : "{}")
+    : null;
+
+  if (shouldSendBody && parsedBody === null) {
+    testerState.value = "errorNonRetryable";
+    testerErrorMessage.value = t("apiDocs.tester.requestFailure");
+    toast.error(t("apiDocs.tester.requestErrorToast"));
     return;
   }
 
   testerState.value = "loading";
-  testErrorMessage.value = "";
-  testStatusCode.value = null;
-  testStatusText.value = "";
-  testResponseBody.value = "";
-  testResponseHeaders.value = {};
-  testRequestMethod.value = endpoint.method;
-
-  const endpointUrl = buildTesterUrl(endpoint, resolveApiEndpoint(apiBase, requestUrl, resolvedPath));
-  testRequestUrl.value = endpointUrl;
-  const headers: Record<string, string> = {};
-  const apiKey = auth.getStoredApiKey();
-  if (apiKey) {
-    headers.Authorization = `Bearer ${apiKey}`;
-  }
-
-  const requestBody = endpointHasBody.value ? requestBodyText.value.trim() : "";
-  if (requestBody.length > 0) {
-    headers["Content-Type"] = "application/json";
-  }
+  testerErrorMessage.value = "";
+  testerResponse.value = null;
 
   const startedAt = Date.now();
-  const fetchResult: FetchEndpointResult = await fetch(endpointUrl, {
-    method: formatMethodLabel(endpoint.method),
-    headers,
-    body: requestBody.length > 0 ? requestBody : undefined,
+  const responseResult = await fetch(endpointUrl, {
+    method: methodLabel(endpoint.method),
+    headers: {
+      Accept: "application/json",
+      ...(shouldSendBody ? { "Content-Type": "application/json" } : {}),
+    },
+    ...(shouldSendBody ? { body: JSON.stringify(parsedBody) } : {}),
+    credentials: "include",
   }).then(
     async (response) => {
-      const body = await response.text();
-      const responseHeaders: Record<string, string> = {};
+      const headers: Record<string, string> = {};
       response.headers.forEach((value, key) => {
-        responseHeaders[key] = value;
+        headers[key] = value;
       });
+      const body = await response.text();
       return {
-        ok: true,
-        statusCode: response.status,
-        statusText: response.statusText,
-        headers: responseHeaders,
-        body,
-        durationMs: Date.now() - startedAt,
+        ok: true as const,
+        payload: {
+          statusCode: response.status,
+          statusText: response.statusText,
+          headers,
+          body,
+          durationMs: Date.now() - startedAt,
+          url: endpointUrl,
+          method: methodLabel(endpoint.method),
+        } satisfies FetchEndpointResultOk,
       };
     },
     (error: unknown) => ({
-      ok: false,
-      errorMessage: getErrorMessage(error, t("apiDocs.tester.requestFailure")),
+      ok: false as const,
+      errorMessage: error instanceof Error ? error.message : t("apiDocs.tester.requestFailure"),
     }),
   );
 
-  if (!fetchResult.ok) {
+  if (!responseResult.ok) {
     testerState.value = "errorRetryable";
-    testErrorMessage.value = fetchResult.errorMessage;
-    testDurationMs.value = Date.now() - startedAt;
+    testerErrorMessage.value = responseResult.errorMessage;
     toast.error(t("apiDocs.tester.requestErrorToast"));
     return;
   }
 
-  testStatusCode.value = fetchResult.statusCode;
-  testStatusText.value = fetchResult.statusText;
-  testResponseHeaders.value = fetchResult.headers;
-  testResponseBody.value = fetchResult.body;
-  testDurationMs.value = fetchResult.durationMs;
-
-  if (fetchResult.statusCode === 401) {
-    testerState.value = "unauthorized";
+  testerResponse.value = responseResult.payload;
+  const isSuccessStatusCode =
+    responseResult.payload.statusCode >= 200 && responseResult.payload.statusCode < 300;
+  if (!isSuccessStatusCode) {
+    testerState.value = toUiStateFromStatusCode(responseResult.payload.statusCode);
+    if (testerState.value === "loading" || testerState.value === "success") {
+      testerState.value = isRetryableStatusCode(responseResult.payload.statusCode)
+        ? "errorRetryable"
+        : "errorNonRetryable";
+    }
+    testerErrorMessage.value = responseResult.payload.body || t("apiDocs.tester.errorFallback");
     toast.error(t("apiDocs.tester.requestErrorToast"));
     return;
   }
 
-  if (fetchResult.statusCode >= 400) {
-    testerState.value = isRetryableStatus(fetchResult.statusCode)
-      ? "errorRetryable"
-      : "errorNonRetryable";
-    toast.error(t("apiDocs.tester.requestErrorToast"));
-    return;
-  }
-
-  if (fetchResult.body.trim().length === 0) {
+  if (responseResult.payload.body.trim().length === 0) {
     testerState.value = "empty";
     toast.info(t("apiDocs.tester.emptyResponseToast"));
     return;
@@ -735,246 +697,314 @@ const executeEndpointRequest = async (): Promise<void> => {
   toast.success(t("apiDocs.tester.requestSuccessToast"));
 };
 
+const formattedResponseBody = computed(() => {
+  const body = testerResponse.value?.body ?? "";
+  if (!body.trim()) {
+    return "";
+  }
+  const parsedBody = safeParseJson(body);
+  if (parsedBody === null) {
+    return body;
+  }
+  return JSON.stringify(parsedBody, null, 2);
+});
+
 watch(
-  endpointGroups,
-  () => {
-    nextTick(() => {
-      startObserver();
-      refreshObserver();
-      const firstEndpoint = endpointGroups.value.flatMap((group) => group.endpoints)[0];
-      const restoredFromHash = syncFromHash(route.hash);
-      if (!restoredFromHash && firstEndpoint) {
-        scrollToSection(firstEndpoint.id, {
-          smooth: false,
-          focus: false,
-          updateHash: false,
-        });
-      }
-    });
+  [docsUiState, endpointGroups],
+  async ([stateValue]) => {
+    if (stateValue !== "success") {
+      stopObserver();
+      return;
+    }
+
+    await nextTick();
+    startObserver();
+    refreshObserver();
+    syncScrollSpyFromCurrentHash();
   },
-  { immediate: true, deep: true },
+  { immediate: true },
 );
 
 watch(
   () => route.hash,
-  (hash) => {
-    syncFromHash(hash);
+  (nextHash) => {
+    if (docsUiState.value !== "success") {
+      return;
+    }
+    syncFromHash(nextHash);
   },
 );
-
-onMounted(() => {
-  const firstEndpoint = endpointGroups.value.flatMap((group) => group.endpoints)[0];
-  const restoredFromHash = syncFromHash(route.hash);
-  if (!restoredFromHash && firstEndpoint) {
-    scrollToSection(firstEndpoint.id, {
-      smooth: false,
-      focus: false,
-      updateHash: false,
-    });
-  }
-  startObserver();
-});
 
 onBeforeUnmount(() => {
   stopObserver();
 });
-
-const uiStateMessageKey = computed(() => {
-  if (apiDocsUiState.value === "loading") return "apiDocs.state.loading";
-  if (apiDocsUiState.value === "errorRetryable") return "apiDocs.state.errorRetryable";
-  if (apiDocsUiState.value === "errorNonRetryable") return "apiDocs.state.errorNonRetryable";
-  if (apiDocsUiState.value === "unauthorized") return "apiDocs.state.unauthorized";
-  if (apiDocsUiState.value === "empty") return "apiDocs.state.empty";
-  return "";
-});
 </script>
 
 <template>
-  <div class="space-y-6">
-    <header>
-      <h1 id="api-docs-page-title" class="text-3xl font-bold">{{ apiDocsTitle }}</h1>
-      <p class="text-sm text-base-content/75">{{ t("apiDocs.intro") }}</p>
+  <div class="mx-auto max-w-[120rem] space-y-6">
+    <header class="space-y-2">
+      <h1 class="text-3xl font-bold">{{ t("apiDocs.title") }}</h1>
+      <p class="text-base-content/70">{{ t("apiDocs.intro") }}</p>
     </header>
 
-    <div v-if="apiDocsUiState !== 'success'" class="rounded-box bg-base-200 p-4">
-      <div
-        v-if="apiDocsUiState === 'loading' || apiDocsUiState === 'idle'"
-        class="flex items-center gap-3"
-        role="status"
-        aria-live="polite"
-      >
-        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
-        <span>{{ t("apiDocs.state.loading") }}</span>
-      </div>
-      <div v-else-if="apiDocsUiState === 'empty'" class="alert alert-info" role="status">
-        <span>{{ t("apiDocs.state.empty") }}</span>
-      </div>
-      <div
-        v-else
-        :class="{
-          'alert alert-warning': apiDocsUiState === 'errorRetryable' || apiDocsUiState === 'errorNonRetryable',
-          'alert alert-error': apiDocsUiState === 'unauthorized',
-        }"
-        role="alert"
-      >
-        <span>{{ t(uiStateMessageKey) }}</span>
-        <button
-          v-if="apiDocsUiState === 'errorRetryable'"
-          type="button"
-          class="btn btn-sm btn-outline"
-          :disabled="apiSpecStatus === 'pending'"
-          :aria-label="t('apiDocs.actions.retry')"
-          @click="refreshApiSpec()"
-        >
-          {{ t("apiDocs.actions.retry") }}
-        </button>
-      </div>
+    <div
+      v-if="docsUiState === 'loading'"
+      class="flex items-center gap-3"
+      role="status"
+      aria-live="polite"
+      :aria-label="t('apiDocs.state.loading')"
+    >
+      <span class="loading loading-spinner loading-md"></span>
+      <span>{{ t("apiDocs.state.loading") }}</span>
     </div>
 
-    <div v-else class="grid gap-6 lg:grid-cols-[280px_1fr]">
-      <aside :aria-label="t('apiDocs.a11y.endpointNavigation')" class="lg:sticky lg:top-20 lg:h-[calc(100vh-8rem)]">
-        <h2 class="mb-2 text-lg font-semibold">{{ t("apiDocs.endpointNavigator") }}</h2>
-        <ul class="menu rounded-box bg-base-200 p-2">
-          <li v-for="group in endpointGroups" :key="group.id">
-            <details open>
-              <summary>{{ group.label }}</summary>
-              <ul class="menu px-2 pb-2">
-                <li v-for="endpoint in group.endpoints" :key="endpoint.id">
-                  <button
-                    type="button"
-                    :aria-label="t('apiDocs.endpoint.openTesterAria', { method: endpoint.method.toUpperCase(), path: endpoint.path })"
-                    :aria-current="activeSectionId === endpoint.id ? 'location' : undefined"
-                    :class="{ active: activeSectionId === endpoint.id }"
-                    @click="scrollToSection(endpoint.id)"
-                  >
-                    <span :class="`badge badge-sm ${endpointMethodClass(endpoint.method)}`">
-                      {{ endpoint.method.toUpperCase() }}
-                    </span>
-                    <span class="truncate font-mono text-xs">{{ endpoint.path }}</span>
-                  </button>
-                </li>
-              </ul>
-            </details>
-          </li>
-        </ul>
+    <div v-else-if="docsUiState === 'empty'" class="alert alert-info" role="status">
+      <span>{{ t("apiDocs.state.empty") }}</span>
+    </div>
+
+    <div
+      v-else-if="docsUiState === 'unauthorized' || docsUiState === 'errorRetryable' || docsUiState === 'errorNonRetryable'"
+      class="alert alert-error items-center justify-between"
+      role="alert"
+      aria-live="assertive"
+    >
+      <span>{{ t(`apiDocs.state.${docsUiState}`) }}</span>
+      <button
+        v-if="docsUiState === 'errorRetryable'"
+        type="button"
+        class="btn btn-sm btn-outline"
+        :aria-label="t('apiDocs.actions.retry')"
+        @click="refreshSpec"
+      >
+        {{ t("apiDocs.actions.retry") }}
+      </button>
+    </div>
+
+    <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
+      <aside class="card bg-base-100 top-24 h-fit shadow-sm lg:sticky">
+        <div class="card-body gap-4">
+          <h2 class="card-title text-base">{{ t("apiDocs.endpointNavigator") }}</h2>
+          <nav :aria-label="t('apiDocs.a11y.endpointNavigation')">
+            <ul class="space-y-4">
+              <li v-for="group in endpointGroups" :key="group.id" class="space-y-2">
+                <p class="text-sm font-semibold uppercase tracking-wide text-base-content/60">
+                  {{ group.label }}
+                </p>
+                <ul class="space-y-2">
+                  <li v-for="endpoint in group.endpoints" :key="endpoint.id">
+                    <button
+                      type="button"
+                      class="btn btn-sm h-auto w-full justify-start whitespace-normal py-2 text-left"
+                      :class="{
+                        'btn-primary': activeEndpointId === endpoint.id,
+                        'btn-ghost': activeEndpointId !== endpoint.id,
+                      }"
+                      :aria-label="
+                        t('apiDocs.endpoint.navigateAria', {
+                          method: methodLabel(endpoint.method),
+                          path: endpoint.path,
+                        })
+                      "
+                      :aria-current="activeEndpointId === endpoint.id ? 'location' : undefined"
+                      @click="scrollToEndpoint(endpoint.id)"
+                    >
+                      <span :class="methodBadgeClass(endpoint.method)" class="mr-2">
+                        {{ methodLabel(endpoint.method) }}
+                      </span>
+                      <span class="font-mono text-xs">{{ endpoint.path }}</span>
+                    </button>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </aside>
 
-      <main class="space-y-8">
+      <main class="space-y-6">
         <section
           v-for="group in endpointGroups"
           :key="group.id"
-          :id="group.id"
-          :aria-labelledby="`${group.id}-title`"
-          class="space-y-4"
+          class="card bg-base-100 border border-base-200 shadow-sm"
         >
-          <h2 :id="`${group.id}-title`" class="text-xl font-semibold">{{ group.label }}</h2>
-          <article
-            v-for="endpoint in group.endpoints"
-            :id="endpoint.id"
-            :key="endpoint.id"
-            :ref="(element) => setSectionRef(endpoint.id, element)"
-            tabindex="-1"
-            class="scroll-mt-20 rounded-box border border-base-300 bg-base-200 p-4"
-          >
-            <header class="mb-3 flex flex-wrap items-start gap-2">
-              <span :class="`badge ${endpointMethodClass(endpoint.method)}`">
-                {{ endpoint.method.toUpperCase() }}
-              </span>
-              <h3 class="font-mono text-base font-semibold">{{ endpoint.path }}</h3>
-              <span v-if="endpoint.operation.deprecated" class="badge badge-warning badge-outline">
-                {{ t("apiDocs.endpoint.deprecated") }}
-              </span>
-            </header>
-            <p class="mb-3 text-sm text-base-content/80">
-              {{ endpoint.operation.summary?.trim() || endpoint.operation.description?.trim() || t('apiDocs.endpoint.noDescription') }}
-            </p>
-            <div class="mb-3 flex flex-wrap gap-2 text-xs text-base-content/60">
-              <span>{{ t("apiDocs.endpoint.methodLabel") }}: {{ formatMethodLabel(endpoint.method) }}</span>
-              <span v-if="endpoint.operation.operationId">
-                | {{ t("apiDocs.endpoint.operationIdLabel") }}: {{ endpoint.operation.operationId }}
-              </span>
-            </div>
-            <button
-              type="button"
-              class="btn btn-sm btn-primary"
-              :aria-label="t('apiDocs.endpoint.openTesterAria', { method: endpoint.method.toUpperCase(), path: endpoint.path })"
-              @click="openEndpointTester(endpoint)"
+          <div class="card-body space-y-5">
+            <h2 class="card-title">{{ group.label }}</h2>
+
+            <article
+              v-for="endpoint in group.endpoints"
+              :id="endpoint.id"
+              :key="endpoint.id"
+              :ref="(element) => setSectionRef(endpoint.id, element)"
+              tabindex="-1"
+              class="scroll-mt-24 space-y-4 rounded-lg border border-base-200 bg-base-100 p-4"
             >
-              {{ t("apiDocs.endpoint.openTester") }}
-            </button>
-          </article>
+              <header class="flex flex-wrap items-start justify-between gap-3">
+                <div class="space-y-2">
+                  <p class="flex items-center gap-2">
+                    <span :class="methodBadgeClass(endpoint.method)">
+                      {{ methodLabel(endpoint.method) }}
+                    </span>
+                    <span class="font-mono text-sm">{{ endpoint.path }}</span>
+                  </p>
+                  <h3 class="text-lg font-semibold">
+                    {{ endpoint.operation.summary || endpoint.operation.operationId || endpoint.path }}
+                  </h3>
+                  <p class="text-sm text-base-content/80">
+                    {{ endpoint.operation.description || t("apiDocs.endpoint.noDescription") }}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline"
+                  :aria-label="
+                    t('apiDocs.endpoint.openTesterAria', {
+                      method: methodLabel(endpoint.method),
+                      path: endpoint.path,
+                    })
+                  "
+                  @click="openEndpointTester(endpoint, $event.currentTarget)"
+                >
+                  {{ t("apiDocs.endpoint.openTester") }}
+                </button>
+              </header>
+
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="rounded-lg border border-base-200 p-3">
+                  <p class="text-xs font-semibold uppercase text-base-content/60">
+                    {{ t("apiDocs.endpoint.methodLabel") }}
+                  </p>
+                  <p class="mt-1 font-mono text-sm">{{ methodLabel(endpoint.method) }}</p>
+                </div>
+                <div class="rounded-lg border border-base-200 p-3">
+                  <p class="text-xs font-semibold uppercase text-base-content/60">
+                    {{ t("apiDocs.endpoint.operationIdLabel") }}
+                  </p>
+                  <p class="mt-1 text-sm">
+                    {{ endpoint.operation.operationId || t("apiDocs.endpoint.noDescription") }}
+                  </p>
+                </div>
+              </div>
+            </article>
+          </div>
         </section>
       </main>
     </div>
 
-    <dialog ref="apiEndpointTesterDialog" class="modal modal-bottom sm:modal-middle" @close="handleEndpointTesterClose">
-      <div class="modal-box max-w-5xl" role="dialog" :aria-label="t('apiDocs.tester.title')" aria-modal="true">
-        <h3 class="text-lg font-bold">{{ t("apiDocs.tester.title") }}</h3>
-        <p v-if="selectedEndpoint" class="mt-1 text-sm text-base-content/75">
-          {{ selectedOperationDescription }}
-        </p>
+    <dialog
+      ref="apiEndpointTesterDialog"
+      class="modal"
+      aria-modal="true"
+      :aria-labelledby="API_TESTER_DIALOG_TITLE_ID"
+      :aria-describedby="selectedEndpoint ? API_TESTER_DIALOG_DESCRIPTION_ID : undefined"
+      @close="handleEndpointTesterClosed"
+    >
+      <div class="modal-box max-w-5xl space-y-4">
+        <header class="space-y-2">
+          <h2 :id="API_TESTER_DIALOG_TITLE_ID" class="text-xl font-semibold">
+            {{ t("apiDocs.tester.title") }}
+          </h2>
+          <p
+            v-if="selectedEndpoint"
+            :id="API_TESTER_DIALOG_DESCRIPTION_ID"
+            class="font-mono text-sm text-base-content/80"
+          >
+            <span :class="methodBadgeClass(selectedEndpoint.method)">
+              {{ methodLabel(selectedEndpoint.method) }}
+            </span>
+            <span class="ml-2">{{ selectedEndpoint.path }}</span>
+          </p>
+        </header>
 
-        <section class="mt-4">
-          <h4 class="text-sm font-semibold">{{ t("apiDocs.tester.lifecycleTitle") }}</h4>
-          <ul class="steps steps-vertical mt-2 w-full lg:steps-horizontal">
-            <li :class="lifecycleStepClasses[0]">{{ t("apiDocs.tester.steps.configure") }}</li>
-            <li :class="lifecycleStepClasses[1]">{{ t("apiDocs.tester.steps.send") }}</li>
-            <li :class="lifecycleStepClasses[2]">{{ t("apiDocs.tester.steps.response") }}</li>
+        <section :aria-label="t('apiDocs.tester.lifecycleTitle')" class="space-y-3">
+          <h3 class="font-medium">{{ t("apiDocs.tester.lifecycleTitle") }}</h3>
+          <ul class="steps steps-vertical w-full lg:steps-horizontal">
+            <li class="step" :class="{ 'step-primary': testerState !== 'idle' }">
+              {{ t("apiDocs.tester.steps.configure") }}
+            </li>
+            <li class="step" :class="{ 'step-primary': testerState !== 'idle' && testerState !== 'loading' }">
+              {{ t("apiDocs.tester.steps.send") }}
+            </li>
+            <li
+              class="step"
+              :class="{
+                'step-success': testerState === 'success' || testerState === 'empty',
+                'step-error':
+                  testerState === 'errorRetryable' ||
+                  testerState === 'errorNonRetryable' ||
+                  testerState === 'unauthorized',
+              }"
+            >
+              {{ t("apiDocs.tester.steps.response") }}
+            </li>
           </ul>
         </section>
 
-        <section v-if="selectedPathParameters.length > 0" class="mt-4" :aria-label="t('apiDocs.tester.pathParametersIntro')">
-          <p class="text-sm text-base-content/80">{{ t("apiDocs.tester.pathParametersIntro") }}</p>
-          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+        <section
+          v-if="selectedEndpoint && selectedEndpoint.pathParameters.length > 0"
+          :aria-label="t('apiDocs.tester.pathParametersIntro')"
+          class="space-y-2"
+        >
+          <h3 class="font-medium">{{ t("apiDocs.tester.pathParametersIntro") }}</h3>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label
-              v-for="pathParameter in selectedPathParameters"
-              :key="`${selectedEndpoint?.id}-${pathParameter}`"
+              v-for="parameterName in selectedEndpoint.pathParameters"
+              :key="`path-${parameterName}`"
               class="form-control"
             >
-              <span class="label text-xs">{{ t("apiDocs.tester.parameterLabel", { name: pathParameter }) }}</span>
+              <span class="label-text">
+                {{ t("apiDocs.tester.parameterLabel", { name: parameterName }) }}
+              </span>
               <input
-                v-model="pathParameterValues[pathParameter]"
-                class="input input-bordered input-sm"
+                v-model="pathParameterValues[parameterName]"
                 type="text"
-                :aria-label="t('apiDocs.tester.parameterLabel', { name: pathParameter })"
+                class="input input-bordered"
+                :aria-label="t('apiDocs.tester.parameterLabel', { name: parameterName })"
               />
             </label>
           </div>
         </section>
 
         <section
-          v-if="selectedEndpoint?.queryParameters && selectedEndpoint.queryParameters.length > 0"
-          class="mt-4"
+          v-if="selectedEndpoint && selectedEndpoint.queryParameters.length > 0"
           :aria-label="t('apiDocs.tester.queryParametersIntro')"
+          class="space-y-2"
         >
-          <p class="text-sm text-base-content/80">{{ t("apiDocs.tester.queryParametersIntro") }}</p>
-          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          <h3 class="font-medium">{{ t("apiDocs.tester.queryParametersIntro") }}</h3>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label
-              v-for="parameter in selectedQueryParameters"
-              :key="`${selectedEndpoint?.id}-${parameter.name}`"
+              v-for="parameter in selectedEndpoint.queryParameters"
+              :key="`query-${parameter.name}`"
               class="form-control"
             >
-              <span class="label-text text-xs">{{ t("apiDocs.tester.parameterLabel", { name: parameter.name }) }}</span>
+              <span class="label-text">
+                {{ t("apiDocs.tester.parameterLabel", { name: parameter.name }) }}
+              </span>
               <input
                 v-model="queryParameterValues[parameter.name]"
-                class="input input-bordered input-sm"
-                :aria-label="t('apiDocs.tester.parameterLabel', { name: parameter.name })"
                 type="text"
+                class="input input-bordered"
+                :aria-label="t('apiDocs.tester.parameterLabel', { name: parameter.name })"
               />
             </label>
           </div>
         </section>
 
-        <section v-if="selectedEndpoint && endpointHasBody" class="mt-4" :aria-label="t('apiDocs.tester.requestBodyIntro')">
-          <p class="text-sm text-base-content/80">{{ t("apiDocs.tester.requestBodyIntro") }}</p>
+        <section
+          v-if="selectedEndpoint"
+          :aria-label="t('apiDocs.tester.requestBodyIntro')"
+          class="space-y-2"
+        >
+          <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
           <textarea
-            v-model="requestBodyText"
-            class="textarea textarea-bordered mt-2 min-h-28 w-full font-mono text-sm"
-            :aria-label="t('apiDocs.tester.requestBodyAria')"
-            spellcheck="false"
+            v-model="requestBodyValue"
+            class="textarea textarea-bordered min-h-40 w-full font-mono text-sm"
             :placeholder="t('apiDocs.tester.bodyPlaceholder')"
+            :aria-label="t('apiDocs.tester.requestBodyAria')"
           />
-          <p v-if="selectedRequestBodyTemplate.length === 0" class="mt-1 text-xs text-base-content/50">
+          <p
+            v-if="!selectedEndpoint.requestBodyTemplate && !selectedEndpoint.requestBodyRequired"
+            class="text-xs text-base-content/60"
+          >
             {{ t("apiDocs.tester.noRequestBodyTemplate") }}
           </p>
         </section>
@@ -983,16 +1013,16 @@ const uiStateMessageKey = computed(() => {
           <button
             type="button"
             class="btn btn-primary"
-            :disabled="!canRunEndpoint || testerState === 'loading'"
+            :disabled="testerState === 'loading'"
             :aria-label="t('apiDocs.tester.send')"
             @click="executeEndpointRequest"
           >
-            <span v-if="testerState === 'loading'" class="loading loading-spinner loading-xs" aria-hidden="true"></span>
-            <span>{{ testerState === "loading" ? t("apiDocs.tester.sending") : t("apiDocs.tester.send") }}</span>
+            <span v-if="testerState === 'loading'" class="loading loading-spinner loading-sm"></span>
+            <span v-else>{{ t("apiDocs.tester.send") }}</span>
           </button>
           <button
-            class="btn btn-ghost"
             type="button"
+            class="btn btn-ghost"
             :aria-label="t('apiDocs.tester.closeAria')"
             @click="closeEndpointTester"
           >
@@ -1000,80 +1030,82 @@ const uiStateMessageKey = computed(() => {
           </button>
         </div>
 
-        <section class="mt-4" :aria-label="t('apiDocs.tester.requestTraceTitle')">
-          <h4 class="font-semibold">{{ t("apiDocs.tester.requestTraceTitle") }}</h4>
-          <div class="mt-2 rounded-box bg-base-300 p-3 text-xs">
-            <p class="break-words">
-              <span class="font-semibold">{{ t("apiDocs.tester.requestMethodLabel") }}:</span>
-              {{ hasSelectedEndpointRequestTrace ? testRequestMethod : EMPTY_TEXT_LABEL }}
-            </p>
-            <p class="break-words">
-              <span class="font-semibold">{{ t("apiDocs.tester.requestUrlLabel") }}:</span>
-              {{ hasSelectedEndpointRequestTrace ? testRequestUrl : EMPTY_TEXT_LABEL }}
-            </p>
-          </div>
-        </section>
+        <section class="space-y-3" :aria-label="t('apiDocs.tester.responseTitle')">
+          <h3 class="font-medium">{{ t("apiDocs.tester.responseTitle") }}</h3>
+          <p class="text-sm text-base-content/70">{{ testerStateLabel }}</p>
 
-        <section class="mt-4" :aria-label="t('apiDocs.tester.metadataTitle')">
-          <h4 class="font-semibold">{{ t("apiDocs.tester.metadataTitle") }}</h4>
-          <div class="overflow-x-auto mt-2">
-            <table class="table table-zebra table-sm">
-              <thead>
-                <tr>
-                  <th>{{ t("apiDocs.tester.metadata.columns.label") }}</th>
-                  <th>{{ t("apiDocs.tester.metadata.columns.value") }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{{ t("apiDocs.tester.metadata.responseStatus") }}</td>
-                  <td>{{ responseStatusText.status }} {{ responseStatusText.text }}</td>
-                </tr>
-                <tr>
-                  <td>{{ t("apiDocs.tester.metadata.duration") }}</td>
-                  <td>{{ testDurationMs !== null ? `${testDurationMs} ms` : EMPTY_TEXT_LABEL }}</td>
-                </tr>
-                <tr>
-                  <td>{{ t("apiDocs.tester.metadata.responseHeaders") }}</td>
-                  <td>{{ hasResponseHeaders ? responseHeaderEntries.length : 0 }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div
+            v-if="testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'"
+            class="alert alert-error"
+            role="alert"
+          >
+            <span>{{ testerErrorMessage || t("apiDocs.tester.errorFallback") }}</span>
           </div>
-        </section>
 
-        <section class="mt-4" :aria-label="t('apiDocs.tester.responseTitle')">
-          <h4 class="font-semibold">{{ t("apiDocs.tester.responseTitle") }}</h4>
-          <div v-if="showTesterResponsePanel" class="mt-2 space-y-2">
-            <div
-              v-if="testerState === 'empty'"
-              class="alert alert-info"
-              role="status"
-            >
-              {{ t("apiDocs.tester.emptyResponse") }}
+          <div v-if="testerState === 'empty'" class="alert alert-info" role="status">
+            <span>{{ t("apiDocs.tester.emptyResponse") }}</span>
+          </div>
+
+          <div v-if="testerResponse" class="space-y-3">
+            <div class="overflow-x-auto">
+              <table class="table table-zebra table-sm">
+                <caption class="sr-only">{{ t("apiDocs.tester.metadataTitle") }}</caption>
+                <thead>
+                  <tr>
+                    <th>{{ t("apiDocs.tester.metadata.columns.label") }}</th>
+                    <th>{{ t("apiDocs.tester.metadata.columns.value") }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ t("apiDocs.tester.metadata.responseStatus") }}</td>
+                    <td>
+                      {{
+                        t("apiDocs.tester.responseStatusLabel", {
+                          status: testerResponse.statusCode,
+                          text: testerResponse.statusText,
+                        })
+                      }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>{{ t("apiDocs.tester.metadata.duration") }}</td>
+                    <td>
+                      {{ t("apiDocs.tester.durationLabel", { duration: testerResponse.durationMs }) }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>{{ t("apiDocs.tester.requestMethodLabel") }}</td>
+                    <td class="font-mono">{{ testerResponse.method }}</td>
+                  </tr>
+                  <tr>
+                    <td>{{ t("apiDocs.tester.requestUrlLabel") }}</td>
+                    <td class="font-mono break-all">{{ testerResponse.url }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div
-              v-if="testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'"
-              class="alert alert-error"
-              role="alert"
-            >
-              {{ testErrorMessage || t("apiDocs.tester.errorFallback") }}
+
+            <div class="space-y-1">
+              <h4 class="font-medium">{{ t("apiDocs.tester.responseHeadersLabel") }}</h4>
+              <pre class="rounded-lg bg-base-200 p-3 text-xs whitespace-pre-wrap">{{
+                Object.keys(testerResponse.headers).length > 0
+                  ? JSON.stringify(testerResponse.headers, null, 2)
+                  : t("apiDocs.tester.noResponseHeaders")
+              }}</pre>
             </div>
-            <div class="rounded-box bg-base-300 p-3 text-xs">
-              <p class="font-semibold">{{ t("apiDocs.tester.responseHeadersLabel") }}</p>
-              <p v-if="!hasResponseHeaders" class="mt-1 text-base-content/60">{{ t("apiDocs.tester.noResponseHeaders") }}</p>
-              <ul v-else class="mt-1 space-y-1">
-                <li v-for="[name, value] in responseHeaderEntries" :key="name" class="break-words">
-                  {{ name }}: {{ value }}
-                </li>
-              </ul>
+
+            <div class="space-y-1">
+              <h4 class="font-medium">{{ t("apiDocs.tester.responseTitle") }}</h4>
+              <pre class="rounded-lg bg-base-200 p-3 text-xs whitespace-pre-wrap">{{
+                formattedResponseBody || t("apiDocs.tester.emptyResponse")
+              }}</pre>
             </div>
-            <pre class="max-h-72 overflow-auto rounded-box bg-base-300 p-3 text-xs whitespace-pre-wrap">{{ requestBodyDisplay }}</pre>
           </div>
         </section>
       </div>
       <form method="dialog" class="modal-backdrop">
-        <button :aria-label="t('apiDocs.tester.closeAria')"></button>
+        <button :aria-label="t('apiDocs.tester.closeAria')">{{ t("apiDocs.tester.close") }}</button>
       </form>
     </dialog>
   </div>

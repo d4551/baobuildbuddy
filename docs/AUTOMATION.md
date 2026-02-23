@@ -11,6 +11,7 @@ BaoBuildBuddy uses RPA-Python for browser automation workflows through direct su
 ## Implementation
 
 - Scraper scripts live in `packages/scraper/`:
+  - `_protocol.py`
   - `apply_job_rpa.py`
   - `job_scraper_gamedev.py`
   - `job_scraper_grackle.py`
@@ -91,6 +92,13 @@ flowchart LR
     "step-01.png",
     "step-02.png"
   ],
+  "artifacts": [
+    {
+      "id": "shot_1",
+      "kind": "screenshot",
+      "path": "step-01.png"
+    }
+  ],
   "steps": [
     {
       "action": "navigate",
@@ -107,20 +115,20 @@ flowchart LR
 - `POST /api/automation/job-apply/schedule` — schedules a future job-application automation run.
 - `POST /api/automation/email-response` — generates an AI-assisted email response and persists it as a run.
 - `POST /api/automation/job-apply` response contract:
-  - `200`: `{"runId": string, "status": "running"}`
-  - `POST /api/automation/job-apply/schedule` `200`: `{"runId": string, "status": "pending", "scheduledFor": string}`
+  - `200`: `RpaRunExecutionEnvelope` with status `running`
+  - `POST /api/automation/job-apply/schedule` `200`: `RpaRunExecutionEnvelope` with status `pending` (`input.schedule.runAt`)
   - `POST /api/automation/email-response` `200`: `{"runId": string, "status": "success", "reply": string, "provider": string, "model": string}`
   - `400`: route-level validation rejection for malformed request envelopes
   - `404`: missing dependency (`resume` / `cover-letter`)
   - `409`: concurrency limit hit
   - `422`: schema/validation failure
   - `500`: unexpected execution failure
-  - Error responses are deterministic JSON envelopes in the form `{"error": string}` on handled routes.
+  - Error responses are deterministic JSON envelopes in the form `{"error":{"code","message","details?"}}`.
   - Error handling follows Elysia centralized `onError` semantics; client callers branch on Eden `{ data, error }` instead of `try/catch`.
 - `GET /api/automation/runs` — list recent runs with optional `type` and `status`.
 - `GET /api/automation/runs/:id` — fetch run detail payload.
 - `GET /api/automation/screenshots/:runId/:index` — read stored screenshot bytes.
-- `WS /api/ws/automation` — subscribe/unsubscribe to live run progress events (`type: "subscribe" | "unsubscribe", runId`).
+- `WS /api/ws/automation` — subscribe/unsubscribe to live run events (`type: "subscribe" | "unsubscribe", runId`) with typed `RpaRunEvent` payloads.
 
 ### Deterministic run status semantics
 
@@ -131,7 +139,7 @@ flowchart LR
 
 ## Operation
 
-1. Routes insert a row in `automation_runs` and return run metadata (`running` for immediate, `pending` for scheduled).
+1. Routes insert a row in `automation_runs` and return a typed run envelope (`RpaRunExecutionEnvelope`).
 2. Immediate job-apply runs execute `apply_job_rpa.py` with typed JSON input; scheduled runs queue in-memory and recover on process boot.
 3. Email-response runs call `AIService.generate(emailResponsePrompt(...))` and persist deterministic output (`reply`, `provider`, `model`).
 4. Output is written back into the same run row (`success`, `error`, `screenshots`, `output`).
@@ -139,7 +147,7 @@ flowchart LR
 6. Settings-driven automation options (`headless`, `defaultTimeout`, `autoSaveScreenshots`, `defaultBrowser`) are validated, sanitized, and passed to the runner. Job-ingestion provider runtime controls are sourced from `settings.automationSettings.jobProviders`.
 7. Completed runs trigger a retention pass (`screenshotRetention`, capped 1–30 days) that deletes stale screenshot directories from disk.
 8. Temporary RPA working directories are removed after each script execution.
-9. UI pages under `/automation` track history, subscribe to `/api/ws/automation` for run updates, and request screenshot bytes from `GET /api/automation/screenshots/:runId/:index`.
+9. UI pages under `/automation` track history via `useAutomationRunStream`, subscribe to `/api/ws/automation` for run updates, and request screenshot bytes from `GET /api/automation/screenshots/:runId/:index`.
 
 ### Job provider runtime contract
 

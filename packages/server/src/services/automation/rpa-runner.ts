@@ -1,10 +1,10 @@
-import { join } from "node:path";
 import type {
   AutomationSettings,
   ErrorEnvelope,
+  JsonObject,
+  RpaRunErrorCode,
   RpaRunEvent,
   RpaRunResult,
-  RpaRunErrorCode,
 } from "@bao/shared";
 import {
   DEFAULT_AUTOMATION_SETTINGS,
@@ -28,6 +28,16 @@ const PYTHON_BINARY =
       ? PYTHON_BINARY_WINDOWS
       : PYTHON_BINARY_POSIX;
 
+type ParsedProtocolLine =
+  | {
+      ok: true;
+      event: RpaRunEvent;
+    }
+  | {
+      ok: false;
+      reason: "invalid_json" | "invalid_event";
+    };
+
 const toSafeTimeoutMs = (value: number | undefined): number => {
   if (typeof value === "number" && Number.isFinite(value) && value > 0) {
     return Math.trunc(value);
@@ -44,6 +54,34 @@ const pushBoundedLine = (target: string[], value: string, limit: number): void =
   if (target.length > limit) {
     target.shift();
   }
+};
+
+const isLikelyJsonLine = (line: string): boolean => {
+  const normalized = line.trim();
+  return normalized.startsWith("{") && normalized.endsWith("}");
+};
+
+const parseProtocolLine = (line: string): ParsedProtocolLine => {
+  const parsedJson = safeParseJson(line);
+  if (parsedJson === null) {
+    return {
+      ok: false,
+      reason: "invalid_json",
+    };
+  }
+
+  const parsedEvent = rpaRunEventSchema.safeParse(parsedJson);
+  if (!parsedEvent.success) {
+    return {
+      ok: false,
+      reason: "invalid_event",
+    };
+  }
+
+  return {
+    ok: true,
+    event: parsedEvent.data,
+  };
 };
 
 const readNdjsonLines = async (
@@ -93,7 +131,7 @@ const readNdjsonLines = async (
 const buildErrorEnvelope = (
   code: RpaRunErrorCode,
   message: string,
-  details?: Record<string, unknown>,
+  details?: JsonObject,
 ): ErrorEnvelope => ({
   code,
   message,
@@ -138,7 +176,7 @@ export async function runPythonScript(
   const timeoutMs = toSafeTimeoutMs(options.timeoutMs);
   const stdoutLimit = options.stdoutLineLimit ?? config.automationStdioBufferLimit;
   const stderrLimit = options.stderrLineLimit ?? config.automationStdioBufferLimit;
-  const scriptPath = join(SCRAPER_DIR, options.scriptName);
+  const scriptPath = `${SCRAPER_DIR}/${options.scriptName}`;
   const startedAt = Date.now();
   const stdoutLines: string[] = [];
   const stderrLines: string[] = [];
@@ -248,6 +286,10 @@ export async function runRpaScript(
   let terminalResult: RpaRunResult | null = null;
   let terminalError: ErrorEnvelope | null = null;
 
+  const pushProtocolError = (source: "stdout" | "stderr", line: string, reason: string): void => {
+    pushBoundedLine(protocolErrors, `${source}:${reason}:${line}`, MAX_PROTOCOL_ERROR_LINES);
+  };
+
   const processResult = await runPythonScript({
     scriptName: options.scriptName,
     scriptInput: {
@@ -259,14 +301,23 @@ export async function runRpaScript(
     signal: options.executionContext.signal,
     outputDir: options.executionContext.outputDir,
     onStdoutLine: (line) => {
-      const parsedJson = safeParseJson(line);
-      const parsedEvent = rpaRunEventSchema.safeParse(parsedJson);
-      if (!parsedEvent.success) {
-        pushBoundedLine(protocolErrors, line, MAX_PROTOCOL_ERROR_LINES);
+      if (!isLikelyJsonLine(line)) {
+        pushProtocolError("stdout", line, "non_json_line");
         return;
       }
 
-      const event = parsedEvent.data;
+      const parsedLine = parseProtocolLine(line);
+      if (!parsedLine.ok) {
+        pushProtocolError("stdout", line, parsedLine.reason);
+        return;
+      }
+
+      const event = parsedLine.event;
+      if (event.eventType === "progress") {
+        pushProtocolError("stdout", line, "unexpected_progress_event");
+        return;
+      }
+
       events.push(event);
       options.onEvent?.(event);
       if (event.eventType === "result") {
@@ -277,14 +328,19 @@ export async function runRpaScript(
       }
     },
     onStderrLine: (line) => {
-      const parsedJson = safeParseJson(line);
-      const parsedEvent = rpaRunEventSchema.safeParse(parsedJson);
-      if (!parsedEvent.success) {
+      if (!isLikelyJsonLine(line)) {
         return;
       }
 
-      const event = parsedEvent.data;
+      const parsedLine = parseProtocolLine(line);
+      if (!parsedLine.ok) {
+        pushProtocolError("stderr", line, parsedLine.reason);
+        return;
+      }
+
+      const event = parsedLine.event;
       if (event.eventType !== "progress") {
+        pushProtocolError("stderr", line, "unexpected_non_progress_event");
         return;
       }
 
@@ -304,11 +360,27 @@ export async function runRpaScript(
   }
 
   if (!terminalError && processResult.exitCode !== 0) {
-    terminalError = buildErrorEnvelope("PYTHON_RUNTIME_ERROR", "Python script exited with an error", {
-      exitCode: processResult.exitCode,
-      stderrTail: processResult.stderrLines,
-      stdoutTail: processResult.stdoutLines,
-    });
+    terminalError = buildErrorEnvelope(
+      "PYTHON_RUNTIME_ERROR",
+      "Python script exited with an error",
+      {
+        exitCode: processResult.exitCode,
+        stderrTail: processResult.stderrLines,
+        stdoutTail: processResult.stdoutLines,
+      },
+    );
+  }
+
+  if (!terminalError && protocolErrors.length > 0) {
+    terminalError = buildErrorEnvelope(
+      "SCRIPT_PROTOCOL_ERROR",
+      "Python script emitted malformed protocol lines",
+      {
+        protocolErrors,
+        stdoutTail: processResult.stdoutLines,
+        stderrTail: processResult.stderrLines,
+      },
+    );
   }
 
   if (!terminalError && !terminalResult) {
@@ -316,18 +388,7 @@ export async function runRpaScript(
       "SCRIPT_OUTPUT_INVALID",
       "Python script did not emit a terminal result event",
       {
-        protocolErrors,
         stdoutTail: processResult.stdoutLines,
-      },
-    );
-  }
-
-  if (!terminalError && protocolErrors.length > 0 && !terminalResult) {
-    terminalError = buildErrorEnvelope(
-      "SCRIPT_PROTOCOL_ERROR",
-      "Python script emitted malformed protocol lines",
-      {
-        protocolErrors,
       },
     );
   }

@@ -1,6 +1,6 @@
+import { APP_BRAND } from "../packages/shared/src/constants/branding";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
-import { APP_BRAND } from "../packages/shared/src/constants/branding";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type RouteVerificationResult = {

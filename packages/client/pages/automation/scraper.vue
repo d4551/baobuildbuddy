@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { API_ENDPOINTS, APP_ROUTES, JOB_PREVIEW_LIMIT, SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared";
 import type { Job } from "@bao/shared";
+import { API_ENDPOINTS, APP_ROUTES, JOB_PREVIEW_LIMIT, SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { resolveApiEndpoint } from "~/utils/endpoints";
-import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
+import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 
 type RunState = "idle" | "running" | "success" | "error";
 

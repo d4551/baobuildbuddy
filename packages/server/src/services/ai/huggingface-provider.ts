@@ -2,6 +2,13 @@ import type { AIResponse, GenerateOptions } from "@bao/shared";
 import { HfInference } from "@huggingface/inference";
 import { BaseAIProvider } from "./provider-interface";
 
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : "Unknown error";
+
 /**
  * Hugging Face AI Provider
  * Works with free tier (no API key required) or with API token for better rate limits
@@ -25,8 +32,8 @@ export class HuggingFaceProvider extends BaseAIProvider {
       fullPrompt = `${options.systemPrompt}\n\n${prompt}`;
     }
 
-    return this.client
-      .textGeneration({
+    const responseResult = await settlePromise(
+      this.client.textGeneration({
         model: this.model,
         inputs: fullPrompt,
         parameters: {
@@ -36,24 +43,26 @@ export class HuggingFaceProvider extends BaseAIProvider {
           top_k: options?.topK ?? 50,
           return_full_text: false,
         },
-      })
-      .then(
-        (response): AIResponse => ({
-          id: this.generateId(),
-          provider: this.name,
-          model: this.model,
-          content: response.generated_text,
-          timing: this.createTimingMetrics(startTime),
-        }),
-        (error: unknown): AIResponse => ({
-          id: this.generateId(),
-          provider: this.name,
-          model: this.model,
-          content: "",
-          error: error instanceof Error ? error.message : "Unknown error",
-          timing: this.createTimingMetrics(startTime),
-        }),
-      );
+      }),
+    );
+    if (responseResult.status === "rejected") {
+      return {
+        id: this.generateId(),
+        provider: this.name,
+        model: this.model,
+        content: "",
+        error: toErrorMessage(responseResult.reason),
+        timing: this.createTimingMetrics(startTime),
+      };
+    }
+
+    return {
+      id: this.generateId(),
+      provider: this.name,
+      model: this.model,
+      content: responseResult.value.generated_text,
+      timing: this.createTimingMetrics(startTime),
+    };
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
@@ -77,11 +86,11 @@ export class HuggingFaceProvider extends BaseAIProvider {
 
     const iterator = stream[Symbol.asyncIterator]();
     while (true) {
-      const nextChunk = await iterator.next().catch((error: unknown) => {
-        throw new Error(
-          `HuggingFace streaming error: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-      });
+      const nextChunkResult = await settlePromise(iterator.next());
+      if (nextChunkResult.status === "rejected") {
+        throw new Error(`HuggingFace streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
+      }
+      const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
         break;
       }

@@ -7,15 +7,15 @@ import {
   APP_BRAND,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
 import { FLOATING_CHAT_PANEL_ID } from "~/constants/layout";
-import { getErrorMessage } from "~/utils/errors";
-import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
   buildChatMessageRenderRows,
   createStreamingAssistantMessage,
   resolveLatestAssistantMessageIndex,
 } from "~/utils/chat";
+import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
 const { messages, loading, streaming, sendMessage, clearMessages, buildCurrentContext } = useAI();

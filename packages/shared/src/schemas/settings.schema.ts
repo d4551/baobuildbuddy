@@ -3,9 +3,9 @@ import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
 import {
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
+  DEFAULT_APP_LANGUAGE,
   DEFAULT_SPEECH_SETTINGS,
   SPEECH_PROVIDER_OPTIONS,
-  DEFAULT_APP_LANGUAGE,
 } from "../constants/settings";
 import type { AIProviderType } from "../types/ai";
 import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES } from "../types/settings";

@@ -1,10 +1,10 @@
+import type { CoverLetterData, CoverLetterTemplate } from "@bao/shared";
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
   generateId,
   isCoverLetterTemplate,
   isRecord,
 } from "@bao/shared";
-import type { CoverLetterData, CoverLetterTemplate } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema";

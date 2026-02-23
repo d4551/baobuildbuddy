@@ -65,6 +65,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
     settings: {
         put: {
             body: {
+                theme?: "bao-light" | "bao-dark" | undefined;
                 notifications?: {
                     achievements?: boolean | undefined;
                     dailyChallenges?: boolean | undefined;
@@ -82,13 +83,13 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     speech?: {
                         locale: string;
                         stt: {
-                            provider: "openai" | "huggingface" | "local" | "custom" | "browser";
+                            provider: "openai" | "huggingface" | "local" | "browser" | "custom";
                             model: string;
                             endpoint: string;
                         };
                         tts: {
                             format: "mp3" | "wav";
-                            provider: "openai" | "huggingface" | "local" | "custom" | "browser";
+                            provider: "openai" | "huggingface" | "local" | "browser" | "custom";
                             model: string;
                             endpoint: string;
                             voice: string;
@@ -116,28 +117,28 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         greenhouseApiBaseUrl: string;
                         greenhouseMaxPages: number;
                         greenhouseBoards: {
+                            company: string;
                             enabled: boolean;
                             board: string;
-                            company: string;
                         }[];
                         leverApiBaseUrl: string;
                         leverMaxPages: number;
                         leverCompanies: {
-                            enabled: boolean;
                             company: string;
+                            enabled: boolean;
                             slug: string;
                         }[];
                         companyBoards: {
-                            name: string;
                             type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
+                            name: string;
                             token: string;
                             enabled: boolean;
                             priority: number;
                         }[];
                         gamingPortals: {
+                            id: "gamedev-net" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
                             source: string;
                             name: string;
-                            id: "gamedev-net" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
                             enabled: boolean;
                             fallbackUrl: string;
                         }[];
@@ -145,7 +146,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 } | undefined;
                 preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                 preferredModel?: string | undefined;
-                theme?: "bao-light" | "bao-dark" | undefined;
                 language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
             };
             params: {};
@@ -208,8 +208,8 @@ export declare const settingsRoutes: Elysia<"/settings", {
         "test-api-key": {
             post: {
                 body: {
-                    provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                     key: string;
+                    provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                 };
                 params: {};
                 query: unknown;
@@ -262,7 +262,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     profile: string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null;
-                    settings: string | number | boolean | never[] | {
+                    gamification: string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null;
                     applications: (string | number | boolean | never[] | {
@@ -271,25 +271,25 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     resumes: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
-                    gamification: string | number | boolean | never[] | {
+                    settings: string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null;
-                    savedJobs: (string | number | boolean | never[] | {
+                    chatHistory: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
                     coverLetters: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
-                    portfolioProjects: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
                     interviewSessions: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
-                    skillMappings: (string | number | boolean | never[] | {
+                    savedJobs: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
-                    chatHistory: (string | number | boolean | never[] | {
+                    portfolioProjects: (string | number | boolean | never[] | {
+                        [x: string]: never;
+                    } | null)[];
+                    skillMappings: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
                     version: "1.0";

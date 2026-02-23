@@ -9,6 +9,7 @@ type ScrollSpyOptions = {
 const DEFAULT_HASH_PREFIX = "#";
 const DEFAULT_ROOT_MARGIN = "-20% 0px -60% 0px";
 const DEFAULT_THRESHOLD = [0.1, 0.3, 0.5, 0.8];
+const MANUAL_SCROLL_LOCK_MS = 250;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 
@@ -23,8 +24,39 @@ export function useScrollSpy(options: ScrollSpyOptions = {}) {
   const sectionNodes = new Map<string, HTMLElement>();
   const observer = ref<IntersectionObserver | null>(null);
   const hashPrefix = options.hashPrefix ?? DEFAULT_HASH_PREFIX;
+  let lastManualScrollAt = 0;
+
+  const updateActiveSection = (sectionId: string, updateHash: boolean): void => {
+    if (sectionId.length === 0 || activeSectionId.value === sectionId) {
+      return;
+    }
+    activeSectionId.value = sectionId;
+    if (!updateHash || typeof window === "undefined") {
+      return;
+    }
+    const nextHash = `${hashPrefix}${sectionId}`;
+    if (window.location.hash === nextHash) {
+      return;
+    }
+    window.history.replaceState({}, "", nextHash);
+  };
+
+  const resolveFallbackSectionId = (): string | null => {
+    const firstSection = sectionNodes.values().next().value;
+    if (!firstSection) {
+      return null;
+    }
+    return firstSection.id || null;
+  };
 
   const sectionObserverCallback: IntersectionObserverCallback = (entries) => {
+    if (typeof window !== "undefined") {
+      const elapsedMs = Date.now() - lastManualScrollAt;
+      if (elapsedMs < MANUAL_SCROLL_LOCK_MS) {
+        return;
+      }
+    }
+
     const nextEntry = entries
       .filter((entry) => entry.isIntersecting)
       .sort((a, b) => {
@@ -35,14 +67,11 @@ export function useScrollSpy(options: ScrollSpyOptions = {}) {
         return a.boundingClientRect.top - b.boundingClientRect.top;
       })[0];
 
-    if (!nextEntry?.target.id) {
+    const nextId = nextEntry?.target.id || resolveFallbackSectionId();
+    if (!nextId) {
       return;
     }
-
-    activeSectionId.value = nextEntry.target.id;
-    if (typeof window !== "undefined") {
-      window.history.replaceState({}, "", `${hashPrefix}${nextEntry.target.id}`);
-    }
+    updateActiveSection(nextId, true);
   };
 
   const refreshObserver = (): void => {
@@ -79,12 +108,24 @@ export function useScrollSpy(options: ScrollSpyOptions = {}) {
    * Registers/unregisters a section node by id.
    */
   const setSectionRef = (sectionId: string, element: Element | null): void => {
+    const previous = sectionNodes.get(sectionId);
+    if (previous && observer.value) {
+      observer.value.unobserve(previous);
+    }
+
     if (!element) {
       sectionNodes.delete(sectionId);
+      if (activeSectionId.value === sectionId) {
+        const fallbackId = resolveFallbackSectionId() ?? "";
+        activeSectionId.value = fallbackId;
+      }
       return;
     }
     if (element instanceof HTMLElement) {
       sectionNodes.set(sectionId, element);
+      if (observer.value) {
+        observer.value.observe(element);
+      }
     }
   };
 
@@ -108,15 +149,12 @@ export function useScrollSpy(options: ScrollSpyOptions = {}) {
     const focus = optionsValue.focus ?? true;
     const updateHash = optionsValue.updateHash ?? true;
 
-    activeSectionId.value = sectionId;
+    lastManualScrollAt = Date.now();
+    updateActiveSection(sectionId, updateHash);
     section.scrollIntoView({
       behavior: smooth ? "smooth" : "auto",
       block: "start",
     });
-
-    if (updateHash && typeof window !== "undefined") {
-      window.history.replaceState({}, "", `${hashPrefix}${sectionId}`);
-    }
     if (focus) {
       section.focus({ preventScroll: true });
     }

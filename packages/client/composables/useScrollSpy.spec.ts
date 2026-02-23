@@ -116,4 +116,28 @@ describe("useScrollSpy", () => {
 
     scope.stop();
   });
+
+  it("does not duplicate hash updates when the active section is unchanged", () => {
+    if (!hasDomEnvironment()) {
+      return;
+    }
+    const scope = effectScope();
+    const replaceStateSpy = vi.spyOn(window.history, "replaceState");
+    const scrollSpy = scope.run(() => useScrollSpy());
+    if (!scrollSpy) {
+      throw new Error("Scroll spy did not initialize");
+    }
+
+    const section = document.createElement("section");
+    section.id = "same";
+    section.scrollIntoView = vi.fn();
+    section.focus = vi.fn();
+    scrollSpy.setSectionRef("same", section);
+
+    scrollSpy.scrollToSection("same", { smooth: false, focus: false, updateHash: true });
+    scrollSpy.scrollToSection("same", { smooth: false, focus: false, updateHash: true });
+
+    expect(replaceStateSpy).toHaveBeenCalledTimes(1);
+    scope.stop();
+  });
 });

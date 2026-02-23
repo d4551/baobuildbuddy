@@ -1,7 +1,7 @@
 import {
+  automationSettingsSchema,
   DEFAULT_SETTINGS_ID,
   type JobProviderSettings,
-  automationSettingsSchema,
   jobProviderSettingsSchema,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";

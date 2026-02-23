@@ -3,9 +3,9 @@
  * This file demonstrates how to use the job aggregator and matching service
  */
 
-import { jobAggregator } from "./job-aggregator";
-import { type UserProfile, calculateMatchScore } from "./matching-service";
 import { createServerLogger } from "../../utils/logger";
+import { jobAggregator } from "./job-aggregator";
+import { calculateMatchScore, type UserProfile } from "./matching-service";
 
 function isTimelineEvent(value: unknown): value is { date: string; description: string } {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -16,6 +16,10 @@ function isTimelineEvent(value: unknown): value is { date: string; description: 
 }
 
 const jobsExampleLogger = createServerLogger("jobs-example-usage");
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
 
 // Example 1: Refresh jobs from all providers
 async function refreshJobs() {
@@ -236,8 +240,8 @@ async function maintainCache() {
 
 // Main execution function
 async function main() {
-  await Promise.resolve()
-    .then(async () => {
+  const result = await settlePromise(
+    (async () => {
       // Uncomment the examples you want to run
 
       // await refreshJobs()
@@ -248,11 +252,14 @@ async function main() {
       // await maintainCache()
 
       jobsExampleLogger.info("\n✓ All examples completed successfully");
-    })
-    .catch((error: unknown) => {
-      jobsExampleLogger.error("Error running examples:", error);
-      throw error;
-    });
+    })(),
+  );
+  if (result.status === "rejected") {
+    jobsExampleLogger.error("Error running examples:", result.reason);
+    throw (result.reason instanceof Error
+      ? result.reason
+      : new Error(typeof result.reason === "string" ? result.reason : "Unknown error"));
+  }
 }
 
 // Run if executed directly

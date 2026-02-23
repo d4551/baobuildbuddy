@@ -52,6 +52,23 @@ if mode == "malformed":
     sys.stdout.write("not-json\\n")
     sys.exit(0)
 
+if mode == "stdout_progress":
+    sys.stdout.write(json.dumps({
+        "protocolVersion": protocol_version,
+        "runId": run_id,
+        "sequence": 0,
+        "timestamp": "2026-02-23T00:00:00+00:00",
+        "eventType": "progress",
+        "action": "wrong_stream",
+        "status": "running",
+    }) + "\\n")
+    sys.exit(0)
+
+if mode == "timeout":
+    import time
+    time.sleep(2.0)
+    sys.exit(0)
+
 sys.stderr.write("runtime failure\\n")
 sys.exit(1)
 `,
@@ -83,7 +100,7 @@ describe("runRpaScript", () => {
     expect(execution.events[1]?.eventType).toBe("result");
   });
 
-  test("returns script-output-invalid for malformed terminal payload", async () => {
+  test("returns protocol error for malformed terminal payload", async () => {
     const runId = generateId();
     const execution = await runRpaScript({
       scriptName: TEST_SCRIPT_NAME,
@@ -97,7 +114,7 @@ describe("runRpaScript", () => {
     });
 
     expect(execution.result).toBeNull();
-    expect(execution.error?.code).toBe("SCRIPT_OUTPUT_INVALID");
+    expect(execution.error?.code).toBe("SCRIPT_PROTOCOL_ERROR");
   });
 
   test("returns runtime error when script exits non-zero", async () => {
@@ -116,5 +133,40 @@ describe("runRpaScript", () => {
     expect(execution.result).toBeNull();
     expect(execution.error?.code).toBe("PYTHON_RUNTIME_ERROR");
     expect(execution.exitCode).not.toBe(0);
+  });
+
+  test("returns protocol error when stdout emits unexpected progress events", async () => {
+    const runId = generateId();
+    const execution = await runRpaScript({
+      scriptName: TEST_SCRIPT_NAME,
+      scriptInput: {
+        mode: "stdout_progress",
+      },
+      executionContext: {
+        runId,
+        timeoutMs: 5_000,
+      },
+    });
+
+    expect(execution.result).toBeNull();
+    expect(execution.error?.code).toBe("SCRIPT_PROTOCOL_ERROR");
+  });
+
+  test("returns timeout error when process exceeds timeout", async () => {
+    const runId = generateId();
+    const execution = await runRpaScript({
+      scriptName: TEST_SCRIPT_NAME,
+      scriptInput: {
+        mode: "timeout",
+      },
+      executionContext: {
+        runId,
+        timeoutMs: 100,
+      },
+    });
+
+    expect(execution.result).toBeNull();
+    expect(execution.timedOut).toBe(true);
+    expect(execution.error?.code).toBe("PYTHON_TIMEOUT");
   });
 });

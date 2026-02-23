@@ -1,9 +1,10 @@
+import type { GamingExperience, ResumeData, ResumePersonalInfo, ResumeSkills } from "@bao/shared";
 import {
-  RESUME_TEMPLATE_DEFAULT,
-  RESUME_DEFAULT_NAME,
-  RESUME_DEFAULT_THEME,
   generateId,
   isResumeTemplate,
+  RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_THEME,
+  RESUME_TEMPLATE_DEFAULT,
   resumeEducationSchema,
   resumeExperienceSchema,
   resumeGamingExperienceSchema,
@@ -11,9 +12,8 @@ import {
   resumeProjectSchema,
   resumeSkillsSchema,
 } from "@bao/shared";
-import type { GamingExperience, ResumeData, ResumePersonalInfo, ResumeSkills } from "@bao/shared";
-import * as z from "zod";
 import { eq } from "drizzle-orm";
+import * as z from "zod";
 import { db } from "../db/client";
 import { resumes } from "../db/schema";
 

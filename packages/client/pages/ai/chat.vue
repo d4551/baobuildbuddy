@@ -2,12 +2,12 @@
 import { APP_BRAND, APP_SEO } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { CHAT_PAGE_CONTAINER_CLASS } from "~/constants/chat";
-import { getErrorMessage } from "~/utils/errors";
 import {
   buildChatMessageRenderRows,
   createStreamingAssistantMessage,
   resolveLatestAssistantMessageIndex,
 } from "~/utils/chat";
+import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   middleware: ["auth"],

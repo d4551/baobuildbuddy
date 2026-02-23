@@ -1,5 +1,5 @@
 import type { AutocompleteResult, SearchResult, SearchResults } from "@bao/shared";
-import { STATE_KEYS, asNumber, asString, isRecord } from "@bao/shared";
+import { asNumber, asString, isRecord, STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, settlePromise, withLoadingState } from "./async-flow";
 

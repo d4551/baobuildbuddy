@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { ReadinessAssessment } from "@bao/shared";
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES, getGamificationPathwayIcon } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { getGamificationPathwayIcon } from "@bao/shared";
 import {
-  SKILLS_READINESS_THRESHOLD_HIGH,
-  SKILLS_READINESS_THRESHOLD_MEDIUM,
   SKILLS_READINESS_DIAL_SIZE_REM,
   SKILLS_READINESS_MAX,
   SKILLS_READINESS_MIN,
+  SKILLS_READINESS_THRESHOLD_HIGH,
+  SKILLS_READINESS_THRESHOLD_MEDIUM,
 } from "~/constants/skills";
 import { getErrorMessage } from "~/utils/errors";
 

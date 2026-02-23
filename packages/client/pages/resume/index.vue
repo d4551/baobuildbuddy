@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {
-  APP_ROUTES,
   APP_ROUTE_QUERY_KEYS,
+  APP_ROUTES,
+  formDataToResumeData,
   RESUME_LIST_PAGE_SIZE,
   RESUME_TEMPLATE_DEFAULT,
   RESUME_TEMPLATE_OPTIONS,
   type ResumeFormData,
   type ResumeTemplate,
-  formDataToResumeData,
   resumeDataToFormData,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
@@ -53,14 +53,14 @@ const scoreResult = ref<Record<string, unknown> | null>(null);
 const resumeSearchQuery = ref("");
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const templateLabelMap = computed<Record<ResumeTemplate, string>>(() => {
-  const templates = t("resumePage.createModal.templates") as Record<
-    string,
-    string
-  >;
-  return RESUME_TEMPLATE_OPTIONS.reduce((acc, template) => {
-    acc[template] = templates[template] ?? template;
-    return acc;
-  }, {} as Record<ResumeTemplate, string>);
+  const templates = t("resumePage.createModal.templates") as Record<string, string>;
+  return RESUME_TEMPLATE_OPTIONS.reduce(
+    (acc, template) => {
+      acc[template] = templates[template] ?? template;
+      return acc;
+    },
+    {} as Record<ResumeTemplate, string>,
+  );
 });
 const createResumeTemplateOptions = computed(() =>
   RESUME_TEMPLATE_OPTIONS.map((template) => ({

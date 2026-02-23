@@ -1,5 +1,5 @@
-import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 import { createServerLogger } from "../../../utils/logger";
+import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 
 export class SimpleRateLimiter {
   private requests: Map<string, number[]> = new Map();

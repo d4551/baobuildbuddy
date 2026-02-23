@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { jsonObjectSchema } from "./json.schema";
 
 /**
  * Canonical automation/runtime error classification.
@@ -21,7 +22,7 @@ export const rpaRunErrorCodeSchema = z.enum([
 export const errorEnvelopeSchema = z.object({
   code: rpaRunErrorCodeSchema,
   message: z.string().min(1).max(2_000),
-  details: z.record(z.string(), z.unknown()).optional(),
+  details: jsonObjectSchema.optional(),
 });
 
 /**

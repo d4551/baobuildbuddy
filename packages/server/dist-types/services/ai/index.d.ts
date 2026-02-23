@@ -16,11 +16,11 @@
  * - Specialized prompts for career assistance
  */
 export { AIService } from "./ai-service";
-export { GeminiProvider } from "./gemini-provider";
 export { ClaudeProvider } from "./claude-provider";
-export { OpenAIProvider } from "./openai-provider";
+export { GeminiProvider } from "./gemini-provider";
 export { HuggingFaceProvider } from "./huggingface-provider";
 export { LocalProvider } from "./local-provider";
+export { OpenAIProvider } from "./openai-provider";
+export * from "./prompts";
 export type { AIProvider } from "./provider-interface";
 export { BaseAIProvider } from "./provider-interface";
-export * from "./prompts";

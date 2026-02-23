@@ -1,4 +1,4 @@
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "@bao/shared";
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared";
 import type { RouteLocationRaw } from "vue-router";
 
 /**

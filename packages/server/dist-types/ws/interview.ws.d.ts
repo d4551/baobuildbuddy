@@ -19,9 +19,9 @@ export declare const interviewWebSocket: Elysia<"", {
         subscribe: {
             body: {
                 content?: string | undefined;
+                sessionId?: string | undefined;
                 studioId?: string | undefined;
                 config?: {} | undefined;
-                sessionId?: string | undefined;
                 type: string;
             };
             params: {};

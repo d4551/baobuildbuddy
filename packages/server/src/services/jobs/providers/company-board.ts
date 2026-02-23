@@ -1,5 +1,5 @@
-import { generateId } from "@bao/shared";
 import type { CompanyBoardATSType, CompanyBoardConfig, JobProviderSettings } from "@bao/shared";
+import { generateId } from "@bao/shared";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
@@ -36,6 +36,10 @@ type ATSResponseFields = {
 type ATSResponse = ATSJob[] | (ATSResponseFields & Record<string, unknown>);
 
 const REMOTE_PATTERN = /remote/i;
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
 
 const resolveLocation = (location: ATSJob["location"]): string => {
   if (typeof location === "string") {
@@ -128,19 +132,22 @@ export class CompanyBoardProvider implements JobProvider {
     }
 
     const url = resolveBoardUrl(this.config.type, this.config.token, providerSettings);
-    return fetch(url, {
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          return [];
-        }
+    const responseResult = await settlePromise(
+      fetch(url, {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
+      }),
+    );
+    if (responseResult.status === "rejected") {
+      return [];
+    }
+    const response = responseResult.value;
+    if (!response.ok) {
+      return [];
+    }
 
-        const data = (await response.json()) as ATSResponse;
-        return this.parseJobs(data, providerSettings);
-      })
-      .catch(() => []);
+    const data = (await response.json()) as ATSResponse;
+    return this.parseJobs(data, providerSettings);
   }
 
   private parseJobs(data: ATSResponse, providerSettings: JobProviderSettings): RawJob[] {

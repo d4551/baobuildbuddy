@@ -1,11 +1,11 @@
 import {
+  generateId,
+  isRecord,
+  parseJson,
   SKILL_CATEGORY_IDS,
   SKILL_DEMAND_LEVEL_IDS,
   SKILL_EVIDENCE_TYPE_IDS,
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
-  generateId,
-  isRecord,
-  parseJson,
   type SkillCategory,
   type SkillEvidence,
   type SkillMapping,
@@ -14,13 +14,13 @@ import { desc, eq } from "drizzle-orm";
 import { Elysia, status, t } from "elysia";
 import { z } from "zod";
 import { db } from "../db/client";
-import { skillAnalysisRateLimit } from "../utils/rate-limit";
 import { settings } from "../db/schema/settings";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { AIService } from "../services/ai/ai-service";
 import { skillAnalysisPrompt } from "../services/ai/prompts";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { createServerLogger } from "../utils/logger";
+import { skillAnalysisRateLimit } from "../utils/rate-limit";
 
 type DemandLevel = SkillMapping["demandLevel"];
 type SkillEvidenceType = SkillEvidence["type"];
@@ -96,6 +96,10 @@ const normalizeStringArray = (value: unknown): string[] =>
     : [];
 
 const skillMappingRoutesLogger = createServerLogger("skill-mapping-routes");
+const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
 
 export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
   .use(skillAnalysisRateLimit)
@@ -249,8 +253,8 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
     async ({ body, set }) => {
       const settingsRows = await db.select().from(settings).limit(1);
 
-      return Promise.resolve()
-        .then(async () => {
+      const analysisResult = await settle(
+        (async () => {
           const aiService = AIService.fromSettings(settingsRows[0]);
 
           const skillsToAnalyze: string[] = [];
@@ -327,8 +331,8 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
               const gameExpression = asNonEmptyString(suggestedMapping.gameExpression);
               const transferableSkill = asNonEmptyString(suggestedMapping.transferableSkill);
               if (gameExpression && transferableSkill) {
-                await skillMappingService
-                  .createMapping({
+                const createResult = await settle(
+                  skillMappingService.createMapping({
                     gameExpression,
                     transferableSkill,
                     industryApplications: normalizeStringArray(
@@ -344,10 +348,14 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
                     demandLevel: normalizeDemandLevel(suggestedMapping.demandLevel),
                     verified: false,
                     aiGenerated: true,
-                  })
-                  .catch((error) => {
-                    skillMappingRoutesLogger.error("Failed to auto-create mapping:", error);
-                  });
+                  }),
+                );
+                if (createResult.status === "rejected") {
+                  skillMappingRoutesLogger.error(
+                    "Failed to auto-create mapping:",
+                    createResult.reason,
+                  );
+                }
               }
             }
           }
@@ -361,17 +369,19 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
             recommendations: normalizeStringArray(analysisResult.recommendations),
             provider: response.provider,
           };
-        })
-        .catch((error: unknown) => {
-          skillMappingRoutesLogger.error("AI analysis error:", error);
-          set.status = 500;
-          return {
-            message: `Error during AI analysis: ${error instanceof Error ? error.message : "Unknown error"}`,
-            detectedSkills: [],
-            suggestedMappings: [],
-            recommendations: [],
-          };
-        });
+        })(),
+      );
+      if (analysisResult.status === "rejected") {
+        skillMappingRoutesLogger.error("AI analysis error:", analysisResult.reason);
+        set.status = 500;
+        return {
+          message: `Error during AI analysis: ${analysisResult.reason instanceof Error ? analysisResult.reason.message : "Unknown error"}`,
+          detectedSkills: [],
+          suggestedMappings: [],
+          recommendations: [],
+        };
+      }
+      return analysisResult.value;
     },
     {
       body: t.Object({

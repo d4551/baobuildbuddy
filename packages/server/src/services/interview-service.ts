@@ -1,13 +1,5 @@
 import {
-  type InterviewAnalysis,
-  type InterviewConfig,
-  type InterviewMode,
-  type InterviewQuestion,
-  type InterviewResponse,
-  type InterviewSession,
-  type InterviewTargetJob,
-  type InterviewerPersona,
-  type VoiceSettings,
+  generateId,
   INTERVIEW_DEFAULT_DURATION_MINUTES,
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
   INTERVIEW_DEFAULT_FOCUS_AREAS,
@@ -16,8 +8,16 @@ import {
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_DEFAULT_VOICE_SETTINGS,
   INTERVIEW_FALLBACK_STUDIO_ID,
-  generateId,
+  type InterviewAnalysis,
+  type InterviewConfig,
+  type InterviewerPersona,
+  type InterviewMode,
+  type InterviewQuestion,
+  type InterviewResponse,
+  type InterviewSession,
+  type InterviewTargetJob,
   safeParseJson,
+  type VoiceSettings,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -58,6 +58,12 @@ const toPersistedRecord = (value: object): Record<string, unknown> => {
 };
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null;
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : "Unknown error";
 
 const MAX_QUESTION_COUNT = 12;
 const DEFAULT_INTERVIEW_MODE: InterviewMode = "studio";
@@ -775,21 +781,25 @@ async function generateQuestions(
     return parsed.slice(0, config.questionCount);
   };
 
-  return tryGenerate(fullPrompt).catch((firstErr: unknown) => {
-    interviewServiceLogger.warn(
-      "AI question generation failed on primary prompt, attempting fallback prompt.",
-      firstErr instanceof Error ? firstErr.message : "Unknown error",
-    );
-    return tryGenerate(buildSimpleQuestionPrompt(role, level, config.questionCount)).catch(
-      (secondErr: unknown) => {
-        interviewServiceLogger.warn(
-          "AI question generation failed on fallback prompt, using deterministic local questions.",
-          secondErr instanceof Error ? secondErr.message : "Unknown error",
-        );
-        return buildFallbackQuestions(config, config.targetJob?.company || studio.name);
-      },
-    );
-  });
+  const primaryResult = await settlePromise(tryGenerate(fullPrompt));
+  if (primaryResult.status === "fulfilled") {
+    return primaryResult.value;
+  }
+  interviewServiceLogger.warn(
+    "AI question generation failed on primary prompt, attempting fallback prompt.",
+    toErrorMessage(primaryResult.reason),
+  );
+  const fallbackResult = await settlePromise(
+    tryGenerate(buildSimpleQuestionPrompt(role, level, config.questionCount)),
+  );
+  if (fallbackResult.status === "fulfilled") {
+    return fallbackResult.value;
+  }
+  interviewServiceLogger.warn(
+    "AI question generation failed on fallback prompt, using deterministic local questions.",
+    toErrorMessage(fallbackResult.reason),
+  );
+  return buildFallbackQuestions(config, config.targetJob?.company || studio.name);
 }
 
 function buildResponseFeedbackPrompt(
@@ -861,40 +871,41 @@ async function generateResponseFeedback(
 
   const persona = buildInterviewerPersona(studio, session.config);
   const prompt = buildResponseFeedbackPrompt(studio, session.config, persona, question, transcript);
-  return createAIService()
-    .then(async (aiService) => {
-      const response = (await withAiOperationTimeout(() =>
-        aiService.generate(prompt, {
-          temperature: 0.35,
-          maxTokens: 500,
-        }),
-      )) ?? {
-        error: "AI operation timed out",
-        content: "",
-        provider: "none",
-        id: "",
-        timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
-      };
+  const aiServiceResult = await settlePromise(createAIService());
+  if (aiServiceResult.status === "rejected") {
+    return fallbackResponseFeedback(transcript, question);
+  }
 
-      if (response.error) {
-        return fallbackResponseFeedback(transcript, question);
-      }
+  const response = (await withAiOperationTimeout(() =>
+    aiServiceResult.value.generate(prompt, {
+      temperature: 0.35,
+      maxTokens: 500,
+    }),
+  )) ?? {
+    error: "AI operation timed out",
+    content: "",
+    provider: "none",
+    id: "",
+    timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
+  };
 
-      const parsedPayload = safeParseJSON(response.content) ?? {
-        score: Number.NaN,
-        feedback: "",
-        strengths: [],
-        improvements: [],
-      };
-      const parsed = normalizeQuestionFeedback(parsedPayload);
-      if (!parsed) return fallbackResponseFeedback(transcript, question);
-      if (parsed.feedback === "") {
-        parsed.feedback = "Good response with room for greater specificity.";
-      }
+  if (response.error) {
+    return fallbackResponseFeedback(transcript, question);
+  }
 
-      return parsed;
-    })
-    .catch(() => fallbackResponseFeedback(transcript, question));
+  const parsedPayload = safeParseJSON(response.content) ?? {
+    score: Number.NaN,
+    feedback: "",
+    strengths: [],
+    improvements: [],
+  };
+  const parsed = normalizeQuestionFeedback(parsedPayload);
+  if (!parsed) return fallbackResponseFeedback(transcript, question);
+  if (parsed.feedback === "") {
+    parsed.feedback = "Good response with room for greater specificity.";
+  }
+
+  return parsed;
 }
 
 function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnalysis {
@@ -1007,23 +1018,24 @@ async function generateFinalAnalysis(
 ): Promise<InterviewAnalysis> {
   const persona = buildInterviewerPersona(studio, session.config);
   const prompt = buildFinalAnalysisPrompt(studio, session.config, session.responses, persona);
-  return createAIService()
-    .then(async (aiService) => {
-      const response =
-        (await withAiOperationTimeout(() =>
-          aiService.generate(prompt, {
-            temperature: 0.35,
-            maxTokens: 900,
-          }),
-        )) ?? null;
+  const aiServiceResult = await settlePromise(createAIService());
+  if (aiServiceResult.status === "rejected") {
+    return calculateDefaultAnalysis(session.responses);
+  }
 
-      if (!response || response.error) return calculateDefaultAnalysis(session.responses);
+  const response =
+    (await withAiOperationTimeout(() =>
+      aiServiceResult.value.generate(prompt, {
+        temperature: 0.35,
+        maxTokens: 900,
+      }),
+    )) ?? null;
 
-      const parsed = normalizeFinalFromAI(response.content);
-      if (parsed) return parsed;
-      return calculateDefaultAnalysis(session.responses);
-    })
-    .catch(() => calculateDefaultAnalysis(session.responses));
+  if (!response || response.error) return calculateDefaultAnalysis(session.responses);
+
+  const parsed = normalizeFinalFromAI(response.content);
+  if (parsed) return parsed;
+  return calculateDefaultAnalysis(session.responses);
 }
 
 function normalizeSessionConfig(row: DBInterviewSession): InterviewConfig {

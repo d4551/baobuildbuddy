@@ -18,17 +18,14 @@
 
 // Main service
 export { AIService } from "./ai-service";
-
+export { ClaudeProvider } from "./claude-provider";
 // Provider implementations
 export { GeminiProvider } from "./gemini-provider";
-export { ClaudeProvider } from "./claude-provider";
-export { OpenAIProvider } from "./openai-provider";
 export { HuggingFaceProvider } from "./huggingface-provider";
 export { LocalProvider } from "./local-provider";
-
+export { OpenAIProvider } from "./openai-provider";
+// Prompt templates
+export * from "./prompts";
 // Interfaces
 export type { AIProvider } from "./provider-interface";
 export { BaseAIProvider } from "./provider-interface";
-
-// Prompt templates
-export * from "./prompts";

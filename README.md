@@ -23,6 +23,38 @@
 - [Automation Guide](docs/AUTOMATION.md)
 - [Desktop (Tauri) Packaging](#89-desktop-tauri-installer-path)
 
+## Stack/version baseline (audited 2026-02-23)
+
+Context7 verification references:
+
+- Nuxt 4 docs (`/websites/nuxt_4_x`) confirm `nuxt` latest tag is v4.
+- Prisma upgrade docs (`/prisma/docs`) confirm Prisma v7 is current major.
+- Bun docs (`/oven-sh/bun`) confirm Bun 1.3 toolchain/runtime practices.
+
+Registry-verified package baseline in this repo:
+
+| Package | Baseline in repo |
+|---|---|
+| `bun` | `1.3.9` |
+| `nuxt` | `4.3.1` |
+| `tailwindcss` | `4.2.1` |
+| `daisyui` | `5.5.19` |
+| `elysia` | `1.4.25` |
+| `@elysiajs/eden` | `1.4.8` |
+| `@tauri-apps/cli` | `2.10.0` |
+| `@tauri-apps/api` | `2.10.1` |
+
+Prisma note:
+
+- The current data layer is `drizzle-orm` (`packages/server`). Prisma is not active in this runtime path yet.
+- Current npm latest for Prisma is `7.4.1`; when Prisma is introduced, pin `prisma` and `@prisma/client` to v7 together.
+
+To re-audit stack versions against npm:
+
+```bash
+bun run audit:stack-versions
+```
+
 ## Non-Technical Install (Pick Your OS)
 
 Use the packaged desktop installers in `packages/desktop/releases` when you want an install path without setting up local development dependencies.
@@ -568,6 +600,8 @@ Expected flow and outputs:
 4. `.env` is created from `.env.example` if missing.
 5. Database setup runs successfully.
 6. Type/lint/test checks pass (unless checks are skipped).
+7. Optional build runs when `--include-build` / `-IncludeBuild` is set.
+8. Optional desktop build runs when `--include-desktop-build` / `-IncludeDesktopBuild` is set.
 
 ### 8.5 Setup script options
 
@@ -575,6 +609,8 @@ Expected flow and outputs:
 |------|------|-----------|--------|
 | Skip verification | `--skip-checks` | `-SkipChecks` | Skip typecheck, lint, and test runs |
 | Skip Python | `--skip-python` | `-SkipPython` | Skip venv creation (Bun-only install) |
+| Include build | `--include-build` | `-IncludeBuild` | Run `bun run build` after setup checks |
+| Include desktop build | `--include-desktop-build` | `-IncludeDesktopBuild` | Run Tauri desktop build after setup checks/build |
 | Help | `--help` | `-Help` | Print usage and exit |
 
 ### 8.6 Manual setup (for controlled environments)
@@ -711,6 +747,12 @@ This command:
 bun run build:desktop
 ```
 
+For deterministic macOS DMG packaging in shells with non-UTF8 locale defaults:
+
+```bash
+LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
+```
+
 Build outputs are generated under `packages/desktop/src-tauri/target/release/bundle` and then organized into the canonical release directory:
 
 - `packages/desktop/releases/macos`
@@ -732,6 +774,10 @@ If desktop build fails with `failed to run 'cargo metadata'`, install Rust using
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
+
+Cross-target requirements from Tauri build contracts:
+1. Windows target (`x86_64-pc-windows-msvc`) requires MSVC `link.exe` (Visual Studio Build Tools with C++).
+2. Linux target (`x86_64-unknown-linux-gnu`) requires cross `pkg-config` + sysroot (`PKG_CONFIG_SYSROOT_DIR`, target GTK/WebKit libs).
 
 #### 8.9.4 Environment overrides for desktop
 
@@ -973,8 +1019,8 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 | `/api/skills/pathways` | Career pathways | Ranked pathways by match score |
 | `/api/skills/readiness` | Career readiness | Readiness score and category breakdown |
 | `/api/skills/ai-analyze` | Skill analysis | Suggested mappings and recommendations |
-| `/api/automation/job-apply` | Start job application automation | `{ runId, status: "running" }` |
-| `/api/automation/job-apply/schedule` | Schedule job application automation | `{ runId, status: "pending", scheduledFor }` |
+| `/api/automation/job-apply` | Start job application automation | `RpaRunExecutionEnvelope` (status `running`) |
+| `/api/automation/job-apply/schedule` | Schedule job application automation | `RpaRunExecutionEnvelope` (status `pending`, `input.schedule.runAt`) |
 | `/api/automation/email-response` | Generate AI email response | `{ runId, status: "success", reply, provider, model }` |
 | `/api/gamification/progress` | XP and level progression | Gamification progress payload |
 | `/api/automation/runs` | Automation audit | Persisted run records |
@@ -986,6 +1032,18 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 | `/api/ws/chat` | AI chat | WebSocket upgrade handshake |
 | `/api/ws/interview` | Mock interview | WebSocket upgrade handshake |
 | `/api/ws/automation` | Automation run progress events | WebSocket subscribe/unsubscribe event stream |
+
+Automation route errors use the typed envelope:
+
+```json
+{
+  "error": {
+    "code": "OUTPUT_VALIDATION_ERROR",
+    "message": "Human readable message",
+    "details": {}
+  }
+}
+```
 
 ### 11.6 UI wiring and accessibility verification
 

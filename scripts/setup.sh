@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # BaoBuildBuddy - Automated setup for macOS and Linux
-# Usage: bash scripts/setup.sh [--skip-checks] [--skip-python]
+# Usage: bash scripts/setup.sh [--skip-checks] [--skip-python] [--include-build] [--include-desktop-build]
 set -euo pipefail
 
 BOLD="\033[1m"
@@ -13,6 +13,8 @@ RESET="\033[0m"
 
 SKIP_CHECKS=false
 SKIP_PYTHON=false
+INCLUDE_BUILD=false
+INCLUDE_DESKTOP_BUILD=false
 ERRORS=0
 WARNINGS=0
 
@@ -20,12 +22,16 @@ for arg in "$@"; do
   case "$arg" in
     --skip-checks) SKIP_CHECKS=true ;;
     --skip-python) SKIP_PYTHON=true ;;
+    --include-build) INCLUDE_BUILD=true ;;
+    --include-desktop-build) INCLUDE_DESKTOP_BUILD=true ;;
     --help|-h)
       echo "Usage: bash scripts/setup.sh [OPTIONS]"
       echo ""
       echo "Options:"
       echo "  --skip-checks   Skip typecheck, lint, and test verification"
       echo "  --skip-python   Skip Python venv setup (Bun-only install)"
+      echo "  --include-build Run bun run build after checks"
+      echo "  --include-desktop-build Run bun run build:desktop after checks/build"
       echo "  --help, -h      Show this help message"
       exit 0
       ;;
@@ -64,6 +70,15 @@ if command -v bun &>/dev/null; then
   ok "Bun ${BUN_VER}"
 else
   die "Bun is not installed. Install from https://bun.sh"
+fi
+
+BUN_MAJOR="$(echo "$BUN_VER" | cut -d. -f1)"
+BUN_MINOR="$(echo "$BUN_VER" | cut -d. -f2)"
+if [ -z "$BUN_MAJOR" ] || [ -z "$BUN_MINOR" ]; then
+  die "Unable to parse Bun version: ${BUN_VER}"
+fi
+if [ "$BUN_MAJOR" -ne 1 ] || [ "$BUN_MINOR" -ne 3 ]; then
+  die "Bun ${BUN_VER} detected. Workspace requires Bun 1.3.x."
 fi
 
 if command -v git &>/dev/null; then
@@ -200,6 +215,32 @@ if [ "$SKIP_CHECKS" = false ]; then
   fi
 else
   echo -e "\n  ${DIM}Skipping verification (--skip-checks)${RESET}"
+fi
+
+if [ "$INCLUDE_BUILD" = true ]; then
+  step "Building applications..."
+  if bun run build 2>&1; then
+    ok "Build passed"
+  else
+    fail "Build failed -- run 'bun run build' for details"
+  fi
+else
+  echo -e "\n  ${DIM}Skipping build (--include-build not set)${RESET}"
+fi
+
+if [ "$INCLUDE_DESKTOP_BUILD" = true ]; then
+  step "Building desktop application (Tauri)..."
+  if command -v rustc >/dev/null 2>&1 && command -v cargo >/dev/null 2>&1; then
+    if LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop 2>&1; then
+      ok "Desktop build passed"
+    else
+      fail "Desktop build failed -- run 'LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop' for details"
+    fi
+  else
+    fail "Desktop build requested but Rust toolchain is unavailable (rustc/cargo missing)"
+  fi
+else
+  echo -e "\n  ${DIM}Skipping desktop build (--include-desktop-build not set)${RESET}"
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────

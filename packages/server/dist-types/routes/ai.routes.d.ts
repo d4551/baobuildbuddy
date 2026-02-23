@@ -37,17 +37,17 @@ export declare const aiRoutes: Elysia<"/ai", {
                         domain?: string | undefined;
                         entity?: {
                             label?: string | undefined;
-                            type: string;
                             id: string;
+                            type: string;
                         } | undefined;
                         source: string;
                         route: {
                             name?: string | undefined;
-                            query: {
-                                [x: string]: string;
-                            };
                             path: string;
                             params: {
+                                [x: string]: string;
+                            };
+                            query: {
                                 [x: string]: string;
                             };
                         };
@@ -66,6 +66,15 @@ export declare const aiRoutes: Elysia<"/ai", {
                 headers: unknown;
                 response: {
                     200: {
+                        error: string;
+                        message?: undefined;
+                        sessionId?: undefined;
+                        timestamp?: undefined;
+                        provider?: undefined;
+                        model?: undefined;
+                        followUps?: undefined;
+                        contextDomain?: undefined;
+                    } | {
                         message: string;
                         sessionId: string;
                         timestamp: string;
@@ -73,8 +82,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                         model: string;
                         followUps: string[];
                         contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
-                    } | {
-                        error: string;
+                        error?: undefined;
                     };
                     422: {
                         type: "validation";
@@ -122,8 +130,6 @@ export declare const aiRoutes: Elysia<"/ai", {
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         error?: undefined;
-                    } | {
-                        error: string;
                     };
                     422: {
                         type: "validation";
@@ -168,8 +174,6 @@ export declare const aiRoutes: Elysia<"/ai", {
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         error?: undefined;
-                    } | {
-                        error: string;
                     };
                     422: {
                         type: "validation";
@@ -219,14 +223,6 @@ export declare const aiRoutes: Elysia<"/ai", {
                             strengths: never[];
                             concerns: never[];
                             highlightSkills: never[];
-                        } | {
-                            jobId: string;
-                            title: string;
-                            company: string;
-                            score: number;
-                            strengths: never[];
-                            concerns: never[];
-                            highlightSkills: never[];
                         })[];
                         recommendations: string[];
                     } | {
@@ -260,19 +256,22 @@ export declare const aiRoutes: Elysia<"/ai", {
                             name: string;
                             models: string[];
                             available: boolean;
-                            health: "healthy" | "degraded" | "down" | "unconfigured";
+                            health: "unconfigured";
                         }[];
-                        preferredProvider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                        configuredProviders: ("gemini" | "claude" | "openai" | "huggingface" | "local")[];
+                        error: string;
+                        preferredProvider?: undefined;
+                        configuredProviders?: undefined;
                     } | {
                         providers: {
                             id: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             name: string;
                             models: string[];
                             available: boolean;
-                            health: "unconfigured";
+                            health: "healthy" | "degraded" | "down" | "unconfigured";
                         }[];
-                        error: string;
+                        preferredProvider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        configuredProviders: ("gemini" | "claude" | "openai" | "huggingface" | "local")[];
+                        error?: undefined;
                     };
                 };
             };
@@ -318,11 +317,15 @@ export declare const aiRoutes: Elysia<"/ai", {
                 headers: unknown;
                 response: {
                     200: {
+                        error: string;
+                        runId?: undefined;
+                        status?: undefined;
+                        message?: undefined;
+                    } | {
                         runId: string;
                         status: string;
                         message: string;
-                    } | {
-                        error: string;
+                        error?: undefined;
                     };
                     422: {
                         type: "validation";

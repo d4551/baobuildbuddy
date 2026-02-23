@@ -30,10 +30,13 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     headers: unknown;
                     response: {
                         200: {
-                            questions: import("../services/cv-questionnaire-service").CvQuestion[];
-                        } | {
                             error: string;
                             details: string;
+                            questions?: undefined;
+                        } | {
+                            questions: import("../services/cv-questionnaire-service").CvQuestion[];
+                            error?: undefined;
+                            details?: undefined;
                         };
                         422: {
                             type: "validation";
@@ -56,8 +59,8 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 post: {
                     body: {
                         questionsAndAnswers: {
-                            category: string;
                             id: string;
+                            category: string;
                             question: string;
                             answer: string;
                         }[];
@@ -105,6 +108,34 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     technical?: string[] | undefined;
                     soft?: string[] | undefined;
                 } | undefined;
+                projects?: {
+                    link?: string | undefined;
+                    technologies?: string[] | undefined;
+                    title: string;
+                    description: string;
+                }[] | undefined;
+                name?: string | undefined;
+                personalInfo?: {
+                    portfolio?: string | undefined;
+                    email?: string | undefined;
+                    location?: string | undefined;
+                    website?: string | undefined;
+                    name?: string | undefined;
+                    phone?: string | undefined;
+                    linkedIn?: string | undefined;
+                    github?: string | undefined;
+                } | undefined;
+                summary?: string | undefined;
+                experience?: {
+                    description?: string | undefined;
+                    location?: string | undefined;
+                    technologies?: string[] | undefined;
+                    endDate?: string | undefined;
+                    achievements?: string[] | undefined;
+                    title: string;
+                    company: string;
+                    startDate: string;
+                }[] | undefined;
                 education?: {
                     gpa?: string | undefined;
                     degree: string;
@@ -112,42 +143,14 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     school: string;
                     year: string;
                 }[] | undefined;
-                name?: string | undefined;
-                summary?: string | undefined;
                 gamingExperience?: {
-                    gameEngines?: string | undefined;
                     platforms?: string | undefined;
+                    gameEngines?: string | undefined;
                     genres?: string | undefined;
                     shippedTitles?: string | undefined;
                 } | undefined;
-                theme?: "light" | "dark" | undefined;
-                projects?: {
-                    technologies?: string[] | undefined;
-                    link?: string | undefined;
-                    title: string;
-                    description: string;
-                }[] | undefined;
-                personalInfo?: {
-                    portfolio?: string | undefined;
-                    website?: string | undefined;
-                    name?: string | undefined;
-                    email?: string | undefined;
-                    phone?: string | undefined;
-                    location?: string | undefined;
-                    linkedIn?: string | undefined;
-                    github?: string | undefined;
-                } | undefined;
-                experience?: {
-                    location?: string | undefined;
-                    achievements?: string[] | undefined;
-                    description?: string | undefined;
-                    technologies?: string[] | undefined;
-                    endDate?: string | undefined;
-                    company: string;
-                    title: string;
-                    startDate: string;
-                }[] | undefined;
                 template?: string | undefined;
+                theme?: "light" | "dark" | undefined;
                 isDefault?: boolean | undefined;
             };
             params: {};
@@ -204,6 +207,34 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         technical?: string[] | undefined;
                         soft?: string[] | undefined;
                     } | undefined;
+                    projects?: {
+                        link?: string | undefined;
+                        technologies?: string[] | undefined;
+                        title: string;
+                        description: string;
+                    }[] | undefined;
+                    name?: string | undefined;
+                    personalInfo?: {
+                        portfolio?: string | undefined;
+                        email?: string | undefined;
+                        location?: string | undefined;
+                        website?: string | undefined;
+                        name?: string | undefined;
+                        phone?: string | undefined;
+                        linkedIn?: string | undefined;
+                        github?: string | undefined;
+                    } | undefined;
+                    summary?: string | undefined;
+                    experience?: {
+                        description?: string | undefined;
+                        location?: string | undefined;
+                        technologies?: string[] | undefined;
+                        endDate?: string | undefined;
+                        achievements?: string[] | undefined;
+                        title: string;
+                        company: string;
+                        startDate: string;
+                    }[] | undefined;
                     education?: {
                         gpa?: string | undefined;
                         degree: string;
@@ -211,42 +242,14 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         school: string;
                         year: string;
                     }[] | undefined;
-                    name?: string | undefined;
-                    summary?: string | undefined;
                     gamingExperience?: {
-                        gameEngines?: string | undefined;
                         platforms?: string | undefined;
+                        gameEngines?: string | undefined;
                         genres?: string | undefined;
                         shippedTitles?: string | undefined;
                     } | undefined;
-                    theme?: "light" | "dark" | undefined;
-                    projects?: {
-                        technologies?: string[] | undefined;
-                        link?: string | undefined;
-                        title: string;
-                        description: string;
-                    }[] | undefined;
-                    personalInfo?: {
-                        portfolio?: string | undefined;
-                        website?: string | undefined;
-                        name?: string | undefined;
-                        email?: string | undefined;
-                        phone?: string | undefined;
-                        location?: string | undefined;
-                        linkedIn?: string | undefined;
-                        github?: string | undefined;
-                    } | undefined;
-                    experience?: {
-                        location?: string | undefined;
-                        achievements?: string[] | undefined;
-                        description?: string | undefined;
-                        technologies?: string[] | undefined;
-                        endDate?: string | undefined;
-                        company: string;
-                        title: string;
-                        startDate: string;
-                    }[] | undefined;
                     template?: string | undefined;
+                    theme?: "light" | "dark" | undefined;
                     isDefault?: boolean | undefined;
                 };
                 params: {
@@ -321,9 +324,10 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     response: {
                         200: Response | {
                             error: string;
-                            details: string;
+                            details?: undefined;
                         } | {
                             error: string;
+                            details: string;
                         };
                         422: {
                             type: "validation";
@@ -354,16 +358,23 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     headers: unknown;
                     response: {
                         200: {
+                            error: string;
+                            details?: undefined;
+                            resume?: undefined;
+                            suggestions?: undefined;
+                            section?: undefined;
+                        } | {
+                            error: string;
+                            details: string;
+                            resume?: undefined;
+                            suggestions?: undefined;
+                            section?: undefined;
+                        } | {
                             resume: ResumeData;
                             suggestions: import("@bao/shared").JsonArray;
                             section: string;
                             error?: undefined;
                             details?: undefined;
-                        } | {
-                            error: string;
-                            details: string;
-                        } | {
-                            error: string;
                         };
                         422: {
                             type: "validation";
@@ -394,6 +405,26 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     headers: unknown;
                     response: {
                         200: {
+                            error: string;
+                            details?: undefined;
+                            resumeId?: undefined;
+                            jobId?: undefined;
+                            score?: undefined;
+                            strengths?: undefined;
+                            improvements?: undefined;
+                            keywords?: undefined;
+                            analysis?: undefined;
+                        } | {
+                            error: string;
+                            details: string;
+                            resumeId?: undefined;
+                            jobId?: undefined;
+                            score?: undefined;
+                            strengths?: undefined;
+                            improvements?: undefined;
+                            keywords?: undefined;
+                            analysis?: undefined;
+                        } | {
                             resumeId: string;
                             jobId: string;
                             score: number;
@@ -403,11 +434,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                             analysis: Record<string, unknown>;
                             error?: undefined;
                             details?: undefined;
-                        } | {
-                            error: string;
-                            details: string;
-                        } | {
-                            error: string;
                         };
                         422: {
                             type: "validation";

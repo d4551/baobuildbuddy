@@ -17,30 +17,18 @@ from typing import Any
 
 from _protocol import ProtocolEmitter
 
-try:
-    import rpa as r
-except ImportError:
-    sys.stdout.write(
-        json.dumps(
-            {
-                "protocolVersion": "1.0",
-                "runId": "missing-run",
-                "sequence": 0,
-                "timestamp": "1970-01-01T00:00:00+00:00",
-                "eventType": "error",
-                "error": {
-                    "code": "PYTHON_RUNTIME_ERROR",
-                    "message": "RPA not installed. pip install rpa",
-                    "source": "python-script",
-                },
-            }
-        )
-        + "\n"
-    )
-    raise SystemExit(1)
+r: Any
 
 ALLOWED_BROWSERS = {"chrome", "chromium", "edge"}
 TOTAL_STEPS = 10
+
+
+def load_rpa_module() -> Any | None:
+    try:
+        import rpa as module
+    except ImportError:
+        return None
+    return module
 
 
 def read_payload() -> dict[str, Any]:
@@ -214,6 +202,13 @@ def main() -> int:
     run_id_raw = payload.get("runId")
     run_id = run_id_raw.strip() if isinstance(run_id_raw, str) and run_id_raw.strip() else "run-missing-id"
     emitter = ProtocolEmitter(run_id=run_id)
+
+    module = load_rpa_module()
+    if module is None:
+        emitter.emit_error("PYTHON_RUNTIME_ERROR", "RPA not installed. pip install rpa")
+        return 1
+    global r
+    r = module
 
     job_url = payload.get("jobUrl")
     resume = payload.get("resume")

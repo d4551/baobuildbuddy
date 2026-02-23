@@ -60,9 +60,11 @@ const frFROverrides = {
   },
   apiDocs: {
     seoTitle: "Documentation API",
-    seoDescription: "Explorez les endpoints disponibles et testez les requêtes directement depuis l'application.",
+    seoDescription:
+      "Explorez les endpoints disponibles et testez les requêtes directement depuis l'application.",
     title: "Référence API",
-    intro: "Consultez la surface de votre API et exécutez des vérifications d'endpoint dans le testeur intégré.",
+    intro:
+      "Consultez la surface de votre API et exécutez des vérifications d'endpoint dans le testeur intégré.",
     endpointNavigator: "Navigation des endpoints",
     groups: {
       untagged: "Non étiqueté",
@@ -86,6 +88,7 @@ const frFROverrides = {
       methodLabel: "Méthode",
       operationIdLabel: "ID d'opération",
       openTester: "Ouvrir le testeur",
+      navigateAria: "Naviguer vers {method} {path}",
       openTesterAria: "Ouvrir le testeur pour {method} {path}",
     },
     tester: {
@@ -95,7 +98,7 @@ const frFROverrides = {
       queryParametersIntro: "Paramètres de requête",
       requestBodyIntro: "Corps de la requête",
       requestBodyAria: "Charge JSON du corps de la requête",
-      bodyPlaceholder: "{\n  \"exemple\": \"valeur\"\n}",
+      bodyPlaceholder: '{\n  "exemple": "valeur"\n}',
       noRequestBodyTemplate: "Aucun modèle de corps n'a été fourni par la spécification OpenAPI.",
       parameterLabel: "Paramètre {name}",
       send: "Envoyer la requête",

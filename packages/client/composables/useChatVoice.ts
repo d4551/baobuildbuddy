@@ -1,8 +1,8 @@
 import type { AIChatVoiceErrorCode, ChatMessage } from "@bao/shared";
 import {
-  AI_CHAT_VOICE_ERROR_MESSAGE_KEYS,
   AI_CHAT_VOICE_AUTO_SPEAK_DEFAULT,
   AI_CHAT_VOICE_DEFAULT_ID,
+  AI_CHAT_VOICE_ERROR_MESSAGE_KEYS,
   STATE_KEYS,
 } from "@bao/shared";
 import type { Ref } from "vue";

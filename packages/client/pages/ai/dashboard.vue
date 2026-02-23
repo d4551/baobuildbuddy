@@ -3,8 +3,8 @@ import {
   AI_PROVIDER_CATALOG,
   AI_PROVIDER_DEFAULT_ORDER,
   AI_PROVIDER_ID_LIST,
-  APP_ROUTES,
   type AIProviderType,
+  APP_ROUTES,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";

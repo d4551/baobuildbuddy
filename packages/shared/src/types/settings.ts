@@ -2,13 +2,13 @@
  * App settings types for single-user local-first app.
  */
 
-import type { AIProviderType } from "./ai";
 import type {
   AppLanguageCode,
   AutomationBrowserOption,
   SpeechProviderOption,
 } from "../constants/settings";
 import { DEFAULT_SPEECH_SETTINGS } from "../constants/settings";
+import type { AIProviderType } from "./ai";
 
 /**
  * Per-provider model preferences.

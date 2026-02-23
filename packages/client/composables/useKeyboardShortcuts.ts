@@ -1,5 +1,5 @@
-import type { NavigationItem } from "~/constants/navigation";
 import { APP_ROUTES } from "@bao/shared";
+import type { NavigationItem } from "~/constants/navigation";
 
 /**
  * Route shortcut metadata rendered in sidebar and handled globally.

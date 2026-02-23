@@ -1,5 +1,5 @@
 import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@bao/shared";
-import { STATE_KEYS, asNumber, asString, asStringArray, isRecord } from "@bao/shared";
+import { asNumber, asString, asStringArray, isRecord, STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { toSkillMapping } from "./api-normalizers";
 import { assertApiResponse, withLoadingState } from "./async-flow";

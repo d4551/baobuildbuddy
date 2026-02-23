@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTES, SKILL_CATEGORY_IDS, type SkillCategory, type SkillMapping } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { toSkillMapping } from "~/composables/api-normalizers";
 import { settlePromise } from "~/composables/async-flow";
 import {
@@ -15,11 +16,10 @@ import {
   SKILLS_GAMIFICATION_XP,
   SKILLS_MIN_GAME_EXPRESSION_LENGTH,
   SKILLS_MIN_TRANSFERABLE_SKILL_LENGTH,
-  type SkillsGamificationReason,
   SKILLS_TOP_MAPPINGS_PREVIEW_LIMIT,
+  type SkillsGamificationReason,
 } from "~/constants/skills";
 import { getErrorMessage } from "~/utils/errors";
-import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 definePageMeta({
   middleware: ["auth"],

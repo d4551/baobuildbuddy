@@ -1,7 +1,7 @@
 import type { AIChatContextDomain, AIProviderType } from "../types/ai";
 import { AI_PROVIDER_IDS } from "../types/ai";
 import { API_ENDPOINTS } from "./endpoints";
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "./routes";
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "./routes";
 
 const CLAUDE_TEST_MAX_TOKENS = 1;
 const ANTHROPIC_API_VERSION = "2023-06-01";

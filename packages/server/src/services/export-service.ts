@@ -1,12 +1,12 @@
 import {
-  RESUME_TEMPLATE_DEFAULT,
   isResumeTemplate,
   type PortfolioMetadata,
   type PortfolioProject,
+  RESUME_TEMPLATE_DEFAULT,
   type ResumeData,
   type ResumeTemplate,
 } from "@bao/shared";
-import { type Color, PDFDocument, type PDFFont, StandardFonts, rgb } from "pdf-lib";
+import { type Color, PDFDocument, type PDFFont, rgb, StandardFonts } from "pdf-lib";
 
 interface RGB {
   r: number;
@@ -100,7 +100,8 @@ export class ExportService {
    */
   async exportResumePDF(resume: ResumeData, templateName?: string): Promise<Uint8Array> {
     const resolvedTemplate = this.resolveTemplate(templateName, resume.template);
-    const template = RESUME_TEMPLATES[resolvedTemplate] ?? RESUME_TEMPLATES[RESUME_TEMPLATE_DEFAULT];
+    const template =
+      RESUME_TEMPLATES[resolvedTemplate] ?? RESUME_TEMPLATES[RESUME_TEMPLATE_DEFAULT];
     if (!template) {
       throw new Error(`Unsupported resume template: ${resolvedTemplate}`);
     }

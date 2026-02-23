@@ -1,10 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getRunMock = vi.fn<(runId: string) => Promise<RpaRunExecutionEnvelope>>();
-const subscribeToRunMock = vi.fn<
-  (runId: string, onEvent: (event: RpaRunEvent) => void) => () => void
->();
+const subscribeToRunMock =
+  vi.fn<(runId: string, onEvent: (event: RpaRunEvent) => void) => () => void>();
 
 let latestEventHandler: ((event: RpaRunEvent) => void) | null = null;
 const unsubscribeMock = vi.fn();
@@ -108,6 +107,45 @@ describe("useAutomationRunStream", () => {
     expect(stream.run.value?.status).toBe("success");
     expect(stream.isStreaming.value).toBe(false);
     expect(unsubscribeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores stale event sequences and does not mark success on progress success", async () => {
+    getRunMock.mockResolvedValueOnce(createRun("running"));
+    const stream = useAutomationRunStream();
+
+    await stream.start("run_12345678");
+    expect(latestEventHandler).not.toBeNull();
+
+    latestEventHandler?.({
+      protocolVersion: "1.0",
+      runId: "run_12345678",
+      sequence: 2,
+      timestamp: new Date().toISOString(),
+      eventType: "progress",
+      action: "fill_profile",
+      status: "success",
+      step: 1,
+      totalSteps: 3,
+      message: "Completed one step",
+    });
+
+    latestEventHandler?.({
+      protocolVersion: "1.0",
+      runId: "run_12345678",
+      sequence: 1,
+      timestamp: new Date().toISOString(),
+      eventType: "progress",
+      action: "old_step",
+      status: "running",
+      step: 0,
+      totalSteps: 3,
+      message: "Out-of-order event",
+    });
+
+    expect(stream.run.value?.status).toBe("running");
+    expect(stream.run.value?.currentStep).toBe(1);
+    expect(stream.events.value.length).toBe(1);
+    expect(stream.state.value).toBe("loading");
   });
 
   it("maps unauthorized fetch failures to deterministic ui state", async () => {

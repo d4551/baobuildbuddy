@@ -2,16 +2,17 @@ import {
   AUTOMATION_RUN_HISTORY_LIMIT,
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
-  rpaRunExecutionEnvelopeSchema,
   type ErrorEnvelope,
-  type RpaRunExecutionEnvelope,
+  jsonObjectSchema,
   type RpaRunErrorCode,
+  type RpaRunExecutionEnvelope,
+  rpaRunErrorCodeSchema,
+  rpaRunExecutionEnvelopeSchema,
 } from "@bao/shared";
 import { and, desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 
 import { db } from "../db/client";
-import { automationRateLimit } from "../utils/rate-limit";
 import { automationRuns } from "../db/schema/automation-runs";
 import {
   AutomationConcurrencyLimitError,
@@ -21,6 +22,7 @@ import {
   applicationAutomationService,
 } from "../services/automation/application-automation-service";
 import { createServerLogger } from "../utils/logger";
+import { automationRateLimit } from "../utils/rate-limit";
 
 const HTTP_STATUS_SUCCESS = 200;
 const HTTP_STATUS_BAD_REQUEST = 400;
@@ -33,13 +35,14 @@ const EMAIL_RESPONSE_MAX_SUBJECT_LENGTH = 200;
 const EMAIL_RESPONSE_MAX_MESSAGE_LENGTH = 12_000;
 const EMAIL_RESPONSE_MAX_SENDER_LENGTH = 200;
 
+const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
+  AUTOMATION_RUN_TYPES;
 const [
-  AUTOMATION_TYPE_SCRAPE,
-  AUTOMATION_TYPE_JOB_APPLY,
-  AUTOMATION_TYPE_EMAIL,
-] = AUTOMATION_RUN_TYPES;
-const [AUTOMATION_STATUS_PENDING, AUTOMATION_STATUS_RUNNING, AUTOMATION_STATUS_SUCCESS, AUTOMATION_STATUS_ERROR] =
-  AUTOMATION_RUN_STATUSES;
+  AUTOMATION_STATUS_PENDING,
+  AUTOMATION_STATUS_RUNNING,
+  AUTOMATION_STATUS_SUCCESS,
+  AUTOMATION_STATUS_ERROR,
+] = AUTOMATION_RUN_STATUSES;
 
 const automationRoutesLogger = createServerLogger("automation-routes");
 
@@ -65,6 +68,7 @@ const nullableRunErrorSchema = t.Union([
   t.Object({
     code: t.String({ minLength: 1 }),
     message: t.String({ minLength: 1 }),
+    source: t.String({ minLength: 1 }),
     details: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
   t.Null(),
@@ -101,6 +105,7 @@ const routeErrorBodySchema = t.Object({
 });
 
 type AutomationDbRow = typeof automationRuns.$inferSelect;
+type AutomationJsonObject = NonNullable<RpaRunExecutionEnvelope["input"]>;
 type JobApplyRequestBody = {
   jobUrl: string;
   resumeId: string;
@@ -119,7 +124,7 @@ type EmailResponseRequestBody = {
   tone?: EmailResponseTone;
 };
 
-const toRouteError = (code: RpaRunErrorCode, message: string, details?: Record<string, unknown>) =>
+const toRouteError = (code: RpaRunErrorCode, message: string, details?: AutomationJsonObject) =>
   ({
     error: {
       code,
@@ -137,7 +142,10 @@ const mapAutomationRouteError = (
       body: toRouteError("OUTPUT_VALIDATION_ERROR", error.message),
     };
   }
-  if (error instanceof AutomationDependencyMissingError || error instanceof AutomationRunNotFoundError) {
+  if (
+    error instanceof AutomationDependencyMissingError ||
+    error instanceof AutomationRunNotFoundError
+  ) {
     return {
       status: HTTP_STATUS_NOT_FOUND,
       body: toRouteError("OUTPUT_VALIDATION_ERROR", error.message),
@@ -168,12 +176,46 @@ const isAutomationRunType = (value: string): value is (typeof AUTOMATION_RUN_TYP
 const isAutomationRunStatus = (value: string): value is (typeof AUTOMATION_RUN_STATUSES)[number] =>
   AUTOMATION_RUN_STATUSES.some((runStatus) => runStatus === value);
 
-const toJsonObject = (value: unknown): Record<string, unknown> | null =>
-  typeof value === "object" && value !== null && !Array.isArray(value)
-    ? Object.fromEntries(Object.entries(value))
-    : null;
+const toJsonObject = (value: unknown): AutomationJsonObject | null => {
+  const parsed = jsonObjectSchema.safeParse(value);
+  if (parsed.success) {
+    return parsed.data;
+  }
+  return null;
+};
 
 const toBooleanFlag = (value: unknown): boolean => value === true || value === 1 || value === "1";
+
+const normalizeRunError = (value: unknown): RpaRunExecutionEnvelope["error"] => {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value;
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const code = "code" in value && typeof value.code === "string" ? value.code.trim() : "";
+  const message =
+    "message" in value && typeof value.message === "string" ? value.message.trim() : "";
+  const parsedCode = rpaRunErrorCodeSchema.safeParse(code);
+  const source =
+    "source" in value && typeof value.source === "string" && value.source.trim().length > 0
+      ? value.source.trim()
+      : "automation-routes";
+
+  if (!parsedCode.success || !message) {
+    return null;
+  }
+
+  const details = "details" in value ? toJsonObject(value.details) : undefined;
+
+  return {
+    code: parsedCode.data,
+    message,
+    source,
+    ...(details ? { details } : {}),
+  };
+};
 
 const normalizeAutomationRun = (run: AutomationDbRow): RpaRunExecutionEnvelope => {
   const normalizedCandidate = {
@@ -185,7 +227,7 @@ const normalizeAutomationRun = (run: AutomationDbRow): RpaRunExecutionEnvelope =
     input: toJsonObject(run.input),
     output: toJsonObject(run.output),
     screenshots: run.screenshots ?? null,
-    error: run.error ?? null,
+    error: normalizeRunError(run.error),
     progress: run.progress ?? null,
     currentStep: run.currentStep ?? null,
     totalSteps: run.totalSteps ?? null,
@@ -235,33 +277,36 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
     "/job-apply",
     async ({ body, set }) => {
       const payload: JobApplyRequestBody = body;
-      return applicationAutomationService
-        .createJobApplyRun(payload)
-        .then(async (runId) => {
-          void applicationAutomationService.runJobApply(runId, payload).then(
-            () => undefined,
-            (error: unknown) => {
-              automationRoutesLogger.error(
-                `[automation] job-apply execution failed for runId=${runId}`,
-                error,
-              );
-            },
+      const [createRunResult] = await Promise.allSettled([
+        applicationAutomationService.createJobApplyRun(payload),
+      ]);
+      if (createRunResult.status === "rejected") {
+        const mapped = mapAutomationRouteError(createRunResult.reason);
+        set.status = mapped.status;
+        return mapped.body;
+      }
+
+      const runId = createRunResult.value;
+      void (async () => {
+        const [executionResult] = await Promise.allSettled([
+          applicationAutomationService.runJobApply(runId, payload),
+        ]);
+        if (executionResult.status === "rejected") {
+          automationRoutesLogger.error(
+            `[automation] job-apply execution failed for runId=${runId}`,
+            executionResult.reason,
           );
+        }
+      })();
 
-          const run = await readAutomationRunById(runId);
-          if (!run) {
-            set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-            return toRouteError("SCRIPT_OUTPUT_INVALID", "Automation run was created but not found");
-          }
+      const run = await readAutomationRunById(runId);
+      if (!run) {
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return toRouteError("SCRIPT_OUTPUT_INVALID", "Automation run was created but not found");
+      }
 
-          set.status = HTTP_STATUS_SUCCESS;
-          return run;
-        })
-        .catch((error: unknown) => {
-          const mapped = mapAutomationRouteError(error);
-          set.status = mapped.status;
-          return mapped.body;
-        });
+      set.status = HTTP_STATUS_SUCCESS;
+      return run;
     },
     {
       body: t.Object({
@@ -285,8 +330,8 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
     "/job-apply/schedule",
     async ({ body, set }) => {
       const payload: ScheduleJobApplyRequestBody = body;
-      return applicationAutomationService
-        .createScheduledJobApplyRun(
+      const [scheduleResult] = await Promise.allSettled([
+        applicationAutomationService.createScheduledJobApplyRun(
           {
             jobUrl: payload.jobUrl,
             resumeId: payload.resumeId,
@@ -295,21 +340,22 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
             ...(payload.customAnswers ? { customAnswers: payload.customAnswers } : {}),
           },
           payload.runAt,
-        )
-        .then(async ({ runId }) => {
-          const run = await readAutomationRunById(runId);
-          if (!run) {
-            set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-            return toRouteError("SCRIPT_OUTPUT_INVALID", "Scheduled automation run not found");
-          }
-          set.status = HTTP_STATUS_SUCCESS;
-          return run;
-        })
-        .catch((error: unknown) => {
-          const mapped = mapAutomationRouteError(error);
-          set.status = mapped.status;
-          return mapped.body;
-        });
+        ),
+      ]);
+      if (scheduleResult.status === "rejected") {
+        const mapped = mapAutomationRouteError(scheduleResult.reason);
+        set.status = mapped.status;
+        return mapped.body;
+      }
+
+      const run = await readAutomationRunById(scheduleResult.value.runId);
+      if (!run) {
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return toRouteError("SCRIPT_OUTPUT_INVALID", "Scheduled automation run not found");
+      }
+
+      set.status = HTTP_STATUS_SUCCESS;
+      return run;
     },
     {
       body: t.Object({
@@ -334,17 +380,17 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
     "/email-response",
     async ({ body, set }) => {
       const payload: EmailResponseRequestBody = body;
-      return applicationAutomationService
-        .runEmailResponse(payload)
-        .then((result) => {
-          set.status = HTTP_STATUS_SUCCESS;
-          return result;
-        })
-        .catch((error: unknown) => {
-          const mapped = mapAutomationRouteError(error);
-          set.status = mapped.status;
-          return mapped.body;
-        });
+      const [emailResponseResult] = await Promise.allSettled([
+        applicationAutomationService.runEmailResponse(payload),
+      ]);
+      if (emailResponseResult.status === "rejected") {
+        const mapped = mapAutomationRouteError(emailResponseResult.reason);
+        set.status = mapped.status;
+        return mapped.body;
+      }
+
+      set.status = HTTP_STATUS_SUCCESS;
+      return emailResponseResult.value;
     },
     {
       body: t.Object({

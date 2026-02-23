@@ -56,14 +56,14 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         projects: {
             post: {
                 body: {
-                    image?: string | undefined;
-                    platforms?: string[] | undefined;
-                    role?: string | undefined;
                     technologies?: string[] | undefined;
+                    platforms?: string[] | undefined;
+                    featured?: boolean | undefined;
+                    image?: string | undefined;
                     liveUrl?: string | undefined;
                     githubUrl?: string | undefined;
                     tags?: string[] | undefined;
-                    featured?: boolean | undefined;
+                    role?: string | undefined;
                     engines?: string[] | undefined;
                     sortOrder?: number | undefined;
                     title: string;
@@ -124,16 +124,16 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
             ":id": {
                 put: {
                     body: {
-                        image?: string | undefined;
-                        platforms?: string[] | undefined;
-                        role?: string | undefined;
                         title?: string | undefined;
                         description?: string | undefined;
                         technologies?: string[] | undefined;
+                        platforms?: string[] | undefined;
+                        featured?: boolean | undefined;
+                        image?: string | undefined;
                         liveUrl?: string | undefined;
                         githubUrl?: string | undefined;
                         tags?: string[] | undefined;
-                        featured?: boolean | undefined;
+                        role?: string | undefined;
                         engines?: string[] | undefined;
                         sortOrder?: number | undefined;
                     };
@@ -208,9 +208,10 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                 response: {
                     200: Response | {
                         error: string;
-                        details: string;
+                        details?: undefined;
                     } | {
                         error: string;
+                        details: string;
                     };
                     422: {
                         type: "validation";

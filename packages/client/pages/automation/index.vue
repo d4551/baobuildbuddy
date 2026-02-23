@@ -4,8 +4,8 @@ import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_PIPELINE_STATUS_KEYS,
-  resolveDashboardPipelineSteps,
   type DashboardPipelineStepViewModel,
+  resolveDashboardPipelineSteps,
 } from "~/constants/dashboard";
 import { getErrorMessage } from "~/utils/errors";
 

@@ -1,6 +1,5 @@
 import type { ResumeData } from "@bao/shared";
-import { isRecord } from "@bao/shared";
-import { safeParseJson } from "@bao/shared";
+import { isRecord, safeParseJson } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";

@@ -2,6 +2,13 @@ import type { AIResponse, GenerateOptions } from "@bao/shared";
 import { type GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { BaseAIProvider } from "./provider-interface";
 
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : "Unknown error";
+
 /**
  * Google Gemini AI Provider
  */
@@ -33,42 +40,40 @@ export class GeminiProvider extends BaseAIProvider {
       fullPrompt = `${options.systemPrompt}\n\n${prompt}`;
     }
 
-    return this.generativeModel
-      .generateContent({
+    const resultResponse = await settlePromise(
+      this.generativeModel.generateContent({
         contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
         generationConfig,
-      })
-      .then(
-        (result): AIResponse => {
-          const response = result.response;
-          const text = response.text();
+      }),
+    );
+    if (resultResponse.status === "rejected") {
+      return {
+        id: this.generateId(),
+        provider: this.name,
+        model: this.model,
+        content: "",
+        error: toErrorMessage(resultResponse.reason),
+        timing: this.createTimingMetrics(startTime),
+      };
+    }
 
-          // Extract usage information if available
-          const usage = response.usageMetadata
-            ? {
-                inputTokens: response.usageMetadata.promptTokenCount || 0,
-                outputTokens: response.usageMetadata.candidatesTokenCount || 0,
-              }
-            : undefined;
+    const response = resultResponse.value.response;
+    const text = response.text();
+    const usage = response.usageMetadata
+      ? {
+          inputTokens: response.usageMetadata.promptTokenCount || 0,
+          outputTokens: response.usageMetadata.candidatesTokenCount || 0,
+        }
+      : undefined;
 
-          return {
-            id: this.generateId(),
-            provider: this.name,
-            model: this.model,
-            content: text,
-            usage,
-            timing: this.createTimingMetrics(startTime),
-          };
-        },
-        (error: unknown): AIResponse => ({
-          id: this.generateId(),
-          provider: this.name,
-          model: this.model,
-          content: "",
-          error: error instanceof Error ? error.message : "Unknown error",
-          timing: this.createTimingMetrics(startTime),
-        }),
-      );
+    return {
+      id: this.generateId(),
+      provider: this.name,
+      model: this.model,
+      content: text,
+      usage,
+      timing: this.createTimingMetrics(startTime),
+    };
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
@@ -85,24 +90,24 @@ export class GeminiProvider extends BaseAIProvider {
       fullPrompt = `${options.systemPrompt}\n\n${prompt}`;
     }
 
-    const result = await this.generativeModel
-      .generateContentStream({
+    const streamResult = await settlePromise(
+      this.generativeModel.generateContentStream({
         contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
         generationConfig,
-      })
-      .catch((error: unknown) => {
-        throw new Error(
-          `Gemini streaming error: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-      });
+      }),
+    );
+    if (streamResult.status === "rejected") {
+      throw new Error(`Gemini streaming error: ${toErrorMessage(streamResult.reason)}`);
+    }
+    const result = streamResult.value;
 
     const iterator = result.stream[Symbol.asyncIterator]();
     while (true) {
-      const nextChunk = await iterator.next().catch((error: unknown) => {
-        throw new Error(
-          `Gemini streaming error: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-      });
+      const nextChunkResult = await settlePromise(iterator.next());
+      if (nextChunkResult.status === "rejected") {
+        throw new Error(`Gemini streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
+      }
+      const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
         break;
       }
@@ -115,9 +120,8 @@ export class GeminiProvider extends BaseAIProvider {
 
   async isAvailable(): Promise<boolean> {
     // Try to list models to verify API key and connectivity
-    return Promise.resolve(this.client.getGenerativeModel({ model: "gemini-pro" })).then(
-      () => true,
-      () => false,
-    );
+    return (
+      await settlePromise(Promise.resolve(this.client.getGenerativeModel({ model: "gemini-pro" })))
+    ).status === "fulfilled";
   }
 }

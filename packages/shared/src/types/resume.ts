@@ -1,4 +1,4 @@
-import type { ResumeTemplate, ResumeExportFormat } from "../constants/resume";
+import type { ResumeExportFormat, ResumeTemplate } from "../constants/resume";
 
 /**
  * Resume types for builder, exports, and AI services

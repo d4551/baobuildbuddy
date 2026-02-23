@@ -86,7 +86,9 @@ const streamTotalSteps = computed<number | null>(() => streamRun.value?.totalSte
 const streamStateLabelKey = computed<string>(
   () => `automation.jobApply.stream.states.${streamState.value}`,
 );
-const streamTimelineRows = computed<RpaRunEvent[]>(() => [...streamEvents.value].slice(-12).reverse());
+const streamTimelineRows = computed<RpaRunEvent[]>(() =>
+  [...streamEvents.value].slice(-12).reverse(),
+);
 
 const lifecycleStepClasses = computed<[string, string, string]>(() => {
   const runStatus = streamRun.value?.status ?? RUN_STATUS_PENDING;

@@ -18,6 +18,14 @@ function parseBoundedInt(
   return Math.min(Math.max(parsed, min), max);
 }
 
+function parseNonEmptyString(value: string | undefined, fallback: string): string {
+  if (!value) {
+    return fallback;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : fallback;
+}
+
 function parseCorsOrigins(value?: string): string[] {
   if (!value?.trim()) {
     return [
@@ -65,5 +73,21 @@ export const config = {
     500,
     50,
     5_000,
+  ),
+  smartFieldMapperFetchTimeoutMs: parseBoundedInt(
+    Bun.env.SMART_FIELD_MAPPER_FETCH_TIMEOUT_MS,
+    10_000,
+    500,
+    120_000,
+  ),
+  smartFieldMapperMaxFormHtmlChars: parseBoundedInt(
+    Bun.env.SMART_FIELD_MAPPER_MAX_FORM_HTML_CHARS,
+    4_000,
+    500,
+    100_000,
+  ),
+  smartFieldMapperUserAgent: parseNonEmptyString(
+    Bun.env.SMART_FIELD_MAPPER_USER_AGENT,
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
   ),
 };

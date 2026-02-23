@@ -1,7 +1,7 @@
 import type {
-  AIChatContextEntityType,
   AIChatContext,
   AIChatContextEntity,
+  AIChatContextEntityType,
   AIChatContextSource,
   ChatMessage,
   GameStudio,
@@ -15,12 +15,12 @@ import {
   AI_CHAT_PAGE_PATH,
   AI_CHAT_ROUTE_QUERY_KEYS,
   APP_BRAND,
-  STATE_KEYS,
   generateId,
   inferAIChatDomainFromRoutePath,
+  STATE_KEYS,
 } from "@bao/shared";
-import type { LocationQueryValue } from "vue-router";
 import { useI18n } from "vue-i18n";
+import type { LocationQueryValue } from "vue-router";
 import { assertApiResponse, settlePromise, withLoadingState } from "~/composables/async-flow";
 import { createChatMessage } from "~/utils/chat";
 

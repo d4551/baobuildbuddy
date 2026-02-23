@@ -4,10 +4,10 @@ import {
   INTERVIEW_DEFAULT_QUESTION_COUNT,
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_UNKNOWN_STUDIO_NAME,
-  WS_ENDPOINTS,
   isRecord,
   safeParseJson,
   toApiScopedPath,
+  WS_ENDPOINTS,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -46,6 +46,11 @@ type InterviewFeedback = {
   strengths: string[];
   improvements: string[];
   summary: string;
+};
+
+const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
 };
 
 type FeedbackSummary = {
@@ -212,33 +217,36 @@ async function handleStartSession(socket: InterviewSocket, data: InterviewMessag
   }
 
   const config = mapWsConfigToInterviewConfig(data.config || {});
-  return interviewService
-    .startSession(studioId, config)
-    .then((session) => {
-      const studioName = session.interviewerPersona?.studioName ?? INTERVIEW_UNKNOWN_STUDIO_NAME;
-      const role = session.config.roleType ?? INTERVIEW_DEFAULT_ROLE_TYPE;
-      const level = session.config.experienceLevel ?? INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
-      const questionCount = session.config.questionCount ?? INTERVIEW_DEFAULT_QUESTION_COUNT;
-      const wsQuestions = toWsQuestions(session.questions);
+  const sessionResult = await settle(interviewService.startSession(studioId, config));
+  if (sessionResult.status === "rejected") {
+    socket.send(
+      JSON.stringify({
+        type: "error",
+        message:
+          sessionResult.reason instanceof Error
+            ? sessionResult.reason.message
+            : "Failed to start interview session",
+      }),
+    );
+    return;
+  }
 
-      socket.send(
-        JSON.stringify({
-          type: "session_started",
-          sessionId: session.id,
-          studioName,
-          questions: wsQuestions,
-          config: { role, level, questionCount },
-        }),
-      );
-    })
-    .catch((err: unknown) => {
-      socket.send(
-        JSON.stringify({
-          type: "error",
-          message: err instanceof Error ? err.message : "Failed to start interview session",
-        }),
-      );
-    });
+  const session = sessionResult.value;
+  const studioName = session.interviewerPersona?.studioName ?? INTERVIEW_UNKNOWN_STUDIO_NAME;
+  const role = session.config.roleType ?? INTERVIEW_DEFAULT_ROLE_TYPE;
+  const level = session.config.experienceLevel ?? INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
+  const questionCount = session.config.questionCount ?? INTERVIEW_DEFAULT_QUESTION_COUNT;
+  const wsQuestions = toWsQuestions(session.questions);
+
+  socket.send(
+    JSON.stringify({
+      type: "session_started",
+      sessionId: session.id,
+      studioName,
+      questions: wsQuestions,
+      config: { role, level, questionCount },
+    }),
+  );
 }
 
 async function handleSubmitResponse(socket: InterviewSocket, data: InterviewMessage) {
@@ -276,9 +284,9 @@ async function handleSubmitResponse(socket: InterviewSocket, data: InterviewMess
     summary: "Response recorded. Configure an AI provider for detailed feedback.",
   };
 
-  feedback = await getAIService()
-    .then((aiService) => {
-      const prompt = `You are an interview coach. Evaluate this interview response.
+  const aiServiceResult = await settle(getAIService());
+  if (aiServiceResult.status === "fulfilled") {
+    const prompt = `You are an interview coach. Evaluate this interview response.
 
 Question: ${currentQuestion?.question || "Unknown question"}
 Category: ${currentQuestion?.type || "general"}
@@ -288,18 +296,20 @@ Return a JSON object:
 {"score": 0-100, "strengths": ["..."], "improvements": ["..."], "summary": "one sentence feedback"}
 
 Only return the JSON object.`;
-
-      return aiService.generate(prompt, { temperature: 0.3 });
-    })
-    .then((response) => parseFeedback(response.content))
-    .catch(() => {
-      return {
+    const feedbackResult = await settle(
+      aiServiceResult.value.generate(prompt, { temperature: 0.3 }),
+    );
+    if (feedbackResult.status === "fulfilled") {
+      feedback = parseFeedback(feedbackResult.value.content);
+    } else {
+      feedback = {
         score: 65,
         strengths: ["Attempted answer"],
         improvements: ["More detail needed"],
         summary: "Response recorded.",
       };
-    });
+    }
+  }
 
   // Save response
   const newResponse: JsonRecord = {

@@ -10,4 +10,7 @@ export declare const config: {
     automationStdioBufferLimit: number;
     smartFieldMapperRetries: number;
     smartFieldMapperRetryDelayMs: number;
+    smartFieldMapperFetchTimeoutMs: number;
+    smartFieldMapperMaxFormHtmlChars: number;
+    smartFieldMapperUserAgent: string;
 };

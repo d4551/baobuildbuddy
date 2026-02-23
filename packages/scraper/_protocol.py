@@ -20,7 +20,7 @@ def _now_iso() -> str:
 
 def serialize_payload(payload: dict[str, Any]) -> str:
     """Serialize a protocol payload deterministically."""
-    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
 
 
 @dataclass

@@ -22,12 +22,12 @@ export declare const interviewRoutes: Elysia<"/interview", {
                 body: {
                     studioId?: string | undefined;
                     config?: {
-                        experienceLevel?: string | undefined;
                         technologies?: string[] | undefined;
-                        duration?: number | undefined;
                         roleType?: string | undefined;
                         roleCategory?: string | undefined;
+                        experienceLevel?: string | undefined;
                         focusAreas?: string[] | undefined;
+                        duration?: number | undefined;
                         questionCount?: number | undefined;
                         includeTechnical?: boolean | undefined;
                         includeBehavioral?: boolean | undefined;
@@ -36,15 +36,15 @@ export declare const interviewRoutes: Elysia<"/interview", {
                         interviewMode?: "job" | "studio" | undefined;
                         targetJob?: {
                             source?: string | undefined;
-                            url?: string | undefined;
                             description?: string | undefined;
-                            technologies?: string[] | undefined;
                             requirements?: string[] | undefined;
+                            technologies?: string[] | undefined;
                             postedDate?: string | undefined;
-                            location: string;
+                            url?: string | undefined;
                             id: string;
-                            company: string;
                             title: string;
+                            company: string;
+                            location: string;
                         } | undefined;
                         voiceSettings?: {
                             language?: string | undefined;

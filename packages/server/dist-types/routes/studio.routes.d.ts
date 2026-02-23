@@ -103,13 +103,13 @@ export declare const studioRoutes: Elysia<"/studios", {
     studios: {
         post: {
             body: {
-                website?: string | undefined;
-                location?: string | undefined;
                 type?: string | undefined;
-                platforms?: string[] | undefined;
-                genres?: string[] | undefined;
                 description?: string | undefined;
+                location?: string | undefined;
                 technologies?: string[] | undefined;
+                platforms?: string[] | undefined;
+                website?: string | undefined;
+                genres?: string[] | undefined;
                 size?: string | undefined;
                 culture?: {} | undefined;
                 remoteWork?: boolean | undefined;
@@ -158,14 +158,14 @@ export declare const studioRoutes: Elysia<"/studios", {
         ":id": {
             put: {
                 body: {
+                    type?: string | undefined;
+                    description?: string | undefined;
+                    location?: string | undefined;
+                    technologies?: string[] | undefined;
+                    platforms?: string[] | undefined;
                     website?: string | undefined;
                     name?: string | undefined;
-                    location?: string | undefined;
-                    type?: string | undefined;
-                    platforms?: string[] | undefined;
                     genres?: string[] | undefined;
-                    description?: string | undefined;
-                    technologies?: string[] | undefined;
                     size?: string | undefined;
                     culture?: {} | undefined;
                     remoteWork?: boolean | undefined;

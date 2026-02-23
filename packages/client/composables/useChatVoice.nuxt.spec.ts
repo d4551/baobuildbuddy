@@ -1,12 +1,12 @@
 import {
-  AI_CHAT_VOICE_ERROR_CODES,
   AI_CHAT_VOICE_DEFAULT_ID,
-  STATE_KEYS,
+  AI_CHAT_VOICE_ERROR_CODES,
   type AIChatVoiceErrorCode,
   type ChatMessage,
+  STATE_KEYS,
 } from "@bao/shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { computed, nextTick, ref, type Ref } from "vue";
+import { computed, nextTick, type Ref, ref } from "vue";
 
 const autoSpeakState = ref(false);
 const selectedVoiceState = ref(AI_CHAT_VOICE_DEFAULT_ID);

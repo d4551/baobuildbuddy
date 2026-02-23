@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { rpaErrorEnvelopeSchema } from "./error-envelope.schema";
+import { jsonObjectSchema } from "./json.schema";
 import {
   rpaArtifactMetadataSchema,
   rpaEventTypeSchema,
@@ -88,8 +89,8 @@ export const rpaRunExecutionEnvelopeSchema = z.object({
   status: rpaRunStatusSchema,
   jobId: z.string().trim().min(1).max(120).nullable(),
   userId: z.string().trim().min(1).max(120).nullable(),
-  input: z.record(z.string(), z.unknown()).nullable(),
-  output: z.union([rpaRunResultSchema, z.record(z.string(), z.unknown())]).nullable(),
+  input: jsonObjectSchema.nullable(),
+  output: z.union([rpaRunResultSchema, jsonObjectSchema]).nullable(),
   screenshots: z.array(z.string().trim().min(1).max(2_000)).nullable(),
   error: z.union([z.string().trim().min(1).max(2_000), rpaErrorEnvelopeSchema]).nullable(),
   progress: z.number().int().nonnegative().nullable(),

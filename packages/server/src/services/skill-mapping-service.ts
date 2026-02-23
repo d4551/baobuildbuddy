@@ -1,17 +1,17 @@
-import {
-  SKILL_CATEGORY_IDS,
-  SKILL_EVIDENCE_TYPE_IDS,
-  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
-  getGamificationPathwayIcon,
-  generateId,
-  isRecord,
-} from "@bao/shared";
 import type {
   CareerPathway,
   ReadinessAssessment,
-  SkillEvidence,
   SkillCategory,
+  SkillEvidence,
   SkillMapping,
+} from "@bao/shared";
+import {
+  generateId,
+  getGamificationPathwayIcon,
+  isRecord,
+  SKILL_CATEGORY_IDS,
+  SKILL_EVIDENCE_TYPE_IDS,
+  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";

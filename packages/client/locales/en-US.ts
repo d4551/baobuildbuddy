@@ -194,6 +194,7 @@ const enUS = {
       methodLabel: "Method",
       operationIdLabel: "Operation ID",
       openTester: "Open tester",
+      navigateAria: "Navigate to {method} {path}",
       openTesterAria: "Open tester for {method} {path}",
     },
     tester: {
@@ -203,7 +204,7 @@ const enUS = {
       queryParametersIntro: "Query parameters",
       requestBodyIntro: "Request body",
       requestBodyAria: "Request body JSON payload",
-      bodyPlaceholder: "{\n  \"example\": \"value\"\n}",
+      bodyPlaceholder: '{\n  "example": "value"\n}',
       noRequestBodyTemplate: "No body template was provided by the OpenAPI specification.",
       parameterLabel: "Parameter {name}",
       send: "Send request",

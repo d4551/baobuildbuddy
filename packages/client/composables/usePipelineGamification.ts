@@ -1,9 +1,9 @@
 import {
   PIPELINE_GAMIFICATION_REASONS,
   PIPELINE_GAMIFICATION_XP,
-  STATE_KEYS,
   type PipelineGamificationAction,
   type PipelineGamificationReason,
+  STATE_KEYS,
 } from "@bao/shared";
 
 type AwardedReasonState = Partial<Record<PipelineGamificationReason, true>>;

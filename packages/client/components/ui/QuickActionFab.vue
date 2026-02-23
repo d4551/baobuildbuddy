@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { QUICK_ACTION_MENU_ID } from "~/constants/layout";
-import { FAB_QUICK_ACTIONS } from "~/constants/dashboard";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
+import { FAB_QUICK_ACTIONS } from "~/constants/dashboard";
+import { QUICK_ACTION_MENU_ID } from "~/constants/layout";
 
 const { t } = useI18n();
 const route = useRoute();

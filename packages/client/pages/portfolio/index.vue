@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import {
   APP_ROUTES,
-  PORTFOLIO_PROJECT_LIST_PAGE_SIZE,
   PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH,
+  PORTFOLIO_PROJECT_LIST_PAGE_SIZE,
   PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT,
   PORTFOLIO_PROJECT_TITLE_MIN_LENGTH,
   type PortfolioMetadata,
   type PortfolioProject,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
-import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 definePageMeta({
   middleware: ["auth"],

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { AppSettings, AutomationSettings, UserProfile } from "@bao/shared";
 import {
+  AI_PROVIDER_CATALOG,
+  type AIProviderType,
   APP_LANGUAGE_OPTIONS,
   type AppLanguageCode,
   AUTOMATION_BROWSER_OPTIONS,
-  DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_APP_LANGUAGE,
+  DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
-  type AIProviderType,
-  AI_PROVIDER_CATALOG,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
 } from "@bao/shared";

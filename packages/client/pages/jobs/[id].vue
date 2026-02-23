@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { APP_ROUTES } from "@bao/shared";
 import type { Job } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
-import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { getErrorMessage } from "~/utils/errors";
+import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 
 const route = useRoute();
 const router = useRouter();

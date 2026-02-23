@@ -1,12 +1,17 @@
-import type {
-  AutomationRunUiState,
-  RpaRunEvent,
-  RpaRunExecutionEnvelope,
-} from "@bao/shared";
+import type { AutomationRunUiState, RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared";
 import { onBeforeUnmount, readonly, ref } from "vue";
 import { useAutomation } from "./useAutomation";
 
-const TERMINAL_STATUSES = new Set(["success", "error"]);
+const TERMINAL_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>(["success", "error"]);
+const PROGRESS_STATUS_TO_RUN_STATUS = {
+  pending: "pending",
+  running: "running",
+  success: "running",
+  error: "error",
+} as const satisfies Record<
+  Extract<RpaRunEvent, { eventType: "progress" }>["status"],
+  RpaRunExecutionEnvelope["status"]
+>;
 
 type StreamError = {
   message: string;
@@ -80,7 +85,9 @@ export function useAutomationRunStream() {
   const streamError = ref<StreamError | null>(null);
   const isStreaming = ref(false);
   const activeRunId = ref<string>("");
+  const lastSequenceByRunId = ref<Record<string, number>>({});
 
+  let requestToken = 0;
   let unsubscribe: (() => void) | null = null;
 
   const stopSubscription = (): void => {
@@ -89,6 +96,26 @@ export function useAutomationRunStream() {
       unsubscribe = null;
     }
     isStreaming.value = false;
+  };
+
+  const resetEvents = (): void => {
+    events.value = [];
+    lastSequenceByRunId.value = {};
+  };
+
+  const shouldApplyEvent = (event: RpaRunEvent): boolean => {
+    if (event.runId !== activeRunId.value) {
+      return false;
+    }
+    const currentSequence = lastSequenceByRunId.value[event.runId];
+    if (typeof currentSequence === "number" && event.sequence <= currentSequence) {
+      return false;
+    }
+    lastSequenceByRunId.value = {
+      ...lastSequenceByRunId.value,
+      [event.runId]: event.sequence,
+    };
+    return true;
   };
 
   const applyEvent = (event: RpaRunEvent): void => {
@@ -103,36 +130,49 @@ export function useAutomationRunStream() {
       const nextTotalSteps =
         typeof event.totalSteps === "number" ? event.totalSteps : currentRun.totalSteps;
       const nextProgress = computeProgressPercent(nextStep ?? null, nextTotalSteps ?? null);
+      const mappedStatus = PROGRESS_STATUS_TO_RUN_STATUS[event.status];
+      const nextStatus =
+        currentRun.status === "running" && mappedStatus === "pending"
+          ? currentRun.status
+          : mappedStatus;
 
       run.value = {
         ...currentRun,
-        status: event.status,
+        status: nextStatus,
         currentStep: nextStep ?? null,
         totalSteps: nextTotalSteps ?? null,
         progress: nextProgress ?? currentRun.progress,
         updatedAt: event.timestamp,
       };
-      state.value = toUiStateFromRun(run.value);
+
+      if (nextStatus === "error") {
+        state.value = "errorNonRetryable";
+        stopSubscription();
+        return;
+      }
+
+      state.value = "loading";
       return;
     }
 
     if (event.eventType === "result") {
       const success = event.result.success;
+      const resultSteps = event.result.steps.length;
       run.value = {
         ...currentRun,
         status: success ? "success" : "error",
         output: event.result,
         error: success ? null : event.result.error,
+        screenshots:
+          event.result.screenshots.length > 0 ? event.result.screenshots : currentRun.screenshots,
         progress: 100,
-        currentStep: event.result.steps.length,
-        totalSteps: event.result.steps.length,
+        currentStep: resultSteps,
+        totalSteps: resultSteps,
         completedAt: event.timestamp,
         updatedAt: event.timestamp,
       };
       state.value = toUiStateFromRun(run.value);
-      if (TERMINAL_STATUSES.has(run.value.status)) {
-        stopSubscription();
-      }
+      stopSubscription();
       return;
     }
 
@@ -152,23 +192,30 @@ export function useAutomationRunStream() {
    */
   const start = async (runId: string): Promise<void> => {
     const normalizedRunId = runId.trim();
+    requestToken += 1;
+    const token = requestToken;
+
+    stopSubscription();
+    resetEvents();
+    streamError.value = null;
+    activeRunId.value = normalizedRunId;
+
     if (normalizedRunId.length === 0) {
       state.value = "empty";
       run.value = null;
-      activeRunId.value = "";
-      stopSubscription();
       return;
     }
 
-    activeRunId.value = normalizedRunId;
-    streamError.value = null;
     state.value = "loading";
-    stopSubscription();
 
     const initialRun = await getRun(normalizedRunId).then(
       (value) => ({ ok: true as const, value }),
       (error: unknown) => ({ ok: false as const, error: toStreamError(error) }),
     );
+
+    if (token !== requestToken) {
+      return;
+    }
 
     if (!initialRun.ok) {
       run.value = null;
@@ -179,13 +226,15 @@ export function useAutomationRunStream() {
 
     run.value = initialRun.value;
     state.value = toUiStateFromRun(initialRun.value);
-    events.value = [];
 
     if (TERMINAL_STATUSES.has(initialRun.value.status)) {
       return;
     }
 
     unsubscribe = subscribeToRun(normalizedRunId, (event) => {
+      if (token !== requestToken || !shouldApplyEvent(event)) {
+        return;
+      }
       applyEvent(event);
     });
     isStreaming.value = true;
@@ -200,6 +249,7 @@ export function useAutomationRunStream() {
    * Cancels websocket subscription for the active run.
    */
   const cancel = (): void => {
+    requestToken += 1;
     stopSubscription();
     if (state.value === "loading") {
       state.value = "idle";
@@ -207,6 +257,7 @@ export function useAutomationRunStream() {
   };
 
   onBeforeUnmount(() => {
+    requestToken += 1;
     stopSubscription();
   });
 

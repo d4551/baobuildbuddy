@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {
-  APP_ROUTES,
   APP_ROUTE_QUERY_KEYS,
+  APP_ROUTES,
   INTERVIEW_MIN_RESPONSE_LENGTH,
   INTERVIEW_PROGRESS_MAX,
   INTERVIEW_PROGRESS_MIN,
 } from "@bao/shared";
-import { useI18n } from "vue-i18n";
 import { onUnmounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 

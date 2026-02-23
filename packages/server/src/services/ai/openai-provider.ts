@@ -2,6 +2,13 @@ import type { AIResponse, GenerateOptions } from "@bao/shared";
 import OpenAI from "openai";
 import { BaseAIProvider } from "./provider-interface";
 
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : "Unknown error";
+
 /**
  * OpenAI AI Provider
  */
@@ -33,40 +40,40 @@ export class OpenAIProvider extends BaseAIProvider {
       content: prompt,
     });
 
-    return this.client.chat.completions
-      .create({
+    const responseResult = await settlePromise(
+      this.client.chat.completions.create({
         model: this.model,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: options?.temperature ?? 0.7,
         top_p: options?.topP ?? 1,
-      })
-      .then(
-        (response): AIResponse => {
-          const text = response.choices[0]?.message?.content || "";
-          return {
-            id: this.generateId(),
-            provider: this.name,
-            model: this.model,
-            content: text,
-            usage: response.usage
-              ? {
-                  inputTokens: response.usage.prompt_tokens,
-                  outputTokens: response.usage.completion_tokens,
-                }
-              : undefined,
-            timing: this.createTimingMetrics(startTime),
-          };
-        },
-        (error: unknown): AIResponse => ({
-          id: this.generateId(),
-          provider: this.name,
-          model: this.model,
-          content: "",
-          error: error instanceof Error ? error.message : "Unknown error",
-          timing: this.createTimingMetrics(startTime),
-        }),
-      );
+      }),
+    );
+    if (responseResult.status === "rejected") {
+      return {
+        id: this.generateId(),
+        provider: this.name,
+        model: this.model,
+        content: "",
+        error: toErrorMessage(responseResult.reason),
+        timing: this.createTimingMetrics(startTime),
+      };
+    }
+    const response = responseResult.value;
+    const text = response.choices[0]?.message?.content || "";
+    return {
+      id: this.generateId(),
+      provider: this.name,
+      model: this.model,
+      content: text,
+      usage: response.usage
+        ? {
+            inputTokens: response.usage.prompt_tokens,
+            outputTokens: response.usage.completion_tokens,
+          }
+        : undefined,
+      timing: this.createTimingMetrics(startTime),
+    };
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
@@ -85,28 +92,28 @@ export class OpenAIProvider extends BaseAIProvider {
       content: prompt,
     });
 
-    const stream = await this.client.chat.completions
-      .create({
+    const streamResult = await settlePromise(
+      this.client.chat.completions.create({
         model: this.model,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: options?.temperature ?? 0.7,
         top_p: options?.topP ?? 1,
         stream: true,
-      })
-      .catch((error: unknown) => {
-        throw new Error(
-          `OpenAI streaming error: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-      });
+      }),
+    );
+    if (streamResult.status === "rejected") {
+      throw new Error(`OpenAI streaming error: ${toErrorMessage(streamResult.reason)}`);
+    }
+    const stream = streamResult.value;
 
     const iterator = stream[Symbol.asyncIterator]();
     while (true) {
-      const nextChunk = await iterator.next().catch((error: unknown) => {
-        throw new Error(
-          `OpenAI streaming error: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-      });
+      const nextChunkResult = await settlePromise(iterator.next());
+      if (nextChunkResult.status === "rejected") {
+        throw new Error(`OpenAI streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
+      }
+      const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
         break;
       }
@@ -119,9 +126,6 @@ export class OpenAIProvider extends BaseAIProvider {
 
   async isAvailable(): Promise<boolean> {
     // List models to verify API key
-    return this.client.models.list().then(
-      () => true,
-      () => false,
-    );
+    return (await settlePromise(this.client.models.list())).status === "fulfilled";
   }
 }

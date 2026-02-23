@@ -1,3 +1,4 @@
+import type { AutomationSettings } from "@bao/shared";
 import {
   AI_PROVIDER_DEFAULT_ORDER,
   DEFAULT_SETTINGS_ID,
@@ -5,7 +6,6 @@ import {
   LOCAL_AI_DEFAULT_MODEL,
   THEME_NAMES,
 } from "@bao/shared";
-import type { AutomationSettings } from "@bao/shared";
 import { sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 

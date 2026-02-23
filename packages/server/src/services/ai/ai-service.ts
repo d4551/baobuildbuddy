@@ -1,4 +1,3 @@
-import { AI_CHAT_CONTEXT_MESSAGE_LIMIT, AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared";
 import type {
   AIProviderConfig,
   AIProviderStatus,
@@ -6,6 +5,7 @@ import type {
   AIResponse,
   GenerateOptions,
 } from "@bao/shared";
+import { AI_CHAT_CONTEXT_MESSAGE_LIMIT, AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared";
 import { ClaudeProvider } from "./claude-provider";
 import { GeminiProvider } from "./gemini-provider";
 import { HuggingFaceProvider } from "./huggingface-provider";

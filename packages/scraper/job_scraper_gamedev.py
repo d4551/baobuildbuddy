@@ -57,11 +57,14 @@ def scrape_jobs() -> list[dict[str, Any]]:
     source_url = resolve_source_url()
     jobs: list[dict[str, Any]] = []
 
+    page_text = ""
     r.init(turbo_mode=True)
-    r.url(source_url)
-    r.wait(3)
-    page_text = r.read("body") if hasattr(r, "read") else ""
-    r.close()
+    try:
+        r.url(source_url)
+        r.wait(3)
+        page_text = r.read("body") if hasattr(r, "read") else ""
+    finally:
+        r.close()
 
     if isinstance(page_text, str) and len(page_text) > 100:
         lines = [line.strip() for line in page_text.split("\n") if line.strip()]
@@ -73,16 +76,6 @@ def scrape_jobs() -> list[dict[str, Any]]:
             jobs.append(normalize_row(line[:120], line, source_url))
             if len(jobs) >= 40:
                 break
-
-    if len(jobs) == 0:
-        fallback_title = "Game Developer"
-        jobs.append(
-            normalize_row(
-                fallback_title,
-                "Visit GameDev.net jobs to review current openings.",
-                source_url,
-            )
-        )
 
     return jobs
 

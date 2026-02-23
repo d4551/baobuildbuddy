@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import { APP_BRAND, APP_ROUTES } from "@bao/shared";
 import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
-import { getXPProgress } from "@bao/shared";
+import { APP_BRAND, APP_ROUTES, getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {
-  GAMIFICATION_ASYNC_DATA_KEY,
   GAMIFICATION_ACHIEVEMENTS_ICON,
+  GAMIFICATION_ASYNC_DATA_KEY,
+  GAMIFICATION_CURRENT_STREAK_ICON,
   GAMIFICATION_DEFAULT_CHALLENGE_GOAL,
+  GAMIFICATION_LEVEL_ICON,
+  GAMIFICATION_LOADING_SKELETON_LINES,
+  GAMIFICATION_LONGEST_STREAK_ICON,
   GAMIFICATION_PROGRESS_MAX,
   GAMIFICATION_PROGRESS_MIN,
-  GAMIFICATION_LOADING_SKELETON_LINES,
   GAMIFICATION_XP_TARGET_FALLBACK,
-  GAMIFICATION_CURRENT_STREAK_ICON,
-  GAMIFICATION_LEVEL_ICON,
-  GAMIFICATION_LONGEST_STREAK_ICON,
 } from "~/constants/gamification";
 import { getErrorMessage } from "~/utils/errors";
 

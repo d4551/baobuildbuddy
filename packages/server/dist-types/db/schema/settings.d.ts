@@ -1,5 +1,5 @@
-import { DEFAULT_SETTINGS_ID } from "@bao/shared";
 import type { AutomationSettings } from "@bao/shared";
+import { DEFAULT_SETTINGS_ID } from "@bao/shared";
 export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "settings";
     schema: undefined;

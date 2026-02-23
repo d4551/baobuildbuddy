@@ -1,14 +1,25 @@
+import eslint from "@eslint/js";
 import pluginVue from "eslint-plugin-vue";
 import pluginVueA11y from "eslint-plugin-vuejs-accessibility";
 import tseslint from "typescript-eslint";
 import vueParser from "vue-eslint-parser";
 
 export default [
+  eslint.configs.recommended,
   ...pluginVue.configs["flat/recommended"],
   ...pluginVueA11y.configs["flat/recommended"],
-  ...tseslint.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
   {
     ignores: ["node_modules/**", ".nuxt/**", "**/.nuxt/**", ".output/**", "dist/**", ".data/**"],
+  },
+  {
+    files: ["**/*.{ts,tsx,vue}"],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
   },
   {
     files: ["**/*.vue"],
@@ -18,7 +29,9 @@ export default [
         parser: tseslint.parser,
         extraFileExtensions: [".vue"],
         ecmaVersion: "latest",
+        projectService: true,
         sourceType: "module",
+        tsconfigRootDir: import.meta.dirname,
       },
     },
   },
@@ -50,7 +63,30 @@ export default [
       "vuejs-accessibility/aria-unsupported-elements": "error",
       "vuejs-accessibility/no-static-element-interactions": "error",
       "vuejs-accessibility/tabindex-no-positive": "error",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-floating-promises": "warn",
+      "@typescript-eslint/no-misused-promises": [
+        "error",
+        {
+          checksVoidReturn: {
+            attributes: false,
+          },
+        },
+      ],
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        {
+          prefer: "type-imports",
+          fixStyle: "inline-type-imports",
+        },
+      ],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
       "@typescript-eslint/no-explicit-any": "error",
     },
   },

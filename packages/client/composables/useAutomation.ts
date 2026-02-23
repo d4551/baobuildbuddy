@@ -1,13 +1,13 @@
 import {
   API_ENDPOINTS,
-  WS_ENDPOINTS,
-  buildAutomationRunEndpoint,
-  rpaRunEventSchema,
-  safeParseJson,
   type AutomationRunStatus,
   type AutomationRunType,
+  buildAutomationRunEndpoint,
   type RpaRunEvent,
   type RpaRunExecutionEnvelope,
+  rpaRunEventSchema,
+  safeParseJson,
+  WS_ENDPOINTS,
 } from "@bao/shared";
 import type { MaybeRef } from "vue";
 import { resolveApiEndpoint, resolveWebSocketEndpoint } from "~/utils/endpoints";
@@ -133,10 +133,7 @@ export function useAutomation() {
   /**
    * Subscribes to run-scoped websocket events.
    */
-  const subscribeToRun = (
-    runId: string,
-    onEvent: (event: RpaRunEvent) => void,
-  ): (() => void) => {
+  const subscribeToRun = (runId: string, onEvent: (event: RpaRunEvent) => void): (() => void) => {
     const wsUrl = resolveWebSocketEndpoint(wsBase, requestUrl, WS_ENDPOINTS.automation);
     const ws = new WebSocket(wsUrl);
 

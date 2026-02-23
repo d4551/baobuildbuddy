@@ -37,6 +37,11 @@ const GLOBAL_RATE_LIMIT_DURATION_MS = 60_000;
 const GLOBAL_RATE_LIMIT_MAX_REQUESTS = 100;
 const HEALTHCHECK_PROBE_SQL = "SELECT 1";
 
+const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
+
 export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticResponse: true })
   .use(
     cors({
@@ -76,12 +81,13 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
   .get(
     toApiScopedPath(API_ENDPOINTS.health),
     async () => {
-      const dbOk = await Promise.resolve()
-        .then(() => {
+      const healthResult = await settle(
+        (async () => {
           sqlite.exec(HEALTHCHECK_PROBE_SQL);
           return true;
-        })
-        .catch(() => false);
+        })(),
+      );
+      const dbOk = healthResult.status === "fulfilled";
       return {
         status: dbOk ? "healthy" : "degraded",
         timestamp: new Date().toISOString(),

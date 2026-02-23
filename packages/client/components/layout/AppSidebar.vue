@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
+import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
 import { APP_DRAWER_ID } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
-import { settlePromise } from "~/composables/async-flow";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
-import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
 
 const route = useRoute();
 const sidebarItems = getSidebarNavigationItems();

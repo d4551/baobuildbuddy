@@ -1,5 +1,5 @@
-import { computed, ref, watch } from "vue";
 import type { ComputedRef, Ref, WatchSource } from "vue";
+import { computed, ref, watch } from "vue";
 
 const FIRST_PAGE = 1;
 const MIN_PAGE_SIZE = 1;

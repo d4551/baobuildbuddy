@@ -1,5 +1,5 @@
-import { AI_CHAT_HISTORY_FETCH_LIMIT } from "@bao/shared";
 import type { AIChatContextDomain, ChatMessage } from "@bao/shared";
+import { AI_CHAT_HISTORY_FETCH_LIMIT } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -16,6 +16,10 @@ interface ConversationContext {
   systemPrompt: string;
   messages: Array<Pick<ChatMessage, "role" | "content">>;
 }
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
 
 export class ConversationContextManager {
   private isChatRole(value: string): value is ChatMessage["role"] {
@@ -107,8 +111,8 @@ export class ConversationContextManager {
    * Load domain-specific data from DB
    */
   private async loadDomainContext(domain: AIChatContextDomain): Promise<string | null> {
-    return Promise.resolve()
-      .then(async () => {
+    const contextResult = await settlePromise(
+      (async () => {
         switch (domain) {
           case "resume": {
             const defaultResume = await db.select().from(resumes).limit(1);
@@ -182,8 +186,14 @@ export class ConversationContextManager {
           default:
             return null;
         }
-      })
-      .catch(() => null);
+      })(),
+    );
+
+    if (contextResult.status === "rejected") {
+      return null;
+    }
+
+    return contextResult.value;
   }
 
   /**

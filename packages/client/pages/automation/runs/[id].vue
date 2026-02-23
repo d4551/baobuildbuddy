@@ -65,7 +65,9 @@ const toLocalizedDateTime = (value: string): string => {
   return new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).format(parsed);
 };
 
-const streamStateMessageKey = computed<string>(() => `automation.runDetail.states.${streamState.value}`);
+const streamStateMessageKey = computed<string>(
+  () => `automation.runDetail.states.${streamState.value}`,
+);
 const statusText = computed(() => {
   if (!run.value) {
     return t("automation.runDetail.loadingStatus");

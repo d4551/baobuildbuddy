@@ -78,7 +78,10 @@ const errorMessage = computed(() =>
 const isLiveRun = (run: RpaRunExecutionEnvelope): boolean =>
   run.status === RUN_STATUS_PENDING || run.status === RUN_STATUS_RUNNING;
 
-const computeProgressFromSteps = (currentStep: number | null, totalSteps: number | null): number => {
+const computeProgressFromSteps = (
+  currentStep: number | null,
+  totalSteps: number | null,
+): number => {
   if (
     typeof currentStep !== "number" ||
     typeof totalSteps !== "number" ||
@@ -157,7 +160,8 @@ const subscribeRun = (run: RpaRunExecutionEnvelope): void => {
     return;
   }
   const unsubscribe = subscribeToRun(run.id, (event) => {
-    const currentRun = liveRunById.value[event.runId] || runs.value?.find((item) => item.id === event.runId);
+    const currentRun =
+      liveRunById.value[event.runId] || runs.value?.find((item) => item.id === event.runId);
     if (!currentRun) {
       return;
     }
@@ -219,7 +223,8 @@ const formatDate = (value: string): string => {
   return new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).format(parsed);
 };
 
-const formatRunType = (runType: AutomationRunType): string => t(`automation.runs.typeOptions.${runType}`);
+const formatRunType = (runType: AutomationRunType): string =>
+  t(`automation.runs.typeOptions.${runType}`);
 const formatRunStatus = (runStatus: AutomationRunStatus): string =>
   t(`automation.runs.statusOptions.${runStatus}`);
 

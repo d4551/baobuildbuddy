@@ -1,4 +1,4 @@
-import { APP_BRAND, WS_ENDPOINTS, generateId, safeParseJson, toApiScopedPath } from "@bao/shared";
+import { APP_BRAND, generateId, safeParseJson, toApiScopedPath, WS_ENDPOINTS } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
@@ -11,6 +11,11 @@ type AutomationActionPayload = {
   jobUrl?: string;
   resumeId?: string;
   coverLetterId?: string;
+};
+
+const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
 };
 
 function parseAutomationActionPayload(raw: string): AutomationActionPayload | null {
@@ -67,30 +72,40 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
       }),
     );
 
-    return db
-      .select()
-      .from(settings)
-      .where(eq(settings.id, DEFAULT_SETTINGS_ID))
-      .then(async (settingsRows) => {
-        const config = settingsRows[0];
-        const { AIService } = await import("../services/ai/ai-service");
-        const aiService = AIService.fromSettings(config);
+    const settingsResult = await settle(
+      db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID)),
+    );
+    if (settingsResult.status === "rejected") {
+      ws.send(
+        JSON.stringify({
+          type: "error",
+          message: "Failed to generate response",
+          sessionId,
+        }),
+      );
+      return;
+    }
 
-        return contextManager
-          .buildContext(sessionId, data.content)
-          .then(async ({ systemPrompt, messages }) => {
-            let responseText = "";
+    const config = settingsResult.value[0];
+    const { AIService } = await import("../services/ai/ai-service");
+    const aiService = AIService.fromSettings(config);
+    const contextResult = await settle(contextManager.buildContext(sessionId, data.content));
+    const responseText =
+      contextResult.status === "rejected"
+        ? generateFallbackResponse(data.content)
+        : await (async () => {
+            let streamedText = "";
             ws.send(JSON.stringify({ type: "stream_start", sessionId }));
 
             const generator = aiService.stream(data.content, {
-              systemPrompt,
-              messages,
+              systemPrompt: contextResult.value.systemPrompt,
+              messages: contextResult.value.messages,
               temperature: 0.7,
               maxTokens: 2048,
             });
 
             for await (const { chunk } of generator) {
-              responseText += chunk;
+              streamedText += chunk;
               ws.send(
                 JSON.stringify({
                   type: "stream_chunk",
@@ -111,7 +126,7 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
               }),
             );
 
-            const actionMatch = responseText.match(/\{"action"\s*:\s*"job_apply"[^{}]*\}/);
+            const actionMatch = streamedText.match(/\{"action"\s*:\s*"job_apply"[^{}]*\}/);
             if (actionMatch) {
               const action = parseAutomationActionPayload(actionMatch[0]);
               if (!action) {
@@ -136,38 +151,37 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
               }
             }
 
-            return responseText;
-          })
-          .catch(() => {
-            const fallback = generateFallbackResponse(data.content);
-            ws.send(
-              JSON.stringify({
-                type: "response",
-                content: fallback,
-                sessionId,
-              }),
-            );
-            return fallback;
-          });
-      })
-      .then(async (responseText) => {
-        await db.insert(chatHistory).values({
-          id: generateId(),
-          role: "assistant",
+            return streamedText;
+          })();
+
+    if (contextResult.status === "rejected") {
+      ws.send(
+        JSON.stringify({
+          type: "response",
           content: responseText,
-          timestamp: new Date().toISOString(),
           sessionId,
-        });
-      })
-      .catch(() => {
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            message: "Failed to generate response",
-            sessionId,
-          }),
-        );
-      });
+        }),
+      );
+    }
+
+    const persistResult = await settle(
+      db.insert(chatHistory).values({
+        id: generateId(),
+        role: "assistant",
+        content: responseText,
+        timestamp: new Date().toISOString(),
+        sessionId,
+      }),
+    );
+    if (persistResult.status === "rejected") {
+      ws.send(
+        JSON.stringify({
+          type: "error",
+          message: "Failed to generate response",
+          sessionId,
+        }),
+      );
+    }
   },
   close() {
     // Connection closed

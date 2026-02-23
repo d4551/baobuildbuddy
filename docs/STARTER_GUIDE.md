@@ -87,6 +87,25 @@ Expected pre-flight state before running setup:
 - ✅ Python 3.10+ available
 - ✅ Chrome or Chromium available
 
+## 2.6 Version drift check (recommended before first build)
+
+Run the repository stack audit command to confirm local package registry alignment:
+
+```bash
+bun run audit:stack-versions
+```
+
+Expected baseline:
+
+- `bun`: `1.3.9`
+- `nuxt`: `4.3.1`
+- `tailwindcss`: `4.2.1`
+- `daisyui`: `5.5.19`
+- `elysia`: `1.4.25`
+- `@elysiajs/eden`: `1.4.8`
+- `@tauri-apps/cli`: `2.10.0`
+- `@tauri-apps/api`: `2.10.1`
+
 ## 3) Get the code
 
 ```bash
@@ -122,6 +141,8 @@ The setup script:
 4. Creates `.env` from `.env.example`.
 5. Generates and pushes DB schema.
 6. Runs `typecheck`, `lint`, and `test` unless skipped.
+7. Optionally runs `bun run build` when `--include-build` / `-IncludeBuild` is provided.
+8. Optionally runs `bun run build:desktop` when `--include-desktop-build` / `-IncludeDesktopBuild` is provided.
 
 After a successful run, you should be able to confirm:
 
@@ -138,6 +159,8 @@ After a successful run, you should be able to confirm:
 |---------|---------|
 | `--skip-checks` (Bash) / `-SkipChecks` (PowerShell) | Skip validation checks after setup |
 | `--skip-python` (Bash) / `-SkipPython` (PowerShell) | Skip Python venv and pip install |
+| `--include-build` (Bash) / `-IncludeBuild` (PowerShell) | Run `bun run build` after setup checks |
+| `--include-desktop-build` (Bash) / `-IncludeDesktopBuild` (PowerShell) | Run `bun run build:desktop` (setup script applies UTF-8 locale env for macOS DMG bundling) |
 | `--help` (Bash) / `-Help` (PowerShell) | Show script usage |
 
 ### 4.4 If setup stops with a warning or error
@@ -345,6 +368,12 @@ If your org requires Electron-specific tooling, Electron remains viable but is i
 bun run build:desktop
 ```
 
+For deterministic macOS DMG packaging in terminals using non-UTF8 locale defaults:
+
+```bash
+LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
+```
+
 Raw output is generated under:
 
 - `packages/desktop/src-tauri/target/release/bundle`
@@ -362,6 +391,10 @@ If `bun run build:desktop` fails with `failed to run 'cargo metadata'`, install 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
+
+Cross-target requirements from Tauri:
+1. Windows target (`x86_64-pc-windows-msvc`) needs MSVC `link.exe` from Visual Studio Build Tools C++ workload.
+2. Linux target (`x86_64-unknown-linux-gnu`) needs cross `pkg-config` and target sysroot (`PKG_CONFIG_SYSROOT_DIR`) plus target GTK/WebKit development libraries.
 
 ### 12.4 Tauri-specific environment knobs
 

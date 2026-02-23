@@ -5,13 +5,13 @@ import type {
   InterviewTargetJob,
 } from "@bao/shared";
 import {
-  INTERVIEW_FALLBACK_STUDIO_ID,
-  STATE_KEYS,
   asBoolean,
   asNumber,
   asString,
   asStringArray,
+  INTERVIEW_FALLBACK_STUDIO_ID,
   isRecord,
+  STATE_KEYS,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";

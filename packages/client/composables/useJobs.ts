@@ -1,5 +1,5 @@
 import type { Job } from "@bao/shared";
-import { STATE_KEYS, isRecord } from "@bao/shared";
+import { isRecord, STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { toJob } from "./api-normalizers";
 import { assertApiResponse, withLoadingState } from "./async-flow";

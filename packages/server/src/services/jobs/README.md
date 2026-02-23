@@ -185,7 +185,7 @@ import { jobAggregator } from "./services/jobs"
 
 // Refresh all jobs from providers
 const result = await jobAggregator.refreshJobs()
-console.log(`Added ${result.new} new jobs, updated ${result.updated}`)
+appLogger.info("jobs-import-summary", { added: result.new, updated: result.updated })
 ```
 
 ### Search Jobs
@@ -202,9 +202,9 @@ const results = await jobAggregator.searchJobs({
   page: 1
 })
 
-console.log(`Found ${results.total} jobs`)
+appLogger.info("jobs-search-count", { total: results.total })
 results.jobs.forEach(job => {
-  console.log(`${job.title} at ${job.company}`)
+  appLogger.info("jobs-search-item", { title: job.title, company: job.company })
 })
 ```
 
@@ -225,9 +225,9 @@ const userProfile = {
 const job = await jobAggregator.getJobById("job-id")
 const matchScore = calculateMatchScore(userProfile, job)
 
-console.log(`Match: ${matchScore.overall}/100`)
-console.log(`Strengths: ${matchScore.strengths.join(", ")}`)
-console.log(`Missing Skills: ${matchScore.missingSkills.join(", ")}`)
+appLogger.info("jobs-match-overall", { score: matchScore.overall })
+appLogger.info("jobs-match-strengths", { strengths: matchScore.strengths })
+appLogger.info("jobs-match-missing-skills", { missingSkills: matchScore.missingSkills })
 ```
 
 ### Application Tracking
@@ -249,7 +249,7 @@ await jobAggregator.updateApplicationStatus(
 // Get all applications
 const applications = await jobAggregator.getApplications()
 applications.forEach(app => {
-  console.log(`${app.job.title} - ${app.status}`)
+  appLogger.info("jobs-application-status", { title: app.job.title, status: app.status })
 })
 ```
 
@@ -263,10 +263,10 @@ if (await jobAggregator.needsRefresh()) {
 
 // Get statistics
 const stats = await jobAggregator.getStats()
-console.log(`Total jobs: ${stats.total}`)
-console.log(`Remote jobs: ${stats.remoteCount}`)
-console.log(`By source:`, stats.bySource)
-console.log(`Last updated: ${stats.lastUpdated}`)
+appLogger.info("jobs-stats-total", { total: stats.total })
+appLogger.info("jobs-stats-remote", { remoteCount: stats.remoteCount })
+appLogger.info("jobs-stats-by-source", { bySource: stats.bySource })
+appLogger.info("jobs-stats-last-updated", { lastUpdated: stats.lastUpdated })
 ```
 
 ## Database Schema

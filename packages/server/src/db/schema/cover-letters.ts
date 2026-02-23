@@ -1,6 +1,6 @@
+import { COVER_LETTER_DEFAULT_TEMPLATE } from "@bao/shared";
 import { sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { COVER_LETTER_DEFAULT_TEMPLATE } from "@bao/shared";
 
 export const coverLetters = sqliteTable("cover_letters", {
   id: text("id").primaryKey(),

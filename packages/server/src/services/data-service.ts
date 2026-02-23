@@ -226,6 +226,10 @@ const parseChatHistoryInsert = (value: unknown): ChatHistoryInsert | null => {
 
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
+};
 
 const runWithErrorHandler = async (
   operation: () => Promise<void>,
@@ -312,8 +316,8 @@ export class DataService {
     }
 
     sqlite.exec("BEGIN");
-    await Promise.resolve()
-      .then(async () => {
+    const transactionResult = await settlePromise(
+      (async () => {
         // Import profile
         if (data.profile) {
           await runWithErrorHandler(
@@ -568,11 +572,12 @@ export class DataService {
         }
 
         sqlite.exec("COMMIT");
-      })
-      .catch((error: unknown) => {
-        sqlite.exec("ROLLBACK");
-        errors.push(`Transaction failed: ${toErrorMessage(error)}`);
-      });
+      })(),
+    );
+    if (transactionResult.status === "rejected") {
+      sqlite.exec("ROLLBACK");
+      errors.push(`Transaction failed: ${toErrorMessage(transactionResult.reason)}`);
+    }
 
     return { imported, skipped, errors };
   }

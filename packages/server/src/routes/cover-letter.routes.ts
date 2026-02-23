@@ -1,9 +1,9 @@
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
   COVER_LETTER_TEMPLATE_OPTIONS,
+  type CoverLetterTemplate,
   generateId,
   isCoverLetterTemplate,
-  type CoverLetterTemplate,
   safeParseJson,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
@@ -48,6 +48,11 @@ const parseGeneratedCoverLetterContent = (content: string): Record<string, unkno
     body: lines.slice(1, -1).join("\n\n") || content,
     conclusion: lines[lines.length - 1] || "Thank you for your consideration.",
   };
+};
+
+const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([operation]);
+  return result;
 };
 
 export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
@@ -194,51 +199,50 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
         : "No additional job information provided";
 
       const prompt = coverLetterPrompt(body.company, body.position, jobInfoText, resumeContext);
-      return aiService
-        .generate(prompt, { temperature: 0.7, maxTokens: 2000 })
-        .then(async (response) => {
-          if (response.error) {
-            set.status = 500;
-            return { error: "Cover letter generation failed", details: response.error };
-          }
+      const aiResult = await settle(aiService.generate(prompt, { temperature: 0.7, maxTokens: 2000 }));
+      if (aiResult.status === "rejected") {
+        set.status = 500;
+        return {
+          error: "Cover letter generation failed",
+          details: aiResult.reason instanceof Error ? aiResult.reason.message : "Unknown error",
+        };
+      }
 
-          const generatedContent = parseGeneratedCoverLetterContent(response.content);
-          const content = {
-            introduction: String(generatedContent.introduction || generatedContent.intro || ""),
-            body: String(generatedContent.body || generatedContent.main || ""),
-            conclusion: String(generatedContent.conclusion || generatedContent.closing || ""),
-          };
+      const response = aiResult.value;
+      if (response.error) {
+        set.status = 500;
+        return { error: "Cover letter generation failed", details: response.error };
+      }
 
-          if (body.save) {
-            const newCoverLetter = {
-              id: generateId(),
-              company: body.company,
-              position: body.position,
-              jobInfo: body.jobInfo || {},
-              content: content,
-              template: normalizeTemplate(body.template),
-            };
+      const generatedContent = parseGeneratedCoverLetterContent(response.content);
+      const content = {
+        introduction: String(generatedContent.introduction || generatedContent.intro || ""),
+        body: String(generatedContent.body || generatedContent.main || ""),
+        conclusion: String(generatedContent.conclusion || generatedContent.closing || ""),
+      };
 
-            await db.insert(coverLetters).values(newCoverLetter);
-            set.status = 201;
-            return {
-              message: "Cover letter generated and saved",
-              coverLetter: newCoverLetter,
-            };
-          }
+      if (body.save) {
+        const newCoverLetter = {
+          id: generateId(),
+          company: body.company,
+          position: body.position,
+          jobInfo: body.jobInfo || {},
+          content,
+          template: normalizeTemplate(body.template),
+        };
 
-          return {
-            message: "Cover letter generated",
-            content: content,
-          };
-        })
-        .catch((error: unknown) => {
-          set.status = 500;
-          return {
-            error: "Cover letter generation failed",
-            details: error instanceof Error ? error.message : "Unknown error",
-          };
-        });
+        await db.insert(coverLetters).values(newCoverLetter);
+        set.status = 201;
+        return {
+          message: "Cover letter generated and saved",
+          coverLetter: newCoverLetter,
+        };
+      }
+
+      return {
+        message: "Cover letter generated",
+        content,
+      };
     },
     {
       body: t.Object({
@@ -283,30 +287,30 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
         sender.location = profile.location;
       }
 
-      return exportService
-        .exportCoverLetterPDF(
+      const exportResult = await settle(
+        exportService.exportCoverLetterPDF(
           {
             company: letter.company,
             position: letter.position,
             content: toJsonRecord(letter.content),
           },
           sender,
-        )
-        .then((pdfBytes) => {
-          return new Response(Buffer.from(pdfBytes), {
-            headers: {
-              "content-type": "application/pdf",
-              "content-disposition": `attachment; filename="cover-letter-${params.id}.pdf"`,
-            },
-          });
-        })
-        .catch((error: unknown) => {
-          set.status = 500;
-          return {
-            error: "Failed to export cover letter",
-            details: error instanceof Error ? error.message : "Unknown error",
-          };
-        });
+        ),
+      );
+      if (exportResult.status === "rejected") {
+        set.status = 500;
+        return {
+          error: "Failed to export cover letter",
+          details: exportResult.reason instanceof Error ? exportResult.reason.message : "Unknown error",
+        };
+      }
+
+      return new Response(Buffer.from(exportResult.value), {
+        headers: {
+          "content-type": "application/pdf",
+          "content-disposition": `attachment; filename="cover-letter-${params.id}.pdf"`,
+        },
+      });
     },
     {
       params: t.Object({

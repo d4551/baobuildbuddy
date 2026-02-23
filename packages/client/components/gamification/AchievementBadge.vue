@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
 import { GAMIFICATION_ICON_FALLBACK } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 
 defineProps<{
   achievement: {

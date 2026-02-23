@@ -26,13 +26,6 @@ export declare const userRoutes: Elysia<"/user", {
                     200: {
                         id: string;
                         name: string;
-                        technicalSkills: never[];
-                        softSkills: never[];
-                        gamingExperience: {};
-                        careerGoals: {};
-                    } | {
-                        id: string;
-                        name: string;
                         email: string | null;
                         phone: string | null;
                         location: string | null;
@@ -49,6 +42,13 @@ export declare const userRoutes: Elysia<"/user", {
                         careerGoals: Record<string, unknown> | null;
                         createdAt: string;
                         updatedAt: string;
+                    } | {
+                        id: string;
+                        name: string;
+                        technicalSkills: never[];
+                        softSkills: never[];
+                        gamingExperience: {};
+                        careerGoals: {};
                     };
                 };
             };
@@ -59,20 +59,20 @@ export declare const userRoutes: Elysia<"/user", {
         profile: {
             put: {
                 body: {
+                    email?: string | undefined;
+                    location?: string | undefined;
                     website?: string | undefined;
                     name?: string | undefined;
-                    email?: string | undefined;
                     phone?: string | undefined;
-                    location?: string | undefined;
                     github?: string | undefined;
-                    linkedin?: string | undefined;
                     summary?: string | undefined;
+                    gamingExperience?: {} | undefined;
+                    softSkills?: string[] | undefined;
+                    linkedin?: string | undefined;
                     currentRole?: string | undefined;
                     currentCompany?: string | undefined;
                     yearsExperience?: number | undefined;
                     technicalSkills?: string[] | undefined;
-                    softSkills?: string[] | undefined;
-                    gamingExperience?: {} | undefined;
                     careerGoals?: {} | undefined;
                 };
                 params: {};

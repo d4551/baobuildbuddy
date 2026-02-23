@@ -32,8 +32,8 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 body: unknown;
                 params: {};
                 query: {
-                    category?: string | undefined;
                     search?: string | undefined;
+                    category?: string | undefined;
                 };
                 headers: unknown;
                 response: {
@@ -68,8 +68,8 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         mappings: {
             post: {
                 body: {
-                    category?: string | undefined;
                     confidence?: number | undefined;
+                    category?: string | undefined;
                     industryApplications?: string[] | undefined;
                     evidence?: {
                         [x: string]: unknown;
@@ -103,8 +103,8 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
             ":id": {
                 put: {
                     body: {
-                        category?: string | undefined;
                         confidence?: number | undefined;
+                        category?: string | undefined;
                         gameExpression?: string | undefined;
                         transferableSkill?: string | undefined;
                         industryApplications?: string[] | undefined;
@@ -252,11 +252,6 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                         suggestedMappings: Record<string, unknown>[];
                         recommendations: string[];
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                    } | {
-                        message: string;
-                        detectedSkills: never[];
-                        suggestedMappings: never[];
-                        recommendations: never[];
                     };
                     422: {
                         type: "validation";

@@ -1,13 +1,8 @@
-import { safeParseJson } from "@bao/shared";
 import type { AIResponse } from "@bao/shared";
+import { safeParseJson } from "@bao/shared";
 import * as z from "zod";
 import { config } from "../../config/env";
 import { formFieldAnalysisPrompt } from "../ai/prompts";
-
-const MAX_STRIPPED_FORM_HTML_CHARS = 4_000;
-const FETCH_TIMEOUT_MS = 10_000;
-const DEFAULT_BROWSER_USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 const selectorMapSchema = z.record(
   z.string().trim().min(1).max(120),
@@ -36,6 +31,16 @@ type FetchPageResult =
       message: string;
     };
 
+const isRetryableFetchFailure = (result: FetchPageResult): boolean => {
+  if (result.ok) {
+    return false;
+  }
+  if (typeof result.statusCode !== "number") {
+    return true;
+  }
+  return result.statusCode === 429 || result.statusCode >= 500;
+};
+
 /**
  * Minimal AI client contract required by smart field mapping.
  */
@@ -59,18 +64,18 @@ export class SmartFieldMapper {
     aiService: FieldMapperAIClient,
   ): Promise<Record<string, string[]>> {
     const uniqueFields = Array.from(
-      new Set(
-        fieldsNeeded
-          .map((field) => field.trim())
-          .filter((field) => field.length > 0),
-      ),
+      new Set(fieldsNeeded.map((field) => field.trim()).filter((field) => field.length > 0)),
     );
 
     if (uniqueFields.length === 0) {
       return {};
     }
 
-    return this.fetchPage(jobUrl).then(
+    return this.fetchPageWithRetry({
+      url: jobUrl,
+      attemptsRemaining: config.smartFieldMapperRetries,
+      delayMs: config.smartFieldMapperRetryDelayMs,
+    }).then(
       async (pageResult) => {
         if (!pageResult.ok) {
           return {};
@@ -94,13 +99,35 @@ export class SmartFieldMapper {
   }
 
   /**
+   * Fetches page HTML and retries for transient failures.
+   */
+  private fetchPageWithRetry(params: {
+    url: string;
+    attemptsRemaining: number;
+    delayMs: number;
+  }): Promise<FetchPageResult> {
+    return this.fetchPage(params.url).then(async (result) => {
+      if (!isRetryableFetchFailure(result) || params.attemptsRemaining <= 1) {
+        return result;
+      }
+
+      await wait(params.delayMs);
+      return this.fetchPageWithRetry({
+        ...params,
+        attemptsRemaining: params.attemptsRemaining - 1,
+        delayMs: params.delayMs * 2,
+      });
+    });
+  }
+
+  /**
    * Fetches page HTML with a deterministic timeout and status checks.
    */
   private fetchPage(url: string): Promise<FetchPageResult> {
     return fetch(url, {
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      signal: AbortSignal.timeout(config.smartFieldMapperFetchTimeoutMs),
       headers: {
-        "User-Agent": DEFAULT_BROWSER_USER_AGENT,
+        "User-Agent": config.smartFieldMapperUserAgent,
       },
     }).then(
       async (response) => {
@@ -189,7 +216,10 @@ export class SmartFieldMapper {
    * Parses and validates selector-map JSON emitted by the AI provider.
    */
   private parseSelectorResponse(content: string): Record<string, string[]> {
-    const cleaned = content.replace(/```json\n?/gu, "").replace(/```\n?/gu, "").trim();
+    const cleaned = content
+      .replace(/```json\n?/gu, "")
+      .replace(/```\n?/gu, "")
+      .trim();
     const parsedValue = safeParseJson(cleaned);
     const parsedSelectors = selectorMapSchema.safeParse(parsedValue);
     if (!parsedSelectors.success) {
@@ -212,7 +242,7 @@ export class SmartFieldMapper {
 
     let result = "";
     for (const match of matches) {
-      if (result.length + match.length > MAX_STRIPPED_FORM_HTML_CHARS) {
+      if (result.length + match.length > config.smartFieldMapperMaxFormHtmlChars) {
         break;
       }
       result += `${match}\n`;
