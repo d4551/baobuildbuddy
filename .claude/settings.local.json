@@ -44,7 +44,8 @@
       "Bash(bun --bun run biome:*)",
       "Bash(bun run format:check:*)",
       "Bash(bun:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "mcp__MCP_DOCKER__resolve-library-id"
     ]
   }
 }

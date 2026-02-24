@@ -59,12 +59,12 @@ export const INTERVIEW_DEFAULT_VOICE_SETTINGS = {
 /**
  * Job search query limit used by the interview hub when loading available targets.
  */
-export const INTERVIEW_HUB_JOB_QUERY_LIMIT = "60";
+export const INTERVIEW_HUB_JOB_QUERY_LIMIT = 60;
 
 /**
  * Job search query limit used by the scraper operations page.
  */
-export const SCRAPER_JOB_QUERY_LIMIT = "80";
+export const SCRAPER_JOB_QUERY_LIMIT = 80;
 
 /**
  * Maximum number of job rows rendered in compact preview tables.
@@ -89,6 +89,7 @@ export const INTERVIEW_PROGRESS_MAX = 100;
 /**
  * Number of recent interview sessions rendered per page in the interview hub table.
  */
+/** @deprecated Use INTERVIEW_HUB_RECENT_SESSION_LIMIT directly. Scheduled for removal. */
 export const INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE = INTERVIEW_HUB_RECENT_SESSION_LIMIT;
 
 /**
