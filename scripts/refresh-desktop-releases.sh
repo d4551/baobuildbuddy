@@ -222,8 +222,8 @@ if [ "$BUILD_WINDOWS" = true ]; then
         ubuntu:24.04 bash -lc '
           set -euo pipefail
           export DEBIAN_FRONTEND=noninteractive
-          apt-get update
-          apt-get install -y nsis
+          apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+          apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends nsis
           makensis -V2 installer.nsi
         '
     fi
@@ -235,8 +235,8 @@ if [ "$BUILD_WINDOWS" = true ]; then
       ubuntu:24.04 bash -lc '
         set -euo pipefail
         export DEBIAN_FRONTEND=noninteractive
-        apt-get update
-        apt-get install -y nsis
+        apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+        apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends nsis
         makensis -V2 installer.nsi
       '
   fi
@@ -268,8 +268,8 @@ if [ "$BUILD_LINUX" = true ]; then
     ubuntu:24.04 bash -lc '
       set -euo pipefail
       export DEBIAN_FRONTEND=noninteractive
-      apt-get update
-      apt-get install -y curl unzip build-essential pkg-config \
+      apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+      apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends curl unzip build-essential pkg-config \
         libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
         librsvg2-dev patchelf ca-certificates git
       curl -fsSL https://bun.sh/install | bash
@@ -312,8 +312,8 @@ if [ "$BUILD_LINUX" = true ]; then
       ubuntu:24.04 bash -lc '
         set -euo pipefail
         export DEBIAN_FRONTEND=noninteractive
-        apt-get update
-        apt-get install -y curl ca-certificates libglib2.0-0 file squashfs-tools
+        apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+        apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends curl ca-certificates libglib2.0-0 file squashfs-tools
         curl -L -o /tmp/appimagetool-aarch64.AppImage \
           https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage
         chmod +x /tmp/appimagetool-aarch64.AppImage
