@@ -36,6 +36,9 @@ bun run build:desktop
 bun run release:refresh:all-os
 ```
 
+`bun run release:refresh:all-os` must run on a macOS host with Docker available and outbound network access for Ubuntu package mirrors plus Bun/Rust/AppImage downloads used by cross-target packaging.
+The script automatically uses containerized NSIS fallback for Windows setup packaging and runs an AppImage fallback path when `linuxdeploy` fails.
+
 Script/runtime verification commands:
 
 ```bash

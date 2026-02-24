@@ -25,6 +25,9 @@ bun run build:desktop
 bun run release:refresh:all-os
 ```
 
+`bun run release:refresh:all-os` requires a macOS host with Docker running and outbound network access for cross-target dependency/bootstrap downloads.
+The refresh flow includes containerized Windows setup fallback and Linux AppImage fallback when primary bundle tooling fails.
+
 Script verification checks:
 
 ```bash

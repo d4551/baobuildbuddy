@@ -42,6 +42,9 @@ Expected validation outcomes:
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
+`bun run release:refresh:all-os` is designed for macOS hosts with Docker available and outbound network access for cross-target dependency bootstrap.
+The script includes containerized Windows setup fallback and Linux AppImage fallback paths to keep release artifact generation deterministic.
+
 If local port `3001` is already occupied, run page verification against an isolated preview port:
 
 ```bash

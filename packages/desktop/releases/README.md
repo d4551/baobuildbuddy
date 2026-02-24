@@ -41,6 +41,12 @@ Use the canonical all-target refresh command:
 bun run release:refresh:all-os
 ```
 
+Host/runtime requirements:
+
+- macOS host (required for DMG generation)
+- Docker daemon running (required for Windows/Linux cross-target packaging)
+- outbound network access for Ubuntu package mirrors and Bun/Rust/AppImage downloads
+
 This command performs:
 
 - release quality gates (`lint`, `typecheck`, `test`, `build`)
@@ -49,6 +55,8 @@ This command performs:
 - Linux ARM64 AppImage/deb/rpm builds (`aarch64-unknown-linux-gnu`)
 - staging into `packages/desktop/releases/{macos,linux,windows}`
 - checksum regeneration in `packages/desktop/releases/sha256.txt`
+- containerized Windows NSIS fallback when local `makensis` is unavailable/fails
+- Linux AppImage fallback using `appimagetool` when `linuxdeploy` bundling fails
 
 Advanced target selection examples:
 
