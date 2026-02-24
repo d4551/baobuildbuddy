@@ -37,6 +37,7 @@ bun run validate:locales
 bun run validate:i18n-ui
 bun run validate:aria
 bun run validate:ui
+bun run audit:official-llms
 ```
 
 Route/content check (requires running server/client target):
@@ -56,6 +57,7 @@ Expected validation outcomes:
 - `bun run build`: all packages build successfully.
 - `CI=true bun run build:desktop`: desktop packaging build succeeds.
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
 ## 1) Understand what is being started

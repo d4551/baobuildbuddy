@@ -17,10 +17,12 @@ Automation-specific checks:
 
 ```bash
 bun run validate:no-try-catch
+bun run validate:no-unsafe-casts
 bun run validate:locales
 bun run validate:i18n-ui
 bun run validate:aria
 bun run validate:ui
+bun run audit:official-llms
 ```
 
 Optional SSR route/content verification while app is running:
@@ -40,6 +42,7 @@ Expected validation outcomes:
 - `bun run build`: all packages build successfully.
 - `CI=true bun run build:desktop`: desktop packaging build succeeds.
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
 `bun run release:refresh:all-os` is designed for macOS hosts with Docker available and outbound network access for cross-target dependency bootstrap.

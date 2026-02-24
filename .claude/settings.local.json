@@ -45,7 +45,9 @@
       "Bash(bun run format:check:*)",
       "Bash(bun:*)",
       "Bash(head:*)",
-      "mcp__MCP_DOCKER__resolve-library-id"
+      "mcp__MCP_DOCKER__resolve-library-id",
+      "mcp__MCP_DOCKER__fetch",
+      "mcp__MCP_DOCKER__get-library-docs"
     ]
   }
 }

@@ -48,6 +48,7 @@ bun run validate:locales
 bun run validate:i18n-ui
 bun run validate:aria
 bun run validate:ui
+bun run audit:official-llms
 ```
 
 SSR route/content verification (requires running app target at `VERIFY_BASE_URL`):
@@ -70,6 +71,7 @@ Expected validation outcomes:
 - `bun run build`: all packages build successfully.
 - `CI=true bun run build:desktop`: desktop packaging build succeeds.
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
 ## Stack and Version Contract
@@ -995,6 +997,7 @@ bun run dev:client
 | Format check | `bun run format:check` | Verify formatter output |
 | UI accessibility + token checks | `bun run validate:ui` | Enforce WCAG contrast pairs and block hardcoded UI colors in client source |
 | UI i18n coverage checks | `bun run validate:i18n-ui` | Reject static template copy/attributes and missing `t('...')` keys |
+| Official framework docs check | `bun run audit:official-llms` | Validate official Bun/Nuxt/Elysia `llms.txt` sources are reachable and contain required guidance markers |
 | No try/catch validation | `bun run validate:no-try-catch` | Enforce repository-wide no-`try/catch` policy in source files |
 | Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
 | Test | `bun run test` | Run test suites for server and client |
