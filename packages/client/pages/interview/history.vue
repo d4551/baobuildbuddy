@@ -8,7 +8,7 @@ import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
 const router = useRouter();
-const { t, locale } = useI18n();
+const { t, locale, fallbackLocale } = useI18n();
 const { $toast } = useNuxtApp();
 const { sessions, loading, fetchSessions, getSession } = useInterview();
 
@@ -128,7 +128,16 @@ function formatDate(value: string | undefined): string {
     return t("interviewHistory.notAvailable");
   }
 
-  return parsedDate.toLocaleDateString(locale.value);
+  const preferredLocale =
+    typeof locale.value === "string" && locale.value.length > 0
+      ? locale.value
+      : typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0
+        ? fallbackLocale.value
+        : Array.isArray(fallbackLocale.value) && typeof fallbackLocale.value[0] === "string"
+          ? fallbackLocale.value[0]
+          : "en-US";
+
+  return new Intl.DateTimeFormat(preferredLocale, { dateStyle: "medium" }).format(parsedDate);
 }
 
 function parseDurationMinutes(value: string): number | null {
