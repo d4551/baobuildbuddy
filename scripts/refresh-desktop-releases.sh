@@ -204,17 +204,42 @@ if [ "$BUILD_WINDOWS" = true ]; then
   ok "Windows payload generation complete"
 
   step "Building Windows x64 setup artifact"
-  docker run --rm --platform linux/arm64/v8 \
-    -v "$REPO_ROOT:$REPO_ROOT" \
-    -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
-    -w "$WINDOWS_NSIS_WORKDIR" \
-    ubuntu:24.04 bash -lc '
-      set -euo pipefail
-      export DEBIAN_FRONTEND=noninteractive
-      apt-get update
-      apt-get install -y nsis
+  if command_exists makensis; then
+    local_makensis_exit=0
+    set +e
+    (
+      cd "$WINDOWS_NSIS_WORKDIR"
       makensis -V2 installer.nsi
-    '
+    )
+    local_makensis_exit=$?
+    set -e
+    if [ "$local_makensis_exit" -ne 0 ]; then
+      warn "Local makensis exited with code $local_makensis_exit; falling back to containerized NSIS."
+      docker run --rm --platform linux/arm64/v8 \
+        -v "$REPO_ROOT:$REPO_ROOT" \
+        -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
+        -w "$WINDOWS_NSIS_WORKDIR" \
+        ubuntu:24.04 bash -lc '
+          set -euo pipefail
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y nsis
+          makensis -V2 installer.nsi
+        '
+    fi
+  else
+    docker run --rm --platform linux/arm64/v8 \
+      -v "$REPO_ROOT:$REPO_ROOT" \
+      -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
+      -w "$WINDOWS_NSIS_WORKDIR" \
+      ubuntu:24.04 bash -lc '
+        set -euo pipefail
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        apt-get install -y nsis
+        makensis -V2 installer.nsi
+      '
+  fi
 
   WINDOWS_SETUP_SOURCE="$(latest_file_from_patterns \
     "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/BaoBuildBuddy_*_x64-setup.exe" \
@@ -314,17 +339,15 @@ fi
 step "Refreshing canonical release directories"
 mkdir -p "$RELEASE_ROOT/macos" "$RELEASE_ROOT/linux" "$RELEASE_ROOT/windows"
 
-rm -f "$RELEASE_ROOT/macos"/BaoBuildBuddy_*.dmg
-rm -f "$RELEASE_ROOT/linux"/BaoBuildBuddy_*.AppImage "$RELEASE_ROOT/linux"/BaoBuildBuddy_*.deb "$RELEASE_ROOT/linux"/BaoBuildBuddy-*.rpm
-rm -f "$RELEASE_ROOT/windows"/BaoBuildBuddy_*.exe
-
 if [ "$BUILD_MACOS" = true ]; then
+  rm -f "$RELEASE_ROOT/macos"/BaoBuildBuddy_*.dmg
   copy_latest_artifact "$RELEASE_ROOT/macos" false \
     "packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_*_aarch64.dmg" \
     "packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/BaoBuildBuddy_*_aarch64.dmg"
 fi
 
 if [ "$BUILD_LINUX" = true ]; then
+  rm -f "$RELEASE_ROOT/linux"/BaoBuildBuddy_*.AppImage "$RELEASE_ROOT/linux"/BaoBuildBuddy_*.deb "$RELEASE_ROOT/linux"/BaoBuildBuddy-*.rpm
   copy_latest_artifact "$RELEASE_ROOT/linux" false \
     "packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/BaoBuildBuddy_*_aarch64.AppImage"
   copy_latest_artifact "$RELEASE_ROOT/linux" false \
@@ -334,6 +357,7 @@ if [ "$BUILD_LINUX" = true ]; then
 fi
 
 if [ "$BUILD_WINDOWS" = true ]; then
+  rm -f "$RELEASE_ROOT/windows"/BaoBuildBuddy_*.exe
   copy_latest_artifact "$RELEASE_ROOT/windows" true \
     "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/BaoBuildBuddy_*_x64-portable.exe" \
     "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/BaoBuildBuddy_*_x64_portable.exe"
