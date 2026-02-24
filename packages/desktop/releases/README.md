@@ -16,6 +16,24 @@ bun run build:desktop
 
 Packaging docs in this file assume the above succeeds without masked diagnostics.
 
+`release:refresh:all-os` now uses a headless fallback for macOS DMG creation:
+
+- First attempt uses default DMG bundling (`bundle_dmg.sh`).
+- If default DMG creation fails, if Finder-based styling fails, or if the expected `.dmg` artifact is missing, the script falls back to `bundle_dmg.sh --skip-jenkins`.
+- The fallback produces a valid distributable `.dmg`, then continues to checksum and release staging.
+
+If you need the same fallback manually:
+
+```bash
+APP_VERSION="$(awk -F '\"' '/^version = /{print $2; exit}' packages/desktop/src-tauri/Cargo.toml)"
+MACOS_APP_PATH="$(/usr/bin/find packages/desktop/src-tauri/target -path '*/bundle/macos/BaoBuildBuddy.app' -print | head -n 1)"
+MACOS_DMG_PATH="packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_${APP_VERSION}_aarch64.dmg"
+MACOS_DMG_SCRIPT="$(/usr/bin/find packages/desktop/src-tauri/target -path '*/bundle/dmg/bundle_dmg.sh' -print | head -n 1)"
+
+mkdir -p "$(dirname "$MACOS_DMG_PATH")"
+bash "$MACOS_DMG_SCRIPT" --skip-jenkins "$MACOS_DMG_PATH" "$MACOS_APP_PATH"
+```
+
 Expected validation outcomes:
 
 - `bun run lint`: no lint warnings or errors.

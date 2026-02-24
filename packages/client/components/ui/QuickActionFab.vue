@@ -8,11 +8,18 @@ import { QUICK_ACTION_MENU_ID } from "~/constants/layout";
 const { t } = useI18n();
 const route = useRoute();
 const isOpen = ref(false);
+const activeActionIndex = ref(0);
 const quickActionMenuId = QUICK_ACTION_MENU_ID;
 const actionButtonRef = useTemplateRef<HTMLButtonElement>("quickActionToggle");
+const actionMenuRef = useTemplateRef<HTMLDivElement>("quickActionMenu");
+const actionItemRefs = ref<(HTMLAnchorElement | null)[]>([]);
 
 const closeQuickActions = (): void => {
   isOpen.value = false;
+};
+
+const openQuickActions = (): void => {
+  isOpen.value = true;
 };
 
 watch(
@@ -24,22 +31,27 @@ watch(
 
 watch(isOpen, (nextOpen) => {
   if (nextOpen) {
-    nextTick(() => {
-      const actionItems = getActionItems();
-      actionItems[0]?.focus();
+    activeActionIndex.value = 0;
+    actionItemRefs.value = new Array<HTMLAnchorElement | null>(FAB_QUICK_ACTIONS.length).fill(null);
+    void nextTick(() => {
+      getActionItems()[activeActionIndex.value]?.focus();
     });
     return;
   }
 
-  nextTick(() => {
+  void nextTick(() => {
     actionButtonRef.value?.focus();
   });
 });
 
 function getActionItems(): HTMLAnchorElement[] {
-  const menuElement = document.getElementById(quickActionMenuId);
-  if (!menuElement) return [];
-  return Array.from(menuElement.querySelectorAll<HTMLAnchorElement>("a[role='menuitem']"));
+  return actionItemRefs.value.filter(
+    (element): element is HTMLAnchorElement => element !== null,
+  );
+}
+
+function setActiveActionRef(index: number, element: Element | null): void {
+  actionItemRefs.value[index] = element instanceof HTMLAnchorElement ? element : null;
 }
 
 function getActionIndex(currentIndex: number, direction: number): number {
@@ -65,9 +77,26 @@ function handleQuickActionKeydown(event: KeyboardEvent, index: number): void {
     return;
   }
 
+  if (event.key === "Home") {
+    event.preventDefault();
+    activeActionIndex.value = 0;
+    getActionItems()[0]?.focus();
+    return;
+  }
+
+  if (event.key === "End") {
+    event.preventDefault();
+    const actionItems = getActionItems();
+    const lastIndex = actionItems.length - 1;
+    activeActionIndex.value = lastIndex;
+    actionItems[lastIndex]?.focus();
+    return;
+  }
+
   if (event.key === "ArrowDown") {
     event.preventDefault();
     const nextIndex = getActionIndex(index, 1);
+    activeActionIndex.value = nextIndex;
     getActionItems()[nextIndex]?.focus();
     return;
   }
@@ -75,7 +104,28 @@ function handleQuickActionKeydown(event: KeyboardEvent, index: number): void {
   if (event.key === "ArrowUp") {
     event.preventDefault();
     const previousIndex = getActionIndex(index, -1);
+    activeActionIndex.value = previousIndex;
     getActionItems()[previousIndex]?.focus();
+    return;
+  }
+
+}
+
+function handleQuickActionButtonKeydown(event: KeyboardEvent): void {
+  if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    openQuickActions();
+  }
+}
+
+function handleQuickActionMenuFocusOut(event: FocusEvent): void {
+  const nextTarget = event.relatedTarget;
+  if (!isOpen.value || !(nextTarget instanceof HTMLElement)) {
+    return;
+  }
+
+  if (!actionMenuRef.value?.contains(nextTarget) && !actionButtonRef.value?.contains(nextTarget)) {
+    closeQuickActions();
   }
 }
 
@@ -85,17 +135,38 @@ function onWindowKeyDown(event: KeyboardEvent): void {
   }
 }
 
+function handleDocumentPointerDown(event: PointerEvent): void {
+  if (!isOpen.value) return;
+  const target = event.target;
+  if (!(target instanceof Node)) return;
+
+  if (
+    actionMenuRef.value?.contains(target) ||
+    actionButtonRef.value?.contains(target)
+  ) {
+    return;
+  }
+
+  closeQuickActions();
+}
+
 onMounted(() => {
+  window.addEventListener("pointerdown", handleDocumentPointerDown);
   window.addEventListener("keydown", onWindowKeyDown);
 });
 
 onUnmounted(() => {
+  window.removeEventListener("pointerdown", handleDocumentPointerDown);
   window.removeEventListener("keydown", onWindowKeyDown);
 });
 </script>
 
 <template>
-  <div class="fab z-[50] left-6 bottom-24 hidden lg:flex" :aria-label="t('quickFab.groupAria', { brand: APP_BRAND.name })">
+  <div
+    class="fab z-[50] left-6 bottom-24 hidden lg:flex"
+    role="region"
+    :aria-label="t('quickFab.groupAria', { brand: APP_BRAND.name })"
+  >
     <button
       ref="quickActionToggle"
       class="btn btn-lg btn-circle btn-primary shadow-lg"
@@ -104,6 +175,7 @@ onUnmounted(() => {
       :aria-controls="quickActionMenuId"
       type="button"
       @keydown.escape.stop="closeQuickActions"
+      @keydown="handleQuickActionButtonKeydown"
       @click="toggleQuickActions"
     >
       <CloseIcon v-if="isOpen" class="h-6 w-6" />
@@ -112,29 +184,44 @@ onUnmounted(() => {
       </svg>
     </button>
 
-    <div
-      v-if="isOpen"
-      :id="quickActionMenuId"
-      role="menu"
-      class="flex flex-col items-end gap-2"
-      :aria-label="t('quickFab.menuAria')"
+    <Transition
+      enter-active-class="transition-all duration-200 ease-out"
+      enter-from-class="translate-y-2 scale-95 opacity-0"
+      enter-to-class="translate-y-0 scale-100 opacity-100"
+      leave-active-class="transition-all duration-150 ease-in"
+      leave-from-class="translate-y-0 scale-100 opacity-100"
+      leave-to-class="translate-y-2 scale-95 opacity-0"
     >
-      <NuxtLink
-        v-for="(action, index) in FAB_QUICK_ACTIONS"
-        :key="action.id"
-        :to="action.to"
-        class="btn btn-lg justify-between min-w-52"
-        role="menuitem"
-        :aria-label="t(action.labelKey)"
-        :aria-hidden="!isOpen"
-        @keydown="handleQuickActionKeydown($event, index)"
-        @click="closeQuickActions"
+      <div
+        v-if="isOpen"
+        :id="quickActionMenuId"
+        role="menu"
+        class="flex flex-col items-end gap-2"
+        :aria-label="t('quickFab.menuAria')"
+        ref="quickActionMenu"
+        @focusout="handleQuickActionMenuFocusOut"
+        aria-orientation="vertical"
+        :aria-activedescendant="`quick-action-${activeActionIndex}`"
       >
-        <span>{{ t(action.labelKey) }}</span>
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.iconPath" />
-        </svg>
-      </NuxtLink>
-    </div>
+        <NuxtLink
+          v-for="(action, index) in FAB_QUICK_ACTIONS"
+          :key="action.id"
+          :to="action.to"
+          :id="`quick-action-${index}`"
+          class="btn btn-lg justify-between min-w-52 transition-colors duration-150"
+          role="menuitem"
+          :tabindex="index === activeActionIndex ? 0 : -1"
+          :aria-label="t(action.labelKey)"
+          @keydown="handleQuickActionKeydown($event, index)"
+          :ref="(element) => setActiveActionRef(index, element)"
+          @click="closeQuickActions"
+        >
+          <span>{{ t(action.labelKey) }}</span>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.iconPath" />
+          </svg>
+        </NuxtLink>
+      </div>
+    </Transition>
   </div>
 </template>

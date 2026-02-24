@@ -57,11 +57,35 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RELEASE_ROOT="$REPO_ROOT/packages/desktop/releases"
 APP_VERSION="$(awk -F '"' '/^version = /{print $2; exit}' "$REPO_ROOT/packages/desktop/src-tauri/Cargo.toml")"
+APP_PRODUCT_NAME="$(awk -F '"' '/"productName"[[:space:]]*:/ {print $4; exit}' "$REPO_ROOT/packages/desktop/src-tauri/tauri.conf.json")"
+APP_BINARY_NAME="$(awk -F '"' '/^name = /{print $2; exit}' "$REPO_ROOT/packages/desktop/src-tauri/Cargo.toml")"
+
+MACOS_BUILD_TARGET="aarch64-apple-darwin"
+MACOS_ARCH="aarch64"
+WINDOWS_BUILD_TARGET="x86_64-pc-windows-msvc"
+WINDOWS_ARCH_LABEL="x64"
+LINUX_BUILD_TARGET="aarch64-unknown-linux-gnu"
+LINUX_ARCH="aarch64"
+LINUX_DEB_ARCH="arm64"
+
+MACOS_HOST_BUNDLE_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/release/bundle"
+MACOS_TARGET_BUNDLE_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${MACOS_BUILD_TARGET}/release/bundle"
+WINDOWS_TARGET_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${WINDOWS_BUILD_TARGET}/release"
+LINUX_TARGET_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${LINUX_BUILD_TARGET}/release"
+
+MACOS_APP_NAME="${APP_PRODUCT_NAME}"
+MACOS_DMG_NAME="${APP_PRODUCT_NAME}_${APP_VERSION}_${MACOS_ARCH}.dmg"
 
 cd "$REPO_ROOT"
 
 if [ -z "$APP_VERSION" ]; then
   die "Could not resolve desktop app version from packages/desktop/src-tauri/Cargo.toml"
+fi
+if [ -z "$APP_PRODUCT_NAME" ]; then
+  die "Could not resolve productName from packages/desktop/src-tauri/tauri.conf.json"
+fi
+if [ -z "$APP_BINARY_NAME" ]; then
+  die "Could not resolve binary name from packages/desktop/src-tauri/Cargo.toml"
 fi
 
 command_exists() {
@@ -127,6 +151,35 @@ sha256_for_file() {
   die "No SHA-256 tool found (requires sha256sum or shasum)."
 }
 
+latest_file_or_die() {
+  local description="$1"
+  local file
+  shift
+
+  file="$(latest_file_from_patterns "$@")" || die "Could not resolve ${description}: $*"
+  printf '%s\n' "$file"
+}
+
+run_headless_macos_dmg() {
+  local app_bundle="$1"
+  local dmg_output="$2"
+
+  local dmg_script
+  dmg_script="$(latest_file_or_die "headless macOS DMG script" \
+    "$MACOS_HOST_BUNDLE_ROOT/dmg/bundle_dmg.sh" \
+    "$MACOS_TARGET_BUNDLE_ROOT/dmg/bundle_dmg.sh" \
+  )"
+
+  if [ ! -f "$dmg_script" ]; then
+    die "DMG helper script not found at $dmg_script"
+  fi
+
+  mkdir -p "$(dirname "$dmg_output")"
+  rm -f "$dmg_output"
+
+  "$dmg_script" --skip-jenkins "$dmg_output" "$app_bundle"
+}
+
 if [ "$RUN_QUALITY_GATES" = true ]; then
   step "Running release quality gates"
   bun run lint
@@ -147,11 +200,44 @@ if [ "$BUILD_MACOS" = true ]; then
   require_command cargo
 
   step "Building macOS DMG artifact"
+  macos_expected_dmg="$MACOS_HOST_BUNDLE_ROOT/dmg/$MACOS_DMG_NAME"
+  macos_build_reason="success"
+  macos_build_exit=0
+  set +e
   LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 CI=true bun run --filter '@bao/desktop' build -- \
-    --target aarch64-apple-darwin \
+    --target "$MACOS_BUILD_TARGET" \
     --bundles dmg \
     --config '{"build":{"beforeBuildCommand":""}}'
-  ok "macOS build complete"
+  macos_build_exit=$?
+  set -e
+
+  if [ "$macos_build_exit" -ne 0 ] || [ ! -f "$macos_expected_dmg" ]; then
+    if [ "$macos_build_exit" -ne 0 ]; then
+      macos_build_reason="non-zero exit code: $macos_build_exit"
+    else
+      macos_build_reason="missing expected artifact: $MACOS_DMG_NAME"
+    fi
+    warn "macOS bundling failed; reason: $macos_build_reason. Running headless fallback with --skip-jenkins."
+    if [ "$macos_build_exit" -ne 0 ]; then
+      warn "macOS bundling exited with code $macos_build_exit."
+    else
+      warn "macOS bundling exited successfully but expected artifact was not created: $MACOS_DMG_NAME"
+    fi
+    MACOS_APP_BUNDLE="$(latest_file_or_die "macOS application bundle" \
+      "$MACOS_HOST_BUNDLE_ROOT/macos/$MACOS_APP_NAME.app" \
+      "$MACOS_TARGET_BUNDLE_ROOT/macos/$MACOS_APP_NAME.app" \
+    )"
+
+    MACOS_DMG_PATH="$MACOS_HOST_BUNDLE_ROOT/dmg/$MACOS_DMG_NAME"
+    run_headless_macos_dmg "$MACOS_APP_BUNDLE" "$MACOS_DMG_PATH"
+    if [ -f "$MACOS_DMG_PATH" ]; then
+      ok "macOS fallback DMG created: $MACOS_DMG_NAME"
+    else
+      die "macOS headless fallback failed to create: $MACOS_DMG_PATH"
+    fi
+  else
+    ok "macOS build complete"
+  fi
 fi
 
 if [ "$BUILD_WINDOWS" = true ]; then
@@ -164,10 +250,9 @@ if [ "$BUILD_WINDOWS" = true ]; then
     ok "cargo-xwin installed"
   fi
 
-  WINDOWS_TARGET_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release"
   WINDOWS_BUNDLE_DIR="$WINDOWS_TARGET_ROOT/bundle/nsis"
   WINDOWS_NSIS_WORKDIR="$WINDOWS_TARGET_ROOT/nsis/x64"
-  WINDOWS_EXE_PATH="$WINDOWS_TARGET_ROOT/bao-build-buddy-desktop.exe"
+  WINDOWS_EXE_PATH="$WINDOWS_TARGET_ROOT/$APP_BINARY_NAME.exe"
 
   rm -rf "$WINDOWS_BUNDLE_DIR" "$WINDOWS_TARGET_ROOT/nsis"
 
@@ -176,12 +261,12 @@ if [ "$BUILD_WINDOWS" = true ]; then
   set +e
   if [ -d "/opt/homebrew/opt/llvm/bin" ]; then
     PATH="/opt/homebrew/opt/llvm/bin:$PATH" bun run --filter '@bao/desktop' build -- \
-      --target x86_64-pc-windows-msvc \
+      --target "$WINDOWS_BUILD_TARGET" \
       --runner cargo-xwin \
       --config '{"build":{"beforeBuildCommand":""}}'
   else
     bun run --filter '@bao/desktop' build -- \
-      --target x86_64-pc-windows-msvc \
+      --target "$WINDOWS_BUILD_TARGET" \
       --runner cargo-xwin \
       --config '{"build":{"beforeBuildCommand":""}}'
   fi
@@ -242,13 +327,13 @@ if [ "$BUILD_WINDOWS" = true ]; then
   fi
 
   WINDOWS_SETUP_SOURCE="$(latest_file_from_patterns \
-    "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/BaoBuildBuddy_*_x64-setup.exe" \
-    "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/nsis/x64/BaoBuildBuddy_*_x64-setup.exe" \
-    "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/nsis/x64/nsis-output.exe")" || die "Windows setup artifact not found after NSIS build."
+    "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
+    "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
+    "$WINDOWS_TARGET_ROOT/nsis/x64/nsis-output.exe")" || die "Windows setup artifact not found after NSIS build."
 
   mkdir -p "$WINDOWS_BUNDLE_DIR"
-  WINDOWS_SETUP_TARGET="$WINDOWS_BUNDLE_DIR/BaoBuildBuddy_${APP_VERSION}_x64-setup.exe"
-  WINDOWS_PORTABLE_TARGET="$WINDOWS_BUNDLE_DIR/BaoBuildBuddy_${APP_VERSION}_x64-portable.exe"
+  WINDOWS_SETUP_TARGET="$WINDOWS_BUNDLE_DIR/${APP_PRODUCT_NAME}_${APP_VERSION}_${WINDOWS_ARCH_LABEL}-setup.exe"
+  WINDOWS_PORTABLE_TARGET="$WINDOWS_BUNDLE_DIR/${APP_PRODUCT_NAME}_${APP_VERSION}_${WINDOWS_ARCH_LABEL}-portable.exe"
   if [ "$WINDOWS_SETUP_SOURCE" != "$WINDOWS_SETUP_TARGET" ]; then
     cp "$WINDOWS_SETUP_SOURCE" "$WINDOWS_SETUP_TARGET"
   fi
@@ -265,6 +350,9 @@ if [ "$BUILD_LINUX" = true ]; then
   docker run --rm --platform linux/arm64/v8 \
     -v "$REPO_ROOT:/workspace" \
     -w /workspace \
+    -e LINUX_BUILD_TARGET="$LINUX_BUILD_TARGET" \
+    -e APP_PRODUCT_NAME="$APP_PRODUCT_NAME" \
+    -e LINUX_ARCH="$LINUX_ARCH" \
     ubuntu:24.04 bash -lc '
       set -euo pipefail
       export DEBIAN_FRONTEND=noninteractive
@@ -277,10 +365,10 @@ if [ "$BUILD_LINUX" = true ]; then
       export PATH="$BUN_INSTALL/bin:$PATH"
       curl https://sh.rustup.rs -sSf | sh -s -- -y
       export PATH="/root/.cargo/bin:$PATH"
-      rustup target add aarch64-unknown-linux-gnu
+      rustup target add "$LINUX_BUILD_TARGET"
       export APPIMAGE_EXTRACT_AND_RUN=1
       bun run --filter "@bao/desktop" build -- \
-        --target aarch64-unknown-linux-gnu \
+        --target "$LINUX_BUILD_TARGET" \
         --config "{\"build\":{\"beforeBuildCommand\":\"\"}}"
     '
   linux_build_exit=$?
@@ -291,24 +379,27 @@ if [ "$BUILD_LINUX" = true ]; then
   fi
 
   if ! latest_file_from_patterns \
-    "packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/BaoBuildBuddy_*_arm64.deb" \
+    "$LINUX_TARGET_ROOT/bundle/deb/${APP_PRODUCT_NAME}_*_${LINUX_DEB_ARCH}.deb" \
     >/dev/null; then
     die "Linux deb artifact not found after Linux build."
   fi
 
   if ! latest_file_from_patterns \
-    "packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/rpm/BaoBuildBuddy-*.aarch64.rpm" \
+    "$LINUX_TARGET_ROOT/bundle/rpm/${APP_PRODUCT_NAME}-*.${LINUX_ARCH}.rpm" \
     >/dev/null; then
     die "Linux rpm artifact not found after Linux build."
   fi
 
   if ! latest_file_from_patterns \
-    "packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/BaoBuildBuddy_*_aarch64.AppImage" \
+    "$LINUX_TARGET_ROOT/bundle/appimage/${APP_PRODUCT_NAME}_*_${LINUX_ARCH}.AppImage" \
     >/dev/null; then
     step "Running AppImage fallback build"
     docker run --rm --platform linux/arm64/v8 \
       -v "$REPO_ROOT:/workspace" \
       -w /workspace \
+      -e LINUX_BUILD_TARGET="$LINUX_BUILD_TARGET" \
+      -e APP_PRODUCT_NAME="$APP_PRODUCT_NAME" \
+      -e LINUX_ARCH="$LINUX_ARCH" \
       ubuntu:24.04 bash -lc '
         set -euo pipefail
         export DEBIAN_FRONTEND=noninteractive
@@ -319,16 +410,16 @@ if [ "$BUILD_LINUX" = true ]; then
         chmod +x /tmp/appimagetool-aarch64.AppImage
         export APPIMAGE_EXTRACT_AND_RUN=1
         VERSION="$(awk -F "\"" "/^version = /{print \$2; exit}" packages/desktop/src-tauri/Cargo.toml)"
-        APPIMAGE_OUTPUT="packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/BaoBuildBuddy_${VERSION}_aarch64.AppImage"
+        APPIMAGE_OUTPUT="packages/desktop/src-tauri/target/${LINUX_BUILD_TARGET}/release/bundle/appimage/${APP_PRODUCT_NAME}_${VERSION}_${LINUX_ARCH}.AppImage"
         /tmp/appimagetool-aarch64.AppImage \
-          packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/BaoBuildBuddy.AppDir \
+          packages/desktop/src-tauri/target/${LINUX_BUILD_TARGET}/release/bundle/appimage/${APP_PRODUCT_NAME}.AppDir \
           "$APPIMAGE_OUTPUT"
       '
     ok "Linux AppImage fallback complete"
   fi
 
   if ! latest_file_from_patterns \
-    "packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/BaoBuildBuddy_*_aarch64.AppImage" \
+    "$LINUX_TARGET_ROOT/bundle/appimage/${APP_PRODUCT_NAME}_*_${LINUX_ARCH}.AppImage" \
     >/dev/null; then
     die "Linux AppImage artifact not found after fallback."
   fi
@@ -340,30 +431,32 @@ step "Refreshing canonical release directories"
 mkdir -p "$RELEASE_ROOT/macos" "$RELEASE_ROOT/linux" "$RELEASE_ROOT/windows"
 
 if [ "$BUILD_MACOS" = true ]; then
-  rm -f "$RELEASE_ROOT/macos"/BaoBuildBuddy_*.dmg
+  rm -f "$RELEASE_ROOT/macos"/"${APP_PRODUCT_NAME}_"*.dmg
   copy_latest_artifact "$RELEASE_ROOT/macos" false \
-    "packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_*_aarch64.dmg" \
-    "packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/BaoBuildBuddy_*_aarch64.dmg"
+    "$MACOS_HOST_BUNDLE_ROOT/dmg/${APP_PRODUCT_NAME}_*_${MACOS_ARCH}.dmg" \
+    "$MACOS_TARGET_BUNDLE_ROOT/dmg/${APP_PRODUCT_NAME}_*_${MACOS_ARCH}.dmg"
 fi
 
 if [ "$BUILD_LINUX" = true ]; then
-  rm -f "$RELEASE_ROOT/linux"/BaoBuildBuddy_*.AppImage "$RELEASE_ROOT/linux"/BaoBuildBuddy_*.deb "$RELEASE_ROOT/linux"/BaoBuildBuddy-*.rpm
+  rm -f "$RELEASE_ROOT/linux"/"${APP_PRODUCT_NAME}_"*.AppImage \
+    "$RELEASE_ROOT/linux"/"${APP_PRODUCT_NAME}_"*.deb \
+    "$RELEASE_ROOT/linux"/"${APP_PRODUCT_NAME}-"*.rpm
   copy_latest_artifact "$RELEASE_ROOT/linux" false \
-    "packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/BaoBuildBuddy_*_aarch64.AppImage"
+    "$LINUX_TARGET_ROOT/bundle/appimage/${APP_PRODUCT_NAME}_*_${LINUX_ARCH}.AppImage"
   copy_latest_artifact "$RELEASE_ROOT/linux" false \
-    "packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/BaoBuildBuddy_*_arm64.deb"
+    "$LINUX_TARGET_ROOT/bundle/deb/${APP_PRODUCT_NAME}_*_${LINUX_DEB_ARCH}.deb"
   copy_latest_artifact "$RELEASE_ROOT/linux" false \
-    "packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/rpm/BaoBuildBuddy-*.aarch64.rpm"
+    "$LINUX_TARGET_ROOT/bundle/rpm/${APP_PRODUCT_NAME}-*.${LINUX_ARCH}.rpm"
 fi
 
 if [ "$BUILD_WINDOWS" = true ]; then
-  rm -f "$RELEASE_ROOT/windows"/BaoBuildBuddy_*.exe
+  rm -f "$RELEASE_ROOT/windows"/"${APP_PRODUCT_NAME}_"*.exe
   copy_latest_artifact "$RELEASE_ROOT/windows" true \
-    "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/BaoBuildBuddy_*_x64-portable.exe" \
-    "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/BaoBuildBuddy_*_x64_portable.exe"
+    "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-portable.exe" \
+    "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}_portable.exe"
   copy_latest_artifact "$RELEASE_ROOT/windows" false \
-    "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/BaoBuildBuddy_*_x64-setup.exe" \
-    "packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/nsis/x64/BaoBuildBuddy_*_x64-setup.exe"
+    "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
+    "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe"
 fi
 
 step "Regenerating release checksums"

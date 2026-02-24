@@ -38,6 +38,8 @@ bun run release:refresh:all-os
 
 After the full quality pass, use `bun run release:refresh:all-os:fast` for deterministic rebuild-only refreshes. It is equivalent to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates` and skips rerunning lint/typecheck/test/build.
 
+`release:refresh:all-os` now includes a headless fallback for macOS DMG creation using `bundle_dmg.sh --skip-jenkins` when default packaging returns a non-zero exit, when Finder-based DMG styling fails, or when the expected `.dmg` artifact is not emitted. This keeps `.dmg` output deterministic in CI while still producing valid release artifacts.
+
 `bun run release:refresh:all-os` must run on a macOS host with Docker available and outbound network access for Ubuntu package mirrors plus Bun/Rust/AppImage downloads used by cross-target packaging.
 The script automatically uses containerized NSIS fallback for Windows setup packaging and runs an AppImage fallback path when `linuxdeploy` fails.
 

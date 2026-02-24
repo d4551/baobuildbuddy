@@ -555,6 +555,12 @@ const frFROverrides = {
       idleStatus: "Voix prête",
     },
   },
+  quickFab: {
+    groupAria: "{brand} actions rapides",
+    expandAria: "Ouvrir les actions rapides",
+    collapseAria: "Fermer les actions rapides",
+    menuAria: "Raccourcis des actions rapides",
+  },
 } as const satisfies AppTranslationOverrides;
 
 export default frFROverrides;

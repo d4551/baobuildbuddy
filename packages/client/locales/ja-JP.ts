@@ -559,6 +559,12 @@ const jaJPOverrides = {
       idleStatus: "音声準備完了",
     },
   },
+  quickFab: {
+    groupAria: "{brand}のクイックアクション",
+    expandAria: "クイックアクションを開く",
+    collapseAria: "クイックアクションを閉じる",
+    menuAria: "クイックアクションのショートカット",
+  },
 } as const satisfies AppTranslationOverrides;
 
 export default jaJPOverrides;
