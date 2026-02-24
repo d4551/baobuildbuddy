@@ -17,9 +17,16 @@ const DEFAULT_I18N_LOCALE_COOKIE_KEY = "bao-locale";
 const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
 const MODULE_PATH_SEPARATOR = "/";
 const WINDOWS_PATH_SEPARATOR = "\\";
+const NODE_MODULES_PATH_SEGMENT = "/node_modules/";
+const PNPM_PATH_SEGMENT = ".pnpm/";
 const LOCALES_DIRECTORY_SEGMENT = "/locales/";
 const LOCALE_FILE_EXTENSION = ".ts";
 const LOCALE_CHUNK_NAME_PREFIX = "locale-";
+
+type VendorChunkRule = {
+  chunkName: string;
+  packagePrefixes: readonly string[];
+};
 
 const parseSupportedLocales = (value: string | undefined): string[] => {
   const parsedLocales = value
@@ -40,16 +47,89 @@ const createLocaleChunkMap = (localeCodes: readonly string[]): Record<string, st
 
 const LOCALE_CHUNK_NAME_BY_FILE = createLocaleChunkMap(APP_LANGUAGE_CODES);
 
+const VENDOR_CHUNK_RULES: readonly VendorChunkRule[] = [
+  {
+    chunkName: "vendor-vue",
+    packagePrefixes: ["vue", "@vue/", "vue-router"],
+  },
+  {
+    chunkName: "vendor-nuxt",
+    packagePrefixes: ["nuxt", "@nuxt/", "nitropack", "h3", "ofetch", "ufo", "hookable"],
+  },
+  {
+    chunkName: "vendor-i18n",
+    packagePrefixes: ["vue-i18n", "@intlify/"],
+  },
+  {
+    chunkName: "vendor-query",
+    packagePrefixes: ["@tanstack/"],
+  },
+  {
+    chunkName: "vendor-zod",
+    packagePrefixes: ["zod"],
+  },
+];
+
 const hasOwnKey = <T extends object>(value: T, key: PropertyKey): key is keyof T =>
   Object.hasOwn(value, key);
 
 const normalizeModuleId = (moduleId: string): string =>
   moduleId.replaceAll(WINDOWS_PATH_SEPARATOR, MODULE_PATH_SEPARATOR);
 
+const matchesPackagePrefix = (packageName: string, prefix: string): boolean =>
+  packageName === prefix || packageName.startsWith(prefix);
+
+const resolveNodeModulePackageName = (normalizedModuleId: string): string | null => {
+  const nodeModulesIndex = normalizedModuleId.lastIndexOf(NODE_MODULES_PATH_SEGMENT);
+  if (nodeModulesIndex === -1) {
+    return null;
+  }
+
+  let packagePath = normalizedModuleId.slice(
+    nodeModulesIndex + NODE_MODULES_PATH_SEGMENT.length,
+  );
+  if (packagePath.startsWith(PNPM_PATH_SEGMENT)) {
+    const nestedNodeModulesIndex = packagePath.indexOf(NODE_MODULES_PATH_SEGMENT);
+    packagePath =
+      nestedNodeModulesIndex === -1
+        ? packagePath
+        : packagePath.slice(nestedNodeModulesIndex + NODE_MODULES_PATH_SEGMENT.length);
+  }
+
+  const pathSegments = packagePath.split(MODULE_PATH_SEPARATOR).filter((segment) => segment.length > 0);
+  if (pathSegments.length === 0) {
+    return null;
+  }
+
+  const [firstPathSegment, secondPathSegment] = pathSegments;
+  if (!firstPathSegment) {
+    return null;
+  }
+
+  if (firstPathSegment.startsWith("@") && secondPathSegment) {
+    return `${firstPathSegment}/${secondPathSegment}`;
+  }
+
+  return firstPathSegment;
+};
+
+const resolveVendorChunkName = (packageName: string): string | undefined => {
+  for (const rule of VENDOR_CHUNK_RULES) {
+    if (rule.packagePrefixes.some((prefix) => matchesPackagePrefix(packageName, prefix))) {
+      return rule.chunkName;
+    }
+  }
+};
+
 const resolveManualChunkName = (moduleId: string): string | undefined => {
   const normalizedModuleId = normalizeModuleId(moduleId);
   if (!normalizedModuleId.includes(LOCALES_DIRECTORY_SEGMENT)) {
-    return;
+    const packageName = resolveNodeModulePackageName(normalizedModuleId);
+    if (!packageName) {
+      return;
+    }
+
+    return resolveVendorChunkName(packageName);
   }
 
   const fileName = normalizedModuleId.split(MODULE_PATH_SEPARATOR).pop();

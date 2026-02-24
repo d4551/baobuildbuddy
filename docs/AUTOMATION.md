@@ -45,6 +45,11 @@ Expected validation outcomes:
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
+Latest verification snapshot (February 24, 2026):
+
+- `bun run audit:official-llms` returned `PASS` for Elysia, Nuxt, and Bun with HTTP `200` responses.
+- `bun run release:refresh:all-os` completed end-to-end and regenerated `packages/desktop/releases/sha256.txt`, including containerized Windows NSIS fallback and Linux AppImage fallback execution paths.
+
 `bun run release:refresh:all-os` is designed for macOS hosts with Docker available and outbound network access for cross-target dependency bootstrap.
 The script includes containerized Windows setup fallback and Linux AppImage fallback paths to keep release artifact generation deterministic.
 
