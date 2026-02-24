@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { mkdirSync, rmSync } from "node:fs";
 import { extname, resolve } from "node:path";
 import type { AutomationSettings, ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
 import {
@@ -402,9 +402,7 @@ export class ApplicationAutomationService {
   private resolveRunArtifactDir(runId: string): string {
     const safeRunId = this.sanitizeRunId(runId);
     const directory = resolve(AUTOMATION_SCREENSHOT_DIR, safeRunId);
-    if (!existsSync(directory)) {
-      mkdirSync(directory, { recursive: true });
-    }
+    mkdirSync(directory, { recursive: true });
     return directory;
   }
 
@@ -1082,9 +1080,7 @@ export class ApplicationAutomationService {
       staleRuns.map((run) =>
         Promise.resolve().then(() => {
           const runDir = resolve(AUTOMATION_SCREENSHOT_DIR, run.id);
-          if (existsSync(runDir)) {
-            rmSync(runDir, { recursive: true, force: true });
-          }
+          rmSync(runDir, { recursive: true, force: true });
         }),
       ),
     );

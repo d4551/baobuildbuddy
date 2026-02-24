@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,9 +26,7 @@ export function resolveDatabasePath(rawPath?: string): string {
   const resolvedPath = resolve(dbPath);
 
   const dbDir = dirname(resolvedPath);
-  if (!existsSync(dbDir)) {
-    mkdirSync(dbDir, { recursive: true });
-  }
+  mkdirSync(dbDir, { recursive: true });
 
   return resolvedPath;
 }
@@ -40,9 +38,7 @@ export const defaultDatabasePath = resolveDatabasePath();
  */
 const DATABASE_DIR = dirname(defaultDatabasePath);
 export const AUTOMATION_SCREENSHOT_DIR = resolve(DATABASE_DIR, "automation", "screenshots");
-if (!existsSync(AUTOMATION_SCREENSHOT_DIR)) {
-  mkdirSync(AUTOMATION_SCREENSHOT_DIR, { recursive: true });
-}
+mkdirSync(AUTOMATION_SCREENSHOT_DIR, { recursive: true });
 
 /**
  * Path to packages/scraper (RPA-Python scripts).
