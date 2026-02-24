@@ -2,23 +2,25 @@
 import {
   AI_PROVIDER_CATALOG,
   APP_BRAND,
-  APP_ROUTES,
-  APP_SEO,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
+  type DashboardStats,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { createFlowEngineInput } from "~/constants/flow-engine";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   layout: "onboarding",
 });
 
+const { t } = useI18n();
+
 if (import.meta.server) {
   useServerSeoMeta({
-    title: APP_SEO.setupTitle,
-    description: APP_SEO.setupDescription,
+    title: t("setup.seoTitle", { brand: APP_BRAND.name }),
+    description: t("setup.seoDescription"),
   });
 }
 
@@ -34,18 +36,13 @@ const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
   claude: "claudeApiKey",
   huggingface: "huggingfaceToken",
 };
-const isSetupProvider = (value: string): value is SetupProvider =>
-  value === "local" ||
-  value === "gemini" ||
-  value === "openai" ||
-  value === "claude" ||
-  value === "huggingface";
 
-const { t } = useI18n();
 const { updateProfile } = useUser();
 const { settings, fetchSettings, updateApiKeys, testApiKey } = useSettings();
 const router = useRouter();
+const api = useApi();
 const { $toast } = useNuxtApp();
+const dashboardStats = ref<DashboardStats | null>(null);
 
 const step = ref<SetupStep>(1);
 const name = ref("");
@@ -72,21 +69,25 @@ const testResults = ref<Record<SetupProvider, TestResult | null>>({
 });
 
 const providerNameById = computed<Record<SetupProvider, string>>(() => {
-  const map: Record<SetupProvider, string> = {
-    local: "Local",
-    gemini: "Gemini",
-    openai: "OpenAI",
-    claude: "Claude",
-    huggingface: "Hugging Face",
+  const catalogMap = new Map(
+    AI_PROVIDER_CATALOG.map((provider) => [provider.id, provider] as const),
+  );
+
+  const resolveProviderName = (providerId: SetupProvider): string => {
+    const provider = catalogMap.get(providerId);
+    if (!provider) {
+      return providerId;
+    }
+    return t(provider.nameKey);
   };
 
-  for (const provider of AI_PROVIDER_CATALOG) {
-    if (isSetupProvider(provider.id)) {
-      map[provider.id] = provider.name;
-    }
-  }
-
-  return map;
+  return {
+    local: resolveProviderName("local"),
+    gemini: resolveProviderName("gemini"),
+    openai: resolveProviderName("openai"),
+    claude: resolveProviderName("claude"),
+    huggingface: resolveProviderName("huggingface"),
+  };
 });
 
 function getProviderLabel(provider: SetupProvider): string {
@@ -101,16 +102,47 @@ function getProviderTestKey(provider: SetupProvider): string {
   return providerCredentials[provider].trim();
 }
 
-onMounted(async () => {
-  await fetchSettings();
+await useAsyncData(
+  "setup-bootstrap",
+  async () => {
+    const settingsResult = await settlePromise(fetchSettings(), t("apiErrors.settings.fetchFailed"));
+    if (settingsResult.ok && settings.value) {
+      if (settings.value.localModelEndpoint) {
+        localModelEndpoint.value = settings.value.localModelEndpoint;
+      }
+      if (settings.value.localModelName) {
+        localModelName.value = settings.value.localModelName;
+      }
+    }
 
-  if (settings.value?.localModelEndpoint) {
-    localModelEndpoint.value = settings.value.localModelEndpoint;
-  }
-  if (settings.value?.localModelName) {
-    localModelName.value = settings.value.localModelName;
-  }
-});
+    const statsResult = await settlePromise(
+      api.stats.dashboard.get(),
+      t("apiErrors.statistics.fetchDashboardFailed"),
+    );
+    if (statsResult.ok && !statsResult.value.error) {
+      dashboardStats.value = statsResult.value.data;
+    } else {
+      dashboardStats.value = null;
+    }
+
+    return {
+      initialized: true,
+    };
+  },
+  {
+    server: true,
+    lazy: false,
+  },
+);
+
+const setupCompletionFlowInput = computed(() =>
+  createFlowEngineInput(dashboardStats.value, {
+    isProfileComplete: true,
+    isSetupComplete: true,
+  }),
+);
+const { primaryAction: setupCompletionPrimaryAction } = useFlowEngine(setupCompletionFlowInput);
+const postSetupFlowTarget = computed(() => setupCompletionPrimaryAction.value.to);
 
 async function handleTestProvider(provider: SetupProvider): Promise<void> {
   const key = getProviderTestKey(provider);
@@ -188,12 +220,12 @@ async function handleComplete(): Promise<void> {
   }
 
   $toast.success(t("setup.completeToast"));
-  await router.push(APP_ROUTES.dashboard);
+  await router.push(postSetupFlowTarget.value);
 }
 </script>
 
 <template>
-  <main aria-labelledby="setup-title">
+  <PageScaffold tag="main" width-token="narrow" labelled-by="setup-title">
     <div class="card bg-base-100 shadow-xl">
       <div class="card-body">
         <h1 id="setup-title" class="card-title text-2xl text-primary mb-4">{{ t("setup.title", { brand: APP_BRAND.name }) }}</h1>
@@ -327,7 +359,23 @@ async function handleComplete(): Promise<void> {
         </div>
 
         <div v-if="step === 3" class="space-y-4 text-center">
-          <div class="text-6xl mb-4" aria-hidden="true">{{ t("setup.successIconLabel") }}</div>
+          <div class="flex justify-center mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              class="h-14 w-14 text-success"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+            </svg>
+            <span class="sr-only">{{ t("setup.successStatusAria") }}</span>
+          </div>
           <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
           <p class="text-base-content/70">
             {{ t("setup.doneDescription", { assistant: APP_BRAND.assistantName }) }}
@@ -345,5 +393,5 @@ async function handleComplete(): Promise<void> {
         </div>
       </div>
     </div>
-  </main>
+  </PageScaffold>
 </template>

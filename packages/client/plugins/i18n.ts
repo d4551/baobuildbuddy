@@ -17,7 +17,11 @@ type AvailableLocale = keyof typeof I18N_MESSAGE_CATALOG;
 const DEFAULT_LOCALE: AvailableLocale = DEFAULT_APP_LANGUAGE;
 const ACCEPT_LANGUAGE_SEPARATOR = ",";
 const ACCEPT_LANGUAGE_WEIGHT_SEPARATOR = ";";
+const ACCEPT_LANGUAGE_QUALITY_PREFIX = "q=";
 const ACCEPT_LANGUAGE_VARIANT_SEPARATOR = "-";
+const ACCEPT_LANGUAGE_DEFAULT_QUALITY = 1;
+const ACCEPT_LANGUAGE_MIN_QUALITY = 0;
+const ACCEPT_LANGUAGE_MAX_QUALITY = 1;
 
 interface LocaleResolutionInput {
   readonly cookieLocale: string | null | undefined;
@@ -27,11 +31,17 @@ interface LocaleResolutionInput {
   readonly defaultLocale: AvailableLocale;
 }
 
+interface WeightedLocaleCandidate {
+  readonly locale: string;
+  readonly quality: number;
+  readonly order: number;
+}
+
 const normalizeLocaleCandidate = (value: string): string =>
-  value.trim().toLowerCase().replace("_", ACCEPT_LANGUAGE_VARIANT_SEPARATOR);
+  value.trim().toLowerCase().replaceAll("_", ACCEPT_LANGUAGE_VARIANT_SEPARATOR);
 
 const isAvailableLocale = (value: string): value is AvailableLocale =>
-  value in I18N_MESSAGE_CATALOG;
+  Object.hasOwn(I18N_MESSAGE_CATALOG, value);
 
 const parseSupportedLocales = (
   configuredLocales: readonly string[],
@@ -81,10 +91,42 @@ const parseAcceptLanguageValues = (value: string | undefined): string[] => {
   if (!value) {
     return [];
   }
-  return value
+
+  const weightedCandidates = value
     .split(ACCEPT_LANGUAGE_SEPARATOR)
-    .map((entry) => entry.split(ACCEPT_LANGUAGE_WEIGHT_SEPARATOR)[0]?.trim() ?? "")
-    .filter((entry) => entry.length > 0);
+    .map((entry, order): WeightedLocaleCandidate | null => {
+      const segments = entry
+        .split(ACCEPT_LANGUAGE_WEIGHT_SEPARATOR)
+        .map((segment) => segment.trim())
+        .filter((segment) => segment.length > 0);
+      const [localeSegment, ...qualitySegments] = segments;
+      if (!localeSegment) {
+        return null;
+      }
+
+      const qualitySegment = qualitySegments.find((segment) =>
+        segment.toLowerCase().startsWith(ACCEPT_LANGUAGE_QUALITY_PREFIX),
+      );
+      const parsedQualityValue = qualitySegment
+        ? Number.parseFloat(qualitySegment.slice(ACCEPT_LANGUAGE_QUALITY_PREFIX.length))
+        : ACCEPT_LANGUAGE_DEFAULT_QUALITY;
+      const quality = Number.isFinite(parsedQualityValue)
+        ? Math.min(
+            ACCEPT_LANGUAGE_MAX_QUALITY,
+            Math.max(ACCEPT_LANGUAGE_MIN_QUALITY, parsedQualityValue),
+          )
+        : ACCEPT_LANGUAGE_DEFAULT_QUALITY;
+
+      return {
+        locale: localeSegment,
+        quality,
+        order,
+      };
+    })
+    .filter((candidate): candidate is WeightedLocaleCandidate => candidate !== null)
+    .sort((left, right) => right.quality - left.quality || left.order - right.order);
+
+  return weightedCandidates.map((candidate) => candidate.locale);
 };
 
 const resolveInitialLocale = ({

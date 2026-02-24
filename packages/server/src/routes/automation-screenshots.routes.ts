@@ -4,6 +4,11 @@ import { Elysia, t } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
+import {
+  CACHE_CONTROL_PRIVATE_NO_STORE,
+  createBinaryResponse,
+  MIME_TYPE_OCTET_STREAM,
+} from "../utils/http-response";
 
 const HTTP_STATUS_NOT_FOUND = 404;
 const RUN_ID_SAFE_PATTERN = /^[0-9a-fA-F-]+$/;
@@ -49,11 +54,9 @@ const readRunScreenshots = async (runId: string): Promise<{ id: string; screensh
 };
 
 const createScreenshotResponse = (contents: ArrayBuffer, extension: string): Response =>
-  new Response(contents, {
-    headers: {
-      "content-type": CONTENT_TYPE_BY_EXTENSION[extension] || "application/octet-stream",
-      "cache-control": "private, no-store, no-cache",
-    },
+  createBinaryResponse(contents, {
+    contentType: CONTENT_TYPE_BY_EXTENSION[extension] || MIME_TYPE_OCTET_STREAM,
+    cacheControl: CACHE_CONTROL_PRIVATE_NO_STORE,
   });
 
 /**

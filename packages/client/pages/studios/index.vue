@@ -18,12 +18,18 @@ const router = useRouter();
 const { t } = useI18n();
 const { studios, loading: studioLoading, fetchStudios } = useStudio();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("studiosIndex.seoTitle"),
+    description: t("studiosIndex.seoDescription"),
+  });
+}
+
 const pageError = ref<string | null>(null);
 const searchQuery = ref("");
 const debouncedSearchQuery = useDebouncedValue(searchQuery, STUDIO_INDEX_FILTER_DEBOUNCE_MS);
-const previewDialogRef = ref<HTMLDialogElement | null>(null);
-useFocusTrap(previewDialogRef, () => showPreviewModal.value);
 const showPreviewModal = ref(false);
+const STUDIOS_PREVIEW_DIALOG_TITLE_ID = "studios-index-preview-dialog-title";
 const previewStudioId = ref("");
 const visibleStudioCount = ref(STUDIO_INDEX_INITIAL_VISIBLE_COUNT);
 const filters = reactive({
@@ -163,20 +169,6 @@ function queryValueToString(value: string | string[] | null | undefined): string
   return typeof value === "string" ? value : "";
 }
 
-function syncPreviewDialog() {
-  const dialog = previewDialogRef.value;
-  if (!dialog) return;
-
-  if (showPreviewModal.value && !dialog.open) {
-    dialog.showModal();
-    return;
-  }
-
-  if (!showPreviewModal.value && dialog.open) {
-    dialog.close();
-  }
-}
-
 async function setPreviewRouteStudioId(id: string | null): Promise<void> {
   const nextQuery = { ...route.query };
   if (id) {
@@ -219,8 +211,6 @@ async function startInterview(studioId: string) {
   await router.push(buildInterviewStudioNavigation(studioId));
 }
 
-watch(showPreviewModal, syncPreviewDialog);
-
 watch(
   () => ({
     search: debouncedSearchQuery.value,
@@ -253,18 +243,18 @@ watch(
   },
   { immediate: true },
 );
-
-onMounted(syncPreviewDialog);
 </script>
 
 <template>
-  <div class="space-y-6">
+  <PageScaffold labelled-by="studios-index-title">
     <section class="hero rounded-box bg-base-200 border border-base-300">
       <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div class="max-w-2xl space-y-3">
-          <h1 class="text-3xl font-bold md:text-4xl">{{ t("studiosIndex.title") }}</h1>
-          <p class="text-base-content/70">{{ t("studiosIndex.subtitle") }}</p>
-        </div>
+        <PageHeaderBlock
+          title-id="studios-index-title"
+          :title="t('studiosIndex.title')"
+          :description="t('studiosIndex.subtitle')"
+          description-class="text-base-content/70"
+        />
       </div>
     </section>
 
@@ -300,7 +290,7 @@ onMounted(syncPreviewDialog);
 
     <div class="card card-border bg-base-100">
       <div class="card-body gap-4">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+        <SectionGrid grid-token="fourColumnLg">
           <fieldset class="fieldset lg:col-span-2">
             <legend class="fieldset-legend">{{ t("studiosIndex.filters.searchLegend") }}</legend>
             <input
@@ -335,7 +325,7 @@ onMounted(syncPreviewDialog);
               <option v-for="size in studioSizeOptions" :key="size" :value="size">{{ size }}</option>
             </select>
           </fieldset>
-        </div>
+        </SectionGrid>
 
         <div class="flex flex-wrap items-center gap-3">
           <label class="label cursor-pointer justify-start gap-2 py-0">
@@ -364,7 +354,7 @@ onMounted(syncPreviewDialog);
       <span>{{ t("studiosIndex.emptyState") }}</span>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <SectionGrid v-else grid-token="threeColumn">
       <article
         v-for="studio in visibleStudios"
         :key="studio.id"
@@ -413,7 +403,7 @@ onMounted(syncPreviewDialog);
           </div>
         </div>
       </article>
-    </div>
+    </SectionGrid>
 
     <div
       v-if="hasAdditionalStudios"
@@ -429,116 +419,108 @@ onMounted(syncPreviewDialog);
       </button>
     </div>
 
-    <dialog
-      ref="previewDialogRef"
-      class="modal modal-bottom sm:modal-middle"
-      :aria-label="t('studiosIndex.preview.dialogAria')"
+    <AppModalFrame
+      v-model:open="showPreviewModal"
+      :title-id="STUDIOS_PREVIEW_DIALOG_TITLE_ID"
+      size-token="standard"
+      :close-aria-label="t('studiosIndex.preview.closeButtonAria')"
+      :close-backdrop-label="t('studiosIndex.preview.closeBackdropButton')"
       @close="handlePreviewDialogClose"
     >
-      <div class="modal-box w-11/12 max-w-4xl">
-        <form method="dialog">
+      <button
+        type="button"
+        class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+        :aria-label="t('studiosIndex.preview.closeButtonAria')"
+        @click="closeStudioPreview"
+      >
+        <CloseIcon class="h-4 w-4" />
+      </button>
+
+      <template v-if="previewStudio">
+        <h3 :id="STUDIOS_PREVIEW_DIALOG_TITLE_ID" class="text-xl font-bold">
+          {{ previewStudio.name }}
+        </h3>
+        <p class="mt-2 text-sm text-base-content/70">
+          {{ studioDescription(previewStudio.description) }}
+        </p>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="badge badge-primary">{{ studioType(previewStudio.type) }}</span>
+          <span class="badge badge-outline">{{ studioSize(previewStudio.size) }}</span>
+          <span class="badge badge-ghost">{{ studioLocation(previewStudio.location) }}</span>
+          <span v-if="previewStudio.remoteWork" class="badge badge-success">
+            {{ t("studiosIndex.card.remoteBadge") }}
+          </span>
+        </div>
+
+        <SectionGrid grid-token="threeColumnMd" extra-class="mt-5">
+          <div class="stat rounded-box border border-base-300 bg-base-100">
+            <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
+            <div class="stat-value text-primary text-2xl">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
+            <div class="stat-desc">{{ t("studiosIndex.preview.stats.interviewReadyDesc") }}</div>
+          </div>
+          <div class="stat rounded-box border border-base-300 bg-base-100">
+            <div class="stat-title">{{ t("studiosIndex.preview.stats.locationTitle") }}</div>
+            <div class="stat-value text-secondary text-lg">
+              {{ studioLocation(previewStudio.location) }}
+            </div>
+            <div class="stat-desc">{{ t("studiosIndex.preview.stats.locationDesc") }}</div>
+          </div>
+          <div class="stat rounded-box border border-base-300 bg-base-100">
+            <div class="stat-title">{{ t("studiosIndex.preview.stats.remoteTitle") }}</div>
+            <div class="stat-value text-accent text-lg">
+              {{ previewStudio.remoteWork ? t("studiosIndex.preview.remoteYes") : t("studiosIndex.preview.remoteNo") }}
+            </div>
+            <div class="stat-desc">{{ t("studiosIndex.preview.stats.remoteDesc") }}</div>
+          </div>
+        </SectionGrid>
+
+        <div class="modal-action">
           <button
             type="button"
-            class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            class="btn btn-primary"
+            :aria-label="t('studiosIndex.preview.startInterviewAria', { studio: previewStudio.name })"
+            @click="startInterview(previewStudio.id)"
+          >
+            {{ t("studiosIndex.preview.startInterviewButton") }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline"
+            :aria-label="t('studiosIndex.preview.openDetailAria', { studio: previewStudio.name })"
+            @click="viewStudio(previewStudio.id)"
+          >
+            {{ t("studiosIndex.preview.openDetailButton") }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-ghost"
             :aria-label="t('studiosIndex.preview.closeButtonAria')"
             @click="closeStudioPreview"
           >
-            <CloseIcon class="h-4 w-4" />
+            {{ t("studiosIndex.preview.closeButton") }}
           </button>
-        </form>
+        </div>
+      </template>
 
-        <template v-if="previewStudio">
-          <h3 class="text-xl font-bold">{{ previewStudio.name }}</h3>
-          <p class="mt-2 text-sm text-base-content/70">
-            {{ studioDescription(previewStudio.description) }}
-          </p>
-
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span class="badge badge-primary">{{ studioType(previewStudio.type) }}</span>
-            <span class="badge badge-outline">{{ studioSize(previewStudio.size) }}</span>
-            <span class="badge badge-ghost">{{ studioLocation(previewStudio.location) }}</span>
-            <span v-if="previewStudio.remoteWork" class="badge badge-success">
-              {{ t("studiosIndex.card.remoteBadge") }}
-            </span>
-          </div>
-
-          <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div class="stat rounded-box border border-base-300 bg-base-100">
-              <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
-              <div class="stat-value text-primary text-2xl">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
-              <div class="stat-desc">{{ t("studiosIndex.preview.stats.interviewReadyDesc") }}</div>
-            </div>
-            <div class="stat rounded-box border border-base-300 bg-base-100">
-              <div class="stat-title">{{ t("studiosIndex.preview.stats.locationTitle") }}</div>
-              <div class="stat-value text-secondary text-lg">
-                {{ studioLocation(previewStudio.location) }}
-              </div>
-              <div class="stat-desc">{{ t("studiosIndex.preview.stats.locationDesc") }}</div>
-            </div>
-            <div class="stat rounded-box border border-base-300 bg-base-100">
-              <div class="stat-title">{{ t("studiosIndex.preview.stats.remoteTitle") }}</div>
-              <div class="stat-value text-accent text-lg">
-                {{ previewStudio.remoteWork ? t("studiosIndex.preview.remoteYes") : t("studiosIndex.preview.remoteNo") }}
-              </div>
-              <div class="stat-desc">{{ t("studiosIndex.preview.stats.remoteDesc") }}</div>
-            </div>
-          </div>
-
-          <div class="modal-action">
-            <button
-              type="button"
-              class="btn btn-primary"
-              :aria-label="t('studiosIndex.preview.startInterviewAria', { studio: previewStudio.name })"
-              @click="startInterview(previewStudio.id)"
-            >
-              {{ t("studiosIndex.preview.startInterviewButton") }}
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline"
-              :aria-label="t('studiosIndex.preview.openDetailAria', { studio: previewStudio.name })"
-              @click="viewStudio(previewStudio.id)"
-            >
-              {{ t("studiosIndex.preview.openDetailButton") }}
-            </button>
-            <button
-              type="button"
-              class="btn btn-ghost"
-              :aria-label="t('studiosIndex.preview.closeButtonAria')"
-              @click="closeStudioPreview"
-            >
-              {{ t("studiosIndex.preview.closeButton") }}
-            </button>
-          </div>
-        </template>
-
-        <template v-else>
-          <h3 class="text-xl font-bold">{{ t("studiosIndex.preview.missingTitle") }}</h3>
-          <p class="mt-2 text-sm text-base-content/70">
-            {{ t("studiosIndex.preview.missingDescription") }}
-          </p>
-          <div class="modal-action">
-            <button
-              type="button"
-              class="btn btn-primary"
-              :aria-label="t('studiosIndex.preview.closeButtonAria')"
-              @click="closeStudioPreview"
-            >
-              {{ t("studiosIndex.preview.closeButton") }}
-            </button>
-          </div>
-        </template>
-      </div>
-
-      <form method="dialog" class="modal-backdrop">
-        <button
-          type="button"
-          :aria-label="t('studiosIndex.preview.closeBackdropAria')"
-          @click="closeStudioPreview"
-        >
-          {{ t("studiosIndex.preview.closeBackdropButton") }}
-        </button>
-      </form>
-    </dialog>
-  </div>
+      <template v-else>
+        <h3 :id="STUDIOS_PREVIEW_DIALOG_TITLE_ID" class="text-xl font-bold">
+          {{ t("studiosIndex.preview.missingTitle") }}
+        </h3>
+        <p class="mt-2 text-sm text-base-content/70">
+          {{ t("studiosIndex.preview.missingDescription") }}
+        </p>
+        <div class="modal-action">
+          <button
+            type="button"
+            class="btn btn-primary"
+            :aria-label="t('studiosIndex.preview.closeButtonAria')"
+            @click="closeStudioPreview"
+          >
+            {{ t("studiosIndex.preview.closeButton") }}
+          </button>
+        </div>
+      </template>
+    </AppModalFrame>
+  </PageScaffold>
 </template>

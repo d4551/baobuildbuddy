@@ -12,6 +12,13 @@ const { t, locale } = useI18n();
 const { $toast } = useNuxtApp();
 const { sessions, loading, fetchSessions, getSession } = useInterview();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("interviewHistory.title"),
+    description: t("interviewHub.seoDescription"),
+  });
+}
+
 const selectedSessionId = ref<string | null>(null);
 const selectedSession = ref<InterviewSession | null>(null);
 const studioFilter = ref("");

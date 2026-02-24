@@ -3,15 +3,29 @@ import type { DashboardStats } from "@bao/shared";
 import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
-  DASHBOARD_PIPELINE_STATUS_KEYS,
   type DashboardPipelineStepViewModel,
   resolveDashboardPipelineSteps,
 } from "~/constants/dashboard";
+import {
+  createFlowEngineInput,
+  type FlowActionId,
+} from "~/constants/flow-engine";
 import { getErrorMessage } from "~/utils/errors";
 
 const AUTOMATION_HUB_ASYNC_DATA_KEY = "automation-hub-stats";
 
 type AutomationHubUiState = "idle" | "loading" | "error" | "success";
+
+type AutomationHubCardId = "scraper" | "jobApply" | "emailResponse" | "runHistory";
+
+interface AutomationHubCard {
+  readonly id: AutomationHubCardId;
+  readonly flowActionId: FlowActionId | null;
+  readonly titleKey: string;
+  readonly descriptionKey: string;
+  readonly buttonKey: string;
+  readonly to: string;
+}
 
 const api = useApi();
 const { t } = useI18n();
@@ -77,13 +91,97 @@ const pipelineSteps = computed<readonly DashboardPipelineStepViewModel[]>(() => 
   });
 });
 
-const nextPipelineStepLabel = computed(() => {
-  const nextStep = pipelineSteps.value.find((step) => step.status !== "complete");
-  if (!nextStep) {
-    return t(DASHBOARD_PIPELINE_STATUS_KEYS.complete);
+const flowInput = computed(() => createFlowEngineInput(stats.value));
+
+const {
+  primaryAction: flowPrimaryAction,
+  recommendedActions: flowRecommendedActions,
+  nextStepLabel: flowNextStepLabel,
+} = useFlowEngine(flowInput);
+
+const nextPipelineStepLabel = computed(() => t(flowNextStepLabel.value));
+
+const baseAutomationCards: readonly AutomationHubCard[] = [
+  {
+    id: "scraper",
+    flowActionId: "automationScraper",
+    titleKey: "automation.hub.cards.scraper.title",
+    descriptionKey: "automation.hub.cards.scraper.description",
+    buttonKey: "automation.hub.cards.scraper.button",
+    to: APP_ROUTES.automationScraper,
+  },
+  {
+    id: "jobApply",
+    flowActionId: "automationApply",
+    titleKey: "automation.hub.cards.jobApply.title",
+    descriptionKey: "automation.hub.cards.jobApply.description",
+    buttonKey: "automation.hub.cards.jobApply.button",
+    to: APP_ROUTES.automationJobApply,
+  },
+  {
+    id: "emailResponse",
+    flowActionId: null,
+    titleKey: "automation.hub.cards.emailResponse.title",
+    descriptionKey: "automation.hub.cards.emailResponse.description",
+    buttonKey: "automation.hub.cards.emailResponse.button",
+    to: APP_ROUTES.automationEmail,
+  },
+  {
+    id: "runHistory",
+    flowActionId: "automationRuns",
+    titleKey: "automation.hub.cards.runHistory.title",
+    descriptionKey: "automation.hub.cards.runHistory.description",
+    buttonKey: "automation.hub.cards.runHistory.button",
+    to: APP_ROUTES.automationRuns,
+  },
+] as const;
+
+const prioritizedCardIds = computed<readonly AutomationHubCardId[]>(() => {
+  const actionPriority = [flowPrimaryAction.value, ...flowRecommendedActions.value]
+    .map((action) => action.id)
+    .filter((actionId) => actionId === "automationScraper" || actionId === "automationApply" || actionId === "automationRuns");
+
+  const orderedCardIds: AutomationHubCardId[] = [];
+  for (const actionId of actionPriority) {
+    const cardId =
+      actionId === "automationScraper"
+        ? "scraper"
+        : actionId === "automationApply"
+          ? "jobApply"
+          : "runHistory";
+    if (orderedCardIds.includes(cardId)) {
+      continue;
+    }
+    orderedCardIds.push(cardId);
   }
 
-  return t("automation.hub.pipelineNextStepLabel", { step: t(nextStep.labelKey) });
+  return orderedCardIds;
+});
+
+const orderedCards = computed(() => {
+  const remainingCards = [...baseAutomationCards];
+  const prioritizedCards: AutomationHubCard[] = [];
+
+  for (const cardId of prioritizedCardIds.value) {
+    const index = remainingCards.findIndex((card) => card.id === cardId);
+    if (index === -1) {
+      continue;
+    }
+    const [card] = remainingCards.splice(index, 1);
+    if (card) {
+      prioritizedCards.push(card);
+    }
+  }
+
+  return [...prioritizedCards, ...remainingCards];
+});
+
+const primaryCardId = computed<AutomationHubCardId | null>(() => {
+  const primaryAction = flowPrimaryAction.value.id;
+  if (primaryAction === "automationScraper") return "scraper";
+  if (primaryAction === "automationApply") return "jobApply";
+  if (primaryAction === "automationRuns") return "runHistory";
+  return null;
 });
 
 async function retryLoad(): Promise<void> {
@@ -92,13 +190,18 @@ async function retryLoad(): Promise<void> {
 </script>
 
 <template>
-  <section class="space-y-6" aria-labelledby="automation-hub-title">
-    <header class="flex items-center justify-between gap-3">
-      <h1 id="automation-hub-title" class="text-3xl font-bold">{{ t("automation.hub.title") }}</h1>
-      <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-outline">
-        {{ t("automation.hub.viewRunsButton") }}
-      </NuxtLink>
-    </header>
+  <PageScaffold tag="section" labelled-by="automation-hub-title">
+    <PageHeaderBlock title-id="automation-hub-title" :title="t('automation.hub.title')">
+      <template #actions>
+        <NuxtLink
+          :to="APP_ROUTES.automationRuns"
+          class="btn btn-outline"
+          :aria-label="t('automation.hub.viewRunsButton')"
+        >
+          {{ t("automation.hub.viewRunsButton") }}
+        </NuxtLink>
+      </template>
+    </PageHeaderBlock>
 
     <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" variant="stats" :lines="4" />
 
@@ -149,55 +252,34 @@ async function retryLoad(): Promise<void> {
         :next-step-label="nextPipelineStepLabel"
       />
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div class="card card-border bg-base-100 hover:bg-base-200 transition-colors">
+      <SectionGrid grid-token="twoToFour">
+        <div
+          v-for="card in orderedCards"
+          :key="card.id"
+          class="card card-border bg-base-100 transition-colors hover:bg-base-200"
+          :class="primaryCardId === card.id ? 'ring-2 ring-primary/40' : ''"
+        >
           <div class="card-body">
-            <h2 class="card-title">{{ t("automation.hub.cards.scraper.title") }}</h2>
-            <p class="text-sm">{{ t("automation.hub.cards.scraper.description") }}</p>
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="card-title">{{ t(card.titleKey) }}</h2>
+              <span v-if="primaryCardId === card.id" class="badge badge-primary badge-outline">
+                {{ t("automation.hub.pipelineTitle") }}
+              </span>
+            </div>
+            <p class="text-sm">{{ t(card.descriptionKey) }}</p>
             <div class="card-actions justify-end mt-4">
-              <NuxtLink :to="APP_ROUTES.automationScraper" class="btn btn-primary">
-                {{ t("automation.hub.cards.scraper.button") }}
+              <NuxtLink
+                :to="card.to"
+                class="btn"
+                :class="primaryCardId === card.id ? 'btn-primary' : 'btn-outline'"
+                :aria-label="t(card.buttonKey)"
+              >
+                {{ t(card.buttonKey) }}
               </NuxtLink>
             </div>
           </div>
         </div>
-
-        <div class="card card-border bg-base-100 hover:bg-base-200 transition-colors">
-          <div class="card-body">
-            <h2 class="card-title">{{ t("automation.hub.cards.jobApply.title") }}</h2>
-            <p class="text-sm">{{ t("automation.hub.cards.jobApply.description") }}</p>
-            <div class="card-actions justify-end mt-4">
-              <NuxtLink :to="APP_ROUTES.automationJobApply" class="btn btn-primary">
-                {{ t("automation.hub.cards.jobApply.button") }}
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
-
-        <div class="card card-border bg-base-100 hover:bg-base-200 transition-colors">
-          <div class="card-body">
-            <h2 class="card-title">{{ t("automation.hub.cards.emailResponse.title") }}</h2>
-            <p class="text-sm">{{ t("automation.hub.cards.emailResponse.description") }}</p>
-            <div class="card-actions justify-end mt-4">
-              <NuxtLink :to="APP_ROUTES.automationEmail" class="btn btn-primary">
-                {{ t("automation.hub.cards.emailResponse.button") }}
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
-
-        <div class="card card-border bg-base-100 hover:bg-base-200 transition-colors">
-          <div class="card-body">
-            <h2 class="card-title">{{ t("automation.hub.cards.runHistory.title") }}</h2>
-            <p class="text-sm">{{ t("automation.hub.cards.runHistory.description") }}</p>
-            <div class="card-actions justify-end mt-4">
-              <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-primary">
-                {{ t("automation.hub.cards.runHistory.button") }}
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
-      </div>
+      </SectionGrid>
     </template>
-  </section>
+  </PageScaffold>
 </template>

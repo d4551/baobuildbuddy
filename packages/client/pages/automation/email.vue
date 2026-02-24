@@ -76,15 +76,20 @@ if (import.meta.server) {
 </script>
 
 <template>
-  <div>
-    <div class="mb-6 flex items-center justify-between gap-3">
-      <h1 class="text-3xl font-bold">{{ t("automation.email.title") }}</h1>
-      <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-outline" :aria-label="t('automation.email.openRunsAria')">
-        {{ t("automation.email.openRunsButton") }}
-      </NuxtLink>
-    </div>
+  <PageScaffold tag="section" width-token="content" labelled-by="automation-email-title">
+    <PageHeaderBlock title-id="automation-email-title" :title="t('automation.email.title')">
+      <template #actions>
+        <NuxtLink
+          :to="APP_ROUTES.automationRuns"
+          class="btn btn-outline"
+          :aria-label="t('automation.email.openRunsAria')"
+        >
+          {{ t("automation.email.openRunsButton") }}
+        </NuxtLink>
+      </template>
+    </PageHeaderBlock>
 
-    <div class="card bg-base-100 max-w-3xl shadow-sm">
+    <div class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">
         <div class="space-y-4">
           <fieldset class="fieldset">
@@ -156,12 +161,12 @@ if (import.meta.server) {
       </div>
     </div>
 
-    <div v-if="submitError" role="alert" class="alert alert-error mt-6">
+    <div v-if="submitError" role="alert" class="alert alert-error">
       <h3 class="font-semibold">{{ t("automation.email.submitErrorTitle") }}</h3>
       <p>{{ submitError }}</p>
     </div>
 
-    <div v-if="lastResult" class="card bg-base-100 shadow-sm mt-6">
+    <div v-if="lastResult" class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">
         <div role="alert" class="alert alert-success">
           <div>
@@ -192,5 +197,5 @@ if (import.meta.server) {
         </div>
       </div>
     </div>
-  </div>
+  </PageScaffold>
 </template>

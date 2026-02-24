@@ -60,6 +60,75 @@ export const SKILL_EVIDENCE_VERIFICATION_STATUS_IDS = ["pending", "verified", "r
 export type SkillEvidenceVerificationStatus =
   (typeof SKILL_EVIDENCE_VERIFICATION_STATUS_IDS)[number];
 
+/**
+ * Canonical readiness feedback identifiers shared by API and UI translation catalogs.
+ */
+export const SKILL_READINESS_FEEDBACK_IDS = [
+  "empty",
+  "early",
+  "developing",
+  "good",
+  "excellent",
+] as const;
+
+/**
+ * Readiness feedback identifier used for localized category feedback copy.
+ */
+export type SkillReadinessFeedbackId = (typeof SKILL_READINESS_FEEDBACK_IDS)[number];
+
+/**
+ * Canonical readiness-improvement identifiers shared by API and UI translation catalogs.
+ */
+export const SKILL_READINESS_IMPROVEMENT_IDS = [
+  "mapTechnicalSkills",
+  "increaseSkillConfidence",
+  "mapLeadershipCommunication",
+  "addTeamCollaborationExamples",
+  "researchIndustryApplications",
+  "connectSkillsToJobRoles",
+  "addSkillEvidence",
+  "buildPortfolioProjects",
+  "documentAchievements",
+  "strengthenTechnicalTransfer",
+  "highlightLeadershipExperience",
+  "broadenSkillCoverage",
+  "refineSpecificExamples",
+  "pursueCertifications",
+  "networkWithProfessionals",
+] as const;
+
+/**
+ * Readiness-improvement identifier used for localized recommendation copy.
+ */
+export type SkillReadinessImprovementId = (typeof SKILL_READINESS_IMPROVEMENT_IDS)[number];
+
+/**
+ * Canonical readiness next-step identifiers shared by API and UI translation catalogs.
+ */
+export const SKILL_READINESS_NEXT_STEP_IDS = [
+  "startApplyingToTargetRoles",
+  "networkWithIndustryProfessionals",
+  "prepareForTechnicalInterviews",
+  "polishLinkedInProfile",
+  "completePortfolioProjects",
+  "mapMoreSkillsToReachFifteen",
+  "addEvidenceToTopSkills",
+  "researchTargetCompaniesAndRoles",
+  "mapTenPlusSkills",
+  "startBuildingPortfolioProjects",
+  "addEvidenceToDemonstrateAbilities",
+  "exploreMatchingCareerPathways",
+  "mapFirstFiveSkills",
+  "exploreSkillCategories",
+  "learnGamingCareerOptions",
+  "setUpProfessionalProfile",
+] as const;
+
+/**
+ * Readiness next-step identifier used for localized next-step copy.
+ */
+export type SkillReadinessNextStepId = (typeof SKILL_READINESS_NEXT_STEP_IDS)[number];
+
 export interface GameSkill {
   id: string;
   name: string;
@@ -124,16 +193,16 @@ export interface ReadinessAssessment {
     industryKnowledge: CategoryAssessment;
     portfolio: CategoryAssessment;
   };
-  improvementSuggestions: string[];
-  nextSteps: string[];
+  improvementSuggestions: SkillReadinessImprovementId[];
+  nextSteps: SkillReadinessNextStepId[];
   targetRoleReadiness?: RoleReadiness[];
 }
 
 export interface CategoryAssessment {
   score: number;
-  feedback: string;
+  feedbackId: SkillReadinessFeedbackId;
   strengths?: string[];
-  improvements?: string[];
+  improvements?: SkillReadinessImprovementId[];
 }
 
 export interface RoleReadiness {

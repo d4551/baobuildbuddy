@@ -16,6 +16,7 @@ import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts";
 import { exportService } from "../services/export-service";
+import { createPdfAttachmentResponse } from "../utils/http-response";
 
 const coverLetterTemplateBodySchema = t.String({
   enum: COVER_LETTER_TEMPLATE_OPTIONS,
@@ -351,12 +352,10 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
         };
       }
 
-      return new Response(Buffer.from(exportResult.value), {
-        headers: {
-          "content-type": "application/pdf",
-          "content-disposition": `attachment; filename="cover-letter-${params.id}.pdf"`,
-        },
-      });
+      return createPdfAttachmentResponse(
+        Buffer.from(exportResult.value),
+        `cover-letter-${params.id}.pdf`,
+      );
     },
     {
       params: t.Object({

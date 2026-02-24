@@ -35,6 +35,7 @@ const frFROverrides = {
     breadcrumbs: "Fil d'Ariane",
     dismissNotification: "Fermer la notification",
     localeSwitcher: "Changer de langue",
+    localeOptionAria: "Changer la langue en {locale}",
   },
   confirmDialog: {
     confirmButton: "Confirmer",
@@ -52,11 +53,171 @@ const frFROverrides = {
     jobs: "Emplois",
     resume: "CV",
     coverLetter: "Lettre de motivation",
+    portfolio: "Portefeuille",
     interview: "Entretien",
     skills: "Compétences",
+    studios: "Studios de jeux",
+    aiChat: "Conversation IA",
     automation: "Automatisation",
+    gamification: "Ludification",
     settings: "Paramètres",
     apiDocs: "Documentation API",
+  },
+  dashboard: {
+    pageTitle: "Tableau de bord",
+  },
+  gamificationPage: {
+    pageTitle: "Centre de gamification",
+    seoTitle: "{brand} Centre de gamification",
+  },
+  jobsPage: {
+    seoTitle: "Offres d'emploi",
+    seoDescription:
+      "Recherchez et filtrez les postes jeu vidéo par plateforme, type de studio, genre et niveau d'expérience.",
+    title: "Offres d'emploi",
+  },
+  skillsPage: {
+    seoTitle: "Cartographie des compétences",
+    title: "Cartographie des compétences",
+  },
+  skillsPathwaysPage: {
+    seoTitle: "Parcours de carrière",
+    title: "Parcours de carrière",
+    readiness: {
+      feedback: {
+        empty: "Les données de préparation pour {category} ne sont pas encore disponibles.",
+        early:
+          "Niveau initial en {category}. Ajoutez davantage de correspondances et de preuves.",
+        developing:
+          "Niveau en progression en {category}. Continuez à ajouter des exemples et des preuves.",
+        good: "Bon niveau en {category}. Continuez à approfondir cette compétence.",
+        excellent: "Excellent niveau en {category}. Vous êtes bien préparé sur cet axe.",
+      },
+      improvements: {
+        mapTechnicalSkills:
+          "Cartographiez plus de compétences techniques de jeu vers des compétences professionnelles.",
+        increaseSkillConfidence:
+          "Augmentez le niveau de confiance de vos correspondances techniques existantes.",
+        mapLeadershipCommunication:
+          "Ajoutez davantage d'expériences de leadership et de communication.",
+        addTeamCollaborationExamples:
+          "Ajoutez des exemples concrets de collaboration d'équipe.",
+        researchIndustryApplications:
+          "Étudiez davantage d'applications métier pour vos compétences cartographiées.",
+        connectSkillsToJobRoles:
+          "Reliez vos compétences cartographiées à des rôles cibles précis.",
+        addSkillEvidence:
+          "Ajoutez des preuves (captures, clips, documents) à vos compétences cartographiées.",
+        buildPortfolioProjects:
+          "Créez des projets de portfolio pour démontrer vos compétences appliquées.",
+        documentAchievements:
+          "Documentez des résultats mesurables pour vos meilleures correspondances.",
+        strengthenTechnicalTransfer:
+          "Renforcez le transfert technique en liant mécaniques de jeu et concepts d'ingénierie.",
+        highlightLeadershipExperience:
+          "Mettez en avant vos expériences de leadership et de communication issues du jeu.",
+        broadenSkillCoverage:
+          "Élargissez la couverture en cartographiant 10 à 15 compétences variées.",
+        refineSpecificExamples:
+          "Affinez vos correspondances actuelles avec des exemples plus précis.",
+        pursueCertifications:
+          "Visez des certifications qui valident vos compétences techniques.",
+        networkWithProfessionals:
+          "Développez votre réseau avec des professionnels de votre secteur cible.",
+      },
+      nextStepItems: {
+        startApplyingToTargetRoles: "Commencez à candidater sur des rôles cibles.",
+        networkWithIndustryProfessionals:
+          "Développez votre réseau avec des professionnels du secteur.",
+        prepareForTechnicalInterviews: "Préparez vos entretiens techniques.",
+        polishLinkedInProfile: "Optimisez votre profil LinkedIn.",
+        completePortfolioProjects:
+          "Complétez votre portfolio avec 3 à 5 projets solides.",
+        mapMoreSkillsToReachFifteen:
+          "Ajoutez 5 compétences cartographiées pour atteindre 15+.",
+        addEvidenceToTopSkills:
+          "Ajoutez des preuves à vos 10 compétences les plus fortes.",
+        researchTargetCompaniesAndRoles:
+          "Étudiez les entreprises et rôles que vous ciblez.",
+        mapTenPlusSkills:
+          "Cartographiez 10+ compétences issues du jeu vers des compétences carrière.",
+        startBuildingPortfolioProjects: "Commencez à construire des projets de portfolio.",
+        addEvidenceToDemonstrateAbilities:
+          "Ajoutez des preuves pour démontrer concrètement vos capacités.",
+        exploreMatchingCareerPathways:
+          "Explorez des parcours de carrière alignés avec vos compétences.",
+        mapFirstFiveSkills:
+          "Cartographiez vos 5 premières compétences issues du jeu.",
+        exploreSkillCategories: "Explorez différentes catégories de compétences.",
+        learnGamingCareerOptions:
+          "Découvrez les options de carrière dans l'industrie du jeu.",
+        setUpProfessionalProfile: "Mettez en place votre profil professionnel.",
+      },
+    },
+  },
+  resumePage: {
+    seoTitle: "Créateur de CV",
+    seoDescription:
+      "Créez des variantes de CV ciblées, suivez l'avancement et enchaînez vers lettre, portfolio et préparation d'entretien.",
+    title: "Créateur de CV",
+  },
+  resumeBuildPage: {
+    title: "Créez votre CV avec l'IA",
+    seoTitle: "Créateur de CV IA",
+  },
+  coverLetterPage: {
+    title: "Lettres de motivation",
+  },
+  interviewHistory: {
+    title: "Historique des entretiens",
+  },
+  interviewHub: {
+    seoTitle: "Centre de préparation aux entretiens",
+    seoDescription:
+      "Entraînez-vous avec des scénarios d'entretien orientés poste ou studio, puis révisez les retours notés.",
+    title: "Centre de préparation aux entretiens",
+    errors: {
+      bootstrapLoadFailed: "Impossible de charger les données du centre d'entretien",
+      roleRecommendationsFailed:
+        "Impossible de charger les recommandations de rôle personnalisées",
+    },
+  },
+  settings: {
+    seoTitle: "Paramètres et profil",
+    seoDescription:
+      "Gérez votre profil, les fournisseurs IA, les préférences de notifications et les valeurs d'automatisation.",
+    title: "Paramètres et profil",
+  },
+  studiosIndex: {
+    seoTitle: "Répertoire des studios",
+    seoDescription:
+      "Parcourez les profils studio, filtrez les attributs opérationnels et lancez des entraînements d'entretien contextualisés.",
+    title: "Répertoire des studios",
+  },
+  aiProviderCatalog: {
+    local: {
+      name: "Modèle local",
+      description: "RamaLama ou Ollama avec une exécution privée, locale d'abord.",
+    },
+    gemini: {
+      description: "Fournisseur cloud principal pour QA générale et génération de contenu.",
+    },
+    claude: {
+      description: "Fournisseur à long contexte pour les workflows d'analyse approfondie.",
+    },
+    openai: {
+      description: "Famille GPT pour le chat et la génération polyvalente.",
+    },
+    huggingface: {
+      description: "Solution cloud de secours avec un large catalogue de modèles ouverts.",
+    },
+  },
+  setup: {
+    title: "Bienvenue sur {brand}",
+    seoTitle: "Configuration {brand}",
+    seoDescription:
+      "Complétez votre profil, configurez les fournisseurs IA et lancez votre espace carrière.",
+    successStatusAria: "État d'achèvement de la configuration",
   },
   apiDocs: {
     seoTitle: "Documentation API",
@@ -138,7 +299,12 @@ const frFROverrides = {
     },
   },
   automation: {
+    hub: {
+      pageTitle: "Centre d'automatisation",
+      title: "Automatisation",
+    },
     runs: {
+      title: "Exécutions d'automatisation",
       openButton: "Ouvrir",
       liveBadge: "En direct",
       liveBadgeAria: "État d'exécution en direct",
@@ -149,6 +315,7 @@ const frFROverrides = {
       },
     },
     jobApply: {
+      title: "Automatisation des candidatures",
       stream: {
         title: "Flux d'exécution en direct",
         subtitle: "Suivez la progression pendant l'exécution de l'automatisation.",
@@ -202,6 +369,15 @@ const frFROverrides = {
         },
       },
     },
+    email: {
+      title: "Automatisation des réponses e-mail",
+    },
+    scraper: {
+      title: "Centre des opérations de scraping",
+      errors: {
+        rewardFailed: "Impossible d'attribuer la progression du scraping.",
+      },
+    },
     runDetail: {
       screenshotLinkLabel: "Ouvrir la capture {index}",
       screenshotLoadError: "La capture {index} n'a pas pu être affichée.",
@@ -251,7 +427,9 @@ const frFROverrides = {
     notFound: "CV introuvable. Veuillez sélectionner un CV à prévisualiser.",
   },
   portfolioPage: {
+    title: "Créateur de portfolio",
     preview: {
+      pageTitle: "Aperçu du portfolio",
       backButton: "Retour à l'éditeur",
       backButtonAria: "Retour à l'éditeur de portfolio",
       exportPdfButton: "Exporter en PDF",
@@ -322,8 +500,23 @@ const frFROverrides = {
       completeFailed: "Échec de la finalisation de l'entretien",
     },
   },
+  studioSelector: {
+    toggleAria: "Ouvrir le sélecteur de studios",
+    selectPlaceholder: "Sélectionner un studio",
+    menuAria: "Menu des studios",
+    searchPlaceholder: "Rechercher des studios",
+    searchAria: "Rechercher des studios",
+    emptyState: "Aucun studio trouvé",
+    optionAria: "Sélectionner le studio {studio}",
+    closeAria: "Fermer le sélecteur de studios",
+    unknownType: "Type inconnu",
+    unknownLocation: "Emplacement inconnu",
+  },
   aiChatPage: {
     title: "Discuter avec {brand}",
+    seoTitle: "{brand} Chat IA",
+    seoDescription:
+      "Discutez avec votre copilote IA de carrière pour la stratégie CV, la préparation aux entretiens et l'automatisation.",
     subtitle: "Votre assistant IA de carrière pour l'industrie du jeu",
     clearAria: "Effacer la conversation du chat",
     clearButton: "Effacer",

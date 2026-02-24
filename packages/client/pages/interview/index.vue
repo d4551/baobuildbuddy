@@ -11,7 +11,6 @@ import {
   INTERVIEW_HUB_JOB_QUERY_LIMIT,
   INTERVIEW_HUB_QUESTION_COUNT_OPTIONS,
   INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE,
-  INTERVIEW_HUB_ROLE_OPTIONS,
   type InterviewMode,
   type InterviewTargetJob,
   JOB_PREVIEW_LIMIT,
@@ -25,6 +24,8 @@ import { getErrorMessage } from "~/utils/errors";
 const { sessions, stats, loading, startSession, fetchSessions, fetchStats } = useInterview();
 const { studios, searchStudios } = useStudio();
 const { jobs, searchJobs, getJob } = useJobs();
+const { profile, fetchProfile } = useUser();
+const { pathways, readiness, fetchPathways, fetchReadiness } = useSkillMapping();
 const { resumes, fetchResumes } = useResume();
 const { coverLetters, fetchCoverLetters } = useCoverLetter();
 const { portfolio, fetchPortfolio } = usePortfolio();
@@ -32,19 +33,24 @@ const tts = useTTS();
 const route = useRoute();
 const router = useRouter();
 const { $toast } = useNuxtApp();
-const { t } = useI18n();
+const { t, locale, fallbackLocale } = useI18n();
+
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("interviewHub.seoTitle"),
+    description: t("interviewHub.seoDescription"),
+  });
+}
 
 const showConfigModal = ref(false);
 const starting = ref(false);
-const configDialogRef = ref<HTMLDialogElement | null>(null);
-useFocusTrap(configDialogRef, () => showConfigModal.value);
+const INTERVIEW_CONFIG_DIALOG_TITLE_ID = "interview-hub-config-dialog-title";
+const INTERVIEW_CONFIG_DIALOG_DESCRIPTION_ID = "interview-hub-config-dialog-description";
+const INTERVIEW_ROLE_SUGGESTIONS_LIST_ID = "interview-hub-role-suggestions";
 const selectedMode = ref<InterviewMode>("studio");
 const selectedJobId = ref("");
 const selectedJobFallback = ref<Job | null>(null);
 const jobSearchTerm = ref("");
-const interviewRoleOptions = ensureOptions(INTERVIEW_HUB_ROLE_OPTIONS, [
-  INTERVIEW_DEFAULT_ROLE_TYPE,
-]);
 const interviewExperienceOptions = ensureOptions(INTERVIEW_HUB_EXPERIENCE_OPTIONS, [
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
 ]);
@@ -81,7 +87,7 @@ function queryValueToString(value: string | string[] | null | undefined): string
 
 const sessionConfig = reactive({
   studioId: "",
-  role: resolvePreferredOption(interviewRoleOptions, 0, INTERVIEW_DEFAULT_ROLE_TYPE),
+  role: INTERVIEW_DEFAULT_ROLE_TYPE,
   experienceLevel: resolvePreferredOption(
     interviewExperienceOptions,
     1,
@@ -158,6 +164,49 @@ const prepCompletionPercent = computed(() => {
   return Math.round((prepReadyCount.value / total) * 100);
 });
 
+const pathwayRoleTitles = computed<readonly string[]>(() =>
+  [...pathways.value]
+    .sort((left, right) => right.matchScore - left.matchScore)
+    .map((pathway) => pathway.title),
+);
+const readinessRoleTitles = computed<readonly string[]>(() =>
+  [...(readiness.value?.targetRoleReadiness ?? [])]
+    .sort((left, right) => right.readinessScore - left.readinessScore)
+    .map((entry) => entry.roleTitle),
+);
+
+function normalizeRoleCandidate(value: string): string {
+  return value.trim().replace(/\s+/gu, " ");
+}
+
+const interviewRoleOptions = computed<readonly string[]>(() => {
+  const ordered: string[] = [];
+  const seen = new Set<string>();
+  const addRole = (value: string | null | undefined): void => {
+    if (!value) return;
+    const normalized = normalizeRoleCandidate(value);
+    if (normalized.length === 0) return;
+    const dedupeKey = normalized.toLowerCase();
+    if (seen.has(dedupeKey)) return;
+    seen.add(dedupeKey);
+    ordered.push(normalized);
+  };
+
+  addRole(profile.value?.currentRole ?? null);
+  for (const roleTitle of readinessRoleTitles.value) {
+    addRole(roleTitle);
+  }
+  for (const roleTitle of pathwayRoleTitles.value) {
+    addRole(roleTitle);
+  }
+  for (const job of jobs.value) {
+    addRole(job.title);
+  }
+  addRole(INTERVIEW_DEFAULT_ROLE_TYPE);
+
+  return ordered;
+});
+
 const availableJobs = computed(() => {
   const unique = new Map<string, Job>();
   for (const job of jobs.value) {
@@ -219,15 +268,32 @@ const isStartDisabled = computed(() => {
 });
 
 await useAsyncData("interview-hub-bootstrap", async () => {
-  await Promise.all([
-    fetchSessions(),
-    fetchStats(),
-    searchStudios(),
-    searchJobs({ limit: INTERVIEW_HUB_JOB_QUERY_LIMIT }),
-    fetchResumes(),
-    fetchCoverLetters(),
-    fetchPortfolio(),
-  ]);
+  const bootstrapResult = await settlePromise(
+    Promise.all([
+      fetchSessions(),
+      fetchStats(),
+      fetchProfile(),
+      searchStudios(),
+      searchJobs({ limit: INTERVIEW_HUB_JOB_QUERY_LIMIT }),
+      fetchResumes(),
+      fetchCoverLetters(),
+      fetchPortfolio(),
+    ]),
+    t("interviewHub.errors.bootstrapLoadFailed"),
+  );
+  if (!bootstrapResult.ok) {
+    $toast.error(getErrorMessage(bootstrapResult.error, t("interviewHub.errors.bootstrapLoadFailed")));
+  }
+
+  const pathwaysResult = await settlePromise(
+    Promise.all([fetchPathways(), fetchReadiness()]),
+    t("interviewHub.errors.roleRecommendationsFailed"),
+  );
+  if (!pathwaysResult.ok) {
+    $toast.error(
+      getErrorMessage(pathwaysResult.error, t("interviewHub.errors.roleRecommendationsFailed")),
+    );
+  }
 
   selectedMode.value = requestedMode.value;
 
@@ -260,22 +326,33 @@ onMounted(() => {
   }
 });
 
-watch(showConfigModal, (isOpen) => {
-  const dialog = configDialogRef.value;
-  if (!dialog) return;
-
-  if (isOpen && !dialog.open) {
-    dialog.showModal();
-  } else if (!isOpen && dialog.open) {
-    dialog.close();
-  }
-});
-
 watch(selectedMode, async (mode) => {
   if (mode === "job" && routeJobId.value && !selectedJob.value) {
     await selectJobById(routeJobId.value);
   }
 });
+
+watch(
+  interviewRoleOptions,
+  (options) => {
+    if (options.length === 0) {
+      sessionConfig.role = INTERVIEW_DEFAULT_ROLE_TYPE;
+      return;
+    }
+    const normalizedCurrentRole = normalizeRoleCandidate(sessionConfig.role).toLowerCase();
+    const hasCurrentRole = options.some((role) => role.toLowerCase() === normalizedCurrentRole);
+    if (!hasCurrentRole) {
+      sessionConfig.role = resolvePreferredOption(options, 0, INTERVIEW_DEFAULT_ROLE_TYPE);
+      return;
+    }
+
+    const normalizedRole = normalizeRoleCandidate(sessionConfig.role);
+    if (normalizedRole !== sessionConfig.role) {
+      sessionConfig.role = normalizedRole;
+    }
+  },
+  { immediate: true },
+);
 
 watch(routeStudioId, (studioId) => {
   if (studioId && selectedMode.value === "studio") {
@@ -348,13 +425,34 @@ function modeLabel(mode: InterviewMode | undefined): string {
   return mode === "job" ? t("interviewHub.mode.job") : t("interviewHub.mode.studio");
 }
 
-function roleLabel(role: string): string {
-  if (role === "game-designer") return t("interviewHub.roles.gameDesigner");
-  if (role === "programmer") return t("interviewHub.roles.programmer");
-  if (role === "artist") return t("interviewHub.roles.artist");
-  if (role === "producer") return t("interviewHub.roles.producer");
-  if (role === "qa") return t("interviewHub.roles.qa");
-  return role;
+function resolvePreferredLocale(): string {
+  if (typeof locale.value === "string" && locale.value.length > 0) {
+    return locale.value;
+  }
+
+  if (typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0) {
+    return fallbackLocale.value;
+  }
+
+  if (Array.isArray(fallbackLocale.value)) {
+    const [firstLocale] = fallbackLocale.value;
+    if (typeof firstLocale === "string" && firstLocale.length > 0) {
+      return firstLocale;
+    }
+  }
+
+  return "en-US";
+}
+
+function formatSessionDate(value: string | undefined): string {
+  if (!(typeof value === "string" && value.length > 0)) {
+    return t("interviewHub.recent.notAvailable");
+  }
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return t("interviewHub.recent.notAvailable");
+  }
+  return new Intl.DateTimeFormat(resolvePreferredLocale(), { dateStyle: "medium" }).format(parsedDate);
 }
 
 function experienceLabel(level: string): string {
@@ -427,15 +525,16 @@ async function viewSession(id: string) {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-7xl space-y-6">
+  <PageScaffold labelled-by="interview-hub-title">
     <section class="hero rounded-box bg-base-200 border border-base-300">
       <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div class="max-w-2xl space-y-3">
-          <h1 class="text-3xl font-bold md:text-4xl">{{ t("interviewHub.title") }}</h1>
-          <p class="text-base-content/70">
-            {{ t("interviewHub.subtitle") }}
-          </p>
-          <div class="flex flex-wrap gap-3">
+        <PageHeaderBlock
+          title-id="interview-hub-title"
+          :title="t('interviewHub.title')"
+          :description="t('interviewHub.subtitle')"
+          description-class="text-base-content/70"
+        >
+          <template #actions>
             <button
               class="btn btn-primary"
               :aria-label="t('interviewHub.hero.openJobAria')"
@@ -450,10 +549,10 @@ async function viewSession(id: string) {
             >
               {{ t("interviewHub.hero.openStudioButton") }}
             </button>
-          </div>
-        </div>
+          </template>
+        </PageHeaderBlock>
 
-        <ul class="steps steps-vertical lg:steps-horizontal w-full max-w-xl" :aria-label="t('interviewHub.hero.stepsAria')">
+        <ul class="steps steps-vertical lg:steps-horizontal w-full" :aria-label="t('interviewHub.hero.stepsAria')">
           <li class="step step-primary">{{ t("interviewHub.hero.steps.chooseContext") }}</li>
           <li class="step" :class="showConfigModal ? 'step-primary' : ''">{{ t("interviewHub.hero.steps.configureSession") }}</li>
           <li class="step">{{ t("interviewHub.hero.steps.practiceAndScore") }}</li>
@@ -508,7 +607,7 @@ async function viewSession(id: string) {
             :aria-label="t('interviewHub.prep.progressAria')"
           ></progress>
 
-          <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+          <SectionGrid grid-token="threeColumnWide">
             <article v-for="item in prepChecklist" :key="item.id" class="card bg-base-200">
               <div class="card-body p-4">
                 <div class="flex items-center justify-between gap-2">
@@ -529,11 +628,11 @@ async function viewSession(id: string) {
                 </div>
               </div>
             </article>
-          </div>
+          </SectionGrid>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <SectionGrid grid-token="twoColumnWide">
         <div class="card card-border bg-base-100">
           <div class="card-body">
             <div class="flex items-center justify-between gap-3">
@@ -588,7 +687,7 @@ async function viewSession(id: string) {
             </div>
           </div>
         </div>
-      </div>
+      </SectionGrid>
 
       <div class="card card-border bg-base-100">
         <div class="card-body">
@@ -635,7 +734,7 @@ async function viewSession(id: string) {
                         {{ session.score ?? 0 }}%
                       </span>
                     </td>
-                    <td>{{ session.createdAt ? new Date(session.createdAt).toLocaleDateString() : t("interviewHub.recent.notAvailable") }}</td>
+                    <td>{{ formatSessionDate(session.createdAt) }}</td>
                     <td>
                       <button
                         class="btn btn-ghost btn-xs"
@@ -666,203 +765,208 @@ async function viewSession(id: string) {
       </div>
     </div>
 
-    <dialog
-      ref="configDialogRef"
-      class="modal modal-bottom sm:modal-middle"
-      :aria-label="t('interviewHub.config.dialogAria')"
-      @close="showConfigModal = false"
+    <AppModalFrame
+      v-model:open="showConfigModal"
+      :title-id="INTERVIEW_CONFIG_DIALOG_TITLE_ID"
+      :described-by-id="INTERVIEW_CONFIG_DIALOG_DESCRIPTION_ID"
+      size-token="standard"
+      :close-aria-label="t('interviewHub.config.closeDialogAria')"
+      :close-backdrop-label="t('interviewHub.config.closeBackdropButton')"
     >
-      <div class="modal-box w-11/12 max-w-4xl">
-        <h3 class="font-bold text-lg">{{ t("interviewHub.config.title") }}</h3>
-        <p class="text-sm text-base-content/70 mt-1">
-          {{ t("interviewHub.config.subtitle") }}
-        </p>
+      <h3 :id="INTERVIEW_CONFIG_DIALOG_TITLE_ID" class="font-bold text-lg">
+        {{ t("interviewHub.config.title") }}
+      </h3>
+      <p :id="INTERVIEW_CONFIG_DIALOG_DESCRIPTION_ID" class="text-sm text-base-content/70 mt-1">
+        {{ t("interviewHub.config.subtitle") }}
+      </p>
 
-        <div class="join mt-4">
-          <button
-            type="button"
-            class="btn join-item"
-            :class="selectedMode === 'job' ? 'btn-primary' : 'btn-outline'"
-            :aria-label="t('interviewHub.config.switchToJobAria')"
-            @click="selectedMode = 'job'"
-          >
-            {{ t("interviewHub.config.modeJobButton") }}
-          </button>
-          <button
-            type="button"
-            class="btn join-item"
-            :class="selectedMode === 'studio' ? 'btn-primary' : 'btn-outline'"
-            :aria-label="t('interviewHub.config.switchToStudioAria')"
-            @click="selectedMode = 'studio'"
-          >
-            {{ t("interviewHub.config.modeStudioButton") }}
-          </button>
-        </div>
+      <div class="join mt-4">
+        <button
+          type="button"
+          class="btn join-item"
+          :class="selectedMode === 'job' ? 'btn-primary' : 'btn-outline'"
+          :aria-label="t('interviewHub.config.switchToJobAria')"
+          @click="selectedMode = 'job'"
+        >
+          {{ t("interviewHub.config.modeJobButton") }}
+        </button>
+        <button
+          type="button"
+          class="btn join-item"
+          :class="selectedMode === 'studio' ? 'btn-primary' : 'btn-outline'"
+          :aria-label="t('interviewHub.config.switchToStudioAria')"
+          @click="selectedMode = 'studio'"
+        >
+          {{ t("interviewHub.config.modeStudioButton") }}
+        </button>
+      </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <div v-if="selectedMode === 'job'" class="space-y-4">
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("interviewHub.config.searchJobsLegend") }}</legend>
-              <input
-                v-model="jobSearchTerm"
-                type="text"
-                class="input w-full"
-                :placeholder="t('interviewHub.config.searchJobsPlaceholder')"
-                :aria-label="t('interviewHub.config.searchJobsAria')"
-              />
-            </fieldset>
+      <SectionGrid grid-token="twoColumnWide" extra-class="mt-6">
+        <div v-if="selectedMode === 'job'" class="space-y-4">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">{{ t("interviewHub.config.searchJobsLegend") }}</legend>
+            <input
+              v-model="jobSearchTerm"
+              type="text"
+              class="input w-full"
+              :placeholder="t('interviewHub.config.searchJobsPlaceholder')"
+              :aria-label="t('interviewHub.config.searchJobsAria')"
+            />
+          </fieldset>
 
-            <div v-if="searchedJobs.length === 0" class="alert alert-soft" role="status">
-              <span>{{ t("interviewHub.config.noJobsState") }}</span>
-            </div>
-
-            <div v-else class="space-y-4">
-              <div class="overflow-x-auto border border-base-300 rounded-box max-h-72">
-                <table class="table table-sm" :aria-label="t('interviewHub.config.jobsTableAria')">
-                  <thead>
-                    <tr>
-                      <th>{{ t("interviewHub.config.jobsColumns.job") }}</th>
-                      <th>{{ t("interviewHub.config.jobsColumns.company") }}</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="job in jobSelectionPagination.items.value" :key="job.id" class="hover:bg-base-200">
-                      <td class="max-w-[16rem] truncate">{{ job.title }}</td>
-                      <td>{{ job.company }}</td>
-                      <td class="text-right">
-                        <button
-                          type="button"
-                          class="btn btn-xs"
-                          :class="job.id === selectedJobId ? 'btn-primary' : 'btn-ghost'"
-                          :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
-                          @click="selectJobById(job.id)"
-                        >
-                          {{ job.id === selectedJobId ? t("interviewHub.config.selectedButton") : t("interviewHub.config.selectButton") }}
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <AppPagination
-                :current-page="jobSelectionPagination.currentPage.value"
-                :total-pages="jobSelectionPagination.totalPages.value"
-                :page-numbers="jobSelectionPagination.pageNumbers.value"
-                :summary="jobSelectionPaginationSummary"
-                :navigation-aria="t('interviewHub.config.pagination.navigationAria')"
-                :previous-aria="t('interviewHub.config.pagination.previousAria')"
-                :next-aria="t('interviewHub.config.pagination.nextAria')"
-                :page-aria="interviewConfigPageAria"
-                @update:current-page="jobSelectionPagination.goToPage"
-              />
-            </div>
-
-            <div v-if="selectedJob" class="card bg-base-200" role="status" aria-live="polite">
-              <div class="card-body p-4">
-                <h4 class="font-semibold">{{ selectedJob.title }}</h4>
-                <p class="text-sm text-base-content/70">{{ selectedJob.company }} · {{ selectedJob.location }}</p>
-                <div class="flex flex-wrap gap-2 mt-2">
-                  <span v-for="tech in selectedJob.technologies?.slice(0, 6)" :key="tech" class="badge badge-sm badge-outline">
-                    {{ tech }}
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div v-if="searchedJobs.length === 0" class="alert alert-soft" role="status">
+            <span>{{ t("interviewHub.config.noJobsState") }}</span>
           </div>
 
           <div v-else class="space-y-4">
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("interviewHub.config.studioLegend") }}</legend>
-              <StudioSelector v-model="sessionConfig.studioId" :studios="studiosForSelector" />
-              <p v-if="studiosForSelector.length === 0" class="text-xs text-base-content/60 mt-2">
-                {{ t("interviewHub.config.noStudiosHint") }}
-              </p>
-            </fieldset>
+            <div class="overflow-x-auto border border-base-300 rounded-box max-h-72">
+              <table class="table table-sm" :aria-label="t('interviewHub.config.jobsTableAria')">
+                <thead>
+                  <tr>
+                    <th>{{ t("interviewHub.config.jobsColumns.job") }}</th>
+                    <th>{{ t("interviewHub.config.jobsColumns.company") }}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="job in jobSelectionPagination.items.value" :key="job.id" class="hover:bg-base-200">
+                    <td class="max-w-[16rem] truncate">{{ job.title }}</td>
+                    <td>{{ job.company }}</td>
+                    <td class="text-right">
+                      <button
+                        type="button"
+                        class="btn btn-xs"
+                        :class="job.id === selectedJobId ? 'btn-primary' : 'btn-ghost'"
+                        :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
+                        @click="selectJobById(job.id)"
+                      >
+                        {{ job.id === selectedJobId ? t("interviewHub.config.selectedButton") : t("interviewHub.config.selectButton") }}
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <AppPagination
+              :current-page="jobSelectionPagination.currentPage.value"
+              :total-pages="jobSelectionPagination.totalPages.value"
+              :page-numbers="jobSelectionPagination.pageNumbers.value"
+              :summary="jobSelectionPaginationSummary"
+              :navigation-aria="t('interviewHub.config.pagination.navigationAria')"
+              :previous-aria="t('interviewHub.config.pagination.previousAria')"
+              :next-aria="t('interviewHub.config.pagination.nextAria')"
+              :page-aria="interviewConfigPageAria"
+              @update:current-page="jobSelectionPagination.goToPage"
+            />
           </div>
 
-          <div class="space-y-4">
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("interviewHub.config.roleLegend") }}</legend>
-              <input
-                v-if="selectedMode === 'job'"
-                v-model="sessionConfig.role"
-                class="input w-full"
-                :aria-label="t('interviewHub.config.roleAria')"
-              />
-              <select
-                v-else
-                v-model="sessionConfig.role"
-                class="select w-full"
-                :aria-label="t('interviewHub.config.roleAria')"
-              >
-                <option v-for="role in interviewRoleOptions" :key="role" :value="role">
-                  {{ roleLabel(role) }}
-                </option>
-              </select>
-            </fieldset>
-
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("interviewHub.config.experienceLegend") }}</legend>
-              <select
-                v-model="sessionConfig.experienceLevel"
-                class="select w-full"
-                :aria-label="t('interviewHub.config.experienceAria')"
-              >
-                <option
-                  v-for="level in interviewExperienceOptions"
-                  :key="level"
-                  :value="level"
-                >
-                  {{ experienceLabel(level) }}
-                </option>
-              </select>
-            </fieldset>
-
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("interviewHub.config.questionCountLegend") }}</legend>
-              <select
-                v-model="sessionConfig.questionCount"
-                class="select w-full"
-                :aria-label="t('interviewHub.config.questionCountAria')"
-              >
-                <option
-                  v-for="option in interviewQuestionCountOptions"
-                  :key="option"
-                  :value="option"
-                >
-                  {{ questionCountLabel(option) }}
-                </option>
-              </select>
-            </fieldset>
-
-            <label class="label cursor-pointer justify-start gap-3">
-              <input
-                v-model="sessionConfig.enableVoiceMode"
-                type="checkbox"
-                class="toggle toggle-primary"
-                :aria-label="t('interviewHub.config.enableVoiceAria')"
-              />
-              <span class="label-text">{{ t("interviewHub.config.enableVoiceLabel") }}</span>
-            </label>
-
-            <fieldset v-if="sessionConfig.enableVoiceMode" class="fieldset">
-              <legend class="fieldset-legend">{{ t("interviewHub.config.ttsVoiceLegend") }}</legend>
-              <select
-                v-model="sessionConfig.voiceSettings.voiceId"
-                class="select w-full"
-                :aria-label="t('interviewHub.config.ttsVoiceAria')"
-              >
-                <option value="">{{ t("interviewHub.config.ttsDefaultOption") }}</option>
-                <option v-for="voice in tts.voices" :key="voice.voiceURI" :value="voice.voiceURI">
-                  {{ voice.name }} ({{ voice.lang }})
-                </option>
-              </select>
-            </fieldset>
+          <div v-if="selectedJob" class="card bg-base-200" role="status" aria-live="polite">
+            <div class="card-body p-4">
+              <h4 class="font-semibold">{{ selectedJob.title }}</h4>
+              <p class="text-sm text-base-content/70">{{ selectedJob.company }} · {{ selectedJob.location }}</p>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <span v-for="tech in selectedJob.technologies?.slice(0, 6)" :key="tech" class="badge badge-sm badge-outline">
+                  {{ tech }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
+        <div v-else class="space-y-4">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">{{ t("interviewHub.config.studioLegend") }}</legend>
+            <StudioSelector v-model="sessionConfig.studioId" :studios="studiosForSelector" />
+            <p v-if="studiosForSelector.length === 0" class="text-xs text-base-content/60 mt-2">
+              {{ t("interviewHub.config.noStudiosHint") }}
+            </p>
+          </fieldset>
+        </div>
+
+        <div class="space-y-4">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">{{ t("interviewHub.config.roleLegend") }}</legend>
+            <input
+              v-if="selectedMode === 'job'"
+              v-model="sessionConfig.role"
+              :list="INTERVIEW_ROLE_SUGGESTIONS_LIST_ID"
+              class="input w-full"
+              :aria-label="t('interviewHub.config.roleAria')"
+            />
+            <select
+              v-else
+              v-model="sessionConfig.role"
+              class="select w-full"
+              :aria-label="t('interviewHub.config.roleAria')"
+            >
+              <option v-for="role in interviewRoleOptions" :key="role" :value="role">
+                {{ role }}
+              </option>
+            </select>
+            <datalist :id="INTERVIEW_ROLE_SUGGESTIONS_LIST_ID">
+              <option v-for="role in interviewRoleOptions" :key="`${role}-suggestion`" :value="role" />
+            </datalist>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">{{ t("interviewHub.config.experienceLegend") }}</legend>
+            <select
+              v-model="sessionConfig.experienceLevel"
+              class="select w-full"
+              :aria-label="t('interviewHub.config.experienceAria')"
+            >
+              <option
+                v-for="level in interviewExperienceOptions"
+                :key="level"
+                :value="level"
+              >
+                {{ experienceLabel(level) }}
+              </option>
+            </select>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">{{ t("interviewHub.config.questionCountLegend") }}</legend>
+            <select
+              v-model="sessionConfig.questionCount"
+              class="select w-full"
+              :aria-label="t('interviewHub.config.questionCountAria')"
+            >
+              <option
+                v-for="option in interviewQuestionCountOptions"
+                :key="option"
+                :value="option"
+              >
+                {{ questionCountLabel(option) }}
+              </option>
+            </select>
+          </fieldset>
+
+          <label class="label cursor-pointer justify-start gap-3">
+            <input
+              v-model="sessionConfig.enableVoiceMode"
+              type="checkbox"
+              class="toggle toggle-primary"
+              :aria-label="t('interviewHub.config.enableVoiceAria')"
+            />
+            <span class="label-text">{{ t("interviewHub.config.enableVoiceLabel") }}</span>
+          </label>
+
+          <fieldset v-if="sessionConfig.enableVoiceMode" class="fieldset">
+            <legend class="fieldset-legend">{{ t("interviewHub.config.ttsVoiceLegend") }}</legend>
+            <select
+              v-model="sessionConfig.voiceSettings.voiceId"
+              class="select w-full"
+              :aria-label="t('interviewHub.config.ttsVoiceAria')"
+            >
+              <option value="">{{ t("interviewHub.config.ttsDefaultOption") }}</option>
+              <option v-for="voice in tts.voices" :key="voice.voiceURI" :value="voice.voiceURI">
+                {{ voice.name }} ({{ voice.lang }})
+              </option>
+            </select>
+          </fieldset>
+        </div>
         <div class="modal-action">
           <button
             type="button"
@@ -883,12 +987,7 @@ async function viewSession(id: string) {
             {{ t("interviewHub.config.startButton") }}
           </button>
         </div>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button :aria-label="t('interviewHub.config.closeDialogAria')" @click="showConfigModal = false">
-          {{ t("interviewHub.config.closeBackdropButton") }}
-        </button>
-      </form>
-    </dialog>
-  </div>
+      </SectionGrid>
+    </AppModalFrame>
+  </PageScaffold>
 </template>

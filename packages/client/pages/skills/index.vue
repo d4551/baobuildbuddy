@@ -44,8 +44,7 @@ const mappings = ref<SkillMapping[]>([]);
 const loading = ref(false);
 const analyzing = ref(false);
 const showAddModal = ref(false);
-const addMappingDialogRef = ref<HTMLDialogElement | null>(null);
-useFocusTrap(addMappingDialogRef, () => showAddModal.value);
+const SKILLS_ADD_MAPPING_DIALOG_TITLE_ID = "skills-page-add-mapping-dialog-title";
 const showDeleteMappingDialog = ref(false);
 const pendingDeleteMappingId = ref<string | null>(null);
 
@@ -133,17 +132,6 @@ const gamificationXP = computed(() => progress.value?.xp ?? 0);
 
 onMounted(() => {
   void initializeSkillsPage();
-});
-
-watch(showAddModal, (isOpen) => {
-  const dialog = addMappingDialogRef.value;
-  if (!dialog) return;
-
-  if (isOpen && !dialog.open) {
-    dialog.showModal();
-  } else if (!isOpen && dialog.open) {
-    dialog.close();
-  }
 });
 
 function resolveCategoryLabel(category: SkillCategory): string {
@@ -642,132 +630,130 @@ function removeApplication(index: number): void {
       </div>
     </div>
 
-    <dialog ref="addMappingDialogRef" class="modal modal-bottom sm:modal-middle" @close="showAddModal = false">
-      <div class="modal-box max-w-2xl">
-        <h3 class="font-bold text-lg mb-4">{{ t("skillsPage.createModal.title") }}</h3>
+    <AppModalFrame
+      v-model:open="showAddModal"
+      :title-id="SKILLS_ADD_MAPPING_DIALOG_TITLE_ID"
+      size-token="compact"
+      :close-aria-label="t('skillsPage.createModal.closeBackdropAria')"
+      :close-backdrop-label="t('skillsPage.createModal.closeBackdropButton')"
+    >
+      <h3 :id="SKILLS_ADD_MAPPING_DIALOG_TITLE_ID" class="font-bold text-lg mb-4">
+        {{ t("skillsPage.createModal.title") }}
+      </h3>
 
-        <div class="space-y-4">
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("skillsPage.createModal.gameExpressionLegend") }}</legend>
+      <div class="space-y-4">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("skillsPage.createModal.gameExpressionLegend") }}</legend>
+          <input
+            v-model="newMapping.gameExpression"
+            type="text"
+            required
+            :minlength="SKILLS_MIN_GAME_EXPRESSION_LENGTH"
+            :placeholder="t('skillsPage.createModal.gameExpressionPlaceholder')"
+            class="input validator w-full"
+            :aria-label="t('skillsPage.createModal.gameExpressionAria')"
+          />
+          <p class="validator-hint">{{ t("skillsPage.createModal.gameExpressionHint") }}</p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("skillsPage.createModal.transferableSkillLegend") }}</legend>
+          <input
+            v-model="newMapping.transferableSkill"
+            type="text"
+            required
+            :minlength="SKILLS_MIN_TRANSFERABLE_SKILL_LENGTH"
+            :placeholder="t('skillsPage.createModal.transferableSkillPlaceholder')"
+            class="input validator w-full"
+            :aria-label="t('skillsPage.createModal.transferableSkillAria')"
+          />
+          <p class="validator-hint">{{ t("skillsPage.createModal.transferableSkillHint") }}</p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("skillsPage.createModal.categoryLegend") }}</legend>
+          <select
+            v-model="newMapping.category"
+            class="select validator w-full"
+            :aria-label="t('skillsPage.createModal.categoryAria')"
+          >
+            <option v-for="categoryOption in categoryOptions" :key="categoryOption.value" :value="categoryOption.value">
+              {{ categoryOption.label }}
+            </option>
+          </select>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("skillsPage.createModal.applicationsLegend") }}</legend>
+          <div class="join w-full">
             <input
-              v-model="newMapping.gameExpression"
+              v-model="newApplication"
               type="text"
-              required
-              :minlength="SKILLS_MIN_GAME_EXPRESSION_LENGTH"
-              :placeholder="t('skillsPage.createModal.gameExpressionPlaceholder')"
-              class="input validator w-full"
-              :aria-label="t('skillsPage.createModal.gameExpressionAria')"
+              class="input input-sm join-item w-full"
+              :placeholder="t('skillsPage.createModal.applicationPlaceholder')"
+              :aria-label="t('skillsPage.createModal.applicationAria')"
+              @keyup.enter="addApplication"
             />
-            <p class="validator-hint">{{ t("skillsPage.createModal.gameExpressionHint") }}</p>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("skillsPage.createModal.transferableSkillLegend") }}</legend>
-            <input
-              v-model="newMapping.transferableSkill"
-              type="text"
-              required
-              :minlength="SKILLS_MIN_TRANSFERABLE_SKILL_LENGTH"
-              :placeholder="t('skillsPage.createModal.transferableSkillPlaceholder')"
-              class="input validator w-full"
-              :aria-label="t('skillsPage.createModal.transferableSkillAria')"
-            />
-            <p class="validator-hint">{{ t("skillsPage.createModal.transferableSkillHint") }}</p>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("skillsPage.createModal.categoryLegend") }}</legend>
-            <select
-              v-model="newMapping.category"
-              class="select validator w-full"
-              :aria-label="t('skillsPage.createModal.categoryAria')"
+            <button
+              class="btn btn-sm btn-primary join-item"
+              :aria-label="t('skillsPage.createModal.addApplicationAria')"
+              @click="addApplication"
             >
-              <option v-for="categoryOption in categoryOptions" :key="categoryOption.value" :value="categoryOption.value">
-                {{ categoryOption.label }}
-              </option>
-            </select>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("skillsPage.createModal.applicationsLegend") }}</legend>
-            <div class="join w-full">
-              <input
-                v-model="newApplication"
-                type="text"
-                class="input input-sm join-item w-full"
-                :placeholder="t('skillsPage.createModal.applicationPlaceholder')"
-                :aria-label="t('skillsPage.createModal.applicationAria')"
-                @keyup.enter="addApplication"
-              />
+              {{ t("skillsPage.createModal.addApplicationButton") }}
+            </button>
+          </div>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <div
+              v-for="(application, index) in newMapping.industryApplications"
+              :key="`${application}-${index}`"
+              class="badge gap-2"
+            >
+              {{ application }}
               <button
-                class="btn btn-sm btn-primary join-item"
-                :aria-label="t('skillsPage.createModal.addApplicationAria')"
-                @click="addApplication"
+                type="button"
+                class="btn btn-ghost btn-xs btn-circle"
+                :aria-label="t('skillsPage.createModal.removeApplicationAria', { application })"
+                @click="removeApplication(index)"
               >
-                {{ t("skillsPage.createModal.addApplicationButton") }}
+                <CloseIcon class="w-3 h-3" />
               </button>
             </div>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <div
-                v-for="(application, index) in newMapping.industryApplications"
-                :key="`${application}-${index}`"
-                class="badge gap-2"
-              >
-                {{ application }}
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-xs btn-circle"
-                  :aria-label="t('skillsPage.createModal.removeApplicationAria', { application })"
-                  @click="removeApplication(index)"
-                >
-                  <CloseIcon class="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-          </fieldset>
+          </div>
+        </fieldset>
 
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">
-              {{ t("skillsPage.createModal.confidenceLegend", { confidence: newMapping.confidence }) }}
-            </legend>
-            <input
-              v-model.number="newMapping.confidence"
-              type="range"
-              :min="SKILLS_CONFIDENCE_MIN"
-              :max="SKILLS_CONFIDENCE_MAX"
-              class="range range-primary"
-              :aria-label="t('skillsPage.createModal.confidenceAria')"
-            />
-          </fieldset>
-        </div>
-
-        <div class="modal-action">
-          <button
-            class="btn btn-ghost"
-            :aria-label="t('skillsPage.createModal.cancelAria')"
-            @click="showAddModal = false"
-          >
-            {{ t("skillsPage.createModal.cancelButton") }}
-          </button>
-          <button
-            class="btn btn-primary"
-            :disabled="!newMapping.gameExpression.trim() || !newMapping.transferableSkill.trim()"
-            :aria-label="t('skillsPage.createModal.createAria')"
-            @click="handleAddMapping"
-          >
-            {{ t("skillsPage.createModal.createButton") }}
-          </button>
-        </div>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">
+            {{ t("skillsPage.createModal.confidenceLegend", { confidence: newMapping.confidence }) }}
+          </legend>
+          <input
+            v-model.number="newMapping.confidence"
+            type="range"
+            :min="SKILLS_CONFIDENCE_MIN"
+            :max="SKILLS_CONFIDENCE_MAX"
+            class="range range-primary"
+            :aria-label="t('skillsPage.createModal.confidenceAria')"
+          />
+        </fieldset>
       </div>
-      <form method="dialog" class="modal-backdrop">
+
+      <div class="modal-action">
         <button
-          :aria-label="t('skillsPage.createModal.closeBackdropAria')"
+          class="btn btn-ghost"
+          :aria-label="t('skillsPage.createModal.cancelAria')"
           @click="showAddModal = false"
         >
-          {{ t("skillsPage.createModal.closeBackdropButton") }}
+          {{ t("skillsPage.createModal.cancelButton") }}
         </button>
-      </form>
-    </dialog>
+        <button
+          class="btn btn-primary"
+          :disabled="!newMapping.gameExpression.trim() || !newMapping.transferableSkill.trim()"
+          :aria-label="t('skillsPage.createModal.createAria')"
+          @click="handleAddMapping"
+        >
+          {{ t("skillsPage.createModal.createButton") }}
+        </button>
+      </div>
+    </AppModalFrame>
 
     <ConfirmDialog
       id="skills-delete-mapping-dialog"

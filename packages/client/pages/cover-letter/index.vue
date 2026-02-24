@@ -31,10 +31,16 @@ const route = useRoute();
 const { $toast } = useNuxtApp();
 const { t, locale } = useI18n();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("coverLetterPage.title"),
+    description: t("coverLetterPage.subtitle"),
+  });
+}
+
 const showGenerateModal = ref(false);
 const generating = ref(false);
-const generateDialogRef = ref<HTMLDialogElement | null>(null);
-useFocusTrap(generateDialogRef, () => showGenerateModal.value);
+const COVER_LETTER_GENERATE_DIALOG_TITLE_ID = "cover-letter-page-generate-dialog-title";
 
 const showDeleteCoverLetterDialog = ref(false);
 const pendingDeleteCoverLetterId = ref<string | null>(null);
@@ -127,17 +133,6 @@ onMounted(async () => {
   }
 
   await Promise.all([fetchCoverLetters(), fetchResumes()]);
-});
-
-watch(showGenerateModal, (isOpen) => {
-  const dialog = generateDialogRef.value;
-  if (!dialog) return;
-
-  if (isOpen && !dialog.open) {
-    dialog.showModal();
-  } else if (!isOpen && dialog.open) {
-    dialog.close();
-  }
 });
 
 function templateLabel(template: CoverLetterTemplate): string {
@@ -329,7 +324,7 @@ function resolveTemplate(value: string): CoverLetterTemplate {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-7xl space-y-6">
+  <PageScaffold width-token="wide" spacing-token="comfortable">
     <section class="rounded-box border border-base-300 bg-base-200 p-6">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div class="space-y-2">
@@ -504,115 +499,116 @@ function resolveTemplate(value: string): CoverLetterTemplate {
       @update:current-page="coverLetterPagination.goToPage"
     />
 
-    <dialog ref="generateDialogRef" class="modal modal-bottom sm:modal-middle" @close="showGenerateModal = false">
-      <div class="modal-box max-w-2xl">
-        <h2 class="text-lg font-bold">{{ t("coverLetterPage.generate.title") }}</h2>
-        <p class="mt-1 text-sm text-base-content/70">{{ t("coverLetterPage.generate.subtitle") }}</p>
+    <AppModalFrame
+      v-model:open="showGenerateModal"
+      :title-id="COVER_LETTER_GENERATE_DIALOG_TITLE_ID"
+      size-token="compact"
+      :close-aria-label="t('coverLetterPage.generate.closeBackdropAria')"
+      :close-backdrop-label="t('coverLetterPage.generate.closeBackdropButton')"
+    >
+      <h2 :id="COVER_LETTER_GENERATE_DIALOG_TITLE_ID" class="text-lg font-bold">
+        {{ t("coverLetterPage.generate.title") }}
+      </h2>
+      <p class="mt-1 text-sm text-base-content/70">{{ t("coverLetterPage.generate.subtitle") }}</p>
 
-        <div class="mt-4 space-y-4">
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("coverLetterPage.generate.companyLegend") }}</legend>
-            <input
-              v-model="generateForm.company"
-              type="text"
-              :minlength="COVER_LETTER_COMPANY_MIN_LENGTH"
-              required
-              class="input validator w-full"
-              :placeholder="t('coverLetterPage.generate.companyPlaceholder')"
-              :aria-label="t('coverLetterPage.generate.companyAria')"
-            />
-            <p class="validator-hint">
-              {{ t("coverLetterPage.generate.companyHint", { count: COVER_LETTER_COMPANY_MIN_LENGTH }) }}
-            </p>
-          </fieldset>
+      <div class="mt-4 space-y-4">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("coverLetterPage.generate.companyLegend") }}</legend>
+          <input
+            v-model="generateForm.company"
+            type="text"
+            :minlength="COVER_LETTER_COMPANY_MIN_LENGTH"
+            required
+            class="input validator w-full"
+            :placeholder="t('coverLetterPage.generate.companyPlaceholder')"
+            :aria-label="t('coverLetterPage.generate.companyAria')"
+          />
+          <p class="validator-hint">
+            {{ t("coverLetterPage.generate.companyHint", { count: COVER_LETTER_COMPANY_MIN_LENGTH }) }}
+          </p>
+        </fieldset>
 
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("coverLetterPage.generate.positionLegend") }}</legend>
-            <input
-              v-model="generateForm.position"
-              type="text"
-              :minlength="COVER_LETTER_POSITION_MIN_LENGTH"
-              required
-              class="input validator w-full"
-              :placeholder="t('coverLetterPage.generate.positionPlaceholder')"
-              :aria-label="t('coverLetterPage.generate.positionAria')"
-            />
-            <p class="validator-hint">
-              {{ t("coverLetterPage.generate.positionHint", { count: COVER_LETTER_POSITION_MIN_LENGTH }) }}
-            </p>
-          </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("coverLetterPage.generate.positionLegend") }}</legend>
+          <input
+            v-model="generateForm.position"
+            type="text"
+            :minlength="COVER_LETTER_POSITION_MIN_LENGTH"
+            required
+            class="input validator w-full"
+            :placeholder="t('coverLetterPage.generate.positionPlaceholder')"
+            :aria-label="t('coverLetterPage.generate.positionAria')"
+          />
+          <p class="validator-hint">
+            {{ t("coverLetterPage.generate.positionHint", { count: COVER_LETTER_POSITION_MIN_LENGTH }) }}
+          </p>
+        </fieldset>
 
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("coverLetterPage.generate.resumeLegend") }}</legend>
-            <select
-              v-model="generateForm.resumeId"
-              class="select w-full"
-              :aria-label="t('coverLetterPage.generate.resumeAria')"
-            >
-              <option value="">{{ t("coverLetterPage.generate.resumeNoneOption") }}</option>
-              <option v-for="resume in resumes" :key="resume.id" :value="resume.id">
-                {{ resume.name }}
-              </option>
-            </select>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("coverLetterPage.generate.jobDescriptionLegend") }}</legend>
-            <textarea
-              v-model="generateForm.jobDescription"
-              :minlength="COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH"
-              class="textarea validator w-full"
-              rows="5"
-              :placeholder="t('coverLetterPage.generate.jobDescriptionPlaceholder')"
-              :aria-label="t('coverLetterPage.generate.jobDescriptionAria')"
-            ></textarea>
-            <p class="validator-hint">
-              {{ t("coverLetterPage.generate.jobDescriptionHint", { count: COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH }) }}
-            </p>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("coverLetterPage.generate.templateLegend") }}</legend>
-            <select
-              v-model="generateForm.template"
-              class="select w-full"
-              :aria-label="t('coverLetterPage.generate.templateAria')"
-            >
-              <option
-                v-for="template in COVER_LETTER_TEMPLATE_OPTIONS"
-                :key="template"
-                :value="template"
-              >
-                {{ templateLabel(template) }}
-              </option>
-            </select>
-          </fieldset>
-        </div>
-
-        <div class="modal-action">
-          <button class="btn btn-ghost" :aria-label="t('coverLetterPage.generate.cancelAria')" @click="showGenerateModal = false">
-            {{ t("coverLetterPage.generate.cancelButton") }}
-          </button>
-          <button
-            class="btn btn-primary"
-            :disabled="generating || !generateForm.company || !generateForm.position"
-            :aria-label="t('coverLetterPage.generate.submitAria')"
-            @click="handleGenerate"
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("coverLetterPage.generate.resumeLegend") }}</legend>
+          <select
+            v-model="generateForm.resumeId"
+            class="select w-full"
+            :aria-label="t('coverLetterPage.generate.resumeAria')"
           >
-            <span v-if="generating" class="loading loading-spinner loading-xs"></span>
-            <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            {{ t("coverLetterPage.generate.submitButton") }}
-          </button>
-        </div>
+            <option value="">{{ t("coverLetterPage.generate.resumeNoneOption") }}</option>
+            <option v-for="resume in resumes" :key="resume.id" :value="resume.id">
+              {{ resume.name }}
+            </option>
+          </select>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("coverLetterPage.generate.jobDescriptionLegend") }}</legend>
+          <textarea
+            v-model="generateForm.jobDescription"
+            :minlength="COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH"
+            class="textarea validator w-full"
+            rows="5"
+            :placeholder="t('coverLetterPage.generate.jobDescriptionPlaceholder')"
+            :aria-label="t('coverLetterPage.generate.jobDescriptionAria')"
+          ></textarea>
+          <p class="validator-hint">
+            {{ t("coverLetterPage.generate.jobDescriptionHint", { count: COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH }) }}
+          </p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("coverLetterPage.generate.templateLegend") }}</legend>
+          <select
+            v-model="generateForm.template"
+            class="select w-full"
+            :aria-label="t('coverLetterPage.generate.templateAria')"
+          >
+            <option
+              v-for="template in COVER_LETTER_TEMPLATE_OPTIONS"
+              :key="template"
+              :value="template"
+            >
+              {{ templateLabel(template) }}
+            </option>
+          </select>
+        </fieldset>
       </div>
-      <form method="dialog" class="modal-backdrop">
-        <button :aria-label="t('coverLetterPage.generate.closeBackdropAria')" @click="showGenerateModal = false">
-          {{ t("coverLetterPage.generate.closeBackdropButton") }}
+
+      <div class="modal-action">
+        <button class="btn btn-ghost" :aria-label="t('coverLetterPage.generate.cancelAria')" @click="showGenerateModal = false">
+          {{ t("coverLetterPage.generate.cancelButton") }}
         </button>
-      </form>
-    </dialog>
+        <button
+          class="btn btn-primary"
+          :disabled="generating || !generateForm.company || !generateForm.position"
+          :aria-label="t('coverLetterPage.generate.submitAria')"
+          @click="handleGenerate"
+        >
+          <span v-if="generating" class="loading loading-spinner loading-xs"></span>
+          <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          {{ t("coverLetterPage.generate.submitButton") }}
+        </button>
+      </div>
+    </AppModalFrame>
 
     <ConfirmDialog
       id="cover-letter-delete-dialog"
@@ -626,5 +622,5 @@ function resolveTemplate(value: string): CoverLetterTemplate {
       @confirm="handleDeleteCoverLetter"
       @cancel="clearDeleteCoverLetterState"
     />
-  </div>
+  </PageScaffold>
 </template>

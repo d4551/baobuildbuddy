@@ -5,7 +5,7 @@ import type {
   UserGamificationData,
   UserProfile,
 } from "@bao/shared";
-import { APP_BRAND, APP_ROUTES, getXPProgress } from "@bao/shared";
+import { APP_BRAND, getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_A11Y_KEYS,
@@ -19,7 +19,6 @@ import {
   DASHBOARD_MOTIVATIONAL_PHRASE_KEYS,
   DASHBOARD_ONBOARDING_STEPS,
   DASHBOARD_PIPELINE_STATUS_KEYS,
-  DASHBOARD_QUICK_ACTIONS,
   DASHBOARD_RECENT_ACTIVITY_LIMIT,
   DASHBOARD_RELATIVE_TIME_KEYS,
   DASHBOARD_STAT_CARDS,
@@ -31,6 +30,7 @@ import {
   getDashboardGamificationDialStyle,
   resolveDashboardPipelineSteps,
 } from "~/constants/dashboard";
+import { createFlowEngineInput } from "~/constants/flow-engine";
 import {
   GAMIFICATION_CURRENT_STREAK_ICON,
   GAMIFICATION_LEVEL_ICON,
@@ -54,10 +54,12 @@ interface DashboardChallengeViewModel {
 }
 
 interface DashboardMetrics {
+  readonly profileCompleteness: number;
   readonly savedJobs: number;
   readonly appliedJobs: number;
   readonly resumeCount: number;
   readonly coverLetterCount: number;
+  readonly portfolioProjectCount: number;
   readonly automationRuns: number;
   readonly successfulAutomationRuns: number;
   readonly mappedSkillsCount: number;
@@ -100,7 +102,7 @@ const { t } = useI18n();
 
 if (import.meta.server) {
   useServerSeoMeta({
-    title: `${APP_BRAND.name} Dashboard`,
+    title: `${APP_BRAND.name} ${t(DASHBOARD_COPY_KEYS.pageTitle)}`,
     description: t(DASHBOARD_COPY_KEYS.seoDescription),
   });
 }
@@ -188,6 +190,21 @@ const nextPipelineStepLabel = computed(() => {
   }
   return t(DASHBOARD_COPY_KEYS.pipelineNextStepLabel, { step: t(nextStep.labelKey) });
 });
+
+const flowInput = computed(() =>
+  createFlowEngineInput(dashboard.value ? toFlowStats(dashboard.value) : null),
+);
+
+const {
+  primaryAction: flowPrimaryAction,
+  recommendedActions: flowRecommendedActions,
+  nextStepLabel: flowNextStepLabel,
+} = useFlowEngine(flowInput);
+const primaryFlowRoute = computed(() => flowPrimaryAction.value.to);
+const primaryFlowLabel = computed(() => t(flowNextStepLabel.value));
+const dashboardQuickActions = computed(() =>
+  [flowPrimaryAction.value, ...flowRecommendedActions.value].slice(0, 4),
+);
 
 onMounted(() => {
   heroPhraseTimer = setInterval(() => {
@@ -366,14 +383,64 @@ async function fetchDashboardViewModel(): Promise<DashboardViewModel> {
     dailyChallenge: pickDailyChallenge(challengeResponse.challenges),
     recentActivity: getRecentActivity(gamification),
     metrics: {
+      profileCompleteness: stats.profile.completeness,
       savedJobs: stats.jobs.saved,
       appliedJobs: stats.jobs.applied,
       resumeCount: stats.resumes.count,
       coverLetterCount: stats.coverLetters.count,
+      portfolioProjectCount: stats.portfolio.projectCount,
       automationRuns: stats.automation.totalRuns,
       successfulAutomationRuns: stats.automation.successfulRuns,
       mappedSkillsCount: stats.skills.mappedCount,
       interviewSessionCount: stats.interviews.totalSessions,
+    },
+  };
+}
+
+function toFlowStats(viewModel: DashboardViewModel): DashboardStats {
+  return {
+    profile: {
+      completeness: viewModel.metrics.profileCompleteness,
+    },
+    jobs: {
+      saved: viewModel.metrics.savedJobs,
+      applied: viewModel.metrics.appliedJobs,
+      interviewing: 0,
+      offered: 0,
+    },
+    resumes: {
+      count: viewModel.metrics.resumeCount,
+      lastUpdated: null,
+    },
+    coverLetters: {
+      count: viewModel.metrics.coverLetterCount,
+    },
+    portfolio: {
+      projectCount: viewModel.metrics.portfolioProjectCount,
+    },
+    interviews: {
+      totalSessions: viewModel.metrics.interviewSessionCount,
+      averageScore: null,
+    },
+    skills: {
+      mappedCount: viewModel.metrics.mappedSkillsCount,
+    },
+    ai: {
+      chatMessages: 0,
+      chatSessions: 0,
+    },
+    gamification: {
+      level: viewModel.gamification?.level ?? 0,
+      xp: viewModel.gamification?.xp ?? 0,
+      achievements: viewModel.gamification?.achievements.length ?? 0,
+      streak: viewModel.gamification?.currentStreak ?? 0,
+    },
+    automation: {
+      totalRuns: viewModel.metrics.automationRuns,
+      successfulRuns: viewModel.metrics.successfulAutomationRuns,
+      successRate: 0,
+      todayRuns: 0,
+      recentRuns: [],
     },
   };
 }
@@ -391,13 +458,13 @@ async function requestData<T>(
 </script>
 
 <template>
-  <section class="space-y-6" aria-labelledby="dashboard-title">
-    <header class="space-y-1">
-      <h1 id="dashboard-title" class="text-3xl font-bold">{{ t(DASHBOARD_COPY_KEYS.pageTitle) }}</h1>
-      <p class="text-sm text-base-content/60">
-        {{ t(DASHBOARD_COPY_KEYS.metricsSummaryLabel, { brand: APP_BRAND.name }) }}
-      </p>
-    </header>
+  <PageScaffold tag="section" labelled-by="dashboard-title">
+    <PageHeaderBlock
+      title-id="dashboard-title"
+      :title="t(DASHBOARD_COPY_KEYS.pageTitle)"
+      :description="t(DASHBOARD_COPY_KEYS.metricsSummaryLabel, { brand: APP_BRAND.name })"
+      description-class="text-sm text-base-content/60"
+    />
 
     <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" variant="stats" :lines="6" />
 
@@ -434,8 +501,8 @@ async function requestData<T>(
           </li>
         </ul>
         <div class="card-actions">
-          <NuxtLink :to="APP_ROUTES.setup" class="btn btn-primary">
-            {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
+          <NuxtLink :to="primaryFlowRoute" class="btn btn-primary">
+            {{ primaryFlowLabel }}
           </NuxtLink>
         </div>
       </div>
@@ -452,8 +519,8 @@ async function requestData<T>(
             </Transition>
           </div>
           <div v-if="!dashboard?.profile?.name" class="card-actions mt-2">
-            <NuxtLink :to="APP_ROUTES.setup" class="btn btn-primary-content">
-              {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
+            <NuxtLink :to="primaryFlowRoute" class="btn btn-primary-content">
+              {{ primaryFlowLabel }}
             </NuxtLink>
           </div>
         </div>
@@ -533,7 +600,7 @@ async function requestData<T>(
         </div>
       </section>
 
-      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <SectionGrid grid-token="twoColumnWide">
         <div v-if="dashboard?.dailyChallenge" class="card bg-base-200">
           <div class="card-body">
             <h2 class="card-title text-lg mb-3">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
@@ -594,14 +661,14 @@ async function requestData<T>(
             </ul>
           </div>
         </div>
-      </section>
+      </SectionGrid>
 
       <section class="card bg-base-200">
         <div class="card-body">
           <h2 class="card-title text-lg mb-4">{{ t(DASHBOARD_COPY_KEYS.quickActionsTitle) }}</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <SectionGrid grid-token="fourColumn">
             <NuxtLink
-              v-for="action in DASHBOARD_QUICK_ACTIONS"
+              v-for="action in dashboardQuickActions"
               :key="action.id"
               :to="action.to"
               class="btn btn-outline justify-start sm:justify-center"
@@ -612,7 +679,7 @@ async function requestData<T>(
               </svg>
               {{ t(action.labelKey) }}
             </NuxtLink>
-          </div>
+          </SectionGrid>
         </div>
       </section>
 
@@ -624,7 +691,7 @@ async function requestData<T>(
         :next-step-label="nextPipelineStepLabel"
       />
     </div>
-  </section>
+  </PageScaffold>
 </template>
 
 <style scoped>

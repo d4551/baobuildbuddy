@@ -368,6 +368,9 @@ const enUS = {
     achievementBadgeAria: "Achievement: {name}. {description}",
   },
   jobsPage: {
+    seoTitle: "Job Board",
+    seoDescription:
+      "Search and filter game-industry roles by platform, studio type, genre, and experience level.",
     title: "Job Board",
     refreshButton: "Refresh Jobs",
     refreshAria: "Refresh job feed",
@@ -601,7 +604,7 @@ const enUS = {
       cancelAria: "Cancel creating a skill mapping",
       createButton: "Add Mapping",
       createAria: "Create skill mapping",
-      closeBackdropButton: "close",
+      closeBackdropButton: "Close",
       closeBackdropAria: "Close skill mapping dialog",
     },
     deleteDialog: {
@@ -655,6 +658,54 @@ const enUS = {
       categoryScoreAria: "{category} readiness score {score} percent",
       topImprovementsTitle: "Top improvements",
       nextStepsTitle: "Next steps",
+      feedback: {
+        empty: "{category} readiness data is not available yet.",
+        early: "Early stage {category}. Focus on adding more mappings and evidence.",
+        developing: "Developing {category}. Keep adding mapped examples and proof.",
+        good: "Good {category}. Continue building depth to strengthen this area.",
+        excellent: "Excellent {category}. You are well-prepared in this area.",
+      },
+      improvements: {
+        mapTechnicalSkills:
+          "Map more technical gaming skills to career-ready technical skills.",
+        increaseSkillConfidence:
+          "Increase confidence ratings for your existing technical mappings.",
+        mapLeadershipCommunication: "Map more leadership and communication experiences.",
+        addTeamCollaborationExamples: "Add concrete team collaboration examples.",
+        researchIndustryApplications:
+          "Research additional industry applications for your mapped skills.",
+        connectSkillsToJobRoles: "Connect mapped skills to specific target job roles.",
+        addSkillEvidence:
+          "Add evidence for your mapped skills with clips, screenshots, or documents.",
+        buildPortfolioProjects: "Build portfolio projects to demonstrate applied skills.",
+        documentAchievements: "Document measurable achievements for your strongest mappings.",
+        strengthenTechnicalTransfer:
+          "Strengthen technical transfer by mapping game mechanics to engineering concepts.",
+        highlightLeadershipExperience:
+          "Highlight leadership and communication experience from gaming contexts.",
+        broadenSkillCoverage: "Broaden skill coverage by mapping 10-15 diverse skills.",
+        refineSpecificExamples: "Refine current mappings with more specific examples.",
+        pursueCertifications: "Pursue certifications that validate your technical strengths.",
+        networkWithProfessionals: "Network with professionals in your target industry.",
+      },
+      nextStepItems: {
+        startApplyingToTargetRoles: "Start applying to target roles.",
+        networkWithIndustryProfessionals: "Network with industry professionals.",
+        prepareForTechnicalInterviews: "Prepare for technical interviews.",
+        polishLinkedInProfile: "Polish your LinkedIn profile.",
+        completePortfolioProjects: "Complete your portfolio with 3-5 strong projects.",
+        mapMoreSkillsToReachFifteen: "Map 5 more skills to reach 15+ total.",
+        addEvidenceToTopSkills: "Add evidence to your top 10 skills.",
+        researchTargetCompaniesAndRoles: "Research target companies and roles.",
+        mapTenPlusSkills: "Map 10+ gaming skills to career skills.",
+        startBuildingPortfolioProjects: "Start building portfolio projects.",
+        addEvidenceToDemonstrateAbilities: "Add evidence to demonstrate your abilities.",
+        exploreMatchingCareerPathways: "Explore career pathways that match your skills.",
+        mapFirstFiveSkills: "Map your first 5 gaming skills.",
+        exploreSkillCategories: "Explore different skill categories.",
+        learnGamingCareerOptions: "Learn about career options in the gaming industry.",
+        setUpProfessionalProfile: "Set up your professional profile.",
+      },
       emptyState: "Readiness data is not available yet. Add skill mappings and run analysis first.",
     },
     pathways: {
@@ -678,6 +729,9 @@ const enUS = {
     },
   },
   resumePage: {
+    seoTitle: "Resume Builder",
+    seoDescription:
+      "Build targeted resume variants, track completion, and move directly into cover letter, portfolio, and interview workflows.",
     title: "Resume Builder",
     subtitle:
       "Build role-targeted resume variants, keep content current, and move directly into cover letter, portfolio, and interview workflows.",
@@ -1523,6 +1577,9 @@ const enUS = {
     },
   },
   studiosIndex: {
+    seoTitle: "Studio Directory",
+    seoDescription:
+      "Browse studio profiles, filter operational attributes, and launch interview practice from verified studio context.",
     title: "Studio Directory",
     subtitle:
       "Browse studio profiles, filter by operational attributes, and move directly into interview practice.",
@@ -1573,7 +1630,7 @@ const enUS = {
       closeButtonAria: "Close studio preview dialog",
       closeButton: "Close",
       closeBackdropAria: "Close studio preview backdrop",
-      closeBackdropButton: "close",
+      closeBackdropButton: "Close",
       remoteYes: "Yes",
       remoteNo: "No",
       startInterviewButton: "Start Interview",
@@ -1982,11 +2039,37 @@ const enUS = {
       errors: {
         studioFailed: "Studio scraper failed",
         jobFailed: "Job scraper failed",
+        rewardFailed: "Failed to award scraper progress",
       },
+    },
+  },
+  aiProviderCatalog: {
+    local: {
+      name: "Local Model",
+      description: "RamaLama or Ollama with private, local-first execution.",
+    },
+    gemini: {
+      name: "Google Gemini",
+      description: "Primary cloud provider for general QA and content generation.",
+    },
+    claude: {
+      name: "Anthropic Claude",
+      description: "Long-context reasoning provider for analysis-heavy workflows.",
+    },
+    openai: {
+      name: "OpenAI",
+      description: "GPT model family for broad chat and generation tasks.",
+    },
+    huggingface: {
+      name: "Hugging Face",
+      description: "Cloud fallback with a broad open-model catalog.",
     },
   },
   setup: {
     title: "Welcome to {brand}",
+    seoTitle: "{brand} Setup",
+    seoDescription:
+      "Complete profile details, configure AI providers, and launch your career workspace.",
     stepsAriaLabel: "Setup progress",
     steps: {
       profile: "Profile",
@@ -2023,7 +2106,7 @@ const enUS = {
     testButton: "Test",
     doneTitle: "You're all set",
     doneDescription: "{assistant} is ready to help you with your game industry career.",
-    successIconLabel: "OK",
+    successStatusAria: "Setup completion status",
     backToAiConfigAria: "Back to AI configuration step",
     launchAria: "Finish setup and launch application",
     launchButton: "Launch {brand}",
@@ -2150,6 +2233,9 @@ const enUS = {
     },
   },
   interviewHub: {
+    seoTitle: "Interview Prep Hub",
+    seoDescription:
+      "Practice with job-based and studio-based interview flows, then review scored feedback and improvement guidance.",
     title: "Interview Prep Hub",
     subtitle:
       "Practice against either real scraped job listings or studio-focused interview tracks. Every session returns scored feedback and targeted improvement points.",
@@ -2281,7 +2367,7 @@ const enUS = {
       startAria: "Start interview session",
       startButton: "Start Interview",
       closeDialogAria: "Close interview configuration dialog",
-      closeBackdropButton: "close",
+      closeBackdropButton: "Close",
       pagination: {
         navigationAria: "Interview job-selection pagination",
         previousAria: "Previous jobs page",
@@ -2293,13 +2379,6 @@ const enUS = {
     mode: {
       job: "Job",
       studio: "Studio",
-    },
-    roles: {
-      gameDesigner: "Game Designer",
-      programmer: "Programmer",
-      artist: "Artist",
-      producer: "Producer",
-      qa: "QA Tester",
     },
     experience: {
       entry: "Entry",
@@ -2316,6 +2395,8 @@ const enUS = {
       started: "Interview session started",
     },
     errors: {
+      bootstrapLoadFailed: "Failed to load interview hub data",
+      roleRecommendationsFailed: "Failed to load tailored role recommendations",
       startFailed: "Failed to start interview session",
       jobLoadFailed: "Failed to load selected job details",
     },
@@ -2362,6 +2443,9 @@ const enUS = {
     },
   },
   settings: {
+    seoTitle: "Settings & Profile",
+    seoDescription:
+      "Manage profile identity, AI providers, notification preferences, and automation defaults from one control plane.",
     title: "Settings & Profile",
     subtitle: "Centralize your identity, assistant behavior, and automation defaults in one place.",
     saveState: {
@@ -2455,7 +2539,7 @@ const enUS = {
       title: "AI Providers",
       subtitle: "Keep local providers as primary and cloud providers as controlled fallbacks.",
       expandAria: "Expand {provider} provider settings",
-      configuredBadge: "configured",
+      configuredBadge: "Configured",
       endpointLabel: "Endpoint URL",
       credentialLabel: "API Key",
       huggingFacePlaceholder: "Enter Hugging Face token",
@@ -2546,7 +2630,7 @@ const enUS = {
   studioSelector: {
     toggleAria: "Open studio selector",
     selectPlaceholder: "Select a studio",
-    listboxAria: "Studios list",
+    menuAria: "Studios menu",
     searchPlaceholder: "Search studios",
     searchAria: "Search studios",
     emptyState: "No studios found",
@@ -2557,6 +2641,9 @@ const enUS = {
   },
   aiChatPage: {
     title: "Chat with {brand}",
+    seoTitle: "{brand} AI Chat",
+    seoDescription:
+      "Chat with your AI career copilot for resume strategy, interview prep, and automation planning.",
     subtitle: "Your AI career assistant for the game industry",
     clearAria: "Clear chat conversation",
     clearButton: "Clear",

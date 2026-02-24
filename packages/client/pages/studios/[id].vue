@@ -11,6 +11,13 @@ const router = useRouter();
 const { t } = useI18n();
 const { studio, loading: studioLoading, fetchStudioById } = useStudio();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("studioDetail.breadcrumbs.detail"),
+    description: t("studiosIndex.seoDescription"),
+  });
+}
+
 const pageError = ref<string | null>(null);
 const studioId = computed(() => {
   const routeParam = route.params.id;
@@ -86,7 +93,7 @@ function studioField(value: string | undefined): string {
 </script>
 
 <template>
-  <div>
+  <PageScaffold width-token="content" spacing-token="comfortable">
     <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
 
     <div v-if="pageError" class="alert alert-error mb-6" role="alert" :aria-label="t('studioDetail.errorBannerAria')">
@@ -101,7 +108,7 @@ function studioField(value: string | undefined): string {
 
     <LoadingSkeleton v-else-if="loading" :lines="10" />
 
-    <div v-else-if="studio" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <SectionGrid v-else-if="studio" grid-token="threeColumnLg">
       <!-- Main Content -->
       <div class="lg:col-span-2 space-y-6">
         <!-- Header -->
@@ -254,6 +261,6 @@ function studioField(value: string | undefined): string {
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </SectionGrid>
+  </PageScaffold>
 </template>

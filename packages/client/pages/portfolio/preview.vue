@@ -5,6 +5,13 @@ const router = useRouter();
 const { portfolio, projects, loading, fetchPortfolio, exportPortfolio } = usePortfolio();
 const { t } = useI18n();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("portfolioPage.preview.pageTitle"),
+    description: t("portfolioPage.subtitle"),
+  });
+}
+
 onMounted(async () => {
   await fetchPortfolio();
 });

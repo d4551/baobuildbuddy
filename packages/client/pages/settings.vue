@@ -57,6 +57,13 @@ const { theme, toggleTheme } = useTheme();
 const { $toast } = useNuxtApp();
 const { locale, t } = useI18n();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("settings.seoTitle"),
+    description: t("settings.seoDescription"),
+  });
+}
+
 const providerFieldById = {
   local: "localModelEndpoint",
   gemini: "geminiApiKey",
@@ -68,8 +75,8 @@ const providerFieldById = {
 const providerInputs = computed<ProviderInputConfig[]>(() =>
   AI_PROVIDER_CATALOG.map((provider) => ({
     id: provider.id,
-    label: provider.name,
-    description: provider.description,
+    label: t(provider.nameKey),
+    description: t(provider.descriptionKey),
     field: providerFieldById[provider.id],
   })),
 );
@@ -417,15 +424,15 @@ async function handleSaveAutomation() {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <PageScaffold labelled-by="settings-page-title">
     <section class="hero rounded-box bg-base-200 border border-base-300">
       <div class="hero-content w-full flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 class="text-3xl font-bold md:text-4xl">{{ t("settings.title") }}</h1>
-          <p class="text-base-content/70 mt-2 max-w-2xl">
-            {{ t("settings.subtitle") }}
-          </p>
-        </div>
+        <PageHeaderBlock
+          title-id="settings-page-title"
+          :title="t('settings.title')"
+          :description="t('settings.subtitle')"
+          description-class="text-base-content/70 mt-2"
+        />
       </div>
     </section>
 
@@ -441,7 +448,7 @@ async function handleSaveAutomation() {
             </span>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SectionGrid grid-token="twoColumn">
             <label class="floating-label w-full">
               <span>{{ t("settings.profile.nameLegend") }}</span>
               <input
@@ -548,7 +555,7 @@ async function handleSaveAutomation() {
                 :aria-label="t('settings.profile.softSkillsAria')"
               />
             </fieldset>
-          </div>
+          </SectionGrid>
 
           <div class="card-actions justify-end">
             <button
@@ -566,7 +573,7 @@ async function handleSaveAutomation() {
 
       <div class="divider divider-primary">{{ t("settings.preferences.title") }}</div>
 
-      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <SectionGrid grid-token="twoColumnXl">
         <div class="card card-border bg-base-100">
           <div class="card-body">
             <h2 class="card-title">{{ t("settings.preferences.title") }}</h2>
@@ -764,7 +771,7 @@ async function handleSaveAutomation() {
             </div>
           </div>
         </div>
-      </div>
+      </SectionGrid>
 
       <div class="divider divider-primary">{{ t("settings.aiProviders.title") }}</div>
 
@@ -787,6 +794,7 @@ async function handleSaveAutomation() {
                 :aria-label="t('settings.aiProviders.expandAria', { provider: provider.label })"
               />
               <div class="collapse-title font-medium flex items-center gap-2">
+                <AIProviderIcon :provider-id="provider.id" class="h-5 w-5 text-primary" />
                 {{ provider.label }}
                 <span v-if="isProviderConfigured(provider.id)" class="badge badge-success badge-xs">
                   {{ t("settings.aiProviders.configuredBadge") }}
@@ -849,5 +857,5 @@ async function handleSaveAutomation() {
         </div>
       </div>
     </div>
-  </div>
+  </PageScaffold>
 </template>

@@ -3,7 +3,8 @@ import { writeError, writeOutput } from "./utils/cli-output";
 type Violation = {
   filePath: string;
   line: number;
-  tagName: "button" | "input" | "select" | "textarea";
+  tagName: "button" | "input" | "select" | "textarea" | "dialog";
+  message: string;
 };
 
 const projectRoot = process.cwd();
@@ -20,6 +21,9 @@ const ignoredDirectoryNames = new Set([
 const interactiveTagNames = ["button", "input", "select", "textarea"] as const;
 const accessibleNameAttributePattern =
   /(?:\s|:|v-bind:)aria-label\s*=|(?:\s|:|v-bind:)aria-labelledby\s*=/u;
+const dialogAccessibleNamePattern =
+  /(?:\s|:|v-bind:)aria-label\s*=|(?:\s|:|v-bind:)aria-labelledby\s*=/u;
+const dialogModalPattern = /(?:\s|:|v-bind:)aria-modal\s*=\s*["']true["']/u;
 const hiddenInputPattern = /type\s*=\s*["']hidden["']/u;
 const ariaHiddenElementPattern = /aria-hidden\s*=\s*["']true["']/u;
 
@@ -85,7 +89,35 @@ const collectTagViolations = (
       filePath,
       line: getLineFromOffset(fileContent, match.index ?? 0),
       tagName,
+      message: "Interactive controls must include aria-label or aria-labelledby.",
     });
+  }
+
+  return violations;
+};
+
+const collectDialogViolations = (filePath: string, fileContent: string): Violation[] => {
+  const violations: Violation[] = [];
+  const dialogTagPattern = /<dialog\b[\s\S]*?>/gu;
+
+  for (const match of fileContent.matchAll(dialogTagPattern)) {
+    const tagMarkup = match[0];
+    if (!dialogAccessibleNamePattern.test(tagMarkup)) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(fileContent, match.index ?? 0),
+        tagName: "dialog",
+        message: "Dialogs must include aria-label or aria-labelledby.",
+      });
+    }
+    if (!dialogModalPattern.test(tagMarkup)) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(fileContent, match.index ?? 0),
+        tagName: "dialog",
+        message: 'Dialogs must include aria-modal="true".',
+      });
+    }
   }
 
   return violations;
@@ -93,7 +125,10 @@ const collectTagViolations = (
 
 const collectFileViolations = async (filePath: string): Promise<Violation[]> => {
   const fileContent = await Bun.file(filePath).text();
-  return interactiveTagNames.flatMap((tagName) => collectTagViolations(filePath, fileContent, tagName));
+  return [
+    ...interactiveTagNames.flatMap((tagName) => collectTagViolations(filePath, fileContent, tagName)),
+    ...collectDialogViolations(filePath, fileContent),
+  ];
 };
 
 const collectViolations = async (): Promise<Violation[]> => {
@@ -106,15 +141,17 @@ const main = async (): Promise<void> => {
   const violations = await collectViolations();
 
   if (violations.length === 0) {
-    await writeOutput("ARIA label validation passed for interactive controls.");
+    await writeOutput(
+      "ARIA validation passed for interactive controls and modal dialog semantics.",
+    );
     return;
   }
 
   await writeError(
-    "ARIA label validation failed. Interactive controls must include aria-label/aria-labelledby:",
+    "ARIA validation failed. Interactive controls and dialogs must include required accessible labels and modal semantics:",
   );
   const lines = violations.map(
-    (violation) => `- ${violation.filePath}:${violation.line} <${violation.tagName}>`,
+    (violation) => `- ${violation.filePath}:${violation.line} <${violation.tagName}> ${violation.message}`,
   );
   if (lines.length > 0) {
     await writeError(lines.join("\n"));

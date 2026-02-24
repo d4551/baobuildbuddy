@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { API_ENDPOINTS, type JsonObject, type JsonValue, safeParseJson } from "@bao/shared";
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useFocusTrap } from "~/composables/useFocusTrap";
 import { useScrollSpy } from "~/composables/useScrollSpy";
 import { useToast } from "~/composables/useToast";
 import { resolveApiEndpoint } from "~/utils/endpoints";
@@ -144,13 +143,8 @@ const config = useRuntimeConfig();
 const requestUrl = useRequestURL();
 const apiBase = String(config.public.apiBase || "/");
 
-const endpointTesterDialogRef = useTemplateRef<HTMLDialogElement>("apiEndpointTesterDialog");
 const testerInvoker = ref<HTMLElement | null>(null);
 const testerDialogOpen = ref(false);
-useFocusTrap(
-  endpointTesterDialogRef,
-  computed(() => testerDialogOpen.value),
-);
 
 const {
   activeSectionId,
@@ -564,27 +558,10 @@ const openEndpointTester = (endpoint: ApiEndpoint, invoker: EventTarget | null):
   }
   queryParameterValues.value = initialQueryValues;
   requestBodyValue.value = endpoint.requestBodyTemplate;
-
-  void nextTick(() => {
-    const dialog = endpointTesterDialogRef.value;
-    if (!dialog || dialog.open) {
-      return;
-    }
-    dialog.showModal();
-    testerDialogOpen.value = true;
-  });
+  testerDialogOpen.value = true;
 };
 
 const closeEndpointTester = (): void => {
-  const dialog = endpointTesterDialogRef.value;
-  if (!dialog) {
-    testerDialogOpen.value = false;
-    return;
-  }
-  if (dialog.open) {
-    dialog.close();
-    return;
-  }
   testerDialogOpen.value = false;
 };
 
@@ -894,15 +871,16 @@ onBeforeUnmount(() => {
       </main>
     </div>
 
-    <dialog
-      ref="apiEndpointTesterDialog"
-      class="modal"
-      aria-modal="true"
-      :aria-labelledby="API_TESTER_DIALOG_TITLE_ID"
-      :aria-describedby="selectedEndpoint ? API_TESTER_DIALOG_DESCRIPTION_ID : undefined"
+    <AppModalFrame
+      v-model:open="testerDialogOpen"
+      :title-id="API_TESTER_DIALOG_TITLE_ID"
+      :described-by-id="selectedEndpoint ? API_TESTER_DIALOG_DESCRIPTION_ID : undefined"
+      size-token="wide"
+      :close-aria-label="t('apiDocs.tester.closeAria')"
+      :close-backdrop-label="t('apiDocs.tester.close')"
       @close="handleEndpointTesterClosed"
     >
-      <div class="modal-box max-w-5xl space-y-4">
+      <div class="space-y-4">
         <header class="space-y-2">
           <h2 :id="API_TESTER_DIALOG_TITLE_ID" class="text-xl font-semibold">
             {{ t("apiDocs.tester.title") }}
@@ -1108,9 +1086,6 @@ onBeforeUnmount(() => {
           </div>
         </section>
       </div>
-      <form method="dialog" class="modal-backdrop">
-        <button :aria-label="t('apiDocs.tester.closeAria')">{{ t("apiDocs.tester.close") }}</button>
-      </form>
-    </dialog>
+    </AppModalFrame>
   </div>
 </template>

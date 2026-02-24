@@ -17,6 +17,7 @@ import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { exportService } from "../services/export-service";
 import { resumeService } from "../services/resume-service";
+import { createPdfAttachmentResponse } from "../utils/http-response";
 
 const resumeTemplateBodySchema = t.String({
   enum: RESUME_TEMPLATE_OPTIONS,
@@ -417,15 +418,10 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         };
       }
 
-      set.headers["content-type"] = "application/pdf";
-      set.headers["content-disposition"] = `attachment; filename="resume-${params.id}.pdf"`;
-
-      return new Response(Buffer.from(exportResult.value), {
-        headers: {
-          "content-type": "application/pdf",
-          "content-disposition": `attachment; filename="resume-${params.id}.pdf"`,
-        },
-      });
+      return createPdfAttachmentResponse(
+        Buffer.from(exportResult.value),
+        `resume-${params.id}.pdf`,
+      );
     },
     {
       params: t.Object({

@@ -12,12 +12,18 @@ const { getJob, saveJob, unsaveJob, applyToJob, savedJobs, loading } = useJobs()
 const { $toast } = useNuxtApp();
 const { t, locale, fallbackLocale } = useI18n();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("jobDetail.breadcrumbs.detailFallback"),
+    description: t("jobsPage.seoDescription"),
+  });
+}
+
 const job = ref<Job | null>(null);
 const showApplyModal = ref(false);
 const applicationNotes = ref("");
 const applying = ref(false);
-const applyDialogRef = ref<HTMLDialogElement | null>(null);
-useFocusTrap(applyDialogRef, () => showApplyModal.value);
+const JOB_APPLY_DIALOG_TITLE_ID = "job-detail-apply-dialog-title";
 
 function routeParamToString(value: string | string[] | undefined): string {
   if (Array.isArray(value)) {
@@ -53,17 +59,6 @@ await useAsyncData(
     watch: [jobId],
   },
 );
-
-watch(showApplyModal, (isOpen) => {
-  const dialog = applyDialogRef.value;
-  if (!dialog) return;
-
-  if (isOpen && !dialog.open) {
-    dialog.showModal();
-  } else if (!isOpen && dialog.open) {
-    dialog.close();
-  }
-});
 
 async function handleSaveToggle() {
   if (isSaved.value) {
@@ -126,12 +121,12 @@ async function startJobInterview() {
 </script>
 
 <template>
-  <div>
+  <PageScaffold width-token="content" spacing-token="comfortable">
     <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
 
     <LoadingSkeleton v-if="loading" :lines="10" />
 
-    <div v-else-if="job" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <SectionGrid v-else-if="job" grid-token="threeColumnLg">
       <!-- Main Content -->
       <div class="lg:col-span-2 space-y-6">
         <!-- Job Header -->
@@ -353,55 +348,51 @@ async function startJobInterview() {
           </div>
         </div>
       </div>
-    </div>
+    </SectionGrid>
 
     <!-- Apply Modal -->
-    <dialog
-      ref="applyDialogRef"
-      class="modal modal-bottom sm:modal-middle"
-      :aria-label="t('jobDetail.applyDialogAria')"
-      @close="showApplyModal = false"
+    <AppModalFrame
+      v-model:open="showApplyModal"
+      :title-id="JOB_APPLY_DIALOG_TITLE_ID"
+      size-token="compact"
+      :close-aria-label="t('jobDetail.closeApplyDialogAria')"
+      :close-backdrop-label="t('jobDetail.closeButton')"
     >
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">{{ t("jobDetail.applyDialogTitle", { title: job?.title }) }}</h3>
+      <h3 :id="JOB_APPLY_DIALOG_TITLE_ID" class="font-bold text-lg mb-4">
+        {{ t("jobDetail.applyDialogTitle", { title: job?.title }) }}
+      </h3>
 
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("jobDetail.applicationNotesLegend") }}</legend>
-          <textarea
-            v-model="applicationNotes"
-            class="textarea textarea-bordered w-full"
-            rows="5"
-            :placeholder="t('jobDetail.applicationNotesPlaceholder')"
-            :aria-label="t('jobDetail.applicationNotesAria')"
-          ></textarea>
-        </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("jobDetail.applicationNotesLegend") }}</legend>
+        <textarea
+          v-model="applicationNotes"
+          class="textarea textarea-bordered w-full"
+          rows="5"
+          :placeholder="t('jobDetail.applicationNotesPlaceholder')"
+          :aria-label="t('jobDetail.applicationNotesAria')"
+        ></textarea>
+      </fieldset>
 
-        <div class="modal-action">
-          <button
-            type="button"
-            class="btn btn-ghost"
-            :aria-label="t('jobDetail.cancelApplyAria')"
-            @click="showApplyModal = false"
-          >
-            {{ t("jobDetail.cancelButton") }}
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            :aria-label="t('jobDetail.submitApplyAria')"
-            :disabled="applying"
-            @click="handleApply"
-          >
-            <span v-if="applying" class="loading loading-spinner loading-xs"></span>
-            {{ t("jobDetail.submitButton") }}
-          </button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button :aria-label="t('jobDetail.closeApplyDialogAria')" @click="showApplyModal = false">
-          {{ t("jobDetail.closeButton") }}
+      <div class="modal-action">
+        <button
+          type="button"
+          class="btn btn-ghost"
+          :aria-label="t('jobDetail.cancelApplyAria')"
+          @click="showApplyModal = false"
+        >
+          {{ t("jobDetail.cancelButton") }}
         </button>
-      </form>
-    </dialog>
-  </div>
+        <button
+          type="button"
+          class="btn btn-primary"
+          :aria-label="t('jobDetail.submitApplyAria')"
+          :disabled="applying"
+          @click="handleApply"
+        >
+          <span v-if="applying" class="loading loading-spinner loading-xs"></span>
+          {{ t("jobDetail.submitButton") }}
+        </button>
+      </div>
+    </AppModalFrame>
+  </PageScaffold>
 </template>

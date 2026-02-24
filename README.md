@@ -45,11 +45,15 @@ Script/runtime verification commands:
 bun run validate:no-try-catch
 bun run validate:no-unsafe-casts
 bun run validate:locales
+bun run validate:page-seo
 bun run validate:i18n-ui
 bun run validate:aria
+bun run validate:ui-layout-tokens
 bun run validate:ui
 bun run audit:official-llms
 ```
+
+`bun run validate:aria` enforces accessible names for interactive controls and requires modal dialogs to declare `aria-modal="true"` with a programmatic label (`aria-label` or `aria-labelledby`).
 
 SSR route/content verification (requires running app target at `VERIFY_BASE_URL`):
 
@@ -73,11 +77,6 @@ Expected validation outcomes:
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
-
-Latest verification snapshot (February 24, 2026):
-
-- `bun run audit:official-llms` returned `PASS` for Elysia, Nuxt, and Bun with HTTP `200` responses.
-- `bun run release:refresh:all-os` completed end-to-end and regenerated `packages/desktop/releases/sha256.txt`, including containerized Windows NSIS fallback and Linux AppImage fallback execution paths.
 
 ## Stack and Version Contract
 
@@ -159,6 +158,11 @@ This readme is your in-game tutorial before the main campaign.
 - `packages/client` -- Nuxt 4 (SSR-first), Tailwind CSS v4, daisyUI v5
 - `packages/shared` -- shared types, contracts, constants, schemas, validation utilities
 - `packages/scraper` -- Python RPA scripts executed via Bun native subprocess I/O
+
+Global flow decisions are centralized in `packages/client/constants/flow-engine.ts` (`resolveFlowReadinessState` + `resolveFlowRecommendations`) and consumed via `packages/client/composables/useFlowEngine.ts` so quick actions and next-step routing are derived from one deterministic source.
+Layout structure is centralized in `packages/client/constants/ui-layout.ts` and rendered through `PageScaffold`, `PageHeaderBlock`, `SectionGrid`, and `AppModalFrame` to keep widths, spacing, grid breakpoints, and modal sizing tokenized.
+AI provider presentation is localized through `aiProviderCatalog.*` keys and rendered with `AIProviderIcon`, so provider labels/descriptions/icons are no longer hardcoded in shared constants.
+Interview role selection is adaptive and recommendation-driven: setup/interview flows now prioritize profile role, readiness role rankings, pathway match scores, and live job-title signals, with a single shared fallback only when no personalized signals are available.
 
 If you want the simplest path with minimal technical detail, use `docs/STARTER_GUIDE.md`.
 
@@ -1000,14 +1004,17 @@ bun run dev:client
 | Server API type contract | `bun run --filter '@bao/server' build:types` | Generate `packages/server/dist-types` declarations used by client typecheck |
 | Format | `bun run format` | Apply Biome formatter |
 | Format check | `bun run format:check` | Verify formatter output |
+| UI ARIA contract checks | `bun run validate:aria` | Enforce interactive labeling and dialog semantics (`aria-modal`, modal labeling) |
+| UI layout token guardrail | `bun run validate:ui-layout-tokens` | Block hardcoded core-page width/grid literals and modal size literals outside shared primitives |
 | UI accessibility + token checks | `bun run validate:ui` | Enforce WCAG contrast pairs and block hardcoded UI colors in client source |
+| Core page SEO metadata checks | `bun run validate:page-seo` | Require SSR `useServerSeoMeta` with `title` + `description` on core pages and reject static metadata literals |
 | UI i18n coverage checks | `bun run validate:i18n-ui` | Reject static template copy/attributes and missing `t('...')` keys |
 | Official framework docs check | `bun run audit:official-llms` | Validate official Bun/Nuxt/Elysia `llms.txt` sources are reachable and contain required guidance markers |
 | No try/catch validation | `bun run validate:no-try-catch` | Enforce repository-wide no-`try/catch` policy in source files |
 | Typecheck | `bun run typecheck` | TypeScript type checking across all packages |
 | Test | `bun run test` | Run test suites for server and client |
-| Lint | `bun run lint` | `validate:no-try-catch` + `validate:i18n-ui` + `validate:ui` + Biome lint + client ESLint |
-| Lint fix | `bun run lint:fix` | `validate:no-try-catch` + `validate:i18n-ui` + `validate:ui` + auto-fix lint issues in Biome and client ESLint |
+| Lint | `bun run lint` | `validate:no-try-catch` + SEO/i18n/ARIA/layout/UI guardrails + typed lint + Biome + client ESLint |
+| Lint fix | `bun run lint:fix` | Guardrails + typed lint fix + Biome/client ESLint autofix while preserving detection policy |
 | DB generate | `bun run db:generate` | Generate Drizzle migration files |
 | DB push | `bun run db:push` | Push schema changes to SQLite |
 | DB studio | `bun run db:studio` | Open Drizzle Studio GUI for database inspection |
@@ -1030,7 +1037,10 @@ bun run dev:client
 ```bash
 bun run format:check
 bun run validate:no-try-catch
+bun run validate:page-seo
 bun run validate:i18n-ui
+bun run validate:aria
+bun run validate:ui-layout-tokens
 bun run validate:ui
 bun run verify:pages
 bun run typecheck
@@ -1040,7 +1050,7 @@ bun run test
 
 Client-side runtime tests for composables use `*.nuxt.spec.ts` and initialize Nuxt with a package-root `rootDir` so alias resolution stays deterministic in workspace runs. Keep those tests explicit about external dependencies (`useApi`) and avoid relying on unresolved auto-import side effects.
 `bun run typecheck` generates server API declarations (`packages/server/dist-types`) before running package typechecks, so Nuxt client typechecking consumes contract types instead of server implementation internals.
-`bun run lint` includes `validate:no-try-catch` and `validate:i18n-ui`, which fail when `try/catch` blocks or static non-localized UI copy appear in source. Error handling should follow Elysia/Eden typed response contracts and shared settled-result helpers.
+`bun run lint` includes `validate:no-try-catch`, `validate:page-seo`, and `validate:i18n-ui`, which fail when `try/catch` blocks, static core-page metadata, or static non-localized UI copy appear in source. Error handling should follow Elysia/Eden typed response contracts and shared settled-result helpers.
 If `3001` is occupied locally, run page verification against an alternate UI port via `VERIFY_HOST` and `VERIFY_PORT`:
 
 ```bash
@@ -1122,7 +1132,10 @@ Automation route errors use the typed envelope:
 ### 11.6 UI wiring and accessibility verification
 
 ```bash
+bun run validate:page-seo
 bun run validate:i18n-ui
+bun run validate:aria
+bun run validate:ui-layout-tokens
 bun run validate:ui
 bun run --filter '@bao/client' lint
 ```
@@ -1132,15 +1145,19 @@ The UI verification pipeline enforces:
 - WCAG AA color contrast for configured daisyUI theme pairs (`*-content` on semantic backgrounds)
 - no hardcoded UI colors in client source (hex/rgb/hsl/oklch literals, Tailwind palette classes, arbitrary color literals)
 - no static user-facing template copy or static ARIA/placeholder/title attributes in Vue templates
+- core pages define SSR `useServerSeoMeta` with localized `title` and `description`
 - all statically referenced `t('...')` keys resolve in the base `en-US` locale schema
 - form controls are programmatically labeled (`label` + `for`, nesting, or ARIA label)
 - clickable UI surfaces are keyboard-operable and focusable
 - anchor and icon-only controls expose accessible names
+- modal surfaces are rendered through `AppModalFrame` with required `aria-modal` and `aria-labelledby`
+- core pages use tokenized layout primitives (`PageScaffold`/`SectionGrid`) rather than ad hoc width/grid literals
+- locale menu semantics use dropdown/menu patterns (`role="menu"` + `menuitemradio`) instead of listbox patterns
 - unsupported ARIA usage is rejected
 
 ```mermaid
 flowchart LR
-  Templates["Vue templates + CSS tokens"] --> UIValidate["bun run validate:i18n-ui + validate:ui"]
+  Templates["Vue templates + shared UI primitives"] --> UIValidate["bun run validate:page-seo + validate:i18n-ui + validate:aria + validate:ui-layout-tokens + validate:ui"]
   UIValidate --> UIState{"Contrast + token checks pass?"}
   UIState -->|No| UIFixes["Fix theme token pairs or remove hardcoded colors"]
   UIFixes --> UIValidate
@@ -1460,6 +1477,7 @@ bun run scripts/validate-ascii-geometry.ts README.md
 - [ ] `.env` populated from `.env.example` with environment-specific values
 - [ ] `bun run typecheck` passes
 - [ ] `bun run validate:no-try-catch` passes
+- [ ] `bun run validate:page-seo` passes
 - [ ] `bun run validate:i18n-ui` passes
 - [ ] `bun run lint` passes
 - [ ] `bun run test` passes

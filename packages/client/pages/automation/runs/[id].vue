@@ -24,11 +24,18 @@ const DATE_FORMAT_OPTIONS = {
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
 
-const { t } = useI18n();
+const { t, locale, fallbackLocale } = useI18n();
 const route = useRoute();
 const requestUrl = useRequestURL();
 const apiBase = String(useRuntimeConfig().public.apiBase || "/");
 const runStream = useAutomationRunStream();
+
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("automation.runDetail.title"),
+    description: t("automation.hub.cards.runHistory.description"),
+  });
+}
 
 const failedScreenshotIndexes = ref<Record<number, boolean>>({});
 
@@ -62,7 +69,15 @@ const toLocalizedDateTime = (value: string): string => {
   if (Number.isNaN(parsed.getTime())) {
     return value;
   }
-  return new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).format(parsed);
+  const preferredLocale =
+    typeof locale.value === "string" && locale.value.length > 0
+      ? locale.value
+      : typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0
+        ? fallbackLocale.value
+        : Array.isArray(fallbackLocale.value) && typeof fallbackLocale.value[0] === "string"
+          ? fallbackLocale.value[0]
+          : "en-US";
+  return new Intl.DateTimeFormat(preferredLocale, DATE_FORMAT_OPTIONS).format(parsed);
 };
 
 const streamStateMessageKey = computed<string>(
@@ -232,10 +247,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div>
-    <div class="mb-6 space-y-3">
+  <PageScaffold tag="section" width-token="content" labelled-by="automation-run-detail-title">
+    <div class="space-y-3">
       <AppBreadcrumbs :crumbs="breadcrumbs" />
-      <h1 class="text-3xl font-bold">{{ t("automation.runDetail.title") }}</h1>
+      <PageHeaderBlock title-id="automation-run-detail-title" :title="t('automation.runDetail.title')" />
     </div>
 
     <div
@@ -331,7 +346,7 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <SectionGrid grid-token="twoColumnWide">
         <section class="card bg-base-100 shadow-sm" :aria-label="t('automation.runDetail.inputPayloadTitle')">
           <div class="card-body">
             <h2 class="card-title">{{ t("automation.runDetail.inputPayloadTitle") }}</h2>
@@ -344,7 +359,7 @@ onBeforeUnmount(() => {
             <pre class="text-sm whitespace-pre-wrap">{{ formattedOutput }}</pre>
           </div>
         </section>
-      </div>
+      </SectionGrid>
 
       <section class="card bg-base-100 shadow-sm" :aria-label="t('automation.runDetail.screenshotsTitle')">
         <div class="card-body">
@@ -352,7 +367,7 @@ onBeforeUnmount(() => {
           <div v-if="screenshotPaths.length === 0" class="text-sm opacity-70">
             {{ t("automation.runDetail.noScreenshots") }}
           </div>
-          <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <SectionGrid v-else grid-token="threeColumn">
             <article
               v-for="(screenshotPath, index) in screenshotPaths"
               :key="screenshotPath"
@@ -386,7 +401,7 @@ onBeforeUnmount(() => {
                 </a>
               </div>
             </article>
-          </div>
+          </SectionGrid>
         </div>
       </section>
     </div>
@@ -401,5 +416,5 @@ onBeforeUnmount(() => {
       <span class="loading loading-spinner loading-lg"></span>
       <span>{{ t(streamStateMessageKey) }}</span>
     </div>
-  </div>
+  </PageScaffold>
 </template>

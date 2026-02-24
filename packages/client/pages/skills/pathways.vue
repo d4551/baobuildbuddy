@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ReadinessAssessment } from "@bao/shared";
+import type { ReadinessAssessment, SkillReadinessFeedbackId } from "@bao/shared";
 import { APP_ROUTES, getGamificationPathwayIcon } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
@@ -20,7 +20,7 @@ type ReadinessCategoryKey = "technical" | "softSkills" | "industryKnowledge" | "
 interface ReadinessCategoryStat {
   readonly key: ReadinessCategoryKey;
   readonly score: number;
-  readonly feedback: string;
+  readonly feedbackId: SkillReadinessFeedbackId;
 }
 
 const READINESS_CATEGORY_LABEL_KEYS: Record<ReadinessCategoryKey, string> = {
@@ -118,7 +118,7 @@ const readinessCategories = computed<readonly ReadinessCategoryStat[]>(() => {
   return READINESS_CATEGORY_KEYS.map((key) => ({
     key,
     score: readinessAssessment.value?.categories[key].score ?? 0,
-    feedback: readinessAssessment.value?.categories[key].feedback ?? "",
+    feedbackId: readinessAssessment.value?.categories[key].feedbackId ?? "empty",
   }));
 });
 
@@ -149,6 +149,23 @@ function getReadinessBadgeColor(percentage: number): string {
 
 function getCategoryLabel(key: ReadinessCategoryKey): string {
   return t(READINESS_CATEGORY_LABEL_KEYS[key]);
+}
+
+function getCategoryFeedbackLabel(
+  categoryKey: ReadinessCategoryKey,
+  feedbackId: SkillReadinessFeedbackId,
+): string {
+  return t(`skillsPathwaysPage.readiness.feedback.${feedbackId}`, {
+    category: getCategoryLabel(categoryKey),
+  });
+}
+
+function getReadinessImprovementLabel(item: ReadinessAssessment["improvementSuggestions"][number]): string {
+  return t(`skillsPathwaysPage.readiness.improvements.${item}`);
+}
+
+function getReadinessNextStepLabel(item: ReadinessAssessment["nextSteps"][number]): string {
+  return t(`skillsPathwaysPage.readiness.nextStepItems.${item}`);
 }
 
 function getPathwayIcon(pathwayId: string): string {
@@ -247,7 +264,9 @@ function getReadinessDialStyle(score: number): Record<string, string> {
                   :max="SKILLS_READINESS_MAX"
                   :aria-label="t('skillsPathwaysPage.readiness.categoryScoreAria', { category: getCategoryLabel(category.key), score: category.score })"
                 ></progress>
-                <p class="text-xs opacity-85">{{ category.feedback }}</p>
+                <p class="text-xs opacity-85">
+                  {{ getCategoryFeedbackLabel(category.key, category.feedbackId) }}
+                </p>
               </div>
             </div>
 
@@ -262,7 +281,7 @@ function getReadinessDialStyle(score: number): Record<string, string> {
                     :key="item"
                     class="list-row px-0 py-1"
                   >
-                    <span>{{ item }}</span>
+                    <span>{{ getReadinessImprovementLabel(item) }}</span>
                   </li>
                 </ul>
               </div>
@@ -277,7 +296,7 @@ function getReadinessDialStyle(score: number): Record<string, string> {
                     :key="item"
                     class="list-row px-0 py-1"
                   >
-                    <span>{{ item }}</span>
+                    <span>{{ getReadinessNextStepLabel(item) }}</span>
                   </li>
                 </ul>
               </div>

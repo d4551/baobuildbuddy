@@ -2618,7 +2618,9 @@ export declare const app: Elysia<"/api", {
                         200: {
                             providers: {
                                 id: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                                name: string;
+                                nameKey: string;
+                                descriptionKey: string;
+                                iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
                                 models: string[];
                                 available: boolean;
                                 health: "unconfigured";
@@ -2629,7 +2631,9 @@ export declare const app: Elysia<"/api", {
                         } | {
                             providers: {
                                 id: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                                name: string;
+                                nameKey: string;
+                                descriptionKey: string;
+                                iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
                                 models: string[];
                                 available: boolean;
                                 health: "healthy" | "degraded" | "down" | "unconfigured";

@@ -7,6 +7,13 @@ const router = useRouter();
 const { getResume, exportResume, loading } = useResume();
 const { t } = useI18n();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("resumePage.seoTitle"),
+    description: t("resumePage.seoDescription"),
+  });
+}
+
 const resume = ref<ResumeData | null>(null);
 const resumeId = computed(() => {
   const routeResumeId = route.query[APP_ROUTE_QUERY_KEYS.id];

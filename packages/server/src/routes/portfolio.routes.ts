@@ -2,6 +2,7 @@ import type { PortfolioMetadata } from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { exportService } from "../services/export-service";
 import { portfolioService } from "../services/portfolio-service";
+import { createPdfAttachmentResponse } from "../utils/http-response";
 
 const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
   const [result] = await Promise.allSettled([operation]);
@@ -163,15 +164,10 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
         };
       }
 
-      set.headers["content-type"] = "application/pdf";
-      set.headers["content-disposition"] = `attachment; filename="portfolio-${portfolio.id}.pdf"`;
-
-      return new Response(Buffer.from(exportResult.value), {
-        headers: {
-          "content-type": "application/pdf",
-          "content-disposition": `attachment; filename="portfolio-${portfolio.id}.pdf"`,
-        },
-      });
+      return createPdfAttachmentResponse(
+        Buffer.from(exportResult.value),
+        `portfolio-${portfolio.id}.pdf`,
+      );
     },
     {
       body: t.Object({

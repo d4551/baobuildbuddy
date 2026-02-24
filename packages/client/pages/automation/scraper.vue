@@ -31,8 +31,15 @@ const jobsFetch = useFetch(
 const { jobs, searchJobs, loading: jobsLoading } = useJobs();
 const router = useRouter();
 const { $toast } = useNuxtApp();
-const { t } = useI18n();
+const { t, locale, fallbackLocale } = useI18n();
 const { awardForAction } = usePipelineGamification();
+
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("automation.scraper.title"),
+    description: t("automation.scraper.subtitle"),
+  });
+}
 
 const studioState = ref<RunState>("idle");
 const jobState = ref<RunState>("idle");
@@ -61,7 +68,24 @@ const jobCount = computed(() => sortedJobs.value.length);
 
 function formatRunTime(value: string | null): string {
   if (!value) return t("automation.scraper.notRunYet");
-  return new Date(value).toLocaleString();
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return t("automation.scraper.notRunYet");
+  }
+
+  const preferredLocale =
+    typeof locale.value === "string" && locale.value.length > 0
+      ? locale.value
+      : typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0
+        ? fallbackLocale.value
+        : Array.isArray(fallbackLocale.value) && typeof fallbackLocale.value[0] === "string"
+          ? fallbackLocale.value[0]
+          : "en-US";
+
+  return new Intl.DateTimeFormat(preferredLocale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(parsedDate);
 }
 
 function relativePostedDate(date: string): string {
@@ -149,7 +173,10 @@ async function startJobInterview(jobId: string) {
 async function resolvePipelineReward(
   action: "scraperStudios" | "scraperJobs",
 ): Promise<number | null> {
-  const rewardResult = await settlePromise(awardForAction(action), "Failed to award scraper XP");
+  const rewardResult = await settlePromise(
+    awardForAction(action),
+    t("automation.scraper.errors.rewardFailed"),
+  );
   if (!rewardResult.ok) {
     // Scraper completion feedback must remain stable without gamification.
     return null;
@@ -159,24 +186,20 @@ async function resolvePipelineReward(
 </script>
 
 <template>
-  <div class="space-y-6">
-    <section class="hero rounded-box bg-base-200 border border-base-300">
-      <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div class="max-w-2xl space-y-3">
-          <h1 class="text-3xl font-bold md:text-4xl">{{ t("automation.scraper.title") }}</h1>
-          <p class="text-base-content/70">
-            {{ t("automation.scraper.subtitle") }}
-          </p>
-        </div>
-        <ul class="steps steps-vertical lg:steps-horizontal w-full max-w-xl" :aria-label="t('automation.scraper.stepsAria')">
-          <li class="step step-primary">{{ t("automation.scraper.steps.run") }}</li>
-          <li class="step">{{ t("automation.scraper.steps.review") }}</li>
-          <li class="step">{{ t("automation.scraper.steps.interview") }}</li>
-        </ul>
-      </div>
-    </section>
+  <PageScaffold tag="section" width-token="content" labelled-by="automation-scraper-title">
+    <PageHeaderBlock
+      title-id="automation-scraper-title"
+      :title="t('automation.scraper.title')"
+      :description="t('automation.scraper.subtitle')"
+    />
 
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <ul class="steps steps-vertical lg:steps-horizontal w-full" :aria-label="t('automation.scraper.stepsAria')">
+      <li class="step step-primary">{{ t("automation.scraper.steps.run") }}</li>
+      <li class="step">{{ t("automation.scraper.steps.review") }}</li>
+      <li class="step">{{ t("automation.scraper.steps.interview") }}</li>
+    </ul>
+
+    <SectionGrid grid-token="twoColumnXl">
       <div class="card card-border bg-base-100">
         <div class="card-body">
           <div class="flex items-center justify-between gap-3">
@@ -268,7 +291,7 @@ async function resolvePipelineReward(
           </div>
         </div>
       </div>
-    </div>
+    </SectionGrid>
 
     <div class="stats stats-vertical lg:stats-horizontal w-full border border-base-300 bg-base-100 shadow-sm">
       <div class="stat">
@@ -333,5 +356,5 @@ async function resolvePipelineReward(
         </div>
       </div>
     </div>
-  </div>
+  </PageScaffold>
 </template>

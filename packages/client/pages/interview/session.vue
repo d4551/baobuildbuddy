@@ -38,6 +38,13 @@ const voiceSettings = computed(() => currentSession.value?.config?.voiceSettings
 const tts = useTTS(voiceSettings);
 const stt = useSTT(voiceSettings);
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("interviewSession.title"),
+    description: t("interviewHub.seoDescription"),
+  });
+}
+
 const currentSessionLoadId = ref(0);
 const sessionLoadError = ref("");
 const response = ref("");

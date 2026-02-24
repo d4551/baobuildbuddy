@@ -372,6 +372,9 @@ const esES: AppTranslationOverrides = {
     },
   },
   jobsPage: {
+    seoTitle: "Bolsa de Empleo",
+    seoDescription:
+      "Busca y filtra roles de la industria de videojuegos por plataforma, tipo de estudio, género y nivel de experiencia.",
     title: "Bolsa de Empleo",
     refreshButton: "Actualizar Empleos",
     refreshAria: "Actualizar feed de empleos",
@@ -606,7 +609,7 @@ const esES: AppTranslationOverrides = {
       cancelAria: "Cancelar creación de mapeo",
       createButton: "Añadir Mapeo",
       createAria: "Crear mapeo de habilidad",
-      closeBackdropButton: "cerrar",
+      closeBackdropButton: "Cerrar",
       closeBackdropAria: "Cerrar diálogo de mapeo de habilidad",
     },
     deleteDialog: {
@@ -660,6 +663,54 @@ const esES: AppTranslationOverrides = {
       categoryScoreAria: "Puntuación de preparación {category} {score} por ciento",
       topImprovementsTitle: "Principales mejoras",
       nextStepsTitle: "Próximos pasos",
+      feedback: {
+        empty: "Aún no hay datos de preparación para {category}.",
+        early: "Etapa inicial en {category}. Enfócate en añadir más mapeos y evidencia.",
+        developing: "Desarrollo en {category}. Sigue añadiendo ejemplos mapeados y evidencia.",
+        good: "Buen nivel en {category}. Sigue profundizando para fortalecer esta área.",
+        excellent: "Excelente nivel en {category}. Estás bien preparado en esta área.",
+      },
+      improvements: {
+        mapTechnicalSkills:
+          "Mapea más habilidades técnicas de juego a habilidades técnicas profesionales.",
+        increaseSkillConfidence:
+          "Aumenta la confianza de tus mapeos técnicos existentes.",
+        mapLeadershipCommunication: "Mapea más experiencias de liderazgo y comunicación.",
+        addTeamCollaborationExamples: "Añade ejemplos concretos de colaboración en equipo.",
+        researchIndustryApplications:
+          "Investiga más aplicaciones de industria para tus habilidades mapeadas.",
+        connectSkillsToJobRoles: "Conecta habilidades mapeadas con roles objetivo concretos.",
+        addSkillEvidence:
+          "Añade evidencia a tus habilidades mapeadas con clips, capturas o documentos.",
+        buildPortfolioProjects: "Construye proyectos de portafolio para demostrar habilidades.",
+        documentAchievements: "Documenta logros medibles para tus mejores mapeos.",
+        strengthenTechnicalTransfer:
+          "Refuerza la transferencia técnica mapeando mecánicas de juego a conceptos de ingeniería.",
+        highlightLeadershipExperience:
+          "Destaca experiencias de liderazgo y comunicación desde contextos de juego.",
+        broadenSkillCoverage: "Amplía cobertura mapeando entre 10 y 15 habilidades diversas.",
+        refineSpecificExamples: "Refina tus mapeos actuales con ejemplos más específicos.",
+        pursueCertifications: "Busca certificaciones que validen tus fortalezas técnicas.",
+        networkWithProfessionals: "Haz networking con profesionales de tu industria objetivo.",
+      },
+      nextStepItems: {
+        startApplyingToTargetRoles: "Empieza a postular a roles objetivo.",
+        networkWithIndustryProfessionals: "Conecta con profesionales del sector.",
+        prepareForTechnicalInterviews: "Prepárate para entrevistas técnicas.",
+        polishLinkedInProfile: "Optimiza tu perfil de LinkedIn.",
+        completePortfolioProjects: "Completa tu portafolio con 3-5 proyectos sólidos.",
+        mapMoreSkillsToReachFifteen: "Mapea 5 habilidades más para llegar a 15 o más.",
+        addEvidenceToTopSkills: "Añade evidencia a tus 10 habilidades principales.",
+        researchTargetCompaniesAndRoles: "Investiga empresas y roles objetivo.",
+        mapTenPlusSkills: "Mapea 10 o más habilidades de juego a carrera.",
+        startBuildingPortfolioProjects: "Empieza a construir proyectos de portafolio.",
+        addEvidenceToDemonstrateAbilities: "Añade evidencia para demostrar tus capacidades.",
+        exploreMatchingCareerPathways: "Explora rutas de carrera que encajen con tus habilidades.",
+        mapFirstFiveSkills: "Mapea tus primeras 5 habilidades de juego.",
+        exploreSkillCategories: "Explora diferentes categorías de habilidades.",
+        learnGamingCareerOptions: "Conoce opciones profesionales de la industria del juego.",
+        setUpProfessionalProfile: "Configura tu perfil profesional.",
+      },
       emptyState:
         "Los datos de preparación no están disponibles. Añade mapeos y ejecuta el análisis primero.",
     },
@@ -685,6 +736,9 @@ const esES: AppTranslationOverrides = {
     },
   },
   resumePage: {
+    seoTitle: "Constructor de Currículum",
+    seoDescription:
+      "Crea variantes de CV orientadas al rol, mide el progreso y conecta con flujos de carta, portafolio y entrevistas.",
     title: "Constructor de Currículum",
     subtitle:
       "Crea variantes de currículum por rol, mantén el contenido actualizado y pasa directamente a cartas de presentación, portafolio y entrevistas.",
@@ -1533,6 +1587,9 @@ const esES: AppTranslationOverrides = {
     },
   },
   studiosIndex: {
+    seoTitle: "Directorio de Estudios",
+    seoDescription:
+      "Explora perfiles de estudios, filtra atributos operativos y lanza práctica de entrevistas desde contexto de estudio.",
     title: "Directorio de Estudios",
     subtitle:
       "Explora perfiles de estudios, filtra por atributos operativos y pasa directamente a la práctica de entrevistas.",
@@ -1583,7 +1640,7 @@ const esES: AppTranslationOverrides = {
       closeButtonAria: "Cerrar vista previa del estudio",
       closeButton: "Cerrar",
       closeBackdropAria: "Cerrar fondo de vista previa",
-      closeBackdropButton: "cerrar",
+      closeBackdropButton: "Cerrar",
       remoteYes: "Sí",
       remoteNo: "No",
       startInterviewButton: "Iniciar Entrevista",
@@ -1994,11 +2051,37 @@ const esES: AppTranslationOverrides = {
       errors: {
         studioFailed: "Error en extractor de estudios",
         jobFailed: "Error en extractor de empleos",
+        rewardFailed: "Error al acreditar progreso del extractor",
       },
+    },
+  },
+  aiProviderCatalog: {
+    local: {
+      name: "Modelo local",
+      description: "RamaLama u Ollama con ejecución privada y local primero.",
+    },
+    gemini: {
+      name: "Google Gemini",
+      description: "Proveedor cloud principal para QA general y generación de contenido.",
+    },
+    claude: {
+      name: "Anthropic Claude",
+      description: "Proveedor de razonamiento de largo contexto para flujos analíticos.",
+    },
+    openai: {
+      name: "OpenAI",
+      description: "Familia GPT para chat y generación en flujos generales.",
+    },
+    huggingface: {
+      name: "Hugging Face",
+      description: "Respaldo cloud con un catálogo amplio de modelos abiertos.",
     },
   },
   setup: {
     title: "Bienvenido a {brand}",
+    seoTitle: "Configuración de {brand}",
+    seoDescription:
+      "Completa tu perfil, configura proveedores de IA y lanza tu espacio de trabajo profesional.",
     stepsAriaLabel: "Progreso de configuración",
     steps: {
       profile: "Perfil",
@@ -2036,7 +2119,7 @@ const esES: AppTranslationOverrides = {
     doneTitle: "Todo listo",
     doneDescription:
       "{assistant} está listo para ayudarte con tu carrera en la industria del juego.",
-    successIconLabel: "OK",
+    successStatusAria: "Estado de finalización de la configuración",
     backToAiConfigAria: "Volver al paso de configuración de IA",
     launchAria: "Finalizar configuración y lanzar aplicación",
     launchButton: "Lanzar {brand}",
@@ -2163,6 +2246,9 @@ const esES: AppTranslationOverrides = {
     },
   },
   interviewHub: {
+    seoTitle: "Centro de Preparación de Entrevistas",
+    seoDescription:
+      "Practica con flujos de entrevista por empleo o estudio y revisa feedback con puntuación y mejoras recomendadas.",
     title: "Centro de Preparación de Entrevistas",
     subtitle:
       "Practica contra ofertas reales extraídas o pistas de entrevista centradas en estudios. Cada sesión devuelve feedback puntuado y puntos de mejora.",
@@ -2295,7 +2381,7 @@ const esES: AppTranslationOverrides = {
       startAria: "Iniciar sesión de entrevista",
       startButton: "Iniciar Entrevista",
       closeDialogAria: "Cerrar diálogo de configuración",
-      closeBackdropButton: "cerrar",
+      closeBackdropButton: "Cerrar",
       pagination: {
         navigationAria: "Paginación de selección de empleos",
         previousAria: "Página anterior de empleos",
@@ -2307,13 +2393,6 @@ const esES: AppTranslationOverrides = {
     mode: {
       job: "Empleo",
       studio: "Estudio",
-    },
-    roles: {
-      gameDesigner: "Diseñador de Juegos",
-      programmer: "Programador",
-      artist: "Artista",
-      producer: "Productor",
-      qa: "Tester QA",
     },
     experience: {
       entry: "Principiante",
@@ -2330,6 +2409,8 @@ const esES: AppTranslationOverrides = {
       started: "Sesión de entrevista iniciada",
     },
     errors: {
+      bootstrapLoadFailed: "Error al cargar los datos del hub de entrevistas",
+      roleRecommendationsFailed: "Error al cargar recomendaciones de rol personalizadas",
       startFailed: "Error al iniciar sesión de entrevista",
       jobLoadFailed: "Error al cargar detalles del empleo seleccionado",
     },
@@ -2376,6 +2457,9 @@ const esES: AppTranslationOverrides = {
     },
   },
   settings: {
+    seoTitle: "Configuración y Perfil",
+    seoDescription:
+      "Administra tu perfil, proveedores de IA, preferencias de notificación y valores predeterminados de automatización.",
     title: "Configuración y Perfil",
     subtitle:
       "Centraliza tu identidad, comportamiento del asistente y valores por defecto de automatización.",
@@ -2470,7 +2554,7 @@ const esES: AppTranslationOverrides = {
       title: "Proveedores de IA",
       subtitle: "Mantén proveedores locales como principales y cloud como respaldo controlado.",
       expandAria: "Expandir configuración de {provider}",
-      configuredBadge: "configurado",
+      configuredBadge: "Configurado",
       endpointLabel: "URL del Endpoint",
       credentialLabel: "Clave API",
       huggingFacePlaceholder: "Introduce token de Hugging Face",
@@ -2561,7 +2645,7 @@ const esES: AppTranslationOverrides = {
   studioSelector: {
     toggleAria: "Abrir selector de estudios",
     selectPlaceholder: "Seleccionar un estudio",
-    listboxAria: "Lista de estudios",
+    menuAria: "Menú de estudios",
     searchPlaceholder: "Buscar estudios",
     searchAria: "Buscar estudios",
     emptyState: "No se encontraron estudios",
@@ -2572,6 +2656,9 @@ const esES: AppTranslationOverrides = {
   },
   aiChatPage: {
     title: "Chat con {brand}",
+    seoTitle: "Chat IA de {brand}",
+    seoDescription:
+      "Habla con tu copiloto de carrera con IA para estrategia de CV, preparación de entrevistas y planificación de automatización.",
     subtitle: "Tu asistente de carrera con IA para la industria del juego",
     clearAria: "Limpiar conversación del chat",
     clearButton: "Limpiar",

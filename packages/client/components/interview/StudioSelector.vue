@@ -22,7 +22,7 @@ const searchQuery = ref("");
 const isOpen = ref(false);
 const searchInputRef = useTemplateRef<HTMLInputElement>("studioSelectorSearchInput");
 const selectorId = useId();
-const listboxId = `studio-selector-listbox-${selectorId}`;
+const menuId = `studio-selector-menu-${selectorId}`;
 
 const selectedStudio = computed(() =>
   props.studios.find((studio) => studio.id === props.modelValue),
@@ -88,8 +88,8 @@ function studioLocationLabel(location: string): string {
       class="btn btn-outline w-full justify-between"
       :aria-label="t('studioSelector.toggleAria')"
       :aria-expanded="isOpen"
-      :aria-controls="listboxId"
-      aria-haspopup="listbox"
+      :aria-controls="menuId"
+      aria-haspopup="menu"
       @click="toggleDropdown"
       @keydown.esc.stop.prevent="onEscape"
     >
@@ -107,12 +107,8 @@ function studioLocationLabel(location: string): string {
 
     <div
       v-if="isOpen"
-      :id="listboxId"
       tabindex="0"
-      role="listbox"
       class="dropdown-content z-10 menu p-2 shadow-lg bg-base-100 rounded-box w-full mt-2 max-h-96 overflow-auto flex-nowrap"
-      :aria-label="t('studioSelector.listboxAria')"
-      @keydown.esc.stop.prevent="onEscape"
     >
       <div class="p-2 sticky top-0 bg-base-100 z-10">
         <input
@@ -126,13 +122,20 @@ function studioLocationLabel(location: string): string {
         />
       </div>
 
-      <ul class="space-y-1">
+      <ul
+        :id="menuId"
+        role="menu"
+        tabindex="-1"
+        class="space-y-1"
+        :aria-label="t('studioSelector.menuAria')"
+        @keydown.esc.stop.prevent="onEscape"
+      >
         <li v-for="studio in filteredStudios" :key="studio.id">
           <button
             type="button"
-            role="option"
+            role="menuitemradio"
             class="flex flex-col items-start gap-1"
-            :aria-selected="studio.id === modelValue"
+            :aria-checked="studio.id === modelValue"
             :aria-label="t('studioSelector.optionAria', { studio: studio.name })"
             :class="{ active: studio.id === modelValue }"
             @click="selectStudio(studio.id)"

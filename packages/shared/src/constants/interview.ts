@@ -98,17 +98,6 @@ export const INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE = INTERVIEW_HUB_RECENT_SESSI
 export const INTERVIEW_MIN_RESPONSE_LENGTH = 10;
 
 /**
- * Canonical role options displayed in the interview hub setup flow.
- */
-export const INTERVIEW_HUB_ROLE_OPTIONS = [
-  "game-designer",
-  "programmer",
-  "artist",
-  "producer",
-  "qa",
-] as const;
-
-/**
  * Canonical experience options displayed in the interview hub setup flow.
  */
 export const INTERVIEW_HUB_EXPERIENCE_OPTIONS = ["entry", "mid", "senior", "lead"] as const;

@@ -238,7 +238,9 @@ export declare const aiRoutes: Elysia<"/ai", {
                     200: {
                         providers: {
                             id: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                            name: string;
+                            nameKey: string;
+                            descriptionKey: string;
+                            iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             models: string[];
                             available: boolean;
                             health: "unconfigured";
@@ -249,7 +251,9 @@ export declare const aiRoutes: Elysia<"/ai", {
                     } | {
                         providers: {
                             id: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                            name: string;
+                            nameKey: string;
+                            descriptionKey: string;
+                            iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             models: string[];
                             available: boolean;
                             health: "healthy" | "degraded" | "down" | "unconfigured";

@@ -16,9 +16,7 @@ type ProviderHealth = "healthy" | "degraded" | "down" | "unconfigured";
 
 type ProviderConfig = {
   id: AIProviderType;
-  name: string;
-  description: string;
-  icon: string;
+  iconId: AIProviderType;
   models: string[];
   available: boolean;
   health: ProviderHealth;
@@ -61,6 +59,13 @@ const { t } = useI18n();
 const { settings, fetchSettings } = useSettings();
 const { $toast } = useNuxtApp();
 const api = useApi();
+
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("aiDashboard.title"),
+    description: t("aiDashboard.subtitle"),
+  });
+}
 
 const providerStats = ref<DashboardStats | null>(null);
 const providers = ref<ProviderConfig[]>([]);
@@ -134,10 +139,32 @@ function providerHealthBadgeClass(health: ProviderHealth): string {
 }
 
 function providerSelectOptionLabel(provider: ProviderConfig): string {
+  const providerName = providerLabel(provider.id);
   if (isProviderConfigured(provider.id)) {
-    return provider.name;
+    return providerName;
   }
-  return t("aiDashboard.preference.providerNotConfiguredOption", { provider: provider.name });
+  return t("aiDashboard.preference.providerNotConfiguredOption", { provider: providerName });
+}
+
+function providerLabel(providerId: AIProviderType): string {
+  const catalogEntry = providerCatalogById.get(providerId);
+  if (!catalogEntry) {
+    return providerId;
+  }
+  return t(catalogEntry.nameKey);
+}
+
+function providerDescription(providerId: AIProviderType): string {
+  const catalogEntry = providerCatalogById.get(providerId);
+  if (!catalogEntry) {
+    return "";
+  }
+  return t(catalogEntry.descriptionKey);
+}
+
+function providerIconId(providerId: AIProviderType): AIProviderType {
+  const catalogEntry = providerCatalogById.get(providerId);
+  return catalogEntry?.iconId ?? providerId;
 }
 
 function normalizeProviderRow(value: unknown): ProviderConfig | null {
@@ -158,9 +185,7 @@ function normalizeProviderRow(value: unknown): ProviderConfig | null {
 
   return {
     id: rawId,
-    name: asString(value.name) ?? catalogEntry.name,
-    description: catalogEntry.description,
-    icon: catalogEntry.icon,
+    iconId: providerIconId(rawId),
     models: models.length > 0 ? models : [...catalogEntry.modelHints],
     available,
     health,
@@ -173,9 +198,7 @@ function buildFallbackProviders(): ProviderConfig[] {
     if (!catalogEntry) {
       return {
         id: providerId,
-        name: providerId,
-        description: "",
-        icon: "💠",
+        iconId: providerId,
         models: [],
         available: false,
         health: "unconfigured",
@@ -184,9 +207,7 @@ function buildFallbackProviders(): ProviderConfig[] {
 
     return {
       id: providerId,
-      name: catalogEntry.name,
-      description: catalogEntry.description,
-      icon: catalogEntry.icon,
+      iconId: providerIconId(providerId),
       models: [...catalogEntry.modelHints],
       available: isProviderConfigured(providerId),
       health: isProviderConfigured(providerId) ? "degraded" : "unconfigured",
@@ -415,6 +436,10 @@ watch(selectedProvider, (providerId) => {
   selectedModel.value = resolveDefaultModel(providerId);
 });
 
+const activeProviderLabel = computed(() =>
+  providerStats.value ? providerLabel(providerStats.value.activeProvider) : "",
+);
+
 onMounted(() => {
   void fetchProviderStats();
 });
@@ -472,7 +497,7 @@ onMounted(() => {
           <div class="stat-title">{{ t("aiDashboard.stats.sessionsTitle") }}</div>
           <div class="stat-value text-accent">{{ providerStats.sessions }}</div>
           <div class="stat-desc">
-            {{ t("aiDashboard.stats.sessionsDesc", { provider: providerStats.activeProvider }) }}
+            {{ t("aiDashboard.stats.sessionsDesc", { provider: activeProviderLabel }) }}
           </div>
         </div>
       </div>
@@ -555,10 +580,10 @@ onMounted(() => {
           <div class="card-body gap-4">
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-start gap-3">
-                <span class="text-3xl" aria-hidden="true">{{ provider.icon }}</span>
+                <AIProviderIcon :provider-id="provider.iconId" class="h-8 w-8 text-primary" />
                 <div>
-                  <h3 class="card-title text-lg">{{ provider.name }}</h3>
-                  <p class="text-xs text-base-content/70">{{ provider.description }}</p>
+                  <h3 class="card-title text-lg">{{ providerLabel(provider.id) }}</h3>
+                  <p class="text-xs text-base-content/70">{{ providerDescription(provider.id) }}</p>
                 </div>
               </div>
               <span
@@ -604,7 +629,7 @@ onMounted(() => {
               <button
                 class="btn btn-outline btn-sm"
                 :disabled="testingProvider === provider.id"
-                :aria-label="t('aiDashboard.providerCard.testAria', { provider: provider.name })"
+                :aria-label="t('aiDashboard.providerCard.testAria', { provider: providerLabel(provider.id) })"
                 @click="handleTestProvider(provider.id)"
               >
                 <span v-if="testingProvider === provider.id" class="loading loading-spinner loading-xs"></span>
@@ -617,7 +642,7 @@ onMounted(() => {
               <NuxtLink
                 :to="APP_ROUTES.settings"
                 class="btn btn-primary btn-sm"
-                :aria-label="t('aiDashboard.providerCard.configureAria', { provider: provider.name })"
+                :aria-label="t('aiDashboard.providerCard.configureAria', { provider: providerLabel(provider.id) })"
               >
                 {{ t("aiDashboard.providerCard.configureButton") }}
               </NuxtLink>

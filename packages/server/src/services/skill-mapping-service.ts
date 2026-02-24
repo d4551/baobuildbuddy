@@ -4,6 +4,9 @@ import type {
   SkillCategory,
   SkillEvidence,
   SkillMapping,
+  SkillReadinessFeedbackId,
+  SkillReadinessImprovementId,
+  SkillReadinessNextStepId,
 } from "@bao/shared";
 import {
   generateId,
@@ -541,21 +544,13 @@ export class SkillMappingService {
     return {
       overallScore: 0,
       categories: {
-        technical: { score: 0, feedback: "No technical skills mapped yet" },
-        softSkills: { score: 0, feedback: "No soft skills mapped yet" },
-        industryKnowledge: { score: 0, feedback: "No industry knowledge demonstrated" },
-        portfolio: { score: 0, feedback: "No portfolio evidence provided" },
+        technical: { score: 0, feedbackId: "empty" },
+        softSkills: { score: 0, feedbackId: "empty" },
+        industryKnowledge: { score: 0, feedbackId: "empty" },
+        portfolio: { score: 0, feedbackId: "empty" },
       },
-      improvementSuggestions: [
-        "Start mapping your gaming skills to career skills",
-        "Add evidence to demonstrate your abilities",
-        "Build a portfolio showcasing your work",
-      ],
-      nextSteps: [
-        "Map at least 5 gaming skills",
-        "Add evidence for your top skills",
-        "Create your first portfolio project",
-      ],
+      improvementSuggestions: ["mapTechnicalSkills", "addSkillEvidence", "buildPortfolioProjects"],
+      nextSteps: ["mapFirstFiveSkills", "exploreSkillCategories", "setUpProfessionalProfile"],
     };
   }
 
@@ -596,24 +591,24 @@ export class SkillMappingService {
       categories: {
         technical: {
           score: metrics.technicalScore,
-          feedback: this.getCategoryFeedback(metrics.technicalScore, "technical skills"),
+          feedbackId: this.getCategoryFeedback(metrics.technicalScore),
           strengths: metrics.technicalSkills.slice(0, 3).map((mapping) => mapping.transferableSkill),
           improvements: this.getTechnicalImprovements(metrics.technicalScore),
         },
         softSkills: {
           score: metrics.softSkillsScore,
-          feedback: this.getCategoryFeedback(metrics.softSkillsScore, "soft skills"),
+          feedbackId: this.getCategoryFeedback(metrics.softSkillsScore),
           strengths: metrics.softSkills.slice(0, 3).map((mapping) => mapping.transferableSkill),
           improvements: this.getSoftSkillImprovements(metrics.softSkillsScore),
         },
         industryKnowledge: {
           score: metrics.industryScore,
-          feedback: this.getCategoryFeedback(metrics.industryScore, "industry knowledge"),
+          feedbackId: this.getCategoryFeedback(metrics.industryScore),
           improvements: this.getIndustryImprovements(metrics.industryScore),
         },
         portfolio: {
           score: metrics.portfolioScore,
-          feedback: this.getCategoryFeedback(metrics.portfolioScore, "portfolio evidence"),
+          feedbackId: this.getCategoryFeedback(metrics.portfolioScore),
           improvements: this.getPortfolioImprovements(metrics.portfolioScore),
         },
       },
@@ -627,36 +622,32 @@ export class SkillMappingService {
     };
   }
 
-  private getTechnicalImprovements(score: number): string[] {
+  private getTechnicalImprovements(score: number): SkillReadinessImprovementId[] {
     if (score >= 70) {
       return [];
     }
-    return ["Add more technical skill mappings", "Increase confidence in existing skills"];
+    return ["mapTechnicalSkills", "increaseSkillConfidence"];
   }
 
-  private getSoftSkillImprovements(score: number): string[] {
+  private getSoftSkillImprovements(score: number): SkillReadinessImprovementId[] {
     if (score >= 70) {
       return [];
     }
-    return ["Map more leadership and communication experiences", "Add team collaboration examples"];
+    return ["mapLeadershipCommunication", "addTeamCollaborationExamples"];
   }
 
-  private getIndustryImprovements(score: number): string[] {
+  private getIndustryImprovements(score: number): SkillReadinessImprovementId[] {
     if (score >= 70) {
       return [];
     }
-    return ["Research more industry applications", "Connect skills to specific job roles"];
+    return ["researchIndustryApplications", "connectSkillsToJobRoles"];
   }
 
-  private getPortfolioImprovements(score: number): string[] {
+  private getPortfolioImprovements(score: number): SkillReadinessImprovementId[] {
     if (score >= 70) {
       return [];
     }
-    return [
-      "Add more evidence to your skill mappings",
-      "Create portfolio projects",
-      "Document your achievements",
-    ];
+    return ["addSkillEvidence", "buildPortfolioProjects", "documentAchievements"];
   }
 
   /**
@@ -672,13 +663,13 @@ export class SkillMappingService {
   }
 
   /**
-   * Get feedback text for a category score
+   * Get feedback bucket key for a category score.
    */
-  private getCategoryFeedback(score: number, category: string): string {
-    if (score >= 80) return `Excellent ${category}! You're well-prepared in this area.`;
-    if (score >= 60) return `Good ${category}. Keep building to strengthen this area.`;
-    if (score >= 40) return `Developing ${category}. Focus on adding more mappings and evidence.`;
-    return `Early stage ${category}. This is an area for significant growth.`;
+  private getCategoryFeedback(score: number): SkillReadinessFeedbackId {
+    if (score >= 80) return "excellent";
+    if (score >= 60) return "good";
+    if (score >= 40) return "developing";
+    return "early";
   }
 
   /**
@@ -689,33 +680,29 @@ export class SkillMappingService {
     technical: number,
     soft: number,
     portfolio: number,
-  ): string[] {
-    const suggestions: string[] = [];
+  ): SkillReadinessImprovementId[] {
+    const suggestions: SkillReadinessImprovementId[] = [];
 
     if (technical < 60) {
-      suggestions.push(
-        "Strengthen your technical skills by mapping game mechanics knowledge to programming concepts",
-      );
+      suggestions.push("strengthenTechnicalTransfer");
     }
 
     if (soft < 60) {
-      suggestions.push("Highlight your leadership and communication experiences from gaming");
+      suggestions.push("highlightLeadershipExperience");
     }
 
     if (portfolio < 60) {
-      suggestions.push(
-        "Build evidence for your skills with clips, screenshots, or project documentation",
-      );
+      suggestions.push("addSkillEvidence");
     }
 
     if (overall < 50) {
-      suggestions.push("Aim to map at least 10-15 diverse skills to show breadth of experience");
+      suggestions.push("broadenSkillCoverage");
     }
 
     if (suggestions.length === 0) {
-      suggestions.push("Continue refining your skill mappings with more specific examples");
-      suggestions.push("Consider certifications to validate your technical skills");
-      suggestions.push("Network with professionals in your target industry");
+      suggestions.push("refineSpecificExamples");
+      suggestions.push("pursueCertifications");
+      suggestions.push("networkWithProfessionals");
     }
 
     return suggestions;
@@ -724,39 +711,39 @@ export class SkillMappingService {
   /**
    * Get next steps based on overall readiness
    */
-  private getNextSteps(overall: number): string[] {
+  private getNextSteps(overall: number): SkillReadinessNextStepId[] {
     if (overall >= 80) {
       return [
-        "Start applying to target roles",
-        "Network with industry professionals",
-        "Prepare for technical interviews",
-        "Polish your LinkedIn profile",
+        "startApplyingToTargetRoles",
+        "networkWithIndustryProfessionals",
+        "prepareForTechnicalInterviews",
+        "polishLinkedInProfile",
       ];
     }
 
     if (overall >= 60) {
       return [
-        "Complete your portfolio with 3-5 strong projects",
-        "Map 5 more skills to reach 15+ total",
-        "Add evidence to your top 10 skills",
-        "Research target companies and roles",
+        "completePortfolioProjects",
+        "mapMoreSkillsToReachFifteen",
+        "addEvidenceToTopSkills",
+        "researchTargetCompaniesAndRoles",
       ];
     }
 
     if (overall >= 40) {
       return [
-        "Map 10+ gaming skills to career skills",
-        "Start building portfolio projects",
-        "Add evidence to demonstrate your abilities",
-        "Explore career pathways that match your skills",
+        "mapTenPlusSkills",
+        "startBuildingPortfolioProjects",
+        "addEvidenceToDemonstrateAbilities",
+        "exploreMatchingCareerPathways",
       ];
     }
 
     return [
-      "Map your first 5 gaming skills",
-      "Explore different skill categories",
-      "Learn about career options in gaming industry",
-      "Set up your professional profile",
+      "mapFirstFiveSkills",
+      "exploreSkillCategories",
+      "learnGamingCareerOptions",
+      "setUpProfessionalProfile",
     ];
   }
 

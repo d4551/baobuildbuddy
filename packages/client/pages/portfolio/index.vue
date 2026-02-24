@@ -32,6 +32,13 @@ const {
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("portfolioPage.title"),
+    description: t("portfolioPage.subtitle"),
+  });
+}
+
 type PortfolioProjectReadonlyView<T> = {
   [K in keyof T]: T[K] extends Array<infer U> ? readonly Readonly<U>[] : T[K];
 };
@@ -41,8 +48,7 @@ type ProjectDirection = "up" | "down";
 
 const showAddModal = ref(false);
 const editingProject = ref<PortfolioProject | null>(null);
-const projectDialogRef = ref<HTMLDialogElement | null>(null);
-useFocusTrap(projectDialogRef, () => showAddModal.value);
+const PORTFOLIO_PROJECT_DIALOG_TITLE_ID = "portfolio-page-project-dialog-title";
 const showDeleteProjectDialog = ref(false);
 const pendingDeleteProjectId = ref<string | null>(null);
 const searchQuery = ref("");
@@ -133,17 +139,6 @@ onMounted(async () => {
     portfolioForm.bio = portfolio.value.metadata.bio || "";
     portfolioForm.email = portfolio.value.metadata.email || "";
     portfolioForm.website = portfolio.value.metadata.website || "";
-  }
-});
-
-watch(showAddModal, (isOpen) => {
-  const dialog = projectDialogRef.value;
-  if (!dialog) return;
-
-  if (isOpen && !dialog.open) {
-    dialog.showModal();
-  } else if (!isOpen && dialog.open) {
-    dialog.close();
   }
 });
 
@@ -393,7 +388,7 @@ function projectPageAria(page: number): string {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-7xl space-y-6">
+  <PageScaffold width-token="wide" spacing-token="comfortable">
     <section class="rounded-box border border-base-300 bg-base-200 p-6">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div class="space-y-2">
@@ -666,136 +661,135 @@ function projectPageAria(page: number): string {
       </section>
     </div>
 
-    <dialog ref="projectDialogRef" class="modal modal-bottom sm:modal-middle" @close="showAddModal = false">
-      <div class="modal-box max-w-2xl">
-        <h3 class="mb-4 text-lg font-bold">
-          {{ editingProject ? t("portfolioPage.modal.editTitle") : t("portfolioPage.modal.addTitle") }}
-        </h3>
+    <AppModalFrame
+      v-model:open="showAddModal"
+      :title-id="PORTFOLIO_PROJECT_DIALOG_TITLE_ID"
+      size-token="compact"
+      :close-aria-label="t('portfolioPage.modal.closeBackdropAria')"
+      :close-backdrop-label="t('portfolioPage.modal.closeBackdropButton')"
+    >
+      <h3 :id="PORTFOLIO_PROJECT_DIALOG_TITLE_ID" class="mb-4 text-lg font-bold">
+        {{ editingProject ? t("portfolioPage.modal.editTitle") : t("portfolioPage.modal.addTitle") }}
+      </h3>
 
-        <div class="space-y-4">
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("portfolioPage.modal.projectTitleLegend") }}</legend>
+      <div class="space-y-4">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("portfolioPage.modal.projectTitleLegend") }}</legend>
+          <input
+            v-model="projectForm.title"
+            type="text"
+            :minlength="PORTFOLIO_PROJECT_TITLE_MIN_LENGTH"
+            class="input validator w-full"
+            :placeholder="t('portfolioPage.modal.projectTitlePlaceholder')"
+            :aria-label="t('portfolioPage.modal.projectTitleAria')"
+          />
+          <p class="validator-hint">
+            {{ t("portfolioPage.modal.projectTitleHint", { count: PORTFOLIO_PROJECT_TITLE_MIN_LENGTH }) }}
+          </p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("portfolioPage.modal.descriptionLegend") }}</legend>
+          <textarea
+            v-model="projectForm.description"
+            :minlength="PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH"
+            class="textarea validator w-full"
+            rows="4"
+            :placeholder="t('portfolioPage.modal.descriptionPlaceholder')"
+            :aria-label="t('portfolioPage.modal.descriptionAria')"
+          ></textarea>
+          <p class="validator-hint">
+            {{ t("portfolioPage.modal.descriptionHint", { count: PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH }) }}
+          </p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("portfolioPage.modal.projectUrlLegend") }}</legend>
+          <input
+            v-model="projectForm.liveUrl"
+            type="url"
+            class="input w-full"
+            :placeholder="t('portfolioPage.modal.projectUrlPlaceholder')"
+            :aria-label="t('portfolioPage.modal.projectUrlAria')"
+          />
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ t("portfolioPage.modal.imageUrlLegend") }}</legend>
+          <input
+            v-model="projectForm.image"
+            type="url"
+            class="input w-full"
+            :placeholder="t('portfolioPage.modal.imageUrlPlaceholder')"
+            :aria-label="t('portfolioPage.modal.imageUrlAria')"
+          />
+        </fieldset>
+
+        <div>
+          <span class="mb-2 block text-sm font-medium">{{ t("portfolioPage.modal.technologiesLegend") }}</span>
+          <div class="mb-2 flex gap-2">
             <input
-              v-model="projectForm.title"
+              v-model="newTech"
               type="text"
-              :minlength="PORTFOLIO_PROJECT_TITLE_MIN_LENGTH"
-              class="input validator w-full"
-              :placeholder="t('portfolioPage.modal.projectTitlePlaceholder')"
-              :aria-label="t('portfolioPage.modal.projectTitleAria')"
+              class="input input-sm flex-1"
+              :placeholder="t('portfolioPage.modal.technologiesPlaceholder')"
+              :aria-label="t('portfolioPage.modal.technologiesAria')"
+              list="portfolio-tech-suggestions"
+              @keyup.enter="addTechnology"
             />
-            <p class="validator-hint">
-              {{ t("portfolioPage.modal.projectTitleHint", { count: PORTFOLIO_PROJECT_TITLE_MIN_LENGTH }) }}
-            </p>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("portfolioPage.modal.descriptionLegend") }}</legend>
-            <textarea
-              v-model="projectForm.description"
-              :minlength="PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH"
-              class="textarea validator w-full"
-              rows="4"
-              :placeholder="t('portfolioPage.modal.descriptionPlaceholder')"
-              :aria-label="t('portfolioPage.modal.descriptionAria')"
-            ></textarea>
-            <p class="validator-hint">
-              {{ t("portfolioPage.modal.descriptionHint", { count: PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH }) }}
-            </p>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("portfolioPage.modal.projectUrlLegend") }}</legend>
-            <input
-              v-model="projectForm.liveUrl"
-              type="url"
-              class="input w-full"
-              :placeholder="t('portfolioPage.modal.projectUrlPlaceholder')"
-              :aria-label="t('portfolioPage.modal.projectUrlAria')"
-            />
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("portfolioPage.modal.imageUrlLegend") }}</legend>
-            <input
-              v-model="projectForm.image"
-              type="url"
-              class="input w-full"
-              :placeholder="t('portfolioPage.modal.imageUrlPlaceholder')"
-              :aria-label="t('portfolioPage.modal.imageUrlAria')"
-            />
-          </fieldset>
-
-          <div>
-            <span class="mb-2 block text-sm font-medium">{{ t("portfolioPage.modal.technologiesLegend") }}</span>
-            <div class="mb-2 flex gap-2">
-              <input
-                v-model="newTech"
-                type="text"
-                class="input input-sm flex-1"
-                :placeholder="t('portfolioPage.modal.technologiesPlaceholder')"
-                :aria-label="t('portfolioPage.modal.technologiesAria')"
-                list="portfolio-tech-suggestions"
-                @keyup.enter="addTechnology"
-              />
-              <button class="btn btn-sm btn-primary" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="addTechnology">
-                {{ t("portfolioPage.modal.addTechnologyButton") }}
-              </button>
-            </div>
-
-            <datalist id="portfolio-tech-suggestions">
-              <option v-for="tech in projectTechnologySuggestions" :key="tech" :value="tech" />
-            </datalist>
-
-            <div class="flex flex-wrap gap-2">
-              <div
-                v-for="(tech, idx) in projectForm.technologies"
-                :key="`${tech}-${idx}`"
-                class="badge gap-2"
-              >
-                {{ tech }}
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-xs btn-circle"
-                  :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
-                  @click="removeTechnology(idx)"
-                >
-                  <CloseIcon class="h-3 w-3" />
-                </button>
-              </div>
-            </div>
+            <button class="btn btn-sm btn-primary" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="addTechnology">
+              {{ t("portfolioPage.modal.addTechnologyButton") }}
+            </button>
           </div>
 
-          <label class="label cursor-pointer justify-start gap-2">
-            <input
-              v-model="projectForm.featured"
-              type="checkbox"
-              class="checkbox checkbox-primary"
-              :aria-label="t('portfolioPage.modal.featuredAria')"
-            />
-            <span class="label-text">{{ t("portfolioPage.modal.featuredLabel") }}</span>
-          </label>
+          <datalist id="portfolio-tech-suggestions">
+            <option v-for="tech in projectTechnologySuggestions" :key="tech" :value="tech" />
+          </datalist>
+
+          <div class="flex flex-wrap gap-2">
+            <div
+              v-for="(tech, idx) in projectForm.technologies"
+              :key="`${tech}-${idx}`"
+              class="badge gap-2"
+            >
+              {{ tech }}
+              <button
+                type="button"
+                class="btn btn-ghost btn-xs btn-circle"
+                :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
+                @click="removeTechnology(idx)"
+              >
+                <CloseIcon class="h-3 w-3" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="modal-action">
-          <button class="btn btn-ghost" :aria-label="t('portfolioPage.modal.cancelAria')" @click="showAddModal = false">
-            {{ t("portfolioPage.modal.cancelButton") }}
-          </button>
-          <button
-            class="btn btn-primary"
-            :disabled="!projectForm.title || !projectForm.description"
-            :aria-label="t('portfolioPage.modal.saveAria')"
-            @click="handleSaveProject"
-          >
-            {{ editingProject ? t("portfolioPage.modal.updateButton") : t("portfolioPage.modal.createButton") }}
-          </button>
-        </div>
+        <label class="label cursor-pointer justify-start gap-2">
+          <input
+            v-model="projectForm.featured"
+            type="checkbox"
+            class="checkbox checkbox-primary"
+            :aria-label="t('portfolioPage.modal.featuredAria')"
+          />
+          <span class="label-text">{{ t("portfolioPage.modal.featuredLabel") }}</span>
+        </label>
       </div>
-      <form method="dialog" class="modal-backdrop">
-        <button :aria-label="t('portfolioPage.modal.closeBackdropAria')" @click="showAddModal = false">
-          {{ t("portfolioPage.modal.closeBackdropButton") }}
+
+      <div class="modal-action">
+        <button class="btn btn-ghost" :aria-label="t('portfolioPage.modal.cancelAria')" @click="showAddModal = false">
+          {{ t("portfolioPage.modal.cancelButton") }}
         </button>
-      </form>
-    </dialog>
+        <button
+          class="btn btn-primary"
+          :disabled="!projectForm.title || !projectForm.description"
+          :aria-label="t('portfolioPage.modal.saveAria')"
+          @click="handleSaveProject"
+        >
+          {{ editingProject ? t("portfolioPage.modal.updateButton") : t("portfolioPage.modal.createButton") }}
+        </button>
+      </div>
+    </AppModalFrame>
 
     <ConfirmDialog
       id="portfolio-delete-project-dialog"
@@ -809,5 +803,5 @@ function projectPageAria(page: number): string {
       @confirm="handleDeleteProject"
       @cancel="clearDeleteProjectState"
     />
-  </div>
+  </PageScaffold>
 </template>

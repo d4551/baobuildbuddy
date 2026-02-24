@@ -34,11 +34,15 @@ Script verification checks:
 bun run validate:no-try-catch
 bun run validate:no-unsafe-casts
 bun run validate:locales
+bun run validate:page-seo
 bun run validate:i18n-ui
 bun run validate:aria
+bun run validate:ui-layout-tokens
 bun run validate:ui
 bun run audit:official-llms
 ```
+
+`bun run validate:aria` checks both control-level labels and modal semantics (`aria-modal="true"` plus a programmatic modal label).
 
 Route/content check (requires running server/client target):
 
@@ -60,10 +64,14 @@ Expected validation outcomes:
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
-Latest verification snapshot (February 24, 2026):
+UI runtime contracts for v1.0:
 
-- `bun run audit:official-llms` returned `PASS` for Elysia, Nuxt, and Bun with HTTP `200` responses.
-- `bun run release:refresh:all-os` completed end-to-end and regenerated `packages/desktop/releases/sha256.txt`, including containerized Windows NSIS fallback and Linux AppImage fallback execution paths.
+- Core pages use tokenized layout primitives (`PageScaffold`, `PageHeaderBlock`, `SectionGrid`) backed by `packages/client/constants/ui-layout.ts`.
+- Modal flows use `AppModalFrame` with required dialog semantics (`aria-modal` + `aria-labelledby`).
+- Cross-page CTA and next-step decisions come from one source: `packages/client/constants/flow-engine.ts` and `packages/client/composables/useFlowEngine.ts`.
+- Automation pages (`/automation`, `/automation/job-apply`, `/automation/email`, `/automation/runs`, `/automation/runs/:id`, `/automation/scraper`) follow the same tokenized layout contract and are enforced by `validate:ui-layout-tokens`.
+- AI provider display copy/icons are locale-driven (`aiProviderCatalog.*`) with a shared icon component (`AIProviderIcon`) to avoid hardcoded provider UI metadata.
+- Interview role recommendations are derived from profile role, readiness role rankings, pathway match scoring, and live job titles; static role slug lists are removed.
 
 ## 1) Understand what is being started
 
@@ -275,6 +283,8 @@ NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=en-US,es-ES,fr-FR,ja-JP
 NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY=bao-locale
 ```
 
+Locale resolution order is deterministic: locale cookie -> `Accept-Language` header (q-weighted) -> browser locale -> configured default locale.
+
 Then add these when you are ready:
 
 - `BAO_DISABLE_AUTH=true` for local dev if you want to skip API key gating.
@@ -318,6 +328,7 @@ Then open `http://localhost:3001` in your browser and confirm:
 1. Home loads without runtime errors.
 2. Settings page is reachable.
 3. A basic API-backed feature returns data (jobs or resumes).
+4. Dashboard quick actions reflect your current pipeline status (incomplete steps are prioritized automatically).
 4. Browser dev tools show no hard errors on initial page load.
 
 ## 9) Complete first-user configuration in UI
@@ -339,7 +350,10 @@ If this is your very first time and you want full confidence:
 ```bash
 bun run format:check
 bun run validate:no-try-catch
+bun run validate:page-seo
 bun run validate:i18n-ui
+bun run validate:aria
+bun run validate:ui-layout-tokens
 bun run validate:ui
 bun run typecheck
 bun run lint

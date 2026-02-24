@@ -918,7 +918,9 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
     if (serviceResult.status === "rejected") {
       const providers = AI_PROVIDER_CATALOG.map((provider) => ({
         id: provider.id,
-        name: provider.name,
+        nameKey: provider.nameKey,
+        descriptionKey: provider.descriptionKey,
+        iconId: provider.iconId,
         models: [...provider.modelHints],
         available: false,
         health: "unconfigured" as const,
@@ -943,7 +945,9 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
 
       return {
         id: provider.id,
-        name: provider.name,
+        nameKey: provider.nameKey,
+        descriptionKey: provider.descriptionKey,
+        iconId: provider.iconId,
         models: [...provider.modelHints],
         available: available ?? false,
         health: status?.health ?? (available ? "healthy" : "unconfigured"),

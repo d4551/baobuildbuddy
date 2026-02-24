@@ -56,6 +56,8 @@ const ignoredDirectoryNames = new Set([
 const translationCallPattern = /(?:\b\$?t)\(\s*(['"`])([^'"`]+)\1/gu;
 const staticAttributePattern =
   /(?<![:\w-])(aria-label|aria-description|aria-placeholder|placeholder|title|alt|data-tip)\s*=\s*("([^"]*)"|'([^']*)')/gu;
+const boundAttributeLiteralPattern =
+  /(?:\s|<)(?::|v-bind:)(aria-label|aria-description|aria-placeholder|placeholder|title|alt|data-tip)\s*=\s*("([^"]*)"|'([^']*)')/gu;
 const templateInterpolationPattern = /\{\{[\s\S]*?\}\}/gu;
 const whitespacePattern = /\s+/gu;
 const localeKeyFormatPattern = /^[a-zA-Z0-9_.-]+$/u;
@@ -392,7 +394,22 @@ const collectMissingTranslationKeyViolations = (
   return violations;
 };
 
-const collectAttributeViolations = (
+const isQuotedLiteralExpression = (expression: string): boolean => {
+  const opensWithSingleQuote = expression.startsWith("'");
+  const closesWithSingleQuote = expression.endsWith("'");
+  const opensWithDoubleQuote = expression.startsWith("\"");
+  const closesWithDoubleQuote = expression.endsWith("\"");
+  const opensWithBacktick = expression.startsWith("`");
+  const closesWithBacktick = expression.endsWith("`");
+
+  return (
+    (opensWithSingleQuote && closesWithSingleQuote) ||
+    (opensWithDoubleQuote && closesWithDoubleQuote) ||
+    (opensWithBacktick && closesWithBacktick && !expression.includes("${"))
+  );
+};
+
+const collectStaticAttributeViolations = (
   filePath: string,
   fileContent: string,
   block: TemplateBlock,
@@ -414,6 +431,46 @@ const collectAttributeViolations = (
   }
   return violations;
 };
+
+const collectBoundLiteralAttributeViolations = (
+  filePath: string,
+  fileContent: string,
+  block: TemplateBlock,
+  tag: TemplateTag,
+): Violation[] => {
+  const violations: Violation[] = [];
+  for (const match of tag.markup.matchAll(boundAttributeLiteralPattern)) {
+    const attributeName = match[1] ?? "";
+    const expression = (match[3] ?? match[4] ?? "").trim();
+    if (expression.length < 2 || !isQuotedLiteralExpression(expression)) {
+      continue;
+    }
+
+    const literalValue = expression.slice(1, -1).trim();
+    if (literalValue.length === 0 || !hasHumanText(literalValue)) {
+      continue;
+    }
+
+    violations.push({
+      filePath,
+      line: getLineFromOffset(fileContent, block.offset + tag.offset + (match.index ?? 0)),
+      message:
+        `Bound template attribute "${attributeName}" uses a literal string expression. ` +
+        `Use i18n binding (for example :${attributeName}="t('...')").`,
+    });
+  }
+  return violations;
+};
+
+const collectAttributeViolations = (
+  filePath: string,
+  fileContent: string,
+  block: TemplateBlock,
+  tag: TemplateTag,
+): Violation[] => [
+  ...collectStaticAttributeViolations(filePath, fileContent, block, tag),
+  ...collectBoundLiteralAttributeViolations(filePath, fileContent, block, tag),
+];
 
 const collectTextViolations = (
   filePath: string,

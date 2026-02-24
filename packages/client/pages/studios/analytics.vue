@@ -23,6 +23,13 @@ const { $toast } = useNuxtApp();
 const api = useApi();
 const { t } = useI18n();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("studioAnalytics.title"),
+    description: t("studiosIndex.seoDescription"),
+  });
+}
+
 const analytics = ref<StudioAnalytics | null>(null);
 const pageError = ref<string | null>(null);
 

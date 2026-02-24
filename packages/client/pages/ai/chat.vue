@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_BRAND, APP_SEO } from "@bao/shared";
+import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { CHAT_PAGE_CONTAINER_CLASS } from "~/constants/chat";
 import {
@@ -13,16 +13,17 @@ definePageMeta({
   middleware: ["auth"],
 });
 
+const { t, locale } = useI18n();
+
 if (import.meta.server) {
   useServerSeoMeta({
-    title: APP_SEO.chatTitle,
-    description: APP_SEO.chatDescription,
+    title: t("aiChatPage.seoTitle", { brand: APP_BRAND.name }),
+    description: t("aiChatPage.seoDescription"),
   });
 }
 
 const { messages, loading, streaming, sendMessage, clearMessages } = useAI();
 const { $toast } = useNuxtApp();
-const { t, locale } = useI18n();
 const {
   speechProviderOptions,
   speechConfig,

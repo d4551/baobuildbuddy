@@ -30,6 +30,13 @@ const { t } = useI18n();
 const { $toast } = useNuxtApp();
 const { awardForAction } = usePipelineGamification();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("jobsPage.seoTitle"),
+    description: t("jobsPage.seoDescription"),
+  });
+}
+
 const searchQuery = ref("");
 const localFilters = reactive<JobsFilterState>({
   location: "",
@@ -267,22 +274,23 @@ async function maybeAwardSearchXp(): Promise<void> {
 </script>
 
 <template>
-  <div>
-    <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-3xl font-bold">{{ t("jobsPage.title") }}</h1>
-      <button
-        class="btn btn-primary btn-sm"
-        :aria-label="t('jobsPage.refreshAria')"
-        :disabled="refreshing"
-        @click="handleRefresh"
-      >
-        <span v-if="refreshing" class="loading loading-spinner loading-xs"></span>
-        <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        {{ t("jobsPage.refreshButton") }}
-      </button>
-    </div>
+  <PageScaffold labelled-by="jobs-page-title">
+    <PageHeaderBlock title-id="jobs-page-title" :title="t('jobsPage.title')">
+      <template #actions>
+        <button
+          class="btn btn-primary btn-sm"
+          :aria-label="t('jobsPage.refreshAria')"
+          :disabled="refreshing"
+          @click="handleRefresh"
+        >
+          <span v-if="refreshing" class="loading loading-spinner loading-xs"></span>
+          <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          {{ t("jobsPage.refreshButton") }}
+        </button>
+      </template>
+    </PageHeaderBlock>
 
     <div class="card mb-6 bg-base-200">
       <div class="card-body">
@@ -315,7 +323,7 @@ async function maybeAwardSearchXp(): Promise<void> {
       </div>
     </div>
 
-    <div class="flex flex-col gap-6 lg:flex-row">
+    <SectionGrid grid-token="sidebar">
       <div class="w-full shrink-0 lg:w-64" :class="{ 'hidden lg:block': !showFilters }">
         <div class="card sticky top-6 bg-base-200">
           <div class="card-body">
@@ -433,7 +441,7 @@ async function maybeAwardSearchXp(): Promise<void> {
         </div>
 
         <div v-else>
-          <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <SectionGrid grid-token="twoColumn" extra-class="mb-6">
             <div
               v-for="job in paginatedJobs"
               :key="job.id"
@@ -510,7 +518,7 @@ async function maybeAwardSearchXp(): Promise<void> {
                 </div>
               </div>
             </div>
-          </div>
+          </SectionGrid>
 
           <div v-if="totalPages > 1" class="flex justify-center">
             <div class="join">
@@ -544,6 +552,6 @@ async function maybeAwardSearchXp(): Promise<void> {
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </SectionGrid>
+  </PageScaffold>
 </template>

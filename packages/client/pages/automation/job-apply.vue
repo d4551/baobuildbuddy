@@ -27,6 +27,13 @@ const requestUrl = useRequestURL();
 const apiBase = String(useRuntimeConfig().public.apiBase || "/");
 const runStream = useAutomationRunStream();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("automation.jobApply.title"),
+    description: t("automation.hub.cards.jobApply.description"),
+  });
+}
+
 interface FormState {
   jobUrl: string;
   resumeId: string;
@@ -253,10 +260,14 @@ async function submitScheduledJobApply(): Promise<void> {
 </script>
 
 <template>
-  <div>
-    <h1 class="mb-6 text-3xl font-bold">{{ t("automation.jobApply.title") }}</h1>
+  <PageScaffold tag="section" width-token="content" labelled-by="automation-job-apply-title">
+    <PageHeaderBlock
+      title-id="automation-job-apply-title"
+      :title="t('automation.jobApply.title')"
+      :description="t('automation.hub.cards.jobApply.description')"
+    />
 
-    <div class="card bg-base-100 max-w-3xl shadow-sm">
+    <div class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">
         <div class="space-y-4">
           <fieldset class="fieldset">
@@ -348,12 +359,12 @@ async function submitScheduledJobApply(): Promise<void> {
       </div>
     </div>
 
-    <div v-if="submitError" role="alert" class="alert alert-error mt-6" aria-live="assertive">
+    <div v-if="submitError" role="alert" class="alert alert-error" aria-live="assertive">
       <h3 class="font-semibold">{{ t("automation.jobApply.submitErrorTitle") }}</h3>
       <p>{{ submitError }}</p>
     </div>
 
-    <div v-if="hasActiveRun" class="card bg-base-100 shadow-sm mt-6">
+    <div v-if="hasActiveRun" class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">
         <h2 class="card-title">{{ t("automation.jobApply.stream.title") }}</h2>
         <p class="text-sm text-base-content/70">{{ t("automation.jobApply.stream.subtitle") }}</p>
@@ -461,7 +472,7 @@ async function submitScheduledJobApply(): Promise<void> {
       </div>
     </div>
 
-    <div v-if="scheduledRun" class="card bg-base-100 shadow-sm mt-6">
+    <div v-if="scheduledRun" class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">
         <div role="alert" class="alert alert-info">
           <h3 class="font-semibold">{{ t("automation.jobApply.schedule.createdTitle") }}</h3>
@@ -486,5 +497,5 @@ async function submitScheduledJobApply(): Promise<void> {
         </div>
       </div>
     </div>
-  </div>
+  </PageScaffold>
 </template>

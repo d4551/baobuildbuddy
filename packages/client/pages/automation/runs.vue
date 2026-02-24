@@ -31,10 +31,17 @@ const DATE_FORMAT_OPTIONS = {
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
 
-const { t } = useI18n();
+const { t, locale, fallbackLocale } = useI18n();
 const statusFilter = ref<RunFilterStatus>("");
 const typeFilter = ref<RunFilterType>("");
 const { fetchRuns, subscribeToRun } = useAutomation();
+
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("automation.runs.title"),
+    description: t("automation.hub.cards.runHistory.description"),
+  });
+}
 
 const activeSubscriptions = new Map<string, () => void>();
 const liveRunById = ref<Record<string, RpaRunExecutionEnvelope>>({});
@@ -220,7 +227,15 @@ const formatDate = (value: string): string => {
   if (Number.isNaN(parsed.getTime())) {
     return value;
   }
-  return new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).format(parsed);
+  const preferredLocale =
+    typeof locale.value === "string" && locale.value.length > 0
+      ? locale.value
+      : typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0
+        ? fallbackLocale.value
+        : Array.isArray(fallbackLocale.value) && typeof fallbackLocale.value[0] === "string"
+          ? fallbackLocale.value[0]
+          : "en-US";
+  return new Intl.DateTimeFormat(preferredLocale, DATE_FORMAT_OPTIONS).format(parsed);
 };
 
 const formatRunType = (runType: AutomationRunType): string =>
@@ -241,19 +256,20 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
 </script>
 
 <template>
-  <div>
-    <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-3xl font-bold">{{ t("automation.runs.title") }}</h1>
-      <NuxtLink
-        :to="APP_ROUTES.automation"
-        class="btn btn-outline"
-        :aria-label="t('automation.runs.backToAutomation')"
-      >
-        {{ t("automation.runs.backButton") }}
-      </NuxtLink>
-    </div>
+  <PageScaffold tag="section" width-token="content" labelled-by="automation-runs-title">
+    <PageHeaderBlock title-id="automation-runs-title" :title="t('automation.runs.title')">
+      <template #actions>
+        <NuxtLink
+          :to="APP_ROUTES.automation"
+          class="btn btn-outline"
+          :aria-label="t('automation.runs.backToAutomation')"
+        >
+          {{ t("automation.runs.backButton") }}
+        </NuxtLink>
+      </template>
+    </PageHeaderBlock>
 
-    <div class="mb-4 flex flex-wrap gap-4">
+    <SectionGrid grid-token="twoColumn">
       <label class="form-control">
         <span class="mb-1 text-sm">{{ t("automation.runs.typeLabel") }}</span>
         <select
@@ -281,63 +297,67 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
           </option>
         </select>
       </label>
-    </div>
+    </SectionGrid>
 
-    <div class="overflow-x-auto">
-      <table class="table table-zebra" :aria-label="t('automation.runs.tableAriaLabel')">
-        <thead>
-          <tr>
-            <th>{{ t("automation.runs.columns.id") }}</th>
-            <th>{{ t("automation.runs.columns.type") }}</th>
-            <th>{{ t("automation.runs.columns.status") }}</th>
-            <th>{{ t("automation.runs.columns.progress") }}</th>
-            <th>{{ t("automation.runs.columns.job") }}</th>
-            <th>{{ t("automation.runs.columns.updated") }}</th>
-            <th>{{ t("automation.runs.columns.actions") }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="run in sortedRuns" :key="run.id" :class="resolveRowClass(run)">
-            <th>{{ run.id }}</th>
-            <td>{{ formatRunType(run.type) }}</td>
-            <td>
-              <div class="flex items-center gap-2">
-                <span>{{ formatRunStatus(run.status) }}</span>
-                <span
-                  v-if="isLiveRun(run)"
-                  class="badge badge-info badge-outline"
-                  :aria-label="t('automation.runs.liveBadgeAria')"
-                >
-                  {{ t("automation.runs.liveBadge") }}
-                </span>
-              </div>
-            </td>
-            <td>{{ formatRunProgress(run) }}</td>
-            <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
-            <td>{{ formatDate(run.updatedAt) }}</td>
-            <td>
-              <NuxtLink
-                :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
-                class="btn btn-xs btn-ghost"
-                :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
-              >
-                {{ t("automation.runs.openButton") }}
-              </NuxtLink>
-            </td>
-          </tr>
-          <tr v-if="!isLoading && sortedRuns.length === 0">
-            <td colspan="7" class="text-center opacity-60">{{ t("automation.runs.emptyState") }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="card card-border bg-base-100">
+      <div class="card-body">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra" :aria-label="t('automation.runs.tableAriaLabel')">
+            <thead>
+              <tr>
+                <th>{{ t("automation.runs.columns.id") }}</th>
+                <th>{{ t("automation.runs.columns.type") }}</th>
+                <th>{{ t("automation.runs.columns.status") }}</th>
+                <th>{{ t("automation.runs.columns.progress") }}</th>
+                <th>{{ t("automation.runs.columns.job") }}</th>
+                <th>{{ t("automation.runs.columns.updated") }}</th>
+                <th>{{ t("automation.runs.columns.actions") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="run in sortedRuns" :key="run.id" :class="resolveRowClass(run)">
+                <th>{{ run.id }}</th>
+                <td>{{ formatRunType(run.type) }}</td>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <span>{{ formatRunStatus(run.status) }}</span>
+                    <span
+                      v-if="isLiveRun(run)"
+                      class="badge badge-info badge-outline"
+                      :aria-label="t('automation.runs.liveBadgeAria')"
+                    >
+                      {{ t("automation.runs.liveBadge") }}
+                    </span>
+                  </div>
+                </td>
+                <td>{{ formatRunProgress(run) }}</td>
+                <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
+                <td>{{ formatDate(run.updatedAt) }}</td>
+                <td>
+                  <NuxtLink
+                    :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
+                    class="btn btn-xs btn-ghost"
+                    :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
+                  >
+                    {{ t("automation.runs.openButton") }}
+                  </NuxtLink>
+                </td>
+              </tr>
+              <tr v-if="!isLoading && sortedRuns.length === 0">
+                <td colspan="7" class="text-center opacity-60">{{ t("automation.runs.emptyState") }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <p v-if="isLoading" class="mt-4 text-sm opacity-70" role="status" aria-live="polite">
-        {{ t("automation.runs.loadingLabel") }}
-      </p>
-      <div v-else-if="error" role="alert" class="alert alert-error mt-4">
-        <h3 class="font-semibold">{{ t("automation.runs.loadErrorTitle") }}</h3>
-        <p>{{ errorMessage }}</p>
+        <p v-if="isLoading" class="text-sm opacity-70" role="status" aria-live="polite">
+          {{ t("automation.runs.loadingLabel") }}
+        </p>
+        <div v-else-if="error" role="alert" class="alert alert-error">
+          <h3 class="font-semibold">{{ t("automation.runs.loadErrorTitle") }}</h3>
+          <p>{{ errorMessage }}</p>
+        </div>
       </div>
     </div>
-  </div>
+  </PageScaffold>
 </template>

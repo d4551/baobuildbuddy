@@ -2,6 +2,7 @@
 import {
   APP_ROUTE_QUERY_KEYS,
   APP_ROUTES,
+  type DashboardStats,
   formDataToResumeData,
   RESUME_LIST_PAGE_SIZE,
   RESUME_TEMPLATE_DEFAULT,
@@ -11,8 +12,8 @@ import {
   resumeDataToFormData,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
+import { createFlowEngineInput } from "~/constants/flow-engine";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -31,16 +32,23 @@ const {
   aiEnhance,
   aiScore,
 } = useResume();
+const api = useApi();
 const route = useRoute();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
 const { awardForAction } = usePipelineGamification();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("resumePage.seoTitle"),
+    description: t("resumePage.seoDescription"),
+  });
+}
+
 const showCreateModal = ref(false);
 const newResumeName = ref("");
 const newResumeTemplate = ref<ResumeTemplate>(RESUME_TEMPLATE_DEFAULT);
-const createDialogRef = ref<HTMLDialogElement | null>(null);
-useFocusTrap(createDialogRef, () => showCreateModal.value);
+const RESUME_CREATE_DIALOG_TITLE_ID = "resume-page-create-dialog-title";
 const selectedResumeId = ref<string | null>(null);
 const showDeleteResumeDialog = ref(false);
 const pendingDeleteResumeId = ref<string | null>(null);
@@ -51,6 +59,7 @@ const enhancing = ref(false);
 const scoring = ref(false);
 const scoreResult = ref<Record<string, unknown> | null>(null);
 const resumeSearchQuery = ref("");
+const dashboardStats = ref<DashboardStats | null>(null);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const templateLabelMap = computed<Record<ResumeTemplate, string>>(() => {
   const templates = t("resumePage.createModal.templates") as Record<string, string>;
@@ -198,6 +207,35 @@ const coverLetterQuickActionRoute = computed(() => ({
     : {}),
 }));
 
+const flowInput = computed(() =>
+  createFlowEngineInput(dashboardStats.value, {
+    hasResume: resumes.value.length > 0,
+  }),
+);
+
+const {
+  primaryAction: flowPrimaryAction,
+  recommendedActions: flowRecommendedActions,
+} = useFlowEngine(flowInput);
+
+interface ResumeCompletionQuickAction {
+  readonly id: string;
+  readonly to: string | { path: string; query?: Record<string, string> };
+  readonly labelKey: string;
+}
+
+const completionQuickActions = computed<readonly ResumeCompletionQuickAction[]>(() => {
+  const actionCandidates = [flowPrimaryAction.value, ...flowRecommendedActions.value]
+    .filter((action) => action.id !== "resume")
+    .slice(0, 3);
+
+  return actionCandidates.map((action) => ({
+    id: action.id,
+    to: action.id === "coverLetter" ? coverLetterQuickActionRoute.value : action.to,
+    labelKey: action.labelKey,
+  }));
+});
+
 function resumeTabLabel(tab: ResumeTabId): string {
   if (tab === "personal") return t("resumePage.tabs.personal");
   if (tab === "experience") return t("resumePage.tabs.experience");
@@ -226,12 +264,18 @@ function resumePageAria(page: number): string {
   return t("resumePage.pagination.pageAria", { page });
 }
 
-onMounted(async () => {
+await useAsyncData("resume-page-bootstrap", async () => {
   await fetchResumes();
+  const statsResponse = await api.stats.dashboard.get();
+  if (!statsResponse.error) {
+    dashboardStats.value = statsResponse.data;
+  }
+
   const id = route.query[APP_ROUTE_QUERY_KEYS.id];
   if (typeof id === "string" && id.trim()) {
     selectedResumeId.value = id.trim();
   }
+  return true;
 });
 
 watch(selectedResumeId, async (id) => {
@@ -241,17 +285,6 @@ watch(selectedResumeId, async (id) => {
       const form = resumeDataToFormData(resume);
       Object.assign(formData, form);
     }
-  }
-});
-
-watch(showCreateModal, (isOpen) => {
-  const dialog = createDialogRef.value;
-  if (!dialog) return;
-
-  if (isOpen && !dialog.open) {
-    dialog.showModal();
-  } else if (!isOpen && dialog.open) {
-    dialog.close();
   }
 });
 
@@ -543,15 +576,14 @@ async function resolvePipelineReward(
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-7xl space-y-6">
+  <PageScaffold>
     <section class="rounded-box border border-base-300 bg-base-200 p-6">
-      <div class="flex flex-wrap items-start justify-between gap-4">
-        <div class="space-y-2">
-          <h1 class="text-3xl font-bold">{{ t("resumePage.title") }}</h1>
-          <p class="max-w-2xl text-sm text-base-content/70">{{ t("resumePage.subtitle") }}</p>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
+      <PageHeaderBlock
+        title-id="resume-page-title"
+        :title="t('resumePage.title')"
+        :description="t('resumePage.subtitle')"
+      >
+        <template #actions>
           <button
             class="btn btn-primary btn-sm"
             :aria-label="t('resumePage.createButtonAria')"
@@ -565,8 +597,8 @@ async function resolvePipelineReward(
           <NuxtLink :to="APP_ROUTES.resumeBuild" class="btn btn-outline btn-sm" :aria-label="t('resumePage.guidedButtonAria')">
             {{ t("resumePage.guidedButton") }}
           </NuxtLink>
-        </div>
-      </div>
+        </template>
+      </PageHeaderBlock>
     </section>
 
     <LoadingSkeleton v-if="loading && !resumes.length" variant="cards" :lines="6" />
@@ -612,7 +644,7 @@ async function resolvePipelineReward(
       </div>
 
       <div v-else class="space-y-4">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <SectionGrid grid-token="threeColumnLg">
           <div
             v-for="resume in resumePagination.items.value"
             :key="resume.id"
@@ -652,7 +684,7 @@ async function resolvePipelineReward(
               </div>
             </div>
           </div>
-        </div>
+        </SectionGrid>
 
         <AppPagination
           :current-page="resumePagination.currentPage.value"
@@ -752,25 +784,13 @@ async function resolvePipelineReward(
             </p>
             <div class="flex flex-wrap gap-2">
               <NuxtLink
-                :to="coverLetterQuickActionRoute"
+                v-for="action in completionQuickActions"
+                :key="action.id"
+                :to="action.to"
                 class="btn btn-xs btn-outline"
-                :aria-label="t('resumePage.completion.quickActions.coverLetterAria')"
+                :aria-label="t(action.labelKey)"
               >
-                {{ t("resumePage.completion.quickActions.coverLetter") }}
-              </NuxtLink>
-              <NuxtLink
-                :to="APP_ROUTES.portfolio"
-                class="btn btn-xs btn-outline"
-                :aria-label="t('resumePage.completion.quickActions.portfolioAria')"
-              >
-                {{ t("resumePage.completion.quickActions.portfolio") }}
-              </NuxtLink>
-              <NuxtLink
-                :to="APP_ROUTES.interview"
-                class="btn btn-xs btn-outline"
-                :aria-label="t('resumePage.completion.quickActions.interviewAria')"
-              >
-                {{ t("resumePage.completion.quickActions.interview") }}
+                {{ t(action.labelKey) }}
               </NuxtLink>
             </div>
           </div>
@@ -866,7 +886,7 @@ async function resolvePipelineReward(
       <div v-if="activeTab === 'personal'" class="card bg-base-200">
         <div class="card-body">
           <h2 class="card-title">{{ t("resumePage.personal.title") }}</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.personal.fullNameLegend") }}</legend>
               <input
@@ -913,7 +933,7 @@ async function resolvePipelineReward(
               <legend class="fieldset-legend">{{ t("resumePage.personal.portfolioLegend") }}</legend>
               <input v-model="formData.portfolio" type="url" class="input w-full" :aria-label="t('resumePage.personal.portfolioAria')"/>
             </fieldset>
-          </div>
+          </SectionGrid>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("resumePage.personal.summaryLegend") }}</legend>
             <textarea
@@ -947,7 +967,7 @@ async function resolvePipelineReward(
                     {{ t("resumePage.experience.removeButton") }}
                   </button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SectionGrid grid-token="twoColumn">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">{{ t("resumePage.experience.jobTitleLegend") }}</legend>
                     <input
@@ -986,7 +1006,7 @@ async function resolvePipelineReward(
                       <input v-model="exp.endDate" type="month" class="input w-full input-sm" :disabled="exp.current" :aria-label="t('resumePage.experience.endDateAria')"/>
                     </fieldset>
                   </div>
-                </div>
+                </SectionGrid>
                 <div class="form-control">
                   <label class="label cursor-pointer justify-start gap-2">
                     <input v-model="exp.current" type="checkbox" class="checkbox checkbox-sm" :aria-label="t('resumePage.experience.currentAria')"/>
@@ -1029,7 +1049,7 @@ async function resolvePipelineReward(
                     {{ t("resumePage.education.removeButton") }}
                   </button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SectionGrid grid-token="twoColumn">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">{{ t("resumePage.education.degreeLegend") }}</legend>
                     <input
@@ -1066,7 +1086,7 @@ async function resolvePipelineReward(
                     <legend class="fieldset-legend">{{ t("resumePage.education.gpaLegend") }}</legend>
                     <input v-model="edu.gpa" type="text" class="input w-full input-sm" :aria-label="t('resumePage.education.gpaAria')"/>
                   </fieldset>
-                </div>
+                </SectionGrid>
               </div>
             </div>
           </div>
@@ -1128,7 +1148,7 @@ async function resolvePipelineReward(
                     {{ t("resumePage.projects.removeButton") }}
                   </button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SectionGrid grid-token="twoColumn">
                   <fieldset class="fieldset">
                     <legend class="fieldset-legend">{{ t("resumePage.projects.nameLegend") }}</legend>
                     <input
@@ -1145,7 +1165,7 @@ async function resolvePipelineReward(
                     <legend class="fieldset-legend">{{ t("resumePage.projects.urlLegend") }}</legend>
                     <input v-model="project.url" type="url" class="input w-full input-sm" :aria-label="t('resumePage.projects.urlAria')"/>
                   </fieldset>
-                </div>
+                </SectionGrid>
                 <fieldset class="fieldset">
                   <legend class="fieldset-legend">{{ t("resumePage.projects.descriptionLegend") }}</legend>
                   <textarea
@@ -1206,62 +1226,60 @@ async function resolvePipelineReward(
     </div>
 
     <!-- Create Modal -->
-    <dialog ref="createDialogRef" class="modal modal-bottom sm:modal-middle" @close="showCreateModal = false">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">{{ t("resumePage.createModal.title") }}</h3>
+    <AppModalFrame
+      v-model:open="showCreateModal"
+      :title-id="RESUME_CREATE_DIALOG_TITLE_ID"
+      size-token="compact"
+      :close-aria-label="t('resumePage.createModal.closeBackdropAria')"
+      :close-backdrop-label="t('resumePage.createModal.closeBackdropButton')"
+    >
+      <h3 :id="RESUME_CREATE_DIALOG_TITLE_ID" class="font-bold text-lg mb-4">
+        {{ t("resumePage.createModal.title") }}
+      </h3>
 
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("resumePage.createModal.nameLegend") }}</legend>
-          <input
-            v-model="newResumeName"
-            type="text"
-            :placeholder="t('resumePage.createModal.namePlaceholder')"
-            class="input w-full"
-            :aria-label="t('resumePage.createModal.nameAria')"
-          />
-        </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("resumePage.createModal.nameLegend") }}</legend>
+        <input
+          v-model="newResumeName"
+          type="text"
+          :placeholder="t('resumePage.createModal.namePlaceholder')"
+          class="input w-full"
+          :aria-label="t('resumePage.createModal.nameAria')"
+        />
+      </fieldset>
 
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("resumePage.createModal.templateLegend") }}</legend>
-          <select v-model="newResumeTemplate" class="select w-full" :aria-label="t('resumePage.createModal.templateAria')">
-            <option
-              v-for="templateOption in createResumeTemplateOptions"
-              :key="templateOption.value"
-              :value="templateOption.value"
-            >
-              {{ templateOption.label }}
-            </option>
-          </select>
-        </fieldset>
-
-        <div class="modal-action">
-          <button
-            class="btn btn-ghost"
-            :aria-label="t('resumePage.createModal.cancelAria')"
-            @click="showCreateModal = false"
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("resumePage.createModal.templateLegend") }}</legend>
+        <select v-model="newResumeTemplate" class="select w-full" :aria-label="t('resumePage.createModal.templateAria')">
+          <option
+            v-for="templateOption in createResumeTemplateOptions"
+            :key="templateOption.value"
+            :value="templateOption.value"
           >
-            {{ t("resumePage.createModal.cancelButton") }}
-          </button>
-          <button
-            class="btn btn-primary"
-            :disabled="creating || !newResumeName.trim()"
-            :aria-label="t('resumePage.createModal.createAria')"
-            @click="handleCreate"
-          >
-            <span v-if="creating" class="loading loading-spinner loading-xs"></span>
-            {{ t("resumePage.createModal.createButton") }}
-          </button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop">
+            {{ templateOption.label }}
+          </option>
+        </select>
+      </fieldset>
+
+      <div class="modal-action">
         <button
-          :aria-label="t('resumePage.createModal.closeBackdropAria')"
+          class="btn btn-ghost"
+          :aria-label="t('resumePage.createModal.cancelAria')"
           @click="showCreateModal = false"
         >
-          {{ t("resumePage.createModal.closeBackdropButton") }}
+          {{ t("resumePage.createModal.cancelButton") }}
         </button>
-      </form>
-    </dialog>
+        <button
+          class="btn btn-primary"
+          :disabled="creating || !newResumeName.trim()"
+          :aria-label="t('resumePage.createModal.createAria')"
+          @click="handleCreate"
+        >
+          <span v-if="creating" class="loading loading-spinner loading-xs"></span>
+          {{ t("resumePage.createModal.createButton") }}
+        </button>
+      </div>
+    </AppModalFrame>
 
     <ConfirmDialog
       id="resume-delete-dialog"
@@ -1275,5 +1293,5 @@ async function resolvePipelineReward(
       @confirm="handleDeleteResume"
       @cancel="clearDeleteResumeState"
     />
-  </div>
+  </PageScaffold>
 </template>

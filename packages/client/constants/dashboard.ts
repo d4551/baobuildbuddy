@@ -38,6 +38,7 @@ type DashboardQuickActionLabelKey =
   `dashboard.quickActions.actions.${keyof DashboardRootSchema["quickActions"]["actions"]}`;
 type DashboardPipelineStepLabelKey =
   `dashboard.pipeline.steps.${keyof DashboardRootSchema["pipeline"]["steps"]}`;
+type DashboardActionLabelKey = DashboardQuickActionLabelKey | DashboardPipelineStepLabelKey;
 type DashboardPipelineStatusLabelKey =
   `dashboard.pipeline.status.${keyof DashboardRootSchema["pipeline"]["status"]}`;
 type DashboardRelativeTimeLabelKey = `dashboard.relativeTime.${keyof DashboardRootSchema["relativeTime"]}`;
@@ -54,7 +55,7 @@ export interface DashboardQuickAction {
   /** Stable item identifier for keyed rendering and tracking. */
   readonly id: string;
   /** Translation key displayed in the action button. */
-  readonly labelKey: DashboardQuickActionLabelKey;
+  readonly labelKey: DashboardActionLabelKey;
   /** Route destination. */
   readonly to: string;
   /** SVG path for the icon. */
@@ -352,19 +353,41 @@ export function resolveDashboardPipelineSteps(
   });
 }
 
-const QUICK_ACTION_REGISTRY = {
-  jobs: {
-    id: "jobs",
-    labelKey: "dashboard.quickActions.actions.browseJobs",
+type DashboardFlowActionId = DashboardPipelineStep["id"] | "interview" | "aiChat";
+
+const DASHBOARD_FLOW_ACTIONS = {
+  search: {
+    id: "search",
+    labelKey: "dashboard.pipeline.steps.search",
     to: APP_ROUTES.jobs,
     iconPath: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
   },
-  resume: {
-    id: "resume",
-    labelKey: "dashboard.quickActions.actions.buildResume",
+  scrape: {
+    id: "scrape",
+    labelKey: "dashboard.pipeline.steps.scrape",
+    to: APP_ROUTES.automationScraper,
+    iconPath:
+      "M4 4h16v4H4V4zm0 6h16v10H4V10zm3 3h3v3H7v-3zm5 0h5v1h-5v-1zm0 2h5v1h-5v-1z",
+  },
+  customize: {
+    id: "customize",
+    labelKey: "dashboard.pipeline.steps.customize",
     to: APP_ROUTES.resume,
     iconPath:
       "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+  },
+  apply: {
+    id: "apply",
+    labelKey: "dashboard.pipeline.steps.apply",
+    to: APP_ROUTES.automationJobApply,
+    iconPath: "M12 19l9-7-9-7v4.5C7 9.5 4 11.5 3 16c2-2 4.5-3 9-3V19z",
+  },
+  gamify: {
+    id: "gamify",
+    labelKey: "dashboard.pipeline.steps.gamify",
+    to: APP_ROUTES.gamification,
+    iconPath:
+      "M12 17l-5.878 3.09 1.122-6.545L2.488 8.91l6.573-.955L12 2l2.939 5.955 6.573.955-4.756 4.635 1.122 6.545z",
   },
   interview: {
     id: "interview",
@@ -380,7 +403,53 @@ const QUICK_ACTION_REGISTRY = {
     iconPath:
       "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
   },
-} as const satisfies Record<string, DashboardQuickAction>;
+} as const satisfies Record<DashboardFlowActionId, DashboardQuickAction>;
+
+const DASHBOARD_FLOW_ACTION_FALLBACK_ORDER: readonly DashboardFlowActionId[] = [
+  "search",
+  "scrape",
+  "customize",
+  "apply",
+  "gamify",
+  "interview",
+  "aiChat",
+] as const;
+
+/**
+ * Resolves prioritized dashboard actions from the current end-to-end pipeline state.
+ *
+ * @param pipelineSteps Pipeline snapshot with status values.
+ * @returns Top actionable routes ordered by nearest incomplete workflow step.
+ */
+export function resolveDashboardFlowActions(
+  pipelineSteps: readonly DashboardPipelineStepViewModel[],
+): readonly DashboardQuickAction[] {
+  const hasIncompleteStep = pipelineSteps.some((step) => step.status !== "complete");
+  const prioritizedPipelineActionIds = pipelineSteps
+    .filter((step) => step.status !== "complete")
+    .map((step) => step.id);
+  const orderedPipelineActionIds = pipelineSteps.map((step) => step.id);
+  const actionPriorityQueue: DashboardFlowActionId[] = hasIncompleteStep
+    ? [
+        ...prioritizedPipelineActionIds,
+        ...orderedPipelineActionIds,
+        ...DASHBOARD_FLOW_ACTION_FALLBACK_ORDER,
+      ]
+    : ["interview", "aiChat", ...DASHBOARD_FLOW_ACTION_FALLBACK_ORDER];
+
+  const uniqueActionIds: DashboardFlowActionId[] = [];
+  for (const actionId of actionPriorityQueue) {
+    if (uniqueActionIds.includes(actionId)) {
+      continue;
+    }
+    uniqueActionIds.push(actionId);
+    if (uniqueActionIds.length >= 4) {
+      break;
+    }
+  }
+
+  return uniqueActionIds.map((actionId) => DASHBOARD_FLOW_ACTIONS[actionId]);
+}
 
 /**
  * Shared card configuration for top-level dashboard metrics.
@@ -422,19 +491,19 @@ export const DASHBOARD_STAT_CARDS: readonly DashboardStatCard[] = [
  * Quick actions rendered in the dashboard footer section.
  */
 export const DASHBOARD_QUICK_ACTIONS: readonly DashboardQuickAction[] = [
-  QUICK_ACTION_REGISTRY.jobs,
-  QUICK_ACTION_REGISTRY.resume,
-  QUICK_ACTION_REGISTRY.interview,
-  QUICK_ACTION_REGISTRY.aiChat,
+  DASHBOARD_FLOW_ACTIONS.search,
+  DASHBOARD_FLOW_ACTIONS.customize,
+  DASHBOARD_FLOW_ACTIONS.apply,
+  DASHBOARD_FLOW_ACTIONS.aiChat,
 ] as const;
 
 /**
  * Quick actions rendered in the floating action button speed dial.
  */
 export const FAB_QUICK_ACTIONS: readonly DashboardQuickAction[] = [
-  QUICK_ACTION_REGISTRY.resume,
-  QUICK_ACTION_REGISTRY.aiChat,
-  QUICK_ACTION_REGISTRY.jobs,
+  DASHBOARD_FLOW_ACTIONS.customize,
+  DASHBOARD_FLOW_ACTIONS.aiChat,
+  DASHBOARD_FLOW_ACTIONS.search,
 ] as const;
 
 /**

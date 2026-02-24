@@ -36,6 +36,7 @@ const jaJPOverrides = {
     notifications: "通知",
     dismissNotification: "通知を閉じる",
     localeSwitcher: "言語を変更",
+    localeOptionAria: "{locale} に言語を変更",
   },
   confirmDialog: {
     confirmButton: "確認",
@@ -62,6 +63,164 @@ const jaJPOverrides = {
     gamification: "ゲーミフィケーション",
     settings: "設定",
     apiDocs: "APIドキュメント",
+  },
+  dashboard: {
+    pageTitle: "ダッシュボード",
+  },
+  gamificationPage: {
+    pageTitle: "ゲーミフィケーションハブ",
+    seoTitle: "{brand} ゲーミフィケーションハブ",
+  },
+  jobsPage: {
+    seoTitle: "求人ボード",
+    seoDescription:
+      "プラットフォーム、スタジオ種別、ジャンル、経験レベルでゲーム業界の求人を検索・絞り込みできます。",
+    title: "求人ボード",
+  },
+  skillsPage: {
+    seoTitle: "スキルマッパー",
+    title: "スキルマッパー",
+  },
+  skillsPathwaysPage: {
+    seoTitle: "キャリアパス",
+    title: "キャリアパス",
+    readiness: {
+      feedback: {
+        empty: "{category} の準備データはまだありません。",
+        early:
+          "{category} は初期段階です。マッピングと証拠をさらに追加してください。",
+        developing:
+          "{category} は発展途上です。具体的な事例と証拠を継続して追加しましょう。",
+        good: "{category} は良好です。さらに深掘りして強化しましょう。",
+        excellent: "{category} は非常に良好です。この領域の準備は十分です。",
+      },
+      improvements: {
+        mapTechnicalSkills:
+          "ゲーム由来の技術スキルを、業務で使える技術スキルへさらにマッピングしましょう。",
+        increaseSkillConfidence:
+          "既存の技術スキルマッピングの信頼度を引き上げましょう。",
+        mapLeadershipCommunication:
+          "リーダーシップとコミュニケーション経験のマッピングを増やしましょう。",
+        addTeamCollaborationExamples:
+          "チーム協業の具体例を追加しましょう。",
+        researchIndustryApplications:
+          "マッピング済みスキルの業界適用先をさらに調査しましょう。",
+        connectSkillsToJobRoles:
+          "マッピング済みスキルを具体的なターゲット職種に結びつけましょう。",
+        addSkillEvidence:
+          "クリップ、スクリーンショット、文書でスキルの証拠を追加しましょう。",
+        buildPortfolioProjects:
+          "実践スキルを示すポートフォリオプロジェクトを構築しましょう。",
+        documentAchievements:
+          "主要なスキルマッピングに対して測定可能な成果を記録しましょう。",
+        strengthenTechnicalTransfer:
+          "ゲームメカニクスを工学概念に対応させ、技術転用力を強化しましょう。",
+        highlightLeadershipExperience:
+          "ゲーム文脈でのリーダーシップとコミュニケーション経験を強調しましょう。",
+        broadenSkillCoverage:
+          "10〜15の多様なスキルをマッピングしてカバレッジを広げましょう。",
+        refineSpecificExamples:
+          "現在のマッピングをより具体的な事例で改善しましょう。",
+        pursueCertifications:
+          "技術力を裏付ける認定資格の取得を検討しましょう。",
+        networkWithProfessionals:
+          "ターゲット業界のプロフェッショナルとのネットワークを拡大しましょう。",
+      },
+      nextStepItems: {
+        startApplyingToTargetRoles: "ターゲット職種への応募を開始しましょう。",
+        networkWithIndustryProfessionals:
+          "業界のプロフェッショナルとネットワークを構築しましょう。",
+        prepareForTechnicalInterviews: "技術面接の準備を進めましょう。",
+        polishLinkedInProfile: "LinkedInプロフィールを磨きましょう。",
+        completePortfolioProjects:
+          "3〜5件の強いポートフォリオプロジェクトを完成させましょう。",
+        mapMoreSkillsToReachFifteen:
+          "追加で5スキルをマッピングして15件以上を目指しましょう。",
+        addEvidenceToTopSkills:
+          "上位10スキルに証拠を追加しましょう。",
+        researchTargetCompaniesAndRoles:
+          "ターゲット企業と職種を調査しましょう。",
+        mapTenPlusSkills:
+          "ゲームスキルを10件以上キャリアスキルへマッピングしましょう。",
+        startBuildingPortfolioProjects:
+          "ポートフォリオプロジェクトの構築を開始しましょう。",
+        addEvidenceToDemonstrateAbilities:
+          "能力を示すための証拠を追加しましょう。",
+        exploreMatchingCareerPathways:
+          "自身のスキルに合うキャリアパスを探索しましょう。",
+        mapFirstFiveSkills:
+          "最初の5つのゲームスキルをマッピングしましょう。",
+        exploreSkillCategories:
+          "さまざまなスキルカテゴリを探索しましょう。",
+        learnGamingCareerOptions:
+          "ゲーム業界のキャリア選択肢を学びましょう。",
+        setUpProfessionalProfile:
+          "プロフェッショナルプロフィールを整備しましょう。",
+      },
+    },
+  },
+  resumePage: {
+    seoTitle: "履歴書ビルダー",
+    seoDescription:
+      "役割別の履歴書を作成し、完成度を管理しながらカバーレター、ポートフォリオ、面接準備へ接続します。",
+    title: "履歴書ビルダー",
+  },
+  resumeBuildPage: {
+    title: "AIで履歴書を作成",
+    seoTitle: "AI履歴書ビルダー",
+  },
+  coverLetterPage: {
+    title: "カバーレター",
+  },
+  interviewHistory: {
+    title: "面接履歴",
+  },
+  interviewHub: {
+    seoTitle: "面接準備ハブ",
+    seoDescription:
+      "求人ベースとスタジオベースの面接フローで練習し、スコア付きフィードバックで改善点を確認できます。",
+    title: "面接準備ハブ",
+    errors: {
+      bootstrapLoadFailed: "面接ハブのデータ読み込みに失敗しました",
+      roleRecommendationsFailed: "最適化されたロール提案の読み込みに失敗しました",
+    },
+  },
+  settings: {
+    seoTitle: "設定とプロフィール",
+    seoDescription:
+      "プロフィール、AIプロバイダー、通知設定、自動化の既定値を一元的に管理します。",
+    title: "設定とプロフィール",
+  },
+  studiosIndex: {
+    seoTitle: "スタジオディレクトリ",
+    seoDescription:
+      "スタジオプロフィールを検索し、運用属性で絞り込み、文脈付きの面接練習を開始できます。",
+    title: "スタジオディレクトリ",
+  },
+  aiProviderCatalog: {
+    local: {
+      name: "ローカルモデル",
+      description: "RamaLama または Ollama を使ったプライベートなローカル優先実行。",
+    },
+    gemini: {
+      description: "一般的なQAとコンテンツ生成に適した主要クラウドプロバイダー。",
+    },
+    claude: {
+      description: "長文脈推論が必要な分析系ワークフロー向けプロバイダー。",
+    },
+    openai: {
+      description: "幅広いチャットと生成タスクに対応するGPTモデルファミリー。",
+    },
+    huggingface: {
+      description: "幅広いオープンモデルを提供するクラウドのフォールバック先。",
+    },
+  },
+  setup: {
+    title: "{brand}へようこそ",
+    seoTitle: "{brand} セットアップ",
+    seoDescription:
+      "プロフィールを設定し、AIプロバイダーを構成して、キャリアワークスペースを起動します。",
+    successStatusAria: "セットアップ完了ステータス",
   },
   apiDocs: {
     seoTitle: "APIドキュメント",
@@ -142,7 +301,12 @@ const jaJPOverrides = {
     },
   },
   automation: {
+    hub: {
+      pageTitle: "自動化ハブ",
+      title: "自動化",
+    },
     runs: {
+      title: "自動化実行履歴",
       openButton: "開く",
       liveBadge: "ライブ",
       liveBadgeAria: "ライブ実行ステータス",
@@ -153,6 +317,7 @@ const jaJPOverrides = {
       },
     },
     jobApply: {
+      title: "求人応募自動化",
       stream: {
         title: "ライブ実行ストリーム",
         subtitle: "自動化の実行中に進捗更新を追跡します。",
@@ -206,6 +371,15 @@ const jaJPOverrides = {
         },
       },
     },
+    email: {
+      title: "メール返信自動化",
+    },
+    scraper: {
+      title: "スクレイパー運用ハブ",
+      errors: {
+        rewardFailed: "スクレイパー進捗の付与に失敗しました。",
+      },
+    },
     runDetail: {
       screenshotLinkLabel: "スクリーンショット {index} を開く",
       screenshotLoadError: "スクリーンショット {index} をプレビューできませんでした。",
@@ -255,7 +429,9 @@ const jaJPOverrides = {
     notFound: "履歴書が見つかりません。プレビューする履歴書を選択してください。",
   },
   portfolioPage: {
+    title: "ポートフォリオビルダー",
     preview: {
+      pageTitle: "ポートフォリオプレビュー",
       backButton: "ビルダーに戻る",
       backButtonAria: "ポートフォリオビルダーに戻る",
       exportPdfButton: "PDFをエクスポート",
@@ -327,8 +503,23 @@ const jaJPOverrides = {
       completeFailed: "面接の完了に失敗しました",
     },
   },
+  studioSelector: {
+    toggleAria: "スタジオセレクターを開く",
+    selectPlaceholder: "スタジオを選択",
+    menuAria: "スタジオメニュー",
+    searchPlaceholder: "スタジオを検索",
+    searchAria: "スタジオを検索",
+    emptyState: "スタジオが見つかりません",
+    optionAria: "スタジオ {studio} を選択",
+    closeAria: "スタジオセレクターを閉じる",
+    unknownType: "不明なタイプ",
+    unknownLocation: "不明な所在地",
+  },
   aiChatPage: {
     title: "Baoとチャットする",
+    seoTitle: "{brand} AIチャット",
+    seoDescription:
+      "履歴書戦略、面接準備、自動化計画についてAIキャリアコパイロットと会話できます。",
     subtitle: "ゲーム業界向けのAIキャリアアシスタント",
     clearAria: "チャット履歴をクリア",
     clearButton: "クリア",

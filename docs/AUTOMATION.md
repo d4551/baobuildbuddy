@@ -19,11 +19,15 @@ Automation-specific checks:
 bun run validate:no-try-catch
 bun run validate:no-unsafe-casts
 bun run validate:locales
+bun run validate:page-seo
 bun run validate:i18n-ui
 bun run validate:aria
+bun run validate:ui-layout-tokens
 bun run validate:ui
 bun run audit:official-llms
 ```
+
+`bun run validate:aria` enforces both control labels and modal dialog semantics (`aria-modal="true"` plus modal labeling).
 
 Optional SSR route/content verification while app is running:
 
@@ -45,10 +49,12 @@ Expected validation outcomes:
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
-Latest verification snapshot (February 24, 2026):
+Automation UI contract:
 
-- `bun run audit:official-llms` returned `PASS` for Elysia, Nuxt, and Bun with HTTP `200` responses.
-- `bun run release:refresh:all-os` completed end-to-end and regenerated `packages/desktop/releases/sha256.txt`, including containerized Windows NSIS fallback and Linux AppImage fallback execution paths.
+- `/automation` page-level layout is tokenized through shared primitives and validated by `validate:ui-layout-tokens`.
+- `/automation/job-apply`, `/automation/email`, `/automation/runs`, `/automation/runs/:id`, and `/automation/scraper` use the same scaffold/header/grid primitives; page-local width/grid literals are disallowed.
+- Recommendation ordering/primary emphasis on the automation hub is derived from the global flow engine (`resolveFlowRecommendations`) rather than static card order.
+- Dialogs in automation pages use the shared modal frame contract with deterministic ARIA semantics.
 
 `bun run release:refresh:all-os` is designed for macOS hosts with Docker available and outbound network access for cross-target dependency bootstrap.
 The script includes containerized Windows setup fallback and Linux AppImage fallback paths to keep release artifact generation deterministic.
@@ -229,7 +235,10 @@ Automation pages under `/automation` must pass the same UI wiring/accessibility 
 
 ```bash
 bun run validate:no-try-catch
+bun run validate:page-seo
 bun run validate:i18n-ui
+bun run validate:aria
+bun run validate:ui-layout-tokens
 bun run validate:ui
 bun run --filter '@bao/client' lint
 ```
@@ -243,7 +252,7 @@ Required behavior:
 
 ```mermaid
 flowchart LR
-  UI["Automation Vue pages"] --> ValidateUI["bun run validate:i18n-ui + validate:ui"]
+  UI["Automation Vue pages"] --> ValidateUI["bun run validate:page-seo + validate:i18n-ui + validate:aria + validate:ui-layout-tokens + validate:ui"]
   ValidateUI --> ColorState{"WCAG contrast + token checks pass?"}
   ColorState -->|No| ColorFix["Fix semantic classes or theme tokens"]
   ColorFix --> ValidateUI
@@ -261,13 +270,17 @@ Run these before shipping automation changes:
 ```bash
 bun run format:check
 bun run validate:no-try-catch
+bun run validate:page-seo
+bun run validate:i18n-ui
+bun run validate:aria
+bun run validate:ui-layout-tokens
 bun run typecheck
 bun run lint
 bun run test
 ```
 
 `bun run typecheck` generates `packages/server/dist-types` first so client-side Nuxt typechecking validates against the typed API contract surface.
-`bun run lint` includes `validate:no-try-catch` and `validate:i18n-ui`, which enforce the no-`try/catch` rule and i18n-safe UI copy standards in source files.
+`bun run lint` includes `validate:no-try-catch`, `validate:page-seo`, and `validate:i18n-ui`, which enforce the no-`try/catch` rule, localized core-page metadata, and i18n-safe UI copy standards in source files.
 
 ### Integration coverage
 

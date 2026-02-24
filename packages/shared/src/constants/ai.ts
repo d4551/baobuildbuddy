@@ -31,9 +31,9 @@ export const LOCAL_AI_SERVERS: readonly LocalProviderServer[] = [
 
 export type AIProviderMetadata = {
   id: AIProviderType;
-  name: string;
-  description: string;
-  icon: string;
+  nameKey: string;
+  descriptionKey: string;
+  iconId: AIProviderType;
   modelHints: readonly string[];
   requiresCredential: boolean;
 };
@@ -41,41 +41,41 @@ export type AIProviderMetadata = {
 export const AI_PROVIDER_CATALOG: readonly AIProviderMetadata[] = [
   {
     id: "local",
-    name: "Local Model",
-    description: "RamaLama / Ollama — private, local-first execution.",
-    icon: "💻",
+    nameKey: "aiProviderCatalog.local.name",
+    descriptionKey: "aiProviderCatalog.local.description",
+    iconId: "local",
     modelHints: [...LOCAL_AI_RECOMMENDED_MODELS],
     requiresCredential: false,
   },
   {
     id: "gemini",
-    name: "Google Gemini",
-    description: "Primary cloud provider for general QA and generation.",
-    icon: "✨",
+    nameKey: "aiProviderCatalog.gemini.name",
+    descriptionKey: "aiProviderCatalog.gemini.description",
+    iconId: "gemini",
     modelHints: ["gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.5-flash"],
     requiresCredential: true,
   },
   {
     id: "claude",
-    name: "Anthropic Claude",
-    description: "Strong reasoning and long-context analysis.",
-    icon: "🧠",
+    nameKey: "aiProviderCatalog.claude.name",
+    descriptionKey: "aiProviderCatalog.claude.description",
+    iconId: "claude",
     modelHints: ["claude-sonnet-4-5-20250929", "claude-3-5-sonnet-20241022", "claude-3-opus"],
     requiresCredential: true,
   },
   {
     id: "openai",
-    name: "OpenAI",
-    description: "GPT model family for flexible responses.",
-    icon: "🤖",
+    nameKey: "aiProviderCatalog.openai.name",
+    descriptionKey: "aiProviderCatalog.openai.description",
+    iconId: "openai",
     modelHints: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
     requiresCredential: true,
   },
   {
     id: "huggingface",
-    name: "Hugging Face",
-    description: "Cloud fallback with a mostly free starter path.",
-    icon: "🤗",
+    nameKey: "aiProviderCatalog.huggingface.name",
+    descriptionKey: "aiProviderCatalog.huggingface.description",
+    iconId: "huggingface",
     modelHints: ["Qwen/Qwen2.5-Coder-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"],
     requiresCredential: false,
   },

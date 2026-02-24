@@ -6,12 +6,17 @@ import type {
   ReadinessAssessment,
   RoleReadiness,
 } from "../types/skill-mapping";
+import {
+  SKILL_READINESS_FEEDBACK_IDS,
+  SKILL_READINESS_IMPROVEMENT_IDS,
+  SKILL_READINESS_NEXT_STEP_IDS,
+} from "../types/skill-mapping";
 
 export const categoryAssessmentSchema = z.object({
   score: z.number().min(0).max(100),
-  feedback: z.string(),
+  feedbackId: z.enum(SKILL_READINESS_FEEDBACK_IDS),
   strengths: z.array(z.string()).optional(),
-  improvements: z.array(z.string()).optional(),
+  improvements: z.array(z.enum(SKILL_READINESS_IMPROVEMENT_IDS)).optional(),
 });
 
 export const roleReadinessSchema = z.object({
@@ -62,8 +67,8 @@ export const readinessAssessmentSchema = z.object({
     industryKnowledge: categoryAssessmentSchema,
     portfolio: categoryAssessmentSchema,
   }),
-  improvementSuggestions: z.array(z.string()),
-  nextSteps: z.array(z.string()),
+  improvementSuggestions: z.array(z.enum(SKILL_READINESS_IMPROVEMENT_IDS)),
+  nextSteps: z.array(z.enum(SKILL_READINESS_NEXT_STEP_IDS)),
   targetRoleReadiness: z.array(roleReadinessSchema).optional(),
 });
 

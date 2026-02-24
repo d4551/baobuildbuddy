@@ -1,5 +1,21 @@
-import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@bao/shared";
-import { asNumber, asString, asStringArray, isRecord, STATE_KEYS } from "@bao/shared";
+import type {
+  CareerPathway,
+  ReadinessAssessment,
+  SkillMapping,
+  SkillReadinessFeedbackId,
+  SkillReadinessImprovementId,
+  SkillReadinessNextStepId,
+} from "@bao/shared";
+import {
+  asNumber,
+  asString,
+  asStringArray,
+  isRecord,
+  SKILL_READINESS_FEEDBACK_IDS,
+  SKILL_READINESS_IMPROVEMENT_IDS,
+  SKILL_READINESS_NEXT_STEP_IDS,
+  STATE_KEYS,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { toSkillMapping } from "./api-normalizers";
 import { assertApiResponse, withLoadingState } from "./async-flow";
@@ -18,6 +34,35 @@ interface SkillMappingContext {
   mappings: ReturnType<typeof useState<SkillMapping[]>>;
   pathways: ReturnType<typeof useState<CareerPathway[]>>;
   readiness: ReturnType<typeof useState<ReadinessAssessment | null>>;
+}
+
+const SKILL_READINESS_FEEDBACK_ID_SET = new Set<string>(SKILL_READINESS_FEEDBACK_IDS);
+const SKILL_READINESS_IMPROVEMENT_ID_SET = new Set<string>(SKILL_READINESS_IMPROVEMENT_IDS);
+const SKILL_READINESS_NEXT_STEP_ID_SET = new Set<string>(SKILL_READINESS_NEXT_STEP_IDS);
+
+function isSkillReadinessFeedbackId(value: string): value is SkillReadinessFeedbackId {
+  return SKILL_READINESS_FEEDBACK_ID_SET.has(value);
+}
+
+function toSkillReadinessFeedbackId(value: unknown): SkillReadinessFeedbackId | null {
+  const feedbackId = asString(value);
+  if (!(feedbackId && isSkillReadinessFeedbackId(feedbackId))) {
+    return null;
+  }
+  return feedbackId;
+}
+
+function toSkillReadinessImprovementIds(value: unknown): SkillReadinessImprovementId[] {
+  return asStringArray(value).filter(
+    (entry): entry is SkillReadinessImprovementId =>
+      SKILL_READINESS_IMPROVEMENT_ID_SET.has(entry),
+  );
+}
+
+function toSkillReadinessNextStepIds(value: unknown): SkillReadinessNextStepId[] {
+  return asStringArray(value).filter(
+    (entry): entry is SkillReadinessNextStepId => SKILL_READINESS_NEXT_STEP_ID_SET.has(entry),
+  );
 }
 
 function toCareerSalary(value: unknown): CareerPathway["averageSalary"] {
@@ -107,16 +152,16 @@ function toReadinessCategory(entry: unknown): ReadinessCategory | null {
   }
 
   const score = asNumber(entry.score);
-  const feedback = asString(entry.feedback);
-  if (score === undefined || !feedback) {
+  const feedbackId = toSkillReadinessFeedbackId(entry.feedbackId);
+  if (score === undefined || feedbackId === null) {
     return null;
   }
 
   return {
     score,
-    feedback,
+    feedbackId,
     strengths: asStringArray(entry.strengths),
-    improvements: asStringArray(entry.improvements),
+    improvements: toSkillReadinessImprovementIds(entry.improvements),
   };
 }
 
@@ -177,8 +222,8 @@ function toReadinessAssessment(value: unknown): ReadinessAssessment | null {
       industryKnowledge,
       portfolio,
     },
-    improvementSuggestions: asStringArray(value.improvementSuggestions),
-    nextSteps: asStringArray(value.nextSteps),
+    improvementSuggestions: toSkillReadinessImprovementIds(value.improvementSuggestions),
+    nextSteps: toSkillReadinessNextStepIds(value.nextSteps),
     targetRoleReadiness: targetRoleReadiness.length > 0 ? targetRoleReadiness : undefined,
   };
 }

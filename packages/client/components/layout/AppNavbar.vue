@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { APP_BRAND, APP_ROUTES } from "@bao/shared";
+import { useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { APP_DRAWER_ID } from "~/constants/layout";
 
 const { theme, toggleTheme } = useTheme();
 const { t, locale, availableLocales } = useI18n();
+const localeMenuRef = useTemplateRef<HTMLDetailsElement>("localeMenu");
+const isLocaleMenuOpen = ref(false);
 
 const localeDisplayNames = computed(
   () =>
@@ -18,6 +21,18 @@ const getLocaleLabel = (localeCode: string): string => {
   const displayName = languageCode ? localeDisplayNames.value.of(languageCode) : undefined;
   return displayName ?? localeCode;
 };
+
+function selectLocale(nextLocale: string): void {
+  locale.value = nextLocale;
+  if (localeMenuRef.value) {
+    localeMenuRef.value.open = false;
+    isLocaleMenuOpen.value = false;
+  }
+}
+
+function syncLocaleMenuState(): void {
+  isLocaleMenuOpen.value = localeMenuRef.value?.open ?? false;
+}
 </script>
 
 <template>
@@ -57,28 +72,37 @@ const getLocaleLabel = (localeCode: string): string => {
           <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Z" />
         </svg>
       </label>
-      <div class="dropdown dropdown-end">
-        <button type="button" class="btn btn-ghost btn-circle" :aria-label="t('a11y.localeSwitcher')">
+      <details ref="localeMenu" class="dropdown dropdown-end" @toggle="syncLocaleMenuState">
+        <summary
+          class="btn btn-ghost btn-circle"
+          :aria-label="t('a11y.localeSwitcher')"
+          aria-haspopup="menu"
+          :aria-expanded="isLocaleMenuOpen"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12 6a3 3 0 110-6 3 3 0 010 6z" />
           </svg>
-        </button>
-        <ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-50 mt-2 w-40 p-2 shadow-lg" role="listbox" :aria-label="t('a11y.localeSwitcher')">
-          <li v-for="loc in availableLocales" :key="loc">
+        </summary>
+        <ul
+          class="menu dropdown-content rounded-box z-50 mt-2 w-40 bg-base-200 p-2 shadow-lg"
+          role="menu"
+          :aria-label="t('a11y.localeSwitcher')"
+        >
+          <li v-for="loc in availableLocales" :key="loc" role="none">
             <button
               type="button"
               class="w-full text-left"
-              :class="{ 'active': locale === loc }"
-              role="option"
-              :aria-selected="locale === loc"
+              :class="{ active: locale === loc }"
+              role="menuitemradio"
+              :aria-checked="locale === loc"
               :aria-label="t('a11y.localeOptionAria', { locale: getLocaleLabel(loc) })"
-              @click="locale = loc"
+              @click="selectLocale(loc)"
             >
               {{ getLocaleLabel(loc) }}
             </button>
           </li>
         </ul>
-      </div>
+      </details>
       <NuxtLink :to="APP_ROUTES.settings" class="btn btn-ghost btn-circle" :aria-label="t('a11y.openSettings')">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

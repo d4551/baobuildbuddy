@@ -25,6 +25,13 @@ const { getCoverLetter, updateCoverLetter, generateCoverLetter, loading } = useC
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
 
+if (import.meta.server) {
+  useServerSeoMeta({
+    title: t("coverLetterDetailPage.details.title"),
+    description: t("coverLetterPage.subtitle"),
+  });
+}
+
 const letter = ref<CoverLetterData | null>(null);
 const letterId = computed(() => {
   return typeof route.params.id === "string" ? route.params.id : "";
