@@ -1,5 +1,12 @@
 import { type SkillMapping } from "@bao/shared";
 import { Elysia } from "elysia";
+type SkillAnalysisResponse = {
+    message: string;
+    detectedSkills: string[];
+    suggestedMappings: Record<string, unknown>[];
+    recommendations: string[];
+    provider?: string;
+};
 export declare const skillMappingRoutes: Elysia<"/skills", {
     decorator: {};
     store: {};
@@ -240,19 +247,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message: string;
-                        detectedSkills: never[];
-                        suggestedMappings: never[];
-                        recommendations: never[];
-                        provider?: undefined;
-                    } | {
-                        message: string;
-                        detectedSkills: string[];
-                        suggestedMappings: Record<string, unknown>[];
-                        recommendations: string[];
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                    };
+                    200: SkillAnalysisResponse;
                     422: {
                         type: "validation";
                         on: string;
@@ -287,3 +282,4 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
     resolve: {};
     schema: {};
 }>;
+export {};

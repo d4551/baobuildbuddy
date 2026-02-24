@@ -49,6 +49,10 @@ export declare class ApplicationAutomationService {
     private schedulerRecoveryInFlight;
     constructor();
     /**
+     * Execute a background task while consuming rejections.
+     */
+    private runBackgroundTask;
+    /**
      * Returns the next monotonic event sequence for a run.
      */
     private nextRunEventSequence;
@@ -92,6 +96,7 @@ export declare class ApplicationAutomationService {
      * Copy screenshots from the Python process into the managed run directory.
      */
     private copyAndIndexScreenshots;
+    private copySingleScreenshot;
     /**
      * Normalizes runner execution output into persisted run-result contract.
      */
@@ -153,6 +158,10 @@ export declare class ApplicationAutomationService {
      * Execute a queued scheduled run, retrying when concurrency is saturated.
      */
     private executeScheduledRun;
+    private createEmailResponseRun;
+    private failEmailResponseRun;
+    private generateEmailResponse;
+    private completeEmailResponseRun;
     /**
      * Run an AI-assisted email response and persist output as an automation run.
      */
@@ -179,6 +188,19 @@ export declare class ApplicationAutomationService {
      * Persist run completion output and award deterministic metadata.
      */
     private markRunCompleted;
+    private assertRunExists;
+    private assertConcurrencyLimit;
+    private loadResumeOrFail;
+    private loadCoverLetterOrFail;
+    private resolveSelectorMap;
+    private createProgressHandler;
+    private markRunStarted;
+    private createExecutionTracking;
+    private runJobApplyScript;
+    private finalizeJobApplySuccess;
+    private executeJobApplyRun;
+    private handleExecutionFailure;
+    private prepareJobApplyRun;
     /**
      * Run full job-application automation for an existing run.
      */

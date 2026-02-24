@@ -16,6 +16,8 @@ export type ScrapedJob = z.infer<typeof scrapedJobSchema>;
  * Scraper service for studio/job ingestion via Python scripts.
  */
 export declare class ScraperService {
+    private upsertStudioRow;
+    private insertScrapedJobIfMissing;
     /**
      * Runs a Python scraper script and returns parsed JSON payload.
      */

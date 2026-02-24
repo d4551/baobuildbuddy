@@ -192,10 +192,12 @@ const buildJobsWhereClause = (query: JobListQuery) => {
 const filterJobsByAttributes = (jobRows: JobRow[], query: JobListQuery): JobRow[] => {
   let filtered = jobRows;
   if (query.platform && isOneOf(JOB_SUPPORTED_PLATFORMS, query.platform)) {
-    filtered = filtered.filter((job) => job.platforms?.includes(query.platform));
+    const platform = query.platform;
+    filtered = filtered.filter((job) => job.platforms?.includes(platform));
   }
   if (query.genre && isOneOf(JOB_GAME_GENRES, query.genre)) {
-    filtered = filtered.filter((job) => job.gameGenres?.includes(query.genre));
+    const genre = query.genre;
+    filtered = filtered.filter((job) => job.gameGenres?.includes(genre));
   }
   return filtered;
 };

@@ -72,12 +72,13 @@ async function getResume(context: ResumeContext, id: string): Promise<ResumeData
   });
 }
 
-async function createResume(context: ResumeContext, resumeData: CreateResumeInput): Promise<unknown> {
+async function createResume(context: ResumeContext, resumeData: CreateResumeInput): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api.resumes.post(resumeData);
     assertApiResponse(error, context.t("apiErrors.resumes.createFailed"));
+    const normalized = requireValue(toResumeData(data), context.t("apiErrors.resumes.invalidPayload"));
     await fetchResumes(context);
-    return data;
+    return normalized;
   });
 }
 

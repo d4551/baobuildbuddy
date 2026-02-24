@@ -1,4 +1,30 @@
 import { Elysia } from "elysia";
+type MatchJobsResponse = {
+    message: string;
+    matches: Array<{
+        jobId: string;
+        title: string;
+        company: string;
+        location: string | null;
+        remote: boolean;
+        score: number;
+        strengths: string[];
+        concerns: string[];
+        highlightSkills: string[];
+    }>;
+    recommendations: string[];
+};
+type CoverLetterSections = {
+    introduction: string;
+    body: string;
+    conclusion: string;
+};
+type ResumeAnalysisResult = {
+    score: number;
+    strengths: string[];
+    improvements: string[];
+    keywords: string[];
+};
 /**
  * AI route group for chat, content generation, matching, and automation triggers.
  */
@@ -66,23 +92,15 @@ export declare const aiRoutes: Elysia<"/ai", {
                 headers: unknown;
                 response: {
                     200: {
-                        error: string;
-                        message?: undefined;
-                        sessionId?: undefined;
-                        timestamp?: undefined;
-                        provider?: undefined;
-                        model?: undefined;
-                        followUps?: undefined;
-                        contextDomain?: undefined;
-                    } | {
                         message: string;
-                        sessionId: string;
+                        sessionId: string | null | undefined;
                         timestamp: string;
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         followUps: string[];
                         contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
-                        error?: undefined;
+                    } | {
+                        error: string;
                     };
                     422: {
                         type: "validation";
@@ -121,12 +139,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                         message: string;
                         resumeId: string;
                         jobId: string | null;
-                        analysis: {
-                            score: number;
-                            strengths: string[];
-                            improvements: string[];
-                            keywords: never[];
-                        };
+                        analysis: ResumeAnalysisResult;
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         error?: undefined;
@@ -166,11 +179,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                         model?: undefined;
                     } | {
                         message: string;
-                        content: {
-                            introduction: string;
-                            body: string;
-                            conclusion: string;
-                        };
+                        content: CoverLetterSections;
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         error?: undefined;
@@ -201,31 +210,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message: string;
-                        matches: ({
-                            jobId: string;
-                            title: string;
-                            company: string;
-                            score: number;
-                            strengths: never[];
-                            concerns: never[];
-                            highlightSkills: never[];
-                            location?: undefined;
-                            remote?: undefined;
-                        } | {
-                            jobId: string;
-                            title: string;
-                            company: string;
-                            location: string;
-                            remote: boolean | null;
-                            score: number;
-                            strengths: never[];
-                            concerns: never[];
-                            highlightSkills: never[];
-                        })[];
-                        recommendations: string[];
-                    } | {
+                    200: MatchJobsResponse | {
                         error: string;
                     };
                     422: {
@@ -361,3 +346,4 @@ export declare const aiRoutes: Elysia<"/ai", {
     resolve: {};
     schema: {};
 }>;
+export {};

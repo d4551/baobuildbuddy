@@ -19,6 +19,8 @@
     "build:windows": "bun run build",
     "build:desktop": "bun run --filter '@bao/desktop' build",
     "build:desktop:debug": "bun run --filter '@bao/desktop' build:debug",
+    "release:refresh:all-os": "bash scripts/refresh-desktop-releases.sh",
+    "release:refresh:all-os:fast": "bash scripts/refresh-desktop-releases.sh --skip-quality-gates",
     "typecheck": "bun run --filter '@bao/server' build:types && bun run --filter '@bao/shared' typecheck && bun run --filter '@bao/server' typecheck && bun run --filter '@bao/client' typecheck",
     "db:generate": "bun --env-file=.env run drizzle-kit generate",
     "db:push": "bun --env-file=.env run drizzle-kit push",

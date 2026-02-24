@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES } from "../constants/automation";
 
 /**

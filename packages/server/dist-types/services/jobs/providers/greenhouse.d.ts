@@ -11,5 +11,8 @@ export declare class GreenhouseProvider implements JobProvider {
         query?: string;
     }): Promise<RawJob[]>;
     private fetchBoardJobs;
+    private fetchBoardJobsPage;
+    private fetchGreenhousePage;
+    private filterMappedJobs;
     private mapJob;
 }

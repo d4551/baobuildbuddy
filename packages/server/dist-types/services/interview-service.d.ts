@@ -16,6 +16,10 @@ export declare class InterviewService {
      * Fetch one interview session.
      */
     getSession(id: string): Promise<InterviewSession | null>;
+    private selectQuestionForResponse;
+    private buildAnalyzedResponse;
+    private persistSessionResponses;
+    private persistFinalAnalysis;
     /**
      * Add one candidate response and generate AI-backed feedback.
      */

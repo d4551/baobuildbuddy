@@ -21,25 +21,24 @@ import {
   JOB_SUPPORTED_PLATFORMS,
   JOB_TYPES,
 } from "@bao/shared";
-import { and, desc, eq, gte, inArray, like, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, like, sql, type SQLWrapper } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs, savedJobs } from "../../db/schema/jobs";
 import { createServerLogger } from "../../utils/logger";
 import { deduplicateJobs, generateContentHash } from "./deduplication";
+import { CompanyBoardsProvider } from "./providers/company-board";
 import {
-  CompanyBoardsProvider,
-  GreenhouseProvider,
   gameDevNetProvider,
   gamesJobsDirectProvider,
   grackleProvider,
   hitmarkerProvider,
-  type JobProvider,
-  LeverProvider,
   pocketGamerProvider,
-  type RawJob,
   remoteGameJobsProvider,
   workWithIndiesProvider,
-} from "./providers";
+} from "./providers/gaming-providers";
+import { GreenhouseProvider } from "./providers/greenhouse";
+import { LeverProvider } from "./providers/lever";
+import type { JobProvider, RawJob } from "./providers/provider-interface";
 
 const isOneOf = <T extends string>(values: readonly T[], value: unknown): value is T => {
   if (typeof value !== "string") {
@@ -186,8 +185,8 @@ export class JobAggregator {
     return "updated";
   }
 
-  private buildSearchConditions(filters: JobFilters): unknown[] {
-    const conditions: unknown[] = [];
+  private buildSearchConditions(filters: JobFilters): SQLWrapper[] {
+    const conditions: SQLWrapper[] = [];
     if (filters.query) {
       const searchPattern = `%${filters.query}%`;
       conditions.push(
@@ -282,10 +281,9 @@ export class JobAggregator {
     filtered = this.applyGenreFilter(filtered, filters.gameGenres);
     filtered = this.applyPlatformFilter(filtered, filters.platforms);
     filtered = this.applySalaryFilter(filtered, filters.salaryMin, filters.salaryMax);
-    if (filters.minMatchScore !== undefined) {
-      filtered = filtered.filter(
-        (job) => job.matchScore !== undefined && job.matchScore >= filters.minMatchScore,
-      );
+    const minMatchScore = filters.minMatchScore;
+    if (minMatchScore !== undefined) {
+      filtered = filtered.filter((job) => job.matchScore !== undefined && job.matchScore >= minMatchScore);
     }
     if (filters.featured !== undefined) {
       filtered = filtered.filter((job) => job.featured === filters.featured);

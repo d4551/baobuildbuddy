@@ -31,15 +31,16 @@ bun run verify:pages
 
 Lint diagnostics are intentionally unmasked; warning/error detection behavior is preserved.
 
-Current command outcomes:
+Expected validation outcomes:
 
-- `bun run lint`: pass, with `255` Biome warnings (visible, unmasked).
-- `bun run --filter '@bao/client' lint`: pass with no warnings.
-- `bun run typecheck`: pass.
-- `bun run test`: pass (`66` server tests, `19` client tests).
-- `bun run build`: pass.
-- `CI=true bun run build:desktop`: pass.
-- `bun run verify:pages`: pass when pointed to the BaoBuildBuddy preview target.
+- `bun run lint`: no lint warnings or errors.
+- `bun run --filter '@bao/client' lint`: no warnings or errors.
+- `bun run typecheck`: no TypeScript diagnostics.
+- `bun run test`: all workspace test suites pass.
+- `bun run build`: all packages build successfully.
+- `CI=true bun run build:desktop`: desktop packaging build succeeds.
+- `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
 If local port `3001` is already occupied, run page verification against an isolated preview port:
 

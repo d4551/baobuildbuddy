@@ -102,7 +102,7 @@ const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>
 };
 
 type ResumeRouteSetState = {
-  status?: number;
+  status?: number | string;
 };
 type ResumeScoreBody = {
   jobId: string;

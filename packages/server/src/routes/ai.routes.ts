@@ -1,4 +1,4 @@
-import type { AIChatContext } from "@bao/shared";
+import type { AIChatContext, AIChatContextDomain } from "@bao/shared";
 import {
   AI_CHAT_CONTEXT_DOMAIN_IDS,
   AI_CHAT_CONTEXT_ENTITY_TYPE_IDS,
@@ -369,7 +369,7 @@ type MatchJobsBody = {
   skills?: string[];
 };
 type RouteSetState = {
-  status?: number;
+  status?: number | string;
 };
 type MatchProfile = {
   userSkills: string[];
@@ -709,7 +709,7 @@ const startJobApplyRun = (
 const buildChatRouteResponse = (
   assistantMessage: ChatHistoryInsert,
   response: Awaited<ReturnType<AIService["generate"]>>,
-  preferredDomain: string,
+  preferredDomain: AIChatContextDomain,
 ) => ({
   message: assistantMessage.content,
   sessionId: assistantMessage.sessionId,

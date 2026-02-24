@@ -232,6 +232,45 @@ const spawnPythonProcess = (
     killSignal: killSignal ?? DEFAULT_KILL_SIGNAL,
   });
 
+interface ProcessWritableStdin {
+  write(payload: string): Promise<number | undefined> | number | undefined;
+  end(): Promise<undefined> | undefined;
+}
+
+const isWritableStdin = (stream: unknown): stream is ProcessWritableStdin => {
+  if (typeof stream !== "object" || stream === null) {
+    return false;
+  }
+  if (!(("write" in stream) && ("end" in stream))) {
+    return false;
+  }
+  return typeof stream.write === "function" && typeof stream.end === "function";
+};
+
+const writeProcessPayload = async (
+  stream: ProcessWritableStdin,
+  payload: string,
+): Promise<void> => {
+  await stream.write(payload);
+  await stream.end();
+};
+
+const isReadableBinaryStream = (
+  stream: number | ReadableStream<Uint8Array> | undefined,
+): stream is ReadableStream<Uint8Array> => stream instanceof ReadableStream;
+
+const createClosedBinaryStream = (): ReadableStream<Uint8Array> =>
+  new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.close();
+    },
+  });
+
+const resolveReadableBinaryStream = (
+  stream: number | ReadableStream<Uint8Array> | undefined,
+): ReadableStream<Uint8Array> =>
+  isReadableBinaryStream(stream) ? stream : createClosedBinaryStream();
+
 const buildScriptPayload = (options: RunPythonScriptOptions): string =>
   JSON.stringify({
     ...options.scriptInput,
@@ -258,15 +297,15 @@ export async function runPythonScript(
   const timeoutSignal = AbortSignal.timeout(timeoutMs);
   const signal = createProcessSignal(timeoutSignal, options.signal, abortState);
   const proc = spawnPythonProcess(scriptPath, signal, options.killSignal);
+  if (isWritableStdin(proc.stdin)) {
+    await writeProcessPayload(proc.stdin, buildScriptPayload(options));
+  }
 
-  await proc.stdin.write(buildScriptPayload(options));
-  await proc.stdin.end();
-
-  const stdoutTask = readNdjsonLines(proc.stdout, (line) => {
+  const stdoutTask = readNdjsonLines(resolveReadableBinaryStream(proc.stdout), (line) => {
     pushBoundedLine(stdoutLines, line, stdoutLimit);
     options.onStdoutLine?.(line);
   });
-  const stderrTask = readNdjsonLines(proc.stderr, (line) => {
+  const stderrTask = readNdjsonLines(resolveReadableBinaryStream(proc.stderr), (line) => {
     pushBoundedLine(stderrLines, line, stderrLimit);
     options.onStderrLine?.(line);
   });

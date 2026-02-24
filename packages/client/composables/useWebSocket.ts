@@ -105,10 +105,13 @@ function logSettledTask(
   task: Promise<unknown>,
   errorPrefix: string,
 ): void {
-  settlePromise(task, errorPrefix).then((result) => {
+  const settleTask = settlePromise(task, errorPrefix).then((result) => {
     if (!result.ok) {
       logger.error(errorPrefix, result.error);
     }
+  });
+  settleTask.catch((error: unknown) => {
+    logger.error(errorPrefix, error);
   });
 }
 
@@ -278,7 +281,7 @@ function createConnect(context: WebSocketContext) {
     context.state.currentPath = path;
     const wsUrl = buildWebSocketUrl(path, resolveWebSocketBase(context));
 
-    settlePromise(
+    const connectionTask = settlePromise(
       Promise.resolve().then(() => new WebSocket(wsUrl)),
       "Failed to create WebSocket connection",
     ).then((connectionResult) => {
@@ -291,6 +294,9 @@ function createConnect(context: WebSocketContext) {
       context.state.socket = connectionResult.value;
       setConnectionTimeout(context, connectionResult.value);
       attachSocketHandlers(context, connectionResult.value, connect);
+    });
+    connectionTask.catch((error: unknown) => {
+      context.logger.error("WebSocket connection task failed:", error);
     });
   };
 

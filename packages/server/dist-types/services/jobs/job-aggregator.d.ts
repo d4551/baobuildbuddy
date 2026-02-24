@@ -9,6 +9,15 @@ export declare class JobAggregator {
     private cacheExpiry;
     private logger;
     constructor();
+    private fetchProviderJobs;
+    private saveOrUpdateJob;
+    private buildSearchConditions;
+    private applyTechnologyFilter;
+    private applyGenreFilter;
+    private applyPlatformFilter;
+    private extractSalaryBounds;
+    private applySalaryFilter;
+    private applyPostFilters;
     /**
      * Refresh jobs from all providers and update cache
      */
@@ -73,6 +82,7 @@ export declare class JobAggregator {
      * Convert database row to Job format
      */
     private dbRowToJob;
+    private applyOptionalRowFields;
     private normalizeSalary;
     private detectRemote;
     private normalizeStudioType;

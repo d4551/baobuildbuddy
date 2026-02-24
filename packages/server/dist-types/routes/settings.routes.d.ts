@@ -283,10 +283,10 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     interviewSessions: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
-                    savedJobs: (string | number | boolean | never[] | {
+                    portfolioProjects: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
-                    portfolioProjects: (string | number | boolean | never[] | {
+                    savedJobs: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
                     skillMappings: (string | number | boolean | never[] | {

@@ -1,4 +1,9 @@
 import { Elysia } from "elysia";
+type GeneratedCoverLetterContent = {
+    introduction: string;
+    body: string;
+    conclusion: string;
+};
 export declare const coverLetterRoutes: Elysia<"/cover-letters", {
     decorator: {};
     store: {};
@@ -200,41 +205,33 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                         error: string;
                         details?: undefined;
                         message?: undefined;
-                        coverLetter?: undefined;
                         content?: undefined;
+                        coverLetter?: undefined;
                     } | {
                         error: string;
                         details: string;
                         message?: undefined;
-                        coverLetter?: undefined;
                         content?: undefined;
+                        coverLetter?: undefined;
+                    } | {
+                        message: string;
+                        content: GeneratedCoverLetterContent;
+                        error?: undefined;
+                        details?: undefined;
+                        coverLetter?: undefined;
                     } | {
                         message: string;
                         coverLetter: {
                             id: string;
                             company: string;
                             position: string;
-                            jobInfo: {};
-                            content: {
-                                introduction: string;
-                                body: string;
-                                conclusion: string;
-                            };
+                            jobInfo: Record<string, unknown>;
+                            content: GeneratedCoverLetterContent;
                             template: "professional" | "creative" | "gaming" | "executive" | "technical";
                         };
                         error?: undefined;
                         details?: undefined;
                         content?: undefined;
-                    } | {
-                        message: string;
-                        content: {
-                            introduction: string;
-                            body: string;
-                            conclusion: string;
-                        };
-                        error?: undefined;
-                        details?: undefined;
-                        coverLetter?: undefined;
                     };
                     422: {
                         type: "validation";
@@ -295,3 +292,4 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
     standaloneSchema: {};
     response: {};
 }>;
+export {};

@@ -411,8 +411,15 @@ export class AIService {
       return;
     }
 
-    const { messages: _messages, ...providerOptions } = options;
-    return providerOptions;
+    const { temperature, maxTokens, topP, topK, timeout, systemPrompt } = options;
+    return {
+      temperature,
+      maxTokens,
+      topP,
+      topK,
+      timeout,
+      systemPrompt,
+    };
   }
 
   private static pushProviderError(
@@ -621,13 +628,13 @@ export class AIService {
   async getAvailableProviders(): Promise<AIProviderStatus[]> {
     const checks = Array.from(this.providers.entries()).map(([providerName, provider]) =>
       provider.isAvailable().then(
-        (available) => ({
+        (available): AIProviderStatus => ({
           provider: providerName,
           available,
           health: available ? "healthy" : "down",
           lastCheck: Date.now(),
         }),
-        (error: unknown) => ({
+        (error: unknown): AIProviderStatus => ({
           provider: providerName,
           available: false,
           health: "down",

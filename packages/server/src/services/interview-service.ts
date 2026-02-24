@@ -1252,7 +1252,7 @@ export class InterviewService {
       sessionId,
       responses,
       questionsLength: session.questions.length,
-      endTime: session.endTime,
+      endTime: session.endTime ?? null,
       nowIso,
     });
 

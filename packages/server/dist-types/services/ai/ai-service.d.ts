@@ -45,6 +45,15 @@ export declare class AIService {
     getProvider(name?: AIProviderType): AIProvider | null;
     private static mergePromptWithContext;
     private static toProviderOptions;
+    private static pushProviderError;
+    private static buildFailureMessage;
+    private resolveAvailableProvider;
+    private generateFromProvider;
+    private generateWithFallback;
+    private buildGenerateFailureResponse;
+    private streamProviderIterator;
+    private streamProvider;
+    private streamWithFallback;
     /**
      * Generate a response with automatic fallback
      */

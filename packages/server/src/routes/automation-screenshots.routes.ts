@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -49,8 +50,8 @@ const readRunScreenshots = async (runId: string): Promise<{ id: string; screensh
   return { id: run.id, screenshots: run.screenshots };
 };
 
-const createScreenshotResponse = (file: BunFile, extension: string): Response =>
-  new Response(file, {
+const createScreenshotResponse = (contents: Uint8Array, extension: string): Response =>
+  new Response(Buffer.from(contents), {
     headers: {
       "content-type": CONTENT_TYPE_BY_EXTENSION[extension] || "application/octet-stream",
       "cache-control": "private, no-store, no-cache",
@@ -99,14 +100,9 @@ export const automationScreenshotRoutes = new Elysia({
       return { error: "Screenshot file missing from disk" };
     }
 
-    const file = Bun.file(filePath);
-    if (!(await file.exists())) {
-      set.status = HTTP_STATUS_NOT_FOUND;
-      return { error: "Screenshot file missing from disk after resolve" };
-    }
-
     const extension = extname(fileName).toLowerCase();
-    return createScreenshotResponse(file, extension);
+    const contents = await readFile(filePath);
+    return createScreenshotResponse(contents, extension);
   },
   {
     params: t.Object({

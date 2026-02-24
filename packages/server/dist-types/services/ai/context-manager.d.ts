@@ -17,6 +17,13 @@ export declare class ConversationContextManager {
      * Load domain-specific data from DB
      */
     private loadDomainContext;
+    private getDomainContextLoader;
+    private loadResumeContext;
+    private loadJobSearchContext;
+    private loadInterviewContext;
+    private loadPortfolioContext;
+    private loadSkillsContext;
+    private loadAutomationContext;
     /**
      * Generate follow-up suggestions based on domain and last response
      */

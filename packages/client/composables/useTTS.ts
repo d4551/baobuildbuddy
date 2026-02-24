@@ -1,11 +1,12 @@
 import type { VoiceSettings } from "@bao/shared";
+import type { Ref } from "vue";
 import { resolveSpeechLocale, resolveSpeechSynthesis } from "~/utils/speech";
 
 interface TTSState {
-  isSpeaking: ReturnType<typeof ref<boolean>>;
-  isPaused: ReturnType<typeof ref<boolean>>;
-  error: ReturnType<typeof ref<string | null>>;
-  voices: ReturnType<typeof ref<SpeechSynthesisVoice[]>>;
+  isSpeaking: Ref<boolean>;
+  isPaused: Ref<boolean>;
+  error: Ref<string | null>;
+  voices: Ref<SpeechSynthesisVoice[]>;
 }
 
 interface TTSContext {
@@ -59,7 +60,7 @@ function createUtterance(
   text: string,
   opts?: Partial<Pick<VoiceSettings, "voiceId" | "rate" | "pitch" | "volume" | "language">>,
 ): SpeechSynthesisUtterance {
-  const persisted = context.settings?.value ?? {};
+  const persisted: Partial<VoiceSettings> = context.settings?.value ?? {};
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = opts?.rate ?? persisted.rate ?? 1;
   utterance.pitch = opts?.pitch ?? persisted.pitch ?? 1;

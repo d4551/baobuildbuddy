@@ -14,6 +14,12 @@ export interface UnifiedSearchResult {
     totalTime: number;
 }
 export declare class SearchService {
+    private runTableQuery;
+    private searchJobs;
+    private searchStudios;
+    private searchSkills;
+    private searchResumes;
+    private collectAutocomplete;
     searchAll(query: string, types?: SearchType[]): Promise<UnifiedSearchResult>;
     autocomplete(prefix: string): Array<{
         text: string;

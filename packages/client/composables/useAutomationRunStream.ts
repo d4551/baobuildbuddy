@@ -1,5 +1,5 @@
 import type { AutomationRunUiState, RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared";
-import { getCurrentScope, onScopeDispose, readonly, ref } from "vue";
+import { getCurrentScope, onScopeDispose, readonly, ref, type Ref } from "vue";
 import { useAutomation } from "./useAutomation";
 
 const TERMINAL_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>(["success", "error"]);
@@ -19,13 +19,13 @@ type StreamError = {
 };
 
 type StreamStateRefs = {
-  state: ReturnType<typeof ref<AutomationRunUiState>>;
-  run: ReturnType<typeof ref<RpaRunExecutionEnvelope | null>>;
-  events: ReturnType<typeof ref<RpaRunEvent[]>>;
-  streamError: ReturnType<typeof ref<StreamError | null>>;
-  isStreaming: ReturnType<typeof ref<boolean>>;
-  activeRunId: ReturnType<typeof ref<string>>;
-  lastSequenceByRunId: ReturnType<typeof ref<Record<string, number>>>;
+  state: Ref<AutomationRunUiState>;
+  run: Ref<RpaRunExecutionEnvelope | null>;
+  events: Ref<RpaRunEvent[]>;
+  streamError: Ref<StreamError | null>;
+  isStreaming: Ref<boolean>;
+  activeRunId: Ref<string>;
+  lastSequenceByRunId: Ref<Record<string, number>>;
 };
 
 type StreamLifecycle = {

@@ -11,5 +11,7 @@ export declare class LeverProvider implements JobProvider {
         query?: string;
     }): Promise<RawJob[]>;
     private fetchCompanyJobs;
+    private fetchCompanyJobsPage;
+    private fetchLeverPage;
     private mapJob;
 }

@@ -1,4 +1,16 @@
 import type { Achievement, DailyChallenge, GamificationStats, LevelUpResult, UserGamificationData } from "@bao/shared";
+type WeeklyDaySummary = {
+    date: string;
+    actions: number;
+    xpEarned: number;
+};
+type WeeklyProgressResult = {
+    challengesCompleted: number;
+    xpEarned: number;
+    actionsCount: number;
+    days: WeeklyDaySummary[];
+    topCategory: string;
+};
 export declare class GamificationService {
     private readonly DEFAULT_ID;
     private typeSafeStats;
@@ -14,6 +26,8 @@ export declare class GamificationService {
      * Award XP and handle level ups with streak multiplier
      */
     awardXP(amount: number, reason: string): Promise<LevelUpResult | null>;
+    private persistAwardedXP;
+    private appendActionHistoryEntry;
     /**
      * Get all achievements with unlock status
      */
@@ -22,6 +36,8 @@ export declare class GamificationService {
      * Check and unlock achievements based on current stats
      */
     checkAchievements(stats: Partial<GamificationStats>): Promise<Achievement[]>;
+    private areAchievementRequirementsMet;
+    private awardAchievementsSequentially;
     /**
      * Get daily challenges
      */
@@ -41,17 +57,13 @@ export declare class GamificationService {
     /**
      * Get weekly progress from action history
      */
-    getWeeklyProgress(): Promise<{
-        challengesCompleted: number;
-        xpEarned: number;
-        actionsCount: number;
-        days: Array<{
-            date: string;
-            actions: number;
-            xpEarned: number;
-        }>;
-        topCategory: string;
-    }>;
+    getWeeklyProgress(): Promise<WeeklyProgressResult>;
+    private filterActionsByDate;
+    private groupActionsByDate;
+    private groupCategoriesByAction;
+    private buildWeeklyDaySummaries;
+    private resolveTopCategory;
+    private countCompletedChallenges;
     /**
      * Get monthly statistics
      */
@@ -65,3 +77,4 @@ export declare class GamificationService {
     }>;
 }
 export declare const gamificationService: GamificationService;
+export {};

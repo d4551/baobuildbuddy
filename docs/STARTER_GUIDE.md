@@ -22,6 +22,7 @@ bun run typecheck
 bun run test
 bun run build
 bun run build:desktop
+bun run release:refresh:all-os
 ```
 
 Script verification checks:
@@ -43,15 +44,16 @@ bun run verify:pages
 
 Lint diagnostics are not hidden; warnings/errors remain fully visible in command output.
 
-Current command outcomes:
+Expected validation outcomes:
 
-- `bun run lint`: pass, with `255` Biome warnings (visible, unmasked).
-- `bun run --filter '@bao/client' lint`: pass with no warnings.
-- `bun run typecheck`: pass.
-- `bun run test`: pass (`66` server tests, `19` client tests).
-- `bun run build`: pass.
-- `CI=true bun run build:desktop`: pass.
-- `bun run verify:pages`: pass when pointed to the BaoBuildBuddy preview target.
+- `bun run lint`: no lint warnings or errors.
+- `bun run --filter '@bao/client' lint`: no warnings or errors.
+- `bun run typecheck`: no TypeScript diagnostics.
+- `bun run test`: all workspace test suites pass.
+- `bun run build`: all packages build successfully.
+- `CI=true bun run build:desktop`: desktop packaging build succeeds.
+- `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
 ## 1) Understand what is being started
 
@@ -411,6 +413,16 @@ If your org requires Electron-specific tooling, Electron remains viable but is i
 
 ### 12.3 Build desktop installer
 
+Canonical all-target desktop release refresh:
+
+```bash
+bun run release:refresh:all-os
+```
+
+This command refreshes macOS/Linux/Windows desktop artifacts and rewrites `packages/desktop/releases/sha256.txt`.
+
+Single-target desktop build for the current host:
+
 ```bash
 bun run build:desktop
 ```
@@ -441,7 +453,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 Cross-target requirements from Tauri:
 1. Windows target (`x86_64-pc-windows-msvc`) needs MSVC `link.exe` from Visual Studio Build Tools C++ workload.
-2. Linux target (`x86_64-unknown-linux-gnu`) needs cross `pkg-config` and target sysroot (`PKG_CONFIG_SYSROOT_DIR`) plus target GTK/WebKit development libraries.
+2. Linux target (`aarch64-unknown-linux-gnu`) needs target GTK/WebKit development libraries and containerized build dependencies.
 
 ### 12.4 Tauri-specific environment knobs
 

@@ -1,4 +1,17 @@
 import { Elysia } from "elysia";
+import { jobs } from "../db/schema/jobs";
+type JobRow = typeof jobs.$inferSelect;
+type JobRecommendation = JobRow & {
+    matchScore: number;
+    matchReason: string;
+    rank: number;
+};
+type JobRecommendationsResponse = {
+    recommendations: JobRecommendation[];
+    reason: string;
+    aiPowered: boolean;
+    provider?: string;
+};
 export declare const jobsRoutes: Elysia<"/jobs", {
     decorator: {};
     store: {};
@@ -35,29 +48,29 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                 200: {
                     jobs: {
                         id: string;
+                        source: string | null;
+                        type: string | null;
                         title: string;
+                        description: string | null;
                         company: string;
                         location: string;
-                        remote: boolean | null;
-                        hybrid: boolean | null;
-                        salary: Record<string, unknown> | null;
-                        description: string | null;
                         requirements: string[] | null;
                         technologies: string[] | null;
-                        experienceLevel: string | null;
-                        type: string | null;
                         postedDate: string | null;
                         url: string | null;
-                        source: string | null;
-                        studioType: string | null;
+                        experienceLevel: string | null;
+                        remote: boolean | null;
+                        hybrid: boolean | null;
                         gameGenres: string[] | null;
                         platforms: string[] | null;
-                        contentHash: string | null;
                         tags: string[] | null;
-                        companyLogo: string | null;
-                        applicationUrl: string | null;
                         createdAt: string;
                         updatedAt: string;
+                        salary: Record<string, unknown> | null;
+                        studioType: string | null;
+                        contentHash: string | null;
+                        companyLogo: string | null;
+                        applicationUrl: string | null;
                     }[];
                     page: number;
                     limit: number;
@@ -395,73 +408,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        recommendations: {
-                            matchScore: number;
-                            matchReason: string;
-                            rank: number;
-                            id: string;
-                            title: string;
-                            company: string;
-                            location: string;
-                            remote: boolean | null;
-                            hybrid: boolean | null;
-                            salary: Record<string, unknown> | null;
-                            description: string | null;
-                            requirements: string[] | null;
-                            technologies: string[] | null;
-                            experienceLevel: string | null;
-                            type: string | null;
-                            postedDate: string | null;
-                            url: string | null;
-                            source: string | null;
-                            studioType: string | null;
-                            gameGenres: string[] | null;
-                            platforms: string[] | null;
-                            contentHash: string | null;
-                            tags: string[] | null;
-                            companyLogo: string | null;
-                            applicationUrl: string | null;
-                            createdAt: string;
-                            updatedAt: string;
-                        }[];
-                        reason: string;
-                        aiPowered: boolean;
-                        provider?: undefined;
-                    } | {
-                        recommendations: {
-                            rank: number;
-                            matchScore: number;
-                            matchReason: string;
-                            id: string;
-                            title: string;
-                            company: string;
-                            location: string;
-                            remote: boolean | null;
-                            hybrid: boolean | null;
-                            salary: Record<string, unknown> | null;
-                            description: string | null;
-                            requirements: string[] | null;
-                            technologies: string[] | null;
-                            experienceLevel: string | null;
-                            type: string | null;
-                            postedDate: string | null;
-                            url: string | null;
-                            source: string | null;
-                            studioType: string | null;
-                            gameGenres: string[] | null;
-                            platforms: string[] | null;
-                            contentHash: string | null;
-                            tags: string[] | null;
-                            companyLogo: string | null;
-                            applicationUrl: string | null;
-                            createdAt: string;
-                            updatedAt: string;
-                        }[];
-                        reason: string;
-                        aiPowered: boolean;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                    };
+                    200: JobRecommendationsResponse;
                 };
             };
         };
@@ -499,3 +446,4 @@ export declare const jobsRoutes: Elysia<"/jobs", {
     standaloneSchema: {};
     response: {};
 }>;
+export {};

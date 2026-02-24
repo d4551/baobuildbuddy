@@ -1,5 +1,5 @@
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import type * as schema from "../schema";
+import type * as schema from "../schema/schema-modules";
 import { studios } from "../schema/studios";
 import { SEED_STUDIOS } from "./studios";
 

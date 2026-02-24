@@ -16,14 +16,15 @@ bun run build:desktop
 
 Packaging docs in this file assume the above succeeds without masked diagnostics.
 
-Current command outcomes:
+Expected validation outcomes:
 
-- `bun run lint`: pass, with `255` Biome warnings (visible, unmasked).
-- `bun run --filter '@bao/client' lint`: pass with no warnings.
-- `bun run typecheck`: pass.
-- `bun run test`: pass (`66` server tests, `19` client tests).
-- `bun run build`: pass.
-- `CI=true bun run build:desktop`: pass.
+- `bun run lint`: no lint warnings or errors.
+- `bun run --filter '@bao/client' lint`: no warnings or errors.
+- `bun run typecheck`: no TypeScript diagnostics.
+- `bun run test`: all workspace test suites pass.
+- `bun run build`: all packages build successfully.
+- `CI=true bun run build:desktop`: desktop packaging build succeeds.
+- `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
 
 Optional SSR/page validation before packaging (when validating UI render contracts):
 
@@ -34,70 +35,33 @@ VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 
 ## Regeneration workflow (macOS host)
 
-Build commands used to regenerate canonical artifacts:
+Use the canonical all-target refresh command:
 
 ```bash
-# macOS dmg (CI mode avoids Finder/AppleScript interactivity failures)
-CI=true bun run --filter '@bao/desktop' build -- --target aarch64-apple-darwin --bundles dmg
-
-# Windows x64 portable exe + generated NSIS script (cross-build)
-PATH="/opt/homebrew/opt/llvm/bin:$PATH" \
-  bun run --filter '@bao/desktop' build -- \
-    --target x86_64-pc-windows-msvc \
-    --runner cargo-xwin \
-    --config "{\"build\":{\"beforeBuildCommand\":\"\"}}"
-
-# Windows x64 setup.exe (compile NSIS script in Linux container)
-docker run --rm --platform linux/arm64/v8 \
-  -v "$PWD:$PWD" \
-  -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
-  -w "$PWD/packages/desktop/src-tauri/target/x86_64-pc-windows-msvc/release/nsis/x64" \
-  ubuntu:24.04 bash -lc '
-    set -euo pipefail
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get install -y nsis
-    makensis -V2 installer.nsi
-  '
-
-# Linux ARM64 (native ARM container build)
-docker run --rm --platform linux/arm64/v8 \
-  -v "$PWD:/workspace" -w /workspace ubuntu:24.04 bash -lc '
-    set -euo pipefail
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get install -y curl unzip build-essential pkg-config \
-      libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
-      librsvg2-dev patchelf ca-certificates git
-    curl -fsSL https://bun.sh/install | bash
-    export BUN_INSTALL="/root/.bun"
-    export PATH="$BUN_INSTALL/bin:$PATH"
-    curl https://sh.rustup.rs -sSf | sh -s -- -y
-    export PATH="/root/.cargo/bin:$PATH"
-    rustup target add aarch64-unknown-linux-gnu
-    export APPIMAGE_EXTRACT_AND_RUN=1
-    bun run --filter "@bao/desktop" build -- \
-      --target aarch64-unknown-linux-gnu --config "{\"build\":{\"beforeBuildCommand\":\"\"}}"
-  '
-
-# Linux ARM64 AppImage fallback from existing AppDir (when linuxdeploy fails)
-docker run --rm --platform linux/arm64/v8 \
-  -v "$PWD:/workspace" -w /workspace ubuntu:24.04 bash -lc '
-    set -euo pipefail
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get install -y curl ca-certificates libglib2.0-0 file squashfs-tools
-    curl -L -o /tmp/appimagetool-aarch64.AppImage \
-      https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage
-    chmod +x /tmp/appimagetool-aarch64.AppImage
-    export APPIMAGE_EXTRACT_AND_RUN=1
-    /tmp/appimagetool-aarch64.AppImage \
-      packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/BaoBuildBuddy.AppDir \
-      packages/desktop/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/BaoBuildBuddy_0.1.0_aarch64.AppImage
-  '
+bun run release:refresh:all-os
 ```
 
-After build, copy Tauri bundle outputs into `packages/desktop/releases/{macos,linux,windows}` and refresh `sha256.txt`.
+This command performs:
+
+- release quality gates (`lint`, `typecheck`, `test`, `build`)
+- macOS DMG build (`aarch64-apple-darwin`)
+- Windows x64 portable and setup builds (`x86_64-pc-windows-msvc`)
+- Linux ARM64 AppImage/deb/rpm builds (`aarch64-unknown-linux-gnu`)
+- staging into `packages/desktop/releases/{macos,linux,windows}`
+- checksum regeneration in `packages/desktop/releases/sha256.txt`
+
+Advanced target selection examples:
+
+```bash
+# Skip quality gates when only rebuilding artifacts
+bash scripts/refresh-desktop-releases.sh --skip-quality-gates
+
+# Rebuild only Linux + Windows artifacts
+bash scripts/refresh-desktop-releases.sh --skip-macos
+
+# Rebuild only macOS artifacts
+bash scripts/refresh-desktop-releases.sh --skip-linux --skip-windows
+```
 
 ## Canonical release directories
 

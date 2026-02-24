@@ -31,5 +31,17 @@ export declare class DataService {
      * Uses a transaction for atomicity
      */
     importAll(data: BaoExportData): Promise<ImportResult>;
+    private executeImportTransaction;
+    private sanitizeImportedSettings;
+    private runTasksSequentially;
+    private importProfileSection;
+    private importSettingsSection;
+    private importResumesSection;
+    private importCoverLettersSection;
+    private importPortfolioProjectsSection;
+    private importInterviewSessionsSection;
+    private importGamificationSection;
+    private importSkillMappingsSection;
+    private importChatHistorySection;
 }
 export declare const dataService: DataService;

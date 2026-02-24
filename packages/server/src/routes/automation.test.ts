@@ -12,8 +12,8 @@ const resumeId = generateId();
 const createdRunIds: string[] = [];
 type RunJobApply = typeof applicationAutomationService.runJobApply;
 type RunEmailResponse = typeof applicationAutomationService.runEmailResponse;
-const runJobApplyStub: RunJobApply = (_runId, _payload, _onProgress) => Promise.resolve();
-const runEmailResponseStub: RunEmailResponse = async (_payload) => {
+const runJobApplyStub: RunJobApply = () => Promise.resolve();
+const runEmailResponseStub: RunEmailResponse = async (payload) => {
   const now = new Date().toISOString();
   const runId = generateId();
   await db.insert(automationRuns).values({
@@ -23,11 +23,11 @@ const runEmailResponseStub: RunEmailResponse = async (_payload) => {
     jobId: null,
     userId: null,
     input: {
-      subject: _payload.subject,
-      message: _payload.message,
-      tone: _payload.tone ?? "professional",
-      ...(typeof _payload.sender === "string" && _payload.sender.length > 0
-        ? { sender: _payload.sender }
+      subject: payload.subject,
+      message: payload.message,
+      tone: payload.tone ?? "professional",
+      ...(typeof payload.sender === "string" && payload.sender.length > 0
+        ? { sender: payload.sender }
         : {}),
     },
     output: {

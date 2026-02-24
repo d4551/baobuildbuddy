@@ -108,7 +108,7 @@ type SkillAnalyzeBody = {
   autoCreateMappings?: boolean;
 };
 type RouteSetState = {
-  status?: number;
+  status?: number | string;
 };
 type SkillAnalysisResponse = {
   message: string;

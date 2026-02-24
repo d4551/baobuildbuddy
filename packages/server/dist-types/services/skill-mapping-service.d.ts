@@ -31,6 +31,16 @@ export declare class SkillMappingService {
      * Calculate career readiness based on skill mappings
      */
     getReadiness(): Promise<ReadinessAssessment>;
+    private groupMappingsByCategory;
+    private buildPathway;
+    private calculatePathwayMatchScore;
+    private buildEmptyReadinessAssessment;
+    private calculateReadinessMetrics;
+    private buildReadinessAssessment;
+    private getTechnicalImprovements;
+    private getSoftSkillImprovements;
+    private getIndustryImprovements;
+    private getPortfolioImprovements;
     /**
      * Calculate average confidence score for a category
      */

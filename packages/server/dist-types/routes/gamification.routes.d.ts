@@ -148,11 +148,11 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                         challengesCompleted: number;
                         xpEarned: number;
                         actionsCount: number;
-                        days: Array<{
+                        days: {
                             date: string;
                             actions: number;
                             xpEarned: number;
-                        }>;
+                        }[];
                         topCategory: string;
                     };
                 };

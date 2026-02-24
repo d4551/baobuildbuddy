@@ -507,10 +507,10 @@ export declare const app: Elysia<"/api", {
                         interviewSessions: (string | number | boolean | never[] | {
                             [x: string]: never;
                         } | null)[];
-                        savedJobs: (string | number | boolean | never[] | {
+                        portfolioProjects: (string | number | boolean | never[] | {
                             [x: string]: never;
                         } | null)[];
-                        portfolioProjects: (string | number | boolean | never[] | {
+                        savedJobs: (string | number | boolean | never[] | {
                             [x: string]: never;
                         } | null)[];
                         skillMappings: (string | number | boolean | never[] | {
@@ -560,29 +560,29 @@ export declare const app: Elysia<"/api", {
                     200: {
                         jobs: {
                             id: string;
+                            source: string | null;
+                            type: string | null;
                             title: string;
+                            description: string | null;
                             company: string;
                             location: string;
-                            remote: boolean | null;
-                            hybrid: boolean | null;
-                            salary: Record<string, unknown> | null;
-                            description: string | null;
                             requirements: string[] | null;
                             technologies: string[] | null;
-                            experienceLevel: string | null;
-                            type: string | null;
                             postedDate: string | null;
                             url: string | null;
-                            source: string | null;
-                            studioType: string | null;
+                            experienceLevel: string | null;
+                            remote: boolean | null;
+                            hybrid: boolean | null;
                             gameGenres: string[] | null;
                             platforms: string[] | null;
-                            contentHash: string | null;
                             tags: string[] | null;
-                            companyLogo: string | null;
-                            applicationUrl: string | null;
                             createdAt: string;
                             updatedAt: string;
+                            salary: Record<string, unknown> | null;
+                            studioType: string | null;
+                            contentHash: string | null;
+                            companyLogo: string | null;
+                            applicationUrl: string | null;
                         }[];
                         page: number;
                         limit: number;
@@ -921,71 +921,39 @@ export declare const app: Elysia<"/api", {
                     headers: unknown;
                     response: {
                         200: {
-                            recommendations: {
+                            recommendations: ({
+                                id: string;
+                                source: string | null;
+                                type: string | null;
+                                title: string;
+                                description: string | null;
+                                company: string;
+                                location: string;
+                                requirements: string[] | null;
+                                technologies: string[] | null;
+                                postedDate: string | null;
+                                url: string | null;
+                                experienceLevel: string | null;
+                                remote: boolean | null;
+                                hybrid: boolean | null;
+                                gameGenres: string[] | null;
+                                platforms: string[] | null;
+                                tags: string[] | null;
+                                createdAt: string;
+                                updatedAt: string;
+                                salary: Record<string, unknown> | null;
+                                studioType: string | null;
+                                contentHash: string | null;
+                                companyLogo: string | null;
+                                applicationUrl: string | null;
+                            } & {
                                 matchScore: number;
                                 matchReason: string;
                                 rank: number;
-                                id: string;
-                                title: string;
-                                company: string;
-                                location: string;
-                                remote: boolean | null;
-                                hybrid: boolean | null;
-                                salary: Record<string, unknown> | null;
-                                description: string | null;
-                                requirements: string[] | null;
-                                technologies: string[] | null;
-                                experienceLevel: string | null;
-                                type: string | null;
-                                postedDate: string | null;
-                                url: string | null;
-                                source: string | null;
-                                studioType: string | null;
-                                gameGenres: string[] | null;
-                                platforms: string[] | null;
-                                contentHash: string | null;
-                                tags: string[] | null;
-                                companyLogo: string | null;
-                                applicationUrl: string | null;
-                                createdAt: string;
-                                updatedAt: string;
-                            }[];
+                            })[];
                             reason: string;
                             aiPowered: boolean;
-                            provider?: undefined;
-                        } | {
-                            recommendations: {
-                                rank: number;
-                                matchScore: number;
-                                matchReason: string;
-                                id: string;
-                                title: string;
-                                company: string;
-                                location: string;
-                                remote: boolean | null;
-                                hybrid: boolean | null;
-                                salary: Record<string, unknown> | null;
-                                description: string | null;
-                                requirements: string[] | null;
-                                technologies: string[] | null;
-                                experienceLevel: string | null;
-                                type: string | null;
-                                postedDate: string | null;
-                                url: string | null;
-                                source: string | null;
-                                studioType: string | null;
-                                gameGenres: string[] | null;
-                                platforms: string[] | null;
-                                contentHash: string | null;
-                                tags: string[] | null;
-                                companyLogo: string | null;
-                                applicationUrl: string | null;
-                                createdAt: string;
-                                updatedAt: string;
-                            }[];
-                            reason: string;
-                            aiPowered: boolean;
-                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                            provider?: string;
                         };
                     };
                 };
@@ -1635,31 +1603,14 @@ export declare const app: Elysia<"/api", {
                             error: string;
                             details?: undefined;
                             message?: undefined;
-                            coverLetter?: undefined;
                             content?: undefined;
+                            coverLetter?: undefined;
                         } | {
                             error: string;
                             details: string;
                             message?: undefined;
+                            content?: undefined;
                             coverLetter?: undefined;
-                            content?: undefined;
-                        } | {
-                            message: string;
-                            coverLetter: {
-                                id: string;
-                                company: string;
-                                position: string;
-                                jobInfo: {};
-                                content: {
-                                    introduction: string;
-                                    body: string;
-                                    conclusion: string;
-                                };
-                                template: "professional" | "creative" | "gaming" | "executive" | "technical";
-                            };
-                            error?: undefined;
-                            details?: undefined;
-                            content?: undefined;
                         } | {
                             message: string;
                             content: {
@@ -1670,6 +1621,23 @@ export declare const app: Elysia<"/api", {
                             error?: undefined;
                             details?: undefined;
                             coverLetter?: undefined;
+                        } | {
+                            message: string;
+                            coverLetter: {
+                                id: string;
+                                company: string;
+                                position: string;
+                                jobInfo: Record<string, unknown>;
+                                content: {
+                                    introduction: string;
+                                    body: string;
+                                    conclusion: string;
+                                };
+                                template: "professional" | "creative" | "gaming" | "executive" | "technical";
+                            };
+                            error?: undefined;
+                            details?: undefined;
+                            content?: undefined;
                         };
                         422: {
                             type: "validation";
@@ -2481,23 +2449,15 @@ export declare const app: Elysia<"/api", {
                     headers: unknown;
                     response: {
                         200: {
-                            error: string;
-                            message?: undefined;
-                            sessionId?: undefined;
-                            timestamp?: undefined;
-                            provider?: undefined;
-                            model?: undefined;
-                            followUps?: undefined;
-                            contextDomain?: undefined;
-                        } | {
                             message: string;
-                            sessionId: string;
+                            sessionId: string | null | undefined;
                             timestamp: string;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             model: string;
                             followUps: string[];
                             contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
-                            error?: undefined;
+                        } | {
+                            error: string;
                         };
                         422: {
                             type: "validation";
@@ -2540,7 +2500,7 @@ export declare const app: Elysia<"/api", {
                                 score: number;
                                 strengths: string[];
                                 improvements: string[];
-                                keywords: never[];
+                                keywords: string[];
                             };
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             model: string;
@@ -2618,27 +2578,17 @@ export declare const app: Elysia<"/api", {
                     response: {
                         200: {
                             message: string;
-                            matches: ({
+                            matches: Array<{
                                 jobId: string;
                                 title: string;
                                 company: string;
+                                location: string | null;
+                                remote: boolean;
                                 score: number;
-                                strengths: never[];
-                                concerns: never[];
-                                highlightSkills: never[];
-                                location?: undefined;
-                                remote?: undefined;
-                            } | {
-                                jobId: string;
-                                title: string;
-                                company: string;
-                                location: string;
-                                remote: boolean | null;
-                                score: number;
-                                strengths: never[];
-                                concerns: never[];
-                                highlightSkills: never[];
-                            })[];
+                                strengths: string[];
+                                concerns: string[];
+                                highlightSkills: string[];
+                            }>;
                             recommendations: string[];
                         } | {
                             error: string;
@@ -2891,11 +2841,11 @@ export declare const app: Elysia<"/api", {
                             challengesCompleted: number;
                             xpEarned: number;
                             actionsCount: number;
-                            days: Array<{
+                            days: {
                                 date: string;
                                 actions: number;
                                 xpEarned: number;
-                            }>;
+                            }[];
                             topCategory: string;
                         };
                     };
@@ -3144,16 +3094,10 @@ export declare const app: Elysia<"/api", {
                     response: {
                         200: {
                             message: string;
-                            detectedSkills: never[];
-                            suggestedMappings: never[];
-                            recommendations: never[];
-                            provider?: undefined;
-                        } | {
-                            message: string;
                             detectedSkills: string[];
                             suggestedMappings: Record<string, unknown>[];
                             recommendations: string[];
-                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                            provider?: string;
                         };
                         422: {
                             type: "validation";

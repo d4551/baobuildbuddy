@@ -33,6 +33,7 @@ bun run typecheck
 bun run test
 bun run build
 bun run build:desktop
+bun run release:refresh:all-os
 ```
 
 Script/runtime verification commands:
@@ -57,15 +58,16 @@ Lint reporting policy:
 - Lint diagnostics are not suppressed.
 - `bun run lint` uses Biome with `--max-diagnostics=1200` to avoid truncated reporting while preserving all current findings in this codebase.
 
-Current command outcomes:
+Expected validation outcomes:
 
-- `bun run lint`: pass, with `255` Biome warnings (visible, unmasked).
-- `bun run --filter '@bao/client' lint`: pass with no warnings.
-- `bun run typecheck`: pass.
-- `bun run test`: pass (`66` server tests, `19` client tests).
-- `bun run build`: pass.
-- `CI=true bun run build:desktop`: pass.
-- `bun run verify:pages`: pass when targeted to the BaoBuildBuddy preview host/port.
+- `bun run lint`: no lint warnings or errors.
+- `bun run --filter '@bao/client' lint`: no warnings or errors.
+- `bun run typecheck`: no TypeScript diagnostics.
+- `bun run test`: all workspace test suites pass.
+- `bun run build`: all packages build successfully.
+- `CI=true bun run build:desktop`: desktop packaging build succeeds.
+- `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
 ## Stack and Version Contract
 
@@ -202,7 +204,7 @@ flowchart TD
   Server -->|contracts| Shared["packages/shared"]
   Server -->|build:types| ServerTypes
 
-  Server -->|register routes| RouteGroup["route modules under packages/server/src/routes/index.ts"]
+  Server -->|register routes| RouteGroup["route modules under packages/server/src/routes/route-modules.ts"]
   RouteGroup --> AuthRoutes["authRoutes"]
   RouteGroup --> UserRoutes["userRoutes"]
   RouteGroup --> SettingsRoutes["settingsRoutes"]
@@ -787,6 +789,16 @@ This command:
 
 #### 8.9.3 Build desktop installers
 
+Canonical cross-target release refresh:
+
+```bash
+bun run release:refresh:all-os
+```
+
+This command runs quality gates, rebuilds desktop artifacts for macOS/Linux/Windows, stages artifacts under `packages/desktop/releases/{macos,linux,windows}`, and regenerates `packages/desktop/releases/sha256.txt`.
+
+Single-target local desktop build (current host target only):
+
 ```bash
 bun run build:desktop
 ```
@@ -821,7 +833,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 Cross-target requirements from Tauri build contracts:
 1. Windows target (`x86_64-pc-windows-msvc`) requires MSVC `link.exe` (Visual Studio Build Tools with C++).
-2. Linux target (`x86_64-unknown-linux-gnu`) requires cross `pkg-config` + sysroot (`PKG_CONFIG_SYSROOT_DIR`, target GTK/WebKit libs).
+2. Linux target (`aarch64-unknown-linux-gnu`) requires target GTK/WebKit development libraries and containerized build dependencies.
 
 #### 8.9.4 Environment overrides for desktop
 
@@ -972,6 +984,8 @@ bun run dev:client
 | Build (Windows) | `bun run build:windows` | Windows entrypoint for CI/local build |
 | Build desktop | `bun run build:desktop` | Build Tauri installer artifacts |
 | Build desktop (debug) | `bun run build:desktop:debug` | Build Tauri debug installer artifacts |
+| Refresh desktop releases (all OS) | `bun run release:refresh:all-os` | Run quality gates, rebuild cross-target artifacts, stage release files, and regenerate checksums |
+| Refresh desktop releases (all OS, fast) | `bun run release:refresh:all-os:fast` | Rebuild and restage cross-target artifacts without rerunning quality gates |
 | Verify SSR pages | `bun run verify:pages` | Validate localized routes return SSR HTML with `<title>`, `<h1>`, and `<main>` |
 | Server API type contract | `bun run --filter '@bao/server' build:types` | Generate `packages/server/dist-types` declarations used by client typecheck |
 | Format | `bun run format` | Apply Biome formatter |

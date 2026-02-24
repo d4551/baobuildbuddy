@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
 import {
   APP_LANGUAGE_CODES,

@@ -74,7 +74,7 @@ type GenerateCoverLetterBody = {
   save?: boolean;
 };
 type RouteSetState = {
-  status?: number;
+  status?: number | string;
 };
 type GeneratedCoverLetterContent = {
   introduction: string;

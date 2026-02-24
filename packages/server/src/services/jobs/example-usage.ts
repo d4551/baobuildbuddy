@@ -18,17 +18,17 @@ function isTimelineEvent(value: unknown): value is { date: string; description: 
 const jobsExampleLogger = createServerLogger("jobs-example-usage");
 
 type ApplicationLogItem = {
-  status: string;
+  status: string | null;
   appliedDate: string;
   notes: string | null;
-  timeline?: unknown[];
+  timeline?: unknown[] | null;
   job: {
     title: string;
     company: string;
   };
 };
 
-function logApplicationTimeline(timeline: unknown[] | undefined): void {
+function logApplicationTimeline(timeline: unknown[] | null | undefined): void {
   if (!(timeline && timeline.length > 0)) {
     return;
   }
@@ -43,7 +43,7 @@ function logApplicationTimeline(timeline: unknown[] | undefined): void {
 
 function logTrackedApplication(app: ApplicationLogItem): void {
   jobsExampleLogger.info(`\n${app.job.title} at ${app.job.company}`);
-  jobsExampleLogger.info(`  Status: ${app.status}`);
+  jobsExampleLogger.info(`  Status: ${app.status ?? "pending"}`);
   jobsExampleLogger.info(`  Applied: ${app.appliedDate}`);
   jobsExampleLogger.info(`  Notes: ${app.notes}`);
   logApplicationTimeline(app.timeline);
