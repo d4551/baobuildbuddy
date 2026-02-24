@@ -8,10 +8,12 @@ const TEST_JOB_URL = "https://example.com/job";
 
 const createFetchMock = (body: string, status: number): typeof fetch =>
   Object.assign(
-    async (_input: string | URL | Request, _init?: RequestInit) =>
-      new Response(body, {
-        status,
-      }),
+    () =>
+      Promise.resolve(
+        new Response(body, {
+          status,
+        }),
+      ),
     {
       preconnect: originalFetch.preconnect,
     },
@@ -22,12 +24,14 @@ const createSequencedFetchMock = (
 ): typeof fetch => {
   let index = 0;
   return Object.assign(
-    async (_input: string | URL | Request, _init?: RequestInit) => {
+    () => {
       const response = responses[Math.min(index, responses.length - 1)];
       index += 1;
-      return new Response(response.body, {
-        status: response.status,
-      });
+      return Promise.resolve(
+        new Response(response.body, {
+          status: response.status,
+        }),
+      );
     },
     {
       preconnect: originalFetch.preconnect,
@@ -62,7 +66,7 @@ describe("smartFieldMapper", () => {
     globalThis.fetch = createFetchMock("upstream unavailable", 503);
 
     const aiClient: FieldMapperAIClient = {
-      generate: async () => createAiResponse("{}"),
+      generate: () => Promise.resolve(createAiResponse("{}")),
     };
 
     const result = await smartFieldMapper.analyze(TEST_JOB_URL, [TEST_FIELD_EMAIL], aiClient);
@@ -73,7 +77,7 @@ describe("smartFieldMapper", () => {
     globalThis.fetch = createFetchMock("<form><input name='email' /></form>", 200);
 
     const aiClient: FieldMapperAIClient = {
-      generate: async () => createAiResponse("not-json"),
+      generate: () => Promise.resolve(createAiResponse("not-json")),
     };
 
     const result = await smartFieldMapper.analyze(TEST_JOB_URL, [TEST_FIELD_EMAIL], aiClient);
@@ -85,12 +89,12 @@ describe("smartFieldMapper", () => {
 
     let callCount = 0;
     const aiClient: FieldMapperAIClient = {
-      generate: async () => {
+      generate: () => {
         callCount += 1;
         if (callCount === 1) {
-          return createAiResponse("", "temporary failure");
+          return Promise.resolve(createAiResponse("", "temporary failure"));
         }
-        return createAiResponse(createSelectorResponse(TEST_FIELD_EMAIL));
+        return Promise.resolve(createAiResponse(createSelectorResponse(TEST_FIELD_EMAIL)));
       },
     };
 
@@ -106,7 +110,7 @@ describe("smartFieldMapper", () => {
     ]);
 
     const aiClient: FieldMapperAIClient = {
-      generate: async () => createAiResponse(createSelectorResponse(TEST_FIELD_EMAIL)),
+      generate: () => Promise.resolve(createAiResponse(createSelectorResponse(TEST_FIELD_EMAIL))),
     };
 
     const result = await smartFieldMapper.analyze(TEST_JOB_URL, [TEST_FIELD_EMAIL], aiClient);

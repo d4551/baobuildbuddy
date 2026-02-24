@@ -150,6 +150,17 @@ const GAMING_TO_PROFESSIONAL: Record<string, string> = {
   "Wiki Editor": "Technical Documentation & Research",
 };
 
+const REQUIRED_SKILL_SENTENCE_PATTERN = /\b(required|must\s+have|essential|minimum|mandatory)\b/i;
+const PREFERRED_SKILL_SENTENCE_PATTERN =
+  /\b(preferred|nice\s+to\s+have|bonus|plus|desired|optional)\b/i;
+const SENTENCE_SPLIT_PATTERN = /[.!?\n]+/;
+const EXPERT_PROFICIENCY_PATTERN =
+  /\b(expert|mastery|extensive|10\+?\s*years?|senior|lead|principal|architect)\b/i;
+const ADVANCED_PROFICIENCY_PATTERN = /\b(advanced|strong|deep|5\+?\s*years?|senior|proficient)\b/i;
+const INTERMEDIATE_PROFICIENCY_PATTERN =
+  /\b(intermediate|experience\s+with|worked\s+with|3\+?\s*years?|familiar)\b/i;
+const BEGINNER_PROFICIENCY_PATTERN = /\b(beginner|learning|basic|introduct|exposure|coursework)\b/i;
+
 export class SkillExtractor {
   extractSkills(text: string): ExtractedSkill[] {
     const skills: ExtractedSkill[] = [];
@@ -184,16 +195,13 @@ export class SkillExtractor {
   } {
     const allSkills = this.extractSkills(description);
 
-    const requiredPatterns = /\b(required|must\s+have|essential|minimum|mandatory)\b/i;
-    const preferredPatterns = /\b(preferred|nice\s+to\s+have|bonus|plus|desired|optional)\b/i;
-
-    const sentences = description.split(/[.!?\n]+/);
+    const sentences = description.split(SENTENCE_SPLIT_PATTERN);
     const requiredSentences = new Set<number>();
     const preferredSentences = new Set<number>();
 
     sentences.forEach((s, i) => {
-      if (requiredPatterns.test(s)) requiredSentences.add(i);
-      if (preferredPatterns.test(s)) preferredSentences.add(i);
+      if (REQUIRED_SKILL_SENTENCE_PATTERN.test(s)) requiredSentences.add(i);
+      if (PREFERRED_SKILL_SENTENCE_PATTERN.test(s)) preferredSentences.add(i);
     });
 
     const required: ExtractedSkill[] = [];
@@ -255,24 +263,16 @@ export class SkillExtractor {
   private detectProficiency(text: string, skillName: string): ExtractedSkill["proficiency"] {
     const surroundingText = this.getSurroundingText(text, skillName, 100).toLowerCase();
 
-    if (
-      /\b(expert|mastery|extensive|10\+?\s*years?|senior|lead|principal|architect)\b/i.test(
-        surroundingText,
-      )
-    ) {
+    if (EXPERT_PROFICIENCY_PATTERN.test(surroundingText)) {
       return "expert";
     }
-    if (/\b(advanced|strong|deep|5\+?\s*years?|senior|proficient)\b/i.test(surroundingText)) {
+    if (ADVANCED_PROFICIENCY_PATTERN.test(surroundingText)) {
       return "advanced";
     }
-    if (
-      /\b(intermediate|experience\s+with|worked\s+with|3\+?\s*years?|familiar)\b/i.test(
-        surroundingText,
-      )
-    ) {
+    if (INTERMEDIATE_PROFICIENCY_PATTERN.test(surroundingText)) {
       return "intermediate";
     }
-    if (/\b(beginner|learning|basic|introduct|exposure|coursework)\b/i.test(surroundingText)) {
+    if (BEGINNER_PROFICIENCY_PATTERN.test(surroundingText)) {
       return "beginner";
     }
     return "intermediate"; // default

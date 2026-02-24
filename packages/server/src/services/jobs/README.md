@@ -2,6 +2,28 @@
 
 A comprehensive job aggregation service for the video game industry, built with Bun, Elysia, and Drizzle ORM.
 
+## Validation and Rebuild Workflow
+
+Run these commands after provider/aggregator changes:
+
+```bash
+bun run lint
+bun run typecheck
+bun run test
+bun run build
+```
+
+Additional ingestion/runtime checks:
+
+```bash
+bun run validate:no-try-catch
+bun run validate:no-hardcoded-paths
+bun run validate:locales
+bun run verify:pages
+```
+
+Lint diagnostics are intentionally unmasked; quality gates must report all active issues.
+
 ## Architecture
 
 The service is organized into several key modules:

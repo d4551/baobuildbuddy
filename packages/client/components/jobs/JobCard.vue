@@ -52,8 +52,8 @@ function toggleSave() {
   emit(isSaved.value ? "save" : "unsave");
 }
 
-function navigateToJob() {
-  navigateTo(APP_ROUTE_BUILDERS.jobDetail(props.job.id));
+async function navigateToJob() {
+  await navigateTo(APP_ROUTE_BUILDERS.jobDetail(props.job.id));
 }
 </script>
 

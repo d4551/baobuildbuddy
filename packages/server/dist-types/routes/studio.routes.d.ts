@@ -132,7 +132,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                     type: string | null;
                     size: string | null;
                     founded: string | null;
-                    remoteWork: boolean;
+                    remoteWork: boolean | undefined;
                     technologies: string[];
                     genres: string[];
                     platforms: string[];

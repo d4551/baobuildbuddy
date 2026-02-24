@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 declare const scrapedJobSchema: z.ZodObject<{
     title: z.ZodString;
     company: z.ZodString;

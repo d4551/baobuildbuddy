@@ -79,18 +79,20 @@ afterAll(() => {
   rmSync(TEST_SCRIPT_PATH, { force: true });
 });
 
-describe("runRpaScript", () => {
+const createExecutionContext = (timeoutMs: number): { runId: string; timeoutMs: number } => ({
+  runId: generateId(),
+  timeoutMs,
+});
+
+const registerSuccessCase = (): void => {
   test("parses NDJSON protocol progress/result events", async () => {
-    const runId = generateId();
+    const context = createExecutionContext(5_000);
     const execution = await runRpaScript({
       scriptName: TEST_SCRIPT_NAME,
       scriptInput: {
         mode: "success",
       },
-      executionContext: {
-        runId,
-        timeoutMs: 5_000,
-      },
+      executionContext: context,
     });
 
     expect(execution.error).toBeNull();
@@ -99,74 +101,78 @@ describe("runRpaScript", () => {
     expect(execution.events[0]?.eventType).toBe("progress");
     expect(execution.events[1]?.eventType).toBe("result");
   });
+};
 
+const registerMalformedPayloadCase = (): void => {
   test("returns protocol error for malformed terminal payload", async () => {
-    const runId = generateId();
+    const context = createExecutionContext(5_000);
     const execution = await runRpaScript({
       scriptName: TEST_SCRIPT_NAME,
       scriptInput: {
         mode: "malformed",
       },
-      executionContext: {
-        runId,
-        timeoutMs: 5_000,
-      },
+      executionContext: context,
     });
 
     expect(execution.result).toBeNull();
     expect(execution.error?.code).toBe("SCRIPT_PROTOCOL_ERROR");
   });
+};
 
+const registerRuntimeFailureCase = (): void => {
   test("returns runtime error when script exits non-zero", async () => {
-    const runId = generateId();
+    const context = createExecutionContext(5_000);
     const execution = await runRpaScript({
       scriptName: TEST_SCRIPT_NAME,
       scriptInput: {
         mode: "runtime",
       },
-      executionContext: {
-        runId,
-        timeoutMs: 5_000,
-      },
+      executionContext: context,
     });
 
     expect(execution.result).toBeNull();
     expect(execution.error?.code).toBe("PYTHON_RUNTIME_ERROR");
     expect(execution.exitCode).not.toBe(0);
   });
+};
 
+const registerUnexpectedProgressCase = (): void => {
   test("returns protocol error when stdout emits unexpected progress events", async () => {
-    const runId = generateId();
+    const context = createExecutionContext(5_000);
     const execution = await runRpaScript({
       scriptName: TEST_SCRIPT_NAME,
       scriptInput: {
         mode: "stdout_progress",
       },
-      executionContext: {
-        runId,
-        timeoutMs: 5_000,
-      },
+      executionContext: context,
     });
 
     expect(execution.result).toBeNull();
     expect(execution.error?.code).toBe("SCRIPT_PROTOCOL_ERROR");
   });
+};
 
+const registerTimeoutCase = (): void => {
   test("returns timeout error when process exceeds timeout", async () => {
-    const runId = generateId();
+    const context = createExecutionContext(100);
     const execution = await runRpaScript({
       scriptName: TEST_SCRIPT_NAME,
       scriptInput: {
         mode: "timeout",
       },
-      executionContext: {
-        runId,
-        timeoutMs: 100,
-      },
+      executionContext: context,
     });
 
     expect(execution.result).toBeNull();
     expect(execution.timedOut).toBe(true);
     expect(execution.error?.code).toBe("PYTHON_TIMEOUT");
   });
+};
+
+describe("runRpaScript", () => {
+  registerSuccessCase();
+  registerMalformedPayloadCase();
+  registerRuntimeFailureCase();
+  registerUnexpectedProgressCase();
+  registerTimeoutCase();
 });

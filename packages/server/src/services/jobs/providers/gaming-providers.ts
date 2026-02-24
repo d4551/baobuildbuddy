@@ -23,6 +23,10 @@ const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledRe
 
 type PortalScrapeMethod = (sourceUrl?: string) => Promise<ScrapedJob[]>;
 
+const WHITESPACE_PATTERN = /\s+/g;
+const NON_HASH_SAFE_PATTERN = /[^a-z0-9-_]/g;
+const REMOTE_LOCATION_PATTERN = /remote/i;
+
 const PORTAL_SCRAPE_METHOD_BY_ID: Record<GamingPortalId, PortalScrapeMethod> = {
   "gamedev-net": () => scraperService.scrapeGameDevNetJobsRaw(),
   grackle: () => scraperService.scrapeGrackleJobsRaw(),
@@ -52,8 +56,8 @@ const resolveHitmarkerContentHash = (job: HitmarkerJob): string => {
   const value = String(source)
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-_]/g, "");
+    .replace(WHITESPACE_PATTERN, "-")
+    .replace(NON_HASH_SAFE_PATTERN, "");
 
   return `hm-${value || generateId()}`;
 };
@@ -107,7 +111,7 @@ export class HitmarkerProvider implements JobProvider {
         title: job.title || "",
         company: resolveCompanyName(job.company, providerSettings.unknownCompanyLabel),
         location,
-        remote: /remote/i.test(location),
+        remote: REMOTE_LOCATION_PATTERN.test(location),
         description: job.description || "",
         url: job.url || `${hitmarkerOrigin}/jobs/${job.slug || job.id || generateId()}`,
         source: "hitmarker",
@@ -132,14 +136,14 @@ export class GamingPortalProvider implements JobProvider {
     this.name = portalId;
   }
 
-  async fetchJobs(_filters?: JobFilters): Promise<RawJob[]> {
+  async fetchJobs(): Promise<RawJob[]> {
     const providerSettingsResult = await settlePromise(loadJobProviderSettings());
     if (providerSettingsResult.status === "rejected") {
       return [];
     }
     const providerSettings = providerSettingsResult.value;
     const portalConfig = resolvePortalConfig(providerSettings.gamingPortals, this.portalId);
-    if (!portalConfig || !portalConfig.enabled) {
+    if (!portalConfig?.enabled) {
       return [];
     }
 
@@ -156,7 +160,7 @@ export class GamingPortalProvider implements JobProvider {
       title: job.title,
       company: job.company,
       location: job.location,
-      remote: !!job.remote,
+      remote: Boolean(job.remote),
       description: job.description || "",
       url: job.url || portalConfig.fallbackUrl,
       source: job.source || portalConfig.source,

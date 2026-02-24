@@ -114,6 +114,9 @@ const USER_GAMING_SPECIALIZATIONS: readonly UserProfile["gamingExperience"]["spe
     "data-analytics",
   ];
 
+const USER_REMOTE_PREFERENCES: readonly NonNullable<UserProfile["careerGoals"]["remotePreference"]>[] =
+  ["onsite", "hybrid", "remote", "flexible"];
+
 const isOneOf = <T extends string>(value: unknown, choices: readonly T[]): value is T =>
   typeof value === "string" && choices.some((choice) => choice === value);
 
@@ -197,7 +200,7 @@ const normalizeSpeechSettings = (value: unknown): AutomationSettings["speech"] =
 };
 
 const normalizeAutomationSettings = (value: unknown): AutomationSettings | undefined => {
-  if (!isRecord(value)) return undefined;
+  if (!isRecord(value)) return;
 
   return {
     headless: asBoolean(value.headless) ?? DEFAULT_AUTOMATION_SETTINGS.headless,
@@ -223,13 +226,13 @@ const normalizeSalary = (value: unknown): Job["salary"] | undefined => {
     return value;
   }
   if (!isRecord(value)) {
-    return undefined;
+    return;
   }
 
   const min = asNumber(value.min);
   const max = asNumber(value.max);
   if (min === undefined || max === undefined) {
-    return undefined;
+    return;
   }
 
   const frequency =
@@ -257,7 +260,7 @@ export const toJob = (value: unknown): Job | null => {
   const title = asString(value.title);
   const company = asString(value.company);
   const location = asString(value.location);
-  if (!id || !title || !company || !location) return null;
+  if (!(((id && title ) && company ) && location)) return null;
 
   return {
     id,
@@ -292,7 +295,7 @@ const toResumeExperience = (value: unknown): ResumeExperienceItem | null => {
   const title = asString(value.title);
   const company = asString(value.company);
   const startDate = asString(value.startDate);
-  if (!title || !company || !startDate) return null;
+  if (!((title && company ) && startDate)) return null;
   return {
     title,
     company,
@@ -311,7 +314,7 @@ const toResumeEducation = (value: unknown): ResumeEducationItem | null => {
   const field = asString(value.field);
   const school = asString(value.school);
   const year = asString(value.year);
-  if (!degree || !field || !school || !year) return null;
+  if (!(((degree && field ) && school ) && year)) return null;
   return {
     degree,
     field,
@@ -325,12 +328,62 @@ const toResumeProject = (value: unknown): ResumeProject | null => {
   if (!isRecord(value)) return null;
   const title = asString(value.title);
   const description = asString(value.description);
-  if (!title || !description) return null;
+  if (!(title && description)) return null;
   return {
     title,
     description,
     technologies: asStringArray(value.technologies),
     link: asString(value.link),
+  };
+};
+
+const toResumeCollection = <T>(
+  value: unknown,
+  normalizer: (entry: unknown) => T | null,
+): T[] =>
+  Array.isArray(value)
+    ? value.map(normalizer).filter((entry): entry is T => entry !== null)
+    : [];
+
+const toResumePersonalInfo = (value: unknown): ResumeData["personalInfo"] | undefined => {
+  const personalInfo = asRecord(value);
+  if (!personalInfo) {
+    return;
+  }
+  return {
+    name: asString(personalInfo.name),
+    email: asString(personalInfo.email),
+    phone: asString(personalInfo.phone),
+    location: asString(personalInfo.location),
+    website: asString(personalInfo.website),
+    linkedIn: asString(personalInfo.linkedIn),
+    github: asString(personalInfo.github),
+    portfolio: asString(personalInfo.portfolio),
+  };
+};
+
+const toResumeSkills = (value: unknown): ResumeData["skills"] | undefined => {
+  const skills = asRecord(value);
+  if (!skills) {
+    return;
+  }
+  return {
+    technical: asStringArray(skills.technical),
+    soft: asStringArray(skills.soft),
+    gaming: asStringArray(skills.gaming),
+  };
+};
+
+const toResumeGamingExperience = (value: unknown): ResumeData["gamingExperience"] | undefined => {
+  const gamingExperience = asRecord(value);
+  if (!gamingExperience) {
+    return;
+  }
+  return {
+    gameEngines: asString(gamingExperience.gameEngines),
+    platforms: asString(gamingExperience.platforms),
+    genres: asString(gamingExperience.genres),
+    shippedTitles: asString(gamingExperience.shippedTitles),
   };
 };
 
@@ -347,54 +400,13 @@ export const toResumeData = (value: unknown): ResumeData | null => {
     template: normalizeResumeTemplate(value.template),
     theme: value.theme === "dark" ? "dark" : "light",
     isDefault: asBoolean(value.isDefault),
+    personalInfo: toResumePersonalInfo(value.personalInfo),
+    experience: toResumeCollection(value.experience, toResumeExperience),
+    education: toResumeCollection(value.education, toResumeEducation),
+    projects: toResumeCollection(value.projects, toResumeProject),
+    skills: toResumeSkills(value.skills),
+    gamingExperience: toResumeGamingExperience(value.gamingExperience),
   };
-
-  const personalInfo = asRecord(value.personalInfo);
-  if (personalInfo) {
-    resume.personalInfo = {
-      name: asString(personalInfo.name),
-      email: asString(personalInfo.email),
-      phone: asString(personalInfo.phone),
-      location: asString(personalInfo.location),
-      website: asString(personalInfo.website),
-      linkedIn: asString(personalInfo.linkedIn),
-      github: asString(personalInfo.github),
-      portfolio: asString(personalInfo.portfolio),
-    };
-  }
-
-  resume.experience = Array.isArray(value.experience)
-    ? value.experience
-        .map(toResumeExperience)
-        .filter((entry): entry is ResumeExperienceItem => entry !== null)
-    : [];
-  resume.education = Array.isArray(value.education)
-    ? value.education
-        .map(toResumeEducation)
-        .filter((entry): entry is ResumeEducationItem => entry !== null)
-    : [];
-  resume.projects = Array.isArray(value.projects)
-    ? value.projects.map(toResumeProject).filter((entry): entry is ResumeProject => entry !== null)
-    : [];
-
-  const skills = asRecord(value.skills);
-  if (skills) {
-    resume.skills = {
-      technical: asStringArray(skills.technical),
-      soft: asStringArray(skills.soft),
-      gaming: asStringArray(skills.gaming),
-    };
-  }
-
-  const gamingExperience = asRecord(value.gamingExperience);
-  if (gamingExperience) {
-    resume.gamingExperience = {
-      gameEngines: asString(gamingExperience.gameEngines),
-      platforms: asString(gamingExperience.platforms),
-      genres: asString(gamingExperience.genres),
-      shippedTitles: asString(gamingExperience.shippedTitles),
-    };
-  }
 
   return resume;
 };
@@ -406,7 +418,7 @@ export const toCoverLetterData = (value: unknown): CoverLetterData | null => {
   if (!isRecord(value)) return null;
   const company = asString(value.company);
   const position = asString(value.position);
-  if (!company || !position) return null;
+  if (!(company && position)) return null;
 
   const contentRecord = asRecord(value.content) ?? {};
   const content: CoverLetterData["content"] = {};
@@ -435,7 +447,7 @@ const toPortfolioProject = (value: unknown): PortfolioProject | null => {
   if (!isRecord(value)) return null;
   const title = asString(value.title);
   const description = asString(value.description);
-  if (!title || !description) return null;
+  if (!(title && description)) return null;
 
   return {
     id: asString(value.id),
@@ -494,6 +506,28 @@ export const toPortfolioData = (value: unknown): PortfolioData | null => {
   };
 };
 
+const toSkillEvidence = (value: unknown): SkillEvidence | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const evidenceId = asString(value.id);
+  const title = asString(value.title);
+  const description = asString(value.description);
+  if (!(evidenceId && title && description)) {
+    return null;
+  }
+
+  return {
+    id: evidenceId,
+    type: asEnum(value.type, SKILL_EVIDENCE_TYPES) ?? "document",
+    title,
+    description,
+    url: asString(value.url),
+    verificationStatus: asEnum(value.verificationStatus, SKILL_EVIDENCE_STATUSES) ?? "pending",
+  };
+};
+
 /**
  * Normalizes an unknown API payload into a shared `SkillMapping` contract.
  */
@@ -502,27 +536,9 @@ export const toSkillMapping = (value: unknown): SkillMapping | null => {
   const id = asString(value.id);
   const gameExpression = asString(value.gameExpression);
   const transferableSkill = asString(value.transferableSkill);
-  if (!id || !gameExpression || !transferableSkill) return null;
+  if (!(id && gameExpression && transferableSkill)) return null;
 
-  const evidence: SkillEvidence[] = [];
-  if (Array.isArray(value.evidence)) {
-    for (const entry of value.evidence) {
-      if (!isRecord(entry)) continue;
-      const evidenceId = asString(entry.id);
-      const title = asString(entry.title);
-      const description = asString(entry.description);
-      if (!evidenceId || !title || !description) continue;
-
-      evidence.push({
-        id: evidenceId,
-        type: asEnum(entry.type, SKILL_EVIDENCE_TYPES) ?? "document",
-        title,
-        description,
-        url: asString(entry.url),
-        verificationStatus: asEnum(entry.verificationStatus, SKILL_EVIDENCE_STATUSES) ?? "pending",
-      });
-    }
-  }
+  const evidence = toResumeCollection(value.evidence, toSkillEvidence);
 
   const category = asEnum(value.category, SKILL_CATEGORIES) ?? "technical";
   const demandLevel = asEnum(value.demandLevel, DEMAND_LEVELS) ?? "medium";
@@ -548,7 +564,7 @@ export const toGameStudio = (value: unknown): GameStudio | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   const name = asString(value.name);
-  if (!id || !name) return null;
+  if (!(id && name)) return null;
 
   return {
     id,
@@ -572,37 +588,78 @@ export const toGameStudio = (value: unknown): GameStudio | null => {
   };
 };
 
+const toUserShippedTitle = (
+  value: Record<string, unknown>,
+): UserProfile["gamingExperience"]["shippedTitles"][number] => ({
+  name: asString(value.name) ?? "",
+  platforms: asStringArray(value.platforms),
+  releaseDate: asString(value.releaseDate),
+  role: asString(value.role) ?? "",
+  teamSize: asNumber(value.teamSize),
+});
+
+const normalizeUserSalaryRange = (value: unknown): UserProfile["careerGoals"]["salaryRange"] => {
+  const salaryRange = asRecord(value);
+  if (!salaryRange) {
+    return;
+  }
+
+  const min = asNumber(salaryRange.min);
+  const max = asNumber(salaryRange.max);
+  if (min === undefined || max === undefined) {
+    return;
+  }
+
+  return {
+    min,
+    max,
+    currency: asString(salaryRange.currency),
+  };
+};
+
+const normalizeUserCareerGoals = (value: unknown): UserProfile["careerGoals"] => {
+  const careerGoals = asRecord(value) ?? {};
+  const remotePreference = asEnum(careerGoals.remotePreference, USER_REMOTE_PREFERENCES);
+  const salaryRange = normalizeUserSalaryRange(careerGoals.salaryRange);
+
+  return {
+    desiredRoles: asStringArray(careerGoals.desiredRoles),
+    preferredCompanySize: asStringArray(careerGoals.preferredCompanySize),
+    preferredLocations: asStringArray(careerGoals.preferredLocations),
+    willingToRelocate: asBoolean(careerGoals.willingToRelocate),
+    ...(remotePreference ? { remotePreference } : {}),
+    ...(salaryRange ? { salaryRange } : {}),
+  };
+};
+
+const normalizeUserGamingExperience = (value: unknown): UserProfile["gamingExperience"] => {
+  const gamingExperience = asRecord(value) ?? {};
+  const shippedTitles = Array.isArray(gamingExperience.shippedTitles)
+    ? gamingExperience.shippedTitles
+        .map((entry) => (isRecord(entry) ? toUserShippedTitle(entry) : null))
+        .filter((entry): entry is UserProfile["gamingExperience"]["shippedTitles"][number] => entry !== null)
+    : [];
+
+  return {
+    yearsInGaming: asNumber(gamingExperience.yearsInGaming),
+    experienceLevel: asEnum(gamingExperience.experienceLevel, USER_EXPERIENCE_LEVELS),
+    specializations: asEnumArray(gamingExperience.specializations, USER_GAMING_SPECIALIZATIONS),
+    gameEngines: asStringArray(gamingExperience.gameEngines),
+    platforms: asStringArray(gamingExperience.platforms),
+    genres: asStringArray(gamingExperience.genres),
+    shippedTitles,
+  };
+};
+
 /**
  * Normalizes an unknown API payload into a shared `UserProfile` contract.
  */
 export const toUserProfile = (value: unknown): UserProfile | null => {
   if (!isRecord(value)) return null;
 
-  const id = asString(value.id) ?? "default";
-  const name = asString(value.name) ?? "";
-  const gamingExperience = asRecord(value.gamingExperience) ?? {};
-  const careerGoals = asRecord(value.careerGoals) ?? {};
-  const remotePreference =
-    careerGoals.remotePreference === "onsite" ||
-    careerGoals.remotePreference === "hybrid" ||
-    careerGoals.remotePreference === "remote" ||
-    careerGoals.remotePreference === "flexible"
-      ? careerGoals.remotePreference
-      : null;
-  const salaryRange =
-    isRecord(careerGoals.salaryRange) &&
-    typeof careerGoals.salaryRange.min === "number" &&
-    typeof careerGoals.salaryRange.max === "number"
-      ? {
-          min: careerGoals.salaryRange.min,
-          max: careerGoals.salaryRange.max,
-          currency: asString(careerGoals.salaryRange.currency),
-        }
-      : null;
-
   return {
-    id,
-    name,
+    id: asString(value.id) ?? "default",
+    name: asString(value.name) ?? "",
     email: asString(value.email),
     phone: asString(value.phone),
     location: asString(value.location),
@@ -615,34 +672,8 @@ export const toUserProfile = (value: unknown): UserProfile | null => {
     yearsExperience: asNumber(value.yearsExperience),
     technicalSkills: asStringArray(value.technicalSkills),
     softSkills: asStringArray(value.softSkills),
-    gamingExperience: {
-      yearsInGaming: asNumber(gamingExperience.yearsInGaming),
-      experienceLevel: asEnum(gamingExperience.experienceLevel, USER_EXPERIENCE_LEVELS),
-      specializations: asEnumArray(gamingExperience.specializations, USER_GAMING_SPECIALIZATIONS),
-      gameEngines: asStringArray(gamingExperience.gameEngines),
-      platforms: asStringArray(gamingExperience.platforms),
-      genres: asStringArray(gamingExperience.genres),
-      shippedTitles: Array.isArray(gamingExperience.shippedTitles)
-        ? gamingExperience.shippedTitles
-            .map((entry) => (isRecord(entry) ? entry : null))
-            .filter((entry): entry is Record<string, unknown> => entry !== null)
-            .map((entry) => ({
-              name: asString(entry.name) ?? "",
-              platforms: asStringArray(entry.platforms),
-              releaseDate: asString(entry.releaseDate),
-              role: asString(entry.role) ?? "",
-              teamSize: asNumber(entry.teamSize),
-            }))
-        : [],
-    },
-    careerGoals: {
-      desiredRoles: asStringArray(careerGoals.desiredRoles),
-      preferredCompanySize: asStringArray(careerGoals.preferredCompanySize),
-      preferredLocations: asStringArray(careerGoals.preferredLocations),
-      willingToRelocate: asBoolean(careerGoals.willingToRelocate),
-      ...(remotePreference ? { remotePreference } : {}),
-      ...(salaryRange ? { salaryRange } : {}),
-    },
+    gamingExperience: normalizeUserGamingExperience(value.gamingExperience),
+    careerGoals: normalizeUserCareerGoals(value.careerGoals),
   };
 };
 

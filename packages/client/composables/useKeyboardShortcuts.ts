@@ -29,81 +29,108 @@ export const KEYBOARD_ROUTE_SHORTCUTS: readonly KeyboardRouteShortcut[] = [
 
 const SHORTCUT_PREFIX_TIMEOUT_MS = 900;
 
+function isEditableTarget(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    (target instanceof HTMLElement && target.isContentEditable)
+  );
+}
+
+function pushShortcutRoute(router: ReturnType<typeof useRouter>, targetRoute: string): void {
+  router.push(targetRoute).catch(() => {
+    // Navigation failures (duplicates, guards) are intentionally ignored for shortcuts.
+  });
+}
+
+function isFocusChatShortcut(event: KeyboardEvent): boolean {
+  return (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+}
+
+function hasBlockedModifier(event: KeyboardEvent): boolean {
+  return event.altKey || event.ctrlKey || event.metaKey;
+}
+
+function createKeyDownHandler(input: {
+  route: ReturnType<typeof useRoute>;
+  router: ReturnType<typeof useRouter>;
+  routeBySuffixKey: ReadonlyMap<string, string>;
+  pendingPrefix: ReturnType<typeof ref<KeyboardRouteShortcut["prefix"] | null>>;
+  resetPrefix: () => void;
+  armPrefix: () => void;
+  focusChatShortcut: () => void;
+}): (event: KeyboardEvent) => void {
+  return (event: KeyboardEvent): void => {
+    if (isFocusChatShortcut(event)) {
+      event.preventDefault();
+      input.focusChatShortcut();
+      return;
+    }
+
+    if (isEditableTarget(event.target) || hasBlockedModifier(event)) {
+      return;
+    }
+
+    const key = event.key.toLowerCase();
+    if (input.pendingPrefix.value === "g") {
+      const targetRoute = input.routeBySuffixKey.get(key);
+      input.resetPrefix();
+      if (targetRoute && input.route.path !== targetRoute) {
+        event.preventDefault();
+        pushShortcutRoute(input.router, targetRoute);
+      }
+      return;
+    }
+
+    if (key === "g") {
+      input.armPrefix();
+    }
+  };
+}
+
 /**
  * Registers global keyboard shortcuts for power-user navigation.
  */
 export function useKeyboardShortcuts() {
   const router = useRouter();
   const route = useRoute();
-
   const pendingPrefix = ref<KeyboardRouteShortcut["prefix"] | null>(null);
   let prefixTimer: ReturnType<typeof setTimeout> | null = null;
-
   const routeBySuffixKey = new Map(
     KEYBOARD_ROUTE_SHORTCUTS.map((shortcut) => [shortcut.key, shortcut.to]),
   );
 
-  const resetPrefix = () => {
+  const resetPrefix = (): void => {
     pendingPrefix.value = null;
     if (prefixTimer) {
       clearTimeout(prefixTimer);
       prefixTimer = null;
     }
   };
-
-  const armPrefix = () => {
+  const armPrefix = (): void => {
     pendingPrefix.value = "g";
     if (prefixTimer) {
       clearTimeout(prefixTimer);
     }
-    prefixTimer = setTimeout(() => {
-      pendingPrefix.value = null;
-      prefixTimer = null;
-    }, SHORTCUT_PREFIX_TIMEOUT_MS);
+    prefixTimer = setTimeout(resetPrefix, SHORTCUT_PREFIX_TIMEOUT_MS);
   };
-
-  const focusChatShortcut = () => {
+  const focusChatShortcut = (): void => {
     window.dispatchEvent(new CustomEvent("bao:focus-chat"));
   };
 
-  const onKeyDown = (event: KeyboardEvent) => {
-    const target = event.target;
-    const isEditableTarget =
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLTextAreaElement ||
-      (target instanceof HTMLElement && target.isContentEditable);
-
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-      event.preventDefault();
-      focusChatShortcut();
-      return;
-    }
-
-    if (isEditableTarget || event.altKey || event.ctrlKey || event.metaKey) {
-      return;
-    }
-
-    const key = event.key.toLowerCase();
-
-    if (pendingPrefix.value === "g") {
-      const targetRoute = routeBySuffixKey.get(key);
-      resetPrefix();
-      if (targetRoute && route.path !== targetRoute) {
-        event.preventDefault();
-        router.push(targetRoute);
-      }
-      return;
-    }
-
-    if (key === "g") {
-      armPrefix();
-    }
-  };
+  const onKeyDown = createKeyDownHandler({
+    route,
+    router,
+    routeBySuffixKey,
+    pendingPrefix,
+    resetPrefix,
+    armPrefix,
+    focusChatShortcut,
+  });
 
   onMounted(() => {
     window.addEventListener("keydown", onKeyDown);
   });
-
   onUnmounted(() => {
     window.removeEventListener("keydown", onKeyDown);
     resetPrefix();

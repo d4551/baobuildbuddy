@@ -108,20 +108,23 @@ export class OpenAIProvider extends BaseAIProvider {
     const stream = streamResult.value;
 
     const iterator = stream[Symbol.asyncIterator]();
-    while (true) {
+    const emitContentChunks = async function* (): AsyncGenerator<string> {
       const nextChunkResult = await settlePromise(iterator.next());
       if (nextChunkResult.status === "rejected") {
         throw new Error(`OpenAI streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
       }
       const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
-        break;
+        return;
       }
       const content = nextChunk.value.choices[0]?.delta?.content;
       if (content) {
         yield content;
       }
-    }
+      yield* emitContentChunks();
+    };
+
+    yield* emitContentChunks();
   }
 
   async isAvailable(): Promise<boolean> {

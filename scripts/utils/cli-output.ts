@@ -2,7 +2,7 @@
  * Write a message to a destination stream with a trailing newline.
  */
 const writeLine = async (
-  stream: typeof Bun.stdout | typeof Bun.stderr,
+  stream: Parameters<typeof Bun.write>[0],
   value: string,
 ): Promise<void> => {
   await Bun.write(stream, `${value}\n`);

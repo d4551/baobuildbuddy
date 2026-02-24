@@ -119,9 +119,9 @@ function formatDate(date: string) {
   });
 }
 
-function startJobInterview() {
+async function startJobInterview() {
   if (!job.value) return;
-  router.push(buildInterviewJobNavigation(job.value.id, "jobs"));
+  await router.push(buildInterviewJobNavigation(job.value.id, "jobs"));
 }
 </script>
 

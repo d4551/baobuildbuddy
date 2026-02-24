@@ -1,6 +1,6 @@
 import type { AIResponse } from "@bao/shared";
 import { safeParseJson } from "@bao/shared";
-import * as z from "zod";
+import { z } from "zod";
 import { config } from "../../config/env";
 import { formFieldAnalysisPrompt } from "../ai/prompts";
 
@@ -12,11 +12,13 @@ const selectorMapSchema = z.record(
 const wait = (delayMs: number): Promise<void> =>
   new Promise((resolve) => {
     const timer = setTimeout(() => resolve(), delayMs);
-    if (typeof timer === "object" && timer !== null && "unref" in timer) {
-      const maybeUnref = timer.unref;
-      if (typeof maybeUnref === "function") {
-        maybeUnref.call(timer);
-      }
+    if (
+      typeof timer === "object" &&
+      timer !== null &&
+      "unref" in timer &&
+      typeof timer.unref === "function"
+    ) {
+      timer.unref();
     }
   });
 

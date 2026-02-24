@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
+const MASKED_KEY_PATTERN = /^\*\*\*[a-zA-Z0-9]{4}$/;
 
 beforeAll(async () => {
   const dbModule = await import("../db/client");
@@ -11,7 +12,7 @@ beforeAll(async () => {
   const { Elysia } = await import("elysia");
 
   initModule.initializeDatabase(dbModule.sqlite);
-  await seedModule.seedDatabase(dbModule.db);
+  seedModule.seedDatabase(dbModule.db);
 
   app = new Elysia({ prefix: "/api" }).use(routesModule.settingsRoutes);
 });
@@ -28,7 +29,7 @@ describe("settings routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.id).toBeDefined();
     if (res.body.geminiApiKey) {
-      expect(res.body.geminiApiKey).toMatch(/^\*\*\*[a-zA-Z0-9]{4}$/);
+      expect(res.body.geminiApiKey).toMatch(MASKED_KEY_PATTERN);
     }
   });
 

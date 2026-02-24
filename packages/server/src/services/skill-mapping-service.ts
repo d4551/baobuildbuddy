@@ -15,7 +15,7 @@ import {
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { skillMappings } from "../db/schema";
+import { skillMappings } from "../db/schema/schema-modules";
 
 const isSkillCategory = (value: string | null): value is SkillCategory =>
   typeof value === "string" && SKILL_CATEGORY_IDS.some((categoryId) => categoryId === value);
@@ -63,6 +63,298 @@ const normalizeEvidenceEntries = (value: unknown[] | null): SkillEvidence[] => {
   return entries;
 };
 
+type CareerPathwayDefinition = Omit<CareerPathway, "id" | "matchScore">;
+type ReadinessMetrics = {
+  technicalSkills: SkillMapping[];
+  softSkills: SkillMapping[];
+  technicalScore: number;
+  softSkillsScore: number;
+  industryScore: number;
+  portfolioScore: number;
+  overallScore: number;
+};
+
+const PATHWAY_DEFINITIONS: Record<SkillCategory, CareerPathwayDefinition> = {
+  technical: {
+    title: "Technical Specialist",
+    description:
+      "Leverage your technical gaming skills in software development, game development, or technical roles",
+    detailedDescription:
+      "Transform your gaming expertise into a thriving technical career. Your experience with game mechanics, mods, and technical problem-solving translates directly to software engineering, game development, and DevOps roles.",
+    stages: [
+      {
+        title: "Foundation",
+        duration: "1-3 months",
+        description: "Build core programming fundamentals",
+        completed: false,
+        current: true,
+      },
+      {
+        title: "Specialization",
+        duration: "3-6 months",
+        description: "Focus on game engines or backend systems",
+        completed: false,
+      },
+      {
+        title: "Portfolio",
+        duration: "2-4 months",
+        description: "Create showcase projects",
+        completed: false,
+      },
+      {
+        title: "Job Ready",
+        duration: "1-2 months",
+        description: "Interview prep and applications",
+        completed: false,
+      },
+    ],
+    requiredSkills: ["Programming", "Problem Solving", "Game Engines", "Version Control"],
+    estimatedTimeToEntry: "6-12 months",
+    icon: resolvePathwayIcon("technical"),
+    averageSalary: { min: 70000, max: 120000, currency: "USD" },
+    jobMarketTrend: "growing",
+  },
+  leadership: {
+    title: "Team Lead / Manager",
+    description: "Channel your guild leadership and team coordination into management roles",
+    detailedDescription:
+      "Your experience leading raids, managing teams, and coordinating complex group activities directly translates to project management and team leadership positions.",
+    stages: [
+      {
+        title: "Team Collaboration",
+        duration: "2-3 months",
+        description: "Master collaboration tools and methodologies",
+        completed: false,
+        current: true,
+      },
+      {
+        title: "Project Management",
+        duration: "3-4 months",
+        description: "Learn PM frameworks and tools",
+        completed: false,
+      },
+      {
+        title: "Leadership Skills",
+        duration: "2-3 months",
+        description: "Develop communication and mentoring",
+        completed: false,
+      },
+      {
+        title: "Certification",
+        duration: "1-2 months",
+        description: "Optional PM certification",
+        completed: false,
+      },
+    ],
+    requiredSkills: [
+      "Team Coordination",
+      "Communication",
+      "Conflict Resolution",
+      "Strategic Planning",
+    ],
+    estimatedTimeToEntry: "8-12 months",
+    icon: resolvePathwayIcon("leadership"),
+    averageSalary: { min: 80000, max: 140000, currency: "USD" },
+    jobMarketTrend: "stable",
+  },
+  community: {
+    title: "Community Manager",
+    description: "Turn your community building experience into a career managing online communities",
+    detailedDescription:
+      "Your skills in building, moderating, and growing gaming communities are highly valuable in community management, social media, and customer success roles.",
+    stages: [
+      {
+        title: "Community Fundamentals",
+        duration: "1-2 months",
+        description: "Learn community management best practices",
+        completed: false,
+        current: true,
+      },
+      {
+        title: "Platform Mastery",
+        duration: "2-3 months",
+        description: "Master Discord, Reddit, social media",
+        completed: false,
+      },
+      {
+        title: "Content Strategy",
+        duration: "2-3 months",
+        description: "Develop content and engagement strategies",
+        completed: false,
+      },
+      {
+        title: "Portfolio Projects",
+        duration: "2-3 months",
+        description: "Build case studies and examples",
+        completed: false,
+      },
+    ],
+    requiredSkills: ["Community Building", "Moderation", "Social Media", "Content Creation"],
+    estimatedTimeToEntry: "6-9 months",
+    icon: resolvePathwayIcon("community"),
+    averageSalary: { min: 50000, max: 90000, currency: "USD" },
+    jobMarketTrend: "growing",
+  },
+  creative: {
+    title: "Creative Professional",
+    description: "Apply your creative gaming skills to design, content creation, or artistic roles",
+    detailedDescription:
+      "Your experience creating content, designing mods, or building in creative games translates directly to UX/UI design, game design, and creative development roles.",
+    stages: [
+      {
+        title: "Design Fundamentals",
+        duration: "2-4 months",
+        description: "Learn design principles and tools",
+        completed: false,
+        current: true,
+      },
+      {
+        title: "Specialization",
+        duration: "3-6 months",
+        description: "Choose UI/UX, game design, or content",
+        completed: false,
+      },
+      {
+        title: "Portfolio Development",
+        duration: "3-6 months",
+        description: "Build professional portfolio",
+        completed: false,
+      },
+      {
+        title: "Industry Entry",
+        duration: "2-3 months",
+        description: "Networking and applications",
+        completed: false,
+      },
+    ],
+    requiredSkills: ["Design Thinking", "Visual Design", "User Experience", "Creative Tools"],
+    estimatedTimeToEntry: "10-18 months",
+    icon: resolvePathwayIcon("creative"),
+    averageSalary: { min: 60000, max: 110000, currency: "USD" },
+    jobMarketTrend: "stable",
+  },
+  analytical: {
+    title: "Data Analyst",
+    description:
+      "Use your analytical and optimization skills in data analysis and business intelligence",
+    detailedDescription:
+      "Your experience analyzing game mechanics, optimizing builds, and making data-driven decisions translates perfectly to data analysis, business intelligence, and analytics roles.",
+    stages: [
+      {
+        title: "Data Fundamentals",
+        duration: "2-3 months",
+        description: "Learn SQL, Excel, statistics basics",
+        completed: false,
+        current: true,
+      },
+      {
+        title: "Analysis Tools",
+        duration: "3-4 months",
+        description: "Master Tableau, Power BI, Python",
+        completed: false,
+      },
+      {
+        title: "Business Context",
+        duration: "2-3 months",
+        description: "Learn business analysis frameworks",
+        completed: false,
+      },
+      {
+        title: "Portfolio Projects",
+        duration: "2-3 months",
+        description: "Build analysis case studies",
+        completed: false,
+      },
+    ],
+    requiredSkills: ["Data Analysis", "Statistical Thinking", "SQL", "Visualization"],
+    estimatedTimeToEntry: "8-12 months",
+    icon: resolvePathwayIcon("analytical"),
+    averageSalary: { min: 65000, max: 105000, currency: "USD" },
+    jobMarketTrend: "growing",
+  },
+  communication: {
+    title: "Communications Specialist",
+    description: "Leverage your communication skills in marketing, PR, or content creation roles",
+    detailedDescription:
+      "Your experience communicating with teams, creating guides, and explaining complex concepts translates to technical writing, marketing, and communications roles.",
+    stages: [
+      {
+        title: "Writing Fundamentals",
+        duration: "1-2 months",
+        description: "Develop professional writing skills",
+        completed: false,
+        current: true,
+      },
+      {
+        title: "Content Creation",
+        duration: "2-3 months",
+        description: "Learn content marketing and strategy",
+        completed: false,
+      },
+      {
+        title: "Platform Skills",
+        duration: "2-3 months",
+        description: "Master various communication platforms",
+        completed: false,
+      },
+      {
+        title: "Portfolio Building",
+        duration: "2-3 months",
+        description: "Create writing samples and case studies",
+        completed: false,
+      },
+    ],
+    requiredSkills: ["Written Communication", "Content Strategy", "Storytelling", "Editing"],
+    estimatedTimeToEntry: "6-10 months",
+    icon: resolvePathwayIcon("communication"),
+    averageSalary: { min: 50000, max: 85000, currency: "USD" },
+    jobMarketTrend: "stable",
+  },
+  project_management: {
+    title: "Project Manager",
+    description: "Apply your planning and coordination skills to professional project management",
+    detailedDescription:
+      "Your experience planning raids, coordinating events, and managing complex projects in games translates directly to professional project management roles.",
+    stages: [
+      {
+        title: "PM Fundamentals",
+        duration: "2-3 months",
+        description: "Learn Agile, Scrum, project basics",
+        completed: false,
+        current: true,
+      },
+      {
+        title: "Tool Mastery",
+        duration: "2-3 months",
+        description: "Master Jira, Asana, MS Project",
+        completed: false,
+      },
+      {
+        title: "Certification Prep",
+        duration: "3-4 months",
+        description: "Study for PMP or CSM certification",
+        completed: false,
+      },
+      {
+        title: "Experience Building",
+        duration: "3-6 months",
+        description: "Lead volunteer or small projects",
+        completed: false,
+      },
+    ],
+    requiredSkills: [
+      "Project Planning",
+      "Risk Management",
+      "Stakeholder Management",
+      "Agile/Scrum",
+    ],
+    estimatedTimeToEntry: "10-16 months",
+    icon: resolvePathwayIcon("project_management"),
+    averageSalary: { min: 75000, max: 130000, currency: "USD" },
+    jobMarketTrend: "growing",
+  },
+};
+
 export class SkillMappingService {
   /**
    * Get all skill mappings
@@ -80,7 +372,7 @@ export class SkillMappingService {
       category: normalizeSkillCategory(row.category),
       demandLevel: this.normalizeDemandLevel(row.demandLevel),
       verified: false,
-      aiGenerated: row.aiGenerated || false,
+      aiGenerated: row.aiGenerated ?? undefined,
     }));
   }
 
@@ -100,7 +392,7 @@ export class SkillMappingService {
       confidence: data.confidence || 50,
       category: data.category,
       demandLevel: data.demandLevel,
-      aiGenerated: data.aiGenerated || false,
+      aiGenerated: data.aiGenerated,
       createdAt: now,
       updatedAt: now,
     });
@@ -134,7 +426,7 @@ export class SkillMappingService {
       category: normalizeSkillCategory(row.category),
       demandLevel: this.normalizeDemandLevel(row.demandLevel),
       verified: false,
-      aiGenerated: row.aiGenerated || false,
+      aiGenerated: row.aiGenerated ?? undefined,
     };
   }
 
@@ -189,329 +481,10 @@ export class SkillMappingService {
    */
   async getPathways(): Promise<CareerPathway[]> {
     const mappings = await this.getMappings();
-
-    // Group by category
-    const categoryGroups: Record<string, SkillMapping[]> = {};
-
-    for (const mapping of mappings) {
-      const category = mapping.category;
-      if (!categoryGroups[category]) {
-        categoryGroups[category] = [];
-      }
-      categoryGroups[category].push(mapping);
-    }
-
-    // Define career pathways for each category
-    const pathwayDefinitions: Record<SkillCategory, Omit<CareerPathway, "id" | "matchScore">> = {
-      technical: {
-        title: "Technical Specialist",
-        description:
-          "Leverage your technical gaming skills in software development, game development, or technical roles",
-        detailedDescription:
-          "Transform your gaming expertise into a thriving technical career. Your experience with game mechanics, mods, and technical problem-solving translates directly to software engineering, game development, and DevOps roles.",
-        stages: [
-          {
-            title: "Foundation",
-            duration: "1-3 months",
-            description: "Build core programming fundamentals",
-            completed: false,
-            current: true,
-          },
-          {
-            title: "Specialization",
-            duration: "3-6 months",
-            description: "Focus on game engines or backend systems",
-            completed: false,
-          },
-          {
-            title: "Portfolio",
-            duration: "2-4 months",
-            description: "Create showcase projects",
-            completed: false,
-          },
-          {
-            title: "Job Ready",
-            duration: "1-2 months",
-            description: "Interview prep and applications",
-            completed: false,
-          },
-        ],
-        requiredSkills: ["Programming", "Problem Solving", "Game Engines", "Version Control"],
-        estimatedTimeToEntry: "6-12 months",
-        icon: resolvePathwayIcon("technical"),
-        averageSalary: { min: 70000, max: 120000, currency: "USD" },
-        jobMarketTrend: "growing",
-      },
-      leadership: {
-        title: "Team Lead / Manager",
-        description: "Channel your guild leadership and team coordination into management roles",
-        detailedDescription:
-          "Your experience leading raids, managing teams, and coordinating complex group activities directly translates to project management and team leadership positions.",
-        stages: [
-          {
-            title: "Team Collaboration",
-            duration: "2-3 months",
-            description: "Master collaboration tools and methodologies",
-            completed: false,
-            current: true,
-          },
-          {
-            title: "Project Management",
-            duration: "3-4 months",
-            description: "Learn PM frameworks and tools",
-            completed: false,
-          },
-          {
-            title: "Leadership Skills",
-            duration: "2-3 months",
-            description: "Develop communication and mentoring",
-            completed: false,
-          },
-          {
-            title: "Certification",
-            duration: "1-2 months",
-            description: "Optional PM certification",
-            completed: false,
-          },
-        ],
-        requiredSkills: [
-          "Team Coordination",
-          "Communication",
-          "Conflict Resolution",
-          "Strategic Planning",
-        ],
-        estimatedTimeToEntry: "8-12 months",
-        icon: resolvePathwayIcon("leadership"),
-        averageSalary: { min: 80000, max: 140000, currency: "USD" },
-        jobMarketTrend: "stable",
-      },
-      community: {
-        title: "Community Manager",
-        description:
-          "Turn your community building experience into a career managing online communities",
-        detailedDescription:
-          "Your skills in building, moderating, and growing gaming communities are highly valuable in community management, social media, and customer success roles.",
-        stages: [
-          {
-            title: "Community Fundamentals",
-            duration: "1-2 months",
-            description: "Learn community management best practices",
-            completed: false,
-            current: true,
-          },
-          {
-            title: "Platform Mastery",
-            duration: "2-3 months",
-            description: "Master Discord, Reddit, social media",
-            completed: false,
-          },
-          {
-            title: "Content Strategy",
-            duration: "2-3 months",
-            description: "Develop content and engagement strategies",
-            completed: false,
-          },
-          {
-            title: "Portfolio Projects",
-            duration: "2-3 months",
-            description: "Build case studies and examples",
-            completed: false,
-          },
-        ],
-        requiredSkills: ["Community Building", "Moderation", "Social Media", "Content Creation"],
-        estimatedTimeToEntry: "6-9 months",
-        icon: resolvePathwayIcon("community"),
-        averageSalary: { min: 50000, max: 90000, currency: "USD" },
-        jobMarketTrend: "growing",
-      },
-      creative: {
-        title: "Creative Professional",
-        description:
-          "Apply your creative gaming skills to design, content creation, or artistic roles",
-        detailedDescription:
-          "Your experience creating content, designing mods, or building in creative games translates directly to UX/UI design, game design, and creative development roles.",
-        stages: [
-          {
-            title: "Design Fundamentals",
-            duration: "2-4 months",
-            description: "Learn design principles and tools",
-            completed: false,
-            current: true,
-          },
-          {
-            title: "Specialization",
-            duration: "3-6 months",
-            description: "Choose UI/UX, game design, or content",
-            completed: false,
-          },
-          {
-            title: "Portfolio Development",
-            duration: "3-6 months",
-            description: "Build professional portfolio",
-            completed: false,
-          },
-          {
-            title: "Industry Entry",
-            duration: "2-3 months",
-            description: "Networking and applications",
-            completed: false,
-          },
-        ],
-        requiredSkills: ["Design Thinking", "Visual Design", "User Experience", "Creative Tools"],
-        estimatedTimeToEntry: "10-18 months",
-        icon: resolvePathwayIcon("creative"),
-        averageSalary: { min: 60000, max: 110000, currency: "USD" },
-        jobMarketTrend: "stable",
-      },
-      analytical: {
-        title: "Data Analyst",
-        description:
-          "Use your analytical and optimization skills in data analysis and business intelligence",
-        detailedDescription:
-          "Your experience analyzing game mechanics, optimizing builds, and making data-driven decisions translates perfectly to data analysis, business intelligence, and analytics roles.",
-        stages: [
-          {
-            title: "Data Fundamentals",
-            duration: "2-3 months",
-            description: "Learn SQL, Excel, statistics basics",
-            completed: false,
-            current: true,
-          },
-          {
-            title: "Analysis Tools",
-            duration: "3-4 months",
-            description: "Master Tableau, Power BI, Python",
-            completed: false,
-          },
-          {
-            title: "Business Context",
-            duration: "2-3 months",
-            description: "Learn business analysis frameworks",
-            completed: false,
-          },
-          {
-            title: "Portfolio Projects",
-            duration: "2-3 months",
-            description: "Build analysis case studies",
-            completed: false,
-          },
-        ],
-        requiredSkills: ["Data Analysis", "Statistical Thinking", "SQL", "Visualization"],
-        estimatedTimeToEntry: "8-12 months",
-        icon: resolvePathwayIcon("analytical"),
-        averageSalary: { min: 65000, max: 105000, currency: "USD" },
-        jobMarketTrend: "growing",
-      },
-      communication: {
-        title: "Communications Specialist",
-        description:
-          "Leverage your communication skills in marketing, PR, or content creation roles",
-        detailedDescription:
-          "Your experience communicating with teams, creating guides, and explaining complex concepts translates to technical writing, marketing, and communications roles.",
-        stages: [
-          {
-            title: "Writing Fundamentals",
-            duration: "1-2 months",
-            description: "Develop professional writing skills",
-            completed: false,
-            current: true,
-          },
-          {
-            title: "Content Creation",
-            duration: "2-3 months",
-            description: "Learn content marketing and strategy",
-            completed: false,
-          },
-          {
-            title: "Platform Skills",
-            duration: "2-3 months",
-            description: "Master various communication platforms",
-            completed: false,
-          },
-          {
-            title: "Portfolio Building",
-            duration: "2-3 months",
-            description: "Create writing samples and case studies",
-            completed: false,
-          },
-        ],
-        requiredSkills: ["Written Communication", "Content Strategy", "Storytelling", "Editing"],
-        estimatedTimeToEntry: "6-10 months",
-        icon: resolvePathwayIcon("communication"),
-        averageSalary: { min: 50000, max: 85000, currency: "USD" },
-        jobMarketTrend: "stable",
-      },
-      project_management: {
-        title: "Project Manager",
-        description:
-          "Apply your planning and coordination skills to professional project management",
-        detailedDescription:
-          "Your experience planning raids, coordinating events, and managing complex projects in games translates directly to professional project management roles.",
-        stages: [
-          {
-            title: "PM Fundamentals",
-            duration: "2-3 months",
-            description: "Learn Agile, Scrum, project basics",
-            completed: false,
-            current: true,
-          },
-          {
-            title: "Tool Mastery",
-            duration: "2-3 months",
-            description: "Master Jira, Asana, MS Project",
-            completed: false,
-          },
-          {
-            title: "Certification Prep",
-            duration: "3-4 months",
-            description: "Study for PMP or CSM certification",
-            completed: false,
-          },
-          {
-            title: "Experience Building",
-            duration: "3-6 months",
-            description: "Lead volunteer or small projects",
-            completed: false,
-          },
-        ],
-        requiredSkills: [
-          "Project Planning",
-          "Risk Management",
-          "Stakeholder Management",
-          "Agile/Scrum",
-        ],
-        estimatedTimeToEntry: "10-16 months",
-        icon: resolvePathwayIcon("project_management"),
-        averageSalary: { min: 75000, max: 130000, currency: "USD" },
-        jobMarketTrend: "growing",
-      },
-    };
-
-    // Create pathways with match scores
-    const pathways: CareerPathway[] = Object.entries(categoryGroups).map(([category, skills]) => {
-      const categoryKey = category as SkillCategory;
-      const definition = pathwayDefinitions[categoryKey];
-
-      // Calculate match score based on number of skills and their confidence
-      const matchScore =
-        skills.length > 0
-          ? Math.min(
-              100,
-              Math.round(
-                (skills.reduce((sum, s) => sum + s.confidence, 0) / skills.length) *
-                  (1 + skills.length / 10),
-              ),
-            )
-          : 0;
-
-      return {
-        id: categoryKey,
-        ...definition,
-        matchScore,
-      };
-    });
-
-    // Sort by match score
+    const groupedMappings = this.groupMappingsByCategory(mappings);
+    const pathways = Object.entries(groupedMappings).map(([category, skills]) =>
+      this.buildPathway(category as SkillCategory, skills),
+    );
     return pathways.sort((a, b) => b.matchScore - a.matchScore);
   }
 
@@ -520,107 +493,170 @@ export class SkillMappingService {
    */
   async getReadiness(): Promise<ReadinessAssessment> {
     const mappings = await this.getMappings();
-
     if (mappings.length === 0) {
-      return {
-        overallScore: 0,
-        categories: {
-          technical: { score: 0, feedback: "No technical skills mapped yet" },
-          softSkills: { score: 0, feedback: "No soft skills mapped yet" },
-          industryKnowledge: { score: 0, feedback: "No industry knowledge demonstrated" },
-          portfolio: { score: 0, feedback: "No portfolio evidence provided" },
-        },
-        improvementSuggestions: [
-          "Start mapping your gaming skills to career skills",
-          "Add evidence to demonstrate your abilities",
-          "Build a portfolio showcasing your work",
-        ],
-        nextSteps: [
-          "Map at least 5 gaming skills",
-          "Add evidence for your top skills",
-          "Create your first portfolio project",
-        ],
-      };
+      return this.buildEmptyReadinessAssessment();
     }
 
-    // Calculate category scores
+    const metrics = this.calculateReadinessMetrics(mappings);
+    return this.buildReadinessAssessment(metrics);
+  }
+
+  private groupMappingsByCategory(
+    mappings: SkillMapping[],
+  ): Record<SkillCategory, SkillMapping[]> {
+    const grouped: Record<SkillCategory, SkillMapping[]> = {
+      technical: [],
+      leadership: [],
+      community: [],
+      creative: [],
+      analytical: [],
+      communication: [],
+      project_management: [],
+    };
+    for (const mapping of mappings) {
+      grouped[mapping.category].push(mapping);
+    }
+    return grouped;
+  }
+
+  private buildPathway(category: SkillCategory, mappings: SkillMapping[]): CareerPathway {
+    const definition = PATHWAY_DEFINITIONS[category];
+    return {
+      id: category,
+      ...definition,
+      matchScore: this.calculatePathwayMatchScore(mappings),
+    };
+  }
+
+  private calculatePathwayMatchScore(mappings: SkillMapping[]): number {
+    if (mappings.length === 0) {
+      return 0;
+    }
+    const averageConfidence =
+      mappings.reduce((sum, mapping) => sum + mapping.confidence, 0) / mappings.length;
+    return Math.min(100, Math.round(averageConfidence * (1 + mappings.length / 10)));
+  }
+
+  private buildEmptyReadinessAssessment(): ReadinessAssessment {
+    return {
+      overallScore: 0,
+      categories: {
+        technical: { score: 0, feedback: "No technical skills mapped yet" },
+        softSkills: { score: 0, feedback: "No soft skills mapped yet" },
+        industryKnowledge: { score: 0, feedback: "No industry knowledge demonstrated" },
+        portfolio: { score: 0, feedback: "No portfolio evidence provided" },
+      },
+      improvementSuggestions: [
+        "Start mapping your gaming skills to career skills",
+        "Add evidence to demonstrate your abilities",
+        "Build a portfolio showcasing your work",
+      ],
+      nextSteps: [
+        "Map at least 5 gaming skills",
+        "Add evidence for your top skills",
+        "Create your first portfolio project",
+      ],
+    };
+  }
+
+  private calculateReadinessMetrics(mappings: SkillMapping[]): ReadinessMetrics {
     const technicalSkills = mappings.filter(
-      (m) => m.category === "technical" || m.category === "analytical",
+      (mapping) => mapping.category === "technical" || mapping.category === "analytical",
     );
     const softSkills = mappings.filter(
-      (m) =>
-        m.category === "leadership" || m.category === "communication" || m.category === "community",
+      (mapping) =>
+        mapping.category === "leadership" ||
+        mapping.category === "communication" ||
+        mapping.category === "community",
     );
-
     const technicalScore = this.calculateCategoryScore(technicalSkills);
     const softSkillsScore = this.calculateCategoryScore(softSkills);
-
-    // Industry knowledge based on industry applications
-    const industryApps = mappings.flatMap((m) => m.industryApplications);
-    const industryScore = Math.min(100, industryApps.length * 10);
-
-    // Portfolio based on evidence
-    const evidenceCount = mappings.reduce((sum, m) => sum + m.evidence.length, 0);
-    const portfolioScore = Math.min(100, evidenceCount * 20);
-
-    // Overall score is weighted average
+    const industryScore = Math.min(100, mappings.flatMap((mapping) => mapping.industryApplications).length * 10);
+    const portfolioScore = Math.min(
+      100,
+      mappings.reduce((sum, mapping) => sum + mapping.evidence.length, 0) * 20,
+    );
     const overallScore = Math.round(
       technicalScore * 0.3 + softSkillsScore * 0.25 + industryScore * 0.2 + portfolioScore * 0.25,
     );
-
     return {
+      technicalSkills,
+      softSkills,
+      technicalScore,
+      softSkillsScore,
+      industryScore,
+      portfolioScore,
       overallScore,
+    };
+  }
+
+  private buildReadinessAssessment(metrics: ReadinessMetrics): ReadinessAssessment {
+    return {
+      overallScore: metrics.overallScore,
       categories: {
         technical: {
-          score: technicalScore,
-          feedback: this.getCategoryFeedback(technicalScore, "technical skills"),
-          strengths: technicalSkills.slice(0, 3).map((s) => s.transferableSkill),
-          improvements:
-            technicalScore < 70
-              ? ["Add more technical skill mappings", "Increase confidence in existing skills"]
-              : [],
+          score: metrics.technicalScore,
+          feedback: this.getCategoryFeedback(metrics.technicalScore, "technical skills"),
+          strengths: metrics.technicalSkills.slice(0, 3).map((mapping) => mapping.transferableSkill),
+          improvements: this.getTechnicalImprovements(metrics.technicalScore),
         },
         softSkills: {
-          score: softSkillsScore,
-          feedback: this.getCategoryFeedback(softSkillsScore, "soft skills"),
-          strengths: softSkills.slice(0, 3).map((s) => s.transferableSkill),
-          improvements:
-            softSkillsScore < 70
-              ? [
-                  "Map more leadership and communication experiences",
-                  "Add team collaboration examples",
-                ]
-              : [],
+          score: metrics.softSkillsScore,
+          feedback: this.getCategoryFeedback(metrics.softSkillsScore, "soft skills"),
+          strengths: metrics.softSkills.slice(0, 3).map((mapping) => mapping.transferableSkill),
+          improvements: this.getSoftSkillImprovements(metrics.softSkillsScore),
         },
         industryKnowledge: {
-          score: industryScore,
-          feedback: this.getCategoryFeedback(industryScore, "industry knowledge"),
-          improvements:
-            industryScore < 70
-              ? ["Research more industry applications", "Connect skills to specific job roles"]
-              : [],
+          score: metrics.industryScore,
+          feedback: this.getCategoryFeedback(metrics.industryScore, "industry knowledge"),
+          improvements: this.getIndustryImprovements(metrics.industryScore),
         },
         portfolio: {
-          score: portfolioScore,
-          feedback: this.getCategoryFeedback(portfolioScore, "portfolio evidence"),
-          improvements:
-            portfolioScore < 70
-              ? [
-                  "Add more evidence to your skill mappings",
-                  "Create portfolio projects",
-                  "Document your achievements",
-                ]
-              : [],
+          score: metrics.portfolioScore,
+          feedback: this.getCategoryFeedback(metrics.portfolioScore, "portfolio evidence"),
+          improvements: this.getPortfolioImprovements(metrics.portfolioScore),
         },
       },
       improvementSuggestions: this.getImprovementSuggestions(
-        overallScore,
-        technicalScore,
-        softSkillsScore,
-        portfolioScore,
+        metrics.overallScore,
+        metrics.technicalScore,
+        metrics.softSkillsScore,
+        metrics.portfolioScore,
       ),
-      nextSteps: this.getNextSteps(overallScore),
+      nextSteps: this.getNextSteps(metrics.overallScore),
     };
+  }
+
+  private getTechnicalImprovements(score: number): string[] {
+    if (score >= 70) {
+      return [];
+    }
+    return ["Add more technical skill mappings", "Increase confidence in existing skills"];
+  }
+
+  private getSoftSkillImprovements(score: number): string[] {
+    if (score >= 70) {
+      return [];
+    }
+    return ["Map more leadership and communication experiences", "Add team collaboration examples"];
+  }
+
+  private getIndustryImprovements(score: number): string[] {
+    if (score >= 70) {
+      return [];
+    }
+    return ["Research more industry applications", "Connect skills to specific job roles"];
+  }
+
+  private getPortfolioImprovements(score: number): string[] {
+    if (score >= 70) {
+      return [];
+    }
+    return [
+      "Add more evidence to your skill mappings",
+      "Create portfolio projects",
+      "Document your achievements",
+    ];
   }
 
   /**

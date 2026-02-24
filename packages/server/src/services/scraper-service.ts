@@ -1,6 +1,6 @@
 import { generateId, type JobSearchResult, safeParseJson } from "@bao/shared";
 import { eq } from "drizzle-orm";
-import * as z from "zod";
+import { z } from "zod";
 import { config } from "../config/env";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
@@ -168,6 +168,70 @@ const toJobSearchResult = (rows: ScrapedJob[]): JobSearchResult => ({
  * Scraper service for studio/job ingestion via Python scripts.
  */
 export class ScraperService {
+  private async upsertStudioRow(studioRow: ScrapedStudio, now: string): Promise<void> {
+    const id = studioRow.id || generateId();
+    const studioData = {
+      name: studioRow.name,
+      website: studioRow.website ?? null,
+      location: studioRow.location ?? null,
+      size: studioRow.size ?? null,
+      type: studioRow.type ?? null,
+      description: studioRow.description ?? null,
+      games: studioRow.games ?? [],
+      technologies: studioRow.technologies ?? [],
+      interviewStyle: studioRow.interviewStyle ?? null,
+      remoteWork: studioRow.remoteWork ?? null,
+    };
+
+    await db
+      .insert(studios)
+      .values({
+        id,
+        ...studioData,
+        logo: null,
+        culture: null,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: studios.id,
+        set: {
+          ...studioData,
+          updatedAt: now,
+        },
+      });
+  }
+
+  private async insertScrapedJobIfMissing(
+    job: JobSearchResult["jobs"][number],
+    now: string,
+  ): Promise<boolean> {
+    const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(0, 100);
+    const existing = await db.select().from(jobs).where(eq(jobs.contentHash, contentHash));
+    if (existing.length > 0) {
+      return false;
+    }
+
+    await db.insert(jobs).values({
+      id: generateId(),
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      remote: Boolean(job.remote),
+      hybrid: false,
+      description: job.description ?? null,
+      url: job.url ?? null,
+      source:
+        job.source?.trim() && job.source.trim().length > 0 ? job.source.trim() : DEFAULT_JOB_SOURCE,
+      contentHash,
+      postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
+      type: DEFAULT_JOB_TYPE,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return true;
+  }
+
   /**
    * Runs a Python scraper script and returns parsed JSON payload.
    */
@@ -280,42 +344,14 @@ export class ScraperService {
     errors.push(...parsedRows.rowErrors);
 
     const now = new Date().toISOString();
-    for (const studioRow of parsedRows.rows) {
-      await runWithErrorCollection(async () => {
-        const id = studioRow.id || generateId();
-        const studioData = {
-          name: studioRow.name,
-          website: studioRow.website ?? null,
-          location: studioRow.location ?? null,
-          size: studioRow.size ?? null,
-          type: studioRow.type ?? null,
-          description: studioRow.description ?? null,
-          games: studioRow.games ?? [],
-          technologies: studioRow.technologies ?? [],
-          interviewStyle: studioRow.interviewStyle ?? null,
-          remoteWork: studioRow.remoteWork ?? null,
-        };
-
-        await db
-          .insert(studios)
-          .values({
-            id,
-            ...studioData,
-            logo: null,
-            culture: null,
-            createdAt: now,
-            updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: studios.id,
-            set: {
-              ...studioData,
-              updatedAt: now,
-            },
-          });
-        upserted += 1;
-      }, errors);
-    }
+    await Promise.allSettled(
+      parsedRows.rows.map((studioRow) =>
+        runWithErrorCollection(async () => {
+          await this.upsertStudioRow(studioRow, now);
+          upserted += 1;
+        }, errors),
+      ),
+    );
 
     return { scraped, upserted, errors };
   }
@@ -426,40 +462,16 @@ export class ScraperService {
 
     const normalizedResult = toJobSearchResult(parsedRows.rows);
     const now = new Date().toISOString();
-
-    for (const job of normalizedResult.jobs) {
-      await runWithErrorCollection(async () => {
-        const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(
-          0,
-          100,
-        );
-        const existing = await db.select().from(jobs).where(eq(jobs.contentHash, contentHash));
-        if (existing.length > 0) {
-          return;
-        }
-
-        await db.insert(jobs).values({
-          id: generateId(),
-          title: job.title,
-          company: job.company,
-          location: job.location,
-          remote: Boolean(job.remote),
-          hybrid: false,
-          description: job.description ?? null,
-          url: job.url ?? null,
-          source:
-            job.source?.trim() && job.source.trim().length > 0
-              ? job.source.trim()
-              : DEFAULT_JOB_SOURCE,
-          contentHash,
-          postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
-          type: DEFAULT_JOB_TYPE,
-          createdAt: now,
-          updatedAt: now,
-        });
-        upserted += 1;
-      }, errors);
-    }
+    await Promise.allSettled(
+      normalizedResult.jobs.map((job) =>
+        runWithErrorCollection(async () => {
+          const inserted = await this.insertScrapedJobIfMissing(job, now);
+          if (inserted) {
+            upserted += 1;
+          }
+        }, errors),
+      ),
+    );
 
     return { scraped, upserted, errors };
   }

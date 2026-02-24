@@ -16,7 +16,7 @@ const debugLogEnabled = ref(true);
  */
 export function createClientLogger(scope: string): ClientLogger {
   const emit = (level: ClientLogLevel, values: unknown[]) => {
-    if (!import.meta.client || !debugLogEnabled.value) {
+    if (!(import.meta.client && debugLogEnabled.value)) {
       return;
     }
 

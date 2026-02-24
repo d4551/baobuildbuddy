@@ -50,112 +50,120 @@ beforeEach(() => {
   subscribeToRunMock.mockReturnValue(unsubscribeMock);
 });
 
+async function assertStartsStreamLifecycle(): Promise<void> {
+  getRunMock.mockResolvedValueOnce(createRun("running"));
+  const stream = useAutomationRunStream();
+
+  await stream.start("run_12345678");
+
+  expect(getRunMock).toHaveBeenCalledWith("run_12345678");
+  expect(subscribeToRunMock).toHaveBeenCalledTimes(1);
+  expect(stream.state.value).toBe("loading");
+  expect(stream.run.value?.status).toBe("running");
+  expect(stream.isStreaming.value).toBe(true);
+}
+
+async function assertAppliesEventsAndStopsAtResult(): Promise<void> {
+  getRunMock.mockResolvedValueOnce(createRun("running"));
+  const stream = useAutomationRunStream();
+
+  await stream.start("run_12345678");
+  expect(latestEventHandler).not.toBeNull();
+
+  latestEventHandler?.({
+    protocolVersion: "1.0",
+    runId: "run_12345678",
+    sequence: 1,
+    timestamp: new Date().toISOString(),
+    eventType: "progress",
+    action: "fill_form",
+    status: "running",
+    step: 2,
+    totalSteps: 3,
+    message: "Filling required fields",
+  });
+
+  expect(stream.run.value?.currentStep).toBe(2);
+  expect(stream.run.value?.totalSteps).toBe(3);
+  expect(stream.run.value?.progress).toBe(67);
+
+  latestEventHandler?.({
+    protocolVersion: "1.0",
+    runId: "run_12345678",
+    sequence: 2,
+    timestamp: new Date().toISOString(),
+    eventType: "result",
+    result: {
+      success: true,
+      error: null,
+      screenshots: [],
+      artifacts: [],
+      steps: [{ action: "submit", status: "ok", message: "Submitted" }],
+    },
+  });
+
+  expect(stream.state.value).toBe("success");
+  expect(stream.run.value?.status).toBe("success");
+  expect(stream.isStreaming.value).toBe(false);
+  expect(unsubscribeMock).toHaveBeenCalledTimes(1);
+}
+
+async function assertIgnoresStaleProgressEvents(): Promise<void> {
+  getRunMock.mockResolvedValueOnce(createRun("running"));
+  const stream = useAutomationRunStream();
+
+  await stream.start("run_12345678");
+  expect(latestEventHandler).not.toBeNull();
+
+  latestEventHandler?.({
+    protocolVersion: "1.0",
+    runId: "run_12345678",
+    sequence: 2,
+    timestamp: new Date().toISOString(),
+    eventType: "progress",
+    action: "fill_profile",
+    status: "success",
+    step: 1,
+    totalSteps: 3,
+    message: "Completed one step",
+  });
+
+  latestEventHandler?.({
+    protocolVersion: "1.0",
+    runId: "run_12345678",
+    sequence: 1,
+    timestamp: new Date().toISOString(),
+    eventType: "progress",
+    action: "old_step",
+    status: "running",
+    step: 0,
+    totalSteps: 3,
+    message: "Out-of-order event",
+  });
+
+  expect(stream.run.value?.status).toBe("running");
+  expect(stream.run.value?.currentStep).toBe(1);
+  expect(stream.events.value.length).toBe(1);
+  expect(stream.state.value).toBe("loading");
+}
+
+async function assertMapsUnauthorizedToUiState(): Promise<void> {
+  getRunMock.mockRejectedValueOnce({ status: 401, message: "Unauthorized" });
+  const stream = useAutomationRunStream();
+
+  await stream.start("run_12345678");
+
+  expect(stream.state.value).toBe("unauthorized");
+  expect(stream.run.value).toBeNull();
+  expect(stream.streamError.value?.message).toBe("Unauthorized");
+}
+
 describe("useAutomationRunStream", () => {
-  it("starts stream lifecycle and subscribes for non-terminal runs", async () => {
-    getRunMock.mockResolvedValueOnce(createRun("running"));
-    const stream = useAutomationRunStream();
+  it("starts stream lifecycle and subscribes for non-terminal runs", assertStartsStreamLifecycle);
 
-    await stream.start("run_12345678");
+  it("applies progress/result events and stops on terminal result", assertAppliesEventsAndStopsAtResult);
 
-    expect(getRunMock).toHaveBeenCalledWith("run_12345678");
-    expect(subscribeToRunMock).toHaveBeenCalledTimes(1);
-    expect(stream.state.value).toBe("loading");
-    expect(stream.run.value?.status).toBe("running");
-    expect(stream.isStreaming.value).toBe(true);
-  });
+  it("ignores stale event sequences and does not mark success on progress success", assertIgnoresStaleProgressEvents);
 
-  it("applies progress/result events and stops on terminal result", async () => {
-    getRunMock.mockResolvedValueOnce(createRun("running"));
-    const stream = useAutomationRunStream();
-
-    await stream.start("run_12345678");
-    expect(latestEventHandler).not.toBeNull();
-
-    latestEventHandler?.({
-      protocolVersion: "1.0",
-      runId: "run_12345678",
-      sequence: 1,
-      timestamp: new Date().toISOString(),
-      eventType: "progress",
-      action: "fill_form",
-      status: "running",
-      step: 2,
-      totalSteps: 3,
-      message: "Filling required fields",
-    });
-
-    expect(stream.run.value?.currentStep).toBe(2);
-    expect(stream.run.value?.totalSteps).toBe(3);
-    expect(stream.run.value?.progress).toBe(67);
-
-    latestEventHandler?.({
-      protocolVersion: "1.0",
-      runId: "run_12345678",
-      sequence: 2,
-      timestamp: new Date().toISOString(),
-      eventType: "result",
-      result: {
-        success: true,
-        error: null,
-        screenshots: [],
-        artifacts: [],
-        steps: [{ action: "submit", status: "ok", message: "Submitted" }],
-      },
-    });
-
-    expect(stream.state.value).toBe("success");
-    expect(stream.run.value?.status).toBe("success");
-    expect(stream.isStreaming.value).toBe(false);
-    expect(unsubscribeMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("ignores stale event sequences and does not mark success on progress success", async () => {
-    getRunMock.mockResolvedValueOnce(createRun("running"));
-    const stream = useAutomationRunStream();
-
-    await stream.start("run_12345678");
-    expect(latestEventHandler).not.toBeNull();
-
-    latestEventHandler?.({
-      protocolVersion: "1.0",
-      runId: "run_12345678",
-      sequence: 2,
-      timestamp: new Date().toISOString(),
-      eventType: "progress",
-      action: "fill_profile",
-      status: "success",
-      step: 1,
-      totalSteps: 3,
-      message: "Completed one step",
-    });
-
-    latestEventHandler?.({
-      protocolVersion: "1.0",
-      runId: "run_12345678",
-      sequence: 1,
-      timestamp: new Date().toISOString(),
-      eventType: "progress",
-      action: "old_step",
-      status: "running",
-      step: 0,
-      totalSteps: 3,
-      message: "Out-of-order event",
-    });
-
-    expect(stream.run.value?.status).toBe("running");
-    expect(stream.run.value?.currentStep).toBe(1);
-    expect(stream.events.value.length).toBe(1);
-    expect(stream.state.value).toBe("loading");
-  });
-
-  it("maps unauthorized fetch failures to deterministic ui state", async () => {
-    getRunMock.mockRejectedValueOnce({ status: 401, message: "Unauthorized" });
-    const stream = useAutomationRunStream();
-
-    await stream.start("run_12345678");
-
-    expect(stream.state.value).toBe("unauthorized");
-    expect(stream.run.value).toBeNull();
-    expect(stream.streamError.value?.message).toBe("Unauthorized");
-  });
+  it("maps unauthorized fetch failures to deterministic ui state", assertMapsUnauthorizedToUiState);
 });

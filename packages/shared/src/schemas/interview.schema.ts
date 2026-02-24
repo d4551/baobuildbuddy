@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 
 export const interviewTargetJobSchema = z.object({
   id: z.string().min(1),

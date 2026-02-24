@@ -16,6 +16,15 @@ interface ConversationContext {
   systemPrompt: string;
   messages: Array<Pick<ChatMessage, "role" | "content">>;
 }
+
+const AUTOMATION_DOMAIN_PATTERN =
+  /\b(automate|automation|rpa|auto[- ]?apply|fill.*form|run.*bot|bot.*apply)\b/i;
+const RESUME_DOMAIN_PATTERN = /\b(resume|cv|bullet|experience|education|summary)\b/;
+const JOB_SEARCH_DOMAIN_PATTERN = /\b(job|apply|salary|remote|position|company|hiring|opening)\b/;
+const INTERVIEW_DOMAIN_PATTERN = /\b(interview|question|answer|practice|mock|prepare)\b/;
+const PORTFOLIO_DOMAIN_PATTERN = /\b(portfolio|project|showcase|demo|sample)\b/;
+const SKILLS_DOMAIN_PATTERN = /\b(skill|mapping|transfer|learn|career\s*path|gap)\b/;
+
 const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
   const [result] = await Promise.allSettled([operation]);
   return result;
@@ -32,14 +41,14 @@ export class ConversationContextManager {
   inferDomain(message: string): AIChatContextDomain {
     const lower = message.toLowerCase();
     // Automation must be checked BEFORE job_search since "apply" overlaps
-    if (/\b(automate|automation|rpa|auto[- ]?apply|fill.*form|run.*bot|bot.*apply)\b/i.test(lower))
+    if (AUTOMATION_DOMAIN_PATTERN.test(lower))
       return "automation";
-    if (/\b(resume|cv|bullet|experience|education|summary)\b/.test(lower)) return "resume";
-    if (/\b(job|apply|salary|remote|position|company|hiring|opening)\b/.test(lower))
+    if (RESUME_DOMAIN_PATTERN.test(lower)) return "resume";
+    if (JOB_SEARCH_DOMAIN_PATTERN.test(lower))
       return "job_search";
-    if (/\b(interview|question|answer|practice|mock|prepare)\b/.test(lower)) return "interview";
-    if (/\b(portfolio|project|showcase|demo|sample)\b/.test(lower)) return "portfolio";
-    if (/\b(skill|mapping|transfer|learn|career\s*path|gap)\b/.test(lower)) return "skills";
+    if (INTERVIEW_DOMAIN_PATTERN.test(lower)) return "interview";
+    if (PORTFOLIO_DOMAIN_PATTERN.test(lower)) return "portfolio";
+    if (SKILLS_DOMAIN_PATTERN.test(lower)) return "skills";
     return "general";
   }
 
@@ -111,89 +120,103 @@ export class ConversationContextManager {
    * Load domain-specific data from DB
    */
   private async loadDomainContext(domain: AIChatContextDomain): Promise<string | null> {
-    const contextResult = await settlePromise(
-      (async () => {
-        switch (domain) {
-          case "resume": {
-            const defaultResume = await db.select().from(resumes).limit(1);
-            if (defaultResume.length > 0) {
-              const r = defaultResume[0];
-              return `User's Resume: "${r.name}"\nSummary: ${r.summary || "Not set"}\nSkills: ${JSON.stringify(r.skills || {})}`;
-            }
-            return null;
-          }
-          case "job_search": {
-            const saved = await db
-              .select({ title: jobs.title, company: jobs.company })
-              .from(savedJobs)
-              .leftJoin(jobs, eq(savedJobs.jobId, jobs.id))
-              .limit(10);
-            if (saved.length > 0) {
-              return `Saved Jobs:\n${saved.map((j) => `- ${j.title} at ${j.company}`).join("\n")}`;
-            }
-            return null;
-          }
-          case "interview": {
-            const sessions = await db
-              .select()
-              .from(interviewSessions)
-              .orderBy(desc(interviewSessions.createdAt))
-              .limit(3);
-            if (sessions.length > 0) {
-              return `Recent Interview Sessions: ${sessions.length} completed`;
-            }
-            return null;
-          }
-          case "portfolio": {
-            const projects = await db.select().from(portfolioProjects).limit(10);
-            if (projects.length > 0) {
-              return `Portfolio Projects:\n${projects.map((p) => `- ${p.title}: ${p.technologies?.join(", ") || "No tech listed"}`).join("\n")}`;
-            }
-            return null;
-          }
-          case "skills": {
-            const mappings = await db.select().from(skillMappings).limit(20);
-            if (mappings.length > 0) {
-              return `Skill Mappings:\n${mappings.map((m) => `- ${m.gameExpression} → ${m.transferableSkill}`).join("\n")}`;
-            }
-            return null;
-          }
-          case "automation": {
-            const recentRuns = await db
-              .select()
-              .from(automationRuns)
-              .orderBy(desc(automationRuns.createdAt))
-              .limit(5);
-            const parts: string[] = [];
-            if (recentRuns.length > 0) {
-              parts.push(`Recent Automation Runs (${recentRuns.length}):`);
-              for (const run of recentRuns) {
-                parts.push(
-                  `- [${run.status}] ${run.type} (${run.createdAt})${run.error ? ` Error: ${run.error}` : ""}`,
-                );
-              }
-            }
-            // List available resumes so the AI can offer choices
-            const availableResumes = await db.select().from(resumes).limit(10);
-            if (availableResumes.length > 0) {
-              parts.push("\nAvailable Resumes:");
-              for (const r of availableResumes) {
-                parts.push(`- "${r.name}" (ID: ${r.id})`);
-              }
-            }
-            return parts.length > 0 ? parts.join("\n") : null;
-          }
-          default:
-            return null;
-        }
-      })(),
-    );
+    const loader = this.getDomainContextLoader(domain);
+    if (!loader) {
+      return null;
+    }
+    const contextResult = await settlePromise(loader());
 
     if (contextResult.status === "rejected") {
       return null;
     }
 
     return contextResult.value;
+  }
+
+  private getDomainContextLoader(domain: AIChatContextDomain): (() => Promise<string | null>) | null {
+    switch (domain) {
+      case "resume":
+        return () => this.loadResumeContext();
+      case "job_search":
+        return () => this.loadJobSearchContext();
+      case "interview":
+        return () => this.loadInterviewContext();
+      case "portfolio":
+        return () => this.loadPortfolioContext();
+      case "skills":
+        return () => this.loadSkillsContext();
+      case "automation":
+        return () => this.loadAutomationContext();
+      default:
+        return null;
+    }
+  }
+
+  private async loadResumeContext(): Promise<string | null> {
+    const defaultResume = await db.select().from(resumes).limit(1);
+    if (defaultResume.length === 0) {
+      return null;
+    }
+    const resume = defaultResume[0];
+    return `User's Resume: "${resume.name}"\nSummary: ${resume.summary || "Not set"}\nSkills: ${JSON.stringify(resume.skills || {})}`;
+  }
+
+  private async loadJobSearchContext(): Promise<string | null> {
+    const saved = await db
+      .select({ title: jobs.title, company: jobs.company })
+      .from(savedJobs)
+      .leftJoin(jobs, eq(savedJobs.jobId, jobs.id))
+      .limit(10);
+    if (saved.length === 0) {
+      return null;
+    }
+    return `Saved Jobs:\n${saved.map((entry) => `- ${entry.title} at ${entry.company}`).join("\n")}`;
+  }
+
+  private async loadInterviewContext(): Promise<string | null> {
+    const sessions = await db
+      .select()
+      .from(interviewSessions)
+      .orderBy(desc(interviewSessions.createdAt))
+      .limit(3);
+    if (sessions.length === 0) {
+      return null;
+    }
+    return `Recent Interview Sessions: ${sessions.length} completed`;
+  }
+
+  private async loadPortfolioContext(): Promise<string | null> {
+    const projects = await db.select().from(portfolioProjects).limit(10);
+    if (projects.length === 0) {
+      return null;
+    }
+    return `Portfolio Projects:\n${projects.map((project) => `- ${project.title}: ${project.technologies?.join(", ") || "No tech listed"}`).join("\n")}`;
+  }
+
+  private async loadSkillsContext(): Promise<string | null> {
+    const mappings = await db.select().from(skillMappings).limit(20);
+    if (mappings.length === 0) {
+      return null;
+    }
+    return `Skill Mappings:\n${mappings.map((mapping) => `- ${mapping.gameExpression} → ${mapping.transferableSkill}`).join("\n")}`;
+  }
+
+  private async loadAutomationContext(): Promise<string | null> {
+    const recentRuns = await db
+      .select()
+      .from(automationRuns)
+      .orderBy(desc(automationRuns.createdAt))
+      .limit(5);
+    const availableResumes = await db.select().from(resumes).limit(10);
+    const runLines = recentRuns.map(
+      (run) => `- [${run.status}] ${run.type} (${run.createdAt})${run.error ? ` Error: ${run.error}` : ""}`,
+    );
+    const resumeLines = availableResumes.map((resume) => `- "${resume.name}" (ID: ${resume.id})`);
+    const parts = [
+      ...(runLines.length > 0 ? [`Recent Automation Runs (${recentRuns.length}):`, ...runLines] : []),
+      ...(resumeLines.length > 0 ? ["\nAvailable Resumes:", ...resumeLines] : []),
+    ];
+    return parts.length > 0 ? parts.join("\n") : null;
   }
 
   /**

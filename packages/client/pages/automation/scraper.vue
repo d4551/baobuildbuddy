@@ -142,8 +142,8 @@ async function runJobs() {
   }
 }
 
-function startJobInterview(jobId: string) {
-  router.push(buildInterviewJobNavigation(jobId, "scraper"));
+async function startJobInterview(jobId: string) {
+  await router.push(buildInterviewJobNavigation(jobId, "scraper"));
 }
 
 async function resolvePipelineReward(

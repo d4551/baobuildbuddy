@@ -11,6 +11,15 @@ const SEARCH_RESULT_TYPE_MAP: Record<string, SearchResult["type"]> = {
   "cover-letters": "cover-letter",
 };
 
+interface SearchContext {
+  api: ReturnType<typeof useApi>;
+  t: ReturnType<typeof useI18n>["t"];
+  query: ReturnType<typeof useState<string>>;
+  results: ReturnType<typeof useState<SearchResults | null>>;
+  suggestions: ReturnType<typeof useState<AutocompleteResult[]>>;
+  loading: ReturnType<typeof useState<boolean>>;
+}
+
 const debounceAsync = <TArgs extends unknown[]>(
   fn: (...args: TArgs) => Promise<void>,
   delayMs: number,
@@ -21,155 +30,181 @@ const debounceAsync = <TArgs extends unknown[]>(
       clearTimeout(timer);
     }
     timer = setTimeout(() => {
-      void fn(...args);
+      fn(...args).then(
+        () => undefined,
+        () => undefined,
+      );
     }, delayMs);
   };
 };
 
+function toSearchFilters(types?: string[]): SearchResults["filters"] {
+  return types?.length ? { types: types.join(",") } : undefined;
+}
+
+function toSearchResult(entry: unknown): SearchResult | null {
+  if (!isRecord(entry)) {
+    return null;
+  }
+  const id = asString(entry.id);
+  const title = asString(entry.title);
+  const rawType = asString(entry.type);
+  if (!(id && title && rawType)) {
+    return null;
+  }
+
+  const mappedType = SEARCH_RESULT_TYPE_MAP[rawType];
+  if (!mappedType) {
+    return null;
+  }
+
+  const subtitle = asString(entry.subtitle);
+  const snippet = asString(entry.snippet);
+  const description = subtitle && snippet ? `${subtitle} • ${snippet}` : subtitle || snippet;
+
+  return {
+    id,
+    type: mappedType,
+    title,
+    matchScore: asNumber(entry.relevance),
+    ...(description ? { description } : {}),
+  };
+}
+
 const toSearchResults = (value: unknown, query: string, types?: string[]): SearchResults => {
-  if (!isRecord(value) || !Array.isArray(value.results)) {
+  const filters = toSearchFilters(types);
+  if (!(isRecord(value) && Array.isArray(value.results))) {
     return {
       query,
       results: [],
       total: 0,
-      filters: types?.length ? { types: types.join(",") } : undefined,
+      filters,
     };
   }
 
-  const results: SearchResult[] = [];
-  for (const entry of value.results) {
-    if (!isRecord(entry)) continue;
-    const id = asString(entry.id);
-    const title = asString(entry.title);
-    const rawType = asString(entry.type);
-    if (!id || !title || !rawType) continue;
-
-    const mappedType = SEARCH_RESULT_TYPE_MAP[rawType];
-    if (!mappedType) continue;
-
-    const subtitle = asString(entry.subtitle);
-    const snippet = asString(entry.snippet);
-    const result: SearchResult = {
-      id,
-      type: mappedType,
-      title,
-      matchScore: asNumber(entry.relevance),
-    };
-    if (subtitle && snippet) {
-      result.description = `${subtitle} • ${snippet}`;
-    } else if (subtitle) {
-      result.description = subtitle;
-    } else if (snippet) {
-      result.description = snippet;
-    }
-    results.push(result);
-  }
+  const results = value.results
+    .map((entry) => toSearchResult(entry))
+    .filter((entry): entry is SearchResult => entry !== null);
 
   return {
     query: asString(value.query) ?? query,
     results,
     total: results.length,
-    filters: types?.length ? { types: types.join(",") } : undefined,
+    filters,
   };
 };
 
 const toAutocompleteResults = (value: unknown): AutocompleteResult[] => {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
   const suggestions: AutocompleteResult[] = [];
   for (const entry of value) {
-    if (!isRecord(entry)) continue;
+    if (!isRecord(entry)) {
+      continue;
+    }
     const text = asString(entry.text);
     const type = asString(entry.type);
-    if (!text || !type) continue;
-    suggestions.push({
-      value: text,
-      type,
-      label: text,
-    });
+    if (text && type) {
+      suggestions.push({ value: text, type, label: text });
+    }
   }
   return suggestions;
 };
 
-/**
- * Unified search composable for searching across jobs, studios, skills, and resumes.
- */
-export function useSearch() {
-  const api = useApi();
-  const { t } = useI18n();
-  const query = useState(STATE_KEYS.SEARCH_QUERY, () => "");
-  const results = useState<SearchResults | null>(STATE_KEYS.SEARCH_RESULTS, () => null);
-  const suggestions = useState<AutocompleteResult[]>(STATE_KEYS.SEARCH_SUGGESTIONS, () => []);
-  const loading = useState(STATE_KEYS.SEARCH_LOADING, () => false);
-
+function createSearchActions(context: SearchContext) {
   const searchAll = debounceAsync(async (q: string, types?: string[]) => {
     if (q.length < 2) {
-      results.value = null;
+      context.results.value = null;
       return;
     }
-    await withLoadingState(loading, async () => {
+
+    await withLoadingState(context.loading, async () => {
       const queryParams: Record<string, string> = { q };
-      if (types?.length) queryParams.types = types.join(",");
-      const { data, error } = await api.search.get({ query: queryParams });
-      assertApiResponse(error, t("apiErrors.search.searchFailed"));
-      results.value = toSearchResults(data, q, types);
+      if (types?.length) {
+        queryParams.types = types.join(",");
+      }
+      const { data, error } = await context.api.search.get({ query: queryParams });
+      assertApiResponse(error, context.t("apiErrors.search.searchFailed"));
+      context.results.value = toSearchResults(data, q, types);
     });
   }, 300);
 
   const autocomplete = debounceAsync(async (prefix: string) => {
     if (prefix.length < 2) {
-      suggestions.value = [];
+      context.suggestions.value = [];
       return;
     }
+
     const settled = await settlePromise(
-      api.search.autocomplete.get({ query: { prefix } }),
-      t("apiErrors.search.autocompleteFailed"),
+      context.api.search.autocomplete.get({ query: { prefix } }),
+      context.t("apiErrors.search.autocompleteFailed"),
     );
-    if (!settled.ok) {
-      suggestions.value = [];
+    if (!settled.ok || settled.value.error) {
+      context.suggestions.value = [];
       return;
     }
-    const { data, error } = settled.value;
-    if (error) {
-      suggestions.value = [];
-      return;
-    }
-    suggestions.value = toAutocompleteResults(data);
+
+    context.suggestions.value = toAutocompleteResults(settled.value.data);
   }, 150);
 
-  function clearSearch() {
-    query.value = "";
-    results.value = null;
-    suggestions.value = [];
-  }
+  const clearSearch = (): void => {
+    context.query.value = "";
+    context.results.value = null;
+    context.suggestions.value = [];
+  };
 
-  const resultCount = computed(() => {
-    if (!results.value) return 0;
-    return results.value.results?.length || 0;
-  });
+  return {
+    searchAll,
+    autocomplete,
+    clearSearch,
+  };
+}
 
+function createSearchComputed(context: SearchContext) {
+  const resultCount = computed(() => context.results.value?.results?.length || 0);
   const resultsByType = computed(() => {
-    if (!results.value?.results) return {};
+    if (!context.results.value?.results) {
+      return {};
+    }
+
     const grouped: Record<string, SearchResult[]> = {};
-    for (const result of results.value.results) {
-      let group = grouped[result.type];
-      if (!group) {
-        group = [];
-        grouped[result.type] = group;
-      }
-      group.push(result);
+    for (const result of context.results.value.results) {
+      grouped[result.type] = [...(grouped[result.type] ?? []), result];
     }
     return grouped;
   });
 
   return {
-    query,
-    results: readonly(results),
-    suggestions: readonly(suggestions),
-    loading: readonly(loading),
     resultCount,
     resultsByType,
-    searchAll,
-    autocomplete,
-    clearSearch,
+  };
+}
+
+/**
+ * Unified search composable for searching across jobs, studios, skills, and resumes.
+ */
+export function useSearch() {
+  const context: SearchContext = {
+    api: useApi(),
+    t: useI18n().t,
+    query: useState(STATE_KEYS.SEARCH_QUERY, () => ""),
+    results: useState<SearchResults | null>(STATE_KEYS.SEARCH_RESULTS, () => null),
+    suggestions: useState<AutocompleteResult[]>(STATE_KEYS.SEARCH_SUGGESTIONS, () => []),
+    loading: useState(STATE_KEYS.SEARCH_LOADING, () => false),
+  };
+
+  const actions = createSearchActions(context);
+  const computedState = createSearchComputed(context);
+
+  return {
+    query: context.query,
+    results: readonly(context.results),
+    suggestions: readonly(context.suggestions),
+    loading: readonly(context.loading),
+    resultCount: computedState.resultCount,
+    resultsByType: computedState.resultsByType,
+    ...actions,
   };
 }

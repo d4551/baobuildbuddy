@@ -24,6 +24,10 @@ export interface UserProfile {
 }
 
 type MatchedJob = Omit<Job, "matchScore"> & { matchScore: MatchScore };
+type ParsedSalaryRange = {
+  min: number;
+  max: number;
+};
 
 function resolveMatchScore(value: number | MatchScore | undefined): number {
   if (typeof value === "number") {
@@ -33,6 +37,41 @@ function resolveMatchScore(value: number | MatchScore | undefined): number {
     return value.overall;
   }
   return 0;
+}
+
+function parseSalaryRange(salary: Job["salary"]): ParsedSalaryRange | null {
+  if (!salary) {
+    return null;
+  }
+
+  if (typeof salary === "string") {
+    const numbers = salary.match(/\d+/g);
+    if (!(numbers && numbers.length >= 1)) {
+      return null;
+    }
+    const min = Number.parseInt(numbers[0], 10) * 1000;
+    const max = numbers.length > 1 ? Number.parseInt(numbers[1], 10) * 1000 : min;
+    return { min, max };
+  }
+
+  if (typeof salary === "object" && typeof salary.min === "number" && typeof salary.max === "number") {
+    return { min: salary.min, max: salary.max };
+  }
+
+  return null;
+}
+
+function calculateOverlapScore(
+  salaryRange: ParsedSalaryRange,
+  userMin: number,
+  userMax: number,
+): number {
+  const overlapStart = Math.max(salaryRange.min, userMin);
+  const overlapEnd = Math.min(salaryRange.max, userMax);
+  const overlapSize = overlapEnd - overlapStart;
+  const userRangeSize = userMax - userMin;
+  const overlapPercent = overlapSize / userRangeSize;
+  return Math.min(100, Math.round(overlapPercent * 100 + 50));
 }
 
 /**
@@ -205,27 +244,12 @@ function calculateLocationMatch(profile: UserProfile, job: Job): number {
  * Calculate salary match score
  */
 function calculateSalaryMatch(profile: UserProfile, job: Job): number {
-  if (!profile.salaryExpectation || !job.salary) {
+  if (!(profile.salaryExpectation && job.salary)) {
     return 60; // Neutral if no salary info
   }
 
-  // Handle both string and object salary formats
-  let jobMin: number | undefined;
-  let jobMax: number | undefined;
-
-  if (typeof job.salary === "string") {
-    // Try to parse salary from string
-    const numbers = job.salary.match(/\d+/g);
-    if (numbers && numbers.length >= 1) {
-      jobMin = Number.parseInt(numbers[0], 10) * 1000; // Assume K format
-      jobMax = numbers.length > 1 ? Number.parseInt(numbers[1], 10) * 1000 : jobMin;
-    }
-  } else if (typeof job.salary === "object") {
-    jobMin = job.salary.min;
-    jobMax = job.salary.max;
-  }
-
-  if (!jobMin || !jobMax) {
+  const salaryRange = parseSalaryRange(job.salary);
+  if (!salaryRange) {
     return 60;
   }
 
@@ -233,19 +257,12 @@ function calculateSalaryMatch(profile: UserProfile, job: Job): number {
   const userMax = profile.salaryExpectation.max || Number.POSITIVE_INFINITY;
 
   // Check if ranges overlap
-  if (jobMax >= userMin && jobMin <= userMax) {
-    // Calculate overlap percentage
-    const overlapStart = Math.max(jobMin, userMin);
-    const overlapEnd = Math.min(jobMax, userMax);
-    const overlapSize = overlapEnd - overlapStart;
-    const userRangeSize = userMax - userMin;
-    const overlapPercent = overlapSize / userRangeSize;
-
-    return Math.min(100, Math.round(overlapPercent * 100 + 50));
+  if (salaryRange.max >= userMin && salaryRange.min <= userMax) {
+    return calculateOverlapScore(salaryRange, userMin, userMax);
   }
 
   // No overlap
-  if (jobMax < userMin) {
+  if (salaryRange.max < userMin) {
     return 20; // Below expectations
   }
 

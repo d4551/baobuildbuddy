@@ -39,7 +39,7 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
         liveUrl: body.liveUrl,
         githubUrl: body.githubUrl,
         tags: body.tags || [],
-        featured: body.featured || false,
+        featured: body.featured,
         role: body.role,
         platforms: body.platforms || [],
         engines: body.engines || [],

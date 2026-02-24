@@ -71,6 +71,18 @@ export function findDuplicates(jobs: RawJob[]): Map<string, RawJob[]> {
   return duplicates;
 }
 
+function mergeJobValues(merged: RawJob, job: RawJob): void {
+  if (!merged.description && job.description) {
+    merged.description = job.description;
+  }
+
+  for (const [key, value] of Object.entries(job)) {
+    if (value && !merged[key]) {
+      merged[key] = value;
+    }
+  }
+}
+
 /**
  * Merge duplicate job postings by combining their metadata
  * Prefers non-empty values and combines arrays
@@ -94,18 +106,7 @@ export function mergeJobs(jobs: RawJob[]): RawJob {
   for (const job of jobs) {
     if (job.source) sources.add(job.source);
     if (job.url) urls.add(job.url);
-
-    // Prefer non-empty description
-    if (!merged.description && job.description) {
-      merged.description = job.description;
-    }
-
-    // Combine any additional properties
-    for (const [key, value] of Object.entries(job)) {
-      if (value && !merged[key]) {
-        merged[key] = value;
-      }
-    }
+    mergeJobValues(merged, job);
   }
 
   // Add metadata about sources

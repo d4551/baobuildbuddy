@@ -12,181 +12,205 @@ const DEFAULT_THRESHOLD = [0.1, 0.3, 0.5, 0.8];
 const MANUAL_SCROLL_LOCK_MS = 250;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-
 const normalizeHashValue = (value: string, hashPrefix: string): string =>
   value.replace(new RegExp(`^${escapeRegExp(hashPrefix)}`, "u"), "").trim();
+
+interface ScrollSpyState {
+  activeSectionId: ReturnType<typeof ref<string>>;
+  sectionNodes: Map<string, HTMLElement>;
+  observer: ReturnType<typeof ref<IntersectionObserver | null>>;
+  hashPrefix: string;
+  lastManualScrollAt: number;
+}
+
+function createScrollSpyState(options: ScrollSpyOptions): ScrollSpyState {
+  return {
+    activeSectionId: ref(""),
+    sectionNodes: new Map<string, HTMLElement>(),
+    observer: ref<IntersectionObserver | null>(null),
+    hashPrefix: options.hashPrefix ?? DEFAULT_HASH_PREFIX,
+    lastManualScrollAt: 0,
+  };
+}
+
+function resolveFallbackSectionId(state: ScrollSpyState): string | null {
+  const firstSection = state.sectionNodes.values().next().value;
+  return firstSection?.id || null;
+}
+
+function updateActiveSection(state: ScrollSpyState, sectionId: string, updateHash: boolean): void {
+  if (sectionId.length === 0 || state.activeSectionId.value === sectionId) {
+    return;
+  }
+
+  state.activeSectionId.value = sectionId;
+  if (!updateHash || typeof window === "undefined") {
+    return;
+  }
+
+  const nextHash = `${state.hashPrefix}${sectionId}`;
+  if (window.location.hash !== nextHash) {
+    window.history.replaceState({}, "", nextHash);
+  }
+}
+
+function shouldIgnoreObserverTick(state: ScrollSpyState): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return Date.now() - state.lastManualScrollAt < MANUAL_SCROLL_LOCK_MS;
+}
+
+function pickEntryId(
+  state: ScrollSpyState,
+  entries: readonly IntersectionObserverEntry[],
+): string | null {
+  const nextEntry = entries
+    .filter((entry) => entry.isIntersecting)
+    .sort((a, b) => {
+      const ratioCompare = b.intersectionRatio - a.intersectionRatio;
+      if (ratioCompare !== 0) {
+        return ratioCompare;
+      }
+      return a.boundingClientRect.top - b.boundingClientRect.top;
+    })[0];
+
+  return nextEntry?.target.id || resolveFallbackSectionId(state);
+}
+
+function createObserverCallback(state: ScrollSpyState): IntersectionObserverCallback {
+  return (entries) => {
+    if (shouldIgnoreObserverTick(state)) {
+      return;
+    }
+
+    const nextId = pickEntryId(state, entries);
+    if (nextId) {
+      updateActiveSection(state, nextId, true);
+    }
+  };
+}
+
+function refreshObserver(state: ScrollSpyState): void {
+  const activeObserver = state.observer.value;
+  if (!activeObserver) {
+    return;
+  }
+
+  activeObserver.disconnect();
+  for (const section of state.sectionNodes.values()) {
+    activeObserver.observe(section);
+  }
+}
+
+function startObserver(state: ScrollSpyState, options: ScrollSpyOptions): void {
+  if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
+    return;
+  }
+
+  if (!state.observer.value) {
+    state.observer.value = new IntersectionObserver(createObserverCallback(state), {
+      root: null,
+      threshold: options.threshold ?? DEFAULT_THRESHOLD,
+      rootMargin: options.rootMargin ?? DEFAULT_ROOT_MARGIN,
+    });
+  }
+
+  refreshObserver(state);
+}
+
+function stopObserver(state: ScrollSpyState): void {
+  state.observer.value?.disconnect();
+  state.observer.value = null;
+}
+
+function setSectionRef(state: ScrollSpyState, sectionId: string, element: Element | null): void {
+  const previous = state.sectionNodes.get(sectionId);
+  if (previous && state.observer.value) {
+    state.observer.value.unobserve(previous);
+  }
+
+  if (!element) {
+    state.sectionNodes.delete(sectionId);
+    if (state.activeSectionId.value === sectionId) {
+      state.activeSectionId.value = resolveFallbackSectionId(state) ?? "";
+    }
+    return;
+  }
+
+  if (element instanceof HTMLElement) {
+    state.sectionNodes.set(sectionId, element);
+    state.observer.value?.observe(element);
+  }
+}
+
+function scrollToSection(
+  state: ScrollSpyState,
+  sectionId: string,
+  optionsValue: {
+    smooth?: boolean;
+    focus?: boolean;
+    updateHash?: boolean;
+  } = {},
+): void {
+  const section = state.sectionNodes.get(sectionId);
+  if (!section) {
+    return;
+  }
+
+  const smooth = optionsValue.smooth ?? true;
+  const focus = optionsValue.focus ?? true;
+  const updateHash = optionsValue.updateHash ?? true;
+
+  state.lastManualScrollAt = Date.now();
+  updateActiveSection(state, sectionId, updateHash);
+  section.scrollIntoView({
+    behavior: smooth ? "smooth" : "auto",
+    block: "start",
+  });
+  if (focus) {
+    section.focus({ preventScroll: true });
+  }
+}
+
+function syncFromHash(state: ScrollSpyState, hashValue: string): boolean {
+  const normalizedHash = normalizeHashValue(hashValue, state.hashPrefix);
+  if (!(normalizedHash && state.sectionNodes.has(normalizedHash))) {
+    return false;
+  }
+
+  scrollToSection(state, normalizedHash, {
+    smooth: false,
+    focus: false,
+    updateHash: false,
+  });
+  return true;
+}
 
 /**
  * Generic section-based scroll spy composable with deterministic active-id updates.
  */
 export function useScrollSpy(options: ScrollSpyOptions = {}) {
-  const activeSectionId = ref<string>("");
-  const sectionNodes = new Map<string, HTMLElement>();
-  const observer = ref<IntersectionObserver | null>(null);
-  const hashPrefix = options.hashPrefix ?? DEFAULT_HASH_PREFIX;
-  let lastManualScrollAt = 0;
-
-  const updateActiveSection = (sectionId: string, updateHash: boolean): void => {
-    if (sectionId.length === 0 || activeSectionId.value === sectionId) {
-      return;
-    }
-    activeSectionId.value = sectionId;
-    if (!updateHash || typeof window === "undefined") {
-      return;
-    }
-    const nextHash = `${hashPrefix}${sectionId}`;
-    if (window.location.hash === nextHash) {
-      return;
-    }
-    window.history.replaceState({}, "", nextHash);
-  };
-
-  const resolveFallbackSectionId = (): string | null => {
-    const firstSection = sectionNodes.values().next().value;
-    if (!firstSection) {
-      return null;
-    }
-    return firstSection.id || null;
-  };
-
-  const sectionObserverCallback: IntersectionObserverCallback = (entries) => {
-    if (typeof window !== "undefined") {
-      const elapsedMs = Date.now() - lastManualScrollAt;
-      if (elapsedMs < MANUAL_SCROLL_LOCK_MS) {
-        return;
-      }
-    }
-
-    const nextEntry = entries
-      .filter((entry) => entry.isIntersecting)
-      .sort((a, b) => {
-        const ratioCompare = b.intersectionRatio - a.intersectionRatio;
-        if (ratioCompare !== 0) {
-          return ratioCompare;
-        }
-        return a.boundingClientRect.top - b.boundingClientRect.top;
-      })[0];
-
-    const nextId = nextEntry?.target.id || resolveFallbackSectionId();
-    if (!nextId) {
-      return;
-    }
-    updateActiveSection(nextId, true);
-  };
-
-  const refreshObserver = (): void => {
-    const activeObserver = observer.value;
-    if (!activeObserver) {
-      return;
-    }
-    activeObserver.disconnect();
-    for (const section of sectionNodes.values()) {
-      activeObserver.observe(section);
-    }
-  };
-
-  const startObserver = (): void => {
-    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
-      return;
-    }
-    if (!observer.value) {
-      observer.value = new IntersectionObserver(sectionObserverCallback, {
-        root: null,
-        threshold: options.threshold ?? DEFAULT_THRESHOLD,
-        rootMargin: options.rootMargin ?? DEFAULT_ROOT_MARGIN,
-      });
-    }
-    refreshObserver();
-  };
-
-  const stopObserver = (): void => {
-    observer.value?.disconnect();
-    observer.value = null;
-  };
-
-  /**
-   * Registers/unregisters a section node by id.
-   */
-  const setSectionRef = (sectionId: string, element: Element | null): void => {
-    const previous = sectionNodes.get(sectionId);
-    if (previous && observer.value) {
-      observer.value.unobserve(previous);
-    }
-
-    if (!element) {
-      sectionNodes.delete(sectionId);
-      if (activeSectionId.value === sectionId) {
-        const fallbackId = resolveFallbackSectionId() ?? "";
-        activeSectionId.value = fallbackId;
-      }
-      return;
-    }
-    if (element instanceof HTMLElement) {
-      sectionNodes.set(sectionId, element);
-      if (observer.value) {
-        observer.value.observe(element);
-      }
-    }
-  };
-
-  /**
-   * Scrolls to a registered section and updates active hash state.
-   */
-  const scrollToSection = (
-    sectionId: string,
-    optionsValue: {
-      smooth?: boolean;
-      focus?: boolean;
-      updateHash?: boolean;
-    } = {},
-  ): void => {
-    const section = sectionNodes.get(sectionId);
-    if (!section) {
-      return;
-    }
-
-    const smooth = optionsValue.smooth ?? true;
-    const focus = optionsValue.focus ?? true;
-    const updateHash = optionsValue.updateHash ?? true;
-
-    lastManualScrollAt = Date.now();
-    updateActiveSection(sectionId, updateHash);
-    section.scrollIntoView({
-      behavior: smooth ? "smooth" : "auto",
-      block: "start",
-    });
-    if (focus) {
-      section.focus({ preventScroll: true });
-    }
-  };
-
-  /**
-   * Restores active section based on URL hash when available.
-   */
-  const syncFromHash = (hashValue: string): boolean => {
-    const normalizedHash = normalizeHashValue(hashValue, hashPrefix);
-    if (!(normalizedHash && sectionNodes.has(normalizedHash))) {
-      return false;
-    }
-    scrollToSection(normalizedHash, {
-      smooth: false,
-      focus: false,
-      updateHash: false,
-    });
-    return true;
-  };
-
+  const state = createScrollSpyState(options);
+  const stop = (): void => stopObserver(state);
   if (getCurrentScope()) {
-    onScopeDispose(stopObserver);
+    onScopeDispose(stop);
   }
 
   return {
-    activeSectionId: readonly(activeSectionId),
-    setSectionRef,
-    scrollToSection,
-    syncFromHash,
-    startObserver,
-    refreshObserver,
-    stopObserver,
+    activeSectionId: readonly(state.activeSectionId),
+    setSectionRef: (sectionId: string, element: Element | null) => setSectionRef(state, sectionId, element),
+    scrollToSection: (
+      sectionId: string,
+      optionsValue: {
+        smooth?: boolean;
+        focus?: boolean;
+        updateHash?: boolean;
+      } = {},
+    ) => scrollToSection(state, sectionId, optionsValue),
+    syncFromHash: (hashValue: string) => syncFromHash(state, hashValue),
+    startObserver: () => startObserver(state, options),
+    refreshObserver: () => refreshObserver(state),
+    stopObserver: stop,
   };
 }

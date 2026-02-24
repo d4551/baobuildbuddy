@@ -42,8 +42,61 @@ interface CoverLetterGenerationInput {
   jobId?: string;
 }
 
+interface EntityContextInput {
+  path: string;
+  routeParams: Record<string, string>;
+  routeQuery: Record<string, string>;
+  jobs: readonly Job[];
+  resumes: readonly ResumeData[];
+  studio: GameStudio | null;
+}
+
+interface ContextBuilderInput {
+  route: ReturnType<typeof useRoute>;
+  jobs: ReturnType<typeof useState<Job[]>>;
+  resumes: ReturnType<typeof useState<ResumeData[]>>;
+  currentStudio: ReturnType<typeof useState<GameStudio | null>>;
+  interviewSessions: ReturnType<typeof useState<InterviewSession[]>>;
+  portfolioData: ReturnType<typeof useState<PortfolioData | null>>;
+}
+
+interface ChatActionInput {
+  api: ReturnType<typeof useApi>;
+  t: ReturnType<typeof useI18n>["t"];
+  toast: ReturnType<typeof useNuxtApp>["$toast"];
+  loading: ReturnType<typeof useState<boolean>>;
+  streaming: ReturnType<typeof useState<boolean>>;
+  messages: ReturnType<typeof useState<ChatMessage[]>>;
+  sessionId: ReturnType<typeof useState<string>>;
+  buildAssistantGreetingMessage: () => ChatMessage;
+  buildCurrentContext: (source?: AIChatContextSource) => AIChatContext;
+  unableToProcessFallback: () => string;
+  requestErrorFallback: () => string;
+}
+
+interface DataActionInput {
+  api: ReturnType<typeof useApi>;
+  t: ReturnType<typeof useI18n>["t"];
+  loading: ReturnType<typeof useState<boolean>>;
+}
+
+interface AIStateRefs {
+  messages: ReturnType<typeof useState<ChatMessage[]>>;
+  sessionId: ReturnType<typeof useState<string>>;
+  streaming: ReturnType<typeof useState<boolean>>;
+  loading: ReturnType<typeof useState<boolean>>;
+  resumes: ReturnType<typeof useState<ResumeData[]>>;
+  jobs: ReturnType<typeof useState<Job[]>>;
+  currentStudio: ReturnType<typeof useState<GameStudio | null>>;
+  interviewSessions: ReturnType<typeof useState<InterviewSession[]>>;
+  portfolioData: ReturnType<typeof useState<PortfolioData | null>>;
+  buildAssistantGreetingMessage: () => ChatMessage;
+}
+
 function resolveAIChatSource(path: string, source?: AIChatContextSource): AIChatContextSource {
-  if (source) return source;
+  if (source) {
+    return source;
+  }
   return path.startsWith(AI_CHAT_PAGE_PATH) ? "chat-page" : "floating-widget";
 }
 
@@ -87,86 +140,297 @@ function normalizeRouteQuery(
   return normalized;
 }
 
-function resolveEntityContext(
-  path: string,
-  routeParams: Record<string, string>,
-  routeQuery: Record<string, string>,
-  jobs: Job[],
-  resumes: ResumeData[],
-  studio: GameStudio | null,
-): AIChatContextEntity | undefined {
-  const routeId = routeParams[AI_CHAT_ROUTE_QUERY_KEYS.id];
-  const queryJobId = routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.jobId];
-  const queryResumeId = routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.resumeId];
-  const queryStudioId = routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.studioId];
-
-  const toEntity = (
-    type: AIChatContextEntityType,
-    id: string,
-    label?: string,
-  ): AIChatContextEntity => {
-    if (label) {
-      return { type, id, label };
-    }
+function toEntity(type: AIChatContextEntityType, id: string, label?: string): AIChatContextEntity {
+  if (!label) {
     return { type, id };
-  };
-
-  if (path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.jobs}/`) && routeId) {
-    const selectedJob = jobs.find((job) => job.id === routeId);
-    const selectedJobLabel = selectedJob ? `${selectedJob.title} at ${selectedJob.company}` : "";
-    if (selectedJobLabel) {
-      return toEntity("job", routeId, selectedJobLabel);
-    }
-    return toEntity("job", routeId);
   }
+  return { type, id, label };
+}
 
-  if (path.startsWith(AI_CHAT_ENTITY_ROUTE_PATHS.interview) && queryJobId) {
-    const selectedJob = jobs.find((job) => job.id === queryJobId);
-    const selectedJobLabel = selectedJob ? `${selectedJob.title} at ${selectedJob.company}` : "";
-    if (selectedJobLabel) {
-      return toEntity("job", queryJobId, selectedJobLabel);
-    }
-    return toEntity("job", queryJobId);
+function resolveJobContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
+  const routeId = input.routeParams[AI_CHAT_ROUTE_QUERY_KEYS.id];
+  if (!(input.path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.jobs}/`) && routeId)) {
+    return;
   }
+  const selectedJob = input.jobs.find((job) => job.id === routeId);
+  const selectedJobLabel = selectedJob ? `${selectedJob.title} at ${selectedJob.company}` : "";
+  return toEntity("job", routeId, selectedJobLabel);
+}
 
-  if (path.startsWith(AI_CHAT_ENTITY_ROUTE_PATHS.resume)) {
-    const resolvedResumeId = routeId || queryResumeId;
-    if (resolvedResumeId) {
-      const selectedResume = resumes.find((resume) => resume.id === resolvedResumeId);
-      const selectedResumeLabel = selectedResume?.name ?? "";
-      if (selectedResumeLabel) {
-        return toEntity("resume", resolvedResumeId, selectedResumeLabel);
-      }
-      return toEntity("resume", resolvedResumeId);
-    }
+function resolveInterviewContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
+  const queryJobId = input.routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.jobId];
+  if (!(input.path.startsWith(AI_CHAT_ENTITY_ROUTE_PATHS.interview) && queryJobId)) {
+    return;
   }
+  const selectedJob = input.jobs.find((job) => job.id === queryJobId);
+  const selectedJobLabel = selectedJob ? `${selectedJob.title} at ${selectedJob.company}` : "";
+  return toEntity("job", queryJobId, selectedJobLabel);
+}
 
-  if (path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.studios}/`) && routeId) {
-    const studioLabel = studio?.name ?? "";
-    if (studioLabel) {
-      return toEntity("studio", routeId, studioLabel);
-    }
-    return toEntity("studio", routeId);
+function resolveResumeContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
+  if (!input.path.startsWith(AI_CHAT_ENTITY_ROUTE_PATHS.resume)) {
+    return;
   }
-
-  if (queryStudioId) {
-    const studioLabel = studio?.name ?? "";
-    if (studioLabel) {
-      return toEntity("studio", queryStudioId, studioLabel);
-    }
-    return toEntity("studio", queryStudioId);
+  const routeId = input.routeParams[AI_CHAT_ROUTE_QUERY_KEYS.id];
+  const queryResumeId = input.routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.resumeId];
+  const resolvedResumeId = routeId || queryResumeId;
+  if (!resolvedResumeId) {
+    return;
   }
+  const selectedResume = input.resumes.find((resume) => resume.id === resolvedResumeId);
+  return toEntity("resume", resolvedResumeId, selectedResume?.name ?? "");
+}
 
-  const interviewSessionId = routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.id];
-  if (path.startsWith(AI_CHAT_ENTITY_ROUTE_PATHS.interviewSession) && interviewSessionId) {
+function resolveStudioPathContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
+  const routeId = input.routeParams[AI_CHAT_ROUTE_QUERY_KEYS.id];
+  if (!(input.path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.studios}/`) && routeId)) {
+    return;
+  }
+  return toEntity("studio", routeId, input.studio?.name ?? "");
+}
+
+function resolveStudioQueryContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
+  const queryStudioId = input.routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.studioId];
+  if (!queryStudioId) {
+    return;
+  }
+  return toEntity("studio", queryStudioId, input.studio?.name ?? "");
+}
+
+function resolveSessionContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
+  const interviewSessionId = input.routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.id];
+  if (input.path.startsWith(AI_CHAT_ENTITY_ROUTE_PATHS.interviewSession) && interviewSessionId) {
     return toEntity("interview_session", interviewSessionId);
   }
 
-  if (path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.automationRuns}/`) && routeId) {
+  const routeId = input.routeParams[AI_CHAT_ROUTE_QUERY_KEYS.id];
+  if (input.path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.automationRuns}/`) && routeId) {
     return toEntity("automation_run", routeId);
   }
 
-  return undefined;
+  return;
+}
+
+function resolveEntityContext(input: EntityContextInput): AIChatContextEntity | undefined {
+  const resolvers = [
+    resolveJobContextEntity,
+    resolveInterviewContextEntity,
+    resolveResumeContextEntity,
+    resolveStudioPathContextEntity,
+    resolveStudioQueryContextEntity,
+    resolveSessionContextEntity,
+  ] as const;
+
+  for (const resolver of resolvers) {
+    const entity = resolver(input);
+    if (entity) {
+      return entity;
+    }
+  }
+
+  return;
+}
+
+function parseAIChatResponse(data: unknown): AIChatResponse {
+  const response: AIChatResponse = {};
+  if (!(data && typeof data === "object")) {
+    return response;
+  }
+
+  if ("message" in data && typeof data.message === "string") {
+    response.message = data.message;
+  }
+  if ("id" in data && typeof data.id === "string") {
+    response.id = data.id;
+  }
+  if ("sessionId" in data && typeof data.sessionId === "string") {
+    response.sessionId = data.sessionId;
+  }
+  if ("timestamp" in data && typeof data.timestamp === "string") {
+    response.timestamp = data.timestamp;
+  }
+
+  return response;
+}
+
+function createContextBuilder(input: ContextBuilderInput) {
+  return (source?: AIChatContextSource): AIChatContext => {
+    const routeParams = normalizeRouteParams(input.route.params);
+    const routeQuery = normalizeRouteQuery(input.route.query);
+    const routeName = typeof input.route.name === "string" ? input.route.name : "";
+    const resolvedSource = resolveAIChatSource(input.route.path, source);
+    const entityContext = resolveEntityContext({
+      path: input.route.path,
+      routeParams,
+      routeQuery,
+      jobs: input.jobs.value,
+      resumes: input.resumes.value,
+      studio: input.currentStudio.value,
+    });
+
+    const context: AIChatContext = {
+      source: resolvedSource,
+      domain: inferAIChatDomainFromRoutePath(input.route.path),
+      route: {
+        path: input.route.path,
+        params: routeParams,
+        query: routeQuery,
+        ...(routeName ? { name: routeName } : {}),
+      },
+      state: {
+        hasResumes: input.resumes.value.length > 0,
+        hasJobs: input.jobs.value.length > 0,
+        hasStudios: input.currentStudio.value !== null,
+        hasInterviewSessions: input.interviewSessions.value.length > 0,
+        hasPortfolioProjects: (input.portfolioData.value?.projects.length ?? 0) > 0,
+      },
+    };
+
+    return entityContext ? { ...context, entity: entityContext } : context;
+  };
+}
+
+async function requestAIChatResponse(
+  input: ChatActionInput,
+  content: string,
+  source?: AIChatContextSource,
+): Promise<AIChatResponse> {
+  const userMessage = createChatMessage({
+    role: "user",
+    content,
+    sessionId: input.sessionId.value,
+    timestamp: new Date().toISOString(),
+  });
+  input.messages.value.push(userMessage);
+
+  const { data, error } = await input.api.ai.chat.post({
+    message: content,
+    sessionId: input.sessionId.value,
+    context: input.buildCurrentContext(source),
+  });
+  assertApiResponse(error, input.t("apiErrors.ai.sendMessageFailed"));
+
+  const response = parseAIChatResponse(data);
+  if (typeof response.sessionId === "string" && response.sessionId.length > 0) {
+    input.sessionId.value = response.sessionId;
+  }
+
+  const assistantMessage = createChatMessage({
+    role: "assistant",
+    content: response.message || input.unableToProcessFallback(),
+    id: response.id,
+    sessionId: response.sessionId ?? input.sessionId.value,
+    timestamp: response.timestamp ?? new Date().toISOString(),
+  });
+  input.messages.value.push(assistantMessage);
+
+  return response;
+}
+
+function createChatActions(input: ChatActionInput) {
+  const sendMessage = async (content: string, options: SendMessageOptions = {}) => {
+    input.streaming.value = true;
+    const sendResult = await settlePromise(
+      withLoadingState(input.loading, () => requestAIChatResponse(input, content, options.source)),
+      input.t("aiChatCommon.requestErrorToast"),
+    );
+    input.streaming.value = false;
+
+    if (!sendResult.ok) {
+      input.toast.error(input.t("aiChatCommon.requestErrorToast"));
+      input.messages.value.push(
+        createChatMessage({
+          role: "assistant",
+          content: input.requestErrorFallback(),
+          sessionId: input.sessionId.value,
+          timestamp: new Date().toISOString(),
+        }),
+      );
+      return null;
+    }
+
+    return sendResult.value;
+  };
+
+  const clearMessages = (): void => {
+    input.sessionId.value = generateId();
+    input.messages.value = [input.buildAssistantGreetingMessage()];
+  };
+
+  return {
+    sendMessage,
+    clearMessages,
+  };
+}
+
+function createDataActions(input: DataActionInput) {
+  const analyzeResume = async (resumeId: string) =>
+    withLoadingState(input.loading, async () => {
+      const { data, error } = await input.api.ai["analyze-resume"].post({ resumeId });
+      assertApiResponse(error, input.t("apiErrors.ai.analyzeResumeFailed"));
+      return data;
+    });
+
+  const generateCoverLetter = async (generationData: CoverLetterGenerationInput) =>
+    withLoadingState(input.loading, async () => {
+      const { data, error } = await input.api.ai["generate-cover-letter"].post(generationData);
+      assertApiResponse(error, input.t("apiErrors.ai.generateCoverLetterFailed"));
+      return data;
+    });
+
+  const matchJobs = async (resumeId: string) =>
+    withLoadingState(input.loading, async () => {
+      const { data, error } = await input.api.ai["match-jobs"].post({ resumeId });
+      assertApiResponse(error, input.t("apiErrors.ai.matchJobsFailed"));
+      return data;
+    });
+
+  const getModels = async () =>
+    withLoadingState(input.loading, async () => {
+      const { data, error } = await input.api.ai.models.get();
+      assertApiResponse(error, input.t("apiErrors.ai.fetchModelsFailed"));
+      return data;
+    });
+
+  const getUsage = async () =>
+    withLoadingState(input.loading, async () => {
+      const { data, error } = await input.api.ai.usage.get();
+      assertApiResponse(error, input.t("apiErrors.ai.fetchUsageFailed"));
+      return data;
+    });
+
+  return {
+    analyzeResume,
+    generateCoverLetter,
+    matchJobs,
+    getModels,
+    getUsage,
+  };
+}
+
+function initializeAIState(t: ReturnType<typeof useI18n>["t"]): AIStateRefs {
+  const messages = useState<ChatMessage[]>(STATE_KEYS.AI_MESSAGES, () => []);
+  const state: AIStateRefs = {
+    messages,
+    sessionId: useState<string>(STATE_KEYS.AI_SESSION_ID, () => generateId()),
+    streaming: useState(STATE_KEYS.AI_STREAMING, () => false),
+    loading: useState(STATE_KEYS.AI_LOADING, () => false),
+    resumes: useState<ResumeData[]>(STATE_KEYS.RESUME_LIST, () => []),
+    jobs: useState<Job[]>(STATE_KEYS.JOBS_LIST, () => []),
+    currentStudio: useState<GameStudio | null>(STATE_KEYS.STUDIO_CURRENT, () => null),
+    interviewSessions: useState<InterviewSession[]>(STATE_KEYS.INTERVIEW_SESSIONS, () => []),
+    portfolioData: useState<PortfolioData | null>(STATE_KEYS.PORTFOLIO_DATA, () => null),
+    buildAssistantGreetingMessage: () =>
+      createChatMessage({
+        role: "assistant",
+        content: t("aiChatCommon.defaultGreeting", { brand: APP_BRAND.name }),
+        timestamp: new Date().toISOString(),
+      }),
+  };
+  if (messages.value.length === 0) {
+    messages.value = [state.buildAssistantGreetingMessage()];
+  }
+  return state;
 }
 
 /**
@@ -177,202 +441,38 @@ export function useAI() {
   const route = useRoute();
   const { $toast } = useNuxtApp();
   const { t } = useI18n();
-  const defaultAssistantGreeting = () =>
-    t("aiChatCommon.defaultGreeting", { brand: APP_BRAND.name });
-  const unableToProcessFallback = () => t("aiChatCommon.unableToProcessFallback");
-  const requestErrorFallback = () => t("aiChatCommon.requestErrorFallback");
-  function buildAssistantGreetingMessage(): ChatMessage {
-    return createChatMessage({
-      role: "assistant",
-      content: defaultAssistantGreeting(),
-      timestamp: new Date().toISOString(),
-    });
-  }
-  const messages = useState<ChatMessage[]>(STATE_KEYS.AI_MESSAGES, () => [
-    buildAssistantGreetingMessage(),
-  ]);
-  const sessionId = useState<string>(STATE_KEYS.AI_SESSION_ID, () => generateId());
-  const streaming = useState(STATE_KEYS.AI_STREAMING, () => false);
-  const loading = useState(STATE_KEYS.AI_LOADING, () => false);
-  const resumes = useState<ResumeData[]>(STATE_KEYS.RESUME_LIST, () => []);
-  const jobs = useState<Job[]>(STATE_KEYS.JOBS_LIST, () => []);
-  const currentStudio = useState<GameStudio | null>(STATE_KEYS.STUDIO_CURRENT, () => null);
-  const interviewSessions = useState<InterviewSession[]>(STATE_KEYS.INTERVIEW_SESSIONS, () => []);
-  const portfolioData = useState<PortfolioData | null>(STATE_KEYS.PORTFOLIO_DATA, () => null);
+  const state = initializeAIState(t);
 
-  function buildChatContext(source: AIChatContextSource): AIChatContext {
-    const routeParams = normalizeRouteParams(route.params);
-    const routeQuery = normalizeRouteQuery(route.query);
-    const routeName = typeof route.name === "string" ? route.name : "";
-
-    const contextRoute: AIChatContext["route"] = {
-      path: route.path,
-      params: routeParams,
-      query: routeQuery,
-      ...(routeName ? { name: routeName } : {}),
-    };
-
-    const contextEntity = resolveEntityContext(
-      route.path,
-      routeParams,
-      routeQuery,
-      jobs.value,
-      resumes.value,
-      currentStudio.value,
-    );
-
-    const contextState: AIChatContext["state"] = {
-      hasResumes: resumes.value.length > 0,
-      hasJobs: jobs.value.length > 0,
-      hasStudios: currentStudio.value !== null,
-      hasInterviewSessions: interviewSessions.value.length > 0,
-      hasPortfolioProjects: (portfolioData.value?.projects.length ?? 0) > 0,
-    };
-
-    const baseContext: AIChatContext = {
-      source,
-      domain: inferAIChatDomainFromRoutePath(route.path),
-      route: contextRoute,
-      state: contextState,
-    };
-
-    if (contextEntity) {
-      return { ...baseContext, entity: contextEntity };
-    }
-
-    return baseContext;
-  }
-
-  function buildCurrentContext(source?: AIChatContextSource): AIChatContext {
-    const resolvedSource = resolveAIChatSource(route.path, source);
-    return buildChatContext(resolvedSource);
-  }
-
-  async function sendMessage(content: string, options: SendMessageOptions = {}) {
-    streaming.value = true;
-    const sendResult = await settlePromise(
-      withLoadingState(loading, async () => {
-        const userMessage = createChatMessage({
-          role: "user",
-          content,
-          sessionId: sessionId.value,
-          timestamp: new Date().toISOString(),
-        });
-        messages.value.push(userMessage);
-
-        const context = buildCurrentContext(options.source);
-        const { data, error } = await api.ai.chat.post({
-          message: content,
-          sessionId: sessionId.value,
-          context,
-        });
-        assertApiResponse(error, t("apiErrors.ai.sendMessageFailed"));
-
-        const response: AIChatResponse = {};
-        if (data && typeof data === "object") {
-          if ("message" in data && typeof data.message === "string") {
-            response.message = data.message;
-          }
-          if ("id" in data && typeof data.id === "string") {
-            response.id = data.id;
-          }
-          if ("sessionId" in data && typeof data.sessionId === "string") {
-            response.sessionId = data.sessionId;
-          }
-          if ("timestamp" in data && typeof data.timestamp === "string") {
-            response.timestamp = data.timestamp;
-          }
-        }
-        if (typeof response.sessionId === "string" && response.sessionId.length > 0) {
-          sessionId.value = response.sessionId;
-        }
-        const assistantMessage = createChatMessage({
-          role: "assistant",
-          content: response.message || unableToProcessFallback(),
-          id: response.id,
-          sessionId: response.sessionId ?? sessionId.value,
-          timestamp: response.timestamp ?? new Date().toISOString(),
-        });
-        messages.value.push(assistantMessage);
-        return response;
-      }),
-      t("aiChatCommon.requestErrorToast"),
-    );
-    streaming.value = false;
-
-    if (!sendResult.ok) {
-      $toast.error(t("aiChatCommon.requestErrorToast"));
-      messages.value.push({
-        ...createChatMessage({
-          role: "assistant",
-          content: requestErrorFallback(),
-          sessionId: sessionId.value,
-          timestamp: new Date().toISOString(),
-        }),
-      });
-      return null;
-    }
-
-    return sendResult.value;
-  }
-
-  async function analyzeResume(resumeId: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.ai["analyze-resume"].post({ resumeId });
-      assertApiResponse(error, t("apiErrors.ai.analyzeResumeFailed"));
-      return data;
-    });
-  }
-
-  async function generateCoverLetter(generationData: CoverLetterGenerationInput) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.ai["generate-cover-letter"].post(generationData);
-      assertApiResponse(error, t("apiErrors.ai.generateCoverLetterFailed"));
-      return data;
-    });
-  }
-
-  async function matchJobs(resumeId: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.ai["match-jobs"].post({ resumeId });
-      assertApiResponse(error, t("apiErrors.ai.matchJobsFailed"));
-      return data;
-    });
-  }
-
-  async function getModels() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.ai.models.get();
-      assertApiResponse(error, t("apiErrors.ai.fetchModelsFailed"));
-      return data;
-    });
-  }
-
-  async function getUsage() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.ai.usage.get();
-      assertApiResponse(error, t("apiErrors.ai.fetchUsageFailed"));
-      return data;
-    });
-  }
-
-  function clearMessages() {
-    sessionId.value = generateId();
-    messages.value = [buildAssistantGreetingMessage()];
-  }
+  const buildCurrentContext = createContextBuilder({
+    route,
+    jobs: state.jobs,
+    resumes: state.resumes,
+    currentStudio: state.currentStudio,
+    interviewSessions: state.interviewSessions,
+    portfolioData: state.portfolioData,
+  });
+  const chatActions = createChatActions({
+    api,
+    t,
+    toast: $toast,
+    loading: state.loading,
+    streaming: state.streaming,
+    messages: state.messages,
+    sessionId: state.sessionId,
+    buildAssistantGreetingMessage: state.buildAssistantGreetingMessage,
+    buildCurrentContext,
+    unableToProcessFallback: () => t("aiChatCommon.unableToProcessFallback"),
+    requestErrorFallback: () => t("aiChatCommon.requestErrorFallback"),
+  });
+  const dataActions = createDataActions({ api, t, loading: state.loading });
 
   return {
-    messages: readonly(messages),
-    sessionId: readonly(sessionId),
-    streaming: readonly(streaming),
-    loading: readonly(loading),
-    sendMessage,
+    messages: readonly(state.messages),
+    sessionId: readonly(state.sessionId),
+    streaming: readonly(state.streaming),
+    loading: readonly(state.loading),
     buildCurrentContext,
-    analyzeResume,
-    generateCoverLetter,
-    matchJobs,
-    getModels,
-    getUsage,
-    clearMessages,
+    ...chatActions,
+    ...dataActions,
   };
 }

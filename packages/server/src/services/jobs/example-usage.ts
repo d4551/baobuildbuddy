@@ -16,10 +16,38 @@ function isTimelineEvent(value: unknown): value is { date: string; description: 
 }
 
 const jobsExampleLogger = createServerLogger("jobs-example-usage");
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
+
+type ApplicationLogItem = {
+  status: string;
+  appliedDate: string;
+  notes: string | null;
+  timeline?: unknown[];
+  job: {
+    title: string;
+    company: string;
+  };
 };
+
+function logApplicationTimeline(timeline: unknown[] | undefined): void {
+  if (!(timeline && timeline.length > 0)) {
+    return;
+  }
+
+  jobsExampleLogger.info("  Timeline:");
+  for (const event of timeline) {
+    if (isTimelineEvent(event)) {
+      jobsExampleLogger.info(`    - ${event.date}: ${event.description}`);
+    }
+  }
+}
+
+function logTrackedApplication(app: ApplicationLogItem): void {
+  jobsExampleLogger.info(`\n${app.job.title} at ${app.job.company}`);
+  jobsExampleLogger.info(`  Status: ${app.status}`);
+  jobsExampleLogger.info(`  Applied: ${app.appliedDate}`);
+  jobsExampleLogger.info(`  Notes: ${app.notes}`);
+  logApplicationTimeline(app.timeline);
+}
 
 // Example 1: Refresh jobs from all providers
 async function refreshJobs() {
@@ -163,19 +191,7 @@ async function trackApplications() {
   jobsExampleLogger.info(`\nYou have ${applications.length} applications:`);
 
   for (const app of applications) {
-    jobsExampleLogger.info(`\n${app.job.title} at ${app.job.company}`);
-    jobsExampleLogger.info(`  Status: ${app.status}`);
-    jobsExampleLogger.info(`  Applied: ${app.appliedDate}`);
-    jobsExampleLogger.info(`  Notes: ${app.notes}`);
-
-    if (app.timeline && app.timeline.length > 0) {
-      jobsExampleLogger.info("  Timeline:");
-      for (const event of app.timeline) {
-        if (isTimelineEvent(event)) {
-          jobsExampleLogger.info(`    - ${event.date}: ${event.description}`);
-        }
-      }
-    }
+    logTrackedApplication(app);
   }
 
   // Get saved jobs
@@ -239,27 +255,18 @@ async function maintainCache() {
 }
 
 // Main execution function
-async function main() {
-  const result = await settlePromise(
-    (async () => {
-      // Uncomment the examples you want to run
+function main(): Promise<void> {
+  // Uncomment the examples you want to run
 
-      // await refreshJobs()
-      // await searchUnityJobs()
-      // await calculateMatches()
-      // await trackApplications()
-      // await advancedSearch()
-      // await maintainCache()
+  // await refreshJobs()
+  // await searchUnityJobs()
+  // await calculateMatches()
+  // await trackApplications()
+  // await advancedSearch()
+  // await maintainCache()
 
-      jobsExampleLogger.info("\n✓ All examples completed successfully");
-    })(),
-  );
-  if (result.status === "rejected") {
-    jobsExampleLogger.error("Error running examples:", result.reason);
-    throw (result.reason instanceof Error
-      ? result.reason
-      : new Error(typeof result.reason === "string" ? result.reason : "Unknown error"));
-  }
+  jobsExampleLogger.info("\n✓ All examples completed successfully");
+  return Promise.resolve();
 }
 
 // Run if executed directly

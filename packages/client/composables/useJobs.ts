@@ -9,140 +9,156 @@ const toJobList = (value: unknown): Job[] =>
     ? value.map((entry) => toJob(entry)).filter((entry): entry is Job => entry !== null)
     : [];
 
+interface JobsContext {
+  api: ReturnType<typeof useApi>;
+  t: ReturnType<typeof useI18n>["t"];
+  loading: ReturnType<typeof useState<boolean>>;
+  jobs: ReturnType<typeof useState<Job[]>>;
+  savedJobs: ReturnType<typeof useState<Job[]>>;
+  applications: ReturnType<typeof useState<Job[]>>;
+  recommendations: ReturnType<typeof useState<Job[]>>;
+  filters: ReturnType<typeof useState<Record<string, string>>>;
+}
+
+async function searchJobs(context: JobsContext, searchFilters?: Record<string, string>): Promise<void> {
+  return withLoadingState(context.loading, async () => {
+    if (searchFilters) {
+      context.filters.value = searchFilters;
+    }
+    const { data, error } = await context.api.jobs.get({ query: context.filters.value });
+    assertApiResponse(error, context.t("apiErrors.jobs.searchFailed"));
+    context.jobs.value =
+      isRecord(data) && Array.isArray(data.jobs) ? toJobList(data.jobs) : toJobList(data);
+  });
+}
+
+async function getJob(context: JobsContext, id: string): Promise<Job | null> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.jobs({ id }).get();
+    assertApiResponse(error, context.t("apiErrors.jobs.fetchFailed"));
+    return toJob(data);
+  });
+}
+
+async function fetchSavedJobs(context: JobsContext): Promise<void> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.jobs.saved.get();
+    assertApiResponse(error, context.t("apiErrors.jobs.fetchSavedFailed"));
+    if (!Array.isArray(data)) {
+      context.savedJobs.value = [];
+      return;
+    }
+    context.savedJobs.value = data
+      .map((entry) => (isRecord(entry) ? toJob(entry.job) : null))
+      .filter((entry): entry is Job => entry !== null);
+  });
+}
+
+async function saveJob(context: JobsContext, jobId: string): Promise<unknown> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.jobs.save.post({ jobId });
+    assertApiResponse(error, context.t("apiErrors.jobs.saveFailed"));
+    await fetchSavedJobs(context);
+    return data;
+  });
+}
+
+async function unsaveJob(context: JobsContext, jobId: string): Promise<void> {
+  return withLoadingState(context.loading, async () => {
+    const { error } = await context.api.jobs.save({ jobId }).delete();
+    assertApiResponse(error, context.t("apiErrors.jobs.unsaveFailed"));
+    await fetchSavedJobs(context);
+  });
+}
+
+async function fetchApplications(context: JobsContext): Promise<void> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.jobs.applications.get();
+    assertApiResponse(error, context.t("apiErrors.jobs.fetchApplicationsFailed"));
+    if (!Array.isArray(data)) {
+      context.applications.value = [];
+      return;
+    }
+    context.applications.value = data
+      .map((entry) => (isRecord(entry) ? toJob(entry.job) : null))
+      .filter((entry): entry is Job => entry !== null);
+  });
+}
+
+async function applyToJob(context: JobsContext, jobId: string, notes?: string): Promise<unknown> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.jobs.apply.post({ jobId, notes });
+    assertApiResponse(error, context.t("apiErrors.jobs.applyFailed"));
+    await fetchApplications(context);
+    return data;
+  });
+}
+
+async function updateApplication(
+  context: JobsContext,
+  id: string,
+  status: string,
+): Promise<unknown> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.jobs.apply({ id }).put({ status });
+    assertApiResponse(error, context.t("apiErrors.jobs.updateApplicationFailed"));
+    await fetchApplications(context);
+    return data;
+  });
+}
+
+async function refreshJobs(context: JobsContext): Promise<unknown> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.jobs.refresh.post();
+    assertApiResponse(error, context.t("apiErrors.jobs.refreshFailed"));
+    await searchJobs(context);
+    return data;
+  });
+}
+
+async function fetchRecommendations(context: JobsContext): Promise<void> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.jobs.recommendations.get();
+    assertApiResponse(error, context.t("apiErrors.jobs.fetchRecommendationsFailed"));
+    if (isRecord(data) && Array.isArray(data.recommendations)) {
+      context.recommendations.value = toJobList(data.recommendations);
+      return;
+    }
+    context.recommendations.value = toJobList(data);
+  });
+}
+
 /**
  * Job search and application management composable.
  */
 export function useJobs() {
-  const api = useApi();
-  const { t } = useI18n();
-  const jobs = useState<Job[]>(STATE_KEYS.JOBS_LIST, () => []);
-  const savedJobs = useState<Job[]>(STATE_KEYS.JOBS_SAVED, () => []);
-  const applications = useState<Job[]>(STATE_KEYS.JOBS_APPLICATIONS, () => []);
-  const loading = useState(STATE_KEYS.JOBS_LOADING, () => false);
-  const filters = useState<Record<string, string>>(STATE_KEYS.JOBS_FILTERS, () => ({}));
-
-  async function searchJobs(searchFilters?: Record<string, string>) {
-    return withLoadingState(loading, async () => {
-      if (searchFilters) {
-        filters.value = searchFilters;
-      }
-      const { data, error } = await api.jobs.get({ query: filters.value });
-      assertApiResponse(error, t("apiErrors.jobs.searchFailed"));
-      jobs.value =
-        isRecord(data) && Array.isArray(data.jobs) ? toJobList(data.jobs) : toJobList(data);
-    });
-  }
-
-  async function getJob(id: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.jobs({ id }).get();
-      assertApiResponse(error, t("apiErrors.jobs.fetchFailed"));
-      return toJob(data);
-    });
-  }
-
-  async function saveJob(jobId: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.jobs.save.post({ jobId });
-      assertApiResponse(error, t("apiErrors.jobs.saveFailed"));
-      await fetchSavedJobs();
-      return data;
-    });
-  }
-
-  async function unsaveJob(jobId: string) {
-    return withLoadingState(loading, async () => {
-      const { error } = await api.jobs.save({ jobId }).delete();
-      assertApiResponse(error, t("apiErrors.jobs.unsaveFailed"));
-      await fetchSavedJobs();
-    });
-  }
-
-  async function fetchSavedJobs() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.jobs.saved.get();
-      assertApiResponse(error, t("apiErrors.jobs.fetchSavedFailed"));
-      if (!Array.isArray(data)) {
-        savedJobs.value = [];
-        return;
-      }
-      savedJobs.value = data
-        .map((entry) => (isRecord(entry) ? toJob(entry.job) : null))
-        .filter((entry): entry is Job => entry !== null);
-    });
-  }
-
-  async function applyToJob(jobId: string, notes?: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.jobs.apply.post({ jobId, notes });
-      assertApiResponse(error, t("apiErrors.jobs.applyFailed"));
-      await fetchApplications();
-      return data;
-    });
-  }
-
-  async function updateApplication(id: string, status: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.jobs.apply({ id }).put({ status });
-      assertApiResponse(error, t("apiErrors.jobs.updateApplicationFailed"));
-      await fetchApplications();
-      return data;
-    });
-  }
-
-  async function fetchApplications() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.jobs.applications.get();
-      assertApiResponse(error, t("apiErrors.jobs.fetchApplicationsFailed"));
-      if (!Array.isArray(data)) {
-        applications.value = [];
-        return;
-      }
-      applications.value = data
-        .map((entry) => (isRecord(entry) ? toJob(entry.job) : null))
-        .filter((entry): entry is Job => entry !== null);
-    });
-  }
-
-  async function refreshJobs() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.jobs.refresh.post();
-      assertApiResponse(error, t("apiErrors.jobs.refreshFailed"));
-      await searchJobs();
-      return data;
-    });
-  }
-
-  const recommendations = useState<Job[]>(STATE_KEYS.JOBS_RECOMMENDATIONS, () => []);
-
-  async function fetchRecommendations() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.jobs.recommendations.get();
-      assertApiResponse(error, t("apiErrors.jobs.fetchRecommendationsFailed"));
-      if (isRecord(data) && Array.isArray(data.recommendations)) {
-        recommendations.value = toJobList(data.recommendations);
-        return;
-      }
-      recommendations.value = toJobList(data);
-    });
-  }
+  const context: JobsContext = {
+    api: useApi(),
+    t: useI18n().t,
+    jobs: useState<Job[]>(STATE_KEYS.JOBS_LIST, () => []),
+    savedJobs: useState<Job[]>(STATE_KEYS.JOBS_SAVED, () => []),
+    applications: useState<Job[]>(STATE_KEYS.JOBS_APPLICATIONS, () => []),
+    recommendations: useState<Job[]>(STATE_KEYS.JOBS_RECOMMENDATIONS, () => []),
+    loading: useState(STATE_KEYS.JOBS_LOADING, () => false),
+    filters: useState<Record<string, string>>(STATE_KEYS.JOBS_FILTERS, () => ({})),
+  };
 
   return {
-    jobs: readonly(jobs),
-    savedJobs: readonly(savedJobs),
-    applications: readonly(applications),
-    recommendations: readonly(recommendations),
-    loading: readonly(loading),
-    filters: readonly(filters),
-    searchJobs,
-    getJob,
-    saveJob,
-    unsaveJob,
-    fetchSavedJobs,
-    applyToJob,
-    updateApplication,
-    fetchApplications,
-    refreshJobs,
-    fetchRecommendations,
+    jobs: readonly(context.jobs),
+    savedJobs: readonly(context.savedJobs),
+    applications: readonly(context.applications),
+    recommendations: readonly(context.recommendations),
+    loading: readonly(context.loading),
+    filters: readonly(context.filters),
+    searchJobs: (searchFilters?: Record<string, string>) => searchJobs(context, searchFilters),
+    getJob: (id: string) => getJob(context, id),
+    saveJob: (jobId: string) => saveJob(context, jobId),
+    unsaveJob: (jobId: string) => unsaveJob(context, jobId),
+    fetchSavedJobs: () => fetchSavedJobs(context),
+    applyToJob: (jobId: string, notes?: string) => applyToJob(context, jobId, notes),
+    updateApplication: (id: string, status: string) => updateApplication(context, id, status),
+    fetchApplications: () => fetchApplications(context),
+    refreshJobs: () => refreshJobs(context),
+    fetchRecommendations: () => fetchRecommendations(context),
   };
 }

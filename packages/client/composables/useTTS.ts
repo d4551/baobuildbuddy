@@ -1,123 +1,172 @@
 import type { VoiceSettings } from "@bao/shared";
 import { resolveSpeechLocale, resolveSpeechSynthesis } from "~/utils/speech";
 
-/**
- * Web Speech API Text-to-Speech composable.
- * Supports VoiceSettings: voiceId, rate, pitch, volume, language.
- */
-export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
-  const isSpeaking = ref(false);
-  const isPaused = ref(false);
-  const error = ref<string | null>(null);
-  const voices = ref<SpeechSynthesisVoice[]>([]);
+interface TTSState {
+  isSpeaking: ReturnType<typeof ref<boolean>>;
+  isPaused: ReturnType<typeof ref<boolean>>;
+  error: ReturnType<typeof ref<string | null>>;
+  voices: ReturnType<typeof ref<SpeechSynthesisVoice[]>>;
+}
 
-  let synthesis: SpeechSynthesis | null = null;
+interface TTSContext {
+  settings?: Ref<VoiceSettings | undefined>;
+  state: TTSState;
+  synthesis: SpeechSynthesis | null;
+}
 
-  function loadVoices(): SpeechSynthesisVoice[] {
-    const resolvedSynthesis = synthesis ?? resolveSpeechSynthesis();
-    if (!resolvedSynthesis) {
-      voices.value = [];
-      return [];
-    }
-    const availableVoices = resolvedSynthesis.getVoices();
-    voices.value = availableVoices;
-    return availableVoices;
+function createTTSState(): TTSState {
+  return {
+    isSpeaking: ref(false),
+    isPaused: ref(false),
+    error: ref<string | null>(null),
+    voices: ref<SpeechSynthesisVoice[]>([]),
+  };
+}
+
+function resolveContextSynthesis(context: TTSContext): SpeechSynthesis | null {
+  const resolved = context.synthesis ?? resolveSpeechSynthesis();
+  if (resolved) {
+    context.synthesis = resolved;
+  }
+  return resolved;
+}
+
+function loadVoices(context: TTSContext): SpeechSynthesisVoice[] {
+  const synthesis = resolveContextSynthesis(context);
+  if (!synthesis) {
+    context.state.voices.value = [];
+    return [];
   }
 
-  onMounted(() => {
-    synthesis = resolveSpeechSynthesis();
+  const availableVoices = synthesis.getVoices();
+  context.state.voices.value = availableVoices;
+  return availableVoices;
+}
+
+function resolveVoiceById(
+  voices: readonly SpeechSynthesisVoice[],
+  id: string,
+): SpeechSynthesisVoice | undefined {
+  const normalizedId = id.toLowerCase();
+  return voices.find(
+    (voice) =>
+      voice.voiceURI === id || voice.name === id || voice.name.toLowerCase().includes(normalizedId),
+  );
+}
+
+function createUtterance(
+  context: TTSContext,
+  text: string,
+  opts?: Partial<Pick<VoiceSettings, "voiceId" | "rate" | "pitch" | "volume" | "language">>,
+): SpeechSynthesisUtterance {
+  const persisted = context.settings?.value ?? {};
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = opts?.rate ?? persisted.rate ?? 1;
+  utterance.pitch = opts?.pitch ?? persisted.pitch ?? 1;
+  utterance.volume = Math.max(0, Math.min(1, opts?.volume ?? persisted.volume ?? 1));
+  utterance.lang = resolveSpeechLocale(opts?.language ?? persisted.language);
+
+  const voiceId = opts?.voiceId ?? persisted.voiceId;
+  if (voiceId) {
+    const voice = resolveVoiceById(context.state.voices.value, voiceId);
+    if (voice) {
+      utterance.voice = voice;
+    }
+  }
+
+  utterance.onstart = () => {
+    context.state.isSpeaking.value = true;
+    context.state.isPaused.value = false;
+    context.state.error.value = null;
+  };
+  utterance.onend = () => {
+    context.state.isSpeaking.value = false;
+    context.state.isPaused.value = false;
+  };
+  utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
+    context.state.error.value = event.error;
+    context.state.isSpeaking.value = false;
+    context.state.isPaused.value = false;
+  };
+
+  return utterance;
+}
+
+function createTTSActions(context: TTSContext) {
+  const speak = (
+    text: string,
+    opts?: Partial<Pick<VoiceSettings, "voiceId" | "rate" | "pitch" | "volume" | "language">>,
+  ): void => {
+    const synthesis = resolveContextSynthesis(context);
     if (!synthesis) {
       return;
     }
-    synthesis.onvoiceschanged = () => loadVoices();
-    loadVoices();
-  });
+    synthesis.cancel();
+    synthesis.speak(createUtterance(context, text, opts));
+  };
 
-  const voiceById = (id: string): SpeechSynthesisVoice | undefined =>
-    voices.value.find(
-      (v) => v.voiceURI === id || v.name === id || v.name.toLowerCase().includes(id.toLowerCase()),
-    );
-
-  const isSupported = computed(() => {
-    return (synthesis ?? resolveSpeechSynthesis()) !== null;
-  });
-
-  function speak(
-    text: string,
-    opts?: Partial<Pick<VoiceSettings, "voiceId" | "rate" | "pitch" | "volume" | "language">>,
-  ) {
-    const resolvedSynthesis = synthesis ?? resolveSpeechSynthesis();
-    if (!resolvedSynthesis) return;
-    synthesis = resolvedSynthesis;
-
-    resolvedSynthesis.cancel();
-    const s: Partial<VoiceSettings> = settings?.value ?? {};
-    const rate = opts?.rate ?? s.rate ?? 1;
-    const pitch = opts?.pitch ?? s.pitch ?? 1;
-    const volume = opts?.volume ?? s.volume ?? 1;
-    const lang = resolveSpeechLocale(opts?.language ?? s.language);
-    const voiceId = opts?.voiceId ?? s.voiceId;
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = rate;
-    utterance.pitch = pitch;
-    utterance.volume = Math.max(0, Math.min(1, volume));
-    utterance.lang = lang;
-    if (voiceId) {
-      const voice = voiceById(voiceId);
-      if (voice) utterance.voice = voice;
+  const pause = (): void => {
+    if (context.synthesis && context.state.isSpeaking.value) {
+      context.synthesis.pause();
+      context.state.isPaused.value = true;
     }
+  };
 
-    utterance.onstart = () => {
-      isSpeaking.value = true;
-      isPaused.value = false;
-      error.value = null;
-    };
-    utterance.onend = () => {
-      isSpeaking.value = false;
-      isPaused.value = false;
-    };
-    utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
-      error.value = event.error;
-      isSpeaking.value = false;
-      isPaused.value = false;
-    };
-
-    resolvedSynthesis.speak(utterance);
-  }
-
-  function pause() {
-    if (synthesis && isSpeaking.value) {
-      synthesis.pause();
-      isPaused.value = true;
+  const resume = (): void => {
+    if (context.synthesis && context.state.isPaused.value) {
+      context.synthesis.resume();
+      context.state.isPaused.value = false;
     }
-  }
+  };
 
-  function resume() {
-    if (synthesis && isPaused.value) {
-      synthesis.resume();
-      isPaused.value = false;
+  const cancel = (): void => {
+    if (context.synthesis) {
+      context.synthesis.cancel();
     }
-  }
-
-  function cancel() {
-    if (synthesis) {
-      synthesis.cancel();
-      isSpeaking.value = false;
-      isPaused.value = false;
-    }
-  }
+    context.state.isSpeaking.value = false;
+    context.state.isPaused.value = false;
+  };
 
   return {
     speak,
     pause,
     resume,
     cancel,
-    isSpeaking: readonly(isSpeaking),
-    isPaused: readonly(isPaused),
-    error: readonly(error),
-    voices: readonly(voices),
+  };
+}
+
+/**
+ * Web Speech API Text-to-Speech composable.
+ * Supports VoiceSettings: voiceId, rate, pitch, volume, language.
+ */
+export function useTTS(settings?: Ref<VoiceSettings | undefined>) {
+  const context: TTSContext = {
+    settings,
+    state: createTTSState(),
+    synthesis: null,
+  };
+
+  onMounted(() => {
+    const synthesis = resolveContextSynthesis(context);
+    if (!synthesis) {
+      return;
+    }
+    synthesis.onvoiceschanged = () => {
+      loadVoices(context);
+    };
+    loadVoices(context);
+  });
+
+  const isSupported = computed(() => resolveContextSynthesis(context) !== null);
+  const actions = createTTSActions(context);
+
+  return {
+    ...actions,
+    isSpeaking: readonly(context.state.isSpeaking),
+    isPaused: readonly(context.state.isPaused),
+    error: readonly(context.state.error),
+    voices: readonly(context.state.voices),
     isSupported: readonly(isSupported),
-    loadVoices,
+    loadVoices: () => loadVoices(context),
   };
 }

@@ -22,6 +22,24 @@ type TemplateTextSegment = {
   offset: number;
 };
 
+type LocalePathFrame = {
+  pathValue: string;
+  node: unknown;
+};
+
+type TemplateTextScanState = {
+  inTag: boolean;
+  inInterpolation: boolean;
+  quote: "'" | '"' | null;
+  textStart: number;
+  index: number;
+};
+
+type TemplateCharacterWindow = {
+  char: string;
+  nextChar: string;
+};
+
 const projectRoot = process.cwd();
 const clientRoot = "packages/client";
 const sourceExtensions = new Set([".vue", ".ts", ".tsx", ".js", ".mjs", ".cjs"]);
@@ -43,6 +61,12 @@ const whitespacePattern = /\s+/gu;
 const localeKeyFormatPattern = /^[a-zA-Z0-9_.-]+$/u;
 const punctuationOnlyPattern = /^[\d\s+./,:;!?()[\]{}<>=_%|*&'"`~-]+$/u;
 const humanTextPattern = /\p{L}/u;
+const templateOpenToken = "{{";
+const templateCloseToken = "}}";
+const tagOpenToken = "<";
+const tagCloseToken = ">";
+const closingTagPrefix = "</";
+const declarationTagPrefix = "<!";
 
 const shouldIgnorePath = (pathValue: string): boolean =>
   pathValue.split("/").some((segment) => ignoredDirectoryNames.has(segment));
@@ -59,35 +83,52 @@ const hasSourceExtension = (pathValue: string): boolean => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+const createChildPath = (pathValue: string, child: string | number): string =>
+  pathValue.length > 0 ? `${pathValue}.${child}` : `${child}`;
+
+const collectChildLocaleFrames = (frame: LocalePathFrame, stack: LocalePathFrame[]): void => {
+  if (Array.isArray(frame.node)) {
+    for (let index = frame.node.length - 1; index >= 0; index -= 1) {
+      stack.push({
+        pathValue: createChildPath(frame.pathValue, index),
+        node: frame.node[index],
+      });
+    }
+    return;
+  }
+
+  if (!isRecord(frame.node)) {
+    return;
+  }
+
+  const entries = Object.entries(frame.node);
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const [key, childNode] = entries[index];
+    stack.push({
+      pathValue: createChildPath(frame.pathValue, key),
+      node: childNode,
+    });
+  }
+};
+
 const collectLocalePaths = (value: unknown): Set<string> => {
   const keys = new Set<string>();
+  const stack: LocalePathFrame[] = [{ pathValue: "", node: value }];
 
-  const visit = (pathValue: string, node: unknown): void => {
-    if (pathValue.length > 0) {
-      keys.add(pathValue);
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (!frame) {
+      continue;
     }
 
-    if (typeof node === "string") {
-      return;
+    if (frame.pathValue.length > 0) {
+      keys.add(frame.pathValue);
     }
 
-    if (Array.isArray(node)) {
-      for (let index = 0; index < node.length; index += 1) {
-        const childPath = pathValue.length > 0 ? `${pathValue}.${index}` : `${index}`;
-        visit(childPath, node[index]);
-      }
-      return;
+    if (typeof frame.node !== "string") {
+      collectChildLocaleFrames(frame, stack);
     }
-
-    if (isRecord(node)) {
-      for (const [key, childNode] of Object.entries(node)) {
-        const childPath = pathValue.length > 0 ? `${pathValue}.${key}` : key;
-        visit(childPath, childNode);
-      }
-    }
-  };
-
-  visit("", value);
+  }
   return keys;
 };
 
@@ -143,120 +184,165 @@ const extractTemplateBlocks = (fileContent: string): TemplateBlock[] => {
   return blocks;
 };
 
+const isQuoteCharacter = (char: string): char is "'" | '"' => char === "'" || char === '"';
+
+const isTemplateTagCandidate = (markup: string): boolean =>
+  !(markup.startsWith(closingTagPrefix) || markup.startsWith(declarationTagPrefix));
+
+const findTagCloseOffset = (templateContent: string, openOffset: number): number => {
+  const contentLength = templateContent.length;
+  let cursor = openOffset + 1;
+  let quote: "'" | '"' | null = null;
+
+  while (cursor < contentLength) {
+    const char = templateContent[cursor];
+    if (quote) {
+      if (char === quote) {
+        quote = null;
+      }
+      cursor += 1;
+      continue;
+    }
+
+    if (isQuoteCharacter(char)) {
+      quote = char;
+      cursor += 1;
+      continue;
+    }
+
+    if (char === tagCloseToken) {
+      return cursor;
+    }
+
+    cursor += 1;
+  }
+
+  return -1;
+};
+
 const collectTemplateTags = (templateContent: string): TemplateTag[] => {
   const tags: TemplateTag[] = [];
   const contentLength = templateContent.length;
   let index = 0;
 
   while (index < contentLength) {
-    const openOffset = templateContent.indexOf("<", index);
+    const openOffset = templateContent.indexOf(tagOpenToken, index);
     if (openOffset === -1) {
       break;
     }
 
-    let cursor = openOffset + 1;
-    let quote: "'" | '"' | null = null;
-    while (cursor < contentLength) {
-      const char = templateContent[cursor];
-      if (quote) {
-        if (char === quote) {
-          quote = null;
-        }
-      } else if (char === "'" || char === '"') {
-        quote = char;
-      } else if (char === ">") {
-        break;
-      }
-      cursor += 1;
-    }
-
-    if (cursor >= contentLength) {
+    const closeOffset = findTagCloseOffset(templateContent, openOffset);
+    if (closeOffset === -1) {
       break;
     }
 
-    const markup = templateContent.slice(openOffset, cursor + 1);
-    if (!markup.startsWith("</") && !markup.startsWith("<!")) {
+    const markup = templateContent.slice(openOffset, closeOffset + 1);
+    if (isTemplateTagCandidate(markup)) {
       tags.push({
         markup,
         offset: openOffset,
       });
     }
 
-    index = cursor + 1;
+    index = closeOffset + 1;
   }
 
   return tags;
 };
 
-const collectTemplateTextSegments = (templateContent: string): TemplateTextSegment[] => {
-  const segments: TemplateTextSegment[] = [];
-  const contentLength = templateContent.length;
-  let inTag = false;
-  let inInterpolation = false;
-  let quote: "'" | '"' | null = null;
-  let textStart = 0;
-  let index = 0;
-
-  while (index < contentLength) {
-    const char = templateContent[index];
-    const nextChar = index + 1 < contentLength ? templateContent[index + 1] : "";
-    if (!inTag) {
-      if (inInterpolation) {
-        if (char === "}" && nextChar === "}") {
-          inInterpolation = false;
-          index += 2;
-          continue;
-        }
-        index += 1;
-        continue;
-      }
-
-      if (char === "{" && nextChar === "{") {
-        inInterpolation = true;
-        index += 2;
-        continue;
-      }
-
-      if (char === "<") {
-        if (index > textStart) {
-          segments.push({
-            text: templateContent.slice(textStart, index),
-            offset: textStart,
-          });
-        }
-        inTag = true;
-      }
-      index += 1;
-      continue;
-    }
-
-    if (quote) {
-      if (char === quote) {
-        quote = null;
-      }
-      index += 1;
-      continue;
-    }
-
-    if (char === "'" || char === '"') {
-      quote = char;
-      index += 1;
-      continue;
-    }
-
-    if (char === ">") {
-      inTag = false;
-      textStart = index + 1;
-    }
-
-    index += 1;
+const appendTextSegment = (
+  segments: TemplateTextSegment[],
+  templateContent: string,
+  textStart: number,
+  textEnd: number,
+): void => {
+  if (textEnd <= textStart) {
+    return;
   }
 
-  if (!inTag && textStart < contentLength) {
-    segments.push({
-      text: templateContent.slice(textStart),
-      offset: textStart,
-    });
+  segments.push({
+    text: templateContent.slice(textStart, textEnd),
+    offset: textStart,
+  });
+};
+
+const isTokenPair = (char: string, nextChar: string, token: string): boolean =>
+  char === token[0] && nextChar === token[1];
+
+const advanceTagState = (state: TemplateTextScanState, char: string): void => {
+  if (state.quote) {
+    if (char === state.quote) {
+      state.quote = null;
+    }
+    return;
+  }
+
+  if (isQuoteCharacter(char)) {
+    state.quote = char;
+    return;
+  }
+
+  if (char === tagCloseToken) {
+    state.inTag = false;
+    state.textStart = state.index + 1;
+  }
+};
+
+const advanceTextState = (
+  state: TemplateTextScanState,
+  segments: TemplateTextSegment[],
+  templateContent: string,
+  charWindow: TemplateCharacterWindow,
+): number => {
+  const { char, nextChar } = charWindow;
+  if (state.inInterpolation) {
+    if (isTokenPair(char, nextChar, templateCloseToken)) {
+      state.inInterpolation = false;
+      return 2;
+    }
+    return 1;
+  }
+
+  if (isTokenPair(char, nextChar, templateOpenToken)) {
+    state.inInterpolation = true;
+    return 2;
+  }
+
+  if (char === tagOpenToken) {
+    appendTextSegment(segments, templateContent, state.textStart, state.index);
+    state.inTag = true;
+  }
+
+  return 1;
+};
+
+const collectTemplateTextSegments = (templateContent: string): TemplateTextSegment[] => {
+  const segments: TemplateTextSegment[] = [];
+  const state: TemplateTextScanState = {
+    inTag: false,
+    inInterpolation: false,
+    quote: null,
+    textStart: 0,
+    index: 0,
+  };
+
+  while (state.index < templateContent.length) {
+    const char = templateContent[state.index];
+    const nextChar =
+      state.index + 1 < templateContent.length ? templateContent[state.index + 1] : "";
+
+    if (state.inTag) {
+      advanceTagState(state, char);
+      state.index += 1;
+      continue;
+    }
+
+    const offsetDelta = advanceTextState(state, segments, templateContent, { char, nextChar });
+    state.index += offsetDelta;
+  }
+
+  if (!state.inTag) {
+    appendTextSegment(segments, templateContent, state.textStart, templateContent.length);
   }
 
   return segments;
@@ -306,61 +392,74 @@ const collectMissingTranslationKeyViolations = (
   return violations;
 };
 
-const collectStaticTemplateViolations = (filePath: string, fileContent: string): Violation[] => {
-  const blocks = extractTemplateBlocks(fileContent);
+const collectAttributeViolations = (
+  filePath: string,
+  fileContent: string,
+  block: TemplateBlock,
+  tag: TemplateTag,
+): Violation[] => {
   const violations: Violation[] = [];
-
-  for (const block of blocks) {
-    const tags = collectTemplateTags(block.content);
-    for (const tag of tags) {
-      for (const match of tag.markup.matchAll(staticAttributePattern)) {
-        const attributeName = match[1] ?? "";
-        const value = (match[3] ?? match[4] ?? "").trim();
-        if (value.length === 0 || !hasHumanText(value)) {
-          continue;
-        }
-
-        violations.push({
-          filePath,
-          line: getLineFromOffset(fileContent, block.offset + tag.offset + (match.index ?? 0)),
-          message: `Static template attribute "${attributeName}" contains user-visible text. Use i18n binding (for example :${attributeName}="t('...')").`,
-        });
-      }
+  for (const match of tag.markup.matchAll(staticAttributePattern)) {
+    const attributeName = match[1] ?? "";
+    const value = (match[3] ?? match[4] ?? "").trim();
+    if (value.length === 0 || !hasHumanText(value)) {
+      continue;
     }
 
-    const textSegments = collectTemplateTextSegments(block.content);
-    for (const segment of textSegments) {
-      const normalizedText = normalizeTemplateText(segment.text);
-      if (isIgnoredTemplateText(normalizedText) || !hasHumanText(normalizedText)) {
-        continue;
-      }
-
-      violations.push({
-        filePath,
-        line: getLineFromOffset(fileContent, block.offset + segment.offset),
-        message: `Static template text "${normalizedText}" detected. Use translation keys with t('...') for user-visible copy.`,
-      });
-    }
+    violations.push({
+      filePath,
+      line: getLineFromOffset(fileContent, block.offset + tag.offset + (match.index ?? 0)),
+      message: `Static template attribute "${attributeName}" contains user-visible text. Use i18n binding (for example :${attributeName}="t('...')").`,
+    });
   }
-
   return violations;
 };
+
+const collectTextViolations = (
+  filePath: string,
+  fileContent: string,
+  block: TemplateBlock,
+): Violation[] => {
+  const violations: Violation[] = [];
+  for (const segment of collectTemplateTextSegments(block.content)) {
+    const normalizedText = normalizeTemplateText(segment.text);
+    if (isIgnoredTemplateText(normalizedText) || !hasHumanText(normalizedText)) {
+      continue;
+    }
+
+    violations.push({
+      filePath,
+      line: getLineFromOffset(fileContent, block.offset + segment.offset),
+      message: `Static template text "${normalizedText}" detected. Use translation keys with t('...') for user-visible copy.`,
+    });
+  }
+  return violations;
+};
+
+const collectStaticTemplateViolations = (filePath: string, fileContent: string): Violation[] =>
+  extractTemplateBlocks(fileContent).flatMap((block) => {
+    const attributeViolations = collectTemplateTags(block.content).flatMap((tag) =>
+      collectAttributeViolations(filePath, fileContent, block, tag),
+    );
+    const textViolations = collectTextViolations(filePath, fileContent, block);
+    return [...attributeViolations, ...textViolations];
+  });
 
 const collectViolations = async (): Promise<Violation[]> => {
   const localeKeys = collectLocalePaths(enUS);
   const files = await collectClientSourceFiles();
-  const violations: Violation[] = [];
+  const violationGroups = await Promise.all(
+    files.map(async (filePath) => {
+      const fileContent = await Bun.file(filePath).text();
+      const fileViolations = collectMissingTranslationKeyViolations(filePath, fileContent, localeKeys);
+      if (filePath.endsWith(".vue")) {
+        fileViolations.push(...collectStaticTemplateViolations(filePath, fileContent));
+      }
+      return fileViolations;
+    }),
+  );
 
-  for (const filePath of files) {
-    const fileContent = await Bun.file(filePath).text();
-    violations.push(...collectMissingTranslationKeyViolations(filePath, fileContent, localeKeys));
-
-    if (filePath.endsWith(".vue")) {
-      violations.push(...collectStaticTemplateViolations(filePath, fileContent));
-    }
-  }
-
-  return violations;
+  return violationGroups.flat();
 };
 
 const main = async (): Promise<void> => {
@@ -376,8 +475,11 @@ const main = async (): Promise<void> => {
   await writeError(
     "UI i18n validation failed. Replace static user-visible copy with i18n keys and ensure all keys exist in en-US locale:",
   );
-  for (const violation of violations) {
-    await writeError(`- ${violation.filePath}:${violation.line} ${violation.message}`);
+  const lines = violations.map(
+    (violation) => `- ${violation.filePath}:${violation.line} ${violation.message}`,
+  );
+  if (lines.length > 0) {
+    await writeError(lines.join("\n"));
   }
   process.exit(1);
 };

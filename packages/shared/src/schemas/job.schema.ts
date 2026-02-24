@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 import {
   JOB_EXPERIENCE_LEVELS,
   JOB_GAME_GENRES,

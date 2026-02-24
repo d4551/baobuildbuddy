@@ -91,20 +91,23 @@ export class ClaudeProvider extends BaseAIProvider {
     const stream = streamResult.value;
 
     const iterator = stream[Symbol.asyncIterator]();
-    while (true) {
+    const emitTextEvents = async function* (): AsyncGenerator<string> {
       const nextEventResult = await settlePromise(iterator.next());
       if (nextEventResult.status === "rejected") {
         throw new Error(`Claude streaming error: ${toErrorMessage(nextEventResult.reason)}`);
       }
       const nextEvent = nextEventResult.value;
       if (nextEvent.done) {
-        break;
+        return;
       }
       const event = nextEvent.value;
       if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
         yield event.delta.text;
       }
-    }
+      yield* emitTextEvents();
+    };
+
+    yield* emitTextEvents();
   }
 
   async isAvailable(): Promise<boolean> {

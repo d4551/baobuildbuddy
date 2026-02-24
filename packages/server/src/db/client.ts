@@ -2,7 +2,43 @@ import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { config } from "../config/env";
 import { resolveDatabasePath } from "../config/paths";
-import * as schema from "./schema";
+import {
+  applications,
+  auth,
+  automationRuns,
+  chatHistory,
+  coverLetters,
+  gamification,
+  interviewSessions,
+  jobs,
+  portfolioProjects,
+  portfolios,
+  resumes,
+  savedJobs,
+  settings,
+  skillMappings,
+  studios,
+  userProfile,
+} from "./schema/schema-modules";
+
+const schema = {
+  applications,
+  auth,
+  automationRuns,
+  chatHistory,
+  coverLetters,
+  gamification,
+  interviewSessions,
+  jobs,
+  portfolioProjects,
+  portfolios,
+  resumes,
+  savedJobs,
+  settings,
+  skillMappings,
+  studios,
+  userProfile,
+};
 
 const dbPath = resolveDatabasePath(Bun.env.DB_PATH ?? config.dbPath);
 const sqlite = new Database(dbPath);

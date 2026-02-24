@@ -13,9 +13,9 @@ import {
   resumeSkillsSchema,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
-import * as z from "zod";
+import { z } from "zod";
 import { db } from "../db/client";
-import { resumes } from "../db/schema";
+import { resumes } from "../db/schema/schema-modules";
 
 const resumeExperienceArraySchema = z.array(resumeExperienceSchema);
 const resumeEducationArraySchema = z.array(resumeEducationSchema);
@@ -132,7 +132,7 @@ export class ResumeService {
       gamingExperience: toGamingExperienceRecord(data.gamingExperience),
       template: data.template || RESUME_TEMPLATE_DEFAULT,
       theme: data.theme || RESUME_DEFAULT_THEME,
-      isDefault: data.isDefault || false,
+      isDefault: data.isDefault,
       createdAt: now,
       updatedAt: now,
     };

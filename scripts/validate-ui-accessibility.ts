@@ -166,7 +166,6 @@ const getThemeColors = (css: string): Record<ThemeMode, Map<string, OklchColor>>
 
 const collectHardcodedColorViolations = async (): Promise<Violation[]> => {
   const files = await collectScannableFiles();
-  const violations: Violation[] = [];
   const patterns = [
     {
       regex: hardcodedColorLiteralPattern,
@@ -183,26 +182,31 @@ const collectHardcodedColorViolations = async (): Promise<Violation[]> => {
     },
   ];
 
-  for (const filePath of files) {
-    const fileContent = await Bun.file(filePath).text();
+  const violationGroups = await Promise.all(
+    files.map(async (filePath) => {
+      const fileContent = await Bun.file(filePath).text();
+      const fileViolations: Violation[] = [];
 
-    for (const pattern of patterns) {
-      pattern.regex.lastIndex = 0;
-      for (const match of fileContent.matchAll(pattern.regex)) {
-        if (allowedColorLiteralFiles.has(filePath)) {
-          continue;
+      for (const pattern of patterns) {
+        pattern.regex.lastIndex = 0;
+        for (const match of fileContent.matchAll(pattern.regex)) {
+          if (allowedColorLiteralFiles.has(filePath)) {
+            continue;
+          }
+
+          fileViolations.push({
+            filePath,
+            line: getLineFromOffset(fileContent, match.index ?? 0),
+            message: pattern.message,
+          });
         }
-
-        violations.push({
-          filePath,
-          line: getLineFromOffset(fileContent, match.index ?? 0),
-          message: pattern.message,
-        });
       }
-    }
-  }
 
-  return violations;
+      return fileViolations;
+    }),
+  );
+
+  return violationGroups.flat();
 };
 
 const collectContrastViolations = (css: string): string[] => {
@@ -214,7 +218,7 @@ const collectContrastViolations = (css: string): string[] => {
       const background = themes[mode].get(backgroundToken);
       const content = themes[mode].get(contentToken);
 
-      if (!background || !content) {
+      if (!(background && content)) {
         failures.push(
           `Missing token pair: bao-${mode}-${backgroundToken} / bao-${mode}-${contentToken}`,
         );
@@ -247,15 +251,19 @@ const main = async (): Promise<void> => {
 
   if (hardcodedColorViolations.length > 0) {
     await writeError("\nHardcoded color violations:");
-    for (const violation of hardcodedColorViolations) {
-      await writeError(`- ${violation.filePath}:${violation.line} ${violation.message}`);
+    const lines = hardcodedColorViolations.map(
+      (violation) => `- ${violation.filePath}:${violation.line} ${violation.message}`,
+    );
+    if (lines.length > 0) {
+      await writeError(lines.join("\n"));
     }
   }
 
   if (contrastViolations.length > 0) {
     await writeError("\nWCAG contrast violations:");
-    for (const violation of contrastViolations) {
-      await writeError(`- ${violation}`);
+    const lines = contrastViolations.map((violation) => `- ${violation}`);
+    if (lines.length > 0) {
+      await writeError(lines.join("\n"));
     }
   }
 

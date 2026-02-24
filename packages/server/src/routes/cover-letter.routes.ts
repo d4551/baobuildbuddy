@@ -50,9 +50,139 @@ const parseGeneratedCoverLetterContent = (content: string): Record<string, unkno
   };
 };
 
+const readCoverLetterSegment = (value: unknown): string => {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.filter((entry): entry is string => typeof entry === "string").join("\n\n");
+  }
+  return "";
+};
+
 const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
   const [result] = await Promise.allSettled([operation]);
   return result;
+};
+
+type GenerateCoverLetterBody = {
+  company: string;
+  position: string;
+  jobInfo?: Record<string, unknown>;
+  resumeId?: string;
+  template?: string;
+  save?: boolean;
+};
+type RouteSetState = {
+  status?: number;
+};
+type GeneratedCoverLetterContent = {
+  introduction: string;
+  body: string;
+  conclusion: string;
+};
+
+const COVER_LETTER_GENERATION_ERROR = "Cover letter generation failed";
+const COVER_LETTER_UNKNOWN_ERROR = "Unknown error";
+
+const resolveResumeContext = async (resumeId?: string): Promise<string> => {
+  if (!resumeId) return "";
+  const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
+  if (resumeRows.length === 0) return "";
+
+  const resume = resumeRows[0];
+  const personalInfo = resume.personalInfo || {};
+  const resumeName =
+    typeof personalInfo.name === "string" && personalInfo.name.trim()
+      ? personalInfo.name
+      : "Not specified";
+  return `
+Resume Context:
+Name: ${resumeName}
+Summary: ${resume.summary}
+Experience: ${JSON.stringify(resume.experience, null, 2)}
+Skills: ${JSON.stringify(resume.skills, null, 2)}
+  `.trim();
+};
+
+const toGeneratedCoverLetterContent = (content: string): GeneratedCoverLetterContent => {
+  const generatedContent = parseGeneratedCoverLetterContent(content);
+  return {
+    introduction:
+      readCoverLetterSegment(generatedContent.introduction) ||
+      readCoverLetterSegment(generatedContent.intro),
+    body: readCoverLetterSegment(generatedContent.body) || readCoverLetterSegment(generatedContent.main),
+    conclusion:
+      readCoverLetterSegment(generatedContent.conclusion) ||
+      readCoverLetterSegment(generatedContent.closing),
+  };
+};
+
+const saveGeneratedCoverLetter = async (
+  body: GenerateCoverLetterBody,
+  content: GeneratedCoverLetterContent,
+) => {
+  const newCoverLetter = {
+    id: generateId(),
+    company: body.company,
+    position: body.position,
+    jobInfo: body.jobInfo || {},
+    content,
+    template: normalizeTemplate(body.template),
+  };
+
+  await db.insert(coverLetters).values(newCoverLetter);
+  return newCoverLetter;
+};
+
+const handleGenerateCoverLetter = async (body: GenerateCoverLetterBody, set: RouteSetState) => {
+  const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+  if (settingsRows.length === 0) {
+    set.status = 503;
+    return {
+      error: "AI settings not configured. Please complete setup in Settings.",
+    };
+  }
+
+  const aiService = AIService.fromSettings(settingsRows[0]);
+  const resumeContext = await resolveResumeContext(body.resumeId);
+  const jobInfoText = body.jobInfo
+    ? JSON.stringify(body.jobInfo, null, 2)
+    : "No additional job information provided";
+  const aiResult = await settle(
+    aiService.generate(coverLetterPrompt(body.company, body.position, jobInfoText, resumeContext), {
+      temperature: 0.7,
+      maxTokens: 2000,
+    }),
+  );
+  if (aiResult.status === "rejected") {
+    set.status = 500;
+    return {
+      error: COVER_LETTER_GENERATION_ERROR,
+      details: aiResult.reason instanceof Error ? aiResult.reason.message : COVER_LETTER_UNKNOWN_ERROR,
+    };
+  }
+
+  const response = aiResult.value;
+  if (response.error) {
+    set.status = 500;
+    return { error: COVER_LETTER_GENERATION_ERROR, details: response.error };
+  }
+
+  const content = toGeneratedCoverLetterContent(response.content);
+  if (!body.save) {
+    return {
+      message: "Cover letter generated",
+      content,
+    };
+  }
+
+  const coverLetter = await saveGeneratedCoverLetter(body, content);
+  set.status = 201;
+  return {
+    message: "Cover letter generated and saved",
+    coverLetter,
+  };
 };
 
 export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
@@ -159,91 +289,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
   )
   .post(
     "/generate",
-    async ({ body, set }) => {
-      const settingsRows = await db
-        .select()
-        .from(settings)
-        .where(eq(settings.id, DEFAULT_SETTINGS_ID));
-
-      if (settingsRows.length === 0) {
-        set.status = 503;
-        return {
-          error: "AI settings not configured. Please complete setup in Settings.",
-        };
-      }
-
-      const aiService = AIService.fromSettings(settingsRows[0]);
-
-      let resumeContext = "";
-      if (body.resumeId) {
-        const resumeRows = await db.select().from(resumes).where(eq(resumes.id, body.resumeId));
-        if (resumeRows.length > 0) {
-          const resume = resumeRows[0];
-          const personalInfo = resume.personalInfo || {};
-          const resumeName =
-            typeof personalInfo.name === "string" && personalInfo.name.trim()
-              ? personalInfo.name
-              : "Not specified";
-          resumeContext = `
-Resume Context:
-Name: ${resumeName}
-Summary: ${resume.summary}
-Experience: ${JSON.stringify(resume.experience, null, 2)}
-Skills: ${JSON.stringify(resume.skills, null, 2)}
-        `.trim();
-        }
-      }
-
-      const jobInfoText = body.jobInfo
-        ? JSON.stringify(body.jobInfo, null, 2)
-        : "No additional job information provided";
-
-      const prompt = coverLetterPrompt(body.company, body.position, jobInfoText, resumeContext);
-      const aiResult = await settle(aiService.generate(prompt, { temperature: 0.7, maxTokens: 2000 }));
-      if (aiResult.status === "rejected") {
-        set.status = 500;
-        return {
-          error: "Cover letter generation failed",
-          details: aiResult.reason instanceof Error ? aiResult.reason.message : "Unknown error",
-        };
-      }
-
-      const response = aiResult.value;
-      if (response.error) {
-        set.status = 500;
-        return { error: "Cover letter generation failed", details: response.error };
-      }
-
-      const generatedContent = parseGeneratedCoverLetterContent(response.content);
-      const content = {
-        introduction: String(generatedContent.introduction || generatedContent.intro || ""),
-        body: String(generatedContent.body || generatedContent.main || ""),
-        conclusion: String(generatedContent.conclusion || generatedContent.closing || ""),
-      };
-
-      if (body.save) {
-        const newCoverLetter = {
-          id: generateId(),
-          company: body.company,
-          position: body.position,
-          jobInfo: body.jobInfo || {},
-          content,
-          template: normalizeTemplate(body.template),
-        };
-
-        await db.insert(coverLetters).values(newCoverLetter);
-        set.status = 201;
-        return {
-          message: "Cover letter generated and saved",
-          coverLetter: newCoverLetter,
-        };
-      }
-
-      return {
-        message: "Cover letter generated",
-        content,
-      };
-    },
+    async ({ body, set }) => handleGenerateCoverLetter(body, set),
     {
       body: t.Object({
         company: t.String({ maxLength: 200 }),

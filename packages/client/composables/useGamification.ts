@@ -3,147 +3,192 @@ import { isRecord, STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
+interface GamificationState {
+  progress: ReturnType<typeof useState<UserGamificationData | null>>;
+  achievements: ReturnType<typeof useState<Achievement[]>>;
+  challenges: ReturnType<typeof useState<DailyChallenge[]>>;
+  weeklyProgress: ReturnType<typeof useState<Record<string, unknown> | null>>;
+  monthlyStats: ReturnType<typeof useState<Record<string, unknown> | null>>;
+  loading: ReturnType<typeof useState<boolean>>;
+}
+
+interface GamificationContext extends GamificationState {
+  api: ReturnType<typeof useApi>;
+  t: ReturnType<typeof useI18n>["t"];
+}
+
+type GamificationStatKey = keyof UserGamificationData["stats"];
+
+const GAMIFICATION_STAT_KEYS: readonly GamificationStatKey[] = [
+  "profileComplete",
+  "skillsMapped",
+  "portfolioItems",
+  "jobApplications",
+  "chatSessions",
+  "resumesGenerated",
+  "savedJobs",
+  "totalTimeSpent",
+  "featuresUsed",
+  "dailyStreak",
+  "weeklyProgress",
+  "interviewsCompleted",
+  "studiosExplored",
+];
+
+const toNumberWithDefault = (value: unknown, fallback: number): number =>
+  typeof value === "number" ? value : fallback;
+
+const toOptionalNumber = (value: unknown): number | undefined =>
+  typeof value === "number" ? value : undefined;
+
+const toOptionalString = (value: unknown): string | undefined =>
+  typeof value === "string" ? value : undefined;
+
+const toStringArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+
+const normalizeStats = (value: unknown): UserGamificationData["stats"] => {
+  const stats: UserGamificationData["stats"] = {};
+  if (!isRecord(value)) {
+    return stats;
+  }
+
+  for (const key of GAMIFICATION_STAT_KEYS) {
+    const statValue = value[key];
+    if (typeof statValue === "number") {
+      stats[key] = statValue;
+    }
+  }
+  return stats;
+};
+
+const normalizeDailyChallenges = (value: unknown): Record<string, string[]> => {
+  if (!isRecord(value)) {
+    return {};
+  }
+
+  const dailyChallenges: Record<string, string[]> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (Array.isArray(entry)) {
+      dailyChallenges[key] = toStringArray(entry);
+    }
+  }
+  return dailyChallenges;
+};
+
 const normalizeProgress = (value: unknown): UserGamificationData | null => {
   if (!isRecord(value)) {
     return null;
   }
 
-  const statsValue = isRecord(value.stats) ? value.stats : {};
-  const stats: Partial<UserGamificationData["stats"]> = {
-    profileComplete:
-      typeof statsValue.profileComplete === "number" ? statsValue.profileComplete : undefined,
-    skillsMapped: typeof statsValue.skillsMapped === "number" ? statsValue.skillsMapped : undefined,
-    portfolioItems:
-      typeof statsValue.portfolioItems === "number" ? statsValue.portfolioItems : undefined,
-    jobApplications:
-      typeof statsValue.jobApplications === "number" ? statsValue.jobApplications : undefined,
-    chatSessions: typeof statsValue.chatSessions === "number" ? statsValue.chatSessions : undefined,
-    resumesGenerated:
-      typeof statsValue.resumesGenerated === "number" ? statsValue.resumesGenerated : undefined,
-    savedJobs: typeof statsValue.savedJobs === "number" ? statsValue.savedJobs : undefined,
-    totalTimeSpent:
-      typeof statsValue.totalTimeSpent === "number" ? statsValue.totalTimeSpent : undefined,
-    featuresUsed: typeof statsValue.featuresUsed === "number" ? statsValue.featuresUsed : undefined,
-    dailyStreak: typeof statsValue.dailyStreak === "number" ? statsValue.dailyStreak : undefined,
-    weeklyProgress:
-      typeof statsValue.weeklyProgress === "number" ? statsValue.weeklyProgress : undefined,
-    interviewsCompleted:
-      typeof statsValue.interviewsCompleted === "number"
-        ? statsValue.interviewsCompleted
-        : undefined,
-    studiosExplored:
-      typeof statsValue.studiosExplored === "number" ? statsValue.studiosExplored : undefined,
-  };
-
-  const dailyChallengesValue = isRecord(value.dailyChallenges) ? value.dailyChallenges : {};
-  const dailyChallenges: Record<string, string[]> = {};
-  for (const [key, entry] of Object.entries(dailyChallengesValue)) {
-    if (Array.isArray(entry)) {
-      dailyChallenges[key] = entry.filter((item): item is string => typeof item === "string");
-    }
-  }
-
-  const achievements = Array.isArray(value.achievements)
-    ? value.achievements.filter((entry): entry is string => typeof entry === "string")
-    : [];
-
   return {
-    xp: typeof value.xp === "number" ? value.xp : 0,
-    level: typeof value.level === "number" ? value.level : 1,
-    achievements,
-    dailyChallenges,
-    longestStreak: typeof value.longestStreak === "number" ? value.longestStreak : 0,
-    currentStreak: typeof value.currentStreak === "number" ? value.currentStreak : 0,
-    lastActiveDate: typeof value.lastActiveDate === "string" ? value.lastActiveDate : undefined,
-    stats,
-    xpForNextLevel: typeof value.xpForNextLevel === "number" ? value.xpForNextLevel : undefined,
-    streak: typeof value.streak === "number" ? value.streak : undefined,
+    xp: toNumberWithDefault(value.xp, 0),
+    level: toNumberWithDefault(value.level, 1),
+    achievements: toStringArray(value.achievements),
+    dailyChallenges: normalizeDailyChallenges(value.dailyChallenges),
+    longestStreak: toNumberWithDefault(value.longestStreak, 0),
+    currentStreak: toNumberWithDefault(value.currentStreak, 0),
+    lastActiveDate: toOptionalString(value.lastActiveDate),
+    stats: normalizeStats(value.stats),
+    xpForNextLevel: toOptionalNumber(value.xpForNextLevel),
+    streak: toOptionalNumber(value.streak),
   };
 };
 
-/**
- * Gamification system composable for XP, achievements, and challenges.
- */
-export function useGamification() {
-  const api = useApi();
-  const { t } = useI18n();
-  const progress = useState<UserGamificationData | null>(
-    STATE_KEYS.GAMIFICATION_PROGRESS,
-    () => null,
-  );
-  const achievements = useState<Achievement[]>(STATE_KEYS.GAMIFICATION_ACHIEVEMENTS, () => []);
-  const challenges = useState<DailyChallenge[]>(STATE_KEYS.GAMIFICATION_CHALLENGES, () => []);
-  const loading = useState(STATE_KEYS.GAMIFICATION_LOADING, () => false);
+const createGamificationState = (): GamificationState => ({
+  progress: useState<UserGamificationData | null>(STATE_KEYS.GAMIFICATION_PROGRESS, () => null),
+  achievements: useState<Achievement[]>(STATE_KEYS.GAMIFICATION_ACHIEVEMENTS, () => []),
+  challenges: useState<DailyChallenge[]>(STATE_KEYS.GAMIFICATION_CHALLENGES, () => []),
+  weeklyProgress: useState<Record<string, unknown> | null>(STATE_KEYS.GAMIFICATION_WEEKLY, () => null),
+  monthlyStats: useState<Record<string, unknown> | null>(STATE_KEYS.GAMIFICATION_MONTHLY, () => null),
+  loading: useState(STATE_KEYS.GAMIFICATION_LOADING, () => false),
+});
 
-  async function fetchProgress() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.gamification.progress.get();
-      assertApiResponse(error, t("apiErrors.gamification.fetchProgressFailed"));
-      const normalized = normalizeProgress(data);
-      if (normalized) {
-        progress.value = normalized;
-      }
-    });
-  }
+const createFetchProgressAction = (context: GamificationContext) => async () =>
+  withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.gamification.progress.get();
+    assertApiResponse(error, context.t("apiErrors.gamification.fetchProgressFailed"));
+    const normalized = normalizeProgress(data);
+    if (normalized) {
+      context.progress.value = normalized;
+    }
+  });
 
-  async function awardXP(amount: number, reason: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.gamification["award-xp"].post({ amount, reason });
-      assertApiResponse(error, t("apiErrors.gamification.awardXPFailed"));
+const createAwardXpAction =
+  (context: GamificationContext, fetchProgress: () => Promise<void>) =>
+  async (amount: number, reason: string) =>
+    withLoadingState(context.loading, async () => {
+      const { data, error } = await context.api.gamification["award-xp"].post({ amount, reason });
+      assertApiResponse(error, context.t("apiErrors.gamification.awardXPFailed"));
       await fetchProgress();
       return data;
     });
-  }
 
-  async function fetchAchievements() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.gamification.achievements.get();
-      assertApiResponse(error, t("apiErrors.gamification.fetchAchievementsFailed"));
-      achievements.value = Array.isArray(data)
-        ? data.filter((entry): entry is Achievement => isRecord(entry))
-        : [];
-    });
-  }
+const createFetchAchievementsAction = (context: GamificationContext) => async () =>
+  withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.gamification.achievements.get();
+    assertApiResponse(error, context.t("apiErrors.gamification.fetchAchievementsFailed"));
+    context.achievements.value = Array.isArray(data)
+      ? data.filter((entry): entry is Achievement => isRecord(entry))
+      : [];
+  });
 
-  async function fetchChallenges() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.gamification.challenges.get();
-      assertApiResponse(error, t("apiErrors.gamification.fetchChallengesFailed"));
-      if (!isRecord(data) || !Array.isArray(data.challenges)) {
-        challenges.value = [];
-        return;
-      }
-      challenges.value = data.challenges.filter((entry): entry is DailyChallenge =>
-        isRecord(entry),
-      );
-    });
-  }
+const createFetchChallengesAction = (context: GamificationContext) => async () =>
+  withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.gamification.challenges.get();
+    assertApiResponse(error, context.t("apiErrors.gamification.fetchChallengesFailed"));
+    if (!(isRecord(data) && Array.isArray(data.challenges))) {
+      context.challenges.value = [];
+      return;
+    }
+    context.challenges.value = data.challenges.filter((entry): entry is DailyChallenge =>
+      isRecord(entry),
+    );
+  });
 
-  async function completeChallenge(id: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.gamification.challenges({ id }).complete.post();
-      assertApiResponse(error, t("apiErrors.gamification.completeChallengeFailed"));
+const createCompleteChallengeAction =
+  (
+    context: GamificationContext,
+    fetchChallenges: () => Promise<void>,
+    fetchProgress: () => Promise<void>,
+  ) =>
+  async (id: string) =>
+    withLoadingState(context.loading, async () => {
+      const { data, error } = await context.api.gamification.challenges({ id }).complete.post();
+      assertApiResponse(error, context.t("apiErrors.gamification.completeChallengeFailed"));
       await fetchChallenges();
       await fetchProgress();
       return data;
     });
-  }
 
+const createFetchWeeklyProgressAction = (context: GamificationContext) => async () =>
+  withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.gamification.weekly.get();
+    assertApiResponse(error, context.t("apiErrors.gamification.fetchWeeklyFailed"));
+    context.weeklyProgress.value = isRecord(data) ? data : null;
+  });
+
+const createFetchMonthlyStatsAction = (context: GamificationContext) => async () =>
+  withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.gamification.monthly.get();
+    assertApiResponse(error, context.t("apiErrors.gamification.fetchMonthlyFailed"));
+    context.monthlyStats.value = isRecord(data) ? data : null;
+  });
+
+const createGamificationComputedState = (state: GamificationState) => {
   const level = computed(() => {
-    if (!progress.value) return 1;
-    const xp = progress.value.xp || 0;
+    const xp = state.progress.value?.xp || 0;
     return Math.floor(Math.sqrt(xp / 100)) + 1;
   });
 
   const xpToNextLevel = computed(() => {
-    const currentLevel = level.value;
-    const nextLevelXP = currentLevel ** 2 * 100;
-    const currentXP = progress.value?.xp || 0;
-    return nextLevelXP - currentXP;
+    const nextLevelXp = level.value ** 2 * 100;
+    const currentXp = state.progress.value?.xp || 0;
+    return nextLevelXp - currentXp;
   });
 
   const currentStreak = computed(
-    () => progress.value?.currentStreak || progress.value?.streak || 0,
+    () => state.progress.value?.currentStreak || state.progress.value?.streak || 0,
   );
 
   const streakMultiplier = computed(() => {
@@ -155,60 +200,55 @@ export function useGamification() {
     return 1.0;
   });
 
-  const weeklyProgress = useState<Record<string, unknown> | null>(
-    STATE_KEYS.GAMIFICATION_WEEKLY,
-    () => null,
-  );
-  const monthlyStats = useState<Record<string, unknown> | null>(
-    STATE_KEYS.GAMIFICATION_MONTHLY,
-    () => null,
-  );
-
-  async function fetchWeeklyProgress() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.gamification.weekly.get();
-      assertApiResponse(error, t("apiErrors.gamification.fetchWeeklyFailed"));
-      weeklyProgress.value = isRecord(data) ? data : null;
-    });
-  }
-
-  async function fetchMonthlyStats() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.gamification.monthly.get();
-      assertApiResponse(error, t("apiErrors.gamification.fetchMonthlyFailed"));
-      monthlyStats.value = isRecord(data) ? data : null;
-    });
-  }
-
   const actionHistory = computed<unknown[]>(() => {
-    if (!isRecord(weeklyProgress.value)) {
+    const weeklyValue = state.weeklyProgress.value;
+    if (!(isRecord(weeklyValue) && Array.isArray(weeklyValue.actionHistory))) {
       return [];
     }
-    const entries = weeklyProgress.value.actionHistory;
-    if (!Array.isArray(entries)) {
-      return [];
-    }
-    return entries.filter((entry): entry is unknown => entry !== undefined || entry === undefined);
+    return weeklyValue.actionHistory;
   });
 
   return {
-    progress: readonly(progress),
-    achievements: readonly(achievements),
-    challenges: readonly(challenges),
-    weeklyProgress: readonly(weeklyProgress),
-    monthlyStats: readonly(monthlyStats),
-    loading: readonly(loading),
     level,
     xpToNextLevel,
     currentStreak,
     streakMultiplier,
     actionHistory,
+  };
+};
+
+/**
+ * Gamification system composable for XP, achievements, and challenges.
+ */
+export function useGamification() {
+  const state = createGamificationState();
+  const context: GamificationContext = {
+    ...state,
+    api: useApi(),
+    t: useI18n().t,
+  };
+
+  const fetchProgress = createFetchProgressAction(context);
+  const fetchChallenges = createFetchChallengesAction(context);
+  const actions = {
     fetchProgress,
-    awardXP,
-    fetchAchievements,
+    awardXP: createAwardXpAction(context, fetchProgress),
+    fetchAchievements: createFetchAchievementsAction(context),
     fetchChallenges,
-    completeChallenge,
-    fetchWeeklyProgress,
-    fetchMonthlyStats,
+    completeChallenge: createCompleteChallengeAction(context, fetchChallenges, fetchProgress),
+    fetchWeeklyProgress: createFetchWeeklyProgressAction(context),
+    fetchMonthlyStats: createFetchMonthlyStatsAction(context),
+  };
+  const computedState = createGamificationComputedState(state);
+
+  return {
+    progress: readonly(state.progress),
+    achievements: readonly(state.achievements),
+    challenges: readonly(state.challenges),
+    weeklyProgress: readonly(state.weeklyProgress),
+    monthlyStats: readonly(state.monthlyStats),
+    loading: readonly(state.loading),
+    ...computedState,
+    ...actions,
   };
 }

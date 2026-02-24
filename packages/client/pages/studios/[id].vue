@@ -71,9 +71,9 @@ async function loadStudio() {
   }
 }
 
-function startPracticeInterview() {
+async function startPracticeInterview() {
   if (!studioId.value) return;
-  router.push(buildInterviewStudioNavigation(studioId.value));
+  await router.push(buildInterviewStudioNavigation(studioId.value));
 }
 
 function remoteWorkLabel(remoteWork: boolean | undefined): string {

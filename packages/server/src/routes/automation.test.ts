@@ -12,11 +12,7 @@ const resumeId = generateId();
 const createdRunIds: string[] = [];
 type RunJobApply = typeof applicationAutomationService.runJobApply;
 type RunEmailResponse = typeof applicationAutomationService.runEmailResponse;
-const runJobApplyStub: RunJobApply = async (_runId, _payload, _onProgress) => {
-  void _runId;
-  void _payload;
-  void _onProgress;
-};
+const runJobApplyStub: RunJobApply = (_runId, _payload, _onProgress) => Promise.resolve();
 const runEmailResponseStub: RunEmailResponse = async (_payload) => {
   const now = new Date().toISOString();
   const runId = generateId();
@@ -107,7 +103,7 @@ beforeAll(async () => {
   const dbModule = await import("../db/client");
 
   initModule.initializeDatabase(dbModule.sqlite);
-  await seedModule.seedDatabase(dbModule.db);
+  seedModule.seedDatabase(dbModule.db);
 
   await db.insert(resumes).values({ id: resumeId });
   app = new Elysia({ prefix: "/api" }).use(routesModule.automationRoutes);
@@ -137,7 +133,7 @@ afterAll(async () => {
   }
 });
 
-describe("automation routes", () => {
+function registerJobApplyValidationTest(): void {
   test("POST /api/automation/job-apply validates required fields", async () => {
     const res = await requestStatusBody<{ error: { code: string; message: string } }>(
       "POST",
@@ -154,7 +150,9 @@ describe("automation routes", () => {
       expect(typeof res.body.error.message).toBe("string");
     }
   });
+}
 
+function registerMissingResumeTest(): void {
   test("POST /api/automation/job-apply rejects missing resume", async () => {
     const res = await requestJson<{ error: { code: string; message: string } }>(
       app,
@@ -168,9 +166,11 @@ describe("automation routes", () => {
     expect(res.status).toBe(404);
     expect(res.body.error.message).toBe("resume not found: not-found-resume-id");
   });
+}
 
+function registerJobApplyEnqueueTest(): void {
   test("POST /api/automation/job-apply enqueues a run and returns run contract", async () => {
-    originalRunJobApply = applicationAutomationService.runJobApply;
+    originalRunJobApply = applicationAutomationService.runJobApply.bind(applicationAutomationService);
     applicationAutomationService.runJobApply = runJobApplyStub;
 
     await Promise.resolve()
@@ -207,7 +207,9 @@ describe("automation routes", () => {
         }
       });
   });
+}
 
+function registerScheduleValidationTest(): void {
   test("POST /api/automation/job-apply/schedule validates runAt", async () => {
     const res = await requestJson<{ error: { code: string; message: string } }>(
       app,
@@ -223,7 +225,9 @@ describe("automation routes", () => {
     expect(res.status).toBe(422);
     expect(res.body.error.message).toContain("runAt");
   });
+}
 
+function registerScheduleCreationTest(): void {
   test("POST /api/automation/job-apply/schedule creates a pending run", async () => {
     const runAt = new Date(Date.now() + 300_000).toISOString();
     const res = await requestJson<{
@@ -259,9 +263,13 @@ describe("automation routes", () => {
     expect(run[0].status).toBe("pending");
     expect(run[0].input).not.toBeNull();
   });
+}
 
+function registerEmailResponseTest(): void {
   test("POST /api/automation/email-response creates a successful email run", async () => {
-    originalRunEmailResponse = applicationAutomationService.runEmailResponse;
+    originalRunEmailResponse = applicationAutomationService.runEmailResponse.bind(
+      applicationAutomationService,
+    );
     applicationAutomationService.runEmailResponse = runEmailResponseStub;
 
     const res = await requestJson<{
@@ -296,4 +304,13 @@ describe("automation routes", () => {
     expect(run[0].status).toBe("success");
     expect(run[0].output).not.toBeNull();
   });
+}
+
+describe("automation routes", () => {
+  registerJobApplyValidationTest();
+  registerMissingResumeTest();
+  registerJobApplyEnqueueTest();
+  registerScheduleValidationTest();
+  registerScheduleCreationTest();
+  registerEmailResponseTest();
 });

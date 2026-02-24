@@ -1,6 +1,9 @@
 import { APP_ROUTES } from "@bao/shared";
 import type { AppTranslationSchema } from "~/locales/en-US";
 
+const PATH_SPLIT_PATTERN = /[?#]/u;
+const MULTIPLE_SLASH_PATTERN = /\/{2,}/gu;
+
 /**
  * Translation keys available for navigation labels.
  */
@@ -168,10 +171,10 @@ export function getDockNavigationItems(): readonly NavigationItem[] {
  * Normalizes route paths for deterministic active-route matching.
  */
 export function normalizeRoutePath(pathValue: string): string {
-  const [pathWithoutQueryRaw] = pathValue.split(/[?#]/u);
+  const [pathWithoutQueryRaw] = pathValue.split(PATH_SPLIT_PATTERN);
   const pathWithoutQuery = pathWithoutQueryRaw ?? "";
   const prefixed = pathWithoutQuery.startsWith("/") ? pathWithoutQuery : `/${pathWithoutQuery}`;
-  const collapsed = prefixed.replace(/\/{2,}/gu, "/");
+  const collapsed = prefixed.replace(MULTIPLE_SLASH_PATTERN, "/");
   if (collapsed.length > 1 && collapsed.endsWith("/")) {
     return collapsed.slice(0, -1);
   }
@@ -217,7 +220,7 @@ export function isRouteActive(currentPath: string, targetPath: string): boolean 
   for (let index = 0; index < targetSegments.length; index += 1) {
     const targetSegment = targetSegments[index];
     const currentSegment = currentSegments[index];
-    if (!targetSegment || !currentSegment || !segmentMatches(targetSegment, currentSegment)) {
+    if (!((targetSegment && currentSegment ) && segmentMatches(targetSegment, currentSegment))) {
       return false;
     }
   }

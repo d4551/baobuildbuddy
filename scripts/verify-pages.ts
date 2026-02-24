@@ -35,6 +35,58 @@ const routePaths = Array.from(new Set(Object.values(APP_ROUTES)));
 const normalizeText = (value: string): string =>
   value.replace(htmlTagPattern, " ").replace(whitespacePattern, " ").trim();
 
+const createRouteFailure = (
+  locale: string,
+  route: string,
+  status: number,
+  reason: string,
+): RouteVerificationFailure => ({
+  locale,
+  route,
+  status,
+  reason,
+});
+
+const verifyHtmlContent = (
+  locale: string,
+  route: string,
+  status: number,
+  html: string,
+): RouteVerificationResult | RouteVerificationFailure => {
+  if (route === "/" && !html.toLowerCase().includes(expectedBrandToken)) {
+    return createRouteFailure(
+      locale,
+      route,
+      status,
+      `Root route did not include expected brand token "${APP_BRAND.name}". Verify VERIFY_HOST/VERIFY_PORT target the BaoBuildBuddy app.`,
+    );
+  }
+
+  const headingMatch = html.match(htmlHeadingPattern);
+  const heading = normalizeText(headingMatch?.[1] ?? "");
+  if (heading.length === 0) {
+    return createRouteFailure(locale, route, status, "No non-empty <h1> heading found in SSR HTML.");
+  }
+
+  const titleMatch = html.match(htmlTitlePattern);
+  const title = normalizeText(titleMatch?.[1] ?? "");
+  if (title.length === 0) {
+    return createRouteFailure(locale, route, status, "No non-empty <title> found in SSR HTML.");
+  }
+
+  if (!htmlMainPattern.test(html)) {
+    return createRouteFailure(locale, route, status, "No <main> landmark found in SSR HTML.");
+  }
+
+  return {
+    locale,
+    route,
+    status,
+    heading,
+    title,
+  };
+};
+
 const verifyRoute = async (
   locale: string,
   route: string,
@@ -47,88 +99,42 @@ const verifyRoute = async (
   });
 
   if (!response.ok) {
-    return {
+    return createRouteFailure(
       locale,
       route,
-      status: response.status,
-      reason: `Expected 2xx status but received ${response.status}.`,
-    };
+      response.status,
+      `Expected 2xx status but received ${response.status}.`,
+    );
   }
 
   const html = await response.text();
-  if (route === "/" && !html.toLowerCase().includes(expectedBrandToken)) {
-    return {
-      locale,
-      route,
-      status: response.status,
-      reason: `Root route did not include expected brand token "${APP_BRAND.name}". Verify VERIFY_HOST/VERIFY_PORT target the BaoBuildBuddy app.`,
-    };
-  }
-
-  const headingMatch = html.match(htmlHeadingPattern);
-  const heading = normalizeText(headingMatch?.[1] ?? "");
-
-  if (heading.length === 0) {
-    return {
-      locale,
-      route,
-      status: response.status,
-      reason: "No non-empty <h1> heading found in SSR HTML.",
-    };
-  }
-
-  const titleMatch = html.match(htmlTitlePattern);
-  const title = normalizeText(titleMatch?.[1] ?? "");
-
-  if (title.length === 0) {
-    return {
-      locale,
-      route,
-      status: response.status,
-      reason: "No non-empty <title> found in SSR HTML.",
-    };
-  }
-
-  const hasMainLandmark = htmlMainPattern.test(html);
-  if (!hasMainLandmark) {
-    return {
-      locale,
-      route,
-      status: response.status,
-      reason: "No <main> landmark found in SSR HTML.",
-    };
-  }
-
-  return {
-    locale,
-    route,
-    status: response.status,
-    heading,
-    title,
-  };
+  return verifyHtmlContent(locale, route, response.status, html);
 };
 
 const main = async (): Promise<void> => {
+  const tasks = APP_LANGUAGE_CODES.flatMap((locale) =>
+    routePaths.map((route) => verifyRoute(locale, route)),
+  );
+  const results = await Promise.all(tasks);
   const successes: RouteVerificationResult[] = [];
   const failures: RouteVerificationFailure[] = [];
 
-  for (const locale of APP_LANGUAGE_CODES) {
-    for (const route of routePaths) {
-      const result = await verifyRoute(locale, route);
-      if ("reason" in result) {
-        failures.push(result);
-      } else {
-        successes.push(result);
-      }
+  for (const result of results) {
+    if ("reason" in result) {
+      failures.push(result);
+    } else {
+      successes.push(result);
     }
   }
 
   await writeOutput(`Route/content verification against ${baseUrl}`);
   await writeOutput(lineSeparator);
-  for (const success of successes) {
-    await writeOutput(
+  const successLines = successes.map(
+    (success) =>
       `[ok] ${success.locale.padEnd(5)} ${success.status} ${success.route.padEnd(26)} ${success.heading} | ${success.title}`,
-    );
+  );
+  if (successLines.length > 0) {
+    await writeOutput(successLines.join("\n"));
   }
 
   if (failures.length === 0) {
@@ -141,10 +147,12 @@ const main = async (): Promise<void> => {
 
   await writeError(lineSeparator);
   await writeError("Route/content verification failures:");
-  for (const failure of failures) {
-    await writeError(
+  const failureLines = failures.map(
+    (failure) =>
       `[fail] ${failure.locale.padEnd(5)} ${failure.status} ${failure.route.padEnd(26)} ${failure.reason}`,
-    );
+  );
+  if (failureLines.length > 0) {
+    await writeError(failureLines.join("\n"));
   }
 
   process.exit(1);

@@ -44,6 +44,18 @@ interface SubmitResponseInput {
   response: string;
 }
 
+interface InterviewState {
+  sessions: ReturnType<typeof useState<InterviewSession[]>>;
+  currentSession: ReturnType<typeof useState<InterviewSession | null>>;
+  stats: ReturnType<typeof useState<Record<string, number> | null>>;
+  loading: ReturnType<typeof useState<boolean>>;
+}
+
+interface InterviewContext extends InterviewState {
+  api: ReturnType<typeof useApi>;
+  t: ReturnType<typeof useI18n>["t"];
+}
+
 const isOneOf = <T extends string>(values: readonly T[], value: unknown): value is T =>
   typeof value === "string" && values.some((entry) => entry === value);
 
@@ -59,12 +71,17 @@ const asQuestionDifficulty = (value: unknown): InterviewQuestionDifficulty =>
 const asInterviewMode = (value: unknown): InterviewMode => (value === "job" ? "job" : "studio");
 
 const asInterviewTargetJob = (value: unknown): InterviewTargetJob | undefined => {
-  if (!isRecord(value)) return undefined;
+  if (!isRecord(value)) {
+    return;
+  }
+
   const id = asString(value.id);
   const title = asString(value.title);
   const company = asString(value.company);
   const location = asString(value.location);
-  if (!id || !title || !company || !location) return undefined;
+  if (!(id && title && company && location)) {
+    return;
+  }
 
   return {
     id,
@@ -80,151 +97,204 @@ const asInterviewTargetJob = (value: unknown): InterviewTargetJob | undefined =>
   };
 };
 
-const toInterviewSession = (value: unknown): InterviewSession | null => {
-  if (!isRecord(value)) return null;
+const toInterviewQuestion = (value: unknown): InterviewSession["questions"][number] | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
 
   const id = asString(value.id);
-  const studioId = asString(value.studioId);
-  if (!id || !studioId) return null;
-
-  const configRecord = isRecord(value.config) ? value.config : {};
-  const voiceSettingsRecord = isRecord(configRecord.voiceSettings)
-    ? configRecord.voiceSettings
-    : null;
-
-  const questions: InterviewSession["questions"] = [];
-  if (Array.isArray(value.questions)) {
-    for (const entry of value.questions) {
-      if (!isRecord(entry)) continue;
-      const questionId = asString(entry.id);
-      const questionText = asString(entry.question);
-      if (!questionId || !questionText) continue;
-
-      const nextQuestion: InterviewSession["questions"][number] = {
-        id: questionId,
-        type: asQuestionType(entry.type),
-        question: questionText,
-        followUps: asStringArray(entry.followUps),
-        expectedDuration: asNumber(entry.expectedDuration) ?? 60,
-        difficulty: asQuestionDifficulty(entry.difficulty),
-        tags: asStringArray(entry.tags),
-      };
-
-      const score = asNumber(entry.score);
-      const feedback = asString(entry.feedback);
-      const response = asString(entry.response);
-      if (score !== undefined) nextQuestion.score = score;
-      if (feedback !== undefined) nextQuestion.feedback = feedback;
-      if (response !== undefined) nextQuestion.response = response;
-
-      questions.push(nextQuestion);
-    }
+  const question = asString(value.question);
+  if (!(id && question)) {
+    return null;
   }
 
-  const responses: InterviewSession["responses"] = [];
-  if (Array.isArray(value.responses)) {
-    for (const entry of value.responses) {
-      if (!isRecord(entry)) continue;
-      const questionId = asString(entry.questionId);
-      const transcript = asString(entry.transcript);
-      if (!questionId || !transcript) continue;
+  const nextQuestion: InterviewSession["questions"][number] = {
+    id,
+    type: asQuestionType(value.type),
+    question,
+    followUps: asStringArray(value.followUps),
+    expectedDuration: asNumber(value.expectedDuration) ?? 60,
+    difficulty: asQuestionDifficulty(value.difficulty),
+    tags: asStringArray(value.tags),
+  };
+  const score = asNumber(value.score);
+  const feedback = asString(value.feedback);
+  const response = asString(value.response);
+  if (score !== undefined) {
+    nextQuestion.score = score;
+  }
+  if (feedback !== undefined) {
+    nextQuestion.feedback = feedback;
+  }
+  if (response !== undefined) {
+    nextQuestion.response = response;
+  }
+  return nextQuestion;
+};
 
-      const nextResponse: InterviewSession["responses"][number] = {
-        questionId,
-        transcript,
-        duration: asNumber(entry.duration) ?? 0,
-        timestamp: asNumber(entry.timestamp) ?? Date.now(),
-        confidence: asNumber(entry.confidence) ?? 0,
-      };
+const toInterviewQuestions = (value: unknown): InterviewSession["questions"] =>
+  Array.isArray(value)
+    ? value
+        .map((entry) => toInterviewQuestion(entry))
+        .filter((entry): entry is InterviewSession["questions"][number] => entry !== null)
+    : [];
 
-      const analysisRecord = isRecord(entry.aiAnalysis) ? entry.aiAnalysis : null;
-      if (analysisRecord) {
-        nextResponse.aiAnalysis = {
-          score: asNumber(analysisRecord.score) ?? 0,
-          feedback: asString(analysisRecord.feedback) ?? "",
-          strengths: asStringArray(analysisRecord.strengths),
-          improvements: asStringArray(analysisRecord.improvements),
-        };
-      }
+const toResponseAnalysis = (
+  value: unknown,
+): InterviewSession["responses"][number]["aiAnalysis"] | undefined => {
+  if (!isRecord(value)) {
+    return;
+  }
+  return {
+    score: asNumber(value.score) ?? 0,
+    feedback: asString(value.feedback) ?? "",
+    strengths: asStringArray(value.strengths),
+    improvements: asStringArray(value.improvements),
+  };
+};
 
-      responses.push(nextResponse);
-    }
+const toInterviewResponse = (value: unknown): InterviewSession["responses"][number] | null => {
+  if (!isRecord(value)) {
+    return null;
   }
 
-  const finalAnalysisRecord = isRecord(value.finalAnalysis) ? value.finalAnalysis : null;
-  const interviewerPersonaRecord = isRecord(value.interviewerPersona)
-    ? value.interviewerPersona
-    : null;
+  const questionId = asString(value.questionId);
+  const transcript = asString(value.transcript);
+  if (!(questionId && transcript)) {
+    return null;
+  }
 
-  const normalizedConfig: InterviewSession["config"] = {
+  const response: InterviewSession["responses"][number] = {
+    questionId,
+    transcript,
+    duration: asNumber(value.duration) ?? 0,
+    timestamp: asNumber(value.timestamp) ?? Date.now(),
+    confidence: asNumber(value.confidence) ?? 0,
+  };
+  const analysis = toResponseAnalysis(value.aiAnalysis);
+  if (analysis) {
+    response.aiAnalysis = analysis;
+  }
+  return response;
+};
+
+const toInterviewResponses = (value: unknown): InterviewSession["responses"] =>
+  Array.isArray(value)
+    ? value
+        .map((entry) => toInterviewResponse(entry))
+        .filter((entry): entry is InterviewSession["responses"][number] => entry !== null)
+    : [];
+
+const toVoiceSettings = (value: unknown): InterviewConfig["voiceSettings"] | undefined => {
+  if (!isRecord(value)) {
+    return;
+  }
+
+  const rate = asNumber(value.rate);
+  const pitch = asNumber(value.pitch);
+  const volume = asNumber(value.volume);
+  const language = asString(value.language);
+  if (rate === undefined || pitch === undefined || volume === undefined || !language) {
+    return;
+  }
+
+  return {
+    microphoneId: asString(value.microphoneId),
+    speakerId: asString(value.speakerId),
+    voiceId: asString(value.voiceId),
+    rate,
+    pitch,
+    volume,
+    language,
+  };
+};
+
+const toInterviewConfig = (value: unknown, questionCount: number): InterviewSession["config"] => {
+  const configRecord = isRecord(value) ? value : {};
+  const config: InterviewSession["config"] = {
     roleType: asString(configRecord.roleType) ?? "Generalist",
     roleCategory: asString(configRecord.roleCategory),
     experienceLevel: asString(configRecord.experienceLevel) ?? "mid",
     focusAreas: asStringArray(configRecord.focusAreas),
     duration: asNumber(configRecord.duration) ?? 30,
-    questionCount: asNumber(configRecord.questionCount) ?? questions.length,
+    questionCount: asNumber(configRecord.questionCount) ?? questionCount,
     includeTechnical: asBoolean(configRecord.includeTechnical) ?? true,
     includeBehavioral: asBoolean(configRecord.includeBehavioral) ?? true,
     includeStudioSpecific: asBoolean(configRecord.includeStudioSpecific) ?? true,
     enableVoiceMode: asBoolean(configRecord.enableVoiceMode),
     technologies: asStringArray(configRecord.technologies),
     interviewMode: asInterviewMode(configRecord.interviewMode),
-    targetJob: asInterviewTargetJob(configRecord.targetJob),
   };
-  if (
-    voiceSettingsRecord &&
-    typeof voiceSettingsRecord.rate === "number" &&
-    typeof voiceSettingsRecord.pitch === "number" &&
-    typeof voiceSettingsRecord.volume === "number" &&
-    typeof voiceSettingsRecord.language === "string"
-  ) {
-    normalizedConfig.voiceSettings = {
-      microphoneId: asString(voiceSettingsRecord.microphoneId),
-      speakerId: asString(voiceSettingsRecord.speakerId),
-      voiceId: asString(voiceSettingsRecord.voiceId),
-      rate: voiceSettingsRecord.rate,
-      pitch: voiceSettingsRecord.pitch,
-      volume: voiceSettingsRecord.volume,
-      language: voiceSettingsRecord.language,
-    };
+
+  const voiceSettings = toVoiceSettings(configRecord.voiceSettings);
+  if (voiceSettings) {
+    config.voiceSettings = voiceSettings;
   }
 
-  const finalAnalysis = finalAnalysisRecord
-    ? (() => {
-        const feedback = asString(finalAnalysisRecord.feedback);
-        return {
-          overallScore: asNumber(finalAnalysisRecord.overallScore) ?? 0,
-          strengths: asStringArray(finalAnalysisRecord.strengths),
-          improvements: asStringArray(finalAnalysisRecord.improvements),
-          recommendations: asStringArray(finalAnalysisRecord.recommendations),
-          ...(feedback ? { feedback } : {}),
-        };
-      })()
-    : null;
-  const interviewerPersona = interviewerPersonaRecord
-    ? {
-        name: asString(interviewerPersonaRecord.name) ?? "",
-        role: asString(interviewerPersonaRecord.role) ?? "",
-        studioName: asString(interviewerPersonaRecord.studioName) ?? "",
-        background: asString(interviewerPersonaRecord.background) ?? "",
-        style: asString(interviewerPersonaRecord.style) ?? "",
-        experience: asString(interviewerPersonaRecord.experience) ?? "",
-      }
-    : null;
+  const targetJob = asInterviewTargetJob(configRecord.targetJob);
+  if (targetJob) {
+    config.targetJob = targetJob;
+  }
+
+  return config;
+};
+
+const toFinalAnalysis = (value: unknown): InterviewSession["finalAnalysis"] | undefined => {
+  if (!isRecord(value)) {
+    return;
+  }
+
+  const feedback = asString(value.feedback);
+  const analysis: NonNullable<InterviewSession["finalAnalysis"]> = {
+    overallScore: asNumber(value.overallScore) ?? 0,
+    strengths: asStringArray(value.strengths),
+    improvements: asStringArray(value.improvements),
+    recommendations: asStringArray(value.recommendations),
+  };
+  if (feedback !== undefined) {
+    analysis.feedback = feedback;
+  }
+  return analysis;
+};
+
+const toInterviewerPersona = (value: unknown): InterviewSession["interviewerPersona"] | undefined => {
+  if (!isRecord(value)) {
+    return;
+  }
 
   return {
+    name: asString(value.name) ?? "",
+    role: asString(value.role) ?? "",
+    studioName: asString(value.studioName) ?? "",
+    background: asString(value.background) ?? "",
+    style: asString(value.style) ?? "",
+    experience: asString(value.experience) ?? "",
+  };
+};
+
+const toInterviewSession = (value: unknown): InterviewSession | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const id = asString(value.id);
+  const studioId = asString(value.studioId);
+  if (!(id && studioId)) {
+    return null;
+  }
+
+  const questions = toInterviewQuestions(value.questions);
+  const session: InterviewSession = {
     id,
     studioId,
-    config: normalizedConfig,
+    config: toInterviewConfig(value.config, questions.length),
     questions,
     currentQuestionIndex: asNumber(value.currentQuestionIndex) ?? 0,
     totalQuestions: asNumber(value.totalQuestions) ?? questions.length,
     startTime: asNumber(value.startTime) ?? Date.now(),
     endTime: asNumber(value.endTime),
     status: asInterviewStatus(value.status),
-    responses,
-    ...(finalAnalysis ? { finalAnalysis } : {}),
-    ...(interviewerPersona ? { interviewerPersona } : {}),
+    responses: toInterviewResponses(value.responses),
     role: asString(value.role),
     studioName: asString(value.studioName),
     score: asNumber(value.score),
@@ -234,6 +304,17 @@ const toInterviewSession = (value: unknown): InterviewSession | null => {
     createdAt: asString(value.createdAt),
     updatedAt: asString(value.updatedAt),
   };
+
+  const finalAnalysis = toFinalAnalysis(value.finalAnalysis);
+  if (finalAnalysis) {
+    session.finalAnalysis = finalAnalysis;
+  }
+
+  const interviewerPersona = toInterviewerPersona(value.interviewerPersona);
+  if (interviewerPersona) {
+    session.interviewerPersona = interviewerPersona;
+  }
+  return session;
 };
 
 const toInterviewSessions = (value: unknown): InterviewSession[] =>
@@ -244,7 +325,9 @@ const toInterviewSessions = (value: unknown): InterviewSession[] =>
     : [];
 
 const toNumericRecord = (value: unknown): Record<string, number> | null => {
-  if (!isRecord(value)) return null;
+  if (!isRecord(value)) {
+    return null;
+  }
   const normalized: Record<string, number> = {};
   for (const [key, entry] of Object.entries(value)) {
     if (typeof entry === "number" && Number.isFinite(entry)) {
@@ -254,107 +337,109 @@ const toNumericRecord = (value: unknown): Record<string, number> | null => {
   return normalized;
 };
 
-/**
- * Interview practice session management composable.
- */
-export function useInterview() {
-  const api = useApi();
-  const { t } = useI18n();
-  const sessions = useState<InterviewSession[]>(STATE_KEYS.INTERVIEW_SESSIONS, () => []);
-  const currentSession = useState<InterviewSession | null>(
-    STATE_KEYS.INTERVIEW_CURRENT_SESSION,
-    () => null,
-  );
-  const stats = useState<Record<string, number> | null>(STATE_KEYS.INTERVIEW_STATS, () => null);
-  const loading = useState(STATE_KEYS.INTERVIEW_LOADING, () => false);
+const requireSession = (value: unknown, invalidMessage: string): InterviewSession =>
+  requireValue(toInterviewSession(value), invalidMessage);
 
-  async function startSession(studioId?: string, config?: Partial<InterviewConfig>) {
-    return withLoadingState(loading, async () => {
+const createInterviewState = (): InterviewState => ({
+  sessions: useState<InterviewSession[]>(STATE_KEYS.INTERVIEW_SESSIONS, () => []),
+  currentSession: useState<InterviewSession | null>(STATE_KEYS.INTERVIEW_CURRENT_SESSION, () => null),
+  stats: useState<Record<string, number> | null>(STATE_KEYS.INTERVIEW_STATS, () => null),
+  loading: useState(STATE_KEYS.INTERVIEW_LOADING, () => false),
+});
+
+const createFetchSessionsAction = (context: InterviewContext) => async () =>
+  withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.interview.sessions.get();
+    assertApiResponse(error, context.t("apiErrors.interview.fetchSessionsFailed"));
+    context.sessions.value = toInterviewSessions(data);
+  });
+
+const createFetchStatsAction = (context: InterviewContext) => async () =>
+  withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.interview.stats.get();
+    assertApiResponse(error, context.t("apiErrors.interview.fetchStatsFailed"));
+    context.stats.value = toNumericRecord(data);
+  });
+
+const createStartSessionAction =
+  (context: InterviewContext, fetchSessions: () => Promise<void>) =>
+  async (studioId?: string, config?: Partial<InterviewConfig>) =>
+    withLoadingState(context.loading, async () => {
       const resolvedStudioId = studioId?.trim().length ? studioId : INTERVIEW_FALLBACK_STUDIO_ID;
-      const { data, error } = await api.interview.sessions.post({
+      const { data, error } = await context.api.interview.sessions.post({
         studioId: resolvedStudioId,
         config,
       });
-      assertApiResponse(error, t("apiErrors.interview.startFailed"));
-      const normalized = requireValue(
-        toInterviewSession(data),
-        t("apiErrors.interview.invalidPayload"),
-      );
-      currentSession.value = normalized;
+      assertApiResponse(error, context.t("apiErrors.interview.startFailed"));
+      const normalized = requireSession(data, context.t("apiErrors.interview.invalidPayload"));
+      context.currentSession.value = normalized;
       await fetchSessions();
       return normalized;
     });
-  }
 
-  async function fetchSessions() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.interview.sessions.get();
-      assertApiResponse(error, t("apiErrors.interview.fetchSessionsFailed"));
-      sessions.value = toInterviewSessions(data);
-    });
-  }
+const createGetSessionAction = (context: InterviewContext) => async (id: string) =>
+  withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api.interview.sessions({ id }).get();
+    assertApiResponse(error, context.t("apiErrors.interview.fetchSessionFailed"));
+    const normalized = requireSession(data, context.t("apiErrors.interview.invalidPayload"));
+    context.currentSession.value = normalized;
+    return normalized;
+  });
 
-  async function getSession(id: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.interview.sessions({ id }).get();
-      assertApiResponse(error, t("apiErrors.interview.fetchSessionFailed"));
-      const normalized = requireValue(
-        toInterviewSession(data),
-        t("apiErrors.interview.invalidPayload"),
-      );
-      currentSession.value = normalized;
+const createSubmitResponseAction =
+  (context: InterviewContext) => async (sessionId: string, response: SubmitResponseInput) =>
+    withLoadingState(context.loading, async () => {
+      const { data, error } = await context.api.interview.sessions({ id: sessionId }).response.post(response);
+      assertApiResponse(error, context.t("apiErrors.interview.submitResponseFailed"));
+      const normalized = requireSession(data, context.t("apiErrors.interview.invalidPayload"));
+      context.currentSession.value = normalized;
       return normalized;
     });
-  }
 
-  async function submitResponse(sessionId: string, response: SubmitResponseInput) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.interview
-        .sessions({ id: sessionId })
-        .response.post(response);
-      assertApiResponse(error, t("apiErrors.interview.submitResponseFailed"));
-      const normalized = requireValue(
-        toInterviewSession(data),
-        t("apiErrors.interview.invalidPayload"),
-      );
-      currentSession.value = normalized;
-      return normalized;
-    });
-  }
-
-  async function completeSession(id: string) {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.interview.sessions({ id }).complete.post();
-      assertApiResponse(error, t("apiErrors.interview.completeFailed"));
-      const normalized = requireValue(
-        toInterviewSession(data),
-        t("apiErrors.interview.invalidPayload"),
-      );
-      currentSession.value = normalized;
+const createCompleteSessionAction =
+  (
+    context: InterviewContext,
+    fetchSessions: () => Promise<void>,
+    fetchStats: () => Promise<void>,
+  ) =>
+  async (id: string) =>
+    withLoadingState(context.loading, async () => {
+      const { data, error } = await context.api.interview.sessions({ id }).complete.post();
+      assertApiResponse(error, context.t("apiErrors.interview.completeFailed"));
+      const normalized = requireSession(data, context.t("apiErrors.interview.invalidPayload"));
+      context.currentSession.value = normalized;
       await fetchSessions();
       await fetchStats();
       return normalized;
     });
-  }
 
-  async function fetchStats() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.interview.stats.get();
-      assertApiResponse(error, t("apiErrors.interview.fetchStatsFailed"));
-      stats.value = toNumericRecord(data);
-    });
-  }
+/**
+ * Interview practice session management composable.
+ */
+export function useInterview() {
+  const state = createInterviewState();
+  const context: InterviewContext = {
+    ...state,
+    api: useApi(),
+    t: useI18n().t,
+  };
+
+  const fetchSessions = createFetchSessionsAction(context);
+  const fetchStats = createFetchStatsAction(context);
+  const actions = {
+    startSession: createStartSessionAction(context, fetchSessions),
+    fetchSessions,
+    getSession: createGetSessionAction(context),
+    submitResponse: createSubmitResponseAction(context),
+    completeSession: createCompleteSessionAction(context, fetchSessions, fetchStats),
+    fetchStats,
+  };
 
   return {
-    sessions: readonly(sessions),
-    currentSession: readonly(currentSession),
-    stats: readonly(stats),
-    loading: readonly(loading),
-    startSession,
-    fetchSessions,
-    getSession,
-    submitResponse,
-    completeSession,
-    fetchStats,
+    sessions: readonly(state.sessions),
+    currentSession: readonly(state.currentSession),
+    stats: readonly(state.stats),
+    loading: readonly(state.loading),
+    ...actions,
   };
 }

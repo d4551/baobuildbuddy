@@ -187,36 +187,36 @@ async function setPreviewRouteStudioId(id: string | null): Promise<void> {
   await router.replace({ query: nextQuery });
 }
 
-function openStudioPreview(id: string) {
+async function openStudioPreview(id: string) {
   previewStudioId.value = id;
   showPreviewModal.value = true;
-  void setPreviewRouteStudioId(id);
+  await setPreviewRouteStudioId(id);
 }
 
-function handlePreviewDialogClose() {
+async function handlePreviewDialogClose() {
   showPreviewModal.value = false;
   previewStudioId.value = "";
   if (routeStudioId.value) {
-    void setPreviewRouteStudioId(null);
+    await setPreviewRouteStudioId(null);
   }
 }
 
-function closeStudioPreview() {
+async function closeStudioPreview() {
   showPreviewModal.value = false;
   previewStudioId.value = "";
   if (routeStudioId.value) {
-    void setPreviewRouteStudioId(null);
+    await setPreviewRouteStudioId(null);
   }
 }
 
-function viewStudio(id: string) {
-  closeStudioPreview();
-  router.push(APP_ROUTE_BUILDERS.studioDetail(id));
+async function viewStudio(id: string) {
+  await closeStudioPreview();
+  await router.push(APP_ROUTE_BUILDERS.studioDetail(id));
 }
 
-function startInterview(studioId: string) {
-  closeStudioPreview();
-  router.push(buildInterviewStudioNavigation(studioId));
+async function startInterview(studioId: string) {
+  await closeStudioPreview();
+  await router.push(buildInterviewStudioNavigation(studioId));
 }
 
 watch(showPreviewModal, syncPreviewDialog);

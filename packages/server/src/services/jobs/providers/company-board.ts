@@ -1,6 +1,6 @@
 import type { CompanyBoardATSType, CompanyBoardConfig, JobProviderSettings } from "@bao/shared";
 import { generateId } from "@bao/shared";
-import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
+import type { JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
 interface ATSJob extends Record<string, unknown> {
@@ -121,7 +121,7 @@ export class CompanyBoardProvider implements JobProvider {
     this.enabled = config.enabled;
   }
 
-  async fetchJobs(_filters?: JobFilters): Promise<RawJob[]> {
+  async fetchJobs(): Promise<RawJob[]> {
     const providerSettings = await loadJobProviderSettings();
     return this.fetchJobsWithSettings(providerSettings);
   }
@@ -267,7 +267,7 @@ export class CompanyBoardsProvider implements JobProvider {
   type = "company-board";
   enabled = true;
 
-  async fetchJobs(_filters?: JobFilters): Promise<RawJob[]> {
+  async fetchJobs(): Promise<RawJob[]> {
     const providerSettings = await loadJobProviderSettings();
     const boards = [...providerSettings.companyBoards]
       .filter((board) => board.enabled)

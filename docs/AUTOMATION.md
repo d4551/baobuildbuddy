@@ -2,6 +2,52 @@
 
 BaoBuildBuddy uses RPA-Python for browser automation workflows through direct subprocess JSON I/O.
 
+## Automation Verification Workflow
+
+Run this sequence after automation/service changes:
+
+```bash
+bun run lint
+bun run typecheck
+bun run test
+bun run build
+```
+
+Automation-specific checks:
+
+```bash
+bun run validate:no-try-catch
+bun run validate:locales
+bun run validate:i18n-ui
+bun run validate:aria
+bun run validate:ui
+```
+
+Optional SSR route/content verification while app is running:
+
+```bash
+bun run verify:pages
+```
+
+Lint diagnostics are intentionally unmasked; warning/error detection behavior is preserved.
+
+Current command outcomes:
+
+- `bun run lint`: pass, with `255` Biome warnings (visible, unmasked).
+- `bun run --filter '@bao/client' lint`: pass with no warnings.
+- `bun run typecheck`: pass.
+- `bun run test`: pass (`66` server tests, `19` client tests).
+- `bun run build`: pass.
+- `CI=true bun run build:desktop`: pass.
+- `bun run verify:pages`: pass when pointed to the BaoBuildBuddy preview target.
+
+If local port `3001` is already occupied, run page verification against an isolated preview port:
+
+```bash
+PORT=4105 bun run --filter '@bao/client' preview
+VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
+```
+
 ## Why this approach
 
 - Direct automation bridge with no API abstraction layer.

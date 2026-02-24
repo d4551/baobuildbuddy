@@ -13,17 +13,31 @@ const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
  */
 function readValidationFields(error: unknown): unknown[] | undefined {
   if (typeof error !== "object" || error === null) {
-    return undefined;
+    return ;
   }
 
-  const details = Reflect.get(error, "all");
-  if (Array.isArray(details)) return details;
-  if (typeof details === "function") {
+  const details = "all" in error ? (error as { all?: unknown }).all : undefined;
+  if (isUnknownArray(details)) return details;
+  if (isValueFactory(details)) {
     const computed = details();
-    return Array.isArray(computed) ? computed : undefined;
+    return isUnknownArray(computed) ? computed : undefined;
   }
 
-  return undefined;
+  return ;
+}
+
+/**
+ * Narrows an unknown value to a parameterless function returning unknown.
+ */
+function isValueFactory(value: unknown): value is () => unknown {
+  return typeof value === "function";
+}
+
+/**
+ * Narrows unknown values to unknown arrays without leaking any.
+ */
+function isUnknownArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
 }
 
 /**

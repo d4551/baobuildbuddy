@@ -386,13 +386,21 @@ Return the customized cover letter text.`;
 /**
  * Interview persona prompt for AI roleplaying as interviewer
  */
-export function interviewPersonaPrompt(
-  role: string,
-  company: string,
-  personality: string,
-  interviewStyle: string,
-  focusAreas: string[],
-): string {
+interface InterviewPersonaPromptInput {
+  role: string;
+  company: string;
+  personality: string;
+  interviewStyle: string;
+  focusAreas: string[];
+}
+
+export function interviewPersonaPrompt({
+  role,
+  company,
+  personality,
+  interviewStyle,
+  focusAreas,
+}: InterviewPersonaPromptInput): string {
   return `You are roleplaying as an interviewer at ${company} for a ${role} position.
 
 Interviewer Personality: ${personality}

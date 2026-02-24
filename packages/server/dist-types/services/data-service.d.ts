@@ -1,15 +1,15 @@
 export declare const DATA_EXPORT_VERSION: "1.0";
 export interface BaoExportData {
-    version: typeof DATA_EXPORT_VERSION;
+    version: string;
     exportedAt: string;
-    profile: unknown | null;
-    settings: unknown | null;
+    profile: unknown;
+    settings: unknown;
     resumes: unknown[];
     coverLetters: unknown[];
-    portfolio: unknown | null;
+    portfolio: unknown;
     portfolioProjects: unknown[];
     interviewSessions: unknown[];
-    gamification: unknown | null;
+    gamification: unknown;
     skillMappings: unknown[];
     savedJobs: unknown[];
     applications: unknown[];

@@ -14,14 +14,14 @@ beforeAll(async () => {
   const { Elysia } = await import("elysia");
 
   initModule.initializeDatabase(dbModule.sqlite);
-  await seedModule.seedDatabase(dbModule.db);
+  seedModule.seedDatabase(dbModule.db);
 
   app = new Elysia({ prefix: "/api" }).use(routesModule.jobsRoutes);
 });
 
 afterAll(() => {});
 
-describe("jobs routes", () => {
+function registerListAndLookupTests(): void {
   test("GET /api/jobs returns jobs list", async () => {
     const res = await requestJson<{ jobs: unknown[]; page: number; total: number }>(
       app,
@@ -38,7 +38,9 @@ describe("jobs routes", () => {
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Job not found");
   });
+}
 
+function registerSavedJobTests(): void {
   test("POST /api/jobs/save requires existing job", async () => {
     const res = await requestJson<{ error: string }>(app, "POST", "/api/jobs/save", {
       jobId: "nonexistent",
@@ -76,7 +78,9 @@ describe("jobs routes", () => {
     );
     expect(delRes.status).toBe(200);
   });
+}
 
+function registerApplicationTests(): void {
   test("POST /api/jobs/apply requires existing job", async () => {
     const res = await requestJson<{ error: string }>(app, "POST", "/api/jobs/apply", {
       jobId: "nonexistent",
@@ -90,4 +94,16 @@ describe("jobs routes", () => {
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
+}
+
+describe("jobs routes listing", () => {
+  registerListAndLookupTests();
+});
+
+describe("jobs routes saved items", () => {
+  registerSavedJobTests();
+});
+
+describe("jobs routes applications", () => {
+  registerApplicationTests();
 });

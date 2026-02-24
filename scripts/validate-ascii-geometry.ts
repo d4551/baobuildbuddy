@@ -23,6 +23,11 @@ type Component = {
   cells: Coord[];
 };
 
+type ConnectionProbe = {
+  source: Coord;
+  target: Coord;
+};
+
 const GRAPH_CHARS = new Set(["+", "-", "|"]);
 const HORIZONTAL_ENDPOINTS = new Set(["+", "|"]);
 const VERTICAL_ENDPOINTS = new Set(["+"]);
@@ -33,48 +38,112 @@ const DIRECTIONS = [
   { row: 1, col: 0 },
 ];
 
-const isGraphChar = (ch: string) => GRAPH_CHARS.has(ch);
+const ASCII_BOX_BLOCK_START_MARKERS = new Set([
+  "```ascii-box",
+  "```text ascii-box",
+  "```txt ascii-box",
+]);
+const HORIZONTAL_CONNECTIONS = new Map<string, Set<string>>([
+  ["-", new Set(["-", "+"])],
+  ["|", new Set<string>()],
+  ["+", new Set(["-", "+", "|"])],
+]);
+const VERTICAL_CONNECTIONS = new Map<string, Set<string>>([
+  ["-", new Set<string>()],
+  ["|", new Set(["|", "+"])],
+  ["+", new Set(["-", "+", "|"])],
+]);
+
+const isGraphChar = (ch: string): boolean => GRAPH_CHARS.has(ch);
+
+const isWithinBounds = (row: number, col: number, height: number, width: number): boolean =>
+  row >= 0 && col >= 0 && row < height && col < width;
+
+const isOrthogonalDirection = (dr: number, dc: number): boolean =>
+  (dr === 0 && dc !== 0) || (dr !== 0 && dc === 0);
 
 const hasConnection = (from: string, to: string, dr: number, dc: number): boolean => {
-  if (!isGraphChar(to) || (dr !== 0 && dc !== 0)) return false;
-
-  if (dr !== 0) {
-    if (from === "|") return to === "|" || to === "+";
-    if (from === "+") return to === "|" || to === "+" || to === "-";
+  if (!(isGraphChar(to) && isOrthogonalDirection(dr, dc))) {
     return false;
   }
 
-  if (dc !== 0) {
-    if (from === "-") return to === "-" || to === "+";
-    if (from === "+") return to === "-" || to === "+" || to === "|";
-    return false;
-  }
-
-  return false;
+  const allowedTargets = dr !== 0 ? VERTICAL_CONNECTIONS.get(from) : HORIZONTAL_CONNECTIONS.get(from);
+  return allowedTargets ? allowedTargets.has(to) : false;
 };
 
-const canConnect = (
-  grid: string[],
-  row: number,
-  col: number,
-  otherRow: number,
-  otherCol: number,
-): boolean => {
-  if (
-    otherRow < 0 ||
-    otherCol < 0 ||
-    otherRow >= grid.length ||
-    otherCol >= grid[otherRow].length
-  ) {
+const canConnect = (grid: string[], { source, target: targetCoord }: ConnectionProbe): boolean => {
+  const otherRow = targetCoord.row;
+  const otherCol = targetCoord.col;
+  if (!isWithinBounds(otherRow, otherCol, grid.length, grid[otherRow]?.length ?? 0)) {
     return false;
   }
 
-  const source = grid[row][col];
-  const target = grid[otherRow][otherCol];
-  const dr = otherRow - row;
-  const dc = otherCol - col;
+  const sourceChar = grid[source.row][source.col];
+  const targetChar = grid[otherRow][otherCol];
+  const dr = otherRow - source.row;
+  const dc = otherCol - source.col;
 
-  return hasConnection(source, target, dr, dc) && hasConnection(target, source, -dr, -dc);
+  return (
+    hasConnection(sourceChar, targetChar, dr, dc) &&
+    hasConnection(targetChar, sourceChar, -dr, -dc)
+  );
+};
+
+interface ExploreComponentOptions {
+  grid: string[];
+  width: number;
+  componentIds: number[][];
+  start: Coord;
+  componentId: number;
+}
+
+const tryQueueNeighbor = (
+  options: ExploreComponentOptions,
+  stack: Coord[],
+  current: Coord,
+  direction: { row: number; col: number },
+): void => {
+  const height = options.grid.length;
+  const nextRow = current.row + direction.row;
+  const nextCol = current.col + direction.col;
+  if (!isWithinBounds(nextRow, nextCol, height, options.width)) {
+    return;
+  }
+  if (!isGraphChar(options.grid[nextRow][nextCol])) {
+    return;
+  }
+  if (options.componentIds[nextRow][nextCol] !== -1) {
+    return;
+  }
+
+  options.componentIds[nextRow][nextCol] = options.componentId;
+  stack.push({ row: nextRow, col: nextCol });
+};
+
+const exploreComponent = (options: ExploreComponentOptions): Component => {
+  const cells: Coord[] = [];
+  const stack: Coord[] = [options.start];
+  let hasPlus = false;
+  options.componentIds[options.start.row][options.start.col] = options.componentId;
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (!current) {
+      continue;
+    }
+
+    const currentChar = options.grid[current.row][current.col];
+    cells.push(current);
+    if (currentChar === "+") {
+      hasPlus = true;
+    }
+
+    for (const direction of DIRECTIONS) {
+      tryQueueNeighbor(options, stack, current, direction);
+    }
+  }
+
+  return { hasPlus, cells };
 };
 
 const buildComponents = (
@@ -82,9 +151,8 @@ const buildComponents = (
   width: number,
 ): { componentIds: number[][]; components: Component[] } => {
   const height = grid.length;
-  const componentIds = Array.from({ length: height }, () => Array(width).fill(-1));
+  const componentIds = Array.from({ length: height }, () => Array<number>(width).fill(-1));
   const components: Component[] = [];
-
   let nextId = 0;
 
   for (let row = 0; row < height; row += 1) {
@@ -93,41 +161,8 @@ const buildComponents = (
         continue;
       }
 
-      const cells: Coord[] = [];
-      let hasPlus = false;
-      const stack: Coord[] = [{ row, col }];
-      componentIds[row][col] = nextId;
-
-      while (stack.length > 0) {
-        const current = stack.pop();
-        if (!current) continue;
-        const cell = grid[current.row][current.col];
-
-        cells.push(current);
-        if (cell === "+") {
-          hasPlus = true;
-        }
-
-        for (const direction of DIRECTIONS) {
-          const nextRow = current.row + direction.row;
-          const nextCol = current.col + direction.col;
-
-          if (nextRow < 0 || nextCol < 0 || nextRow >= height || nextCol >= width) {
-            continue;
-          }
-          if (!isGraphChar(grid[nextRow][nextCol]) || componentIds[nextRow][nextCol] !== -1) {
-            continue;
-          }
-
-          componentIds[nextRow][nextCol] = nextId;
-          stack.push({ row: nextRow, col: nextCol });
-        }
-      }
-
-      components.push({
-        hasPlus,
-        cells,
-      });
+      const component = exploreComponent({ grid, width, componentIds, start: { row, col }, componentId: nextId });
+      components.push(component);
       nextId += 1;
     }
   }
@@ -135,19 +170,19 @@ const buildComponents = (
   return { componentIds, components };
 };
 
-const analyzeBlock = (
-  blockLines: string[],
+type FailureReporter = (
+  lineOffset: number,
+  ch: string,
+  reason: string,
+  colOffset: number,
+) => void;
+
+const createFailureReporter = (
+  failures: Failure[],
   blockIndex: number,
   blockStartLine: number,
-): Failure[] => {
-  const failures: Failure[] = [];
-  const maxWidth = Math.max(0, ...blockLines.map((line) => line.length));
-  const grid = blockLines.map((line) => line.padEnd(maxWidth, " "));
-  const height = grid.length;
-  const width = maxWidth;
-  const { componentIds, components } = buildComponents(grid, width);
-
-  const lineInBlock = (lineOffset: number, ch: string, reason: string, colOffset: number) => {
+): FailureReporter => {
+  return (lineOffset, ch, reason, colOffset) => {
     failures.push({
       blockIndex,
       lineNumber: blockStartLine + lineOffset + 1,
@@ -156,43 +191,65 @@ const analyzeBlock = (
       reason,
     });
   };
+};
 
-  const countConnectedNeighbors = (row: number, col: number): number => {
-    let connected = 0;
+const countConnectedNeighbors = (grid: string[], row: number, col: number): number => {
+  let connected = 0;
 
-    for (const direction of DIRECTIONS) {
-      if (canConnect(grid, row, col, row + direction.row, col + direction.col)) {
-        connected += 1;
-      }
+  for (const direction of DIRECTIONS) {
+    const probe = {
+      source: { row, col },
+      target: { row: row + direction.row, col: col + direction.col },
+    };
+    if (canConnect(grid, probe)) {
+      connected += 1;
     }
+  }
 
-    return connected;
-  };
+  return connected;
+};
 
-  const validateDegree = (row: number, col: number, current: string): void => {
-    const connected = countConnectedNeighbors(row, col);
+interface DegreeValidationInput {
+  grid: string[];
+  row: number;
+  col: number;
+  current: string;
+  reportFailure: FailureReporter;
+}
 
-    if (current === "-") {
-      if (connected !== 2) {
-        lineInBlock(row, current, `horizontal segment has degree ${connected}, expected 2`, col);
-      }
-      return;
+const validateDegree = ({
+  grid,
+  row,
+  col,
+  current,
+  reportFailure,
+}: DegreeValidationInput): void => {
+  const connected = countConnectedNeighbors(grid, row, col);
+
+  if (current === "-") {
+    if (connected !== 2) {
+      reportFailure(row, current, `horizontal segment has degree ${connected}, expected 2`, col);
     }
+    return;
+  }
 
-    if (current === "|") {
-      if (connected !== 2) {
-        lineInBlock(row, current, `vertical segment has degree ${connected}, expected 2`, col);
-      }
-      return;
+  if (current === "|") {
+    if (connected !== 2) {
+      reportFailure(row, current, `vertical segment has degree ${connected}, expected 2`, col);
     }
+    return;
+  }
 
-    if (current === "+") {
-      if (connected < 2) {
-        lineInBlock(row, current, `junction has degree ${connected}, expected >= 2`, col);
-      }
-    }
-  };
+  if (current === "+" && connected < 2) {
+    reportFailure(row, current, `junction has degree ${connected}, expected >= 2`, col);
+  }
+};
 
+const validateComponentDegrees = (
+  grid: string[],
+  components: Component[],
+  reportFailure: FailureReporter,
+): void => {
   for (const component of components) {
     if (!component.hasPlus) {
       continue;
@@ -200,80 +257,154 @@ const analyzeBlock = (
 
     for (const cell of component.cells) {
       const current = grid[cell.row][cell.col];
-      validateDegree(cell.row, cell.col, current);
+      validateDegree({
+        grid,
+        row: cell.row,
+        col: cell.col,
+        current,
+        reportFailure,
+      });
     }
   }
+};
 
-  for (let row = 0; row < height; row += 1) {
+const isBoxComponent = (components: Component[], componentId: number): boolean =>
+  componentId >= 0 && Boolean(components[componentId]?.hasPlus);
+
+interface RunValidationContext {
+  grid: string[];
+  width: number;
+  height: number;
+  componentIds: number[][];
+  components: Component[];
+  reportFailure: FailureReporter;
+}
+
+const validateHorizontalRun = (
+  context: RunValidationContext,
+  row: number,
+  runStart: number,
+  runEnd: number,
+): void => {
+  const runLength = runEnd - runStart + 1;
+  const componentId = context.componentIds[row][runStart];
+  if (runLength < 2 || !isBoxComponent(context.components, componentId)) {
+    return;
+  }
+
+  const left = runStart > 0 ? context.grid[row][runStart - 1] : " ";
+  const right = runEnd + 1 < context.width ? context.grid[row][runEnd + 1] : " ";
+  if (!HORIZONTAL_ENDPOINTS.has(left)) {
+    context.reportFailure(
+      row,
+      "-",
+      "horizontal run start must connect to a box corner or side",
+      runStart,
+    );
+  }
+  if (!HORIZONTAL_ENDPOINTS.has(right)) {
+    context.reportFailure(row, "-", "horizontal run end must connect to a box corner or side", runEnd);
+  }
+};
+
+const validateHorizontalRuns = (context: RunValidationContext): void => {
+  for (let row = 0; row < context.grid.length; row += 1) {
     let col = 0;
-    while (col < width) {
-      if (grid[row][col] !== "-") {
+    while (col < context.width) {
+      if (context.grid[row][col] !== "-") {
         col += 1;
         continue;
       }
 
       const runStart = col;
-      while (col + 1 < width && grid[row][col + 1] === "-") {
+      while (col + 1 < context.width && context.grid[row][col + 1] === "-") {
         col += 1;
       }
       const runEnd = col;
-      const runLength = runEnd - runStart + 1;
-      const componentId = componentIds[row][runStart];
-
-      if (runLength >= 2 && componentId >= 0 && components[componentId]?.hasPlus) {
-        const left = runStart > 0 ? grid[row][runStart - 1] : " ";
-        const right = runEnd + 1 < width ? grid[row][runEnd + 1] : " ";
-
-        if (!HORIZONTAL_ENDPOINTS.has(left)) {
-          lineInBlock(
-            row,
-            "-",
-            "horizontal run start must connect to a box corner or side",
-            runStart,
-          );
-        }
-        if (!HORIZONTAL_ENDPOINTS.has(right)) {
-          lineInBlock(row, "-", "horizontal run end must connect to a box corner or side", runEnd);
-        }
-      }
-
+      validateHorizontalRun(context, row, runStart, runEnd);
       col = runEnd + 1;
     }
   }
+};
 
-  for (let col = 0; col < width; col += 1) {
+const validateVerticalRun = (
+  context: RunValidationContext,
+  col: number,
+  runStart: number,
+  runEnd: number,
+): void => {
+  const runLength = runEnd - runStart + 1;
+  const componentId = context.componentIds[runStart][col];
+  if (runLength < 2 || !isBoxComponent(context.components, componentId)) {
+    return;
+  }
+
+  const top = runStart > 0 ? context.grid[runStart - 1][col] : " ";
+  const bottom = runEnd + 1 < context.height ? context.grid[runEnd + 1][col] : " ";
+  if (!VERTICAL_ENDPOINTS.has(top)) {
+    context.reportFailure(runStart, "|", "vertical run start must connect at the top", col);
+  }
+  if (!VERTICAL_ENDPOINTS.has(bottom)) {
+    context.reportFailure(runEnd, "|", "vertical run end must connect at the bottom", col);
+  }
+};
+
+const validateVerticalRuns = (context: RunValidationContext): void => {
+  for (let col = 0; col < context.width; col += 1) {
     let row = 0;
-    while (row < height) {
-      if (grid[row][col] !== "|") {
+    while (row < context.height) {
+      if (context.grid[row][col] !== "|") {
         row += 1;
         continue;
       }
 
       const runStart = row;
-      while (row + 1 < height && grid[row + 1][col] === "|") {
+      while (row + 1 < context.height && context.grid[row + 1][col] === "|") {
         row += 1;
       }
       const runEnd = row;
-      const runLength = runEnd - runStart + 1;
-      const componentId = componentIds[runStart][col];
-
-      if (runLength >= 2 && componentId >= 0 && components[componentId]?.hasPlus) {
-        const top = runStart > 0 ? grid[runStart - 1][col] : " ";
-        const bottom = runEnd + 1 < height ? grid[runEnd + 1][col] : " ";
-
-        if (!VERTICAL_ENDPOINTS.has(top)) {
-          lineInBlock(runStart, "|", "vertical run start must connect at the top", col);
-        }
-        if (!VERTICAL_ENDPOINTS.has(bottom)) {
-          lineInBlock(runEnd, "|", "vertical run end must connect at the bottom", col);
-        }
-      }
-
+      validateVerticalRun(context, col, runStart, runEnd);
       row = runEnd + 1;
     }
   }
+};
+
+const getPaddedGrid = (blockLines: string[]): { grid: string[]; width: number; height: number } => {
+  const width = Math.max(0, ...blockLines.map((line) => line.length));
+  const grid = blockLines.map((line) => line.padEnd(width, " "));
+  return { grid, width, height: grid.length };
+};
+
+const analyzeBlock = (
+  blockLines: string[],
+  blockIndex: number,
+  blockStartLine: number,
+): Failure[] => {
+  const failures: Failure[] = [];
+  const { grid, width, height } = getPaddedGrid(blockLines);
+  const { componentIds, components } = buildComponents(grid, width);
+  const reportFailure = createFailureReporter(failures, blockIndex, blockStartLine);
+  const context: RunValidationContext = {
+    grid,
+    width,
+    height,
+    componentIds,
+    components,
+    reportFailure,
+  };
+
+  validateComponentDegrees(grid, components, reportFailure);
+  validateHorizontalRuns(context);
+  validateVerticalRuns(context);
 
   return failures;
+};
+
+const shouldStartValidationBlock = (trimmedLine: string): boolean => {
+  if (ASCII_BOX_BLOCK_START_MARKERS.has(trimmedLine)) {
+    return true;
+  }
+  return validateAllTextBlocks && trimmedLine === "```text";
 };
 
 const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
@@ -285,16 +416,7 @@ const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
 
   for (const [index, line] of linesToAnalyze.entries()) {
     const trimmedLine = line.trim();
-    const isAsciiBoxStart =
-      trimmedLine === "```ascii-box" ||
-      trimmedLine === "```text ascii-box" ||
-      trimmedLine === "```txt ascii-box";
-    const isDefaultTextStart = trimmedLine === "```text";
-    const shouldStartBlock = validateAllTextBlocks
-      ? isDefaultTextStart || isAsciiBoxStart
-      : isAsciiBoxStart;
-
-    if (shouldStartBlock) {
+    if (shouldStartValidationBlock(trimmedLine)) {
       if (!inBlock) {
         inBlock = true;
         currentBlock += 1;
@@ -304,10 +426,12 @@ const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
       continue;
     }
 
-    if (trimmedLine === "```" && inBlock) {
-      diagnostics.push(...analyzeBlock(blockLines, currentBlock, blockStartLine));
-      inBlock = false;
-      blockLines = [];
+    if (trimmedLine === "```") {
+      if (inBlock) {
+        diagnostics.push(...analyzeBlock(blockLines, currentBlock, blockStartLine));
+        inBlock = false;
+        blockLines = [];
+      }
       continue;
     }
 
@@ -323,27 +447,36 @@ const collectDiagnostics = (linesToAnalyze: string[]): Failure[] => {
   return diagnostics;
 };
 
-let failedFileCount = 0;
+const diagnosticsByFile = await Promise.all(
+  filesToValidate.map(async (filePath) => {
+    const fileText = await Bun.file(filePath).text();
+    const lines = fileText.split("\n");
+    return {
+      filePath,
+      diagnostics: collectDiagnostics(lines),
+    };
+  }),
+);
 
-for (const filePath of filesToValidate) {
-  const fileText = await Bun.file(filePath).text();
-  const lines = fileText.split("\n");
-  const diagnostics = collectDiagnostics(lines);
-
+const outputLines = diagnosticsByFile.flatMap(({ filePath, diagnostics }) => {
   if (diagnostics.length === 0) {
-    await writeOutput(`✅ geometry pass in ${filePath}`);
-    continue;
+    return [`✅ geometry pass in ${filePath}`];
   }
 
-  failedFileCount += 1;
-  await writeOutput(`❌ geometry issues found in ${filePath}: ${diagnostics.length}`);
-  for (const d of diagnostics) {
-    await writeOutput(
-      `block #${d.blockIndex} line ${d.lineNumber} col ${d.columnNumber} char ${JSON.stringify(d.ch)} :: ${d.reason}`,
-    );
-  }
-}
+  return [
+    `❌ geometry issues found in ${filePath}: ${diagnostics.length}`,
+    ...diagnostics.map(
+      (diagnostic) =>
+        `block #${diagnostic.blockIndex} line ${diagnostic.lineNumber} col ${diagnostic.columnNumber} char ${JSON.stringify(diagnostic.ch)} :: ${diagnostic.reason}`,
+    ),
+  ];
+});
 
+await writeOutput(outputLines.join("\n"));
+
+const failedFileCount = diagnosticsByFile.filter(
+  ({ diagnostics }) => diagnostics.length > 0,
+).length;
 if (failedFileCount > 0) {
   process.exit(1);
 }

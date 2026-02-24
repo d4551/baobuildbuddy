@@ -85,24 +85,27 @@ export class HuggingFaceProvider extends BaseAIProvider {
     });
 
     const iterator = stream[Symbol.asyncIterator]();
-    while (true) {
+    const emitTokens = async function* (): AsyncGenerator<string> {
       const nextChunkResult = await settlePromise(iterator.next());
       if (nextChunkResult.status === "rejected") {
         throw new Error(`HuggingFace streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
       }
       const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
-        break;
+        return;
       }
       if (nextChunk.value.token.text) {
         yield nextChunk.value.token.text;
       }
-    }
+      yield* emitTokens();
+    };
+
+    yield* emitTokens();
   }
 
-  async isAvailable(): Promise<boolean> {
+  isAvailable(): Promise<boolean> {
     // HuggingFace free tier is always available
     // Even without an API key, you can use the inference API with rate limits
-    return true;
+    return Promise.resolve(true);
   }
 }

@@ -102,20 +102,23 @@ export class GeminiProvider extends BaseAIProvider {
     const result = streamResult.value;
 
     const iterator = result.stream[Symbol.asyncIterator]();
-    while (true) {
+    const emitTextChunks = async function* (): AsyncGenerator<string> {
       const nextChunkResult = await settlePromise(iterator.next());
       if (nextChunkResult.status === "rejected") {
         throw new Error(`Gemini streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
       }
       const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
-        break;
+        return;
       }
       const text = nextChunk.value.text();
       if (text) {
         yield text;
       }
-    }
+      yield* emitTextChunks();
+    };
+
+    yield* emitTextChunks();
   }
 
   async isAvailable(): Promise<boolean> {

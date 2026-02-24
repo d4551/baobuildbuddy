@@ -37,8 +37,8 @@
     "verify:pages": "bun run scripts/verify-pages.ts",
     "lint:typed": "bun --bun run eslint --config eslint.config.mjs \"packages/server/src/**/*.ts\" \"packages/shared/src/**/*.ts\" \"scripts/**/*.ts\"",
     "lint:typed:fix": "bun --bun run eslint --config eslint.config.mjs \"packages/server/src/**/*.ts\" \"packages/shared/src/**/*.ts\" \"scripts/**/*.ts\" --fix",
-    "lint": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run lint:typed && bun --bun run biome lint . && bun run --filter '@bao/client' lint && bun run typecheck",
-    "lint:fix": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run lint:typed:fix && bun --bun run biome lint . --write && bun run --filter '@bao/client' lint --fix && bun run typecheck"
+    "lint": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run lint:typed && bun --bun run biome lint . --max-diagnostics=1200 && bun run --filter '@bao/client' lint && bun run typecheck",
+    "lint:fix": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run lint:typed:fix && bun --bun run biome lint . --write --max-diagnostics=1200 && bun run --filter '@bao/client' lint --fix && bun run typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.3",

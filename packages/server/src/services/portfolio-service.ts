@@ -2,7 +2,7 @@ import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/sh
 import { generateId } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { portfolioProjects, portfolios } from "../db/schema";
+import { portfolioProjects, portfolios } from "../db/schema/schema-modules";
 
 type PortfolioRecord = {
   id: string;
@@ -73,7 +73,7 @@ export class PortfolioService {
       description: row.description,
       technologies: row.technologies || [],
       tags: row.tags || [],
-      featured: row.featured || false,
+      featured: row.featured ?? undefined,
       sortOrder: row.sortOrder || 0,
     };
 
@@ -215,7 +215,7 @@ export class PortfolioService {
       ...(data.liveUrl ? { liveUrl: data.liveUrl } : {}),
       ...(data.githubUrl ? { githubUrl: data.githubUrl } : {}),
       tags: data.tags || [],
-      featured: data.featured || false,
+      featured: data.featured,
       ...(data.role ? { role: data.role } : {}),
       ...(data.platforms !== undefined ? { platforms: data.platforms } : {}),
       ...(data.engines !== undefined ? { engines: data.engines } : {}),
@@ -307,27 +307,32 @@ export class PortfolioService {
       return true;
     }
 
-    for (let i = 0; i < orderedIds.length; i++) {
-      const orderedId = orderedIds[i];
-      if (!orderedId) continue;
-      await db
-        .update(portfolioProjects)
-        .set({ sortOrder: i, updatedAt: new Date().toISOString() })
-        .where(eq(portfolioProjects.id, orderedId));
-    }
+    const orderedProjectIds = orderedIds.filter((orderedId): orderedId is string => Boolean(orderedId));
+    const orderedUpdateTimestamp = new Date().toISOString();
+    await Promise.all(
+      orderedProjectIds.map((orderedId, index) =>
+        db
+          .update(portfolioProjects)
+          .set({ sortOrder: index, updatedAt: orderedUpdateTimestamp })
+          .where(eq(portfolioProjects.id, orderedId)),
+      ),
+    );
 
     const remainingProjects = existing.filter(
-      (project) => !project.id || !orderedIds.includes(project.id),
+      (project) => !(project.id && orderedIds.includes(project.id)),
     );
     const nextIndex = orderedIds.length;
-    for (let i = 0; i < remainingProjects.length; i++) {
-      const project = remainingProjects[i];
-      if (!project.id) continue;
-      await db
-        .update(portfolioProjects)
-        .set({ sortOrder: nextIndex + i, updatedAt: new Date().toISOString() })
-        .where(eq(portfolioProjects.id, project.id));
-    }
+    const remainingUpdateTimestamp = new Date().toISOString();
+    await Promise.all(
+      remainingProjects
+        .filter((project): project is PortfolioProject & { id: string } => Boolean(project.id))
+        .map((project, index) =>
+          db
+            .update(portfolioProjects)
+            .set({ sortOrder: nextIndex + index, updatedAt: remainingUpdateTimestamp })
+            .where(eq(portfolioProjects.id, project.id)),
+        ),
+    );
 
     return true;
   }

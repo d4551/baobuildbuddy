@@ -82,7 +82,7 @@ watch(streaming, () => {
 });
 
 function scrollToBottom() {
-  nextTick(() => {
+  requestAnimationFrame(() => {
     if (chatContainer.value) {
       chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
     }
@@ -118,8 +118,8 @@ async function handleSaveSpeechConfig(): Promise<void> {
   $toast.success(t("aiChatPage.voiceSettings.saveSuccess"));
 }
 
-onMounted(() => {
-  void ensureSpeechConfigLoaded();
+onMounted(async () => {
+  await ensureSpeechConfigLoaded();
 });
 </script>
 

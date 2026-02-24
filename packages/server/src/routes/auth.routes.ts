@@ -7,12 +7,13 @@ import { auth } from "../db/schema/auth";
 const AUTH_ID = "default";
 const API_KEY_PREFIX = "bao_";
 const API_KEY_RANDOM_BYTES = 24;
+const BASE64URL_PADDING_PATTERN = /=+$/u;
 
 const encodeBase64Url = (bytes: Uint8Array): string =>
   btoa(String.fromCharCode(...bytes))
     .replace(/\+/gu, "-")
     .replace(/\//gu, "_")
-    .replace(/=+$/u, "");
+    .replace(BASE64URL_PADDING_PATTERN, "");
 
 function generateApiKey(): string {
   const bytes = new Uint8Array(API_KEY_RANDOM_BYTES);
@@ -32,7 +33,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       return { configured: false };
     }
     const rows = await db.select().from(auth).where(eq(auth.id, AUTH_ID));
-    const hasKey = !!rows[0]?.apiKey;
+    const hasKey = Boolean(rows[0]?.apiKey);
     return { configured: hasKey };
   })
   .post("/init", async () => {

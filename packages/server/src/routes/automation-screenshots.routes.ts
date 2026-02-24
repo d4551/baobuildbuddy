@@ -21,6 +21,42 @@ const CONTENT_TYPE_BY_EXTENSION: Readonly<Record<string, string>> = {
   ".bmp": "image/bmp",
 };
 
+const isInvalidScreenshotIndex = (value: string): boolean =>
+  value.length === 0 || value.includes(".") || value[0] === "-";
+
+const isInvalidRunId = (runId: string): boolean =>
+  runId.length < RUN_ID_MIN_LENGTH || !RUN_ID_SAFE_PATTERN.test(runId);
+
+const isSafeScreenshotFileName = (fileName: unknown): fileName is string =>
+  typeof fileName === "string" &&
+  FILE_NAME_SAFE_PATTERN.test(fileName) &&
+  ALLOWED_EXTENSIONS.has(extname(fileName).toLowerCase());
+
+const resolveScreenshotIndex = (indexValue: string, screenshotCount: number): number | null => {
+  const parsedIndex = Number.parseInt(indexValue, 10);
+  if (Number.isNaN(parsedIndex) || parsedIndex < 0 || parsedIndex >= screenshotCount) {
+    return null;
+  }
+  return parsedIndex;
+};
+
+const readRunScreenshots = async (runId: string): Promise<{ id: string; screenshots: string[] } | null> => {
+  const runRows = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
+  const run = runRows[0];
+  if (!(run && Array.isArray(run.screenshots))) {
+    return null;
+  }
+  return { id: run.id, screenshots: run.screenshots };
+};
+
+const createScreenshotResponse = (file: BunFile, extension: string): Response =>
+  new Response(file, {
+    headers: {
+      "content-type": CONTENT_TYPE_BY_EXTENSION[extension] || "application/octet-stream",
+      "cache-control": "private, no-store, no-cache",
+    },
+  });
+
 /**
  * Serves automation run screenshots from managed run directories.
  */
@@ -29,50 +65,35 @@ export const automationScreenshotRoutes = new Elysia({
 }).get(
   "/:runId/:index",
   async ({ params, set }) => {
-    if (
-      typeof params.index !== "string" ||
-      params.index.length === 0 ||
-      params.index.includes(".") ||
-      params.index[0] === "-"
-    ) {
+    if (typeof params.index !== "string" || isInvalidScreenshotIndex(params.index)) {
       set.status = HTTP_STATUS_BAD_REQUEST;
       return { error: "Invalid screenshot index format" };
     }
 
-    if (params.runId.length < RUN_ID_MIN_LENGTH || !RUN_ID_SAFE_PATTERN.test(params.runId)) {
+    if (isInvalidRunId(params.runId)) {
       set.status = HTTP_STATUS_BAD_REQUEST;
       return { error: "Invalid run ID format" };
     }
 
-    const run = await db
-      .select()
-      .from(automationRuns)
-      .where(eq(automationRuns.id, params.runId))
-      .limit(1);
-
-    if (!run.length || !run[0].screenshots) {
+    const run = await readRunScreenshots(params.runId);
+    if (!run) {
       set.status = HTTP_STATUS_NOT_FOUND;
       return { error: "Screenshot not found" };
     }
 
-    const screenshots = run[0].screenshots;
-    const idx = Number.parseInt(params.index, 10);
-    if (Number.isNaN(idx) || idx < 0 || idx >= screenshots.length) {
+    const idx = resolveScreenshotIndex(params.index, run.screenshots.length);
+    if (idx === null) {
       set.status = HTTP_STATUS_NOT_FOUND;
       return { error: "Screenshot index out of range" };
     }
 
-    const fileName = screenshots[idx];
-    if (
-      typeof fileName !== "string" ||
-      !FILE_NAME_SAFE_PATTERN.test(fileName) ||
-      !ALLOWED_EXTENSIONS.has(extname(fileName).toLowerCase())
-    ) {
+    const fileName = run.screenshots[idx];
+    if (!isSafeScreenshotFileName(fileName)) {
       set.status = HTTP_STATUS_NOT_FOUND;
       return { error: "Invalid screenshot file metadata" };
     }
 
-    const filePath = resolve(AUTOMATION_SCREENSHOT_DIR, run[0].id, fileName);
+    const filePath = resolve(AUTOMATION_SCREENSHOT_DIR, run.id, fileName);
     if (!existsSync(filePath)) {
       set.status = HTTP_STATUS_NOT_FOUND;
       return { error: "Screenshot file missing from disk" };
@@ -85,12 +106,7 @@ export const automationScreenshotRoutes = new Elysia({
     }
 
     const extension = extname(fileName).toLowerCase();
-    return new Response(file, {
-      headers: {
-        "content-type": CONTENT_TYPE_BY_EXTENSION[extension] || "application/octet-stream",
-        "cache-control": "private, no-store, no-cache",
-      },
-    });
+    return createScreenshotResponse(file, extension);
   },
   {
     params: t.Object({

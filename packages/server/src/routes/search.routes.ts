@@ -7,7 +7,7 @@ type SearchType = (typeof searchTypes)[number];
 export const searchRoutes = new Elysia({ prefix: "/search" })
   .get(
     "/",
-    async ({ query }) => {
+    ({ query }) => {
       const q = query.q || "";
       if (q.length < 2) {
         return {
@@ -34,7 +34,7 @@ export const searchRoutes = new Elysia({ prefix: "/search" })
   )
   .get(
     "/autocomplete",
-    async ({ query }) => {
+    ({ query }) => {
       const prefix = query.prefix || "";
       return searchService.autocomplete(prefix);
     },

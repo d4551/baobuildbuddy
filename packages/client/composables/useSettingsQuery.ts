@@ -5,7 +5,7 @@ import { useI18n } from "vue-i18n";
 import { toAppSettings } from "./api-normalizers";
 
 const toErrorMessage = (value: unknown): string | undefined => {
-  if (!isRecord(value)) return undefined;
+  if (!isRecord(value)) return ;
   return typeof value.message === "string" ? value.message : undefined;
 };
 

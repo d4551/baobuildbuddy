@@ -12,7 +12,7 @@ import { and, count, eq, inArray, ne, sql } from "drizzle-orm";
 import { config } from "../../config/env";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
 import { db } from "../../db/client";
-import { coverLetters, resumes } from "../../db/schema";
+import { coverLetters, resumes } from "../../db/schema/schema-modules";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
@@ -64,6 +64,26 @@ interface ScheduledRunMetadata {
   runAt: string;
 }
 
+interface JobApplyRunPreparation {
+  runId: string;
+  automationSettings: AutomationSettings;
+  normalized: JobApplyExecutionPayload;
+  resume: typeof resumes.$inferSelect;
+  coverLetter: typeof coverLetters.$inferSelect | null;
+  selectorMap: Record<string, string[]>;
+  progressHandler: (event: RpaRunEvent) => void;
+  runArtifactDir: string;
+}
+
+interface JobApplyExecutionTracking {
+  exitCode: number | null;
+  timedOut: boolean;
+  aborted: boolean;
+  executionMs: number | null;
+  errorEnvelope: ErrorEnvelope | null;
+  terminalPersisted: boolean;
+}
+
 const DEFAULT_PROGRESS = 0;
 const FINISHED_PROGRESS = 100;
 const MAX_SCREENSHOT_NAME_LENGTH = 96;
@@ -92,6 +112,7 @@ const MIN_SCHEDULE_LEAD_TIME_MS = 1_000;
 const MAX_SCHEDULE_LEAD_TIME_MS = 2_592_000_000;
 const SCHEDULE_RETRY_DELAY_MS = 30_000;
 const MAX_RECOVERABLE_SCHEDULED_RUNS = 500;
+const RUN_ID_PATTERN = /^[0-9a-f-]+$/i;
 
 type SchedulerTimer = ReturnType<typeof setTimeout>;
 
@@ -161,7 +182,17 @@ export class ApplicationAutomationService {
   private schedulerRecoveryInFlight = false;
 
   constructor() {
-    void this.restoreScheduledRuns();
+    this.runBackgroundTask(this.restoreScheduledRuns());
+  }
+
+  /**
+   * Execute a background task while consuming rejections.
+   */
+  private runBackgroundTask(task: Promise<unknown>): void {
+    task.then(
+      () => undefined,
+      () => undefined,
+    );
   }
 
   /**
@@ -389,39 +420,42 @@ export class ApplicationAutomationService {
     }
 
     const runDir = this.resolveRunArtifactDir(runId);
-    const result: string[] = [];
+    const copiedScreenshots = await Promise.all(
+      sourceScreenshots.map((sourcePath, index) => this.copySingleScreenshot(runDir, index, sourcePath)),
+    );
+    return copiedScreenshots.filter((fileName): fileName is string => typeof fileName === "string");
+  }
 
-    for (const [index, sourcePath] of sourceScreenshots.entries()) {
-      if (typeof sourcePath !== "string" || !sourcePath.trim()) {
-        continue;
-      }
-
-      const sourceFile = Bun.file(sourcePath);
-      if (!(await sourceFile.exists())) {
-        continue;
-      }
-
-      const safeFileName = this.resolveScreenshotName(index, sourcePath);
-      const destination = resolve(runDir, safeFileName);
-      const sourceResolvedPath = resolve(sourcePath);
-      if (sourceResolvedPath === destination) {
-        result.push(safeFileName);
-        continue;
-      }
-
-      const bytesResult = await settlePromise(sourceFile.arrayBuffer());
-      if (bytesResult.status === "rejected") {
-        continue;
-      }
-      const writeResult = await settlePromise(Bun.write(destination, bytesResult.value));
-      if (writeResult.status === "rejected") {
-        continue;
-      }
-
-      result.push(safeFileName);
+  private async copySingleScreenshot(
+    runDir: string,
+    index: number,
+    sourcePath: string,
+  ): Promise<string | null> {
+    if (!sourcePath.trim()) {
+      return null;
     }
 
-    return result;
+    const sourceFile = Bun.file(sourcePath);
+    if (!(await sourceFile.exists())) {
+      return null;
+    }
+
+    const safeFileName = this.resolveScreenshotName(index, sourcePath);
+    const destination = resolve(runDir, safeFileName);
+    const sourceResolvedPath = resolve(sourcePath);
+    if (sourceResolvedPath === destination) {
+      return safeFileName;
+    }
+
+    const bytesResult = await settlePromise(sourceFile.arrayBuffer());
+    if (bytesResult.status === "rejected") {
+      return null;
+    }
+    const writeResult = await settlePromise(Bun.write(destination, bytesResult.value));
+    if (writeResult.status === "rejected") {
+      return null;
+    }
+    return safeFileName;
   }
 
   /**
@@ -559,7 +593,7 @@ export class ApplicationAutomationService {
         status: "running",
         jobId: normalized.jobId || null,
         userId: null,
-        input: this.buildAuditInput(normalized, options.includeActionInPayload || false),
+        input: this.buildAuditInput(normalized, options.includeActionInPayload ?? false),
         progress: DEFAULT_PROGRESS,
         currentStep: null,
         totalSteps: null,
@@ -670,13 +704,15 @@ export class ApplicationAutomationService {
     const delayMs = Math.max(0, new Date(runAt).getTime() - Date.now());
     const timer = setTimeout(() => {
       this.scheduledRunTimers.delete(runId);
-      void this.executeScheduledRun(runId, payload);
+      this.runBackgroundTask(this.executeScheduledRun(runId, payload));
     }, delayMs);
-    if (typeof timer === "object" && timer !== null && "unref" in timer) {
-      const possibleUnref = timer.unref;
-      if (typeof possibleUnref === "function") {
-        possibleUnref.call(timer);
-      }
+    if (
+      typeof timer === "object" &&
+      timer !== null &&
+      "unref" in timer &&
+      typeof timer.unref === "function"
+    ) {
+      timer.unref();
     }
 
     this.scheduledRunTimers.set(runId, timer);
@@ -716,7 +752,7 @@ export class ApplicationAutomationService {
       for (const row of pendingRowsResult.value) {
         const metadata = this.parseScheduledRunMetadata(row.input ?? null);
         const payload = this.parseScheduledJobApplyPayload(row.input ?? null);
-        if (!metadata || !payload) {
+        if (!(metadata && payload)) {
           continue;
         }
 
@@ -790,9 +826,8 @@ export class ApplicationAutomationService {
     if (executionResult.status === "fulfilled") {
       return;
     }
-    const executionError = executionResult.reason;
 
-    if (executionError instanceof AutomationConcurrencyLimitError) {
+    if (executionResult.reason instanceof AutomationConcurrencyLimitError) {
       const nextRunAt = new Date(Date.now() + SCHEDULE_RETRY_DELAY_MS).toISOString();
       await db
         .update(automationRuns)
@@ -818,23 +853,14 @@ export class ApplicationAutomationService {
       return;
     }
 
-    throw executionError;
+    throw executionResult.reason;
   }
 
-  /**
-   * Run an AI-assisted email response and persist output as an automation run.
-   */
-  async runEmailResponse(payload: EmailResponsePayload): Promise<{
-    runId: string;
-    status: "success";
-    reply: string;
-    provider: string;
-    model: string;
-  }> {
-    const normalized = this.normalizeEmailResponsePayload(payload);
+  private async createEmailResponseRun(
+    runId: string,
+    normalized: EmailResponseExecutionPayload,
+  ): Promise<void> {
     const now = new Date().toISOString();
-    const runId = generateId();
-
     await db.insert(automationRuns).values({
       id: runId,
       type: "email",
@@ -858,47 +884,47 @@ export class ApplicationAutomationService {
       createdAt: now,
       updatedAt: now,
     });
+  }
 
-    const persistFailure = async (error: unknown): Promise<never> => {
-      const message = toErrorMessage(error, "Failed to generate email response");
-      const completedAt = new Date().toISOString();
-
-      await db
-        .update(automationRuns)
-        .set({
-          status: "error",
-          output: {
-            success: false,
-            error: message,
-          },
+  private async failEmailResponseRun(runId: string, error: unknown): Promise<never> {
+    const message = toErrorMessage(error, "Failed to generate email response");
+    const completedAt = new Date().toISOString();
+    await db
+      .update(automationRuns)
+      .set({
+        status: "error",
+        output: {
+          success: false,
           error: message,
-          progress: FINISHED_PROGRESS,
-          currentStep: 1,
-          totalSteps: 1,
-          completedAt,
-          updatedAt: completedAt,
-        })
-        .where(eq(automationRuns.id, runId));
+        },
+        error: message,
+        progress: FINISHED_PROGRESS,
+        currentStep: 1,
+        totalSteps: 1,
+        completedAt,
+        updatedAt: completedAt,
+      })
+      .where(eq(automationRuns.id, runId));
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: "email_response",
+        status: "error",
+        message,
+        step: 1,
+        totalSteps: 1,
+      }),
+    );
+    throw error instanceof Error ? error : new Error(message);
+  }
 
-      broadcastAutomationEvent(
-        this.createProgressEvent({
-          runId,
-          action: "email_response",
-          status: "error",
-          message,
-          step: 1,
-          totalSteps: 1,
-        }),
-      );
-
-      throw error instanceof Error ? error : new Error(message);
-    };
-
+  private async generateEmailResponse(
+    normalized: EmailResponseExecutionPayload,
+  ): Promise<{ reply: string; provider: string; model: string }> {
     const aiService = await this.tryLoadAIService();
     if (!aiService) {
-      return persistFailure(new Error("No AI provider is available for email response generation"));
+      throw new Error("No AI provider is available for email response generation");
     }
-
     const aiResultOutcome = await settlePromise(
       aiService.generate(
         emailResponsePrompt(
@@ -910,15 +936,20 @@ export class ApplicationAutomationService {
       ),
     );
     if (aiResultOutcome.status === "rejected") {
-      return persistFailure(aiResultOutcome.reason);
+      throw aiResultOutcome.reason;
     }
-
     const aiResult = aiResultOutcome.value;
     const reply = aiResult.content.trim();
     if (reply.length === 0) {
-      return persistFailure(new Error("AI provider returned an empty email response"));
+      throw new Error("AI provider returned an empty email response");
     }
+    return { reply, provider: aiResult.provider, model: aiResult.model };
+  }
 
+  private async completeEmailResponseRun(
+    runId: string,
+    result: { reply: string; provider: string; model: string },
+  ): Promise<void> {
     const completedAt = new Date().toISOString();
     await db
       .update(automationRuns)
@@ -926,9 +957,9 @@ export class ApplicationAutomationService {
         status: "success",
         output: {
           success: true,
-          reply,
-          provider: aiResult.provider,
-          model: aiResult.model,
+          reply: result.reply,
+          provider: result.provider,
+          model: result.model,
         },
         error: null,
         progress: FINISHED_PROGRESS,
@@ -938,7 +969,6 @@ export class ApplicationAutomationService {
         updatedAt: completedAt,
       })
       .where(eq(automationRuns.id, runId));
-
     broadcastAutomationEvent(
       this.createProgressEvent({
         runId,
@@ -949,14 +979,27 @@ export class ApplicationAutomationService {
         totalSteps: 1,
       }),
     );
+  }
 
-    return {
-      runId,
-      status: "success",
-      reply,
-      provider: aiResult.provider,
-      model: aiResult.model,
-    };
+  /**
+   * Run an AI-assisted email response and persist output as an automation run.
+   */
+  async runEmailResponse(payload: EmailResponsePayload): Promise<{
+    runId: string;
+    status: "success";
+    reply: string;
+    provider: string;
+    model: string;
+  }> {
+    const normalized = this.normalizeEmailResponsePayload(payload);
+    const runId = generateId();
+    await this.createEmailResponseRun(runId, normalized);
+    const responseResult = await settlePromise(this.generateEmailResponse(normalized));
+    if (responseResult.status === "rejected") {
+      return this.failEmailResponseRun(runId, responseResult.reason);
+    }
+    await this.completeEmailResponseRun(runId, responseResult.value);
+    return { runId, status: "success", ...responseResult.value };
   }
 
   /**
@@ -1035,18 +1078,16 @@ export class ApplicationAutomationService {
       )
       .limit(CLEANUP_LIMIT);
 
-    for (const run of staleRuns) {
-      const cleanupResult = await settlePromise(
-        (async () => {
+    await Promise.allSettled(
+      staleRuns.map((run) =>
+        Promise.resolve().then(() => {
           const runDir = resolve(AUTOMATION_SCREENSHOT_DIR, run.id);
           if (existsSync(runDir)) {
             rmSync(runDir, { recursive: true, force: true });
           }
-        })(),
-      );
-      if (cleanupResult.status === "rejected") {
-      }
-    }
+        }),
+      ),
+    );
   }
 
   /**
@@ -1133,29 +1174,18 @@ export class ApplicationAutomationService {
     await this.purgeExpiredAutomationScreenshots(automationSettings.screenshotRetention);
   }
 
-  /**
-   * Run full job-application automation for an existing run.
-   */
-  async runJobApply(
-    runId: string,
-    payload: JobApplyPayload,
-    onProgress?: (event: RpaRunEvent) => void,
-  ): Promise<void> {
-    this.clearScheduledRunTimer(runId);
-    const normalized = this.normalizePayload(payload);
-
+  private async assertRunExists(runId: string): Promise<void> {
     const runRows = await db
       .select()
       .from(automationRuns)
       .where(eq(automationRuns.id, runId))
       .limit(1);
     if (runRows.length === 0) {
-      const error = new AutomationRunNotFoundError(runId);
-      throw error;
+      throw new AutomationRunNotFoundError(runId);
     }
+  }
 
-    const automationSettings = await this.loadAutomationSettings();
-    const maxConcurrentRuns = this.resolveMaxConcurrentRuns(automationSettings);
+  private async assertConcurrencyLimit(runId: string, maxConcurrentRuns: number): Promise<void> {
     const runningRows = await db
       .select({ count: count() })
       .from(automationRuns)
@@ -1170,57 +1200,77 @@ export class ApplicationAutomationService {
     if (runningCount >= maxConcurrentRuns) {
       throw new AutomationConcurrencyLimitError(runningCount, maxConcurrentRuns);
     }
+  }
 
+  private async loadResumeOrFail(
+    runId: string,
+    resumeId: string,
+    automationSettings: AutomationSettings,
+  ): Promise<typeof resumes.$inferSelect> {
     const resumeRows = await db
       .select()
       .from(resumes)
-      .where(eq(resumes.id, normalized.resumeId))
+      .where(eq(resumes.id, resumeId))
       .limit(1);
     if (resumeRows.length === 0) {
-      const error = new AutomationDependencyMissingError("resume", normalized.resumeId);
+      const error = new AutomationDependencyMissingError("resume", resumeId);
       await this.markRunFailed(runId, error.message, automationSettings);
       throw error;
     }
+    return resumeRows[0];
+  }
 
-    const resume = resumeRows[0];
-    let coverLetter: typeof coverLetters.$inferSelect | null = null;
-    if (normalized.coverLetterId) {
-      const coverLetterRows = await db
-        .select()
-        .from(coverLetters)
-        .where(eq(coverLetters.id, normalized.coverLetterId))
-        .limit(1);
-      if (coverLetterRows.length === 0) {
-        const error = new AutomationDependencyMissingError("coverLetter", normalized.coverLetterId);
-        await this.markRunFailed(runId, error.message, automationSettings);
-        throw error;
-      }
-      coverLetter = coverLetterRows[0];
+  private async loadCoverLetterOrFail(
+    runId: string,
+    coverLetterId: string | undefined,
+    automationSettings: AutomationSettings,
+  ): Promise<typeof coverLetters.$inferSelect | null> {
+    if (!coverLetterId) {
+      return null;
     }
 
-    let selectorMap: Record<string, string[]> = {};
-    if (automationSettings.enableSmartSelectors) {
-      const aiService = await this.tryLoadAIService();
-      if (aiService) {
-        selectorMap = await smartFieldMapper.analyze(
-          normalized.jobUrl,
-          ["fullName", "email", "phone", "resume", "coverLetter", "submit"],
-          aiService,
-        );
-      }
+    const coverLetterRows = await db
+      .select()
+      .from(coverLetters)
+      .where(eq(coverLetters.id, coverLetterId))
+      .limit(1);
+    if (coverLetterRows.length === 0) {
+      const error = new AutomationDependencyMissingError("coverLetter", coverLetterId);
+      await this.markRunFailed(runId, error.message, automationSettings);
+      throw error;
+    }
+    return coverLetterRows[0];
+  }
+
+  private async resolveSelectorMap(
+    automationSettings: AutomationSettings,
+    jobUrl: string,
+  ): Promise<Record<string, string[]>> {
+    if (!automationSettings.enableSmartSelectors) {
+      return {};
     }
 
-    const progressHandler = (event: RpaRunEvent): void => {
+    const aiService = await this.tryLoadAIService();
+    if (!aiService) {
+      return {};
+    }
+
+    return smartFieldMapper.analyze(jobUrl, ["fullName", "email", "phone", "resume", "coverLetter", "submit"], aiService);
+  }
+
+  private createProgressHandler(onProgress?: (event: RpaRunEvent) => void): (event: RpaRunEvent) => void {
+    return (event: RpaRunEvent): void => {
       if (event.eventType !== "progress") {
         return;
       }
 
-      void this.persistProgress(event);
+      this.runBackgroundTask(this.persistProgress(event));
       broadcastAutomationEvent(event);
       onProgress?.(event);
     };
+  }
 
-    const runArtifactDir = this.resolveRunArtifactDir(runId);
+  private async markRunStarted(runId: string): Promise<void> {
     await db
       .update(automationRuns)
       .set({
@@ -1233,97 +1283,189 @@ export class ApplicationAutomationService {
         executionMs: null,
       })
       .where(eq(automationRuns.id, runId));
+  }
 
-    let lastExitCode: number | null = null;
-    let lastTimedOut = false;
-    let lastAborted = false;
-    let lastExecutionMs: number | null = null;
-    let lastErrorEnvelope: ErrorEnvelope | null = null;
-    let terminalPersisted = false;
-    const executionResult = await settlePromise(
-      (async () => {
-        const execution = await runRpaScript({
-          scriptName: "apply_job_rpa.py",
-          scriptInput: {
-            jobUrl: normalized.jobUrl,
-            resume,
-            coverLetter: coverLetter ? { content: coverLetter.content || {} } : null,
-            customAnswers: normalized.customAnswers,
-            selectorMap,
-          },
-          executionContext: {
-            runId,
-            timeoutMs:
-              Number.isFinite(automationSettings.defaultTimeout) &&
-              automationSettings.defaultTimeout > 0
-                ? Math.trunc(automationSettings.defaultTimeout * 1_000)
-                : config.automationScriptTimeoutMs,
-            outputDir: runArtifactDir,
-          },
-          automationSettings,
-          onEvent: progressHandler,
-        });
-        lastExitCode = execution.exitCode;
-        lastTimedOut = execution.timedOut;
-        lastAborted = execution.aborted;
-        lastExecutionMs = execution.executionMs;
-        lastErrorEnvelope = execution.error;
-        if (execution.error) {
-          throw new Error(execution.error.message);
-        }
+  private createExecutionTracking(): JobApplyExecutionTracking {
+    return {
+      exitCode: null,
+      timedOut: false,
+      aborted: false,
+      executionMs: null,
+      errorEnvelope: null,
+      terminalPersisted: false,
+    };
+  }
 
-        const normalizedResult = await this.normalizeExecutionResult(runId, execution);
-        await this.markRunCompleted(runId, normalizedResult, automationSettings, execution);
-        terminalPersisted = true;
-        if (!normalizedResult.success) {
-          throw new Error(normalizedResult.error || "Job application automation failed");
-        }
+  private async runJobApplyScript(
+    preparation: JobApplyRunPreparation,
+    tracking: JobApplyExecutionTracking,
+  ): Promise<RpaScriptExecutionResult> {
+    const execution = await runRpaScript({
+      scriptName: "apply_job_rpa.py",
+      scriptInput: {
+        jobUrl: preparation.normalized.jobUrl,
+        resume: preparation.resume,
+        coverLetter: preparation.coverLetter ? { content: preparation.coverLetter.content || {} } : null,
+        customAnswers: preparation.normalized.customAnswers,
+        selectorMap: preparation.selectorMap,
+      },
+      executionContext: {
+        runId: preparation.runId,
+        timeoutMs:
+          Number.isFinite(preparation.automationSettings.defaultTimeout) &&
+          preparation.automationSettings.defaultTimeout > 0
+            ? Math.trunc(preparation.automationSettings.defaultTimeout * 1_000)
+            : config.automationScriptTimeoutMs,
+        outputDir: preparation.runArtifactDir,
+      },
+      automationSettings: preparation.automationSettings,
+      onEvent: preparation.progressHandler,
+    });
 
-        broadcastAutomationEvent(
-          this.createProgressEvent({
-            runId,
-            action: "completed",
-            status: "success",
-            message: "Job application automation completed",
-          }),
-        );
+    tracking.exitCode = execution.exitCode;
+    tracking.timedOut = execution.timedOut;
+    tracking.aborted = execution.aborted;
+    tracking.executionMs = execution.executionMs;
+    tracking.errorEnvelope = execution.error;
 
-        const awardXpResult = await settlePromise(
-          gamificationService.awardXP(50, "automation_success"),
-        );
-        if (awardXpResult.status === "rejected") {
-          return;
-        }
-      })(),
+    if (execution.error) {
+      throw new Error(execution.error.message);
+    }
+
+    return execution;
+  }
+
+  private async finalizeJobApplySuccess(
+    preparation: JobApplyRunPreparation,
+    tracking: JobApplyExecutionTracking,
+    execution: RpaScriptExecutionResult,
+  ): Promise<void> {
+    const normalizedResult = await this.normalizeExecutionResult(preparation.runId, execution);
+    await this.markRunCompleted(
+      preparation.runId,
+      normalizedResult,
+      preparation.automationSettings,
+      execution,
+    );
+    tracking.terminalPersisted = true;
+
+    if (!normalizedResult.success) {
+      throw new Error(normalizedResult.error || "Job application automation failed");
+    }
+
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId: preparation.runId,
+        action: "completed",
+        status: "success",
+        message: "Job application automation completed",
+      }),
     );
 
+    const awardXpResult = await settlePromise(
+      gamificationService.awardXP(50, "automation_success"),
+    );
+    if (awardXpResult.status === "rejected") {
+      return;
+    }
+  }
+
+  private async executeJobApplyRun(
+    preparation: JobApplyRunPreparation,
+    tracking: JobApplyExecutionTracking,
+  ): Promise<void> {
+    const execution = await this.runJobApplyScript(preparation, tracking);
+    await this.finalizeJobApplySuccess(preparation, tracking, execution);
+  }
+
+  private async handleExecutionFailure(
+    runId: string,
+    automationSettings: AutomationSettings,
+    tracking: JobApplyExecutionTracking,
+    reason: unknown,
+  ): Promise<never> {
+    const message = toErrorMessage(reason, "Job application automation failed");
+    if (!tracking.terminalPersisted) {
+      await this.markRunFailed(runId, message, automationSettings, {
+        exitCode: tracking.exitCode,
+        timedOut: tracking.timedOut,
+        aborted: tracking.aborted,
+        executionMs: tracking.executionMs,
+        errorEnvelope: tracking.errorEnvelope,
+      });
+    }
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: "automation",
+        status: "error",
+        message,
+      }),
+    );
+    throw reason instanceof Error ? reason : new Error(message);
+  }
+
+  private async prepareJobApplyRun(
+    runId: string,
+    payload: JobApplyPayload,
+    onProgress?: (event: RpaRunEvent) => void,
+  ): Promise<JobApplyRunPreparation> {
+    this.clearScheduledRunTimer(runId);
+    const normalized = this.normalizePayload(payload);
+    await this.assertRunExists(runId);
+
+    const automationSettings = await this.loadAutomationSettings();
+    const maxConcurrentRuns = this.resolveMaxConcurrentRuns(automationSettings);
+    await this.assertConcurrencyLimit(runId, maxConcurrentRuns);
+
+    const resume = await this.loadResumeOrFail(runId, normalized.resumeId, automationSettings);
+    const coverLetter = await this.loadCoverLetterOrFail(
+      runId,
+      normalized.coverLetterId,
+      automationSettings,
+    );
+    const selectorMap = await this.resolveSelectorMap(automationSettings, normalized.jobUrl);
+    const progressHandler = this.createProgressHandler(onProgress);
+    const runArtifactDir = this.resolveRunArtifactDir(runId);
+
+    return {
+      runId,
+      automationSettings,
+      normalized,
+      resume,
+      coverLetter,
+      selectorMap,
+      progressHandler,
+      runArtifactDir,
+    };
+  }
+
+  /**
+   * Run full job-application automation for an existing run.
+   */
+  async runJobApply(
+    runId: string,
+    payload: JobApplyPayload,
+    onProgress?: (event: RpaRunEvent) => void,
+  ): Promise<void> {
+    const preparation = await this.prepareJobApplyRun(runId, payload, onProgress);
+    await this.markRunStarted(runId);
+
+    const tracking = this.createExecutionTracking();
+    const executionResult = await settlePromise(this.executeJobApplyRun(preparation, tracking));
     if (executionResult.status === "rejected") {
-      const executionError = executionResult.reason;
-      const message = toErrorMessage(executionError, "Job application automation failed");
-      if (!terminalPersisted) {
-        await this.markRunFailed(runId, message, automationSettings, {
-          exitCode: lastExitCode,
-          timedOut: lastTimedOut,
-          aborted: lastAborted,
-          executionMs: lastExecutionMs,
-          errorEnvelope: lastErrorEnvelope,
-        });
-      }
-      broadcastAutomationEvent(
-        this.createProgressEvent({
-          runId,
-          action: "automation",
-          status: "error",
-          message,
-        }),
+      await this.handleExecutionFailure(
+        runId,
+        preparation.automationSettings,
+        tracking,
+        executionResult.reason,
       );
-      throw executionError instanceof Error ? executionError : new Error(message);
     }
   }
 
   private sanitizeRunId(runId: string): string {
     const safeId = runId.trim();
-    if (!/^[0-9a-f-]+$/i.test(safeId) || safeId.length < MIN_ID_LENGTH) {
+    if (!RUN_ID_PATTERN.test(safeId) || safeId.length < MIN_ID_LENGTH) {
       throw new Error("runId is invalid");
     }
     return safeId;
@@ -1345,29 +1487,26 @@ function sanitizeSteps(
   steps: Array<{ action?: unknown; status?: unknown; message?: unknown }>,
 ): Array<{ action: string; status: "ok" | "error"; message?: string }> {
   return steps
-    .map((step): { action: string; status: "ok" | "error"; message?: string } | null => {
-      if (!step || typeof step !== "object") {
-        return null;
-      }
-
-      const action =
-        typeof step.action === "string" && step.action.length <= MAX_CUSTOM_ANSWER_KEY_LENGTH
-          ? step.action
-          : null;
-      if (!action) {
-        return null;
-      }
-
-      const status = step.status === "error" || step.status === "ok" ? step.status : "ok";
-      const message =
-        typeof step.message === "string" && step.message.length <= MAX_CUSTOM_ANSWER_VALUE_LENGTH
-          ? step.message
-          : undefined;
-      return { action, status, ...(message ? { message } : {}) };
-    })
+    .map((step) => sanitizeStep(step))
     .filter(
       (step): step is { action: string; status: "ok" | "error"; message?: string } => step !== null,
     );
+}
+
+function sanitizeStep(
+  step: { action?: unknown; status?: unknown; message?: unknown },
+): { action: string; status: "ok" | "error"; message?: string } | null {
+  if (!step || typeof step !== "object") {
+    return null;
+  }
+  if (typeof step.action !== "string" || step.action.length > MAX_CUSTOM_ANSWER_KEY_LENGTH) {
+    return null;
+  }
+  const status = step.status === "error" || step.status === "ok" ? step.status : "ok";
+  if (typeof step.message !== "string" || step.message.length > MAX_CUSTOM_ANSWER_VALUE_LENGTH) {
+    return { action: step.action, status };
+  }
+  return { action: step.action, status, message: step.message };
 }
 
 export const applicationAutomationService = new ApplicationAutomationService();

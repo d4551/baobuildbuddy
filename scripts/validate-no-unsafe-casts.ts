@@ -49,44 +49,46 @@ const getLineFromOffset = (text: string, offset: number): number => {
 };
 
 const collectSourceFiles = async (): Promise<string[]> => {
-  const files: string[] = [];
+  const fileGroups = await Promise.all(
+    scanRoots.map(async (root) => {
+      const glob = new Bun.Glob(`${root}/**/*`);
+      const relativeFilePaths = await Array.fromAsync(
+        glob.scan({ cwd: projectRoot, onlyFiles: true }),
+      );
 
-  for (const root of scanRoots) {
-    const glob = new Bun.Glob(`${root}/**/*`);
-    for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
-      const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
-      if (!hasAllowedExtension(normalizedPath) || shouldIgnorePath(normalizedPath)) {
-        continue;
-      }
-      files.push(normalizedPath);
-    }
-  }
+      return relativeFilePaths
+        .map((relativeFilePath) => relativeFilePath.replace(/\\/gu, "/"))
+        .filter((normalizedPath) => hasAllowedExtension(normalizedPath) && !shouldIgnorePath(normalizedPath));
+    }),
+  );
 
-  return files;
+  return fileGroups.flat();
 };
 
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectSourceFiles();
-  const violations: Violation[] = [];
+  const violationGroups = await Promise.all(
+    files.map(async (filePath) => {
+      const fileContent = await Bun.file(filePath).text();
+      unsafeCastPattern.lastIndex = 0;
+      return Array.from(fileContent.matchAll(unsafeCastPattern))
+        .map((match) => {
+          const castType = match[1];
+          if (castType !== "any" && castType !== "unknown") {
+            return null;
+          }
 
-  for (const filePath of files) {
-    const fileContent = await Bun.file(filePath).text();
-    unsafeCastPattern.lastIndex = 0;
-    for (const match of fileContent.matchAll(unsafeCastPattern)) {
-      const castType = match[1];
-      if (castType !== "any" && castType !== "unknown") {
-        continue;
-      }
+          return {
+            filePath,
+            line: getLineFromOffset(fileContent, match.index ?? 0),
+            castType,
+          };
+        })
+        .filter((violation): violation is Violation => violation !== null);
+    }),
+  );
 
-      violations.push({
-        filePath,
-        line: getLineFromOffset(fileContent, match.index ?? 0),
-        castType,
-      });
-    }
-  }
-
-  return violations;
+  return violationGroups.flat();
 };
 
 const main = async (): Promise<void> => {
@@ -98,8 +100,11 @@ const main = async (): Promise<void> => {
   }
 
   await writeError("Unsafe type casts are disallowed. Found:");
-  for (const violation of violations) {
-    await writeError(`- ${violation.filePath}:${violation.line} uses \`as ${violation.castType}\``);
+  const lines = violations.map(
+    (violation) => `- ${violation.filePath}:${violation.line} uses \`as ${violation.castType}\``,
+  );
+  if (lines.length > 0) {
+    await writeError(lines.join("\n"));
   }
 
   process.exit(1);

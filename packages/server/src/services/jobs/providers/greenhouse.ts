@@ -27,6 +27,27 @@ interface GreenhouseResponse {
   jobs: GreenhouseJob[];
 }
 
+type GreenhouseFetchStatus = {
+  ok: true;
+  jobs: GreenhouseJob[];
+} | {
+  ok: false;
+};
+
+type JobProviderSettings = Awaited<ReturnType<typeof loadJobProviderSettings>>;
+
+type GreenhouseBoardContext = {
+  board: string;
+  company: string;
+  providerSettings: JobProviderSettings;
+  query?: string;
+};
+
+type GreenhouseBoardPageState = {
+  page: number;
+  accumulatedJobs: RawJob[];
+};
+
 /**
  * Provider for Greenhouse-hosted boards configured in settings.
  */
@@ -52,56 +73,78 @@ export class GreenhouseProvider implements JobProvider {
   private async fetchBoardJobs(
     board: string,
     company: string,
-    providerSettings: Awaited<ReturnType<typeof loadJobProviderSettings>>,
+    providerSettings: JobProviderSettings,
     query?: string,
   ): Promise<RawJob[]> {
-    const jobs: RawJob[] = [];
-    let page = 1;
+    return this.fetchBoardJobsPage(
+      { board, company, providerSettings, query },
+      { page: 1, accumulatedJobs: [] },
+    );
+  }
 
-    while (page <= providerSettings.greenhouseMaxPages) {
-      const url = `${providerSettings.greenhouseApiBaseUrl}/${board}/jobs?page=${page}`;
-      const response = await fetch(url, {
-        headers: {
-          Accept: "application/json",
-          "User-Agent": JOB_AGGREGATOR_USER_AGENT,
-        },
-        signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
-      });
+  private async fetchBoardJobsPage(
+    context: GreenhouseBoardContext,
+    state: GreenhouseBoardPageState,
+  ): Promise<RawJob[]> {
+    const { board, company, providerSettings, query } = context;
+    const { page, accumulatedJobs } = state;
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          break;
-        }
-        return jobs;
-      }
-
-      const data = (await response.json()) as GreenhouseResponse;
-
-      if (!data.jobs || data.jobs.length === 0) {
-        break;
-      }
-
-      for (const job of data.jobs) {
-        const rawJob = this.mapJob(job, company, board);
-
-        if (query) {
-          const searchText = `${rawJob.title} ${rawJob.description}`.toLowerCase();
-          if (!searchText.includes(query.toLowerCase())) {
-            continue;
-          }
-        }
-
-        jobs.push(rawJob);
-      }
-
-      if (data.jobs.length < 100) {
-        break;
-      }
-
-      page++;
+    if (page > providerSettings.greenhouseMaxPages) {
+      return accumulatedJobs;
     }
 
-    return jobs;
+    const fetchStatus = await this.fetchGreenhousePage(board, page, providerSettings);
+    if (!fetchStatus.ok) {
+      return accumulatedJobs;
+    }
+    if (fetchStatus.jobs.length === 0) {
+      return accumulatedJobs;
+    }
+
+    const pageJobs = this.filterMappedJobs(fetchStatus.jobs, company, board, query);
+    const nextJobs = [...accumulatedJobs, ...pageJobs];
+    if (fetchStatus.jobs.length < 100) {
+      return nextJobs;
+    }
+    return this.fetchBoardJobsPage(context, { page: page + 1, accumulatedJobs: nextJobs });
+  }
+
+  private async fetchGreenhousePage(
+    board: string,
+    page: number,
+    providerSettings: JobProviderSettings,
+  ): Promise<GreenhouseFetchStatus> {
+    const url = `${providerSettings.greenhouseApiBaseUrl}/${board}/jobs?page=${page}`;
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": JOB_AGGREGATOR_USER_AGENT,
+      },
+      signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
+    });
+    if (!response.ok) {
+      return { ok: false };
+    }
+    const data = (await response.json()) as GreenhouseResponse;
+    return { ok: true, jobs: data.jobs || [] };
+  }
+
+  private filterMappedJobs(
+    jobs: GreenhouseJob[],
+    company: string,
+    board: string,
+    query?: string,
+  ): RawJob[] {
+    const queryLower = query?.toLowerCase();
+    return jobs
+      .map((job) => this.mapJob(job, company, board))
+      .filter((rawJob) => {
+        if (!queryLower) {
+          return true;
+        }
+        const searchText = `${rawJob.title} ${rawJob.description}`.toLowerCase();
+        return searchText.includes(queryLower);
+      });
   }
 
   private mapJob(job: GreenhouseJob, company: string, board: string): RawJob {

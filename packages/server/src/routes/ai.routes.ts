@@ -156,7 +156,7 @@ const isValidChatContextEntityType = (
  * Normalize optional client context payload into strict shared AIChatContext shape.
  */
 function normalizeClientChatContext(context?: ChatContextPayload): AIChatContext | null {
-  if (!context || !isValidChatContextSource(context.source)) {
+  if (!(context && isValidChatContextSource(context.source))) {
     return null;
   }
 
@@ -337,82 +337,525 @@ const parseProjectEntries = (value: unknown[] | null | undefined): ProjectEntry[
       }))
     : [];
 
+type ChatHistoryInsert = typeof chatHistory.$inferInsert;
+type JobRow = typeof jobs.$inferSelect;
+type MatchJobsResponse = {
+  message: string;
+  matches: Array<{
+    jobId: string;
+    title: string;
+    company: string;
+    location: string | null;
+    remote: boolean;
+    score: number;
+    strengths: string[];
+    concerns: string[];
+    highlightSkills: string[];
+  }>;
+  recommendations: string[];
+};
+type AnalyzeResumeBody = {
+  resumeId: string;
+  jobId?: string;
+};
+type GenerateCoverLetterBody = {
+  resumeId: string;
+  jobId?: string;
+  company: string;
+  position: string;
+};
+type MatchJobsBody = {
+  resumeId?: string;
+  skills?: string[];
+};
+type RouteSetState = {
+  status?: number;
+};
+type MatchProfile = {
+  userSkills: string[];
+  experience: string;
+  goals: string;
+};
+type CoverLetterSections = {
+  introduction: string;
+  body: string;
+  conclusion: string;
+};
+type ResumeAnalysisResult = {
+  score: number;
+  strengths: string[];
+  improvements: string[];
+  keywords: string[];
+};
+
+const DEFAULT_ANALYZE_RESUME_RESPONSE: ResumeAnalysisResult = {
+  score: 70,
+  strengths: ["Well-formatted resume"],
+  improvements: ["Add more specific achievements", "Include relevant keywords"],
+  keywords: [],
+};
+
+const DEFAULT_COVER_LETTER_RESPONSE: CoverLetterSections = {
+  introduction: "I am excited to apply for this position.",
+  body: "My experience and skills make me a strong candidate for this role.",
+  conclusion: "I look forward to discussing this opportunity with you.",
+};
+
+const DEFAULT_MATCH_SCORE = 50;
+const DEFAULT_RESUME_ANALYSIS_ERROR = "Failed to analyze resume";
+const DEFAULT_COVER_LETTER_ERROR = "Failed to generate cover letter";
+const DEFAULT_JOB_MATCH_ERROR = "Failed to match jobs";
+const JOB_DESCRIPTION_UNAVAILABLE = "No specific job description provided.";
+
+const toErrorMessage = (reason: unknown, fallback: string): string =>
+  reason instanceof Error ? reason.message : fallback;
+
+const createChatMessage = (
+  role: "user" | "assistant",
+  content: string,
+  sessionId: string,
+): ChatHistoryInsert => ({
+  id: generateId(),
+  role,
+  content,
+  timestamp: new Date().toISOString(),
+  sessionId,
+});
+
+const appendPersonalInfoSection = (sections: string[], personalInfo?: Record<string, unknown> | null) => {
+  if (!personalInfo) return;
+  sections.push("Personal Information:");
+  sections.push(JSON.stringify(personalInfo, null, 2));
+};
+
+const appendSummarySection = (sections: string[], summary?: string | null) => {
+  if (!summary) return;
+  sections.push("\nSummary:");
+  sections.push(summary);
+};
+
+const appendExperienceSection = (sections: string[], entries: ExperienceEntry[]) => {
+  if (entries.length === 0) return;
+
+  sections.push("\nWork Experience:");
+  for (const [index, exp] of entries.entries()) {
+    sections.push(`\n${index + 1}. ${exp.title || "Position"} at ${exp.company || "Company"}`);
+    if (exp.duration) sections.push(`   Duration: ${exp.duration}`);
+    if (exp.description) sections.push(`   ${exp.description}`);
+    if (!(exp.achievements && exp.achievements.length > 0)) continue;
+    sections.push("   Achievements:");
+    for (const achievement of exp.achievements) {
+      sections.push(`   - ${achievement}`);
+    }
+  }
+};
+
+const appendEducationSection = (sections: string[], entries: EducationEntry[]) => {
+  if (entries.length === 0) return;
+
+  sections.push("\nEducation:");
+  for (const [index, entry] of entries.entries()) {
+    sections.push(`${index + 1}. ${entry.degree || "Degree"} - ${entry.institution || "Institution"}`);
+    if (entry.year) sections.push(`   Year: ${entry.year}`);
+  }
+};
+
+const appendSkillsSection = (sections: string[], skills?: Record<string, unknown> | null) => {
+  if (!skills) return;
+  sections.push("\nSkills:");
+  sections.push(JSON.stringify(skills, null, 2));
+};
+
+const appendProjectsSection = (sections: string[], entries: ProjectEntry[]) => {
+  if (entries.length === 0) return;
+
+  sections.push("\nProjects:");
+  for (const [index, project] of entries.entries()) {
+    sections.push(`\n${index + 1}. ${project.name || project.title || "Project"}`);
+    if (project.description) sections.push(`   ${project.description}`);
+    if (project.technologies && project.technologies.length > 0) {
+      sections.push(`   Technologies: ${project.technologies.join(", ")}`);
+    }
+  }
+};
+
+const appendGamingExperienceSection = (
+  sections: string[],
+  gamingExperience?: Record<string, unknown> | null,
+) => {
+  if (!gamingExperience) return;
+  sections.push("\nGaming Experience:");
+  sections.push(JSON.stringify(gamingExperience, null, 2));
+};
+
 /**
  * Serialize resume data to text for AI analysis
  */
 function serializeResume(resume: ResumeRecord): string {
   const sections: string[] = [];
-
-  // Personal Info
-  if (resume.personalInfo) {
-    sections.push("Personal Information:");
-    sections.push(JSON.stringify(resume.personalInfo, null, 2));
-  }
-
-  // Summary
-  if (resume.summary) {
-    sections.push("\nSummary:");
-    sections.push(resume.summary);
-  }
-
-  // Experience
-  const experienceEntries = parseExperienceEntries(resume.experience);
-  if (experienceEntries.length > 0) {
-    sections.push("\nWork Experience:");
-    for (const [idx, exp] of Object.entries(experienceEntries)) {
-      const index = Number(idx);
-      sections.push(`\n${index + 1}. ${exp.title || "Position"} at ${exp.company || "Company"}`);
-      if (exp.duration) sections.push(`   Duration: ${exp.duration}`);
-      if (exp.description) sections.push(`   ${exp.description}`);
-      if (exp.achievements && exp.achievements.length > 0) {
-        sections.push("   Achievements:");
-        for (const ach of exp.achievements) {
-          sections.push(`   - ${ach}`);
-        }
-      }
-    }
-  }
-
-  // Education
-  const educationEntries = parseEducationEntries(resume.education);
-  if (educationEntries.length > 0) {
-    sections.push("\nEducation:");
-    for (const [idx, edu] of Object.entries(educationEntries)) {
-      const index = Number(idx);
-      sections.push(
-        `${index + 1}. ${edu.degree || "Degree"} - ${edu.institution || "Institution"}`,
-      );
-      if (edu.year) sections.push(`   Year: ${edu.year}`);
-    }
-  }
-
-  // Skills
-  if (resume.skills) {
-    sections.push("\nSkills:");
-    sections.push(JSON.stringify(resume.skills, null, 2));
-  }
-
-  // Projects
-  const projectEntries = parseProjectEntries(resume.projects);
-  if (projectEntries.length > 0) {
-    sections.push("\nProjects:");
-    projectEntries.forEach((proj, idx: number) => {
-      sections.push(`\n${idx + 1}. ${proj.name || proj.title || "Project"}`);
-      if (proj.description) sections.push(`   ${proj.description}`);
-      if (proj.technologies && proj.technologies.length > 0) {
-        sections.push(`   Technologies: ${proj.technologies.join(", ")}`);
-      }
-    });
-  }
-
-  // Gaming Experience
-  if (resume.gamingExperience) {
-    sections.push("\nGaming Experience:");
-    sections.push(JSON.stringify(resume.gamingExperience, null, 2));
-  }
+  appendPersonalInfoSection(sections, resume.personalInfo);
+  appendSummarySection(sections, resume.summary);
+  appendExperienceSection(sections, parseExperienceEntries(resume.experience));
+  appendEducationSection(sections, parseEducationEntries(resume.education));
+  appendSkillsSection(sections, resume.skills);
+  appendProjectsSection(sections, parseProjectEntries(resume.projects));
+  appendGamingExperienceSection(sections, resume.gamingExperience);
 
   return sections.join("\n");
 }
+
+const createFallbackJobMatch = (job: JobRow) => ({
+  jobId: job.id,
+  title: job.title,
+  company: job.company,
+  location: job.location,
+  remote: job.remote ?? false,
+  score: DEFAULT_MATCH_SCORE,
+  strengths: [],
+  concerns: [],
+  highlightSkills: [],
+});
+
+const buildResumeJobDescription = (job: JobRow): string => {
+  return `
+Title: ${job.title}
+Company: ${job.company}
+Description: ${job.description || ""}
+Requirements: ${job.requirements?.join(", ") || ""}
+Technologies: ${job.technologies?.join(", ") || ""}
+  `.trim();
+};
+
+const parseResumeAnalysisResult = (content: string): ResumeAnalysisResult => {
+  const parsed = safeJSONParse(content, DEFAULT_ANALYZE_RESUME_RESPONSE);
+  return {
+    score: parsed.score || DEFAULT_ANALYZE_RESUME_RESPONSE.score,
+    strengths: parsed.strengths || [],
+    improvements: parsed.improvements || [],
+    keywords: parsed.keywords || [],
+  };
+};
+
+const parseCoverLetterSections = (content: string): CoverLetterSections => {
+  const parsed = safeJSONParse(content, DEFAULT_COVER_LETTER_RESPONSE);
+  return {
+    introduction: parsed.introduction || DEFAULT_COVER_LETTER_RESPONSE.introduction,
+    body: parsed.body || "My experience and skills make me a strong candidate.",
+    conclusion: parsed.conclusion || "I look forward to discussing this opportunity.",
+  };
+};
+
+const persistChatMessage = async (message: ChatHistoryInsert): Promise<PromiseSettledResult<unknown>> => {
+  return settle(db.insert(chatHistory).values(message));
+};
+
+const buildAnalyzeResumePrompt = (resumeText: string, jobDescription: string): string => {
+  if (jobDescription.length > 0) {
+    return `${resumeScorePrompt(resumeText, jobDescription)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`;
+  }
+  return `${resumeEnhancePrompt(resumeText)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`;
+};
+
+const resolveAnalyzeResumeJobDescription = async (jobId?: string): Promise<string> => {
+  if (!jobId) return "";
+  const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
+  return jobRows.length > 0 ? buildResumeJobDescription(jobRows[0]) : "";
+};
+
+const resolveCoverLetterJobDescription = async (jobId?: string): Promise<string> => {
+  if (!jobId) return JOB_DESCRIPTION_UNAVAILABLE;
+  const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
+  if (jobRows.length === 0) return JOB_DESCRIPTION_UNAVAILABLE;
+  return jobRows[0].description || JOB_DESCRIPTION_UNAVAILABLE;
+};
+
+const extractResumeSkills = (resume: ResumeRecord): string[] =>
+  resume.skills ? Object.values(resume.skills).flatMap((value) => collectStringArray(value)) : [];
+
+const mergeUniqueSkills = (existing: string[], additional: string[]): string[] => {
+  if (additional.length === 0) return existing;
+  return [...new Set([...existing, ...additional])];
+};
+
+const buildMatchProfile = async (skills: string[] | undefined, resumeId?: string): Promise<MatchProfile> => {
+  const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
+  const profile = profileRows[0];
+
+  let userSkills = skills || [];
+  let experience = "";
+  let goals = "";
+
+  if (profile) {
+    userSkills = skills || [...(profile.technicalSkills || []), ...(profile.softSkills || [])];
+    experience = profile.summary || "";
+    goals = profile.careerGoals ? JSON.stringify(profile.careerGoals) : "";
+  }
+
+  if (!resumeId) return { userSkills, experience, goals };
+
+  const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
+  const resume = resumeRows[0];
+  if (!resume) return { userSkills, experience, goals };
+
+  if (resume.summary) experience = resume.summary;
+  userSkills = mergeUniqueSkills(userSkills, extractResumeSkills(resume));
+  return { userSkills, experience, goals };
+};
+
+const buildJobMatchPromptText = (profile: MatchProfile, job: JobRow): string =>
+  `${jobMatchPrompt(
+    {
+      skills: profile.userSkills,
+      experience: profile.experience,
+      goals: profile.goals,
+    },
+    {
+      title: job.title,
+      company: job.company,
+      description: job.description || "",
+      requirements: job.requirements || [],
+    },
+  )}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), concerns (string[]), highlightSkills (string[]).`;
+
+const analyzeSingleJobMatch = async (
+  aiService: AIService,
+  profile: MatchProfile,
+  job: JobRow,
+): Promise<MatchJobsResponse["matches"][number]> => {
+  const responseResult = await settle(
+    aiService.generate(buildJobMatchPromptText(profile, job), {
+      temperature: 0.3,
+      maxTokens: 1000,
+    }),
+  );
+  if (responseResult.status === "rejected") {
+    aiRoutesLogger.error(`Failed to analyze job ${job.id}:`, responseResult.reason);
+    return createFallbackJobMatch(job);
+  }
+
+  const response = responseResult.value;
+  if (response.error) return createFallbackJobMatch(job);
+
+  const parsed = safeJSONParse(response.content, {
+    score: DEFAULT_MATCH_SCORE,
+    strengths: [],
+    concerns: [],
+    highlightSkills: [],
+  });
+
+  return {
+    jobId: job.id,
+    title: job.title,
+    company: job.company,
+    location: job.location,
+    remote: job.remote ?? false,
+    score: parsed.score || DEFAULT_MATCH_SCORE,
+    strengths: parsed.strengths || [],
+    concerns: parsed.concerns || [],
+    highlightSkills: parsed.highlightSkills || [],
+  };
+};
+
+const buildJobMatchRecommendations = (matches: MatchJobsResponse["matches"]): string[] => {
+  const topMatch = matches[0];
+  if (!topMatch) return [];
+  return [
+    `Apply to ${topMatch.title} at ${topMatch.company} (${topMatch.score}% match)`,
+    ...topMatch.strengths.slice(0, 2),
+  ];
+};
+
+const runJobMatchingFlow = async (
+  resumeId: string | undefined,
+  skills: string[] | undefined,
+): Promise<MatchJobsResponse> => {
+  const profile = await buildMatchProfile(skills, resumeId);
+  const recentJobs = await db.select().from(jobs).orderBy(desc(jobs.postedDate)).limit(10);
+  if (recentJobs.length === 0) {
+    return {
+      message: "No jobs available for matching",
+      matches: [],
+      recommendations: [],
+    };
+  }
+
+  const aiService = await getAIService();
+  const matches = await Promise.all(
+    recentJobs.slice(0, 5).map((job) => analyzeSingleJobMatch(aiService, profile, job)),
+  );
+  matches.sort((a, b) => b.score - a.score);
+
+  return {
+    message: "Job matching complete",
+    matches,
+    recommendations: buildJobMatchRecommendations(matches),
+  };
+};
+
+const startJobApplyRun = (
+  runId: string,
+  payload: {
+    jobUrl: string;
+    resumeId: string;
+    coverLetterId?: string;
+    jobId?: string;
+  },
+) => {
+  applicationAutomationService.runJobApply(runId, payload).then(undefined, (error) => {
+    aiRoutesLogger.error("Failed to execute job application automation run:", error);
+  });
+};
+
+const buildChatRouteResponse = (
+  assistantMessage: ChatHistoryInsert,
+  response: Awaited<ReturnType<AIService["generate"]>>,
+  preferredDomain: string,
+) => ({
+  message: assistantMessage.content,
+  sessionId: assistantMessage.sessionId,
+  timestamp: assistantMessage.timestamp,
+  provider: response.provider,
+  model: response.model,
+  followUps: contextManager.generateFollowUps(preferredDomain),
+  contextDomain: preferredDomain,
+});
+
+const handleChatRoute = async (
+  body: { message: string; sessionId?: string; context?: ChatContextPayload },
+  set: RouteSetState,
+) => {
+  const sessionId = body.sessionId ?? generateId();
+  const persistUserMessageResult = await persistChatMessage(
+    createChatMessage("user", body.message, sessionId),
+  );
+  if (persistUserMessageResult.status === "rejected") {
+    set.status = 500;
+    return { error: toErrorMessage(persistUserMessageResult.reason, "Failed to generate AI response") };
+  }
+
+  const aiService = await getAIService();
+  const clientContext = normalizeClientChatContext(body.context);
+  const preferredDomain = clientContext?.domain ?? contextManager.inferDomain(body.message);
+  const contextualConversation = await contextManager.buildContext(
+    sessionId,
+    body.message,
+    preferredDomain,
+  );
+  const systemPrompt = composeChatSystemPrompt(
+    SYSTEM_PROMPT,
+    contextualConversation.systemPrompt,
+    clientContext,
+  );
+  const generationResult = await settle(
+    aiService.generate(body.message, {
+      systemPrompt,
+      messages: contextualConversation.messages,
+      temperature: 0.7,
+      maxTokens: 2000,
+    }),
+  );
+  if (generationResult.status === "rejected") {
+    set.status = 500;
+    return { error: toErrorMessage(generationResult.reason, "Failed to generate AI response") };
+  }
+
+  const response = generationResult.value;
+  if (response.error) {
+    set.status = 500;
+    return { error: response.error };
+  }
+
+  const assistantMessage = createChatMessage("assistant", response.content, sessionId);
+  const persistAssistantMessageResult = await persistChatMessage(assistantMessage);
+  if (persistAssistantMessageResult.status === "rejected") {
+    set.status = 500;
+    return {
+      error: toErrorMessage(persistAssistantMessageResult.reason, "Failed to generate AI response"),
+    };
+  }
+  return buildChatRouteResponse(assistantMessage, response, preferredDomain);
+};
+
+const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody, set: RouteSetState) => {
+  const resumeRows = await db.select().from(resumes).where(eq(resumes.id, body.resumeId));
+  if (resumeRows.length === 0) {
+    set.status = 404;
+    return { error: "Resume not found" };
+  }
+
+  const resumeText = serializeResume(resumeRows[0] as ResumeRecord);
+  const jobDescription = await resolveAnalyzeResumeJobDescription(body.jobId);
+  const aiService = await getAIService();
+  const responseResult = await settle(
+    aiService.generate(buildAnalyzeResumePrompt(resumeText, jobDescription), {
+      temperature: 0.3,
+      maxTokens: 2000,
+    }),
+  );
+  if (responseResult.status === "rejected") {
+    set.status = 500;
+    return { error: toErrorMessage(responseResult.reason, DEFAULT_RESUME_ANALYSIS_ERROR) };
+  }
+
+  const response = responseResult.value;
+  if (response.error) {
+    set.status = 500;
+    return { error: response.error };
+  }
+
+  return {
+    message: "Resume analysis complete",
+    resumeId: body.resumeId,
+    jobId: body.jobId || null,
+    analysis: parseResumeAnalysisResult(response.content),
+    provider: response.provider,
+    model: response.model,
+  };
+};
+
+const handleGenerateCoverLetterRoute = async (body: GenerateCoverLetterBody, set: RouteSetState) => {
+  const resumeRows = await db.select().from(resumes).where(eq(resumes.id, body.resumeId));
+  if (resumeRows.length === 0) {
+    set.status = 404;
+    return { error: "Resume not found" };
+  }
+
+  const resumeText = serializeResume(resumeRows[0] as ResumeRecord);
+  const jobDescription = await resolveCoverLetterJobDescription(body.jobId);
+  const aiService = await getAIService();
+  const responseResult = await settle(
+    aiService.generate(coverLetterPrompt(body.company, body.position, jobDescription, resumeText), {
+      temperature: 0.7,
+      maxTokens: 2000,
+    }),
+  );
+  if (responseResult.status === "rejected") {
+    set.status = 500;
+    return { error: toErrorMessage(responseResult.reason, DEFAULT_COVER_LETTER_ERROR) };
+  }
+
+  const response = responseResult.value;
+  if (response.error) {
+    set.status = 500;
+    return { error: response.error };
+  }
+
+  return {
+    message: "Cover letter generated successfully",
+    content: parseCoverLetterSections(response.content),
+    provider: response.provider,
+    model: response.model,
+  };
+};
+
+const handleMatchJobsRoute = async (body: MatchJobsBody, set: RouteSetState) => {
+  const flowResult = await settle(runJobMatchingFlow(body.resumeId, body.skills));
+  if (flowResult.status === "rejected") {
+    set.status = 500;
+    return { error: toErrorMessage(flowResult.reason, DEFAULT_JOB_MATCH_ERROR) };
+  }
+  return flowResult.value;
+};
 
 /**
  * AI route group for chat, content generation, matching, and automation triggers.
@@ -428,97 +871,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
   )
   .post(
     "/chat",
-    async ({ body, set }) => {
-      const { message, context } = body;
-      const sessionId = body.sessionId ?? generateId();
-
-      const userMsg = {
-        id: generateId(),
-        role: "user",
-        content: message,
-        timestamp: new Date().toISOString(),
-        sessionId,
-      };
-
-      const persistUserMessageResult = await settle(db.insert(chatHistory).values(userMsg));
-      if (persistUserMessageResult.status === "rejected") {
-        set.status = 500;
-        return {
-          error:
-            persistUserMessageResult.reason instanceof Error
-              ? persistUserMessageResult.reason.message
-              : "Failed to generate AI response",
-        };
-      }
-
-      const aiService = await getAIService();
-      const clientContext = normalizeClientChatContext(context);
-      const preferredDomain = clientContext?.domain ?? contextManager.inferDomain(message);
-      const contextualConversation = await contextManager.buildContext(
-        sessionId,
-        message,
-        preferredDomain,
-      );
-      const systemPrompt = composeChatSystemPrompt(
-        SYSTEM_PROMPT,
-        contextualConversation.systemPrompt,
-        clientContext,
-      );
-
-      const generationResult = await settle(
-        aiService.generate(message, {
-          systemPrompt,
-          messages: contextualConversation.messages,
-          temperature: 0.7,
-          maxTokens: 2000,
-        }),
-      );
-      if (generationResult.status === "rejected") {
-        set.status = 500;
-        return {
-          error:
-            generationResult.reason instanceof Error
-              ? generationResult.reason.message
-              : "Failed to generate AI response",
-        };
-      }
-
-      const response = generationResult.value;
-      if (response.error) {
-        set.status = 500;
-        return { error: response.error };
-      }
-
-      const aiResponse = {
-        id: generateId(),
-        role: "assistant",
-        content: response.content,
-        timestamp: new Date().toISOString(),
-        sessionId,
-      };
-      const persistAssistantMessageResult = await settle(db.insert(chatHistory).values(aiResponse));
-      if (persistAssistantMessageResult.status === "rejected") {
-        set.status = 500;
-        return {
-          error:
-            persistAssistantMessageResult.reason instanceof Error
-              ? persistAssistantMessageResult.reason.message
-              : "Failed to generate AI response",
-        };
-      }
-
-      const followUps = contextManager.generateFollowUps(preferredDomain);
-
-      return {
-        message: aiResponse.content,
-        sessionId,
-        timestamp: aiResponse.timestamp,
-        provider: response.provider,
-        model: response.model,
-        followUps,
-        contextDomain: preferredDomain,
-      };
-    },
+    async ({ body, set }) => handleChatRoute(body, set),
     {
       body: t.Object({
         message: t.String({ maxLength: 10000 }),
@@ -529,81 +882,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
   )
   .post(
     "/analyze-resume",
-    async ({ body, set }) => {
-      const { resumeId, jobId } = body;
-
-      const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
-      if (resumeRows.length === 0) {
-        set.status = 404;
-        return { error: "Resume not found" };
-      }
-
-      const resume = resumeRows[0];
-      const resumeText = serializeResume(resume);
-
-      let jobDescription = "";
-      if (jobId) {
-        const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
-        if (jobRows.length > 0) {
-          const job = jobRows[0];
-          jobDescription = `
-Title: ${job.title}
-Company: ${job.company}
-Description: ${job.description || ""}
-Requirements: ${job.requirements?.join(", ") || ""}
-Technologies: ${job.technologies?.join(", ") || ""}
-          `.trim();
-        }
-      }
-
-      const aiService = await getAIService();
-      const prompt =
-        jobId && jobDescription
-          ? `${resumeScorePrompt(resumeText, jobDescription)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`
-          : `${resumeEnhancePrompt(resumeText)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`;
-      const responseResult = await settle(
-        aiService.generate(prompt, {
-          temperature: 0.3,
-          maxTokens: 2000,
-        }),
-      );
-      if (responseResult.status === "rejected") {
-        set.status = 500;
-        return {
-          error:
-            responseResult.reason instanceof Error
-              ? responseResult.reason.message
-              : "Failed to analyze resume",
-        };
-      }
-
-      const response = responseResult.value;
-      if (response.error) {
-        set.status = 500;
-        return { error: response.error };
-      }
-
-      const analysis = safeJSONParse(response.content, {
-        score: 70,
-        strengths: ["Well-formatted resume"],
-        improvements: ["Add more specific achievements", "Include relevant keywords"],
-        keywords: [],
-      });
-
-      return {
-        message: "Resume analysis complete",
-        resumeId,
-        jobId: jobId || null,
-        analysis: {
-          score: analysis.score || 70,
-          strengths: analysis.strengths || [],
-          improvements: analysis.improvements || [],
-          keywords: analysis.keywords || [],
-        },
-        provider: response.provider,
-        model: response.model,
-      };
-    },
+    async ({ body, set }) => handleAnalyzeResumeRoute(body, set),
     {
       body: t.Object({
         resumeId: t.String({ maxLength: 100 }),
@@ -613,69 +892,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
   )
   .post(
     "/generate-cover-letter",
-    async ({ body, set }) => {
-      const { resumeId, jobId, company, position } = body;
-
-      const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
-      if (resumeRows.length === 0) {
-        set.status = 404;
-        return { error: "Resume not found" };
-      }
-
-      const resume = resumeRows[0];
-      const resumeText = serializeResume(resume);
-
-      let jobDescription = "No specific job description provided.";
-      if (jobId) {
-        const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
-        if (jobRows.length > 0) {
-          const job = jobRows[0];
-          jobDescription = job.description || jobDescription;
-        }
-      }
-
-      const aiService = await getAIService();
-      const prompt = coverLetterPrompt(company, position, jobDescription, resumeText);
-
-      const responseResult = await settle(
-        aiService.generate(prompt, {
-          temperature: 0.7,
-          maxTokens: 2000,
-        }),
-      );
-      if (responseResult.status === "rejected") {
-        set.status = 500;
-        return {
-          error:
-            responseResult.reason instanceof Error
-              ? responseResult.reason.message
-              : "Failed to generate cover letter",
-        };
-      }
-
-      const response = responseResult.value;
-      if (response.error) {
-        set.status = 500;
-        return { error: response.error };
-      }
-
-      const coverLetter = safeJSONParse(response.content, {
-        introduction: "I am excited to apply for this position.",
-        body: "My experience and skills make me a strong candidate for this role.",
-        conclusion: "I look forward to discussing this opportunity with you.",
-      });
-
-      return {
-        message: "Cover letter generated successfully",
-        content: {
-          introduction: coverLetter.introduction || "I am excited to apply for this position.",
-          body: coverLetter.body || "My experience and skills make me a strong candidate.",
-          conclusion: coverLetter.conclusion || "I look forward to discussing this opportunity.",
-        },
-        provider: response.provider,
-        model: response.model,
-      };
-    },
+    async ({ body, set }) => handleGenerateCoverLetterRoute(body, set),
     {
       body: t.Object({
         resumeId: t.String({ maxLength: 100 }),
@@ -687,151 +904,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
   )
   .post(
     "/match-jobs",
-    async ({ body, set }) => {
-      const { resumeId, skills } = body;
-
-      const flowResult = await settle(
-        (async () => {
-          const profileRows = await db
-            .select()
-            .from(userProfile)
-            .where(eq(userProfile.id, "default"));
-
-          let userSkills: string[] = skills || [];
-          let experience = "";
-          let goals = "";
-
-          if (profileRows.length > 0) {
-            const profile = profileRows[0];
-            userSkills = skills || [
-              ...(profile.technicalSkills || []),
-              ...(profile.softSkills || []),
-            ];
-            experience = profile.summary || "";
-            goals = profile.careerGoals ? JSON.stringify(profile.careerGoals) : "";
-          }
-
-          if (resumeId) {
-            const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
-
-            if (resumeRows.length > 0) {
-              const resume = resumeRows[0];
-              if (resume.summary) experience = resume.summary;
-              if (resume.skills) {
-                const resumeSkills = Object.values(resume.skills).flatMap((value) =>
-                  collectStringArray(value),
-                );
-                userSkills = [...new Set([...userSkills, ...resumeSkills])];
-              }
-            }
-          }
-
-          const recentJobs = await db.select().from(jobs).orderBy(desc(jobs.postedDate)).limit(10);
-
-          if (recentJobs.length === 0) {
-            return {
-              message: "No jobs available for matching",
-              matches: [],
-              recommendations: [],
-            };
-          }
-
-          const aiService = await getAIService();
-
-          const matches = await Promise.all(
-            recentJobs.slice(0, 5).map(async (job) => {
-              const prompt = `${jobMatchPrompt(
-                {
-                  skills: userSkills,
-                  experience,
-                  goals,
-                },
-                {
-                  title: job.title,
-                  company: job.company,
-                  description: job.description || "",
-                  requirements: job.requirements || [],
-                },
-              )}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), concerns (string[]), highlightSkills (string[]).`;
-
-              const responseResult = await settle(
-                aiService.generate(prompt, {
-                  temperature: 0.3,
-                  maxTokens: 1000,
-                }),
-              );
-              if (responseResult.status === "rejected") {
-                aiRoutesLogger.error(`Failed to analyze job ${job.id}:`, responseResult.reason);
-                return {
-                  jobId: job.id,
-                  title: job.title,
-                  company: job.company,
-                  score: 50,
-                  strengths: [],
-                  concerns: [],
-                  highlightSkills: [],
-                };
-              }
-
-              const response = responseResult.value;
-              if (response.error) {
-                return {
-                  jobId: job.id,
-                  title: job.title,
-                  company: job.company,
-                  score: 50,
-                  strengths: [],
-                  concerns: [],
-                  highlightSkills: [],
-                };
-              }
-
-              const analysis = safeJSONParse(response.content, {
-                score: 50,
-                strengths: [],
-                concerns: [],
-                highlightSkills: [],
-              });
-
-              return {
-                jobId: job.id,
-                title: job.title,
-                company: job.company,
-                location: job.location,
-                remote: job.remote,
-                score: analysis.score || 50,
-                strengths: analysis.strengths || [],
-                concerns: analysis.concerns || [],
-                highlightSkills: analysis.highlightSkills || [],
-              };
-            }),
-          );
-
-          matches.sort((a, b) => b.score - a.score);
-
-          const topMatch = matches[0];
-          const recommendations = topMatch
-            ? [
-                `Apply to ${topMatch.title} at ${topMatch.company} (${topMatch.score}% match)`,
-                ...topMatch.strengths.slice(0, 2),
-              ]
-            : [];
-
-          return {
-            message: "Job matching complete",
-            matches,
-            recommendations,
-          };
-        })(),
-      );
-      if (flowResult.status === "rejected") {
-        set.status = 500;
-        return {
-          error: flowResult.reason instanceof Error ? flowResult.reason.message : "Failed to match jobs",
-        };
-      }
-      return flowResult.value;
-    },
+    async ({ body, set }) => handleMatchJobsRoute(body, set),
     {
       body: t.Object({
         resumeId: t.Optional(t.String({ maxLength: 100 })),
@@ -923,7 +996,7 @@ Technologies: ${job.technologies?.join(", ") || ""}
       }
 
       const runId = runResult.value;
-      void applicationAutomationService.runJobApply(runId, {
+      startJobApplyRun(runId, {
         jobUrl,
         resumeId,
         coverLetterId,

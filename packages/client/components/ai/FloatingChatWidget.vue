@@ -135,13 +135,13 @@ watch(isOpen, (open) => {
   }
   unreadCount.value = 0;
   scrollToBottom();
-  nextTick(() => {
+  requestAnimationFrame(() => {
     inputRef.value?.focus();
   });
 });
 
 function scrollToBottom() {
-  nextTick(() => {
+  requestAnimationFrame(() => {
     const panelBody = panelBodyRef.value;
     if (!panelBody) return;
     panelBody.scrollTop = panelBody.scrollHeight;
@@ -163,7 +163,7 @@ function toggleSpeechSettings(): void {
 function handleFocusChatShortcut() {
   isOpen.value = true;
   unreadCount.value = 0;
-  nextTick(() => {
+  requestAnimationFrame(() => {
     inputRef.value?.focus();
   });
 }
@@ -209,8 +209,8 @@ async function handleSaveSpeechConfig(): Promise<void> {
   $toast.success(t("floatingChat.voiceSettings.saveSuccess"));
 }
 
-onMounted(() => {
-  void ensureSpeechConfigLoaded();
+onMounted(async () => {
+  await ensureSpeechConfigLoaded();
   window.addEventListener("bao:focus-chat", onFocusChatShortcut);
 });
 

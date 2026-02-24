@@ -38,117 +38,16 @@ export class StatisticsService {
   }
 
   async getDashboardStats(): Promise<DashboardStats> {
-    // Profile completeness
-    let profileCompleteness = 0;
-    await this.runBestEffort(async () => {
-      const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
-      if (profileRows.length > 0) {
-        const p = profileRows[0];
-        const fields = [p.name, p.email, p.location, p.summary, p.currentRole];
-        const filled = fields.filter((f) => f && String(f).trim().length > 0).length;
-        profileCompleteness = Math.round((filled / fields.length) * 100);
-      }
-    });
-
-    // Jobs stats
-    const jobStats = { saved: 0, applied: 0, interviewing: 0, offered: 0 };
-    await this.runBestEffort(async () => {
-      const savedCount = await db.select({ count: count() }).from(savedJobs);
-      jobStats.saved = savedCount[0]?.count || 0;
-
-      const appRows = await db.select().from(applications);
-      for (const app of appRows) {
-        const status = app.status?.toLowerCase() || "";
-        if (status === "applied") jobStats.applied++;
-        else if (status === "interviewing") jobStats.interviewing++;
-        else if (status === "offered") jobStats.offered++;
-      }
-    });
-
-    // Resumes
-    const resumeStats = { count: 0, lastUpdated: null as string | null };
-    await this.runBestEffort(async () => {
-      const resumeCount = await db.select({ count: count() }).from(resumes);
-      resumeStats.count = resumeCount[0]?.count || 0;
-    });
-
-    // Cover letters
-    let clCount = 0;
-    await this.runBestEffort(async () => {
-      const clResult = await db.select({ count: count() }).from(coverLetters);
-      clCount = clResult[0]?.count || 0;
-    });
-
-    // Portfolio
-    let projectCount = 0;
-    await this.runBestEffort(async () => {
-      const projResult = await db.select({ count: count() }).from(portfolioProjects);
-      projectCount = projResult[0]?.count || 0;
-    });
-
-    // Interviews
-    const interviewStats = { totalSessions: 0, averageScore: null as number | null };
-    await this.runBestEffort(async () => {
-      const intResult = await db.select({ count: count() }).from(interviewSessions);
-      interviewStats.totalSessions = intResult[0]?.count || 0;
-    });
-
-    // Skills
-    let mappedCount = 0;
-    await this.runBestEffort(async () => {
-      const skillResult = await db.select({ count: count() }).from(skillMappings);
-      mappedCount = skillResult[0]?.count || 0;
-    });
-
-    // AI chat
-    const aiStats = { chatMessages: 0, chatSessions: 0 };
-    await this.runBestEffort(async () => {
-      const msgResult = await db.select({ count: count() }).from(chatHistory);
-      aiStats.chatMessages = msgResult[0]?.count || 0;
-    });
-
-    // Gamification
-    const gamStats = { level: 1, xp: 0, achievements: 0, streak: 0 };
-    await this.runBestEffort(async () => {
-      const gamRows = await db.select().from(gamification).where(eq(gamification.id, "default"));
-      if (gamRows.length > 0) {
-        const g = gamRows[0];
-        gamStats.level = g.level || 1;
-        gamStats.xp = g.xp || 0;
-        gamStats.achievements = Array.isArray(g.achievements) ? g.achievements.length : 0;
-        gamStats.streak = g.currentStreak || 0;
-      }
-    });
-
-    // Automation stats
-    const autoStats: AutomationStats = {
-      totalRuns: 0,
-      successfulRuns: 0,
-      successRate: 0,
-      todayRuns: 0,
-      recentRuns: [],
-    };
-    await this.runBestEffort(async () => {
-      const allRuns = await db
-        .select()
-        .from(automationRuns)
-        .orderBy(desc(automationRuns.createdAt))
-        .limit(100);
-      autoStats.totalRuns = allRuns.length;
-      autoStats.successfulRuns = allRuns.filter((r) => r.status === "success").length;
-      autoStats.successRate =
-        autoStats.totalRuns > 0
-          ? Math.round((autoStats.successfulRuns / autoStats.totalRuns) * 100)
-          : 0;
-      const today = new Date().toISOString().split("T")[0];
-      autoStats.todayRuns = allRuns.filter((r) => r.createdAt?.startsWith(today)).length;
-      autoStats.recentRuns = allRuns.slice(0, 5).map((r) => ({
-        id: r.id,
-        type: r.type,
-        status: r.status,
-        createdAt: r.createdAt,
-      }));
-    });
+    const profileCompleteness = await this.getProfileCompleteness();
+    const jobStats = await this.getJobStats();
+    const resumeStats = await this.getResumeStats();
+    const clCount = await this.getCoverLetterCount();
+    const projectCount = await this.getPortfolioProjectCount();
+    const interviewStats = await this.getInterviewStats();
+    const mappedCount = await this.getMappedSkillCount();
+    const aiStats = await this.getAiStats();
+    const gamStats = await this.getGamificationStats();
+    const autoStats = await this.getAutomationStats();
 
     return {
       profile: { completeness: profileCompleteness },
@@ -162,6 +61,160 @@ export class StatisticsService {
       gamification: gamStats,
       automation: autoStats,
     };
+  }
+
+  private async getProfileCompleteness(): Promise<number> {
+    let profileCompleteness = 0;
+    await this.runBestEffort(async () => {
+      const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
+      const profile = profileRows[0];
+      if (!profile) {
+        return;
+      }
+      const fields = [profile.name, profile.email, profile.location, profile.summary, profile.currentRole];
+      const filled = fields.filter((field) => field && String(field).trim().length > 0).length;
+      profileCompleteness = Math.round((filled / fields.length) * 100);
+    });
+    return profileCompleteness;
+  }
+
+  private async getJobStats(): Promise<DashboardStats["jobs"]> {
+    const jobStats: DashboardStats["jobs"] = {
+      saved: 0,
+      applied: 0,
+      interviewing: 0,
+      offered: 0,
+    };
+    await this.runBestEffort(async () => {
+      const savedCount = await db.select({ count: count() }).from(savedJobs);
+      jobStats.saved = savedCount[0]?.count || 0;
+      const applicationRows = await db.select().from(applications);
+      for (const app of applicationRows) {
+        const status = app.status?.toLowerCase() || "";
+        if (status === "applied") jobStats.applied++;
+        else if (status === "interviewing") jobStats.interviewing++;
+        else if (status === "offered") jobStats.offered++;
+      }
+    });
+    return jobStats;
+  }
+
+  private async getResumeStats(): Promise<DashboardStats["resumes"]> {
+    const resumeStats: DashboardStats["resumes"] = {
+      count: 0,
+      lastUpdated: null,
+    };
+    await this.runBestEffort(async () => {
+      const resumeCount = await db.select({ count: count() }).from(resumes);
+      resumeStats.count = resumeCount[0]?.count || 0;
+    });
+    return resumeStats;
+  }
+
+  private async getCoverLetterCount(): Promise<number> {
+    let countValue = 0;
+    await this.runBestEffort(async () => {
+      const result = await db.select({ count: count() }).from(coverLetters);
+      countValue = result[0]?.count || 0;
+    });
+    return countValue;
+  }
+
+  private async getPortfolioProjectCount(): Promise<number> {
+    let projectCount = 0;
+    await this.runBestEffort(async () => {
+      const result = await db.select({ count: count() }).from(portfolioProjects);
+      projectCount = result[0]?.count || 0;
+    });
+    return projectCount;
+  }
+
+  private async getInterviewStats(): Promise<DashboardStats["interviews"]> {
+    const interviewStats: DashboardStats["interviews"] = {
+      totalSessions: 0,
+      averageScore: null,
+    };
+    await this.runBestEffort(async () => {
+      const result = await db.select({ count: count() }).from(interviewSessions);
+      interviewStats.totalSessions = result[0]?.count || 0;
+    });
+    return interviewStats;
+  }
+
+  private async getMappedSkillCount(): Promise<number> {
+    let mappedCount = 0;
+    await this.runBestEffort(async () => {
+      const result = await db.select({ count: count() }).from(skillMappings);
+      mappedCount = result[0]?.count || 0;
+    });
+    return mappedCount;
+  }
+
+  private async getAiStats(): Promise<DashboardStats["ai"]> {
+    const aiStats: DashboardStats["ai"] = {
+      chatMessages: 0,
+      chatSessions: 0,
+    };
+    await this.runBestEffort(async () => {
+      const messageCount = await db.select({ count: count() }).from(chatHistory);
+      aiStats.chatMessages = messageCount[0]?.count || 0;
+    });
+    return aiStats;
+  }
+
+  private async getGamificationStats(): Promise<DashboardStats["gamification"]> {
+    const gamStats: DashboardStats["gamification"] = {
+      level: 1,
+      xp: 0,
+      achievements: 0,
+      streak: 0,
+    };
+    await this.runBestEffort(async () => {
+      const gamRows = await db.select().from(gamification).where(eq(gamification.id, "default"));
+      const gamificationRow = gamRows[0];
+      if (!gamificationRow) {
+        return;
+      }
+      gamStats.level = gamificationRow.level || 1;
+      gamStats.xp = gamificationRow.xp || 0;
+      gamStats.achievements = Array.isArray(gamificationRow.achievements)
+        ? gamificationRow.achievements.length
+        : 0;
+      gamStats.streak = gamificationRow.currentStreak || 0;
+    });
+    return gamStats;
+  }
+
+  private async getAutomationStats(): Promise<AutomationStats> {
+    const automationStats: AutomationStats = {
+      totalRuns: 0,
+      successfulRuns: 0,
+      successRate: 0,
+      todayRuns: 0,
+      recentRuns: [],
+    };
+    await this.runBestEffort(async () => {
+      const allRuns = await db
+        .select()
+        .from(automationRuns)
+        .orderBy(desc(automationRuns.createdAt))
+        .limit(100);
+      automationStats.totalRuns = allRuns.length;
+      automationStats.successfulRuns = allRuns.filter((run) => run.status === "success").length;
+      automationStats.successRate =
+        automationStats.totalRuns > 0
+          ? Math.round((automationStats.successfulRuns / automationStats.totalRuns) * 100)
+          : 0;
+      const today = new Date().toISOString().split("T")[0];
+      automationStats.todayRuns = allRuns.filter((run) => run.createdAt?.startsWith(today)).length;
+      automationStats.recentRuns = allRuns.slice(0, 5).map((run) => ({
+        id: run.id,
+        type: run.type,
+        status: run.status,
+        createdAt: run.createdAt,
+      }));
+    });
+    return automationStats;
   }
 
   async getWeeklyActivity(): Promise<WeeklyActivity> {

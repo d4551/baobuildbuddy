@@ -23,7 +23,51 @@
 - [Automation Guide](docs/AUTOMATION.md)
 - [Desktop (Tauri) Packaging](#89-desktop-tauri-installer-path)
 
-## Stack/version baseline (audited 2026-02-23)
+## Release Validation Workflow
+
+Use this sequence for a full local quality gate and rebuild pass:
+
+```bash
+bun run lint
+bun run typecheck
+bun run test
+bun run build
+bun run build:desktop
+```
+
+Script/runtime verification commands:
+
+```bash
+bun run validate:no-try-catch
+bun run validate:no-unsafe-casts
+bun run validate:locales
+bun run validate:i18n-ui
+bun run validate:aria
+bun run validate:ui
+```
+
+SSR route/content verification (requires running app target at `VERIFY_BASE_URL`):
+
+```bash
+bun run verify:pages
+```
+
+Lint reporting policy:
+
+- Lint diagnostics are not suppressed.
+- `bun run lint` uses Biome with `--max-diagnostics=1200` to avoid truncated reporting while preserving all current findings in this codebase.
+
+Current command outcomes:
+
+- `bun run lint`: pass, with `255` Biome warnings (visible, unmasked).
+- `bun run --filter '@bao/client' lint`: pass with no warnings.
+- `bun run typecheck`: pass.
+- `bun run test`: pass (`66` server tests, `19` client tests).
+- `bun run build`: pass.
+- `CI=true bun run build:desktop`: pass.
+- `bun run verify:pages`: pass when targeted to the BaoBuildBuddy preview host/port.
+
+## Stack and Version Contract
 
 Context7 verification references:
 
@@ -31,7 +75,7 @@ Context7 verification references:
 - Prisma upgrade docs (`/prisma/docs`) confirm Prisma v7 is current major.
 - Bun docs (`/oven-sh/bun`) confirm Bun 1.3 toolchain/runtime practices.
 
-Registry-verified package baseline in this repo:
+Pinned package versions in this repo:
 
 | Package | Baseline in repo |
 |---|---|
@@ -49,7 +93,7 @@ Prisma note:
 - The current data layer is `drizzle-orm` (`packages/server`). Prisma is not active in this runtime path yet.
 - Current npm latest for Prisma is `7.4.1`; when Prisma is introduced, pin `prisma` and `@prisma/client` to v7 together.
 
-To re-audit stack versions against npm:
+To verify stack versions against npm:
 
 ```bash
 bun run audit:stack-versions
@@ -560,7 +604,7 @@ Use one command per tool based on your platform:
 
 If your Linux distro does not ship `chromium-browser`, install `google-chrome-stable` from Google's official package repository.
 
-Pin Bun to the workspace baseline explicitly when needed:
+Pin Bun to the workspace version explicitly when needed:
 
 ```bash
 curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.9"
@@ -972,7 +1016,12 @@ bun run test
 Client-side runtime tests for composables use `*.nuxt.spec.ts` and initialize Nuxt with a package-root `rootDir` so alias resolution stays deterministic in workspace runs. Keep those tests explicit about external dependencies (`useApi`) and avoid relying on unresolved auto-import side effects.
 `bun run typecheck` generates server API declarations (`packages/server/dist-types`) before running package typechecks, so Nuxt client typechecking consumes contract types instead of server implementation internals.
 `bun run lint` includes `validate:no-try-catch` and `validate:i18n-ui`, which fail when `try/catch` blocks or static non-localized UI copy appear in source. Error handling should follow Elysia/Eden typed response contracts and shared settled-result helpers.
-If `3001` is occupied locally, run page verification against an alternate UI port via `VERIFY_HOST` and `VERIFY_PORT`.
+If `3001` is occupied locally, run page verification against an alternate UI port via `VERIFY_HOST` and `VERIFY_PORT`:
+
+```bash
+PORT=4105 bun run --filter '@bao/client' preview
+VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
+```
 Server-side tests run with deterministic in-process AI behavior (`BAO_TEST_MODE=1`), so test execution does not depend on external AI providers or network availability.
 Rate-limited route groups use header-aware client-key generation (`x-forwarded-for` / `cf-connecting-ip` / `x-real-ip` fallback), which keeps behavior deterministic in local tests and proxy deployments.
 For a non-technical runbook with copy/paste steps only, use `docs/STARTER_GUIDE.md`.

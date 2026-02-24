@@ -48,6 +48,81 @@ const isOneOf = <T extends string>(values: readonly T[], value: unknown): value 
   return values.some((entry) => entry === value);
 };
 
+const REMOTE_KEYWORDS = ["remote", "work from home", "wfh", "anywhere"];
+const HYBRID_KEYWORDS = ["hybrid"];
+const SALARY_NUMBER_PATTERN = /\d+/g;
+const AAA_STUDIO_KEYWORDS = [
+  "riot",
+  "epic",
+  "blizzard",
+  "electronic arts",
+  "ea",
+  "activision",
+  "ubisoft",
+  "rockstar",
+  "bungie",
+  "naughty dog",
+  "insomniac",
+  "respawn",
+  "guerrilla",
+  "treyarch",
+  "sledgehammer",
+  "infinity ward",
+  "2k",
+  "square enix",
+  "obsidian",
+  "gearbox",
+  "playground games",
+  "sucker punch",
+  "arkane",
+  "machinegames",
+  "machine games",
+  "cd projekt",
+  "wargaming",
+  "mojang",
+  "firaxis",
+  "avalanche",
+  "amplitude",
+  "cloud imperium",
+  "cloud chamber",
+  "netflix games",
+  "lightspeed",
+  "striking distance",
+  "bandai namco",
+  "capcom",
+  "sega",
+  "konami",
+  "take-two",
+  "take two",
+  "bethesda",
+  "larian",
+  "double fine",
+  "second dinner",
+  "archetype entertainment",
+] as const;
+const MOBILE_STUDIO_KEYWORDS = [
+  "supercell",
+  "zynga",
+  "king",
+  "jam city",
+  "wildlife",
+  "playq",
+  "voodoo",
+  "niantic",
+  "pokemon",
+  "demiurge",
+] as const;
+const VR_STUDIO_KEYWORDS = ["meta", "oculus"] as const;
+const PLATFORM_STUDIO_KEYWORDS = ["valve", "unity", "unreal", "nvidia", "roblox", "discord"] as const;
+const ESPORTS_STUDIO_KEYWORDS = ["esl", "faceit", "hitmarker"] as const;
+const STUDIO_KEYWORD_GROUPS: ReadonlyArray<readonly [StudioType, readonly string[]]> = [
+  ["AAA", AAA_STUDIO_KEYWORDS],
+  ["Mobile", MOBILE_STUDIO_KEYWORDS],
+  ["VR/AR", VR_STUDIO_KEYWORDS],
+  ["Platform", PLATFORM_STUDIO_KEYWORDS],
+  ["Esports", ESPORTS_STUDIO_KEYWORDS],
+];
+
 export class JobAggregator {
   private providers: JobProvider[];
   private cacheExpiry: number; // milliseconds
@@ -76,73 +151,168 @@ export class JobAggregator {
     this.cacheExpiry = 6 * 60 * 60 * 1000;
   }
 
+  private async fetchProviderJobs(): Promise<RawJob[]> {
+    const results = await Promise.allSettled(this.providers.map((provider) => provider.fetchJobs()));
+    return results.flatMap((result, index) => {
+      const providerName = this.providers[index]?.name || "unknown-provider";
+      if (result.status === "fulfilled") {
+        this.logger.info(`${providerName}: fetched ${result.value.length} jobs`);
+        return result.value;
+      }
+      this.logger.error(`${providerName}: failed`, result.reason);
+      return [];
+    });
+  }
+
+  private async saveOrUpdateJob(rawJob: RawJob): Promise<"new" | "updated" | "skipped"> {
+    const job = this.rawJobToJob(rawJob);
+    if (!job.contentHash) {
+      return "skipped";
+    }
+
+    const existing = await db.select().from(jobs).where(eq(jobs.contentHash, job.contentHash)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(jobs).values(job);
+      return "new";
+    }
+
+    await db
+      .update(jobs)
+      .set({
+        ...job,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(jobs.id, existing[0].id));
+    return "updated";
+  }
+
+  private buildSearchConditions(filters: JobFilters): unknown[] {
+    const conditions: unknown[] = [];
+    if (filters.query) {
+      const searchPattern = `%${filters.query}%`;
+      conditions.push(
+        sql`(
+          ${jobs.title} LIKE ${searchPattern} OR
+          ${jobs.company} LIKE ${searchPattern} OR
+          ${jobs.description} LIKE ${searchPattern}
+        )`,
+      );
+    }
+    if (filters.company) conditions.push(like(jobs.company, `%${filters.company}%`));
+    if (filters.location) conditions.push(like(jobs.location, `%${filters.location}%`));
+    if (filters.remote !== undefined) conditions.push(eq(jobs.remote, filters.remote));
+    if (filters.hybrid !== undefined) conditions.push(eq(jobs.hybrid, filters.hybrid));
+    if (filters.experienceLevel) conditions.push(eq(jobs.experienceLevel, filters.experienceLevel));
+    if (filters.jobType) conditions.push(eq(jobs.type, filters.jobType));
+    if (filters.studioTypes && filters.studioTypes.length > 0) {
+      conditions.push(inArray(jobs.studioType, filters.studioTypes));
+    }
+    if (filters.postedWithin) {
+      const cutoffDate = new Date(Date.now() - filters.postedWithin * 24 * 60 * 60 * 1000);
+      conditions.push(gte(jobs.postedDate, cutoffDate.toISOString()));
+    }
+    return conditions;
+  }
+
+  private applyTechnologyFilter(allJobs: Job[], technologies: string[] | undefined): Job[] {
+    if (!(technologies && technologies.length > 0)) {
+      return allJobs;
+    }
+    return allJobs.filter((job) => {
+      if (!job.technologies) return false;
+      const jobTechs = job.technologies.map((technology) => technology.toLowerCase());
+      return technologies.some((technology) => jobTechs.includes(technology.toLowerCase()));
+    });
+  }
+
+  private applyGenreFilter(allJobs: Job[], gameGenres: GameGenre[] | undefined): Job[] {
+    if (!(gameGenres && gameGenres.length > 0)) {
+      return allJobs;
+    }
+    return allJobs.filter(
+      (job) => Boolean(job.gameGenres) && gameGenres.some((genre) => job.gameGenres?.includes(genre)),
+    );
+  }
+
+  private applyPlatformFilter(allJobs: Job[], platforms: Platform[] | undefined): Job[] {
+    if (!(platforms && platforms.length > 0)) {
+      return allJobs;
+    }
+    return allJobs.filter(
+      (job) => Boolean(job.platforms) && platforms.some((platform) => job.platforms?.includes(platform)),
+    );
+  }
+
+  private extractSalaryBounds(salary: Job["salary"]): { min: number | undefined; max: number | undefined } {
+    if (!salary) {
+      return { min: undefined, max: undefined };
+    }
+    if (typeof salary === "string") {
+      const numbers = salary.match(SALARY_NUMBER_PATTERN);
+      if (!numbers) {
+        return { min: undefined, max: undefined };
+      }
+      const min = Number.parseInt(numbers[0], 10) * 1000;
+      const max = numbers.length > 1 ? Number.parseInt(numbers[1], 10) * 1000 : min;
+      return { min, max };
+    }
+    return {
+      min: salary.min,
+      max: salary.max,
+    };
+  }
+
+  private applySalaryFilter(allJobs: Job[], salaryMin: number | undefined, salaryMax: number | undefined): Job[] {
+    if (!(salaryMin || salaryMax)) {
+      return allJobs;
+    }
+    return allJobs.filter((job) => {
+      const bounds = this.extractSalaryBounds(job.salary);
+      if (!(bounds.min && bounds.max)) {
+        return false;
+      }
+      if (salaryMin && bounds.max < salaryMin) return false;
+      if (salaryMax && bounds.min > salaryMax) return false;
+      return true;
+    });
+  }
+
+  private applyPostFilters(allJobs: Job[], filters: JobFilters): Job[] {
+    let filtered = this.applyTechnologyFilter(allJobs, filters.technologies);
+    filtered = this.applyGenreFilter(filtered, filters.gameGenres);
+    filtered = this.applyPlatformFilter(filtered, filters.platforms);
+    filtered = this.applySalaryFilter(filtered, filters.salaryMin, filters.salaryMax);
+    if (filters.minMatchScore !== undefined) {
+      filtered = filtered.filter(
+        (job) => job.matchScore !== undefined && job.matchScore >= filters.minMatchScore,
+      );
+    }
+    if (filters.featured !== undefined) {
+      filtered = filtered.filter((job) => job.featured === filters.featured);
+    }
+    return filtered;
+  }
+
   /**
    * Refresh jobs from all providers and update cache
    */
   async refreshJobs(): Promise<{ total: number; new: number; updated: number }> {
     this.logger.info("Starting job refresh from all providers");
 
-    // Fetch from all providers in parallel
-    const results = await Promise.allSettled(
-      this.providers.map((provider) => provider.fetchJobs()),
-    );
-
-    // Collect all successful results
-    const allRawJobs: RawJob[] = [];
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i];
-      if (result.status === "fulfilled") {
-        allRawJobs.push(...result.value);
-        this.logger.info(`${this.providers[i].name}: fetched ${result.value.length} jobs`);
-      } else {
-        this.logger.error(`${this.providers[i].name}: failed`, result.reason);
-      }
-    }
-
-    // Deduplicate across providers
+    const allRawJobs = await this.fetchProviderJobs();
     const uniqueJobs = deduplicateJobs(allRawJobs);
     this.logger.debug(`Deduplicated: ${allRawJobs.length} -> ${uniqueJobs.length} jobs`);
 
-    // Convert to Job format and save to database
     let newCount = 0;
     let updatedCount = 0;
-
-    for (const rawJob of uniqueJobs) {
-      await Promise.resolve()
-        .then(async () => {
-          const job = this.rawJobToJob(rawJob);
-          if (!job.contentHash) {
-            return;
-          }
-
-          const existing = await db
-            .select()
-            .from(jobs)
-            .where(eq(jobs.contentHash, job.contentHash))
-            .limit(1);
-
-          if (existing.length === 0) {
-            // Insert new job
-            await db.insert(jobs).values(job);
-            newCount++;
-          } else {
-            // Update existing job
-            await db
-              .update(jobs)
-              .set({
-                ...job,
-                updatedAt: new Date().toISOString(),
-              })
-              .where(eq(jobs.id, existing[0].id));
-            updatedCount++;
-          }
-        })
-        .then(
-          () => undefined,
-          (error: unknown) => {
-            this.logger.error("Failed to save job:", error);
-          },
-        );
+    const saveResults = await Promise.allSettled(uniqueJobs.map((rawJob) => this.saveOrUpdateJob(rawJob)));
+    for (const result of saveResults) {
+      if (result.status === "fulfilled") {
+        if (result.value === "new") newCount += 1;
+        if (result.value === "updated") updatedCount += 1;
+        continue;
+      }
+      this.logger.error("Failed to save job:", result.reason);
     }
 
     this.logger.info(`Refresh complete: ${newCount} new, ${updatedCount} updated`);
@@ -158,163 +328,15 @@ export class JobAggregator {
    * Search jobs with filters and pagination
    */
   async searchJobs(filters: JobFilters = {}): Promise<JobSearchResult> {
-    const {
-      query,
-      company,
-      location,
-      remote,
-      hybrid,
-      salaryMin,
-      salaryMax,
-      experienceLevel,
-      jobType,
-      technologies,
-      studioTypes,
-      gameGenres,
-      platforms,
-      postedWithin,
-      featured,
-      minMatchScore,
-      limit = 20,
-      page = 1,
-    } = filters;
-
-    // Build query conditions
-    const conditions = [];
-
-    // Text search across title, company, description
-    if (query) {
-      const searchPattern = `%${query}%`;
-      conditions.push(
-        sql`(
-          ${jobs.title} LIKE ${searchPattern} OR
-          ${jobs.company} LIKE ${searchPattern} OR
-          ${jobs.description} LIKE ${searchPattern}
-        )`,
-      );
-    }
-
-    // Company filter
-    if (company) {
-      conditions.push(like(jobs.company, `%${company}%`));
-    }
-
-    // Location filter
-    if (location) {
-      conditions.push(like(jobs.location, `%${location}%`));
-    }
-
-    // Remote/Hybrid filters
-    if (remote !== undefined) {
-      conditions.push(eq(jobs.remote, remote));
-    }
-
-    if (hybrid !== undefined) {
-      conditions.push(eq(jobs.hybrid, hybrid));
-    }
-
-    // Experience level
-    if (experienceLevel) {
-      conditions.push(eq(jobs.experienceLevel, experienceLevel));
-    }
-
-    // Job type
-    if (jobType) {
-      conditions.push(eq(jobs.type, jobType));
-    }
-
-    // Studio types
-    if (studioTypes && studioTypes.length > 0) {
-      conditions.push(inArray(jobs.studioType, studioTypes));
-    }
-
-    // Posted date filter
-    if (postedWithin) {
-      const cutoffDate = new Date(Date.now() - postedWithin * 24 * 60 * 60 * 1000);
-      conditions.push(gte(jobs.postedDate, cutoffDate.toISOString()));
-    }
-
-    // Build the query
-    const query_builder =
-      conditions.length > 0
-        ? db
-            .select()
-            .from(jobs)
-            .where(and(...conditions))
-        : db.select().from(jobs);
-
-    // Apply ordering and pagination
+    const limit = filters.limit ?? 20;
+    const page = filters.page ?? 1;
+    const conditions = this.buildSearchConditions(filters);
+    const queryBuilder =
+      conditions.length > 0 ? db.select().from(jobs).where(and(...conditions)) : db.select().from(jobs);
     const offset = (page - 1) * limit;
-    const results = await query_builder.orderBy(desc(jobs.postedDate)).limit(limit).offset(offset);
-
-    // Convert results to Job format
+    const results = await queryBuilder.orderBy(desc(jobs.postedDate)).limit(limit).offset(offset);
     const jobResults: Job[] = results.map((row) => this.dbRowToJob(row));
-
-    // Apply additional filters that require post-processing
-    let filteredJobs = jobResults;
-
-    // Technology filter
-    if (technologies && technologies.length > 0) {
-      filteredJobs = filteredJobs.filter((job) => {
-        if (!job.technologies) return false;
-        const jobTechs = job.technologies.map((t) => t.toLowerCase());
-        return technologies.some((t) => jobTechs.includes(t.toLowerCase()));
-      });
-    }
-
-    // Genre filter
-    if (gameGenres && gameGenres.length > 0) {
-      filteredJobs = filteredJobs.filter((job) => {
-        if (!job.gameGenres) return false;
-        return gameGenres.some((g) => job.gameGenres?.includes(g));
-      });
-    }
-
-    // Platform filter
-    if (platforms && platforms.length > 0) {
-      filteredJobs = filteredJobs.filter((job) => {
-        if (!job.platforms) return false;
-        return platforms.some((p) => job.platforms?.includes(p));
-      });
-    }
-
-    // Salary filter (requires parsing)
-    if (salaryMin || salaryMax) {
-      filteredJobs = filteredJobs.filter((job) => {
-        if (!job.salary) return false;
-
-        let jobMin: number | undefined;
-        let jobMax: number | undefined;
-
-        if (typeof job.salary === "string") {
-          const numbers = job.salary.match(/\d+/g);
-          if (numbers) {
-            jobMin = Number.parseInt(numbers[0], 10) * 1000;
-            jobMax = numbers.length > 1 ? Number.parseInt(numbers[1], 10) * 1000 : jobMin;
-          }
-        } else {
-          jobMin = job.salary.min;
-          jobMax = job.salary.max;
-        }
-
-        if (salaryMin && jobMax && jobMax < salaryMin) return false;
-        if (salaryMax && jobMin && jobMin > salaryMax) return false;
-
-        return true;
-      });
-    }
-
-    // Match score filter
-    if (minMatchScore !== undefined) {
-      filteredJobs = filteredJobs.filter(
-        (job) => job.matchScore && job.matchScore >= minMatchScore,
-      );
-    }
-
-    // Featured filter
-    if (featured !== undefined) {
-      filteredJobs = filteredJobs.filter((job) => job.featured === featured);
-    }
+    const filteredJobs = this.applyPostFilters(jobResults, filters);
 
     return {
       jobs: filteredJobs,
@@ -557,7 +579,7 @@ export class JobAggregator {
    * Convert database row to Job format
    */
   private dbRowToJob(row: typeof jobs.$inferSelect): Job {
-    const job: Job = {
+    const baseJob: Job = {
       id: row.id,
       title: row.title,
       company: row.company,
@@ -571,43 +593,30 @@ export class JobAggregator {
       gameGenres: this.normalizeGameGenres(row.gameGenres),
       platforms: this.normalizePlatforms(row.platforms),
     };
-    if (row.hybrid !== null && row.hybrid !== undefined) {
-      job.hybrid = row.hybrid;
-    }
-    if (Array.isArray(row.requirements)) {
-      job.requirements = row.requirements;
-    }
-    if (Array.isArray(row.technologies)) {
-      job.technologies = row.technologies;
-    }
-    const experienceLevel = this.normalizeExperienceLevel(row.experienceLevel);
-    if (experienceLevel) {
-      job.experienceLevel = experienceLevel;
-    }
-    if (row.url !== null && row.url !== undefined) {
-      job.url = row.url;
-    }
-    if (row.source !== null && row.source !== undefined) {
-      job.source = row.source;
-    }
-    if (row.contentHash !== null && row.contentHash !== undefined) {
-      job.contentHash = row.contentHash;
-    }
-    if (Array.isArray(row.tags)) {
-      job.tags = row.tags;
-    }
-    if (row.companyLogo !== null && row.companyLogo !== undefined) {
-      job.companyLogo = row.companyLogo;
-    }
-    if (row.applicationUrl !== null && row.applicationUrl !== undefined) {
-      job.applicationUrl = row.applicationUrl;
-    }
+    return this.applyOptionalRowFields(baseJob, row);
+  }
 
-    return job;
+  private applyOptionalRowFields(
+    job: Job,
+    row: typeof jobs.$inferSelect,
+  ): Job {
+    return {
+      ...job,
+      hybrid: row.hybrid ?? undefined,
+      requirements: Array.isArray(row.requirements) ? row.requirements : undefined,
+      technologies: Array.isArray(row.technologies) ? row.technologies : undefined,
+      experienceLevel: this.normalizeExperienceLevel(row.experienceLevel),
+      url: row.url ?? undefined,
+      source: row.source ?? undefined,
+      contentHash: row.contentHash ?? undefined,
+      tags: Array.isArray(row.tags) ? row.tags : undefined,
+      companyLogo: row.companyLogo ?? undefined,
+      applicationUrl: row.applicationUrl ?? undefined,
+    };
   }
 
   private normalizeSalary(value: Record<string, unknown> | null): Job["salary"] | undefined {
-    if (!value) return undefined;
+    if (!value) return ;
 
     if (typeof value.label === "string" && value.label.trim().length > 0) {
       return value.label;
@@ -630,36 +639,35 @@ export class JobAggregator {
       return normalized;
     }
 
-    return undefined;
+    return ;
   }
 
   // Helper methods for data enrichment
 
   private detectRemote(location: string): boolean {
-    const remotKeywords = ["remote", "work from home", "wfh", "anywhere"];
     const locationLower = location.toLowerCase();
-    return remotKeywords.some((keyword) => locationLower.includes(keyword));
+    return REMOTE_KEYWORDS.some((keyword) => locationLower.includes(keyword));
   }
 
   private normalizeStudioType(value: string | null): StudioType | undefined {
-    if (!isOneOf(JOB_STUDIO_TYPES, value)) return undefined;
+    if (!isOneOf(JOB_STUDIO_TYPES, value)) return ;
     return value;
   }
 
   private normalizeGameGenres(value: string[] | null): GameGenre[] | undefined {
-    if (!Array.isArray(value)) return undefined;
+    if (!Array.isArray(value)) return ;
     return value.filter((genre): genre is GameGenre => isOneOf(JOB_GAME_GENRES, genre));
   }
 
   private normalizePlatforms(value: string[] | null): Platform[] | undefined {
-    if (!Array.isArray(value)) return undefined;
+    if (!Array.isArray(value)) return ;
     return value.filter((platform): platform is Platform =>
       isOneOf(JOB_SUPPORTED_PLATFORMS, platform),
     );
   }
 
   private normalizeExperienceLevel(value: string | null): JobExperienceLevel | undefined {
-    if (!isOneOf(JOB_EXPERIENCE_LEVELS, value)) return undefined;
+    if (!isOneOf(JOB_EXPERIENCE_LEVELS, value)) return ;
     return value;
   }
 
@@ -669,8 +677,7 @@ export class JobAggregator {
   }
 
   private detectHybrid(location: string): boolean {
-    const hybridKeywords = ["hybrid"];
-    return hybridKeywords.some((keyword) => location.toLowerCase().includes(keyword));
+    return HYBRID_KEYWORDS.some((keyword) => location.toLowerCase().includes(keyword));
   }
 
   private detectExperienceLevel(title: string): JobExperienceLevel | undefined {
@@ -683,7 +690,7 @@ export class JobAggregator {
     if (titleLower.includes("junior") || titleLower.includes("jr")) return "junior";
     if (titleLower.includes("entry") || titleLower.includes("intern")) return "entry";
 
-    return undefined;
+    return ;
   }
 
   private detectJobType(title: string): JobType {
@@ -699,77 +706,11 @@ export class JobAggregator {
 
   private detectStudioType(company: string): StudioType {
     const companyLower = company.toLowerCase();
-
-    const aaaStudios = [
-      "riot",
-      "epic",
-      "blizzard",
-      "electronic arts",
-      "ea",
-      "activision",
-      "ubisoft",
-      "rockstar",
-      "bungie",
-      "naughty dog",
-      "insomniac",
-      "respawn",
-      "guerrilla",
-      "treyarch",
-      "sledgehammer",
-      "infinity ward",
-      "2k",
-      "square enix",
-      "obsidian",
-      "gearbox",
-      "playground games",
-      "sucker punch",
-      "arkane",
-      "machinegames",
-      "machine games",
-      "cd projekt",
-      "wargaming",
-      "mojang",
-      "firaxis",
-      "avalanche",
-      "amplitude",
-      "cloud imperium",
-      "cloud chamber",
-      "netflix games",
-      "lightspeed",
-      "striking distance",
-      "bandai namco",
-      "capcom",
-      "sega",
-      "konami",
-      "take-two",
-      "take two",
-      "bethesda",
-      "larian",
-      "double fine",
-      "second dinner",
-      "archetype entertainment",
-    ];
-    const mobileStudios = [
-      "supercell",
-      "zynga",
-      "king",
-      "jam city",
-      "wildlife",
-      "playq",
-      "voodoo",
-      "niantic",
-      "pokemon",
-      "demiurge",
-    ];
-    const vrStudios = ["meta", "oculus"];
-    const platformStudios = ["valve", "unity", "unreal", "nvidia", "roblox", "discord"];
-    const esportsStudios = ["esl", "faceit", "hitmarker"];
-
-    if (aaaStudios.some((s) => companyLower.includes(s))) return "AAA";
-    if (mobileStudios.some((s) => companyLower.includes(s))) return "Mobile";
-    if (vrStudios.some((s) => companyLower.includes(s))) return "VR/AR";
-    if (platformStudios.some((s) => companyLower.includes(s))) return "Platform";
-    if (esportsStudios.some((s) => companyLower.includes(s))) return "Esports";
+    for (const [studioType, keywords] of STUDIO_KEYWORD_GROUPS) {
+      if (keywords.some((keyword) => companyLower.includes(keyword))) {
+        return studioType;
+      }
+    }
 
     return "Indie";
   }

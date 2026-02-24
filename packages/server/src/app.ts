@@ -26,7 +26,7 @@ import {
   statsRoutes,
   studioRoutes,
   userRoutes,
-} from "./routes";
+} from "./routes/route-modules";
 import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
@@ -82,10 +82,10 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
     toApiScopedPath(API_ENDPOINTS.health),
     async () => {
       const healthResult = await settle(
-        (async () => {
+        Promise.resolve().then(() => {
           sqlite.exec(HEALTHCHECK_PROBE_SQL);
           return true;
-        })(),
+        }),
       );
       const dbOk = healthResult.status === "fulfilled";
       return {

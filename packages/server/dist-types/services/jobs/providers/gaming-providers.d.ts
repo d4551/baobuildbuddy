@@ -18,7 +18,7 @@ export declare class GamingPortalProvider implements JobProvider {
     enabled: boolean;
     private readonly portalId;
     constructor(portalId: GamingPortalId);
-    fetchJobs(_filters?: JobFilters): Promise<RawJob[]>;
+    fetchJobs(): Promise<RawJob[]>;
 }
 /**
  * Shared Hitmarker provider instance.

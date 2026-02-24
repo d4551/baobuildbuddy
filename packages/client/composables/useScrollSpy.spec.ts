@@ -44,103 +44,102 @@ const createEntry = (target: Element, intersectionRatio: number): IntersectionOb
   intersectionRatio,
 });
 
+const hasDomEnvironment = (): boolean =>
+  typeof window !== "undefined" && typeof document !== "undefined";
+
 beforeEach(() => {
   MockIntersectionObserver.latest = null;
   vi.restoreAllMocks();
   globalThis.IntersectionObserver = MockIntersectionObserver;
 });
 
-const hasDomEnvironment = (): boolean =>
-  typeof window !== "undefined" && typeof document !== "undefined";
+function createScopedScrollSpy() {
+  const scope = effectScope();
+  const scrollSpy = scope.run(() => useScrollSpy());
+  if (!scrollSpy) {
+    throw new Error("Scroll spy did not initialize");
+  }
+  return { scope, scrollSpy };
+}
+
+function assertSyncsFromHash(): void {
+  if (!hasDomEnvironment()) {
+    return;
+  }
+
+  const { scope, scrollSpy } = createScopedScrollSpy();
+  const replaceStateSpy = vi.spyOn(window.history, "replaceState");
+
+  const section = document.createElement("section");
+  section.id = "overview";
+  section.scrollIntoView = vi.fn();
+  section.focus = vi.fn();
+
+  scrollSpy.setSectionRef("overview", section);
+  const restored = scrollSpy.syncFromHash("#overview");
+
+  expect(restored).toBe(true);
+  expect(scrollSpy.activeSectionId.value).toBe("overview");
+  expect(section.scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "start" });
+  expect(section.focus).not.toHaveBeenCalled();
+  expect(replaceStateSpy).not.toHaveBeenCalled();
+
+  scope.stop();
+}
+
+function assertUpdatesActiveSectionFromObserver(): void {
+  if (!hasDomEnvironment()) {
+    return;
+  }
+
+  const { scope, scrollSpy } = createScopedScrollSpy();
+  const replaceStateSpy = vi.spyOn(window.history, "replaceState");
+
+  const sectionOne = document.createElement("section");
+  sectionOne.id = "one";
+  const sectionTwo = document.createElement("section");
+  sectionTwo.id = "two";
+  scrollSpy.setSectionRef("one", sectionOne);
+  scrollSpy.setSectionRef("two", sectionTwo);
+
+  scrollSpy.startObserver();
+  const observer = MockIntersectionObserver.latest;
+  if (!observer) {
+    throw new Error("Observer was not created");
+  }
+
+  observer.trigger([createEntry(sectionOne, 0.3), createEntry(sectionTwo, 0.8)]);
+
+  expect(scrollSpy.activeSectionId.value).toBe("two");
+  expect(replaceStateSpy).toHaveBeenCalledWith({}, "", "#two");
+
+  scope.stop();
+}
+
+function assertDoesNotDuplicateHashUpdates(): void {
+  if (!hasDomEnvironment()) {
+    return;
+  }
+
+  const { scope, scrollSpy } = createScopedScrollSpy();
+  const replaceStateSpy = vi.spyOn(window.history, "replaceState");
+
+  const section = document.createElement("section");
+  section.id = "same";
+  section.scrollIntoView = vi.fn();
+  section.focus = vi.fn();
+  scrollSpy.setSectionRef("same", section);
+
+  scrollSpy.scrollToSection("same", { smooth: false, focus: false, updateHash: true });
+  scrollSpy.scrollToSection("same", { smooth: false, focus: false, updateHash: true });
+
+  expect(replaceStateSpy).toHaveBeenCalledTimes(1);
+
+  scope.stop();
+}
 
 describe("useScrollSpy", () => {
-  it("syncs from hash and scrolls to registered section", () => {
-    if (!hasDomEnvironment()) {
-      return;
-    }
-    const scope = effectScope();
-    const spy = vi.spyOn(window.history, "replaceState");
-    const scrollSpy = scope.run(() => useScrollSpy());
-    if (!scrollSpy) {
-      throw new Error("Scroll spy did not initialize");
-    }
-
-    const section = document.createElement("section");
-    section.id = "overview";
-    const scrollIntoViewMock = vi.fn();
-    const focusMock = vi.fn();
-    section.scrollIntoView = scrollIntoViewMock;
-    section.focus = focusMock;
-
-    scrollSpy.setSectionRef("overview", section);
-    const restored = scrollSpy.syncFromHash("#overview");
-
-    expect(restored).toBe(true);
-    expect(scrollSpy.activeSectionId.value).toBe("overview");
-    expect(scrollIntoViewMock).toHaveBeenCalledWith({
-      behavior: "auto",
-      block: "start",
-    });
-    expect(focusMock).not.toHaveBeenCalled();
-    expect(spy).not.toHaveBeenCalled();
-
-    scope.stop();
-  });
-
-  it("updates active section from intersection observer events", () => {
-    if (!hasDomEnvironment()) {
-      return;
-    }
-    const scope = effectScope();
-    const replaceStateSpy = vi.spyOn(window.history, "replaceState");
-    const scrollSpy = scope.run(() => useScrollSpy());
-    if (!scrollSpy) {
-      throw new Error("Scroll spy did not initialize");
-    }
-
-    const sectionOne = document.createElement("section");
-    sectionOne.id = "one";
-    const sectionTwo = document.createElement("section");
-    sectionTwo.id = "two";
-    scrollSpy.setSectionRef("one", sectionOne);
-    scrollSpy.setSectionRef("two", sectionTwo);
-
-    scrollSpy.startObserver();
-
-    const observer = MockIntersectionObserver.latest;
-    if (!observer) {
-      throw new Error("Observer was not created");
-    }
-
-    observer.trigger([createEntry(sectionOne, 0.3), createEntry(sectionTwo, 0.8)]);
-
-    expect(scrollSpy.activeSectionId.value).toBe("two");
-    expect(replaceStateSpy).toHaveBeenCalledWith({}, "", "#two");
-
-    scope.stop();
-  });
-
-  it("does not duplicate hash updates when the active section is unchanged", () => {
-    if (!hasDomEnvironment()) {
-      return;
-    }
-    const scope = effectScope();
-    const replaceStateSpy = vi.spyOn(window.history, "replaceState");
-    const scrollSpy = scope.run(() => useScrollSpy());
-    if (!scrollSpy) {
-      throw new Error("Scroll spy did not initialize");
-    }
-
-    const section = document.createElement("section");
-    section.id = "same";
-    section.scrollIntoView = vi.fn();
-    section.focus = vi.fn();
-    scrollSpy.setSectionRef("same", section);
-
-    scrollSpy.scrollToSection("same", { smooth: false, focus: false, updateHash: true });
-    scrollSpy.scrollToSection("same", { smooth: false, focus: false, updateHash: true });
-
-    expect(replaceStateSpy).toHaveBeenCalledTimes(1);
-    scope.stop();
-  });
+  it("syncs from hash and scrolls to registered section", assertSyncsFromHash);
+  it("updates active section from intersection observer events", assertUpdatesActiveSectionFromObserver);
+  it("does not duplicate hash updates when the active section is unchanged", assertDoesNotDuplicateHashUpdates);
 });

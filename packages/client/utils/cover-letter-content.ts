@@ -8,6 +8,7 @@ const COVER_LETTER_PRIMARY_SECTION_KEYS = [
   "conclusion",
   "signature",
 ] as const;
+const SECTION_SPLIT_PATTERN = /\n{2,}/u;
 
 /**
  * Converts structured cover-letter content into readable multiline text for previews/editing.
@@ -60,7 +61,7 @@ export function plainTextToCoverLetterContent(value: string): CoverLetterData["c
   if (trimmedValue.length === 0) return {};
 
   const sections = trimmedValue
-    .split(/\n{2,}/)
+    .split(SECTION_SPLIT_PATTERN)
     .map((section) => section.trim())
     .filter((section) => section.length > 0);
 

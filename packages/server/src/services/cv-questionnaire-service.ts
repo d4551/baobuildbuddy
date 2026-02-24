@@ -6,6 +6,10 @@ import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { AIService } from "./ai/ai-service";
 import { cvQuestionnaireQuestionsPrompt, cvQuestionnaireSynthesizePrompt } from "./ai/prompts";
 
+const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
+const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;
+const JSON_OBJECT_PATTERN = /\{[\s\S]*\}/;
+
 export interface CvQuestion {
   id: string;
   question: string;
@@ -30,11 +34,11 @@ async function getAIService(): Promise<AIService> {
 }
 
 function extractJson(text: string): string {
-  const codeFence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const codeFence = text.match(JSON_CODE_FENCE_PATTERN);
   if (codeFence?.[1]) return codeFence[1].trim();
-  const arrayMatch = text.match(/\[[\s\S]*\]/);
+  const arrayMatch = text.match(JSON_ARRAY_PATTERN);
   if (arrayMatch) return arrayMatch[0];
-  const objectMatch = text.match(/\{[\s\S]*\}/);
+  const objectMatch = text.match(JSON_OBJECT_PATTERN);
   if (objectMatch) return objectMatch[0];
   return text.trim();
 }

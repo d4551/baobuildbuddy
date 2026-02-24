@@ -118,11 +118,11 @@ function prevQuestion() {
   if (currentQuestionIndex.value > 0) currentQuestionIndex.value--;
 }
 
-function nextQuestion() {
+async function nextQuestion() {
   if (currentQuestionIndex.value < aiQuestions.value.length - 1) {
     currentQuestionIndex.value++;
   } else {
-    finishAndSynthesize();
+    await finishAndSynthesize();
   }
 }
 
@@ -160,7 +160,7 @@ async function finishAndSynthesize() {
       : "";
   if (resumeId.length > 0) {
     $toast.success(t("resumeBuildPage.toasts.resumeCreated"));
-    router.push(APP_ROUTE_BUILDERS.resumeEditor(resumeId));
+    await router.push(APP_ROUTE_BUILDERS.resumeEditor(resumeId));
     return;
   }
 

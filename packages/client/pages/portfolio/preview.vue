@@ -5,8 +5,8 @@ const router = useRouter();
 const { portfolio, projects, loading, fetchPortfolio, exportPortfolio } = usePortfolio();
 const { t } = useI18n();
 
-onMounted(() => {
-  fetchPortfolio();
+onMounted(async () => {
+  await fetchPortfolio();
 });
 
 async function handleExport() {

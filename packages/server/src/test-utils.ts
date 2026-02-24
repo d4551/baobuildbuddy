@@ -24,10 +24,7 @@ export function createTestDbPath(prefix: string): string {
 
 export async function requestJson<T>(
   app: AppRequestHandler,
-  method: string,
-  path: string,
-  body?: unknown,
-  headers?: Record<string, string>,
+  ...[method, path, body, headers]: [string, string, unknown?, Record<string, string>?]
 ): Promise<ApiResponseEnvelope<T>> {
   const response = await app.handle(
     new Request(`http://localhost${path}`, {

@@ -48,38 +48,36 @@ const getLineFromOffset = (text: string, offset: number): number => {
 };
 
 const collectSourceFiles = async (): Promise<string[]> => {
-  const files: string[] = [];
+  const fileGroups = await Promise.all(
+    scanRoots.map(async (root) => {
+      const glob = new Bun.Glob(`${root}/**/*`);
+      const relativeFilePaths = await Array.fromAsync(
+        glob.scan({ cwd: projectRoot, onlyFiles: true }),
+      );
 
-  for (const root of scanRoots) {
-    const glob = new Bun.Glob(`${root}/**/*`);
-    for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
-      const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
-      if (!hasAllowedExtension(normalizedPath) || shouldIgnorePath(normalizedPath)) {
-        continue;
-      }
-      files.push(normalizedPath);
-    }
-  }
+      return relativeFilePaths
+        .map((relativeFilePath) => relativeFilePath.replace(/\\/gu, "/"))
+        .filter((normalizedPath) => hasAllowedExtension(normalizedPath) && !shouldIgnorePath(normalizedPath));
+    }),
+  );
 
-  return files;
+  return fileGroups.flat();
 };
 
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectSourceFiles();
-  const violations: Violation[] = [];
-
-  for (const filePath of files) {
-    const fileContent = await Bun.file(filePath).text();
-    tryPattern.lastIndex = 0;
-    for (const match of fileContent.matchAll(tryPattern)) {
-      violations.push({
+  const violationGroups = await Promise.all(
+    files.map(async (filePath) => {
+      const fileContent = await Bun.file(filePath).text();
+      tryPattern.lastIndex = 0;
+      return Array.from(fileContent.matchAll(tryPattern), (match) => ({
         filePath,
         line: getLineFromOffset(fileContent, match.index ?? 0),
-      });
-    }
-  }
+      }));
+    }),
+  );
 
-  return violations;
+  return violationGroups.flat();
 };
 
 const main = async (): Promise<void> => {
@@ -91,8 +89,9 @@ const main = async (): Promise<void> => {
   }
 
   await writeError("try/catch blocks are disallowed. Found:");
-  for (const violation of violations) {
-    await writeError(`- ${violation.filePath}:${violation.line}`);
+  const lines = violations.map((violation) => `- ${violation.filePath}:${violation.line}`);
+  if (lines.length > 0) {
+    await writeError(lines.join("\n"));
   }
 
   process.exit(1);

@@ -14,11 +14,14 @@ import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { interviewSessions } from "../db/schema/interviews";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
+import type { AIService } from "../services/ai/ai-service";
 import { interviewService } from "../services/interview-service";
 
-type AIServiceInstance = import("../services/ai/ai-service").AIService;
+type AIServiceInstance = AIService;
 type InterviewSocket = { send: (data: string) => void };
 type JsonRecord = Record<string, unknown>;
+type InterviewSessionRow = typeof interviewSessions.$inferSelect;
+type InterviewSessionQuestion = { id: string; question: string; type: string };
 
 async function getAIService(): Promise<AIServiceInstance> {
   const { AIService } = await import("../services/ai/ai-service");
@@ -96,7 +99,7 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
     studioId: t.Optional(t.String({ maxLength: 100 })),
     config: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
-  async open(ws) {
+  open(ws) {
     ws.send(
       JSON.stringify({
         type: "connected",
@@ -209,6 +212,144 @@ function parseFeedback(response: string): InterviewFeedback {
   };
 }
 
+function sendInterviewError(socket: InterviewSocket, message: string): void {
+  socket.send(JSON.stringify({ type: "error", message }));
+}
+
+async function getInterviewSessionById(sessionId: string): Promise<InterviewSessionRow | null> {
+  const sessionRows = await db
+    .select()
+    .from(interviewSessions)
+    .where(eq(interviewSessions.id, sessionId));
+  return sessionRows[0] ?? null;
+}
+
+function getSessionResponses(session: InterviewSessionRow): JsonRecord[] {
+  if (!Array.isArray(session.responses)) {
+    return [];
+  }
+  return session.responses.filter(isRecord);
+}
+
+function getSessionQuestions(session: InterviewSessionRow): InterviewSessionQuestion[] {
+  if (!Array.isArray(session.questions)) {
+    return [];
+  }
+  return session.questions.filter(isQuestionRecord);
+}
+
+function createFeedbackPrompt(content: string, currentQuestion: InterviewSessionQuestion | undefined): string {
+  return `You are an interview coach. Evaluate this interview response.
+
+Question: ${currentQuestion?.question || "Unknown question"}
+Category: ${currentQuestion?.type || "general"}
+Candidate Response: ${content}
+
+Return a JSON object:
+{"score": 0-100, "strengths": ["..."], "improvements": ["..."], "summary": "one sentence feedback"}
+
+Only return the JSON object.`;
+}
+
+function getDefaultFeedback(): InterviewFeedback {
+  return {
+    score: 70,
+    strengths: ["Response provided"],
+    improvements: ["Configure AI for detailed feedback"],
+    summary: "Response recorded. Configure an AI provider for detailed feedback.",
+  };
+}
+
+function getAiFallbackFeedback(): InterviewFeedback {
+  return {
+    score: 65,
+    strengths: ["Attempted answer"],
+    improvements: ["More detail needed"],
+    summary: "Response recorded.",
+  };
+}
+
+async function evaluateInterviewResponse(
+  content: string,
+  currentQuestion: InterviewSessionQuestion | undefined,
+): Promise<InterviewFeedback> {
+  const aiServiceResult = await settle(getAIService());
+  if (aiServiceResult.status === "rejected") {
+    return getDefaultFeedback();
+  }
+
+  const prompt = createFeedbackPrompt(content, currentQuestion);
+  const feedbackResult = await settle(aiServiceResult.value.generate(prompt, { temperature: 0.3 }));
+  if (feedbackResult.status === "rejected") {
+    return getAiFallbackFeedback();
+  }
+
+  return parseFeedback(feedbackResult.value.content);
+}
+
+function buildSessionResponseRecord(
+  questionIndex: number,
+  currentQuestion: InterviewSessionQuestion | undefined,
+  content: string,
+  feedback: InterviewFeedback,
+): JsonRecord {
+  return {
+    questionIndex,
+    question: currentQuestion?.question,
+    answer: content,
+    feedback,
+    timestamp: new Date().toISOString(),
+    questionCategory: currentQuestion?.type,
+  };
+}
+
+function getRecommendations(avgScore: number): string[] {
+  if (avgScore >= 80) {
+    return ["Strong performance! Focus on refining edge cases."];
+  }
+  if (avgScore >= 60) {
+    return [
+      "Good foundation. Practice more specific examples.",
+      "Review common follow-up questions.",
+    ];
+  }
+  return [
+    "Consider more structured practice.",
+    "Research the company more thoroughly.",
+    "Prepare concrete examples from your experience.",
+  ];
+}
+
+function buildFinalAnalysis(session: InterviewSessionRow, responses: JsonRecord[]) {
+  const totalScore = responses.reduce((sum, responseRecord) => {
+    const { score } = getFeedbackSummary(responseRecord.feedback);
+    return Number.isFinite(score) ? sum + score : sum;
+  }, 0);
+
+  const answeredQuestions = responses.length;
+  const avgScore = answeredQuestions > 0 ? Math.round(totalScore / answeredQuestions) : 0;
+  const responseStrengths = responses.flatMap((responseRecord) => {
+    const { strengths } = getFeedbackSummary(responseRecord.feedback);
+    return strengths;
+  });
+  const responseImprovements = responses.flatMap((responseRecord) => {
+    const { improvements } = getFeedbackSummary(responseRecord.feedback);
+    return improvements;
+  });
+  const totalQuestions = Array.isArray(session.questions) ? session.questions.length : 0;
+  const strengths = Array.from(new Set(responseStrengths)).slice(0, 5);
+  const weaknesses = Array.from(new Set(responseImprovements)).slice(0, 5);
+
+  return {
+    overallScore: avgScore,
+    totalQuestions,
+    answeredQuestions,
+    strengths,
+    weaknesses,
+    recommendations: getRecommendations(avgScore),
+  };
+}
+
 async function handleStartSession(socket: InterviewSocket, data: InterviewMessage) {
   const studioId = data.studioId;
   if (!studioId) {
@@ -253,76 +394,26 @@ async function handleSubmitResponse(socket: InterviewSocket, data: InterviewMess
   const sessionId = data.sessionId;
   const content = data.content;
 
-  if (!sessionId || !content) {
-    socket.send(JSON.stringify({ type: "error", message: "sessionId and content are required" }));
+  if (!(sessionId && content)) {
+    sendInterviewError(socket, "sessionId and content are required");
     return;
   }
 
-  const sessionRows = await db
-    .select()
-    .from(interviewSessions)
-    .where(eq(interviewSessions.id, sessionId));
-  const session = sessionRows[0];
+  const session = await getInterviewSessionById(sessionId);
   if (!session) {
-    socket.send(JSON.stringify({ type: "error", message: "Session not found" }));
+    sendInterviewError(socket, "Session not found");
     return;
   }
 
-  const responses: JsonRecord[] = Array.isArray(session.responses)
-    ? session.responses.filter(isRecord)
-    : [];
-  const questions = Array.isArray(session.questions)
-    ? session.questions.filter(isQuestionRecord)
-    : [];
+  const responses = getSessionResponses(session);
+  const questions = getSessionQuestions(session);
   const questionIndex = responses.length;
   const currentQuestion = questions[questionIndex];
-
-  let feedback: InterviewFeedback = {
-    score: 70,
-    strengths: ["Response provided"],
-    improvements: ["Configure AI for detailed feedback"],
-    summary: "Response recorded. Configure an AI provider for detailed feedback.",
-  };
-
-  const aiServiceResult = await settle(getAIService());
-  if (aiServiceResult.status === "fulfilled") {
-    const prompt = `You are an interview coach. Evaluate this interview response.
-
-Question: ${currentQuestion?.question || "Unknown question"}
-Category: ${currentQuestion?.type || "general"}
-Candidate Response: ${content}
-
-Return a JSON object:
-{"score": 0-100, "strengths": ["..."], "improvements": ["..."], "summary": "one sentence feedback"}
-
-Only return the JSON object.`;
-    const feedbackResult = await settle(
-      aiServiceResult.value.generate(prompt, { temperature: 0.3 }),
-    );
-    if (feedbackResult.status === "fulfilled") {
-      feedback = parseFeedback(feedbackResult.value.content);
-    } else {
-      feedback = {
-        score: 65,
-        strengths: ["Attempted answer"],
-        improvements: ["More detail needed"],
-        summary: "Response recorded.",
-      };
-    }
-  }
-
-  // Save response
-  const newResponse: JsonRecord = {
-    questionIndex,
-    question: currentQuestion?.question,
-    answer: content,
-    feedback,
-    timestamp: new Date().toISOString(),
-    questionCategory: currentQuestion?.type,
-  };
+  const feedback = await evaluateInterviewResponse(content, currentQuestion);
+  const newResponse = buildSessionResponseRecord(questionIndex, currentQuestion, content, feedback);
 
   const nextQuestion = questions[questionIndex + 1] ?? null;
-  const nextQuestionValue = questionIndex + 1;
+  const responseIndex = questionIndex + 1;
   const isComplete = responses.length + 1 >= questions.length;
 
   responses.push(newResponse);
@@ -339,7 +430,7 @@ Only return the JSON object.`;
       questionIndex,
       isComplete,
       nextQuestion: isComplete ? null : nextQuestion,
-      responseIndex: nextQuestionValue,
+      responseIndex,
     }),
   );
 }
@@ -347,65 +438,18 @@ Only return the JSON object.`;
 async function handleEndSession(socket: InterviewSocket, data: InterviewMessage) {
   const sessionId = data.sessionId;
   if (!sessionId) {
-    socket.send(JSON.stringify({ type: "error", message: "sessionId is required" }));
+    sendInterviewError(socket, "sessionId is required");
     return;
   }
 
-  const sessionRows = await db
-    .select()
-    .from(interviewSessions)
-    .where(eq(interviewSessions.id, sessionId));
-  const session = sessionRows[0];
+  const session = await getInterviewSessionById(sessionId);
   if (!session) {
-    socket.send(JSON.stringify({ type: "error", message: "Session not found" }));
+    sendInterviewError(socket, "Session not found");
     return;
   }
 
-  const responses: JsonRecord[] = Array.isArray(session.responses)
-    ? session.responses.filter(isRecord)
-    : [];
-  const totalScore = responses.reduce((sum, responseRecord) => {
-    const { score } = getFeedbackSummary(responseRecord.feedback);
-    return Number.isFinite(score) ? sum + score : sum;
-  }, 0);
-
-  const answeredQuestions = responses.length;
-  const avgScore = answeredQuestions > 0 ? Math.round(totalScore / answeredQuestions) : 0;
-  const responseStrengths = responses.flatMap((responseRecord) => {
-    const { strengths } = getFeedbackSummary(responseRecord.feedback);
-    return strengths;
-  });
-
-  const responseImprovements = responses.flatMap((responseRecord) => {
-    const { improvements } = getFeedbackSummary(responseRecord.feedback);
-    return improvements;
-  });
-
-  const totalQuestions = Array.isArray(session.questions) ? session.questions.length : 0;
-  const finalAnalysis = {
-    overallScore: avgScore,
-    totalQuestions,
-    answeredQuestions,
-    strengths: Array.from(
-      new Set(responseStrengths.filter((value): value is string => typeof value === "string")),
-    ).slice(0, 5),
-    weaknesses: Array.from(
-      new Set(responseImprovements.filter((value): value is string => typeof value === "string")),
-    ).slice(0, 5),
-    recommendations:
-      avgScore >= 80
-        ? ["Strong performance! Focus on refining edge cases."]
-        : avgScore >= 60
-          ? [
-              "Good foundation. Practice more specific examples.",
-              "Review common follow-up questions.",
-            ]
-          : [
-              "Consider more structured practice.",
-              "Research the company more thoroughly.",
-              "Prepare concrete examples from your experience.",
-            ],
-  };
+  const responses = getSessionResponses(session);
+  const finalAnalysis = buildFinalAnalysis(session, responses);
 
   await db
     .update(interviewSessions)

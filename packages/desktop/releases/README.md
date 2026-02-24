@@ -2,6 +2,36 @@
 
 Generated: synchronized with current release artifacts
 
+## Quality Gate Before Packaging
+
+Run from repo root before desktop release packaging:
+
+```bash
+bun run lint
+bun run typecheck
+bun run test
+bun run build
+bun run build:desktop
+```
+
+Packaging docs in this file assume the above succeeds without masked diagnostics.
+
+Current command outcomes:
+
+- `bun run lint`: pass, with `255` Biome warnings (visible, unmasked).
+- `bun run --filter '@bao/client' lint`: pass with no warnings.
+- `bun run typecheck`: pass.
+- `bun run test`: pass (`66` server tests, `19` client tests).
+- `bun run build`: pass.
+- `CI=true bun run build:desktop`: pass.
+
+Optional SSR/page validation before packaging (when validating UI render contracts):
+
+```bash
+PORT=4105 bun run --filter '@bao/client' preview
+VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
+```
+
 ## Regeneration workflow (macOS host)
 
 Build commands used to regenerate canonical artifacts:

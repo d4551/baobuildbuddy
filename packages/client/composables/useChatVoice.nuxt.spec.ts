@@ -27,18 +27,16 @@ const stopSpeaking = vi.fn();
 
 function useNuxtStateMock(
   key: typeof STATE_KEYS.AI_CHAT_AUTO_SPEAK,
-  initializer?: () => boolean,
+  _initializer?: () => boolean,
 ): Ref<boolean>;
 function useNuxtStateMock(
   key: typeof STATE_KEYS.AI_CHAT_VOICE_ID,
-  initializer?: () => string,
+  _initializer?: () => string,
 ): Ref<string>;
 function useNuxtStateMock(
   key: string,
-  initializer?: () => boolean | string,
+  _initializer?: () => boolean | string,
 ): Ref<boolean | string> {
-  void initializer;
-
   if (key === STATE_KEYS.AI_CHAT_AUTO_SPEAK) {
     return autoSpeakState;
   }
@@ -90,79 +88,87 @@ beforeEach(() => {
   resetSpeechState();
 });
 
-describe("useChatVoice", () => {
-  it("resolves canonical speech error code to i18n message key", async () => {
-    const draft = ref("");
-    const locale = ref("en-US");
-    const messages = ref<ChatMessage[]>([]);
-    const chatVoice = useChatVoice({ draft, locale, messages });
+async function assertResolvesSpeechErrorMessageKey(): Promise<void> {
+  const draft = ref("");
+  const locale = ref("en-US");
+  const messages = ref<ChatMessage[]>([]);
+  const chatVoice = useChatVoice({ draft, locale, messages });
 
-    expect(chatVoice.errorMessageKey.value).toBe("");
+  expect(chatVoice.errorMessageKey.value).toBe("");
 
-    speechError.value = AI_CHAT_VOICE_ERROR_CODES.network;
-    await nextTick();
+  speechError.value = AI_CHAT_VOICE_ERROR_CODES.network;
+  await nextTick();
 
-    expect(chatVoice.errorMessageKey.value).toBe("aiChatCommon.voice.errors.network");
-  });
+  expect(chatVoice.errorMessageKey.value).toBe("aiChatCommon.voice.errors.network");
+}
 
-  it("mirrors speech transcript into draft input", async () => {
-    const draft = ref("");
-    const locale = ref("en-US");
-    const messages = ref<ChatMessage[]>([]);
-    useChatVoice({ draft, locale, messages });
+async function assertMirrorsTranscriptIntoDraft(): Promise<void> {
+  const draft = ref("");
+  const locale = ref("en-US");
+  const messages = ref<ChatMessage[]>([]);
+  useChatVoice({ draft, locale, messages });
 
-    fullTranscript.value = "Draft from speech";
-    await nextTick();
+  fullTranscript.value = "Draft from speech";
+  await nextTick();
 
-    expect(draft.value).toBe("Draft from speech");
-  });
+  expect(draft.value).toBe("Draft from speech");
+}
 
-  it("uses selected voice when replaying latest assistant message", async () => {
-    const fallbackVoice: SpeechSynthesisVoice = {
-      voiceURI: "voice-en-us",
-      name: "Voice EN",
+async function assertReplaysAssistantMessageWithSelectedVoice(): Promise<void> {
+  const fallbackVoice: SpeechSynthesisVoice = {
+    voiceURI: "voice-en-us",
+    name: "Voice EN",
+    lang: "en-US",
+    localService: true,
+    default: true,
+  };
+  voices.value = [fallbackVoice];
+
+  const draft = ref("");
+  const locale = ref("en-US");
+  const messages = ref<ChatMessage[]>([
+    {
+      role: "assistant",
+      content: "Latest assistant reply",
+      timestamp: new Date().toISOString(),
+    },
+  ]);
+  const chatVoice = useChatVoice({ draft, locale, messages });
+
+  await nextTick();
+  expect(chatVoice.selectedVoiceId.value).toBe("voice-en-us");
+  expect(chatVoice.canReplayAssistant.value).toBe(true);
+
+  const replayed = chatVoice.speakLatestAssistantMessage();
+  expect(replayed).toBe(true);
+  expect(speak).toHaveBeenCalledWith(
+    "Latest assistant reply",
+    expect.objectContaining({
       lang: "en-US",
-      localService: true,
-      default: true,
-    };
-    voices.value = [fallbackVoice];
+      voice: fallbackVoice,
+    }),
+  );
+}
 
-    const draft = ref("");
-    const locale = ref("en-US");
-    const messages = ref<ChatMessage[]>([
-      {
-        role: "assistant",
-        content: "Latest assistant reply",
-        timestamp: new Date().toISOString(),
-      },
-    ]);
-    const chatVoice = useChatVoice({ draft, locale, messages });
+function assertBlocksStartListeningWhenUnsupported(): void {
+  supportsRecognition.value = false;
 
-    await nextTick();
-    expect(chatVoice.selectedVoiceId.value).toBe("voice-en-us");
-    expect(chatVoice.canReplayAssistant.value).toBe(true);
+  const draft = ref("");
+  const locale = ref("en-US");
+  const messages = ref<ChatMessage[]>([]);
+  const chatVoice = useChatVoice({ draft, locale, messages });
 
-    const replayed = chatVoice.speakLatestAssistantMessage();
-    expect(replayed).toBe(true);
-    expect(speak).toHaveBeenCalledWith(
-      "Latest assistant reply",
-      expect.objectContaining({
-        lang: "en-US",
-        voice: fallbackVoice,
-      }),
-    );
-  });
+  const started = chatVoice.startListening();
+  expect(started).toBe(false);
+  expect(startListening).not.toHaveBeenCalled();
+}
 
-  it("blocks startListening when speech recognition is unsupported", () => {
-    supportsRecognition.value = false;
-
-    const draft = ref("");
-    const locale = ref("en-US");
-    const messages = ref<ChatMessage[]>([]);
-    const chatVoice = useChatVoice({ draft, locale, messages });
-
-    const started = chatVoice.startListening();
-    expect(started).toBe(false);
-    expect(startListening).not.toHaveBeenCalled();
-  });
+describe("useChatVoice", () => {
+  it("resolves canonical speech error code to i18n message key", assertResolvesSpeechErrorMessageKey);
+  it("mirrors speech transcript into draft input", assertMirrorsTranscriptIntoDraft);
+  it(
+    "uses selected voice when replaying latest assistant message",
+    assertReplaysAssistantMessageWithSelectedVoice,
+  );
+  it("blocks startListening when speech recognition is unsupported", assertBlocksStartListeningWhenUnsupported);
 });

@@ -78,7 +78,7 @@ export const studioRoutes = new Elysia({ prefix: "/studios" })
         type: body.type || null,
         size: body.size || null,
         founded: body.founded || null,
-        remoteWork: body.remoteWork || false,
+        remoteWork: body.remoteWork,
         technologies: body.technologies || [],
         genres: body.genres || [],
         platforms: body.platforms || [],

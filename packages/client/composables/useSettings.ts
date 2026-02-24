@@ -12,17 +12,17 @@ type UpdateSettingsInput = NonNullable<Parameters<ApiClient["settings"]["put"]>[
 type UpdateApiKeysInput = NonNullable<Parameters<ApiClient["settings"]["api-keys"]["put"]>[0]>;
 type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
 
-/**
- * Provides accessors and mutators for global app settings.
- *
- * @returns State and actions for reading/updating settings and API keys.
- */
-export function useSettings() {
-  const api = useApi();
-  const { t } = useI18n();
-  const settings = useNuxtState<AppSettings | null>(STATE_KEYS.APP_SETTINGS, () => null);
-  const loading = useNuxtState(STATE_KEYS.SETTINGS_LOADING, () => false);
-  const isAiConfigurationIncomplete = computed(() => {
+interface SettingsContext {
+  api: ApiClient;
+  t: ReturnType<typeof useI18n>["t"];
+  settings: ReturnType<typeof useNuxtState<AppSettings | null>>;
+  loading: ReturnType<typeof useNuxtState<boolean>>;
+}
+
+function createAiConfigurationIncompleteComputed(
+  settings: ReturnType<typeof useNuxtState<AppSettings | null>>,
+) {
+  return computed(() => {
     if (!settings.value) {
       return false;
     }
@@ -36,50 +36,69 @@ export function useSettings() {
       Boolean(settings.value.hasClaudeKey) ||
       Boolean(settings.value.hasHuggingfaceToken);
 
-    return !hasLocalConfig && !hasCloudProvider;
+    return !(hasLocalConfig || hasCloudProvider);
   });
+}
 
-  async function fetchSettings() {
-    return withLoadingState(loading, async () => {
-      const { data, error } = await api.settings.get();
-      assertApiResponse(error, t("apiErrors.settings.fetchFailed"));
-      const normalized = requireValue(toAppSettings(data), t("apiErrors.settings.invalidPayload"));
-      settings.value = normalized;
+function createSettingsActions(context: SettingsContext) {
+  const fetchSettings = async () =>
+    withLoadingState(context.loading, async () => {
+      const { data, error } = await context.api.settings.get();
+      assertApiResponse(error, context.t("apiErrors.settings.fetchFailed"));
+      const normalized = requireValue(toAppSettings(data), context.t("apiErrors.settings.invalidPayload"));
+      context.settings.value = normalized;
     });
-  }
 
-  async function updateSettings(updates: UpdateSettingsInput) {
-    return withLoadingState(loading, async () => {
-      const { error } = await api.settings.put(updates);
-      assertApiResponse(error, t("apiErrors.settings.updateFailed"));
+  const updateSettings = async (updates: UpdateSettingsInput) =>
+    withLoadingState(context.loading, async () => {
+      const { error } = await context.api.settings.put(updates);
+      assertApiResponse(error, context.t("apiErrors.settings.updateFailed"));
       await fetchSettings();
     });
-  }
 
-  async function updateApiKeys(keys: UpdateApiKeysInput) {
-    return withLoadingState(loading, async () => {
-      const { error } = await api.settings["api-keys"].put(keys);
-      assertApiResponse(error, t("apiErrors.settings.updateApiKeysFailed"));
+  const updateApiKeys = async (keys: UpdateApiKeysInput) =>
+    withLoadingState(context.loading, async () => {
+      const { error } = await context.api.settings["api-keys"].put(keys);
+      assertApiResponse(error, context.t("apiErrors.settings.updateApiKeysFailed"));
       await fetchSettings();
     });
-  }
 
-  async function testApiKey(provider: TestApiKeyInput["provider"], key: string) {
-    const { data, error } = await api.settings["test-api-key"].post({ provider, key });
-    if (error) return { valid: false, provider };
-    if (!data || typeof data.valid !== "boolean") {
+  const testApiKey = async (provider: TestApiKeyInput["provider"], key: string) => {
+    const { data, error } = await context.api.settings["test-api-key"].post({ provider, key });
+    if (error || !data || typeof data.valid !== "boolean") {
       return { valid: false, provider };
     }
     return { valid: data.valid, provider };
-  }
+  };
 
   return {
-    settings: readonly(settings),
-    loading: readonly(loading),
-    isAiConfigurationIncomplete: readonly(isAiConfigurationIncomplete),
     fetchSettings,
     updateSettings,
     updateApiKeys,
     testApiKey,
+  };
+}
+
+/**
+ * Provides accessors and mutators for global app settings.
+ *
+ * @returns State and actions for reading/updating settings and API keys.
+ */
+export function useSettings() {
+  const context: SettingsContext = {
+    api: useApi(),
+    t: useI18n().t,
+    settings: useNuxtState<AppSettings | null>(STATE_KEYS.APP_SETTINGS, () => null),
+    loading: useNuxtState(STATE_KEYS.SETTINGS_LOADING, () => false),
+  };
+
+  const isAiConfigurationIncomplete = createAiConfigurationIncompleteComputed(context.settings);
+  const actions = createSettingsActions(context);
+
+  return {
+    settings: readonly(context.settings),
+    loading: readonly(context.loading),
+    isAiConfigurationIncomplete: readonly(isAiConfigurationIncomplete),
+    ...actions,
   };
 }

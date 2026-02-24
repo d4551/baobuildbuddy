@@ -21,7 +21,7 @@ import {
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
-import { studios } from "../db/schema";
+import { studios } from "../db/schema/schema-modules";
 import { interviewService } from "../services/interview-service";
 
 type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
@@ -77,7 +77,7 @@ function asNonNegativeInt(value: number | undefined): number | undefined {
   if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
     return value;
   }
-  return undefined;
+  return ;
 }
 
 function asStringArrayTrimmed(value: unknown): string[] {
@@ -89,13 +89,13 @@ function asStringArrayTrimmed(value: unknown): string[] {
 function parseTargetJob(
   value: CreateSessionConfigInput["targetJob"],
 ): InterviewTargetJob | undefined {
-  if (!value) return undefined;
+  if (!value) return ;
   const id = asString(value.id);
   const title = asString(value.title);
   const company = asString(value.company);
   const location = asString(value.location);
-  if (!id || !title || !company || !location) {
-    return undefined;
+  if (!(((id && title ) && company ) && location)) {
+    return ;
   }
 
   const requirements = asStringArrayTrimmed(value.requirements);
@@ -137,7 +137,7 @@ function normalizeVoiceSettings(
   value: CreateSessionConfigInput["voiceSettings"],
 ): VoiceSettings | undefined {
   if (!value) {
-    return undefined;
+    return ;
   }
 
   const microphoneId = asString(value.microphoneId);

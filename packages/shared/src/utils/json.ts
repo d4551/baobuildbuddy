@@ -35,6 +35,17 @@ type ParseFailure = {
 
 type ParseResult<T extends JsonValue> = ParseSuccess<T> | ParseFailure;
 
+type EscapeParseResult =
+  | {
+      ok: true;
+      value: string;
+      nextCursor: number;
+    }
+  | {
+      ok: false;
+      index: number;
+    };
+
 const ESCAPE_MAP: Record<string, string> = {
   '"': '"',
   "\\": "\\",
@@ -55,12 +66,49 @@ const isDigit = (char: string | undefined): boolean =>
 const isHexDigit = (char: string): boolean =>
   (char >= "0" && char <= "9") || (char >= "a" && char <= "f") || (char >= "A" && char <= "F");
 
+const isControlCharacter = (char: string): boolean => char <= "\u001F";
+
 function skipWhitespace(input: string, index: number): number {
   let cursor = index;
   while (cursor < input.length && isWhitespace(input[cursor])) {
     cursor += 1;
   }
   return cursor;
+}
+
+function parseUnicodeEscape(input: string, cursor: number): EscapeParseResult {
+  const unicode = input.slice(cursor + 2, cursor + 6);
+  if (unicode.length !== 4 || !unicode.split("").every(isHexDigit)) {
+    return { ok: false, index: cursor };
+  }
+  return {
+    ok: true,
+    value: String.fromCodePoint(Number.parseInt(unicode, 16)),
+    nextCursor: cursor + 6,
+  };
+}
+
+function parseMappedEscape(escaped: string, cursor: number): EscapeParseResult {
+  const replacement = ESCAPE_MAP[escaped];
+  if (replacement === undefined) {
+    return { ok: false, index: cursor };
+  }
+  return {
+    ok: true,
+    value: replacement,
+    nextCursor: cursor + 2,
+  };
+}
+
+function parseEscapedToken(input: string, cursor: number): EscapeParseResult {
+  const escaped = input[cursor + 1];
+  if (!escaped) {
+    return { ok: false, index: cursor };
+  }
+  if (escaped === "u") {
+    return parseUnicodeEscape(input, cursor);
+  }
+  return parseMappedEscape(escaped, cursor);
 }
 
 function parseString(input: string, startIndex: number): ParseResult<string> {
@@ -82,31 +130,16 @@ function parseString(input: string, startIndex: number): ParseResult<string> {
     }
 
     if (char === "\\") {
-      const escaped = input[cursor + 1];
-      if (!escaped) {
-        return { ok: false, index: cursor };
+      const escapedResult = parseEscapedToken(input, cursor);
+      if (!escapedResult.ok) {
+        return { ok: false, index: escapedResult.index };
       }
-
-      if (escaped === "u") {
-        const unicode = input.slice(cursor + 2, cursor + 6);
-        if (unicode.length !== 4 || !unicode.split("").every(isHexDigit)) {
-          return { ok: false, index: cursor };
-        }
-        value += String.fromCodePoint(Number.parseInt(unicode, 16));
-        cursor += 6;
-        continue;
-      }
-
-      const replacement = ESCAPE_MAP[escaped];
-      if (replacement === undefined) {
-        return { ok: false, index: cursor };
-      }
-      value += replacement;
-      cursor += 2;
+      value += escapedResult.value;
+      cursor = escapedResult.nextCursor;
       continue;
     }
 
-    if (char <= "\u001F") {
+    if (isControlCharacter(char)) {
       return { ok: false, index: cursor };
     }
 
@@ -129,52 +162,75 @@ function parseLiteral<T extends JsonPrimitive>(
   return { ok: true, value, index: startIndex + literal.length };
 }
 
-function parseNumber(input: string, startIndex: number): ParseResult<number> {
-  let cursor = startIndex;
+function consumeOptionalMinus(input: string, cursor: number): number {
+  return input[cursor] === "-" ? cursor + 1 : cursor;
+}
 
-  if (input[cursor] === "-") {
-    cursor += 1;
-  }
-
-  const integerStart = cursor;
+function consumeIntegerPart(input: string, cursor: number): number | null {
   if (input[cursor] === "0") {
-    cursor += 1;
-  } else {
-    if (!isDigit(input[cursor])) {
-      return { ok: false, index: startIndex };
-    }
-    while (isDigit(input[cursor])) {
-      cursor += 1;
-    }
+    return cursor + 1;
+  }
+  if (!isDigit(input[cursor])) {
+    return null;
   }
 
-  if (cursor === integerStart) {
+  let nextCursor = cursor;
+  while (isDigit(input[nextCursor])) {
+    nextCursor += 1;
+  }
+  return nextCursor;
+}
+
+function consumeFractionPart(input: string, cursor: number): number | null {
+  if (input[cursor] !== ".") {
+    return cursor;
+  }
+  const nextCursor = cursor + 1;
+  if (!isDigit(input[nextCursor])) {
+    return null;
+  }
+  let fractionCursor = nextCursor;
+  while (isDigit(input[fractionCursor])) {
+    fractionCursor += 1;
+  }
+  return fractionCursor;
+}
+
+function consumeExponentPart(input: string, cursor: number): number | null {
+  const exponentToken = input[cursor];
+  if (!(exponentToken === "e" || exponentToken === "E")) {
+    return cursor;
+  }
+
+  let exponentCursor = cursor + 1;
+  const signToken = input[exponentCursor];
+  if (signToken === "+" || signToken === "-") {
+    exponentCursor += 1;
+  }
+  if (!isDigit(input[exponentCursor])) {
+    return null;
+  }
+  while (isDigit(input[exponentCursor])) {
+    exponentCursor += 1;
+  }
+  return exponentCursor;
+}
+
+function parseNumber(input: string, startIndex: number): ParseResult<number> {
+  const integerStart = consumeOptionalMinus(input, startIndex);
+  const integerCursor = consumeIntegerPart(input, integerStart);
+  if (integerCursor === null) {
     return { ok: false, index: startIndex };
   }
 
-  if (input[cursor] === ".") {
-    cursor += 1;
-    if (!isDigit(input[cursor])) {
-      return { ok: false, index: startIndex };
-    }
-    while (isDigit(input[cursor])) {
-      cursor += 1;
-    }
+  const fractionCursor = consumeFractionPart(input, integerCursor);
+  if (fractionCursor === null) {
+    return { ok: false, index: startIndex };
   }
 
-  const exponentToken = input[cursor];
-  if (exponentToken === "e" || exponentToken === "E") {
-    cursor += 1;
-    const signToken = input[cursor];
-    if (signToken === "+" || signToken === "-") {
-      cursor += 1;
-    }
-    if (!isDigit(input[cursor])) {
-      return { ok: false, index: startIndex };
-    }
-    while (isDigit(input[cursor])) {
-      cursor += 1;
-    }
+  const cursor = consumeExponentPart(input, fractionCursor);
+  if (cursor === null) {
+    return { ok: false, index: startIndex };
   }
 
   const parsedValue = Number(input.slice(startIndex, cursor));

@@ -168,12 +168,12 @@ function clearFilters() {
   currentPage.value = 1;
 }
 
-function viewJob(id: string) {
-  router.push(APP_ROUTE_BUILDERS.jobDetail(id));
+async function viewJob(id: string) {
+  await router.push(APP_ROUTE_BUILDERS.jobDetail(id));
 }
 
-function interviewJob(id: string) {
-  router.push(buildInterviewJobNavigation(id, "jobs-list"));
+async function interviewJob(id: string) {
+  await router.push(buildInterviewJobNavigation(id, "jobs-list"));
 }
 
 function getMatchScoreColor(score: number) {

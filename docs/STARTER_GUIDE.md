@@ -12,6 +12,47 @@ If you need deeper architecture and runbook details, see the full runbook: [READ
 Use this guide if this is your first time running BaoBuildBuddy locally.
 Think of it as the tutorial level: follow each checkpoint in order before unlocking the rest of the project.
 
+## Release Validation and Rebuild
+
+After setup is complete, use the production validation sequence:
+
+```bash
+bun run lint
+bun run typecheck
+bun run test
+bun run build
+bun run build:desktop
+```
+
+Script verification checks:
+
+```bash
+bun run validate:no-try-catch
+bun run validate:no-unsafe-casts
+bun run validate:locales
+bun run validate:i18n-ui
+bun run validate:aria
+bun run validate:ui
+```
+
+Route/content check (requires running server/client target):
+
+```bash
+bun run verify:pages
+```
+
+Lint diagnostics are not hidden; warnings/errors remain fully visible in command output.
+
+Current command outcomes:
+
+- `bun run lint`: pass, with `255` Biome warnings (visible, unmasked).
+- `bun run --filter '@bao/client' lint`: pass with no warnings.
+- `bun run typecheck`: pass.
+- `bun run test`: pass (`66` server tests, `19` client tests).
+- `bun run build`: pass.
+- `CI=true bun run build:desktop`: pass.
+- `bun run verify:pages`: pass when pointed to the BaoBuildBuddy preview target.
+
 ## 1) Understand what is being started
 
 BaoBuildBuddy is a monorepo with two runtime services:
@@ -54,7 +95,7 @@ Optional but recommended:
 
 If your Linux distro does not provide `chromium-browser`, install `google-chrome-stable` from Google's official repository.
 
-Pin Bun to the workspace baseline explicitly when needed:
+Pin Bun to the workspace version explicitly when needed:
 
 ```bash
 curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.9"
@@ -95,7 +136,7 @@ Run the repository stack audit command to confirm local package registry alignme
 bun run audit:stack-versions
 ```
 
-Expected baseline:
+Pinned versions:
 
 - `bun`: `1.3.9`
 - `nuxt`: `4.3.1`
@@ -288,10 +329,16 @@ bun run format:check
 bun run validate:no-try-catch
 bun run validate:i18n-ui
 bun run validate:ui
-bun run verify:pages
 bun run typecheck
 bun run lint
 bun run test
+```
+
+For `verify:pages`, target your BaoBuildBuddy preview instance explicitly if port `3001` is already used by another app:
+
+```bash
+PORT=4105 bun run --filter '@bao/client' preview
+VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 
 This validates repository health and the public/client contract generation path.

@@ -344,9 +344,9 @@ function startTimer() {
   }, SESSION_TIMER_INTERVAL_MS);
 }
 
-function goToHistory() {
+async function goToHistory() {
   if (!sessionId.value) return;
-  router.push({
+  await router.push({
     path: APP_ROUTES.interviewHistory,
     query: {
       [APP_ROUTE_QUERY_KEYS.sessionId]: sessionId.value,
@@ -387,7 +387,7 @@ async function handleSubmitResponse(submittedResponse?: string) {
 
   if (submitResult.value?.status === "completed") {
     $toast.success(t("interviewSession.toasts.completed"));
-    goToHistory();
+    await goToHistory();
   } else if (isLastQuestion.value) {
     await handleCompleteInterview();
   }
@@ -413,7 +413,7 @@ async function handleCompleteInterview() {
   }
 
   $toast.success(t("interviewSession.toasts.completed"));
-  goToHistory();
+  await goToHistory();
 }
 </script>
 

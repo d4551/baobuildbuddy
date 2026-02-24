@@ -23,7 +23,7 @@ async function createTestHarness(): Promise<TestHarness> {
 
   initModule.initializeDatabase(dbModule.sqlite);
   const seedModule = await import("./db/seed");
-  await seedModule.seedDatabase(dbModule.db);
+  seedModule.seedDatabase(dbModule.db);
 
   const app = new Elysia({ prefix: "/api" }).use(routesModule.interviewRoutes);
 
@@ -101,7 +101,7 @@ describe("interview service", () => {
   });
 });
 
-describe("interview API compatibility", () => {
+function registerRoleTypeCompatibilityTest(): void {
   test("POST /api/interview/sessions accepts roleType and returns created payload", async () => {
     const response = await requestJson<{
       id: string;
@@ -123,7 +123,9 @@ describe("interview API compatibility", () => {
     expect(response.body.totalQuestions).toBe(1);
     expect(response.body.message).toBe("Interview session created");
   });
+}
 
+function registerCanonicalResponsePayloadTest(): void {
   test("POST /api/interview/sessions/:id/response accepts canonical response payload", async () => {
     const created = await requestJson<{
       id: string;
@@ -152,7 +154,9 @@ describe("interview API compatibility", () => {
     expect(response.body.totalResponses).toBe(1);
     expect(response.body.message).toBe("Response recorded");
   });
+}
 
+function registerJobContextPersistenceTest(): void {
   test("POST /api/interview/sessions persists job interview context", async () => {
     const response = await requestJson<{
       id: string;
@@ -187,4 +191,16 @@ describe("interview API compatibility", () => {
     expect(response.body.role).toBe("Senior Gameplay Engineer");
     expect(response.body.studioName).toBe("Supergiant Games");
   });
+}
+
+describe("interview API compatibility", () => {
+  registerRoleTypeCompatibilityTest();
+});
+
+describe("interview API response payload compatibility", () => {
+  registerCanonicalResponsePayloadTest();
+});
+
+describe("interview API job context compatibility", () => {
+  registerJobContextPersistenceTest();
 });

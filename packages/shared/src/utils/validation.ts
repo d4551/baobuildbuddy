@@ -2,8 +2,10 @@
  * Shared validation utilities
  */
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return EMAIL_PATTERN.test(email);
 }
 
 export function isValidUrl(url: string): boolean {

@@ -7,7 +7,7 @@ beforeAll(async () => {
   const seedModule = await import("../db/seed");
 
   initModule.initializeDatabase(dbModule.sqlite);
-  await seedModule.seedDatabase(dbModule.db);
+  seedModule.seedDatabase(dbModule.db);
 });
 
 afterAll(() => {});

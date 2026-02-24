@@ -411,15 +411,15 @@ async function handleStartInterview() {
   if (startResult.value?.id) {
     showConfigModal.value = false;
     $toast.success(t("interviewHub.toasts.started"));
-    router.push({
+    await router.push({
       path: APP_ROUTES.interviewSession,
       query: { [APP_ROUTE_QUERY_KEYS.id]: startResult.value.id },
     });
   }
 }
 
-function viewSession(id: string) {
-  router.push({
+async function viewSession(id: string) {
+  await router.push({
     path: APP_ROUTES.interviewHistory,
     query: { [APP_ROUTE_QUERY_KEYS.sessionId]: id },
   });

@@ -20,6 +20,43 @@ export interface UseChatVoiceOptions {
   messages: Readonly<Ref<ChatMessage[]>>;
 }
 
+interface VoiceWatchInput {
+  speech: ReturnType<typeof useSpeech>;
+  locale: Ref<string>;
+  messages: Readonly<Ref<ChatMessage[]>>;
+  draft: Ref<string>;
+  autoSpeakReplies: Ref<boolean>;
+  selectedVoiceId: Ref<string>;
+  voices: Readonly<Ref<readonly SpeechSynthesisVoice[]>>;
+}
+
+interface VoiceActionInput {
+  speech: ReturnType<typeof useSpeech>;
+  locale: Ref<string>;
+  selectedVoiceId: Ref<string>;
+  voices: Readonly<Ref<readonly SpeechSynthesisVoice[]>>;
+  latestAssistantMessage: Readonly<Ref<string>>;
+  canReplayAssistant: Readonly<Ref<boolean>>;
+}
+
+interface VoiceComputedState {
+  autoSpeakReplies: Ref<boolean>;
+  selectedVoiceId: Ref<string>;
+  voices: Readonly<Ref<readonly SpeechSynthesisVoice[]>>;
+  latestAssistantMessage: Readonly<Ref<string>>;
+  canReplayAssistant: Readonly<Ref<boolean>>;
+  errorMessageKey: Readonly<Ref<string>>;
+  supportHintKey: Readonly<Ref<string>>;
+}
+
+interface SpeakVoiceInput {
+  speech: ReturnType<typeof useSpeech>;
+  text: string;
+  locale: string;
+  selectedVoiceId: string;
+  voices: readonly SpeechSynthesisVoice[];
+}
+
 /**
  * Resolves the most recent assistant message with non-empty content.
  *
@@ -29,11 +66,7 @@ export interface UseChatVoiceOptions {
 function resolveLatestAssistantMessage(messages: readonly ChatMessage[]): string {
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
-    if (!message) {
-      continue;
-    }
-
-    if (message.role !== "assistant") {
+    if (!message || message.role !== "assistant") {
       continue;
     }
 
@@ -75,7 +108,7 @@ function resolveVoiceSupportHintKey(
     return "";
   }
 
-  if (!supportsRecognition && !supportsSynthesis) {
+  if (!(supportsRecognition || supportsSynthesis)) {
     return "aiChatCommon.voice.unsupportedHint";
   }
 
@@ -99,7 +132,7 @@ function resolveVoiceById(
 ): SpeechSynthesisVoice | undefined {
   const trimmedVoiceId = voiceId.trim();
   if (trimmedVoiceId.length === 0) {
-    return undefined;
+    return;
   }
 
   return voices.find((voice) => voice.voiceURI === trimmedVoiceId);
@@ -128,14 +161,126 @@ function resolveLocaleVoice(
   );
 }
 
-/**
- * Voice controls shared by floating chat and full chat page.
- *
- * @param options Chat input and message refs.
- * @returns Reactive voice controls and status values.
- */
-export function useChatVoice(options: UseChatVoiceOptions) {
-  const speech = useSpeech();
+function resolveSelectedVoice(
+  selectedVoiceId: string,
+  locale: string,
+  voices: readonly SpeechSynthesisVoice[],
+): string {
+  if (voices.length === 0) {
+    return AI_CHAT_VOICE_DEFAULT_ID;
+  }
+
+  const selectedVoice = resolveVoiceById(selectedVoiceId, voices);
+  if (selectedVoice) {
+    return selectedVoiceId;
+  }
+
+  return resolveLocaleVoice(locale, voices)?.voiceURI ?? AI_CHAT_VOICE_DEFAULT_ID;
+}
+
+function speakWithSelectedVoice(input: SpeakVoiceInput): void {
+  const selectedVoice = resolveVoiceById(input.selectedVoiceId, input.voices);
+  input.speech.speak(input.text, {
+    lang: resolveSpeechLocale(input.locale),
+    ...(selectedVoice ? { voice: selectedVoice } : {}),
+  });
+}
+
+function registerVoiceWatchers(input: VoiceWatchInput): void {
+  watch(
+    [input.voices, () => input.locale.value],
+    ([availableVoices, localeValue]) => {
+      input.selectedVoiceId.value = resolveSelectedVoice(
+        input.selectedVoiceId.value,
+        localeValue,
+        availableVoices,
+      );
+    },
+    { immediate: true },
+  );
+
+  watch(
+    () => input.speech.fullTranscript.value,
+    (transcriptValue) => {
+      if (transcriptValue.length > 0) {
+        input.draft.value = transcriptValue;
+      }
+    },
+  );
+
+  watch(
+    () => input.messages.value.length,
+    (nextLength, previousLength) => {
+      if (!(input.speech.supportsSynthesis.value && input.autoSpeakReplies.value)) {
+        return;
+      }
+      if (nextLength <= previousLength) {
+        return;
+      }
+      const newestMessage = input.messages.value.at(-1);
+      if (!newestMessage || newestMessage.role !== "assistant") {
+        return;
+      }
+      const trimmedContent = newestMessage.content.trim();
+      if (trimmedContent.length > 0) {
+        speakWithSelectedVoice({
+          speech: input.speech,
+          text: trimmedContent,
+          locale: input.locale.value,
+          selectedVoiceId: input.selectedVoiceId.value,
+          voices: input.voices.value,
+        });
+      }
+    },
+  );
+}
+
+function createVoiceActions(input: VoiceActionInput) {
+  const startListening = (): boolean => {
+    if (!input.speech.supportsRecognition.value) {
+      return false;
+    }
+    return input.speech.startListening(resolveSpeechLocale(input.locale.value));
+  };
+
+  const stopListening = (): void => {
+    input.speech.stopListening();
+  };
+
+  const toggleListening = (): boolean => {
+    if (input.speech.isListening.value) {
+      stopListening();
+      return true;
+    }
+    return startListening();
+  };
+
+  const speakLatestAssistantMessage = (): boolean => {
+    if (!input.canReplayAssistant.value) {
+      return false;
+    }
+    speakWithSelectedVoice({
+      speech: input.speech,
+      text: input.latestAssistantMessage.value,
+      locale: input.locale.value,
+      selectedVoiceId: input.selectedVoiceId.value,
+      voices: input.voices.value,
+    });
+    return true;
+  };
+
+  return {
+    startListening,
+    stopListening,
+    toggleListening,
+    speakLatestAssistantMessage,
+  };
+}
+
+function createVoiceComputedState(
+  options: UseChatVoiceOptions,
+  speech: ReturnType<typeof useSpeech>,
+): VoiceComputedState {
   const autoSpeakReplies = useNuxtState<boolean>(
     STATE_KEYS.AI_CHAT_AUTO_SPEAK,
     () => AI_CHAT_VOICE_AUTO_SPEAK_DEFAULT,
@@ -145,134 +290,72 @@ export function useChatVoice(options: UseChatVoiceOptions) {
     () => AI_CHAT_VOICE_DEFAULT_ID,
   );
   const voices = computed(() => speech.voices.value);
-
-  const latestAssistantMessage = computed(() =>
-    resolveLatestAssistantMessage(options.messages.value),
-  );
+  const latestAssistantMessage = computed(() => resolveLatestAssistantMessage(options.messages.value));
   const canReplayAssistant = computed(
     () => speech.supportsSynthesis.value && latestAssistantMessage.value.length > 0,
   );
-  const errorMessageKey = computed(() => resolveSpeechErrorMessageKey(speech.error.value));
-  const supportHintKey = computed(() =>
-    resolveVoiceSupportHintKey(speech.supportsRecognition.value, speech.supportsSynthesis.value),
-  );
-
-  watch(
-    [voices, () => options.locale.value],
-    ([availableVoices, localeValue]) => {
-      if (availableVoices.length === 0) {
-        selectedVoiceId.value = AI_CHAT_VOICE_DEFAULT_ID;
-        return;
-      }
-
-      const selectedVoice = resolveVoiceById(selectedVoiceId.value, availableVoices);
-      if (selectedVoice) {
-        return;
-      }
-
-      const fallbackVoice = resolveLocaleVoice(localeValue, availableVoices);
-      selectedVoiceId.value = fallbackVoice?.voiceURI ?? AI_CHAT_VOICE_DEFAULT_ID;
-    },
-    { immediate: true },
-  );
-
-  watch(
-    () => speech.fullTranscript.value,
-    (transcriptValue) => {
-      if (transcriptValue.length === 0) {
-        return;
-      }
-      options.draft.value = transcriptValue;
-    },
-  );
-
-  watch(
-    () => options.messages.value.length,
-    (nextLength, previousLength) => {
-      if (
-        !speech.supportsSynthesis.value ||
-        !autoSpeakReplies.value ||
-        nextLength <= previousLength
-      ) {
-        return;
-      }
-
-      const newestMessage = options.messages.value.at(-1);
-      if (!newestMessage || newestMessage.role !== "assistant") {
-        return;
-      }
-
-      const trimmedContent = newestMessage.content.trim();
-      if (trimmedContent.length === 0) {
-        return;
-      }
-
-      const selectedVoice = resolveVoiceById(selectedVoiceId.value, voices.value);
-      speech.speak(trimmedContent, {
-        lang: resolveSpeechLocale(options.locale.value),
-        ...(selectedVoice ? { voice: selectedVoice } : {}),
-      });
-    },
-  );
-
-  function startListening(): boolean {
-    if (!speech.supportsRecognition.value) {
-      return false;
-    }
-
-    return speech.startListening(resolveSpeechLocale(options.locale.value));
-  }
-
-  function stopListening(): void {
-    speech.stopListening();
-  }
-
-  function toggleListening(): boolean {
-    if (speech.isListening.value) {
-      stopListening();
-      return true;
-    }
-
-    return startListening();
-  }
-
-  function speakLatestAssistantMessage(): boolean {
-    if (!canReplayAssistant.value) {
-      return false;
-    }
-
-    const selectedVoice = resolveVoiceById(selectedVoiceId.value, voices.value);
-    speech.speak(latestAssistantMessage.value, {
-      lang: resolveSpeechLocale(options.locale.value),
-      ...(selectedVoice ? { voice: selectedVoice } : {}),
-    });
-    return true;
-  }
-
-  const cleanup = () => {
-    speech.stopListening();
-    speech.stopSpeaking();
-  };
-
-  if (getCurrentScope()) {
-    onScopeDispose(cleanup);
-  }
 
   return {
     autoSpeakReplies,
     selectedVoiceId,
     voices,
+    latestAssistantMessage,
     canReplayAssistant,
-    errorMessageKey,
-    supportHintKey,
+    errorMessageKey: computed(() => resolveSpeechErrorMessageKey(speech.error.value)),
+    supportHintKey: computed(() =>
+      resolveVoiceSupportHintKey(speech.supportsRecognition.value, speech.supportsSynthesis.value),
+    ),
+  };
+}
+
+/**
+ * Voice controls shared by floating chat and full chat page.
+ *
+ * @param options Chat input and message refs.
+ * @returns Reactive voice controls and status values.
+ */
+export function useChatVoice(options: UseChatVoiceOptions) {
+  const speech = useSpeech();
+  const state = createVoiceComputedState(options, speech);
+
+  registerVoiceWatchers({
+    speech,
+    locale: options.locale,
+    messages: options.messages,
+    draft: options.draft,
+    autoSpeakReplies: state.autoSpeakReplies,
+    selectedVoiceId: state.selectedVoiceId,
+    voices: state.voices,
+  });
+  const actions = createVoiceActions({
+    speech,
+    locale: options.locale,
+    selectedVoiceId: state.selectedVoiceId,
+    voices: state.voices,
+    latestAssistantMessage: state.latestAssistantMessage,
+    canReplayAssistant: state.canReplayAssistant,
+  });
+
+  const cleanup = () => {
+    speech.stopListening();
+    speech.stopSpeaking();
+  };
+  if (getCurrentScope()) {
+    onScopeDispose(cleanup);
+  }
+
+  return {
+    autoSpeakReplies: state.autoSpeakReplies,
+    selectedVoiceId: state.selectedVoiceId,
+    voices: state.voices,
+    canReplayAssistant: state.canReplayAssistant,
+    errorMessageKey: state.errorMessageKey,
+    supportHintKey: state.supportHintKey,
     isListening: speech.isListening,
     isSpeaking: speech.isSpeaking,
     supportsRecognition: speech.supportsRecognition,
     supportsSynthesis: speech.supportsSynthesis,
     isSupported: speech.isSupported,
-    startListening,
-    stopListening,
-    toggleListening,
-    speakLatestAssistantMessage,
+    ...actions,
   };
 }

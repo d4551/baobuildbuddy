@@ -12,25 +12,40 @@ const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>
   return result;
 };
 
+const runBackgroundTask = (
+  task: Promise<unknown>,
+  onError?: (error: unknown) => void,
+): void => {
+  task.then(
+    () => undefined,
+    (error) => {
+      onError?.(error);
+    },
+  );
+};
+
 // Initialize database
 initializeDatabase(sqlite);
 
 // Seed database with gaming studios (idempotent — only seeds if empty)
-void (async () => {
-  const seedResult = await settle(seedDatabase(db));
+runBackgroundTask(
+  (async () => {
+  const seedResult = await settle(Promise.resolve().then(() => seedDatabase(db)));
   if (seedResult.status === "rejected") {
     logger.error(
       "Seed failed",
       seedResult.reason instanceof Error ? seedResult.reason.message : seedResult.reason,
     );
   }
-})();
+  })(),
+);
 
 // Job refresh: run every 6 hours (Bun-native, no cron deps)
 const JOB_REFRESH_MS = 6 * 60 * 60 * 1000;
 setInterval(() => {
   const aggregator = new JobAggregator();
-  void (async () => {
+  runBackgroundTask(
+    (async () => {
     const refreshResult = await settle(aggregator.refreshJobs());
     if (refreshResult.status === "rejected") {
       logger.error(
@@ -43,7 +58,8 @@ setInterval(() => {
     logger.info(
       `JobRefresh ${refreshResult.value.new} new, ${refreshResult.value.updated} updated (${refreshResult.value.total} total)`,
     );
-  })();
+    })(),
+  );
 }, JOB_REFRESH_MS);
 
 // Start server
@@ -53,13 +69,27 @@ logger.info(`BaoBuildBuddy server running at http://${config.host}:${config.port
 logger.info(`Health check: http://${config.host}:${config.port}/api/health`);
 
 // Graceful shutdown
-function gracefulShutdown(signal: string) {
+async function gracefulShutdown(signal: string): Promise<void> {
   logger.warn(`Received ${signal}, shutting down gracefully...`);
-  server.stop();
+  await server.stop();
   sqlite.close();
   logger.info("Database closed. Goodbye.");
   process.exit(0);
 }
 
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => {
+  runBackgroundTask(gracefulShutdown("SIGTERM"), (error) => {
+    logger.error(
+      "Graceful shutdown failed",
+      error instanceof Error ? error.message : error,
+    );
+  });
+});
+process.on("SIGINT", () => {
+  runBackgroundTask(gracefulShutdown("SIGINT"), (error) => {
+    logger.error(
+      "Graceful shutdown failed",
+      error instanceof Error ? error.message : error,
+    );
+  });
+});

@@ -54,7 +54,7 @@ watch(
 
     if (isOpen && !dialog.open) {
       dialog.showModal();
-      nextTick(() => {
+      requestAnimationFrame(() => {
         const target = props.focusPrimary ? confirmButtonRef.value : cancelButtonRef.value;
         target?.focus();
       });

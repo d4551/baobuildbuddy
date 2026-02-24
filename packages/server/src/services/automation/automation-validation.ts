@@ -31,6 +31,8 @@ const DISALLOWED_HOST_PATTERNS = [
   /\.internal$/i,
 ];
 
+const DISALLOWED_IPV6_PREFIX_PATTERN = /^(fc|fd|fe80)/i;
+
 /**
  * Validate and normalize an automation URL while blocking unsafe host targets.
  */
@@ -148,5 +150,5 @@ function isDisallowedIpv4(hostname: string): boolean {
 }
 
 function isDisallowedIpv6(hostname: string): boolean {
-  return hostname === "::1" || /^fc|^fd|^fe80/i.test(hostname);
+  return hostname === "::1" || DISALLOWED_IPV6_PREFIX_PATTERN.test(hostname);
 }

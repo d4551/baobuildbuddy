@@ -11,7 +11,7 @@ export declare class ExportService {
     exportCoverLetterPDF(coverLetter: {
         company: string;
         position: string;
-        content: Record<string, unknown>;
+        content: unknown;
     }, userProfile: {
         name: string;
         email?: string;

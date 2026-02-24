@@ -66,10 +66,7 @@ function toArray(val: string | string[]): string[] {
   return [];
 }
 
-/**
- * Convert form data to canonical ResumeData.
- */
-export function formDataToResumeData(form: Partial<ResumeFormData>): Partial<ResumeData> {
+function buildPersonalInfo(form: Partial<ResumeFormData>): ResumePersonalInfo {
   const personalInfo: ResumePersonalInfo = {};
   if (form.name) personalInfo.name = form.name;
   if (form.email) personalInfo.email = form.email;
@@ -77,8 +74,13 @@ export function formDataToResumeData(form: Partial<ResumeFormData>): Partial<Res
   if (form.location) personalInfo.location = form.location;
   if (form.linkedIn) personalInfo.linkedIn = form.linkedIn;
   if (form.portfolio) personalInfo.portfolio = form.portfolio;
+  return personalInfo;
+}
 
-  const experience: ResumeExperienceItem[] = (form.experience || []).map((exp) => ({
+function mapFormExperienceToResumeExperience(
+  experience: ResumeFormExperience[] | undefined,
+): ResumeExperienceItem[] {
+  return (experience || []).map((exp) => ({
     title: exp.title,
     company: exp.company,
     startDate: exp.startDate,
@@ -86,84 +88,92 @@ export function formDataToResumeData(form: Partial<ResumeFormData>): Partial<Res
     ...(exp.location ? { location: exp.location } : {}),
     ...(exp.description ? { description: exp.description } : {}),
   }));
+}
 
-  const education: ResumeEducationItem[] = (form.education || []).map((edu) => ({
+function mapFormEducationToResumeEducation(
+  education: ResumeFormEducation[] | undefined,
+): ResumeEducationItem[] {
+  return (education || []).map((edu) => ({
     degree: edu.degree,
     school: edu.school,
     field: "",
     year: edu.graduationDate,
     ...(edu.gpa ? { gpa: edu.gpa } : {}),
   }));
+}
 
+function buildSkillsFromForm(skillsInput: string[] | undefined): ResumeSkills {
   const skills: ResumeSkills = {};
-  if (form.skills?.length) {
-    skills.technical = form.skills;
+  if (skillsInput?.length) {
+    skills.technical = skillsInput;
   }
+  return skills;
+}
 
-  const projects: ResumeProject[] = (form.projects || []).map((project) => ({
+function mapFormProjectsToResumeProjects(projects: ResumeFormProject[] | undefined): ResumeProject[] {
+  return (projects || []).map((project) => ({
     title: project.name,
     description: project.description,
     ...(project.technologies?.length ? { technologies: project.technologies } : {}),
     ...(project.url ? { link: project.url } : {}),
   }));
+}
 
+function buildGamingExperience(
+  gaming: ResumeFormData["gaming"] | undefined,
+): GamingExperience {
   const gamingExperience: GamingExperience = {};
-  if (form.gaming) {
-    const roles = toArray(form.gaming.roles);
-    const genres = toArray(form.gaming.genres);
-    const achievements = toArray(form.gaming.achievements);
-    if (roles.length) gamingExperience.gameEngines = roles.join(", ");
-    if (genres.length) gamingExperience.genres = genres.join(", ");
-    if (achievements.length) gamingExperience.shippedTitles = achievements.join("; ");
+  if (!gaming) {
+    return gamingExperience;
   }
 
+  const roles = toArray(gaming.roles);
+  const genres = toArray(gaming.genres);
+  const achievements = toArray(gaming.achievements);
+  if (roles.length) gamingExperience.gameEngines = roles.join(", ");
+  if (genres.length) gamingExperience.genres = genres.join(", ");
+  if (achievements.length) gamingExperience.shippedTitles = achievements.join("; ");
+  return gamingExperience;
+}
+
+function buildResumeData(input: {
+  form: Partial<ResumeFormData>;
+  personalInfo: ResumePersonalInfo;
+  experience: ResumeExperienceItem[];
+  education: ResumeEducationItem[];
+  skills: ResumeSkills;
+  projects: ResumeProject[];
+  gamingExperience: GamingExperience;
+}): Partial<ResumeData> {
   const resumeData: Partial<ResumeData> = {};
-  if (Object.keys(personalInfo).length > 0) {
-    resumeData.personalInfo = personalInfo;
+  if (Object.keys(input.personalInfo).length > 0) {
+    resumeData.personalInfo = input.personalInfo;
   }
-  if (form.summary) {
-    resumeData.summary = form.summary;
+  if (input.form.summary) {
+    resumeData.summary = input.form.summary;
   }
-  if (experience.length > 0) {
-    resumeData.experience = experience;
+  if (input.experience.length > 0) {
+    resumeData.experience = input.experience;
   }
-  if (education.length > 0) {
-    resumeData.education = education;
+  if (input.education.length > 0) {
+    resumeData.education = input.education;
   }
-  if (Object.keys(skills).length > 0) {
-    resumeData.skills = skills;
+  if (Object.keys(input.skills).length > 0) {
+    resumeData.skills = input.skills;
   }
-  if (projects.length > 0) {
-    resumeData.projects = projects;
+  if (input.projects.length > 0) {
+    resumeData.projects = input.projects;
   }
-  if (Object.keys(gamingExperience).length > 0) {
-    resumeData.gamingExperience = gamingExperience;
+  if (Object.keys(input.gamingExperience).length > 0) {
+    resumeData.gamingExperience = input.gamingExperience;
   }
-
   return resumeData;
 }
 
-/**
- * Convert canonical ResumeData to form data.
- */
-export function resumeDataToFormData(resume: Partial<ResumeData>): ResumeFormData {
-  const pi = resume.personalInfo || {};
-  const form: ResumeFormData = {
-    name: pi.name || "",
-    email: pi.email || "",
-    phone: pi.phone || "",
-    location: pi.location || "",
-    summary: resume.summary || "",
-    linkedIn: pi.linkedIn || "",
-    portfolio: pi.portfolio || "",
-    experience: [],
-    education: [],
-    skills: [],
-    projects: [],
-    gaming: { roles: [], genres: [], achievements: [] },
-  };
-
-  form.experience = (resume.experience || []).map((exp) => ({
+function mapResumeExperienceToFormExperience(
+  experience: ResumeExperienceItem[] | undefined,
+): ResumeFormExperience[] {
+  return (experience || []).map((exp) => ({
     title: exp.title,
     company: exp.company,
     location: exp.location || "",
@@ -172,32 +182,76 @@ export function resumeDataToFormData(resume: Partial<ResumeData>): ResumeFormDat
     current: !exp.endDate,
     description: exp.description || "",
   }));
+}
 
-  form.education = (resume.education || []).map((edu) => ({
+function mapResumeEducationToFormEducation(
+  education: ResumeEducationItem[] | undefined,
+): ResumeFormEducation[] {
+  return (education || []).map((edu) => ({
     degree: edu.degree,
     school: edu.school,
     location: "",
     graduationDate: edu.year,
     gpa: edu.gpa || "",
   }));
+}
 
-  const tech = resume.skills?.technical || [];
-  const soft = resume.skills?.soft || [];
-  form.skills = [...tech, ...soft];
-
-  form.projects = (resume.projects || []).map((p) => ({
-    name: p.title,
-    description: p.description,
-    technologies: p.technologies || [],
-    url: p.link || "",
+function mapResumeProjectsToFormProjects(projects: ResumeProject[] | undefined): ResumeFormProject[] {
+  return (projects || []).map((project) => ({
+    name: project.title,
+    description: project.description,
+    technologies: project.technologies || [],
+    url: project.link || "",
   }));
+}
 
-  const ge = resume.gamingExperience || {};
-  form.gaming = {
-    roles: ge.gameEngines ? ge.gameEngines.split(",").map((s) => s.trim()) : [],
-    genres: ge.genres ? ge.genres.split(",").map((s) => s.trim()) : [],
-    achievements: ge.shippedTitles ? ge.shippedTitles.split(";").map((s) => s.trim()) : [],
+function splitDelimited(value: string | undefined, delimiter: string): string[] {
+  return value ? value.split(delimiter).map((entry) => entry.trim()) : [];
+}
+
+/**
+ * Convert form data to canonical ResumeData.
+ */
+export function formDataToResumeData(form: Partial<ResumeFormData>): Partial<ResumeData> {
+  const personalInfo = buildPersonalInfo(form);
+  const experience = mapFormExperienceToResumeExperience(form.experience);
+  const education = mapFormEducationToResumeEducation(form.education);
+  const skills = buildSkillsFromForm(form.skills);
+  const projects = mapFormProjectsToResumeProjects(form.projects);
+  const gamingExperience = buildGamingExperience(form.gaming);
+
+  return buildResumeData({
+    form,
+    personalInfo,
+    experience,
+    education,
+    skills,
+    projects,
+    gamingExperience,
+  });
+}
+
+/**
+ * Convert canonical ResumeData to form data.
+ */
+export function resumeDataToFormData(resume: Partial<ResumeData>): ResumeFormData {
+  const pi = resume.personalInfo || {};
+  return {
+    name: pi.name || "",
+    email: pi.email || "",
+    phone: pi.phone || "",
+    location: pi.location || "",
+    summary: resume.summary || "",
+    linkedIn: pi.linkedIn || "",
+    portfolio: pi.portfolio || "",
+    experience: mapResumeExperienceToFormExperience(resume.experience),
+    education: mapResumeEducationToFormEducation(resume.education),
+    skills: [...(resume.skills?.technical || []), ...(resume.skills?.soft || [])],
+    projects: mapResumeProjectsToFormProjects(resume.projects),
+    gaming: {
+      roles: splitDelimited(resume.gamingExperience?.gameEngines, ","),
+      genres: splitDelimited(resume.gamingExperience?.genres, ","),
+      achievements: splitDelimited(resume.gamingExperience?.shippedTitles, ";"),
+    },
   };
-
-  return form;
 }

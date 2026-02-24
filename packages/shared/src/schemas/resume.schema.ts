@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 import { RESUME_TEMPLATE_OPTIONS } from "../constants/resume";
 
 const resumeTemplateValues = RESUME_TEMPLATE_OPTIONS;

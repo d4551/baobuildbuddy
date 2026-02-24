@@ -46,95 +46,96 @@ interface FetchRunsParams {
   status?: AutomationRunStatus;
 }
 
-/**
- * Automation feature composable using shared run/event contracts.
- */
-export function useAutomation() {
-  const config = useRuntimeConfig();
-  const requestUrl = useRequestURL();
-  const apiBase = String(config.public.apiBase || "/");
-  const wsBase = String(config.public.wsBase || config.public.apiBase || "/");
+interface AutomationRuntime {
+  apiBase: string;
+  wsBase: string;
+  requestUrl: URL;
+}
 
-  /**
-   * Starts a job-apply automation run.
-   */
-  const triggerJobApply = (body: JobApplyBody) => {
-    return $fetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationJobApply),
+function resolveAutomationRuntime(
+  config: ReturnType<typeof useRuntimeConfig>,
+  requestUrl: URL,
+): AutomationRuntime {
+  return {
+    apiBase: String(config.public.apiBase || "/"),
+    wsBase: String(config.public.wsBase || config.public.apiBase || "/"),
+    requestUrl,
+  };
+}
+
+function createRunMutations(runtime: AutomationRuntime) {
+  const triggerJobApply = (body: JobApplyBody) =>
+    $fetch<RpaRunExecutionEnvelope>(
+      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationJobApply),
       {
         method: "POST",
         body,
       },
     );
-  };
 
-  /**
-   * Schedules a job-apply automation run.
-   */
   const scheduleJobApply = (body: ScheduleJobApplyBody) =>
     $fetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationJobApplySchedule),
+      resolveApiEndpoint(
+        runtime.apiBase,
+        runtime.requestUrl,
+        API_ENDPOINTS.automationJobApplySchedule,
+      ),
       {
         method: "POST",
         body,
       },
     );
 
-  /**
-   * Generates an AI-assisted email response run.
-   */
   const triggerEmailResponse = (body: EmailResponseBody) =>
     $fetch<EmailAutomationResponse>(
-      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationEmailResponse),
+      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationEmailResponse),
       {
         method: "POST",
         body,
       },
     );
 
-  /**
-   * Fetches run history with optional type/status filters.
-   */
-  const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}) =>
-    useFetch<RpaRunExecutionEnvelope[]>(
-      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationRuns),
-      {
-        query: params,
-      },
-    );
+  return {
+    triggerJobApply,
+    scheduleJobApply,
+    triggerEmailResponse,
+  };
+}
 
-  /**
-   * Fetches one run by id as reactive async data.
-   */
+function createRunQueries(runtime: AutomationRuntime) {
+  const runsEndpoint = resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationRuns);
+
+  const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}) =>
+    useFetch<RpaRunExecutionEnvelope[]>(runsEndpoint, {
+      query: params,
+    });
+
   const fetchRun = (id: string) =>
     useFetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(apiBase, requestUrl, buildAutomationRunEndpoint(id)),
+      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, buildAutomationRunEndpoint(id)),
     );
 
-  /**
-   * Fetches one run by id as an imperative request.
-   */
   const getRun = (id: string) =>
     $fetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(apiBase, requestUrl, buildAutomationRunEndpoint(id)),
+      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, buildAutomationRunEndpoint(id)),
     );
 
-  /**
-   * Fetches run history as an imperative request.
-   */
   const getRuns = (params: FetchRunsParams = {}) =>
-    $fetch<RpaRunExecutionEnvelope[]>(
-      resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.automationRuns),
-      {
-        query: params,
-      },
-    );
+    $fetch<RpaRunExecutionEnvelope[]>(runsEndpoint, {
+      query: params,
+    });
 
-  /**
-   * Subscribes to run-scoped websocket events.
-   */
-  const subscribeToRun = (runId: string, onEvent: (event: RpaRunEvent) => void): (() => void) => {
-    const wsUrl = resolveWebSocketEndpoint(wsBase, requestUrl, WS_ENDPOINTS.automation);
+  return {
+    fetchRuns,
+    fetchRun,
+    getRun,
+    getRuns,
+  };
+}
+
+function createRunSubscription(runtime: AutomationRuntime) {
+  return (runId: string, onEvent: (event: RpaRunEvent) => void): (() => void) => {
+    const wsUrl = resolveWebSocketEndpoint(runtime.wsBase, runtime.requestUrl, WS_ENDPOINTS.automation);
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -152,10 +153,9 @@ export function useAutomation() {
       }
       const parsedPayload = safeParseJson(event.data);
       const parsedEvent = rpaRunEventSchema.safeParse(parsedPayload);
-      if (!parsedEvent.success) {
-        return;
+      if (parsedEvent.success) {
+        onEvent(parsedEvent.data);
       }
-      onEvent(parsedEvent.data);
     };
 
     return () => {
@@ -170,15 +170,17 @@ export function useAutomation() {
       ws.close();
     };
   };
+}
+
+/**
+ * Automation feature composable using shared run/event contracts.
+ */
+export function useAutomation() {
+  const runtime = resolveAutomationRuntime(useRuntimeConfig(), useRequestURL());
 
   return {
-    triggerJobApply,
-    scheduleJobApply,
-    triggerEmailResponse,
-    fetchRuns,
-    fetchRun,
-    getRun,
-    getRuns,
-    subscribeToRun,
+    ...createRunMutations(runtime),
+    ...createRunQueries(runtime),
+    subscribeToRun: createRunSubscription(runtime),
   };
 }

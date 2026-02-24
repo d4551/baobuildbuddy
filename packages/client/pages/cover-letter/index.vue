@@ -212,8 +212,8 @@ async function handleDeleteCoverLetter() {
   $toast.success(t("coverLetterPage.toasts.deleted"));
 }
 
-function editLetter(id: string) {
-  router.push(APP_ROUTE_BUILDERS.coverLetterDetail(id));
+async function editLetter(id: string) {
+  await router.push(APP_ROUTE_BUILDERS.coverLetterDetail(id));
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -287,7 +287,7 @@ async function handleGenerate() {
   const generatedId = resolveGeneratedCoverLetterId(generateResult.value);
   if (generatedId) {
     $toast.success(t("coverLetterPage.toasts.generated"));
-    router.push(APP_ROUTE_BUILDERS.coverLetterDetail(generatedId));
+    await router.push(APP_ROUTE_BUILDERS.coverLetterDetail(generatedId));
     return;
   }
 

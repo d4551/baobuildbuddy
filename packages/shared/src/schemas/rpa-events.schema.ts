@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 import { rpaErrorEnvelopeSchema } from "./error-envelope.schema";
 import { jsonObjectSchema } from "./json.schema";
 import {

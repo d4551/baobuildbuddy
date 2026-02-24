@@ -188,7 +188,7 @@ async function handleComplete(): Promise<void> {
   }
 
   $toast.success(t("setup.completeToast"));
-  router.push(APP_ROUTES.dashboard);
+  await router.push(APP_ROUTES.dashboard);
 }
 </script>
 

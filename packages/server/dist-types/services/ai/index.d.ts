@@ -21,6 +21,6 @@ export { GeminiProvider } from "./gemini-provider";
 export { HuggingFaceProvider } from "./huggingface-provider";
 export { LocalProvider } from "./local-provider";
 export { OpenAIProvider } from "./openai-provider";
-export * from "./prompts";
+export { careerTransitionPrompt, companyResearchPrompt, coverLetterCustomizePrompt, coverLetterPrompt, cvQuestionnaireQuestionsPrompt, cvQuestionnaireSynthesizePrompt, DOMAIN_SYSTEM_PROMPTS, emailResponsePrompt, formFieldAnalysisPrompt, GAMING_INDUSTRY_CONTEXT, interviewFeedbackPrompt, interviewFollowUpPrompt, interviewPersonaPrompt, interviewQuestionPrompt, jobMatchPrompt, portfolioDescriptionPrompt, portfolioReviewPrompt, resumeEnhancePrompt, resumeQuantifyPrompt, resumeScorePrompt, salaryNegotiationPrompt, skillAnalysisPrompt, skillCategorizePrompt, skillGapPrompt, SYSTEM_PROMPT } from "./prompts";
 export type { AIProvider } from "./provider-interface";
 export { BaseAIProvider } from "./provider-interface";

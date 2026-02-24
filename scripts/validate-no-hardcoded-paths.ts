@@ -108,13 +108,16 @@ const collectApiViolations = (filePath: string, content: string): Violation[] =>
 
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectClientFiles();
-  const violations: Violation[] = [];
-  for (const filePath of files) {
-    const fileContent = await Bun.file(filePath).text();
-    violations.push(...collectRouteViolations(filePath, fileContent));
-    violations.push(...collectApiViolations(filePath, fileContent));
-  }
-  return violations;
+  const violationGroups = await Promise.all(
+    files.map(async (filePath) => {
+      const fileContent = await Bun.file(filePath).text();
+      return [
+        ...collectRouteViolations(filePath, fileContent),
+        ...collectApiViolations(filePath, fileContent),
+      ];
+    }),
+  );
+  return violationGroups.flat();
 };
 
 const main = async (): Promise<void> => {
@@ -127,15 +130,14 @@ const main = async (): Promise<void> => {
   }
 
   process.stderr.write("Hardcoded path validation failed:\n");
-  for (const violation of violations) {
+  const lines = violations.map((violation) => {
     const reason =
       violation.category === "route"
         ? "Use APP_ROUTES/APP_ROUTE_BUILDERS instead of a route literal."
         : "Use API_ENDPOINTS/builders instead of a hardcoded /api path literal.";
-    process.stderr.write(
-      `- ${violation.filePath}:${violation.line} ${violation.literal} ${reason}\n`,
-    );
-  }
+    return `- ${violation.filePath}:${violation.line} ${violation.literal} ${reason}`;
+  });
+  process.stderr.write(`${lines.join("\n")}\n`);
   process.exit(1);
 };
 

@@ -49,12 +49,12 @@ const normalizeModuleId = (moduleId: string): string =>
 const resolveManualChunkName = (moduleId: string): string | undefined => {
   const normalizedModuleId = normalizeModuleId(moduleId);
   if (!normalizedModuleId.includes(LOCALES_DIRECTORY_SEGMENT)) {
-    return undefined;
+    return;
   }
 
   const fileName = normalizedModuleId.split(MODULE_PATH_SEPARATOR).pop();
-  if (!fileName || !hasOwnKey(LOCALE_CHUNK_NAME_BY_FILE, fileName)) {
-    return undefined;
+  if (!(fileName && hasOwnKey(LOCALE_CHUNK_NAME_BY_FILE, fileName))) {
+    return;
   }
 
   return LOCALE_CHUNK_NAME_BY_FILE[fileName];
@@ -112,7 +112,7 @@ export default defineNuxtConfig({
       conditions: ["import", "module", "default"],
     },
     ssr: {
-      noExternal: ["@bao/shared", "zod"],
+      noExternal: ["@bao/shared"],
     },
   },
 

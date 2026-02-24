@@ -5,12 +5,12 @@
 import type { SalaryRange } from "../types/jobs";
 
 export function parseSalary(input: string | SalaryRange | undefined): SalaryRange | undefined {
-  if (!input) return undefined;
+  if (!input) return ;
   if (typeof input !== "string") return input;
 
   // Try to extract numbers from string like "$80,000 - $120,000"
   const numbers = input.match(/[\d,]+/g);
-  if (!numbers || numbers.length === 0) return undefined;
+  if (!numbers || numbers.length === 0) return ;
 
   const parsed = numbers.map((n) => Number.parseInt(n.replace(/,/g, ""), 10));
 
@@ -25,12 +25,12 @@ export function parseSalary(input: string | SalaryRange | undefined): SalaryRang
   if (parsed.length === 1) {
     const firstValue = parsed[0];
     if (firstValue === undefined) {
-      return undefined;
+      return ;
     }
     return { min: firstValue, max: firstValue, currency: "USD", frequency: "yearly" };
   }
 
-  return undefined;
+  return ;
 }
 
 export function formatSalary(salary: SalaryRange | string | undefined): string {

@@ -68,6 +68,10 @@ const toErrorMessage = (error: unknown): string =>
 const MAX_QUESTION_COUNT = 12;
 const DEFAULT_INTERVIEW_MODE: InterviewMode = "studio";
 const AI_OPERATION_TIMEOUT_MS = 1200;
+const PREFIX_FOR_PATTERN = /^\s*For\s*/u;
+const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
+const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;
+const JSON_OBJECT_PATTERN = /\{[\s\S]*\}/;
 const interviewServiceLogger = createServerLogger("interview-service");
 const FALLBACK_INTERVIEW_QUESTIONS: Array<Omit<InterviewQuestion, "id">> = [
   {
@@ -189,7 +193,10 @@ function buildFallbackQuestions(config: InterviewConfig, studioName: string): In
     questions.push({
       ...seed,
       id: `fallback-${questions.length + 1}`,
-      question: `For ${studioName}, ${seed.question}`.replace(/^\s*For\s*/, `For ${studioName}, `),
+      question: `For ${studioName}, ${seed.question}`.replace(
+        PREFIX_FOR_PATTERN,
+        `For ${studioName}, `,
+      ),
     });
   }
 
@@ -258,15 +265,15 @@ function normalizeInterviewMode(value: unknown): InterviewMode {
 }
 
 function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undefined {
-  if (!isRecord(value)) return undefined;
+  if (!isRecord(value)) return ;
 
   const id = parseString(value.id, "");
   const title = parseString(value.title, "");
   const company = parseString(value.company, "");
   const location = parseString(value.location, "");
 
-  if (!id || !title || !company || !location) {
-    return undefined;
+  if (!(((id && title ) && company ) && location)) {
+    return ;
   }
 
   const requirements = parseStringArray(value.requirements);
@@ -305,7 +312,7 @@ function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undef
 }
 
 function normalizeVoiceSettings(raw: unknown): VoiceSettings | undefined {
-  if (!isRecord(raw)) return undefined;
+  if (!isRecord(raw)) return ;
 
   const microphoneId = parseString(raw.microphoneId, "");
   const speakerId = parseString(raw.speakerId, "");
@@ -534,17 +541,17 @@ function normalizeInterviewSessionStatus(value: unknown): InterviewSession["stat
 function extractJSON(text: string): string {
   if (typeof text !== "string") return text;
 
-  const codeFenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const codeFenceMatch = text.match(JSON_CODE_FENCE_PATTERN);
   if (codeFenceMatch?.[1]) {
     return codeFenceMatch[1].trim();
   }
 
-  const arrayMatch = text.match(/\[[\s\S]*\]/);
+  const arrayMatch = text.match(JSON_ARRAY_PATTERN);
   if (arrayMatch) {
     return arrayMatch[0];
   }
 
-  const objectMatch = text.match(/\{[\s\S]*\}/);
+  const objectMatch = text.match(JSON_OBJECT_PATTERN);
   if (objectMatch) {
     return objectMatch[0];
   }
@@ -581,7 +588,6 @@ function fallbackResponseScore(transcript: string): number {
 
 function fallbackResponseFeedback(
   transcript: string,
-  _question: InterviewQuestion,
 ): NonNullable<InterviewResponse["aiAnalysis"]> {
   return {
     score: fallbackResponseScore(transcript),
@@ -802,20 +808,21 @@ async function generateQuestions(
   return buildFallbackQuestions(config, config.targetJob?.company || studio.name);
 }
 
-function buildResponseFeedbackPrompt(
-  studio: StudioContext,
-  config: InterviewConfig,
-  persona: InterviewerPersona,
-  question: InterviewQuestion,
-  responseText: string,
-): string {
-  return `${interviewPersonaPrompt(
-    config.targetJob?.title || config.roleType,
-    config.targetJob?.company || studio.name,
-    persona.name,
-    studio.interviewStyle,
-    config.focusAreas,
-  )}
+function buildResponseFeedbackPrompt(input: {
+  studio: StudioContext;
+  config: InterviewConfig;
+  persona: InterviewerPersona;
+  question: InterviewQuestion;
+  responseText: string;
+}): string {
+  const { studio, config, persona, question, responseText } = input;
+  return `${interviewPersonaPrompt({
+    role: config.targetJob?.title || config.roleType,
+    company: config.targetJob?.company || studio.name,
+    personality: persona.name,
+    interviewStyle: studio.interviewStyle,
+    focusAreas: config.focusAreas,
+  })}
 
 Interview mode: ${config.interviewMode || DEFAULT_INTERVIEW_MODE}
 ${buildJobPromptContext(config)}
@@ -843,7 +850,11 @@ function normalizeQuestionFeedback(
 ): NonNullable<InterviewResponse["aiAnalysis"]> | null {
   if (!isRecord(raw)) return null;
   const parsedScore =
-    typeof raw.score === "number" ? raw.score : Number.parseInt(String(raw.score || ""), 10);
+    typeof raw.score === "number"
+      ? raw.score
+      : typeof raw.score === "string"
+        ? Number.parseInt(raw.score, 10)
+        : Number.NaN;
   if (!Number.isFinite(parsedScore)) return null;
 
   return {
@@ -870,10 +881,16 @@ async function generateResponseFeedback(
   }
 
   const persona = buildInterviewerPersona(studio, session.config);
-  const prompt = buildResponseFeedbackPrompt(studio, session.config, persona, question, transcript);
+  const prompt = buildResponseFeedbackPrompt({
+    studio,
+    config: session.config,
+    persona,
+    question,
+    responseText: transcript,
+  });
   const aiServiceResult = await settlePromise(createAIService());
   if (aiServiceResult.status === "rejected") {
-    return fallbackResponseFeedback(transcript, question);
+    return fallbackResponseFeedback(transcript);
   }
 
   const response = (await withAiOperationTimeout(() =>
@@ -890,7 +907,7 @@ async function generateResponseFeedback(
   };
 
   if (response.error) {
-    return fallbackResponseFeedback(transcript, question);
+    return fallbackResponseFeedback(transcript);
   }
 
   const parsedPayload = safeParseJSON(response.content) ?? {
@@ -900,7 +917,7 @@ async function generateResponseFeedback(
     improvements: [],
   };
   const parsed = normalizeQuestionFeedback(parsedPayload);
-  if (!parsed) return fallbackResponseFeedback(transcript, question);
+  if (!parsed) return fallbackResponseFeedback(transcript);
   if (parsed.feedback === "") {
     parsed.feedback = "Good response with room for greater specificity.";
   }
@@ -962,13 +979,13 @@ function buildFinalAnalysisPrompt(
     (response, index) => `Q${index + 1}: "${response.questionId}"`,
   );
 
-  return `${interviewPersonaPrompt(
-    config.targetJob?.title || config.roleType,
-    config.targetJob?.company || studio.name,
-    persona.name,
-    studio.interviewStyle,
-    config.focusAreas,
-  )}
+  return `${interviewPersonaPrompt({
+    role: config.targetJob?.title || config.roleType,
+    company: config.targetJob?.company || studio.name,
+    personality: persona.name,
+    interviewStyle: studio.interviewStyle,
+    focusAreas: config.focusAreas,
+  })}
 Interview mode: ${config.interviewMode || DEFAULT_INTERVIEW_MODE}
 ${buildJobPromptContext(config)}
 You are analyzing the following interview responses.
@@ -1139,6 +1156,74 @@ export class InterviewService {
     return toInterviewSession(rows[0]);
   }
 
+  private selectQuestionForResponse(
+    session: InterviewSession,
+    response: InterviewResponse,
+  ): InterviewQuestion | null {
+    const questions = session.questions;
+    const matchedQuestion = questions.find((entry) => entry.id === response.questionId);
+    return matchedQuestion ?? questions[session.currentQuestionIndex] ?? questions[questions.length - 1] ?? null;
+  }
+
+  private buildAnalyzedResponse(
+    response: InterviewResponse,
+    questionId: string,
+    analysis: NonNullable<InterviewResponse["aiAnalysis"]>,
+  ): InterviewResponse {
+    return {
+      ...response,
+      questionId,
+      duration: Math.max(1, response.duration),
+      transcript: response.transcript.trim(),
+      timestamp: response.timestamp || Date.now(),
+      confidence: Math.max(0, Math.min(1, response.confidence || 0.8)),
+      aiAnalysis: analysis,
+    };
+  }
+
+  private async persistSessionResponses(
+    options: {
+      sessionId: string;
+      responses: InterviewResponse[];
+      questionsLength: number;
+      endTime: number | null;
+      nowIso: string;
+    },
+  ): Promise<InterviewSession["status"]> {
+    const status: InterviewSession["status"] =
+      options.responses.length >= options.questionsLength ? "completed" : "active";
+    await db
+      .update(interviewSessions)
+      .set({
+        responses: options.responses,
+        status,
+        endTime: status === "completed" ? Date.now() : options.endTime,
+        updatedAt: options.nowIso,
+      })
+      .where(eq(interviewSessions.id, options.sessionId));
+    return status;
+  }
+
+  private async persistFinalAnalysis(
+    sessionId: string,
+    studioContext: StudioContext,
+    nowIso: string,
+  ): Promise<void> {
+    const finalized = await this.getSession(sessionId);
+    if (!finalized) {
+      return;
+    }
+    const finalAnalysis = await generateFinalAnalysis(finalized, studioContext);
+    const persistedFinalAnalysis = toPersistedRecord(finalAnalysis);
+    await db
+      .update(interviewSessions)
+      .set({
+        finalAnalysis: persistedFinalAnalysis,
+        updatedAt: nowIso,
+      })
+      .where(eq(interviewSessions.id, sessionId));
+  }
+
   /**
    * Add one candidate response and generate AI-backed feedback.
    */
@@ -1150,10 +1235,7 @@ export class InterviewService {
     if (!session) return null;
     if (session.status === "completed") return session;
 
-    const questions = session.questions;
-    const matchedQuestion = questions.find((entry) => entry.id === response.questionId);
-    const question =
-      matchedQuestion ?? questions[session.currentQuestionIndex] ?? questions[questions.length - 1];
+    const question = this.selectQuestionForResponse(session, response);
     if (!question) return session;
 
     const studioContext = await resolveStudioContext(session.studioId);
@@ -1163,42 +1245,19 @@ export class InterviewService {
       question,
       response.transcript,
     );
-    const now = new Date().toISOString();
-    const responseWithAnalysis: InterviewResponse = {
-      ...response,
-      questionId: question.id,
-      duration: Math.max(1, response.duration),
-      transcript: response.transcript.trim(),
-      timestamp: response.timestamp || Date.now(),
-      confidence: Math.max(0, Math.min(1, response.confidence || 0.8)),
-      aiAnalysis: analysis,
-    };
-
+    const nowIso = new Date().toISOString();
+    const responseWithAnalysis = this.buildAnalyzedResponse(response, question.id, analysis);
     const responses = [...session.responses, responseWithAnalysis];
-    const status: InterviewSession["status"] =
-      responses.length >= questions.length ? "completed" : "active";
-    await db
-      .update(interviewSessions)
-      .set({
-        responses,
-        status,
-        endTime: status === "completed" ? Date.now() : session.endTime,
-        updatedAt: now,
-      })
-      .where(eq(interviewSessions.id, sessionId));
+    const status = await this.persistSessionResponses({
+      sessionId,
+      responses,
+      questionsLength: session.questions.length,
+      endTime: session.endTime,
+      nowIso,
+    });
 
     if (status === "completed") {
-      const finalized = await this.getSession(sessionId);
-      if (!finalized) return null;
-      const finalAnalysis = await generateFinalAnalysis(finalized, studioContext);
-      const persistedFinalAnalysis = toPersistedRecord(finalAnalysis);
-      await db
-        .update(interviewSessions)
-        .set({
-          finalAnalysis: persistedFinalAnalysis,
-          updatedAt: now,
-        })
-        .where(eq(interviewSessions.id, sessionId));
+      await this.persistFinalAnalysis(sessionId, studioContext, nowIso);
     }
 
     return this.getSession(sessionId);

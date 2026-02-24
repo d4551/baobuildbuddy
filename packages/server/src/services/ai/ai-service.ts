@@ -17,13 +17,15 @@ const TEST_AI_PROVIDER_NAME = "local" as const;
 const TEST_AI_MODEL_NAME = "deterministic-test-model";
 const TEST_AI_MAX_QUESTION_COUNT = 12;
 const UNKNOWN_ERROR_MESSAGE = "Unknown error";
+const EXACT_QUESTION_COUNT_PATTERN = /exactly\s+(\d+)\s+questions/i;
+const GENERATE_QUESTION_COUNT_PATTERN = /generate\s+(\d+)\s+interview questions/i;
 
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
 
 function parseQuestionCount(prompt: string): number {
-  const exactMatch = prompt.match(/exactly\s+(\d+)\s+questions/i);
-  const generateMatch = prompt.match(/generate\s+(\d+)\s+interview questions/i);
+  const exactMatch = prompt.match(EXACT_QUESTION_COUNT_PATTERN);
+  const generateMatch = prompt.match(GENERATE_QUESTION_COUNT_PATTERN);
   const matchedValue = exactMatch?.[1] ?? generateMatch?.[1];
   const parsed = matchedValue ? Number.parseInt(matchedValue, 10) : Number.NaN;
   if (!Number.isFinite(parsed) || parsed < 1) {
@@ -39,6 +41,8 @@ function parseIncludeFlag(prompt: string, label: string, fallback: boolean): boo
   if (matched === "false") return false;
   return fallback;
 }
+
+type ProviderFailure = { provider: AIProviderType; error: string };
 
 function buildDeterministicQuestionSet(prompt: string): string {
   const questionCount = parseQuestionCount(prompt);
@@ -137,11 +141,11 @@ class DeterministicTestProvider implements AIProvider {
   name = TEST_AI_PROVIDER_NAME;
   model = TEST_AI_MODEL_NAME;
 
-  async generate(prompt: string): Promise<AIResponse> {
+  generate(prompt: string): Promise<AIResponse> {
     const startedAt = Date.now();
     const content = buildDeterministicContent(prompt);
     const completedAt = Date.now();
-    return {
+    return Promise.resolve({
       id: `test-${startedAt}`,
       provider: this.name,
       model: this.model,
@@ -151,15 +155,19 @@ class DeterministicTestProvider implements AIProvider {
         completedAt,
         totalTime: completedAt - startedAt,
       },
-    };
+    });
   }
 
-  async *stream(prompt: string): AsyncGenerator<string> {
-    yield buildDeterministicContent(prompt);
+  stream(prompt: string): AsyncGenerator<string> {
+    const content = buildDeterministicContent(prompt);
+    return (async function* streamDeterministicContent(): AsyncGenerator<string> {
+      await Promise.resolve();
+      yield content;
+    })();
   }
 
-  async isAvailable(): Promise<boolean> {
-    return true;
+  isAvailable(): Promise<boolean> {
+    return Promise.resolve(true);
   }
 }
 
@@ -400,90 +408,192 @@ export class AIService {
     options?: GenerateOptions,
   ): Omit<GenerateOptions, "messages"> | undefined {
     if (!options) {
-      return undefined;
+      return;
     }
 
     const { messages: _messages, ...providerOptions } = options;
     return providerOptions;
   }
 
-  /**
-   * Generate a response with automatic fallback
-   */
-  async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
-    const errors: Array<{ provider: AIProviderType; error: string }> = [];
-    const contextualPrompt = AIService.mergePromptWithContext(prompt, options);
-    const providerOptions = AIService.toProviderOptions(options);
+  private static pushProviderError(
+    errors: ProviderFailure[],
+    provider: AIProviderType,
+    error: string,
+  ): void {
+    errors.push({ provider, error });
+  }
 
-    // Try each provider in fallback order
-    for (const providerName of this.fallbackOrder) {
-      const provider = this.providers.get(providerName);
-      if (!provider) continue;
+  private static buildFailureMessage(errors: ProviderFailure[]): string {
+    return errors.map((entry) => `${entry.provider}: ${entry.error}`).join("; ");
+  }
 
-      const availability = await provider.isAvailable().then(
-        (isAvailable) => ({ isAvailable, error: null as string | null }),
-        (error: unknown) => ({ isAvailable: false, error: toErrorMessage(error) }),
-      );
-      if (availability.error) {
-        errors.push({
-          provider: providerName,
-          error: availability.error,
-        });
-        continue;
-      }
-      if (!availability.isAvailable) {
-        errors.push({
-          provider: providerName,
-          error: "Provider not available",
-        });
-        continue;
-      }
-
-      const generationResult = await provider.generate(contextualPrompt, providerOptions).then(
-        (response) => ({ response, error: null as string | null }),
-        (error: unknown) => ({ response: null as AIResponse | null, error: toErrorMessage(error) }),
-      );
-      if (generationResult.error) {
-        errors.push({
-          provider: providerName,
-          error: generationResult.error,
-        });
-        continue;
-      }
-
-      const response = generationResult.response;
-      if (!response) {
-        continue;
-      }
-
-      // If there's an error in the response, try next provider
-      if (response.error) {
-        errors.push({
-          provider: providerName,
-          error: response.error,
-        });
-        continue;
-      }
-
-      // Success!
-      return response;
+  private async resolveAvailableProvider(
+    providerName: AIProviderType,
+    errors: ProviderFailure[],
+  ): Promise<AIProvider | null> {
+    const provider = this.providers.get(providerName);
+    if (!provider) {
+      return null;
     }
 
-    // All providers failed
-    const errorMessage = errors.map((e) => `${e.provider}: ${e.error}`).join("; ");
+    const availability = await provider.isAvailable().then(
+      (isAvailable) => ({ isAvailable, error: null as string | null }),
+      (error: unknown) => ({ isAvailable: false, error: toErrorMessage(error) }),
+    );
+    if (availability.error) {
+      AIService.pushProviderError(errors, providerName, availability.error);
+      return null;
+    }
+    if (!availability.isAvailable) {
+      AIService.pushProviderError(errors, providerName, "Provider not available");
+      return null;
+    }
+    return provider;
+  }
 
+  private async generateFromProvider(
+    providerName: AIProviderType,
+    contextualPrompt: string,
+    providerOptions: Omit<GenerateOptions, "messages"> | undefined,
+    errors: ProviderFailure[],
+  ): Promise<AIResponse | null> {
+    const provider = await this.resolveAvailableProvider(providerName, errors);
+    if (!provider) {
+      return null;
+    }
+
+    const generationResult = await provider.generate(contextualPrompt, providerOptions).then(
+      (response) => ({ response, error: null as string | null }),
+      (error: unknown) => ({ response: null as AIResponse | null, error: toErrorMessage(error) }),
+    );
+    if (generationResult.error) {
+      AIService.pushProviderError(errors, providerName, generationResult.error);
+      return null;
+    }
+
+    if (!generationResult.response) {
+      return null;
+    }
+    if (generationResult.response.error) {
+      AIService.pushProviderError(errors, providerName, generationResult.response.error);
+      return null;
+    }
+    return generationResult.response;
+  }
+
+  private async generateWithFallback(
+    index: number,
+    contextualPrompt: string,
+    providerOptions: Omit<GenerateOptions, "messages"> | undefined,
+    errors: ProviderFailure[],
+  ): Promise<AIResponse | null> {
+    const providerName = this.fallbackOrder[index];
+    if (!providerName) {
+      return null;
+    }
+
+    const response = await this.generateFromProvider(
+      providerName,
+      contextualPrompt,
+      providerOptions,
+      errors,
+    );
+    if (response) {
+      return response;
+    }
+    return this.generateWithFallback(index + 1, contextualPrompt, providerOptions, errors);
+  }
+
+  private buildGenerateFailureResponse(errors: ProviderFailure[]): AIResponse {
+    const now = Date.now();
+    const errorMessage = AIService.buildFailureMessage(errors);
     return {
-      id: `failed-${Date.now()}`,
+      id: `failed-${now}`,
       provider: this.preferredProvider || AI_PROVIDER_DEFAULT_ORDER[0],
       model: "none",
       content: "",
       error: `All providers failed: ${errorMessage}`,
       timing: {
-        startedAt: Date.now(),
-        completedAt: Date.now(),
+        startedAt: now,
+        completedAt: now,
         totalTime: 0,
       },
     };
+  }
+
+  private async *streamProviderIterator(
+    providerName: AIProviderType,
+    iterator: AsyncIterator<string>,
+    errors: ProviderFailure[],
+    hasYielded: boolean,
+  ): AsyncGenerator<{ chunk: string; provider: AIProviderType }, { hasYielded: boolean; failed: boolean }> {
+    const nextChunk = await iterator.next().then(
+      (result) => ({ result, error: null as string | null }),
+      (error: unknown) => ({
+        result: null as IteratorResult<string> | null,
+        error: toErrorMessage(error),
+      }),
+    );
+    if (nextChunk.error) {
+      AIService.pushProviderError(errors, providerName, nextChunk.error);
+      return { hasYielded, failed: true };
+    }
+    if (!nextChunk.result || nextChunk.result.done) {
+      return { hasYielded, failed: false };
+    }
+    yield { chunk: nextChunk.result.value, provider: providerName };
+    return yield* this.streamProviderIterator(providerName, iterator, errors, true);
+  }
+
+  private async *streamProvider(
+    providerName: AIProviderType,
+    contextualPrompt: string,
+    providerOptions: Omit<GenerateOptions, "messages"> | undefined,
+    errors: ProviderFailure[],
+  ): AsyncGenerator<{ chunk: string; provider: AIProviderType }, { hasYielded: boolean; failed: boolean }> {
+    const provider = await this.resolveAvailableProvider(providerName, errors);
+    if (!provider) {
+      return { hasYielded: false, failed: true };
+    }
+    const iterator = provider.stream(contextualPrompt, providerOptions)[Symbol.asyncIterator]();
+    return yield* this.streamProviderIterator(providerName, iterator, errors, false);
+  }
+
+  private async *streamWithFallback(
+    index: number,
+    contextualPrompt: string,
+    providerOptions: Omit<GenerateOptions, "messages"> | undefined,
+    errors: ProviderFailure[],
+  ): AsyncGenerator<{ chunk: string; provider: AIProviderType }, boolean> {
+    const providerName = this.fallbackOrder[index];
+    if (!providerName) {
+      return false;
+    }
+
+    const streamResult = yield* this.streamProvider(
+      providerName,
+      contextualPrompt,
+      providerOptions,
+      errors,
+    );
+    if (streamResult.hasYielded && !streamResult.failed) {
+      return true;
+    }
+    return yield* this.streamWithFallback(index + 1, contextualPrompt, providerOptions, errors);
+  }
+
+  /**
+   * Generate a response with automatic fallback
+   */
+  async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
+    const errors: ProviderFailure[] = [];
+    const contextualPrompt = AIService.mergePromptWithContext(prompt, options);
+    const providerOptions = AIService.toProviderOptions(options);
+    const response = await this.generateWithFallback(0, contextualPrompt, providerOptions, errors);
+    if (response) {
+      return response;
+    }
+    return this.buildGenerateFailureResponse(errors);
   }
 
   /**
@@ -493,77 +603,15 @@ export class AIService {
     prompt: string,
     options?: GenerateOptions,
   ): AsyncGenerator<{ chunk: string; provider: AIProviderType }> {
-    const errors: Array<{ provider: AIProviderType; error: string }> = [];
+    const errors: ProviderFailure[] = [];
     const contextualPrompt = AIService.mergePromptWithContext(prompt, options);
     const providerOptions = AIService.toProviderOptions(options);
-
-    // Try each provider in fallback order
-    for (const providerName of this.fallbackOrder) {
-      const provider = this.providers.get(providerName);
-      if (!provider) continue;
-
-      const availability = await provider.isAvailable().then(
-        (isAvailable) => ({ isAvailable, error: null as string | null }),
-        (error: unknown) => ({ isAvailable: false, error: toErrorMessage(error) }),
-      );
-      if (availability.error) {
-        errors.push({
-          provider: providerName,
-          error: availability.error,
-        });
-        continue;
-      }
-      if (!availability.isAvailable) {
-        errors.push({
-          provider: providerName,
-          error: "Provider not available",
-        });
-        continue;
-      }
-
-      // Try to stream
-      let hasYielded = false;
-      const iterator = provider.stream(contextualPrompt, providerOptions)[Symbol.asyncIterator]();
-      let streamFailed = false;
-      while (true) {
-        const nextChunk = await iterator.next().then(
-          (result) => ({ result, error: null as string | null }),
-          (error: unknown) => ({
-            result: null as IteratorResult<string> | null,
-            error: toErrorMessage(error),
-          }),
-        );
-
-        if (nextChunk.error) {
-          errors.push({
-            provider: providerName,
-            error: nextChunk.error,
-          });
-          streamFailed = true;
-          break;
-        }
-
-        if (!nextChunk.result || nextChunk.result.done) {
-          break;
-        }
-
-        hasYielded = true;
-        yield { chunk: nextChunk.result.value, provider: providerName };
-      }
-
-      if (streamFailed) {
-        continue;
-      }
-
-      // If we successfully yielded at least one chunk, we're done
-      if (hasYielded) {
-        return;
-      }
+    const streamed = yield* this.streamWithFallback(0, contextualPrompt, providerOptions, errors);
+    if (streamed) {
+      return;
     }
 
-    // All providers failed
-    const errorMessage = errors.map((e) => `${e.provider}: ${e.error}`).join("; ");
-
+    const errorMessage = AIService.buildFailureMessage(errors);
     throw new Error(`All providers failed to stream: ${errorMessage}`);
   }
 
@@ -571,31 +619,24 @@ export class AIService {
    * Get status of all providers
    */
   async getAvailableProviders(): Promise<AIProviderStatus[]> {
-    const statuses: AIProviderStatus[] = [];
-
-    for (const [providerName, provider] of this.providers) {
-      await provider.isAvailable().then(
-        (available) => {
-          statuses.push({
-            provider: providerName,
-            available,
-            health: available ? "healthy" : "down",
-            lastCheck: Date.now(),
-          });
-        },
-        (error: unknown) => {
-          statuses.push({
-            provider: providerName,
-            available: false,
-            health: "down",
-            lastCheck: Date.now(),
-            error: toErrorMessage(error),
-          });
-        },
-      );
-    }
-
-    return statuses;
+    const checks = Array.from(this.providers.entries()).map(([providerName, provider]) =>
+      provider.isAvailable().then(
+        (available) => ({
+          provider: providerName,
+          available,
+          health: available ? "healthy" : "down",
+          lastCheck: Date.now(),
+        }),
+        (error: unknown) => ({
+          provider: providerName,
+          available: false,
+          health: "down",
+          lastCheck: Date.now(),
+          error: toErrorMessage(error),
+        }),
+      ),
+    );
+    return Promise.all(checks);
   }
 
   /**

@@ -2,249 +2,364 @@ import { type JsonObject, type JsonValue, STATE_KEYS, safeParseJson } from "@bao
 import { settlePromise } from "~/composables/async-flow";
 import { createClientLogger } from "~/utils/client-logger";
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+const WS_PROTOCOL_PATTERN = /^wss?:\/\//i;
+const HTTPS_PROTOCOL_PATTERN = /^https:/;
+const HTTP_PROTOCOL_PATTERN = /^http:/;
+
+const MAX_RECONNECT_ATTEMPTS = 10;
+const MAX_RECONNECT_DELAY = 30_000;
+const BASE_RECONNECT_DELAY = 1_000;
+const CONNECTION_TIMEOUT = 10_000;
+const PING_INTERVAL = 30_000;
+
 const isJsonObject = (value: JsonValue): value is JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 const isPongMessage = (value: Record<string, unknown>): boolean => value.type === "pong";
 
-/**
- * WebSocket connection manager with auto-reconnect, timeout, and keep-alive.
- */
-export function useWebSocket() {
-  const config = useRuntimeConfig();
-  const connected = useState(STATE_KEYS.WS_CONNECTED, () => false);
-  const lastMessage = useState<Record<string, unknown> | null>(
-    STATE_KEYS.WS_LAST_MESSAGE,
-    () => null,
-  );
-  const requestUrl = useRequestURL();
-  const logger = createClientLogger("use-web-socket");
+type MessageHandler = (data: Record<string, unknown>) => void;
+type DisconnectHandler = () => void;
 
-  let socket: WebSocket | null = null;
-  let reconnectAttempts = 0;
-  let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
-  let connectionTimeout: ReturnType<typeof setTimeout> | null = null;
-  let pingInterval: ReturnType<typeof setInterval> | null = null;
-  let messageHandlers: Array<(data: Record<string, unknown>) => void> = [];
-  let disconnectHandlers: Array<() => void> = [];
-  let currentPath: string | null = null;
+type WebSocketRuntimeState = {
+  socket: WebSocket | null;
+  reconnectAttempts: number;
+  reconnectTimeout: ReturnType<typeof setTimeout> | null;
+  connectionTimeout: ReturnType<typeof setTimeout> | null;
+  pingInterval: ReturnType<typeof setInterval> | null;
+  messageHandlers: MessageHandler[];
+  disconnectHandlers: DisconnectHandler[];
+  currentPath: string | null;
+};
 
-  const MAX_RECONNECT_ATTEMPTS = 10;
-  const MAX_RECONNECT_DELAY = 30_000;
-  const BASE_RECONNECT_DELAY = 1_000;
-  const CONNECTION_TIMEOUT = 10_000;
-  const PING_INTERVAL = 30_000;
+type WebSocketBindings = {
+  readonly connected: ReturnType<typeof useState<boolean>>;
+  readonly lastMessage: ReturnType<typeof useState<Record<string, unknown> | null>>;
+};
 
-  function getReconnectDelay(): number {
-    return Math.min(BASE_RECONNECT_DELAY * 2 ** reconnectAttempts, MAX_RECONNECT_DELAY);
+type WebSocketEnvironment = {
+  readonly config: ReturnType<typeof useRuntimeConfig>;
+  readonly requestUrl: ReturnType<typeof useRequestURL>;
+  readonly logger: ReturnType<typeof createClientLogger>;
+};
+
+type WebSocketContext = WebSocketEnvironment & WebSocketBindings & { state: WebSocketRuntimeState };
+
+function createRuntimeState(): WebSocketRuntimeState {
+  return {
+    socket: null,
+    reconnectAttempts: 0,
+    reconnectTimeout: null,
+    connectionTimeout: null,
+    pingInterval: null,
+    messageHandlers: [],
+    disconnectHandlers: [],
+    currentPath: null,
+  };
+}
+
+function getReconnectDelay(reconnectAttempts: number): number {
+  return Math.min(BASE_RECONNECT_DELAY * 2 ** reconnectAttempts, MAX_RECONNECT_DELAY);
+}
+
+function resolveWebSocketBase(environment: WebSocketEnvironment): string {
+  const configuredBase = (
+    environment.config.public.wsBase ||
+    environment.config.public.apiBase ||
+    "/"
+  ).toString();
+  const resolved = new URL(configuredBase, environment.requestUrl)
+    .toString()
+    .replace(TRAILING_SLASH_PATTERN, "");
+
+  if (WS_PROTOCOL_PATTERN.test(resolved)) {
+    return resolved;
   }
 
-  function resolveWebSocketBase(): string {
-    const configuredBase = (config.public.wsBase || config.public.apiBase || "/").toString();
-    const resolved = new URL(configuredBase, requestUrl).toString().replace(/\/$/, "");
-
-    if (/^wss?:\/\//i.test(resolved)) {
-      return resolved;
-    }
-
-    return requestUrl.protocol === "https:"
-      ? resolved.replace(/^https:/, "wss:").replace(/^http:/, "wss:")
-      : resolved.replace(/^https:/, "ws:").replace(/^http:/, "ws:");
+  if (environment.requestUrl.protocol === "https:") {
+    return resolved
+      .replace(HTTPS_PROTOCOL_PATTERN, "wss:")
+      .replace(HTTP_PROTOCOL_PATTERN, "wss:");
   }
 
-  function clearTimers() {
-    if (reconnectTimeout) {
-      clearTimeout(reconnectTimeout);
-      reconnectTimeout = null;
+  return resolved.replace(HTTPS_PROTOCOL_PATTERN, "ws:").replace(HTTP_PROTOCOL_PATTERN, "ws:");
+}
+
+function clearTimers(state: WebSocketRuntimeState): void {
+  if (state.reconnectTimeout) {
+    clearTimeout(state.reconnectTimeout);
+    state.reconnectTimeout = null;
+  }
+  if (state.connectionTimeout) {
+    clearTimeout(state.connectionTimeout);
+    state.connectionTimeout = null;
+  }
+  if (state.pingInterval) {
+    clearInterval(state.pingInterval);
+    state.pingInterval = null;
+  }
+}
+
+function logSettledTask(
+  logger: ReturnType<typeof createClientLogger>,
+  task: Promise<unknown>,
+  errorPrefix: string,
+): void {
+  settlePromise(task, errorPrefix).then((result) => {
+    if (!result.ok) {
+      logger.error(errorPrefix, result.error);
     }
-    if (connectionTimeout) {
-      clearTimeout(connectionTimeout);
-      connectionTimeout = null;
-    }
-    if (pingInterval) {
-      clearInterval(pingInterval);
-      pingInterval = null;
-    }
+  });
+}
+
+function runHandlerTask(
+  logger: ReturnType<typeof createClientLogger>,
+  task: () => void,
+  errorPrefix: string,
+): void {
+  logSettledTask(logger, Promise.resolve().then(task), errorPrefix);
+}
+
+function containsCircularOrBigInt(value: unknown, seen: WeakSet<object>): boolean {
+  if (typeof value === "bigint") {
+    return true;
+  }
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  if (seen.has(value)) {
+    return true;
+  }
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    return value.some((entry) => containsCircularOrBigInt(entry, seen));
   }
 
-  function runHandlerTask(task: () => void, errorPrefix: string): void {
-    void settlePromise(Promise.resolve().then(task), errorPrefix).then((result) => {
-      if (!result.ok) {
-        logger.error(errorPrefix, result.error);
-      }
-    });
+  return Object.values(value).some((entry) => containsCircularOrBigInt(entry, seen));
+}
+
+function startPingInterval(context: WebSocketContext): void {
+  if (context.state.pingInterval) {
+    clearInterval(context.state.pingInterval);
   }
 
-  function containsCircularOrBigInt(value: unknown, seen: WeakSet<object>): boolean {
-    if (typeof value === "bigint") {
-      return true;
-    }
-    if (typeof value !== "object" || value === null) {
-      return false;
-    }
-    if (seen.has(value)) {
-      return true;
-    }
-    seen.add(value);
-
-    if (Array.isArray(value)) {
-      return value.some((entry) => containsCircularOrBigInt(entry, seen));
-    }
-
-    return Object.values(value).some((entry) => containsCircularOrBigInt(entry, seen));
-  }
-
-  function startPingInterval() {
-    if (pingInterval) clearInterval(pingInterval);
-    pingInterval = setInterval(() => {
-      if (!socket || socket.readyState !== WebSocket.OPEN) {
-        return;
-      }
-
-      void settlePromise(
-        Promise.resolve().then(() => {
-          socket?.send(JSON.stringify({ type: "ping" }));
-        }),
-        "WebSocket ping failed",
-      );
-    }, PING_INTERVAL);
-  }
-
-  function connect(path: string) {
-    if (socket && socket.readyState === WebSocket.OPEN) {
+  context.state.pingInterval = setInterval(() => {
+    if (!context.state.socket || context.state.socket.readyState !== WebSocket.OPEN) {
       return;
     }
 
-    currentPath = path;
-    const wsBase = resolveWebSocketBase();
-    const normalizedBase = wsBase.endsWith("/") ? wsBase.slice(0, -1) : wsBase;
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    const wsUrl = `${normalizedBase}${normalizedPath}`;
+    logSettledTask(
+      context.logger,
+      Promise.resolve().then(() => {
+        context.state.socket?.send(JSON.stringify({ type: "ping" }));
+      }),
+      "WebSocket ping failed",
+    );
+  }, PING_INTERVAL);
+}
 
-    void settlePromise(
+function parseSocketMessage(
+  logger: ReturnType<typeof createClientLogger>,
+  rawData: unknown,
+): Record<string, unknown> | null {
+  if (typeof rawData !== "string") {
+    return null;
+  }
+
+  const parsed = safeParseJson(rawData);
+  if (!(parsed && isJsonObject(parsed))) {
+    logger.error("Failed to parse WebSocket message");
+    return null;
+  }
+
+  return parsed;
+}
+
+function notifyDisconnectHandlers(context: WebSocketContext): void {
+  for (const handler of context.state.disconnectHandlers) {
+    runHandlerTask(context.logger, handler, "Error in disconnect handler");
+  }
+}
+
+function dispatchSocketMessage(context: WebSocketContext, payload: Record<string, unknown>): void {
+  if (isPongMessage(payload)) {
+    return;
+  }
+
+  context.lastMessage.value = payload;
+  for (const handler of context.state.messageHandlers) {
+    runHandlerTask(
+      context.logger,
+      () => {
+        handler(payload);
+      },
+      "Error in WebSocket message handler",
+    );
+  }
+}
+
+function scheduleReconnect(context: WebSocketContext, connect: (path: string) => void): void {
+  if (!context.state.currentPath || context.state.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+    if (context.state.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      context.logger.error(`WebSocket gave up after ${MAX_RECONNECT_ATTEMPTS} reconnection attempts`);
+    }
+    return;
+  }
+
+  const delay = getReconnectDelay(context.state.reconnectAttempts);
+  context.state.reconnectAttempts += 1;
+  context.logger.debug(
+    `WebSocket reconnecting in ${delay}ms (attempt ${context.state.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`,
+  );
+
+  context.state.reconnectTimeout = setTimeout(() => {
+    if (context.state.currentPath) {
+      connect(context.state.currentPath);
+    }
+  }, delay);
+}
+
+function attachSocketHandlers(
+  context: WebSocketContext,
+  socket: WebSocket,
+  connect: (path: string) => void,
+): void {
+  socket.onopen = () => {
+    if (context.state.connectionTimeout) {
+      clearTimeout(context.state.connectionTimeout);
+      context.state.connectionTimeout = null;
+    }
+    context.connected.value = true;
+    context.state.reconnectAttempts = 0;
+    startPingInterval(context);
+  };
+
+  socket.onmessage = (event) => {
+    const payload = parseSocketMessage(context.logger, event.data);
+    if (payload) {
+      dispatchSocketMessage(context, payload);
+    }
+  };
+
+  socket.onerror = (error) => {
+    context.logger.error("WebSocket error:", error);
+  };
+
+  socket.onclose = () => {
+    context.connected.value = false;
+    clearTimers(context.state);
+    notifyDisconnectHandlers(context);
+    scheduleReconnect(context, connect);
+  };
+}
+
+function buildWebSocketUrl(path: string, wsBase: string): string {
+  const normalizedBase = wsBase.endsWith("/") ? wsBase.slice(0, -1) : wsBase;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
+}
+
+function setConnectionTimeout(context: WebSocketContext, socket: WebSocket): void {
+  context.state.connectionTimeout = setTimeout(() => {
+    if (socket.readyState !== WebSocket.OPEN) {
+      context.logger.warn("WebSocket connection timeout, closing");
+      socket.close();
+    }
+  }, CONNECTION_TIMEOUT);
+}
+
+function createConnect(context: WebSocketContext) {
+  const connect = (path: string): void => {
+    if (context.state.socket && context.state.socket.readyState === WebSocket.OPEN) {
+      return;
+    }
+
+    context.state.currentPath = path;
+    const wsUrl = buildWebSocketUrl(path, resolveWebSocketBase(context));
+
+    settlePromise(
       Promise.resolve().then(() => new WebSocket(wsUrl)),
       "Failed to create WebSocket connection",
     ).then((connectionResult) => {
       if (!connectionResult.ok) {
-        logger.error("Failed to create WebSocket connection:", connectionResult.error);
-        connected.value = false;
+        context.logger.error("Failed to create WebSocket connection:", connectionResult.error);
+        context.connected.value = false;
         return;
       }
 
-      socket = connectionResult.value;
-
-      // Connection timeout — if socket doesn't open in 10s, abort
-      connectionTimeout = setTimeout(() => {
-        if (socket && socket.readyState !== WebSocket.OPEN) {
-          logger.warn("WebSocket connection timeout, closing");
-          socket.close();
-        }
-      }, CONNECTION_TIMEOUT);
-
-      socket.onopen = () => {
-        if (connectionTimeout) {
-          clearTimeout(connectionTimeout);
-          connectionTimeout = null;
-        }
-        connected.value = true;
-        reconnectAttempts = 0;
-        startPingInterval();
-      };
-
-      socket.onmessage = (event) => {
-        if (typeof event.data !== "string") {
-          return;
-        }
-
-        const parsed = safeParseJson(event.data);
-        if (!parsed || !isJsonObject(parsed)) {
-          logger.error("Failed to parse WebSocket message");
-          return;
-        }
-        if (isPongMessage(parsed)) return;
-
-        lastMessage.value = parsed;
-        for (const handler of messageHandlers) {
-          runHandlerTask(() => {
-            handler(parsed);
-          }, "Error in WebSocket message handler");
-        }
-      };
-
-      socket.onerror = (error) => {
-        logger.error("WebSocket error:", error);
-      };
-
-      socket.onclose = () => {
-        connected.value = false;
-        clearTimers();
-
-        for (const handler of disconnectHandlers) {
-          runHandlerTask(handler, "Error in disconnect handler");
-        }
-
-        if (currentPath && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-          const delay = getReconnectDelay();
-          reconnectAttempts += 1;
-          logger.debug(
-            `WebSocket reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`,
-          );
-
-          reconnectTimeout = setTimeout(() => {
-            if (currentPath) connect(currentPath);
-          }, delay);
-        } else if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-          logger.error(`WebSocket gave up after ${MAX_RECONNECT_ATTEMPTS} reconnection attempts`);
-        }
-      };
+      context.state.socket = connectionResult.value;
+      setConnectionTimeout(context, connectionResult.value);
+      attachSocketHandlers(context, connectionResult.value, connect);
     });
+  };
+
+  return connect;
+}
+
+function sendMessage(context: WebSocketContext, data: Record<string, unknown> | string): boolean {
+  if (!context.state.socket || context.state.socket.readyState !== WebSocket.OPEN) {
+    context.logger.error("WebSocket not connected");
+    return false;
   }
 
-  function send(data: Record<string, unknown> | string): boolean {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-      logger.error("WebSocket not connected");
-      return false;
-    }
-
-    if (typeof data !== "string" && containsCircularOrBigInt(data, new WeakSet<object>())) {
-      logger.error("WebSocket message contains unsupported JSON payload");
-      return false;
-    }
-
-    const message = typeof data === "string" ? data : JSON.stringify(data);
-    socket.send(message);
-    return true;
+  if (typeof data !== "string" && containsCircularOrBigInt(data, new WeakSet<object>())) {
+    context.logger.error("WebSocket message contains unsupported JSON payload");
+    return false;
   }
 
-  function onMessage(callback: (data: Record<string, unknown>) => void): () => void {
-    messageHandlers.push(callback);
-    return () => {
-      messageHandlers = messageHandlers.filter((h) => h !== callback);
-    };
+  const message = typeof data === "string" ? data : JSON.stringify(data);
+  context.state.socket.send(message);
+  return true;
+}
+
+function subscribeMessageHandler(context: WebSocketContext, callback: MessageHandler): () => void {
+  context.state.messageHandlers.push(callback);
+  return () => {
+    context.state.messageHandlers = context.state.messageHandlers.filter((handler) => handler !== callback);
+  };
+}
+
+function subscribeDisconnectHandler(context: WebSocketContext, callback: DisconnectHandler): () => void {
+  context.state.disconnectHandlers.push(callback);
+  return () => {
+    context.state.disconnectHandlers = context.state.disconnectHandlers.filter(
+      (handler) => handler !== callback,
+    );
+  };
+}
+
+function disconnectSocket(context: WebSocketContext): void {
+  context.state.currentPath = null;
+  clearTimers(context.state);
+
+  if (context.state.socket) {
+    context.state.socket.onclose = null;
+    context.state.socket.close();
+    context.state.socket = null;
   }
 
-  function onDisconnect(callback: () => void): () => void {
-    disconnectHandlers.push(callback);
-    return () => {
-      disconnectHandlers = disconnectHandlers.filter((h) => h !== callback);
-    };
-  }
+  context.connected.value = false;
+  context.state.reconnectAttempts = 0;
+  context.state.messageHandlers = [];
+  context.state.disconnectHandlers = [];
+}
 
-  function disconnect() {
-    currentPath = null;
-    clearTimers();
+/**
+ * WebSocket connection manager with auto-reconnect, timeout, and keep-alive.
+ */
+export function useWebSocket() {
+  const context: WebSocketContext = {
+    config: useRuntimeConfig(),
+    requestUrl: useRequestURL(),
+    logger: createClientLogger("use-web-socket"),
+    connected: useState(STATE_KEYS.WS_CONNECTED, () => false),
+    lastMessage: useState<Record<string, unknown> | null>(STATE_KEYS.WS_LAST_MESSAGE, () => null),
+    state: createRuntimeState(),
+  };
 
-    if (socket) {
-      socket.onclose = null;
-      socket.close();
-      socket = null;
-    }
-
-    connected.value = false;
-    reconnectAttempts = 0;
-    messageHandlers = [];
-    disconnectHandlers = [];
-  }
+  const connect = createConnect(context);
+  const disconnect = () => disconnectSocket(context);
 
   if (import.meta.client) {
     onUnmounted(() => {
@@ -253,14 +368,14 @@ export function useWebSocket() {
   }
 
   return {
-    connected: readonly(connected),
-    lastMessage: readonly(lastMessage),
-    reconnectAttempts,
+    connected: readonly(context.connected),
+    lastMessage: readonly(context.lastMessage),
+    reconnectAttempts: context.state.reconnectAttempts,
     maxReconnectAttempts: MAX_RECONNECT_ATTEMPTS,
     connect,
-    send,
-    onMessage,
-    onDisconnect,
+    send: (data: Record<string, unknown> | string) => sendMessage(context, data),
+    onMessage: (callback: MessageHandler) => subscribeMessageHandler(context, callback),
+    onDisconnect: (callback: DisconnectHandler) => subscribeDisconnectHandler(context, callback),
     disconnect,
   };
 }

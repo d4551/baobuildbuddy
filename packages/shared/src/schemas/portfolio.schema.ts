@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 
 import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "../types/portfolio";
 

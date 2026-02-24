@@ -31,6 +31,7 @@ const HTTP_STATUS_CONFLICT = 409;
 const HTTP_STATUS_UNPROCESSABLE_ENTITY = 422;
 const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
 const RUN_ID_MIN_LENGTH = 8;
+const RUN_ID_PATTERN = /^[0-9a-fA-F-]+$/;
 const EMAIL_RESPONSE_MAX_SUBJECT_LENGTH = 200;
 const EMAIL_RESPONSE_MAX_MESSAGE_LENGTH = 12_000;
 const EMAIL_RESPONSE_MAX_SENDER_LENGTH = 200;
@@ -203,7 +204,7 @@ const normalizeRunError = (value: unknown): RpaRunExecutionEnvelope["error"] => 
       ? value.source.trim()
       : "automation-routes";
 
-  if (!parsedCode.success || !message) {
+  if (!(parsedCode.success && message)) {
     return null;
   }
 
@@ -268,6 +269,15 @@ const readAutomationRunById = async (runId: string): Promise<RpaRunExecutionEnve
   return normalizeAutomationRun(rows[0]);
 };
 
+const runJobApplyInBackground = (runId: string, payload: JobApplyRequestBody): void => {
+  applicationAutomationService.runJobApply(runId, payload).then(
+    () => undefined,
+    (error: unknown) => {
+      automationRoutesLogger.error(`[automation] job-apply execution failed for runId=${runId}`, error);
+    },
+  );
+};
+
 /**
  * Automation API routes for RPA-driven workflows and run history.
  */
@@ -287,17 +297,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
       }
 
       const runId = createRunResult.value;
-      void (async () => {
-        const [executionResult] = await Promise.allSettled([
-          applicationAutomationService.runJobApply(runId, payload),
-        ]);
-        if (executionResult.status === "rejected") {
-          automationRoutesLogger.error(
-            `[automation] job-apply execution failed for runId=${runId}`,
-            executionResult.reason,
-          );
-        }
-      })();
+      runJobApplyInBackground(runId, payload);
 
       const run = await readAutomationRunById(runId);
       if (!run) {
@@ -453,7 +453,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
   .get(
     "/runs/:id",
     async ({ params, set }) => {
-      if (params.id.length < RUN_ID_MIN_LENGTH || !/^[0-9a-fA-F-]+$/.test(params.id)) {
+      if (params.id.length < RUN_ID_MIN_LENGTH || !RUN_ID_PATTERN.test(params.id)) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return toRouteError("OUTPUT_VALIDATION_ERROR", "Invalid run ID format");
       }
@@ -469,7 +469,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
     },
     {
       params: t.Object({
-        id: t.String({ minLength: RUN_ID_MIN_LENGTH, pattern: "^[0-9a-fA-F-]+$" }),
+        id: t.String({ minLength: RUN_ID_MIN_LENGTH, pattern: RUN_ID_PATTERN.source }),
       }),
       response: {
         [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,

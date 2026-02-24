@@ -7,7 +7,7 @@ import {
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { coverLetters } from "../db/schema";
+import { coverLetters } from "../db/schema/schema-modules";
 
 const toCoverLetterContent = (value: unknown): CoverLetterData["content"] => {
   if (!isRecord(value)) {

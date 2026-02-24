@@ -18,31 +18,54 @@ type StreamError = {
   statusCode?: number;
 };
 
+type StreamStateRefs = {
+  state: ReturnType<typeof ref<AutomationRunUiState>>;
+  run: ReturnType<typeof ref<RpaRunExecutionEnvelope | null>>;
+  events: ReturnType<typeof ref<RpaRunEvent[]>>;
+  streamError: ReturnType<typeof ref<StreamError | null>>;
+  isStreaming: ReturnType<typeof ref<boolean>>;
+  activeRunId: ReturnType<typeof ref<string>>;
+  lastSequenceByRunId: ReturnType<typeof ref<Record<string, number>>>;
+};
+
+type StreamLifecycle = {
+  requestToken: number;
+  unsubscribe: (() => void) | null;
+};
+
+type EventApplyResult = {
+  nextRun: RpaRunExecutionEnvelope;
+  nextState: AutomationRunUiState;
+  shouldStop: boolean;
+};
+
+interface StreamDependencies {
+  refs: StreamStateRefs;
+  lifecycle: StreamLifecycle;
+  getRun: ReturnType<typeof useAutomation>["getRun"];
+  subscribeToRun: ReturnType<typeof useAutomation>["subscribeToRun"];
+}
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
 const toStreamError = (error: unknown): StreamError => {
-  if (isRecord(error)) {
-    const maybeStatus = error.status;
-    const maybeStatusCode = error.statusCode;
-    const maybeMessage = error.message;
-    return {
-      message:
-        typeof maybeMessage === "string" && maybeMessage.length > 0
-          ? maybeMessage
-          : "Automation stream request failed",
-      statusCode:
-        typeof maybeStatus === "number"
-          ? maybeStatus
-          : typeof maybeStatusCode === "number"
-            ? maybeStatusCode
-            : undefined,
-    };
+  if (!isRecord(error)) {
+    return { message: "Automation stream request failed" };
   }
 
-  return {
-    message: "Automation stream request failed",
-  };
+  const message =
+    typeof error.message === "string" && error.message.length > 0
+      ? error.message
+      : "Automation stream request failed";
+  const statusCode =
+    typeof error.status === "number"
+      ? error.status
+      : typeof error.statusCode === "number"
+        ? error.statusCode
+        : undefined;
+
+  return { message, statusCode };
 };
 
 const toUiStateFromError = (error: StreamError): AutomationRunUiState => {
@@ -75,205 +98,249 @@ const computeProgressPercent = (step: number | null, totalSteps: number | null):
   return Math.max(0, Math.min(100, Math.round((step / totalSteps) * 100)));
 };
 
+function createStreamStateRefs(): StreamStateRefs {
+  return {
+    state: ref<AutomationRunUiState>("idle"),
+    run: ref<RpaRunExecutionEnvelope | null>(null),
+    events: ref<RpaRunEvent[]>([]),
+    streamError: ref<StreamError | null>(null),
+    isStreaming: ref(false),
+    activeRunId: ref(""),
+    lastSequenceByRunId: ref<Record<string, number>>({}),
+  };
+}
+
+function stopSubscription(lifecycle: StreamLifecycle, refs: StreamStateRefs): void {
+  if (lifecycle.unsubscribe) {
+    lifecycle.unsubscribe();
+    lifecycle.unsubscribe = null;
+  }
+  refs.isStreaming.value = false;
+}
+
+function resetEventState(refs: StreamStateRefs): void {
+  refs.events.value = [];
+  refs.lastSequenceByRunId.value = {};
+}
+
+function shouldApplyEvent(refs: StreamStateRefs, event: RpaRunEvent): boolean {
+  if (event.runId !== refs.activeRunId.value) {
+    return false;
+  }
+
+  const currentSequence = refs.lastSequenceByRunId.value[event.runId];
+  if (typeof currentSequence === "number" && event.sequence <= currentSequence) {
+    return false;
+  }
+
+  refs.lastSequenceByRunId.value = {
+    ...refs.lastSequenceByRunId.value,
+    [event.runId]: event.sequence,
+  };
+
+  return true;
+}
+
+function applyProgressEvent(
+  currentRun: RpaRunExecutionEnvelope,
+  event: Extract<RpaRunEvent, { eventType: "progress" }>,
+): EventApplyResult {
+  const nextStep = typeof event.step === "number" ? event.step : currentRun.currentStep;
+  const nextTotalSteps =
+    typeof event.totalSteps === "number" ? event.totalSteps : currentRun.totalSteps;
+  const nextProgress = computeProgressPercent(nextStep ?? null, nextTotalSteps ?? null);
+  const mappedStatus = PROGRESS_STATUS_TO_RUN_STATUS[event.status];
+  const nextStatus =
+    currentRun.status === "running" && mappedStatus === "pending" ? currentRun.status : mappedStatus;
+
+  return {
+    nextRun: {
+      ...currentRun,
+      status: nextStatus,
+      currentStep: nextStep ?? null,
+      totalSteps: nextTotalSteps ?? null,
+      progress: nextProgress ?? currentRun.progress,
+      updatedAt: event.timestamp,
+    },
+    nextState: nextStatus === "error" ? "errorNonRetryable" : "loading",
+    shouldStop: nextStatus === "error",
+  };
+}
+
+function applyResultEvent(
+  currentRun: RpaRunExecutionEnvelope,
+  event: Extract<RpaRunEvent, { eventType: "result" }>,
+): EventApplyResult {
+  const success = event.result.success;
+  const resultSteps = event.result.steps.length;
+  const nextRun: RpaRunExecutionEnvelope = {
+    ...currentRun,
+    status: success ? "success" : "error",
+    output: event.result,
+    error: success ? null : event.result.error,
+    screenshots: event.result.screenshots.length > 0 ? event.result.screenshots : currentRun.screenshots,
+    progress: 100,
+    currentStep: resultSteps,
+    totalSteps: resultSteps,
+    completedAt: event.timestamp,
+    updatedAt: event.timestamp,
+  };
+
+  return {
+    nextRun,
+    nextState: toUiStateFromRun(nextRun),
+    shouldStop: true,
+  };
+}
+
+function applyErrorEvent(
+  currentRun: RpaRunExecutionEnvelope,
+  event: Extract<RpaRunEvent, { eventType: "error" }>,
+): EventApplyResult {
+  return {
+    nextRun: {
+      ...currentRun,
+      status: "error",
+      error: event.error,
+      completedAt: event.timestamp,
+      updatedAt: event.timestamp,
+    },
+    nextState: "errorNonRetryable",
+    shouldStop: true,
+  };
+}
+
+function applyEvent(
+  refs: StreamStateRefs,
+  lifecycle: StreamLifecycle,
+  event: RpaRunEvent,
+): void {
+  refs.events.value = [...refs.events.value, event];
+  const currentRun = refs.run.value;
+  if (!currentRun || currentRun.id !== event.runId) {
+    return;
+  }
+
+  const next =
+    event.eventType === "progress"
+      ? applyProgressEvent(currentRun, event)
+      : event.eventType === "result"
+        ? applyResultEvent(currentRun, event)
+        : applyErrorEvent(currentRun, event);
+
+  refs.run.value = next.nextRun;
+  refs.state.value = next.nextState;
+  if (next.shouldStop) {
+    stopSubscription(lifecycle, refs);
+  }
+}
+
+async function fetchInitialRun(
+  getRun: ReturnType<typeof useAutomation>["getRun"],
+  runId: string,
+): Promise<{ ok: true; value: RpaRunExecutionEnvelope } | { ok: false; error: StreamError }> {
+  return getRun(runId).then(
+    (value) => ({ ok: true as const, value }),
+    (error: unknown) => ({ ok: false as const, error: toStreamError(error) }),
+  );
+}
+
+function subscribeForRun(
+  dependencies: StreamDependencies,
+  runId: string,
+  token: number,
+): void {
+  dependencies.lifecycle.unsubscribe = dependencies.subscribeToRun(runId, (event) => {
+    if (token === dependencies.lifecycle.requestToken && shouldApplyEvent(dependencies.refs, event)) {
+      applyEvent(dependencies.refs, dependencies.lifecycle, event);
+    }
+  });
+  dependencies.refs.isStreaming.value = true;
+}
+
+async function startStream(
+  dependencies: StreamDependencies,
+  runId: string,
+): Promise<void> {
+  const normalizedRunId = runId.trim();
+  dependencies.lifecycle.requestToken += 1;
+  const token = dependencies.lifecycle.requestToken;
+
+  stopSubscription(dependencies.lifecycle, dependencies.refs);
+  resetEventState(dependencies.refs);
+  dependencies.refs.streamError.value = null;
+  dependencies.refs.activeRunId.value = normalizedRunId;
+
+  if (normalizedRunId.length === 0) {
+    dependencies.refs.state.value = "empty";
+    dependencies.refs.run.value = null;
+    return;
+  }
+
+  dependencies.refs.state.value = "loading";
+  const initialRun = await fetchInitialRun(dependencies.getRun, normalizedRunId);
+  if (token !== dependencies.lifecycle.requestToken) {
+    return;
+  }
+  if (!initialRun.ok) {
+    dependencies.refs.run.value = null;
+    dependencies.refs.streamError.value = initialRun.error;
+    dependencies.refs.state.value = toUiStateFromError(initialRun.error);
+    return;
+  }
+
+  dependencies.refs.run.value = initialRun.value;
+  dependencies.refs.state.value = toUiStateFromRun(initialRun.value);
+  if (!TERMINAL_STATUSES.has(initialRun.value.status)) {
+    subscribeForRun(dependencies, normalizedRunId, token);
+  }
+}
+
+function cancelStream(refs: StreamStateRefs, lifecycle: StreamLifecycle): void {
+  lifecycle.requestToken += 1;
+  stopSubscription(lifecycle, refs);
+  if (refs.state.value === "loading") {
+    refs.state.value = "idle";
+  }
+}
+
+function cleanupStream(refs: StreamStateRefs, lifecycle: StreamLifecycle): void {
+  lifecycle.requestToken += 1;
+  stopSubscription(lifecycle, refs);
+}
+
 /**
  * Reactive automation run stream composable.
  * Owns fetch + websocket lifecycle and deterministic UI-state mapping.
  */
 export function useAutomationRunStream() {
   const { getRun, subscribeToRun } = useAutomation();
-
-  const state = ref<AutomationRunUiState>("idle");
-  const run = ref<RpaRunExecutionEnvelope | null>(null);
-  const events = ref<RpaRunEvent[]>([]);
-  const streamError = ref<StreamError | null>(null);
-  const isStreaming = ref(false);
-  const activeRunId = ref<string>("");
-  const lastSequenceByRunId = ref<Record<string, number>>({});
-
-  let requestToken = 0;
-  let unsubscribe: (() => void) | null = null;
-
-  const stopSubscription = (): void => {
-    if (unsubscribe) {
-      unsubscribe();
-      unsubscribe = null;
-    }
-    isStreaming.value = false;
+  const refs = createStreamStateRefs();
+  const lifecycle: StreamLifecycle = {
+    requestToken: 0,
+    unsubscribe: null,
   };
-
-  const resetEvents = (): void => {
-    events.value = [];
-    lastSequenceByRunId.value = {};
+  const dependencies: StreamDependencies = {
+    refs,
+    lifecycle,
+    getRun,
+    subscribeToRun,
   };
-
-  const shouldApplyEvent = (event: RpaRunEvent): boolean => {
-    if (event.runId !== activeRunId.value) {
-      return false;
-    }
-    const currentSequence = lastSequenceByRunId.value[event.runId];
-    if (typeof currentSequence === "number" && event.sequence <= currentSequence) {
-      return false;
-    }
-    lastSequenceByRunId.value = {
-      ...lastSequenceByRunId.value,
-      [event.runId]: event.sequence,
-    };
-    return true;
-  };
-
-  const applyEvent = (event: RpaRunEvent): void => {
-    events.value = [...events.value, event];
-    const currentRun = run.value;
-    if (!currentRun || currentRun.id !== event.runId) {
-      return;
-    }
-
-    if (event.eventType === "progress") {
-      const nextStep = typeof event.step === "number" ? event.step : currentRun.currentStep;
-      const nextTotalSteps =
-        typeof event.totalSteps === "number" ? event.totalSteps : currentRun.totalSteps;
-      const nextProgress = computeProgressPercent(nextStep ?? null, nextTotalSteps ?? null);
-      const mappedStatus = PROGRESS_STATUS_TO_RUN_STATUS[event.status];
-      const nextStatus =
-        currentRun.status === "running" && mappedStatus === "pending"
-          ? currentRun.status
-          : mappedStatus;
-
-      run.value = {
-        ...currentRun,
-        status: nextStatus,
-        currentStep: nextStep ?? null,
-        totalSteps: nextTotalSteps ?? null,
-        progress: nextProgress ?? currentRun.progress,
-        updatedAt: event.timestamp,
-      };
-
-      if (nextStatus === "error") {
-        state.value = "errorNonRetryable";
-        stopSubscription();
-        return;
-      }
-
-      state.value = "loading";
-      return;
-    }
-
-    if (event.eventType === "result") {
-      const success = event.result.success;
-      const resultSteps = event.result.steps.length;
-      run.value = {
-        ...currentRun,
-        status: success ? "success" : "error",
-        output: event.result,
-        error: success ? null : event.result.error,
-        screenshots:
-          event.result.screenshots.length > 0 ? event.result.screenshots : currentRun.screenshots,
-        progress: 100,
-        currentStep: resultSteps,
-        totalSteps: resultSteps,
-        completedAt: event.timestamp,
-        updatedAt: event.timestamp,
-      };
-      state.value = toUiStateFromRun(run.value);
-      stopSubscription();
-      return;
-    }
-
-    run.value = {
-      ...currentRun,
-      status: "error",
-      error: event.error,
-      completedAt: event.timestamp,
-      updatedAt: event.timestamp,
-    };
-    state.value = "errorNonRetryable";
-    stopSubscription();
-  };
-
-  /**
-   * Starts stream lifecycle for a specific run id.
-   */
-  const start = async (runId: string): Promise<void> => {
-    const normalizedRunId = runId.trim();
-    requestToken += 1;
-    const token = requestToken;
-
-    stopSubscription();
-    resetEvents();
-    streamError.value = null;
-    activeRunId.value = normalizedRunId;
-
-    if (normalizedRunId.length === 0) {
-      state.value = "empty";
-      run.value = null;
-      return;
-    }
-
-    state.value = "loading";
-
-    const initialRun = await getRun(normalizedRunId).then(
-      (value) => ({ ok: true as const, value }),
-      (error: unknown) => ({ ok: false as const, error: toStreamError(error) }),
-    );
-
-    if (token !== requestToken) {
-      return;
-    }
-
-    if (!initialRun.ok) {
-      run.value = null;
-      streamError.value = initialRun.error;
-      state.value = toUiStateFromError(initialRun.error);
-      return;
-    }
-
-    run.value = initialRun.value;
-    state.value = toUiStateFromRun(initialRun.value);
-
-    if (TERMINAL_STATUSES.has(initialRun.value.status)) {
-      return;
-    }
-
-    unsubscribe = subscribeToRun(normalizedRunId, (event) => {
-      if (token !== requestToken || !shouldApplyEvent(event)) {
-        return;
-      }
-      applyEvent(event);
-    });
-    isStreaming.value = true;
-  };
-
-  /**
-   * Refetches and re-subscribes the active run stream.
-   */
-  const retry = (): Promise<void> => start(activeRunId.value);
-
-  /**
-   * Cancels websocket subscription for the active run.
-   */
-  const cancel = (): void => {
-    requestToken += 1;
-    stopSubscription();
-    if (state.value === "loading") {
-      state.value = "idle";
-    }
-  };
-
-  const cleanup = (): void => {
-    requestToken += 1;
-    stopSubscription();
-  };
-
+  const start = (runId: string): Promise<void> =>
+    startStream(dependencies, runId);
+  const retry = (): Promise<void> => start(refs.activeRunId.value);
+  const cancel = (): void => cancelStream(refs, lifecycle);
+  const cleanup = (): void => cleanupStream(refs, lifecycle);
   if (getCurrentScope()) {
     onScopeDispose(cleanup);
   }
 
   return {
-    state: readonly(state),
-    run: readonly(run),
-    events: readonly(events),
-    streamError: readonly(streamError),
-    isStreaming: readonly(isStreaming),
+    state: readonly(refs.state),
+    run: readonly(refs.run),
+    events: readonly(refs.events),
+    streamError: readonly(refs.streamError),
+    isStreaming: readonly(refs.isStreaming),
     start,
     retry,
     cancel,

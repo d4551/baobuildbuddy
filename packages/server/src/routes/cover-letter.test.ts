@@ -12,14 +12,14 @@ beforeAll(async () => {
   const { Elysia } = await import("elysia");
 
   initModule.initializeDatabase(dbModule.sqlite);
-  await seedModule.seedDatabase(dbModule.db);
+  seedModule.seedDatabase(dbModule.db);
 
   app = new Elysia({ prefix: "/api" }).use(routesModule.coverLetterRoutes);
 });
 
 afterAll(() => {});
 
-describe("cover-letter routes", () => {
+function registerCreateAndReadTests(): void {
   test("POST /api/cover-letters creates cover letter", async () => {
     const res = await requestJson<{ id: string; company: string; position: string }>(
       app,
@@ -60,7 +60,9 @@ describe("cover-letter routes", () => {
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Cover letter not found");
   });
+}
 
+function registerUpdateAndDeleteTests(): void {
   test("PUT /api/cover-letters/:id updates", async () => {
     const res = await requestJson<{ position: string }>(
       app,
@@ -81,4 +83,12 @@ describe("cover-letter routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
+}
+
+describe("cover-letter routes create/read", () => {
+  registerCreateAndReadTests();
+});
+
+describe("cover-letter routes update/delete", () => {
+  registerUpdateAndDeleteTests();
 });

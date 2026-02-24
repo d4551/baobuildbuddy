@@ -273,7 +273,7 @@ const mergeAutomationSettings = (
   const currentParsed = automationSettingsSchema.safeParse(current);
   const patchParsed = automationSettingsPatchSchema.safeParse(patch ?? {});
 
-  if (!currentParsed.success || !patchParsed.success) {
+  if (!(currentParsed.success && patchParsed.success)) {
     return null;
   }
 
@@ -346,11 +346,11 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       huggingfaceToken: row.huggingfaceToken
         ? `***${row.huggingfaceToken.slice(-KEY_MASK_VISIBLE_CHARS)}`
         : null,
-      hasGeminiKey: !!row.geminiApiKey,
-      hasOpenaiKey: !!row.openaiApiKey,
-      hasClaudeKey: !!row.claudeApiKey,
-      hasHuggingfaceToken: !!row.huggingfaceToken,
-      hasLocalKey: !!row.localModelEndpoint,
+      hasGeminiKey: Boolean(row.geminiApiKey),
+      hasOpenaiKey: Boolean(row.openaiApiKey),
+      hasClaudeKey: Boolean(row.claudeApiKey),
+      hasHuggingfaceToken: Boolean(row.huggingfaceToken),
+      hasLocalKey: Boolean(row.localModelEndpoint),
     };
   })
   .put(

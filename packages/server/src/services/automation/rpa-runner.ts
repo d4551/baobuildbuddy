@@ -20,6 +20,7 @@ const MAX_PROTOCOL_ERROR_LINES = 20;
 const WINDOWS_PLATFORM = "win32";
 const PYTHON_BINARY_WINDOWS = "python";
 const PYTHON_BINARY_POSIX = "python3";
+const NDJSON_LINE_SPLIT_PATTERN = /\r?\n/gu;
 
 const PYTHON_BINARY =
   Bun.env.PYTHON_BINARY && Bun.env.PYTHON_BINARY.trim().length > 0
@@ -84,6 +85,28 @@ const parseProtocolLine = (line: string): ParsedProtocolLine => {
   };
 };
 
+const emitNonEmptyLines = (lines: string[], onLine: (line: string) => void): void => {
+  for (const line of lines) {
+    const normalized = line.trim();
+    if (normalized.length > 0) {
+      onLine(normalized);
+    }
+  }
+};
+
+const appendDecodedChunk = (
+  decoder: TextDecoder,
+  pending: string,
+  value: Uint8Array,
+  onLine: (line: string) => void,
+): string => {
+  const decoded = decoder.decode(value, { stream: true });
+  const lines = `${pending}${decoded}`.split(NDJSON_LINE_SPLIT_PATTERN);
+  const nextPending = lines.pop() ?? "";
+  emitNonEmptyLines(lines, onLine);
+  return nextPending;
+};
+
 const readNdjsonLines = async (
   stream: ReadableStream<Uint8Array>,
   onLine: (line: string) => void,
@@ -109,15 +132,7 @@ const readNdjsonLines = async (
         }
 
         if (value && value.length > 0) {
-          pending += decoder.decode(value, { stream: true });
-          const lines = pending.split(/\r?\n/gu);
-          pending = lines.pop() ?? "";
-          for (const line of lines) {
-            const normalized = line.trim();
-            if (normalized.length > 0) {
-              onLine(normalized);
-            }
-          }
+          pending = appendDecodedChunk(decoder, pending, value, onLine);
         }
 
         return readLoop();
@@ -167,6 +182,64 @@ export interface RunPythonScriptOptions {
   onStderrLine?: (line: string) => void;
 }
 
+type ExecutionAbortState = {
+  timedOut: boolean;
+  aborted: boolean;
+};
+
+const createExecutionAbortState = (): ExecutionAbortState => ({
+  timedOut: false,
+  aborted: false,
+});
+
+const createProcessSignal = (
+  timeoutSignal: AbortSignal,
+  externalSignal: AbortSignal | undefined,
+  state: ExecutionAbortState,
+): AbortSignal => {
+  timeoutSignal.addEventListener(
+    "abort",
+    () => {
+      state.timedOut = true;
+    },
+    { once: true },
+  );
+
+  if (!externalSignal) {
+    return timeoutSignal;
+  }
+  externalSignal.addEventListener(
+    "abort",
+    () => {
+      state.aborted = true;
+    },
+    { once: true },
+  );
+  return AbortSignal.any([externalSignal, timeoutSignal]);
+};
+
+const spawnPythonProcess = (
+  scriptPath: string,
+  signal: AbortSignal,
+  killSignal: number | string | undefined,
+): ReturnType<typeof Bun.spawn> =>
+  Bun.spawn([PYTHON_BINARY, scriptPath], {
+    cwd: SCRAPER_DIR,
+    stdin: "pipe",
+    stdout: "pipe",
+    stderr: "pipe",
+    signal,
+    killSignal: killSignal ?? DEFAULT_KILL_SIGNAL,
+  });
+
+const buildScriptPayload = (options: RunPythonScriptOptions): string =>
+  JSON.stringify({
+    ...options.scriptInput,
+    runId: options.runId,
+    outputDir: options.outputDir ?? null,
+    protocolVersion: RPA_PROTOCOL_VERSION,
+  });
+
 /**
  * Executes a Python script with Bun-native lifecycle controls and bounded IO capture.
  */
@@ -180,46 +253,13 @@ export async function runPythonScript(
   const startedAt = Date.now();
   const stdoutLines: string[] = [];
   const stderrLines: string[] = [];
-  let timedOut = false;
-  let aborted = false;
+  const abortState = createExecutionAbortState();
 
   const timeoutSignal = AbortSignal.timeout(timeoutMs);
-  timeoutSignal.addEventListener(
-    "abort",
-    () => {
-      timedOut = true;
-    },
-    { once: true },
-  );
+  const signal = createProcessSignal(timeoutSignal, options.signal, abortState);
+  const proc = spawnPythonProcess(scriptPath, signal, options.killSignal);
 
-  if (options.signal) {
-    options.signal.addEventListener(
-      "abort",
-      () => {
-        aborted = true;
-      },
-      { once: true },
-    );
-  }
-
-  const signal = options.signal ? AbortSignal.any([options.signal, timeoutSignal]) : timeoutSignal;
-  const proc = Bun.spawn([PYTHON_BINARY, scriptPath], {
-    cwd: SCRAPER_DIR,
-    stdin: "pipe",
-    stdout: "pipe",
-    stderr: "pipe",
-    signal,
-    killSignal: options.killSignal ?? DEFAULT_KILL_SIGNAL,
-  });
-
-  const payload = JSON.stringify({
-    ...options.scriptInput,
-    runId: options.runId,
-    outputDir: options.outputDir ?? null,
-    protocolVersion: RPA_PROTOCOL_VERSION,
-  });
-
-  await proc.stdin.write(payload);
+  await proc.stdin.write(buildScriptPayload(options));
   await proc.stdin.end();
 
   const stdoutTask = readNdjsonLines(proc.stdout, (line) => {
@@ -236,8 +276,8 @@ export async function runPythonScript(
 
   return {
     exitCode,
-    timedOut,
-    aborted,
+    timedOut: abortState.timedOut,
+    aborted: abortState.aborted,
     executionMs,
     stdoutLines,
     stderrLines,
@@ -275,20 +315,128 @@ export interface RpaScriptExecutionResult {
   stderrLines: string[];
 }
 
+type ProtocolCaptureState = {
+  events: RpaRunEvent[];
+  protocolErrors: string[];
+  terminalResult: RpaRunResult | null;
+  terminalError: ErrorEnvelope | null;
+};
+
+const createProtocolCaptureState = (): ProtocolCaptureState => ({
+  events: [],
+  protocolErrors: [],
+  terminalResult: null,
+  terminalError: null,
+});
+
+const pushProtocolError = (
+  state: ProtocolCaptureState,
+  source: "stdout" | "stderr",
+  line: string,
+  reason: string,
+): void => {
+  pushBoundedLine(state.protocolErrors, `${source}:${reason}:${line}`, MAX_PROTOCOL_ERROR_LINES);
+};
+
+const handleStdoutLine = (
+  line: string,
+  state: ProtocolCaptureState,
+  onEvent: ((event: RpaRunEvent) => void) | undefined,
+): void => {
+  if (!isLikelyJsonLine(line)) {
+    pushProtocolError(state, "stdout", line, "non_json_line");
+    return;
+  }
+  const parsedLine = parseProtocolLine(line);
+  if (!parsedLine.ok) {
+    pushProtocolError(state, "stdout", line, parsedLine.reason);
+    return;
+  }
+
+  const event = parsedLine.event;
+  if (event.eventType === "progress") {
+    pushProtocolError(state, "stdout", line, "unexpected_progress_event");
+    return;
+  }
+  state.events.push(event);
+  onEvent?.(event);
+  if (event.eventType === "result") {
+    state.terminalResult = event.result;
+  } else if (event.eventType === "error") {
+    state.terminalError = event.error;
+  }
+};
+
+const handleStderrLine = (
+  line: string,
+  state: ProtocolCaptureState,
+  onEvent: ((event: RpaRunEvent) => void) | undefined,
+): void => {
+  if (!isLikelyJsonLine(line)) {
+    return;
+  }
+  const parsedLine = parseProtocolLine(line);
+  if (!parsedLine.ok) {
+    pushProtocolError(state, "stderr", line, parsedLine.reason);
+    return;
+  }
+  if (parsedLine.event.eventType !== "progress") {
+    pushProtocolError(state, "stderr", line, "unexpected_non_progress_event");
+    return;
+  }
+  state.events.push(parsedLine.event);
+  onEvent?.(parsedLine.event);
+};
+
+const resolveTerminalError = (
+  state: ProtocolCaptureState,
+  processResult: PythonScriptExecutionResult,
+  timeoutMs: number | undefined,
+): ErrorEnvelope | null => {
+  let terminalError = state.terminalError;
+  if (processResult.timedOut) {
+    terminalError = buildErrorEnvelope("PYTHON_TIMEOUT", "Python script timed out", {
+      timeoutMs: timeoutMs ?? config.automationScriptTimeoutMs,
+    });
+  }
+  if (!terminalError && processResult.aborted) {
+    terminalError = buildErrorEnvelope("PYTHON_CANCELLED", "Python script execution was cancelled");
+  }
+  if (!terminalError && processResult.exitCode !== 0) {
+    terminalError = buildErrorEnvelope("PYTHON_RUNTIME_ERROR", "Python script exited with an error", {
+      exitCode: processResult.exitCode,
+      stderrTail: processResult.stderrLines,
+      stdoutTail: processResult.stdoutLines,
+    });
+  }
+  if (!terminalError && state.protocolErrors.length > 0) {
+    terminalError = buildErrorEnvelope(
+      "SCRIPT_PROTOCOL_ERROR",
+      "Python script emitted malformed protocol lines",
+      {
+        protocolErrors: state.protocolErrors,
+        stdoutTail: processResult.stdoutLines,
+        stderrTail: processResult.stderrLines,
+      },
+    );
+  }
+  if (!(terminalError || state.terminalResult)) {
+    terminalError = buildErrorEnvelope(
+      "SCRIPT_OUTPUT_INVALID",
+      "Python script did not emit a terminal result event",
+      { stdoutTail: processResult.stdoutLines },
+    );
+  }
+  return terminalError;
+};
+
 /**
  * Runs an RPA script and validates protocol events using shared schemas.
  */
 export async function runRpaScript(
   options: RunRpaScriptOptions,
 ): Promise<RpaScriptExecutionResult> {
-  const events: RpaRunEvent[] = [];
-  const protocolErrors: string[] = [];
-  let terminalResult: RpaRunResult | null = null;
-  let terminalError: ErrorEnvelope | null = null;
-
-  const pushProtocolError = (source: "stdout" | "stderr", line: string, reason: string): void => {
-    pushBoundedLine(protocolErrors, `${source}:${reason}:${line}`, MAX_PROTOCOL_ERROR_LINES);
-  };
+  const state = createProtocolCaptureState();
 
   const processResult = await runPythonScript({
     scriptName: options.scriptName,
@@ -301,102 +449,19 @@ export async function runRpaScript(
     signal: options.executionContext.signal,
     outputDir: options.executionContext.outputDir,
     onStdoutLine: (line) => {
-      if (!isLikelyJsonLine(line)) {
-        pushProtocolError("stdout", line, "non_json_line");
-        return;
-      }
-
-      const parsedLine = parseProtocolLine(line);
-      if (!parsedLine.ok) {
-        pushProtocolError("stdout", line, parsedLine.reason);
-        return;
-      }
-
-      const event = parsedLine.event;
-      if (event.eventType === "progress") {
-        pushProtocolError("stdout", line, "unexpected_progress_event");
-        return;
-      }
-
-      events.push(event);
-      options.onEvent?.(event);
-      if (event.eventType === "result") {
-        terminalResult = event.result;
-      }
-      if (event.eventType === "error") {
-        terminalError = event.error;
-      }
+      handleStdoutLine(line, state, options.onEvent);
     },
     onStderrLine: (line) => {
-      if (!isLikelyJsonLine(line)) {
-        return;
-      }
-
-      const parsedLine = parseProtocolLine(line);
-      if (!parsedLine.ok) {
-        pushProtocolError("stderr", line, parsedLine.reason);
-        return;
-      }
-
-      const event = parsedLine.event;
-      if (event.eventType !== "progress") {
-        pushProtocolError("stderr", line, "unexpected_non_progress_event");
-        return;
-      }
-
-      events.push(event);
-      options.onEvent?.(event);
+      handleStderrLine(line, state, options.onEvent);
     },
   });
 
-  if (processResult.timedOut) {
-    terminalError = buildErrorEnvelope("PYTHON_TIMEOUT", "Python script timed out", {
-      timeoutMs: options.executionContext.timeoutMs ?? config.automationScriptTimeoutMs,
-    });
-  }
-
-  if (!terminalError && processResult.aborted) {
-    terminalError = buildErrorEnvelope("PYTHON_CANCELLED", "Python script execution was cancelled");
-  }
-
-  if (!terminalError && processResult.exitCode !== 0) {
-    terminalError = buildErrorEnvelope(
-      "PYTHON_RUNTIME_ERROR",
-      "Python script exited with an error",
-      {
-        exitCode: processResult.exitCode,
-        stderrTail: processResult.stderrLines,
-        stdoutTail: processResult.stdoutLines,
-      },
-    );
-  }
-
-  if (!terminalError && protocolErrors.length > 0) {
-    terminalError = buildErrorEnvelope(
-      "SCRIPT_PROTOCOL_ERROR",
-      "Python script emitted malformed protocol lines",
-      {
-        protocolErrors,
-        stdoutTail: processResult.stdoutLines,
-        stderrTail: processResult.stderrLines,
-      },
-    );
-  }
-
-  if (!terminalError && !terminalResult) {
-    terminalError = buildErrorEnvelope(
-      "SCRIPT_OUTPUT_INVALID",
-      "Python script did not emit a terminal result event",
-      {
-        stdoutTail: processResult.stdoutLines,
-      },
-    );
-  }
+  const terminalError = resolveTerminalError(state, processResult, options.executionContext.timeoutMs);
 
   return {
-    result: terminalResult,
+    result: state.terminalResult,
     error: terminalError,
-    events,
+    events: state.events,
     exitCode: processResult.exitCode,
     timedOut: processResult.timedOut,
     aborted: processResult.aborted,

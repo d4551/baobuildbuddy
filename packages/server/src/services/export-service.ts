@@ -84,6 +84,52 @@ const RESUME_TEMPLATES: Partial<Record<ResumeTemplate, ResumeTemplateDefinition>
   },
 };
 
+const asStringParagraphs = (value: unknown): string[] => {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? [trimmed] : [];
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .filter((entry): entry is string => typeof entry === "string")
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
+  }
+
+  return [];
+};
+
+const toCoverLetterParagraphs = (content: unknown): string[] => {
+  if (typeof content === "string") {
+    return content
+      .split("\n\n")
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
+  }
+
+  if (typeof content !== "object" || content === null || Array.isArray(content)) {
+    return [];
+  }
+
+  const contentRecord = content as Record<string, unknown>;
+  const canonicalParagraphs = [
+    ...asStringParagraphs(contentRecord.opening),
+    ...asStringParagraphs(contentRecord.body),
+    ...asStringParagraphs(contentRecord.closing),
+  ];
+
+  if (canonicalParagraphs.length > 0) {
+    return canonicalParagraphs;
+  }
+
+  return [
+    ...asStringParagraphs(contentRecord.introduction),
+    ...asStringParagraphs(contentRecord.main),
+    ...asStringParagraphs(contentRecord.conclusion),
+  ];
+};
+
 export class ExportService {
   private resolveTemplate(templateName?: string, resumeTemplate?: string): ResumeTemplate {
     if (isResumeTemplate(templateName)) {
@@ -155,12 +201,14 @@ export class ExportService {
 
     // Helper to draw text with line wrapping
     const drawText = (
-      text: string,
-      x: number,
-      size: number,
-      color: Color,
-      font: PDFFont,
-      maxWidth: number,
+      ...[text, x, size, color, font, maxWidth]: [
+        string,
+        number,
+        number,
+        Color,
+        PDFFont,
+        number,
+      ]
     ) => {
       const words = text.split(" ");
       let line = "";
@@ -653,7 +701,7 @@ export class ExportService {
    * Export cover letter as PDF
    */
   async exportCoverLetterPDF(
-    coverLetter: { company: string; position: string; content: Record<string, unknown> },
+    coverLetter: { company: string; position: string; content: unknown },
     userProfile: { name: string; email?: string; phone?: string; location?: string },
   ): Promise<Uint8Array> {
     const pdfDoc = await PDFDocument.create();
@@ -712,18 +760,7 @@ export class ExportService {
     y -= 25;
 
     // Body paragraphs
-    const content = coverLetter.content;
-    const paragraphs: string[] = [];
-    if (content.opening) paragraphs.push(String(content.opening));
-    if (content.body)
-      paragraphs.push(
-        ...(Array.isArray(content.body) ? content.body.map(String) : [String(content.body)]),
-      );
-    if (content.closing) paragraphs.push(String(content.closing));
-    // Fallback: if content is a plain string
-    if (paragraphs.length === 0 && typeof content === "string") {
-      paragraphs.push(...(content as string).split("\n\n"));
-    }
+    const paragraphs = toCoverLetterParagraphs(coverLetter.content);
 
     for (const paragraph of paragraphs) {
       // Word-wrap the paragraph
@@ -782,11 +819,12 @@ export class ExportService {
     if (pdfDoc.getPageCount() <= 1) return pdfBytes;
 
     // Clone resume data to avoid mutating original
-    const optimized = JSON.parse(JSON.stringify(resume));
+    const optimized: ResumeData = structuredClone(resume);
 
     // Strategy 1: Remove optional sections (projects first, then gaming experience)
-    if (optimized.projects?.length > 0 && pdfDoc.getPageCount() > 1) {
-      optimized.projects = optimized.projects.slice(0, 2); // Keep only top 2
+    const optimizedProjects = optimized.projects;
+    if (Array.isArray(optimizedProjects) && optimizedProjects.length > 0 && pdfDoc.getPageCount() > 1) {
+      optimized.projects = optimizedProjects.slice(0, 2); // Keep only top 2
       pdfBytes = await this.exportResumePDF(optimized, templateName);
       pdfDoc = await PDFDocument.load(pdfBytes);
     }
@@ -806,12 +844,12 @@ export class ExportService {
     // Strategy 2: Truncate experience descriptions
     if (pdfDoc.getPageCount() > 1 && optimized.experience) {
       for (const exp of optimized.experience) {
-        if (exp.achievements?.length > 3) {
-          exp.achievements = exp.achievements.slice(0, 3);
+        const achievements = exp.achievements;
+        if (Array.isArray(achievements) && achievements.length > 3) {
+          exp.achievements = achievements.slice(0, 3);
         }
       }
       pdfBytes = await this.exportResumePDF(optimized, templateName);
-      pdfDoc = await PDFDocument.load(pdfBytes);
     }
 
     return pdfBytes;
@@ -850,12 +888,14 @@ export class ExportService {
 
     // Helper to draw text with line wrapping
     const drawText = (
-      text: string,
-      x: number,
-      size: number,
-      color: Color,
-      font: PDFFont,
-      maxWidth: number,
+      ...[text, x, size, color, font, maxWidth]: [
+        string,
+        number,
+        number,
+        Color,
+        PDFFont,
+        number,
+      ]
     ) => {
       const words = text.split(" ");
       let line = "";

@@ -22,131 +22,163 @@ interface GenerateCoverLetterInput {
   jobInfo?: Record<string, unknown>;
 }
 
+interface CoverLetterContext {
+  api: ReturnType<typeof useApi>;
+  toast: ReturnType<typeof useNuxtApp>["$toast"];
+  t: ReturnType<typeof useI18n>["t"];
+  loading: ReturnType<typeof useState<boolean>>;
+  coverLetters: ReturnType<typeof useState<CoverLetterData[]>>;
+  currentLetter: ReturnType<typeof useState<CoverLetterData | null>>;
+}
+
+async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
+  context.loading.value = true;
+  const { data, error } = await context.api["cover-letters"].get();
+  context.loading.value = false;
+
+  if (error) {
+    context.toast.error(context.t("coverLetterPage.toasts.fetchFailed"));
+    return;
+  }
+
+  const rows = Array.isArray(data) ? data : [];
+  context.coverLetters.value = rows
+    .map((row) => toCoverLetterData(row))
+    .filter((row): row is CoverLetterData => row !== null);
+}
+
+async function getCoverLetter(context: CoverLetterContext, id: string): Promise<CoverLetterData | null> {
+  context.loading.value = true;
+  const { data, error } = await context.api["cover-letters"]({ id }).get();
+  context.loading.value = false;
+
+  if (error || !data) {
+    context.toast.error(context.t("coverLetterDetailPage.toasts.loadFailed"));
+    return null;
+  }
+
+  const normalized = toCoverLetterData(data);
+  if (!normalized) {
+    context.toast.error(context.t("coverLetterDetailPage.toasts.loadFailed"));
+    return null;
+  }
+
+  context.currentLetter.value = normalized;
+  return normalized;
+}
+
+async function createCoverLetter(
+  context: CoverLetterContext,
+  letterData: CreateCoverLetterInput,
+): Promise<unknown> {
+  context.loading.value = true;
+  const { data, error } = await context.api["cover-letters"].post(letterData);
+  context.loading.value = false;
+
+  if (error) {
+    context.toast.error(context.t("coverLetterPage.toasts.generateFailed"));
+    return null;
+  }
+
+  await fetchCoverLetters(context);
+  return data;
+}
+
+async function updateCoverLetter(
+  context: CoverLetterContext,
+  id: string,
+  updates: UpdateCoverLetterInput,
+): Promise<unknown> {
+  context.loading.value = true;
+  const { data, error } = await context.api["cover-letters"]({ id }).put(updates);
+  context.loading.value = false;
+
+  if (error || !data) {
+    context.toast.error(context.t("coverLetterDetailPage.toasts.saveFailed"));
+    return null;
+  }
+
+  const normalized = toCoverLetterData(data);
+  if (normalized) {
+    context.currentLetter.value = normalized;
+  }
+  await fetchCoverLetters(context);
+  return data;
+}
+
+async function deleteCoverLetter(context: CoverLetterContext, id: string): Promise<void> {
+  context.loading.value = true;
+  const { error } = await context.api["cover-letters"]({ id }).delete();
+  context.loading.value = false;
+
+  if (error) {
+    context.toast.error(context.t("coverLetterPage.toasts.deleteFailed"));
+    return;
+  }
+
+  if (context.currentLetter.value?.id === id) {
+    context.currentLetter.value = null;
+  }
+  await fetchCoverLetters(context);
+}
+
+async function generateCoverLetter(
+  context: CoverLetterContext,
+  generationData: GenerateCoverLetterInput,
+): Promise<unknown> {
+  context.loading.value = true;
+  const { data, error } = await context.api["cover-letters"].generate.post(generationData);
+  context.loading.value = false;
+
+  if (error) {
+    context.toast.error(context.t("coverLetterPage.toasts.generateFailed"));
+    return null;
+  }
+
+  if (generationData.save) {
+    await fetchCoverLetters(context);
+  }
+  return data;
+}
+
+async function exportPdf(context: CoverLetterContext, id: string): Promise<unknown> {
+  context.loading.value = true;
+  const { data, error } = await context.api["cover-letters"]({ id }).export.post();
+  context.loading.value = false;
+
+  if (error) {
+    context.toast.error(context.t("coverLetterDetailPage.toasts.exportFailed"));
+    return null;
+  }
+
+  return data;
+}
+
 /**
  * Cover letter management composable.
  */
 export function useCoverLetter() {
-  const api = useApi();
-  const { $toast } = useNuxtApp();
-  const { t } = useI18n();
-  const coverLetters = useState<CoverLetterData[]>(STATE_KEYS.COVERLETTERS_LIST, () => []);
-  const currentLetter = useState<CoverLetterData | null>(
-    STATE_KEYS.COVERLETTER_CURRENT,
-    () => null,
-  );
-  const loading = useState(STATE_KEYS.COVERLETTER_LOADING, () => false);
-
-  async function fetchCoverLetters() {
-    loading.value = true;
-    const { data, error } = await api["cover-letters"].get();
-    loading.value = false;
-    if (error) {
-      $toast.error(t("coverLetterPage.toasts.fetchFailed"));
-      return;
-    }
-    const rows = Array.isArray(data) ? data : [];
-    coverLetters.value = rows
-      .map((row) => toCoverLetterData(row))
-      .filter((row): row is CoverLetterData => row !== null);
-  }
-
-  async function getCoverLetter(id: string) {
-    loading.value = true;
-    const { data, error } = await api["cover-letters"]({ id }).get();
-    loading.value = false;
-    if (error || !data) {
-      $toast.error(t("coverLetterDetailPage.toasts.loadFailed"));
-      return null;
-    }
-    const normalized = toCoverLetterData(data);
-    if (!normalized) {
-      $toast.error(t("coverLetterDetailPage.toasts.loadFailed"));
-      return null;
-    }
-    currentLetter.value = normalized;
-    return normalized;
-  }
-
-  async function createCoverLetter(letterData: CreateCoverLetterInput) {
-    loading.value = true;
-    const { data, error } = await api["cover-letters"].post(letterData);
-    loading.value = false;
-    if (error) {
-      $toast.error(t("coverLetterPage.toasts.generateFailed"));
-      return null;
-    }
-    await fetchCoverLetters();
-    return data;
-  }
-
-  async function updateCoverLetter(id: string, updates: UpdateCoverLetterInput) {
-    loading.value = true;
-    const { data, error } = await api["cover-letters"]({ id }).put(updates);
-    loading.value = false;
-    if (error || !data) {
-      $toast.error(t("coverLetterDetailPage.toasts.saveFailed"));
-      return null;
-    }
-    const normalized = toCoverLetterData(data);
-    if (normalized) {
-      currentLetter.value = normalized;
-    }
-    await fetchCoverLetters();
-    return data;
-  }
-
-  async function deleteCoverLetter(id: string) {
-    loading.value = true;
-    const { error } = await api["cover-letters"]({ id }).delete();
-    loading.value = false;
-    if (error) {
-      $toast.error(t("coverLetterPage.toasts.deleteFailed"));
-      return;
-    }
-    if (currentLetter.value?.id === id) {
-      currentLetter.value = null;
-    }
-    await fetchCoverLetters();
-  }
-
-  async function generateCoverLetter(generationData: GenerateCoverLetterInput) {
-    loading.value = true;
-    const { data, error } = await api["cover-letters"].generate.post(generationData);
-    loading.value = false;
-    if (error) {
-      $toast.error(t("coverLetterPage.toasts.generateFailed"));
-      return null;
-    }
-    if (generationData.save) {
-      await fetchCoverLetters();
-    }
-    return data;
-  }
-
-  /**
-   * Export a cover letter as PDF.
-   */
-  async function exportPdf(id: string) {
-    loading.value = true;
-    const { data, error } = await api["cover-letters"]({ id }).export.post();
-    loading.value = false;
-    if (error) {
-      $toast.error(t("coverLetterDetailPage.toasts.exportFailed"));
-      return null;
-    }
-    return data;
-  }
+  const context: CoverLetterContext = {
+    api: useApi(),
+    toast: useNuxtApp().$toast,
+    t: useI18n().t,
+    coverLetters: useState<CoverLetterData[]>(STATE_KEYS.COVERLETTERS_LIST, () => []),
+    currentLetter: useState<CoverLetterData | null>(STATE_KEYS.COVERLETTER_CURRENT, () => null),
+    loading: useState(STATE_KEYS.COVERLETTER_LOADING, () => false),
+  };
 
   return {
-    coverLetters: readonly(coverLetters),
-    currentLetter: readonly(currentLetter),
-    loading: readonly(loading),
-    fetchCoverLetters,
-    getCoverLetter,
-    createCoverLetter,
-    updateCoverLetter,
-    deleteCoverLetter,
-    generateCoverLetter,
-    exportPdf,
+    coverLetters: readonly(context.coverLetters),
+    currentLetter: readonly(context.currentLetter),
+    loading: readonly(context.loading),
+    fetchCoverLetters: () => fetchCoverLetters(context),
+    getCoverLetter: (id: string) => getCoverLetter(context, id),
+    createCoverLetter: (letterData: CreateCoverLetterInput) => createCoverLetter(context, letterData),
+    updateCoverLetter: (id: string, updates: UpdateCoverLetterInput) =>
+      updateCoverLetter(context, id, updates),
+    deleteCoverLetter: (id: string) => deleteCoverLetter(context, id),
+    generateCoverLetter: (generationData: GenerateCoverLetterInput) =>
+      generateCoverLetter(context, generationData),
+    exportPdf: (id: string) => exportPdf(context, id),
   };
 }

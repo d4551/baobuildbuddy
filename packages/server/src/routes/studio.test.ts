@@ -11,7 +11,7 @@ beforeAll(async () => {
   const { Elysia } = await import("elysia");
 
   initModule.initializeDatabase(dbModule.sqlite);
-  await seedModule.seedDatabase(dbModule.db);
+  seedModule.seedDatabase(dbModule.db);
 
   app = new Elysia({ prefix: "/api" }).use(routesModule.studioRoutes);
 });

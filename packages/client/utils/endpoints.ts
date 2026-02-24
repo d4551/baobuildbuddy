@@ -2,6 +2,9 @@ import { API_ENDPOINT_PREFIX } from "@bao/shared";
 
 const ABSOLUTE_HTTP_URL_PATTERN = /^https?:\/\//i;
 const ABSOLUTE_WS_URL_PATTERN = /^wss?:\/\//i;
+const TRAILING_SLASH_PATTERN = /\/$/u;
+const HTTPS_PROTOCOL_PATTERN = /^https:/i;
+const HTTP_PROTOCOL_PATTERN = /^http:/i;
 
 /**
  * Resolves runtime API base from public config and current request URL.
@@ -14,7 +17,7 @@ export function resolveApiBase(configuredBase: string, requestUrl: URL): string 
   const baseUrl = ABSOLUTE_HTTP_URL_PATTERN.test(configuredBase)
     ? configuredBase
     : new URL(configuredBase, requestUrl).toString();
-  return baseUrl.replace(/\/$/, "");
+  return baseUrl.replace(TRAILING_SLASH_PATTERN, "");
 }
 
 /**
@@ -34,7 +37,7 @@ export function resolveApiEndpoint(
 ): string {
   const resolvedBase = resolveApiBase(configuredBase, requestUrl);
   const normalizedPath = endpointPath.startsWith("/") ? endpointPath : `/${endpointPath}`;
-  const resolvedBasePath = new URL(resolvedBase).pathname.replace(/\/$/, "");
+  const resolvedBasePath = new URL(resolvedBase).pathname.replace(TRAILING_SLASH_PATTERN, "");
   const baseIncludesApiPrefix =
     resolvedBasePath === API_ENDPOINT_PREFIX || resolvedBasePath.endsWith(API_ENDPOINT_PREFIX);
   const targetPath =
@@ -62,8 +65,10 @@ export function resolveWebSocketEndpoint(
   const wsBase = ABSOLUTE_WS_URL_PATTERN.test(normalizedBase)
     ? normalizedBase
     : requestUrl.protocol === "https:"
-      ? normalizedBase.replace(/^https:/i, "wss:").replace(/^http:/i, "wss:")
-      : normalizedBase.replace(/^https:/i, "ws:").replace(/^http:/i, "ws:");
+      ? normalizedBase
+          .replace(HTTPS_PROTOCOL_PATTERN, "wss:")
+          .replace(HTTP_PROTOCOL_PATTERN, "wss:")
+      : normalizedBase.replace(HTTPS_PROTOCOL_PATTERN, "ws:").replace(HTTP_PROTOCOL_PATTERN, "ws:");
   const normalizedPath = endpointPath.startsWith("/") ? endpointPath : `/${endpointPath}`;
   return `${wsBase}${normalizedPath}`;
 }

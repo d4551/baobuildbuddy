@@ -25,7 +25,35 @@ type JobRecommendationMatch = {
   matchReason: string;
 };
 
+type JobRow = typeof jobs.$inferSelect;
+type UserProfileRow = typeof userProfile.$inferSelect;
+type JobListQuery = {
+  q?: string;
+  location?: string;
+  remote?: string;
+  experienceLevel?: string;
+  studioType?: string;
+  platform?: string;
+  genre?: string;
+  page?: string;
+  limit?: string;
+};
+type JobRecommendation = JobRow & {
+  matchScore: number;
+  matchReason: string;
+  rank: number;
+};
+type JobRecommendationsResponse = {
+  recommendations: JobRecommendation[];
+  reason: string;
+  aiPowered: boolean;
+  provider?: string;
+};
+
 const jobsRoutesLogger = createServerLogger("jobs-routes");
+const RECOMMENDATION_JSON_REGEX = /\[[\s\S]*\]/;
+const DEFAULT_RECOMMENDATION_SCORE = 50;
+const DEFAULT_RECOMMENDATION_REASON = "Recent posting";
 
 const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
   const [result] = await Promise.allSettled([operation]);
@@ -47,81 +75,200 @@ function isJobRecommendationMatch(value: unknown): value is JobRecommendationMat
   );
 }
 
+const toRecentPostingRecommendations = (recentJobs: JobRow[]): JobRecommendation[] => {
+  return recentJobs.map((job, index) => ({
+    ...job,
+    matchScore: DEFAULT_RECOMMENDATION_SCORE,
+    matchReason: DEFAULT_RECOMMENDATION_REASON,
+    rank: index + 1,
+  }));
+};
+
+const toFallbackRecommendations = (
+  recentJobs: JobRow[],
+  reason: string,
+): JobRecommendationsResponse => ({
+  recommendations: toRecentPostingRecommendations(recentJobs),
+  reason,
+  aiPowered: false,
+});
+
+const buildRecommendationPrompt = (profile: UserProfileRow, recentJobs: JobRow[]): string => {
+  const userSkills = [...(profile.technicalSkills || []), ...(profile.softSkills || [])].join(", ");
+  const userExperience =
+    profile.currentRole && profile.currentCompany
+      ? `${profile.currentRole} at ${profile.currentCompany}`
+      : profile.summary || "Gaming professional";
+  const userGoals =
+    typeof profile.careerGoals === "object" && profile.careerGoals !== null
+      ? JSON.stringify(profile.careerGoals)
+      : "Career growth in gaming industry";
+  const jobsSummary = recentJobs
+    .map(
+      (job, idx) =>
+        `Job ${idx + 1}: ${job.title} at ${job.company} - ${job.location} - ${job.experienceLevel || "Not specified"}`,
+    )
+    .join("\n");
+
+  return `You are a career matching AI assistant. Analyze these jobs against the user profile and score each job from 0-100 based on match quality.
+
+User Profile:
+- Skills: ${userSkills || "Not specified"}
+- Experience: ${userExperience}
+- Career Goals: ${userGoals}
+- Years of Experience: ${profile.yearsExperience || "Not specified"}
+
+Available Jobs:
+${jobsSummary}
+
+Return a JSON array with match analysis for each job. Format:
+[
+  {
+    "jobIndex": 0,
+    "matchScore": 85,
+    "matchReason": "Strong skills alignment with technical requirements"
+  }
+]
+
+Provide realistic scores based on skills match, experience level alignment, and career goals fit.`;
+};
+
+const parseRecommendationMatches = (responseContent: string): JobRecommendationMatch[] => {
+  const jsonMatch = responseContent.match(RECOMMENDATION_JSON_REGEX);
+  if (!jsonMatch) return [];
+  const parsed = safeParseJson(jsonMatch[0]);
+  return Array.isArray(parsed) ? parsed.filter(isJobRecommendationMatch) : [];
+};
+
+const mapRecommendationMatches = (
+  recentJobs: JobRow[],
+  matches: JobRecommendationMatch[],
+): JobRecommendation[] => {
+  return matches
+    .map((match) => {
+      const job = recentJobs[match.jobIndex];
+      if (!job) return null;
+      return {
+        ...job,
+        matchScore: match.matchScore,
+        matchReason: match.matchReason,
+        rank: 0,
+      };
+    })
+    .filter((job): job is JobRecommendation => job !== null)
+    .sort((a, b) => b.matchScore - a.matchScore)
+    .map((job, index) => ({
+      ...job,
+      rank: index + 1,
+    }));
+};
+
+const buildJobsWhereClause = (query: JobListQuery) => {
+  const conditions = [];
+  if (query.q) {
+    conditions.push(
+      or(
+        like(jobs.title, `%${query.q}%`),
+        like(jobs.company, `%${query.q}%`),
+        like(jobs.description, `%${query.q}%`),
+      ),
+    );
+  }
+  if (query.location) {
+    conditions.push(like(jobs.location, `%${query.location}%`));
+  }
+  if (query.remote === "true") {
+    conditions.push(eq(jobs.remote, true));
+  }
+  if (query.experienceLevel && isOneOf(JOB_EXPERIENCE_LEVELS, query.experienceLevel)) {
+    conditions.push(eq(jobs.experienceLevel, query.experienceLevel));
+  }
+  if (query.studioType && isOneOf(JOB_STUDIO_TYPES, query.studioType)) {
+    conditions.push(eq(jobs.studioType, query.studioType));
+  }
+  return conditions.length > 0 ? and(...conditions) : undefined;
+};
+
+const filterJobsByAttributes = (jobRows: JobRow[], query: JobListQuery): JobRow[] => {
+  let filtered = jobRows;
+  if (query.platform && isOneOf(JOB_SUPPORTED_PLATFORMS, query.platform)) {
+    filtered = filtered.filter((job) => job.platforms?.includes(query.platform));
+  }
+  if (query.genre && isOneOf(JOB_GAME_GENRES, query.genre)) {
+    filtered = filtered.filter((job) => job.gameGenres?.includes(query.genre));
+  }
+  return filtered;
+};
+
+const listJobs = async (query: JobListQuery) => {
+  const pageNum = parsePositiveInteger(query.page || String(JOB_QUERY_DEFAULT_PAGE), JOB_QUERY_DEFAULT_PAGE);
+  const requestedLimit = parsePositiveInteger(
+    query.limit || String(JOB_QUERY_DEFAULT_LIMIT),
+    JOB_QUERY_DEFAULT_LIMIT,
+  );
+  const limitNum = Math.min(requestedLimit, JOB_QUERY_MAX_LIMIT);
+  const offset = (pageNum - 1) * limitNum;
+  const results = await db
+    .select()
+    .from(jobs)
+    .where(buildJobsWhereClause(query))
+    .orderBy(desc(jobs.postedDate))
+    .limit(limitNum)
+    .offset(offset);
+  const filtered = filterJobsByAttributes(results, query);
+
+  return {
+    jobs: filtered,
+    page: pageNum,
+    limit: limitNum,
+    total: filtered.length,
+  };
+};
+
+const getRecommendations = async (): Promise<JobRecommendationsResponse> => {
+  const profileRows = await db.select().from(userProfile).limit(1);
+  const profile = profileRows[0];
+  const recentJobs = await db.select().from(jobs).orderBy(desc(jobs.postedDate)).limit(20);
+  if (!profile || recentJobs.length === 0) {
+    return toFallbackRecommendations(
+      recentJobs,
+      profile ? "No jobs available" : "Create your profile for personalized recommendations",
+    );
+  }
+
+  const settingsResult = await settle(db.select().from(settings).limit(1));
+  if (settingsResult.status === "rejected") {
+    jobsRoutesLogger.error("Job recommendations error:", settingsResult.reason);
+    const details = settingsResult.reason instanceof Error ? settingsResult.reason.message : "Unknown error";
+    return toFallbackRecommendations(recentJobs, `Error generating recommendations: ${details}`);
+  }
+
+  const aiService = AIService.fromSettings(settingsResult.value[0]);
+  const response = await aiService.generate(buildRecommendationPrompt(profile, recentJobs), {
+    temperature: 0.3,
+    maxTokens: 1500,
+  });
+  if (response.error) {
+    return toFallbackRecommendations(recentJobs, `AI recommendations failed: ${response.error}`);
+  }
+
+  const matches = parseRecommendationMatches(response.content);
+  if (matches.length === 0) {
+    return toFallbackRecommendations(recentJobs, "AI analysis completed but no matches found");
+  }
+
+  return {
+    recommendations: mapRecommendationMatches(recentJobs, matches),
+    reason: "AI-powered personalized job recommendations",
+    aiPowered: true,
+    provider: response.provider,
+  };
+};
+
 export const jobsRoutes = new Elysia({ prefix: "/jobs" })
   .get(
     "/",
-    async ({ query }) => {
-      const {
-        q = "",
-        location = "",
-        remote,
-        experienceLevel,
-        studioType,
-        platform,
-        genre,
-        page = String(JOB_QUERY_DEFAULT_PAGE),
-        limit = String(JOB_QUERY_DEFAULT_LIMIT),
-      } = query;
-
-      const pageNum = parsePositiveInteger(page, JOB_QUERY_DEFAULT_PAGE);
-      const requestedLimit = parsePositiveInteger(limit, JOB_QUERY_DEFAULT_LIMIT);
-      const limitNum = Math.min(requestedLimit, JOB_QUERY_MAX_LIMIT);
-      const offset = (pageNum - 1) * limitNum;
-
-      const conditions = [];
-
-      if (q) {
-        conditions.push(
-          or(
-            like(jobs.title, `%${q}%`),
-            like(jobs.company, `%${q}%`),
-            like(jobs.description, `%${q}%`),
-          ),
-        );
-      }
-
-      if (location) {
-        conditions.push(like(jobs.location, `%${location}%`));
-      }
-
-      if (remote === "true") {
-        conditions.push(eq(jobs.remote, true));
-      }
-
-      if (experienceLevel && isOneOf(JOB_EXPERIENCE_LEVELS, experienceLevel)) {
-        conditions.push(eq(jobs.experienceLevel, experienceLevel));
-      }
-
-      if (studioType && isOneOf(JOB_STUDIO_TYPES, studioType)) {
-        conditions.push(eq(jobs.studioType, studioType));
-      }
-
-      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-
-      const results = await db
-        .select()
-        .from(jobs)
-        .where(whereClause)
-        .orderBy(desc(jobs.postedDate))
-        .limit(limitNum)
-        .offset(offset);
-
-      // Filter by platform/genre in memory since they're JSON arrays
-      let filtered = results;
-      if (platform && isOneOf(JOB_SUPPORTED_PLATFORMS, platform)) {
-        filtered = filtered.filter((job) => job.platforms?.includes(platform));
-      }
-      if (genre && isOneOf(JOB_GAME_GENRES, genre)) {
-        filtered = filtered.filter((job) => job.gameGenres?.includes(genre));
-      }
-
-      return {
-        jobs: filtered,
-        page: pageNum,
-        limit: limitNum,
-        total: filtered.length,
-      };
-    },
+    async ({ query }) => listJobs(query),
     {
       query: t.Object({
         q: t.Optional(t.String({ maxLength: 200 })),
@@ -322,150 +469,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
     return apps;
   })
   .get("/recommendations", async () => {
-    const profileRows = await db.select().from(userProfile).limit(1);
-    const profile = profileRows.length > 0 ? profileRows[0] : null;
-
-    const recentJobs = await db.select().from(jobs).orderBy(desc(jobs.postedDate)).limit(20);
-
-    if (!profile || recentJobs.length === 0) {
-      return {
-        recommendations: recentJobs.map((job, index) => ({
-          ...job,
-          matchScore: 50,
-          matchReason: "Recent posting",
-          rank: index + 1,
-        })),
-        reason: profile
-          ? "No jobs available"
-          : "Create your profile for personalized recommendations",
-        aiPowered: false,
-      };
-    }
-
-    const settingsResult = await settle(db.select().from(settings).limit(1));
-    if (settingsResult.status === "rejected") {
-      jobsRoutesLogger.error("Job recommendations error:", settingsResult.reason);
-      return {
-        recommendations: recentJobs.map((job, index) => ({
-          ...job,
-          matchScore: 50,
-          matchReason: "Recent posting",
-          rank: index + 1,
-        })),
-        reason: `Error generating recommendations: ${settingsResult.reason instanceof Error ? settingsResult.reason.message : "Unknown error"}`,
-        aiPowered: false,
-      };
-    }
-    const aiService = AIService.fromSettings(settingsResult.value[0]);
-
-    const userSkills = [...(profile.technicalSkills || []), ...(profile.softSkills || [])].join(
-      ", ",
-    );
-
-    const userExperience =
-      profile.currentRole && profile.currentCompany
-        ? `${profile.currentRole} at ${profile.currentCompany}`
-        : profile.summary || "Gaming professional";
-
-    const userGoals =
-      typeof profile.careerGoals === "object" && profile.careerGoals !== null
-        ? JSON.stringify(profile.careerGoals)
-        : "Career growth in gaming industry";
-
-    const jobsSummary = recentJobs
-      .map(
-        (job, idx) =>
-          `Job ${idx + 1}: ${job.title} at ${job.company} - ${job.location} - ${job.experienceLevel || "Not specified"}`,
-      )
-      .join("\n");
-
-    const prompt = `You are a career matching AI assistant. Analyze these jobs against the user profile and score each job from 0-100 based on match quality.
-
-User Profile:
-- Skills: ${userSkills || "Not specified"}
-- Experience: ${userExperience}
-- Career Goals: ${userGoals}
-- Years of Experience: ${profile.yearsExperience || "Not specified"}
-
-Available Jobs:
-${jobsSummary}
-
-Return a JSON array with match analysis for each job. Format:
-[
-  {
-    "jobIndex": 0,
-    "matchScore": 85,
-    "matchReason": "Strong skills alignment with technical requirements"
-  }
-]
-
-Provide realistic scores based on skills match, experience level alignment, and career goals fit.`;
-
-    const response = await aiService.generate(prompt, {
-      temperature: 0.3,
-      maxTokens: 1500,
-    });
-
-    if (response.error) {
-      return {
-        recommendations: recentJobs.map((job, index) => ({
-          ...job,
-          matchScore: 50,
-          matchReason: "AI analysis unavailable",
-          rank: index + 1,
-        })),
-        reason: `AI recommendations failed: ${response.error}`,
-        aiPowered: false,
-      };
-    }
-
-    let matchedJobs: JobRecommendationMatch[] = [];
-
-    const jsonMatch = response.content.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      const parsed = safeParseJson(jsonMatch[0]);
-      if (Array.isArray(parsed)) {
-        matchedJobs = parsed.filter(isJobRecommendationMatch);
-      }
-    }
-
-    if (matchedJobs.length === 0) {
-      return {
-        recommendations: recentJobs.map((job, index) => ({
-          ...job,
-          matchScore: 50,
-          matchReason: "Recent posting",
-          rank: index + 1,
-        })),
-        reason: "AI analysis completed but no matches found",
-        aiPowered: false,
-      };
-    }
-
-    const recommendations = matchedJobs
-      .map((match) => {
-        const job = recentJobs[match.jobIndex];
-        if (!job) return null;
-        return {
-          ...job,
-          matchScore: match.matchScore,
-          matchReason: match.matchReason,
-          rank: 0,
-        };
-      })
-      .filter((job) => job !== null)
-      .sort((a, b) => (b?.matchScore || 0) - (a?.matchScore || 0))
-      .map((job, index) => ({
-        ...job,
-        rank: index + 1,
-      }));
-
-    return {
-      recommendations,
-      reason: "AI-powered personalized job recommendations",
-      aiPowered: true,
-      provider: response.provider,
-    };
+    return getRecommendations();
   })
   .post("/refresh", async ({ set }) => {
     const aggregator = new JobAggregator();

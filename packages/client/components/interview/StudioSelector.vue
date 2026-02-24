@@ -42,7 +42,7 @@ const filteredStudios = computed(() => {
 
 watch(isOpen, (open) => {
   if (!open) return;
-  nextTick(() => {
+  requestAnimationFrame(() => {
     searchInputRef.value?.focus();
   });
 });

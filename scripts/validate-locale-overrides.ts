@@ -113,10 +113,13 @@ const main = async (): Promise<void> => {
   }
 
   await writeError("Locale override validation failed:");
-  for (const violation of violations) {
-    await writeError(`- [${violation.locale}] ${violation.key}: ${violation.message}`);
+  const lines = violations.map(
+    (violation) => `- [${violation.locale}] ${violation.key}: ${violation.message}`,
+  );
+  if (lines.length > 0) {
+    await writeError(lines.join("\n"));
   }
   process.exit(1);
 };
 
-main();
+await main();

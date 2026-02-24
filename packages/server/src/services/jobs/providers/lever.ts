@@ -22,6 +22,21 @@ interface LeverJob {
   workplaceType?: string;
 }
 
+type JobProviderSettings = Awaited<ReturnType<typeof loadJobProviderSettings>>;
+
+type LeverCompanyContext = {
+  companySlug: string;
+  companyName: string;
+  providerSettings: JobProviderSettings;
+  query?: string;
+};
+
+type LeverCompanyPageState = {
+  page: number;
+  offset: number | undefined;
+  accumulatedJobs: RawJob[];
+};
+
 /**
  * Provider for Lever-hosted companies configured in settings.
  */
@@ -52,62 +67,85 @@ export class LeverProvider implements JobProvider {
   private async fetchCompanyJobs(
     companySlug: string,
     companyName: string,
-    providerSettings: Awaited<ReturnType<typeof loadJobProviderSettings>>,
+    providerSettings: JobProviderSettings,
     query?: string,
   ): Promise<RawJob[]> {
-    const jobs: RawJob[] = [];
-    let offset: number | undefined;
+    return this.fetchCompanyJobsPage(
+      { companySlug, companyName, providerSettings, query },
+      {
+        page: 0,
+        offset: undefined,
+        accumulatedJobs: [],
+      },
+    );
+  }
 
-    for (let page = 0; page < providerSettings.leverMaxPages; page++) {
-      let requestUrl = `${providerSettings.leverApiBaseUrl}/${companySlug}?mode=json`;
-      if (offset !== undefined) {
-        requestUrl += `&offset=${offset}`;
-      }
-      if (query) {
-        requestUrl += `&team=${encodeURIComponent(query)}`;
-      }
+  private async fetchCompanyJobsPage(
+    context: LeverCompanyContext,
+    state: LeverCompanyPageState,
+  ): Promise<RawJob[]> {
+    const { companySlug, companyName, providerSettings, query } = context;
+    const { page, offset, accumulatedJobs } = state;
 
-      const response = await fetch(requestUrl, {
-        headers: {
-          Accept: "application/json",
-          "User-Agent": JOB_AGGREGATOR_USER_AGENT,
-        },
-        signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          break;
-        }
-        return jobs;
-      }
-
-      const data = (await response.json()) as LeverJob[];
-      if (!Array.isArray(data) || data.length === 0) {
-        break;
-      }
-
-      for (const job of data) {
-        const rawJob = this.mapJob(job, companySlug, companyName);
-
-        if (query) {
-          const searchText = `${rawJob.title} ${rawJob.description}`.toLowerCase();
-          if (!searchText.includes(query.toLowerCase())) {
-            continue;
-          }
-        }
-
-        jobs.push(rawJob);
-      }
-
-      if (data.length < 100) {
-        break;
-      }
-
-      offset = (offset ?? 0) + data.length;
+    if (page >= providerSettings.leverMaxPages) {
+      return accumulatedJobs;
     }
 
-    return jobs;
+    const data = await this.fetchLeverPage(companySlug, providerSettings, query, offset);
+    if (!data || data.length === 0) {
+      return accumulatedJobs;
+    }
+
+    const queryLower = query?.toLowerCase();
+    const pageJobs = data
+      .map((job) => this.mapJob(job, companySlug, companyName))
+      .filter((rawJob) => {
+        if (!queryLower) {
+          return true;
+        }
+        const searchText = `${rawJob.title} ${rawJob.description}`.toLowerCase();
+        return searchText.includes(queryLower);
+      });
+    const nextJobs = [...accumulatedJobs, ...pageJobs];
+    if (data.length < 100) {
+      return nextJobs;
+    }
+
+    const nextOffset = (offset ?? 0) + data.length;
+    return this.fetchCompanyJobsPage(context, {
+      page: page + 1,
+      offset: nextOffset,
+      accumulatedJobs: nextJobs,
+    });
+  }
+
+  private async fetchLeverPage(
+    companySlug: string,
+    providerSettings: JobProviderSettings,
+    query: string | undefined,
+    offset: number | undefined,
+  ): Promise<LeverJob[] | null> {
+    let requestUrl = `${providerSettings.leverApiBaseUrl}/${companySlug}?mode=json`;
+    if (offset !== undefined) {
+      requestUrl += `&offset=${offset}`;
+    }
+    if (query) {
+      requestUrl += `&team=${encodeURIComponent(query)}`;
+    }
+
+    const response = await fetch(requestUrl, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": JOB_AGGREGATOR_USER_AGENT,
+      },
+      signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
+    });
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as LeverJob[];
+    return Array.isArray(data) ? data : [];
   }
 
   private mapJob(job: LeverJob, companySlug: string, companyName: string): RawJob {

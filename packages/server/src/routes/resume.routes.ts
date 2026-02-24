@@ -81,9 +81,133 @@ const toResumeTemplateOrUndefined = (
   value: string | undefined,
 ): ResumeData["template"] | undefined => (isResumeTemplate(value) ? value : undefined);
 
+const formatJobRequirements = (value: unknown): string => {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    const normalized = value.filter((entry): entry is string => typeof entry === "string");
+    if (normalized.length > 0) {
+      return normalized.join(", ");
+    }
+  }
+
+  return "Not specified";
+};
+
 const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
   const [result] = await Promise.allSettled([operation]);
   return result;
+};
+
+type ResumeRouteSetState = {
+  status?: number;
+};
+type ResumeScoreBody = {
+  jobId: string;
+};
+type ResumeScoreDetails = {
+  analysis: Record<string, unknown>;
+  score: number;
+  strengths: string[];
+  improvements: string[];
+  keywords: string[];
+};
+
+const serializeResumeForAi = (resume: ResumeData): string => `
+Resume: ${resume.name}
+Summary: ${resume.summary}
+Experience: ${JSON.stringify(resume.experience, null, 2)}
+Education: ${JSON.stringify(resume.education, null, 2)}
+Skills: ${JSON.stringify(resume.skills, null, 2)}
+Projects: ${JSON.stringify(resume.projects, null, 2)}
+${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingExperience, null, 2)}` : ""}
+`.trim();
+
+const serializeJobForAi = (job: typeof jobs.$inferSelect): string => `
+Job: ${job.title} at ${job.company}
+Description: ${job.description}
+Requirements: ${formatJobRequirements(job.requirements)}
+Location: ${job.location || "Not specified"}
+Type: ${job.type || "Not specified"}
+`.trim();
+
+const parseResumeScoreDetails = (content: string): ResumeScoreDetails => {
+  const parsedAnalysis = safeParseJson(content);
+  const analysisRecord: Record<string, unknown> =
+    parsedAnalysis && typeof parsedAnalysis === "object" && !Array.isArray(parsedAnalysis)
+      ? parsedAnalysis
+      : {
+          score: 50,
+          strengths: ["Unable to parse AI response"],
+          improvements: ["Please try again"],
+          keywords: [],
+        };
+  const score = typeof analysisRecord.score === "number" ? analysisRecord.score : 0;
+  const strengths = Array.isArray(analysisRecord.strengths)
+    ? analysisRecord.strengths.filter((entry): entry is string => typeof entry === "string")
+    : [];
+  const improvements = Array.isArray(analysisRecord.improvements)
+    ? analysisRecord.improvements.filter((entry): entry is string => typeof entry === "string")
+    : [];
+  const keywords = Array.isArray(analysisRecord.keywords)
+    ? analysisRecord.keywords.filter((entry): entry is string => typeof entry === "string")
+    : [];
+  return {
+    analysis: analysisRecord,
+    score,
+    strengths,
+    improvements,
+    keywords,
+  };
+};
+
+const handleResumeAiScore = async (resumeId: string, body: ResumeScoreBody, set: ResumeRouteSetState) => {
+  const resume = await resumeService.getResume(resumeId);
+  if (!resume) {
+    set.status = 404;
+    return { error: "Resume not found" };
+  }
+
+  const jobRows = await db.select().from(jobs).where(eq(jobs.id, body.jobId));
+  if (jobRows.length === 0) {
+    set.status = 404;
+    return { error: "Job not found" };
+  }
+
+  const settingsRows = await db.select().from(settings);
+  const aiService = AIService.fromSettings(settingsRows[0]);
+  const aiResult = await settle(
+    aiService.generate(resumeScorePrompt(serializeResumeForAi(resume), serializeJobForAi(jobRows[0])), {
+      temperature: 0.3,
+      maxTokens: 1500,
+    }),
+  );
+  if (aiResult.status === "rejected") {
+    set.status = 500;
+    return {
+      error: "AI scoring failed",
+      details: aiResult.reason instanceof Error ? aiResult.reason.message : "Unknown error",
+    };
+  }
+
+  const response = aiResult.value;
+  if (response.error) {
+    set.status = 500;
+    return { error: "AI scoring failed", details: response.error };
+  }
+
+  const details = parseResumeScoreDetails(response.content);
+  return {
+    resumeId,
+    jobId: body.jobId,
+    score: details.score,
+    strengths: details.strengths,
+    improvements: details.improvements,
+    keywords: details.keywords,
+    analysis: details.analysis,
+  };
 };
 
 export const resumeRoutes = new Elysia({ prefix: "/resumes" })
@@ -378,90 +502,7 @@ ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingEx
   )
   .post(
     "/:id/ai-score",
-    async ({ params, body, set }) => {
-      const resume = await resumeService.getResume(params.id);
-      if (!resume) {
-        set.status = 404;
-        return { error: "Resume not found" };
-      }
-
-      const jobRows = await db.select().from(jobs).where(eq(jobs.id, body.jobId));
-      if (jobRows.length === 0) {
-        set.status = 404;
-        return { error: "Job not found" };
-      }
-
-      const job = jobRows[0];
-
-      const settingsRows = await db.select().from(settings);
-      const aiService = AIService.fromSettings(settingsRows[0]);
-
-      const resumeText = `
-Resume: ${resume.name}
-Summary: ${resume.summary}
-Experience: ${JSON.stringify(resume.experience, null, 2)}
-Education: ${JSON.stringify(resume.education, null, 2)}
-Skills: ${JSON.stringify(resume.skills, null, 2)}
-Projects: ${JSON.stringify(resume.projects, null, 2)}
-${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingExperience, null, 2)}` : ""}
-    `.trim();
-
-      const jobText = `
-Job: ${job.title} at ${job.company}
-Description: ${job.description}
-Requirements: ${job.requirements || "Not specified"}
-Location: ${job.location || "Not specified"}
-Type: ${job.type || "Not specified"}
-    `.trim();
-
-      const prompt = resumeScorePrompt(resumeText, jobText);
-
-      const aiResult = await settle(aiService.generate(prompt, { temperature: 0.3, maxTokens: 1500 }));
-      if (aiResult.status === "rejected") {
-        set.status = 500;
-        return {
-          error: "AI scoring failed",
-          details: aiResult.reason instanceof Error ? aiResult.reason.message : "Unknown error",
-        };
-      }
-
-      const response = aiResult.value;
-      if (response.error) {
-        set.status = 500;
-        return { error: "AI scoring failed", details: response.error };
-      }
-
-      const parsedAnalysis = safeParseJson(response.content);
-      const analysisRecord: Record<string, unknown> =
-        parsedAnalysis && typeof parsedAnalysis === "object" && !Array.isArray(parsedAnalysis)
-          ? parsedAnalysis
-          : {
-              score: 50,
-              strengths: ["Unable to parse AI response"],
-              improvements: ["Please try again"],
-              keywords: [],
-            };
-      const score = typeof analysisRecord.score === "number" ? analysisRecord.score : 0;
-      const strengths = Array.isArray(analysisRecord.strengths)
-        ? analysisRecord.strengths.filter((entry): entry is string => typeof entry === "string")
-        : [];
-      const improvements = Array.isArray(analysisRecord.improvements)
-        ? analysisRecord.improvements.filter((entry): entry is string => typeof entry === "string")
-        : [];
-      const keywords = Array.isArray(analysisRecord.keywords)
-        ? analysisRecord.keywords.filter((entry): entry is string => typeof entry === "string")
-        : [];
-
-      return {
-        resumeId: params.id,
-        jobId: body.jobId,
-        score,
-        strengths,
-        improvements,
-        keywords,
-        analysis: analysisRecord,
-      };
-    },
+    async ({ params, body, set }) => handleResumeAiScore(params.id, body, set),
     {
       params: t.Object({
         id: t.String({ maxLength: 100 }),
