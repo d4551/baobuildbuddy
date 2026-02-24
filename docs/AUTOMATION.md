@@ -46,6 +46,7 @@ Expected validation outcomes:
 - `bun run build`: all packages build successfully.
 - `CI=true bun run build:desktop`: desktop packaging build succeeds.
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run release:refresh:all-os:fast`: desktop artifacts and `sha256.txt` are rebuilt without rerunning quality gates.
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
@@ -58,6 +59,8 @@ Automation UI contract:
 
 `bun run release:refresh:all-os` is designed for macOS hosts with Docker available and outbound network access for cross-target dependency bootstrap.
 The script includes containerized Windows setup fallback and Linux AppImage fallback paths to keep release artifact generation deterministic.
+
+Use `bun run release:refresh:all-os:fast` when you need only a deterministic rebuild after quality gates have already passed. This maps directly to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates`.
 
 If local port `3001` is already occupied, run page verification against an isolated preview port:
 

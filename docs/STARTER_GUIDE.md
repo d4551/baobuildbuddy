@@ -25,6 +25,8 @@ bun run build:desktop
 bun run release:refresh:all-os
 ```
 
+Use `bun run release:refresh:all-os:fast` after the full quality gate run when you only need a rebuild and checksum refresh. It maps to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates`.
+
 `bun run release:refresh:all-os` requires a macOS host with Docker running and outbound network access for cross-target dependency/bootstrap downloads.
 The refresh flow includes containerized Windows setup fallback and Linux AppImage fallback when primary bundle tooling fails.
 
@@ -61,6 +63,7 @@ Expected validation outcomes:
 - `bun run build`: all packages build successfully.
 - `CI=true bun run build:desktop`: desktop packaging build succeeds.
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run release:refresh:all-os:fast`: artifacts and checksums are regenerated without rerunning quality gates.
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
@@ -72,6 +75,7 @@ UI runtime contracts for v1.0:
 - Automation pages (`/automation`, `/automation/job-apply`, `/automation/email`, `/automation/runs`, `/automation/runs/:id`, `/automation/scraper`) follow the same tokenized layout contract and are enforced by `validate:ui-layout-tokens`.
 - AI provider display copy/icons are locale-driven (`aiProviderCatalog.*`) with a shared icon component (`AIProviderIcon`) to avoid hardcoded provider UI metadata.
 - Interview role recommendations are derived from profile role, readiness role rankings, pathway match scoring, and live job titles; static role slug lists are removed.
+- Skills-readiness UI copy is locale-driven from typed server IDs (`feedbackId`, `improvementSuggestions`, `nextSteps`) instead of service hardcoded prose.
 
 ## 1) Understand what is being started
 
@@ -381,6 +385,7 @@ bun run test
 
 - Server starts but UI cannot connect:
   - Check `.env` has `NUXT_PUBLIC_API_BASE=/` for `bun run dev`.
+  - If `NUXT_PUBLIC_API_PROXY` is unset, Nuxt dev now proxies `/api` to `http://localhost:${PORT}` by default.
   - Recheck `NUXT_PUBLIC_WS_BASE`.
 - Port conflict:
   - Change `PORT` in `.env`.
@@ -444,6 +449,14 @@ bun run release:refresh:all-os
 ```
 
 This command refreshes macOS/Linux/Windows desktop artifacts and rewrites `packages/desktop/releases/sha256.txt`.
+
+Repeatable cross-target rebuild:
+
+```bash
+bun run release:refresh:all-os:fast
+```
+
+Use this command for local rebuild cycles once the quality gates have already passed.
 
 Single-target desktop build for the current host:
 

@@ -666,45 +666,45 @@ const enUS = {
         excellent: "Excellent {category}. You are well-prepared in this area.",
       },
       improvements: {
-        mapTechnicalSkills:
+        imp_tech_map:
           "Map more technical gaming skills to career-ready technical skills.",
-        increaseSkillConfidence:
+        imp_conf_up:
           "Increase confidence ratings for your existing technical mappings.",
-        mapLeadershipCommunication: "Map more leadership and communication experiences.",
-        addTeamCollaborationExamples: "Add concrete team collaboration examples.",
-        researchIndustryApplications:
+        imp_lead_comm: "Map more leadership and communication experiences.",
+        imp_team_examples: "Add concrete team collaboration examples.",
+        imp_industry_research:
           "Research additional industry applications for your mapped skills.",
-        connectSkillsToJobRoles: "Connect mapped skills to specific target job roles.",
-        addSkillEvidence:
+        imp_role_link: "Connect mapped skills to specific target job roles.",
+        imp_evidence_add:
           "Add evidence for your mapped skills with clips, screenshots, or documents.",
-        buildPortfolioProjects: "Build portfolio projects to demonstrate applied skills.",
-        documentAchievements: "Document measurable achievements for your strongest mappings.",
-        strengthenTechnicalTransfer:
+        imp_portfolio_build: "Build portfolio projects to demonstrate applied skills.",
+        imp_achievements_doc: "Document measurable achievements for your strongest mappings.",
+        imp_transfer_strengthen:
           "Strengthen technical transfer by mapping game mechanics to engineering concepts.",
-        highlightLeadershipExperience:
+        imp_leadership_highlight:
           "Highlight leadership and communication experience from gaming contexts.",
-        broadenSkillCoverage: "Broaden skill coverage by mapping 10-15 diverse skills.",
-        refineSpecificExamples: "Refine current mappings with more specific examples.",
-        pursueCertifications: "Pursue certifications that validate your technical strengths.",
-        networkWithProfessionals: "Network with professionals in your target industry.",
+        imp_coverage_broaden: "Broaden skill coverage by mapping 10-15 diverse skills.",
+        imp_examples_refine: "Refine current mappings with more specific examples.",
+        imp_certs_pursue: "Pursue certifications that validate your technical strengths.",
+        imp_network_pro: "Network with professionals in your target industry.",
       },
       nextStepItems: {
-        startApplyingToTargetRoles: "Start applying to target roles.",
-        networkWithIndustryProfessionals: "Network with industry professionals.",
-        prepareForTechnicalInterviews: "Prepare for technical interviews.",
-        polishLinkedInProfile: "Polish your LinkedIn profile.",
-        completePortfolioProjects: "Complete your portfolio with 3-5 strong projects.",
-        mapMoreSkillsToReachFifteen: "Map 5 more skills to reach 15+ total.",
-        addEvidenceToTopSkills: "Add evidence to your top 10 skills.",
-        researchTargetCompaniesAndRoles: "Research target companies and roles.",
-        mapTenPlusSkills: "Map 10+ gaming skills to career skills.",
-        startBuildingPortfolioProjects: "Start building portfolio projects.",
-        addEvidenceToDemonstrateAbilities: "Add evidence to demonstrate your abilities.",
-        exploreMatchingCareerPathways: "Explore career pathways that match your skills.",
-        mapFirstFiveSkills: "Map your first 5 gaming skills.",
-        exploreSkillCategories: "Explore different skill categories.",
-        learnGamingCareerOptions: "Learn about career options in the gaming industry.",
-        setUpProfessionalProfile: "Set up your professional profile.",
+        step_apply_roles: "Start applying to target roles.",
+        step_network_industry: "Network with industry professionals.",
+        step_prepare_interviews: "Prepare for technical interviews.",
+        step_polish_linkedin: "Polish your LinkedIn profile.",
+        step_complete_portfolio: "Complete your portfolio with 3-5 strong projects.",
+        step_map_skills_15: "Map 5 more skills to reach 15+ total.",
+        step_evidence_top: "Add evidence to your top 10 skills.",
+        step_research_targets: "Research target companies and roles.",
+        step_map_skills_10: "Map 10+ gaming skills to career skills.",
+        step_start_portfolio: "Start building portfolio projects.",
+        step_evidence_abilities: "Add evidence to demonstrate your abilities.",
+        step_explore_pathways: "Explore career pathways that match your skills.",
+        step_map_skills_5: "Map your first 5 gaming skills.",
+        step_explore_categories: "Explore different skill categories.",
+        step_learn_careers: "Learn about career options in the gaming industry.",
+        step_setup_profile: "Set up your professional profile.",
       },
       emptyState: "Readiness data is not available yet. Add skill mappings and run analysis first.",
     },

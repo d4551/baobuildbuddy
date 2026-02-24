@@ -95,66 +95,66 @@ const jaJPOverrides = {
         excellent: "{category} は非常に良好です。この領域の準備は十分です。",
       },
       improvements: {
-        mapTechnicalSkills:
+        imp_tech_map:
           "ゲーム由来の技術スキルを、業務で使える技術スキルへさらにマッピングしましょう。",
-        increaseSkillConfidence:
+        imp_conf_up:
           "既存の技術スキルマッピングの信頼度を引き上げましょう。",
-        mapLeadershipCommunication:
+        imp_lead_comm:
           "リーダーシップとコミュニケーション経験のマッピングを増やしましょう。",
-        addTeamCollaborationExamples:
+        imp_team_examples:
           "チーム協業の具体例を追加しましょう。",
-        researchIndustryApplications:
+        imp_industry_research:
           "マッピング済みスキルの業界適用先をさらに調査しましょう。",
-        connectSkillsToJobRoles:
+        imp_role_link:
           "マッピング済みスキルを具体的なターゲット職種に結びつけましょう。",
-        addSkillEvidence:
+        imp_evidence_add:
           "クリップ、スクリーンショット、文書でスキルの証拠を追加しましょう。",
-        buildPortfolioProjects:
+        imp_portfolio_build:
           "実践スキルを示すポートフォリオプロジェクトを構築しましょう。",
-        documentAchievements:
+        imp_achievements_doc:
           "主要なスキルマッピングに対して測定可能な成果を記録しましょう。",
-        strengthenTechnicalTransfer:
+        imp_transfer_strengthen:
           "ゲームメカニクスを工学概念に対応させ、技術転用力を強化しましょう。",
-        highlightLeadershipExperience:
+        imp_leadership_highlight:
           "ゲーム文脈でのリーダーシップとコミュニケーション経験を強調しましょう。",
-        broadenSkillCoverage:
+        imp_coverage_broaden:
           "10〜15の多様なスキルをマッピングしてカバレッジを広げましょう。",
-        refineSpecificExamples:
+        imp_examples_refine:
           "現在のマッピングをより具体的な事例で改善しましょう。",
-        pursueCertifications:
+        imp_certs_pursue:
           "技術力を裏付ける認定資格の取得を検討しましょう。",
-        networkWithProfessionals:
+        imp_network_pro:
           "ターゲット業界のプロフェッショナルとのネットワークを拡大しましょう。",
       },
       nextStepItems: {
-        startApplyingToTargetRoles: "ターゲット職種への応募を開始しましょう。",
-        networkWithIndustryProfessionals:
+        step_apply_roles: "ターゲット職種への応募を開始しましょう。",
+        step_network_industry:
           "業界のプロフェッショナルとネットワークを構築しましょう。",
-        prepareForTechnicalInterviews: "技術面接の準備を進めましょう。",
-        polishLinkedInProfile: "LinkedInプロフィールを磨きましょう。",
-        completePortfolioProjects:
+        step_prepare_interviews: "技術面接の準備を進めましょう。",
+        step_polish_linkedin: "LinkedInプロフィールを磨きましょう。",
+        step_complete_portfolio:
           "3〜5件の強いポートフォリオプロジェクトを完成させましょう。",
-        mapMoreSkillsToReachFifteen:
+        step_map_skills_15:
           "追加で5スキルをマッピングして15件以上を目指しましょう。",
-        addEvidenceToTopSkills:
+        step_evidence_top:
           "上位10スキルに証拠を追加しましょう。",
-        researchTargetCompaniesAndRoles:
+        step_research_targets:
           "ターゲット企業と職種を調査しましょう。",
-        mapTenPlusSkills:
+        step_map_skills_10:
           "ゲームスキルを10件以上キャリアスキルへマッピングしましょう。",
-        startBuildingPortfolioProjects:
+        step_start_portfolio:
           "ポートフォリオプロジェクトの構築を開始しましょう。",
-        addEvidenceToDemonstrateAbilities:
+        step_evidence_abilities:
           "能力を示すための証拠を追加しましょう。",
-        exploreMatchingCareerPathways:
+        step_explore_pathways:
           "自身のスキルに合うキャリアパスを探索しましょう。",
-        mapFirstFiveSkills:
+        step_map_skills_5:
           "最初の5つのゲームスキルをマッピングしましょう。",
-        exploreSkillCategories:
+        step_explore_categories:
           "さまざまなスキルカテゴリを探索しましょう。",
-        learnGamingCareerOptions:
+        step_learn_careers:
           "ゲーム業界のキャリア選択肢を学びましょう。",
-        setUpProfessionalProfile:
+        step_setup_profile:
           "プロフェッショナルプロフィールを整備しましょう。",
       },
     },

@@ -1,10 +1,19 @@
 import { APP_BRAND, APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared";
 
+const DEFAULT_DEV_SERVER_PORT = "3000";
+const isProductionBuild = process.env.NODE_ENV === "production";
+const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
+const configuredApiProxy = process.env.NUXT_PUBLIC_API_PROXY;
+const configuredServerPort = process.env.PORT;
+const resolvedDevServerPort =
+  configuredServerPort && configuredServerPort.length > 0
+    ? configuredServerPort
+    : DEFAULT_DEV_SERVER_PORT;
+const defaultDevApiProxy = `http://localhost:${resolvedDevServerPort}`;
 const apiBaseProxy =
-  process.env.NUXT_PUBLIC_API_PROXY ||
-  (process.env.NUXT_PUBLIC_API_BASE && process.env.NUXT_PUBLIC_API_BASE !== "/"
-    ? process.env.NUXT_PUBLIC_API_BASE
-    : undefined);
+  configuredApiProxy ||
+  (configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : undefined) ||
+  (!isProductionBuild ? defaultDevApiProxy : undefined);
 const DECIMAL_RADIX = 10;
 const DEFAULT_QUERY_STALE_TIME_MS = 60_000;
 const DEFAULT_QUERY_RETRY_COUNT = 1;
@@ -140,7 +149,6 @@ const resolveManualChunkName = (moduleId: string): string | undefined => {
   return LOCALE_CHUNK_NAME_BY_FILE[fileName];
 };
 
-const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
 const resolvedApiBase =
   configuredApiBase && configuredApiBase !== "/"
     ? configuredApiBase

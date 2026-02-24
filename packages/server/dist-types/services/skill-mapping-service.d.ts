@@ -46,7 +46,7 @@ export declare class SkillMappingService {
      */
     private calculateCategoryScore;
     /**
-     * Get feedback text for a category score
+     * Get feedback bucket key for a category score.
      */
     private getCategoryFeedback;
     /**

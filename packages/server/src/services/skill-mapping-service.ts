@@ -549,8 +549,8 @@ export class SkillMappingService {
         industryKnowledge: { score: 0, feedbackId: "empty" },
         portfolio: { score: 0, feedbackId: "empty" },
       },
-      improvementSuggestions: ["mapTechnicalSkills", "addSkillEvidence", "buildPortfolioProjects"],
-      nextSteps: ["mapFirstFiveSkills", "exploreSkillCategories", "setUpProfessionalProfile"],
+      improvementSuggestions: ["imp_tech_map", "imp_evidence_add", "imp_portfolio_build"],
+      nextSteps: ["step_map_skills_5", "step_explore_categories", "step_setup_profile"],
     };
   }
 
@@ -626,28 +626,28 @@ export class SkillMappingService {
     if (score >= 70) {
       return [];
     }
-    return ["mapTechnicalSkills", "increaseSkillConfidence"];
+    return ["imp_tech_map", "imp_conf_up"];
   }
 
   private getSoftSkillImprovements(score: number): SkillReadinessImprovementId[] {
     if (score >= 70) {
       return [];
     }
-    return ["mapLeadershipCommunication", "addTeamCollaborationExamples"];
+    return ["imp_lead_comm", "imp_team_examples"];
   }
 
   private getIndustryImprovements(score: number): SkillReadinessImprovementId[] {
     if (score >= 70) {
       return [];
     }
-    return ["researchIndustryApplications", "connectSkillsToJobRoles"];
+    return ["imp_industry_research", "imp_role_link"];
   }
 
   private getPortfolioImprovements(score: number): SkillReadinessImprovementId[] {
     if (score >= 70) {
       return [];
     }
-    return ["addSkillEvidence", "buildPortfolioProjects", "documentAchievements"];
+    return ["imp_evidence_add", "imp_portfolio_build", "imp_achievements_doc"];
   }
 
   /**
@@ -684,25 +684,25 @@ export class SkillMappingService {
     const suggestions: SkillReadinessImprovementId[] = [];
 
     if (technical < 60) {
-      suggestions.push("strengthenTechnicalTransfer");
+      suggestions.push("imp_transfer_strengthen");
     }
 
     if (soft < 60) {
-      suggestions.push("highlightLeadershipExperience");
+      suggestions.push("imp_leadership_highlight");
     }
 
     if (portfolio < 60) {
-      suggestions.push("addSkillEvidence");
+      suggestions.push("imp_evidence_add");
     }
 
     if (overall < 50) {
-      suggestions.push("broadenSkillCoverage");
+      suggestions.push("imp_coverage_broaden");
     }
 
     if (suggestions.length === 0) {
-      suggestions.push("refineSpecificExamples");
-      suggestions.push("pursueCertifications");
-      suggestions.push("networkWithProfessionals");
+      suggestions.push("imp_examples_refine");
+      suggestions.push("imp_certs_pursue");
+      suggestions.push("imp_network_pro");
     }
 
     return suggestions;
@@ -714,36 +714,36 @@ export class SkillMappingService {
   private getNextSteps(overall: number): SkillReadinessNextStepId[] {
     if (overall >= 80) {
       return [
-        "startApplyingToTargetRoles",
-        "networkWithIndustryProfessionals",
-        "prepareForTechnicalInterviews",
-        "polishLinkedInProfile",
+        "step_apply_roles",
+        "step_network_industry",
+        "step_prepare_interviews",
+        "step_polish_linkedin",
       ];
     }
 
     if (overall >= 60) {
       return [
-        "completePortfolioProjects",
-        "mapMoreSkillsToReachFifteen",
-        "addEvidenceToTopSkills",
-        "researchTargetCompaniesAndRoles",
+        "step_complete_portfolio",
+        "step_map_skills_15",
+        "step_evidence_top",
+        "step_research_targets",
       ];
     }
 
     if (overall >= 40) {
       return [
-        "mapTenPlusSkills",
-        "startBuildingPortfolioProjects",
-        "addEvidenceToDemonstrateAbilities",
-        "exploreMatchingCareerPathways",
+        "step_map_skills_10",
+        "step_start_portfolio",
+        "step_evidence_abilities",
+        "step_explore_pathways",
       ];
     }
 
     return [
-      "mapFirstFiveSkills",
-      "exploreSkillCategories",
-      "learnGamingCareerOptions",
-      "setUpProfessionalProfile",
+      "step_map_skills_5",
+      "step_explore_categories",
+      "step_learn_careers",
+      "step_setup_profile",
     ];
   }
 

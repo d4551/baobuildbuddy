@@ -671,45 +671,45 @@ const esES: AppTranslationOverrides = {
         excellent: "Excelente nivel en {category}. Estás bien preparado en esta área.",
       },
       improvements: {
-        mapTechnicalSkills:
+        imp_tech_map:
           "Mapea más habilidades técnicas de juego a habilidades técnicas profesionales.",
-        increaseSkillConfidence:
+        imp_conf_up:
           "Aumenta la confianza de tus mapeos técnicos existentes.",
-        mapLeadershipCommunication: "Mapea más experiencias de liderazgo y comunicación.",
-        addTeamCollaborationExamples: "Añade ejemplos concretos de colaboración en equipo.",
-        researchIndustryApplications:
+        imp_lead_comm: "Mapea más experiencias de liderazgo y comunicación.",
+        imp_team_examples: "Añade ejemplos concretos de colaboración en equipo.",
+        imp_industry_research:
           "Investiga más aplicaciones de industria para tus habilidades mapeadas.",
-        connectSkillsToJobRoles: "Conecta habilidades mapeadas con roles objetivo concretos.",
-        addSkillEvidence:
+        imp_role_link: "Conecta habilidades mapeadas con roles objetivo concretos.",
+        imp_evidence_add:
           "Añade evidencia a tus habilidades mapeadas con clips, capturas o documentos.",
-        buildPortfolioProjects: "Construye proyectos de portafolio para demostrar habilidades.",
-        documentAchievements: "Documenta logros medibles para tus mejores mapeos.",
-        strengthenTechnicalTransfer:
+        imp_portfolio_build: "Construye proyectos de portafolio para demostrar habilidades.",
+        imp_achievements_doc: "Documenta logros medibles para tus mejores mapeos.",
+        imp_transfer_strengthen:
           "Refuerza la transferencia técnica mapeando mecánicas de juego a conceptos de ingeniería.",
-        highlightLeadershipExperience:
+        imp_leadership_highlight:
           "Destaca experiencias de liderazgo y comunicación desde contextos de juego.",
-        broadenSkillCoverage: "Amplía cobertura mapeando entre 10 y 15 habilidades diversas.",
-        refineSpecificExamples: "Refina tus mapeos actuales con ejemplos más específicos.",
-        pursueCertifications: "Busca certificaciones que validen tus fortalezas técnicas.",
-        networkWithProfessionals: "Haz networking con profesionales de tu industria objetivo.",
+        imp_coverage_broaden: "Amplía cobertura mapeando entre 10 y 15 habilidades diversas.",
+        imp_examples_refine: "Refina tus mapeos actuales con ejemplos más específicos.",
+        imp_certs_pursue: "Busca certificaciones que validen tus fortalezas técnicas.",
+        imp_network_pro: "Haz networking con profesionales de tu industria objetivo.",
       },
       nextStepItems: {
-        startApplyingToTargetRoles: "Empieza a postular a roles objetivo.",
-        networkWithIndustryProfessionals: "Conecta con profesionales del sector.",
-        prepareForTechnicalInterviews: "Prepárate para entrevistas técnicas.",
-        polishLinkedInProfile: "Optimiza tu perfil de LinkedIn.",
-        completePortfolioProjects: "Completa tu portafolio con 3-5 proyectos sólidos.",
-        mapMoreSkillsToReachFifteen: "Mapea 5 habilidades más para llegar a 15 o más.",
-        addEvidenceToTopSkills: "Añade evidencia a tus 10 habilidades principales.",
-        researchTargetCompaniesAndRoles: "Investiga empresas y roles objetivo.",
-        mapTenPlusSkills: "Mapea 10 o más habilidades de juego a carrera.",
-        startBuildingPortfolioProjects: "Empieza a construir proyectos de portafolio.",
-        addEvidenceToDemonstrateAbilities: "Añade evidencia para demostrar tus capacidades.",
-        exploreMatchingCareerPathways: "Explora rutas de carrera que encajen con tus habilidades.",
-        mapFirstFiveSkills: "Mapea tus primeras 5 habilidades de juego.",
-        exploreSkillCategories: "Explora diferentes categorías de habilidades.",
-        learnGamingCareerOptions: "Conoce opciones profesionales de la industria del juego.",
-        setUpProfessionalProfile: "Configura tu perfil profesional.",
+        step_apply_roles: "Empieza a postular a roles objetivo.",
+        step_network_industry: "Conecta con profesionales del sector.",
+        step_prepare_interviews: "Prepárate para entrevistas técnicas.",
+        step_polish_linkedin: "Optimiza tu perfil de LinkedIn.",
+        step_complete_portfolio: "Completa tu portafolio con 3-5 proyectos sólidos.",
+        step_map_skills_15: "Mapea 5 habilidades más para llegar a 15 o más.",
+        step_evidence_top: "Añade evidencia a tus 10 habilidades principales.",
+        step_research_targets: "Investiga empresas y roles objetivo.",
+        step_map_skills_10: "Mapea 10 o más habilidades de juego a carrera.",
+        step_start_portfolio: "Empieza a construir proyectos de portafolio.",
+        step_evidence_abilities: "Añade evidencia para demostrar tus capacidades.",
+        step_explore_pathways: "Explora rutas de carrera que encajen con tus habilidades.",
+        step_map_skills_5: "Mapea tus primeras 5 habilidades de juego.",
+        step_explore_categories: "Explora diferentes categorías de habilidades.",
+        step_learn_careers: "Conoce opciones profesionales de la industria del juego.",
+        step_setup_profile: "Configura tu perfil profesional.",
       },
       emptyState:
         "Los datos de preparación no están disponibles. Añade mapeos y ejecuta el análisis primero.",

@@ -9,6 +9,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { resolveApiEndpoint } from "~/utils/endpoints";
+import { formatDateWithLocale } from "~/utils/locale-format";
 
 type TimelineStatus = "pending" | "running" | "success" | "error";
 type TimelineEntry = {
@@ -65,19 +66,13 @@ const isResultOutput = (value: unknown): value is RpaRunResult => {
 };
 
 const toLocalizedDateTime = (value: string): string => {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-  const preferredLocale =
-    typeof locale.value === "string" && locale.value.length > 0
-      ? locale.value
-      : typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0
-        ? fallbackLocale.value
-        : Array.isArray(fallbackLocale.value) && typeof fallbackLocale.value[0] === "string"
-          ? fallbackLocale.value[0]
-          : "en-US";
-  return new Intl.DateTimeFormat(preferredLocale, DATE_FORMAT_OPTIONS).format(parsed);
+  const formattedDate = formatDateWithLocale(
+    value,
+    locale.value,
+    fallbackLocale.value,
+    DATE_FORMAT_OPTIONS,
+  );
+  return formattedDate ?? value;
 };
 
 const streamStateMessageKey = computed<string>(

@@ -36,6 +36,8 @@ bun run build:desktop
 bun run release:refresh:all-os
 ```
 
+After the full quality pass, use `bun run release:refresh:all-os:fast` for deterministic rebuild-only refreshes. It is equivalent to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates` and skips rerunning lint/typecheck/test/build.
+
 `bun run release:refresh:all-os` must run on a macOS host with Docker available and outbound network access for Ubuntu package mirrors plus Bun/Rust/AppImage downloads used by cross-target packaging.
 The script automatically uses containerized NSIS fallback for Windows setup packaging and runs an AppImage fallback path when `linuxdeploy` fails.
 
@@ -75,6 +77,7 @@ Expected validation outcomes:
 - `bun run build`: all packages build successfully.
 - `CI=true bun run build:desktop`: desktop packaging build succeeds.
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run release:refresh:all-os:fast`: desktop artifacts are rebuilt and checksummed without rerunning lint/typecheck/test/build.
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
@@ -163,6 +166,7 @@ Global flow decisions are centralized in `packages/client/constants/flow-engine.
 Layout structure is centralized in `packages/client/constants/ui-layout.ts` and rendered through `PageScaffold`, `PageHeaderBlock`, `SectionGrid`, and `AppModalFrame` to keep widths, spacing, grid breakpoints, and modal sizing tokenized.
 AI provider presentation is localized through `aiProviderCatalog.*` keys and rendered with `AIProviderIcon`, so provider labels/descriptions/icons are no longer hardcoded in shared constants.
 Interview role selection is adaptive and recommendation-driven: setup/interview flows now prioritize profile role, readiness role rankings, pathway match scores, and live job-title signals, with a single shared fallback only when no personalized signals are available.
+Skills readiness payloads now emit typed recommendation IDs (`feedbackId`, `improvementSuggestions`, `nextSteps`) instead of hardcoded prose so UI copy is fully locale-driven.
 
 If you want the simplest path with minimal technical detail, use `docs/STARTER_GUIDE.md`.
 
@@ -811,6 +815,14 @@ bun run release:refresh:all-os
 
 This command runs quality gates, rebuilds desktop artifacts for macOS/Linux/Windows, stages artifacts under `packages/desktop/releases/{macos,linux,windows}`, and regenerates `packages/desktop/releases/sha256.txt`.
 
+Repeatable rebuild-only refresh:
+
+```bash
+bun run release:refresh:all-os:fast
+```
+
+This command skips quality gates and performs only the packaging/release artifact refresh (`--skip-quality-gates`) from the same canonical workflow.
+
 Single-target local desktop build (current host target only):
 
 ```bash
@@ -888,7 +900,7 @@ Cross-target requirements from Tauri build contracts:
 |-----|---------|
 | `NUXT_PUBLIC_API_BASE` | API base URL for `useFetch` / `$fetch` calls |
 | `NUXT_PUBLIC_WS_BASE` | WebSocket base URL for chat, interview, and automation |
-| `NUXT_PUBLIC_API_PROXY` | Dev proxy target for API server |
+| `NUXT_PUBLIC_API_PROXY` | Dev proxy target for API server (if unset in development, defaults to `http://localhost:${PORT}`) |
 | `NUXT_PUBLIC_QUERY_STALE_TIME_MS` | TanStack Query stale time |
 | `NUXT_PUBLIC_QUERY_RETRY_COUNT` | TanStack Query retry budget |
 | `NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS` | Refetch on window focus |
@@ -1407,7 +1419,7 @@ Migrations are in `packages/server/src/db/migrations/`. Seed data (`packages/ser
 | Check | Command / action |
 |-------|-----------------|
 | API base configured? | Verify `NUXT_PUBLIC_API_BASE` in `.env` |
-| Proxy configured? | Verify `NUXT_PUBLIC_API_PROXY` points to running server |
+| Proxy configured? | Set `NUXT_PUBLIC_API_PROXY` explicitly, or ensure server is reachable at `http://localhost:${PORT}` (dev default proxy target) |
 | CORS issue? | Ensure `CORS_ORIGINS` includes client origin |
 | Server running? | `curl http://localhost:3000/api/health` |
 

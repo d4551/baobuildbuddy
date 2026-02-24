@@ -217,8 +217,8 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                             industryKnowledge: import("@bao/shared").CategoryAssessment;
                             portfolio: import("@bao/shared").CategoryAssessment;
                         };
-                        improvementSuggestions: string[];
-                        nextSteps: string[];
+                        improvementSuggestions: import("@bao/shared").SkillReadinessImprovementId[];
+                        nextSteps: import("@bao/shared").SkillReadinessNextStepId[];
                         targetRoleReadiness?: import("@bao/shared").RoleReadiness[];
                     };
                     422: {

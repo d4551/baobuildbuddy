@@ -20,6 +20,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
+import { formatDateWithLocale } from "~/utils/locale-format";
 
 const { sessions, stats, loading, startSession, fetchSessions, fetchStats } = useInterview();
 const { studios, searchStudios } = useStudio();
@@ -425,34 +426,18 @@ function modeLabel(mode: InterviewMode | undefined): string {
   return mode === "job" ? t("interviewHub.mode.job") : t("interviewHub.mode.studio");
 }
 
-function resolvePreferredLocale(): string {
-  if (typeof locale.value === "string" && locale.value.length > 0) {
-    return locale.value;
-  }
-
-  if (typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0) {
-    return fallbackLocale.value;
-  }
-
-  if (Array.isArray(fallbackLocale.value)) {
-    const [firstLocale] = fallbackLocale.value;
-    if (typeof firstLocale === "string" && firstLocale.length > 0) {
-      return firstLocale;
-    }
-  }
-
-  return "en-US";
-}
-
 function formatSessionDate(value: string | undefined): string {
   if (!(typeof value === "string" && value.length > 0)) {
     return t("interviewHub.recent.notAvailable");
   }
-  const parsedDate = new Date(value);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return t("interviewHub.recent.notAvailable");
-  }
-  return new Intl.DateTimeFormat(resolvePreferredLocale(), { dateStyle: "medium" }).format(parsedDate);
+
+  const formattedDate = formatDateWithLocale(
+    value,
+    locale.value,
+    fallbackLocale.value,
+    { dateStyle: "medium" },
+  );
+  return formattedDate ?? t("interviewHub.recent.notAvailable");
 }
 
 function experienceLabel(level: string): string {

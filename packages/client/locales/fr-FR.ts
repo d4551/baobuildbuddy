@@ -94,64 +94,64 @@ const frFROverrides = {
         excellent: "Excellent niveau en {category}. Vous êtes bien préparé sur cet axe.",
       },
       improvements: {
-        mapTechnicalSkills:
+        imp_tech_map:
           "Cartographiez plus de compétences techniques de jeu vers des compétences professionnelles.",
-        increaseSkillConfidence:
+        imp_conf_up:
           "Augmentez le niveau de confiance de vos correspondances techniques existantes.",
-        mapLeadershipCommunication:
+        imp_lead_comm:
           "Ajoutez davantage d'expériences de leadership et de communication.",
-        addTeamCollaborationExamples:
+        imp_team_examples:
           "Ajoutez des exemples concrets de collaboration d'équipe.",
-        researchIndustryApplications:
+        imp_industry_research:
           "Étudiez davantage d'applications métier pour vos compétences cartographiées.",
-        connectSkillsToJobRoles:
+        imp_role_link:
           "Reliez vos compétences cartographiées à des rôles cibles précis.",
-        addSkillEvidence:
+        imp_evidence_add:
           "Ajoutez des preuves (captures, clips, documents) à vos compétences cartographiées.",
-        buildPortfolioProjects:
+        imp_portfolio_build:
           "Créez des projets de portfolio pour démontrer vos compétences appliquées.",
-        documentAchievements:
+        imp_achievements_doc:
           "Documentez des résultats mesurables pour vos meilleures correspondances.",
-        strengthenTechnicalTransfer:
+        imp_transfer_strengthen:
           "Renforcez le transfert technique en liant mécaniques de jeu et concepts d'ingénierie.",
-        highlightLeadershipExperience:
+        imp_leadership_highlight:
           "Mettez en avant vos expériences de leadership et de communication issues du jeu.",
-        broadenSkillCoverage:
+        imp_coverage_broaden:
           "Élargissez la couverture en cartographiant 10 à 15 compétences variées.",
-        refineSpecificExamples:
+        imp_examples_refine:
           "Affinez vos correspondances actuelles avec des exemples plus précis.",
-        pursueCertifications:
+        imp_certs_pursue:
           "Visez des certifications qui valident vos compétences techniques.",
-        networkWithProfessionals:
+        imp_network_pro:
           "Développez votre réseau avec des professionnels de votre secteur cible.",
       },
       nextStepItems: {
-        startApplyingToTargetRoles: "Commencez à candidater sur des rôles cibles.",
-        networkWithIndustryProfessionals:
+        step_apply_roles: "Commencez à candidater sur des rôles cibles.",
+        step_network_industry:
           "Développez votre réseau avec des professionnels du secteur.",
-        prepareForTechnicalInterviews: "Préparez vos entretiens techniques.",
-        polishLinkedInProfile: "Optimisez votre profil LinkedIn.",
-        completePortfolioProjects:
+        step_prepare_interviews: "Préparez vos entretiens techniques.",
+        step_polish_linkedin: "Optimisez votre profil LinkedIn.",
+        step_complete_portfolio:
           "Complétez votre portfolio avec 3 à 5 projets solides.",
-        mapMoreSkillsToReachFifteen:
+        step_map_skills_15:
           "Ajoutez 5 compétences cartographiées pour atteindre 15+.",
-        addEvidenceToTopSkills:
+        step_evidence_top:
           "Ajoutez des preuves à vos 10 compétences les plus fortes.",
-        researchTargetCompaniesAndRoles:
+        step_research_targets:
           "Étudiez les entreprises et rôles que vous ciblez.",
-        mapTenPlusSkills:
+        step_map_skills_10:
           "Cartographiez 10+ compétences issues du jeu vers des compétences carrière.",
-        startBuildingPortfolioProjects: "Commencez à construire des projets de portfolio.",
-        addEvidenceToDemonstrateAbilities:
+        step_start_portfolio: "Commencez à construire des projets de portfolio.",
+        step_evidence_abilities:
           "Ajoutez des preuves pour démontrer concrètement vos capacités.",
-        exploreMatchingCareerPathways:
+        step_explore_pathways:
           "Explorez des parcours de carrière alignés avec vos compétences.",
-        mapFirstFiveSkills:
+        step_map_skills_5:
           "Cartographiez vos 5 premières compétences issues du jeu.",
-        exploreSkillCategories: "Explorez différentes catégories de compétences.",
-        learnGamingCareerOptions:
+        step_explore_categories: "Explorez différentes catégories de compétences.",
+        step_learn_careers:
           "Découvrez les options de carrière dans l'industrie du jeu.",
-        setUpProfessionalProfile: "Mettez en place votre profil professionnel.",
+        step_setup_profile: "Mettez en place votre profil professionnel.",
       },
     },
   },

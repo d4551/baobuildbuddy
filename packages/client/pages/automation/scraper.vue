@@ -6,6 +6,7 @@ import { settlePromise } from "~/composables/async-flow";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
+import { formatDateWithLocale } from "~/utils/locale-format";
 
 type RunState = "idle" | "running" | "success" | "error";
 
@@ -68,24 +69,11 @@ const jobCount = computed(() => sortedJobs.value.length);
 
 function formatRunTime(value: string | null): string {
   if (!value) return t("automation.scraper.notRunYet");
-  const parsedDate = new Date(value);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return t("automation.scraper.notRunYet");
-  }
-
-  const preferredLocale =
-    typeof locale.value === "string" && locale.value.length > 0
-      ? locale.value
-      : typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0
-        ? fallbackLocale.value
-        : Array.isArray(fallbackLocale.value) && typeof fallbackLocale.value[0] === "string"
-          ? fallbackLocale.value[0]
-          : "en-US";
-
-  return new Intl.DateTimeFormat(preferredLocale, {
+  const formattedDate = formatDateWithLocale(value, locale.value, fallbackLocale.value, {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(parsedDate);
+  });
+  return formattedDate ?? t("automation.scraper.notRunYet");
 }
 
 function relativePostedDate(date: string): string {

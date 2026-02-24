@@ -1,8 +1,15 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import {
+  SKILL_READINESS_FEEDBACK_IDS,
+  SKILL_READINESS_IMPROVEMENT_IDS,
+  SKILL_READINESS_NEXT_STEP_IDS,
+  type SkillReadinessFeedbackId,
+  type SkillReadinessImprovementId,
+  type SkillReadinessNextStepId,
+} from "@bao/shared";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
-let mappingId: string;
 const SKILL_MAPPINGS_ROUTE = "/api/skills/mappings";
 
 const buildSkillMappingsCategoryPath = (category: string): string => {
@@ -25,13 +32,66 @@ beforeAll(async () => {
 
 afterAll(() => {});
 
-describe("skill-mapping routes", () => {
+const createSkillMapping = async (): Promise<string> => {
+  const res = await requestJson<{ id: string }>(app, "POST", SKILL_MAPPINGS_ROUTE, {
+    gameExpression: "Optimized rendering pipeline",
+    transferableSkill: "Performance optimization",
+    category: "technical",
+  });
+  expect(res.status).toBe(201);
+  return res.body.id;
+};
+
+describe("skill-mapping list routes", () => {
   test("GET /api/skills/mappings returns list", async () => {
     const res = await requestJson<unknown[]>(app, "GET", SKILL_MAPPINGS_ROUTE);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
+  test("GET /api/skills/mappings?category=technical filters", async () => {
+    const res = await requestJson<unknown[]>(
+      app,
+      "GET",
+      buildSkillMappingsCategoryPath("technical"),
+    );
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+});
+
+describe("skill-mapping readiness route", () => {
+  test("GET /api/skills/readiness returns typed readiness ids", async () => {
+    const res = await requestJson<{
+      categories: {
+        technical: { feedbackId: SkillReadinessFeedbackId };
+        softSkills: { feedbackId: SkillReadinessFeedbackId };
+        industryKnowledge: { feedbackId: SkillReadinessFeedbackId };
+        portfolio: { feedbackId: SkillReadinessFeedbackId };
+      };
+      improvementSuggestions: SkillReadinessImprovementId[];
+      nextSteps: SkillReadinessNextStepId[];
+    }>(app, "GET", "/api/skills/readiness");
+
+    expect(res.status).toBe(200);
+    expect(SKILL_READINESS_FEEDBACK_IDS).toContain(res.body.categories.technical.feedbackId);
+    expect(SKILL_READINESS_FEEDBACK_IDS).toContain(res.body.categories.softSkills.feedbackId);
+    expect(SKILL_READINESS_FEEDBACK_IDS).toContain(
+      res.body.categories.industryKnowledge.feedbackId,
+    );
+    expect(SKILL_READINESS_FEEDBACK_IDS).toContain(res.body.categories.portfolio.feedbackId);
+
+    for (const suggestion of res.body.improvementSuggestions) {
+      expect(SKILL_READINESS_IMPROVEMENT_IDS).toContain(suggestion);
+    }
+
+    for (const nextStep of res.body.nextSteps) {
+      expect(SKILL_READINESS_NEXT_STEP_IDS).toContain(nextStep);
+    }
+  });
+});
+
+describe("skill-mapping mutation routes", () => {
   test("POST /api/skills/mappings creates mapping", async () => {
     const res = await requestJson<{
       id: string;
@@ -46,20 +106,10 @@ describe("skill-mapping routes", () => {
     expect(res.body.gameExpression).toBe("Optimized rendering pipeline");
     expect(res.body.transferableSkill).toBe("Performance optimization");
     expect(res.body.id).toBeDefined();
-    mappingId = res.body.id;
-  });
-
-  test("GET /api/skills/mappings?category=technical filters", async () => {
-    const res = await requestJson<unknown[]>(
-      app,
-      "GET",
-      buildSkillMappingsCategoryPath("technical"),
-    );
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
   });
 
   test("PUT /api/skills/mappings/:id updates", async () => {
+    const mappingId = await createSkillMapping();
     const res = await requestJson<{ transferableSkill: string }>(
       app,
       "PUT",
@@ -71,6 +121,7 @@ describe("skill-mapping routes", () => {
   });
 
   test("DELETE /api/skills/mappings/:id removes", async () => {
+    const mappingId = await createSkillMapping();
     const res = await requestJson<{ message: string; id: string }>(
       app,
       "DELETE",

@@ -5,6 +5,7 @@ import type { LocationQueryValue } from "vue-router";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
+import { formatDateWithLocale } from "~/utils/locale-format";
 
 const route = useRoute();
 const router = useRouter();
@@ -128,16 +129,13 @@ function formatDate(value: string | undefined): string {
     return t("interviewHistory.notAvailable");
   }
 
-  const preferredLocale =
-    typeof locale.value === "string" && locale.value.length > 0
-      ? locale.value
-      : typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0
-        ? fallbackLocale.value
-        : Array.isArray(fallbackLocale.value) && typeof fallbackLocale.value[0] === "string"
-          ? fallbackLocale.value[0]
-          : "en-US";
-
-  return new Intl.DateTimeFormat(preferredLocale, { dateStyle: "medium" }).format(parsedDate);
+  const formattedDate = formatDateWithLocale(
+    parsedDate,
+    locale.value,
+    fallbackLocale.value,
+    { dateStyle: "medium" },
+  );
+  return formattedDate ?? t("interviewHistory.notAvailable");
 }
 
 function parseDurationMinutes(value: string): number | null {

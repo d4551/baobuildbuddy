@@ -12,6 +12,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { useAutomation } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";
+import { formatDateWithLocale } from "~/utils/locale-format";
 
 type RunFilterType = "" | AutomationRunType;
 type RunFilterStatus = "" | AutomationRunStatus;
@@ -223,19 +224,13 @@ const sortedRuns = computed<RpaRunExecutionEnvelope[]>(() =>
 );
 
 const formatDate = (value: string): string => {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-  const preferredLocale =
-    typeof locale.value === "string" && locale.value.length > 0
-      ? locale.value
-      : typeof fallbackLocale.value === "string" && fallbackLocale.value.length > 0
-        ? fallbackLocale.value
-        : Array.isArray(fallbackLocale.value) && typeof fallbackLocale.value[0] === "string"
-          ? fallbackLocale.value[0]
-          : "en-US";
-  return new Intl.DateTimeFormat(preferredLocale, DATE_FORMAT_OPTIONS).format(parsed);
+  const formattedDate = formatDateWithLocale(
+    value,
+    locale.value,
+    fallbackLocale.value,
+    DATE_FORMAT_OPTIONS,
+  );
+  return formattedDate ?? value;
 };
 
 const formatRunType = (runType: AutomationRunType): string =>

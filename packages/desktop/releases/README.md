@@ -25,6 +25,7 @@ Expected validation outcomes:
 - `bun run build`: all packages build successfully.
 - `CI=true bun run build:desktop`: desktop packaging build succeeds.
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
+- `bun run release:refresh:all-os:fast`: desktop target artifacts are rebuilt and checksummed without rerunning quality gates.
 
 Optional SSR/page validation before packaging (when validating UI render contracts):
 
@@ -40,6 +41,14 @@ Use the canonical all-target refresh command:
 ```bash
 bun run release:refresh:all-os
 ```
+
+For fast local rebuilds after quality gates:
+
+```bash
+bun run release:refresh:all-os:fast
+```
+
+`bun run release:refresh:all-os:fast` is equivalent to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates` and performs packaging + checksum regeneration only.
 
 Host/runtime requirements:
 
