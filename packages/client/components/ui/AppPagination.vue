@@ -22,6 +22,7 @@ const emit = defineEmits<{
 
 const canGoPrevious = computed(() => props.currentPage > 1);
 const canGoNext = computed(() => props.currentPage < props.totalPages);
+const hasPages = computed(() => props.totalPages > 1);
 
 function selectPage(page: number): void {
   if (page < 1 || page > props.totalPages || page === props.currentPage) return;
@@ -40,7 +41,7 @@ function selectNextPage(): void {
 </script>
 
 <template>
-  <div v-if="totalPages > 1" class="card card-border bg-base-100">
+  <div v-if="hasPages" class="card card-border bg-base-100">
     <div class="card-body gap-3 py-4 md:flex-row md:items-center md:justify-between">
       <p class="text-xs text-base-content/70">{{ summary }}</p>
 
@@ -52,7 +53,8 @@ function selectNextPage(): void {
           :disabled="!canGoPrevious"
           @click="selectPreviousPage"
         >
-          «
+          <span aria-hidden="true">«</span>
+          <span class="sr-only">{{ previousAria }}</span>
         </button>
 
         <button
@@ -62,6 +64,7 @@ function selectNextPage(): void {
           class="join-item btn btn-sm"
           :class="{ 'btn-active': page === currentPage }"
           :aria-label="pageAria(page)"
+          :aria-current="page === currentPage ? 'page' : undefined"
           @click="selectPage(page)"
         >
           {{ page }}
@@ -74,7 +77,8 @@ function selectNextPage(): void {
           :disabled="!canGoNext"
           @click="selectNextPage"
         >
-          »
+          <span aria-hidden="true">»</span>
+          <span class="sr-only">{{ nextAria }}</span>
         </button>
       </nav>
     </div>

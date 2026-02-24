@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { APP_BRAND, APP_ROUTES } from "@bao/shared";
-import { useTemplateRef } from "vue";
+import { APP_BRAND, APP_ROUTES, THEME_NAMES } from "@bao/shared";
+import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { APP_DRAWER_ID } from "~/constants/layout";
 
@@ -8,6 +8,7 @@ const { theme, toggleTheme } = useTheme();
 const { t, locale, availableLocales } = useI18n();
 const localeMenuRef = useTemplateRef<HTMLDetailsElement>("localeMenu");
 const isLocaleMenuOpen = ref(false);
+const isDarkTheme = computed(() => theme.value === THEME_NAMES.dark);
 
 const localeDisplayNames = computed(
   () =>
@@ -60,8 +61,9 @@ function syncLocaleMenuState(): void {
         <input
           type="checkbox"
           class="theme-controller"
-          value="bao-dark"
-          :checked="theme === 'bao-dark'"
+          :value="THEME_NAMES.dark"
+          :checked="isDarkTheme"
+          :aria-checked="isDarkTheme"
           :aria-label="t('a11y.toggleTheme')"
           @change="toggleTheme()"
         />

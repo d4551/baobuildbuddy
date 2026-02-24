@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { useDebouncedValue } from "~/composables/useDebouncedValue";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const props = defineProps<{
   modelValue: string;
@@ -13,7 +16,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const searchValue = ref(props.modelValue);
-let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
+const debouncedSearchValue = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+
+function emitSearch(): void {
+  emit("search");
+}
 
 watch(
   () => props.modelValue,
@@ -24,28 +31,24 @@ watch(
 
 watch(searchValue, (newValue) => {
   emit("update:modelValue", newValue);
-
-  if (debounceTimeout) {
-    clearTimeout(debounceTimeout);
-  }
-
-  debounceTimeout = setTimeout(() => {
-    emit("search");
-  }, 300);
 });
 
 function clearSearch() {
   searchValue.value = "";
   emit("update:modelValue", "");
-  emit("search");
+  emitSearch();
 }
 
 function handleSubmit() {
-  if (debounceTimeout) {
-    clearTimeout(debounceTimeout);
-  }
-  emit("search");
+  emitSearch();
 }
+
+watch(
+  debouncedSearchValue,
+  emitSearch,
+  { immediate: false },
+);
+
 </script>
 
 <template>
