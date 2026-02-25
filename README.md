@@ -21,6 +21,7 @@
 - [Non-Technical Install (Pick Your OS)](#non-technical-install-pick-your-os)
 - [Getting Started (First-time setup)](docs/STARTER_GUIDE.md)
 - [Automation Guide](docs/AUTOMATION.md)
+- [User Manual (step-by-step with screenshots)](docs/USER_GUIDE.md)
 - [Desktop (Tauri) Packaging](#89-desktop-tauri-installer-path)
 
 ## Release Validation Workflow
@@ -137,7 +138,7 @@ If you are on a different CPU architecture, use the matching artifact for that a
 ```text ascii-box
 /------------------------------\
 |           BAO WORLD          |
-|     Press START to begin!     |
+|    Press START to begin!     |
 |------------------------------|
 | 1) Prepare environment       |
 | 2) Configure services        |

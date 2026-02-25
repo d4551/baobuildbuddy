@@ -9,6 +9,8 @@
 
 If you need deeper architecture and runbook details, see the full runbook: [README.md](../README.md).
 
+For a click-by-click feature walkthrough with screenshots, see [USER_GUIDE.md](./USER_GUIDE.md).
+
 Use this guide if this is your first time running BaoBuildBuddy locally.
 Think of it as the tutorial level: follow each checkpoint in order before unlocking the rest of the project.
 
