@@ -35,6 +35,7 @@ Script verification checks:
 ```bash
 bun run validate:no-try-catch
 bun run validate:no-unsafe-casts
+bun run validate:no-hardcoded-paths
 bun run validate:locales
 bun run validate:page-seo
 bun run validate:i18n-ui
@@ -63,11 +64,11 @@ Expected validation outcomes:
 - `bun run build`: all packages build successfully.
 - `CI=true bun run build:desktop`: desktop packaging build succeeds.
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
-- `bun run release:refresh:all-os:fast`: artifacts and checksums are regenerated without rerunning quality gates.
+- `bun run release:refresh:all-os:fast`: artifacts and checksums are rebuilt without rerunning quality gates.
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
-UI runtime contracts for v1.0:
+UI runtime contracts:
 
 - Core pages use tokenized layout primitives (`PageScaffold`, `PageHeaderBlock`, `SectionGrid`) backed by `packages/client/constants/ui-layout.ts`.
 - Modal flows use `AppModalFrame` with required dialog semantics (`aria-modal` + `aria-labelledby`).
@@ -98,7 +99,7 @@ Install these before running setup:
 
 Required:
 
-- bun 1.3.x
+- Bun runtime matching `packageManager` in root `package.json`
 - Git
 - Python 3.10+
 - Chrome or Chromium
@@ -112,21 +113,21 @@ Optional but recommended:
 
 | Tool | macOS (Homebrew) | Ubuntu / Debian | Windows (winget) |
 |------|-------------------|------------------|------------------|
-| Bun 1.3.x | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
+| Bun (from `packageManager`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
 | Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
 | Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
 | Chrome | `brew install --cask google-chrome` | `sudo apt-get update && sudo apt-get install -y chromium-browser` | `winget install --id Google.Chrome -e` |
 
 If your Linux distro does not provide `chromium-browser`, install `google-chrome-stable` from Google's official repository.
 
-Pin Bun to the workspace version explicitly when needed:
+Read Bun baseline from the workspace manifest when selecting an installer:
 
 ```bash
-curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.9"
+bun pm pkg get packageManager
 ```
 
 ```powershell
-iex "& {$(irm https://bun.sh/install.ps1)} -Version 1.3.9"
+bun pm pkg get packageManager
 ```
 
 Verify each tool is on `PATH`:
@@ -147,7 +148,7 @@ On Windows use `python --version` and check Chrome with:
 
 Expected pre-flight state before running setup:
 
-- ✅ bun 1.3.x installed
+- ✅ Bun runtime matches manifest baseline (`packageManager` in root `package.json`)
 - ✅ Git available
 - ✅ Python 3.10+ available
 - ✅ Chrome or Chromium available
@@ -160,16 +161,11 @@ Run the repository stack audit command to confirm local package registry alignme
 bun run audit:stack-versions
 ```
 
-Pinned versions:
+Run this command and keep local setup aligned to those outputs:
 
-- `bun`: `1.3.9`
-- `nuxt`: `4.3.1`
-- `tailwindcss`: `4.2.1`
-- `daisyui`: `5.5.19`
-- `elysia`: `1.4.25`
-- `@elysiajs/eden`: `1.4.8`
-- `@tauri-apps/cli`: `2.10.0`
-- `@tauri-apps/api`: `2.10.1`
+- `bun run audit:stack-versions`
+- `bun pm pkg get packageManager`
+- `bun pm pkg get dependencies.nuxt dependencies.elysia dependencies.daisyui dependencies.tailwindcss`
 
 ## 3) Get the code
 
@@ -201,6 +197,7 @@ powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 The setup script:
 
 1. Checks required tools.
+2. Validates Bun major/minor against `packageManager` in root `package.json`.
 2. Installs workspace dependencies.
 3. Creates `.venv` and installs Python scraper dependencies.
 4. Creates `.env` from `.env.example`.
@@ -236,7 +233,7 @@ After a successful run, you should be able to confirm:
 
 Common fixes:
 
-- Update bun to the latest 1.3.x.
+- Update Bun to satisfy manifest baseline (`packageManager` in root `package.json`) and rerun setup.
 - Install Python 3.10+ and ensure it is in `PATH`.
 - Install Chrome from the official package for your OS.
 
@@ -469,6 +466,14 @@ For deterministic macOS DMG packaging in terminals using non-UTF8 locale default
 ```bash
 LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
 ```
+
+If the direct build exits with `failed to run bundle_dmg.sh` but reports a completed first bundling pass, run the release refresher fallback path so DMG creation is retried headless:
+
+```bash
+bun run release:refresh:all-os:fast --skip-linux --skip-windows
+```
+
+That command validates desktop artifacts, runs the same macOS packaging command, and applies the `bundle_dmg.sh --skip-jenkins` fallback before staging.
 
 Raw output is generated under:
 

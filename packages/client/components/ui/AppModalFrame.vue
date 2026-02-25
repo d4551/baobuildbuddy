@@ -32,6 +32,7 @@ const modalBoxClass = computed(() => UI_MODAL_SIZE_CLASS_BY_TOKEN[props.sizeToke
 const backdropButtonLabel = computed(() =>
   props.closeBackdropLabel.trim().length > 0 ? props.closeBackdropLabel : props.closeAriaLabel,
 );
+const resolvedDescribedById = computed(() => props.describedById?.trim() ?? "");
 
 watch(
   () => props.open,
@@ -70,7 +71,7 @@ function handleClose(): void {
     class="modal modal-bottom sm:modal-middle"
     aria-modal="true"
     :aria-labelledby="titleId"
-    :aria-describedby="describedById"
+    :aria-describedby="resolvedDescribedById.length > 0 ? resolvedDescribedById : undefined"
     @close="handleClose"
   >
     <div class="modal-box" :class="modalBoxClass">

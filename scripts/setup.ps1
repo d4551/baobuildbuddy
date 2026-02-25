@@ -30,6 +30,19 @@ if ($Help) {
     exit 0
 }
 
+$packageManifestPath = Join-Path $PSScriptRoot ".." "package.json"
+$packageManifest = Get-Content -Raw $packageManifestPath 2>$null
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($packageManifest)) {
+    Die "Unable to read root package.json at $packageManifestPath"
+}
+
+$bunRequirementMatch = [regex]::Match($packageManifest, '"packageManager"\s*:\s*"bun@([0-9]+)\.([0-9]+)\.([0-9]+)"')
+if (-not $bunRequirementMatch.Success) {
+    Die "Unable to resolve required Bun version from package.json packageManager field."
+}
+$requiredBunMajor = [int]$bunRequirementMatch.Groups[1].Value
+$requiredBunMinor = [int]$bunRequirementMatch.Groups[2].Value
+
 Write-Host @"
 
    ____              ____        _ _     _ ____            _     _
@@ -43,7 +56,7 @@ Write-Host @"
 
 $osInfo = [System.Environment]::OSVersion
 Write-Host "  Platform: Windows $($osInfo.Version)" -ForegroundColor DarkGray
-Write-Host "  Script:   setup.ps1 v1.0" -ForegroundColor DarkGray
+Write-Host "  Script:   setup.ps1" -ForegroundColor DarkGray
 Write-Host ""
 
 # -- 1. Check prerequisites ----------------------------------------------------
@@ -60,8 +73,8 @@ if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($bunVer)) {
 if ($bunVer -match "^(\d+)\.(\d+)\.(\d+)") {
     $bunMajor = [int]$Matches[1]
     $bunMinor = [int]$Matches[2]
-    if ($bunMajor -ne 1 -or $bunMinor -ne 3) {
-        Die "Bun $bunVer detected. Workspace requires Bun 1.3.x."
+    if ($bunMajor -ne $requiredBunMajor -or $bunMinor -ne $requiredBunMinor) {
+        Die "Bun $bunVer detected. Workspace requires Bun $($requiredBunMajor).$($requiredBunMinor).x."
     }
 } else {
     Die "Unable to parse Bun version: $bunVer"

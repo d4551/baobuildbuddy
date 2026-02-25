@@ -18,6 +18,7 @@ Automation-specific checks:
 ```bash
 bun run validate:no-try-catch
 bun run validate:no-unsafe-casts
+bun run validate:no-hardcoded-paths
 bun run validate:locales
 bun run validate:page-seo
 bun run validate:i18n-ui
@@ -49,6 +50,12 @@ Expected validation outcomes:
 - `bun run release:refresh:all-os:fast`: desktop artifacts and `sha256.txt` are rebuilt without rerunning quality gates.
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
+
+If a desktop run ends with `failed to run bundle_dmg.sh` after a successful first DMG pass, rerun the fallback refresh path:
+
+```bash
+bash scripts/refresh-desktop-releases.sh --skip-quality-gates --skip-linux --skip-windows
+```
 
 Automation UI contract:
 
@@ -268,7 +275,7 @@ flowchart LR
 
 ## Verification commands
 
-Run these before shipping automation changes:
+Run these before merging automation changes:
 
 ```bash
 bun run format:check

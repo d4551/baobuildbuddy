@@ -5,12 +5,12 @@
    | |_) | (_| | (_) | |_) | |_| | | | (_| | |_) | |_| | (_| | (_| | |_| |
    |____/ \__,_|\___/|____/ \__,_|_|_|\__,_|____/ \__,_|\__,_|\__,_|\__, |
                                                                       |___/
-                     v1.0  ~  Local Operations Manual
+                        Local Operations Manual
 ```
 
-# BaoBuildBuddy v1.0 Local Setup Guide
+# BaoBuildBuddy Local Setup Guide
 
-[![Bun](https://img.shields.io/badge/Bun-1.3.*-f9f9f1?logo=bun&logoColor=black)](https://bun.sh/)
+[![Bun](https://img.shields.io/badge/Bun-Manifest-1f2937?logo=bun&logoColor=white)](https://bun.sh/)
 [![Nuxt](https://img.shields.io/badge/Nuxt-4.x-00dc82?logo=nuxtdotjs&logoColor=white)](https://nuxt.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/github/license/d4551/baobuildbuddy)](https://github.com/d4551/baobuildbuddy/blob/main/LICENSE)
@@ -36,7 +36,7 @@ bun run build:desktop
 bun run release:refresh:all-os
 ```
 
-After the full quality pass, use `bun run release:refresh:all-os:fast` for deterministic rebuild-only refreshes. It is equivalent to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates` and skips rerunning lint/typecheck/test/build.
+After the full quality pass, use `bun run release:refresh:all-os:fast` for a deterministic rebuild-only packaging pass. It is equivalent to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates` and skips rerunning lint/typecheck/test/build.
 
 `release:refresh:all-os` now includes a headless fallback for macOS DMG creation using `bundle_dmg.sh --skip-jenkins` when default packaging returns a non-zero exit, when Finder-based DMG styling fails, or when the expected `.dmg` artifact is not emitted. This keeps `.dmg` output deterministic in CI while still producing valid release artifacts.
 
@@ -48,6 +48,7 @@ Script/runtime verification commands:
 ```bash
 bun run validate:no-try-catch
 bun run validate:no-unsafe-casts
+bun run validate:no-hardcoded-paths
 bun run validate:locales
 bun run validate:page-seo
 bun run validate:i18n-ui
@@ -88,26 +89,19 @@ Expected validation outcomes:
 Context7 verification references:
 
 - Nuxt 4 docs (`/websites/nuxt_4_x`) confirm `nuxt` latest tag is v4.
-- Prisma upgrade docs (`/prisma/docs`) confirm Prisma v7 is current major.
-- Bun docs (`/oven-sh/bun`) confirm Bun 1.3 toolchain/runtime practices.
+- Drizzle ORM docs (`/drizzle/team/drizzle`) confirm runtime data layer guidance.
+- Bun docs (`/oven-sh/bun`) confirm Bun runtime/toolchain guidance.
 
-Pinned package versions in this repo:
+Track and verify stack versions via the workspace manifest and npm latest checks:
 
-| Package | Baseline in repo |
-|---|---|
-| `bun` | `1.3.9` |
-| `nuxt` | `4.3.1` |
-| `tailwindcss` | `4.2.1` |
-| `daisyui` | `5.5.19` |
-| `elysia` | `1.4.25` |
-| `@elysiajs/eden` | `1.4.8` |
-| `@tauri-apps/cli` | `2.10.0` |
-| `@tauri-apps/api` | `2.10.1` |
+- `bun run audit:stack-versions` (authoritative runtime check)
+- `bun pm pkg get packageManager` (workspace-required Bun baseline)
+- `bun pm pkg get dependencies.nuxt dependencies.tailwindcss` (framework baseline sanity check)
 
-Prisma note:
+Data layer note:
 
-- The current data layer is `drizzle-orm` (`packages/server`). Prisma is not active in this runtime path yet.
-- Current npm latest for Prisma is `7.4.1`; when Prisma is introduced, pin `prisma` and `@prisma/client` to v7 together.
+- The active runtime stack uses `drizzle-orm` (`packages/server`).
+- When adding Prisma-based paths, pin `prisma` and `@prisma/client` to the same major together.
 
 To verify stack versions against npm:
 
@@ -127,9 +121,9 @@ Use the packaged desktop installers in `packages/desktop/releases` when you want
 
 | Operating system | Artifact pattern |
 |------------------|--------------|
-| macOS (Apple Silicon) | `BaoBuildBuddy_<VERSION>_aarch64.dmg` |
-| Windows (x64) | `BaoBuildBuddy_<VERSION>_x64-setup.exe` |
-| Linux (ARM64) | `BaoBuildBuddy_<VERSION>_aarch64.AppImage` or `BaoBuildBuddy_<VERSION>_arm64.deb` |
+| macOS (Apple Silicon) | `<PRODUCT_NAME>_<VERSION>_aarch64.dmg` |
+| Windows (x64) | `<PRODUCT_NAME>_<VERSION>_x64-setup.exe` |
+| Linux (ARM64) | `<PRODUCT_NAME>_<VERSION>_aarch64.AppImage` or `<PRODUCT_NAME>_<VERSION>_arm64.deb` |
 
 If you are on a different CPU architecture, use the matching artifact for that architecture when available in releases.
 
@@ -174,7 +168,7 @@ If you want the simplest path with minimal technical detail, use `docs/STARTER_G
 
 ## 1) Scope of this document
 
-This is the canonical local setup runbook for BaoBuildBuddy v1.0. It covers:
+This is the canonical local setup runbook for BaoBuildBuddy. It covers:
 
 - Local install and startup for all four packages
 - Environment configuration via `.env` and source-of-truth config files
@@ -619,21 +613,21 @@ Use one command per tool based on your platform:
 
 | Tool | macOS (Homebrew) | Ubuntu / Debian | Windows (winget) |
 |------|-------------------|------------------|------------------|
-| Bun 1.3.x | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
+| Bun (from `packageManager`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
 | Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
 | Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
 | Chrome | `brew install --cask google-chrome` | `sudo apt-get update && sudo apt-get install -y chromium-browser` | `winget install --id Google.Chrome -e` |
 
 If your Linux distro does not ship `chromium-browser`, install `google-chrome-stable` from Google's official package repository.
 
-Pin Bun to the workspace version explicitly when needed:
+Read Bun baseline from the workspace manifest when selecting an installer:
 
 ```bash
-curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.9"
+bun pm pkg get packageManager
 ```
 
 ```powershell
-iex "& {$(irm https://bun.sh/install.ps1)} -Version 1.3.9"
+bun pm pkg get packageManager
 ```
 
 ### 8.3 Prepare your workspace
@@ -1522,7 +1516,7 @@ bun run scripts/validate-ascii-geometry.ts README.md
   |   | |__| |_| | |  | |  __/| |___| |___  | | | |___        |
   |    \____\___/|_|  |_|_|   |_____|_____| |_| |_____|       |
   |                                                            |
-  |               BaoBuildBuddy v1.0 is ready.                 |
+  |                  BaoBuildBuddy is ready.                 |
   |                                                            |
   |               "Thank you Mario!                            |
   |                But our princess is in                       |

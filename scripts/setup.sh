@@ -17,6 +17,12 @@ INCLUDE_BUILD=false
 INCLUDE_DESKTOP_BUILD=false
 ERRORS=0
 WARNINGS=0
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REQUIRED_BUN_SEMVER="$(awk -F '"' '/"packageManager":/ { if ($4 ~ /^bun@/) print $4; exit }' "$REPO_ROOT/package.json")"
+REQUIRED_BUN_VERSION="${REQUIRED_BUN_SEMVER#bun@}"
+REQUIRED_BUN_MAJOR="${REQUIRED_BUN_VERSION%%.*}"
+REQUIRED_BUN_REST="${REQUIRED_BUN_VERSION#*.}"
+REQUIRED_BUN_MINOR="${REQUIRED_BUN_REST%%.*}"
 
 for arg in "$@"; do
   case "$arg" in
@@ -44,6 +50,20 @@ warn()    { echo -e "  ${YELLOW}[WARN]${RESET} $1"; WARNINGS=$((WARNINGS + 1)); 
 fail()    { echo -e "  ${RED}[FAIL]${RESET} $1"; ERRORS=$((ERRORS + 1)); }
 die()     { echo -e "\n  ${RED}[FATAL]${RESET} $1"; exit 1; }
 
+resolve_python_command() {
+  if command -v python3 &>/dev/null; then
+    printf "python3"
+    return 0
+  fi
+
+  if command -v python &>/dev/null; then
+    printf "python"
+    return 0
+  fi
+
+  return 1
+}
+
 echo -e "${BOLD}"
 cat << 'BANNER'
    ____              ____        _ _     _ ____            _     _
@@ -58,7 +78,7 @@ echo -e "${RESET}"
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 echo -e "  ${DIM}Platform: ${OS} ${ARCH}${RESET}"
-echo -e "  ${DIM}Script:   setup.sh v1.0${RESET}"
+echo -e "  ${DIM}Script:   setup.sh${RESET}"
 echo ""
 
 # ── 1. Check prerequisites ───────────────────────────────────────────────────
@@ -72,13 +92,17 @@ else
   die "Bun is not installed. Install from https://bun.sh"
 fi
 
+if [ -z "$REQUIRED_BUN_VERSION" ]; then
+  die "Unable to resolve required Bun version from package.json packageManager field."
+fi
+
 BUN_MAJOR="$(echo "$BUN_VER" | cut -d. -f1)"
 BUN_MINOR="$(echo "$BUN_VER" | cut -d. -f2)"
 if [ -z "$BUN_MAJOR" ] || [ -z "$BUN_MINOR" ]; then
   die "Unable to parse Bun version: ${BUN_VER}"
 fi
-if [ "$BUN_MAJOR" -ne 1 ] || [ "$BUN_MINOR" -ne 3 ]; then
-  die "Bun ${BUN_VER} detected. Workspace requires Bun 1.3.x."
+if [ "$BUN_MAJOR" -ne "$REQUIRED_BUN_MAJOR" ] || [ "$BUN_MINOR" -ne "$REQUIRED_BUN_MINOR" ]; then
+  die "Bun ${BUN_VER} detected. Workspace requires Bun ${REQUIRED_BUN_MAJOR}.${REQUIRED_BUN_MINOR}.x."
 fi
 
 if command -v git &>/dev/null; then
@@ -88,14 +112,19 @@ else
 fi
 
 if [ "$SKIP_PYTHON" = false ]; then
-  if command -v python3 &>/dev/null; then
-    PY_VER="$(python3 --version | cut -d' ' -f2)"
+  if [ -z "${PY_COMMAND:-}" ]; then
+    PY_COMMAND="$(resolve_python_command || true)"
+  fi
+
+  if [ -n "${PY_COMMAND}" ]; then
+    PY_VER="$("${PY_COMMAND}" --version | cut -d' ' -f2)"
     PY_MAJOR="$(echo "$PY_VER" | cut -d. -f1)"
     PY_MINOR="$(echo "$PY_VER" | cut -d. -f2)"
     if [ "$PY_MAJOR" -ge 3 ] && [ "$PY_MINOR" -ge 10 ]; then
       ok "Python ${PY_VER}"
     else
       warn "Python ${PY_VER} found but 3.10+ required for RPA scripts"
+      PY_COMMAND=""
     fi
   else
     warn "Python 3 not found -- RPA/scraper features will be unavailable"
@@ -131,24 +160,28 @@ fi
 
 # ── 3. Python virtual environment ─────────────────────────────────────────────
 
-if [ "$SKIP_PYTHON" = false ] && command -v python3 &>/dev/null; then
+if [ "$SKIP_PYTHON" = false ] && [ -z "${PY_COMMAND+x}" ]; then
+  PY_COMMAND=""
+fi
+
+if [ "$SKIP_PYTHON" = false ] && [ -n "$PY_COMMAND" ]; then
   step "Setting up Python virtual environment..."
 
   if [ -d ".venv" ]; then
     ok "Virtual environment already exists at .venv/"
   else
-    python3 -m venv .venv
+    "$PY_COMMAND" -m venv .venv
     ok "Created .venv/"
   fi
 
   # shellcheck disable=SC1091
   source .venv/bin/activate
-  python -m pip install --upgrade pip --quiet 2>/dev/null
-  python -m pip install -r packages/scraper/requirements.txt --quiet 2>/dev/null
+  "$PY_COMMAND" -m pip install --upgrade pip --quiet 2>/dev/null
+  "$PY_COMMAND" -m pip install -r packages/scraper/requirements.txt --quiet 2>/dev/null
   ok "Python dependencies installed"
 
   # Verify rpa is importable
-  if python -c "import rpa" 2>/dev/null; then
+  if "$PY_COMMAND" -c "import rpa" 2>/dev/null; then
     ok "rpa module verified"
   else
     warn "rpa module could not be imported -- check packages/scraper/requirements.txt"

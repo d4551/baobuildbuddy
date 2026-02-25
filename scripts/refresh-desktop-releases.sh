@@ -106,7 +106,9 @@ latest_file_from_patterns() {
   shopt -s nullglob
   for pattern in "$@"; do
     for file in $pattern; do
-      candidates+=("$file")
+      if [ -e "$file" ]; then
+        candidates+=("$file")
+      fi
     done
   done
   shopt -u nullglob
@@ -115,7 +117,7 @@ latest_file_from_patterns() {
     return 1
   fi
 
-  ls -1t "${candidates[@]}" 2>/dev/null | head -n 1
+  printf '%s\0' "${candidates[@]}" | xargs -0 ls -1dt | head -n 1
 }
 
 copy_latest_artifact() {
@@ -177,7 +179,7 @@ run_headless_macos_dmg() {
   mkdir -p "$(dirname "$dmg_output")"
   rm -f "$dmg_output"
 
-  "$dmg_script" --skip-jenkins "$dmg_output" "$app_bundle"
+  "$dmg_script" --skip-jenkins "$dmg_output" "$app_bundle" || die "macOS headless DMG rebuild failed using script: $dmg_script"
 }
 
 if [ "$RUN_QUALITY_GATES" = true ]; then
