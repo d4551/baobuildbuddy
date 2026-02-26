@@ -9,16 +9,31 @@ const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledRe
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : "Unknown error";
 
+type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
+
+const buildChatMessages = (
+  prompt: string,
+  systemPrompt?: string,
+): ChatMessage[] => {
+  const messages: ChatMessage[] = [];
+  if (systemPrompt) {
+    messages.push({ role: "system", content: systemPrompt });
+  }
+  messages.push({ role: "user", content: prompt });
+  return messages;
+};
+
 /**
  * Hugging Face AI Provider
- * Works with free tier (no API key required) or with API token for better rate limits
+ * Uses chatCompletion API for conversational models.
+ * Works with free tier (no API key required) or with API token for better rate limits.
  */
 export class HuggingFaceProvider extends BaseAIProvider {
   name = "huggingface" as const;
   model: string;
   private client: HfInference;
 
-  constructor(apiKey?: string, model = "mistralai/Mistral-7B-Instruct-v0.3") {
+  constructor(apiKey?: string, model = "Qwen/Qwen2.5-Coder-32B-Instruct") {
     super(apiKey);
     this.model = model;
     this.client = new HfInference(apiKey);
@@ -26,23 +41,15 @@ export class HuggingFaceProvider extends BaseAIProvider {
 
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
-    // Build the prompt with system prompt if provided
-    let fullPrompt = prompt;
-    if (options?.systemPrompt) {
-      fullPrompt = `${options.systemPrompt}\n\n${prompt}`;
-    }
+    const messages = buildChatMessages(prompt, options?.systemPrompt);
 
     const responseResult = await settlePromise(
-      this.client.textGeneration({
+      this.client.chatCompletion({
         model: this.model,
-        inputs: fullPrompt,
-        parameters: {
-          max_new_tokens: options?.maxTokens ?? 1024,
-          temperature: options?.temperature ?? 0.7,
-          top_p: options?.topP ?? 0.95,
-          top_k: options?.topK ?? 50,
-          return_full_text: false,
-        },
+        messages,
+        max_tokens: options?.maxTokens ?? 1024,
+        temperature: options?.temperature ?? 0.7,
+        top_p: options?.topP ?? 0.95,
       }),
     );
     if (responseResult.status === "rejected") {
@@ -56,32 +63,26 @@ export class HuggingFaceProvider extends BaseAIProvider {
       };
     }
 
+    const content = responseResult.value.choices[0]?.message?.content ?? "";
+
     return {
       id: this.generateId(),
       provider: this.name,
       model: this.model,
-      content: responseResult.value.generated_text,
+      content,
       timing: this.createTimingMetrics(startTime),
     };
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
-    // Build the prompt with system prompt if provided
-    let fullPrompt = prompt;
-    if (options?.systemPrompt) {
-      fullPrompt = `${options.systemPrompt}\n\n${prompt}`;
-    }
+    const messages = buildChatMessages(prompt, options?.systemPrompt);
 
-    const stream = this.client.textGenerationStream({
+    const stream = this.client.chatCompletionStream({
       model: this.model,
-      inputs: fullPrompt,
-      parameters: {
-        max_new_tokens: options?.maxTokens ?? 1024,
-        temperature: options?.temperature ?? 0.7,
-        top_p: options?.topP ?? 0.95,
-        top_k: options?.topK ?? 50,
-        return_full_text: false,
-      },
+      messages,
+      max_tokens: options?.maxTokens ?? 1024,
+      temperature: options?.temperature ?? 0.7,
+      top_p: options?.topP ?? 0.95,
     });
 
     const iterator = stream[Symbol.asyncIterator]();
@@ -94,8 +95,9 @@ export class HuggingFaceProvider extends BaseAIProvider {
       if (nextChunk.done) {
         return;
       }
-      if (nextChunk.value.token.text) {
-        yield nextChunk.value.token.text;
+      const delta = nextChunk.value.choices?.[0]?.delta?.content;
+      if (delta) {
+        yield delta;
       }
       yield* emitTokens();
     };
@@ -104,8 +106,6 @@ export class HuggingFaceProvider extends BaseAIProvider {
   }
 
   isAvailable(): Promise<boolean> {
-    // HuggingFace free tier is always available
-    // Even without an API key, you can use the inference API with rate limits
     return Promise.resolve(true);
   }
 }
