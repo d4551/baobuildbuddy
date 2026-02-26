@@ -21,6 +21,7 @@
     "nuxt": "^4.3.1",
     "vue": "^3.5.28",
     "vue-i18n": "^11.2.8",
+    "vue-router": "^5.0.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {
