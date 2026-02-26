@@ -146,13 +146,7 @@ elif [ "$OS" = "Darwin" ] && [ -d "/Applications/Google Chrome.app" ]; then
   CHROME_FOUND=true
 fi
 if [ "$CHROME_FOUND" = false ]; then
-  warn "Chrome/Chromium not detected -- RPA browser automation requires it"
-fi
-
-if command -v php &>/dev/null; then
-  ok "PHP found: $(php --version | head -1)"
-else
-  warn "PHP not found -- TagUI RPA engine requires php-cli (install: apt install php-cli / brew install php)"
+  warn "Chrome/Chromium not detected -- system Chrome is optional (Playwright bundles its own)"
 fi
 
 # ── 2. Install Bun dependencies ──────────────────────────────────────────────
@@ -200,11 +194,15 @@ if [ "$SKIP_PYTHON" = false ] && [ -n "$PY_COMMAND" ]; then
   "$PY_COMMAND" -m pip install -r packages/scraper/requirements.txt --quiet 2>/dev/null
   ok "Python dependencies installed"
 
-  # Verify rpa is importable
-  if "$PY_COMMAND" -c "import rpa" 2>/dev/null; then
-    ok "rpa module verified"
+  # Install Playwright browser
+  "$PY_COMMAND" -m playwright install chromium --quiet 2>/dev/null || true
+  ok "Playwright chromium installed"
+
+  # Verify playwright is importable
+  if "$PY_COMMAND" -c "from playwright.sync_api import sync_playwright" 2>/dev/null; then
+    ok "playwright module verified"
   else
-    warn "rpa module could not be imported -- check packages/scraper/requirements.txt"
+    warn "playwright module could not be imported -- check packages/scraper/requirements.txt"
   fi
 else
   if [ "$SKIP_PYTHON" = true ]; then
@@ -228,8 +226,6 @@ else
     if [ -d ".venv" ]; then
       echo "PYTHON_BINARY=$(pwd)/.venv/bin/python3" >> .env
     fi
-    # Set OPENSSL_CONF for containerized environments
-    echo "OPENSSL_CONF=/dev/null" >> .env
     # Increase stdio buffer for large scraper outputs
     echo "AUTOMATION_STDIO_BUFFER_LIMIT=2000" >> .env
     warn "Edit .env with your environment-specific values before running"

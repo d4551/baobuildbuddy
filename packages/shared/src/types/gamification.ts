@@ -9,7 +9,12 @@ export interface GamificationStats {
   jobApplications: number;
   chatSessions: number;
   resumesGenerated: number;
+  coverLettersGenerated: number;
   savedJobs: number;
+  jobsSaved: number;
+  interviewScore: number;
+  dataExported: number;
+  earlyLogin: number;
   totalTimeSpent: number;
   featuresUsed: number;
   dailyStreak: number;

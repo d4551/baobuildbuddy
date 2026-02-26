@@ -102,8 +102,7 @@ Required:
 - Bun runtime matching `packageManager` in root `package.json`
 - Git
 - Python 3.10+
-- Chrome or Chromium
-- PHP CLI (for TagUI RPA engine)
+- Rust + Cargo (for desktop builds)
 
 Optional but recommended:
 
@@ -118,10 +117,9 @@ Optional but recommended:
 | Bun (from `packageManager`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
 | Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
 | Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
-| Chrome | `brew install --cask google-chrome` | `sudo apt-get update && sudo apt-get install -y chromium-browser` | `winget install --id Google.Chrome -e` |
-| PHP CLI | `brew install php` | `sudo apt-get install -y php-cli` | `winget install --id PHP.PHP -e` |
+| Rust | `brew install rustup-init && rustup-init` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
 
-If your Linux distro does not provide `chromium-browser`, install `google-chrome-stable` from Google's official repository.
+Playwright bundles its own Chromium — no separate Chrome or PHP install needed.
 
 HuggingFace free tier now requires an API token. Create one at https://huggingface.co/settings/tokens and set `HUGGINGFACE_TOKEN` in `.env` or via the Settings UI.
 
@@ -302,7 +300,6 @@ For RPA/automation support, add:
 
 ```text
 PYTHON_BINARY=/path/to/.venv/bin/python3
-OPENSSL_CONF=/dev/null
 AUTOMATION_STDIO_BUFFER_LIMIT=2000
 ```
 

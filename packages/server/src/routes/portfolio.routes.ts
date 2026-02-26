@@ -48,7 +48,7 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
         sortOrder: body.sortOrder || 0,
       });
       set.status = 201;
-      Promise.resolve(gamificationService.trackAction("portfolioItems", 35, "portfolio_project_added"));
+      void gamificationService.trackAction("portfolioItems", 35, "portfolio_project_added");
       return newProject;
     },
     {

@@ -155,7 +155,9 @@ watch(
     apiKeys.localModelName = currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
 
     preferencesLanguage.value = currentSettings.language || DEFAULT_APP_LANGUAGE;
-    preferredProviderSelection.value = (currentSettings.preferredProvider as AIProviderType) || "local";
+    const isKnownProvider = (v: string): v is AIProviderType => v in providerFieldById;
+    const saved = currentSettings.preferredProvider ?? "";
+    preferredProviderSelection.value = isKnownProvider(saved) ? saved : "local";
 
     notificationForm.achievements = currentSettings.notifications?.achievements ?? true;
     notificationForm.dailyChallenges = currentSettings.notifications?.dailyChallenges ?? true;

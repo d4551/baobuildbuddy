@@ -39,25 +39,22 @@ Standard commands are in `README.md` Section 10.4. The essentials:
 
 8. **AI features require at least one provider key** (or local model endpoint). The app runs without them but AI-powered features (chat, interview, resume review) won't function. HuggingFace free tier now requires an API token (set `HUGGINGFACE_TOKEN` in `.env` or via Settings UI).
 
-9. **Python/RPA is optional.** The scraper package requires Python 3.10+ and Chrome, but the rest of the app works without it.
+9. **Python/RPA uses Playwright** (not TagUI). The scraper package requires Python 3.10+ and `playwright`. Run `pip install -r packages/scraper/requirements.txt && playwright install chromium`. No PHP, no separate Chrome install needed.
 
-10. **RPA/TagUI requires `OPENSSL_CONF=/dev/null`** in containerized environments. Without this, OpenSSL 3.x fails to load `libproviders.so` and TagUI cannot initialize Chrome. Set this in `.env` and ensure the server process inherits it.
+10. **`PYTHON_BINARY` env var** should point to the venv Python (e.g., `/workspace/.venv/bin/python3`) so the server's `rpa-runner.ts` uses the correct Python with Playwright installed.
 
-11. **RPA requires PHP CLI** (`php-cli` package) for TagUI's parsing engine. Install via `sudo apt-get install -y php-cli`.
+11. **`AUTOMATION_STDIO_BUFFER_LIMIT`** defaults to 200 lines. Large scraper outputs (e.g., studio scraper with 1300+ lines) get truncated. Set to `2000` in `.env` for full output.
 
-12. **`PYTHON_BINARY` env var** should point to the venv Python (e.g., `/workspace/.venv/bin/python3`) so the server's `rpa-runner.ts` uses the correct Python with RPA packages installed.
+12. **Job provider settings must be configured** via `PUT /api/settings` before `POST /api/jobs/refresh` returns results. The `automationSettings.jobProviders` object must include Greenhouse boards, Lever companies, and ATS templates. See `README.md` Section 9.5.
 
-13. **`AUTOMATION_STDIO_BUFFER_LIMIT`** defaults to 200 lines. Large scraper outputs (e.g., studio scraper with 1300+ lines) get truncated. Set to `2000` in `.env` for full output.
+13. **RPA gaming board scrapers** use Playwright's native DOM selectors (`query_selector_all`, `inner_text`, `evaluate`). When site layouts change, update the selectors in each scraper script. Current status (Feb 2026):
+    - **GrackleHQ**: Working (30+ jobs) — `div.joblisting` selectors
+    - **WorkWithIndies**: Working (60+ jobs) — `a.job-card` + regex
+    - **RemoteGameJobs**: Working (41+ jobs) — `.job-box` containers
+    - **GameDev.net**: Defunct (404) — graceful empty return
+    - **GamesJobsDirect**: Working — `a[href*='/job/']` links
+    - **PocketGamer**: Working — `article` containers
 
-14. **Job provider settings must be configured** via `PUT /api/settings` before `POST /api/jobs/refresh` returns results. The `automationSettings.jobProviders` object must include Greenhouse boards, Lever companies, and ATS templates. See `README.md` Section 9.4.
+14. **Email response generation** requires a configured AI provider. Without API keys, the endpoint returns `"AI provider returned an empty email response"`. Configure at least one provider via Settings UI or `.env`.
 
-15. **RPA gaming board scrapers** use text-based parsing via `r.read('body')` rather than `r.dom()` JavaScript execution (which is unreliable in TagUI headless mode). When site layouts change, update the text-parsing logic in each scraper script. Current status (Feb 2026):
-    - **GrackleHQ**: Working (30+ jobs) — parses "Title / Company - Location" text blocks from `div.joblisting`
-    - **WorkWithIndies**: Working (60+ jobs) — regex matches "Company is hiring a Title" patterns
-    - **RemoteGameJobs**: Working (41+ jobs) — line-based parsing with JS/noise filtering
-    - **GameDev.net**: Defunct (404) — handled gracefully with empty return
-    - **GamesJobsDirect/PocketGamer**: Untested — may need similar text-parsing updates
-
-16. **Email response generation** requires a configured AI provider. Without API keys, the endpoint returns `"AI provider returned an empty email response"`. This is expected — configure at least one provider via Settings UI or `.env`.
-
-17. **Tauri desktop** (`@bao/desktop`) requires the Rust toolchain (`rustc` + `cargo`). It's optional for web development and not installed in the cloud VM by default.
+15. **Tauri desktop** (`@bao/desktop`) requires the Rust toolchain (`rustc` + `cargo`). Install via `rustup`.

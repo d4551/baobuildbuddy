@@ -847,7 +847,7 @@ export class GamificationService {
   ): Promise<void> {
     const progress = await this.getProgress();
     const currentStats = (progress.stats || {}) as Record<string, unknown>;
-    const currentValue = typeof currentStats[statKey] === "number" ? (currentStats[statKey] as number) : 0;
+    const currentValue = typeof currentStats[statKey] === "number" ? (currentStats[statKey]) : 0;
     const updatedStats = { ...currentStats, [statKey]: currentValue + 1 };
 
     const now = new Date().toISOString();

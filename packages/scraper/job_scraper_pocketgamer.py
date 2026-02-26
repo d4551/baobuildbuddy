@@ -1,30 +1,22 @@
 #!/usr/bin/env python3
-"""
-PocketGamer.biz job scraper using RPA-Python.
-Scrapes games industry jobs from pocketgamer.biz/jobs and outputs JSON.
-"""
-import json
+"""PocketGamer.biz job scraper using Playwright."""
 import hashlib
+import json
 import sys
 
-DEFAULT_SOURCE_URL = "https://www.pocketgamer.biz/jobs/"
+from playwright.sync_api import sync_playwright
 
-try:
-    import rpa as r
-except ImportError:
-    print(json.dumps({"error": "RPA not installed. Run: pip install rpa"}), file=sys.stderr)
-    sys.exit(1)
+DEFAULT_SOURCE_URL = "https://www.pocketgamer.biz/jobs/"
 
 
 def resolve_source_url() -> str:
     try:
         payload = json.loads(sys.stdin.read() or "{}")
-        source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
-        if isinstance(source_url, str) and source_url.strip():
-            return source_url.strip()
+        url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+        if isinstance(url, str) and url.strip():
+            return url.strip()
     except Exception:
         pass
-
     return DEFAULT_SOURCE_URL
 
 
@@ -34,86 +26,38 @@ def content_hash(title: str, company: str, location: str) -> str:
 
 
 def scrape_jobs() -> list[dict]:
-    jobs = []
+    jobs: list[dict] = []
     source_url = resolve_source_url()
-    try:
-        r.init(turbo_mode=True)
-        r.url(source_url)
-        r.wait(4)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(source_url, wait_until="networkidle", timeout=20000)
 
-        # PocketGamer uses <article> elements inside .featured and .index containers
-        # Job titles in h1, company in .cat, description in .strap
-        js_extract = """
-        (function() {
-            var results = [];
-            var articles = document.querySelectorAll('article');
-            articles.forEach(function(article) {
-                var link = article.querySelector('a[href]');
-                var titleEl = article.querySelector('h1, h2, h3, [class*="title"]');
-                var companyEl = article.querySelector('.cat, [class*="company"], [class*="publisher"]');
-                var descEl = article.querySelector('.strap, [class*="description"], [class*="summary"], p');
-
-                var title = titleEl ? titleEl.textContent.trim() : '';
-                if (!title || title.length < 3) return;
-
-                var company = companyEl ? companyEl.textContent.trim() : 'Unknown';
-                var description = descEl ? descEl.textContent.trim() : '';
-                var url = link ? link.href : '';
-
-                // Try to extract location from description
-                var location = 'Unknown';
-                var locMatch = description.match(/((?:London|Manchester|Brighton|Helsinki|Stockholm|Berlin|Paris|Montreal|Toronto|Vancouver|Tokyo|Seoul|Singapore|San Francisco|Los Angeles|New York|Austin|Seattle|Irvine|Remote|Worldwide|UK|USA|US|Europe)[^,.]*)/i);
-                if (locMatch) {
-                    location = locMatch[1].trim();
-                }
-
-                results.push({
-                    title: title.substring(0, 200),
-                    company: company.substring(0, 100),
-                    location: location.substring(0, 100),
-                    description: description.substring(0, 500),
-                    url: url
-                });
-            });
-            return JSON.stringify(results);
-        })()
-        """
-        raw = r.dom(js_extract)
-        r.close()
-
-        if raw and isinstance(raw, str):
-            try:
-                parsed = json.loads(raw)
-            except json.JSONDecodeError:
-                parsed = []
-
-            for item in parsed[:40]:
-                title = item.get("title", "").strip()
-                if not title or len(title) < 3:
-                    continue
-                company = item.get("company", "Unknown")
-                loc = item.get("location", "Unknown")
-                jobs.append({
-                    "title": title,
-                    "company": company,
-                    "location": loc,
-                    "remote": "remote" in loc.lower(),
-                    "description": item.get("description", ""),
-                    "url": item.get("url", source_url),
-                    "source": "pocketgamer",
-                    "postedDate": "",
-                    "contentHash": content_hash(title, company, loc),
-                })
-    except Exception as e:
-        try:
-            r.close()
-        except Exception:
-            pass
-        print(f"Scraper error: {e}", file=sys.stderr)
-
+        articles = page.query_selector_all("article, .job-listing, [class*='job']")
+        for article in articles[:40]:
+            title_el = article.query_selector("h2, h3, h4, a[href*='job'], .title")
+            if not title_el:
+                continue
+            title = (title_el.inner_text() or "").strip()
+            if not title or len(title) < 5:
+                continue
+            company_el = article.query_selector(".cat, .company, [class*='company']")
+            company = (company_el.inner_text() if company_el else "Unknown").strip()[:100]
+            desc_el = article.query_selector(".strap, .description, p")
+            description = (desc_el.inner_text() if desc_el else "").strip()[:500]
+            link_el = article.query_selector("a[href]")
+            url = (link_el.get_attribute("href") if link_el else source_url) or source_url
+            if url.startswith("/"):
+                url = f"https://www.pocketgamer.biz{url}"
+            jobs.append({
+                "title": title[:200], "company": company, "location": "Remote",
+                "remote": True, "description": description, "url": url,
+                "source": "pocketgamer", "postedDate": "",
+                "contentHash": content_hash(title, company, "Remote"),
+            })
+        browser.close()
     return jobs
 
 
 if __name__ == "__main__":
-    result = scrape_jobs()
-    print(json.dumps(result, indent=2))
+    print(json.dumps(scrape_jobs(), indent=2))

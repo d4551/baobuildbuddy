@@ -125,12 +125,7 @@ if (-not $chromeFound) {
     Warn "Chrome not detected -- RPA browser automation requires it"
 }
 
-try {
-    & php --version | Out-Null
-    Ok "PHP found"
-} catch {
-    Warn "PHP not found -- TagUI RPA engine requires php-cli"
-}
+# Playwright bundles its own Chromium — no separate PHP/Chrome needed for RPA
 
 # -- 2. Install Bun dependencies -----------------------------------------------
 
@@ -176,10 +171,12 @@ if (-not $SkipPython -and $pythonAvailable) {
             if ($LASTEXITCODE -eq 0) {
                 Ok "Python dependencies installed"
 
-                # Verify rpa is importable
-                & python -c "import rpa" 2>$null
-                if ($LASTEXITCODE -eq 0) { Ok "rpa module verified" }
-                else { Warn "rpa module could not be imported -- check requirements.txt" }
+                & python -m playwright install chromium 2>$null
+                Ok "Playwright chromium installed"
+
+                & python -c "from playwright.sync_api import sync_playwright" 2>$null
+                if ($LASTEXITCODE -eq 0) { Ok "playwright module verified" }
+                else { Warn "playwright module could not be imported -- check requirements.txt" }
             } else {
                 Fail "Python dependency installation failed"
             }

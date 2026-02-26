@@ -293,7 +293,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         verified: false,
       });
       set.status = 201;
-      Promise.resolve(gamificationService.trackAction("skillsMapped", 15, "skill_mapped"));
+      void gamificationService.trackAction("skillsMapped", 15, "skill_mapped");
       return newMapping;
     },
     {

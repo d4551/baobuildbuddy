@@ -305,7 +305,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
       };
       const created = await resumeService.createResume(createPayload);
       set.status = 201;
-      Promise.resolve(gamificationService.trackAction("resumesGenerated", 30, "resume_created"));
+      void gamificationService.trackAction("resumesGenerated", 30, "resume_created");
       return created;
     },
     {

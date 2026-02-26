@@ -206,7 +206,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
 
       await db.insert(coverLetters).values(newCoverLetter);
       set.status = 201;
-      Promise.resolve(gamificationService.trackAction("coverLettersGenerated", 30, "cover_letter_created"));
+      void gamificationService.trackAction("coverLettersGenerated", 30, "cover_letter_created");
       return newCoverLetter;
     },
     {

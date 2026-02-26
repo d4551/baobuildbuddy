@@ -372,7 +372,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
         return { error: "Interview session not found" };
       }
 
-      Promise.resolve(gamificationService.trackAction("interviewsCompleted", 75, "interview_completed"));
+      void gamificationService.trackAction("interviewsCompleted", 75, "interview_completed");
 
       return {
         ...(await sessionWithDerivedFields(completed)),

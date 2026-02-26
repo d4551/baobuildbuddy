@@ -1,31 +1,23 @@
 #!/usr/bin/env python3
-"""
-GrackleHQ job scraper using RPA-Python.
-Scrapes gaming industry job listings from gracklehq.com/jobs and outputs JSON.
-"""
-import json
+"""GrackleHQ job scraper using Playwright."""
 import hashlib
-import re
+import json
 import sys
 
-DEFAULT_SOURCE_URL = "https://gracklehq.com/jobs"
+from playwright.sync_api import sync_playwright
 
-try:
-    import rpa as r
-except ImportError:
-    print(json.dumps({"error": "RPA not installed. Run: pip install rpa"}), file=sys.stderr)
-    sys.exit(1)
+
+DEFAULT_SOURCE_URL = "https://gracklehq.com/jobs"
 
 
 def resolve_source_url() -> str:
     try:
         payload = json.loads(sys.stdin.read() or "{}")
-        source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
-        if isinstance(source_url, str) and source_url.strip():
-            return source_url.strip()
+        url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+        if isinstance(url, str) and url.strip():
+            return url.strip()
     except Exception:
         pass
-
     return DEFAULT_SOURCE_URL
 
 
@@ -34,69 +26,43 @@ def content_hash(title: str, company: str, location: str) -> str:
     return f"grackle-{hashlib.sha256(raw.encode()).hexdigest()[:12]}"
 
 
-AGE_PATTERN = re.compile(r"^<?\d+d?$")
-
-
 def scrape_jobs() -> list[dict]:
     jobs: list[dict] = []
     source_url = resolve_source_url()
-    try:
-        r.init(turbo_mode=True, headless_mode=True)
-        r.url(source_url)
-        r.wait(4)
-        body = r.read("body") or ""
-        r.close()
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(source_url, wait_until="networkidle", timeout=20000)
 
-        if not body or len(body) < 100:
-            return jobs
-
-        lines = [ln.strip() for ln in body.split("\n") if ln.strip()]
-        in_jobs = False
-        current_title: str | None = None
-
-        for line in lines:
-            if "results" in line.lower() and not in_jobs:
-                in_jobs = True
+        listings = page.query_selector_all("div.joblisting")
+        for listing in listings[:50]:
+            link = listing.query_selector("a[target='_blank']") or listing.query_selector("a")
+            if not link:
                 continue
-            if not in_jobs:
+            title = (link.inner_text() or "").strip()
+            if not title or len(title) < 3:
                 continue
-            if line.startswith("Filters") or line.startswith("Department"):
-                break
-            if AGE_PATTERN.match(line):
-                continue
-
-            if " - " in line and len(line) < 250 and current_title:
-                parts = line.split(" - ", 1)
-                company = parts[0].strip()
-                location = parts[1].strip() if len(parts) > 1 else "Remote"
-                if AGE_PATTERN.match(company):
-                    current_title = None
-                    continue
-                jobs.append({
-                    "title": current_title[:200],
-                    "company": company[:100],
-                    "location": location[:100],
-                    "remote": "remote" in location.lower(),
-                    "description": "",
-                    "url": source_url,
-                    "source": "grackle",
-                    "postedDate": "",
-                    "contentHash": content_hash(current_title, company, location),
-                })
-                current_title = None
-            elif line and len(line) > 5 and len(line) < 250 and not AGE_PATTERN.match(line):
-                current_title = line
-
-    except Exception as e:
-        try:
-            r.close()
-        except Exception:
-            pass
-        print(f"Scraper error: {e}", file=sys.stderr)
-
-    return jobs[:50]
+            full_text = listing.inner_text().replace("\n", " ").strip()
+            after_title = full_text.replace(title, "", 1).strip()
+            company, location = "Unknown", "Remote"
+            parts = after_title.split(" - ", 1)
+            if len(parts) >= 2:
+                company = parts[0].strip().lstrip("- ").strip()[:100]
+                location = parts[1].strip().split("  ")[0].strip()[:100]
+            elif parts[0].strip():
+                company = parts[0].strip().lstrip("- ").strip()[:100]
+            url = link.get_attribute("href") or source_url
+            if url.startswith("/"):
+                url = f"https://gracklehq.com{url}"
+            jobs.append({
+                "title": title[:200], "company": company, "location": location,
+                "remote": "remote" in location.lower(), "description": "",
+                "url": url, "source": "grackle", "postedDate": "",
+                "contentHash": content_hash(title, company, location),
+            })
+        browser.close()
+    return jobs
 
 
 if __name__ == "__main__":
-    result = scrape_jobs()
-    print(json.dumps(result, indent=2))
+    print(json.dumps(scrape_jobs(), indent=2))
