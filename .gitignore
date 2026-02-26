@@ -35,3 +35,4 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 .venv/
+packages/desktop/src-tauri/target/
