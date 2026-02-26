@@ -13,6 +13,11 @@ export declare class LocalProvider extends BaseAIProvider {
     stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string>;
     isAvailable(): Promise<boolean>;
     /**
+     * Query the local server for available models and return the first one.
+     * Returns null if the server is unreachable or has no models.
+     */
+    static detectFirstModel(baseUrl: string): Promise<string | null>;
+    /**
      * Static method to detect local AI servers
      */
     static detectLocalServers(): Promise<Array<{
