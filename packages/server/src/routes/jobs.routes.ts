@@ -16,6 +16,7 @@ import { applications, jobs, savedJobs } from "../db/schema/jobs";
 import { settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
+import { gamificationService } from "../services/gamification-service";
 import { JobAggregator } from "../services/jobs/job-aggregator";
 import { createServerLogger } from "../utils/logger";
 
@@ -327,6 +328,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
 
       await db.insert(savedJobs).values(newSaved);
       set.status = 201;
+      Promise.resolve(gamificationService.trackAction("jobsSaved", 10, "job_saved"));
       return newSaved;
     },
     {
@@ -397,6 +399,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
 
       await db.insert(applications).values(newApplication);
       set.status = 201;
+      Promise.resolve(gamificationService.trackAction("jobApplications", 40, "job_applied"));
       return newApplication;
     },
     {

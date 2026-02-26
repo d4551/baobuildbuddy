@@ -22,6 +22,7 @@ import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/schema-modules";
+import { gamificationService } from "../services/gamification-service";
 import { interviewService } from "../services/interview-service";
 
 type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
@@ -370,6 +371,8 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
         set.status = 404;
         return { error: "Interview session not found" };
       }
+
+      Promise.resolve(gamificationService.trackAction("interviewsCompleted", 75, "interview_completed"));
 
       return {
         ...(await sessionWithDerivedFields(completed)),

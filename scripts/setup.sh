@@ -149,6 +149,12 @@ if [ "$CHROME_FOUND" = false ]; then
   warn "Chrome/Chromium not detected -- RPA browser automation requires it"
 fi
 
+if command -v php &>/dev/null; then
+  ok "PHP found: $(php --version | head -1)"
+else
+  warn "PHP not found -- TagUI RPA engine requires php-cli (install: apt install php-cli / brew install php)"
+fi
+
 # ── 2. Install Bun dependencies ──────────────────────────────────────────────
 
 step "Installing Bun dependencies..."
@@ -156,6 +162,20 @@ if bun install; then
   ok "bun install complete"
 else
   die "bun install failed"
+fi
+
+step "Preparing Nuxt types..."
+if (cd packages/client && bun --bun run nuxt prepare) 2>&1; then
+  ok "Nuxt types generated"
+else
+  warn "Nuxt prepare failed -- client typecheck/lint may fail"
+fi
+
+step "Generating server type declarations..."
+if bun run --filter '@bao/server' build:types 2>&1; then
+  ok "Server type declarations generated"
+else
+  warn "Server build:types failed -- client lint may fail"
 fi
 
 # ── 3. Python virtual environment ─────────────────────────────────────────────
@@ -202,6 +222,16 @@ else
   if [ -f ".env.example" ]; then
     cp .env.example .env
     ok "Created .env from .env.example"
+    # Remove NUXT_PUBLIC_I18N_SUPPORTED_LOCALES (runtime override breaks i18n plugin)
+    sed -i '/^NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=/d' .env 2>/dev/null || true
+    # Set Python binary to venv path if venv exists
+    if [ -d ".venv" ]; then
+      echo "PYTHON_BINARY=$(pwd)/.venv/bin/python3" >> .env
+    fi
+    # Set OPENSSL_CONF for containerized environments
+    echo "OPENSSL_CONF=/dev/null" >> .env
+    # Increase stdio buffer for large scraper outputs
+    echo "AUTOMATION_STDIO_BUFFER_LIMIT=2000" >> .env
     warn "Edit .env with your environment-specific values before running"
   else
     fail ".env.example not found -- cannot bootstrap environment"

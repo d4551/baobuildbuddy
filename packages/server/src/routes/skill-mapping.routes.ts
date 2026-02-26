@@ -18,6 +18,7 @@ import { settings } from "../db/schema/settings";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { AIService } from "../services/ai/ai-service";
 import { skillAnalysisPrompt } from "../services/ai/prompts";
+import { gamificationService } from "../services/gamification-service";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { createServerLogger } from "../utils/logger";
 import { skillAnalysisRateLimit } from "../utils/rate-limit";
@@ -292,6 +293,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         verified: false,
       });
       set.status = 201;
+      Promise.resolve(gamificationService.trackAction("skillsMapped", 15, "skill_mapped"));
       return newMapping;
     },
     {

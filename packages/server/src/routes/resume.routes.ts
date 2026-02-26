@@ -16,6 +16,7 @@ import { AIService } from "../services/ai/ai-service";
 import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { exportService } from "../services/export-service";
+import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";
 import { createPdfAttachmentResponse } from "../utils/http-response";
 
@@ -304,6 +305,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
       };
       const created = await resumeService.createResume(createPayload);
       set.status = 201;
+      Promise.resolve(gamificationService.trackAction("resumesGenerated", 30, "resume_created"));
       return created;
     },
     {

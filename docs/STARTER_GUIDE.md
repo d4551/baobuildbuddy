@@ -103,11 +103,13 @@ Required:
 - Git
 - Python 3.10+
 - Chrome or Chromium
+- PHP CLI (for TagUI RPA engine)
 
 Optional but recommended:
 
 - curl
 - jq
+- At least one AI provider API key (HuggingFace token, OpenAI, Gemini, or Claude)
 
 ### 2.1 Installables (quick install commands)
 
@@ -117,8 +119,11 @@ Optional but recommended:
 | Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
 | Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
 | Chrome | `brew install --cask google-chrome` | `sudo apt-get update && sudo apt-get install -y chromium-browser` | `winget install --id Google.Chrome -e` |
+| PHP CLI | `brew install php` | `sudo apt-get install -y php-cli` | `winget install --id PHP.PHP -e` |
 
 If your Linux distro does not provide `chromium-browser`, install `google-chrome-stable` from Google's official repository.
+
+HuggingFace free tier now requires an API token. Create one at https://huggingface.co/settings/tokens and set `HUGGINGFACE_TOKEN` in `.env` or via the Settings UI.
 
 Read Bun baseline from the workspace manifest when selecting an installer:
 
@@ -280,9 +285,10 @@ NUXT_PUBLIC_API_BASE=/
 NUXT_PUBLIC_WS_BASE=/
 NUXT_PUBLIC_I18N_DEFAULT_LOCALE=en-US
 NUXT_PUBLIC_I18N_FALLBACK_LOCALE=en-US
-NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=en-US,es-ES,fr-FR,ja-JP
 NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY=bao-locale
 ```
+
+> **Important:** Do NOT set `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` in `.env`. Nuxt runtime config env override replaces the parsed array with a raw string, breaking the i18n plugin. The default is handled in `nuxt.config.ts`.
 
 Locale resolution order is deterministic: locale cookie -> `Accept-Language` header (q-weighted) -> browser locale -> configured default locale.
 
@@ -291,6 +297,16 @@ Then add these when you are ready:
 - `BAO_DISABLE_AUTH=true` for local dev if you want to skip API key gating.
 - `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` for local model.
 - `OPENAI_API_KEY`, `GEMINI_API_KEY`, `CLAUDE_API_KEY`, `HUGGINGFACE_TOKEN` as needed.
+
+For RPA/automation support, add:
+
+```text
+PYTHON_BINARY=/path/to/.venv/bin/python3
+OPENSSL_CONF=/dev/null
+AUTOMATION_STDIO_BUFFER_LIMIT=2000
+```
+
+AI provider keys can also be set via the **Settings > AI Providers** section in the UI, where each provider has a configuration panel with test and save buttons.
 
 Treat `.env.example` as the canonical base.
 

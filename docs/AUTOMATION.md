@@ -308,11 +308,56 @@ Route-level regression coverage exists in `packages/server/src/routes/automation
 
 ## Environment
 
-- Python dependency: `rpa` (TagUI backend)
-- Install in the Python environment used by Bun:
+### Required dependencies
+
+| Dependency | Purpose | Install |
+|-----------|---------|---------|
+| Python 3.10+ | RPA script runtime | System package manager |
+| `rpa` (pip) | TagUI browser automation backend | `pip install rpa` |
+| Chrome / Chromium | Browser target for RPA | System package manager |
+| PHP CLI | TagUI parsing engine | `apt install php-cli` / `brew install php` |
+
+### Environment variables
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `PYTHON_BINARY` | Path to Python binary (use venv path) | `python3` (Unix) / `python` (Windows) |
+| `OPENSSL_CONF` | Set to `/dev/null` in containers to fix OpenSSL 3.x `libproviders.so` error | System default |
+| `AUTOMATION_STDIO_BUFFER_LIMIT` | Max stdout/stderr lines from scraper scripts | `200` (increase to `2000` for large outputs) |
+| `AUTOMATION_SCRIPT_TIMEOUT_MS` | Max execution time per script | `30000` |
+
+### Setup
 
 ```bash
-pip install rpa
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r packages/scraper/requirements.txt
 ```
 
-Automation requires `python3` on Unix and `python` on Windows.
+Set `PYTHON_BINARY` in `.env` to the venv Python:
+
+```bash
+PYTHON_BINARY=/path/to/project/.venv/bin/python3
+```
+
+For containerized environments (Docker, cloud VMs), add:
+
+```bash
+OPENSSL_CONF=/dev/null
+AUTOMATION_STDIO_BUFFER_LIMIT=2000
+```
+
+### Scraper status (Feb 2026)
+
+| Script | Source | Status | Notes |
+|--------|--------|--------|-------|
+| `studio_scraper.py` | Curated data | Working (62 studios) | Pure Python, no browser |
+| `job_scraper_grackle.py` | GrackleHQ | Working (30+ jobs) | Text parsing from `div.joblisting` |
+| `job_scraper_workwithindies.py` | WorkWithIndies | Working (60+ jobs) | Regex "is hiring" pattern |
+| `job_scraper_remotegamejobs.py` | RemoteGameJobs | Working (41+ jobs) | Line parsing with noise filter |
+| `job_scraper_gamedev.py` | GameDev.net | Defunct (404) | Site jobs board offline |
+| `job_scraper_gamesjobsdirect.py` | GamesJobsDirect | Untested | May need selector updates |
+| `job_scraper_pocketgamer.py` | PocketGamer | Untested | May need selector updates |
+| `apply_job_rpa.py` | Job application | Working | Full browser RPA automation |
+
+All scrapers use `r.read('body')` text parsing instead of `r.dom()` JavaScript execution for reliability in headless mode.
