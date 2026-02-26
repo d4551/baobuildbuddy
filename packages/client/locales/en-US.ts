@@ -2547,7 +2547,7 @@ const enUS = {
       testAria: "Test AI provider connection",
       testButton: "Test",
       localModelLegend: "Local model name",
-      localModelPlaceholder: "e.g. llama3.2",
+      localModelPlaceholder: "Auto-detected from server",
       localModelAria: "Local model name",
       connectedBadge: "Connected",
       failedBadge: "Failed",

@@ -39,7 +39,7 @@ Standard commands are in `README.md` Section 10.4. The essentials:
 
 8. **AI features require at least one provider key** (or local model endpoint). The app runs without them but AI-powered features (chat, interview, resume review) won't function. HuggingFace free tier now requires an API token (set `HUGGINGFACE_TOKEN` in `.env` or via Settings UI).
 
-9. **Python/RPA uses Playwright** (not TagUI). The scraper package requires Python 3.10+ and `playwright`. Run `pip install -r packages/scraper/requirements.txt && playwright install chromium`. No PHP, no separate Chrome install needed.
+9. **Python/RPA uses Playwright.** The scraper package requires Python 3.10+ and `playwright`. Run `pip install -r packages/scraper/requirements.txt && playwright install chromium`.
 
 10. **`PYTHON_BINARY` env var** should point to the venv Python (e.g., `/workspace/.venv/bin/python3`) so the server's `rpa-runner.ts` uses the correct Python with Playwright installed.
 

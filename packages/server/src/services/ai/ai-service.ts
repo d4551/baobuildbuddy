@@ -727,4 +727,14 @@ export class AIService {
   getFallbackOrder(): AIProviderType[] {
     return [...this.fallbackOrder];
   }
+
+  /**
+   * Get the active model name for a given provider (detected or configured).
+   */
+  getActiveModel(providerType: AIProviderType): string | null {
+    const provider = this.providers.get(providerType);
+    if (!provider) return null;
+    const model = provider.model;
+    return model && model !== "auto-detect" ? model : null;
+  }
 }
