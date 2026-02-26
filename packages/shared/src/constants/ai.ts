@@ -10,9 +10,9 @@ const CLAUDE_TEST_MODEL = "claude-sonnet-4-5-20250929";
 /**
  * Default local provider endpoints and model settings.
  */
-export const LOCAL_AI_DEFAULT_ENDPOINT = "http://localhost:8080/v1";
+export const LOCAL_AI_DEFAULT_ENDPOINT = "http://localhost:11434/v1";
 export const OLLAMA_AI_DEFAULT_ENDPOINT = "http://localhost:11434/v1";
-export const LOCAL_AI_DEFAULT_MODEL = "llama3.2";
+export const LOCAL_AI_DEFAULT_MODEL = "";
 
 export const LOCAL_AI_RECOMMENDED_MODELS = ["llama3.2", "granite-code", "mistral"] as const;
 

@@ -137,8 +137,24 @@ export class LocalProvider extends BaseAIProvider {
   }
 
   async isAvailable(): Promise<boolean> {
-    // Try to list models to verify the local server is running
     return (await settlePromise(this.client.models.list())).status === "fulfilled";
+  }
+
+  /**
+   * Query the local server for available models and return the first one.
+   * Returns null if the server is unreachable or has no models.
+   */
+  static async detectFirstModel(baseUrl: string): Promise<string | null> {
+    const provider = new LocalProvider(baseUrl, "detect-placeholder");
+    const listResult = await settlePromise(provider.client.models.list());
+    if (listResult.status === "rejected") {
+      return null;
+    }
+    const models: Array<{ id: string }> = [];
+    for await (const model of listResult.value) {
+      models.push(model);
+    }
+    return models.length > 0 ? models[0].id : null;
   }
 
   /**

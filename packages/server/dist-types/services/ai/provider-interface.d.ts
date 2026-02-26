@@ -25,7 +25,7 @@ export declare abstract class BaseAIProvider implements AIProvider {
     abstract name: AIProviderType;
     abstract model: string;
     protected apiKey?: string;
-    protected baseUrl?: string;
+    readonly baseUrl?: string;
     constructor(apiKey?: string, baseUrl?: string);
     abstract generate(prompt: string, options?: GenerateOptions): Promise<AIResponse>;
     abstract stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string>;

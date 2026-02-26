@@ -284,9 +284,7 @@ export class AIService {
       config.provider === "local" &&
       typeof config.baseUrl === "string" &&
       config.baseUrl.trim().length > 0 &&
-      URL.canParse(config.baseUrl) &&
-      typeof config.model === "string" &&
-      config.model.trim().length > 0
+      URL.canParse(config.baseUrl)
     );
   }
 
@@ -305,7 +303,7 @@ export class AIService {
         if (!AIService.canCreateLocalProvider(config)) {
           return null;
         }
-        return new LocalProvider(config.baseUrl, config.model);
+        return new LocalProvider(config.baseUrl, config.model || "auto-detect");
       default:
         return null;
     }
@@ -326,6 +324,19 @@ export class AIService {
     // Always ensure HuggingFace is available as fallback (free tier)
     if (!this.providers.has("huggingface")) {
       this.providers.set("huggingface", new HuggingFaceProvider());
+    }
+
+    // Auto-detect local model if provider exists but model is a placeholder
+    const localProvider = this.providers.get("local");
+    if (localProvider && (localProvider as LocalProvider).model === "auto-detect") {
+      const baseUrl = (localProvider as LocalProvider).baseUrl;
+      if (typeof baseUrl === "string" && baseUrl.trim().length > 0) {
+        void LocalProvider.detectFirstModel(baseUrl).then((detected) => {
+          if (detected) {
+            (localProvider as LocalProvider).model = detected;
+          }
+        });
+      }
     }
   }
 

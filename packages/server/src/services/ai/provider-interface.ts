@@ -31,7 +31,7 @@ export abstract class BaseAIProvider implements AIProvider {
   abstract model: string;
 
   protected apiKey?: string;
-  protected baseUrl?: string;
+  readonly baseUrl?: string;
 
   constructor(apiKey?: string, baseUrl?: string) {
     this.apiKey = apiKey;
