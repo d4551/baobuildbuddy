@@ -929,7 +929,7 @@ Keys can also be configured via **Settings > AI Providers** in the UI with test 
 | `AUTOMATION_STDIO_BUFFER_LIMIT` | Max stdout lines from scraper scripts | `200` (increase to `2000` for large outputs) |
 | `AUTOMATION_SCRIPT_TIMEOUT_MS` | Max execution time per automation script | `30000` (30 seconds) |
 
-All RPA scripts use Playwright (headless Chromium). No separate Chrome, PHP, or TagUI install needed.
+All RPA scripts use Playwright with bundled Chromium. No separate browser install needed.
 
 ### 9.5 Settings Table Runtime Configuration
 

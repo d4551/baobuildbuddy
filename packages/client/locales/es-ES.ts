@@ -2562,7 +2562,7 @@ const esES: AppTranslationOverrides = {
       testAria: "Probar conexión del proveedor de IA",
       testButton: "Probar",
       localModelLegend: "Nombre del modelo local",
-      localModelPlaceholder: "ej. llama3.2",
+      localModelPlaceholder: "Detectado automáticamente del servidor",
       localModelAria: "Nombre del modelo local",
       connectedBadge: "Conectado",
       failedBadge: "Fallido",

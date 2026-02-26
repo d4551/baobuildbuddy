@@ -938,17 +938,23 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
     const localProviders = await aiService.detectLocalProviders();
     const localProviderAvailable = localProviders.some((provider) => provider.available);
 
+    const activeLocalModel = aiService.getActiveModel("local");
     const providers = AI_PROVIDER_CATALOG.map((provider) => {
       const status = statusByProvider.get(provider.id);
       const available =
         provider.id === "local" ? (status?.available ?? localProviderAvailable) : status?.available;
+
+      const models =
+        provider.id === "local" && activeLocalModel
+          ? [activeLocalModel, ...provider.modelHints.filter((h) => h !== activeLocalModel)]
+          : [...provider.modelHints];
 
       return {
         id: provider.id,
         nameKey: provider.nameKey,
         descriptionKey: provider.descriptionKey,
         iconId: provider.iconId,
-        models: [...provider.modelHints],
+        models,
         available: available ?? false,
         health: status?.health ?? (available ? "healthy" : "unconfigured"),
       };
