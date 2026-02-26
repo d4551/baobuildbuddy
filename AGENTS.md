@@ -51,4 +51,13 @@ Standard commands are in `README.md` Section 10.4. The essentials:
 
 14. **Job provider settings must be configured** via `PUT /api/settings` before `POST /api/jobs/refresh` returns results. The `automationSettings.jobProviders` object must include Greenhouse boards, Lever companies, and ATS templates. See `README.md` Section 9.4.
 
-15. **RPA gaming board scrapers** (GameDev.net, GrackleHQ, etc.) depend on current website DOM structures. The RPA infrastructure works but individual scrapers may return empty results when site layouts change — this is expected and scrapers need selector updates.
+15. **RPA gaming board scrapers** use text-based parsing via `r.read('body')` rather than `r.dom()` JavaScript execution (which is unreliable in TagUI headless mode). When site layouts change, update the text-parsing logic in each scraper script. Current status (Feb 2026):
+    - **GrackleHQ**: Working (30+ jobs) — parses "Title / Company - Location" text blocks from `div.joblisting`
+    - **WorkWithIndies**: Working (60+ jobs) — regex matches "Company is hiring a Title" patterns
+    - **RemoteGameJobs**: Working (41+ jobs) — line-based parsing with JS/noise filtering
+    - **GameDev.net**: Defunct (404) — handled gracefully with empty return
+    - **GamesJobsDirect/PocketGamer**: Untested — may need similar text-parsing updates
+
+16. **Email response generation** requires a configured AI provider. Without API keys, the endpoint returns `"AI provider returned an empty email response"`. This is expected — configure at least one provider via Settings UI or `.env`.
+
+17. **Tauri desktop** (`@bao/desktop`) requires the Rust toolchain (`rustc` + `cargo`). It's optional for web development and not installed in the cloud VM by default.
