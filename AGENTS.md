@@ -37,6 +37,18 @@ Standard commands are in `README.md` Section 10.4. The essentials:
 
 7. **No external database needed.** SQLite is embedded via `bun:sqlite`; the DB file is at `~/.bao/bao.db` by default.
 
-8. **AI features require at least one provider key** (or local model endpoint). The app runs without them but AI-powered features (chat, interview, resume review) won't function.
+8. **AI features require at least one provider key** (or local model endpoint). The app runs without them but AI-powered features (chat, interview, resume review) won't function. HuggingFace free tier now requires an API token (set `HUGGINGFACE_TOKEN` in `.env` or via Settings UI).
 
 9. **Python/RPA is optional.** The scraper package requires Python 3.10+ and Chrome, but the rest of the app works without it.
+
+10. **RPA/TagUI requires `OPENSSL_CONF=/dev/null`** in containerized environments. Without this, OpenSSL 3.x fails to load `libproviders.so` and TagUI cannot initialize Chrome. Set this in `.env` and ensure the server process inherits it.
+
+11. **RPA requires PHP CLI** (`php-cli` package) for TagUI's parsing engine. Install via `sudo apt-get install -y php-cli`.
+
+12. **`PYTHON_BINARY` env var** should point to the venv Python (e.g., `/workspace/.venv/bin/python3`) so the server's `rpa-runner.ts` uses the correct Python with RPA packages installed.
+
+13. **`AUTOMATION_STDIO_BUFFER_LIMIT`** defaults to 200 lines. Large scraper outputs (e.g., studio scraper with 1300+ lines) get truncated. Set to `2000` in `.env` for full output.
+
+14. **Job provider settings must be configured** via `PUT /api/settings` before `POST /api/jobs/refresh` returns results. The `automationSettings.jobProviders` object must include Greenhouse boards, Lever companies, and ATS templates. See `README.md` Section 9.4.
+
+15. **RPA gaming board scrapers** (GameDev.net, GrackleHQ, etc.) depend on current website DOM structures. The RPA infrastructure works but individual scrapers may return empty results when site layouts change — this is expected and scrapers need selector updates.
