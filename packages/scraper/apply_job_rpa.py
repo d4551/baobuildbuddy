@@ -157,6 +157,25 @@ def main() -> int:
         add_step(steps, "navigate", "ok", f"Loaded {job_url.strip()}")
         snap(page, "Loaded job page")
 
+        # Detect if we need to follow a redirect to the actual application form
+        # Many company career pages link to Greenhouse/Lever hosted forms
+        current_url = page.url
+        apply_link = page.locator("a:has-text('Apply'), a[href*='boards.greenhouse.io'], a[href*='jobs.lever.co'], a[href*='apply']").first
+        if apply_link.count() > 0 and "greenhouse.io" not in current_url and "lever.co" not in current_url:
+            apply_href = apply_link.get_attribute("href")
+            if apply_href and ("greenhouse" in apply_href or "lever" in apply_href or "apply" in apply_href):
+                page.goto(apply_href, wait_until="domcontentloaded", timeout=timeout_s * 1000)
+                page.wait_for_timeout(2000)
+                add_step(steps, "follow_apply_link", "ok", f"Followed to {page.url[:80]}")
+                snap(page, "Application form page")
+
+        # For Greenhouse hosted forms, scroll to the application section
+        app_form = page.locator("#application-form, .application-form, form[data-discover='true']").first
+        if app_form.count() > 0:
+            app_form.scroll_into_view_if_needed()
+            page.wait_for_timeout(1000)
+            add_step(steps, "scroll_to_form", "ok", "Scrolled to application form")
+
         step_number += 1
         emit_progress("detect_fields")
         fields = page.evaluate("""() => Array.from(document.querySelectorAll('input,textarea,select')).map(e => ({
@@ -164,31 +183,55 @@ def main() -> int:
         }))""")
         add_step(steps, "detect_fields", "ok", f"Detected {len(fields)} form fields")
 
-        name_selectors = (selectors.get("fullName", []) if isinstance(selectors.get("fullName"), list) else []) + [
-            "input[name='fullName']", "input[name='name']", "input[name='first_name']", "input[name='firstName']",
-        ]
-        email_selectors = (selectors.get("email", []) if isinstance(selectors.get("email"), list) else []) + [
-            "input[type='email']", "input[name='email']",
-        ]
-        phone_selectors = (selectors.get("phone", []) if isinstance(selectors.get("phone"), list) else []) + [
-            "input[type='tel']", "input[name='phone']",
-        ]
-        resume_selectors = (selectors.get("resume", []) if isinstance(selectors.get("resume"), list) else []) + [
-            "input[type='file']", "input[name='resume']", "input[name='cv']",
-        ]
-        cover_letter_selectors = (selectors.get("coverLetter", []) if isinstance(selectors.get("coverLetter"), list) else []) + [
+        # Greenhouse ATS selectors (most common)
+        gh_name = ["#first_name", "input[name='job_application[first_name]']"]
+        gh_last = ["#last_name", "input[name='job_application[last_name]']"]
+        gh_email = ["#email", "input[name='job_application[email]']"]
+        gh_phone = ["#phone", "input[name='job_application[phone]']"]
+        gh_resume = ["input[data-source='paste']", "input[name='job_application[resume]']"]
+        gh_submit = ["#submit_app", "button:has-text('Submit application')"]
+
+        # Lever ATS selectors
+        lv_name = ["input[name='name']", "input[name='cards[0][field0]']"]
+        lv_email = ["input[name='email']", "input[name='cards[0][field1]']"]
+        lv_phone = ["input[name='phone']", "input[name='cards[0][field2]']"]
+        lv_resume = ["input[name='resume']", ".resume-upload input[type='file']"]
+
+        # Generic fallbacks
+        gen_name = ["input[name='fullName']", "input[name='name']", "input[name='firstName']", "input[autocomplete='given-name']"]
+        gen_email = ["input[type='email']", "input[name='email']", "input[autocomplete='email']"]
+        gen_phone = ["input[type='tel']", "input[name='phone']", "input[autocomplete='tel']"]
+        gen_resume = ["input[type='file']", "input[name='resume']", "input[name='cv']"]
+        gen_submit = ["button[type='submit']", "input[type='submit']", "button:has-text('Apply')"]
+
+        custom = lambda k: selectors.get(k, []) if isinstance(selectors.get(k), list) else []
+        name_selectors = custom("fullName") + gh_name + lv_name + gen_name
+        email_selectors = custom("email") + gh_email + lv_email + gen_email
+        phone_selectors = custom("phone") + gh_phone + lv_phone + gen_phone
+        resume_selectors = custom("resume") + gh_resume + lv_resume + gen_resume
+        cover_letter_selectors = (custom("coverLetter")) + [
             "textarea[name='cover_letter']", "textarea[name='coverLetter']",
+            "#cover_letter", "textarea[name='job_application[cover_letter]']",
         ]
-        submit_selectors = (selectors.get("submit", []) if isinstance(selectors.get("submit"), list) else []) + [
-            "button[type='submit']", "input[type='submit']",
-        ]
+        submit_selectors = custom("submit") + gh_submit + gen_submit
+        last_name_selectors = gh_last + ["input[name='lastName']", "input[name='last_name']", "input[autocomplete='family-name']"]
 
         step_number += 1
         emit_progress("fill_name")
-        if candidates["fullName"] and fill_field(page, name_selectors, candidates["fullName"]):
-            add_step(steps, "fill_name", "ok")
+        full_name = candidates["fullName"]
+        if full_name:
+            # Try first/last split for Greenhouse
+            name_parts = full_name.split(" ", 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ""
+            first_filled = fill_field(page, name_selectors, first_name)
+            if first_filled and last_name:
+                fill_field(page, last_name_selectors, last_name)
+            elif not first_filled:
+                fill_field(page, name_selectors, full_name)
+            add_step(steps, "fill_name", "ok", f"Filled: {full_name}")
         else:
-            add_step(steps, "fill_name", "error", "Name field not found")
+            add_step(steps, "fill_name", "error", "No name data available")
 
         step_number += 1
         emit_progress("fill_email")
