@@ -125,12 +125,26 @@ if (-not $chromeFound) {
     Warn "Chrome not detected -- RPA browser automation requires it"
 }
 
+# Playwright bundles its own Chromium — no separate PHP/Chrome needed for RPA
+
 # -- 2. Install Bun dependencies -----------------------------------------------
 
 Step "Installing Bun dependencies..."
 & bun install
 if ($LASTEXITCODE -eq 0) { Ok "bun install complete" }
 else { Fail "bun install failed with exit code $LASTEXITCODE" }
+
+Step "Preparing Nuxt types..."
+Push-Location packages/client
+& bun --bun run nuxt prepare 2>&1
+if ($LASTEXITCODE -eq 0) { Ok "Nuxt types generated" }
+else { Warn "Nuxt prepare failed -- client typecheck/lint may fail" }
+Pop-Location
+
+Step "Generating server type declarations..."
+& bun run --filter '@bao/server' build:types 2>&1
+if ($LASTEXITCODE -eq 0) { Ok "Server type declarations generated" }
+else { Warn "Server build:types failed -- client lint may fail" }
 
 # -- 3. Python virtual environment ----------------------------------------------
 
@@ -157,10 +171,12 @@ if (-not $SkipPython -and $pythonAvailable) {
             if ($LASTEXITCODE -eq 0) {
                 Ok "Python dependencies installed"
 
-                # Verify rpa is importable
-                & python -c "import rpa" 2>$null
-                if ($LASTEXITCODE -eq 0) { Ok "rpa module verified" }
-                else { Warn "rpa module could not be imported -- check requirements.txt" }
+                & python -m playwright install chromium 2>$null
+                Ok "Playwright chromium installed"
+
+                & python -c "from playwright.sync_api import sync_playwright" 2>$null
+                if ($LASTEXITCODE -eq 0) { Ok "playwright module verified" }
+                else { Warn "playwright module could not be imported -- check requirements.txt" }
             } else {
                 Fail "Python dependency installation failed"
             }
@@ -179,6 +195,12 @@ if (Test-Path ".env") {
 } else {
     if (Test-Path ".env.example") {
         Copy-Item ".env.example" ".env"
+        $envContent = Get-Content ".env" | Where-Object { $_ -notmatch '^NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=' }
+        $envContent | Set-Content ".env"
+        Add-Content ".env" "AUTOMATION_STDIO_BUFFER_LIMIT=2000"
+        if (Test-Path ".venv") {
+            Add-Content ".env" "PYTHON_BINARY=$((Get-Location).Path)\.venv\Scripts\python.exe"
+        }
         Ok "Created .env from .env.example"
         Warn "Edit .env with your environment-specific values before running"
     } else {

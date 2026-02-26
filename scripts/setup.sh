@@ -146,7 +146,7 @@ elif [ "$OS" = "Darwin" ] && [ -d "/Applications/Google Chrome.app" ]; then
   CHROME_FOUND=true
 fi
 if [ "$CHROME_FOUND" = false ]; then
-  warn "Chrome/Chromium not detected -- RPA browser automation requires it"
+  warn "Chrome/Chromium not detected -- system Chrome is optional (Playwright bundles its own)"
 fi
 
 # ── 2. Install Bun dependencies ──────────────────────────────────────────────
@@ -156,6 +156,20 @@ if bun install; then
   ok "bun install complete"
 else
   die "bun install failed"
+fi
+
+step "Preparing Nuxt types..."
+if (cd packages/client && bun --bun run nuxt prepare) 2>&1; then
+  ok "Nuxt types generated"
+else
+  warn "Nuxt prepare failed -- client typecheck/lint may fail"
+fi
+
+step "Generating server type declarations..."
+if bun run --filter '@bao/server' build:types 2>&1; then
+  ok "Server type declarations generated"
+else
+  warn "Server build:types failed -- client lint may fail"
 fi
 
 # ── 3. Python virtual environment ─────────────────────────────────────────────
@@ -180,11 +194,15 @@ if [ "$SKIP_PYTHON" = false ] && [ -n "$PY_COMMAND" ]; then
   "$PY_COMMAND" -m pip install -r packages/scraper/requirements.txt --quiet 2>/dev/null
   ok "Python dependencies installed"
 
-  # Verify rpa is importable
-  if "$PY_COMMAND" -c "import rpa" 2>/dev/null; then
-    ok "rpa module verified"
+  # Install Playwright browser
+  "$PY_COMMAND" -m playwright install chromium --quiet 2>/dev/null || true
+  ok "Playwright chromium installed"
+
+  # Verify playwright is importable
+  if "$PY_COMMAND" -c "from playwright.sync_api import sync_playwright" 2>/dev/null; then
+    ok "playwright module verified"
   else
-    warn "rpa module could not be imported -- check packages/scraper/requirements.txt"
+    warn "playwright module could not be imported -- check packages/scraper/requirements.txt"
   fi
 else
   if [ "$SKIP_PYTHON" = true ]; then
@@ -202,6 +220,14 @@ else
   if [ -f ".env.example" ]; then
     cp .env.example .env
     ok "Created .env from .env.example"
+    # Remove NUXT_PUBLIC_I18N_SUPPORTED_LOCALES (runtime override breaks i18n plugin)
+    sed -i '/^NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=/d' .env 2>/dev/null || true
+    # Set Python binary to venv path if venv exists
+    if [ -d ".venv" ]; then
+      echo "PYTHON_BINARY=$(pwd)/.venv/bin/python3" >> .env
+    fi
+    # Increase stdio buffer for large scraper outputs
+    echo "AUTOMATION_STDIO_BUFFER_LIMIT=2000" >> .env
     warn "Edit .env with your environment-specific values before running"
   else
     fail ".env.example not found -- cannot bootstrap environment"

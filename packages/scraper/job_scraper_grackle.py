@@ -1,30 +1,23 @@
 #!/usr/bin/env python3
-"""
-GrackleHQ job scraper using RPA-Python.
-Scrapes gaming industry job listings from gracklehq.com/jobs and outputs JSON.
-"""
-import json
+"""GrackleHQ job scraper using Playwright."""
 import hashlib
+import json
 import sys
 
-DEFAULT_SOURCE_URL = "https://gracklehq.com/jobs"
+from playwright.sync_api import sync_playwright
 
-try:
-    import rpa as r
-except ImportError:
-    print(json.dumps({"error": "RPA not installed. Run: pip install rpa"}), file=sys.stderr)
-    sys.exit(1)
+
+DEFAULT_SOURCE_URL = "https://gracklehq.com/jobs"
 
 
 def resolve_source_url() -> str:
     try:
         payload = json.loads(sys.stdin.read() or "{}")
-        source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
-        if isinstance(source_url, str) and source_url.strip():
-            return source_url.strip()
+        url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+        if isinstance(url, str) and url.strip():
+            return url.strip()
     except Exception:
         pass
-
     return DEFAULT_SOURCE_URL
 
 
@@ -34,90 +27,42 @@ def content_hash(title: str, company: str, location: str) -> str:
 
 
 def scrape_jobs() -> list[dict]:
-    jobs = []
+    jobs: list[dict] = []
     source_url = resolve_source_url()
-    try:
-        r.init(turbo_mode=True)
-        r.url(source_url)
-        r.wait(4)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(source_url, wait_until="networkidle", timeout=20000)
 
-        # Extract job data using DOM queries
-        # GrackleHQ uses a[href*="/rd/"] links with "Company - Location" text nearby
-        js_extract = """
-        (function() {
-            var results = [];
-            var links = document.querySelectorAll('a[href*="/rd/"]');
-            links.forEach(function(link) {
-                var title = (link.textContent || '').trim();
-                if (!title || title.length < 3) return;
-
-                // Look for company/location in adjacent text or parent container
-                var parent = link.closest('li, div, tr, article') || link.parentElement;
-                var fullText = parent ? parent.textContent.replace(/\\s+/g, ' ').trim() : '';
-
-                var company = 'Unknown';
-                var location = 'Remote';
-
-                // Parse "Company - Location" pattern from surrounding text
-                var afterTitle = fullText.replace(title, '').trim();
-                var parts = afterTitle.split(' - ');
-                if (parts.length >= 2) {
-                    company = parts[0].trim().replace(/^[\\s-]+/, '').trim();
-                    location = parts[1].trim().split(/\\s{2,}/)[0].trim();
-                } else if (parts.length === 1 && parts[0].trim().length > 2) {
-                    company = parts[0].trim().replace(/^[\\s-]+/, '').trim();
-                }
-
-                // Clean up
-                if (company.length > 100) company = company.substring(0, 100);
-                if (location.length > 100) location = location.substring(0, 100);
-
-                results.push({
-                    title: title.substring(0, 200),
-                    company: company || 'Unknown',
-                    location: location || 'Remote',
-                    url: link.href || ''
-                });
-            });
-            return JSON.stringify(results);
-        })()
-        """
-        raw = r.dom(js_extract)
-        r.close()
-
-        if raw and isinstance(raw, str):
-            try:
-                parsed = json.loads(raw)
-            except json.JSONDecodeError:
-                parsed = []
-
-            for item in parsed[:50]:
-                title = item.get("title", "").strip()
-                if not title or len(title) < 3:
-                    continue
-                company = item.get("company", "Unknown")
-                loc = item.get("location", "Remote")
-                jobs.append({
-                    "title": title,
-                    "company": company,
-                    "location": loc,
-                    "remote": "remote" in loc.lower(),
-                    "description": "",
-                    "url": item.get("url", source_url),
-                    "source": "grackle",
-                    "postedDate": "",
-                    "contentHash": content_hash(title, company, loc),
-                })
-    except Exception as e:
-        try:
-            r.close()
-        except Exception:
-            pass
-        print(f"Scraper error: {e}", file=sys.stderr)
-
+        listings = page.query_selector_all("div.joblisting")
+        for listing in listings[:50]:
+            link = listing.query_selector("a[target='_blank']") or listing.query_selector("a")
+            if not link:
+                continue
+            title = (link.inner_text() or "").strip()
+            if not title or len(title) < 3:
+                continue
+            full_text = listing.inner_text().replace("\n", " ").strip()
+            after_title = full_text.replace(title, "", 1).strip()
+            company, location = "Unknown", "Remote"
+            parts = after_title.split(" - ", 1)
+            if len(parts) >= 2:
+                company = parts[0].strip().lstrip("- ").strip()[:100]
+                location = parts[1].strip().split("  ")[0].strip()[:100]
+            elif parts[0].strip():
+                company = parts[0].strip().lstrip("- ").strip()[:100]
+            url = link.get_attribute("href") or source_url
+            if url.startswith("/"):
+                url = f"https://gracklehq.com{url}"
+            jobs.append({
+                "title": title[:200], "company": company, "location": location,
+                "remote": "remote" in location.lower(), "description": "",
+                "url": url, "source": "grackle", "postedDate": "",
+                "contentHash": content_hash(title, company, location),
+            })
+        browser.close()
     return jobs
 
 
 if __name__ == "__main__":
-    result = scrape_jobs()
-    print(json.dumps(result, indent=2))
+    print(json.dumps(scrape_jobs(), indent=2))

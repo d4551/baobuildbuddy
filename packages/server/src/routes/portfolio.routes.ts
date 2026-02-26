@@ -1,6 +1,7 @@
 import type { PortfolioMetadata } from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { exportService } from "../services/export-service";
+import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
 import { createPdfAttachmentResponse } from "../utils/http-response";
 
@@ -47,6 +48,7 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
         sortOrder: body.sortOrder || 0,
       });
       set.status = 201;
+      void gamificationService.trackAction("portfolioItems", 35, "portfolio_project_added");
       return newProject;
     },
     {

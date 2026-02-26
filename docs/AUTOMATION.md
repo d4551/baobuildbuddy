@@ -308,11 +308,51 @@ Route-level regression coverage exists in `packages/server/src/routes/automation
 
 ## Environment
 
-- Python dependency: `rpa` (TagUI backend)
-- Install in the Python environment used by Bun:
+### Required dependencies
+
+| Dependency | Purpose | Install |
+|-----------|---------|---------|
+| Python 3.10+ | RPA script runtime | System package manager |
+| `playwright` (pip) | Headless browser automation | `pip install playwright && playwright install chromium` |
+| Rust + Cargo | Desktop installer builds (Tauri) | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
+
+Playwright bundles its own Chromium — no separate Chrome/PHP install needed.
+
+### Environment variables
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `PYTHON_BINARY` | Path to Python binary (use venv path) | `python3` (Unix) / `python` (Windows) |
+| `AUTOMATION_STDIO_BUFFER_LIMIT` | Max stdout/stderr lines from scraper scripts | `200` (increase to `2000` for large outputs) |
+| `AUTOMATION_SCRIPT_TIMEOUT_MS` | Max execution time per script | `30000` |
+
+### Setup
 
 ```bash
-pip install rpa
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r packages/scraper/requirements.txt
+playwright install chromium
 ```
 
-Automation requires `python3` on Unix and `python` on Windows.
+Set `PYTHON_BINARY` in `.env` to the venv Python:
+
+```bash
+PYTHON_BINARY=/path/to/project/.venv/bin/python3
+AUTOMATION_STDIO_BUFFER_LIMIT=2000
+```
+
+### Scraper status (Feb 2026)
+
+| Script | Source | Status | Notes |
+|--------|--------|--------|-------|
+| `studio_scraper.py` | Curated data | Working (62 studios) | Pure Python, no browser |
+| `job_scraper_grackle.py` | GrackleHQ | Working (30+ jobs) | Playwright `div.joblisting` selectors |
+| `job_scraper_workwithindies.py` | WorkWithIndies | Working (60+ jobs) | Playwright `a.job-card` + regex |
+| `job_scraper_remotegamejobs.py` | RemoteGameJobs | Working (41+ jobs) | Playwright `.job-box` containers |
+| `job_scraper_gamedev.py` | GameDev.net | Defunct (404) | Site jobs board offline; graceful empty return |
+| `job_scraper_gamesjobsdirect.py` | GamesJobsDirect | Working | Playwright `a[href*='/job/']` links |
+| `job_scraper_pocketgamer.py` | PocketGamer | Working | Playwright `article` containers |
+| `apply_job_rpa.py` | Job application | Working | Full Playwright browser automation |
+
+All scrapers use Playwright's native DOM query API (`query_selector_all`, `inner_text`, `evaluate`) for reliable headless operation.

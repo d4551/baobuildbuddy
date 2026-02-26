@@ -598,10 +598,10 @@ This section is the canonical first-run path for new developers. It starts from 
 |--------------------|----------------------------------------|
 | Bun                | Runtime, package manager, test runner  |
 | Git                | Source control                         |
-| Python             | RPA script execution                   |
-| Chrome or Chromium | Browser automation target              |
+| Python 3.10+       | RPA script execution (Playwright)      |
+| Rust + Cargo       | Desktop installer builds (Tauri)       |
 
-Optional: `curl` and `jq` for command-line diagnostics.
+Optional: `curl`, `jq` for diagnostics. At least one AI provider API key for AI features. Playwright bundles its own Chromium.
 
 Chrome/Chromium executable names checked by setup scripts:
 - macOS/Linux: `google-chrome`, `chromium`, `chromium-browser`, `/Applications/Google Chrome.app`
@@ -616,7 +616,7 @@ Use one command per tool based on your platform:
 | Bun (from `packageManager`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
 | Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
 | Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
-| Chrome | `brew install --cask google-chrome` | `sudo apt-get update && sudo apt-get install -y chromium-browser` | `winget install --id Google.Chrome -e` |
+| Rust | `brew install rustup-init && rustup-init` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
 
 If your Linux distro does not ship `chromium-browser`, install `google-chrome-stable` from Google's official package repository.
 
@@ -902,10 +902,15 @@ Cross-target requirements from Tauri build contracts:
 | `NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS` | Refetch on window focus |
 | `NUXT_PUBLIC_I18N_DEFAULT_LOCALE` | Initial locale to load (`en-US` default) |
 | `NUXT_PUBLIC_I18N_FALLBACK_LOCALE` | Locale fallback when missing translations are requested |
-| `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` | Comma-separated locale codes (`en-US,es-ES,fr-FR,ja-JP`) |
 | `NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY` | Cookie key for persisted user locale |
 
+> **Do NOT set `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES`** in `.env`. Nuxt runtime config env override replaces the parsed array with a raw string, breaking the i18n plugin. The nuxt.config.ts `parseSupportedLocales()` handles the default.
+
 ### 9.3 AI provider keys
+
+At least one AI provider key is required for AI-powered features (chat, interview questions, email response, resume review, cover letter generation). HuggingFace free tier requires a token — create one at https://huggingface.co/settings/tokens.
+
+Keys can also be configured via **Settings > AI Providers** in the UI with test and save buttons.
 
 | Key | Purpose |
 |-----|---------|
@@ -914,9 +919,19 @@ Cross-target requirements from Tauri build contracts:
 | `OPENAI_API_KEY` | OpenAI cloud provider |
 | `GEMINI_API_KEY` | Google Gemini cloud provider |
 | `CLAUDE_API_KEY` | Anthropic Claude cloud provider |
-| `HUGGINGFACE_TOKEN` | HuggingFace Inference API |
+| `HUGGINGFACE_TOKEN` | HuggingFace Inference API (free tier requires token) |
 
-### 9.4 Settings Table Runtime Configuration
+### 9.4 RPA / Automation environment (Playwright)
+
+| Key | Purpose | Default |
+|-----|---------|---------|
+| `PYTHON_BINARY` | Python binary path (set to venv Python) | `python3` (Unix) / `python` (Windows) |
+| `AUTOMATION_STDIO_BUFFER_LIMIT` | Max stdout lines from scraper scripts | `200` (increase to `2000` for large outputs) |
+| `AUTOMATION_SCRIPT_TIMEOUT_MS` | Max execution time per automation script | `30000` (30 seconds) |
+
+All RPA scripts use Playwright (headless Chromium). No separate Chrome, PHP, or TagUI install needed.
+
+### 9.5 Settings Table Runtime Configuration
 
 Runtime provider tuning for job ingestion is persisted in `settings.automationSettings.jobProviders` and read by:
 - `packages/server/src/services/jobs/providers/company-board.ts`

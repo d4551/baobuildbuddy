@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-GameDev.net job scraper using RPA-Python.
-Outputs normalized rows for server-side ingestion.
+Hitmarker gaming jobs scraper using Playwright.
+Replaces the defunct GameDev.net scraper. Hitmarker is the leading
+gaming/esports job board with active listings.
 """
 from __future__ import annotations
 
@@ -10,76 +11,77 @@ import json
 import sys
 from typing import Any
 
-DEFAULT_SOURCE_URL = "https://www.gamedev.net/jobs/"
-SOURCE_NAME = "gamedev-net"
+from playwright.sync_api import sync_playwright
 
-try:
-    import rpa as r
-except ImportError:
-    print(json.dumps({"error": "RPA not installed. Run: pip install rpa"}), file=sys.stderr)
-    raise SystemExit(1)
+DEFAULT_SOURCE_URL = "https://hitmarker.net/jobs"
+SOURCE_NAME = "hitmarker-scraper"
 
 
 def resolve_source_url() -> str:
     payload_raw = sys.stdin.read() or "{}"
     payload = json.loads(payload_raw)
-    source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
-    if isinstance(source_url, str) and source_url.strip():
-        return source_url.strip()
+    url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+    if isinstance(url, str) and url.strip():
+        return url.strip()
     return DEFAULT_SOURCE_URL
 
 
-def make_content_hash(title: str, company: str, location: str, url: str) -> str:
-    canonical = f"{title}|{company}|{location}|{url}|{SOURCE_NAME}".strip().lower()
-    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
-    return f"{SOURCE_NAME}-{digest}"
-
-
-def normalize_row(title: str, description: str, source_url: str) -> dict[str, Any]:
-    clean_title = title.strip()[:200]
-    clean_description = description.strip()[:5000]
-    company = "GameDev.net"
-    location = "Remote"
-    return {
-        "title": clean_title,
-        "company": company,
-        "location": location,
-        "url": source_url,
-        "source": SOURCE_NAME,
-        "contentHash": make_content_hash(clean_title, company, location, source_url),
-        "description": clean_description,
-        "postDate": "",
-        "remote": True,
-    }
+def make_content_hash(title: str, company: str, location: str) -> str:
+    canonical = f"{title}|{company}|{location}|{SOURCE_NAME}".strip().lower()
+    return f"{SOURCE_NAME}-{hashlib.sha256(canonical.encode('utf-8')).hexdigest()[:16]}"
 
 
 def scrape_jobs() -> list[dict[str, Any]]:
     source_url = resolve_source_url()
     jobs: list[dict[str, Any]] = []
 
-    page_text = ""
-    r.init(turbo_mode=True)
-    try:
-        r.url(source_url)
-        r.wait(3)
-        page_text = r.read("body") if hasattr(r, "read") else ""
-    finally:
-        r.close()
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(source_url, wait_until="networkidle", timeout=20000)
+        page.wait_for_timeout(2000)
 
-    if isinstance(page_text, str) and len(page_text) > 100:
-        lines = [line.strip() for line in page_text.split("\n") if line.strip()]
-        for line in lines[:60]:
-            if len(line) < 15:
+        cards = page.query_selector_all("a[href*='/jobs/']")
+        seen: set[str] = set()
+        for card in cards[:60]:
+            href = card.get_attribute("href") or ""
+            if not href or href in seen or "/jobs/" not in href:
                 continue
-            if "job" not in line.lower() and "engineer" not in line.lower() and "developer" not in line.lower():
-                continue
-            jobs.append(normalize_row(line[:120], line, source_url))
-            if len(jobs) >= 40:
-                break
+            seen.add(href)
 
-    return jobs
+            text = (card.inner_text() or "").strip()
+            lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+            if len(lines) < 2:
+                continue
+
+            title = lines[0]
+            company = lines[1] if len(lines) > 1 else "Unknown"
+            location = "Remote"
+            for ln in lines[2:]:
+                if any(kw in ln.lower() for kw in ["remote", "usa", "uk", "europe", "canada", "worldwide"]):
+                    location = ln
+                    break
+
+            if len(title) < 5:
+                continue
+
+            url = href if href.startswith("http") else f"https://hitmarker.net{href}"
+            jobs.append({
+                "title": title[:200],
+                "company": company[:100],
+                "location": location[:100],
+                "url": url,
+                "source": SOURCE_NAME,
+                "contentHash": make_content_hash(title, company, location),
+                "description": "",
+                "postDate": "",
+                "remote": "remote" in location.lower(),
+            })
+
+        browser.close()
+
+    return jobs[:40]
 
 
 if __name__ == "__main__":
-    result = scrape_jobs()
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(scrape_jobs(), ensure_ascii=False, indent=2))

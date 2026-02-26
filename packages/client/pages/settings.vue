@@ -117,6 +117,7 @@ const testResults = reactive<Record<AIProviderType, { valid: boolean } | null>>(
 
 const testingProvider = ref<AIProviderType | null>(null);
 const preferencesLanguage = ref(DEFAULT_APP_LANGUAGE);
+const preferredProviderSelection = ref<AIProviderType>("local");
 const preferencesSaveState = ref<SaveState>("idle");
 const profileSaveState = ref<SaveState>("idle");
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -154,6 +155,9 @@ watch(
     apiKeys.localModelName = currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
 
     preferencesLanguage.value = currentSettings.language || DEFAULT_APP_LANGUAGE;
+    const isKnownProvider = (v: string): v is AIProviderType => v in providerFieldById;
+    const saved = currentSettings.preferredProvider ?? "";
+    preferredProviderSelection.value = isKnownProvider(saved) ? saved : "local";
 
     notificationForm.achievements = currentSettings.notifications?.achievements ?? true;
     notificationForm.dailyChallenges = currentSettings.notifications?.dailyChallenges ?? true;
@@ -279,6 +283,18 @@ async function handleTest(providerId: AIProviderType) {
   } else {
     $toast.error(t("settings.aiProviders.connectionFailed"));
   }
+}
+
+async function handleSavePreferredProvider() {
+  const providerSaveResult = await settlePromise(
+    updateSettings({ preferredProvider: preferredProviderSelection.value }),
+    t("settings.errors.failedToSavePreferences"),
+  );
+  if (!providerSaveResult.ok) {
+    showToastError(providerSaveResult.error, t("settings.errors.failedToSavePreferences"));
+    return;
+  }
+  $toast.success(t("settings.aiProviders.preferredProviderSaved"));
 }
 
 async function handleSaveKeys() {
@@ -781,6 +797,21 @@ async function handleSaveAutomation() {
           <p class="text-sm text-base-content/70 mb-3">
             {{ t("settings.aiProviders.subtitle") }}
           </p>
+
+          <fieldset class="fieldset mb-4">
+            <legend class="fieldset-legend">{{ t("settings.aiProviders.preferredProviderLegend") }}</legend>
+            <select
+              v-model="preferredProviderSelection"
+              class="select w-full"
+              :aria-label="t('settings.aiProviders.preferredProviderAria')"
+              @change="handleSavePreferredProvider"
+            >
+              <option v-for="provider in providerInputs" :key="provider.id" :value="provider.id">
+                {{ provider.label }}
+              </option>
+            </select>
+            <p class="text-xs text-base-content/50 mt-1">{{ t("settings.aiProviders.preferredProviderHint") }}</p>
+          </fieldset>
 
           <div class="space-y-4">
             <div

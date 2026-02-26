@@ -1,122 +1,69 @@
 #!/usr/bin/env python3
-"""
-RemoteGameJobs scraper using RPA-Python.
-Scrapes remote gaming job listings from remotegamejobs.com and outputs JSON.
-"""
-import json
+"""RemoteGameJobs scraper using Playwright."""
 import hashlib
+import json
 import sys
 
-DEFAULT_SOURCE_URL = "https://remotegamejobs.com"
+from playwright.sync_api import sync_playwright
 
-try:
-    import rpa as r
-except ImportError:
-    print(json.dumps({"error": "RPA not installed. Run: pip install rpa"}), file=sys.stderr)
-    sys.exit(1)
+DEFAULT_SOURCE_URL = "https://remotegamejobs.com"
 
 
 def resolve_source_url() -> str:
     try:
         payload = json.loads(sys.stdin.read() or "{}")
-        source_url = payload.get("sourceUrl") if isinstance(payload, dict) else None
-        if isinstance(source_url, str) and source_url.strip():
-            return source_url.strip()
+        url = payload.get("sourceUrl") if isinstance(payload, dict) else None
+        if isinstance(url, str) and url.strip():
+            return url.strip()
     except Exception:
         pass
-
     return DEFAULT_SOURCE_URL
 
 
-def content_hash(title: str, company: str, location: str) -> str:
-    raw = f"{title}|{company}|{location}".lower().strip()
+def content_hash(title: str, company: str) -> str:
+    raw = f"{title}|{company}|Remote".lower().strip()
     return f"rgj-{hashlib.sha256(raw.encode()).hexdigest()[:12]}"
 
 
 def scrape_jobs() -> list[dict]:
-    jobs = []
+    jobs: list[dict] = []
     source_url = resolve_source_url()
-    try:
-        r.init(turbo_mode=True)
-        r.url(source_url)
-        r.wait(4)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(source_url, wait_until="networkidle", timeout=20000)
 
-        # Site uses .job-box containers with jQuery hover effects
-        js_extract = """
-        (function() {
-            var results = [];
-            var boxes = document.querySelectorAll('.job-box, [class*="job-card"], [class*="job-list"], article');
-            if (boxes.length === 0) {
-                // Fallback: try finding any link-heavy sections
-                boxes = document.querySelectorAll('a[href*="job"], a[href*="position"], a[href*="career"]');
-                boxes.forEach(function(link) {
-                    var text = (link.textContent || '').trim();
-                    if (text && text.length > 5) {
-                        results.push({
-                            title: text.substring(0, 200),
-                            company: 'Unknown',
-                            location: 'Remote',
-                            url: link.href || ''
-                        });
-                    }
-                });
-            } else {
-                boxes.forEach(function(box) {
-                    var titleEl = box.querySelector('h1, h2, h3, h4, [class*="title"], a');
-                    var companyEl = box.querySelector('[class*="company"], [class*="studio"], [class*="org"]');
-                    var locationEl = box.querySelector('[class*="location"], [class*="loc"]');
-                    var linkEl = box.querySelector('a[href]') || box.closest('a');
-
-                    var title = titleEl ? titleEl.textContent.trim() : '';
-                    if (!title) return;
-
-                    results.push({
-                        title: title.substring(0, 200),
-                        company: companyEl ? companyEl.textContent.trim() : 'Unknown',
-                        location: locationEl ? locationEl.textContent.trim() : 'Remote',
-                        url: linkEl ? linkEl.href : ''
-                    });
-                });
-            }
-            return JSON.stringify(results);
-        })()
-        """
-        raw = r.dom(js_extract)
-        r.close()
-
-        if raw and isinstance(raw, str):
-            try:
-                parsed = json.loads(raw)
-            except json.JSONDecodeError:
-                parsed = []
-
-            for item in parsed[:50]:
-                title = item.get("title", "").strip()
-                if not title or len(title) < 3:
+        emp_types = {"full-time", "part-time", "contract", "freelance", "internship", "details"}
+        boxes = page.query_selector_all(".job-box")
+        for box in boxes[:50]:
+            link = box.query_selector("a.has-text-black") or box.query_selector("a[href*='/jobs/']")
+            if not link:
+                continue
+            title = link.text_content()
+            if title:
+                title = title.strip().split("\n")[0].strip()
+            if not title or len(title) < 5:
+                continue
+            company = "Unknown"
+            lines = [ln.strip() for ln in box.inner_text().split("\n") if ln.strip()]
+            for ln in lines:
+                if ln == title or ln.lower() in emp_types or ln.startswith("Remote"):
                     continue
-                company = item.get("company", "Unknown")
-                loc = item.get("location", "Remote")
-                jobs.append({
-                    "title": title,
-                    "company": company,
-                    "location": loc,
-                    "remote": True,  # All jobs on this site are remote
-                    "description": "",
-                    "url": item.get("url", source_url),
-                    "source": "remotegamejobs",
-                    "postedDate": "",
-                    "contentHash": content_hash(title, company, loc),
-                })
-    except Exception as e:
-        try:
-            r.close()
-        except Exception:
-            pass
-        print(f"Scraper error: {e}", file=sys.stderr)
-
+                if 2 < len(ln) < 80:
+                    company = ln
+                    break
+            url = link.get_attribute("href") or source_url
+            if url.startswith("/"):
+                url = f"https://remotegamejobs.com{url}"
+            jobs.append({
+                "title": title[:200], "company": company[:100], "location": "Remote",
+                "remote": True, "description": "", "url": url,
+                "source": "remotegamejobs", "postedDate": "",
+                "contentHash": content_hash(title, company),
+            })
+        browser.close()
     return jobs
 
 
 if __name__ == "__main__":
-    result = scrape_jobs()
-    print(json.dumps(result, indent=2))
+    print(json.dumps(scrape_jobs(), indent=2))

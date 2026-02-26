@@ -114,7 +114,7 @@ export class GreenhouseProvider implements JobProvider {
     page: number,
     providerSettings: JobProviderSettings,
   ): Promise<GreenhouseFetchStatus> {
-    const url = `${providerSettings.greenhouseApiBaseUrl}/${board}/jobs?page=${page}`;
+    const url = `${providerSettings.greenhouseApiBaseUrl}/${board}/jobs?content=true&page=${page}`;
     const response = await fetch(url, {
       headers: {
         Accept: "application/json",

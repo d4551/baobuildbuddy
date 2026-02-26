@@ -13,6 +13,7 @@ import { coverLetters } from "../db/schema/cover-letters";
 import { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
+import { gamificationService } from "../services/gamification-service";
 import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts";
 import { exportService } from "../services/export-service";
@@ -205,6 +206,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
 
       await db.insert(coverLetters).values(newCoverLetter);
       set.status = 201;
+      void gamificationService.trackAction("coverLettersGenerated", 30, "cover_letter_created");
       return newCoverLetter;
     },
     {

@@ -2555,6 +2555,10 @@ const enUS = {
       saveButton: "Save API Keys",
       connectionSuccessful: "Connection successful",
       connectionFailed: "Connection failed",
+      preferredProviderLegend: "Preferred AI Provider",
+      preferredProviderAria: "Select preferred AI provider",
+      preferredProviderHint: "The AI system will try this provider first, then fall back to others.",
+      preferredProviderSaved: "Preferred provider updated",
     },
     toasts: {
       apiKeysSaved: "API keys saved",

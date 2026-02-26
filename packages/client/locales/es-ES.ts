@@ -2570,6 +2570,10 @@ const esES: AppTranslationOverrides = {
       saveButton: "Guardar Claves API",
       connectionSuccessful: "Conexión exitosa",
       connectionFailed: "Conexión fallida",
+      preferredProviderLegend: "Proveedor de IA preferido",
+      preferredProviderAria: "Seleccionar proveedor de IA preferido",
+      preferredProviderHint: "El sistema de IA intentará este proveedor primero y luego recurrirá a otros.",
+      preferredProviderSaved: "Proveedor preferido actualizado",
     },
     toasts: {
       apiKeysSaved: "Claves API guardadas",

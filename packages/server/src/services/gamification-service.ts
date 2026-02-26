@@ -836,6 +836,29 @@ export class GamificationService {
       streakDays: Math.min(progress.currentStreak, 30),
     };
   }
+
+  /**
+   * Increment a stat counter, award XP, and check for newly unlocked achievements.
+   */
+  async trackAction(
+    statKey: keyof GamificationStats,
+    xpAmount: number,
+    reason: string,
+  ): Promise<void> {
+    const progress = await this.getProgress();
+    const currentStats = (progress.stats || {}) as Record<string, unknown>;
+    const currentValue = typeof currentStats[statKey] === "number" ? (currentStats[statKey]) : 0;
+    const updatedStats = { ...currentStats, [statKey]: currentValue + 1 };
+
+    const now = new Date().toISOString();
+    await db
+      .update(gamification)
+      .set({ stats: updatedStats, updatedAt: now })
+      .where(eq(gamification.id, this.DEFAULT_ID));
+
+    await this.awardXP(xpAmount, reason);
+    await this.checkAchievements(updatedStats as Partial<GamificationStats>);
+  }
 }
 
 export const gamificationService = new GamificationService();

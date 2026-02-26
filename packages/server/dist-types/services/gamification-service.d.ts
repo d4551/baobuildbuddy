@@ -75,6 +75,10 @@ export declare class GamificationService {
         actionsCount: number;
         streakDays: number;
     }>;
+    /**
+     * Increment a stat counter, award XP, and check for newly unlocked achievements.
+     */
+    trackAction(statKey: keyof GamificationStats, xpAmount: number, reason: string): Promise<void>;
 }
 export declare const gamificationService: GamificationService;
 export {};

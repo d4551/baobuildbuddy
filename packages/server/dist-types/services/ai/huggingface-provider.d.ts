@@ -2,7 +2,8 @@ import type { AIResponse, GenerateOptions } from "@bao/shared";
 import { BaseAIProvider } from "./provider-interface";
 /**
  * Hugging Face AI Provider
- * Works with free tier (no API key required) or with API token for better rate limits
+ * Uses chatCompletion API for conversational models.
+ * Works with free tier (no API key required) or with API token for better rate limits.
  */
 export declare class HuggingFaceProvider extends BaseAIProvider {
     name: "huggingface";
