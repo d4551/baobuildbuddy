@@ -66,16 +66,23 @@ def scrape_jobs() -> list[dict[str, Any]]:
     finally:
         r.close()
 
-    if isinstance(page_text, str) and len(page_text) > 100:
-        lines = [line.strip() for line in page_text.split("\n") if line.strip()]
-        for line in lines[:60]:
-            if len(line) < 15:
-                continue
-            if "job" not in line.lower() and "engineer" not in line.lower() and "developer" not in line.lower():
-                continue
-            jobs.append(normalize_row(line[:120], line, source_url))
-            if len(jobs) >= 40:
-                break
+    if not isinstance(page_text, str) or len(page_text) < 100:
+        return jobs
+
+    lower_text = page_text.lower()
+    if "resolver404" in lower_text or "not made it to production" in lower_text:
+        print("GameDev.net jobs board is currently unavailable (404)", file=sys.stderr)
+        return jobs
+
+    lines = [line.strip() for line in page_text.split("\n") if line.strip()]
+    for line in lines[:60]:
+        if len(line) < 15:
+            continue
+        if "job" not in line.lower() and "engineer" not in line.lower() and "developer" not in line.lower():
+            continue
+        jobs.append(normalize_row(line[:120], line, source_url))
+        if len(jobs) >= 40:
+            break
 
     return jobs
 

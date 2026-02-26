@@ -5,6 +5,7 @@ Scrapes gaming industry job listings from gracklehq.com/jobs and outputs JSON.
 """
 import json
 import hashlib
+import re
 import sys
 
 DEFAULT_SOURCE_URL = "https://gracklehq.com/jobs"
@@ -33,81 +34,59 @@ def content_hash(title: str, company: str, location: str) -> str:
     return f"grackle-{hashlib.sha256(raw.encode()).hexdigest()[:12]}"
 
 
+AGE_PATTERN = re.compile(r"^<?\d+d?$")
+
+
 def scrape_jobs() -> list[dict]:
-    jobs = []
+    jobs: list[dict] = []
     source_url = resolve_source_url()
     try:
-        r.init(turbo_mode=True)
+        r.init(turbo_mode=True, headless_mode=True)
         r.url(source_url)
         r.wait(4)
-
-        # Extract job data using DOM queries
-        # GrackleHQ uses a[href*="/rd/"] links with "Company - Location" text nearby
-        js_extract = """
-        (function() {
-            var results = [];
-            var links = document.querySelectorAll('a[href*="/rd/"]');
-            links.forEach(function(link) {
-                var title = (link.textContent || '').trim();
-                if (!title || title.length < 3) return;
-
-                // Look for company/location in adjacent text or parent container
-                var parent = link.closest('li, div, tr, article') || link.parentElement;
-                var fullText = parent ? parent.textContent.replace(/\\s+/g, ' ').trim() : '';
-
-                var company = 'Unknown';
-                var location = 'Remote';
-
-                // Parse "Company - Location" pattern from surrounding text
-                var afterTitle = fullText.replace(title, '').trim();
-                var parts = afterTitle.split(' - ');
-                if (parts.length >= 2) {
-                    company = parts[0].trim().replace(/^[\\s-]+/, '').trim();
-                    location = parts[1].trim().split(/\\s{2,}/)[0].trim();
-                } else if (parts.length === 1 && parts[0].trim().length > 2) {
-                    company = parts[0].trim().replace(/^[\\s-]+/, '').trim();
-                }
-
-                // Clean up
-                if (company.length > 100) company = company.substring(0, 100);
-                if (location.length > 100) location = location.substring(0, 100);
-
-                results.push({
-                    title: title.substring(0, 200),
-                    company: company || 'Unknown',
-                    location: location || 'Remote',
-                    url: link.href || ''
-                });
-            });
-            return JSON.stringify(results);
-        })()
-        """
-        raw = r.dom(js_extract)
+        body = r.read("body") or ""
         r.close()
 
-        if raw and isinstance(raw, str):
-            try:
-                parsed = json.loads(raw)
-            except json.JSONDecodeError:
-                parsed = []
+        if not body or len(body) < 100:
+            return jobs
 
-            for item in parsed[:50]:
-                title = item.get("title", "").strip()
-                if not title or len(title) < 3:
+        lines = [ln.strip() for ln in body.split("\n") if ln.strip()]
+        in_jobs = False
+        current_title: str | None = None
+
+        for line in lines:
+            if "results" in line.lower() and not in_jobs:
+                in_jobs = True
+                continue
+            if not in_jobs:
+                continue
+            if line.startswith("Filters") or line.startswith("Department"):
+                break
+            if AGE_PATTERN.match(line):
+                continue
+
+            if " - " in line and len(line) < 250 and current_title:
+                parts = line.split(" - ", 1)
+                company = parts[0].strip()
+                location = parts[1].strip() if len(parts) > 1 else "Remote"
+                if AGE_PATTERN.match(company):
+                    current_title = None
                     continue
-                company = item.get("company", "Unknown")
-                loc = item.get("location", "Remote")
                 jobs.append({
-                    "title": title,
-                    "company": company,
-                    "location": loc,
-                    "remote": "remote" in loc.lower(),
+                    "title": current_title[:200],
+                    "company": company[:100],
+                    "location": location[:100],
+                    "remote": "remote" in location.lower(),
                     "description": "",
-                    "url": item.get("url", source_url),
+                    "url": source_url,
                     "source": "grackle",
                     "postedDate": "",
-                    "contentHash": content_hash(title, company, loc),
+                    "contentHash": content_hash(current_title, company, location),
                 })
+                current_title = None
+            elif line and len(line) > 5 and len(line) < 250 and not AGE_PATTERN.match(line):
+                current_title = line
+
     except Exception as e:
         try:
             r.close()
@@ -115,7 +94,7 @@ def scrape_jobs() -> list[dict]:
             pass
         print(f"Scraper error: {e}", file=sys.stderr)
 
-    return jobs
+    return jobs[:50]
 
 
 if __name__ == "__main__":

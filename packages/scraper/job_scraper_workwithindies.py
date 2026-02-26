@@ -5,6 +5,7 @@ Scrapes indie game studio job listings from workwithindies.com and outputs JSON.
 """
 import json
 import hashlib
+import re
 import sys
 
 DEFAULT_SOURCE_URL = "https://workwithindies.com"
@@ -33,82 +34,49 @@ def content_hash(title: str, company: str, location: str) -> str:
     return f"wwi-{hashlib.sha256(raw.encode()).hexdigest()[:12]}"
 
 
+HIRING_PATTERN = re.compile(
+    r"(.+?)\s+is hiring\s+(?:a |an )?(.+?)(?:to (?:work from|join their team in|join)\s+(.+?))?(?:Learn More|$)",
+    re.IGNORECASE,
+)
+
+
 def scrape_jobs() -> list[dict]:
-    jobs = []
+    jobs: list[dict] = []
     source_url = resolve_source_url()
     try:
-        r.init(turbo_mode=True)
+        r.init(turbo_mode=True, headless_mode=True)
         r.url(source_url)
-        r.wait(5)  # Jetboost/JS-rendered, needs extra load time
-
-        # Extract jobs from career links - site uses a[href*="/careers/"] pattern
-        # Text format: "Company is hiring a Title to join..."
-        js_extract = """
-        (function() {
-            var results = [];
-            var links = document.querySelectorAll('a[href*="/careers/"]');
-            links.forEach(function(link) {
-                var text = (link.textContent || '').replace(/\\s+/g, ' ').trim();
-                if (!text || text.length < 10) return;
-
-                var title = '';
-                var company = '';
-                var location = 'Remote';
-
-                // Parse "Company is hiring a Title" pattern
-                var hiringMatch = text.match(/^(.+?)\\s+is hiring\\s+(?:a |an )?(.+?)(?:\\s+to\\s+|$)/i);
-                if (hiringMatch) {
-                    company = hiringMatch[1].trim();
-                    title = hiringMatch[2].trim();
-                } else {
-                    // Fallback: use full text as title
-                    title = text.substring(0, 150);
-                }
-
-                // Look for location hints
-                var locMatch = text.match(/(?:work from|based in|located in)\\s+(?:the\\s+)?(.+?)(?:\\.|$)/i);
-                if (locMatch) {
-                    location = locMatch[1].trim();
-                }
-
-                if (title) {
-                    results.push({
-                        title: title.substring(0, 200),
-                        company: company || 'Unknown',
-                        location: location,
-                        url: link.href || ''
-                    });
-                }
-            });
-            return JSON.stringify(results);
-        })()
-        """
-        raw = r.dom(js_extract)
+        r.wait(5)
+        body = r.read("body") or ""
         r.close()
 
-        if raw and isinstance(raw, str):
-            try:
-                parsed = json.loads(raw)
-            except json.JSONDecodeError:
-                parsed = []
+        if not body or len(body) < 100:
+            return jobs
 
-            for item in parsed[:60]:
-                title = item.get("title", "").strip()
-                if not title or len(title) < 3:
-                    continue
-                company = item.get("company", "Unknown")
-                loc = item.get("location", "Remote")
-                jobs.append({
-                    "title": title,
-                    "company": company,
-                    "location": loc,
-                    "remote": "remote" in loc.lower() or "anywhere" in loc.lower(),
-                    "description": "",
-                    "url": item.get("url", source_url),
-                    "source": "workwithindies",
-                    "postDate": "",
-                    "contentHash": content_hash(title, company, loc),
-                })
+        for match in HIRING_PATTERN.finditer(body):
+            company = match.group(1).strip()
+            title = match.group(2).strip()
+            location = match.group(3).strip() if match.group(3) else "Remote"
+
+            if not title or len(title) < 3:
+                continue
+            if title.lower().startswith("learn more"):
+                continue
+            if len(company) > 80 or "resume" in company.lower() or "discord" in company.lower():
+                continue
+
+            jobs.append({
+                "title": title[:200],
+                "company": company[:100],
+                "location": location[:100],
+                "remote": "remote" in location.lower() or "anywhere" in location.lower(),
+                "description": "",
+                "url": source_url,
+                "source": "workwithindies",
+                "postDate": "",
+                "contentHash": content_hash(title, company, location),
+            })
+
     except Exception as e:
         try:
             r.close()
@@ -116,7 +84,7 @@ def scrape_jobs() -> list[dict]:
             pass
         print(f"Scraper error: {e}", file=sys.stderr)
 
-    return jobs
+    return jobs[:60]
 
 
 if __name__ == "__main__":
