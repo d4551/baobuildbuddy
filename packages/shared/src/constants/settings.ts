@@ -51,18 +51,46 @@ export type SpeechProviderOption = (typeof SPEECH_PROVIDER_OPTIONS)[number];
 export const DEFAULT_SPEECH_LOCALE = "en-US";
 
 /**
+ * Curated speech model options by provider for chat/interview selectors.
+ * Single source of truth — defaults and UI selectors both derive from this.
+ */
+export const SPEECH_MODEL_OPTIONS = {
+  stt: {
+    browser: ["browser-default"],
+    openai: ["gpt-4o-mini-transcribe", "gpt-4o-transcribe"],
+    huggingface: ["openai/whisper-large-v3-turbo"],
+    local: ["whisper-tiny", "whisper-small", "whisper-large-v3-turbo", "distil-whisper-large-v3"],
+    custom: ["custom-stt-model"],
+  },
+  tts: {
+    browser: ["browser-default"],
+    openai: ["gpt-4o-mini-tts", "gpt-4o-audio-preview"],
+    huggingface: ["suno/bark", "hexgrad/Kokoro-82M"],
+    local: ["kokoro", "piper", "xtts-v2"],
+    custom: ["custom-tts-model"],
+  },
+} as const satisfies {
+  stt: Record<SpeechProviderOption, readonly string[]>;
+  tts: Record<SpeechProviderOption, readonly string[]>;
+};
+
+const DEFAULT_STT_PROVIDER: SpeechProviderOption = "browser";
+const DEFAULT_TTS_PROVIDER: SpeechProviderOption = "browser";
+
+/**
  * Default provider/model values for speech recognition and synthesis.
+ * Model values are derived from SPEECH_MODEL_OPTIONS — not hardcoded.
  */
 export const DEFAULT_SPEECH_SETTINGS = {
   locale: DEFAULT_SPEECH_LOCALE,
   stt: {
-    provider: "browser",
-    model: "gpt-4o-mini-transcribe",
+    provider: DEFAULT_STT_PROVIDER,
+    model: SPEECH_MODEL_OPTIONS.stt[DEFAULT_STT_PROVIDER][0],
     endpoint: "",
   },
   tts: {
-    provider: "browser",
-    model: "gpt-4o-mini-tts",
+    provider: DEFAULT_TTS_PROVIDER,
+    model: SPEECH_MODEL_OPTIONS.tts[DEFAULT_TTS_PROVIDER][0],
     endpoint: "",
     voice: "alloy",
     format: "mp3",
@@ -81,27 +109,4 @@ export const DEFAULT_SPEECH_SETTINGS = {
     voice: string;
     format: "mp3" | "wav";
   };
-};
-
-/**
- * Curated speech model options by provider for chat/interview selectors.
- */
-export const SPEECH_MODEL_OPTIONS = {
-  stt: {
-    browser: ["browser-default"],
-    openai: ["gpt-4o-mini-transcribe", "gpt-4o-transcribe"],
-    huggingface: ["openai/whisper-large-v3-turbo"],
-    local: ["whisper-large-v3-turbo", "whisper-small", "distil-whisper-large-v3"],
-    custom: ["custom-stt-model"],
-  },
-  tts: {
-    browser: ["browser-default"],
-    openai: ["gpt-4o-mini-tts", "gpt-4o-audio-preview"],
-    huggingface: ["suno/bark", "hexgrad/Kokoro-82M"],
-    local: ["kokoro", "piper", "xtts-v2"],
-    custom: ["custom-tts-model"],
-  },
-} as const satisfies {
-  stt: Record<SpeechProviderOption, readonly string[]>;
-  tts: Record<SpeechProviderOption, readonly string[]>;
 };

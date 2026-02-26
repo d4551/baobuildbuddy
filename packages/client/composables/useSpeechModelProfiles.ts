@@ -58,13 +58,16 @@ const resolveDefaultModel = (kind: SpeechModelProfileKind, provider: SpeechProvi
   return configuredModels[0] ?? "";
 };
 
-const createSpeechConfigState = (): SpeechModelProfileState =>
-  reactive<SpeechModelProfileState>({
-    sttProvider: DEFAULT_SPEECH_SETTINGS.stt.provider,
-    sttModel: DEFAULT_SPEECH_SETTINGS.stt.model,
-    ttsProvider: DEFAULT_SPEECH_SETTINGS.tts.provider,
-    ttsModel: DEFAULT_SPEECH_SETTINGS.tts.model,
+const createSpeechConfigState = (): SpeechModelProfileState => {
+  const sttProvider = DEFAULT_SPEECH_SETTINGS.stt.provider;
+  const ttsProvider = DEFAULT_SPEECH_SETTINGS.tts.provider;
+  return reactive<SpeechModelProfileState>({
+    sttProvider,
+    sttModel: resolveDefaultModel("stt", sttProvider),
+    ttsProvider,
+    ttsModel: resolveDefaultModel("tts", ttsProvider),
   });
+};
 
 const createPersistedSpeechConfig = (
   settings: ReturnType<typeof useSettings>["settings"],
