@@ -34,25 +34,25 @@ const restoreDomGlobals = (state: DomGlobalState): void => {
   if (state.window) {
     runtime.window = state.window;
   } else {
-    delete runtime.window;
+    runtime.window = undefined;
   }
 
   if (state.document) {
     runtime.document = state.document;
   } else {
-    delete runtime.document;
+    runtime.document = undefined;
   }
 
   if (state.HTMLElement) {
     runtime.HTMLElement = state.HTMLElement;
   } else {
-    delete runtime.HTMLElement;
+    runtime.HTMLElement = undefined;
   }
 
   if (state.HTMLAnchorElement) {
     runtime.HTMLAnchorElement = state.HTMLAnchorElement;
   } else {
-    delete runtime.HTMLAnchorElement;
+    runtime.HTMLAnchorElement = undefined;
   }
 };
 
@@ -74,15 +74,20 @@ const createEvaluatePage = (html: string): PageEvaluator => {
       runtime.HTMLElement = window.HTMLElement;
       runtime.HTMLAnchorElement = window.HTMLAnchorElement;
 
-      try {
-        if (typeof arg === "undefined") {
-          return (pageFunction as () => Result)();
-        }
+      const [evaluationResult] = await Promise.allSettled([
+        Promise.resolve(
+          typeof arg === "undefined"
+            ? (pageFunction as () => Result)()
+            : (pageFunction as (value: Arg) => Result)(arg),
+        ),
+      ]);
+      restoreDomGlobals(previousGlobals);
 
-        return (pageFunction as (value: Arg) => Result)(arg);
-      } finally {
-        restoreDomGlobals(previousGlobals);
+      if (evaluationResult.status === "rejected") {
+        throw evaluationResult.reason;
       }
+
+      return evaluationResult.value;
     },
   };
 };

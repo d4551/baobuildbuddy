@@ -20,7 +20,7 @@
     "typecheck": "bun --bun run nuxt typecheck",
     "test": "bun --bun run vitest run",
     "test:watch": "bun --bun run vitest",
-    "lint": "bun --bun run eslint ."
+    "lint": "bun --bun run eslint app.vue error.vue components composables constants layouts locales middleware pages plugins types utils nuxt.config.ts vitest.config.ts eslint.config.js"
   },
   "dependencies": {
     "@bao/shared": "workspace:*",
