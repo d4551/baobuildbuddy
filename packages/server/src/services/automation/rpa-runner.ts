@@ -17,7 +17,7 @@ import {
 } from "@bao/shared";
 import { config } from "../../config/env";
 import { SCRAPER_DIR } from "../../config/paths";
-import { isAbsolute, resolve } from "node:path";
+import { isAbsolute, resolve } from "path";
 
 const DEFAULT_KILL_SIGNAL = "SIGKILL";
 const MAX_PROTOCOL_ERROR_LINES = 20;

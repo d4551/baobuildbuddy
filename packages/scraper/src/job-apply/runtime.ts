@@ -5,8 +5,8 @@ import {
   type JobApplyScriptEnvelope,
   type RpaRunResult,
 } from "@bao/shared";
-import { mkdir } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { mkdir } from "fs/promises";
+import { basename, join } from "path";
 import type { Locator, Page } from "playwright";
 import {
   closeAutomationBrowser,

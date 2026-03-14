@@ -2,7 +2,6 @@ import { APP_BRAND } from "../packages/shared/src/constants/branding";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
 import { writeError, writeOutput } from "./utils/cli-output";
-import { resolve } from "node:path";
 
 type RouteVerificationResult = {
   locale: string;
@@ -27,7 +26,7 @@ const DEFAULT_VERIFY_BASE_URL = `http://${DEFAULT_VERIFY_HOST}:${DEFAULT_VERIFY_
 const EXTERNAL_VERIFY_BASE_URL = process.env.VERIFY_BASE_URL?.replace(/\/$/u, "") ?? null;
 const VERIFY_BASE_URL = EXTERNAL_VERIFY_BASE_URL ?? DEFAULT_VERIFY_BASE_URL;
 const CLIENT_BUILD_OUTPUT_PATH = "packages/client/.output/server/index.mjs";
-const CLIENT_PACKAGE_ROOT = resolve(process.cwd(), "packages/client");
+const CLIENT_PACKAGE_ROOT = Bun.resolveSync("packages/client", process.cwd());
 const PREVIEW_READY_TIMEOUT_MS = 60_000;
 const PREVIEW_POLL_INTERVAL_MS = 1_000;
 const PREVIEW_LOG_LIMIT = 40;

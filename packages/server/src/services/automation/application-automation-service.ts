@@ -1,6 +1,6 @@
-import { mkdirSync, rmSync } from "node:fs";
-import { access, readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { mkdirSync, rmSync } from "fs";
+import { access, readFile, writeFile } from "fs/promises";
+import { join, resolve } from "path";
 import {
   API_ERROR_EMPTY_EMAIL_RESPONSE,
   API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED,
