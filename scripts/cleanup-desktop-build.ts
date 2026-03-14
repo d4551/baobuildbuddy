@@ -101,7 +101,7 @@ const collectTemporaryDiskImages = async (): Promise<string[]> => {
   for await (const relativePath of DESKTOP_TEMP_DMG_GLOB.scan({
     cwd: DESKTOP_TAURI_ROOT,
   })) {
-    imagePaths.push(resolve(DESKTOP_TAURI_ROOT, relativePath));
+    imagePaths.push(Bun.resolveSync(relativePath, DESKTOP_TAURI_ROOT));
   }
 
   return imagePaths;
@@ -112,7 +112,7 @@ const collectBundleDirectories = async (): Promise<string[]> => {
   for await (const relativePath of DESKTOP_BUNDLE_GLOB.scan({
     cwd: DESKTOP_TAURI_ROOT,
   })) {
-    directoryPaths.push(resolve(DESKTOP_TAURI_ROOT, relativePath));
+    directoryPaths.push(Bun.resolveSync(relativePath, DESKTOP_TAURI_ROOT));
   }
 
   return directoryPaths;
