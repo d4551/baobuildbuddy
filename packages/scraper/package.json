@@ -16,9 +16,9 @@
     "./scripts/*": "./src/scripts/*.ts"
   },
   "scripts": {
-    "typecheck": "bunx --bun tsc --noEmit",
+    "typecheck": "bun run tsc --noEmit",
     "test": "bun test",
-    "install:browsers": "bunx --bun playwright install chromium"
+    "install:browsers": "bun run playwright install chromium"
   },
   "dependencies": {
     "@bao/shared": "workspace:*",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "happy-dom": "^20.6.3",
     "typescript": "^5.9.3"
   }
 }

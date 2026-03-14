@@ -1,7 +1,7 @@
 import type { ScrapedJob } from "@bao/shared";
-import type { Page } from "playwright";
 import { buildScraperHash } from "../runtime/hash";
 import { toAbsoluteUrl, toBoundedText } from "./provider-helpers";
+import type { PageEvaluator } from "./provider-types";
 
 const HITMARKER_SCAN_LIMIT = 60;
 const HITMARKER_RESULT_LIMIT = 40;
@@ -74,12 +74,12 @@ const extractHitmarkerCandidates = ({
 /**
  * Extracts normalized Hitmarker jobs from the current Playwright page.
  *
- * @param page Playwright page positioned on a Hitmarker listing.
+ * @param page Page evaluator positioned on a Hitmarker listing.
  * @param sourceUrl Canonical source URL supplied by settings.
  * @returns Normalized job rows.
  */
 export const extractHitmarkerJobs = async (
-  page: Page,
+  page: PageEvaluator,
   sourceUrl: string,
 ): Promise<ScrapedJob[]> => {
   const rows = await page.evaluate(extractHitmarkerCandidates, {

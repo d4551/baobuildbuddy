@@ -1,7 +1,7 @@
 import type { ScrapedJob } from "@bao/shared";
-import type { Page } from "playwright";
 import { buildScraperHash } from "../runtime/hash";
 import { normalizeWhitespace, toAbsoluteUrl, toBoundedText } from "./provider-helpers";
+import type { PageEvaluator } from "./provider-types";
 
 const GRACKLE_RESULT_LIMIT = 50;
 
@@ -15,11 +15,14 @@ type GrackleCandidate = {
 /**
  * Extracts normalized GrackleHQ jobs from the current Playwright page.
  *
- * @param page Playwright page positioned on a GrackleHQ listing.
+ * @param page Page evaluator positioned on a GrackleHQ listing.
  * @param sourceUrl Canonical source URL supplied by settings.
  * @returns Normalized job rows.
  */
-export const extractGrackleJobs = async (page: Page, sourceUrl: string): Promise<ScrapedJob[]> => {
+export const extractGrackleJobs = async (
+  page: PageEvaluator,
+  sourceUrl: string,
+): Promise<ScrapedJob[]> => {
   const rows = await page.evaluate((resultLimit) => {
     const stripLeadingSeparator = (value: string): string =>
       value.startsWith("-") ? value.slice(1).trimStart() : value;

@@ -1,19 +1,19 @@
 import type { ScrapedJob } from "@bao/shared";
-import type { Page } from "playwright";
 import { buildScraperHash } from "../runtime/hash";
 import { normalizeWhitespace, toAbsoluteUrl, toBoundedText } from "./provider-helpers";
+import type { PageEvaluator } from "./provider-types";
 
 const GAMES_JOBS_DIRECT_RESULT_LIMIT = 80;
 
 /**
  * Extracts normalized GamesJobsDirect entries from the current Playwright page.
  *
- * @param page Playwright page positioned on a GamesJobsDirect listing.
+ * @param page Page evaluator positioned on a GamesJobsDirect listing.
  * @param sourceUrl Canonical source URL supplied by settings.
  * @returns Normalized job rows.
  */
 export const extractGamesJobsDirectJobs = async (
-  page: Page,
+  page: PageEvaluator,
   sourceUrl: string,
 ): Promise<ScrapedJob[]> => {
   const rows = await page.evaluate(() => {

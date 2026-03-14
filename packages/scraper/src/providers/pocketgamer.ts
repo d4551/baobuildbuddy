@@ -1,7 +1,7 @@
 import type { ScrapedJob } from "@bao/shared";
-import type { Page } from "playwright";
 import { buildScraperHash } from "../runtime/hash";
 import { normalizeWhitespace, toAbsoluteUrl, toBoundedText } from "./provider-helpers";
+import type { PageEvaluator } from "./provider-types";
 
 const POCKET_GAMER_RESULT_LIMIT = 40;
 
@@ -49,12 +49,12 @@ const extractPocketGamerCandidates = ({
 /**
  * Extracts normalized PocketGamer.biz jobs from the current Playwright page.
  *
- * @param page Playwright page positioned on a PocketGamer listing.
+ * @param page Page evaluator positioned on a PocketGamer listing.
  * @param sourceUrl Canonical source URL supplied by settings.
  * @returns Normalized job rows.
  */
 export const extractPocketGamerJobs = async (
-  page: Page,
+  page: PageEvaluator,
   sourceUrl: string,
 ): Promise<ScrapedJob[]> => {
   const rows = await page.evaluate(extractPocketGamerCandidates, {

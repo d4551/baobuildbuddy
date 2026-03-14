@@ -1,7 +1,7 @@
 import type { ScrapedJob } from "@bao/shared";
-import type { Page } from "playwright";
 import { buildScraperHash } from "../runtime/hash";
 import { toAbsoluteUrl, toBoundedText } from "./provider-helpers";
+import type { PageEvaluator } from "./provider-types";
 
 const REMOTE_GAME_JOBS_RESULT_LIMIT = 50;
 const EMPLOYMENT_TYPE_TOKENS = ["full-time", "part-time", "contract", "freelance", "internship"];
@@ -73,12 +73,12 @@ const extractRemoteGameJobsCandidates = ({
 /**
  * Extracts normalized RemoteGameJobs entries from the current Playwright page.
  *
- * @param page Playwright page positioned on a RemoteGameJobs listing.
+ * @param page Page evaluator positioned on a RemoteGameJobs listing.
  * @param sourceUrl Canonical source URL supplied by settings.
  * @returns Normalized job rows.
  */
 export const extractRemoteGameJobs = async (
-  page: Page,
+  page: PageEvaluator,
   sourceUrl: string,
 ): Promise<ScrapedJob[]> => {
   const rows = await page.evaluate(extractRemoteGameJobsCandidates, {
