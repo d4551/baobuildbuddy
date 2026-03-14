@@ -1,6 +1,5 @@
 import { writeError, writeOutput } from "./utils/cli-output";
 import { rm } from "fs/promises";
-import { resolve } from "node:path";
 
 type PreflightCheck = {
   label: string;
@@ -14,10 +13,10 @@ type NetworkTarget = {
 };
 
 const NETWORK_TIMEOUT_MS = 8_000;
-const DESKTOP_TAURI_ROOT = resolve(process.cwd(), "packages/desktop/src-tauri");
+const DESKTOP_TAURI_ROOT = Bun.resolveSync("packages/desktop/src-tauri", process.cwd());
 const DESKTOP_TAURI_TARGET_DIRS = [
-  resolve(DESKTOP_TAURI_ROOT, "target"),
-  resolve(DESKTOP_TAURI_ROOT, "target-linux"),
+  Bun.resolveSync("target", DESKTOP_TAURI_ROOT),
+  Bun.resolveSync("target-linux", DESKTOP_TAURI_ROOT),
 ] as const;
 const NETWORK_TARGETS: readonly NetworkTarget[] = [
   { label: "bun.sh", url: "https://bun.sh" },

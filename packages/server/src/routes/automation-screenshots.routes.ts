@@ -11,7 +11,7 @@ import {
   RUN_ID_SAFE_PATTERN_SOURCE,
   settle,
 } from "@bao/shared";
-import { join } from "node:path";
+import { join } from "path";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";

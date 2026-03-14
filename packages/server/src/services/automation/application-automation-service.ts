@@ -1,5 +1,5 @@
-import { mkdirSync, rmSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { mkdirSync, rmSync } from "fs";
+import { join, resolve } from "path";
 import {
   API_ERROR_EMPTY_EMAIL_RESPONSE,
   API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED,
