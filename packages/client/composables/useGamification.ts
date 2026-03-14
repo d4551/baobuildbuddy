@@ -99,8 +99,14 @@ const createGamificationState = (): GamificationState => ({
   progress: useState<UserGamificationData | null>(STATE_KEYS.GAMIFICATION_PROGRESS, () => null),
   achievements: useState<Achievement[]>(STATE_KEYS.GAMIFICATION_ACHIEVEMENTS, () => []),
   challenges: useState<DailyChallenge[]>(STATE_KEYS.GAMIFICATION_CHALLENGES, () => []),
-  weeklyProgress: useState<Record<string, unknown> | null>(STATE_KEYS.GAMIFICATION_WEEKLY, () => null),
-  monthlyStats: useState<Record<string, unknown> | null>(STATE_KEYS.GAMIFICATION_MONTHLY, () => null),
+  weeklyProgress: useState<Record<string, unknown> | null>(
+    STATE_KEYS.GAMIFICATION_WEEKLY,
+    () => null,
+  ),
+  monthlyStats: useState<Record<string, unknown> | null>(
+    STATE_KEYS.GAMIFICATION_MONTHLY,
+    () => null,
+  ),
   loading: useState(STATE_KEYS.GAMIFICATION_LOADING, () => false),
 });
 

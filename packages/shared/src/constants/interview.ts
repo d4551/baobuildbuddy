@@ -87,12 +87,6 @@ export const INTERVIEW_PROGRESS_MIN = 0;
 export const INTERVIEW_PROGRESS_MAX = 100;
 
 /**
- * Number of recent interview sessions rendered per page in the interview hub table.
- */
-/** @deprecated Use INTERVIEW_HUB_RECENT_SESSION_LIMIT directly. Scheduled for removal. */
-export const INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE = INTERVIEW_HUB_RECENT_SESSION_LIMIT;
-
-/**
  * Minimum response length required before submitting an interview answer.
  */
 export const INTERVIEW_MIN_RESPONSE_LENGTH = 10;
@@ -106,3 +100,18 @@ export const INTERVIEW_HUB_EXPERIENCE_OPTIONS = ["entry", "mid", "senior", "lead
  * Canonical question-count options displayed in the interview hub setup flow.
  */
 export const INTERVIEW_HUB_QUESTION_COUNT_OPTIONS = [3, 5, 8] as const;
+
+/**
+ * Maximum allowed question count for interview sessions (validation cap).
+ */
+export const INTERVIEW_MAX_QUESTION_COUNT = 20;
+
+/**
+ * Maximum questions generated per interview session (service cap).
+ */
+export const INTERVIEW_SERVICE_MAX_QUESTION_COUNT = 12;
+
+/**
+ * Timeout in ms for AI operations during interview (question generation, feedback).
+ */
+export const AI_OPERATION_TIMEOUT_MS = 1200;

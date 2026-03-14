@@ -182,6 +182,7 @@ onMounted(async () => {
             class="input input-bordered input-lg join-item flex-1"
             :disabled="loading"
             :aria-label="t('aiChatPage.inputAria')"
+            @keyup.enter.prevent="handleSendMessage"
           />
           <button
             type="submit"

@@ -290,7 +290,9 @@ function createVoiceComputedState(
     () => AI_CHAT_VOICE_DEFAULT_ID,
   );
   const voices = computed(() => speech.voices.value);
-  const latestAssistantMessage = computed(() => resolveLatestAssistantMessage(options.messages.value));
+  const latestAssistantMessage = computed(() =>
+    resolveLatestAssistantMessage(options.messages.value),
+  );
   const canReplayAssistant = computed(
     () => speech.supportsSynthesis.value && latestAssistantMessage.value.length > 0,
   );

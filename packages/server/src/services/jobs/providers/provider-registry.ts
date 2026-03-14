@@ -1,22 +1,29 @@
+import {
+  JOB_PROVIDER_RATE_LIMIT_MAX_REQUESTS,
+  JOB_PROVIDER_RATE_LIMIT_WINDOW_MS,
+} from "@bao/shared";
 import { createServerLogger } from "../../../utils/logger";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 
 export class SimpleRateLimiter {
   private requests: Map<string, number[]> = new Map();
 
-  constructor(private maxPerMinute = 15) {}
+  constructor(
+    private maxPerWindow = JOB_PROVIDER_RATE_LIMIT_MAX_REQUESTS,
+    private windowMs = JOB_PROVIDER_RATE_LIMIT_WINDOW_MS,
+  ) {}
 
   canMakeRequest(provider: string): boolean {
     const now = Date.now();
     const requests = this.requests.get(provider) || [];
-    const recentRequests = requests.filter((t) => now - t < 60000);
-    return recentRequests.length < this.maxPerMinute;
+    const recentRequests = requests.filter((t) => now - t < this.windowMs);
+    return recentRequests.length < this.maxPerWindow;
   }
 
   recordRequest(provider: string): void {
     const now = Date.now();
     const requests = this.requests.get(provider) || [];
-    const recentRequests = requests.filter((t) => now - t < 60000);
+    const recentRequests = requests.filter((t) => now - t < this.windowMs);
     recentRequests.push(now);
     this.requests.set(provider, recentRequests);
   }
@@ -24,7 +31,7 @@ export class SimpleRateLimiter {
 
 export class JobProviderRegistry {
   private providers = new Map<string, JobProvider>();
-  private rateLimiter = new SimpleRateLimiter(15);
+  private rateLimiter = new SimpleRateLimiter();
   private logger = createServerLogger("job-provider-registry");
 
   register(provider: JobProvider): void {

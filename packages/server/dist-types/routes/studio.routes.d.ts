@@ -1,4 +1,14 @@
 import { Elysia } from "elysia";
+export interface StudioAnalytics {
+    totalStudios: number;
+    byType: Record<string, number>;
+    bySize: Record<string, number>;
+    remoteWorkStudios: number;
+    topTechnologies: Array<{
+        name: string;
+        count: number;
+    }>;
+}
 export declare const studioRoutes: Elysia<"/studios", {
     decorator: {};
     store: {};
@@ -106,13 +116,13 @@ export declare const studioRoutes: Elysia<"/studios", {
                 type?: string | undefined;
                 description?: string | undefined;
                 location?: string | undefined;
-                technologies?: string[] | undefined;
-                platforms?: string[] | undefined;
                 website?: string | undefined;
-                genres?: string[] | undefined;
                 size?: string | undefined;
-                culture?: {} | undefined;
+                technologies?: string[] | undefined;
                 remoteWork?: boolean | undefined;
+                platforms?: string[] | undefined;
+                genres?: string[] | undefined;
+                culture?: {} | undefined;
                 founded?: string | undefined;
                 benefits?: string[] | undefined;
                 socialMedia?: {} | undefined;
@@ -160,15 +170,15 @@ export declare const studioRoutes: Elysia<"/studios", {
                 body: {
                     type?: string | undefined;
                     description?: string | undefined;
-                    location?: string | undefined;
-                    technologies?: string[] | undefined;
-                    platforms?: string[] | undefined;
-                    website?: string | undefined;
                     name?: string | undefined;
-                    genres?: string[] | undefined;
+                    location?: string | undefined;
+                    website?: string | undefined;
                     size?: string | undefined;
-                    culture?: {} | undefined;
+                    technologies?: string[] | undefined;
                     remoteWork?: boolean | undefined;
+                    platforms?: string[] | undefined;
+                    genres?: string[] | undefined;
+                    culture?: {} | undefined;
                     founded?: string | undefined;
                     benefits?: string[] | undefined;
                     socialMedia?: {} | undefined;
@@ -254,16 +264,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        totalStudios: number;
-                        byType: Record<string, number>;
-                        bySize: Record<string, number>;
-                        remoteWorkStudios: number;
-                        topTechnologies: Array<{
-                            name: string;
-                            count: number;
-                        }>;
-                    };
+                    200: StudioAnalytics;
                 };
             };
         };

@@ -46,7 +46,10 @@ const findSeoBlock = (fileContent: string): SeoBlock | null => {
     return null;
   }
 
-  const openParenthesisOffset = fileContent.indexOf("(", seoComposableOffset + seoComposableToken.length);
+  const openParenthesisOffset = fileContent.indexOf(
+    "(",
+    seoComposableOffset + seoComposableToken.length,
+  );
   if (openParenthesisOffset === -1) {
     return null;
   }
@@ -69,7 +72,10 @@ const findSeoBlock = (fileContent: string): SeoBlock | null => {
   };
 };
 
-const resolveSeoPropertyValue = (seoBody: string, propertyName: "title" | "description"): string | null => {
+const resolveSeoPropertyValue = (
+  seoBody: string,
+  propertyName: "title" | "description",
+): string | null => {
   const propertyPattern = new RegExp(
     `\\b${propertyName}\\s*:\\s*([\\s\\S]*?)(?=,\\s*(?:\\n|$)|\\n\\s*[A-Za-z_$][\\w$]*\\s*:|$)`,
     "u",
@@ -89,12 +95,15 @@ const isStaticLiteralSeoValue = (value: string): boolean => {
 
   const startsWithSingleQuote = value.startsWith("'");
   const endsWithSingleQuote = value.endsWith("'");
-  const startsWithDoubleQuote = value.startsWith("\"");
-  const endsWithDoubleQuote = value.endsWith("\"");
+  const startsWithDoubleQuote = value.startsWith('"');
+  const endsWithDoubleQuote = value.endsWith('"');
   const startsWithBacktick = value.startsWith("`");
   const endsWithBacktick = value.endsWith("`");
 
-  if ((startsWithSingleQuote && endsWithSingleQuote) || (startsWithDoubleQuote && endsWithDoubleQuote)) {
+  if (
+    (startsWithSingleQuote && endsWithSingleQuote) ||
+    (startsWithDoubleQuote && endsWithDoubleQuote)
+  ) {
     const literal = value.slice(1, -1).trim();
     return literal.length > 0 && humanTextPattern.test(literal);
   }
@@ -116,7 +125,8 @@ const collectFileViolations = async (filePath: string): Promise<Violation[]> => 
       {
         filePath,
         line: 1,
-        message: "Missing useServerSeoMeta call. Core pages must define SSR title and description metadata.",
+        message:
+          "Missing useServerSeoMeta call. Core pages must define SSR title and description metadata.",
       },
     ];
   }

@@ -181,7 +181,9 @@ function resolveResumeContextEntity(input: EntityContextInput): AIChatContextEnt
   return toEntity("resume", resolvedResumeId, selectedResume?.name ?? "");
 }
 
-function resolveStudioPathContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
+function resolveStudioPathContextEntity(
+  input: EntityContextInput,
+): AIChatContextEntity | undefined {
   const routeId = input.routeParams[AI_CHAT_ROUTE_QUERY_KEYS.id];
   if (!(input.path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.studios}/`) && routeId)) {
     return;
@@ -189,7 +191,9 @@ function resolveStudioPathContextEntity(input: EntityContextInput): AIChatContex
   return toEntity("studio", routeId, input.studio?.name ?? "");
 }
 
-function resolveStudioQueryContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
+function resolveStudioQueryContextEntity(
+  input: EntityContextInput,
+): AIChatContextEntity | undefined {
   const queryStudioId = input.routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.studioId];
   if (!queryStudioId) {
     return;

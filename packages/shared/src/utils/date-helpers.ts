@@ -2,38 +2,49 @@
  * Date utility helpers
  */
 
+import { MS_PER_DAY, SECONDS_PER_30_DAYS, SECONDS_PER_WEEK } from "../constants/time";
+
 export type RelativeTimeTranslator = (key: string, params?: { count?: number }) => string;
+
+/** Options for formatRelativeTime. */
+export type FormatRelativeTimeOptions = {
+  /** i18n key prefix (e.g. "common.relativeTime", "dashboard.relativeTime"). Default: "common.relativeTime". */
+  keyPrefix?: string;
+  /** When true and seconds < 60, use minutesAgo with count 1 instead of justNow. For namespaces without justNow. */
+  minOneUnit?: boolean;
+  /** When true, use daysAgo for all day+ ranges instead of weeksAgo. For namespaces without weeksAgo. */
+  daysOnly?: boolean;
+};
+
+const DEFAULT_KEY_PREFIX = "common.relativeTime";
 
 /**
  * Returns a translated relative time string using the provided translation function.
  * Use this for i18n-aware relative time display.
  */
-export function formatRelativeTime(date: string | Date, t: RelativeTimeTranslator): string {
+export function formatRelativeTime(
+  date: string | Date,
+  t: RelativeTimeTranslator,
+  options?: FormatRelativeTimeOptions,
+): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+  const prefix = options?.keyPrefix ?? DEFAULT_KEY_PREFIX;
 
-  if (seconds < 60) return t("common.relativeTime.justNow");
+  if (seconds < 60) {
+    if (options?.minOneUnit) {
+      return t(`${prefix}.minutesAgo`, { count: 1 });
+    }
+    return t(`${prefix}.justNow`);
+  }
   if (seconds < 3600)
-    return t("common.relativeTime.minutesAgo", { count: Math.floor(seconds / 60) });
+    return t(`${prefix}.minutesAgo`, { count: Math.max(1, Math.floor(seconds / 60)) });
   if (seconds < 86400)
-    return t("common.relativeTime.hoursAgo", { count: Math.floor(seconds / 3600) });
-  if (seconds < 604800)
-    return t("common.relativeTime.daysAgo", { count: Math.floor(seconds / 86400) });
-  if (seconds < 2592000)
-    return t("common.relativeTime.weeksAgo", { count: Math.floor(seconds / 604800) });
-  return d.toLocaleDateString();
-}
-
-/** @deprecated Use formatRelativeTime with i18n t() for locale-aware output */
-export function timeAgo(date: string | Date): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
-
-  if (seconds < 60) return "just now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-  if (seconds < 2592000) return `${Math.floor(seconds / 604800)}w ago`;
+    return t(`${prefix}.hoursAgo`, { count: Math.max(1, Math.floor(seconds / 3600)) });
+  if (options?.daysOnly || seconds < SECONDS_PER_WEEK)
+    return t(`${prefix}.daysAgo`, { count: Math.max(1, Math.floor(seconds / 86400)) });
+  if (seconds < SECONDS_PER_30_DAYS)
+    return t(`${prefix}.weeksAgo`, { count: Math.floor(seconds / SECONDS_PER_WEEK) });
   return d.toLocaleDateString();
 }
 
@@ -55,5 +66,38 @@ export function isToday(date: string | Date): boolean {
 export function daysBetween(a: string | Date, b: string | Date): number {
   const da = typeof a === "string" ? new Date(a) : a;
   const db = typeof b === "string" ? new Date(b) : b;
-  return Math.floor(Math.abs(da.getTime() - db.getTime()) / 86400000);
+  return Math.floor(Math.abs(da.getTime() - db.getTime()) / MS_PER_DAY);
+}
+
+/** Options for formatRelativeTimeForDate. */
+export type FormatRelativeTimeForDateOptions = {
+  /** i18n key prefix (e.g. "jobsPage.date", "jobCard.relativeTime"). */
+  keyPrefix: string;
+  /** Key for invalid/missing dates. Defaults to `${keyPrefix}.unknown`. */
+  unknownKey?: string;
+};
+
+/**
+ * Returns a translated relative date string (day granularity) using the provided translator.
+ * Single source for job-posted-date, scraper dates, etc.
+ * Use formatRelativeTime for sub-day granularity (chat, activity timestamps).
+ */
+export function formatRelativeTimeForDate(
+  date: string | Date,
+  t: RelativeTimeTranslator,
+  options: FormatRelativeTimeForDateOptions,
+): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (Number.isNaN(d.getTime())) {
+    return t(options.unknownKey ?? `${options.keyPrefix}.unknown`);
+  }
+
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / MS_PER_DAY);
+
+  if (diffDays <= 0) return t(`${options.keyPrefix}.today`);
+  if (diffDays === 1) return t(`${options.keyPrefix}.yesterday`);
+  if (diffDays < 7) return t(`${options.keyPrefix}.daysAgo`, { count: diffDays });
+  if (diffDays < 30) return t(`${options.keyPrefix}.weeksAgo`, { count: Math.floor(diffDays / 7) });
+  return t(`${options.keyPrefix}.monthsAgo`, { count: Math.floor(diffDays / 30) });
 }

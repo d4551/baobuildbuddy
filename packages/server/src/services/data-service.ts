@@ -1,4 +1,12 @@
 import {
+  API_ERROR_INVALID_COVER_LETTER_PAYLOAD,
+  API_ERROR_INVALID_GAMIFICATION_PAYLOAD,
+  API_ERROR_INVALID_INTERVIEW_SESSION_PAYLOAD,
+  API_ERROR_INVALID_PORTFOLIO_PAYLOAD,
+  API_ERROR_INVALID_PORTFOLIO_PROJECT_PAYLOAD,
+  API_ERROR_INVALID_RESUME_PAYLOAD,
+  API_ERROR_INVALID_SKILL_MAPPING_PAYLOAD,
+  DEFAULT_PROFILE_ID,
   asBoolean,
   asNumber,
   asRecord,
@@ -6,6 +14,8 @@ import {
   asStringArray,
   asUnknownArray,
   isRecord,
+  settle,
+  toErrorMessage,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db, sqlite } from "../db/client";
@@ -55,7 +65,7 @@ type SkillMappingInsert = typeof skillMappings.$inferInsert;
 type ChatHistoryInsert = typeof chatHistory.$inferInsert;
 
 const asStringArrayRecord = (value: unknown): Record<string, string[]> | undefined => {
-  if (!isRecord(value)) return ;
+  if (!isRecord(value)) return;
   const result: Record<string, string[]> = {};
   for (const [key, entry] of Object.entries(value)) {
     if (!Array.isArray(entry)) continue;
@@ -65,9 +75,7 @@ const asStringArrayRecord = (value: unknown): Record<string, string[]> | undefin
 };
 
 const omitImportMetadata = (value: Record<string, unknown>): Record<string, unknown> =>
-  Object.fromEntries(
-    Object.entries(value).filter(([key]) => key !== "id" && key !== "createdAt"),
-  );
+  Object.fromEntries(Object.entries(value).filter(([key]) => key !== "id" && key !== "createdAt"));
 
 const parseResumeInsert = (value: unknown): ResumeInsert | null => {
   if (!isRecord(value)) return null;
@@ -97,7 +105,7 @@ const parseCoverLetterInsert = (value: unknown): CoverLetterInsert | null => {
   const id = asString(value.id);
   const company = asString(value.company);
   const position = asString(value.position);
-  if (!((id && company ) && position)) return null;
+  if (!(id && company && position)) return null;
 
   return {
     id,
@@ -129,7 +137,7 @@ const parsePortfolioProjectInsert = (value: unknown): PortfolioProjectInsert | n
   const portfolioId = asString(value.portfolioId);
   const title = asString(value.title);
   const description = asString(value.description);
-  if (!(((id && portfolioId ) && title ) && description)) return null;
+  if (!(id && portfolioId && title && description)) return null;
 
   return {
     id,
@@ -175,7 +183,7 @@ const parseInterviewSessionInsert = (value: unknown): InterviewSessionInsert | n
 const parseGamificationInsert = (value: unknown): GamificationInsert | null => {
   if (!isRecord(value)) return null;
   return {
-    id: asString(value.id) ?? "default",
+    id: asString(value.id) ?? DEFAULT_PROFILE_ID,
     xp: asNumber(value.xp),
     level: asNumber(value.level),
     achievements: asStringArray(value.achievements) ?? [],
@@ -194,7 +202,7 @@ const parseSkillMappingInsert = (value: unknown): SkillMappingInsert | null => {
   const id = asString(value.id);
   const gameExpression = asString(value.gameExpression);
   const transferableSkill = asString(value.transferableSkill);
-  if (!((id && gameExpression ) && transferableSkill)) return null;
+  if (!(id && gameExpression && transferableSkill)) return null;
 
   return {
     id,
@@ -217,7 +225,7 @@ const parseChatHistoryInsert = (value: unknown): ChatHistoryInsert | null => {
   const role = asString(value.role);
   const content = asString(value.content);
   const timestamp = asString(value.timestamp);
-  if (!(((id && role ) && content ) && timestamp)) return null;
+  if (!(id && role && content && timestamp)) return null;
 
   return {
     id,
@@ -227,13 +235,6 @@ const parseChatHistoryInsert = (value: unknown): ChatHistoryInsert | null => {
     sessionId: asString(value.sessionId),
     createdAt: asString(value.createdAt),
   };
-};
-
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
 };
 
 const runWithErrorHandler = async (
@@ -261,7 +262,10 @@ export class DataService {
    * API keys are redacted for security
    */
   async exportAll(): Promise<BaoExportData> {
-    const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
+    const profileRows = await db
+      .select()
+      .from(userProfile)
+      .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
     const settingsRows = await db
       .select()
       .from(settings)
@@ -271,7 +275,10 @@ export class DataService {
     const allPortfolios = await db.select().from(portfolios);
     const allProjects = await db.select().from(portfolioProjects);
     const allInterviews = await db.select().from(interviewSessions);
-    const gamRows = await db.select().from(gamification).where(eq(gamification.id, "default"));
+    const gamRows = await db
+      .select()
+      .from(gamification)
+      .where(eq(gamification.id, DEFAULT_PROFILE_ID));
     const allSkills = await db.select().from(skillMappings);
     const allSaved = await db.select().from(savedJobs);
     const allApps = await db.select().from(applications);
@@ -321,7 +328,7 @@ export class DataService {
     }
 
     sqlite.exec("BEGIN");
-    const transactionResult = await settlePromise(this.executeImportTransaction(data, imported, errors));
+    const transactionResult = await settle(this.executeImportTransaction(data, imported, errors));
     if (transactionResult.status === "rejected") {
       sqlite.exec("ROLLBACK");
       errors.push(`Transaction failed: ${toErrorMessage(transactionResult.reason)}`);
@@ -360,10 +367,7 @@ export class DataService {
     return settingsRecord;
   }
 
-  private async runTasksSequentially(
-    tasks: Array<() => Promise<void>>,
-    index = 0,
-  ): Promise<void> {
+  private async runTasksSequentially(tasks: Array<() => Promise<void>>, index = 0): Promise<void> {
     if (index >= tasks.length) {
       return;
     }
@@ -382,16 +386,19 @@ export class DataService {
 
     await runWithErrorHandler(
       async () => {
-        const existing = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
+        const existing = await db
+          .select()
+          .from(userProfile)
+          .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
         const profile = isRecord(data.profile) ? data.profile : {};
         if (existing.length > 0) {
           const rest = omitImportMetadata(profile);
           await db
             .update(userProfile)
             .set({ ...rest, updatedAt: new Date().toISOString() })
-            .where(eq(userProfile.id, "default"));
+            .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
         } else {
-          await db.insert(userProfile).values({ ...profile, id: "default" });
+          await db.insert(userProfile).values({ ...profile, id: DEFAULT_PROFILE_ID });
         }
         imported.profile = 1;
       },
@@ -413,7 +420,10 @@ export class DataService {
     await runWithErrorHandler(
       async () => {
         const normalized = this.sanitizeImportedSettings(data.settings);
-        const existing = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+        const existing = await db
+          .select()
+          .from(settings)
+          .where(eq(settings.id, DEFAULT_SETTINGS_ID));
         if (existing.length > 0) {
           await db
             .update(settings)
@@ -440,22 +450,26 @@ export class DataService {
     }
 
     let count = 0;
-    const tasks = data.resumes.map((resume) => async () =>
-      runWithErrorHandler(
-        async () => {
-          const parsedResume = parseResumeInsert(resume);
-          if (!parsedResume) throw new Error("Invalid resume payload");
-          await db.insert(resumes).values(parsedResume).onConflictDoUpdate({
-            target: resumes.id,
-            set: { ...parsedResume, updatedAt: new Date().toISOString() },
-          });
-          count++;
-        },
-        (message) => {
-          const record = isRecord(resume) ? resume : {};
-          errors.push(`Resume "${asString(record.name) ?? "unknown"}" import failed: ${message}`);
-        },
-      ),
+    const tasks = data.resumes.map(
+      (resume) => async () =>
+        runWithErrorHandler(
+          async () => {
+            const parsedResume = parseResumeInsert(resume);
+            if (!parsedResume) throw new Error(API_ERROR_INVALID_RESUME_PAYLOAD);
+            await db
+              .insert(resumes)
+              .values(parsedResume)
+              .onConflictDoUpdate({
+                target: resumes.id,
+                set: { ...parsedResume, updatedAt: new Date().toISOString() },
+              });
+            count++;
+          },
+          (message) => {
+            const record = isRecord(resume) ? resume : {};
+            errors.push(`Resume "${asString(record.name) ?? "unknown"}" import failed: ${message}`);
+          },
+        ),
     );
     await this.runTasksSequentially(tasks);
     imported.resumes = count;
@@ -471,21 +485,25 @@ export class DataService {
     }
 
     let count = 0;
-    const tasks = data.coverLetters.map((coverLetter) => async () =>
-      runWithErrorHandler(
-        async () => {
-          const parsedCoverLetter = parseCoverLetterInsert(coverLetter);
-          if (!parsedCoverLetter) throw new Error("Invalid cover letter payload");
-          await db.insert(coverLetters).values(parsedCoverLetter).onConflictDoUpdate({
-            target: coverLetters.id,
-            set: { ...parsedCoverLetter, updatedAt: new Date().toISOString() },
-          });
-          count++;
-        },
-        (message) => {
-          errors.push(`Cover letter import failed: ${message}`);
-        },
-      ),
+    const tasks = data.coverLetters.map(
+      (coverLetter) => async () =>
+        runWithErrorHandler(
+          async () => {
+            const parsedCoverLetter = parseCoverLetterInsert(coverLetter);
+            if (!parsedCoverLetter) throw new Error(API_ERROR_INVALID_COVER_LETTER_PAYLOAD);
+            await db
+              .insert(coverLetters)
+              .values(parsedCoverLetter)
+              .onConflictDoUpdate({
+                target: coverLetters.id,
+                set: { ...parsedCoverLetter, updatedAt: new Date().toISOString() },
+              });
+            count++;
+          },
+          (message) => {
+            errors.push(`Cover letter import failed: ${message}`);
+          },
+        ),
     );
     await this.runTasksSequentially(tasks);
     imported.coverLetters = count;
@@ -503,30 +521,34 @@ export class DataService {
     if (data.portfolio) {
       await runIgnoringErrors(async () => {
         const portfolioRow = parsePortfolioInsert(data.portfolio);
-        if (!portfolioRow) throw new Error("Invalid portfolio payload");
+        if (!portfolioRow) throw new Error(API_ERROR_INVALID_PORTFOLIO_PAYLOAD);
         await db.insert(portfolios).values(portfolioRow).onConflictDoNothing();
       });
     }
 
     let count = 0;
-    const tasks = data.portfolioProjects.map((project) => async () =>
-      runWithErrorHandler(
-        async () => {
-          const parsedProject = parsePortfolioProjectInsert(project);
-          if (!parsedProject) throw new Error("Invalid portfolio project payload");
-          await db.insert(portfolioProjects).values(parsedProject).onConflictDoUpdate({
-            target: portfolioProjects.id,
-            set: { ...parsedProject, updatedAt: new Date().toISOString() },
-          });
-          count++;
-        },
-        (message) => {
-          const record = isRecord(project) ? project : {};
-          errors.push(
-            `Portfolio project "${asString(record.title) ?? "unknown"}" import failed: ${message}`,
-          );
-        },
-      ),
+    const tasks = data.portfolioProjects.map(
+      (project) => async () =>
+        runWithErrorHandler(
+          async () => {
+            const parsedProject = parsePortfolioProjectInsert(project);
+            if (!parsedProject) throw new Error(API_ERROR_INVALID_PORTFOLIO_PROJECT_PAYLOAD);
+            await db
+              .insert(portfolioProjects)
+              .values(parsedProject)
+              .onConflictDoUpdate({
+                target: portfolioProjects.id,
+                set: { ...parsedProject, updatedAt: new Date().toISOString() },
+              });
+            count++;
+          },
+          (message) => {
+            const record = isRecord(project) ? project : {};
+            errors.push(
+              `Portfolio project "${asString(record.title) ?? "unknown"}" import failed: ${message}`,
+            );
+          },
+        ),
     );
     await this.runTasksSequentially(tasks);
     imported.portfolioProjects = count;
@@ -542,21 +564,25 @@ export class DataService {
     }
 
     let count = 0;
-    const tasks = data.interviewSessions.map((session) => async () =>
-      runWithErrorHandler(
-        async () => {
-          const parsedSession = parseInterviewSessionInsert(session);
-          if (!parsedSession) throw new Error("Invalid interview session payload");
-          await db.insert(interviewSessions).values(parsedSession).onConflictDoUpdate({
-            target: interviewSessions.id,
-            set: { ...parsedSession, updatedAt: new Date().toISOString() },
-          });
-          count++;
-        },
-        (message) => {
-          errors.push(`Interview session import failed: ${message}`);
-        },
-      ),
+    const tasks = data.interviewSessions.map(
+      (session) => async () =>
+        runWithErrorHandler(
+          async () => {
+            const parsedSession = parseInterviewSessionInsert(session);
+            if (!parsedSession) throw new Error(API_ERROR_INVALID_INTERVIEW_SESSION_PAYLOAD);
+            await db
+              .insert(interviewSessions)
+              .values(parsedSession)
+              .onConflictDoUpdate({
+                target: interviewSessions.id,
+                set: { ...parsedSession, updatedAt: new Date().toISOString() },
+              });
+            count++;
+          },
+          (message) => {
+            errors.push(`Interview session import failed: ${message}`);
+          },
+        ),
     );
     await this.runTasksSequentially(tasks);
     imported.interviewSessions = count;
@@ -573,17 +599,20 @@ export class DataService {
 
     await runWithErrorHandler(
       async () => {
-        const existing = await db.select().from(gamification).where(eq(gamification.id, "default"));
+        const existing = await db
+          .select()
+          .from(gamification)
+          .where(eq(gamification.id, DEFAULT_PROFILE_ID));
         const parsedGamification = parseGamificationInsert(data.gamification);
-        if (!parsedGamification) throw new Error("Invalid gamification payload");
+        if (!parsedGamification) throw new Error(API_ERROR_INVALID_GAMIFICATION_PAYLOAD);
         if (existing.length > 0) {
           const rest = omitImportMetadata(parsedGamification);
           await db
             .update(gamification)
             .set({ ...rest, updatedAt: new Date().toISOString() })
-            .where(eq(gamification.id, "default"));
+            .where(eq(gamification.id, DEFAULT_PROFILE_ID));
         } else {
-          await db.insert(gamification).values({ ...parsedGamification, id: "default" });
+          await db.insert(gamification).values({ ...parsedGamification, id: DEFAULT_PROFILE_ID });
         }
         imported.gamification = 1;
       },
@@ -603,21 +632,25 @@ export class DataService {
     }
 
     let count = 0;
-    const tasks = data.skillMappings.map((skill) => async () =>
-      runWithErrorHandler(
-        async () => {
-          const parsedSkill = parseSkillMappingInsert(skill);
-          if (!parsedSkill) throw new Error("Invalid skill mapping payload");
-          await db.insert(skillMappings).values(parsedSkill).onConflictDoUpdate({
-            target: skillMappings.id,
-            set: { ...parsedSkill, updatedAt: new Date().toISOString() },
-          });
-          count++;
-        },
-        (message) => {
-          errors.push(`Skill mapping import failed: ${message}`);
-        },
-      ),
+    const tasks = data.skillMappings.map(
+      (skill) => async () =>
+        runWithErrorHandler(
+          async () => {
+            const parsedSkill = parseSkillMappingInsert(skill);
+            if (!parsedSkill) throw new Error(API_ERROR_INVALID_SKILL_MAPPING_PAYLOAD);
+            await db
+              .insert(skillMappings)
+              .values(parsedSkill)
+              .onConflictDoUpdate({
+                target: skillMappings.id,
+                set: { ...parsedSkill, updatedAt: new Date().toISOString() },
+              });
+            count++;
+          },
+          (message) => {
+            errors.push(`Skill mapping import failed: ${message}`);
+          },
+        ),
     );
     await this.runTasksSequentially(tasks);
     imported.skillMappings = count;
@@ -632,15 +665,16 @@ export class DataService {
     }
 
     let count = 0;
-    const tasks = data.chatHistory.map((message) => async () =>
-      runIgnoringErrors(async () => {
-        const parsedMessage = parseChatHistoryInsert(message);
-        if (!parsedMessage) {
-          return;
-        }
-        await db.insert(chatHistory).values(parsedMessage).onConflictDoNothing();
-        count++;
-      }),
+    const tasks = data.chatHistory.map(
+      (message) => async () =>
+        runIgnoringErrors(async () => {
+          const parsedMessage = parseChatHistoryInsert(message);
+          if (!parsedMessage) {
+            return;
+          }
+          await db.insert(chatHistory).values(parsedMessage).onConflictDoNothing();
+          count++;
+        }),
     );
     await this.runTasksSequentially(tasks);
     imported.chatHistory = count;

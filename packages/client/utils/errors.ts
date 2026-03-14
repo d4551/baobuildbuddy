@@ -1,36 +1,16 @@
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+/**
+ * Client error message extraction. Re-exports shared toErrorMessage with API_ERROR_UNEXPECTED as default fallback.
+ * Use t("apiErrors.unexpected") or page-specific i18n keys when displaying user-facing fallbacks.
+ */
+import { API_ERROR_UNEXPECTED, toErrorMessage as sharedToErrorMessage } from "@bao/shared";
 
-const toMessage = (value: unknown): string | null => {
-  if (typeof value === "string" && value.trim().length > 0) {
-    return value;
-  }
-
-  return null;
-};
-
-export function getErrorMessage(error: unknown, fallback = "An unexpected error occurred"): string {
-  if (error instanceof Error) {
-    const message = toMessage(error.message);
-    if (message) {
-      return message;
-    }
-  }
-
-  if (isRecord(error)) {
-    const directMessage = toMessage(error.message);
-    if (directMessage) {
-      return directMessage;
-    }
-
-    const value = error.value;
-    if (isRecord(value)) {
-      const nestedMessage = toMessage(value.message);
-      if (nestedMessage) {
-        return nestedMessage;
-      }
-    }
-  }
-
-  return fallback;
+/**
+ * Extracts a user-facing error message from unknown error values.
+ * Supports Error instances, Eden API error shape (Record with message/value.message).
+ *
+ * @param error - Unknown error (Error, Eden API error, etc.)
+ * @param fallback - Fallback when no message can be extracted. Defaults to API_ERROR_UNEXPECTED. Prefer t("apiErrors.unexpected") or page-specific i18n keys.
+ */
+export function getErrorMessage(error: unknown, fallback = API_ERROR_UNEXPECTED): string {
+  return sharedToErrorMessage(error, fallback);
 }

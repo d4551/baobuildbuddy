@@ -1,5 +1,6 @@
 import z from "zod";
 import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES } from "../constants/automation";
+import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
 
 /**
  * Canonical protocol version emitted by Python automation scripts.
@@ -56,8 +57,8 @@ export const rpaArtifactKindSchema = z.enum(["screenshot", "trace", "document", 
 export const rpaArtifactMetadataSchema = z.object({
   id: z.string().trim().min(1).max(120),
   kind: rpaArtifactKindSchema,
-  path: z.string().trim().min(1).max(2_000),
-  label: z.string().trim().min(1).max(200).optional(),
+  path: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+  label: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT).optional(),
   mimeType: z.string().trim().min(1).max(120).optional(),
 });
 

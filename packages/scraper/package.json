@@ -1,0 +1,32 @@
+{
+  "name": "@bao/scraper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d4551/baobuildbuddy.git",
+    "directory": "packages/scraper"
+  },
+  "bugs": {
+    "url": "https://github.com/d4551/baobuildbuddy/issues"
+  },
+  "homepage": "https://github.com/d4551/baobuildbuddy/tree/main/packages/scraper",
+  "exports": {
+    "./scripts/*": "./src/scripts/*.ts"
+  },
+  "scripts": {
+    "typecheck": "bunx --bun tsc --noEmit",
+    "test": "bun test",
+    "install:browsers": "bunx --bun playwright install chromium"
+  },
+  "dependencies": {
+    "@bao/shared": "workspace:*",
+    "playwright": "^1.58.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  }
+}

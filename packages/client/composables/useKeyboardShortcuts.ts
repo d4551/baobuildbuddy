@@ -1,5 +1,6 @@
 import { APP_ROUTES } from "@bao/shared";
 import type { NavigationItem } from "~/constants/navigation";
+import { createClientLogger } from "~/utils/client-logger";
 
 /**
  * Route shortcut metadata rendered in sidebar and handled globally.
@@ -37,9 +38,11 @@ function isEditableTarget(target: EventTarget | null): boolean {
   );
 }
 
+const shortcutLogger = createClientLogger("keyboard-shortcuts");
+
 function pushShortcutRoute(router: ReturnType<typeof useRouter>, targetRoute: string): void {
-  router.push(targetRoute).catch(() => {
-    // Navigation failures (duplicates, guards) are intentionally ignored for shortcuts.
+  router.push(targetRoute).catch((err: unknown) => {
+    shortcutLogger.debug("Shortcut navigation failed (duplicate or guard)", { targetRoute, err });
   });
 }
 

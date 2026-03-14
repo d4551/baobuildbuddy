@@ -1,0 +1,20 @@
+# Reduce upload size - Railway builds from source
+# These are excluded from deployment upload (similar to .gitignore)
+node_modules
+.git
+.venv
+*.db
+*.sqlite
+*.sqlite3
+.tauri
+packages/desktop/src-tauri/target
+packages/desktop/src-tauri/target-linux
+.nuxt
+.output
+dist
+dist-electron
+build
+*.log
+.DS_Store
+.vscode
+.idea

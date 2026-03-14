@@ -1,10 +1,31 @@
 import {
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  API_ERROR_COVER_LETTER_NOT_FOUND,
+  API_ERROR_AI_SETTINGS_NOT_CONFIGURED,
+  API_ERROR_COVER_LETTER_GENERATION_FAILED,
+  COVER_LETTER_DEFAULT_CLOSING,
+  COVER_LETTER_DEFAULT_OPENING,
+  DEFAULT_UNSPECIFIED_LABEL,
+  API_MESSAGE_COVER_LETTER_GENERATED_ONLY,
+  API_MESSAGE_COVER_LETTER_GENERATED_SAVED,
+  DEFAULT_PROFILE_ID,
+  API_ERROR_EXPORT_COVER_LETTER,
+  API_ERROR_UNKNOWN,
   COVER_LETTER_DEFAULT_TEMPLATE,
   COVER_LETTER_TEMPLATE_OPTIONS,
   type CoverLetterTemplate,
   generateId,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_SERVICE_UNAVAILABLE,
   isCoverLetterTemplate,
+  ROUTE_GAMIFICATION_XP,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_SHORT,
   safeParseJson,
+  settle,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -46,9 +67,9 @@ const parseGeneratedCoverLetterContent = (content: string): Record<string, unkno
 
   const lines = content.split("\n").filter((line: string) => line.trim());
   return {
-    introduction: lines[0] || "Dear Hiring Manager,",
+    introduction: lines[0] || COVER_LETTER_DEFAULT_OPENING,
     body: lines.slice(1, -1).join("\n\n") || content,
-    conclusion: lines[lines.length - 1] || "Thank you for your consideration.",
+    conclusion: lines[lines.length - 1] || COVER_LETTER_DEFAULT_CLOSING,
   };
 };
 
@@ -60,11 +81,6 @@ const readCoverLetterSegment = (value: unknown): string => {
     return value.filter((entry): entry is string => typeof entry === "string").join("\n\n");
   }
   return "";
-};
-
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
 };
 
 type GenerateCoverLetterBody = {
@@ -84,9 +100,6 @@ type GeneratedCoverLetterContent = {
   conclusion: string;
 };
 
-const COVER_LETTER_GENERATION_ERROR = "Cover letter generation failed";
-const COVER_LETTER_UNKNOWN_ERROR = "Unknown error";
-
 const resolveResumeContext = async (resumeId?: string): Promise<string> => {
   if (!resumeId) return "";
   const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
@@ -97,7 +110,7 @@ const resolveResumeContext = async (resumeId?: string): Promise<string> => {
   const resumeName =
     typeof personalInfo.name === "string" && personalInfo.name.trim()
       ? personalInfo.name
-      : "Not specified";
+      : DEFAULT_UNSPECIFIED_LABEL;
   return `
 Resume Context:
 Name: ${resumeName}
@@ -113,7 +126,9 @@ const toGeneratedCoverLetterContent = (content: string): GeneratedCoverLetterCon
     introduction:
       readCoverLetterSegment(generatedContent.introduction) ||
       readCoverLetterSegment(generatedContent.intro),
-    body: readCoverLetterSegment(generatedContent.body) || readCoverLetterSegment(generatedContent.main),
+    body:
+      readCoverLetterSegment(generatedContent.body) ||
+      readCoverLetterSegment(generatedContent.main),
     conclusion:
       readCoverLetterSegment(generatedContent.conclusion) ||
       readCoverLetterSegment(generatedContent.closing),
@@ -140,9 +155,9 @@ const saveGeneratedCoverLetter = async (
 const handleGenerateCoverLetter = async (body: GenerateCoverLetterBody, set: RouteSetState) => {
   const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
   if (settingsRows.length === 0) {
-    set.status = 503;
+    set.status = HTTP_STATUS_SERVICE_UNAVAILABLE;
     return {
-      error: "AI settings not configured. Please complete setup in Settings.",
+      error: API_ERROR_AI_SETTINGS_NOT_CONFIGURED,
     };
   }
 
@@ -153,36 +168,36 @@ const handleGenerateCoverLetter = async (body: GenerateCoverLetterBody, set: Rou
     : "No additional job information provided";
   const aiResult = await settle(
     aiService.generate(coverLetterPrompt(body.company, body.position, jobInfoText, resumeContext), {
-      temperature: 0.7,
-      maxTokens: 2000,
+      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+      maxTokens: SCHEMA_MAX_LENGTH_LONG,
     }),
   );
   if (aiResult.status === "rejected") {
-    set.status = 500;
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return {
-      error: COVER_LETTER_GENERATION_ERROR,
-      details: aiResult.reason instanceof Error ? aiResult.reason.message : COVER_LETTER_UNKNOWN_ERROR,
+      error: API_ERROR_COVER_LETTER_GENERATION_FAILED,
+      details: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
     };
   }
 
   const response = aiResult.value;
   if (response.error) {
-    set.status = 500;
-    return { error: COVER_LETTER_GENERATION_ERROR, details: response.error };
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return { error: API_ERROR_COVER_LETTER_GENERATION_FAILED, details: response.error };
   }
 
   const content = toGeneratedCoverLetterContent(response.content);
   if (!body.save) {
     return {
-      message: "Cover letter generated",
+      message: API_MESSAGE_COVER_LETTER_GENERATED_ONLY,
       content,
     };
   }
 
   const coverLetter = await saveGeneratedCoverLetter(body, content);
-  set.status = 201;
+  set.status = HTTP_STATUS_CREATED;
   return {
-    message: "Cover letter generated and saved",
+    message: API_MESSAGE_COVER_LETTER_GENERATED_SAVED,
     coverLetter,
   };
 };
@@ -205,14 +220,18 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
       };
 
       await db.insert(coverLetters).values(newCoverLetter);
-      set.status = 201;
-      void gamificationService.trackAction("coverLettersGenerated", 30, "cover_letter_created");
+      set.status = HTTP_STATUS_CREATED;
+      gamificationService.trackActionFireAndForget(
+        "coverLettersGenerated",
+        ROUTE_GAMIFICATION_XP.coverLettersGenerated,
+        "cover_letter_created",
+      );
       return newCoverLetter;
     },
     {
       body: t.Object({
-        company: t.String({ maxLength: 200 }),
-        position: t.String({ maxLength: 200 }),
+        company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+        position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
         jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
         content: t.Optional(t.Record(t.String(), t.Unknown())),
         template: t.Optional(coverLetterTemplateBodySchema),
@@ -224,14 +243,14 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
     async ({ params, set }) => {
       const rows = await db.select().from(coverLetters).where(eq(coverLetters.id, params.id));
       if (rows.length === 0) {
-        set.status = 404;
-        return { error: "Cover letter not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_COVER_LETTER_NOT_FOUND };
       }
       return rows[0];
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
@@ -240,8 +259,8 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
     async ({ params, body, set }) => {
       const existing = await db.select().from(coverLetters).where(eq(coverLetters.id, params.id));
       if (existing.length === 0) {
-        set.status = 404;
-        return { error: "Cover letter not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_COVER_LETTER_NOT_FOUND };
       }
 
       const updates: Record<string, unknown> = {
@@ -261,11 +280,11 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        company: t.Optional(t.String({ maxLength: 200 })),
-        position: t.Optional(t.String({ maxLength: 200 })),
+        company: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        position: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
         jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
         content: t.Optional(t.Record(t.String(), t.Unknown())),
         template: t.Optional(coverLetterTemplateBodySchema),
@@ -277,8 +296,8 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
     async ({ params, set }) => {
       const existing = await db.select().from(coverLetters).where(eq(coverLetters.id, params.id));
       if (existing.length === 0) {
-        set.status = 404;
-        return { error: "Cover letter not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_COVER_LETTER_NOT_FOUND };
       }
 
       await db.delete(coverLetters).where(eq(coverLetters.id, params.id));
@@ -286,37 +305,36 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
-  .post(
-    "/generate",
-    async ({ body, set }) => handleGenerateCoverLetter(body, set),
-    {
-      body: t.Object({
-        company: t.String({ maxLength: 200 }),
-        position: t.String({ maxLength: 200 }),
-        jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
-        resumeId: t.Optional(t.String({ maxLength: 100 })),
-        template: t.Optional(coverLetterTemplateBodySchema),
-        save: t.Optional(t.Boolean()),
-      }),
-    },
-  )
+  .post("/generate", async ({ body, set }) => handleGenerateCoverLetter(body, set), {
+    body: t.Object({
+      company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+      position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+      jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
+      resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+      template: t.Optional(coverLetterTemplateBodySchema),
+      save: t.Optional(t.Boolean()),
+    }),
+  })
   .post(
     "/:id/export",
     async ({ params, set }) => {
       const rows = await db.select().from(coverLetters).where(eq(coverLetters.id, params.id));
       if (rows.length === 0) {
-        set.status = 404;
-        return { error: "Cover letter not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_COVER_LETTER_NOT_FOUND };
       }
 
       const letter = rows[0];
 
       // Load user profile for sender info
-      const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
+      const profileRows = await db
+        .select()
+        .from(userProfile)
+        .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
       const profile = profileRows[0];
       const sender: {
         name: string;
@@ -347,10 +365,11 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
         ),
       );
       if (exportResult.status === "rejected") {
-        set.status = 500;
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
-          error: "Failed to export cover letter",
-          details: exportResult.reason instanceof Error ? exportResult.reason.message : "Unknown error",
+          error: API_ERROR_EXPORT_COVER_LETTER,
+          details:
+            exportResult.reason instanceof Error ? exportResult.reason.message : API_ERROR_UNKNOWN,
         };
       }
 
@@ -361,7 +380,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   );

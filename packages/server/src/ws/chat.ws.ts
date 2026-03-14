@@ -1,4 +1,16 @@
-import { APP_BRAND, generateId, safeParseJson, toApiScopedPath, WS_ENDPOINTS } from "@bao/shared";
+import {
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  API_ERROR_GENERATE_RESPONSE,
+  AI_MAX_TOKENS_WS,
+  APP_BRAND,
+  generateId,
+  safeParseJson,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_MESSAGE,
+  settle,
+  toApiScopedPath,
+  WS_ENDPOINTS,
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
@@ -32,11 +44,6 @@ type AutomationActionPayload = {
 
 const JOB_APPLY_ACTION_PATTERN = /\{"action"\s*:\s*"job_apply"[^{}]*\}/;
 
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -66,7 +73,7 @@ function sendSocketPayload(socket: ChatSocket, payload: Record<string, unknown>)
 function sendChatError(socket: ChatSocket, sessionId: string): void {
   sendSocketPayload(socket, {
     type: "error",
-    message: "Failed to generate response",
+    message: API_ERROR_GENERATE_RESPONSE,
     sessionId,
   });
 }
@@ -136,8 +143,8 @@ async function streamAssistantResponse({
   const generator = aiService.stream(input, {
     systemPrompt: context.systemPrompt,
     messages: context.messages,
-    temperature: 0.7,
-    maxTokens: 2048,
+    temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+    maxTokens: AI_MAX_TOKENS_WS,
   });
 
   for await (const { chunk } of generator) {
@@ -194,8 +201,8 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
 
 export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat), {
   body: t.Object({
-    content: t.String({ maxLength: 10000 }),
-    sessionId: t.Optional(t.String({ maxLength: 100 })),
+    content: t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
+    sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
   }),
   open(ws) {
     sendSocketPayload(ws, {

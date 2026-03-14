@@ -1,6 +1,4 @@
-/**
- * Shared limits for job application automation request validation.
- */
+/** Re-export shared limits for consumers that import from this module. */
 export declare const MAX_JOB_URL_LENGTH = 2048;
 export declare const MAX_CUSTOM_ANSWER_KEY_LENGTH = 120;
 export declare const MAX_CUSTOM_ANSWER_VALUE_LENGTH = 2000;

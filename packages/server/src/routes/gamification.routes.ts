@@ -1,3 +1,10 @@
+import {
+  API_ERROR_CHALLENGE_NOT_FOUND,
+  API_MESSAGE_CHALLENGE_COMPLETED,
+  HTTP_STATUS_CREATED,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_SHORT,
+} from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { gamificationService } from "../services/gamification-service";
 
@@ -25,7 +32,7 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification" })
     {
       body: t.Object({
         amount: t.Number({ minimum: 0, maximum: 10000 }),
-        reason: t.String({ maxLength: 200 }),
+        reason: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
       }),
     },
   )
@@ -50,14 +57,14 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification" })
       const completed = await gamificationService.completeChallenge(params.id);
 
       if (!completed) {
-        return { message: "Challenge already completed or not found", completed: false };
+        return { message: API_ERROR_CHALLENGE_NOT_FOUND, completed: false };
       }
 
       const progress = await gamificationService.getProgress();
 
-      set.status = 201;
+      set.status = HTTP_STATUS_CREATED;
       return {
-        message: "Challenge completed!",
+        message: API_MESSAGE_CHALLENGE_COMPLETED,
         challengeId: params.id,
         completed: true,
         totalXP: progress.xp,
@@ -66,7 +73,7 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification" })
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )

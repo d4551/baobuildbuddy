@@ -1,4 +1,9 @@
 import { rateLimit } from "elysia-rate-limit";
+import {
+  RATE_LIMIT_DURATION_MS,
+  RATE_LIMIT_MAX_AUTOMATION,
+  RATE_LIMIT_MAX_SKILL_ANALYSIS,
+} from "../config/rate-limit";
 
 /**
  * Resolves a client identifier for rate limiting from request headers.
@@ -29,18 +34,17 @@ export function resolveRateLimitClientKey(request: Request): string {
  */
 export const automationRateLimit = rateLimit({
   scoping: "scoped",
-  duration: 60_000,
-  max: 30,
+  duration: RATE_LIMIT_DURATION_MS,
+  max: RATE_LIMIT_MAX_AUTOMATION,
   generator: (request) => resolveRateLimitClientKey(request),
 });
 
 /**
  * Rate limit plugin for skill analysis (AI) operations.
- * 20 requests per minute per client.
  */
 export const skillAnalysisRateLimit = rateLimit({
   scoping: "scoped",
-  duration: 60_000,
-  max: 20,
+  duration: RATE_LIMIT_DURATION_MS,
+  max: RATE_LIMIT_MAX_SKILL_ANALYSIS,
   generator: (request) => resolveRateLimitClientKey(request),
 });

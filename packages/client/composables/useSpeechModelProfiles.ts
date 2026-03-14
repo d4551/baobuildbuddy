@@ -50,7 +50,10 @@ const resolveProviderModels = (
   provider: SpeechProviderOption,
 ): readonly string[] => SPEECH_MODEL_OPTIONS[kind][provider];
 
-const resolveDefaultModel = (kind: SpeechModelProfileKind, provider: SpeechProviderOption): string => {
+const resolveDefaultModel = (
+  kind: SpeechModelProfileKind,
+  provider: SpeechProviderOption,
+): string => {
   const configuredModels = resolveProviderModels(kind, provider);
   if (configuredModels.length === 0) {
     return kind === "stt" ? DEFAULT_SPEECH_SETTINGS.stt.model : DEFAULT_SPEECH_SETTINGS.tts.model;
@@ -73,7 +76,8 @@ const createPersistedSpeechConfig = (
   settings: ReturnType<typeof useSettings>["settings"],
 ): ComputedRef<SpeechModelProfileState> =>
   computed<SpeechModelProfileState>(() => {
-    const persistedSpeech = settings.value?.automationSettings?.speech ?? DEFAULT_AUTOMATION_SETTINGS.speech;
+    const persistedSpeech =
+      settings.value?.automationSettings?.speech ?? DEFAULT_AUTOMATION_SETTINGS.speech;
     return {
       sttProvider: persistedSpeech.stt.provider,
       sttModel: persistedSpeech.stt.model,
@@ -101,7 +105,8 @@ const syncSpeechConfigFromSettings = (
   watch(
     settings,
     (currentSettings) => {
-      const persistedSpeech = currentSettings?.automationSettings?.speech ?? DEFAULT_AUTOMATION_SETTINGS.speech;
+      const persistedSpeech =
+        currentSettings?.automationSettings?.speech ?? DEFAULT_AUTOMATION_SETTINGS.speech;
       speechConfig.sttProvider = persistedSpeech.stt.provider;
       speechConfig.sttModel = persistedSpeech.stt.model;
       speechConfig.ttsProvider = persistedSpeech.tts.provider;
@@ -142,7 +147,8 @@ const buildNextSpeechConfig = (
   speechConfig: SpeechModelProfileState,
   locale: string,
 ) => {
-  const existingAutomationSettings = settings.value?.automationSettings ?? DEFAULT_AUTOMATION_SETTINGS;
+  const existingAutomationSettings =
+    settings.value?.automationSettings ?? DEFAULT_AUTOMATION_SETTINGS;
   const sttModel = speechConfig.sttModel.trim();
   const ttsModel = speechConfig.ttsModel.trim();
   return {

@@ -1,8 +1,8 @@
-import type { AutomationSettings, ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
+import type { AutomationScriptId, AutomationSettings, ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
 /**
- * Generic process-level result for Python script execution.
+ * Generic process-level result for automation script execution.
  */
-export interface PythonScriptExecutionResult {
+export interface AutomationScriptExecutionResult {
     exitCode: number;
     timedOut: boolean;
     aborted: boolean;
@@ -11,10 +11,11 @@ export interface PythonScriptExecutionResult {
     stderrLines: string[];
 }
 /**
- * Options for generic Python script execution.
+ * Options for generic Bun-based automation script execution.
  */
-export interface RunPythonScriptOptions {
-    scriptName: string;
+export interface RunAutomationScriptOptions {
+    scriptId?: AutomationScriptId;
+    scriptPath?: string;
     scriptInput: Record<string, unknown>;
     timeoutMs?: number;
     signal?: AbortSignal;
@@ -27,14 +28,15 @@ export interface RunPythonScriptOptions {
     onStderrLine?: (line: string) => void;
 }
 /**
- * Executes a Python script with Bun-native lifecycle controls and bounded IO capture.
+ * Executes a Bun-based automation script with bounded IO capture and cancellation.
  */
-export declare function runPythonScript(options: RunPythonScriptOptions): Promise<PythonScriptExecutionResult>;
+export declare function runAutomationScript(options: RunAutomationScriptOptions): Promise<AutomationScriptExecutionResult>;
 /**
  * Options for contract-first RPA script execution.
  */
 export interface RunRpaScriptOptions {
-    scriptName: string;
+    scriptId?: AutomationScriptId;
+    scriptPath?: string;
     scriptInput: Record<string, unknown>;
     executionContext: {
         runId: string;

@@ -6,10 +6,7 @@ import {
   type DashboardPipelineStepViewModel,
   resolveDashboardPipelineSteps,
 } from "~/constants/dashboard";
-import {
-  createFlowEngineInput,
-  type FlowActionId,
-} from "~/constants/flow-engine";
+import { createFlowEngineInput, type FlowActionId } from "~/constants/flow-engine";
 import { getErrorMessage } from "~/utils/errors";
 
 const AUTOMATION_HUB_ASYNC_DATA_KEY = "automation-hub-stats";
@@ -139,7 +136,12 @@ const baseAutomationCards: readonly AutomationHubCard[] = [
 const prioritizedCardIds = computed<readonly AutomationHubCardId[]>(() => {
   const actionPriority = [flowPrimaryAction.value, ...flowRecommendedActions.value]
     .map((action) => action.id)
-    .filter((actionId) => actionId === "automationScraper" || actionId === "automationApply" || actionId === "automationRuns");
+    .filter(
+      (actionId) =>
+        actionId === "automationScraper" ||
+        actionId === "automationApply" ||
+        actionId === "automationRuns",
+    );
 
   const orderedCardIds: AutomationHubCardId[] = [];
   for (const actionId of actionPriority) {

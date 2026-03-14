@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { APP_BRAND, APP_ROUTES, THEME_NAMES } from "@bao/shared";
+import {
+  APP_BRAND,
+  APP_LANGUAGE_LABELS,
+  APP_ROUTES,
+  THEME_NAMES,
+  type AppLanguageCode,
+} from "@bao/shared";
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { APP_DRAWER_ID } from "~/constants/layout";
@@ -10,17 +16,9 @@ const localeMenuRef = useTemplateRef<HTMLDetailsElement>("localeMenu");
 const isLocaleMenuOpen = ref(false);
 const isDarkTheme = computed(() => theme.value === THEME_NAMES.dark);
 
-const localeDisplayNames = computed(
-  () =>
-    new Intl.DisplayNames([locale.value], {
-      type: "language",
-    }),
-);
-
 const getLocaleLabel = (localeCode: string): string => {
-  const [languageCode] = localeCode.split("-");
-  const displayName = languageCode ? localeDisplayNames.value.of(languageCode) : undefined;
-  return displayName ?? localeCode;
+  const directLabel = APP_LANGUAGE_LABELS[localeCode as AppLanguageCode];
+  return directLabel || localeCode;
 };
 
 function selectLocale(nextLocale: string): void {

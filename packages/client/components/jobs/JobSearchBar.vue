@@ -43,12 +43,7 @@ function handleSubmit() {
   emitSearch();
 }
 
-watch(
-  debouncedSearchValue,
-  emitSearch,
-  { immediate: false },
-);
-
+watch(debouncedSearchValue, emitSearch, { immediate: false });
 </script>
 
 <template>

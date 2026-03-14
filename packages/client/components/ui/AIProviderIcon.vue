@@ -8,7 +8,9 @@ type IconPath = {
 
 const AI_PROVIDER_ICON_PATHS: Record<AIProviderType, readonly IconPath[]> = {
   local: [
-    { d: "M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v7A2.5 2.5 0 0 1 17.5 17h-11A2.5 2.5 0 0 1 4 14.5v-7Z" },
+    {
+      d: "M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v7A2.5 2.5 0 0 1 17.5 17h-11A2.5 2.5 0 0 1 4 14.5v-7Z",
+    },
     { d: "M8 20h8" },
     { d: "M10 17v3" },
     { d: "M14 17v3" },

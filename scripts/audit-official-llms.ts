@@ -1,14 +1,12 @@
 const LINE_BREAK_PATTERN = /\r?\n/;
+const FETCH_TIMEOUT_MS = 8_000;
+const FETCH_RETRY_COUNT = 3;
 
 const LLM_SOURCES = [
   {
     name: "Elysia",
     url: "https://elysiajs.com/llms.txt",
-    requiredMarkers: [
-      "Ergonomic Framework for Humans",
-      "Essential",
-      "Best Practice - ElysiaJS",
-    ],
+    requiredMarkers: ["Ergonomic Framework for Humans", "Essential", "Best Practice - ElysiaJS"],
   },
   {
     name: "Nuxt",
@@ -35,15 +33,35 @@ type SourceAudit = {
   contentLength: number;
   missingMarkers: string[];
   fetchError: string | null;
+  failureClass: "none" | "timeout" | "network" | "http" | "marker" | "unknown";
+  attempts: number;
 };
 
 const countLines = (text: string): number =>
   text.length === 0 ? 0 : text.split(LINE_BREAK_PATTERN).length;
 
-const auditSource = async (source: LlmSource): Promise<SourceAudit> => {
-  const response = await fetch(source.url, { redirect: "follow" });
+const classifyFetchError = (reason: string): SourceAudit["failureClass"] => {
+  if (reason.toLowerCase().includes("timeout")) {
+    return "timeout";
+  }
+  if (
+    reason.toLowerCase().includes("network") ||
+    reason.toLowerCase().includes("fetch") ||
+    reason.toLowerCase().includes("dns")
+  ) {
+    return "network";
+  }
+  return "unknown";
+};
+
+const auditResponse = async (
+  source: LlmSource,
+  attempts: number,
+  response: Response,
+): Promise<SourceAudit> => {
   const content = await response.text();
   const missingMarkers = source.requiredMarkers.filter((marker) => !content.includes(marker));
+  const failureClass = !response.ok ? "http" : missingMarkers.length > 0 ? "marker" : "none";
 
   return {
     name: source.name,
@@ -56,21 +74,62 @@ const auditSource = async (source: LlmSource): Promise<SourceAudit> => {
     contentLength: content.length,
     missingMarkers,
     fetchError: null,
+    failureClass,
+    attempts,
   };
 };
 
-const createFetchErrorAudit = (source: LlmSource, reason: unknown): SourceAudit => ({
-  name: source.name,
-  url: source.url,
-  finalUrl: source.url,
-  statusCode: 0,
-  ok: false,
-  redirected: false,
-  lineCount: 0,
-  contentLength: 0,
-  missingMarkers: [...source.requiredMarkers],
-  fetchError: String(reason),
-});
+const createFetchErrorAudit = (
+  source: LlmSource,
+  reason: unknown,
+  attempts: number,
+): SourceAudit => {
+  const errorMessage = String(reason);
+
+  return {
+    name: source.name,
+    url: source.url,
+    finalUrl: source.url,
+    statusCode: 0,
+    ok: false,
+    redirected: false,
+    lineCount: 0,
+    contentLength: 0,
+    missingMarkers: [...source.requiredMarkers],
+    fetchError: errorMessage,
+    failureClass: classifyFetchError(errorMessage),
+    attempts,
+  };
+};
+
+const attemptAudit = async (source: LlmSource, attempts: number): Promise<SourceAudit> => {
+  const result = await Promise.allSettled([
+    fetch(source.url, {
+      redirect: "follow",
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    }),
+  ]);
+  const fetchResult = result[0];
+
+  if (fetchResult.status === "rejected") {
+    return createFetchErrorAudit(source, fetchResult.reason, attempts);
+  }
+
+  return auditResponse(source, attempts, fetchResult.value);
+};
+
+const auditSource = async (source: LlmSource, attempts = 1): Promise<SourceAudit> => {
+  const audit = await attemptAudit(source, attempts);
+  if (
+    attempts >= FETCH_RETRY_COUNT ||
+    audit.failureClass === "none" ||
+    audit.failureClass === "marker"
+  ) {
+    return audit;
+  }
+
+  return auditSource(source, attempts + 1);
+};
 
 const formatResult = (audit: SourceAudit): string => {
   const statusToken = audit.ok ? "PASS" : "FAIL";
@@ -79,6 +138,8 @@ const formatResult = (audit: SourceAudit): string => {
       ? "markers=ok"
       : `markers=missing(${audit.missingMarkers.join(" | ")})`;
   const errorStatus = audit.fetchError ? `error=${audit.fetchError}` : "error=none";
+  const failureStatus = `failureClass=${audit.failureClass}`;
+  const attemptStatus = `attempts=${audit.attempts}`;
 
   return [
     `[${statusToken}]`,
@@ -90,6 +151,8 @@ const formatResult = (audit: SourceAudit): string => {
     `lines=${audit.lineCount}`,
     `bytes=${audit.contentLength}`,
     markerStatus,
+    failureStatus,
+    attemptStatus,
     errorStatus,
   ].join(" ");
 };
@@ -102,7 +165,7 @@ const settledAudits = await Promise.allSettled(LLM_SOURCES.map((source) => audit
 const audits: SourceAudit[] = settledAudits.map((result, index) =>
   result.status === "fulfilled"
     ? result.value
-    : createFetchErrorAudit(LLM_SOURCES[index], result.reason),
+    : createFetchErrorAudit(LLM_SOURCES[index], result.reason, FETCH_RETRY_COUNT),
 );
 
 writeLine("Official llms.txt audit results");

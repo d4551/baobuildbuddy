@@ -11,6 +11,7 @@ import { settlePromise } from "~/composables/async-flow";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 import { getErrorMessage } from "~/utils/errors";
+import { formatDateWithLocale } from "~/utils/locale-format";
 
 const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
   AUTOMATION_RUN_STATUSES;
@@ -21,7 +22,7 @@ const DATE_FORMAT_OPTIONS = {
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
 
-const { t } = useI18n();
+const { t, locale, fallbackLocale } = useI18n();
 const { triggerJobApply, scheduleJobApply } = useAutomation();
 const requestUrl = useRequestURL();
 const apiBase = String(useRuntimeConfig().public.apiBase || "/");
@@ -114,11 +115,13 @@ const lifecycleStepClasses = computed<[string, string, string]>(() => {
 });
 
 const toLocalizedDateTime = (value: string): string => {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).format(parsed);
+  const formatted = formatDateWithLocale(
+    value,
+    locale.value,
+    fallbackLocale.value,
+    DATE_FORMAT_OPTIONS,
+  );
+  return formatted ?? value;
 };
 
 const resolveScheduledRunAt = (run: RpaRunExecutionEnvelope): string => {

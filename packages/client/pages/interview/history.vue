@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { APP_ROUTE_QUERY_KEYS, type InterviewSession } from "@bao/shared";
+import {
+  APP_ROUTE_QUERY_KEYS,
+  type InterviewSession,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import type { LocationQueryValue } from "vue-router";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
@@ -129,12 +134,9 @@ function formatDate(value: string | undefined): string {
     return t("interviewHistory.notAvailable");
   }
 
-  const formattedDate = formatDateWithLocale(
-    parsedDate,
-    locale.value,
-    fallbackLocale.value,
-    { dateStyle: "medium" },
-  );
+  const formattedDate = formatDateWithLocale(parsedDate, locale.value, fallbackLocale.value, {
+    dateStyle: "medium",
+  });
   return formattedDate ?? t("interviewHistory.notAvailable");
 }
 
@@ -203,8 +205,8 @@ function scoreBadgeClass(value: number | undefined): string {
     return "badge-warning";
   }
 
-  if (value >= 80) return "badge-success";
-  if (value >= 60) return "badge-warning";
+  if (value >= SCORE_PASS_THRESHOLD) return "badge-success";
+  if (value >= SCORE_WARNING_THRESHOLD) return "badge-warning";
   return "badge-error";
 }
 
@@ -216,14 +218,14 @@ function questionScoreText(score: number | undefined): number {
 }
 
 function getScoreColorClass(score: number): string {
-  if (score >= 80) return "text-success";
-  if (score >= 60) return "text-warning";
+  if (score >= SCORE_PASS_THRESHOLD) return "text-success";
+  if (score >= SCORE_WARNING_THRESHOLD) return "text-warning";
   return "text-error";
 }
 
 function getTimelineLineClass(score: number): string {
-  if (score >= 80) return "bg-success";
-  if (score >= 60) return "bg-warning";
+  if (score >= SCORE_PASS_THRESHOLD) return "bg-success";
+  if (score >= SCORE_WARNING_THRESHOLD) return "bg-warning";
   return "bg-error";
 }
 </script>
@@ -334,6 +336,7 @@ function getTimelineLineClass(score: number): string {
                       :class="getScoreColorClass(session.score ?? 0)"
                       :style="`--value:${session.score ?? 0}; --size:2.5rem; --thickness:0.18rem;`"
                       role="progressbar"
+                      :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })"
                       :aria-valuenow="session.score ?? 0"
                       aria-valuemin="0"
                       aria-valuemax="100"
@@ -404,6 +407,11 @@ function getTimelineLineClass(score: number): string {
                     class="radial-progress"
                     :class="getScoreColorClass(selectedSession.score ?? 0)"
                     :style="{ '--value': selectedSession.score ?? 0, '--size': '3rem' }"
+                    role="progressbar"
+                    :aria-label="t('interviewHistory.detailScoreAria', { score: selectedSession.score ?? 0 })"
+                    :aria-valuenow="selectedSession.score ?? 0"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
                   >
                     <span class="text-sm font-bold">{{ formatScore(selectedSession.score) }}</span>
                   </div>

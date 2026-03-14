@@ -46,7 +46,7 @@ async function hydrateSidebarSettings(): Promise<void> {
   if (settings.value) {
     return;
   }
-  await settlePromise(fetchSettings(), "sidebar.settingsHydrationFailed");
+  await settlePromise(fetchSettings(), t("apiErrors.settings.fetchFailed"));
 }
 
 onMounted(() => {

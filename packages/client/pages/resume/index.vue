@@ -213,10 +213,8 @@ const flowInput = computed(() =>
   }),
 );
 
-const {
-  primaryAction: flowPrimaryAction,
-  recommendedActions: flowRecommendedActions,
-} = useFlowEngine(flowInput);
+const { primaryAction: flowPrimaryAction, recommendedActions: flowRecommendedActions } =
+  useFlowEngine(flowInput);
 
 interface ResumeCompletionQuickAction {
   readonly id: string;
@@ -566,7 +564,10 @@ function removeSkill(index: number) {
 async function resolvePipelineReward(
   action: "resumeSave" | "resumeEnhance",
 ): Promise<number | null> {
-  const rewardResult = await settlePromise(awardForAction(action), "Failed to award resume XP");
+  const rewardResult = await settlePromise(
+    awardForAction(action),
+    t("apiErrors.gamification.awardXPFailed"),
+  );
   if (!rewardResult.ok) {
     // Resume save/enhance should succeed even when gamification is unavailable.
     return null;

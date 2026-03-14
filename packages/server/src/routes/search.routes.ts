@@ -1,3 +1,4 @@
+import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { searchService } from "../services/search-service";
 
@@ -27,8 +28,8 @@ export const searchRoutes = new Elysia({ prefix: "/search" })
     },
     {
       query: t.Object({
-        q: t.Optional(t.String({ maxLength: 200 })),
-        types: t.Optional(t.String({ maxLength: 100 })),
+        q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        types: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
       }),
     },
   )
@@ -40,7 +41,7 @@ export const searchRoutes = new Elysia({ prefix: "/search" })
     },
     {
       query: t.Object({
-        prefix: t.Optional(t.String({ maxLength: 100 })),
+        prefix: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
       }),
     },
   );

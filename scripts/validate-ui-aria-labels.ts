@@ -1,4 +1,5 @@
 import { writeError, writeOutput } from "./utils/cli-output";
+import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
 type Violation = {
   filePath: string;
@@ -9,15 +10,6 @@ type Violation = {
 
 const projectRoot = process.cwd();
 const clientRoot = "packages/client";
-const ignoredDirectoryNames = new Set([
-  "node_modules",
-  ".git",
-  ".nuxt",
-  ".output",
-  "dist",
-  "dist-types",
-  "coverage",
-]);
 const interactiveTagNames = ["button", "input", "select", "textarea"] as const;
 const accessibleNameAttributePattern =
   /(?:\s|:|v-bind:)aria-label\s*=|(?:\s|:|v-bind:)aria-labelledby\s*=/u;
@@ -26,23 +18,6 @@ const dialogAccessibleNamePattern =
 const dialogModalPattern = /(?:\s|:|v-bind:)aria-modal\s*=\s*["']true["']/u;
 const hiddenInputPattern = /type\s*=\s*["']hidden["']/u;
 const ariaHiddenElementPattern = /aria-hidden\s*=\s*["']true["']/u;
-
-const shouldIgnorePath = (pathValue: string): boolean =>
-  pathValue.split("/").some((segment) => ignoredDirectoryNames.has(segment));
-
-const getLineFromOffset = (text: string, offset: number): number => {
-  if (offset <= 0) {
-    return 1;
-  }
-
-  let line = 1;
-  for (let index = 0; index < offset; index += 1) {
-    if (text.charCodeAt(index) === 10) {
-      line += 1;
-    }
-  }
-  return line;
-};
 
 const hasAccessibleNameAttribute = (tagMarkup: string): boolean =>
   accessibleNameAttributePattern.test(tagMarkup);
@@ -126,14 +101,18 @@ const collectDialogViolations = (filePath: string, fileContent: string): Violati
 const collectFileViolations = async (filePath: string): Promise<Violation[]> => {
   const fileContent = await Bun.file(filePath).text();
   return [
-    ...interactiveTagNames.flatMap((tagName) => collectTagViolations(filePath, fileContent, tagName)),
+    ...interactiveTagNames.flatMap((tagName) =>
+      collectTagViolations(filePath, fileContent, tagName),
+    ),
     ...collectDialogViolations(filePath, fileContent),
   ];
 };
 
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectVueFiles();
-  const perFileViolations = await Promise.all(files.map((filePath) => collectFileViolations(filePath)));
+  const perFileViolations = await Promise.all(
+    files.map((filePath) => collectFileViolations(filePath)),
+  );
   return perFileViolations.flat();
 };
 
@@ -151,7 +130,8 @@ const main = async (): Promise<void> => {
     "ARIA validation failed. Interactive controls and dialogs must include required accessible labels and modal semantics:",
   );
   const lines = violations.map(
-    (violation) => `- ${violation.filePath}:${violation.line} <${violation.tagName}> ${violation.message}`,
+    (violation) =>
+      `- ${violation.filePath}:${violation.line} <${violation.tagName}> ${violation.message}`,
   );
   if (lines.length > 0) {
     await writeError(lines.join("\n"));

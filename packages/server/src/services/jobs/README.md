@@ -4,25 +4,7 @@ A comprehensive job aggregation service for the video game industry, built with 
 
 ## Validation and Rebuild Workflow
 
-Run these commands after provider/aggregator changes:
-
-```bash
-bun run lint
-bun run typecheck
-bun run test
-bun run build
-```
-
-Additional ingestion/runtime checks:
-
-```bash
-bun run validate:no-try-catch
-bun run validate:no-hardcoded-paths
-bun run validate:locales
-bun run verify:pages
-```
-
-Lint diagnostics are intentionally unmasked; quality gates must report all active issues.
+For the full validation sequence and quality gates, see [README.md § Release Validation Workflow](../../../../../README.md#release-validation-workflow).
 
 ## Architecture
 
@@ -39,7 +21,7 @@ Job providers fetch listings from various Applicant Tracking Systems (ATS) used 
   - **Lever**
 - **Gaming job boards**:
   - **Hitmarker** (API-native)
-  - **GameDev.net** (RPA-backed)
+  - **Hitmarker** (RPA-backed)
   - **GrackleHQ** (RPA-backed)
   - **Work With Indies** (RPA-backed)
   - **RemoteGameJobs** (RPA-backed)
@@ -310,13 +292,7 @@ Jobs are cached in SQLite using Drizzle ORM:
 
 ### Cache Expiry
 
-Jobs are cached for 6 hours by default (`job-aggregator.ts`, `cacheExpiry`):
-
-```typescript
-constructor() {
-  this.cacheExpiry = 6 * 60 * 60 * 1000 // 6 hours
-}
-```
+Jobs are cached using `JOB_AGGREGATOR_CACHE_EXPIRY_MS` from `@bao/shared` (single source of truth).
 
 ### Provider runtime source of truth
 

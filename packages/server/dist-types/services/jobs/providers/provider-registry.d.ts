@@ -1,8 +1,9 @@
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 export declare class SimpleRateLimiter {
-    private maxPerMinute;
+    private maxPerWindow;
+    private windowMs;
     private requests;
-    constructor(maxPerMinute?: number);
+    constructor(maxPerWindow?: number, windowMs?: number);
     canMakeRequest(provider: string): boolean;
     recordRequest(provider: string): void;
 }

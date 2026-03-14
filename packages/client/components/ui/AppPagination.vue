@@ -61,9 +61,7 @@ function selectNextPage(): void {
 }
 
 function getPageButtons(): HTMLButtonElement[] {
-  return pageButtonRefs.value.filter(
-    (element): element is HTMLButtonElement => element !== null,
-  );
+  return pageButtonRefs.value.filter((element): element is HTMLButtonElement => element !== null);
 }
 
 function getPageIndex(page: number): number {

@@ -108,19 +108,20 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     technical?: string[] | undefined;
                     soft?: string[] | undefined;
                 } | undefined;
+                name?: string | undefined;
+                theme?: "light" | "dark" | undefined;
                 projects?: {
                     link?: string | undefined;
                     technologies?: string[] | undefined;
                     title: string;
                     description: string;
                 }[] | undefined;
-                name?: string | undefined;
                 personalInfo?: {
                     portfolio?: string | undefined;
                     email?: string | undefined;
+                    name?: string | undefined;
                     location?: string | undefined;
                     website?: string | undefined;
-                    name?: string | undefined;
                     phone?: string | undefined;
                     linkedIn?: string | undefined;
                     github?: string | undefined;
@@ -128,10 +129,10 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 summary?: string | undefined;
                 experience?: {
                     description?: string | undefined;
+                    achievements?: string[] | undefined;
                     location?: string | undefined;
                     technologies?: string[] | undefined;
                     endDate?: string | undefined;
-                    achievements?: string[] | undefined;
                     title: string;
                     company: string;
                     startDate: string;
@@ -150,7 +151,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     shippedTitles?: string | undefined;
                 } | undefined;
                 template?: string | undefined;
-                theme?: "light" | "dark" | undefined;
                 isDefault?: boolean | undefined;
             };
             params: {};
@@ -207,19 +207,20 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         technical?: string[] | undefined;
                         soft?: string[] | undefined;
                     } | undefined;
+                    name?: string | undefined;
+                    theme?: "light" | "dark" | undefined;
                     projects?: {
                         link?: string | undefined;
                         technologies?: string[] | undefined;
                         title: string;
                         description: string;
                     }[] | undefined;
-                    name?: string | undefined;
                     personalInfo?: {
                         portfolio?: string | undefined;
                         email?: string | undefined;
+                        name?: string | undefined;
                         location?: string | undefined;
                         website?: string | undefined;
-                        name?: string | undefined;
                         phone?: string | undefined;
                         linkedIn?: string | undefined;
                         github?: string | undefined;
@@ -227,10 +228,10 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     summary?: string | undefined;
                     experience?: {
                         description?: string | undefined;
+                        achievements?: string[] | undefined;
                         location?: string | undefined;
                         technologies?: string[] | undefined;
                         endDate?: string | undefined;
-                        achievements?: string[] | undefined;
                         title: string;
                         company: string;
                         startDate: string;
@@ -249,7 +250,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         shippedTitles?: string | undefined;
                     } | undefined;
                     template?: string | undefined;
-                    theme?: "light" | "dark" | undefined;
                     isDefault?: boolean | undefined;
                 };
                 params: {

@@ -16,6 +16,7 @@ import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { coverLetterContentToPlainText } from "~/utils/cover-letter-content";
 import { getErrorMessage } from "~/utils/errors";
+import { formatDateWithLocale } from "~/utils/locale-format";
 
 definePageMeta({
   middleware: ["auth"],
@@ -29,7 +30,7 @@ const { resumes, fetchResumes } = useResume();
 const router = useRouter();
 const route = useRoute();
 const { $toast } = useNuxtApp();
-const { t, locale } = useI18n();
+const { t, locale, fallbackLocale } = useI18n();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -141,13 +142,12 @@ function templateLabel(template: CoverLetterTemplate): string {
 
 function formatCreatedAt(value: string | undefined): string {
   if (!value) return t("coverLetterPage.notAvailable");
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return t("coverLetterPage.notAvailable");
-  return new Intl.DateTimeFormat(locale.value, {
+  const formatted = formatDateWithLocale(value, locale.value, fallbackLocale.value, {
     year: "numeric",
     month: "short",
     day: "numeric",
-  }).format(date);
+  });
+  return formatted ?? t("coverLetterPage.notAvailable");
 }
 
 function previewContent(value: string): string {

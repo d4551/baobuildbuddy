@@ -1,20 +1,16 @@
-import type { AIResponse, GenerateOptions } from "@bao/shared";
+import {
+  API_ERROR_AI_STREAMING_FAILED,
+  settle,
+  toErrorMessage,
+  type AIResponse,
+  type GenerateOptions,
+} from "@bao/shared";
 import { HfInference } from "@huggingface/inference";
 import { BaseAIProvider } from "./provider-interface";
 
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : "Unknown error";
-
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
-const buildChatMessages = (
-  prompt: string,
-  systemPrompt?: string,
-): ChatMessage[] => {
+const buildChatMessages = (prompt: string, systemPrompt?: string): ChatMessage[] => {
   const messages: ChatMessage[] = [];
   if (systemPrompt) {
     messages.push({ role: "system", content: systemPrompt });
@@ -43,7 +39,7 @@ export class HuggingFaceProvider extends BaseAIProvider {
     const startTime = Date.now();
     const messages = buildChatMessages(prompt, options?.systemPrompt);
 
-    const responseResult = await settlePromise(
+    const responseResult = await settle(
       this.client.chatCompletion({
         model: this.model,
         messages,
@@ -87,9 +83,11 @@ export class HuggingFaceProvider extends BaseAIProvider {
 
     const iterator = stream[Symbol.asyncIterator]();
     const emitTokens = async function* (): AsyncGenerator<string> {
-      const nextChunkResult = await settlePromise(iterator.next());
+      const nextChunkResult = await settle(iterator.next());
       if (nextChunkResult.status === "rejected") {
-        throw new Error(`HuggingFace streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
+        throw new Error(
+          `${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(nextChunkResult.reason)}`,
+        );
       }
       const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {

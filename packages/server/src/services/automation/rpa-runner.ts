@@ -1,4 +1,5 @@
 import type {
+  AutomationScriptId,
   AutomationSettings,
   ErrorEnvelope,
   JsonObject,
@@ -7,6 +8,8 @@ import type {
   RpaRunResult,
 } from "@bao/shared";
 import {
+  automationScriptEntryById,
+  automationScriptIdSchema,
   DEFAULT_AUTOMATION_SETTINGS,
   RPA_PROTOCOL_VERSION,
   rpaRunEventSchema,
@@ -14,20 +17,11 @@ import {
 } from "@bao/shared";
 import { config } from "../../config/env";
 import { SCRAPER_DIR } from "../../config/paths";
+import { isAbsolute, resolve } from "node:path";
 
 const DEFAULT_KILL_SIGNAL = "SIGKILL";
 const MAX_PROTOCOL_ERROR_LINES = 20;
-const WINDOWS_PLATFORM = "win32";
-const PYTHON_BINARY_WINDOWS = "python";
-const PYTHON_BINARY_POSIX = "python3";
 const NDJSON_LINE_SPLIT_PATTERN = /\r?\n/gu;
-
-const PYTHON_BINARY =
-  Bun.env.PYTHON_BINARY && Bun.env.PYTHON_BINARY.trim().length > 0
-    ? Bun.env.PYTHON_BINARY.trim()
-    : process.platform === WINDOWS_PLATFORM
-      ? PYTHON_BINARY_WINDOWS
-      : PYTHON_BINARY_POSIX;
 
 type ParsedProtocolLine =
   | {
@@ -154,9 +148,9 @@ const buildErrorEnvelope = (
 });
 
 /**
- * Generic process-level result for Python script execution.
+ * Generic process-level result for automation script execution.
  */
-export interface PythonScriptExecutionResult {
+export interface AutomationScriptExecutionResult {
   exitCode: number;
   timedOut: boolean;
   aborted: boolean;
@@ -166,10 +160,11 @@ export interface PythonScriptExecutionResult {
 }
 
 /**
- * Options for generic Python script execution.
+ * Options for generic Bun-based automation script execution.
  */
-export interface RunPythonScriptOptions {
-  scriptName: string;
+export interface RunAutomationScriptOptions {
+  scriptId?: AutomationScriptId;
+  scriptPath?: string;
   scriptInput: Record<string, unknown>;
   timeoutMs?: number;
   signal?: AbortSignal;
@@ -218,12 +213,26 @@ const createProcessSignal = (
   return AbortSignal.any([externalSignal, timeoutSignal]);
 };
 
-const spawnPythonProcess = (
+const resolveAutomationScriptPath = (options: RunAutomationScriptOptions): string => {
+  const scriptPath = options.scriptPath?.trim();
+  if (scriptPath && scriptPath.length > 0) {
+    return isAbsolute(scriptPath) ? scriptPath : resolve(SCRAPER_DIR, scriptPath);
+  }
+
+  const parsedScriptId = automationScriptIdSchema.safeParse(options.scriptId);
+  if (!parsedScriptId.success) {
+    return resolve(SCRAPER_DIR, "__missing-script__.ts");
+  }
+
+  return resolve(SCRAPER_DIR, automationScriptEntryById[parsedScriptId.data]);
+};
+
+const spawnAutomationProcess = (
   scriptPath: string,
   signal: AbortSignal,
   killSignal: number | string | undefined,
 ): ReturnType<typeof Bun.spawn> =>
-  Bun.spawn([PYTHON_BINARY, scriptPath], {
+  Bun.spawn([process.execPath, scriptPath], {
     cwd: SCRAPER_DIR,
     stdin: "pipe",
     stdout: "pipe",
@@ -241,7 +250,7 @@ const isWritableStdin = (stream: unknown): stream is ProcessWritableStdin => {
   if (typeof stream !== "object" || stream === null) {
     return false;
   }
-  if (!(("write" in stream) && ("end" in stream))) {
+  if (!("write" in stream && "end" in stream)) {
     return false;
   }
   return typeof stream.write === "function" && typeof stream.end === "function";
@@ -271,7 +280,7 @@ const resolveReadableBinaryStream = (
 ): ReadableStream<Uint8Array> =>
   isReadableBinaryStream(stream) ? stream : createClosedBinaryStream();
 
-const buildScriptPayload = (options: RunPythonScriptOptions): string =>
+const buildScriptPayload = (options: RunAutomationScriptOptions): string =>
   JSON.stringify({
     ...options.scriptInput,
     runId: options.runId,
@@ -280,15 +289,15 @@ const buildScriptPayload = (options: RunPythonScriptOptions): string =>
   });
 
 /**
- * Executes a Python script with Bun-native lifecycle controls and bounded IO capture.
+ * Executes a Bun-based automation script with bounded IO capture and cancellation.
  */
-export async function runPythonScript(
-  options: RunPythonScriptOptions,
-): Promise<PythonScriptExecutionResult> {
+export async function runAutomationScript(
+  options: RunAutomationScriptOptions,
+): Promise<AutomationScriptExecutionResult> {
   const timeoutMs = toSafeTimeoutMs(options.timeoutMs);
   const stdoutLimit = options.stdoutLineLimit ?? config.automationStdioBufferLimit;
   const stderrLimit = options.stderrLineLimit ?? config.automationStdioBufferLimit;
-  const scriptPath = `${SCRAPER_DIR}/${options.scriptName}`;
+  const scriptPath = resolveAutomationScriptPath(options);
   const startedAt = Date.now();
   const stdoutLines: string[] = [];
   const stderrLines: string[] = [];
@@ -296,7 +305,7 @@ export async function runPythonScript(
 
   const timeoutSignal = AbortSignal.timeout(timeoutMs);
   const signal = createProcessSignal(timeoutSignal, options.signal, abortState);
-  const proc = spawnPythonProcess(scriptPath, signal, options.killSignal);
+  const proc = spawnAutomationProcess(scriptPath, signal, options.killSignal);
   if (isWritableStdin(proc.stdin)) {
     await writeProcessPayload(proc.stdin, buildScriptPayload(options));
   }
@@ -327,7 +336,8 @@ export async function runPythonScript(
  * Options for contract-first RPA script execution.
  */
 export interface RunRpaScriptOptions {
-  scriptName: string;
+  scriptId?: AutomationScriptId;
+  scriptPath?: string;
   scriptInput: Record<string, unknown>;
   executionContext: {
     runId: string;
@@ -429,29 +439,36 @@ const handleStderrLine = (
 
 const resolveTerminalError = (
   state: ProtocolCaptureState,
-  processResult: PythonScriptExecutionResult,
+  processResult: AutomationScriptExecutionResult,
   timeoutMs: number | undefined,
 ): ErrorEnvelope | null => {
   let terminalError = state.terminalError;
   if (processResult.timedOut) {
-    terminalError = buildErrorEnvelope("PYTHON_TIMEOUT", "Python script timed out", {
+    terminalError = buildErrorEnvelope("AUTOMATION_TIMEOUT", "Automation script timed out", {
       timeoutMs: timeoutMs ?? config.automationScriptTimeoutMs,
     });
   }
   if (!terminalError && processResult.aborted) {
-    terminalError = buildErrorEnvelope("PYTHON_CANCELLED", "Python script execution was cancelled");
+    terminalError = buildErrorEnvelope(
+      "AUTOMATION_CANCELLED",
+      "Automation script execution was cancelled",
+    );
   }
   if (!terminalError && processResult.exitCode !== 0) {
-    terminalError = buildErrorEnvelope("PYTHON_RUNTIME_ERROR", "Python script exited with an error", {
-      exitCode: processResult.exitCode,
-      stderrTail: processResult.stderrLines,
-      stdoutTail: processResult.stdoutLines,
-    });
+    terminalError = buildErrorEnvelope(
+      "AUTOMATION_RUNTIME_ERROR",
+      "Automation script exited with an error",
+      {
+        exitCode: processResult.exitCode,
+        stderrTail: processResult.stderrLines,
+        stdoutTail: processResult.stdoutLines,
+      },
+    );
   }
   if (!terminalError && state.protocolErrors.length > 0) {
     terminalError = buildErrorEnvelope(
       "SCRIPT_PROTOCOL_ERROR",
-      "Python script emitted malformed protocol lines",
+      "Automation script emitted malformed protocol lines",
       {
         protocolErrors: state.protocolErrors,
         stdoutTail: processResult.stdoutLines,
@@ -462,7 +479,7 @@ const resolveTerminalError = (
   if (!(terminalError || state.terminalResult)) {
     terminalError = buildErrorEnvelope(
       "SCRIPT_OUTPUT_INVALID",
-      "Python script did not emit a terminal result event",
+      "Automation script did not emit a terminal result event",
       { stdoutTail: processResult.stdoutLines },
     );
   }
@@ -477,8 +494,9 @@ export async function runRpaScript(
 ): Promise<RpaScriptExecutionResult> {
   const state = createProtocolCaptureState();
 
-  const processResult = await runPythonScript({
-    scriptName: options.scriptName,
+  const processResult = await runAutomationScript({
+    scriptId: options.scriptId,
+    scriptPath: options.scriptPath,
     scriptInput: {
       ...options.scriptInput,
       settings: options.automationSettings ?? DEFAULT_AUTOMATION_SETTINGS,
@@ -495,7 +513,11 @@ export async function runRpaScript(
     },
   });
 
-  const terminalError = resolveTerminalError(state, processResult, options.executionContext.timeoutMs);
+  const terminalError = resolveTerminalError(
+    state,
+    processResult,
+    options.executionContext.timeoutMs,
+  );
 
   return {
     result: state.terminalResult,

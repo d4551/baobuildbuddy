@@ -154,8 +154,7 @@ export const FLOW_ACTION_DEFINITIONS: Record<FlowActionId, FlowActionDefinition>
     id: "automationScraper",
     to: APP_ROUTES.automationScraper,
     labelKey: "dashboard.pipeline.steps.scrape",
-    iconPath:
-      "M4 4h16v4H4V4zm0 6h16v10H4V10zm3 3h3v3H7v-3zm5 0h5v1h-5v-1zm0 2h5v1h-5v-1z",
+    iconPath: "M4 4h16v4H4V4zm0 6h16v10H4V10zm3 3h3v3H7v-3zm5 0h5v1h-5v-1zm0 2h5v1h-5v-1z",
   },
   automationApply: {
     id: "automationApply",
@@ -167,8 +166,7 @@ export const FLOW_ACTION_DEFINITIONS: Record<FlowActionId, FlowActionDefinition>
     id: "automationRuns",
     to: APP_ROUTES.automationRuns,
     labelKey: "automation.hub.viewRunsButton",
-    iconPath:
-      "M13 3v10h8m-8-10a9 9 0 100 18 9 9 0 000-18zM5 12h4m6 0h4M12 7v2m0 6v2",
+    iconPath: "M13 3v10h8m-8-10a9 9 0 100 18 9 9 0 000-18zM5 12h4m6 0h4M12 7v2m0 6v2",
   },
   interview: {
     id: "interview",
@@ -237,7 +235,9 @@ function buildFlowResolution(
   primaryId: FlowActionId,
   secondaryIds: readonly FlowActionId[],
 ): FlowResolution {
-  const orderedSecondary = dedupeActionIds(secondaryIds).filter((actionId) => actionId !== primaryId);
+  const orderedSecondary = dedupeActionIds(secondaryIds).filter(
+    (actionId) => actionId !== primaryId,
+  );
   const primaryAction = toRecommendation(primaryId, "primary");
   const recommendedActions = orderedSecondary.map((actionId) =>
     toRecommendation(actionId, "secondary"),
@@ -266,16 +266,45 @@ function resolveRecommendationByReadiness(
     readonly interviewSessions: number;
   },
 ): FlowResolution {
+  const readinessResolution = resolveReadinessStage(readiness);
+  if (readinessResolution) {
+    return readinessResolution;
+  }
+
+  const metricsResolution = resolveMetricStage(metrics);
+  if (metricsResolution) {
+    return metricsResolution;
+  }
+
+  return buildFlowResolution("optimize", "interview", [
+    "aiChat",
+    "automationRuns",
+    "jobs",
+    "resume",
+  ]);
+}
+
+/**
+ * Resolves the first actionable stage from readiness flags alone.
+ */
+function resolveReadinessStage(readiness: FlowReadinessState): FlowResolution | null {
   if (!(readiness.isSetupComplete && readiness.isProfileComplete)) {
     return buildFlowResolution("setup", "setup", ["resume", "jobs", "aiChat"]);
   }
 
   if (!readiness.hasResume) {
-    return buildFlowResolution("resumeAssets", "resume", ["coverLetter", "portfolio", "jobs", "automationScraper"]);
+    return buildFlowResolution("resumeAssets", "resume", [
+      "coverLetter",
+      "portfolio",
+      "jobs",
+      "automationScraper",
+    ]);
   }
 
   if (!(readiness.hasCoverLetter && readiness.hasPortfolio)) {
-    const primaryAssetAction: FlowActionId = !readiness.hasCoverLetter ? "coverLetter" : "portfolio";
+    const primaryAssetAction: FlowActionId = !readiness.hasCoverLetter
+      ? "coverLetter"
+      : "portfolio";
     return buildFlowResolution("portfolioAssets", primaryAssetAction, [
       "resume",
       "coverLetter",
@@ -285,8 +314,24 @@ function resolveRecommendationByReadiness(
     ]);
   }
 
+  return null;
+}
+
+/**
+ * Resolves the first actionable stage from job/interview metrics.
+ */
+function resolveMetricStage(metrics: {
+  readonly savedJobs: number;
+  readonly appliedJobs: number;
+  readonly interviewSessions: number;
+}): FlowResolution | null {
   if (metrics.savedJobs <= 0 && metrics.appliedJobs <= 0) {
-    return buildFlowResolution("jobDiscovery", "jobs", ["automationScraper", "resume", "automationApply", "interview"]);
+    return buildFlowResolution("jobDiscovery", "jobs", [
+      "automationScraper",
+      "resume",
+      "automationApply",
+      "interview",
+    ]);
   }
 
   if (metrics.appliedJobs <= 0) {
@@ -300,10 +345,15 @@ function resolveRecommendationByReadiness(
   }
 
   if (metrics.interviewSessions <= 0) {
-    return buildFlowResolution("interviewPractice", "interview", ["aiChat", "automationRuns", "jobs", "resume"]);
+    return buildFlowResolution("interviewPractice", "interview", [
+      "aiChat",
+      "automationRuns",
+      "jobs",
+      "resume",
+    ]);
   }
 
-  return buildFlowResolution("optimize", "interview", ["aiChat", "automationRuns", "jobs", "resume"]);
+  return null;
 }
 
 /**

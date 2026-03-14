@@ -1,4 +1,5 @@
 import z from "zod";
+import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
 import { rpaErrorEnvelopeSchema } from "./error-envelope.schema";
 import { jsonObjectSchema } from "./json.schema";
 import {
@@ -17,9 +18,9 @@ import {
  * Step-level execution result emitted by the automation script.
  */
 export const rpaRunStepSchema = z.object({
-  action: z.string().trim().min(1).max(200),
+  action: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
   status: z.enum(["ok", "error"]),
-  message: z.string().trim().min(1).max(2_000).optional(),
+  message: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
 });
 
 /**
@@ -27,8 +28,8 @@ export const rpaRunStepSchema = z.object({
  */
 export const rpaRunResultSchema = z.object({
   success: z.boolean(),
-  error: z.string().trim().min(1).max(2_000).nullable(),
-  screenshots: z.array(z.string().trim().min(1).max(2_000)).default([]),
+  error: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG).nullable(),
+  screenshots: z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG)).default([]),
   artifacts: z.array(rpaArtifactMetadataSchema).default([]),
   steps: z.array(rpaRunStepSchema).default([]),
 });
@@ -48,9 +49,9 @@ export const rpaRunEventBaseSchema = z.object({
  */
 export const rpaProgressEventSchema = rpaRunEventBaseSchema.extend({
   eventType: z.literal(rpaEventTypeSchema.enum.progress),
-  action: z.string().trim().min(1).max(200),
+  action: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
   status: rpaStepStatusSchema,
-  message: z.string().trim().min(1).max(2_000).optional(),
+  message: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
   step: z.number().int().nonnegative().optional(),
   totalSteps: z.number().int().positive().optional(),
 });
@@ -91,8 +92,10 @@ export const rpaRunExecutionEnvelopeSchema = z.object({
   userId: z.string().trim().min(1).max(120).nullable(),
   input: jsonObjectSchema.nullable(),
   output: z.union([rpaRunResultSchema, jsonObjectSchema]).nullable(),
-  screenshots: z.array(z.string().trim().min(1).max(2_000)).nullable(),
-  error: z.union([z.string().trim().min(1).max(2_000), rpaErrorEnvelopeSchema]).nullable(),
+  screenshots: z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG)).nullable(),
+  error: z
+    .union([z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG), rpaErrorEnvelopeSchema])
+    .nullable(),
   progress: z.number().int().nonnegative().nullable(),
   currentStep: z.number().int().nonnegative().nullable(),
   totalSteps: z.number().int().nonnegative().nullable(),

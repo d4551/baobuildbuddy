@@ -4,6 +4,7 @@ import tseslint from "typescript-eslint";
 const lintTargets = [
   "packages/server/src/**/*.ts",
   "packages/shared/src/**/*.ts",
+  "packages/scraper/src/**/*.ts",
   "scripts/**/*.ts",
 ];
 

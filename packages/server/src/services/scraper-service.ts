@@ -1,11 +1,25 @@
-import { generateId, type JobSearchResult, safeParseJson } from "@bao/shared";
+import {
+  API_ERROR_INVALID_SCRAPER_JSON,
+  automationScriptIdSchema,
+  generateId,
+  gamingPortalScraperScriptIdByPortalId,
+  type JobSearchResult,
+  scrapedJobSchema,
+  scrapedStudioSchema,
+  safeParseJson,
+  type AutomationScriptId,
+  type GamingPortalId,
+  type ScrapedJob,
+  type ScrapedStudio,
+  toErrorMessage,
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 import { config } from "../config/env";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { studios } from "../db/schema/studios";
-import { runPythonScript } from "./automation/rpa-runner";
+import { runAutomationScript } from "./automation/rpa-runner";
+import { loadJobProviderSettings } from "./jobs/providers/provider-settings";
 
 type ScriptInputPayload = {
   sourceUrl?: string;
@@ -16,47 +30,19 @@ type ScriptExecutionOptions = {
   signal?: AbortSignal;
 };
 
-const GAMEDEV_SCRIPT_NAME = "job_scraper_gamedev.py";
-const GRACKLE_SCRIPT_NAME = "job_scraper_grackle.py";
-const WORKWITHINDIES_SCRIPT_NAME = "job_scraper_workwithindies.py";
-const REMOTEGAMEJOBS_SCRIPT_NAME = "job_scraper_remotegamejobs.py";
-const GAMESJOBSDIRECT_SCRIPT_NAME = "job_scraper_gamesjobsdirect.py";
-const POCKETGAMER_SCRIPT_NAME = "job_scraper_pocketgamer.py";
+const HITMARKER_SCRIPT_ID = gamingPortalScraperScriptIdByPortalId.hitmarker;
+const GRACKLE_SCRIPT_ID = gamingPortalScraperScriptIdByPortalId.grackle;
+const WORKWITHINDIES_SCRIPT_ID = gamingPortalScraperScriptIdByPortalId.workwithindies;
+const REMOTEGAMEJOBS_SCRIPT_ID = gamingPortalScraperScriptIdByPortalId.remotegamejobs;
+const GAMESJOBSDIRECT_SCRIPT_ID = gamingPortalScraperScriptIdByPortalId.gamesjobsdirect;
+const POCKETGAMER_SCRIPT_ID = gamingPortalScraperScriptIdByPortalId.pocketgamer;
+const STUDIO_SCRAPER_SCRIPT_ID: AutomationScriptId = "studio-scraper";
 const DEFAULT_JOB_POSTED_DATE = "";
 const DEFAULT_JOB_TYPE = "full-time";
 const DEFAULT_JOB_SOURCE = "unknown-source";
 const CONTENT_HASH_PREFIX = "job";
 const CONTENT_HASH_LENGTH = 24;
-
-const scrapedStudioSchema = z.object({
-  id: z.string().trim().min(1).optional(),
-  name: z.string().trim().min(1),
-  website: z.string().trim().min(1).optional(),
-  location: z.string().trim().min(1).optional(),
-  size: z.string().trim().min(1).optional(),
-  type: z.string().trim().min(1).optional(),
-  description: z.string().trim().min(1).optional(),
-  games: z.array(z.string().trim().min(1)).optional(),
-  technologies: z.array(z.string().trim().min(1)).optional(),
-  interviewStyle: z.string().trim().min(1).optional(),
-  remoteWork: z.boolean().nullable().optional(),
-});
-
-const scrapedJobSchema = z.object({
-  title: z.string().trim().min(1).max(200),
-  company: z.string().trim().min(1).max(200),
-  location: z.string().trim().min(1).max(200),
-  remote: z.boolean().optional(),
-  description: z.string().trim().max(5_000).optional(),
-  url: z.string().trim().max(500).optional(),
-  source: z.string().trim().max(120).optional(),
-  contentHash: z.string().trim().max(200).optional(),
-  postDate: z.string().trim().max(80).optional(),
-  postedDate: z.string().trim().max(80).optional(),
-});
-
-type ScrapedStudio = z.infer<typeof scrapedStudioSchema>;
-export type ScrapedJob = z.infer<typeof scrapedJobSchema>;
+export type { ScrapedJob };
 
 type ScriptRows<T> = {
   rows: T[];
@@ -75,8 +61,14 @@ type ScraperScriptExecutionResult =
       stderrLines: string[];
     };
 
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
+type AutomationScriptReference = {
+  scriptId?: AutomationScriptId;
+  scriptPath?: string;
+};
+
+type ScriptReferenceOverride = {
+  scriptPath: string;
+};
 
 const runWithErrorCollection = async (
   operation: () => Promise<void>,
@@ -115,6 +107,13 @@ const parseJsonRows = (raw: unknown): unknown[] => {
 
   return [raw];
 };
+
+const resolveScriptReference = (
+  scriptReference: AutomationScriptId | ScriptReferenceOverride,
+): AutomationScriptReference =>
+  typeof scriptReference === "string"
+    ? { scriptId: automationScriptIdSchema.parse(scriptReference) }
+    : { scriptPath: scriptReference.scriptPath };
 
 const normalizeHashInput = (value: string | undefined): string =>
   typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -168,6 +167,15 @@ const toJobSearchResult = (rows: ScrapedJob[]): JobSearchResult => ({
  * Scraper service for studio/job ingestion via Python scripts.
  */
 export class ScraperService {
+  private async resolvePortalSourceUrl(portalId: GamingPortalId): Promise<string | null> {
+    const providerSettings = await loadJobProviderSettings();
+    const portalConfig =
+      providerSettings.gamingPortals.find((portal) => portal.id === portalId && portal.enabled) ??
+      null;
+
+    return portalConfig?.fallbackUrl ?? null;
+  }
+
   private async upsertStudioRow(studioRow: ScrapedStudio, now: string): Promise<void> {
     const id = studioRow.id || generateId();
     const studioData = {
@@ -206,7 +214,10 @@ export class ScraperService {
     job: JobSearchResult["jobs"][number],
     now: string,
   ): Promise<boolean> {
-    const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(0, 100);
+    const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(
+      0,
+      100,
+    );
     const existing = await db.select().from(jobs).where(eq(jobs.contentHash, contentHash));
     if (existing.length > 0) {
       return false;
@@ -233,15 +244,16 @@ export class ScraperService {
   }
 
   /**
-   * Runs a Python scraper script and returns parsed JSON payload.
+   * Runs a Bun automation scraper script and returns parsed JSON payload.
    */
   private async runScraperScript(
-    scriptName: string,
+    scriptReference: AutomationScriptReference,
     payload: ScriptInputPayload = {},
     options: ScriptExecutionOptions = {},
   ): Promise<ScraperScriptExecutionResult> {
-    const execution = await runPythonScript({
-      scriptName,
+    const execution = await runAutomationScript({
+      scriptId: scriptReference.scriptId,
+      scriptPath: scriptReference.scriptPath,
       scriptInput: payload,
       runId: generateId(),
       timeoutMs: options.timeoutMs ?? config.automationScriptTimeoutMs,
@@ -263,7 +275,7 @@ export class ScraperService {
     if (parsed === null && outputText !== "null") {
       return {
         ok: false,
-        error: "Scraper script returned invalid JSON",
+        error: API_ERROR_INVALID_SCRAPER_JSON,
         stderrLines: execution.stderrLines,
       };
     }
@@ -333,7 +345,9 @@ export class ScraperService {
     let scraped = 0;
     let upserted = 0;
 
-    const scriptResult = await this.runScraperScript("studio_scraper.py");
+    const scriptResult = await this.runScraperScript({
+      scriptId: STUDIO_SCRAPER_SCRIPT_ID,
+    });
     if (!scriptResult.ok) {
       errors.push(scriptResult.error);
       return { scraped, upserted, errors };
@@ -357,13 +371,20 @@ export class ScraperService {
   }
 
   /**
-   * Scrapes jobs from GameDev.net and validates normalized output shape.
+   * Scrapes jobs from Hitmarker and validates normalized output shape.
    */
-  async scrapeGameDevNetJobsRaw(
+  async scrapeHitmarkerJobsRaw(
     sourceUrl?: string,
-    scriptName: string = GAMEDEV_SCRIPT_NAME,
+    scriptReference: AutomationScriptId | ScriptReferenceOverride = HITMARKER_SCRIPT_ID,
   ): Promise<ScrapedJob[]> {
-    const scriptResult = await this.runScraperScript(scriptName, sourceUrl ? { sourceUrl } : {});
+    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("hitmarker"));
+    if (!resolvedSourceUrl) {
+      return [];
+    }
+
+    const scriptResult = await this.runScraperScript(resolveScriptReference(scriptReference), {
+      sourceUrl: resolvedSourceUrl,
+    });
     if (!scriptResult.ok) {
       return [];
     }
@@ -374,9 +395,14 @@ export class ScraperService {
    * Scrapes jobs from Grackle and validates normalized output shape.
    */
   async scrapeGrackleJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
+    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("grackle"));
+    if (!resolvedSourceUrl) {
+      return [];
+    }
+
     const scriptResult = await this.runScraperScript(
-      GRACKLE_SCRIPT_NAME,
-      sourceUrl ? { sourceUrl } : {},
+      { scriptId: GRACKLE_SCRIPT_ID },
+      { sourceUrl: resolvedSourceUrl },
     );
     if (!scriptResult.ok) {
       return [];
@@ -388,9 +414,14 @@ export class ScraperService {
    * Scrapes jobs from WorkWithIndies and validates normalized output shape.
    */
   async scrapeWorkWithIndiesJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
+    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("workwithindies"));
+    if (!resolvedSourceUrl) {
+      return [];
+    }
+
     const scriptResult = await this.runScraperScript(
-      WORKWITHINDIES_SCRIPT_NAME,
-      sourceUrl ? { sourceUrl } : {},
+      { scriptId: WORKWITHINDIES_SCRIPT_ID },
+      { sourceUrl: resolvedSourceUrl },
     );
     if (!scriptResult.ok) {
       return [];
@@ -402,9 +433,14 @@ export class ScraperService {
    * Scrapes jobs from RemoteGameJobs and validates normalized output shape.
    */
   async scrapeRemoteGameJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
+    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("remotegamejobs"));
+    if (!resolvedSourceUrl) {
+      return [];
+    }
+
     const scriptResult = await this.runScraperScript(
-      REMOTEGAMEJOBS_SCRIPT_NAME,
-      sourceUrl ? { sourceUrl } : {},
+      { scriptId: REMOTEGAMEJOBS_SCRIPT_ID },
+      { sourceUrl: resolvedSourceUrl },
     );
     if (!scriptResult.ok) {
       return [];
@@ -416,9 +452,14 @@ export class ScraperService {
    * Scrapes jobs from GamesJobsDirect and validates normalized output shape.
    */
   async scrapeGamesJobsDirectRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
+    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("gamesjobsdirect"));
+    if (!resolvedSourceUrl) {
+      return [];
+    }
+
     const scriptResult = await this.runScraperScript(
-      GAMESJOBSDIRECT_SCRIPT_NAME,
-      sourceUrl ? { sourceUrl } : {},
+      { scriptId: GAMESJOBSDIRECT_SCRIPT_ID },
+      { sourceUrl: resolvedSourceUrl },
     );
     if (!scriptResult.ok) {
       return [];
@@ -430,9 +471,14 @@ export class ScraperService {
    * Scrapes jobs from PocketGamer and validates normalized output shape.
    */
   async scrapePocketGamerJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
+    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("pocketgamer"));
+    if (!resolvedSourceUrl) {
+      return [];
+    }
+
     const scriptResult = await this.runScraperScript(
-      POCKETGAMER_SCRIPT_NAME,
-      sourceUrl ? { sourceUrl } : {},
+      { scriptId: POCKETGAMER_SCRIPT_ID },
+      { sourceUrl: resolvedSourceUrl },
     );
     if (!scriptResult.ok) {
       return [];
@@ -441,16 +487,24 @@ export class ScraperService {
   }
 
   /**
-   * Scrapes and upserts GameDev.net jobs with row-level error reporting.
+   * Scrapes and upserts Hitmarker jobs with row-level error reporting.
    */
-  async scrapeGameDevNetJobs(
-    scriptName: string = GAMEDEV_SCRIPT_NAME,
+  async scrapeHitmarkerJobs(
+    scriptReference: AutomationScriptId | ScriptReferenceOverride = HITMARKER_SCRIPT_ID,
   ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
     const errors: string[] = [];
     let scraped = 0;
     let upserted = 0;
 
-    const scriptResult = await this.runScraperScript(scriptName);
+    const resolvedSourceUrl = await this.resolvePortalSourceUrl("hitmarker");
+    if (!resolvedSourceUrl) {
+      errors.push("Missing enabled Hitmarker portal fallbackUrl.");
+      return { scraped, upserted, errors };
+    }
+
+    const scriptResult = await this.runScraperScript(resolveScriptReference(scriptReference), {
+      sourceUrl: resolvedSourceUrl,
+    });
     if (!scriptResult.ok) {
       errors.push(scriptResult.error);
       return { scraped, upserted, errors };

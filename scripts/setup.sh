@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # BaoBuildBuddy - Automated setup for macOS and Linux
-# Usage: bash scripts/setup.sh [--skip-checks] [--skip-python] [--include-build] [--include-desktop-build]
+# Usage: bash scripts/setup.sh [--skip-checks] [--skip-browser-install] [--include-build] [--include-desktop-build]
 set -euo pipefail
 
 BOLD="\033[1m"
@@ -12,7 +12,7 @@ CYAN="\033[0;36m"
 RESET="\033[0m"
 
 SKIP_CHECKS=false
-SKIP_PYTHON=false
+SKIP_BROWSER_INSTALL=false
 INCLUDE_BUILD=false
 INCLUDE_DESKTOP_BUILD=false
 ERRORS=0
@@ -27,7 +27,7 @@ REQUIRED_BUN_MINOR="${REQUIRED_BUN_REST%%.*}"
 for arg in "$@"; do
   case "$arg" in
     --skip-checks) SKIP_CHECKS=true ;;
-    --skip-python) SKIP_PYTHON=true ;;
+    --skip-browser-install) SKIP_BROWSER_INSTALL=true ;;
     --include-build) INCLUDE_BUILD=true ;;
     --include-desktop-build) INCLUDE_DESKTOP_BUILD=true ;;
     --help|-h)
@@ -35,7 +35,7 @@ for arg in "$@"; do
       echo ""
       echo "Options:"
       echo "  --skip-checks   Skip typecheck, lint, and test verification"
-      echo "  --skip-python   Skip Python venv setup (Bun-only install)"
+      echo "  --skip-browser-install Skip Playwright browser installation"
       echo "  --include-build Run bun run build after checks"
       echo "  --include-desktop-build Run bun run build:desktop after checks/build"
       echo "  --help, -h      Show this help message"
@@ -50,17 +50,53 @@ warn()    { echo -e "  ${YELLOW}[WARN]${RESET} $1"; WARNINGS=$((WARNINGS + 1)); 
 fail()    { echo -e "  ${RED}[FAIL]${RESET} $1"; ERRORS=$((ERRORS + 1)); }
 die()     { echo -e "\n  ${RED}[FATAL]${RESET} $1"; exit 1; }
 
-resolve_python_command() {
-  if command -v python3 &>/dev/null; then
-    printf "python3"
+resolve_db_path() {
+  local env_db_path
+  local default_db_path="$HOME/.bao/bao.db"
+
+  if [ -f ".env" ]; then
+    env_db_path="$(awk -F= '/^DB_PATH=/{print $2; exit}' .env | tr -d '\r')"
+    env_db_path="${env_db_path%%#*}"
+    env_db_path="$(echo "$env_db_path" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  fi
+
+  local resolved_path="${env_db_path:-$default_db_path}"
+  if [ "${resolved_path:0:1}" = "~" ]; then
+    resolved_path="${HOME}${resolved_path:1}"
+  fi
+
+  printf "%s" "$resolved_path"
+}
+
+run_db_push_with_recovery() {
+  local db_push_output
+  local db_path
+
+  if db_push_output="$(bun run db:push 2>&1)"; then
+    ok "Schema push complete"
     return 0
   fi
 
-  if command -v python &>/dev/null; then
-    printf "python"
-    return 0
+  db_path="$(resolve_db_path)"
+
+  if [ ! -f "$db_path" ]; then
+    fail "db:push failed"
+    printf "%s\n" "$db_push_output"
+    return 1
   fi
 
+  if printf "%s" "$db_push_output" | grep -q "already exists"; then
+    warn "Detected a pre-existing local database with conflicting indexes at $db_path"
+    rm -f "$db_path" "${db_path}-shm" "${db_path}-wal"
+    mkdir -p "$(dirname "$db_path")"
+    if bun run db:push --force 2>&1; then
+      ok "Schema push complete after local database reset"
+      return 0
+    fi
+  fi
+
+  fail "db:push failed"
+  printf "%s\n" "$db_push_output"
   return 1
 }
 
@@ -111,26 +147,6 @@ else
   die "Git is not installed."
 fi
 
-if [ "$SKIP_PYTHON" = false ]; then
-  if [ -z "${PY_COMMAND:-}" ]; then
-    PY_COMMAND="$(resolve_python_command || true)"
-  fi
-
-  if [ -n "${PY_COMMAND}" ]; then
-    PY_VER="$("${PY_COMMAND}" --version | cut -d' ' -f2)"
-    PY_MAJOR="$(echo "$PY_VER" | cut -d. -f1)"
-    PY_MINOR="$(echo "$PY_VER" | cut -d. -f2)"
-    if [ "$PY_MAJOR" -ge 3 ] && [ "$PY_MINOR" -ge 10 ]; then
-      ok "Python ${PY_VER}"
-    else
-      warn "Python ${PY_VER} found but 3.10+ required for RPA scripts"
-      PY_COMMAND=""
-    fi
-  else
-    warn "Python 3 not found -- RPA/scraper features will be unavailable"
-  fi
-fi
-
 CHROME_FOUND=false
 if command -v google-chrome &>/dev/null; then
   ok "Chrome found: $(command -v google-chrome)"
@@ -172,42 +188,17 @@ else
   warn "Server build:types failed -- client lint may fail"
 fi
 
-# ── 3. Python virtual environment ─────────────────────────────────────────────
+# ── 3. Playwright browsers ────────────────────────────────────────────────────
 
-if [ "$SKIP_PYTHON" = false ] && [ -z "${PY_COMMAND+x}" ]; then
-  PY_COMMAND=""
-fi
-
-if [ "$SKIP_PYTHON" = false ] && [ -n "$PY_COMMAND" ]; then
-  step "Setting up Python virtual environment..."
-
-  if [ -d ".venv" ]; then
-    ok "Virtual environment already exists at .venv/"
+if [ "$SKIP_BROWSER_INSTALL" = false ]; then
+  step "Installing Playwright Chromium for Bun automation runtime..."
+  if bun run automation:browsers:install 2>&1; then
+    ok "Playwright Chromium installed"
   else
-    "$PY_COMMAND" -m venv .venv
-    ok "Created .venv/"
-  fi
-
-  # shellcheck disable=SC1091
-  source .venv/bin/activate
-  "$PY_COMMAND" -m pip install --upgrade pip --quiet 2>/dev/null
-  "$PY_COMMAND" -m pip install -r packages/scraper/requirements.txt --quiet 2>/dev/null
-  ok "Python dependencies installed"
-
-  # Install Playwright browser
-  "$PY_COMMAND" -m playwright install chromium --quiet 2>/dev/null || true
-  ok "Playwright chromium installed"
-
-  # Verify playwright is importable
-  if "$PY_COMMAND" -c "from playwright.sync_api import sync_playwright" 2>/dev/null; then
-    ok "playwright module verified"
-  else
-    warn "playwright module could not be imported -- check packages/scraper/requirements.txt"
+    fail "Playwright browser installation failed"
   fi
 else
-  if [ "$SKIP_PYTHON" = true ]; then
-    echo -e "\n  ${DIM}Skipping Python setup (--skip-python)${RESET}"
-  fi
+  echo -e "\n  ${DIM}Skipping Playwright browser installation (--skip-browser-install)${RESET}"
 fi
 
 # ── 4. Environment file ──────────────────────────────────────────────────────
@@ -222,11 +213,6 @@ else
     ok "Created .env from .env.example"
     # Remove NUXT_PUBLIC_I18N_SUPPORTED_LOCALES (runtime override breaks i18n plugin)
     sed -i '/^NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=/d' .env 2>/dev/null || true
-    # Set Python binary to venv path if venv exists
-    if [ -d ".venv" ]; then
-      echo "PYTHON_BINARY=$(pwd)/.venv/bin/python3" >> .env
-    fi
-    # Increase stdio buffer for large scraper outputs
     echo "AUTOMATION_STDIO_BUFFER_LIMIT=2000" >> .env
     warn "Edit .env with your environment-specific values before running"
   else
@@ -244,10 +230,8 @@ else
   fail "db:generate failed"
 fi
 
-if bun run db:push 2>&1; then
-  ok "Schema push complete"
-else
-  fail "db:push failed"
+if run_db_push_with_recovery; then
+  :
 fi
 
 # ── 6. Verification ──────────────────────────────────────────────────────────

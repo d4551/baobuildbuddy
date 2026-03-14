@@ -1,4 +1,10 @@
-import { type RpaRunEvent, rpaRunEventSchema, toApiScopedPath, WS_ENDPOINTS } from "@bao/shared";
+import {
+  type RpaRunEvent,
+  rpaRunEventSchema,
+  SCHEMA_MAX_LENGTH_RUN_ID,
+  toApiScopedPath,
+  WS_ENDPOINTS,
+} from "@bao/shared";
 import { Elysia, t } from "elysia";
 
 const WS_READY_STATE_OPEN = 1;
@@ -77,7 +83,7 @@ export function broadcastAutomationEvent(event: RpaRunEvent): void {
 export const automationWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.automation), {
   body: t.Object({
     type: t.Union([t.Literal("subscribe"), t.Literal("unsubscribe")]),
-    runId: t.Optional(t.String({ minLength: 8, maxLength: 128 })),
+    runId: t.Optional(t.String({ minLength: 8, maxLength: SCHEMA_MAX_LENGTH_RUN_ID })),
   }),
 
   message(ws, payload) {

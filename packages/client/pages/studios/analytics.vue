@@ -231,7 +231,15 @@ function getMaxCount(items: readonly AnalyticsTechnology[]) {
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 
           <div class="flex items-center justify-center py-8">
-            <div class="radial-progress text-primary" :style="`--value:${remoteWorkPercentage}; --size:12rem;`">
+            <div
+              class="radial-progress text-primary"
+              :style="`--value:${remoteWorkPercentage}; --size:12rem;`"
+              role="progressbar"
+              :aria-label="t('studioAnalytics.remoteWorkProgressAria', { value: remoteWorkPercentage })"
+              :aria-valuenow="remoteWorkPercentage"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
               <div class="text-center">
                 <span class="text-4xl font-bold">{{ remoteWorkPercentage }}%</span>
                 <p class="text-sm mt-2">{{ t("studioAnalytics.sections.offerRemoteLabel") }}</p>

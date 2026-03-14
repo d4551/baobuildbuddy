@@ -1,15 +1,27 @@
-import { APP_BRAND, APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared";
+import {
+  APP_BRAND,
+  APP_LANGUAGE_CODES,
+  DEFAULT_APP_LANGUAGE,
+  DEFAULT_CLIENT_DEV_PORT,
+  DEFAULT_SERVER_PORT,
+} from "@bao/shared";
 
-const DEFAULT_DEV_SERVER_PORT = "3000";
+const DEFAULT_CLIENT_PORT = String(DEFAULT_CLIENT_DEV_PORT);
+const DEFAULT_API_SERVER_PORT = String(DEFAULT_SERVER_PORT);
 const isProductionBuild = process.env.NODE_ENV === "production";
 const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
 const configuredApiProxy = process.env.NUXT_PUBLIC_API_PROXY;
-const configuredServerPort = process.env.PORT;
-const resolvedDevServerPort =
+const configuredServerPort = process.env.SERVER_PORT || process.env.PORT;
+const resolvedApiServerPort =
   configuredServerPort && configuredServerPort.length > 0
     ? configuredServerPort
-    : DEFAULT_DEV_SERVER_PORT;
-const defaultDevApiProxy = `http://localhost:${resolvedDevServerPort}`;
+    : DEFAULT_API_SERVER_PORT;
+const configuredClientPort = process.env.CLIENT_PORT || process.env.NUXT_CLIENT_PORT;
+const resolvedDevServerPort =
+  configuredClientPort && configuredClientPort.length > 0
+    ? configuredClientPort
+    : DEFAULT_CLIENT_PORT;
+const defaultDevApiProxy = `http://localhost:${resolvedApiServerPort}`;
 const apiBaseProxy =
   configuredApiProxy ||
   (configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : undefined) ||
@@ -24,6 +36,7 @@ const DEFAULT_APP_DESCRIPTION = "AI-powered career assistant for the video game 
 const DEFAULT_I18N_LOCALE = DEFAULT_APP_LANGUAGE;
 const DEFAULT_I18N_LOCALE_COOKIE_KEY = "bao-locale";
 const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
+const VITE_BUILD_TARGET = "baseline-widely-available";
 const MODULE_PATH_SEPARATOR = "/";
 const WINDOWS_PATH_SEPARATOR = "\\";
 const NODE_MODULES_PATH_SEGMENT = "/node_modules/";
@@ -94,9 +107,7 @@ const resolveNodeModulePackageName = (normalizedModuleId: string): string | null
     return null;
   }
 
-  let packagePath = normalizedModuleId.slice(
-    nodeModulesIndex + NODE_MODULES_PATH_SEGMENT.length,
-  );
+  let packagePath = normalizedModuleId.slice(nodeModulesIndex + NODE_MODULES_PATH_SEGMENT.length);
   if (packagePath.startsWith(PNPM_PATH_SEGMENT)) {
     const nestedNodeModulesIndex = packagePath.indexOf(NODE_MODULES_PATH_SEGMENT);
     packagePath =
@@ -105,7 +116,9 @@ const resolveNodeModulePackageName = (normalizedModuleId: string): string | null
         : packagePath.slice(nestedNodeModulesIndex + NODE_MODULES_PATH_SEGMENT.length);
   }
 
-  const pathSegments = packagePath.split(MODULE_PATH_SEPARATOR).filter((segment) => segment.length > 0);
+  const pathSegments = packagePath
+    .split(MODULE_PATH_SEPARATOR)
+    .filter((segment) => segment.length > 0);
   if (pathSegments.length === 0) {
     return null;
   }
@@ -162,6 +175,10 @@ export default defineNuxtConfig({
   compatibilityDate: NUXT_COMPATIBILITY_DATE,
   devtools: { enabled: true },
 
+  devServer: {
+    port: Number(resolvedDevServerPort),
+  },
+
   build: {
     transpile: ["@bao/shared"],
   },
@@ -185,6 +202,10 @@ export default defineNuxtConfig({
       devSourcemap: true,
     },
     build: {
+      target: VITE_BUILD_TARGET,
+      modulePreload: {
+        polyfill: false,
+      },
       sourcemap: false,
       rollupOptions: {
         output: {
@@ -219,6 +240,13 @@ export default defineNuxtConfig({
               changeOrigin: true,
             },
           },
+          ...(isProductionBuild
+            ? {
+                routeRules: {
+                  "/api/**": { proxy: `${apiBaseProxy}/api/**` },
+                },
+              }
+            : {}),
         }
       : {}),
   },

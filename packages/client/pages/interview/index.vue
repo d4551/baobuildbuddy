@@ -10,11 +10,13 @@ import {
   INTERVIEW_HUB_EXPERIENCE_OPTIONS,
   INTERVIEW_HUB_JOB_QUERY_LIMIT,
   INTERVIEW_HUB_QUESTION_COUNT_OPTIONS,
-  INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE,
+  INTERVIEW_HUB_RECENT_SESSION_LIMIT,
   type InterviewMode,
   type InterviewTargetJob,
   JOB_PREVIEW_LIMIT,
   type Job,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
   type VoiceSettings,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
@@ -119,7 +121,7 @@ const averageScore = computed(() => Math.round(stats.value?.averageScore ?? 0));
 const improvementTrend = computed(() => Math.round(stats.value?.improvementTrend ?? 0));
 const recentSessionPagination = usePagination(
   computed(() => sessions.value),
-  INTERVIEW_HUB_RECENT_SESSION_PAGE_SIZE,
+  INTERVIEW_HUB_RECENT_SESSION_LIMIT,
 );
 const recentSessions = computed(() => recentSessionPagination.items.value);
 const recentSessionsPaginationSummary = computed(() =>
@@ -283,7 +285,9 @@ await useAsyncData("interview-hub-bootstrap", async () => {
     t("interviewHub.errors.bootstrapLoadFailed"),
   );
   if (!bootstrapResult.ok) {
-    $toast.error(getErrorMessage(bootstrapResult.error, t("interviewHub.errors.bootstrapLoadFailed")));
+    $toast.error(
+      getErrorMessage(bootstrapResult.error, t("interviewHub.errors.bootstrapLoadFailed")),
+    );
   }
 
   const pathwaysResult = await settlePromise(
@@ -431,12 +435,9 @@ function formatSessionDate(value: string | undefined): string {
     return t("interviewHub.recent.notAvailable");
   }
 
-  const formattedDate = formatDateWithLocale(
-    value,
-    locale.value,
-    fallbackLocale.value,
-    { dateStyle: "medium" },
-  );
+  const formattedDate = formatDateWithLocale(value, locale.value, fallbackLocale.value, {
+    dateStyle: "medium",
+  });
   return formattedDate ?? t("interviewHub.recent.notAvailable");
 }
 
@@ -711,9 +712,9 @@ async function viewSession(id: string) {
                       <span
                         class="badge"
                         :class="{
-                          'badge-success': (session.score ?? 0) >= 80,
-                          'badge-warning': (session.score ?? 0) >= 60 && (session.score ?? 0) < 80,
-                          'badge-error': (session.score ?? 0) < 60,
+                          'badge-success': (session.score ?? 0) >= SCORE_PASS_THRESHOLD,
+                          'badge-warning': (session.score ?? 0) >= SCORE_WARNING_THRESHOLD && (session.score ?? 0) < SCORE_PASS_THRESHOLD,
+                          'badge-error': (session.score ?? 0) < SCORE_WARNING_THRESHOLD,
                         }"
                       >
                         {{ session.score ?? 0 }}%

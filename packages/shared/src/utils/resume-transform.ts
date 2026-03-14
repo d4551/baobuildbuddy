@@ -110,7 +110,9 @@ function buildSkillsFromForm(skillsInput: string[] | undefined): ResumeSkills {
   return skills;
 }
 
-function mapFormProjectsToResumeProjects(projects: ResumeFormProject[] | undefined): ResumeProject[] {
+function mapFormProjectsToResumeProjects(
+  projects: ResumeFormProject[] | undefined,
+): ResumeProject[] {
   return (projects || []).map((project) => ({
     title: project.name,
     description: project.description,
@@ -119,9 +121,7 @@ function mapFormProjectsToResumeProjects(projects: ResumeFormProject[] | undefin
   }));
 }
 
-function buildGamingExperience(
-  gaming: ResumeFormData["gaming"] | undefined,
-): GamingExperience {
+function buildGamingExperience(gaming: ResumeFormData["gaming"] | undefined): GamingExperience {
   const gamingExperience: GamingExperience = {};
   if (!gaming) {
     return gamingExperience;
@@ -196,7 +196,9 @@ function mapResumeEducationToFormEducation(
   }));
 }
 
-function mapResumeProjectsToFormProjects(projects: ResumeProject[] | undefined): ResumeFormProject[] {
+function mapResumeProjectsToFormProjects(
+  projects: ResumeProject[] | undefined,
+): ResumeFormProject[] {
   return (projects || []).map((project) => ({
     name: project.title,
     description: project.description,

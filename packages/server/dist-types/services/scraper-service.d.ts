@@ -1,25 +1,17 @@
-import { z } from "zod";
-declare const scrapedJobSchema: z.ZodObject<{
-    title: z.ZodString;
-    company: z.ZodString;
-    location: z.ZodString;
-    remote: z.ZodOptional<z.ZodBoolean>;
-    description: z.ZodOptional<z.ZodString>;
-    url: z.ZodOptional<z.ZodString>;
-    source: z.ZodOptional<z.ZodString>;
-    contentHash: z.ZodOptional<z.ZodString>;
-    postDate: z.ZodOptional<z.ZodString>;
-    postedDate: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
-export type ScrapedJob = z.infer<typeof scrapedJobSchema>;
+import { type AutomationScriptId, type ScrapedJob } from "@bao/shared";
+export type { ScrapedJob };
+type ScriptReferenceOverride = {
+    scriptPath: string;
+};
 /**
  * Scraper service for studio/job ingestion via Python scripts.
  */
 export declare class ScraperService {
+    private resolvePortalSourceUrl;
     private upsertStudioRow;
     private insertScrapedJobIfMissing;
     /**
-     * Runs a Python scraper script and returns parsed JSON payload.
+     * Runs a Bun automation scraper script and returns parsed JSON payload.
      */
     private runScraperScript;
     /**
@@ -39,9 +31,9 @@ export declare class ScraperService {
         errors: string[];
     }>;
     /**
-     * Scrapes jobs from GameDev.net and validates normalized output shape.
+     * Scrapes jobs from Hitmarker and validates normalized output shape.
      */
-    scrapeGameDevNetJobsRaw(sourceUrl?: string, scriptName?: string): Promise<ScrapedJob[]>;
+    scrapeHitmarkerJobsRaw(sourceUrl?: string, scriptReference?: AutomationScriptId | ScriptReferenceOverride): Promise<ScrapedJob[]>;
     /**
      * Scrapes jobs from Grackle and validates normalized output shape.
      */
@@ -63,13 +55,12 @@ export declare class ScraperService {
      */
     scrapePocketGamerJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]>;
     /**
-     * Scrapes and upserts GameDev.net jobs with row-level error reporting.
+     * Scrapes and upserts Hitmarker jobs with row-level error reporting.
      */
-    scrapeGameDevNetJobs(scriptName?: string): Promise<{
+    scrapeHitmarkerJobs(scriptReference?: AutomationScriptId | ScriptReferenceOverride): Promise<{
         scraped: number;
         upserted: number;
         errors: string[];
     }>;
 }
 export declare const scraperService: ScraperService;
-export {};

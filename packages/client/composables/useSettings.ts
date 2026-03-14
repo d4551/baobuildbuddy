@@ -45,7 +45,10 @@ function createSettingsActions(context: SettingsContext) {
     withLoadingState(context.loading, async () => {
       const { data, error } = await context.api.settings.get();
       assertApiResponse(error, context.t("apiErrors.settings.fetchFailed"));
-      const normalized = requireValue(toAppSettings(data), context.t("apiErrors.settings.invalidPayload"));
+      const normalized = requireValue(
+        toAppSettings(data),
+        context.t("apiErrors.settings.invalidPayload"),
+      );
       context.settings.value = normalized;
     });
 

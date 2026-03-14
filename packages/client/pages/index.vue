@@ -5,7 +5,7 @@ import type {
   UserGamificationData,
   UserProfile,
 } from "@bao/shared";
-import { APP_BRAND, getXPProgress } from "@bao/shared";
+import { APP_BRAND, formatRelativeTime, getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_A11Y_KEYS,
@@ -20,7 +20,6 @@ import {
   DASHBOARD_ONBOARDING_STEPS,
   DASHBOARD_PIPELINE_STATUS_KEYS,
   DASHBOARD_RECENT_ACTIVITY_LIMIT,
-  DASHBOARD_RELATIVE_TIME_KEYS,
   DASHBOARD_STAT_CARDS,
   DASHBOARD_TIME_CONSTANTS,
   DASHBOARD_WELCOME_HEADING_KEYS,
@@ -36,6 +35,8 @@ import {
   GAMIFICATION_LEVEL_ICON,
   GAMIFICATION_XP_TARGET_FALLBACK,
 } from "~/constants/gamification";
+import { requireValue } from "~/composables/async-flow";
+import { toUserProfile } from "~/composables/api-normalizers";
 import { getErrorMessage } from "~/utils/errors";
 
 interface DashboardActivity {
@@ -81,18 +82,10 @@ interface DailyChallengesResponse {
   readonly date: string;
 }
 
-interface EdenErrorPayload {
-  readonly message?: string;
-}
-
-interface EdenErrorEnvelope {
-  readonly value?: EdenErrorPayload;
-}
-
-interface EdenResult<T> {
-  readonly data: T;
-  readonly error?: EdenErrorEnvelope | null;
-}
+type EdenResponse = {
+  readonly data?: unknown;
+  readonly error?: unknown;
+};
 
 type DashboardUiState = "idle" | "loading" | "error" | "empty" | "success";
 
@@ -139,7 +132,7 @@ const activeHeroPhrase = computed(() => {
     DASHBOARD_MOTIVATIONAL_PHRASE_KEYS[
       heroPhraseIndex.value % DASHBOARD_MOTIVATIONAL_PHRASE_KEYS.length
     ];
-  return t(phraseKey);
+  return t(phraseKey ?? DASHBOARD_MOTIVATIONAL_PHRASE_KEYS[0]);
 });
 let heroPhraseTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -279,6 +272,7 @@ function pickDailyChallenge(
 ): DashboardChallengeViewModel | null {
   if (challenges.length === 0) return null;
   const currentChallenge = challenges.find((challenge) => !challenge.completed) ?? challenges[0];
+  if (!currentChallenge) return null;
   return mapDailyChallenge(currentChallenge);
 }
 
@@ -341,28 +335,19 @@ function getRecentActivity(progress: UserGamificationData | null): DashboardActi
 }
 
 function formatTimeAgo(timestamp: Date): string {
-  const elapsed = Date.now() - timestamp.getTime();
-
-  if (elapsed < DASHBOARD_TIME_CONSTANTS.millisecondsPerHour) {
-    const minutes = Math.max(
-      1,
-      Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerMinute),
-    );
-    return t(DASHBOARD_RELATIVE_TIME_KEYS.minutesAgo, { count: minutes });
-  }
-
-  if (elapsed < DASHBOARD_TIME_CONSTANTS.millisecondsPerDay) {
-    const hours = Math.max(1, Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerHour));
-    return t(DASHBOARD_RELATIVE_TIME_KEYS.hoursAgo, { count: hours });
-  }
-
-  const days = Math.max(1, Math.floor(elapsed / DASHBOARD_TIME_CONSTANTS.millisecondsPerDay));
-  return t(DASHBOARD_RELATIVE_TIME_KEYS.daysAgo, { count: days });
+  return formatRelativeTime(timestamp, (key, params) => t(key, params ?? {}), {
+    keyPrefix: "dashboard.relativeTime",
+    minOneUnit: true,
+    daysOnly: true,
+  });
 }
 
 async function fetchDashboardViewModel(): Promise<DashboardViewModel> {
   const [profile, stats, gamification, challengeResponse] = await Promise.all([
-    requestData<UserProfile>(api.user.profile.get(), t(DASHBOARD_ERROR_KEYS.profileLoadFallback)),
+    requestData<unknown>(api.user.profile.get(), t(DASHBOARD_ERROR_KEYS.profileLoadFallback)).then(
+      (rawProfile) =>
+        requireValue(toUserProfile(rawProfile), t(DASHBOARD_ERROR_KEYS.profileLoadFallback)),
+    ),
     requestData<DashboardStats>(
       api.stats.dashboard.get(),
       t(DASHBOARD_ERROR_KEYS.metricsLoadFallback),
@@ -445,15 +430,15 @@ function toFlowStats(viewModel: DashboardViewModel): DashboardStats {
   };
 }
 
-async function requestData<T>(
-  request: Promise<EdenResult<T>>,
-  fallbackMessage: string,
-): Promise<T> {
+async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: string): Promise<T> {
   const response = await request;
   if (response.error) {
     throw new Error(getErrorMessage(response.error, fallbackMessage));
   }
-  return response.data;
+  if (response.data == null) {
+    throw new Error(fallbackMessage);
+  }
+  return response.data as T;
 }
 </script>
 
@@ -565,6 +550,7 @@ async function requestData<T>(
                 :aria-valuenow="levelProgress"
                 :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
                 :aria-valuemax="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
+                :aria-label="t(DASHBOARD_A11Y_KEYS.levelProgressAria)"
               >
                 <span class="text-sm font-bold">{{ levelProgress }}%</span>
               </div>
@@ -580,7 +566,7 @@ async function requestData<T>(
       </section>
 
       <section>
-        <div class="stats stats-vertical md:stats-horizontal w-full bg-base-100 shadow">
+        <div class="stats stats-vertical lg:stats-horizontal w-full bg-base-100 shadow">
           <NuxtLink
             v-for="statCard in DASHBOARD_STAT_CARDS"
             :key="statCard.id"

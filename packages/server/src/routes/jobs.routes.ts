@@ -1,5 +1,19 @@
 import {
+  AI_DEFAULT_TEMPERATURE,
+  API_ERROR_APPLICATION_NOT_FOUND,
+  API_ERROR_JOB_NOT_FOUND,
+  API_ERROR_UNKNOWN,
+  DEFAULT_UNSPECIFIED_LABEL,
+  API_MESSAGE_ALREADY_APPLIED,
+  API_MESSAGE_JOB_ALREADY_SAVED,
+  API_MESSAGE_JOB_REFRESH_COMPLETE,
+  AI_MAX_TOKENS_MATCH,
   generateId,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  JOB_DEFAULT_RECOMMENDATION_REASON,
+  JOB_DEFAULT_RECOMMENDATION_SCORE,
   JOB_EXPERIENCE_LEVELS,
   JOB_GAME_GENRES,
   JOB_QUERY_DEFAULT_LIMIT,
@@ -7,7 +21,14 @@ import {
   JOB_QUERY_MAX_LIMIT,
   JOB_STUDIO_TYPES,
   JOB_SUPPORTED_PLATFORMS,
+  ROUTE_GAMIFICATION_XP,
+  SCHEMA_MAX_LENGTH_DESCRIPTION,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LABEL,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_LENGTH_TINY,
   safeParseJson,
+  settle,
 } from "@bao/shared";
 import { and, desc, eq, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -53,13 +74,6 @@ type JobRecommendationsResponse = {
 
 const jobsRoutesLogger = createServerLogger("jobs-routes");
 const RECOMMENDATION_JSON_REGEX = /\[[\s\S]*\]/;
-const DEFAULT_RECOMMENDATION_SCORE = 50;
-const DEFAULT_RECOMMENDATION_REASON = "Recent posting";
-
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 
 function isJobRecommendationMatch(value: unknown): value is JobRecommendationMatch {
   return (
@@ -79,8 +93,8 @@ function isJobRecommendationMatch(value: unknown): value is JobRecommendationMat
 const toRecentPostingRecommendations = (recentJobs: JobRow[]): JobRecommendation[] => {
   return recentJobs.map((job, index) => ({
     ...job,
-    matchScore: DEFAULT_RECOMMENDATION_SCORE,
-    matchReason: DEFAULT_RECOMMENDATION_REASON,
+    matchScore: JOB_DEFAULT_RECOMMENDATION_SCORE,
+    matchReason: JOB_DEFAULT_RECOMMENDATION_REASON,
     rank: index + 1,
   }));
 };
@@ -107,17 +121,17 @@ const buildRecommendationPrompt = (profile: UserProfileRow, recentJobs: JobRow[]
   const jobsSummary = recentJobs
     .map(
       (job, idx) =>
-        `Job ${idx + 1}: ${job.title} at ${job.company} - ${job.location} - ${job.experienceLevel || "Not specified"}`,
+        `Job ${idx + 1}: ${job.title} at ${job.company} - ${job.location} - ${job.experienceLevel || DEFAULT_UNSPECIFIED_LABEL}`,
     )
     .join("\n");
 
   return `You are a career matching AI assistant. Analyze these jobs against the user profile and score each job from 0-100 based on match quality.
 
 User Profile:
-- Skills: ${userSkills || "Not specified"}
+- Skills: ${userSkills || DEFAULT_UNSPECIFIED_LABEL}
 - Experience: ${userExperience}
 - Career Goals: ${userGoals}
-- Years of Experience: ${profile.yearsExperience || "Not specified"}
+- Years of Experience: ${profile.yearsExperience || DEFAULT_UNSPECIFIED_LABEL}
 
 Available Jobs:
 ${jobsSummary}
@@ -204,7 +218,10 @@ const filterJobsByAttributes = (jobRows: JobRow[], query: JobListQuery): JobRow[
 };
 
 const listJobs = async (query: JobListQuery) => {
-  const pageNum = parsePositiveInteger(query.page || String(JOB_QUERY_DEFAULT_PAGE), JOB_QUERY_DEFAULT_PAGE);
+  const pageNum = parsePositiveInteger(
+    query.page || String(JOB_QUERY_DEFAULT_PAGE),
+    JOB_QUERY_DEFAULT_PAGE,
+  );
   const requestedLimit = parsePositiveInteger(
     query.limit || String(JOB_QUERY_DEFAULT_LIMIT),
     JOB_QUERY_DEFAULT_LIMIT,
@@ -231,7 +248,11 @@ const listJobs = async (query: JobListQuery) => {
 const getRecommendations = async (): Promise<JobRecommendationsResponse> => {
   const profileRows = await db.select().from(userProfile).limit(1);
   const profile = profileRows[0];
-  const recentJobs = await db.select().from(jobs).orderBy(desc(jobs.postedDate)).limit(20);
+  const recentJobs = await db
+    .select()
+    .from(jobs)
+    .orderBy(desc(jobs.postedDate))
+    .limit(JOB_QUERY_DEFAULT_LIMIT);
   if (!profile || recentJobs.length === 0) {
     return toFallbackRecommendations(
       recentJobs,
@@ -242,14 +263,15 @@ const getRecommendations = async (): Promise<JobRecommendationsResponse> => {
   const settingsResult = await settle(db.select().from(settings).limit(1));
   if (settingsResult.status === "rejected") {
     jobsRoutesLogger.error("Job recommendations error:", settingsResult.reason);
-    const details = settingsResult.reason instanceof Error ? settingsResult.reason.message : "Unknown error";
+    const details =
+      settingsResult.reason instanceof Error ? settingsResult.reason.message : API_ERROR_UNKNOWN;
     return toFallbackRecommendations(recentJobs, `Error generating recommendations: ${details}`);
   }
 
   const aiService = AIService.fromSettings(settingsResult.value[0]);
   const response = await aiService.generate(buildRecommendationPrompt(profile, recentJobs), {
-    temperature: 0.3,
-    maxTokens: 1500,
+    temperature: AI_DEFAULT_TEMPERATURE,
+    maxTokens: AI_MAX_TOKENS_MATCH,
   });
   if (response.error) {
     return toFallbackRecommendations(recentJobs, `AI recommendations failed: ${response.error}`);
@@ -269,36 +291,32 @@ const getRecommendations = async (): Promise<JobRecommendationsResponse> => {
 };
 
 export const jobsRoutes = new Elysia({ prefix: "/jobs" })
-  .get(
-    "/",
-    async ({ query }) => listJobs(query),
-    {
-      query: t.Object({
-        q: t.Optional(t.String({ maxLength: 200 })),
-        location: t.Optional(t.String({ maxLength: 200 })),
-        remote: t.Optional(t.String({ maxLength: 10 })),
-        experienceLevel: t.Optional(t.String({ maxLength: 50 })),
-        studioType: t.Optional(t.String({ maxLength: 50 })),
-        platform: t.Optional(t.String({ maxLength: 50 })),
-        genre: t.Optional(t.String({ maxLength: 50 })),
-        page: t.Optional(t.String({ maxLength: 10 })),
-        limit: t.Optional(t.String({ maxLength: 10 })),
-      }),
-    },
-  )
+  .get("/", async ({ query }) => listJobs(query), {
+    query: t.Object({
+      q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+      location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+      remote: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+      experienceLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+      studioType: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+      platform: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+      genre: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+      page: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+      limit: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+    }),
+  })
   .get(
     "/:id",
     async ({ params, set }) => {
       const rows = await db.select().from(jobs).where(eq(jobs.id, params.id));
       if (rows.length === 0) {
-        set.status = 404;
-        return { error: "Job not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_JOB_NOT_FOUND };
       }
       return rows[0];
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
@@ -310,14 +328,14 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
       // Check if job exists
       const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
       if (jobRows.length === 0) {
-        set.status = 404;
-        return { error: "Job not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_JOB_NOT_FOUND };
       }
 
       // Check if already saved
       const existing = await db.select().from(savedJobs).where(eq(savedJobs.jobId, jobId));
       if (existing.length > 0) {
-        return { message: "Job already saved", saved: existing[0] };
+        return { message: API_MESSAGE_JOB_ALREADY_SAVED, saved: existing[0] };
       }
 
       const newSaved = {
@@ -327,13 +345,17 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
       };
 
       await db.insert(savedJobs).values(newSaved);
-      set.status = 201;
-      void gamificationService.trackAction("jobsSaved", 10, "job_saved");
+      set.status = HTTP_STATUS_CREATED;
+      gamificationService.trackActionFireAndForget(
+        "jobsSaved",
+        ROUTE_GAMIFICATION_XP.jobsSaved,
+        "job_saved",
+      );
       return newSaved;
     },
     {
       body: t.Object({
-        jobId: t.String({ maxLength: 100 }),
+        jobId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
@@ -345,7 +367,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
     },
     {
       params: t.Object({
-        jobId: t.String({ maxLength: 100 }),
+        jobId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
@@ -371,14 +393,14 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
       // Check if job exists
       const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
       if (jobRows.length === 0) {
-        set.status = 404;
-        return { error: "Job not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_JOB_NOT_FOUND };
       }
 
       // Check if already applied
       const existing = await db.select().from(applications).where(eq(applications.jobId, jobId));
       if (existing.length > 0) {
-        return { message: "Already applied to this job", application: existing[0] };
+        return { message: API_MESSAGE_ALREADY_APPLIED, application: existing[0] };
       }
 
       const now = new Date().toISOString();
@@ -398,14 +420,18 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
       };
 
       await db.insert(applications).values(newApplication);
-      set.status = 201;
-      void gamificationService.trackAction("jobApplications", 40, "job_applied");
+      set.status = HTTP_STATUS_CREATED;
+      gamificationService.trackActionFireAndForget(
+        "jobApplications",
+        ROUTE_GAMIFICATION_XP.jobApplications,
+        "job_applied",
+      );
       return newApplication;
     },
     {
       body: t.Object({
-        jobId: t.String({ maxLength: 100 }),
-        notes: t.Optional(t.String({ maxLength: 5000 })),
+        jobId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+        notes: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
       }),
     },
   )
@@ -416,8 +442,8 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
 
       const existing = await db.select().from(applications).where(eq(applications.id, params.id));
       if (existing.length === 0) {
-        set.status = 404;
-        return { error: "Application not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_APPLICATION_NOT_FOUND };
       }
 
       const app = existing[0];
@@ -446,11 +472,11 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        status: t.Optional(t.String({ maxLength: 50 })),
-        notes: t.Optional(t.String({ maxLength: 5000 })),
+        status: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+        notes: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
       }),
     },
   )
@@ -481,9 +507,9 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
     const refreshResult = await settle(aggregator.refreshJobs());
     if (refreshResult.status === "rejected") {
       jobsRoutesLogger.error("Job refresh error:", refreshResult.reason);
-      set.status = 500;
+      set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
       return {
-        message: `Job refresh failed: ${refreshResult.reason instanceof Error ? refreshResult.reason.message : "Unknown error"}`,
+        message: `Job refresh failed: ${refreshResult.reason instanceof Error ? refreshResult.reason.message : API_ERROR_UNKNOWN}`,
         status: "failed",
         totalJobs: 0,
         newJobs: 0,
@@ -492,7 +518,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
     }
 
     return {
-      message: "Job refresh completed successfully",
+      message: API_MESSAGE_JOB_REFRESH_COMPLETE,
       status: "completed",
       totalJobs: refreshResult.value.total,
       newJobs: refreshResult.value.new,

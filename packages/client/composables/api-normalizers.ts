@@ -114,8 +114,9 @@ const USER_GAMING_SPECIALIZATIONS: readonly UserProfile["gamingExperience"]["spe
     "data-analytics",
   ];
 
-const USER_REMOTE_PREFERENCES: readonly NonNullable<UserProfile["careerGoals"]["remotePreference"]>[] =
-  ["onsite", "hybrid", "remote", "flexible"];
+const USER_REMOTE_PREFERENCES: readonly NonNullable<
+  UserProfile["careerGoals"]["remotePreference"]
+>[] = ["onsite", "hybrid", "remote", "flexible"];
 
 const isOneOf = <T extends string>(value: unknown, choices: readonly T[]): value is T =>
   typeof value === "string" && choices.some((choice) => choice === value);
@@ -260,7 +261,7 @@ export const toJob = (value: unknown): Job | null => {
   const title = asString(value.title);
   const company = asString(value.company);
   const location = asString(value.location);
-  if (!(((id && title ) && company ) && location)) return null;
+  if (!(id && title && company && location)) return null;
 
   return {
     id,
@@ -295,7 +296,7 @@ const toResumeExperience = (value: unknown): ResumeExperienceItem | null => {
   const title = asString(value.title);
   const company = asString(value.company);
   const startDate = asString(value.startDate);
-  if (!((title && company ) && startDate)) return null;
+  if (!(title && company && startDate)) return null;
   return {
     title,
     company,
@@ -314,7 +315,7 @@ const toResumeEducation = (value: unknown): ResumeEducationItem | null => {
   const field = asString(value.field);
   const school = asString(value.school);
   const year = asString(value.year);
-  if (!(((degree && field ) && school ) && year)) return null;
+  if (!(degree && field && school && year)) return null;
   return {
     degree,
     field,
@@ -337,13 +338,8 @@ const toResumeProject = (value: unknown): ResumeProject | null => {
   };
 };
 
-const toResumeCollection = <T>(
-  value: unknown,
-  normalizer: (entry: unknown) => T | null,
-): T[] =>
-  Array.isArray(value)
-    ? value.map(normalizer).filter((entry): entry is T => entry !== null)
-    : [];
+const toResumeCollection = <T>(value: unknown, normalizer: (entry: unknown) => T | null): T[] =>
+  Array.isArray(value) ? value.map(normalizer).filter((entry): entry is T => entry !== null) : [];
 
 const toResumePersonalInfo = (value: unknown): ResumeData["personalInfo"] | undefined => {
   const personalInfo = asRecord(value);
@@ -637,7 +633,10 @@ const normalizeUserGamingExperience = (value: unknown): UserProfile["gamingExper
   const shippedTitles = Array.isArray(gamingExperience.shippedTitles)
     ? gamingExperience.shippedTitles
         .map((entry) => (isRecord(entry) ? toUserShippedTitle(entry) : null))
-        .filter((entry): entry is UserProfile["gamingExperience"]["shippedTitles"][number] => entry !== null)
+        .filter(
+          (entry): entry is UserProfile["gamingExperience"]["shippedTitles"][number] =>
+            entry !== null,
+        )
     : [];
 
   return {

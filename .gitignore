@@ -35,4 +35,8 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 .venv/
+
+# Railway CLI (contains project link - do not commit)
+.railway/
 packages/desktop/src-tauri/target/
+packages/desktop/src-tauri/target-linux/

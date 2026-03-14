@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PortfolioProject } from "@bao/shared";
+import { PORTFOLIO_PROJECT_DESCRIPTION_PREVIEW_LENGTH } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -14,11 +15,10 @@ const emit = defineEmits<{
 }>();
 
 const truncatedDescription = computed(() => {
-  const maxLength = 120;
-  if (props.project.description.length <= maxLength) {
+  if (props.project.description.length <= PORTFOLIO_PROJECT_DESCRIPTION_PREVIEW_LENGTH) {
     return props.project.description;
   }
-  return props.project.description.slice(0, maxLength) + "...";
+  return props.project.description.slice(0, PORTFOLIO_PROJECT_DESCRIPTION_PREVIEW_LENGTH) + "...";
 });
 </script>
 

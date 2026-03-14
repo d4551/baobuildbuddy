@@ -97,4 +97,8 @@ export declare class AIService {
      * Get the current fallback order
      */
     getFallbackOrder(): AIProviderType[];
+    /**
+     * Get the active model name for a given provider (detected or configured).
+     */
+    getActiveModel(providerType: AIProviderType): string | null;
 }

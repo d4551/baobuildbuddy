@@ -6,10 +6,7 @@ const isReadonlyUnknownArray = (value: unknown): value is readonly unknown[] =>
 /**
  * Resolves a deterministic locale from vue-i18n locale and fallback-locale values.
  */
-export function resolvePreferredLocale(
-  localeValue: unknown,
-  fallbackLocaleValue: unknown,
-): string {
+export function resolvePreferredLocale(localeValue: unknown, fallbackLocaleValue: unknown): string {
   if (typeof localeValue === "string" && localeValue.length > 0) {
     return localeValue;
   }

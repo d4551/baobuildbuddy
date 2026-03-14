@@ -41,3 +41,18 @@ export const PIPELINE_GAMIFICATION_REASONS = {
  */
 export type PipelineGamificationReason =
   (typeof PIPELINE_GAMIFICATION_REASONS)[PipelineGamificationAction];
+
+/**
+ * XP amounts for route-level gamification (resume, cover letter, portfolio, etc.).
+ * Single source of truth for route handlers.
+ */
+export const ROUTE_GAMIFICATION_XP = {
+  resumesGenerated: 30,
+  coverLettersGenerated: 30,
+  portfolioItems: 35,
+  interviewsCompleted: 75,
+  jobsSaved: 10,
+  jobApplications: 40,
+  skillsMapped: 15,
+  automationCompleted: 50,
+} as const;

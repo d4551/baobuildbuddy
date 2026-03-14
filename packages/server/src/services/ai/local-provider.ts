@@ -1,14 +1,16 @@
-import type { AIResponse, GenerateOptions } from "@bao/shared";
-import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL, LOCAL_AI_SERVERS } from "@bao/shared";
+import {
+  API_ERROR_AI_STREAMING_FAILED,
+  LOCAL_AI_DEFAULT_ENDPOINT,
+  LOCAL_AI_DEFAULT_MODEL,
+  LOCAL_AI_AUTO_DETECT_MODEL,
+  LOCAL_AI_SERVERS,
+  settle,
+  toErrorMessage,
+  type AIResponse,
+  type GenerateOptions,
+} from "@bao/shared";
 import OpenAI from "openai";
 import { BaseAIProvider } from "./provider-interface";
-
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : "Unknown error";
 
 /**
  * Local AI Provider for RamaLama, Ollama, and other OpenAI-compatible local servers
@@ -49,7 +51,7 @@ export class LocalProvider extends BaseAIProvider {
       content: prompt,
     });
 
-    const responseResult = await settlePromise(
+    const responseResult = await settle(
       this.client.chat.completions.create({
         model: this.model,
         messages,
@@ -101,7 +103,7 @@ export class LocalProvider extends BaseAIProvider {
       content: prompt,
     });
 
-    const streamResult = await settlePromise(
+    const streamResult = await settle(
       this.client.chat.completions.create({
         model: this.model,
         messages,
@@ -112,15 +114,17 @@ export class LocalProvider extends BaseAIProvider {
       }),
     );
     if (streamResult.status === "rejected") {
-      throw new Error(`Local AI streaming error: ${toErrorMessage(streamResult.reason)}`);
+      throw new Error(`${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(streamResult.reason)}`);
     }
     const stream = streamResult.value;
 
     const iterator = stream[Symbol.asyncIterator]();
     const emitContentChunks = async function* (): AsyncGenerator<string> {
-      const nextChunkResult = await settlePromise(iterator.next());
+      const nextChunkResult = await settle(iterator.next());
       if (nextChunkResult.status === "rejected") {
-        throw new Error(`Local AI streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
+        throw new Error(
+          `${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(nextChunkResult.reason)}`,
+        );
       }
       const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
@@ -137,7 +141,29 @@ export class LocalProvider extends BaseAIProvider {
   }
 
   async isAvailable(): Promise<boolean> {
-    return (await settlePromise(this.client.models.list())).status === "fulfilled";
+    const resolvedModel = await this.resolveModelIfNeeded();
+    if (!resolvedModel) {
+      return false;
+    }
+    return (await settle(this.client.models.list())).status === "fulfilled";
+  }
+
+  private async resolveModelIfNeeded(): Promise<boolean> {
+    if (this.model && this.model !== LOCAL_AI_AUTO_DETECT_MODEL) {
+      return true;
+    }
+
+    if (!this.baseUrl || typeof this.baseUrl !== "string" || this.baseUrl.trim().length === 0) {
+      return false;
+    }
+
+    const detected = await settle(LocalProvider.detectFirstModel(this.baseUrl));
+    if (detected.status === "rejected" || !detected.value) {
+      return false;
+    }
+
+    this.model = detected.value;
+    return true;
   }
 
   /**
@@ -145,8 +171,8 @@ export class LocalProvider extends BaseAIProvider {
    * Returns null if the server is unreachable or has no models.
    */
   static async detectFirstModel(baseUrl: string): Promise<string | null> {
-    const provider = new LocalProvider(baseUrl, "detect-placeholder");
-    const listResult = await settlePromise(provider.client.models.list());
+    const provider = new LocalProvider(baseUrl, LOCAL_AI_AUTO_DETECT_MODEL);
+    const listResult = await settle(provider.client.models.list());
     if (listResult.status === "rejected") {
       return null;
     }
@@ -171,7 +197,7 @@ export class LocalProvider extends BaseAIProvider {
 
     const results = await Promise.all(
       servers.map(async (server) => {
-        const result = await settlePromise(
+        const result = await settle(
           Promise.resolve().then(async () => {
             const provider = new LocalProvider(server.baseUrl);
             const available = await provider.isAvailable();

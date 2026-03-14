@@ -67,7 +67,8 @@ const hasConnection = (from: string, to: string, dr: number, dc: number): boolea
     return false;
   }
 
-  const allowedTargets = dr !== 0 ? VERTICAL_CONNECTIONS.get(from) : HORIZONTAL_CONNECTIONS.get(from);
+  const allowedTargets =
+    dr !== 0 ? VERTICAL_CONNECTIONS.get(from) : HORIZONTAL_CONNECTIONS.get(from);
   return allowedTargets ? allowedTargets.has(to) : false;
 };
 
@@ -84,8 +85,7 @@ const canConnect = (grid: string[], { source, target: targetCoord }: ConnectionP
   const dc = otherCol - source.col;
 
   return (
-    hasConnection(sourceChar, targetChar, dr, dc) &&
-    hasConnection(targetChar, sourceChar, -dr, -dc)
+    hasConnection(sourceChar, targetChar, dr, dc) && hasConnection(targetChar, sourceChar, -dr, -dc)
   );
 };
 
@@ -161,7 +161,13 @@ const buildComponents = (
         continue;
       }
 
-      const component = exploreComponent({ grid, width, componentIds, start: { row, col }, componentId: nextId });
+      const component = exploreComponent({
+        grid,
+        width,
+        componentIds,
+        start: { row, col },
+        componentId: nextId,
+      });
       components.push(component);
       nextId += 1;
     }
@@ -170,12 +176,7 @@ const buildComponents = (
   return { componentIds, components };
 };
 
-type FailureReporter = (
-  lineOffset: number,
-  ch: string,
-  reason: string,
-  colOffset: number,
-) => void;
+type FailureReporter = (lineOffset: number, ch: string, reason: string, colOffset: number) => void;
 
 const createFailureReporter = (
   failures: Failure[],
@@ -303,7 +304,12 @@ const validateHorizontalRun = (
     );
   }
   if (!HORIZONTAL_ENDPOINTS.has(right)) {
-    context.reportFailure(row, "-", "horizontal run end must connect to a box corner or side", runEnd);
+    context.reportFailure(
+      row,
+      "-",
+      "horizontal run end must connect to a box corner or side",
+      runEnd,
+    );
   }
 };
 

@@ -397,8 +397,8 @@ const collectMissingTranslationKeyViolations = (
 const isQuotedLiteralExpression = (expression: string): boolean => {
   const opensWithSingleQuote = expression.startsWith("'");
   const closesWithSingleQuote = expression.endsWith("'");
-  const opensWithDoubleQuote = expression.startsWith("\"");
-  const closesWithDoubleQuote = expression.endsWith("\"");
+  const opensWithDoubleQuote = expression.startsWith('"');
+  const closesWithDoubleQuote = expression.endsWith('"');
   const opensWithBacktick = expression.startsWith("`");
   const closesWithBacktick = expression.endsWith("`");
 
@@ -508,7 +508,11 @@ const collectViolations = async (): Promise<Violation[]> => {
   const violationGroups = await Promise.all(
     files.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();
-      const fileViolations = collectMissingTranslationKeyViolations(filePath, fileContent, localeKeys);
+      const fileViolations = collectMissingTranslationKeyViolations(
+        filePath,
+        fileContent,
+        localeKeys,
+      );
       if (filePath.endsWith(".vue")) {
         fileViolations.push(...collectStaticTemplateViolations(filePath, fileContent));
       }

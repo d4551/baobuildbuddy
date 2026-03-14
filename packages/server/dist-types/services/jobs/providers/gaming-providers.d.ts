@@ -1,4 +1,4 @@
-import type { GamingPortalId } from "@bao/shared";
+import { type GamingPortalId } from "@bao/shared";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 /**
  * Provider for Hitmarker gaming jobs.
@@ -25,9 +25,9 @@ export declare class GamingPortalProvider implements JobProvider {
  */
 export declare const hitmarkerProvider: HitmarkerProvider;
 /**
- * Shared GameDev.net provider instance.
+ * Shared Hitmarker portal provider instance.
  */
-export declare const gameDevNetProvider: GamingPortalProvider;
+export declare const hitmarkerPortalProvider: GamingPortalProvider;
 /**
  * Shared GrackleHQ provider instance.
  */

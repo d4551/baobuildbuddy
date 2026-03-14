@@ -1,4 +1,5 @@
 import { writeError, writeOutput } from "./utils/cli-output";
+import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
 type Violation = {
   filePath: string;
@@ -9,15 +10,6 @@ type Violation = {
 const projectRoot = process.cwd();
 const scanRoots = ["packages", "scripts"] as const;
 const allowedExtensions = new Set([".ts", ".tsx", ".vue", ".js", ".mjs", ".cjs"]);
-const ignoredDirectoryNames = new Set([
-  "node_modules",
-  ".git",
-  ".nuxt",
-  ".output",
-  "dist",
-  "dist-types",
-  "coverage",
-]);
 const unsafeCastPattern = /\bas\s+(any|unknown)\b/gu;
 
 const hasAllowedExtension = (pathValue: string): boolean => {
@@ -30,24 +22,6 @@ const hasAllowedExtension = (pathValue: string): boolean => {
   return false;
 };
 
-const shouldIgnorePath = (pathValue: string): boolean =>
-  pathValue.split("/").some((segment) => ignoredDirectoryNames.has(segment));
-
-const getLineFromOffset = (text: string, offset: number): number => {
-  if (offset <= 0) {
-    return 1;
-  }
-
-  let line = 1;
-  for (let index = 0; index < offset; index += 1) {
-    if (text.charCodeAt(index) === 10) {
-      line += 1;
-    }
-  }
-
-  return line;
-};
-
 const collectSourceFiles = async (): Promise<string[]> => {
   const fileGroups = await Promise.all(
     scanRoots.map(async (root) => {
@@ -58,7 +32,10 @@ const collectSourceFiles = async (): Promise<string[]> => {
 
       return relativeFilePaths
         .map((relativeFilePath) => relativeFilePath.replace(/\\/gu, "/"))
-        .filter((normalizedPath) => hasAllowedExtension(normalizedPath) && !shouldIgnorePath(normalizedPath));
+        .filter(
+          (normalizedPath) =>
+            hasAllowedExtension(normalizedPath) && !shouldIgnorePath(normalizedPath),
+        );
     }),
   );
 

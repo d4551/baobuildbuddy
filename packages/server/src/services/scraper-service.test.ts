@@ -1,54 +1,110 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { rmSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import {
+  DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_SETTINGS_ID,
+  type JobProviderSettings,
+} from "@bao/shared";
 import { SCRAPER_DIR } from "../config/paths";
 import { db, sqlite } from "../db/client";
 import { initializeDatabase } from "../db/init";
 import { jobs } from "../db/schema/jobs";
+import { settings } from "../db/schema/settings";
 import { scraperService } from "./scraper-service";
 
-const TEST_SCRIPT_NAME = "scraper_contract_test.py";
+const TEST_SCRIPT_NAME = "scraper_contract_test.ts";
 const TEST_SCRIPT_PATH = join(SCRAPER_DIR, TEST_SCRIPT_NAME);
+const buildApiTemplate = (origin: string, path: string, query = ""): string =>
+  `${origin}${path}${query}`;
+const buildFilterQuery = (field: string, value: string): string => `?filter[${field}]=${value}`;
+
+const TEST_JOB_PROVIDER_SETTINGS: JobProviderSettings = {
+  providerTimeoutMs: 5_000,
+  companyBoardResultLimit: 25,
+  gamingBoardResultLimit: 25,
+  unknownLocationLabel: "Unknown location",
+  unknownCompanyLabel: "Unknown company",
+  hitmarkerApiBaseUrl: "https://api.hitmarker.test/jobs",
+  hitmarkerDefaultQuery: "engineer",
+  hitmarkerDefaultLocation: "Remote",
+  greenhouseApiBaseUrl: "https://boards.greenhouse.io",
+  greenhouseMaxPages: 1,
+  greenhouseBoards: [],
+  leverApiBaseUrl: "https://api.lever.co/v0/postings",
+  leverMaxPages: 1,
+  leverCompanies: [],
+  companyBoardApiTemplates: {
+    greenhouse: "https://boards.greenhouse.io/__TOKEN__/jobs",
+    lever: "https://api.lever.co/v0/postings/__TOKEN__?mode=json",
+    recruitee: "https://api.recruitee.com/c/__TOKEN__/careers/offers",
+    workable: "https://apply.workable.com/api/v3/accounts/__TOKEN__/jobs",
+    ashby: "https://jobs.ashbyhq.com/api/non-user-graphql?organizationId=__TOKEN__",
+    smartrecruiters: "https://api.smartrecruiters.com/v1/companies/__TOKEN__/postings",
+    teamtailor: buildApiTemplate(
+      "https://api.teamtailor.com",
+      "/v1/jobs",
+      buildFilterQuery("organization", "__TOKEN__"),
+    ),
+    workday: "https://__TOKEN__/wday/cxs/__TOKEN__/jobs",
+  },
+  companyBoards: [],
+  gamingPortals: [
+    {
+      id: "hitmarker",
+      name: "Hitmarker",
+      source: "hitmarker",
+      fallbackUrl: "https://example.com/hitmarker",
+      enabled: true,
+    },
+  ],
+};
 
 beforeAll(async () => {
   initializeDatabase(sqlite);
-  await Bun.write(
+  await writeFile(
     TEST_SCRIPT_PATH,
-    `#!/usr/bin/env python3
-import json
-import sys
+    `const payload = JSON.parse((await Bun.stdin.text()) || "{}");
+const mode = typeof payload.mode === "string" ? payload.mode : "mixed";
 
-payload = json.loads(sys.stdin.read() or "{}")
-mode = payload.get("mode", "mixed")
+if (mode === "malformed") {
+  process.stdout.write("not-json\\n");
+  process.exit(0);
+}
 
-if mode == "malformed":
-    sys.stdout.write("not-json\\n")
-    sys.exit(0)
-
-rows = [
-    {
-        "title": "Gameplay Engineer",
-        "company": "Studio Alpha",
-        "location": "Remote",
-        "url": "https://example.com/jobs/1",
-        "source": "gamedev-net",
-        "contentHash": "gdn-contract-1",
-        "description": "Build gameplay systems",
-        "postDate": "2026-02-20",
-        "remote": True
-    },
-    {
-        "company": "Invalid Missing Title"
-    }
-]
-sys.stdout.write(json.dumps(rows))
-sys.exit(0)
+const rows = [
+  {
+    title: "Gameplay Engineer",
+    company: "Studio Alpha",
+    location: "Remote",
+    url: "https://example.com/jobs/1",
+    source: "hitmarker",
+    contentHash: "gdn-contract-1",
+    description: "Build gameplay systems",
+    postDate: "2026-02-20",
+    remote: true,
+  },
+  {
+    company: "Invalid Missing Title",
+  },
+];
+process.stdout.write(JSON.stringify(rows));
+process.exit(0);
 `,
   );
 });
 
 beforeEach(async () => {
   await db.delete(jobs);
+  await db.delete(settings);
+  await db.insert(settings).values({
+    id: DEFAULT_SETTINGS_ID,
+    automationSettings: {
+      ...DEFAULT_AUTOMATION_SETTINGS,
+      jobProviders: TEST_JOB_PROVIDER_SETTINGS,
+    },
+  });
 });
 
 afterAll(() => {
@@ -57,7 +113,7 @@ afterAll(() => {
 
 describe("scraperService", () => {
   test("captures row-level errors while ingesting valid rows", async () => {
-    const result = await scraperService.scrapeGameDevNetJobs(TEST_SCRIPT_NAME);
+    const result = await scraperService.scrapeHitmarkerJobs({ scriptPath: TEST_SCRIPT_NAME });
 
     expect(result.scraped).toBe(1);
     expect(result.upserted).toBe(1);
@@ -65,45 +121,39 @@ describe("scraperService", () => {
   });
 
   test("reports malformed scraper JSON payloads", async () => {
-    await Bun.write(
+    await writeFile(
       TEST_SCRIPT_PATH,
-      `#!/usr/bin/env python3
-import sys
-sys.stdout.write("not-json\\n")
-sys.exit(0)
+      `process.stdout.write("not-json\\n");
+process.exit(0);
 `,
     );
 
-    const result = await scraperService.scrapeGameDevNetJobs(TEST_SCRIPT_NAME);
+    const result = await scraperService.scrapeHitmarkerJobs({ scriptPath: TEST_SCRIPT_NAME });
     expect(result.scraped).toBe(0);
     expect(result.upserted).toBe(0);
     expect(result.errors.some((entry) => entry.includes("invalid JSON"))).toBe(true);
   });
 
   test("derives deterministic content hashes when scraper rows omit contentHash", async () => {
-    await Bun.write(
+    await writeFile(
       TEST_SCRIPT_PATH,
-      `#!/usr/bin/env python3
-import json
-import sys
-
-sys.stdout.write(json.dumps([
+      `process.stdout.write(JSON.stringify([
   {
-    "title": "AI Gameplay Engineer",
-    "company": "Studio Hash",
-    "location": "Remote",
-    "url": "https://example.com/jobs/hash",
-    "source": "contract-source",
-    "description": "Build deterministic systems",
-    "postDate": "2026-02-23",
-    "remote": True
-  }
-]))
-sys.exit(0)
+    title: "AI Gameplay Engineer",
+    company: "Studio Hash",
+    location: "Remote",
+    url: "https://example.com/jobs/hash",
+    source: "contract-source",
+    description: "Build deterministic systems",
+    postDate: "2026-02-23",
+    remote: true,
+  },
+]));
+process.exit(0);
 `,
     );
 
-    const firstRun = await scraperService.scrapeGameDevNetJobs(TEST_SCRIPT_NAME);
+    const firstRun = await scraperService.scrapeHitmarkerJobs({ scriptPath: TEST_SCRIPT_NAME });
     expect(firstRun.upserted).toBe(1);
     const firstRows = await db.select().from(jobs);
     const firstHash = firstRows[0]?.contentHash ?? "";
@@ -111,7 +161,7 @@ sys.exit(0)
 
     await db.delete(jobs);
 
-    const secondRun = await scraperService.scrapeGameDevNetJobs(TEST_SCRIPT_NAME);
+    const secondRun = await scraperService.scrapeHitmarkerJobs({ scriptPath: TEST_SCRIPT_NAME });
     expect(secondRun.upserted).toBe(1);
     const secondRows = await db.select().from(jobs);
     const secondHash = secondRows[0]?.contentHash ?? "";

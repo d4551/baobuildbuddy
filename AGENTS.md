@@ -44,7 +44,7 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
 
 4. **`better-sqlite3` is needed for `drizzle-kit push/generate`** even though the runtime uses `bun:sqlite`.
 
-5. **`packages/server/src/db/schema/index.ts`** is a barrel re-export from `schema-modules.ts`, required by `drizzle.config.ts`.
+5. **`packages/server/src/db/schema/schema-modules.ts`** is the schema source; `drizzle.config.ts` points to it directly.
 
 6. **Auth is disabled in local dev** by setting `BAO_DISABLE_AUTH=true` in `.env`.
 
@@ -54,7 +54,7 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
 
 9. **Speech model defaults are derived from provider.** `DEFAULT_SPEECH_SETTINGS` reads from `SPEECH_MODEL_OPTIONS[provider][0]`. When the user switches provider in the UI, the model auto-updates to the first option for that provider.
 
-10. **Python/RPA uses Playwright.** Run `pip install -r packages/scraper/requirements.txt && playwright install chromium`. Set `PYTHON_BINARY` in `.env` to the venv Python path.
+10. **Bun/TS RPA uses Playwright.** Run `bun run automation:browsers:install` after `bun install` to install Chromium for the automation workspace.
 
 11. **`AUTOMATION_STDIO_BUFFER_LIMIT`** defaults to 200 lines. Set to `2000` in `.env` for large scraper outputs.
 
@@ -64,7 +64,7 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
     - **GrackleHQ**: Working (30+ jobs)
     - **WorkWithIndies**: Working (60+ jobs)
     - **RemoteGameJobs**: Working (41+ jobs)
-    - **Hitmarker**: Working (replaces defunct GameDev.net)
+    - **Hitmarker**: Working (primary active gaming job board feed)
     - **GamesJobsDirect**: Working
     - **PocketGamer**: Working
     - **Greenhouse API**: Working (168+ jobs with full descriptions via `content=true`)

@@ -32,8 +32,8 @@ export declare const automationRoutes: Elysia<"/automation", {
         "job-apply": {
             post: {
                 body: {
-                    jobId?: string | undefined;
                     customAnswers?: {} | undefined;
+                    jobId?: string | undefined;
                     coverLetterId?: string | undefined;
                     resumeId: string;
                     jobUrl: string;
@@ -42,6 +42,13 @@ export declare const automationRoutes: Elysia<"/automation", {
                 query: unknown;
                 headers: unknown;
                 response: {
+                    500: {
+                        error: {
+                            details?: {} | undefined;
+                            message: string;
+                            code: string;
+                        };
+                    };
                     200: {
                         id: string;
                         aborted: boolean;
@@ -51,14 +58,14 @@ export declare const automationRoutes: Elysia<"/automation", {
                             message: string;
                             code: string;
                         } | null;
-                        progress: number | null;
-                        input: {
-                            [x: string]: unknown;
-                        } | null;
+                        type: "scrape" | "job_apply" | "email";
                         output: {
                             [x: string]: unknown;
                         } | null;
-                        type: "scrape" | "job_apply" | "email";
+                        input: {
+                            [x: string]: unknown;
+                        } | null;
+                        progress: number | null;
                         createdAt: string;
                         updatedAt: string;
                         status: "success" | "pending" | "running" | "error";
@@ -72,13 +79,6 @@ export declare const automationRoutes: Elysia<"/automation", {
                         exitCode: number | null;
                         timedOut: boolean;
                         executionMs: number | null;
-                    };
-                    500: {
-                        error: {
-                            details?: {} | undefined;
-                            message: string;
-                            code: string;
-                        };
                     };
                     400: {
                         error: {
@@ -118,8 +118,8 @@ export declare const automationRoutes: Elysia<"/automation", {
             schedule: {
                 post: {
                     body: {
-                        jobId?: string | undefined;
                         customAnswers?: {} | undefined;
+                        jobId?: string | undefined;
                         coverLetterId?: string | undefined;
                         resumeId: string;
                         jobUrl: string;
@@ -129,6 +129,13 @@ export declare const automationRoutes: Elysia<"/automation", {
                     query: unknown;
                     headers: unknown;
                     response: {
+                        500: {
+                            error: {
+                                details?: {} | undefined;
+                                message: string;
+                                code: string;
+                            };
+                        };
                         200: {
                             id: string;
                             aborted: boolean;
@@ -138,14 +145,14 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 message: string;
                                 code: string;
                             } | null;
-                            progress: number | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
+                            type: "scrape" | "job_apply" | "email";
                             output: {
                                 [x: string]: unknown;
                             } | null;
-                            type: "scrape" | "job_apply" | "email";
+                            input: {
+                                [x: string]: unknown;
+                            } | null;
+                            progress: number | null;
                             createdAt: string;
                             updatedAt: string;
                             status: "success" | "pending" | "running" | "error";
@@ -159,13 +166,6 @@ export declare const automationRoutes: Elysia<"/automation", {
                             exitCode: number | null;
                             timedOut: boolean;
                             executionMs: number | null;
-                        };
-                        500: {
-                            error: {
-                                details?: {} | undefined;
-                                message: string;
-                                code: string;
-                            };
                         };
                         400: {
                             error: {
@@ -214,19 +214,19 @@ export declare const automationRoutes: Elysia<"/automation", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        status: "success";
-                        runId: string;
-                        provider: string;
-                        model: string;
-                        reply: string;
-                    };
                     500: {
                         error: {
                             details?: {} | undefined;
                             message: string;
                             code: string;
                         };
+                    };
+                    200: {
+                        provider: string;
+                        model: string;
+                        runId: string;
+                        status: "success";
+                        reply: string;
                     };
                     400: {
                         error: {
@@ -281,14 +281,14 @@ export declare const automationRoutes: Elysia<"/automation", {
                             message: string;
                             code: string;
                         } | null;
-                        progress: number | null;
-                        input: {
-                            [x: string]: unknown;
-                        } | null;
+                        type: "scrape" | "job_apply" | "email";
                         output: {
                             [x: string]: unknown;
                         } | null;
-                        type: "scrape" | "job_apply" | "email";
+                        input: {
+                            [x: string]: unknown;
+                        } | null;
+                        progress: number | null;
                         createdAt: string;
                         updatedAt: string;
                         status: "success" | "pending" | "running" | "error";
@@ -337,14 +337,14 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 message: string;
                                 code: string;
                             } | null;
-                            progress: number | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
+                            type: "scrape" | "job_apply" | "email";
                             output: {
                                 [x: string]: unknown;
                             } | null;
-                            type: "scrape" | "job_apply" | "email";
+                            input: {
+                                [x: string]: unknown;
+                            } | null;
+                            progress: number | null;
                             createdAt: string;
                             updatedAt: string;
                             status: "success" | "pending" | "running" | "error";

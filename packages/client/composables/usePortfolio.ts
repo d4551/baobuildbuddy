@@ -45,7 +45,10 @@ async function updatePortfolio(
   });
 }
 
-async function addProject(context: PortfolioContext, projectData: CreateProjectPayload): Promise<unknown> {
+async function addProject(
+  context: PortfolioContext,
+  projectData: CreateProjectPayload,
+): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api.portfolio.projects.post(projectData);
     assertApiResponse(error, context.t("apiErrors.portfolio.addProjectFailed"));
@@ -115,7 +118,8 @@ export function usePortfolio() {
     fetchPortfolio: () => fetchPortfolio(context),
     updatePortfolio: (updates: Partial<PortfolioMetadata>) => updatePortfolio(context, updates),
     addProject: (projectData: CreateProjectPayload) => addProject(context, projectData),
-    updateProject: (id: string, updates: UpdateProjectPayload) => updateProject(context, id, updates),
+    updateProject: (id: string, updates: UpdateProjectPayload) =>
+      updateProject(context, id, updates),
     deleteProject: (id: string) => deleteProject(context, id),
     reorderProjects: (orderedIds: string[]) => reorderProjects(context, orderedIds),
     exportPortfolio: () => exportPortfolio(context),

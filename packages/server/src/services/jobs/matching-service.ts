@@ -4,6 +4,13 @@
  */
 
 import type { Job, JobExperienceLevel, MatchScore } from "@bao/shared";
+import {
+  DEFAULT_SCORE_NEUTRAL,
+  JOB_SALARY_PARSE_MULTIPLIER,
+  MATCHING_IMPROVEMENT_THRESHOLD,
+  MATCHING_STRENGTH_THRESHOLD,
+  MATCHING_WEIGHTS,
+} from "@bao/shared";
 
 export interface UserProfile {
   skills: string[];
@@ -49,12 +56,17 @@ function parseSalaryRange(salary: Job["salary"]): ParsedSalaryRange | null {
     if (!(numbers && numbers.length >= 1)) {
       return null;
     }
-    const min = Number.parseInt(numbers[0], 10) * 1000;
-    const max = numbers.length > 1 ? Number.parseInt(numbers[1], 10) * 1000 : min;
+    const min = Number.parseInt(numbers[0], 10) * JOB_SALARY_PARSE_MULTIPLIER;
+    const max =
+      numbers.length > 1 ? Number.parseInt(numbers[1], 10) * JOB_SALARY_PARSE_MULTIPLIER : min;
     return { min, max };
   }
 
-  if (typeof salary === "object" && typeof salary.min === "number" && typeof salary.max === "number") {
+  if (
+    typeof salary === "object" &&
+    typeof salary.min === "number" &&
+    typeof salary.max === "number"
+  ) {
     return { min: salary.min, max: salary.max };
   }
 
@@ -88,43 +100,33 @@ export function calculateMatchScore(userProfile: UserProfile, job: Job): MatchSc
     technology: calculateTechnologyMatch(userProfile, job),
   };
 
-  // Weighted average - adjust weights based on importance
-  const weights = {
-    skills: 0.25,
-    experience: 0.2,
-    location: 0.15,
-    salary: 0.15,
-    culture: 0.1,
-    technology: 0.15,
-  };
-
   const overall = Math.round(
-    scores.skills * weights.skills +
-      scores.experience * weights.experience +
-      scores.location * weights.location +
-      scores.salary * weights.salary +
-      scores.culture * weights.culture +
-      scores.technology * weights.technology,
+    scores.skills * MATCHING_WEIGHTS.skills +
+      scores.experience * MATCHING_WEIGHTS.experience +
+      scores.location * MATCHING_WEIGHTS.location +
+      scores.salary * MATCHING_WEIGHTS.salary +
+      scores.culture * MATCHING_WEIGHTS.culture +
+      scores.technology * MATCHING_WEIGHTS.technology,
   );
 
   const strengths: string[] = [];
   const improvements: string[] = [];
   const missingSkills: string[] = [];
 
-  // Identify strengths (scores > 70)
-  if (scores.skills > 70) strengths.push("Strong skill match");
-  if (scores.technology > 70) strengths.push("Technology stack alignment");
-  if (scores.experience > 70) strengths.push("Experience level fit");
-  if (scores.location > 70) strengths.push("Location preference match");
-  if (scores.salary > 70) strengths.push("Salary expectations aligned");
+  if (scores.skills > MATCHING_STRENGTH_THRESHOLD) strengths.push("Strong skill match");
+  if (scores.technology > MATCHING_STRENGTH_THRESHOLD) strengths.push("Technology stack alignment");
+  if (scores.experience > MATCHING_STRENGTH_THRESHOLD) strengths.push("Experience level fit");
+  if (scores.location > MATCHING_STRENGTH_THRESHOLD) strengths.push("Location preference match");
+  if (scores.salary > MATCHING_STRENGTH_THRESHOLD) strengths.push("Salary expectations aligned");
 
-  // Identify areas for improvement (scores < 50)
-  if (scores.skills < 50) {
+  if (scores.skills < MATCHING_IMPROVEMENT_THRESHOLD) {
     improvements.push("Develop additional required skills");
     missingSkills.push(...findMissingSkills(userProfile, job));
   }
-  if (scores.experience < 50) improvements.push("Gain more relevant experience");
-  if (scores.technology < 50) improvements.push("Learn required technologies");
+  if (scores.experience < MATCHING_IMPROVEMENT_THRESHOLD)
+    improvements.push("Gain more relevant experience");
+  if (scores.technology < MATCHING_IMPROVEMENT_THRESHOLD)
+    improvements.push("Learn required technologies");
 
   return {
     overall,
@@ -140,7 +142,7 @@ export function calculateMatchScore(userProfile: UserProfile, job: Job): MatchSc
  */
 function calculateSkillMatch(profile: UserProfile, job: Job): number {
   if (!job.requirements || job.requirements.length === 0) {
-    return 50; // Neutral score if no requirements specified
+    return DEFAULT_SCORE_NEUTRAL;
   }
 
   const userSkills = new Set(profile.skills.map((s) => s.toLowerCase().trim()));
@@ -175,7 +177,7 @@ function calculateExperienceMatch(profile: UserProfile, job: Job): number {
   }
 
   if (!profile.experienceLevel) {
-    return 50; // Can't determine without user experience level
+    return DEFAULT_SCORE_NEUTRAL;
   }
 
   const levels: Record<JobExperienceLevel, number> = {
@@ -200,9 +202,8 @@ function calculateExperienceMatch(profile: UserProfile, job: Job): number {
     return 75;
   }
 
-  // Two levels difference is acceptable
   if (Math.abs(userLevel - jobLevel) === 2) {
-    return 50;
+    return DEFAULT_SCORE_NEUTRAL;
   }
 
   // More than two levels is a poor match
@@ -306,7 +307,7 @@ function calculateCultureMatch(profile: UserProfile, job: Job): number {
  */
 function calculateTechnologyMatch(profile: UserProfile, job: Job): number {
   if (!job.technologies || job.technologies.length === 0) {
-    return 50; // Neutral if no tech specified
+    return DEFAULT_SCORE_NEUTRAL;
   }
 
   const userTech = new Set(profile.technologies.map((t) => t.toLowerCase().trim()));

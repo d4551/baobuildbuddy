@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { APP_ROUTES, SKILL_CATEGORY_IDS, type SkillCategory, type SkillMapping } from "@bao/shared";
+import {
+  APP_ROUTES,
+  ROUTE_GAMIFICATION_XP,
+  SKILL_CATEGORY_IDS,
+  type SkillCategory,
+  type SkillMapping,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { toSkillMapping } from "~/composables/api-normalizers";
@@ -196,7 +202,10 @@ async function initializeSkillsPage(): Promise<void> {
 }
 
 async function tryAwardSkillXp(amount: number, reason: SkillsGamificationReason): Promise<boolean> {
-  const awardResult = await settlePromise(awardXP(amount, reason), "Failed to award skills XP");
+  const awardResult = await settlePromise(
+    awardXP(amount, reason),
+    t("apiErrors.gamification.awardXPFailed"),
+  );
   return awardResult.ok;
 }
 
@@ -227,10 +236,7 @@ async function handleAddMapping(): Promise<void> {
       await fetchMappings();
       showAddModal.value = false;
       resetForm();
-      return tryAwardSkillXp(
-        SKILLS_GAMIFICATION_XP.mappingAdded,
-        SKILLS_GAMIFICATION_REASONS.mappingAdded,
-      );
+      return true;
     })(),
     t("skillsPage.errors.addFailed"),
   );
@@ -241,13 +247,10 @@ async function handleAddMapping(): Promise<void> {
     return;
   }
 
-  const awardedXp = addMappingResult.value;
   $toast.success(
-    awardedXp
-      ? t("skillsPage.toasts.mappingAddedWithXp", {
-          xp: SKILLS_GAMIFICATION_XP.mappingAdded,
-        })
-      : t("skillsPage.toasts.mappingAdded"),
+    t("skillsPage.toasts.mappingAddedWithXp", {
+      xp: ROUTE_GAMIFICATION_XP.skillsMapped,
+    }),
   );
 }
 

@@ -2,12 +2,15 @@
 import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared";
 import {
   APP_ROUTE_BUILDERS,
+  formatRelativeTimeForDate,
   JOB_DISCOVERY_DEFAULT_PAGE_SIZE,
   JOB_EXPERIENCE_LEVELS,
   JOB_FILTER_ALL_VALUE,
   JOB_GAME_GENRES,
   JOB_STUDIO_TYPES,
   JOB_SUPPORTED_PLATFORMS,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -144,7 +147,7 @@ watch(totalPages, (nextTotal) => {
 
 async function handleRefresh() {
   refreshing.value = true;
-  const refreshResult = await settlePromise(refreshJobs(), "Failed to refresh jobs");
+  const refreshResult = await settlePromise(refreshJobs(), t("apiErrors.jobs.refreshFailed"));
   if (refreshResult.ok) {
     await maybeAwardSearchXp();
   }
@@ -184,25 +187,15 @@ async function interviewJob(id: string) {
 }
 
 function getMatchScoreColor(score: number) {
-  if (score >= 80) return "text-success";
-  if (score >= 60) return "text-warning";
+  if (score >= SCORE_PASS_THRESHOLD) return "text-success";
+  if (score >= SCORE_WARNING_THRESHOLD) return "text-warning";
   return "text-error";
 }
 
 function formatDate(date: string) {
-  const parsedDate = new Date(date);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return t("jobsPage.date.unknown");
-  }
-
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays <= 0) return t("jobsPage.date.today");
-  if (diffDays === 1) return t("jobsPage.date.yesterday");
-  if (diffDays < 7) return t("jobsPage.date.daysAgo", { count: diffDays });
-  if (diffDays < 30) return t("jobsPage.date.weeksAgo", { count: Math.floor(diffDays / 7) });
-  return t("jobsPage.date.monthsAgo", { count: Math.floor(diffDays / 30) });
+  return formatRelativeTimeForDate(date, (key, params) => t(key, params), {
+    keyPrefix: "jobsPage.date",
+  });
 }
 
 function experienceOptionLabel(value: FilterSelection<JobExperienceLevel>): string {
@@ -260,7 +253,7 @@ function hasSearchCriteria(): boolean {
 async function maybeAwardSearchXp(): Promise<void> {
   const rewardResult = await settlePromise(
     awardForAction("jobSearch"),
-    "Failed to award job-search XP",
+    t("apiErrors.gamification.awardXPFailed"),
   );
   if (!rewardResult.ok) {
     // Search UX must not fail if gamification awarding is unavailable.

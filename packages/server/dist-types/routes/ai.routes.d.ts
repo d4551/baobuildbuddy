@@ -298,8 +298,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                     jobId?: string | undefined;
                     coverLetterId?: string | undefined;
                     resumeId: string;
-                    action: string;
                     jobUrl: string;
+                    action: string;
                 };
                 params: {};
                 query: unknown;

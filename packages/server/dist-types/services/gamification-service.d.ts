@@ -14,6 +14,10 @@ type WeeklyProgressResult = {
 export declare class GamificationService {
     private readonly DEFAULT_ID;
     private typeSafeStats;
+    private toNumericStats;
+    private toActionHistory;
+    private isNumberValue;
+    private getNumericStat;
     /**
      * Get or create the gamification progress record
      */
@@ -79,6 +83,10 @@ export declare class GamificationService {
      * Increment a stat counter, award XP, and check for newly unlocked achievements.
      */
     trackAction(statKey: keyof GamificationStats, xpAmount: number, reason: string): Promise<void>;
+    /**
+     * Fire-and-forget trackAction for use in route handlers. Logs errors without blocking response.
+     */
+    trackActionFireAndForget(statKey: keyof GamificationStats, xpAmount: number, reason: string): void;
 }
 export declare const gamificationService: GamificationService;
 export {};

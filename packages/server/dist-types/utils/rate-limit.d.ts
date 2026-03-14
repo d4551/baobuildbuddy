@@ -30,7 +30,6 @@ export declare const automationRateLimit: (app: import("elysia").default) => imp
 }>;
 /**
  * Rate limit plugin for skill analysis (AI) operations.
- * 20 requests per minute per client.
  */
 export declare const skillAnalysisRateLimit: (app: import("elysia").default) => import("elysia").default<"", {
     decorator: {};

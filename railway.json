@@ -1,0 +1,15 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "RAILPACK",
+    "buildCommand": "bun run --filter '@bao/server' build:types && bun run --filter '@bao/client' build",
+    "watchPatterns": ["packages/client/**", "packages/shared/**", "package.json", "bun.lockb"]
+  },
+  "deploy": {
+    "startCommand": "bun run start:client",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 60,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}

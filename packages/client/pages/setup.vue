@@ -39,6 +39,7 @@ const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
 
 const { updateProfile } = useUser();
 const { settings, fetchSettings, updateApiKeys, testApiKey } = useSettings();
+const { checkAuthStatus, initAuth, getStoredApiKey, setStoredApiKey } = useAuth();
 const router = useRouter();
 const api = useApi();
 const { $toast } = useNuxtApp();
@@ -105,7 +106,10 @@ function getProviderTestKey(provider: SetupProvider): string {
 await useAsyncData(
   "setup-bootstrap",
   async () => {
-    const settingsResult = await settlePromise(fetchSettings(), t("apiErrors.settings.fetchFailed"));
+    const settingsResult = await settlePromise(
+      fetchSettings(),
+      t("apiErrors.settings.fetchFailed"),
+    );
     if (settingsResult.ok && settings.value) {
       if (settings.value.localModelEndpoint) {
         localModelEndpoint.value = settings.value.localModelEndpoint;
@@ -181,6 +185,27 @@ async function handleComplete(): Promise<void> {
   saving.value = true;
   const trimmedName = name.value.trim();
   const trimmedRole = currentRole.value.trim();
+
+  const authStatus = await checkAuthStatus();
+  const authInitResult = await settlePromise(initAuth(), t("apiErrors.auth.initFailed"));
+  if (!authInitResult.ok) {
+    if (authStatus.authRequired) {
+      saving.value = false;
+      $toast.error(getErrorMessage(authInitResult.error, t("apiErrors.auth.initFailed")));
+      return;
+    }
+  } else {
+    const issuedApiKey = authInitResult.value.apiKey;
+    if (typeof issuedApiKey === "string" && issuedApiKey.length > 0) {
+      setStoredApiKey(issuedApiKey);
+    }
+
+    if (authStatus.authRequired && !getStoredApiKey()) {
+      saving.value = false;
+      $toast.error(t("apiErrors.auth.initFailed"));
+      return;
+    }
+  }
 
   if (trimmedName) {
     const profileUpdateResult = await settlePromise(

@@ -33,7 +33,9 @@ function processRecognitionResults(event: SpeechRecognitionEvent): RecognitionUp
   };
 }
 
-function createRecognitionInstance(settings?: Ref<VoiceSettings | undefined>): SpeechRecognition | null {
+function createRecognitionInstance(
+  settings?: Ref<VoiceSettings | undefined>,
+): SpeechRecognition | null {
   const speechRecognitionCtor = resolveSpeechRecognitionConstructor();
   if (!speechRecognitionCtor) {
     return null;

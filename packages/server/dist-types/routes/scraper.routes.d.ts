@@ -38,7 +38,7 @@ export declare const scraperRoutes: Elysia<"/scraper", {
 } & {
     scraper: {
         jobs: {
-            gamedev: {
+            hitmarker: {
                 post: {
                     body: unknown;
                     params: {};

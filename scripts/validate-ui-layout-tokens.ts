@@ -1,4 +1,5 @@
 import { writeError, writeOutput } from "./utils/cli-output";
+import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
 type Violation = {
   filePath: string;
@@ -9,15 +10,6 @@ type Violation = {
 const projectRoot = process.cwd();
 const clientRoot = "packages/client";
 const appModalFramePath = "packages/client/components/ui/AppModalFrame.vue";
-const ignoredDirectoryNames = new Set([
-  "node_modules",
-  ".git",
-  ".nuxt",
-  ".output",
-  "dist",
-  "dist-types",
-  "coverage",
-]);
 
 const coreLayoutPagePaths = new Set([
   "packages/client/pages/index.vue",
@@ -43,23 +35,6 @@ const pageWidthLiteralPattern = /\b(?:max-w-(?:2xl|3xl|4xl|5xl|6xl|7xl)|w-11\/12
 const adHocGridBreakpointPattern = /class\s*=\s*["'][^"']*\bgrid\b[^"']*\bgrid-cols-[^"']*["']/gu;
 const sectionGridExtraClassPattern =
   /<SectionGrid[^>]*\bextra-class\s*=\s*["'][^"']*\bgrid-cols-[^"']*["'][^>]*>/gu;
-
-const shouldIgnorePath = (pathValue: string): boolean =>
-  pathValue.split("/").some((segment) => ignoredDirectoryNames.has(segment));
-
-const getLineFromOffset = (text: string, offset: number): number => {
-  if (offset <= 0) {
-    return 1;
-  }
-
-  let line = 1;
-  for (let index = 0; index < offset; index += 1) {
-    if (text.charCodeAt(index) === 10) {
-      line += 1;
-    }
-  }
-  return line;
-};
 
 const collectVueFiles = async (): Promise<string[]> => {
   const files: string[] = [];

@@ -1,19 +1,34 @@
 import {
+  A4_PAGE_HEIGHT,
+  A4_PAGE_SIZE,
+  A4_PAGE_WIDTH,
+  API_ERROR_UNSUPPORTED_RESUME_TEMPLATE,
+  COVER_LETTER_DEFAULT_SIGNATURE,
+  COVER_LETTER_LINE_HEIGHT,
+  COVER_LETTER_MARGIN,
+  COVER_LETTER_PARAGRAPH_GAP,
+  COVER_LETTER_PARAGRAPH_SIZE,
+  EXPORT_DATE_LOCALE,
+  isRecord,
   isResumeTemplate,
+  PORTFOLIO_FOOTER_X_OFFSET,
+  PORTFOLIO_FOOTER_Y,
+  PORTFOLIO_MARGIN,
+  PORTFOLIO_PROJECT_SPACE,
   type PortfolioMetadata,
   type PortfolioProject,
+  RESUME_BODY_LINE_GAP,
+  RESUME_CONTACT_SPACING,
+  RESUME_DIVIDER_SPACING,
+  RESUME_HEADER_NAME_SPACING,
+  RESUME_LINKS_SPACING,
+  RESUME_SECTION_HEADER_SPACING,
+  RESUME_SECTION_SPACE,
   RESUME_TEMPLATE_DEFAULT,
   type ResumeData,
   type ResumeTemplate,
 } from "@bao/shared";
-import {
-  type Color,
-  PDFDocument,
-  type PDFFont,
-  type PDFPage,
-  rgb,
-  StandardFonts,
-} from "pdf-lib";
+import { type Color, PDFDocument, type PDFFont, type PDFPage, rgb, StandardFonts } from "pdf-lib";
 
 interface RGB {
   r: number;
@@ -111,31 +126,11 @@ interface PortfolioRenderContext {
   boldFont: PDFFont;
 }
 
-const A4_PAGE_SIZE: [number, number] = [595.28, 841.89];
-const [A4_PAGE_WIDTH, A4_PAGE_HEIGHT] = A4_PAGE_SIZE;
-
-const RESUME_SECTION_SPACE = 60;
-const RESUME_BODY_LINE_GAP = 4;
-const RESUME_HEADER_NAME_SPACING = 30;
-const RESUME_CONTACT_SPACING = 15;
-const RESUME_LINKS_SPACING = 25;
-const RESUME_DIVIDER_SPACING = 20;
-const RESUME_SECTION_HEADER_SPACING = 18;
-
-const COVER_LETTER_MARGIN = 60;
-const COVER_LETTER_PARAGRAPH_SIZE = 11;
-const COVER_LETTER_LINE_HEIGHT = 16;
-const COVER_LETTER_PARAGRAPH_GAP = 10;
-const COVER_LETTER_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+const COVER_LETTER_DATE_FORMATTER = new Intl.DateTimeFormat(EXPORT_DATE_LOCALE, {
   year: "numeric",
   month: "long",
   day: "numeric",
 });
-
-const PORTFOLIO_MARGIN = 50;
-const PORTFOLIO_PROJECT_SPACE = 100;
-const PORTFOLIO_FOOTER_Y = 30;
-const PORTFOLIO_FOOTER_X_OFFSET = 30;
 
 const COVER_LETTER_COLORS = {
   text: rgb(0.15, 0.15, 0.15),
@@ -231,11 +226,11 @@ const toCoverLetterParagraphs = (content: unknown): string[] => {
       .filter((entry) => entry.length > 0);
   }
 
-  if (typeof content !== "object" || content === null || Array.isArray(content)) {
+  if (!isRecord(content)) {
     return [];
   }
 
-  const contentRecord = content as Record<string, unknown>;
+  const contentRecord = content;
   const canonicalParagraphs = [
     ...asStringParagraphs(contentRecord.opening),
     ...asStringParagraphs(contentRecord.body),
@@ -342,7 +337,9 @@ export class ExportService {
     }
   }
 
-  private async createResumeContext(template: ResumeTemplateDefinition): Promise<ResumeRenderContext> {
+  private async createResumeContext(
+    template: ResumeTemplateDefinition,
+  ): Promise<ResumeRenderContext> {
     const pdfDoc = await PDFDocument.create();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -512,7 +509,10 @@ export class ExportService {
     context.yPosition -= 10;
   }
 
-  private renderResumeExperienceDate(context: ResumeRenderContext, experience: ResumeExperienceItem): void {
+  private renderResumeExperienceDate(
+    context: ResumeRenderContext,
+    experience: ResumeExperienceItem,
+  ): void {
     const dateLabel = experience.endDate
       ? `${experience.startDate} - ${experience.endDate}`
       : `${experience.startDate} - Present`;
@@ -628,7 +628,10 @@ export class ExportService {
     }
   }
 
-  private renderResumeEducationItem(context: ResumeRenderContext, education: ResumeEducationItem): void {
+  private renderResumeEducationItem(
+    context: ResumeRenderContext,
+    education: ResumeEducationItem,
+  ): void {
     this.ensureResumeSpace(context, 50);
 
     context.page.drawText(`${education.degree} in ${education.field}`, {
@@ -849,7 +852,9 @@ export class ExportService {
       resume.gamingExperience.gameEngines
         ? `Engines: ${resume.gamingExperience.gameEngines}`
         : undefined,
-      resume.gamingExperience.platforms ? `Platforms: ${resume.gamingExperience.platforms}` : undefined,
+      resume.gamingExperience.platforms
+        ? `Platforms: ${resume.gamingExperience.platforms}`
+        : undefined,
       resume.gamingExperience.genres ? `Genres: ${resume.gamingExperience.genres}` : undefined,
       resume.gamingExperience.shippedTitles
         ? `Shipped Titles: ${resume.gamingExperience.shippedTitles}`
@@ -882,7 +887,7 @@ export class ExportService {
     const template =
       RESUME_TEMPLATES[resolvedTemplate] ?? RESUME_TEMPLATES[RESUME_TEMPLATE_DEFAULT];
     if (!template) {
-      throw new Error(`Unsupported resume template: ${resolvedTemplate}`);
+      throw new Error(`${API_ERROR_UNSUPPORTED_RESUME_TEMPLATE}: ${resolvedTemplate}`);
     }
 
     const context = await this.createResumeContext(template);
@@ -1030,14 +1035,11 @@ export class ExportService {
     }
   }
 
-  private renderCoverLetterClosing(
-    context: CoverLetterRenderContext,
-    signerName: string,
-  ): void {
+  private renderCoverLetterClosing(context: CoverLetterRenderContext, signerName: string): void {
     context.yPosition -= 10;
     this.ensureCoverLetterSpace(context, 35);
 
-    context.page.drawText("Sincerely,", {
+    context.page.drawText(COVER_LETTER_DEFAULT_SIGNATURE, {
       x: context.margin,
       y: context.yPosition,
       size: 11,
@@ -1086,7 +1088,11 @@ export class ExportService {
 
     // Strategy 1: Remove optional sections (projects first, then gaming experience)
     const optimizedProjects = optimized.projects;
-    if (Array.isArray(optimizedProjects) && optimizedProjects.length > 0 && pdfDoc.getPageCount() > 1) {
+    if (
+      Array.isArray(optimizedProjects) &&
+      optimizedProjects.length > 0 &&
+      pdfDoc.getPageCount() > 1
+    ) {
       optimized.projects = optimizedProjects.slice(0, 2); // Keep only top 2
       pdfBytes = await this.exportResumePDF(optimized, templateName);
       pdfDoc = await PDFDocument.load(pdfBytes);
@@ -1398,10 +1404,7 @@ export class ExportService {
     context.yPosition -= 15;
   }
 
-  private renderPortfolioProjectTags(
-    context: PortfolioRenderContext,
-    tags?: string[],
-  ): void {
+  private renderPortfolioProjectTags(context: PortfolioRenderContext, tags?: string[]): void {
     if (!Array.isArray(tags) || tags.length === 0) {
       return;
     }

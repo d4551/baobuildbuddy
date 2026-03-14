@@ -139,6 +139,7 @@ const enUS = {
     auth: {
       initFailed: "Failed to init auth",
     },
+    unexpected: "An unexpected error occurred",
   },
   confirmDialog: {
     confirmButton: "Confirm",
@@ -480,6 +481,7 @@ const enUS = {
       daysAgo: "{count}d ago",
       weeksAgo: "{count}w ago",
       monthsAgo: "{count}mo ago",
+      unknown: "—",
     },
   },
   resumePreview: {
@@ -666,14 +668,11 @@ const enUS = {
         excellent: "Excellent {category}. You are well-prepared in this area.",
       },
       improvements: {
-        imp_tech_map:
-          "Map more technical gaming skills to career-ready technical skills.",
-        imp_conf_up:
-          "Increase confidence ratings for your existing technical mappings.",
+        imp_tech_map: "Map more technical gaming skills to career-ready technical skills.",
+        imp_conf_up: "Increase confidence ratings for your existing technical mappings.",
         imp_lead_comm: "Map more leadership and communication experiences.",
         imp_team_examples: "Add concrete team collaboration examples.",
-        imp_industry_research:
-          "Research additional industry applications for your mapped skills.",
+        imp_industry_research: "Research additional industry applications for your mapped skills.",
         imp_role_link: "Connect mapped skills to specific target job roles.",
         imp_evidence_add:
           "Add evidence for your mapped skills with clips, screenshots, or documents.",
@@ -1660,6 +1659,7 @@ const enUS = {
     retryAria: "Retry loading studio analytics",
     retryButton: "Retry",
     progressAria: "Progress for {label}",
+    remoteWorkProgressAria: "Remote work availability: {value} percent",
     overview: {
       totalStudiosTitle: "Total Studios",
       totalStudiosDesc: "In database",
@@ -2209,6 +2209,8 @@ const enUS = {
     detailStudioLabel: "Studio",
     detailRoleLabel: "Role",
     detailScoreLabel: "Overall Score",
+    timelineScoreAria: "Interview score: {score} percent",
+    detailScoreAria: "Interview score: {score} percent",
     questionsLabel: "Questions",
     questionAria: "Interview question {index}",
     questionHeader: "Q{index}: {score}%",
@@ -2557,7 +2559,8 @@ const enUS = {
       connectionFailed: "Connection failed",
       preferredProviderLegend: "Preferred AI Provider",
       preferredProviderAria: "Select preferred AI provider",
-      preferredProviderHint: "The AI system will try this provider first, then fall back to others.",
+      preferredProviderHint:
+        "The AI system will try this provider first, then fall back to others.",
       preferredProviderSaved: "Preferred provider updated",
     },
     toasts: {

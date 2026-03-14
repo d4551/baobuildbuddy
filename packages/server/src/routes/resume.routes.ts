@@ -1,11 +1,45 @@
 import {
+  AI_DEFAULT_TEMPERATURE,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  AI_MAX_TOKENS_RESUME,
+  AI_MAX_TOKENS_SCORE,
+  API_ERROR_AI_ENHANCEMENT_FAILED,
+  DEFAULT_UNSPECIFIED_LABEL,
+  RESUME_DEFAULT_NAME_QUESTIONNAIRE,
+  DEFAULT_SCORE_NEUTRAL,
+  API_ERROR_AI_SCORING_FAILED,
+  API_ERROR_EXPORT_RESUME,
+  API_ERROR_GENERATE_QUESTIONS,
+  API_ERROR_JOB_NOT_FOUND,
+  API_ERROR_RESUME_NOT_FOUND,
+  API_ERROR_SYNTHESIZE_RESUME,
+  API_ERROR_UNKNOWN,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
   isResumeTemplate,
   RESUME_DEFAULT_NAME,
   RESUME_DEFAULT_THEME,
+  ROUTE_GAMIFICATION_XP,
   RESUME_TEMPLATE_DEFAULT,
   RESUME_TEMPLATE_OPTIONS,
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_ITEMS_SMALL,
+  SCHEMA_MAX_LENGTH_ACHIEVEMENT,
+  SCHEMA_MAX_LENGTH_DATE,
+  SCHEMA_MAX_LENGTH_DESCRIPTION,
+  SCHEMA_MAX_LENGTH_EMAIL,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LABEL,
+  SCHEMA_MAX_LENGTH_MICRO,
+  SCHEMA_MAX_LENGTH_PHONE,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_LENGTH_SHIPPED,
+  SCHEMA_MAX_LENGTH_URL,
+  SCHEMA_MAX_ITEMS_XXLARGE,
   type ResumeData,
   safeParseJson,
+  settle,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -27,53 +61,67 @@ const resumeTemplateBodySchema = t.String({
 const resumeThemeBodySchema = t.Union([t.Literal("light"), t.Literal("dark")]);
 
 const resumePersonalInfoBodySchema = t.Object({
-  name: t.Optional(t.String({ maxLength: 200 })),
-  email: t.Optional(t.String({ maxLength: 320 })),
-  phone: t.Optional(t.String({ maxLength: 30 })),
-  location: t.Optional(t.String({ maxLength: 200 })),
-  website: t.Optional(t.String({ maxLength: 500 })),
-  linkedIn: t.Optional(t.String({ maxLength: 500 })),
-  github: t.Optional(t.String({ maxLength: 500 })),
-  portfolio: t.Optional(t.String({ maxLength: 500 })),
+  name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  email: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+  phone: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_PHONE })),
+  location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  linkedIn: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  github: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  portfolio: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
 });
 
 const resumeExperienceBodySchema = t.Object({
-  title: t.String({ maxLength: 200 }),
-  company: t.String({ maxLength: 200 }),
-  startDate: t.String({ maxLength: 80 }),
-  endDate: t.Optional(t.String({ maxLength: 80 })),
-  location: t.Optional(t.String({ maxLength: 200 })),
-  description: t.Optional(t.String({ maxLength: 5000 })),
-  achievements: t.Optional(t.Array(t.String({ maxLength: 300 }), { maxItems: 50 })),
-  technologies: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 50 })),
+  title: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  startDate: t.String({ maxLength: SCHEMA_MAX_LENGTH_DATE }),
+  endDate: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DATE })),
+  location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+  achievements: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ACHIEVEMENT }), {
+      maxItems: SCHEMA_MAX_ITEMS_LARGE,
+    }),
+  ),
+  technologies: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+  ),
 });
 
 const resumeEducationBodySchema = t.Object({
-  degree: t.String({ maxLength: 200 }),
-  field: t.String({ maxLength: 200 }),
-  school: t.String({ maxLength: 200 }),
-  year: t.String({ maxLength: 50 }),
-  gpa: t.Optional(t.String({ maxLength: 20 })),
+  degree: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  field: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  school: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  year: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
+  gpa: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
 });
 
 const resumeSkillsBodySchema = t.Object({
-  technical: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
-  soft: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
-  gaming: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
+  technical: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_XXLARGE }),
+  ),
+  soft: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_XXLARGE }),
+  ),
+  gaming: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_XXLARGE }),
+  ),
 });
 
 const resumeProjectBodySchema = t.Object({
-  title: t.String({ maxLength: 200 }),
-  description: t.String({ maxLength: 5000 }),
-  technologies: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 50 })),
-  link: t.Optional(t.String({ maxLength: 500 })),
+  title: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  description: t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION }),
+  technologies: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+  ),
+  link: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
 });
 
 const resumeGamingExperienceBodySchema = t.Object({
-  gameEngines: t.Optional(t.String({ maxLength: 500 })),
-  platforms: t.Optional(t.String({ maxLength: 500 })),
-  genres: t.Optional(t.String({ maxLength: 500 })),
-  shippedTitles: t.Optional(t.String({ maxLength: 1000 })),
+  gameEngines: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  platforms: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  genres: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  shippedTitles: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHIPPED })),
 });
 
 const toResumeTemplateOrDefault = (value: string | undefined): ResumeData["template"] =>
@@ -95,12 +143,7 @@ const formatJobRequirements = (value: unknown): string => {
     }
   }
 
-  return "Not specified";
-};
-
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
+  return DEFAULT_UNSPECIFIED_LABEL;
 };
 
 type ResumeRouteSetState = {
@@ -117,7 +160,8 @@ type ResumeScoreDetails = {
   keywords: string[];
 };
 
-const serializeResumeForAi = (resume: ResumeData): string => `
+const serializeResumeForAi = (resume: ResumeData): string =>
+  `
 Resume: ${resume.name}
 Summary: ${resume.summary}
 Experience: ${JSON.stringify(resume.experience, null, 2)}
@@ -127,12 +171,13 @@ Projects: ${JSON.stringify(resume.projects, null, 2)}
 ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingExperience, null, 2)}` : ""}
 `.trim();
 
-const serializeJobForAi = (job: typeof jobs.$inferSelect): string => `
+const serializeJobForAi = (job: typeof jobs.$inferSelect): string =>
+  `
 Job: ${job.title} at ${job.company}
 Description: ${job.description}
 Requirements: ${formatJobRequirements(job.requirements)}
-Location: ${job.location || "Not specified"}
-Type: ${job.type || "Not specified"}
+Location: ${job.location || DEFAULT_UNSPECIFIED_LABEL}
+Type: ${job.type || DEFAULT_UNSPECIFIED_LABEL}
 `.trim();
 
 const parseResumeScoreDetails = (content: string): ResumeScoreDetails => {
@@ -141,7 +186,7 @@ const parseResumeScoreDetails = (content: string): ResumeScoreDetails => {
     parsedAnalysis && typeof parsedAnalysis === "object" && !Array.isArray(parsedAnalysis)
       ? parsedAnalysis
       : {
-          score: 50,
+          score: DEFAULT_SCORE_NEUTRAL,
           strengths: ["Unable to parse AI response"],
           improvements: ["Please try again"],
           keywords: [],
@@ -165,39 +210,46 @@ const parseResumeScoreDetails = (content: string): ResumeScoreDetails => {
   };
 };
 
-const handleResumeAiScore = async (resumeId: string, body: ResumeScoreBody, set: ResumeRouteSetState) => {
+const handleResumeAiScore = async (
+  resumeId: string,
+  body: ResumeScoreBody,
+  set: ResumeRouteSetState,
+) => {
   const resume = await resumeService.getResume(resumeId);
   if (!resume) {
-    set.status = 404;
-    return { error: "Resume not found" };
+    set.status = HTTP_STATUS_NOT_FOUND;
+    return { error: API_ERROR_RESUME_NOT_FOUND };
   }
 
   const jobRows = await db.select().from(jobs).where(eq(jobs.id, body.jobId));
   if (jobRows.length === 0) {
-    set.status = 404;
-    return { error: "Job not found" };
+    set.status = HTTP_STATUS_NOT_FOUND;
+    return { error: API_ERROR_JOB_NOT_FOUND };
   }
 
   const settingsRows = await db.select().from(settings);
   const aiService = AIService.fromSettings(settingsRows[0]);
   const aiResult = await settle(
-    aiService.generate(resumeScorePrompt(serializeResumeForAi(resume), serializeJobForAi(jobRows[0])), {
-      temperature: 0.3,
-      maxTokens: 1500,
-    }),
+    aiService.generate(
+      resumeScorePrompt(serializeResumeForAi(resume), serializeJobForAi(jobRows[0])),
+      {
+        temperature: AI_DEFAULT_TEMPERATURE,
+        maxTokens: AI_MAX_TOKENS_RESUME,
+      },
+    ),
   );
   if (aiResult.status === "rejected") {
-    set.status = 500;
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return {
-      error: "AI scoring failed",
-      details: aiResult.reason instanceof Error ? aiResult.reason.message : "Unknown error",
+      error: API_ERROR_AI_SCORING_FAILED,
+      details: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
     };
   }
 
   const response = aiResult.value;
   if (response.error) {
-    set.status = 500;
-    return { error: "AI scoring failed", details: response.error };
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return { error: API_ERROR_AI_SCORING_FAILED, details: response.error };
   }
 
   const details = parseResumeScoreDetails(response.content);
@@ -224,19 +276,19 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         }),
       );
       if (result.status === "rejected") {
-        set.status = 500;
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
-          error: "Failed to generate questions",
-          details: result.reason instanceof Error ? result.reason.message : "Unknown error",
+          error: API_ERROR_GENERATE_QUESTIONS,
+          details: result.reason instanceof Error ? result.reason.message : API_ERROR_UNKNOWN,
         };
       }
       return { questions: result.value };
     },
     {
       body: t.Object({
-        targetRole: t.String({ maxLength: 200 }),
-        studioName: t.Optional(t.String({ maxLength: 200 })),
-        experienceLevel: t.Optional(t.String({ maxLength: 50 })),
+        targetRole: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+        studioName: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        experienceLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
       }),
     },
   )
@@ -247,28 +299,32 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         cvQuestionnaireService.synthesizeResume(body.questionsAndAnswers),
       );
       if (synthesizeResult.status === "rejected") {
-        set.status = 500;
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
-          error: "Failed to synthesize resume",
-          details: synthesizeResult.reason instanceof Error ? synthesizeResult.reason.message : "Unknown error",
+          error: API_ERROR_SYNTHESIZE_RESUME,
+          details:
+            synthesizeResult.reason instanceof Error
+              ? synthesizeResult.reason.message
+              : API_ERROR_UNKNOWN,
         };
       }
 
       const createResult = await settle(
         resumeService.createResume({
-          name: "Resume from Questionnaire",
+          name: RESUME_DEFAULT_NAME_QUESTIONNAIRE,
           ...synthesizeResult.value,
         }),
       );
       if (createResult.status === "rejected") {
-        set.status = 500;
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
-          error: "Failed to synthesize resume",
-          details: createResult.reason instanceof Error ? createResult.reason.message : "Unknown error",
+          error: API_ERROR_SYNTHESIZE_RESUME,
+          details:
+            createResult.reason instanceof Error ? createResult.reason.message : API_ERROR_UNKNOWN,
         };
       }
 
-      set.status = 201;
+      set.status = HTTP_STATUS_CREATED;
       return createResult.value;
     },
     {
@@ -304,19 +360,29 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
         isDefault: body.isDefault === true,
       };
       const created = await resumeService.createResume(createPayload);
-      set.status = 201;
-      void gamificationService.trackAction("resumesGenerated", 30, "resume_created");
+      set.status = HTTP_STATUS_CREATED;
+      gamificationService.trackActionFireAndForget(
+        "resumesGenerated",
+        ROUTE_GAMIFICATION_XP.resumesGenerated,
+        "resume_created",
+      );
       return created;
     },
     {
       body: t.Object({
-        name: t.Optional(t.String({ maxLength: 200 })),
+        name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
         personalInfo: t.Optional(resumePersonalInfoBodySchema),
-        summary: t.Optional(t.String({ maxLength: 5000 })),
-        experience: t.Optional(t.Array(resumeExperienceBodySchema, { maxItems: 50 })),
-        education: t.Optional(t.Array(resumeEducationBodySchema, { maxItems: 20 })),
+        summary: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+        experience: t.Optional(
+          t.Array(resumeExperienceBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+        ),
+        education: t.Optional(
+          t.Array(resumeEducationBodySchema, { maxItems: SCHEMA_MAX_ITEMS_SMALL }),
+        ),
         skills: t.Optional(resumeSkillsBodySchema),
-        projects: t.Optional(t.Array(resumeProjectBodySchema, { maxItems: 50 })),
+        projects: t.Optional(
+          t.Array(resumeProjectBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+        ),
         gamingExperience: t.Optional(resumeGamingExperienceBodySchema),
         template: t.Optional(resumeTemplateBodySchema),
         theme: t.Optional(resumeThemeBodySchema),
@@ -329,16 +395,16 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
     async ({ params, set }) => {
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
-        set.status = 404;
+        set.status = HTTP_STATUS_NOT_FOUND;
         return {
-          error: "Resume not found",
+          error: API_ERROR_RESUME_NOT_FOUND,
         };
       }
       return resume;
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
@@ -360,23 +426,29 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
       };
       const updated = await resumeService.updateResume(params.id, updatePayload);
       if (!updated) {
-        set.status = 404;
-        return { error: "Resume not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_RESUME_NOT_FOUND };
       }
       return updated;
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        name: t.Optional(t.String({ maxLength: 200 })),
+        name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
         personalInfo: t.Optional(resumePersonalInfoBodySchema),
-        summary: t.Optional(t.String({ maxLength: 5000 })),
-        experience: t.Optional(t.Array(resumeExperienceBodySchema, { maxItems: 50 })),
-        education: t.Optional(t.Array(resumeEducationBodySchema, { maxItems: 20 })),
+        summary: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+        experience: t.Optional(
+          t.Array(resumeExperienceBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+        ),
+        education: t.Optional(
+          t.Array(resumeEducationBodySchema, { maxItems: SCHEMA_MAX_ITEMS_SMALL }),
+        ),
         skills: t.Optional(resumeSkillsBodySchema),
-        projects: t.Optional(t.Array(resumeProjectBodySchema, { maxItems: 50 })),
+        projects: t.Optional(
+          t.Array(resumeProjectBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+        ),
         gamingExperience: t.Optional(resumeGamingExperienceBodySchema),
         template: t.Optional(resumeTemplateBodySchema),
         theme: t.Optional(resumeThemeBodySchema),
@@ -389,15 +461,15 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
     async ({ params, set }) => {
       const existing = await resumeService.getResume(params.id);
       if (!existing) {
-        set.status = 404;
-        return { error: "Resume not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_RESUME_NOT_FOUND };
       }
       await resumeService.deleteResume(params.id);
       return { success: true, id: params.id };
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
@@ -406,17 +478,18 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
     async ({ params, body, set }) => {
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
-        set.status = 404;
-        return { error: "Resume not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_RESUME_NOT_FOUND };
       }
 
       const templateName = body.template || resume.template || RESUME_TEMPLATE_DEFAULT;
       const exportResult = await settle(exportService.exportResumePDF(resume, templateName));
       if (exportResult.status === "rejected") {
-        set.status = 500;
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
-          error: "Failed to export resume",
-          details: exportResult.reason instanceof Error ? exportResult.reason.message : "Unknown error",
+          error: API_ERROR_EXPORT_RESUME,
+          details:
+            exportResult.reason instanceof Error ? exportResult.reason.message : API_ERROR_UNKNOWN,
         };
       }
 
@@ -427,10 +500,10 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        format: t.Optional(t.String({ maxLength: 20 })),
+        format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
         template: t.Optional(resumeTemplateBodySchema),
       }),
     },
@@ -440,8 +513,8 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes" })
     async ({ params, body, set }) => {
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
-        set.status = 404;
-        return { error: "Resume not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_RESUME_NOT_FOUND };
       }
 
       const settingsRows = await db.select().from(settings);
@@ -460,28 +533,35 @@ ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingEx
       const section = body.section || "all";
       const prompt = resumeEnhancePrompt(resumeText, section);
 
-      const aiResult = await settle(aiService.generate(prompt, { temperature: 0.7, maxTokens: 2000 }));
+      const aiResult = await settle(
+        aiService.generate(prompt, {
+          temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+          maxTokens: AI_MAX_TOKENS_SCORE,
+        }),
+      );
       if (aiResult.status === "rejected") {
-        set.status = 500;
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
-          error: "AI enhancement failed",
-          details: aiResult.reason instanceof Error ? aiResult.reason.message : "Unknown error",
+          error: API_ERROR_AI_ENHANCEMENT_FAILED,
+          details: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
         };
       }
 
       const response = aiResult.value;
       if (response.error) {
-        set.status = 500;
-        return { error: "AI enhancement failed", details: response.error };
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return { error: API_ERROR_AI_ENHANCEMENT_FAILED, details: response.error };
       }
 
       const parsed = safeParseJson(response.content);
-      const parsedRecord = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
-      const suggestions = parsedRecord && Array.isArray(parsedRecord.suggestions)
-        ? parsedRecord.suggestions
-        : parsedRecord
-          ? [parsedRecord]
-          : [{ text: response.content, section }];
+      const parsedRecord =
+        parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+      const suggestions =
+        parsedRecord && Array.isArray(parsedRecord.suggestions)
+          ? parsedRecord.suggestions
+          : parsedRecord
+            ? [parsedRecord]
+            : [{ text: response.content, section }];
 
       return {
         resume,
@@ -491,10 +571,10 @@ ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingEx
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        section: t.Optional(t.String({ maxLength: 50 })),
+        section: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
       }),
     },
   )
@@ -503,10 +583,10 @@ ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingEx
     async ({ params, body, set }) => handleResumeAiScore(params.id, body, set),
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        jobId: t.String({ maxLength: 100 }),
+        jobId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   );

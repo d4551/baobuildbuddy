@@ -6,9 +6,18 @@ interface AuthStatus {
   configured: boolean;
 }
 
+interface AuthInitResult {
+  configured: boolean;
+  apiKey?: string;
+  message?: string;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
 interface UseAuthState {
   checkAuthStatus: () => Promise<AuthStatus>;
-  initAuth: () => Promise<Record<string, unknown>>;
+  initAuth: () => Promise<AuthInitResult>;
   getStoredApiKey: () => string | null;
   setStoredApiKey: (key: string | null) => void;
 }
@@ -37,7 +46,16 @@ export function useAuth(): UseAuthState {
   async function initAuth() {
     const { data, error } = await api.auth.init.post();
     if (error) throw new Error(AUTH_INIT_FAILED_ERROR_KEY);
-    return data ?? {};
+    const payload = data ?? {};
+    if (!isRecord(payload)) {
+      return { configured: false };
+    }
+
+    const configured = payload.configured === true;
+    const apiKey = typeof payload.apiKey === "string" ? payload.apiKey : undefined;
+    const message = typeof payload.message === "string" ? payload.message : undefined;
+
+    return { configured, apiKey, message };
   }
 
   return {

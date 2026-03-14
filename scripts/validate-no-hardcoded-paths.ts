@@ -1,4 +1,9 @@
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
+import {
+  getLineFromOffset,
+  IGNORED_DIRECTORY_NAMES,
+  shouldIgnorePath,
+} from "./utils/validation-helpers";
 
 type ViolationCategory = "route" | "api";
 
@@ -12,16 +17,7 @@ type Violation = {
 const projectRoot = process.cwd();
 const clientRoot = "packages/client";
 const allowedExtensions = new Set([".ts", ".tsx", ".vue", ".js", ".mjs", ".cjs"]);
-const ignoredDirectoryNames = new Set([
-  "node_modules",
-  ".git",
-  ".nuxt",
-  ".output",
-  "dist",
-  "dist-types",
-  "coverage",
-]);
-const ignoredPathSegments = new Set(["locales"]);
+const ignoredPathSegments = new Set([...IGNORED_DIRECTORY_NAMES, "locales"]);
 const routeAllowList = new Set<string>(["packages/client/nuxt.config.ts"]);
 const apiAllowList = new Set<string>(["packages/client/nuxt.config.ts"]);
 const appRouteLiterals = Object.values(APP_ROUTES).filter((route) => route !== "/");
@@ -37,32 +33,17 @@ const hasAllowedExtension = (pathValue: string): boolean => {
   return false;
 };
 
-const shouldIgnorePath = (pathValue: string): boolean =>
-  pathValue
-    .split("/")
-    .some((segment) => ignoredDirectoryNames.has(segment) || ignoredPathSegments.has(segment));
+const shouldIgnoreClientPath = (pathValue: string): boolean =>
+  shouldIgnorePath(pathValue, ignoredPathSegments);
 
-const getLineFromOffset = (text: string, offset: number): number => {
-  if (offset <= 0) {
-    return 1;
-  }
-  let line = 1;
-  for (let index = 0; index < offset; index += 1) {
-    if (text.charCodeAt(index) === 10) {
-      line += 1;
-    }
-  }
-  return line;
-};
-
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+import { escapeRegExp } from "../packages/shared/src/utils/string";
 
 const collectClientFiles = async (): Promise<string[]> => {
   const files: string[] = [];
   const glob = new Bun.Glob(`${clientRoot}/**/*`);
   for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
     const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
-    if (!hasAllowedExtension(normalizedPath) || shouldIgnorePath(normalizedPath)) {
+    if (!hasAllowedExtension(normalizedPath) || shouldIgnoreClientPath(normalizedPath)) {
       continue;
     }
     files.push(normalizedPath);

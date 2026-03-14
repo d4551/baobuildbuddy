@@ -142,6 +142,12 @@ function assertDoesNotDuplicateHashUpdates(): void {
 
 describe("useScrollSpy", () => {
   it("syncs from hash and scrolls to registered section", assertSyncsFromHash);
-  it("updates active section from intersection observer events", assertUpdatesActiveSectionFromObserver);
-  it("does not duplicate hash updates when the active section is unchanged", assertDoesNotDuplicateHashUpdates);
+  it(
+    "updates active section from intersection observer events",
+    assertUpdatesActiveSectionFromObserver,
+  );
+  it(
+    "does not duplicate hash updates when the active section is unchanged",
+    assertDoesNotDuplicateHashUpdates,
+  );
 });

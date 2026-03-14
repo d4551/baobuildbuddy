@@ -1,4 +1,10 @@
-import { APP_ROUTES } from "@bao/shared";
+import {
+  APP_ROUTES,
+  DASHBOARD_HERO_TEXT_ROTATE_INTERVAL_MS,
+  MS_PER_DAY,
+  MS_PER_HOUR,
+  MS_PER_MINUTE,
+} from "@bao/shared";
 import type { AppTranslationSchema } from "~/locales/en-US";
 
 /**
@@ -30,9 +36,9 @@ type DashboardTopLevelKey =
   | "pipelineAria"
   | "pipelineNextStepLabel";
 type DashboardCopyKey = `dashboard.${DashboardTopLevelKey}`;
-type DashboardHeroPhraseKey =
-  `dashboard.heroPhrases.${keyof DashboardRootSchema["heroPhrases"]}`;
-type DashboardOnboardingLabelKey = `dashboard.onboarding.${keyof DashboardRootSchema["onboarding"]}`;
+type DashboardHeroPhraseKey = `dashboard.heroPhrases.${keyof DashboardRootSchema["heroPhrases"]}`;
+type DashboardOnboardingLabelKey =
+  `dashboard.onboarding.${keyof DashboardRootSchema["onboarding"]}`;
 type DashboardStatLabelKey = `dashboard.stats.${keyof DashboardRootSchema["stats"]}`;
 type DashboardQuickActionLabelKey =
   `dashboard.quickActions.actions.${keyof DashboardRootSchema["quickActions"]["actions"]}`;
@@ -41,7 +47,6 @@ type DashboardPipelineStepLabelKey =
 type DashboardActionLabelKey = DashboardQuickActionLabelKey | DashboardPipelineStepLabelKey;
 type DashboardPipelineStatusLabelKey =
   `dashboard.pipeline.status.${keyof DashboardRootSchema["pipeline"]["status"]}`;
-type DashboardRelativeTimeLabelKey = `dashboard.relativeTime.${keyof DashboardRootSchema["relativeTime"]}`;
 type DashboardWelcomeHeadingKey =
   `dashboard.welcomeHeading.${keyof DashboardRootSchema["welcomeHeading"]}`;
 type DashboardErrorKey = `dashboard.errors.${keyof DashboardRootSchema["errors"]}`;
@@ -190,15 +195,6 @@ export const DASHBOARD_MOTIVATIONAL_PHRASE_KEYS = [
 ] as const satisfies readonly DashboardHeroPhraseKey[];
 
 /**
- * Translation keys for relative activity timestamps.
- */
-export const DASHBOARD_RELATIVE_TIME_KEYS = {
-  minutesAgo: "dashboard.relativeTime.minutesAgo",
-  hoursAgo: "dashboard.relativeTime.hoursAgo",
-  daysAgo: "dashboard.relativeTime.daysAgo",
-} as const satisfies Record<"minutesAgo" | "hoursAgo" | "daysAgo", DashboardRelativeTimeLabelKey>;
-
-/**
  * Translation keys for shared accessibility labels on dashboard cards and progress indicators.
  */
 export const DASHBOARD_A11Y_KEYS = {
@@ -283,10 +279,10 @@ export const DASHBOARD_RECENT_ACTIVITY_LIMIT = 5;
  * Time conversion constants for relative timestamps.
  */
 export const DASHBOARD_TIME_CONSTANTS = {
-  millisecondsPerMinute: 60_000,
-  millisecondsPerHour: 3_600_000,
-  millisecondsPerDay: 86_400_000,
-  heroTextRotateIntervalMs: 3_200,
+  millisecondsPerMinute: MS_PER_MINUTE,
+  millisecondsPerHour: MS_PER_HOUR,
+  millisecondsPerDay: MS_PER_DAY,
+  heroTextRotateIntervalMs: DASHBOARD_HERO_TEXT_ROTATE_INTERVAL_MS,
 } as const;
 
 /**
@@ -366,8 +362,7 @@ const DASHBOARD_FLOW_ACTIONS = {
     id: "scrape",
     labelKey: "dashboard.pipeline.steps.scrape",
     to: APP_ROUTES.automationScraper,
-    iconPath:
-      "M4 4h16v4H4V4zm0 6h16v10H4V10zm3 3h3v3H7v-3zm5 0h5v1h-5v-1zm0 2h5v1h-5v-1z",
+    iconPath: "M4 4h16v4H4V4zm0 6h16v10H4V10zm3 3h3v3H7v-3zm5 0h5v1h-5v-1zm0 2h5v1h-5v-1z",
   },
   customize: {
     id: "customize",

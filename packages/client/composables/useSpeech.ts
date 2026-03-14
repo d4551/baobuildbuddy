@@ -111,7 +111,8 @@ const createLoadVoicesAction = (state: SpeechState) => (): SpeechSynthesisVoice[
 };
 
 const createRecognitionResultHandler =
-  (state: SpeechState) => (event: SpeechRecognitionEvent): void => {
+  (state: SpeechState) =>
+  (event: SpeechRecognitionEvent): void => {
     let finalTranscript = "";
     let currentInterimTranscript = "";
     for (let index = event.resultIndex; index < event.results.length; index += 1) {
@@ -163,36 +164,38 @@ const setupSpeechApis = (state: SpeechState, loadVoices: () => SpeechSynthesisVo
   });
 };
 
-const createSpeakAction = (state: SpeechState) => (text: string, options?: SpeakOptions): void => {
-  const synthesis = resolveSynthesis(state);
-  if (!synthesis) {
-    state.error.value = AI_CHAT_VOICE_ERROR_CODES.unsupportedSynthesis;
-    return;
-  }
+const createSpeakAction =
+  (state: SpeechState) =>
+  (text: string, options?: SpeakOptions): void => {
+    const synthesis = resolveSynthesis(state);
+    if (!synthesis) {
+      state.error.value = AI_CHAT_VOICE_ERROR_CODES.unsupportedSynthesis;
+      return;
+    }
 
-  synthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = options?.rate ?? 1;
-  utterance.pitch = options?.pitch ?? 1;
-  utterance.volume = options?.volume ?? 1;
-  utterance.lang = resolveSpeechLocale(options?.lang);
-  if (options?.voice) {
-    utterance.voice = options.voice;
-  }
+    synthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = options?.rate ?? 1;
+    utterance.pitch = options?.pitch ?? 1;
+    utterance.volume = options?.volume ?? 1;
+    utterance.lang = resolveSpeechLocale(options?.lang);
+    if (options?.voice) {
+      utterance.voice = options.voice;
+    }
 
-  utterance.onstart = () => {
-    state.isSpeaking.value = true;
-    state.error.value = null;
+    utterance.onstart = () => {
+      state.isSpeaking.value = true;
+      state.error.value = null;
+    };
+    utterance.onend = () => {
+      state.isSpeaking.value = false;
+    };
+    utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
+      state.error.value = resolveSynthesisErrorCode(event.error);
+      state.isSpeaking.value = false;
+    };
+    synthesis.speak(utterance);
   };
-  utterance.onend = () => {
-    state.isSpeaking.value = false;
-  };
-  utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
-    state.error.value = resolveSynthesisErrorCode(event.error);
-    state.isSpeaking.value = false;
-  };
-  synthesis.speak(utterance);
-};
 
 const createStopSpeakingAction = (state: SpeechState) => (): void => {
   const synthesis = resolveSynthesis(state);
@@ -202,23 +205,25 @@ const createStopSpeakingAction = (state: SpeechState) => (): void => {
   state.isSpeaking.value = false;
 };
 
-const createStartListeningAction = (state: SpeechState) => (locale?: string): boolean => {
-  if (!state.recognition.value) {
-    state.error.value = AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition;
-    return false;
-  }
-  if (state.isListening.value) {
-    return true;
-  }
+const createStartListeningAction =
+  (state: SpeechState) =>
+  (locale?: string): boolean => {
+    if (!state.recognition.value) {
+      state.error.value = AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition;
+      return false;
+    }
+    if (state.isListening.value) {
+      return true;
+    }
 
-  state.error.value = null;
-  state.transcript.value = "";
-  state.interimTranscript.value = "";
-  state.recognition.value.lang = resolveSpeechLocale(locale);
-  state.recognition.value.start();
-  state.isListening.value = true;
-  return true;
-};
+    state.error.value = null;
+    state.transcript.value = "";
+    state.interimTranscript.value = "";
+    state.recognition.value.lang = resolveSpeechLocale(locale);
+    state.recognition.value.start();
+    state.isListening.value = true;
+    return true;
+  };
 
 const createStopListeningAction = (state: SpeechState) => (): void => {
   if (state.recognition.value) {
@@ -234,7 +239,9 @@ const createSpeechSupportState = (state: SpeechState) => {
     return combinedTranscript.trim();
   });
   const supportsRecognition = computed(() => resolveSpeechRecognitionConstructor() !== null);
-  const supportsSynthesis = computed(() => (state.synthesis.value ?? resolveSpeechSynthesis()) !== null);
+  const supportsSynthesis = computed(
+    () => (state.synthesis.value ?? resolveSpeechSynthesis()) !== null,
+  );
   const isSupported = computed(() => supportsRecognition.value || supportsSynthesis.value);
   return {
     fullTranscript,

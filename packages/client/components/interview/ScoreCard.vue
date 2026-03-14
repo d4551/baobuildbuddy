@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 
 interface ScoreAnalysis {
@@ -17,15 +18,15 @@ const RADIAL_PROGRESS_THICKNESS = "1rem";
 
 const scoreColor = computed(() => {
   const score = props.analysis.overallScore;
-  if (score >= 80) return "text-success";
-  if (score >= 60) return "text-warning";
+  if (score >= SCORE_PASS_THRESHOLD) return "text-success";
+  if (score >= SCORE_WARNING_THRESHOLD) return "text-warning";
   return "text-error";
 });
 
 const scoreBorderColor = computed(() => {
   const score = props.analysis.overallScore;
-  if (score >= 80) return "border-success";
-  if (score >= 60) return "border-warning";
+  if (score >= SCORE_PASS_THRESHOLD) return "border-success";
+  if (score >= SCORE_WARNING_THRESHOLD) return "border-warning";
   return "border-error";
 });
 

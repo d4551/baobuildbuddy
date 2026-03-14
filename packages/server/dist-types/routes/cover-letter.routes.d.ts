@@ -44,8 +44,8 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
     "cover-letters": {
         post: {
             body: {
-                template?: string | undefined;
                 content?: {} | undefined;
+                template?: string | undefined;
                 jobInfo?: {} | undefined;
                 company: string;
                 position: string;
@@ -116,8 +116,8 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
             put: {
                 body: {
                     company?: string | undefined;
-                    template?: string | undefined;
                     content?: {} | undefined;
+                    template?: string | undefined;
                     position?: string | undefined;
                     jobInfo?: {} | undefined;
                 };

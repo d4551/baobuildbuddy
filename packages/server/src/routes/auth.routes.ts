@@ -1,10 +1,14 @@
+import {
+  API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
+  API_MESSAGE_AUTH_DISABLED,
+  API_MESSAGE_SAVE_API_KEY_ONCE,
+  DEFAULT_PROFILE_ID,
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { config } from "../config/env";
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
-
-const AUTH_ID = "default";
 const API_KEY_PREFIX = "bao_";
 const API_KEY_RANDOM_BYTES = 24;
 const BASE64URL_PADDING_PATTERN = /=+$/u;
@@ -22,35 +26,40 @@ function generateApiKey(): string {
 }
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
-  .get("/status", () => {
+  .get("/status", async () => {
     if (config.disableAuth) {
       return { configured: false, authRequired: false };
     }
-    return { authRequired: true };
+    const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+    const hasKey = Boolean(rows[0]?.apiKey);
+    return { authRequired: true, configured: hasKey };
   })
   .get("/configured", async () => {
     if (config.disableAuth) {
       return { configured: false };
     }
-    const rows = await db.select().from(auth).where(eq(auth.id, AUTH_ID));
+    const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
     const hasKey = Boolean(rows[0]?.apiKey);
     return { configured: hasKey };
   })
   .post("/init", async () => {
     if (config.disableAuth) {
-      return { configured: false, message: "Auth disabled" };
+      return { configured: false, message: API_MESSAGE_AUTH_DISABLED };
     }
 
-    const rows = await db.select().from(auth).where(eq(auth.id, AUTH_ID));
-    if (rows[0]?.apiKey) {
+    const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+    const existingApiKey = rows[0]?.apiKey;
+
+    if (existingApiKey) {
       return {
         configured: true,
-        message: "API key already configured",
+        apiKey: existingApiKey,
+        message: API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
       };
     }
 
     const apiKey = generateApiKey();
-    await db.insert(auth).values({ id: AUTH_ID, apiKey }).onConflictDoUpdate({
+    await db.insert(auth).values({ id: DEFAULT_PROFILE_ID, apiKey }).onConflictDoUpdate({
       target: auth.id,
       set: { apiKey },
     });
@@ -58,6 +67,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     return {
       configured: true,
       apiKey,
-      message: "Save this API key — it will not be shown again",
+      message: API_MESSAGE_SAVE_API_KEY_ONCE,
     };
   });

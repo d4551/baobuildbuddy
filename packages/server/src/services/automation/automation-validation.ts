@@ -1,12 +1,27 @@
-import { isIP } from "node:net";
+import {
+  API_ERROR_CUSTOM_ANSWERS_KEY_EXCEEDS,
+  API_ERROR_CUSTOM_ANSWERS_KEYS,
+  API_ERROR_CUSTOM_ANSWERS_MAX_COUNT,
+  API_ERROR_CUSTOM_ANSWERS_OBJECT,
+  API_ERROR_CUSTOM_ANSWERS_VALUE_EXCEEDS,
+  API_ERROR_CUSTOM_ANSWERS_VALUE_MUST_BE_STRING,
+  API_ERROR_JOB_URL_ABSOLUTE,
+  API_ERROR_JOB_URL_DISALLOWED_HOST,
+  API_ERROR_JOB_URL_EXCEEDS_LENGTH,
+  API_ERROR_JOB_URL_HTTP_ONLY,
+  API_ERROR_JOB_URL_NO_CREDENTIALS,
+  API_ERROR_JOB_URL_REQUIRED,
+  AUTOMATION_MAX_CUSTOM_ANSWER_COUNT,
+  AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH,
+  AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH,
+  AUTOMATION_MAX_JOB_URL_LENGTH,
+} from "@bao/shared";
 
-/**
- * Shared limits for job application automation request validation.
- */
-export const MAX_JOB_URL_LENGTH = 2_048;
-export const MAX_CUSTOM_ANSWER_KEY_LENGTH = 120;
-export const MAX_CUSTOM_ANSWER_VALUE_LENGTH = 2_000;
-export const MAX_CUSTOM_ANSWER_COUNT = 50;
+/** Re-export shared limits for consumers that import from this module. */
+export const MAX_JOB_URL_LENGTH = AUTOMATION_MAX_JOB_URL_LENGTH;
+export const MAX_CUSTOM_ANSWER_KEY_LENGTH = AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH;
+export const MAX_CUSTOM_ANSWER_VALUE_LENGTH = AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH;
+export const MAX_CUSTOM_ANSWER_COUNT = AUTOMATION_MAX_CUSTOM_ANSWER_COUNT;
 
 const DISALLOWED_IPV4_PREFIXES = [
   [127, 0],
@@ -14,6 +29,9 @@ const DISALLOWED_IPV4_PREFIXES = [
   [169, 254],
   [192, 168],
 ];
+
+const IP_SEGMENT_REGEX = /^\d+$/;
+const IPV6_SEGMENT_REGEX = /^[0-9a-f:.]+$/i;
 
 const DISALLOWED_HOST_PATTERNS = [
   /^localhost$/i,
@@ -39,29 +57,31 @@ const DISALLOWED_IPV6_PREFIX_PATTERN = /^(fc|fd|fe80)/i;
 export function sanitizeAndValidateJobUrl(rawJobUrl: string): string {
   const jobUrl = rawJobUrl.trim();
   if (!jobUrl) {
-    throw new Error("jobUrl is required");
+    throw new Error(API_ERROR_JOB_URL_REQUIRED);
   }
 
-  if (jobUrl.length > MAX_JOB_URL_LENGTH) {
-    throw new Error(`jobUrl exceeds ${MAX_JOB_URL_LENGTH} characters`);
+  if (jobUrl.length > AUTOMATION_MAX_JOB_URL_LENGTH) {
+    throw new Error(
+      API_ERROR_JOB_URL_EXCEEDS_LENGTH.replace("__MAX__", String(AUTOMATION_MAX_JOB_URL_LENGTH)),
+    );
   }
 
   if (!URL.canParse(jobUrl)) {
-    throw new Error("jobUrl must be an absolute URL");
+    throw new Error(API_ERROR_JOB_URL_ABSOLUTE);
   }
   const parsedUrl = new URL(jobUrl);
 
   if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-    throw new Error("Only http and https job URLs are allowed");
+    throw new Error(API_ERROR_JOB_URL_HTTP_ONLY);
   }
 
   if (parsedUrl.username || parsedUrl.password) {
-    throw new Error("jobUrl must not contain credentials");
+    throw new Error(API_ERROR_JOB_URL_NO_CREDENTIALS);
   }
 
   const host = parsedUrl.hostname.toLowerCase();
   if (isDisallowedAutomationHost(host)) {
-    throw new Error("jobUrl resolves to a disallowed host");
+    throw new Error(API_ERROR_JOB_URL_DISALLOWED_HOST);
   }
 
   return parsedUrl.toString();
@@ -78,31 +98,43 @@ export function sanitizeCustomAnswers(
   }
 
   if (typeof customAnswers !== "object" || Array.isArray(customAnswers)) {
-    throw new Error("customAnswers must be an object map");
+    throw new Error(API_ERROR_CUSTOM_ANSWERS_OBJECT);
   }
 
   const entries = Object.entries(customAnswers);
   if (entries.length > MAX_CUSTOM_ANSWER_COUNT) {
-    throw new Error(`Maximum ${MAX_CUSTOM_ANSWER_COUNT} custom answers allowed`);
+    throw new Error(
+      API_ERROR_CUSTOM_ANSWERS_MAX_COUNT.replace("__MAX__", String(MAX_CUSTOM_ANSWER_COUNT)),
+    );
   }
 
   const normalized: Record<string, string> = {};
   for (const [rawKey, rawValue] of entries) {
     const key = rawKey.trim();
     if (!key) {
-      throw new Error("customAnswers keys must not be empty");
+      throw new Error(API_ERROR_CUSTOM_ANSWERS_KEYS);
     }
     if (key.length > MAX_CUSTOM_ANSWER_KEY_LENGTH) {
-      throw new Error(`customAnswers key exceeds ${MAX_CUSTOM_ANSWER_KEY_LENGTH} characters`);
+      throw new Error(
+        API_ERROR_CUSTOM_ANSWERS_KEY_EXCEEDS.replace(
+          "__MAX__",
+          String(MAX_CUSTOM_ANSWER_KEY_LENGTH),
+        ),
+      );
     }
 
     if (typeof rawValue !== "string") {
-      throw new Error(`customAnswers[${key}] must be a string value`);
+      throw new Error(API_ERROR_CUSTOM_ANSWERS_VALUE_MUST_BE_STRING.replace("__KEY__", key));
     }
 
     const value = rawValue.trim();
     if (value.length > MAX_CUSTOM_ANSWER_VALUE_LENGTH) {
-      throw new Error(`customAnswers[${key}] exceeds ${MAX_CUSTOM_ANSWER_VALUE_LENGTH} characters`);
+      throw new Error(
+        API_ERROR_CUSTOM_ANSWERS_VALUE_EXCEEDS.replace("__KEY__", key).replace(
+          "__MAX__",
+          String(MAX_CUSTOM_ANSWER_VALUE_LENGTH),
+        ),
+      );
     }
 
     normalized[key] = value;
@@ -124,12 +156,11 @@ function isDisallowedAutomationHost(hostname: string): boolean {
     return true;
   }
 
-  const ipType = isIP(hostname);
-  if (ipType === 4) {
+  if (isIpv4Address(hostname)) {
     return isDisallowedIpv4(hostname);
   }
 
-  if (ipType === 6) {
+  if (isIpv6Address(hostname)) {
     return isDisallowedIpv6(hostname);
   }
 
@@ -147,6 +178,30 @@ function isDisallowedIpv4(hostname: string): boolean {
     ([disallowedFirst, disallowedSecond]) =>
       first === disallowedFirst && (disallowedSecond === 0 ? true : second === disallowedSecond),
   );
+}
+
+function isIpv4Address(hostname: string): boolean {
+  const segments = hostname.split(".");
+  if (segments.length !== 4) {
+    return false;
+  }
+
+  for (const segment of segments) {
+    if (!IP_SEGMENT_REGEX.test(segment)) {
+      return false;
+    }
+
+    const parsed = Number.parseInt(segment, 10);
+    if (Number.isNaN(parsed) || parsed < 0 || parsed > 255) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isIpv6Address(hostname: string): boolean {
+  return hostname.includes(":") && IPV6_SEGMENT_REGEX.test(hostname);
 }
 
 function isDisallowedIpv6(hostname: string): boolean {

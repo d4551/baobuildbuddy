@@ -1,13 +1,12 @@
-import type { AIResponse, GenerateOptions } from "@bao/shared";
+import {
+  API_ERROR_AI_STREAMING_FAILED,
+  settle,
+  toErrorMessage,
+  type AIResponse,
+  type GenerateOptions,
+} from "@bao/shared";
 import { type GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { BaseAIProvider } from "./provider-interface";
-
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : "Unknown error";
 
 /**
  * Google Gemini AI Provider
@@ -40,7 +39,7 @@ export class GeminiProvider extends BaseAIProvider {
       fullPrompt = `${options.systemPrompt}\n\n${prompt}`;
     }
 
-    const resultResponse = await settlePromise(
+    const resultResponse = await settle(
       this.generativeModel.generateContent({
         contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
         generationConfig,
@@ -90,22 +89,24 @@ export class GeminiProvider extends BaseAIProvider {
       fullPrompt = `${options.systemPrompt}\n\n${prompt}`;
     }
 
-    const streamResult = await settlePromise(
+    const streamResult = await settle(
       this.generativeModel.generateContentStream({
         contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
         generationConfig,
       }),
     );
     if (streamResult.status === "rejected") {
-      throw new Error(`Gemini streaming error: ${toErrorMessage(streamResult.reason)}`);
+      throw new Error(`${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(streamResult.reason)}`);
     }
     const result = streamResult.value;
 
     const iterator = result.stream[Symbol.asyncIterator]();
     const emitTextChunks = async function* (): AsyncGenerator<string> {
-      const nextChunkResult = await settlePromise(iterator.next());
+      const nextChunkResult = await settle(iterator.next());
       if (nextChunkResult.status === "rejected") {
-        throw new Error(`Gemini streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
+        throw new Error(
+          `${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(nextChunkResult.reason)}`,
+        );
       }
       const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
@@ -124,7 +125,8 @@ export class GeminiProvider extends BaseAIProvider {
   async isAvailable(): Promise<boolean> {
     // Try to list models to verify API key and connectivity
     return (
-      await settlePromise(Promise.resolve(this.client.getGenerativeModel({ model: "gemini-pro" })))
-    ).status === "fulfilled";
+      (await settle(Promise.resolve(this.client.getGenerativeModel({ model: "gemini-pro" }))))
+        .status === "fulfilled"
+    );
   }
 }
