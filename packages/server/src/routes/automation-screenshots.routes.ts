@@ -11,7 +11,6 @@ import {
   RUN_ID_SAFE_PATTERN_SOURCE,
   settle,
 } from "@bao/shared";
-import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -80,17 +79,22 @@ const createScreenshotResponse = (contents: BinaryPayload, extension: string): R
     cacheControl: CACHE_CONTROL_PRIVATE_NO_STORE,
   });
 
-const isMissingFileError = (error: unknown): boolean =>
-  Boolean(error && typeof error === "object" && "code" in error && error.code === "ENOENT");
-
+/**
+ * Reads screenshot file contents using Bun-native file API.
+ *
+ * @param filePath - Absolute path to the screenshot file.
+ * @returns File contents as ArrayBuffer, or null when the file does not exist.
+ */
 const readScreenshotPayload = async (filePath: string): Promise<BinaryPayload | null> => {
-  const readResult = await settle(readFile(filePath));
-  if (readResult.status === "fulfilled") {
-    return readResult.value;
+  const file = Bun.file(filePath);
+  const exists = await file.exists();
+  if (!exists) {
+    return null;
   }
 
-  if (isMissingFileError(readResult.reason)) {
-    return null;
+  const readResult = await settle(file.arrayBuffer());
+  if (readResult.status === "fulfilled") {
+    return new Uint8Array(readResult.value);
   }
 
   throw readResult.reason;

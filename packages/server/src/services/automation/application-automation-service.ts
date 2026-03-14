@@ -1,6 +1,5 @@
-import { mkdirSync, rmSync } from "fs";
-import { access, readFile, writeFile } from "fs/promises";
-import { join, resolve } from "path";
+import { mkdirSync, rmSync } from "node:fs";
+import { join, resolve } from "node:path";
 import {
   API_ERROR_EMPTY_EMAIL_RESPONSE,
   API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED,
@@ -440,9 +439,8 @@ export class ApplicationAutomationService {
       return null;
     }
 
-    const sourceExists = await access(sourcePath)
-      .then(() => true)
-      .catch(() => false);
+    const sourceFile = Bun.file(sourcePath);
+    const sourceExists = await sourceFile.exists();
     if (!sourceExists) {
       return null;
     }
@@ -454,11 +452,11 @@ export class ApplicationAutomationService {
       return safeFileName;
     }
 
-    const bytesResult = await settle(readFile(sourcePath));
+    const bytesResult = await settle(sourceFile.arrayBuffer());
     if (bytesResult.status === "rejected") {
       return null;
     }
-    const writeResult = await settle(writeFile(destination, bytesResult.value));
+    const writeResult = await settle(Bun.write(destination, bytesResult.value));
     if (writeResult.status === "rejected") {
       return null;
     }

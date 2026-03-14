@@ -1,4 +1,5 @@
 import { rm } from "fs/promises";
+import { resolve } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type MountedDesktopImage = {
@@ -6,8 +7,8 @@ type MountedDesktopImage = {
   mountPaths: string[];
 };
 
-const REPO_ROOT = Bun.resolveSync("..", import.meta.dir);
-const DESKTOP_TAURI_ROOT = Bun.resolveSync("packages/desktop/src-tauri", REPO_ROOT);
+const REPO_ROOT = resolve(import.meta.dir, "..");
+const DESKTOP_TAURI_ROOT = resolve(REPO_ROOT, "packages/desktop/src-tauri");
 const DESKTOP_BUNDLE_GLOB = new Bun.Glob("target/**/bundle");
 const DESKTOP_TEMP_DMG_GLOB = new Bun.Glob("target/**/bundle/macos/rw.*.BaoBuildBuddy_*.dmg");
 const MOUNT_LINE_SPLIT_PATTERN = /\t+/;

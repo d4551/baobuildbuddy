@@ -1,4 +1,4 @@
-import { type ChildProcess, spawn, spawnSync, type SpawnSyncReturns } from "node:child_process";
+import { type ChildProcess, spawn, spawnSync, type SpawnSyncReturns } from "child_process";
 
 import {
   DEFAULT_CLIENT_DEV_PORT,
