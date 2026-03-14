@@ -8,51 +8,39 @@ import { extractRemoteGameJobs } from "./remotegamejobs";
 import type { PageEvaluator } from "./provider-types";
 import { extractWorkWithIndiesJobs } from "./workwithindies";
 
-type DomGlobalState = {
-  window?: Window;
-  document?: Document;
-  HTMLElement?: typeof globalThis.HTMLElement;
-  HTMLAnchorElement?: typeof globalThis.HTMLAnchorElement;
-};
+const DOM_GLOBAL_KEYS = [
+  "window",
+  "document",
+  "HTMLElement",
+  "HTMLAnchorElement",
+] as const;
+const DOM_GLOBAL_ABSENT = Symbol("dom-global-absent");
+
+type DomGlobalKey = (typeof DOM_GLOBAL_KEYS)[number];
+type DomGlobalValue = object | undefined | typeof DOM_GLOBAL_ABSENT;
+type DomGlobalState = Record<DomGlobalKey, DomGlobalValue>;
 
 const TEST_SOURCE_URL = "https://example.com/jobs";
 
 const captureDomGlobals = (): DomGlobalState => {
-  const runtime = globalThis as typeof globalThis & Partial<DomGlobalState>;
-
-  return {
-    window: runtime.window,
-    document: runtime.document,
-    HTMLElement: runtime.HTMLElement,
-    HTMLAnchorElement: runtime.HTMLAnchorElement,
-  };
+  return Object.fromEntries(
+    DOM_GLOBAL_KEYS.map((key) => [
+      key,
+      Reflect.has(globalThis, key)
+        ? Reflect.get(globalThis, key)
+        : DOM_GLOBAL_ABSENT,
+    ]),
+  ) as DomGlobalState;
 };
 
 const restoreDomGlobals = (state: DomGlobalState): void => {
-  const runtime = globalThis as typeof globalThis & Partial<DomGlobalState>;
+  for (const key of DOM_GLOBAL_KEYS) {
+    if (state[key] === DOM_GLOBAL_ABSENT) {
+      Reflect.deleteProperty(globalThis, key);
+      continue;
+    }
 
-  if (state.window) {
-    runtime.window = state.window;
-  } else {
-    runtime.window = undefined;
-  }
-
-  if (state.document) {
-    runtime.document = state.document;
-  } else {
-    runtime.document = undefined;
-  }
-
-  if (state.HTMLElement) {
-    runtime.HTMLElement = state.HTMLElement;
-  } else {
-    runtime.HTMLElement = undefined;
-  }
-
-  if (state.HTMLAnchorElement) {
-    runtime.HTMLAnchorElement = state.HTMLAnchorElement;
-  } else {
-    runtime.HTMLAnchorElement = undefined;
+    Reflect.set(globalThis, key, state[key]);
   }
 };
 
@@ -67,12 +55,10 @@ const createEvaluatePage = (html: string): PageEvaluator => {
       arg?: Arg,
     ): Promise<Result> => {
       const previousGlobals = captureDomGlobals();
-      const runtime = globalThis as typeof globalThis & Partial<DomGlobalState>;
-
-      runtime.window = window;
-      runtime.document = window.document;
-      runtime.HTMLElement = window.HTMLElement;
-      runtime.HTMLAnchorElement = window.HTMLAnchorElement;
+      Reflect.set(globalThis, "window", window);
+      Reflect.set(globalThis, "document", window.document);
+      Reflect.set(globalThis, "HTMLElement", window.HTMLElement);
+      Reflect.set(globalThis, "HTMLAnchorElement", window.HTMLAnchorElement);
 
       const [evaluationResult] = await Promise.allSettled([
         Promise.resolve(
