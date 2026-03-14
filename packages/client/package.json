@@ -3,8 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d4551/baobuildbuddy.git",
+    "directory": "packages/client"
+  },
+  "bugs": {
+    "url": "https://github.com/d4551/baobuildbuddy/issues"
+  },
+  "homepage": "https://github.com/d4551/baobuildbuddy/tree/main/packages/client",
   "scripts": {
-    "dev": "bun --bun run nuxt dev --port 3001",
+    "dev": "bun --bun run nuxt dev",
     "build": "bun --bun run nuxt build",
     "generate": "bun --bun run nuxt generate",
     "preview": "bun --bun run nuxt preview",
@@ -18,8 +27,8 @@
     "@elysiajs/eden": "^1.4.8",
     "@nuxt/image": "^2.0.0",
     "@tanstack/vue-query": "^5.92.9",
-    "nuxt": "^4.3.1",
-    "vue": "^3.5.28",
+    "nuxt": "^4.4.2",
+    "vue": "^3.5.30",
     "vue-i18n": "^11.2.8",
     "vue-router": "^5.0.3",
     "zod": "^4.3.6"

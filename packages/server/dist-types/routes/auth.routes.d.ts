@@ -26,9 +26,6 @@ export declare const authRoutes: Elysia<"/auth", {
                     200: {
                         configured: boolean;
                         authRequired: boolean;
-                    } | {
-                        authRequired: boolean;
-                        configured?: undefined;
                     };
                 };
             };

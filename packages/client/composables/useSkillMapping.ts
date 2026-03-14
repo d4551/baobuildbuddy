@@ -53,24 +53,19 @@ function toSkillReadinessFeedbackId(value: unknown): SkillReadinessFeedbackId | 
 }
 
 function toSkillReadinessImprovementIds(value: unknown): SkillReadinessImprovementId[] {
-  return asStringArray(value).filter(
-    (entry): entry is SkillReadinessImprovementId =>
-      SKILL_READINESS_IMPROVEMENT_ID_SET.has(entry),
+  return asStringArray(value).filter((entry): entry is SkillReadinessImprovementId =>
+    SKILL_READINESS_IMPROVEMENT_ID_SET.has(entry),
   );
 }
 
 function toSkillReadinessNextStepIds(value: unknown): SkillReadinessNextStepId[] {
-  return asStringArray(value).filter(
-    (entry): entry is SkillReadinessNextStepId => SKILL_READINESS_NEXT_STEP_ID_SET.has(entry),
+  return asStringArray(value).filter((entry): entry is SkillReadinessNextStepId =>
+    SKILL_READINESS_NEXT_STEP_ID_SET.has(entry),
   );
 }
 
 function toCareerSalary(value: unknown): CareerPathway["averageSalary"] {
-  if (
-    isRecord(value) &&
-    typeof value.min === "number" &&
-    typeof value.max === "number"
-  ) {
+  if (isRecord(value) && typeof value.min === "number" && typeof value.max === "number") {
     return {
       min: value.min,
       max: value.max,
@@ -126,7 +121,9 @@ function toCareerPathway(value: unknown): CareerPathway | null {
   }
 
   const stages = Array.isArray(value.stages)
-    ? value.stages.map((entry) => toCareerStage(entry)).filter((entry): entry is CareerPathway["stages"][number] => entry !== null)
+    ? value.stages
+        .map((entry) => toCareerStage(entry))
+        .filter((entry): entry is CareerPathway["stages"][number] => entry !== null)
     : [];
   const trend = value.jobMarketTrend;
 
@@ -197,7 +194,10 @@ function toTargetRoleReadiness(
       }
       return readiness;
     })
-    .filter((entry): entry is NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] => entry !== null);
+    .filter(
+      (entry): entry is NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] =>
+        entry !== null,
+    );
 }
 
 function toReadinessAssessment(value: unknown): ReadinessAssessment | null {
@@ -234,7 +234,9 @@ function createSkillMappingActions(context: SkillMappingContext) {
       const { data, error } = await context.api.skills.mappings.get();
       assertApiResponse(error, context.t("apiErrors.skills.fetchMappingsFailed"));
       context.mappings.value = Array.isArray(data)
-        ? data.map((entry) => toSkillMapping(entry)).filter((entry): entry is SkillMapping => entry !== null)
+        ? data
+            .map((entry) => toSkillMapping(entry))
+            .filter((entry): entry is SkillMapping => entry !== null)
         : [];
     });
 
@@ -275,7 +277,9 @@ function createSkillInsightActions(context: SkillMappingContext) {
       const { data, error } = await context.api.skills.pathways.get();
       assertApiResponse(error, context.t("apiErrors.skills.fetchPathwaysFailed"));
       context.pathways.value = Array.isArray(data)
-        ? data.map((entry) => toCareerPathway(entry)).filter((entry): entry is CareerPathway => entry !== null)
+        ? data
+            .map((entry) => toCareerPathway(entry))
+            .filter((entry): entry is CareerPathway => entry !== null)
         : [];
     });
 
@@ -288,14 +292,18 @@ function createSkillInsightActions(context: SkillMappingContext) {
 
   const aiAnalyze = async (skills: string[]) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills["ai-analyze"].post({ gameExperience: { skills } });
+      const { data, error } = await context.api.skills["ai-analyze"].post({
+        gameExperience: { skills },
+      });
       assertApiResponse(error, context.t("apiErrors.skills.analyzeFailed"));
       return data;
     });
 
   const extractFromText = async (text: string) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills["ai-analyze"].post({ resume: { experience: text } });
+      const { data, error } = await context.api.skills["ai-analyze"].post({
+        resume: { experience: text },
+      });
       assertApiResponse(error, context.t("apiErrors.skills.extractFailed"));
       return data;
     });

@@ -1,12 +1,33 @@
 import type { AIProviderType, AutomationSettings, NotificationPreferences } from "@bao/shared";
 import {
   AI_PROVIDER_ID_LIST,
+  API_ERROR_INIT_SETTINGS_ROW,
+  API_ERROR_INVALID_AUTOMATION_PAYLOAD,
+  API_ERROR_LOAD_SETTINGS,
+  API_ERROR_UNKNOWN_PROVIDER,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
   AI_PROVIDER_TEST_STRATEGY_BY_ID,
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
   automationSettingsSchema,
   DEFAULT_NOTIFICATION_PREFERENCES,
   DEFAULT_SETTINGS_ID,
+  SCHEMA_MAX_LENGTH_API_KEY,
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_MODEL,
+  SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
+  SCHEMA_MAX_LENGTH_SETTINGS_URL,
+  SCHEMA_MAX_LENGTH_MICRO,
+  SCHEMA_MAX_BOARD_RESULT_LIMIT,
+  SCHEMA_MAX_PAGES_MAX,
+  SCHEMA_MAX_PAGES_MIN,
+  SCHEMA_PROVIDER_TIMEOUT_MAX_MS,
+  SCHEMA_PROVIDER_TIMEOUT_MIN_MS,
+  SCHEMA_MAX_ITEMS_BOARDS,
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_LENGTH_ID,
+  settle,
   SPEECH_PROVIDER_OPTIONS,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
@@ -15,16 +36,14 @@ import { rateLimit } from "elysia-rate-limit";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { DATA_EXPORT_VERSION } from "../services/data-service";
+import { resolveRateLimitClientKey } from "../utils/request";
+import {
+  RATE_LIMIT_SETTINGS_DURATION_MS,
+  RATE_LIMIT_SETTINGS_MAX_REQUESTS,
+} from "../config/rate-limit";
 
 const VALID_PROVIDERS = AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]];
-
-const SETTINGS_RATE_LIMIT_DURATION_MS = 60_000;
-const SETTINGS_RATE_LIMIT_MAX_REQUESTS = 10;
 const KEY_MASK_VISIBLE_CHARS = 4;
-const MODEL_MAX_LENGTH = 200;
-const API_KEY_MAX_LENGTH = 500;
-const SETTINGS_LABEL_MAX_LENGTH = 120;
-const URL_MAX_LENGTH = 200;
 
 const COMPANY_BOARD_PROVIDER_TYPES = [
   "greenhouse",
@@ -38,7 +57,7 @@ const COMPANY_BOARD_PROVIDER_TYPES = [
 ] as const;
 
 const GAMING_PORTAL_IDS = [
-  "gamedev-net",
+  "hitmarker",
   "grackle",
   "workwithindies",
   "remotegamejobs",
@@ -68,7 +87,7 @@ const [
   COMPANY_BOARD_WORKDAY,
 ] = COMPANY_BOARD_PROVIDER_TYPES;
 const [
-  GAMING_PORTAL_GAMDEVO_NET,
+  GAMING_PORTAL_HITMARKER,
   GAMING_PORTAL_GRACKLE,
   GAMING_PORTAL_WORKWITHINDIES,
   GAMING_PORTAL_REMOTEGAMEJOBS,
@@ -81,11 +100,6 @@ const [AUTOMATION_BROWSER_CHROME, AUTOMATION_BROWSER_CHROMIUM, AUTOMATION_BROWSE
   AUTOMATION_BROWSER_IDS;
 const [APP_LANGUAGE_EN_US, APP_LANGUAGE_ES_ES, APP_LANGUAGE_FR_FR, APP_LANGUAGE_JA_JP] =
   LANGUAGE_CODES;
-
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 
 const speechProviderBodySchema = t.Union([
   t.Literal(SPEECH_PROVIDER_BROWSER),
@@ -107,7 +121,7 @@ const companyBoardTypeBodySchema = t.Union([
 ]);
 
 const gamingPortalIdBodySchema = t.Union([
-  t.Literal(GAMING_PORTAL_GAMDEVO_NET),
+  t.Literal(GAMING_PORTAL_HITMARKER),
   t.Literal(GAMING_PORTAL_GRACKLE),
   t.Literal(GAMING_PORTAL_WORKWITHINDIES),
   t.Literal(GAMING_PORTAL_REMOTEGAMEJOBS),
@@ -139,76 +153,79 @@ const languageBodySchema = t.Union([
 const apiProviderBodySchema = preferredProviderBodySchema;
 
 const companyBoardApiTemplatesBodySchema = t.Object({
-  greenhouse: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  lever: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  recruitee: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  workable: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  ashby: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  smartrecruiters: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  teamtailor: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  workday: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  greenhouse: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  lever: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  recruitee: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  workable: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  ashby: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  smartrecruiters: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  teamtailor: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  workday: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
 });
 
 const companyBoardConfigBodySchema = t.Object({
-  name: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
-  token: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  name: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  token: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
   type: companyBoardTypeBodySchema,
   enabled: t.Boolean(),
   priority: t.Number({ minimum: 0, maximum: 1000 }),
 });
 
 const greenhouseBoardConfigBodySchema = t.Object({
-  board: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
-  company: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  board: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  company: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
   enabled: t.Boolean(),
 });
 
 const leverCompanyConfigBodySchema = t.Object({
-  slug: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
-  company: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+  slug: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  company: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
   enabled: t.Boolean(),
 });
 
 const gamingPortalConfigBodySchema = t.Object({
   id: gamingPortalIdBodySchema,
-  name: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
-  source: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
-  fallbackUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
+  name: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  source: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  fallbackUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
   enabled: t.Boolean(),
 });
 
 const jobProviderSettingsBodySchema = t.Object({
-  providerTimeoutMs: t.Number({ minimum: 1000, maximum: 120000 }),
-  companyBoardResultLimit: t.Number({ minimum: 1, maximum: 200 }),
-  gamingBoardResultLimit: t.Number({ minimum: 1, maximum: 200 }),
-  unknownLocationLabel: t.String({ minLength: 1, maxLength: 100 }),
-  unknownCompanyLabel: t.String({ minLength: 1, maxLength: 100 }),
-  hitmarkerApiBaseUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  hitmarkerDefaultQuery: t.String({ minLength: 1, maxLength: 100 }),
-  hitmarkerDefaultLocation: t.String({ minLength: 1, maxLength: 100 }),
-  greenhouseApiBaseUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  greenhouseMaxPages: t.Number({ minimum: 1, maximum: 20 }),
-  greenhouseBoards: t.Array(greenhouseBoardConfigBodySchema, { maxItems: 500 }),
-  leverApiBaseUrl: t.String({ minLength: 1, maxLength: URL_MAX_LENGTH }),
-  leverMaxPages: t.Number({ minimum: 1, maximum: 20 }),
-  leverCompanies: t.Array(leverCompanyConfigBodySchema, { maxItems: 500 }),
+  providerTimeoutMs: t.Number({
+    minimum: SCHEMA_PROVIDER_TIMEOUT_MIN_MS,
+    maximum: SCHEMA_PROVIDER_TIMEOUT_MAX_MS,
+  }),
+  companyBoardResultLimit: t.Number({ minimum: 1, maximum: SCHEMA_MAX_BOARD_RESULT_LIMIT }),
+  gamingBoardResultLimit: t.Number({ minimum: 1, maximum: SCHEMA_MAX_BOARD_RESULT_LIMIT }),
+  unknownLocationLabel: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  unknownCompanyLabel: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  hitmarkerApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  hitmarkerDefaultQuery: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  hitmarkerDefaultLocation: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  greenhouseApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  greenhouseMaxPages: t.Number({ minimum: SCHEMA_MAX_PAGES_MIN, maximum: SCHEMA_MAX_PAGES_MAX }),
+  greenhouseBoards: t.Array(greenhouseBoardConfigBodySchema, { maxItems: SCHEMA_MAX_ITEMS_BOARDS }),
+  leverApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  leverMaxPages: t.Number({ minimum: SCHEMA_MAX_PAGES_MIN, maximum: SCHEMA_MAX_PAGES_MAX }),
+  leverCompanies: t.Array(leverCompanyConfigBodySchema, { maxItems: SCHEMA_MAX_ITEMS_BOARDS }),
   companyBoardApiTemplates: companyBoardApiTemplatesBodySchema,
-  companyBoards: t.Array(companyBoardConfigBodySchema, { maxItems: 500 }),
-  gamingPortals: t.Array(gamingPortalConfigBodySchema, { maxItems: 50 }),
+  companyBoards: t.Array(companyBoardConfigBodySchema, { maxItems: SCHEMA_MAX_ITEMS_BOARDS }),
+  gamingPortals: t.Array(gamingPortalConfigBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
 });
 
 const speechSettingsBodySchema = t.Object({
-  locale: t.String({ minLength: 2, maxLength: 20 }),
+  locale: t.String({ minLength: 2, maxLength: SCHEMA_MAX_LENGTH_MICRO }),
   stt: t.Object({
     provider: speechProviderBodySchema,
-    model: t.String({ minLength: 1, maxLength: MODEL_MAX_LENGTH }),
-    endpoint: t.String({ maxLength: 2000 }),
+    model: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_MODEL }),
+    endpoint: t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG }),
   }),
   tts: t.Object({
     provider: speechProviderBodySchema,
-    model: t.String({ minLength: 1, maxLength: MODEL_MAX_LENGTH }),
-    endpoint: t.String({ maxLength: 2000 }),
-    voice: t.String({ minLength: 1, maxLength: SETTINGS_LABEL_MAX_LENGTH }),
+    model: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_MODEL }),
+    endpoint: t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    voice: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
     format: t.Union([t.Literal("mp3"), t.Literal("wav")]),
   }),
 });
@@ -291,32 +308,12 @@ const mergeAutomationSettings = (
   return mergedParsed.data;
 };
 
-const resolveRateLimitClientKey = (request: Request): string => {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor && forwardedFor.trim().length > 0) {
-    const firstHop = forwardedFor.split(",")[0]?.trim();
-    if (firstHop) return firstHop;
-  }
-
-  const cloudflareIp = request.headers.get("cf-connecting-ip");
-  if (cloudflareIp && cloudflareIp.trim().length > 0) {
-    return cloudflareIp.trim();
-  }
-
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp && realIp.trim().length > 0) {
-    return realIp.trim();
-  }
-
-  return new URL(request.url).host;
-};
-
 export const settingsRoutes = new Elysia({ prefix: "/settings" })
   .use(
     rateLimit({
       scoping: "scoped",
-      duration: SETTINGS_RATE_LIMIT_DURATION_MS,
-      max: SETTINGS_RATE_LIMIT_MAX_REQUESTS,
+      duration: RATE_LIMIT_SETTINGS_DURATION_MS,
+      max: RATE_LIMIT_SETTINGS_MAX_REQUESTS,
       generator: (request) => resolveRateLimitClientKey(request),
     }),
   )
@@ -329,7 +326,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
 
     const row = rows[0];
     if (!row) {
-      return { error: "Failed to load settings" };
+      return { error: API_ERROR_LOAD_SETTINGS };
     }
 
     return {
@@ -364,8 +361,8 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
 
       const existingRow = existing[0];
       if (!existingRow) {
-        set.status = 500;
-        return { success: false, error: "Failed to initialize settings row" };
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return { success: false, error: API_ERROR_INIT_SETTINGS_ROW };
       }
 
       const update: Partial<typeof settings.$inferInsert> = {};
@@ -390,10 +387,10 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
         );
 
         if (!mergedAutomationSettings) {
-          set.status = 422;
+          set.status = HTTP_STATUS_UNPROCESSABLE_ENTITY;
           return {
             success: false,
-            error: "Invalid automationSettings payload",
+            error: API_ERROR_INVALID_AUTOMATION_PAYLOAD,
           };
         }
 
@@ -410,7 +407,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
     {
       body: t.Object({
         preferredProvider: t.Optional(preferredProviderBodySchema),
-        preferredModel: t.Optional(t.String({ maxLength: MODEL_MAX_LENGTH })),
+        preferredModel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
         theme: t.Optional(t.Union([t.Literal("bao-light"), t.Literal("bao-dark")])),
         language: t.Optional(languageBodySchema),
         notifications: t.Optional(
@@ -460,12 +457,12 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
     },
     {
       body: t.Object({
-        geminiApiKey: t.Optional(t.String({ maxLength: API_KEY_MAX_LENGTH })),
-        openaiApiKey: t.Optional(t.String({ maxLength: API_KEY_MAX_LENGTH })),
-        claudeApiKey: t.Optional(t.String({ maxLength: API_KEY_MAX_LENGTH })),
-        huggingfaceToken: t.Optional(t.String({ maxLength: API_KEY_MAX_LENGTH })),
-        localModelEndpoint: t.Optional(t.String({ maxLength: API_KEY_MAX_LENGTH })),
-        localModelName: t.Optional(t.String({ maxLength: MODEL_MAX_LENGTH })),
+        geminiApiKey: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
+        openaiApiKey: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
+        claudeApiKey: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
+        huggingfaceToken: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
+        localModelEndpoint: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
+        localModelName: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
       }),
     },
   )
@@ -493,7 +490,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
         return {
           valid: false,
           provider: body.provider,
-          error: "Unknown provider",
+          error: API_ERROR_UNKNOWN_PROVIDER,
         };
       }
 
@@ -511,7 +508,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
     {
       body: t.Object({
         provider: apiProviderBodySchema,
-        key: t.String({ minLength: 1, maxLength: API_KEY_MAX_LENGTH }),
+        key: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_API_KEY }),
       }),
     },
   )

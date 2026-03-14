@@ -1,5 +1,16 @@
-import type { AIChatContextDomain, ChatMessage } from "@bao/shared";
-import { AI_CHAT_HISTORY_FETCH_LIMIT } from "@bao/shared";
+import {
+  AI_CHAT_CONTEXT_AVAILABLE_RESUMES_LIMIT,
+  AI_CHAT_CONTEXT_AUTOMATION_RUNS_LIMIT,
+  AI_CHAT_CONTEXT_INTERVIEW_SESSIONS_LIMIT,
+  AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT,
+  AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT,
+  AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT,
+  AI_CHAT_HISTORY_FETCH_LIMIT,
+  DEFAULT_PROFILE_ID,
+  settle,
+  type AIChatContextDomain,
+  type ChatMessage,
+} from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -25,11 +36,6 @@ const INTERVIEW_DOMAIN_PATTERN = /\b(interview|question|answer|practice|mock|pre
 const PORTFOLIO_DOMAIN_PATTERN = /\b(portfolio|project|showcase|demo|sample)\b/;
 const SKILLS_DOMAIN_PATTERN = /\b(skill|mapping|transfer|learn|career\s*path|gap)\b/;
 
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-
 export class ConversationContextManager {
   private isChatRole(value: string): value is ChatMessage["role"] {
     return value === "user" || value === "assistant" || value === "system";
@@ -41,11 +47,9 @@ export class ConversationContextManager {
   inferDomain(message: string): AIChatContextDomain {
     const lower = message.toLowerCase();
     // Automation must be checked BEFORE job_search since "apply" overlaps
-    if (AUTOMATION_DOMAIN_PATTERN.test(lower))
-      return "automation";
+    if (AUTOMATION_DOMAIN_PATTERN.test(lower)) return "automation";
     if (RESUME_DOMAIN_PATTERN.test(lower)) return "resume";
-    if (JOB_SEARCH_DOMAIN_PATTERN.test(lower))
-      return "job_search";
+    if (JOB_SEARCH_DOMAIN_PATTERN.test(lower)) return "job_search";
     if (INTERVIEW_DOMAIN_PATTERN.test(lower)) return "interview";
     if (PORTFOLIO_DOMAIN_PATTERN.test(lower)) return "portfolio";
     if (SKILLS_DOMAIN_PATTERN.test(lower)) return "skills";
@@ -61,8 +65,20 @@ export class ConversationContextManager {
     preferredDomain?: AIChatContextDomain,
   ): Promise<ConversationContext> {
     const domain = preferredDomain ?? this.inferDomain(currentMessage);
+    const messages = await this.loadConversationMessages(sessionId, currentMessage);
+    const profile = await this.loadDefaultProfile();
+    const domainContext = await this.loadDomainContext(domain);
+    const systemPrompt = this.buildSystemPrompt(domain, profile, domainContext);
+    return { systemPrompt, messages };
+  }
 
-    // Load conversation history (last 20 messages)
+  /**
+   * Loads recent conversation history and appends the current user message once.
+   */
+  private async loadConversationMessages(
+    sessionId: string,
+    currentMessage: string,
+  ): Promise<Array<Pick<ChatMessage, "role" | "content">>> {
     const history = await db
       .select()
       .from(chatHistory)
@@ -70,7 +86,6 @@ export class ConversationContextManager {
       .orderBy(desc(chatHistory.timestamp))
       .limit(AI_CHAT_HISTORY_FETCH_LIMIT);
 
-    // Reverse to get chronological order
     const messages: Array<Pick<ChatMessage, "role" | "content">> = history
       .reverse()
       .flatMap((msg) =>
@@ -84,7 +99,6 @@ export class ConversationContextManager {
           : [],
       );
 
-    // Ensure current message is present once when context is assembled.
     const lastMessage = messages[messages.length - 1];
     const hasCurrentMessageAtTail =
       lastMessage?.role === "user" && lastMessage.content === currentMessage;
@@ -92,28 +106,39 @@ export class ConversationContextManager {
       messages.push({ role: "user", content: currentMessage });
     }
 
-    // Load user profile
-    const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
-    const profile = profileRows[0];
+    return messages;
+  }
 
-    // Build system prompt with domain context
+  /**
+   * Loads the default user profile row when available.
+   */
+  private async loadDefaultProfile() {
+    const profileRows = await db
+      .select()
+      .from(userProfile)
+      .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
+    return profileRows[0] ?? null;
+  }
+
+  /**
+   * Builds the final system prompt from the selected domain and user context.
+   */
+  private buildSystemPrompt(
+    domain: AIChatContextDomain,
+    profile: typeof userProfile.$inferSelect | null,
+    domainContext: string | null,
+  ): string {
     let systemPrompt = DOMAIN_SYSTEM_PROMPTS[domain] || DOMAIN_SYSTEM_PROMPTS.general;
 
-    // Add user context
     if (profile) {
       systemPrompt += `\n\nUser Context:\nName: ${profile.name || "Not set"}\nCurrent Role: ${profile.currentRole || "Not set"}\nYears Experience: ${profile.yearsExperience || "Not set"}\nLocation: ${profile.location || "Not set"}`;
     }
 
-    // Add domain-specific data
-    const domainContext = await this.loadDomainContext(domain);
     if (domainContext) {
       systemPrompt += `\n\nRelevant Data:\n${domainContext}`;
     }
 
-    // Add gaming industry context
-    systemPrompt += `\n\n${GAMING_INDUSTRY_CONTEXT}`;
-
-    return { systemPrompt, messages };
+    return `${systemPrompt}\n\n${GAMING_INDUSTRY_CONTEXT}`;
   }
 
   /**
@@ -124,7 +149,7 @@ export class ConversationContextManager {
     if (!loader) {
       return null;
     }
-    const contextResult = await settlePromise(loader());
+    const contextResult = await settle(loader());
 
     if (contextResult.status === "rejected") {
       return null;
@@ -133,7 +158,9 @@ export class ConversationContextManager {
     return contextResult.value;
   }
 
-  private getDomainContextLoader(domain: AIChatContextDomain): (() => Promise<string | null>) | null {
+  private getDomainContextLoader(
+    domain: AIChatContextDomain,
+  ): (() => Promise<string | null>) | null {
     switch (domain) {
       case "resume":
         return () => this.loadResumeContext();
@@ -166,7 +193,7 @@ export class ConversationContextManager {
       .select({ title: jobs.title, company: jobs.company })
       .from(savedJobs)
       .leftJoin(jobs, eq(savedJobs.jobId, jobs.id))
-      .limit(10);
+      .limit(AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT);
     if (saved.length === 0) {
       return null;
     }
@@ -178,7 +205,7 @@ export class ConversationContextManager {
       .select()
       .from(interviewSessions)
       .orderBy(desc(interviewSessions.createdAt))
-      .limit(3);
+      .limit(AI_CHAT_CONTEXT_INTERVIEW_SESSIONS_LIMIT);
     if (sessions.length === 0) {
       return null;
     }
@@ -186,7 +213,10 @@ export class ConversationContextManager {
   }
 
   private async loadPortfolioContext(): Promise<string | null> {
-    const projects = await db.select().from(portfolioProjects).limit(10);
+    const projects = await db
+      .select()
+      .from(portfolioProjects)
+      .limit(AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT);
     if (projects.length === 0) {
       return null;
     }
@@ -194,7 +224,10 @@ export class ConversationContextManager {
   }
 
   private async loadSkillsContext(): Promise<string | null> {
-    const mappings = await db.select().from(skillMappings).limit(20);
+    const mappings = await db
+      .select()
+      .from(skillMappings)
+      .limit(AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT);
     if (mappings.length === 0) {
       return null;
     }
@@ -206,14 +239,20 @@ export class ConversationContextManager {
       .select()
       .from(automationRuns)
       .orderBy(desc(automationRuns.createdAt))
-      .limit(5);
-    const availableResumes = await db.select().from(resumes).limit(10);
+      .limit(AI_CHAT_CONTEXT_AUTOMATION_RUNS_LIMIT);
+    const availableResumes = await db
+      .select()
+      .from(resumes)
+      .limit(AI_CHAT_CONTEXT_AVAILABLE_RESUMES_LIMIT);
     const runLines = recentRuns.map(
-      (run) => `- [${run.status}] ${run.type} (${run.createdAt})${run.error ? ` Error: ${run.error}` : ""}`,
+      (run) =>
+        `- [${run.status}] ${run.type} (${run.createdAt})${run.error ? ` Error: ${run.error}` : ""}`,
     );
     const resumeLines = availableResumes.map((resume) => `- "${resume.name}" (ID: ${resume.id})`);
     const parts = [
-      ...(runLines.length > 0 ? [`Recent Automation Runs (${recentRuns.length}):`, ...runLines] : []),
+      ...(runLines.length > 0
+        ? [`Recent Automation Runs (${recentRuns.length}):`, ...runLines]
+        : []),
       ...(resumeLines.length > 0 ? ["\nAvailable Resumes:", ...resumeLines] : []),
     ];
     return parts.length > 0 ? parts.join("\n") : null;

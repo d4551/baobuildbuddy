@@ -1,13 +1,12 @@
-import type { AIResponse, GenerateOptions } from "@bao/shared";
+import {
+  API_ERROR_AI_STREAMING_FAILED,
+  settle,
+  toErrorMessage,
+  type AIResponse,
+  type GenerateOptions,
+} from "@bao/shared";
 import OpenAI from "openai";
 import { BaseAIProvider } from "./provider-interface";
-
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : "Unknown error";
 
 /**
  * OpenAI AI Provider
@@ -40,7 +39,7 @@ export class OpenAIProvider extends BaseAIProvider {
       content: prompt,
     });
 
-    const responseResult = await settlePromise(
+    const responseResult = await settle(
       this.client.chat.completions.create({
         model: this.model,
         messages,
@@ -92,7 +91,7 @@ export class OpenAIProvider extends BaseAIProvider {
       content: prompt,
     });
 
-    const streamResult = await settlePromise(
+    const streamResult = await settle(
       this.client.chat.completions.create({
         model: this.model,
         messages,
@@ -103,15 +102,17 @@ export class OpenAIProvider extends BaseAIProvider {
       }),
     );
     if (streamResult.status === "rejected") {
-      throw new Error(`OpenAI streaming error: ${toErrorMessage(streamResult.reason)}`);
+      throw new Error(`${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(streamResult.reason)}`);
     }
     const stream = streamResult.value;
 
     const iterator = stream[Symbol.asyncIterator]();
     const emitContentChunks = async function* (): AsyncGenerator<string> {
-      const nextChunkResult = await settlePromise(iterator.next());
+      const nextChunkResult = await settle(iterator.next());
       if (nextChunkResult.status === "rejected") {
-        throw new Error(`OpenAI streaming error: ${toErrorMessage(nextChunkResult.reason)}`);
+        throw new Error(
+          `${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(nextChunkResult.reason)}`,
+        );
       }
       const nextChunk = nextChunkResult.value;
       if (nextChunk.done) {
@@ -129,6 +130,6 @@ export class OpenAIProvider extends BaseAIProvider {
 
   async isAvailable(): Promise<boolean> {
     // List models to verify API key
-    return (await settlePromise(this.client.models.list())).status === "fulfilled";
+    return (await settle(this.client.models.list())).status === "fulfilled";
   }
 }

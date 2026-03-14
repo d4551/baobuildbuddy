@@ -6,13 +6,20 @@ import type {
   UserGamificationData,
 } from "@bao/shared";
 import {
+  DEFAULT_PROFILE_ID,
   getGamificationAchievementIcon,
   getGamificationChallengeIcon,
   getLevelForXP,
+  MS_PER_DAY,
+  SCHEMA_MAX_ITEMS_BOARDS,
+  isRecord,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { gamification } from "../db/schema/schema-modules";
+import { createServerLogger } from "../utils/logger";
+
+const gamificationLogger = createServerLogger("gamification");
 
 type ActionHistoryEntry = {
   action: string;
@@ -35,9 +42,29 @@ const resolveAchievementIcon = (achievementId: string): string =>
 
 const resolveChallengeIcon = (challengeId: string): string =>
   getGamificationChallengeIcon(challengeId);
-const MAX_ACTION_HISTORY = 500;
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const MAX_ACTION_HISTORY = SCHEMA_MAX_ITEMS_BOARDS;
 const WEEK_DAYS = 7;
+const GAMIFICATION_STAT_KEYS: Array<keyof GamificationStats> = [
+  "profileComplete",
+  "skillsMapped",
+  "portfolioItems",
+  "jobApplications",
+  "chatSessions",
+  "resumesGenerated",
+  "coverLettersGenerated",
+  "savedJobs",
+  "jobsSaved",
+  "interviewScore",
+  "dataExported",
+  "earlyLogin",
+  "totalTimeSpent",
+  "featuresUsed",
+  "dailyStreak",
+  "weeklyProgress",
+  "interviewsCompleted",
+  "studiosExplored",
+];
+type NumericGamificationStats = Partial<Record<string, number>>;
 const ACHIEVEMENT_DEFINITIONS: AchievementDefinition[] = [
   {
     id: "first_resume",
@@ -364,21 +391,59 @@ const DAILY_CHALLENGE_DEFINITIONS: DailyChallenge[] = [
 ];
 
 export class GamificationService {
-  private readonly DEFAULT_ID = "default";
+  private readonly DEFAULT_ID = DEFAULT_PROFILE_ID;
   private typeSafeStats(
     stats: Partial<GamificationStats> | null | undefined,
   ): Partial<GamificationStats> & { actionHistory: ActionHistoryEntry[] } {
-    const normalized =
-      stats && typeof stats === "object"
-        ? ({ ...stats } as Partial<GamificationStats> & {
-            actionHistory?: ActionHistoryEntry[];
-          })
-        : {};
-
     return {
-      ...normalized,
-      actionHistory: Array.isArray(normalized.actionHistory) ? normalized.actionHistory : [],
+      ...this.toNumericStats(stats),
+      actionHistory: this.toActionHistory(stats),
     };
+  }
+
+  private toNumericStats(
+    stats: Partial<GamificationStats> | null | undefined,
+  ): NumericGamificationStats {
+    if (!stats || typeof stats !== "object") {
+      return {};
+    }
+
+    const normalized: NumericGamificationStats = {};
+    for (const key of GAMIFICATION_STAT_KEYS) {
+      const value = stats[key];
+      if (typeof value === "number" && Number.isFinite(value)) {
+        normalized[key] = value;
+      }
+    }
+    return normalized;
+  }
+
+  private toActionHistory(stats: unknown): ActionHistoryEntry[] {
+    if (!isRecord(stats)) {
+      return [];
+    }
+
+    const rawHistory = stats.actionHistory;
+    if (!Array.isArray(rawHistory)) {
+      return [];
+    }
+
+    return rawHistory.filter(
+      (entry): entry is ActionHistoryEntry =>
+        isRecord(entry) &&
+        typeof entry.action === "string" &&
+        typeof entry.xpGained === "number" &&
+        typeof entry.timestamp === "string",
+    );
+  }
+
+  private isNumberValue(value: unknown): value is number {
+    return typeof value === "number" && Number.isFinite(value);
+  }
+
+  private getNumericStat(stats: NumericGamificationStats, key: string): number {
+    const value = stats[key];
+    return this.isNumberValue(value) ? value : 0;
   }
 
   /**
@@ -529,11 +594,12 @@ export class GamificationService {
   async checkAchievements(stats: Partial<GamificationStats>): Promise<Achievement[]> {
     const progress = await this.getProgress();
     const achievements = await this.getAchievements();
-    const pendingStats = stats as Partial<Record<string, number>>;
-    const existingStats = progress.stats as Partial<Record<string, number>>;
+    const pendingStats = this.toNumericStats(stats);
+    const existingStats = this.toNumericStats(progress.stats);
     const unlockable = achievements.filter(
       (achievement) =>
-        !achievement.unlocked && this.areAchievementRequirementsMet(achievement, pendingStats, existingStats),
+        !achievement.unlocked &&
+        this.areAchievementRequirementsMet(achievement, pendingStats, existingStats),
     );
 
     if (unlockable.length === 0) {
@@ -541,7 +607,10 @@ export class GamificationService {
     }
 
     const now = new Date().toISOString();
-    const unlockedIds = [...progress.achievements, ...unlockable.map((achievement) => achievement.id)];
+    const unlockedIds = [
+      ...progress.achievements,
+      ...unlockable.map((achievement) => achievement.id),
+    ];
     await db
       .update(gamification)
       .set({
@@ -555,11 +624,13 @@ export class GamificationService {
 
   private areAchievementRequirementsMet(
     achievement: Achievement,
-    pendingStats: Partial<Record<string, number>>,
-    existingStats: Partial<Record<string, number>>,
+    pendingStats: NumericGamificationStats,
+    existingStats: NumericGamificationStats,
   ): boolean {
     return Object.entries(achievement.requirements).every(([key, requiredValue]) => {
-      const statValue = pendingStats[key] || existingStats[key] || 0;
+      const pendingValue = this.getNumericStat(pendingStats, key);
+      const existingValue = this.getNumericStat(existingStats, key);
+      const statValue = pendingValue || existingValue;
       return statValue >= requiredValue;
     });
   }
@@ -598,7 +669,7 @@ export class GamificationService {
     return this.getDefinedChallenges().map((challenge) => ({
       ...challenge,
       completed: false,
-      validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      validUntil: new Date(Date.now() + MS_PER_DAY).toISOString(),
     }));
   }
 
@@ -665,7 +736,7 @@ export class GamificationService {
       return;
     }
 
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - MS_PER_DAY).toISOString().split("T")[0];
 
     let newStreak = progress.currentStreak;
 
@@ -696,7 +767,7 @@ export class GamificationService {
   async getWeeklyProgress(): Promise<WeeklyProgressResult> {
     const progress = await this.getProgress();
     const now = new Date();
-    const weekAgo = new Date(now.getTime() - WEEK_DAYS * DAY_IN_MS);
+    const weekAgo = new Date(now.getTime() - WEEK_DAYS * MS_PER_DAY);
     const actionHistory = this.typeSafeStats(progress.stats).actionHistory;
     const weekActions = this.filterActionsByDate(actionHistory, weekAgo, now);
     const dayMap = this.groupActionsByDate(weekActions);
@@ -722,7 +793,9 @@ export class GamificationService {
     });
   }
 
-  private groupActionsByDate(actions: ActionHistoryEntry[]): Map<string, { actions: number; xpEarned: number }> {
+  private groupActionsByDate(
+    actions: ActionHistoryEntry[],
+  ): Map<string, { actions: number; xpEarned: number }> {
     const dayMap = new Map<string, { actions: number; xpEarned: number }>();
     for (const action of actions) {
       const day = action.timestamp.split("T")[0];
@@ -750,7 +823,7 @@ export class GamificationService {
   ): WeeklyDaySummary[] {
     const days: WeeklyDaySummary[] = [];
     for (let offset = WEEK_DAYS - 1; offset >= 0; offset--) {
-      const date = new Date(now.getTime() - offset * DAY_IN_MS).toISOString().split("T")[0];
+      const date = new Date(now.getTime() - offset * MS_PER_DAY).toISOString().split("T")[0];
       const dayData = dayMap.get(date) || { actions: 0, xpEarned: 0 };
       days.push({ date, ...dayData });
     }
@@ -800,7 +873,7 @@ export class GamificationService {
     const actionHistory = statsObj.actionHistory;
 
     const now = new Date();
-    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getTime() - 30 * MS_PER_DAY);
 
     // Filter actions from last 30 days
     const monthActions = actionHistory.filter((a) => {
@@ -846,9 +919,12 @@ export class GamificationService {
     reason: string,
   ): Promise<void> {
     const progress = await this.getProgress();
-    const currentStats = (progress.stats || {}) as Record<string, unknown>;
-    const currentValue = typeof currentStats[statKey] === "number" ? (currentStats[statKey]) : 0;
-    const updatedStats = { ...currentStats, [statKey]: currentValue + 1 };
+    const currentStats = this.toNumericStats(progress.stats);
+    const currentValue = this.getNumericStat(currentStats, statKey);
+    const updatedStats: Partial<GamificationStats> = {
+      ...currentStats,
+      [statKey]: currentValue + 1,
+    };
 
     const now = new Date().toISOString();
     await db
@@ -857,7 +933,20 @@ export class GamificationService {
       .where(eq(gamification.id, this.DEFAULT_ID));
 
     await this.awardXP(xpAmount, reason);
-    await this.checkAchievements(updatedStats as Partial<GamificationStats>);
+    await this.checkAchievements(updatedStats);
+  }
+
+  /**
+   * Fire-and-forget trackAction for use in route handlers. Logs errors without blocking response.
+   */
+  trackActionFireAndForget(
+    statKey: keyof GamificationStats,
+    xpAmount: number,
+    reason: string,
+  ): void {
+    this.trackAction(statKey, xpAmount, reason).catch((err: unknown) => {
+      gamificationLogger.error("trackAction failed", { statKey, reason, err });
+    });
   }
 }
 

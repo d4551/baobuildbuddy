@@ -3,6 +3,7 @@
  * Uses content-based hashing to identify duplicate job postings
  */
 
+import { API_ERROR_CANNOT_MERGE_EMPTY_JOBS } from "@bao/shared";
 import type { RawJob } from "./providers/provider-interface";
 
 /**
@@ -89,7 +90,7 @@ function mergeJobValues(merged: RawJob, job: RawJob): void {
  */
 export function mergeJobs(jobs: RawJob[]): RawJob {
   if (jobs.length === 0) {
-    throw new Error("Cannot merge empty array of jobs");
+    throw new Error(API_ERROR_CANNOT_MERGE_EMPTY_JOBS);
   }
 
   if (jobs.length === 1) {

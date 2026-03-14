@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d4551/baobuildbuddy.git",
+    "directory": "packages/shared"
+  },
+  "bugs": {
+    "url": "https://github.com/d4551/baobuildbuddy/issues"
+  },
+  "homepage": "https://github.com/d4551/baobuildbuddy/tree/main/packages/shared",
   "main": "./src/public-api.ts",
   "types": "./src/public-api.ts",
   "exports": {

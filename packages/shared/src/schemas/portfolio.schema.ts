@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { SCHEMA_MAX_LENGTH_DESCRIPTION, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
 import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "../types/portfolio";
 
 const portfolioLinkSchema = z.object({
@@ -21,8 +22,8 @@ const portfolioMediaSchema = z.object({
 export const portfolioProjectSchema = z.object({
   id: z.string().optional(),
   portfolioId: z.string().optional(),
-  title: z.string().min(1).max(200),
-  description: z.string().min(1).max(5000),
+  title: z.string().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  description: z.string().min(1).max(SCHEMA_MAX_LENGTH_DESCRIPTION),
   technologies: z.array(z.string()).optional(),
   image: z.string().url().optional(),
   liveUrl: z.string().url().optional(),
@@ -74,8 +75,8 @@ export const portfolioReorderSchema = z.object({
 });
 
 export const portfolioProjectCreateSchema = z.object({
-  title: z.string().min(1).max(200),
-  description: z.string().min(1).max(5000),
+  title: z.string().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  description: z.string().min(1).max(SCHEMA_MAX_LENGTH_DESCRIPTION),
   technologies: z.array(z.string()).max(50).optional(),
   image: z.string().url().optional(),
   liveUrl: z.string().url().optional(),

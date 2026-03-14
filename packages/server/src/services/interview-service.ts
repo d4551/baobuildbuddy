@@ -1,6 +1,18 @@
 import {
+  AI_DEFAULT_TEMPERATURE_INTERVIEW,
+  AI_DEFAULT_TEMPERATURE_INTERVIEW_QUESTIONS,
+  AI_MAX_TOKENS_ANALYSIS,
+  AI_MAX_TOKENS_FEEDBACK,
+  AI_MAX_TOKENS_QUESTION,
+  AI_OPERATION_TIMEOUT_MS,
+  API_ERROR_AI_NO_QUESTIONS,
+  API_ERROR_AI_OPERATION_TIMEOUT,
+  DEFAULT_UNSPECIFIED_LABEL,
   generateId,
   INTERVIEW_DEFAULT_DURATION_MINUTES,
+  INTERVIEW_SERVICE_MAX_QUESTION_COUNT,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
   INTERVIEW_DEFAULT_FOCUS_AREAS,
   INTERVIEW_DEFAULT_QUESTION_COUNT,
@@ -17,6 +29,8 @@ import {
   type InterviewSession,
   type InterviewTargetJob,
   safeParseJson,
+  settle,
+  toErrorMessage,
   type VoiceSettings,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
@@ -58,16 +72,8 @@ const toPersistedRecord = (value: object): Record<string, unknown> => {
 };
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null;
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : "Unknown error";
 
-const MAX_QUESTION_COUNT = 12;
 const DEFAULT_INTERVIEW_MODE: InterviewMode = "studio";
-const AI_OPERATION_TIMEOUT_MS = 1200;
 const PREFIX_FOR_PATTERN = /^\s*For\s*/u;
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
 const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;
@@ -265,15 +271,15 @@ function normalizeInterviewMode(value: unknown): InterviewMode {
 }
 
 function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undefined {
-  if (!isRecord(value)) return ;
+  if (!isRecord(value)) return;
 
   const id = parseString(value.id, "");
   const title = parseString(value.title, "");
   const company = parseString(value.company, "");
   const location = parseString(value.location, "");
 
-  if (!(((id && title ) && company ) && location)) {
-    return ;
+  if (!(id && title && company && location)) {
+    return;
   }
 
   const requirements = parseStringArray(value.requirements);
@@ -312,7 +318,7 @@ function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undef
 }
 
 function normalizeVoiceSettings(raw: unknown): VoiceSettings | undefined {
-  if (!isRecord(raw)) return ;
+  if (!isRecord(raw)) return;
 
   const microphoneId = parseString(raw.microphoneId, "");
   const speakerId = parseString(raw.speakerId, "");
@@ -343,7 +349,7 @@ function normalizeConfig(raw: InterviewConfigInput): InterviewConfig {
     raw.questionCount,
     INTERVIEW_DEFAULT_QUESTION_COUNT,
     1,
-    MAX_QUESTION_COUNT,
+    INTERVIEW_SERVICE_MAX_QUESTION_COUNT,
   );
   const duration = parseNumber(raw.duration, INTERVIEW_DEFAULT_DURATION_MINUTES, 5, 120);
   const experienceLevel = normalizeExperienceLevel(
@@ -697,8 +703,8 @@ function buildJobPromptContext(config: InterviewConfig): string {
 - Job title: ${targetJob.title}
 - Company: ${targetJob.company}
 - Location: ${targetJob.location}
-- Technologies: ${targetJob.technologies?.join(", ") || "Not specified"}
-- Requirements: ${targetJob.requirements?.slice(0, 8).join("; ") || "Not specified"}
+- Technologies: ${targetJob.technologies?.join(", ") || DEFAULT_UNSPECIFIED_LABEL}
+- Requirements: ${targetJob.requirements?.slice(0, 8).join("; ") || DEFAULT_UNSPECIFIED_LABEL}
 - Description: ${targetJob.description || "Not provided"}
 - Source: ${targetJob.source || "Unknown"}`;
 }
@@ -763,11 +769,11 @@ async function generateQuestions(
   const tryGenerate = async (prompt: string): Promise<InterviewQuestion[]> => {
     const response = (await withAiOperationTimeout(() =>
       aiService.generate(prompt, {
-        temperature: 0.65,
-        maxTokens: 1200,
+        temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW_QUESTIONS,
+        maxTokens: AI_MAX_TOKENS_ANALYSIS,
       }),
     )) ?? {
-      error: "AI operation timed out",
+      error: API_ERROR_AI_OPERATION_TIMEOUT,
       content: "",
       provider: "none",
       id: "",
@@ -783,11 +789,11 @@ async function generateQuestions(
       return true;
     });
 
-    if (parsed.length === 0) throw new Error("AI returned no valid questions");
+    if (parsed.length === 0) throw new Error(API_ERROR_AI_NO_QUESTIONS);
     return parsed.slice(0, config.questionCount);
   };
 
-  const primaryResult = await settlePromise(tryGenerate(fullPrompt));
+  const primaryResult = await settle(tryGenerate(fullPrompt));
   if (primaryResult.status === "fulfilled") {
     return primaryResult.value;
   }
@@ -795,7 +801,7 @@ async function generateQuestions(
     "AI question generation failed on primary prompt, attempting fallback prompt.",
     toErrorMessage(primaryResult.reason),
   );
-  const fallbackResult = await settlePromise(
+  const fallbackResult = await settle(
     tryGenerate(buildSimpleQuestionPrompt(role, level, config.questionCount)),
   );
   if (fallbackResult.status === "fulfilled") {
@@ -888,18 +894,18 @@ async function generateResponseFeedback(
     question,
     responseText: transcript,
   });
-  const aiServiceResult = await settlePromise(createAIService());
+  const aiServiceResult = await settle(createAIService());
   if (aiServiceResult.status === "rejected") {
     return fallbackResponseFeedback(transcript);
   }
 
   const response = (await withAiOperationTimeout(() =>
     aiServiceResult.value.generate(prompt, {
-      temperature: 0.35,
-      maxTokens: 500,
+      temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
+      maxTokens: AI_MAX_TOKENS_FEEDBACK,
     }),
   )) ?? {
-    error: "AI operation timed out",
+    error: API_ERROR_AI_OPERATION_TIMEOUT,
     content: "",
     provider: "none",
     id: "",
@@ -957,13 +963,13 @@ function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnal
     strengths: strengths.slice(0, 5),
     improvements: improvements.slice(0, 5),
     recommendations:
-      average >= 80
+      average >= SCORE_PASS_THRESHOLD
         ? ["Sustain your structured communication and add extra quantification."]
-        : average >= 65
+        : average >= SCORE_WARNING_THRESHOLD
           ? ["Work on measurable examples and deeper technical justification."]
           : ["Practice response structure using situation, action, result examples."],
     feedback:
-      average >= 80
+      average >= SCORE_PASS_THRESHOLD
         ? "Strong session across technical and behavioral areas."
         : "Good foundation; improve depth, metrics, and real project examples.",
   };
@@ -1035,7 +1041,7 @@ async function generateFinalAnalysis(
 ): Promise<InterviewAnalysis> {
   const persona = buildInterviewerPersona(studio, session.config);
   const prompt = buildFinalAnalysisPrompt(studio, session.config, session.responses, persona);
-  const aiServiceResult = await settlePromise(createAIService());
+  const aiServiceResult = await settle(createAIService());
   if (aiServiceResult.status === "rejected") {
     return calculateDefaultAnalysis(session.responses);
   }
@@ -1043,8 +1049,8 @@ async function generateFinalAnalysis(
   const response =
     (await withAiOperationTimeout(() =>
       aiServiceResult.value.generate(prompt, {
-        temperature: 0.35,
-        maxTokens: 900,
+        temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
+        maxTokens: AI_MAX_TOKENS_QUESTION,
       }),
     )) ?? null;
 
@@ -1162,7 +1168,12 @@ export class InterviewService {
   ): InterviewQuestion | null {
     const questions = session.questions;
     const matchedQuestion = questions.find((entry) => entry.id === response.questionId);
-    return matchedQuestion ?? questions[session.currentQuestionIndex] ?? questions[questions.length - 1] ?? null;
+    return (
+      matchedQuestion ??
+      questions[session.currentQuestionIndex] ??
+      questions[questions.length - 1] ??
+      null
+    );
   }
 
   private buildAnalyzedResponse(
@@ -1181,15 +1192,13 @@ export class InterviewService {
     };
   }
 
-  private async persistSessionResponses(
-    options: {
-      sessionId: string;
-      responses: InterviewResponse[];
-      questionsLength: number;
-      endTime: number | null;
-      nowIso: string;
-    },
-  ): Promise<InterviewSession["status"]> {
+  private async persistSessionResponses(options: {
+    sessionId: string;
+    responses: InterviewResponse[];
+    questionsLength: number;
+    endTime: number | null;
+    nowIso: string;
+  }): Promise<InterviewSession["status"]> {
     const status: InterviewSession["status"] =
       options.responses.length >= options.questionsLength ? "completed" : "active";
     await db

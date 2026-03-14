@@ -8,8 +8,17 @@ import type {
   VoiceSettings,
 } from "@bao/shared";
 import {
+  API_ERROR_INTERVIEW_QUESTION_UNRESOLVED,
+  API_ERROR_INTERVIEW_RESPONSE_REQUIRED,
+  API_ERROR_INTERVIEW_SESSION_NOT_FOUND,
+  API_MESSAGE_INTERVIEW_COMPLETED,
+  API_MESSAGE_INTERVIEW_SESSION_CREATED,
+  API_MESSAGE_RESPONSE_RECORDED,
   asString,
   asStringArray,
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
   INTERVIEW_DEFAULT_FOCUS_AREAS,
   INTERVIEW_DEFAULT_QUESTION_COUNT,
@@ -17,6 +26,17 @@ import {
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_DEFAULT_VOICE_SETTINGS,
   INTERVIEW_FALLBACK_STUDIO_ID,
+  ROUTE_GAMIFICATION_XP,
+  SCHEMA_MAX_ITEMS_MEDIUM,
+  SCHEMA_MAX_ITEMS_XLARGE,
+  SCHEMA_MAX_LENGTH_DEVICE,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_JOB_DESCRIPTION,
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_MESSAGE,
+  SCHEMA_MAX_LENGTH_MICRO,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -37,38 +57,52 @@ type SubmitResponseBody = {
 
 const interviewModeSchema = t.Union([t.Literal("studio"), t.Literal("job")]);
 const voiceSettingsSchema = t.Object({
-  microphoneId: t.Optional(t.String({ maxLength: 120 })),
-  speakerId: t.Optional(t.String({ maxLength: 120 })),
-  voiceId: t.Optional(t.String({ maxLength: 120 })),
+  microphoneId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  speakerId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  voiceId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
   rate: t.Optional(t.Number({ minimum: 0.25, maximum: 3 })),
   pitch: t.Optional(t.Number({ minimum: 0.5, maximum: 2 })),
   volume: t.Optional(t.Number({ minimum: 0, maximum: 2 })),
-  language: t.Optional(t.String({ maxLength: 20 })),
+  language: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
 });
 const targetJobSchema = t.Object({
-  id: t.String({ minLength: 1, maxLength: 120 }),
-  title: t.String({ minLength: 1, maxLength: 200 }),
-  company: t.String({ minLength: 1, maxLength: 200 }),
-  location: t.String({ minLength: 1, maxLength: 120 }),
-  description: t.Optional(t.String({ maxLength: 20_000 })),
-  requirements: t.Optional(t.Array(t.String({ maxLength: 500 }), { maxItems: 60 })),
-  technologies: t.Optional(t.Array(t.String({ maxLength: 120 }), { maxItems: 60 })),
-  source: t.Optional(t.String({ maxLength: 120 })),
-  postedDate: t.Optional(t.String({ maxLength: 120 })),
-  url: t.Optional(t.String({ maxLength: 2_000 })),
+  id: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_DEVICE }),
+  title: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  company: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  location: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_DEVICE }),
+  description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_JOB_DESCRIPTION })),
+  requirements: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL }), { maxItems: SCHEMA_MAX_ITEMS_XLARGE }),
+  ),
+  technologies: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
+      maxItems: SCHEMA_MAX_ITEMS_XLARGE,
+    }),
+  ),
+  source: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  postedDate: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  url: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG })),
 });
 const sessionConfigSchema = t.Object({
-  roleType: t.Optional(t.String({ maxLength: 200 })),
-  roleCategory: t.Optional(t.String({ maxLength: 120 })),
-  experienceLevel: t.Optional(t.String({ maxLength: 120 })),
-  focusAreas: t.Optional(t.Array(t.String({ maxLength: 120 }), { maxItems: 30 })),
+  roleType: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  roleCategory: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  experienceLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  focusAreas: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
+      maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+    }),
+  ),
   duration: t.Optional(t.Integer({ minimum: 5, maximum: 120 })),
   questionCount: t.Optional(t.Integer({ minimum: 1, maximum: 20 })),
   includeTechnical: t.Optional(t.Boolean()),
   includeBehavioral: t.Optional(t.Boolean()),
   includeStudioSpecific: t.Optional(t.Boolean()),
   enableVoiceMode: t.Optional(t.Boolean()),
-  technologies: t.Optional(t.Array(t.String({ maxLength: 120 }), { maxItems: 60 })),
+  technologies: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
+      maxItems: SCHEMA_MAX_ITEMS_XLARGE,
+    }),
+  ),
   voiceSettings: t.Optional(voiceSettingsSchema),
   interviewMode: t.Optional(interviewModeSchema),
   targetJob: t.Optional(targetJobSchema),
@@ -78,7 +112,7 @@ function asNonNegativeInt(value: number | undefined): number | undefined {
   if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
     return value;
   }
-  return ;
+  return;
 }
 
 function asStringArrayTrimmed(value: unknown): string[] {
@@ -90,13 +124,13 @@ function asStringArrayTrimmed(value: unknown): string[] {
 function parseTargetJob(
   value: CreateSessionConfigInput["targetJob"],
 ): InterviewTargetJob | undefined {
-  if (!value) return ;
+  if (!value) return;
   const id = asString(value.id);
   const title = asString(value.title);
   const company = asString(value.company);
   const location = asString(value.location);
-  if (!(((id && title ) && company ) && location)) {
-    return ;
+  if (!(id && title && company && location)) {
+    return;
   }
 
   const requirements = asStringArrayTrimmed(value.requirements);
@@ -138,7 +172,7 @@ function normalizeVoiceSettings(
   value: CreateSessionConfigInput["voiceSettings"],
 ): VoiceSettings | undefined {
   if (!value) {
-    return ;
+    return;
   }
 
   const microphoneId = asString(value.microphoneId);
@@ -286,15 +320,15 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
       const resolvedStudioId = asString(studioId) || INTERVIEW_FALLBACK_STUDIO_ID;
       const created = await interviewService.startSession(resolvedStudioId, normalizedConfig);
       const response = await sessionWithDerivedFields(created);
-      set.status = 201;
+      set.status = HTTP_STATUS_CREATED;
       return {
         ...response,
-        message: "Interview session created",
+        message: API_MESSAGE_INTERVIEW_SESSION_CREATED,
       };
     },
     {
       body: t.Object({
-        studioId: t.Optional(t.String({ maxLength: 100 })),
+        studioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
         config: t.Optional(sessionConfigSchema),
       }),
     },
@@ -308,14 +342,14 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
     async ({ params, set }) => {
       const session = await interviewService.getSession(params.id);
       if (!session) {
-        set.status = 404;
-        return { error: "Interview session not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND };
       }
       return sessionWithDerivedFields(session);
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
@@ -324,42 +358,42 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
     async ({ params, body, set }) => {
       const session = await interviewService.getSession(params.id);
       if (!session) {
-        set.status = 404;
-        return { error: "Interview session not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND };
       }
 
       const payload = parseResponsePayload(body);
       if (!payload) {
-        set.status = 400;
-        return { error: "questionId or questionIndex and response are required" };
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return { error: API_ERROR_INTERVIEW_RESPONSE_REQUIRED };
       }
 
       const resolvedQuestionId = resolveQuestionId(session, payload);
       if (!resolvedQuestionId) {
-        set.status = 400;
-        return { error: "Unable to resolve question for this response" };
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return { error: API_ERROR_INTERVIEW_QUESTION_UNRESOLVED };
       }
 
       const response = buildDefaultResponse(resolvedQuestionId, payload.response);
       const updated = await interviewService.addResponse(params.id, response);
       if (!updated) {
-        set.status = 404;
-        return { error: "Interview session not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND };
       }
 
       return {
         ...(await sessionWithDerivedFields(updated)),
-        message: "Response recorded",
+        message: API_MESSAGE_RESPONSE_RECORDED,
       };
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        questionId: t.Optional(t.String({ maxLength: 100 })),
+        questionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
         questionIndex: t.Optional(t.Integer({ minimum: 0 })),
-        response: t.String({ minLength: 1, maxLength: 10000 }),
+        response: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
       }),
     },
   )
@@ -368,20 +402,24 @@ export const interviewRoutes = new Elysia({ prefix: "/interview" })
     async ({ params, set }) => {
       const completed = await interviewService.completeSession(params.id);
       if (!completed) {
-        set.status = 404;
-        return { error: "Interview session not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND };
       }
 
-      void gamificationService.trackAction("interviewsCompleted", 75, "interview_completed");
+      gamificationService.trackActionFireAndForget(
+        "interviewsCompleted",
+        ROUTE_GAMIFICATION_XP.interviewsCompleted,
+        "interview_completed",
+      );
 
       return {
         ...(await sessionWithDerivedFields(completed)),
-        message: "Interview completed",
+        message: API_MESSAGE_INTERVIEW_COMPLETED,
       };
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )

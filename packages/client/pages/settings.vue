@@ -4,6 +4,7 @@ import {
   AI_PROVIDER_CATALOG,
   type AIProviderType,
   APP_LANGUAGE_OPTIONS,
+  APP_LANGUAGE_LABELS,
   type AppLanguageCode,
   AUTOMATION_BROWSER_OPTIONS,
   DEFAULT_APP_LANGUAGE,
@@ -55,7 +56,7 @@ const {
 const { profile, fetchProfile, updateProfile, loading: profileLoading } = useUser();
 const { theme, toggleTheme } = useTheme();
 const { $toast } = useNuxtApp();
-const { locale, t } = useI18n();
+const { t } = useI18n();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -81,14 +82,7 @@ const providerInputs = computed<ProviderInputConfig[]>(() =>
   })),
 );
 
-const buildLanguageLabel = (value: AppLanguageCode): string => {
-  if (typeof Intl.DisplayNames !== "function") {
-    return value;
-  }
-
-  const labels = new Intl.DisplayNames([locale.value], { type: "language" });
-  return labels.of(value) || value;
-};
+const buildLanguageLabel = (value: AppLanguageCode): string => APP_LANGUAGE_LABELS[value] || value;
 
 const languageOptions = computed(() =>
   APP_LANGUAGE_OPTIONS.map((option) => ({
@@ -844,6 +838,7 @@ async function handleSaveAutomation() {
                       :aria-label="providerKeyLabel(provider.id)"
                     />
                     <button
+                      type="button"
                       class="btn btn-outline join-item"
                       :aria-label="t('settings.aiProviders.testAria')"
                       @click="handleTest(provider.id)"

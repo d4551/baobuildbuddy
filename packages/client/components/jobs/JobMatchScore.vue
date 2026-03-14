@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -12,14 +13,14 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const scoreColor = computed(() => {
-  if (props.score > 80) return "text-success";
-  if (props.score > 60) return "text-warning";
+  if (props.score >= SCORE_PASS_THRESHOLD) return "text-success";
+  if (props.score >= SCORE_WARNING_THRESHOLD) return "text-warning";
   return "text-error";
 });
 
 const scoreBorderColor = computed(() => {
-  if (props.score > 80) return "border-success";
-  if (props.score > 60) return "border-warning";
+  if (props.score >= SCORE_PASS_THRESHOLD) return "border-success";
+  if (props.score >= SCORE_WARNING_THRESHOLD) return "border-warning";
   return "border-error";
 });
 </script>
@@ -32,6 +33,9 @@ const scoreBorderColor = computed(() => {
       :style="`--value:${score};`"
       role="progressbar"
       :aria-label="t('jobsPage.matchBreakdown.overallProgressAria', { score })"
+      :aria-valuenow="score"
+      aria-valuemin="0"
+      aria-valuemax="100"
     >
       <span class="text-2xl font-bold">{{ score }}%</span>
     </div>

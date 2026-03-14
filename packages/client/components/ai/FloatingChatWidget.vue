@@ -346,6 +346,7 @@ onUnmounted(() => {
                 :placeholder="t('floatingChat.inputPlaceholder')"
                 :aria-label="t('floatingChat.inputAria')"
                 :disabled="loading"
+                @keyup.enter.prevent="handleSendMessage"
               />
               <ChatVoiceControls
                 v-model:selected-voice-id="selectedVoiceId"

@@ -1,14 +1,13 @@
-import { mkdirSync } from "node:fs";
+import { DEFAULT_DB_PATH_RELATIVE } from "@bao/shared";
+import { existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
 /**
  * Shared filesystem path utilities for server runtime and tooling configuration.
  */
 const HOME_DIRECTORY = homedir();
 const TILDE_PREFIX = /^~(?=$|[\\/])/;
-const DEFAULT_DB_FILE = ".bao/bao.db";
 
 /**
  * Expand a path that starts with ~ to the current user home directory.
@@ -21,7 +20,7 @@ export function expandHomeDirectory(pathValue: string): string {
  * Resolve a DB path and ensure its parent directory exists.
  */
 export function resolveDatabasePath(rawPath?: string): string {
-  const fallbackPath = resolve(HOME_DIRECTORY, DEFAULT_DB_FILE);
+  const fallbackPath = resolve(HOME_DIRECTORY, DEFAULT_DB_PATH_RELATIVE);
   const dbPath = rawPath ? expandHomeDirectory(rawPath) : fallbackPath;
   const resolvedPath = resolve(dbPath);
 
@@ -41,15 +40,29 @@ export const AUTOMATION_SCREENSHOT_DIR = resolve(DATABASE_DIR, "automation", "sc
 mkdirSync(AUTOMATION_SCREENSHOT_DIR, { recursive: true });
 
 /**
- * Path to packages/scraper (RPA-Python scripts).
- * Resolved relative to packages/server/src/config.
+ * Path to packages/scraper (Bun/TypeScript automation runtime).
+ * Resolved from current working directory with fallback candidates so tooling runs
+ * reliably even when drizzle-kit executes the config in CJS mode.
  */
-const SERVER_SOURCE_DIR =
-  typeof import.meta.dir === "undefined"
-    ? dirname(fileURLToPath(import.meta.url))
-    : import.meta.dir;
+const resolveScraperDir = (): string => {
+  const cwd = process.cwd();
+  const candidates = [
+    resolve(cwd, "packages", "scraper"),
+    resolve(cwd, "..", "packages", "scraper"),
+    resolve(cwd, "..", "..", "packages", "scraper"),
+    resolve(cwd, "..", "..", "..", "packages", "scraper"),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
+};
 
 /**
  * Absolute path to the shared scraper package used by automation services.
  */
-export const SCRAPER_DIR = resolve(SERVER_SOURCE_DIR, "..", "..", "..", "scraper");
+export const SCRAPER_DIR = resolveScraperDir();

@@ -72,9 +72,7 @@
       "indexes": {
         "applications_job_id_idx": {
           "name": "applications_job_id_idx",
-          "columns": [
-            "job_id"
-          ],
+          "columns": ["job_id"],
           "isUnique": false
         }
       },
@@ -83,12 +81,8 @@
           "name": "applications_job_id_jobs_id_fk",
           "tableFrom": "applications",
           "tableTo": "jobs",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -328,16 +322,12 @@
       "indexes": {
         "chat_history_session_id_idx": {
           "name": "chat_history_session_id_idx",
-          "columns": [
-            "session_id"
-          ],
+          "columns": ["session_id"],
           "isUnique": false
         },
         "chat_history_timestamp_idx": {
           "name": "chat_history_timestamp_idx",
-          "columns": [
-            "timestamp"
-          ],
+          "columns": ["timestamp"],
           "isUnique": false
         }
       },
@@ -602,9 +592,7 @@
       "indexes": {
         "interview_sessions_studio_id_idx": {
           "name": "interview_sessions_studio_id_idx",
-          "columns": [
-            "studio_id"
-          ],
+          "columns": ["studio_id"],
           "isUnique": false
         }
       },
@@ -793,23 +781,17 @@
       "indexes": {
         "jobs_source_idx": {
           "name": "jobs_source_idx",
-          "columns": [
-            "source"
-          ],
+          "columns": ["source"],
           "isUnique": false
         },
         "jobs_posted_date_idx": {
           "name": "jobs_posted_date_idx",
-          "columns": [
-            "posted_date"
-          ],
+          "columns": ["posted_date"],
           "isUnique": false
         },
         "jobs_content_hash_idx": {
           "name": "jobs_content_hash_idx",
-          "columns": [
-            "content_hash"
-          ],
+          "columns": ["content_hash"],
           "isUnique": true
         }
       },
@@ -943,9 +925,7 @@
       "indexes": {
         "portfolio_projects_portfolio_id_idx": {
           "name": "portfolio_projects_portfolio_id_idx",
-          "columns": [
-            "portfolio_id"
-          ],
+          "columns": ["portfolio_id"],
           "isUnique": false
         }
       },
@@ -954,12 +934,8 @@
           "name": "portfolio_projects_portfolio_id_portfolios_id_fk",
           "tableFrom": "portfolio_projects",
           "tableTo": "portfolios",
-          "columnsFrom": [
-            "portfolio_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["portfolio_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1153,9 +1129,7 @@
       "indexes": {
         "saved_jobs_job_id_idx": {
           "name": "saved_jobs_job_id_idx",
-          "columns": [
-            "job_id"
-          ],
+          "columns": ["job_id"],
           "isUnique": false
         }
       },
@@ -1164,12 +1138,8 @@
           "name": "saved_jobs_job_id_jobs_id_fk",
           "tableFrom": "saved_jobs",
           "tableTo": "jobs",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

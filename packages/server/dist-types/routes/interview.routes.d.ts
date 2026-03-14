@@ -37,10 +37,10 @@ export declare const interviewRoutes: Elysia<"/interview", {
                         targetJob?: {
                             source?: string | undefined;
                             description?: string | undefined;
-                            requirements?: string[] | undefined;
-                            technologies?: string[] | undefined;
-                            postedDate?: string | undefined;
                             url?: string | undefined;
+                            postedDate?: string | undefined;
+                            technologies?: string[] | undefined;
+                            requirements?: string[] | undefined;
                             id: string;
                             title: string;
                             company: string;

@@ -32,7 +32,7 @@ export type CompanyBoardATSType =
  * Supported portal identifiers for gaming-board scraper providers.
  */
 export type GamingPortalId =
-  | "gamedev-net"
+  | "hitmarker"
   | "grackle"
   | "workwithindies"
   | "remotegamejobs"
@@ -150,6 +150,11 @@ export interface AutomationSettings {
  * Global settings row identifier.
  */
 export const DEFAULT_SETTINGS_ID = "default";
+
+/**
+ * Default profile/entity ID for single-user mode (user profile, gamification, auth).
+ */
+export const DEFAULT_PROFILE_ID = "default";
 
 /**
  * Notification preference settings.

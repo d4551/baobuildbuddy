@@ -151,7 +151,9 @@ function applyProgressEvent(
   const nextProgress = computeProgressPercent(nextStep ?? null, nextTotalSteps ?? null);
   const mappedStatus = PROGRESS_STATUS_TO_RUN_STATUS[event.status];
   const nextStatus =
-    currentRun.status === "running" && mappedStatus === "pending" ? currentRun.status : mappedStatus;
+    currentRun.status === "running" && mappedStatus === "pending"
+      ? currentRun.status
+      : mappedStatus;
 
   return {
     nextRun: {
@@ -178,7 +180,8 @@ function applyResultEvent(
     status: success ? "success" : "error",
     output: event.result,
     error: success ? null : event.result.error,
-    screenshots: event.result.screenshots.length > 0 ? event.result.screenshots : currentRun.screenshots,
+    screenshots:
+      event.result.screenshots.length > 0 ? event.result.screenshots : currentRun.screenshots,
     progress: 100,
     currentStep: resultSteps,
     totalSteps: resultSteps,
@@ -210,11 +213,7 @@ function applyErrorEvent(
   };
 }
 
-function applyEvent(
-  refs: StreamStateRefs,
-  lifecycle: StreamLifecycle,
-  event: RpaRunEvent,
-): void {
+function applyEvent(refs: StreamStateRefs, lifecycle: StreamLifecycle, event: RpaRunEvent): void {
   refs.events.value = [...refs.events.value, event];
   const currentRun = refs.run.value;
   if (!currentRun || currentRun.id !== event.runId) {
@@ -245,23 +244,19 @@ async function fetchInitialRun(
   );
 }
 
-function subscribeForRun(
-  dependencies: StreamDependencies,
-  runId: string,
-  token: number,
-): void {
+function subscribeForRun(dependencies: StreamDependencies, runId: string, token: number): void {
   dependencies.lifecycle.unsubscribe = dependencies.subscribeToRun(runId, (event) => {
-    if (token === dependencies.lifecycle.requestToken && shouldApplyEvent(dependencies.refs, event)) {
+    if (
+      token === dependencies.lifecycle.requestToken &&
+      shouldApplyEvent(dependencies.refs, event)
+    ) {
       applyEvent(dependencies.refs, dependencies.lifecycle, event);
     }
   });
   dependencies.refs.isStreaming.value = true;
 }
 
-async function startStream(
-  dependencies: StreamDependencies,
-  runId: string,
-): Promise<void> {
+async function startStream(dependencies: StreamDependencies, runId: string): Promise<void> {
   const normalizedRunId = runId.trim();
   dependencies.lifecycle.requestToken += 1;
   const token = dependencies.lifecycle.requestToken;
@@ -326,8 +321,7 @@ export function useAutomationRunStream() {
     getRun,
     subscribeToRun,
   };
-  const start = (runId: string): Promise<void> =>
-    startStream(dependencies, runId);
+  const start = (runId: string): Promise<void> => startStream(dependencies, runId);
   const retry = (): Promise<void> => start(refs.activeRunId.value);
   const cancel = (): void => cancelStream(refs, lifecycle);
   const cleanup = (): void => cleanupStream(refs, lifecycle);

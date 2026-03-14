@@ -1,10 +1,18 @@
-import { API_ENDPOINT_PREFIX, API_ENDPOINTS, APP_BRAND, toApiScopedPath } from "@bao/shared";
+import {
+  API_ENDPOINT_PREFIX,
+  API_ENDPOINTS,
+  APP_BRAND,
+  HTTP_STATUS_OK,
+  OPENAPI_VERSION,
+  settle,
+  toApiScopedPath,
+} from "@bao/shared";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "./config/env";
-import { sqlite } from "./db/client";
+import { HEALTHCHECK_PROBE_SQL, sqlite } from "./db/client";
 import { authGuard } from "./middleware/auth";
 import { errorHandler } from "./middleware/error-handler";
 import { logger } from "./middleware/logger";
@@ -30,17 +38,7 @@ import {
 import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
-
-const OPENAPI_VERSION = "0.1.0" as const;
-const HTTP_STATUS_OK = 200;
-const GLOBAL_RATE_LIMIT_DURATION_MS = 60_000;
-const GLOBAL_RATE_LIMIT_MAX_REQUESTS = 100;
-const HEALTHCHECK_PROBE_SQL = "SELECT 1";
-
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
+import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 
 export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticResponse: true })
   .use(
@@ -75,7 +73,7 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
       fields: t.Optional(t.Array(t.Unknown())),
     }),
   })
-  .use(rateLimit({ duration: GLOBAL_RATE_LIMIT_DURATION_MS, max: GLOBAL_RATE_LIMIT_MAX_REQUESTS }))
+  .use(rateLimit({ duration: RATE_LIMIT_GLOBAL_DURATION_MS, max: RATE_LIMIT_GLOBAL_MAX_REQUESTS }))
   .use(logger)
   .use(errorHandler)
   .get(

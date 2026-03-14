@@ -257,7 +257,9 @@ const toFinalAnalysis = (value: unknown): InterviewSession["finalAnalysis"] | un
   return analysis;
 };
 
-const toInterviewerPersona = (value: unknown): InterviewSession["interviewerPersona"] | undefined => {
+const toInterviewerPersona = (
+  value: unknown,
+): InterviewSession["interviewerPersona"] | undefined => {
   if (!isRecord(value)) {
     return;
   }
@@ -342,7 +344,10 @@ const requireSession = (value: unknown, invalidMessage: string): InterviewSessio
 
 const createInterviewState = (): InterviewState => ({
   sessions: useState<InterviewSession[]>(STATE_KEYS.INTERVIEW_SESSIONS, () => []),
-  currentSession: useState<InterviewSession | null>(STATE_KEYS.INTERVIEW_CURRENT_SESSION, () => null),
+  currentSession: useState<InterviewSession | null>(
+    STATE_KEYS.INTERVIEW_CURRENT_SESSION,
+    () => null,
+  ),
   stats: useState<Record<string, number> | null>(STATE_KEYS.INTERVIEW_STATS, () => null),
   loading: useState(STATE_KEYS.INTERVIEW_LOADING, () => false),
 });
@@ -389,7 +394,9 @@ const createGetSessionAction = (context: InterviewContext) => async (id: string)
 const createSubmitResponseAction =
   (context: InterviewContext) => async (sessionId: string, response: SubmitResponseInput) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.interview.sessions({ id: sessionId }).response.post(response);
+      const { data, error } = await context.api.interview
+        .sessions({ id: sessionId })
+        .response.post(response);
       assertApiResponse(error, context.t("apiErrors.interview.submitResponseFailed"));
       const normalized = requireSession(data, context.t("apiErrors.interview.invalidPayload"));
       context.currentSession.value = normalized;

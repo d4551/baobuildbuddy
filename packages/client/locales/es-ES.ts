@@ -141,6 +141,7 @@ const esES: AppTranslationOverrides = {
     auth: {
       initFailed: "Error al inicializar autenticación",
     },
+    unexpected: "Ha ocurrido un error inesperado",
   },
   confirmDialog: {
     confirmButton: "Confirmar",
@@ -484,6 +485,7 @@ const esES: AppTranslationOverrides = {
       daysAgo: "hace {count}d",
       weeksAgo: "hace {count}s",
       monthsAgo: "hace {count}mes",
+      unknown: "—",
     },
   },
   resumePreview: {
@@ -673,8 +675,7 @@ const esES: AppTranslationOverrides = {
       improvements: {
         imp_tech_map:
           "Mapea más habilidades técnicas de juego a habilidades técnicas profesionales.",
-        imp_conf_up:
-          "Aumenta la confianza de tus mapeos técnicos existentes.",
+        imp_conf_up: "Aumenta la confianza de tus mapeos técnicos existentes.",
         imp_lead_comm: "Mapea más experiencias de liderazgo y comunicación.",
         imp_team_examples: "Añade ejemplos concretos de colaboración en equipo.",
         imp_industry_research:
@@ -1670,6 +1671,7 @@ const esES: AppTranslationOverrides = {
     retryAria: "Reintentar carga de analíticas",
     retryButton: "Reintentar",
     progressAria: "Progreso de {label}",
+    remoteWorkProgressAria: "Disponibilidad de trabajo remoto: {value} por ciento",
     overview: {
       totalStudiosTitle: "Total de Estudios",
       totalStudiosDesc: "En base de datos",
@@ -2222,6 +2224,8 @@ const esES: AppTranslationOverrides = {
     detailStudioLabel: "Estudio",
     detailRoleLabel: "Rol",
     detailScoreLabel: "Puntuación General",
+    timelineScoreAria: "Puntuación de entrevista: {score} por ciento",
+    detailScoreAria: "Puntuación de entrevista: {score} por ciento",
     questionsLabel: "Preguntas",
     questionAria: "Pregunta de entrevista {index}",
     questionHeader: "P{index}: {score}%",
@@ -2572,7 +2576,8 @@ const esES: AppTranslationOverrides = {
       connectionFailed: "Conexión fallida",
       preferredProviderLegend: "Proveedor de IA preferido",
       preferredProviderAria: "Seleccionar proveedor de IA preferido",
-      preferredProviderHint: "El sistema de IA intentará este proveedor primero y luego recurrirá a otros.",
+      preferredProviderHint:
+        "El sistema de IA intentará este proveedor primero y luego recurrirá a otros.",
       preferredProviderSaved: "Proveedor preferido actualizado",
     },
     toasts: {

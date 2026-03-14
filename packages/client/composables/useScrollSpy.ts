@@ -1,3 +1,4 @@
+import { escapeRegExp } from "@bao/shared";
 import { getCurrentScope, onScopeDispose, readonly, ref } from "vue";
 
 type ScrollSpyOptions = {
@@ -10,8 +11,6 @@ const DEFAULT_HASH_PREFIX = "#";
 const DEFAULT_ROOT_MARGIN = "-20% 0px -60% 0px";
 const DEFAULT_THRESHOLD = [0.1, 0.3, 0.5, 0.8];
 const MANUAL_SCROLL_LOCK_MS = 250;
-
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 const normalizeHashValue = (value: string, hashPrefix: string): string =>
   value.replace(new RegExp(`^${escapeRegExp(hashPrefix)}`, "u"), "").trim();
 
@@ -199,7 +198,8 @@ export function useScrollSpy(options: ScrollSpyOptions = {}) {
 
   return {
     activeSectionId: readonly(state.activeSectionId),
-    setSectionRef: (sectionId: string, element: Element | null) => setSectionRef(state, sectionId, element),
+    setSectionRef: (sectionId: string, element: Element | null) =>
+      setSectionRef(state, sectionId, element),
     scrollToSection: (
       sectionId: string,
       optionsValue: {

@@ -1,5 +1,9 @@
 import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
-import { generateId } from "@bao/shared";
+import {
+  API_ERROR_CREATE_PROJECT,
+  API_ERROR_INVALID_PROJECT_ID_REORDER,
+  generateId,
+} from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { portfolioProjects, portfolios } from "../db/schema/schema-modules";
@@ -226,7 +230,7 @@ export class PortfolioService {
 
     const created = await this.getProject(id);
     if (!created) {
-      throw new Error("Failed to create project");
+      throw new Error(API_ERROR_CREATE_PROJECT);
     }
 
     return created;
@@ -300,14 +304,16 @@ export class PortfolioService {
     const validIds = existing.map((project) => project.id);
     const hasInvalidIds = orderedIds.some((id) => !validIds.includes(id));
     if (hasInvalidIds) {
-      throw new Error("Invalid project ID in reorder payload");
+      throw new Error(API_ERROR_INVALID_PROJECT_ID_REORDER);
     }
 
     if (orderedIds.length === 0) {
       return true;
     }
 
-    const orderedProjectIds = orderedIds.filter((orderedId): orderedId is string => Boolean(orderedId));
+    const orderedProjectIds = orderedIds.filter((orderedId): orderedId is string =>
+      Boolean(orderedId),
+    );
     const orderedUpdateTimestamp = new Date().toISOString();
     await Promise.all(
       orderedProjectIds.map((orderedId, index) =>

@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d4551/baobuildbuddy.git",
+    "directory": "packages/server"
+  },
+  "bugs": {
+    "url": "https://github.com/d4551/baobuildbuddy/issues"
+  },
+  "homepage": "https://github.com/d4551/baobuildbuddy/tree/main/packages/server",
   "main": "./src/index.ts",
   "types": "./dist-types/index.d.ts",
   "exports": {
@@ -34,8 +43,8 @@
     "@huggingface/inference": "^4.13.12",
     "@bao/shared": "workspace:*",
     "drizzle-orm": "^0.45.1",
-    "elysia": "^1.4.25",
-    "elysia-rate-limit": "^4.2.0",
+    "elysia": "^1.4.27",
+    "elysia-rate-limit": "^4.5.0",
     "openai": "^6.22.0",
     "pdf-lib": "^1.17.0",
     "pino": "^10.3.1",

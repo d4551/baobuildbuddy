@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { Job } from "@bao/shared";
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES, SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
+import { formatDateWithLocale } from "~/utils/locale-format";
 
 const route = useRoute();
 const router = useRouter();
@@ -101,17 +102,19 @@ async function handleApply() {
 }
 
 function getMatchScoreColor(score: number) {
-  if (score >= 80) return "text-success";
-  if (score >= 60) return "text-warning";
+  if (score >= SCORE_PASS_THRESHOLD) return "text-success";
+  if (score >= SCORE_WARNING_THRESHOLD) return "text-warning";
   return "text-error";
 }
 
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString(locale.value || fallbackLocale.value || "en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+function formatDate(date: string): string {
+  return (
+    formatDateWithLocale(date, locale.value, fallbackLocale.value, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }) ?? date
+  );
 }
 
 async function startJobInterview() {
@@ -161,7 +164,16 @@ async function startJobInterview() {
               </div>
 
               <div v-if="job.matchScore" class="text-center">
-                <div class="radial-progress" :class="getMatchScoreColor(job.matchScore)" :style="`--value:${job.matchScore}; --size:5rem;`">
+                <div
+                  class="radial-progress"
+                  :class="getMatchScoreColor(job.matchScore)"
+                  :style="`--value:${job.matchScore}; --size:5rem;`"
+                  role="progressbar"
+                  :aria-label="t('jobDetail.scoreProgressAria')"
+                  :aria-valuenow="job.matchScore"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
                   <span class="text-lg font-bold">{{ job.matchScore }}%</span>
                 </div>
                 <p class="text-xs text-base-content/60 mt-1">{{ t("jobDetail.matchScoreLabel") }}</p>

@@ -5,7 +5,13 @@ import type {
   AIResponse,
   GenerateOptions,
 } from "@bao/shared";
-import { AI_CHAT_CONTEXT_MESSAGE_LIMIT, AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared";
+import {
+  LOCAL_AI_AUTO_DETECT_MODEL,
+  AI_CHAT_CONTEXT_MESSAGE_LIMIT,
+  AI_PROVIDER_DEFAULT_ORDER,
+  API_ERROR_ALL_PROVIDERS_STREAM_FAILED,
+  toErrorMessage,
+} from "@bao/shared";
 import { ClaudeProvider } from "./claude-provider";
 import { GeminiProvider } from "./gemini-provider";
 import { HuggingFaceProvider } from "./huggingface-provider";
@@ -16,12 +22,11 @@ import type { AIProvider } from "./provider-interface";
 const TEST_AI_PROVIDER_NAME = "local" as const;
 const TEST_AI_MODEL_NAME = "deterministic-test-model";
 const TEST_AI_MAX_QUESTION_COUNT = 12;
-const UNKNOWN_ERROR_MESSAGE = "Unknown error";
 const EXACT_QUESTION_COUNT_PATTERN = /exactly\s+(\d+)\s+questions/i;
 const GENERATE_QUESTION_COUNT_PATTERN = /generate\s+(\d+)\s+interview questions/i;
-
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+type AvailabilityResult = { isAvailable: boolean; error: string | null };
+type GenerationAttempt = { response: AIResponse | null; error: string | null };
+type StreamAttempt = { result: IteratorResult<string> | null; error: string | null };
 
 function parseQuestionCount(prompt: string): number {
   const exactMatch = prompt.match(EXACT_QUESTION_COUNT_PATTERN);
@@ -274,9 +279,10 @@ export class AIService {
    */
   private static resolvePreferredProvider(preferredProvider?: string | null): AIProviderType {
     if (!preferredProvider) return AI_PROVIDER_DEFAULT_ORDER[0];
-    return AI_PROVIDER_DEFAULT_ORDER.includes(preferredProvider as AIProviderType)
-      ? (preferredProvider as AIProviderType)
-      : AI_PROVIDER_DEFAULT_ORDER[0];
+    const matchedProvider = AI_PROVIDER_DEFAULT_ORDER.find(
+      (provider) => provider === preferredProvider,
+    );
+    return matchedProvider ?? AI_PROVIDER_DEFAULT_ORDER[0];
   }
 
   private static canCreateLocalProvider(config: AIProviderConfig): boolean {
@@ -303,7 +309,7 @@ export class AIService {
         if (!AIService.canCreateLocalProvider(config)) {
           return null;
         }
-        return new LocalProvider(config.baseUrl, config.model || "auto-detect");
+        return new LocalProvider(config.baseUrl, config.model || LOCAL_AI_AUTO_DETECT_MODEL);
       default:
         return null;
     }
@@ -324,19 +330,6 @@ export class AIService {
     // Always ensure HuggingFace is available as fallback (free tier)
     if (!this.providers.has("huggingface")) {
       this.providers.set("huggingface", new HuggingFaceProvider());
-    }
-
-    // Auto-detect local model if provider exists but model is a placeholder
-    const localProvider = this.providers.get("local");
-    if (localProvider && (localProvider as LocalProvider).model === "auto-detect") {
-      const baseUrl = (localProvider as LocalProvider).baseUrl;
-      if (typeof baseUrl === "string" && baseUrl.trim().length > 0) {
-        void LocalProvider.detectFirstModel(baseUrl).then((detected) => {
-          if (detected) {
-            (localProvider as LocalProvider).model = detected;
-          }
-        });
-      }
     }
   }
 
@@ -371,12 +364,12 @@ export class AIService {
   }
 
   private refreshFallbackOrder(): void {
-    this.rebuildFallbackOrder(
-      Array.from(this.providers.keys()).map((provider) => ({
-        provider,
-        enabled: true,
-      })) as AIProviderConfig[],
-    );
+    const providerConfigs: AIProviderConfig[] = [];
+    for (const provider of this.providers.keys()) {
+      providerConfigs.push({ provider, enabled: true });
+    }
+
+    this.rebuildFallbackOrder(providerConfigs);
   }
 
   /**
@@ -454,10 +447,10 @@ export class AIService {
       return null;
     }
 
-    const availability = await provider.isAvailable().then(
-      (isAvailable) => ({ isAvailable, error: null as string | null }),
-      (error: unknown) => ({ isAvailable: false, error: toErrorMessage(error) }),
-    );
+    const availability: AvailabilityResult = await provider
+      .isAvailable()
+      .then((isAvailable) => ({ isAvailable, error: null }))
+      .catch((error: unknown) => ({ isAvailable: false, error: toErrorMessage(error) }));
     if (availability.error) {
       AIService.pushProviderError(errors, providerName, availability.error);
       return null;
@@ -480,10 +473,10 @@ export class AIService {
       return null;
     }
 
-    const generationResult = await provider.generate(contextualPrompt, providerOptions).then(
-      (response) => ({ response, error: null as string | null }),
-      (error: unknown) => ({ response: null as AIResponse | null, error: toErrorMessage(error) }),
-    );
+    const generationResult: GenerationAttempt = await provider
+      .generate(contextualPrompt, providerOptions)
+      .then((response) => ({ response, error: null }))
+      .catch((error: unknown) => ({ response: null, error: toErrorMessage(error) }));
     if (generationResult.error) {
       AIService.pushProviderError(errors, providerName, generationResult.error);
       return null;
@@ -544,14 +537,14 @@ export class AIService {
     iterator: AsyncIterator<string>,
     errors: ProviderFailure[],
     hasYielded: boolean,
-  ): AsyncGenerator<{ chunk: string; provider: AIProviderType }, { hasYielded: boolean; failed: boolean }> {
-    const nextChunk = await iterator.next().then(
-      (result) => ({ result, error: null as string | null }),
-      (error: unknown) => ({
-        result: null as IteratorResult<string> | null,
-        error: toErrorMessage(error),
-      }),
-    );
+  ): AsyncGenerator<
+    { chunk: string; provider: AIProviderType },
+    { hasYielded: boolean; failed: boolean }
+  > {
+    const nextChunk: StreamAttempt = await iterator
+      .next()
+      .then((result) => ({ result, error: null }))
+      .catch((error: unknown) => ({ result: null, error: toErrorMessage(error) }));
     if (nextChunk.error) {
       AIService.pushProviderError(errors, providerName, nextChunk.error);
       return { hasYielded, failed: true };
@@ -568,7 +561,10 @@ export class AIService {
     contextualPrompt: string,
     providerOptions: Omit<GenerateOptions, "messages"> | undefined,
     errors: ProviderFailure[],
-  ): AsyncGenerator<{ chunk: string; provider: AIProviderType }, { hasYielded: boolean; failed: boolean }> {
+  ): AsyncGenerator<
+    { chunk: string; provider: AIProviderType },
+    { hasYielded: boolean; failed: boolean }
+  > {
     const provider = await this.resolveAvailableProvider(providerName, errors);
     if (!provider) {
       return { hasYielded: false, failed: true };
@@ -630,7 +626,7 @@ export class AIService {
     }
 
     const errorMessage = AIService.buildFailureMessage(errors);
-    throw new Error(`All providers failed to stream: ${errorMessage}`);
+    throw new Error(`${API_ERROR_ALL_PROVIDERS_STREAM_FAILED}: ${errorMessage}`);
   }
 
   /**
@@ -735,6 +731,6 @@ export class AIService {
     const provider = this.providers.get(providerType);
     if (!provider) return null;
     const model = provider.model;
-    return model && model !== "auto-detect" ? model : null;
+    return model && model !== LOCAL_AI_AUTO_DETECT_MODEL ? model : null;
   }
 }

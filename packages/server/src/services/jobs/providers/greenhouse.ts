@@ -27,12 +27,14 @@ interface GreenhouseResponse {
   jobs: GreenhouseJob[];
 }
 
-type GreenhouseFetchStatus = {
-  ok: true;
-  jobs: GreenhouseJob[];
-} | {
-  ok: false;
-};
+type GreenhouseFetchStatus =
+  | {
+      ok: true;
+      jobs: GreenhouseJob[];
+    }
+  | {
+      ok: false;
+    };
 
 type JobProviderSettings = Awaited<ReturnType<typeof loadJobProviderSettings>>;
 

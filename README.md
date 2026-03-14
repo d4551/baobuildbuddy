@@ -46,6 +46,7 @@ The script automatically uses containerized NSIS fallback for Windows setup pack
 Script/runtime verification commands:
 
 ```bash
+bun run ci:alignment
 bun run validate:no-try-catch
 bun run validate:no-unsafe-casts
 bun run validate:no-hardcoded-paths
@@ -53,6 +54,7 @@ bun run validate:locales
 bun run validate:page-seo
 bun run validate:i18n-ui
 bun run validate:aria
+bun run validate:alignment
 bun run validate:ui-layout-tokens
 bun run validate:ui
 bun run audit:official-llms
@@ -82,6 +84,8 @@ Expected validation outcomes:
 - `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
 - `bun run release:refresh:all-os:fast`: desktop artifacts are rebuilt and checksummed without rerunning lint/typecheck/test/build.
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
+- `bun run ci:alignment`: frozen-lockfile install plus the Bun/daisyUI alignment gate passes.
+- `bun run validate:alignment`: combined baseline + stack + UI contracts pass for Bun and daisyUI alignment.
 - `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
 
 ## Stack and Version Contract
@@ -94,20 +98,29 @@ Context7 verification references:
 
 Track and verify stack versions via the workspace manifest and npm latest checks:
 
+- `bun run ci:alignment` (CI install + alignment gate using `bun ci`)
 - `bun run audit:stack-versions` (authoritative runtime check)
+- `bun run verify:bun-baseline` (guards against stale Bun baseline references)
+- `bun run validate:alignment` (runtime + stack + UI contract gate)
 - `bun pm pkg get packageManager` (workspace-required Bun baseline)
 - `bun pm pkg get dependencies.nuxt dependencies.tailwindcss` (framework baseline sanity check)
 
 Data layer note:
 
-- The active runtime stack uses `drizzle-orm` (`packages/server`).
-- When adding Prisma-based paths, pin `prisma` and `@prisma/client` to the same major together.
+- The active runtime stack uses `drizzle-orm` (`packages/server`) with `bun:sqlite`. Drizzle is the sole ORM; no Prisma.
 
 To verify stack versions against npm:
 
 ```bash
 bun run audit:stack-versions
+bun run validate:daisyui-contracts
 ```
+
+daisyUI blueprint contract scope:
+
+- `scripts/validate-daisyui-contracts.ts` audits the app shell drawer/navbar plus the jobs, automation, skills, and score/progress surfaces against daisyUI semantic classes.
+- Required blueprint primitives in scope are `card`, `btn`, `drawer`, `navbar`, `table`, `list`, `progress`, and `radial-progress`.
+- The validator rejects raw table/progress markup without `table`/`progress`, `btn-*` modifiers without `btn`, and `radial-progress` usage without accessible progressbar attributes.
 
 ## Non-Technical Install (Pick Your OS)
 
@@ -334,7 +347,7 @@ To add a new language:
 3. Add the locale to `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` at runtime (or environment variable).
 4. Add matching preference/voice mapping where required.
 
-## 4) Python RPA subsystem
+## 4) Bun automation subsystem
 
 ```text
          ___
@@ -346,7 +359,7 @@ To add a new language:
       /_______\    audit trail and replay capability.
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        "Do a barrel roll!" -- but only after
-       verifying your Python venv is active.
+       Playwright Chromium is installed.
 ```
 
 Automation execution is invoked from `automationRoutes` and routed through `application-automation-service.ts` --> `rpa-runner.ts`.
@@ -430,29 +443,22 @@ GET /api/automation/screenshots/:runId/:index
 }
 ```
 
-### 4.3 Python API used by scripts
+### 4.3 Bun automation runtime
 
-The Python entry points use these RPA primitives:
-
-- `r.init(turbo_mode=True)`
-- `r.url(jobUrl)`
-- `r.type(selector, text)`
-- `r.click(selector)`
-- `r.snap("page", outputPath)`
-- `r.close()`
-
-Current scripts in `packages/scraper/`:
+The automation/runtime package now lives in `packages/scraper` as a Bun workspace package:
 
 | Script | Purpose |
 |--------|---------|
-| `apply_job_rpa.py` | Automates job application form submission |
-| `job_scraper_gamedev.py` | Scrapes jobs from GameDev.net |
-| `job_scraper_grackle.py` | Scrapes jobs from GrackleHQ |
-| `job_scraper_workwithindies.py` | Scrapes jobs from Work With Indies |
-| `job_scraper_remotegamejobs.py` | Scrapes jobs from RemoteGameJobs |
-| `job_scraper_gamesjobsdirect.py` | Scrapes jobs from GamesJobsDirect |
-| `job_scraper_pocketgamer.py` | Scrapes jobs from PocketGamer.biz |
-| `studio_scraper.py` | Scrapes studio directory data |
+| `src/scripts/job-apply.ts` | Automates job application form submission with Playwright |
+| `src/scripts/scraper-hitmarker.ts` | Scrapes jobs from Hitmarker |
+| `src/scripts/scraper-grackle.ts` | Scrapes jobs from GrackleHQ |
+| `src/scripts/scraper-workwithindies.ts` | Scrapes jobs from Work With Indies |
+| `src/scripts/scraper-remotegamejobs.ts` | Scrapes jobs from RemoteGameJobs |
+| `src/scripts/scraper-gamesjobsdirect.ts` | Scrapes jobs from GamesJobsDirect |
+| `src/scripts/scraper-pocketgamer.ts` | Scrapes jobs from PocketGamer.biz |
+| `src/scripts/studio-scraper.ts` | Emits the curated studio directory dataset |
+
+The server resolves stable script IDs (for example `job-apply` and `scraper-hitmarker`) through the shared registry and launches them with `Bun.spawn([process.execPath, scriptPath], ...)`.
 
 ### 4.4 Bun subprocess contract
 
@@ -493,7 +499,7 @@ The job aggregation system lives under `packages/server/src/services/jobs/` and 
 | `services/jobs/providers/provider-settings.ts` | Settings-backed provider configuration for known company board URLs |
 | `providers/gaming-providers.ts` | Game-industry-specific board aggregation |
 
-The default provider set includes Greenhouse, Lever, Hitmarker, GameDev.net, GrackleHQ, Work With Indies, RemoteGameJobs, GamesJobsDirect, PocketGamer.biz, plus configured SmartRecruiters/Workday/Ashby company boards.
+The default provider set includes Greenhouse, Lever, Hitmarker, GrackleHQ, Work With Indies, RemoteGameJobs, GamesJobsDirect, PocketGamer.biz, plus configured SmartRecruiters/Workday/Ashby company boards.
 
 The aggregator calls each registered provider, deduplicates results, runs matching against the user's resume/skills profile, and persists to the `jobs` schema in SQLite.
 
@@ -596,7 +602,7 @@ This section is the canonical first-run path for new developers. It starts from 
 
 | Required           | Purpose                                |
 |--------------------|----------------------------------------|
-| Bun                | Runtime, package manager, test runner  |
+| Bun (>=1.3.10)    | Runtime, package manager, test runner  |
 | Git                | Source control                         |
 | Python 3.10+       | RPA script execution (Playwright)      |
 | Rust + Cargo       | Desktop installer builds (Tauri)       |
@@ -609,7 +615,7 @@ Chrome/Chromium executable names checked by setup scripts:
 
 #### 8.2.1 Installables (OS package commands)
 
-Use one command per tool based on your platform:
+Use one command per tool based on your platform. Bun is pinned in this repo to the 1.3.10 baseline (`bun@1.3.10` in `package.json`):
 
 | Tool | macOS (Homebrew) | Ubuntu / Debian | Windows (winget) |
 |------|-------------------|------------------|------------------|
@@ -624,10 +630,12 @@ Read Bun baseline from the workspace manifest when selecting an installer:
 
 ```bash
 bun pm pkg get packageManager
+# -> "bun@1.3.10"
 ```
 
 ```powershell
 bun pm pkg get packageManager
+# -> "bun@1.3.10"
 ```
 
 ### 8.3 Prepare your workspace
@@ -641,7 +649,7 @@ If you already have a checked-out copy, start at `git pull` and continue with se
 
 ### 8.4 Automated setup (recommended)
 
-One command handles dependency install, Python venv, database setup, and verification:
+One command handles dependency install, Playwright browser install, database setup, and verification:
 
 **macOS / Linux:**
 ```bash
@@ -656,7 +664,7 @@ powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 Expected flow and outputs:
 1. The script prints the OS and architecture.
 2. `bun install` completes without errors.
-3. `.venv` is created and Python packages from `packages/scraper/requirements.txt` install.
+3. `bun run automation:browsers:install` installs Playwright Chromium unless browser installation is skipped.
 4. `.env` is created from `.env.example` if missing.
 5. Database setup runs successfully.
 6. Type/lint/test checks pass (unless checks are skipped).
@@ -668,7 +676,7 @@ Expected flow and outputs:
 | Flag | Bash | PowerShell | Effect |
 |------|------|-----------|--------|
 | Skip verification | `--skip-checks` | `-SkipChecks` | Skip typecheck, lint, and test runs |
-| Skip Python | `--skip-python` | `-SkipPython` | Skip venv creation (Bun-only install) |
+| Skip browser install | `--skip-browser-install` | `-SkipBrowserInstall` | Skip Playwright Chromium installation |
 | Include build | `--include-build` | `-IncludeBuild` | Run `bun run build` after setup checks |
 | Include desktop build | `--include-desktop-build` | `-IncludeDesktopBuild` | Run Tauri desktop build after setup checks/build |
 | Help | `--help` | `-Help` | Print usage and exit |
@@ -679,22 +687,7 @@ If you prefer manual control, follow these steps:
 
 ```bash
 bun install
-```
-
-**Python environment:**
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-python -m pip install -r packages/scraper/requirements.txt
-```
-
-Windows manual alternative:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r packages\scraper\requirements.txt
+bun run automation:browsers:install
 ```
 
 **Environment file:**
@@ -704,7 +697,7 @@ cp .env.example .env
 ```
 
 Edit `.env` before first run:
-1. Keep `NUXT_PUBLIC_API_BASE=/` and `NUXT_PUBLIC_WS_BASE=/` when running `bun run dev`.
+1. Keep `NUXT_PUBLIC_API_BASE=/` and `NUXT_PUBLIC_WS_BASE=/` only if you override stack URLs manually; `bun run dev` now resolves both through `scripts/dev-stack.ts`.
 2. Set `BAO_DISABLE_AUTH=true` only for local development without API-key flow.
 3. Add provider keys only if you are using those providers.
 4. Set `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` only if using local inference.
@@ -745,7 +738,7 @@ If all three requests respond, the API stack is reachable from defaults.
 | `packages/server/src/config/env.ts`      | Server environment validation  |
 | `packages/server/src/config/paths.ts`    | File system paths used by server |
 | `packages/client/nuxt.config.ts`         | Client runtime config, proxy, modules |
-| `packages/scraper/requirements.txt`      | Python RPA dependencies        |
+| `packages/scraper/package.json`          | Bun automation runtime dependencies |
 | `.env.example`                           | Template for all env vars      |
 
 ### 8.9 Desktop (Tauri) installer path
@@ -765,7 +758,7 @@ If all three requests respond, the API stack is reachable from defaults.
 
 For this repository, Tauri is the best fit for desktop installers because:
 
-1. You already use Bun tooling and `bun run dev` for the entire stack.
+1. You already use Bun tooling and `bun run dev` (which now runs `scripts/dev-stack.ts`) for the entire stack.
 2. Tauri bundles a tiny native shell around existing web UI.
 3. You avoid the duplicate runtime overhead and heavier package size of Electron.
 
@@ -854,8 +847,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 Cross-target requirements from Tauri build contracts:
-1. Windows target (`x86_64-pc-windows-msvc`) requires MSVC `link.exe` (Visual Studio Build Tools with C++).
-2. Linux target (`aarch64-unknown-linux-gnu`) requires target GTK/WebKit development libraries and containerized build dependencies.
+1. **Windows** (`x86_64-pc-windows-msvc`): `cargo-xwin` (`cargo install cargo-xwin`), Docker for NSIS setup fallback when local `makensis` fails.
+2. **Linux** (`aarch64-unknown-linux-gnu`): Docker with Ubuntu 24.04 for containerized GTK/WebKit and AppImage/deb/rpm bundling.
 
 #### 8.9.4 Environment overrides for desktop
 
@@ -925,11 +918,10 @@ Keys can also be configured via **Settings > AI Providers** in the UI with test 
 
 | Key | Purpose | Default |
 |-----|---------|---------|
-| `PYTHON_BINARY` | Python binary path (set to venv Python) | `python3` (Unix) / `python` (Windows) |
 | `AUTOMATION_STDIO_BUFFER_LIMIT` | Max stdout lines from scraper scripts | `200` (increase to `2000` for large outputs) |
 | `AUTOMATION_SCRIPT_TIMEOUT_MS` | Max execution time per automation script | `30000` (30 seconds) |
 
-All RPA scripts use Playwright with bundled Chromium. No separate browser install needed.
+Install bundled Chromium with `bun run automation:browsers:install`. The setup scripts do this automatically unless `--skip-browser-install` / `-SkipBrowserInstall` is used.
 
 ### 9.5 Settings Table Runtime Configuration
 
@@ -965,7 +957,7 @@ Required `jobProviders` keys:
     |  ___  ___  |
     | | 1 || 2 | |      PLAYER SELECT
     | |___||___| |
-    |  ___  ___  |      1 = Full stack   (bun run dev)
+    |  ___  ___  |      1 = Full stack   (bun run dev / scripts/dev-stack.ts)
     | | 3 || 4 | |      2 = Server only  (bun run dev:server)
     | |___||___| |      3 = Client only  (bun run dev:client)
     |_____________|      4 = Split terminals
@@ -979,7 +971,7 @@ Required `jobProviders` keys:
 bun run dev
 ```
 
-Runs both services in parallel:
+Coordinates server + client via `scripts/dev-stack.ts`:
 - `bun run dev:server` (packages/server on `PORT`, default 3000)
 - `bun run dev:client` (packages/client, default 3001)
 
@@ -999,19 +991,20 @@ bun run dev:client
 
 | Endpoint | Default | Config key |
 |----------|---------|-----------|
-| API server | `http://localhost:3000` | `PORT` (server) |
-| Client / UI | `http://localhost:3001` | `packages/client` dev script (`nuxt dev --port 3001`) |
+| API server | `http://localhost:3000` (or `SERVER_PORT`) | `PORT` / `SERVER_PORT` |
+| Client / UI | `http://localhost:3001` (or `CLIENT_PORT`) | client `nuxt dev` default |
 | Client API base | `/` | `NUXT_PUBLIC_API_BASE` |
 | Client API proxy target | unset | `NUXT_PUBLIC_API_PROXY` |
-| Chat WebSocket | `ws://localhost:3000/api/ws/chat` | derived from `NUXT_PUBLIC_WS_BASE` |
-| Interview WebSocket | `ws://localhost:3000/api/ws/interview` | derived from `NUXT_PUBLIC_WS_BASE` |
-| Automation WebSocket | `ws://localhost:3000/api/ws/automation` | derived from `NUXT_PUBLIC_WS_BASE` |
+| Chat WebSocket | `ws://localhost:3000/api/ws/chat` (or `SERVER_PORT`) | derived from `NUXT_PUBLIC_WS_BASE` |
+| Interview WebSocket | `ws://localhost:3000/api/ws/interview` (or `SERVER_PORT`) | derived from `NUXT_PUBLIC_WS_BASE` |
+| Automation WebSocket | `ws://localhost:3000/api/ws/automation` (or `SERVER_PORT`) | derived from `NUXT_PUBLIC_WS_BASE` |
 
 ### 10.4 All available scripts
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| Dev (full) | `bun run dev` | Start server + client in parallel |
+| Dev (full) | `bun run dev` | Start server + client via `scripts/dev-stack.ts` |
+| Dev (stack) | `bun run dev:stack` | Alias to `scripts/dev-stack.ts` |
 | Dev server | `bun run dev:server` | Start API server only |
 | Dev client | `bun run dev:client` | Start Nuxt client only |
 | Dev desktop | `bun run dev:desktop` | Start Tauri desktop wrapper (auto-starts server + client) |
@@ -1299,16 +1292,12 @@ Manual browser checklist for final sign-off:
     |   |   |   |   +-- salary-ranges, state-keys, xp-levels
     |   |   |   +-- utils/          4 utility modules
     |   |   |       +-- validation, date-helpers, salary-parser, resume-transform
-    |   +-- scraper/                Python RPA scripts
-    |       +-- apply_job_rpa.py
-    |       +-- job_scraper_gamedev.py
-    |       +-- job_scraper_grackle.py
-    |       +-- job_scraper_workwithindies.py
-    |       +-- job_scraper_remotegamejobs.py
-    |       +-- job_scraper_gamesjobsdirect.py
-    |       +-- job_scraper_pocketgamer.py
-    |       +-- studio_scraper.py
-    |       +-- requirements.txt
+    |   +-- scraper/                Bun automation runtime
+    |       +-- src/scripts/            Bun/TS automation entrypoints
+    |       +-- src/providers/          Playwright scraper extractors
+    |       +-- src/job-apply/          ATS adapter runtime
+    |       +-- src/runtime/            IO/protocol/browser helpers
+    |       +-- package.json
     +-- scripts/
     |   +-- setup.sh                    Automated setup for macOS / Linux
     |   +-- setup.ps1                   Automated setup for Windows (PowerShell)
@@ -1446,7 +1435,7 @@ Migrations are in `packages/server/src/db/migrations/`. Seed data (`packages/ser
 
 | Check | Command / action |
 |-------|-----------------|
-| Python venv active? | `source .venv/bin/activate && python -c "import rpa"` |
+| Playwright browser installed? | `bun run automation:browsers:install` |
 | Chrome available? | `which google-chrome` or `which chromium` |
 | Script output? | Check server logs for stdout/stderr from subprocess |
 | Run record? | Query `/api/automation/runs` for the run ID, check `error` and `screenshots` |
@@ -1496,7 +1485,7 @@ bun run scripts/validate-ascii-geometry.ts README.md
 ```
 
 - [ ] `bun install` completed successfully
-- [ ] Python venv created and `rpa` installed from `packages/scraper/requirements.txt`
+- [ ] `bun run automation:browsers:install` completed successfully
 - [ ] `.env` populated from `.env.example` with environment-specific values
 - [ ] `bun run typecheck` passes
 - [ ] `bun run validate:no-try-catch` passes

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
-import { generateId } from "@bao/shared";
+import { generateId, settle } from "@bao/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -60,10 +60,6 @@ const runEmailResponseStub: RunEmailResponse = async (payload) => {
 let originalRunJobApply: RunJobApply | undefined;
 let originalRunEmailResponse: RunEmailResponse | undefined;
 const CLEANUP_AUTOMATION_TYPES = ["job_apply", "email"] as const;
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 
 const requestStatusBody = async <T>(
   method: string,
@@ -78,7 +74,7 @@ const requestStatusBody = async <T>(
     }),
   );
   const payload = await response.text();
-  const parsedPayloadResult = await settlePromise(
+  const parsedPayloadResult = await settle(
     Promise.resolve(payload).then((content) => JSON.parse(content) as T),
   );
 
@@ -170,7 +166,9 @@ function registerMissingResumeTest(): void {
 
 function registerJobApplyEnqueueTest(): void {
   test("POST /api/automation/job-apply enqueues a run and returns run contract", async () => {
-    originalRunJobApply = applicationAutomationService.runJobApply.bind(applicationAutomationService);
+    originalRunJobApply = applicationAutomationService.runJobApply.bind(
+      applicationAutomationService,
+    );
     applicationAutomationService.runJobApply = runJobApplyStub;
 
     await Promise.resolve()

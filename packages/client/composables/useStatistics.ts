@@ -87,9 +87,7 @@ const toRecentAutomationRun = (
   return { id, type, status, createdAt };
 };
 
-const toRecentAutomationRuns = (
-  value: unknown,
-): DashboardStats["automation"]["recentRuns"] => {
+const toRecentAutomationRuns = (value: unknown): DashboardStats["automation"]["recentRuns"] => {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -125,7 +123,9 @@ const toPortfolioStats = (value: DashboardSections["portfolio"]): DashboardStats
   projectCount: asNumber(value.projectCount) ?? 0,
 });
 
-const toInterviewStats = (value: DashboardSections["interviews"]): DashboardStats["interviews"] => ({
+const toInterviewStats = (
+  value: DashboardSections["interviews"],
+): DashboardStats["interviews"] => ({
   totalSessions: asNumber(value.totalSessions) ?? 0,
   averageScore: asNumber(value.averageScore) ?? null,
 });

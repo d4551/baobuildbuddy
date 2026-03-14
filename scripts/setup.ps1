@@ -1,8 +1,8 @@
 # BaoBuildBuddy - Automated setup for Windows (PowerShell)
-# Usage: powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 [-SkipChecks] [-SkipPython] [-IncludeBuild] [-IncludeDesktopBuild]
+# Usage: powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 [-SkipChecks] [-SkipBrowserInstall] [-IncludeBuild] [-IncludeDesktopBuild]
 param(
     [switch]$SkipChecks,
-    [switch]$SkipPython,
+    [switch]$SkipBrowserInstall,
     [switch]$IncludeBuild,
     [switch]$IncludeDesktopBuild,
     [switch]$Help
@@ -23,7 +23,7 @@ if ($Help) {
     Write-Host ""
     Write-Host "Options:"
     Write-Host "  -SkipChecks   Skip typecheck, lint, and test verification"
-    Write-Host "  -SkipPython   Skip Python venv setup (Bun-only install)"
+    Write-Host "  -SkipBrowserInstall Skip Playwright browser installation"
     Write-Host "  -IncludeBuild Run bun run build after checks"
     Write-Host "  -IncludeDesktopBuild Run bun run build:desktop after checks/build"
     Write-Host "  -Help         Show this help message"
@@ -87,27 +87,6 @@ if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($gitVer)) {
     Die "Git is not installed or not available in PATH."
 }
 
-$pythonAvailable = $false
-if (-not $SkipPython) {
-    $pyOutput = & python --version 2>&1
-    if ($LASTEXITCODE -eq 0) {
-        if ($pyOutput -match "(\d+)\.(\d+)\.(\d+)") {
-            $major = [int]$Matches[1]
-            $minor = [int]$Matches[2]
-            if ($major -ge 3 -and $minor -ge 10) {
-                Ok "Python $($Matches[0])"
-                $pythonAvailable = $true
-            } else {
-                Warn "Python $($Matches[0]) found but 3.10+ required for RPA scripts"
-            }
-        } else {
-            Warn "Python version output could not be parsed: $pyOutput"
-        }
-    } else {
-        Warn "Python not found -- RPA/scraper features will be unavailable"
-    }
-}
-
 $chromeFound = $false
 $chromePaths = @(
     "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
@@ -125,7 +104,7 @@ if (-not $chromeFound) {
     Warn "Chrome not detected -- RPA browser automation requires it"
 }
 
-# Playwright bundles its own Chromium — no separate PHP/Chrome needed for RPA
+# Playwright bundles its own Chromium — system Chrome remains optional.
 
 # -- 2. Install Bun dependencies -----------------------------------------------
 
@@ -146,44 +125,15 @@ Step "Generating server type declarations..."
 if ($LASTEXITCODE -eq 0) { Ok "Server type declarations generated" }
 else { Warn "Server build:types failed -- client lint may fail" }
 
-# -- 3. Python virtual environment ----------------------------------------------
+# -- 3. Playwright browsers -----------------------------------------------------
 
-if (-not $SkipPython -and $pythonAvailable) {
-    Step "Setting up Python virtual environment..."
-
-    if (Test-Path ".venv") {
-        Ok "Virtual environment already exists at .venv\"
-    } else {
-        & python -m venv .venv
-        if ($LASTEXITCODE -eq 0) { Ok "Created .venv\" }
-        else { Fail "Failed to create Python venv" }
-    }
-
-    & .venv\Scripts\Activate.ps1
-    if ($LASTEXITCODE -ne 0) {
-        Fail "Python virtual environment activation failed"
-    } else {
-        & python -m pip install --upgrade pip --quiet 2>$null
-        if ($LASTEXITCODE -ne 0) {
-            Fail "Failed to upgrade pip"
-        } else {
-            & python -m pip install -r packages\scraper\requirements.txt --quiet 2>$null
-            if ($LASTEXITCODE -eq 0) {
-                Ok "Python dependencies installed"
-
-                & python -m playwright install chromium 2>$null
-                Ok "Playwright chromium installed"
-
-                & python -c "from playwright.sync_api import sync_playwright" 2>$null
-                if ($LASTEXITCODE -eq 0) { Ok "playwright module verified" }
-                else { Warn "playwright module could not be imported -- check requirements.txt" }
-            } else {
-                Fail "Python dependency installation failed"
-            }
-        }
-    }
-} elseif ($SkipPython) {
-    Write-Host "`n  Skipping Python setup (-SkipPython)" -ForegroundColor DarkGray
+if (-not $SkipBrowserInstall) {
+    Step "Installing Playwright Chromium for Bun automation runtime..."
+    & bun run automation:browsers:install 2>&1
+    if ($LASTEXITCODE -eq 0) { Ok "Playwright Chromium installed" }
+    else { Fail "Playwright browser installation failed" }
+} else {
+    Write-Host "`n  Skipping Playwright browser installation (-SkipBrowserInstall)" -ForegroundColor DarkGray
 }
 
 # -- 4. Environment file -------------------------------------------------------
@@ -198,9 +148,6 @@ if (Test-Path ".env") {
         $envContent = Get-Content ".env" | Where-Object { $_ -notmatch '^NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=' }
         $envContent | Set-Content ".env"
         Add-Content ".env" "AUTOMATION_STDIO_BUFFER_LIMIT=2000"
-        if (Test-Path ".venv") {
-            Add-Content ".env" "PYTHON_BINARY=$((Get-Location).Path)\.venv\Scripts\python.exe"
-        }
         Ok "Created .env from .env.example"
         Warn "Edit .env with your environment-specific values before running"
     } else {

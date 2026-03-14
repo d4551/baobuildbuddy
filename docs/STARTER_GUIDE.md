@@ -14,59 +14,7 @@ Think of it as the tutorial level: follow each checkpoint in order before unlock
 
 ## Release Validation and Rebuild
 
-After setup is complete, use the production validation sequence:
-
-```bash
-bun run lint
-bun run typecheck
-bun run test
-bun run build
-bun run build:desktop
-bun run release:refresh:all-os
-```
-
-Use `bun run release:refresh:all-os:fast` after the full quality gate run when you only need a rebuild and checksum refresh. It maps to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates`.
-
-`bun run release:refresh:all-os` requires a macOS host with Docker running and outbound network access for cross-target dependency/bootstrap downloads.
-The refresh flow includes containerized Windows setup fallback and Linux AppImage fallback when primary bundle tooling fails.
-
-Script verification checks:
-
-```bash
-bun run validate:no-try-catch
-bun run validate:no-unsafe-casts
-bun run validate:no-hardcoded-paths
-bun run validate:locales
-bun run validate:page-seo
-bun run validate:i18n-ui
-bun run validate:aria
-bun run validate:ui-layout-tokens
-bun run validate:ui
-bun run audit:official-llms
-```
-
-`bun run validate:aria` checks both control-level labels and modal semantics (`aria-modal="true"` plus a programmatic modal label).
-
-Route/content check (requires running server/client target):
-
-```bash
-bun run verify:pages
-```
-
-Lint diagnostics are not hidden; warnings/errors remain fully visible in command output.
-
-Expected validation outcomes:
-
-- `bun run lint`: no lint warnings or errors.
-- `bun run --filter '@bao/client' lint`: no warnings or errors.
-- `bun run typecheck`: no TypeScript diagnostics.
-- `bun run test`: all workspace test suites pass.
-- `bun run build`: all packages build successfully.
-- `CI=true bun run build:desktop`: desktop packaging build succeeds.
-- `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
-- `bun run release:refresh:all-os:fast`: artifacts and checksums are rebuilt without rerunning quality gates.
-- `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
-- `bun run verify:pages`: all required SSR routes and content checks pass against the selected preview target.
+For the full production validation sequence, script verification commands, and expected outcomes, see [README.md § Release Validation Workflow](../README.md#release-validation-workflow).
 
 UI runtime contracts:
 
@@ -90,6 +38,7 @@ The standard one-command workflow starts both at once with:
 ```bash
 bun run dev
 ```
+`bun run dev` executes `scripts/dev-stack.ts` to orchestrate server/client startup.
 
 This is the recommended path for first-time setup.
 
@@ -99,7 +48,7 @@ Install these before running setup:
 
 Required:
 
-- Bun runtime matching `packageManager` in root `package.json`
+- Bun runtime pinned to `bun@1.3.10` via `packageManager` in root `package.json`
 - Git
 - Python 3.10+
 - Rust + Cargo (for desktop builds)
@@ -114,7 +63,7 @@ Optional but recommended:
 
 | Tool | macOS (Homebrew) | Ubuntu / Debian | Windows (winget) |
 |------|-------------------|------------------|------------------|
-| Bun (from `packageManager`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
+| Bun (from `packageManager` = `bun@1.3.10`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
 | Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
 | Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
 | Rust | `brew install rustup-init && rustup-init` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
@@ -127,10 +76,12 @@ Read Bun baseline from the workspace manifest when selecting an installer:
 
 ```bash
 bun pm pkg get packageManager
+# -> "bun@1.3.10"
 ```
 
 ```powershell
 bun pm pkg get packageManager
+# -> "bun@1.3.10"
 ```
 
 Verify each tool is on `PATH`:
@@ -164,11 +115,39 @@ Run the repository stack audit command to confirm local package registry alignme
 bun run audit:stack-versions
 ```
 
-Run this command and keep local setup aligned to those outputs:
+Run these alignment gates and keep local setup aligned to their outputs:
 
+- `bun run ci:alignment` (for CI or any frozen-lockfile validation run)
 - `bun run audit:stack-versions`
+- `bun run verify:bun-baseline`
+- `bun run validate:alignment`
 - `bun pm pkg get packageManager`
 - `bun pm pkg get dependencies.nuxt dependencies.elysia dependencies.daisyui dependencies.tailwindcss`
+
+Expected pass patterns:
+
+```text
+bun run audit:stack-versions
+# prints package names and latest npm versions
+
+bun run ci:alignment
+# runs bun ci, then validate:alignment
+
+bun run verify:bun-baseline
+# prints "✅ Bun baseline and 1.3.9 guard checks passed"
+
+bun run validate:alignment
+# prints "daisyUI component contract validation passed." and layout-token validation pass output
+
+bun pm pkg get packageManager
+# -> "bun@1.3.10"
+```
+
+daisyUI contract coverage in this gate:
+
+- Shell layout: `packages/client/layouts/default.vue` and `packages/client/components/layout/AppNavbar.vue` must preserve drawer/navbar blueprint semantics.
+- Core surfaces: jobs, automation, and skills flows are checked for `card`, `btn`, `table`, `list`, `progress`, and `radial-progress` usage.
+- Accessibility rule: radial progress indicators must expose `role="progressbar"` and `aria-valuenow`.
 
 ## 3) Get the code
 
@@ -202,7 +181,7 @@ The setup script:
 1. Checks required tools.
 2. Validates Bun major/minor against `packageManager` in root `package.json`.
 2. Installs workspace dependencies.
-3. Creates `.venv` and installs Python scraper dependencies.
+3. Installs Playwright Chromium for the Bun automation runtime unless skipped.
 4. Creates `.env` from `.env.example`.
 5. Generates and pushes DB schema.
 6. Runs `typecheck`, `lint`, and `test` unless skipped.
@@ -213,7 +192,7 @@ After a successful run, you should be able to confirm:
 
 ```text
 ✅ Bun workspace install complete
-✅ Python environment configured for scraper scripts
+✅ Playwright Chromium installed for automation scripts
 ✅ SQLite schema generated and ready for local runs
 ✅ Initial validation checks pass
 ```
@@ -223,7 +202,7 @@ After a successful run, you should be able to confirm:
 | Command | Meaning |
 |---------|---------|
 | `--skip-checks` (Bash) / `-SkipChecks` (PowerShell) | Skip validation checks after setup |
-| `--skip-python` (Bash) / `-SkipPython` (PowerShell) | Skip Python venv and pip install |
+| `--skip-browser-install` (Bash) / `-SkipBrowserInstall` (PowerShell) | Skip Playwright Chromium installation |
 | `--include-build` (Bash) / `-IncludeBuild` (PowerShell) | Run `bun run build` after setup checks |
 | `--include-desktop-build` (Bash) / `-IncludeDesktopBuild` (PowerShell) | Run `bun run build:desktop` (setup script applies UTF-8 locale env for macOS DMG bundling) |
 | `--help` (Bash) / `-Help` (PowerShell) | Show script usage |
@@ -237,7 +216,7 @@ After a successful run, you should be able to confirm:
 Common fixes:
 
 - Update Bun to satisfy manifest baseline (`packageManager` in root `package.json`) and rerun setup.
-- Install Python 3.10+ and ensure it is in `PATH`.
+- Run `bun run automation:browsers:install` if Playwright Chromium is missing.
 - Install Chrome from the official package for your OS.
 
 ### 4.5 Keep bootstrap deterministic
@@ -254,12 +233,7 @@ Use this when you need to inspect each command.
 
 ```bash
 bun install
-```
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -r packages/scraper/requirements.txt
+bun run automation:browsers:install
 ```
 
 Create the environment file and install the database schema:
@@ -299,7 +273,6 @@ Then add these when you are ready:
 For RPA/automation support, add:
 
 ```text
-PYTHON_BINARY=/path/to/.venv/bin/python3
 AUTOMATION_STDIO_BUFFER_LIMIT=2000
 ```
 
@@ -314,6 +287,7 @@ Treat `.env.example` as the canonical base.
 ```bash
 bun run dev
 ```
+bun run dev executes `scripts/dev-stack.ts` to orchestrate server/client startup.
 
 ### 7.2 Split terminal mode
 
@@ -359,20 +333,7 @@ Then open `http://localhost:3001` in your browser and confirm:
 
 ## 10) Validate contract and docs
 
-If this is your very first time and you want full confidence:
-
-```bash
-bun run format:check
-bun run validate:no-try-catch
-bun run validate:page-seo
-bun run validate:i18n-ui
-bun run validate:aria
-bun run validate:ui-layout-tokens
-bun run validate:ui
-bun run typecheck
-bun run lint
-bun run test
-```
+For the full validation sequence and script verification commands, see [README.md § Release Validation Workflow](../README.md#release-validation-workflow).
 
 For `verify:pages`, target your BaoBuildBuddy preview instance explicitly if port `3001` is already used by another app:
 
@@ -381,30 +342,21 @@ PORT=4105 bun run --filter '@bao/client' preview
 VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 
-This validates repository health and the public/client contract generation path.
-
-For day-one confidence, run this minimal set first:
-
-```bash
-bun run typecheck
-bun run lint
-bun run test
-```
-
 ## 11) Troubleshooting quick path
 
 - Server starts but UI cannot connect:
-  - Check `.env` has `NUXT_PUBLIC_API_BASE=/` for `bun run dev`.
+  - Check `NUXT_PUBLIC_API_BASE`/`NUXT_PUBLIC_WS_BASE` for your profile.
+  - `bun run dev` writes these automatically when launching `scripts/dev-stack.ts`.
   - If `NUXT_PUBLIC_API_PROXY` is unset, Nuxt dev now proxies `/api` to `http://localhost:${PORT}` by default.
   - Recheck `NUXT_PUBLIC_WS_BASE`.
 - Port conflict:
   - Change `PORT` in `.env`.
-- Python missing:
-  - Re-run setup with `--skip-python` only if you want to defer automation.
+- Playwright browser missing:
+  - Run `bun run automation:browsers:install` or rerun setup without `--skip-browser-install`.
 - `curl` health checks fail:
   - Confirm server terminal shows `Listening on ...` and no startup errors.
 - RPA automation unavailable:
-  - Ensure Chrome is installed and Python virtual env dependencies are installed.
+  - Ensure Playwright Chromium is installed and rerun `bun run automation:browsers:install`.
 - Locales missing or duplicated:
   - Verify `.env` locales match keys under `packages/client/locales`.
 
@@ -436,8 +388,8 @@ bun run dev:desktop
 This does three things:
 
 1. Runs the full stack bootstrap logic in `packages/desktop/src-tauri/src/main.rs`.
-2. Checks whether `PORT=3000` and `CLIENT_PORT=3001` are already responding.
-3. Starts `bun run dev` if required and opens the app window at `http://127.0.0.1:3001`.
+2. Checks whether `PORT=3000` and `CLIENT_PORT=3001` (or configured overrides) are already responding.
+3. Starts `bun run dev`/`scripts/dev-stack.ts` if required and opens the app window at `http://localhost:3001` by default.
 
 Why Tauri is preferred for this repo:
 
@@ -483,10 +435,10 @@ LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
 If the direct build exits with `failed to run bundle_dmg.sh` but reports a completed first bundling pass, run the release refresher fallback path so DMG creation is retried headless:
 
 ```bash
-bun run release:refresh:all-os:fast --skip-linux --skip-windows
+bash scripts/refresh-desktop-releases.sh --skip-quality-gates --skip-linux --skip-windows
 ```
 
-That command validates desktop artifacts, runs the same macOS packaging command, and applies the `bundle_dmg.sh --skip-jenkins` fallback before staging.
+That command runs macOS packaging only and applies the `bundle_dmg.sh --skip-jenkins` fallback before staging.
 
 Raw output is generated under:
 
@@ -507,8 +459,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 Cross-target requirements from Tauri:
-1. Windows target (`x86_64-pc-windows-msvc`) needs MSVC `link.exe` from Visual Studio Build Tools C++ workload.
-2. Linux target (`aarch64-unknown-linux-gnu`) needs target GTK/WebKit development libraries and containerized build dependencies.
+1. **Windows** (`x86_64-pc-windows-msvc`): `cargo-xwin`, Docker for NSIS setup fallback.
+2. **Linux** (`aarch64-unknown-linux-gnu`): Docker with Ubuntu 24.04 for containerized bundling.
 
 ### 12.4 Tauri-specific environment knobs
 

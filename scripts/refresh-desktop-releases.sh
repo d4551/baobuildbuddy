@@ -56,9 +56,17 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RELEASE_ROOT="$REPO_ROOT/packages/desktop/releases"
+LINUX_DOCKERFILE_DIR="$REPO_ROOT/scripts/docker/linux-arm64-builder"
 APP_VERSION="$(awk -F '"' '/^version = /{print $2; exit}' "$REPO_ROOT/packages/desktop/src-tauri/Cargo.toml")"
 APP_PRODUCT_NAME="$(awk -F '"' '/"productName"[[:space:]]*:/ {print $4; exit}' "$REPO_ROOT/packages/desktop/src-tauri/tauri.conf.json")"
 APP_BINARY_NAME="$(awk -F '"' '/^name = /{print $2; exit}' "$REPO_ROOT/packages/desktop/src-tauri/Cargo.toml")"
+
+LINUX_DOCKER_PLATFORM="linux/arm64/v8"
+LINUX_DOCKER_IMAGE="baobuildbuddy-linux-arm64-builder:ubuntu24.04-v1"
+LINUX_DOCKER_BUILD_ROOT="/tmp/bao-linux-build"
+LINUX_DOCKER_BUN_CACHE_VOLUME="baobuildbuddy-linux-arm64-bun-cache"
+LINUX_DOCKER_CARGO_GIT_VOLUME="baobuildbuddy-linux-arm64-cargo-git"
+LINUX_DOCKER_CARGO_REGISTRY_VOLUME="baobuildbuddy-linux-arm64-cargo-registry"
 
 MACOS_BUILD_TARGET="aarch64-apple-darwin"
 MACOS_ARCH="aarch64"
@@ -67,11 +75,14 @@ WINDOWS_ARCH_LABEL="x64"
 LINUX_BUILD_TARGET="aarch64-unknown-linux-gnu"
 LINUX_ARCH="aarch64"
 LINUX_DEB_ARCH="arm64"
+# Isolated target dir for Docker Linux build to avoid phf_macros rlib format errors
+# from host (macOS) artifacts in the shared target/ directory
+LINUX_CARGO_TARGET_DIR="packages/desktop/src-tauri/target-linux"
+LINUX_TARGET_ROOT="$REPO_ROOT/${LINUX_CARGO_TARGET_DIR}/${LINUX_BUILD_TARGET}/release"
 
 MACOS_HOST_BUNDLE_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/release/bundle"
 MACOS_TARGET_BUNDLE_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${MACOS_BUILD_TARGET}/release/bundle"
 WINDOWS_TARGET_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${WINDOWS_BUILD_TARGET}/release"
-LINUX_TARGET_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${LINUX_BUILD_TARGET}/release"
 
 MACOS_APP_NAME="${APP_PRODUCT_NAME}"
 MACOS_DMG_NAME="${APP_PRODUCT_NAME}_${APP_VERSION}_${MACOS_ARCH}.dmg"
@@ -96,6 +107,53 @@ require_command() {
   if ! command_exists "$1"; then
     die "Required command not found: $1"
   fi
+}
+
+prepare_linux_builder_image() {
+  if [ ! -f "$LINUX_DOCKERFILE_DIR/Dockerfile" ]; then
+    die "Linux ARM64 builder Dockerfile not found: $LINUX_DOCKERFILE_DIR/Dockerfile"
+  fi
+
+  step "Preparing Linux ARM64 builder image"
+  docker build --platform "$LINUX_DOCKER_PLATFORM" -t "$LINUX_DOCKER_IMAGE" "$LINUX_DOCKERFILE_DIR" >/dev/null
+  ok "Linux ARM64 builder image ready"
+}
+
+run_linux_container_build() {
+  local container_command="$1"
+
+  docker run --rm --platform "$LINUX_DOCKER_PLATFORM" \
+    -v "$REPO_ROOT:/repo" \
+    -v "$LINUX_DOCKER_BUN_CACHE_VOLUME:/root/.bun/install/cache" \
+    -v "$LINUX_DOCKER_CARGO_GIT_VOLUME:/root/.cargo/git" \
+    -v "$LINUX_DOCKER_CARGO_REGISTRY_VOLUME:/root/.cargo/registry" \
+    -w /repo \
+    -e LINUX_BUILD_TARGET="$LINUX_BUILD_TARGET" \
+    -e LINUX_CARGO_TARGET_DIR="$LINUX_CARGO_TARGET_DIR" \
+    -e LINUX_DOCKER_BUILD_ROOT="$LINUX_DOCKER_BUILD_ROOT" \
+    -e APP_PRODUCT_NAME="$APP_PRODUCT_NAME" \
+    -e LINUX_ARCH="$LINUX_ARCH" \
+    -e HOME="/root" \
+    "$LINUX_DOCKER_IMAGE" bash -lc "$container_command"
+}
+
+describe_linux_container_exit() {
+  local exit_code="$1"
+
+  case "$exit_code" in
+    0)
+      printf '%s\n' "success"
+      ;;
+    137)
+      printf '%s\n' "exit 137 (container terminated, typically due to memory pressure)"
+      ;;
+    143)
+      printf '%s\n' "exit 143 (container terminated by SIGTERM)"
+      ;;
+    *)
+      printf 'exit %s\n' "$exit_code"
+      ;;
+  esac
 }
 
 latest_file_from_patterns() {
@@ -261,13 +319,14 @@ if [ "$BUILD_WINDOWS" = true ]; then
   step "Building Windows x64 portable artifact"
   windows_build_exit=0
   set +e
+  # Unset CI to avoid cargo-xwin --ci rejecting CI=1 (expects true/false)
   if [ -d "/opt/homebrew/opt/llvm/bin" ]; then
-    PATH="/opt/homebrew/opt/llvm/bin:$PATH" bun run --filter '@bao/desktop' build -- \
+    PATH="/opt/homebrew/opt/llvm/bin:$PATH" env -u CI bun run --filter '@bao/desktop' build -- \
       --target "$WINDOWS_BUILD_TARGET" \
       --runner cargo-xwin \
       --config '{"build":{"beforeBuildCommand":""}}'
   else
-    bun run --filter '@bao/desktop' build -- \
+    env -u CI bun run --filter '@bao/desktop' build -- \
       --target "$WINDOWS_BUILD_TARGET" \
       --runner cargo-xwin \
       --config '{"build":{"beforeBuildCommand":""}}'
@@ -291,6 +350,7 @@ if [ "$BUILD_WINDOWS" = true ]; then
   ok "Windows payload generation complete"
 
   step "Building Windows x64 setup artifact"
+  windows_setup_ok=false
   if command_exists makensis; then
     local_makensis_exit=0
     set +e
@@ -300,8 +360,11 @@ if [ "$BUILD_WINDOWS" = true ]; then
     )
     local_makensis_exit=$?
     set -e
-    if [ "$local_makensis_exit" -ne 0 ]; then
+    if [ "$local_makensis_exit" -eq 0 ]; then
+      windows_setup_ok=true
+    else
       warn "Local makensis exited with code $local_makensis_exit; falling back to containerized NSIS."
+      set +e
       docker run --rm --platform linux/arm64/v8 \
         -v "$REPO_ROOT:$REPO_ROOT" \
         -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
@@ -313,8 +376,11 @@ if [ "$BUILD_WINDOWS" = true ]; then
           apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends nsis
           makensis -V2 installer.nsi
         '
+      [ $? -eq 0 ] && windows_setup_ok=true
+      set -e
     fi
   else
+    set +e
     docker run --rm --platform linux/arm64/v8 \
       -v "$REPO_ROOT:$REPO_ROOT" \
       -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
@@ -326,97 +392,99 @@ if [ "$BUILD_WINDOWS" = true ]; then
         apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends nsis
         makensis -V2 installer.nsi
       '
+    [ $? -eq 0 ] && windows_setup_ok=true
+    set -e
   fi
 
-  WINDOWS_SETUP_SOURCE="$(latest_file_from_patterns \
-    "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
-    "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
-    "$WINDOWS_TARGET_ROOT/nsis/x64/nsis-output.exe")" || die "Windows setup artifact not found after NSIS build."
+  if [ "$windows_setup_ok" = false ]; then
+    die "NSIS setup build failed for requested Windows target."
+  fi
 
   mkdir -p "$WINDOWS_BUNDLE_DIR"
   WINDOWS_SETUP_TARGET="$WINDOWS_BUNDLE_DIR/${APP_PRODUCT_NAME}_${APP_VERSION}_${WINDOWS_ARCH_LABEL}-setup.exe"
   WINDOWS_PORTABLE_TARGET="$WINDOWS_BUNDLE_DIR/${APP_PRODUCT_NAME}_${APP_VERSION}_${WINDOWS_ARCH_LABEL}-portable.exe"
-  if [ "$WINDOWS_SETUP_SOURCE" != "$WINDOWS_SETUP_TARGET" ]; then
+  WINDOWS_SETUP_SOURCE=""
+  if [ "$windows_setup_ok" = true ]; then
+    WINDOWS_SETUP_SOURCE="$(latest_file_from_patterns \
+      "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
+      "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
+      "$WINDOWS_TARGET_ROOT/nsis/x64/nsis-output.exe")" || true
+  fi
+  if [ -n "$WINDOWS_SETUP_SOURCE" ] && [ -f "$WINDOWS_SETUP_SOURCE" ]; then
     cp "$WINDOWS_SETUP_SOURCE" "$WINDOWS_SETUP_TARGET"
+    ok "Windows setup artifact staged"
   fi
   cp "$WINDOWS_EXE_PATH" "$WINDOWS_PORTABLE_TARGET"
-  ok "Windows setup and portable artifacts prepared"
+  ok "Windows portable artifact staged"
 fi
 
+LINUX_ARTIFACTS_READY=false
 if [ "$BUILD_LINUX" = true ]; then
   require_command docker
+  prepare_linux_builder_image
 
   step "Building Linux ARM64 artifacts"
   linux_build_exit=0
   set +e
-  docker run --rm --platform linux/arm64/v8 \
-    -v "$REPO_ROOT:/workspace" \
-    -w /workspace \
-    -e LINUX_BUILD_TARGET="$LINUX_BUILD_TARGET" \
-    -e APP_PRODUCT_NAME="$APP_PRODUCT_NAME" \
-    -e LINUX_ARCH="$LINUX_ARCH" \
-    ubuntu:24.04 bash -lc '
-      set -euo pipefail
-      export DEBIAN_FRONTEND=noninteractive
-      apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
-      apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends curl unzip build-essential pkg-config \
-        libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
-        librsvg2-dev patchelf ca-certificates git
-      curl -fsSL https://bun.sh/install | bash
-      export BUN_INSTALL="/root/.bun"
-      export PATH="$BUN_INSTALL/bin:$PATH"
-      curl https://sh.rustup.rs -sSf | sh -s -- -y
-      export PATH="/root/.cargo/bin:$PATH"
-      rustup target add "$LINUX_BUILD_TARGET"
-      export APPIMAGE_EXTRACT_AND_RUN=1
-      bun run --filter "@bao/desktop" build -- \
-        --target "$LINUX_BUILD_TARGET" \
-        --config "{\"build\":{\"beforeBuildCommand\":\"\"}}"
-    '
+  run_linux_container_build '
+    set -euo pipefail
+    rm -rf "$LINUX_DOCKER_BUILD_ROOT"
+    mkdir -p "$LINUX_DOCKER_BUILD_ROOT"
+    tar \
+      --exclude=.git \
+      --exclude=node_modules \
+      --exclude=packages/client/.nuxt \
+      --exclude=packages/desktop/src-tauri/target \
+      --exclude=packages/desktop/src-tauri/target-linux \
+      -C /repo -cf - . | tar -C "$LINUX_DOCKER_BUILD_ROOT" -xf -
+    cd "$LINUX_DOCKER_BUILD_ROOT"
+    bun install --frozen-lockfile --filter "@bao/desktop"
+    export CARGO_TARGET_DIR="$LINUX_DOCKER_BUILD_ROOT/$LINUX_CARGO_TARGET_DIR"
+    export APPIMAGE_EXTRACT_AND_RUN=1
+    export CARGO_BUILD_JOBS=1
+    set +e
+    bun run --filter "@bao/desktop" build -- \
+      --target "$LINUX_BUILD_TARGET" \
+      --config "{\"build\":{\"beforeBuildCommand\":\"\"}}"
+    linux_build_exit=$?
+    set -e
+    mkdir -p "/repo/$LINUX_CARGO_TARGET_DIR/$LINUX_BUILD_TARGET"
+    rm -rf "/repo/$LINUX_CARGO_TARGET_DIR/$LINUX_BUILD_TARGET/release"
+    cp -R "$CARGO_TARGET_DIR/$LINUX_BUILD_TARGET/release" "/repo/$LINUX_CARGO_TARGET_DIR/$LINUX_BUILD_TARGET/"
+    exit "$linux_build_exit"
+  '
   linux_build_exit=$?
   set -e
 
   if [ "$linux_build_exit" -ne 0 ]; then
-    warn "Linux ARM64 build exited with code $linux_build_exit; validating emitted payloads and AppImage fallback."
+    warn "Linux ARM64 build returned $(describe_linux_container_exit "$linux_build_exit"); validating deb/rpm outputs and AppImage fallback."
   fi
 
   if ! latest_file_from_patterns \
     "$LINUX_TARGET_ROOT/bundle/deb/${APP_PRODUCT_NAME}_*_${LINUX_DEB_ARCH}.deb" \
     >/dev/null; then
-    die "Linux deb artifact not found after Linux build."
-  fi
-
-  if ! latest_file_from_patterns \
+    die "Linux deb artifact not found after requested build (build status: $(describe_linux_container_exit "$linux_build_exit"))."
+  elif ! latest_file_from_patterns \
     "$LINUX_TARGET_ROOT/bundle/rpm/${APP_PRODUCT_NAME}-*.${LINUX_ARCH}.rpm" \
     >/dev/null; then
-    die "Linux rpm artifact not found after Linux build."
-  fi
-
-  if ! latest_file_from_patterns \
+    die "Linux rpm artifact not found after requested build (build status: $(describe_linux_container_exit "$linux_build_exit"))."
+  elif ! latest_file_from_patterns \
     "$LINUX_TARGET_ROOT/bundle/appimage/${APP_PRODUCT_NAME}_*_${LINUX_ARCH}.AppImage" \
     >/dev/null; then
     step "Running AppImage fallback build"
-    docker run --rm --platform linux/arm64/v8 \
-      -v "$REPO_ROOT:/workspace" \
-      -w /workspace \
-      -e LINUX_BUILD_TARGET="$LINUX_BUILD_TARGET" \
-      -e APP_PRODUCT_NAME="$APP_PRODUCT_NAME" \
-      -e LINUX_ARCH="$LINUX_ARCH" \
-      ubuntu:24.04 bash -lc '
+    run_linux_container_build '
         set -euo pipefail
-        export DEBIAN_FRONTEND=noninteractive
-        apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
-        apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends curl ca-certificates libglib2.0-0 file squashfs-tools
         curl -L -o /tmp/appimagetool-aarch64.AppImage \
           https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage
         chmod +x /tmp/appimagetool-aarch64.AppImage
         export APPIMAGE_EXTRACT_AND_RUN=1
         VERSION="$(awk -F "\"" "/^version = /{print \$2; exit}" packages/desktop/src-tauri/Cargo.toml)"
-        APPIMAGE_OUTPUT="packages/desktop/src-tauri/target/${LINUX_BUILD_TARGET}/release/bundle/appimage/${APP_PRODUCT_NAME}_${VERSION}_${LINUX_ARCH}.AppImage"
+        LINUX_RELEASE_ROOT="/repo/$LINUX_CARGO_TARGET_DIR/${LINUX_BUILD_TARGET}/release"
+        APPIMAGE_OUTPUT="${LINUX_RELEASE_ROOT}/bundle/appimage/${APP_PRODUCT_NAME}_${VERSION}_${LINUX_ARCH}.AppImage"
         /tmp/appimagetool-aarch64.AppImage \
-          packages/desktop/src-tauri/target/${LINUX_BUILD_TARGET}/release/bundle/appimage/${APP_PRODUCT_NAME}.AppDir \
+          "${LINUX_RELEASE_ROOT}/bundle/appimage/${APP_PRODUCT_NAME}.AppDir" \
           "$APPIMAGE_OUTPUT"
-      '
+    '
     ok "Linux AppImage fallback complete"
   fi
 
@@ -424,9 +492,13 @@ if [ "$BUILD_LINUX" = true ]; then
     "$LINUX_TARGET_ROOT/bundle/appimage/${APP_PRODUCT_NAME}_*_${LINUX_ARCH}.AppImage" \
     >/dev/null; then
     die "Linux AppImage artifact not found after fallback."
+  else
+    LINUX_ARTIFACTS_READY=true
   fi
 
-  ok "Linux ARM64 artifacts ready"
+  if [ "$LINUX_ARTIFACTS_READY" = true ]; then
+    ok "Linux ARM64 artifacts ready"
+  fi
 fi
 
 step "Refreshing canonical release directories"
@@ -456,9 +528,14 @@ if [ "$BUILD_WINDOWS" = true ]; then
   copy_latest_artifact "$RELEASE_ROOT/windows" true \
     "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-portable.exe" \
     "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}_portable.exe"
-  copy_latest_artifact "$RELEASE_ROOT/windows" false \
+  if latest_file_from_patterns \
     "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
-    "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe"
+    "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
+    >/dev/null; then
+    copy_latest_artifact "$RELEASE_ROOT/windows" false \
+      "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
+      "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe"
+  fi
 fi
 
 step "Regenerating release checksums"

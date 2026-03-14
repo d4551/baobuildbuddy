@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { APP_ROUTE_BUILDERS } from "@bao/shared";
+import {
+  APP_ROUTE_BUILDERS,
+  formatRelativeTimeForDate,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -29,23 +34,16 @@ const remainingCount = computed(() => Math.max(0, props.job.technologies.length 
 
 const matchScoreColor = computed(() => {
   if (!props.job.matchScore) return "badge-ghost";
-  if (props.job.matchScore > 80) return "badge-success";
-  if (props.job.matchScore > 60) return "badge-warning";
+  if (props.job.matchScore >= SCORE_PASS_THRESHOLD) return "badge-success";
+  if (props.job.matchScore >= SCORE_WARNING_THRESHOLD) return "badge-warning";
   return "badge-error";
 });
 
-const relativeTime = computed(() => {
-  const now = new Date();
-  const posted = new Date(props.job.postedDate);
-  const diffTime = Math.abs(now.getTime() - posted.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return t("jobCard.relativeTime.today");
-  if (diffDays === 1) return t("jobCard.relativeTime.yesterday");
-  if (diffDays < 7) return t("jobCard.relativeTime.daysAgo", { count: diffDays });
-  if (diffDays < 30) return t("jobCard.relativeTime.weeksAgo", { count: Math.floor(diffDays / 7) });
-  return t("jobCard.relativeTime.monthsAgo", { count: Math.floor(diffDays / 30) });
-});
+const relativeTime = computed(() =>
+  formatRelativeTimeForDate(props.job.postedDate, (key, params) => t(key, params), {
+    keyPrefix: "jobCard.relativeTime",
+  }),
+);
 
 function toggleSave() {
   isSaved.value = !isSaved.value;

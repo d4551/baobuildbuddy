@@ -1,4 +1,9 @@
-import { isResumeTemplate, RESUME_DEFAULT_NAME, RESUME_TEMPLATE_DEFAULT } from "@bao/shared";
+import {
+  isResumeTemplate,
+  JOB_QUERY_DEFAULT_LIMIT,
+  RESUME_DEFAULT_NAME,
+  RESUME_TEMPLATE_DEFAULT,
+} from "@bao/shared";
 import { like, or } from "drizzle-orm";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
@@ -122,7 +127,7 @@ export class SearchService {
             like(jobs.description, pattern),
           ),
         )
-        .limit(20),
+        .limit(JOB_QUERY_DEFAULT_LIMIT),
     );
     if (!jobRows) {
       return [];
@@ -150,7 +155,7 @@ export class SearchService {
             like(studios.location, pattern),
           ),
         )
-        .limit(20),
+        .limit(JOB_QUERY_DEFAULT_LIMIT),
     );
     if (!studioRows) {
       return [];
@@ -177,7 +182,7 @@ export class SearchService {
             like(skillMappings.transferableSkill, pattern),
           ),
         )
-        .limit(20),
+        .limit(JOB_QUERY_DEFAULT_LIMIT),
     );
     if (!skillRows) {
       return [];
@@ -198,7 +203,7 @@ export class SearchService {
         .select()
         .from(resumes)
         .where(or(like(resumes.name, pattern), like(resumes.summary, pattern)))
-        .limit(20),
+        .limit(JOB_QUERY_DEFAULT_LIMIT),
     );
     if (!resumeRows) {
       return [];

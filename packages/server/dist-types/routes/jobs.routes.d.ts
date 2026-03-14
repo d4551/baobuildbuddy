@@ -34,8 +34,8 @@ export declare const jobsRoutes: Elysia<"/jobs", {
             params: {};
             query: {
                 location?: string | undefined;
-                experienceLevel?: string | undefined;
                 remote?: string | undefined;
+                experienceLevel?: string | undefined;
                 limit?: string | undefined;
                 page?: string | undefined;
                 studioType?: string | undefined;
@@ -54,12 +54,13 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                         description: string | null;
                         company: string;
                         location: string;
-                        requirements: string[] | null;
-                        technologies: string[] | null;
-                        postedDate: string | null;
-                        url: string | null;
-                        experienceLevel: string | null;
                         remote: boolean | null;
+                        url: string | null;
+                        contentHash: string | null;
+                        postedDate: string | null;
+                        technologies: string[] | null;
+                        requirements: string[] | null;
+                        experienceLevel: string | null;
                         hybrid: boolean | null;
                         gameGenres: string[] | null;
                         platforms: string[] | null;
@@ -68,7 +69,6 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                         updatedAt: string;
                         salary: Record<string, unknown> | null;
                         studioType: string | null;
-                        contentHash: string | null;
                         companyLogo: string | null;
                         applicationUrl: string | null;
                     }[];

@@ -161,9 +161,15 @@ async function assertMapsUnauthorizedToUiState(): Promise<void> {
 describe("useAutomationRunStream", () => {
   it("starts stream lifecycle and subscribes for non-terminal runs", assertStartsStreamLifecycle);
 
-  it("applies progress/result events and stops on terminal result", assertAppliesEventsAndStopsAtResult);
+  it(
+    "applies progress/result events and stops on terminal result",
+    assertAppliesEventsAndStopsAtResult,
+  );
 
-  it("ignores stale event sequences and does not mark success on progress success", assertIgnoresStaleProgressEvents);
+  it(
+    "ignores stale event sequences and does not mark success on progress success",
+    assertIgnoresStaleProgressEvents,
+  );
 
   it("maps unauthorized fetch failures to deterministic ui state", assertMapsUnauthorizedToUiState);
 });

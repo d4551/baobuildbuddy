@@ -5,16 +5,16 @@
 export interface UserProfile {
   id: string; // always "default"
   name: string;
-  email?: string;
-  phone?: string;
-  location?: string;
-  website?: string;
-  linkedin?: string;
-  github?: string;
-  summary?: string;
-  currentRole?: string;
-  currentCompany?: string;
-  yearsExperience?: number;
+  email?: string | null;
+  phone?: string | null;
+  location?: string | null;
+  website?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  summary?: string | null;
+  currentRole?: string | null;
+  currentCompany?: string | null;
+  yearsExperience?: number | null;
   technicalSkills: string[];
   softSkills: string[];
   gamingExperience: GamingExperienceProfile;

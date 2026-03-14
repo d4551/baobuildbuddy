@@ -20,7 +20,10 @@ interface JobsContext {
   filters: ReturnType<typeof useState<Record<string, string>>>;
 }
 
-async function searchJobs(context: JobsContext, searchFilters?: Record<string, string>): Promise<void> {
+async function searchJobs(
+  context: JobsContext,
+  searchFilters?: Record<string, string>,
+): Promise<void> {
   return withLoadingState(context.loading, async () => {
     if (searchFilters) {
       context.filters.value = searchFilters;

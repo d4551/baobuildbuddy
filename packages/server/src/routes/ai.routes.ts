@@ -1,15 +1,49 @@
 import type { AIChatContext, AIChatContextDomain } from "@bao/shared";
 import {
+  API_ERROR_ANALYZE_RESUME,
+  API_ERROR_GENERATE_AI_RESPONSE,
+  API_MESSAGE_AI_NO_JOBS_FOR_MATCHING,
+  API_MESSAGE_AI_NO_PROVIDERS,
+  API_MESSAGE_COVER_LETTER_GENERATED,
+  API_MESSAGE_JOB_MATCHING_COMPLETE,
+  API_ERROR_UNSUPPORTED_AUTOMATION_ACTION,
+  API_MESSAGE_RESUME_ANALYSIS_COMPLETE,
+  API_ERROR_GENERATE_COVER_LETTER,
+  API_ERROR_MATCH_JOBS,
+  API_ERROR_RESUME_NOT_FOUND,
+  AI_DEFAULT_TEMPERATURE,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  DEFAULT_PROFILE_ID,
+  DEFAULT_SCORE_NEUTRAL,
   AI_CHAT_CONTEXT_DOMAIN_IDS,
   AI_CHAT_CONTEXT_ENTITY_TYPE_IDS,
   AI_CHAT_CONTEXT_SOURCE_IDS,
+  AI_CHAT_CONTEXT_TAIL_LIMIT,
+  AI_CHAT_RECENT_JOBS_LIMIT,
+  AI_MAX_TOKENS_CHAT,
   AI_PROVIDER_CATALOG,
   asString,
   asStringArray,
   generateId,
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
   inferAIChatDomainFromRoutePath,
   isRecord,
+  SCHEMA_MAX_LENGTH_DEVICE,
+  SCHEMA_MAX_LENGTH_ENTITY_TYPE,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LABEL,
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_MESSAGE,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_LENGTH_SOURCE,
+  SCHEMA_MAX_LENGTH_URL,
+  SCHEMA_MAX_ITEMS_XXLARGE,
   safeParseJson,
+  MS_PER_MINUTE,
+  settle,
+  toErrorMessage,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -29,44 +63,10 @@ import {
   resumeScorePrompt,
   SYSTEM_PROMPT,
 } from "../services/ai/prompts";
-import {
-  AutomationConcurrencyLimitError,
-  AutomationDependencyMissingError,
-  AutomationValidationError,
-  applicationAutomationService,
-} from "../services/automation/application-automation-service";
+import { applicationAutomationService } from "../services/automation/application-automation-service";
+import { mapAutomationRouteError } from "../utils/automation-route-error";
 import { createServerLogger } from "../utils/logger";
-
-const HTTP_STATUS_BAD_REQUEST = 400;
-const HTTP_STATUS_NOT_FOUND = 404;
-const HTTP_STATUS_CONFLICT = 409;
-const HTTP_STATUS_UNPROCESSABLE_ENTITY = 422;
-const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
-
-const mapAutomationRouteError = (error: unknown) => {
-  if (error instanceof AutomationValidationError) {
-    return {
-      status: HTTP_STATUS_UNPROCESSABLE_ENTITY,
-      message: error.message,
-    };
-  }
-  if (error instanceof AutomationDependencyMissingError) {
-    return {
-      status: HTTP_STATUS_NOT_FOUND,
-      message: error.message,
-    };
-  }
-  if (error instanceof AutomationConcurrencyLimitError) {
-    return {
-      status: HTTP_STATUS_CONFLICT,
-      message: error.message,
-    };
-  }
-  return {
-    status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
-    message: error instanceof Error ? error.message : "Failed to start automation",
-  };
-};
+import { resolveRateLimitClientKey } from "../utils/request";
 
 const aiRoutesLogger = createServerLogger("ai-routes");
 
@@ -80,11 +80,6 @@ async function getAIService() {
   const aiService = AIService.fromSettings(settingsRow);
   return aiService;
 }
-
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 
 /**
  * Helper to safely parse JSON from AI responses
@@ -113,19 +108,19 @@ const collectStringArray = (value: unknown): string[] => {
 };
 
 const chatContextSchema = t.Object({
-  source: t.String({ maxLength: 32 }),
-  domain: t.Optional(t.String({ maxLength: 32 })),
+  source: t.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE }),
+  domain: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE })),
   route: t.Object({
-    path: t.String({ maxLength: 500 }),
-    name: t.Optional(t.String({ maxLength: 120 })),
+    path: t.String({ maxLength: SCHEMA_MAX_LENGTH_URL }),
+    name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
     params: t.Record(t.String(), t.String()),
     query: t.Record(t.String(), t.String()),
   }),
   entity: t.Optional(
     t.Object({
-      type: t.String({ maxLength: 64 }),
-      id: t.String({ maxLength: 100 }),
-      label: t.Optional(t.String({ maxLength: 200 })),
+      type: t.String({ maxLength: SCHEMA_MAX_LENGTH_ENTITY_TYPE }),
+      id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+      label: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
     }),
   ),
   state: t.Object({
@@ -246,26 +241,6 @@ function composeChatSystemPrompt(
   }
   return promptSections.join("\n\n");
 }
-
-const resolveRateLimitClientKey = (request: Request): string => {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor && forwardedFor.trim().length > 0) {
-    const firstHop = forwardedFor.split(",")[0]?.trim();
-    if (firstHop) return firstHop;
-  }
-
-  const cloudflareIp = request.headers.get("cf-connecting-ip");
-  if (cloudflareIp && cloudflareIp.trim().length > 0) {
-    return cloudflareIp.trim();
-  }
-
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp && realIp.trim().length > 0) {
-    return realIp.trim();
-  }
-
-  return new URL(request.url).host;
-};
 
 interface ExperienceEntry {
   title?: string;
@@ -401,14 +376,7 @@ const DEFAULT_COVER_LETTER_RESPONSE: CoverLetterSections = {
   conclusion: "I look forward to discussing this opportunity with you.",
 };
 
-const DEFAULT_MATCH_SCORE = 50;
-const DEFAULT_RESUME_ANALYSIS_ERROR = "Failed to analyze resume";
-const DEFAULT_COVER_LETTER_ERROR = "Failed to generate cover letter";
-const DEFAULT_JOB_MATCH_ERROR = "Failed to match jobs";
 const JOB_DESCRIPTION_UNAVAILABLE = "No specific job description provided.";
-
-const toErrorMessage = (reason: unknown, fallback: string): string =>
-  reason instanceof Error ? reason.message : fallback;
 
 const createChatMessage = (
   role: "user" | "assistant",
@@ -422,7 +390,10 @@ const createChatMessage = (
   sessionId,
 });
 
-const appendPersonalInfoSection = (sections: string[], personalInfo?: Record<string, unknown> | null) => {
+const appendPersonalInfoSection = (
+  sections: string[],
+  personalInfo?: Record<string, unknown> | null,
+) => {
   if (!personalInfo) return;
   sections.push("Personal Information:");
   sections.push(JSON.stringify(personalInfo, null, 2));
@@ -455,7 +426,9 @@ const appendEducationSection = (sections: string[], entries: EducationEntry[]) =
 
   sections.push("\nEducation:");
   for (const [index, entry] of entries.entries()) {
-    sections.push(`${index + 1}. ${entry.degree || "Degree"} - ${entry.institution || "Institution"}`);
+    sections.push(
+      `${index + 1}. ${entry.degree || "Degree"} - ${entry.institution || "Institution"}`,
+    );
     if (entry.year) sections.push(`   Year: ${entry.year}`);
   }
 };
@@ -510,7 +483,7 @@ const createFallbackJobMatch = (job: JobRow) => ({
   company: job.company,
   location: job.location,
   remote: job.remote ?? false,
-  score: DEFAULT_MATCH_SCORE,
+  score: DEFAULT_SCORE_NEUTRAL,
   strengths: [],
   concerns: [],
   highlightSkills: [],
@@ -545,7 +518,9 @@ const parseCoverLetterSections = (content: string): CoverLetterSections => {
   };
 };
 
-const persistChatMessage = async (message: ChatHistoryInsert): Promise<PromiseSettledResult<unknown>> => {
+const persistChatMessage = async (
+  message: ChatHistoryInsert,
+): Promise<PromiseSettledResult<unknown>> => {
   return settle(db.insert(chatHistory).values(message));
 };
 
@@ -577,8 +552,14 @@ const mergeUniqueSkills = (existing: string[], additional: string[]): string[] =
   return [...new Set([...existing, ...additional])];
 };
 
-const buildMatchProfile = async (skills: string[] | undefined, resumeId?: string): Promise<MatchProfile> => {
-  const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
+const buildMatchProfile = async (
+  skills: string[] | undefined,
+  resumeId?: string,
+): Promise<MatchProfile> => {
+  const profileRows = await db
+    .select()
+    .from(userProfile)
+    .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
   const profile = profileRows[0];
 
   let userSkills = skills || [];
@@ -624,8 +605,8 @@ const analyzeSingleJobMatch = async (
 ): Promise<MatchJobsResponse["matches"][number]> => {
   const responseResult = await settle(
     aiService.generate(buildJobMatchPromptText(profile, job), {
-      temperature: 0.3,
-      maxTokens: 1000,
+      temperature: AI_DEFAULT_TEMPERATURE,
+      maxTokens: AI_MAX_TOKENS_CHAT,
     }),
   );
   if (responseResult.status === "rejected") {
@@ -637,7 +618,7 @@ const analyzeSingleJobMatch = async (
   if (response.error) return createFallbackJobMatch(job);
 
   const parsed = safeJSONParse(response.content, {
-    score: DEFAULT_MATCH_SCORE,
+    score: DEFAULT_SCORE_NEUTRAL,
     strengths: [],
     concerns: [],
     highlightSkills: [],
@@ -649,7 +630,7 @@ const analyzeSingleJobMatch = async (
     company: job.company,
     location: job.location,
     remote: job.remote ?? false,
-    score: parsed.score || DEFAULT_MATCH_SCORE,
+    score: parsed.score || DEFAULT_SCORE_NEUTRAL,
     strengths: parsed.strengths || [],
     concerns: parsed.concerns || [],
     highlightSkills: parsed.highlightSkills || [],
@@ -670,10 +651,14 @@ const runJobMatchingFlow = async (
   skills: string[] | undefined,
 ): Promise<MatchJobsResponse> => {
   const profile = await buildMatchProfile(skills, resumeId);
-  const recentJobs = await db.select().from(jobs).orderBy(desc(jobs.postedDate)).limit(10);
+  const recentJobs = await db
+    .select()
+    .from(jobs)
+    .orderBy(desc(jobs.postedDate))
+    .limit(AI_CHAT_RECENT_JOBS_LIMIT);
   if (recentJobs.length === 0) {
     return {
-      message: "No jobs available for matching",
+      message: API_MESSAGE_AI_NO_JOBS_FOR_MATCHING,
       matches: [],
       recommendations: [],
     };
@@ -686,7 +671,7 @@ const runJobMatchingFlow = async (
   matches.sort((a, b) => b.score - a.score);
 
   return {
-    message: "Job matching complete",
+    message: API_MESSAGE_JOB_MATCHING_COMPLETE,
     matches,
     recommendations: buildJobMatchRecommendations(matches),
   };
@@ -729,8 +714,10 @@ const handleChatRoute = async (
     createChatMessage("user", body.message, sessionId),
   );
   if (persistUserMessageResult.status === "rejected") {
-    set.status = 500;
-    return { error: toErrorMessage(persistUserMessageResult.reason, "Failed to generate AI response") };
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return {
+      error: toErrorMessage(persistUserMessageResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
+    };
   }
 
   const aiService = await getAIService();
@@ -750,27 +737,27 @@ const handleChatRoute = async (
     aiService.generate(body.message, {
       systemPrompt,
       messages: contextualConversation.messages,
-      temperature: 0.7,
-      maxTokens: 2000,
+      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+      maxTokens: SCHEMA_MAX_LENGTH_LONG,
     }),
   );
   if (generationResult.status === "rejected") {
-    set.status = 500;
-    return { error: toErrorMessage(generationResult.reason, "Failed to generate AI response") };
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return { error: toErrorMessage(generationResult.reason, API_ERROR_GENERATE_AI_RESPONSE) };
   }
 
   const response = generationResult.value;
   if (response.error) {
-    set.status = 500;
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return { error: response.error };
   }
 
   const assistantMessage = createChatMessage("assistant", response.content, sessionId);
   const persistAssistantMessageResult = await persistChatMessage(assistantMessage);
   if (persistAssistantMessageResult.status === "rejected") {
-    set.status = 500;
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return {
-      error: toErrorMessage(persistAssistantMessageResult.reason, "Failed to generate AI response"),
+      error: toErrorMessage(persistAssistantMessageResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
     };
   }
   return buildChatRouteResponse(assistantMessage, response, preferredDomain);
@@ -779,8 +766,8 @@ const handleChatRoute = async (
 const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody, set: RouteSetState) => {
   const resumeRows = await db.select().from(resumes).where(eq(resumes.id, body.resumeId));
   if (resumeRows.length === 0) {
-    set.status = 404;
-    return { error: "Resume not found" };
+    set.status = HTTP_STATUS_NOT_FOUND;
+    return { error: API_ERROR_RESUME_NOT_FOUND };
   }
 
   const resumeText = serializeResume(resumeRows[0] as ResumeRecord);
@@ -788,23 +775,23 @@ const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody, set: RouteSetSt
   const aiService = await getAIService();
   const responseResult = await settle(
     aiService.generate(buildAnalyzeResumePrompt(resumeText, jobDescription), {
-      temperature: 0.3,
-      maxTokens: 2000,
+      temperature: AI_DEFAULT_TEMPERATURE,
+      maxTokens: SCHEMA_MAX_LENGTH_LONG,
     }),
   );
   if (responseResult.status === "rejected") {
-    set.status = 500;
-    return { error: toErrorMessage(responseResult.reason, DEFAULT_RESUME_ANALYSIS_ERROR) };
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return { error: toErrorMessage(responseResult.reason, API_ERROR_ANALYZE_RESUME) };
   }
 
   const response = responseResult.value;
   if (response.error) {
-    set.status = 500;
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return { error: response.error };
   }
 
   return {
-    message: "Resume analysis complete",
+    message: API_MESSAGE_RESUME_ANALYSIS_COMPLETE,
     resumeId: body.resumeId,
     jobId: body.jobId || null,
     analysis: parseResumeAnalysisResult(response.content),
@@ -813,11 +800,14 @@ const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody, set: RouteSetSt
   };
 };
 
-const handleGenerateCoverLetterRoute = async (body: GenerateCoverLetterBody, set: RouteSetState) => {
+const handleGenerateCoverLetterRoute = async (
+  body: GenerateCoverLetterBody,
+  set: RouteSetState,
+) => {
   const resumeRows = await db.select().from(resumes).where(eq(resumes.id, body.resumeId));
   if (resumeRows.length === 0) {
-    set.status = 404;
-    return { error: "Resume not found" };
+    set.status = HTTP_STATUS_NOT_FOUND;
+    return { error: API_ERROR_RESUME_NOT_FOUND };
   }
 
   const resumeText = serializeResume(resumeRows[0] as ResumeRecord);
@@ -825,23 +815,23 @@ const handleGenerateCoverLetterRoute = async (body: GenerateCoverLetterBody, set
   const aiService = await getAIService();
   const responseResult = await settle(
     aiService.generate(coverLetterPrompt(body.company, body.position, jobDescription, resumeText), {
-      temperature: 0.7,
-      maxTokens: 2000,
+      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+      maxTokens: SCHEMA_MAX_LENGTH_LONG,
     }),
   );
   if (responseResult.status === "rejected") {
-    set.status = 500;
-    return { error: toErrorMessage(responseResult.reason, DEFAULT_COVER_LETTER_ERROR) };
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return { error: toErrorMessage(responseResult.reason, API_ERROR_GENERATE_COVER_LETTER) };
   }
 
   const response = responseResult.value;
   if (response.error) {
-    set.status = 500;
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return { error: response.error };
   }
 
   return {
-    message: "Cover letter generated successfully",
+    message: API_MESSAGE_COVER_LETTER_GENERATED,
     content: parseCoverLetterSections(response.content),
     provider: response.provider,
     model: response.model,
@@ -851,8 +841,8 @@ const handleGenerateCoverLetterRoute = async (body: GenerateCoverLetterBody, set
 const handleMatchJobsRoute = async (body: MatchJobsBody, set: RouteSetState) => {
   const flowResult = await settle(runJobMatchingFlow(body.resumeId, body.skills));
   if (flowResult.status === "rejected") {
-    set.status = 500;
-    return { error: toErrorMessage(flowResult.reason, DEFAULT_JOB_MATCH_ERROR) };
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return { error: toErrorMessage(flowResult.reason, API_ERROR_MATCH_JOBS) };
   }
   return flowResult.value;
 };
@@ -864,55 +854,47 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
   .use(
     rateLimit({
       scoping: "scoped",
-      duration: 60000,
+      duration: MS_PER_MINUTE,
       max: 25,
       generator: (request) => resolveRateLimitClientKey(request),
     }),
   )
-  .post(
-    "/chat",
-    async ({ body, set }) => handleChatRoute(body, set),
-    {
-      body: t.Object({
-        message: t.String({ maxLength: 10000 }),
-        sessionId: t.Optional(t.String({ maxLength: 100 })),
-        context: t.Optional(chatContextSchema),
-      }),
-    },
-  )
-  .post(
-    "/analyze-resume",
-    async ({ body, set }) => handleAnalyzeResumeRoute(body, set),
-    {
-      body: t.Object({
-        resumeId: t.String({ maxLength: 100 }),
-        jobId: t.Optional(t.String({ maxLength: 100 })),
-      }),
-    },
-  )
+  .post("/chat", async ({ body, set }) => handleChatRoute(body, set), {
+    body: t.Object({
+      message: t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
+      sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+      context: t.Optional(chatContextSchema),
+    }),
+  })
+  .post("/analyze-resume", async ({ body, set }) => handleAnalyzeResumeRoute(body, set), {
+    body: t.Object({
+      resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+      jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    }),
+  })
   .post(
     "/generate-cover-letter",
     async ({ body, set }) => handleGenerateCoverLetterRoute(body, set),
     {
       body: t.Object({
-        resumeId: t.String({ maxLength: 100 }),
-        jobId: t.Optional(t.String({ maxLength: 100 })),
-        company: t.String({ maxLength: 200 }),
-        position: t.String({ maxLength: 200 }),
+        resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+        jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+        company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+        position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
       }),
     },
   )
-  .post(
-    "/match-jobs",
-    async ({ body, set }) => handleMatchJobsRoute(body, set),
-    {
-      body: t.Object({
-        resumeId: t.Optional(t.String({ maxLength: 100 })),
-        skills: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 100 })),
-        preferences: t.Optional(aiPreferenceSchema),
-      }),
-    },
-  )
+  .post("/match-jobs", async ({ body, set }) => handleMatchJobsRoute(body, set), {
+    body: t.Object({
+      resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+      skills: t.Optional(
+        t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+          maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
+        }),
+      ),
+      preferences: t.Optional(aiPreferenceSchema),
+    }),
+  })
   .get("/models", async () => {
     const serviceResult = await settle(getAIService());
     if (serviceResult.status === "rejected") {
@@ -927,7 +909,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
       }));
       return {
         providers,
-        error: "No AI providers configured. Please add API keys in settings.",
+        error: API_MESSAGE_AI_NO_PROVIDERS,
       };
     }
 
@@ -974,7 +956,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
       userMessages: chatMessages.filter((m) => m.role === "user").length,
       assistantMessages: chatMessages.filter((m) => m.role === "assistant").length,
       sessions: [...new Set(chatMessages.map((m) => m.sessionId))].length,
-      recentActivity: chatMessages.slice(-10).map((m) => ({
+      recentActivity: chatMessages.slice(-AI_CHAT_CONTEXT_TAIL_LIMIT).map((m) => ({
         timestamp: m.timestamp,
         role: m.role,
         sessionId: m.sessionId,
@@ -988,7 +970,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
 
       if (action !== "job_apply") {
         set.status = HTTP_STATUS_BAD_REQUEST;
-        return { error: `Unsupported automation action: ${action}` };
+        return { error: API_ERROR_UNSUPPORTED_AUTOMATION_ACTION.replace("__ACTION__", action) };
       }
 
       const runResult = await settle(
@@ -1001,7 +983,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
         const mapped = mapAutomationRouteError(runResult.reason);
         set.status = mapped.status;
         return {
-          error: mapped.message,
+          error: mapped.body.error.message,
         };
       }
 
@@ -1022,11 +1004,11 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
     },
     {
       body: t.Object({
-        action: t.String({ maxLength: 50 }),
-        jobUrl: t.String({ minLength: 1, maxLength: 2000 }),
-        resumeId: t.String({ maxLength: 100 }),
-        coverLetterId: t.Optional(t.String({ maxLength: 100 })),
-        jobId: t.Optional(t.String({ maxLength: 100 })),
+        action: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
+        jobUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+        resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+        coverLetterId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+        jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
       }),
     },
   );

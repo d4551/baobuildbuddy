@@ -1,6 +1,14 @@
 import z from "zod";
 import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
 import {
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_PAGES_MAX,
+  SCHEMA_MAX_PAGES_MIN,
+  SCHEMA_PROVIDER_TIMEOUT_MAX_MS,
+  SCHEMA_PROVIDER_TIMEOUT_MIN_MS,
+} from "../constants/schema-limits";
+import {
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
   DEFAULT_APP_LANGUAGE,
@@ -31,7 +39,7 @@ export const companyBoardTypeSchema = z.enum([
 ]);
 
 export const gamingPortalIdSchema = z.enum([
-  "gamedev-net",
+  "hitmarker",
   "grackle",
   "workwithindies",
   "remotegamejobs",
@@ -68,18 +76,22 @@ export const gamingPortalConfigSchema = z.object({
 });
 
 export const companyBoardApiTemplatesSchema = z.object({
-  greenhouse: z.string().trim().min(1).max(200),
-  lever: z.string().trim().min(1).max(200),
-  recruitee: z.string().trim().min(1).max(200),
-  workable: z.string().trim().min(1).max(200),
-  ashby: z.string().trim().min(1).max(200),
-  smartrecruiters: z.string().trim().min(1).max(200),
-  teamtailor: z.string().trim().min(1).max(200),
-  workday: z.string().trim().min(1).max(200),
+  greenhouse: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  lever: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  recruitee: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  workable: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  ashby: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  smartrecruiters: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  teamtailor: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  workday: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
 });
 
 export const jobProviderSettingsSchema = z.object({
-  providerTimeoutMs: z.number().int().min(1_000).max(120_000),
+  providerTimeoutMs: z
+    .number()
+    .int()
+    .min(SCHEMA_PROVIDER_TIMEOUT_MIN_MS)
+    .max(SCHEMA_PROVIDER_TIMEOUT_MAX_MS),
   companyBoardResultLimit: z.number().int().min(1).max(200),
   gamingBoardResultLimit: z.number().int().min(1).max(200),
   unknownLocationLabel: z.string().trim().min(1).max(100),
@@ -88,10 +100,10 @@ export const jobProviderSettingsSchema = z.object({
   hitmarkerDefaultQuery: z.string().trim().min(1).max(100),
   hitmarkerDefaultLocation: z.string().trim().min(1).max(100),
   greenhouseApiBaseUrl: z.string().url(),
-  greenhouseMaxPages: z.number().int().min(1).max(20),
+  greenhouseMaxPages: z.number().int().min(SCHEMA_MAX_PAGES_MIN).max(SCHEMA_MAX_PAGES_MAX),
   greenhouseBoards: z.array(greenhouseBoardConfigSchema).max(500),
   leverApiBaseUrl: z.string().url(),
-  leverMaxPages: z.number().int().min(1).max(20),
+  leverMaxPages: z.number().int().min(SCHEMA_MAX_PAGES_MIN).max(SCHEMA_MAX_PAGES_MAX),
   leverCompanies: z.array(leverCompanyConfigSchema).max(500),
   companyBoardApiTemplates: companyBoardApiTemplatesSchema,
   companyBoards: z.array(companyBoardConfigSchema).max(500),
@@ -111,14 +123,32 @@ const speechProviderSchema = z.enum(SPEECH_PROVIDER_OPTIONS);
 
 export const speechToTextSettingsSchema = z.object({
   provider: speechProviderSchema.default(DEFAULT_SPEECH_SETTINGS.stt.provider),
-  model: z.string().trim().min(1).max(200).default(DEFAULT_SPEECH_SETTINGS.stt.model),
-  endpoint: z.string().trim().max(2000).default(DEFAULT_SPEECH_SETTINGS.stt.endpoint),
+  model: z
+    .string()
+    .trim()
+    .min(1)
+    .max(SCHEMA_MAX_LENGTH_SHORT)
+    .default(DEFAULT_SPEECH_SETTINGS.stt.model),
+  endpoint: z
+    .string()
+    .trim()
+    .max(SCHEMA_MAX_LENGTH_LONG)
+    .default(DEFAULT_SPEECH_SETTINGS.stt.endpoint),
 });
 
 export const textToSpeechSettingsSchema = z.object({
   provider: speechProviderSchema.default(DEFAULT_SPEECH_SETTINGS.tts.provider),
-  model: z.string().trim().min(1).max(200).default(DEFAULT_SPEECH_SETTINGS.tts.model),
-  endpoint: z.string().trim().max(2000).default(DEFAULT_SPEECH_SETTINGS.tts.endpoint),
+  model: z
+    .string()
+    .trim()
+    .min(1)
+    .max(SCHEMA_MAX_LENGTH_SHORT)
+    .default(DEFAULT_SPEECH_SETTINGS.tts.model),
+  endpoint: z
+    .string()
+    .trim()
+    .max(SCHEMA_MAX_LENGTH_LONG)
+    .default(DEFAULT_SPEECH_SETTINGS.tts.endpoint),
   voice: z.string().trim().min(1).max(120).default(DEFAULT_SPEECH_SETTINGS.tts.voice),
   format: z.enum(["mp3", "wav"]).default(DEFAULT_SPEECH_SETTINGS.tts.format),
 });

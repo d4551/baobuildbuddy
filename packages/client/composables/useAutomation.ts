@@ -88,7 +88,11 @@ function createRunMutations(runtime: AutomationRuntime) {
 
   const triggerEmailResponse = (body: EmailResponseBody) =>
     $fetch<EmailAutomationResponse>(
-      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationEmailResponse),
+      resolveApiEndpoint(
+        runtime.apiBase,
+        runtime.requestUrl,
+        API_ENDPOINTS.automationEmailResponse,
+      ),
       {
         method: "POST",
         body,
@@ -103,7 +107,11 @@ function createRunMutations(runtime: AutomationRuntime) {
 }
 
 function createRunQueries(runtime: AutomationRuntime) {
-  const runsEndpoint = resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationRuns);
+  const runsEndpoint = resolveApiEndpoint(
+    runtime.apiBase,
+    runtime.requestUrl,
+    API_ENDPOINTS.automationRuns,
+  );
 
   const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}) =>
     useFetch<RpaRunExecutionEnvelope[]>(runsEndpoint, {
@@ -135,7 +143,11 @@ function createRunQueries(runtime: AutomationRuntime) {
 
 function createRunSubscription(runtime: AutomationRuntime) {
   return (runId: string, onEvent: (event: RpaRunEvent) => void): (() => void) => {
-    const wsUrl = resolveWebSocketEndpoint(runtime.wsBase, runtime.requestUrl, WS_ENDPOINTS.automation);
+    const wsUrl = resolveWebSocketEndpoint(
+      runtime.wsBase,
+      runtime.requestUrl,
+      WS_ENDPOINTS.automation,
+    );
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {

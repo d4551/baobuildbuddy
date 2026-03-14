@@ -1,5 +1,4 @@
-import type { GamingPortalConfig, GamingPortalId } from "@bao/shared";
-import { generateId } from "@bao/shared";
+import { generateId, settle, type GamingPortalConfig, type GamingPortalId } from "@bao/shared";
 import { type ScrapedJob, scraperService } from "../../scraper-service";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
@@ -16,10 +15,6 @@ interface HitmarkerJob extends Record<string, unknown> {
 }
 
 type HitmarkerResponse = HitmarkerJob[] | { jobs?: HitmarkerJob[]; data?: HitmarkerJob[] };
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 
 type PortalScrapeMethod = (sourceUrl?: string) => Promise<ScrapedJob[]>;
 
@@ -28,7 +23,7 @@ const NON_HASH_SAFE_PATTERN = /[^a-z0-9-_]/g;
 const REMOTE_LOCATION_PATTERN = /remote/i;
 
 const PORTAL_SCRAPE_METHOD_BY_ID: Record<GamingPortalId, PortalScrapeMethod> = {
-  "gamedev-net": () => scraperService.scrapeGameDevNetJobsRaw(),
+  hitmarker: () => scraperService.scrapeHitmarkerJobsRaw(),
   grackle: () => scraperService.scrapeGrackleJobsRaw(),
   workwithindies: () => scraperService.scrapeWorkWithIndiesJobsRaw(),
   remotegamejobs: () => scraperService.scrapeRemoteGameJobsRaw(),
@@ -76,7 +71,7 @@ export class HitmarkerProvider implements JobProvider {
   enabled = true;
 
   async fetchJobs(filters?: JobFilters): Promise<RawJob[]> {
-    const providerSettingsResult = await settlePromise(loadJobProviderSettings());
+    const providerSettingsResult = await settle(loadJobProviderSettings());
     if (providerSettingsResult.status === "rejected") {
       return [];
     }
@@ -85,7 +80,7 @@ export class HitmarkerProvider implements JobProvider {
     const requestUrl = new URL(providerSettings.hitmarkerApiBaseUrl);
     requestUrl.searchParams.set("search", query);
     requestUrl.searchParams.set("limit", String(providerSettings.gamingBoardResultLimit));
-    const responseResult = await settlePromise(
+    const responseResult = await settle(
       fetch(requestUrl.toString(), {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
@@ -137,7 +132,7 @@ export class GamingPortalProvider implements JobProvider {
   }
 
   async fetchJobs(): Promise<RawJob[]> {
-    const providerSettingsResult = await settlePromise(loadJobProviderSettings());
+    const providerSettingsResult = await settle(loadJobProviderSettings());
     if (providerSettingsResult.status === "rejected") {
       return [];
     }
@@ -150,7 +145,7 @@ export class GamingPortalProvider implements JobProvider {
     this.name = portalConfig.name;
 
     const scrapeMethod = PORTAL_SCRAPE_METHOD_BY_ID[this.portalId];
-    const scrapeResult = await settlePromise(scrapeMethod(portalConfig.fallbackUrl));
+    const scrapeResult = await settle(scrapeMethod(portalConfig.fallbackUrl));
     if (scrapeResult.status === "rejected") {
       return [];
     }
@@ -176,9 +171,9 @@ export class GamingPortalProvider implements JobProvider {
 export const hitmarkerProvider = new HitmarkerProvider();
 
 /**
- * Shared GameDev.net provider instance.
+ * Shared Hitmarker portal provider instance.
  */
-export const gameDevNetProvider = new GamingPortalProvider("gamedev-net");
+export const hitmarkerPortalProvider = new GamingPortalProvider("hitmarker");
 
 /**
  * Shared GrackleHQ provider instance.

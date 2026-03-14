@@ -5,14 +5,43 @@ import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "./routes";
 
 const CLAUDE_TEST_MAX_TOKENS = 1;
 const ANTHROPIC_API_VERSION = "2023-06-01";
+
+/** Default temperature for analysis, matching, and structured outputs (lower = more deterministic). */
+export const AI_DEFAULT_TEMPERATURE = 0.3;
+
+/** Default temperature for creative generation (resume, cover letter). */
+export const AI_DEFAULT_TEMPERATURE_CREATIVE = 0.7;
+
+/** Default temperature for interview Q&A and feedback (slightly higher than analysis). */
+export const AI_DEFAULT_TEMPERATURE_INTERVIEW = 0.35;
+
+/** Default temperature for interview question generation (more varied questions). */
+export const AI_DEFAULT_TEMPERATURE_INTERVIEW_QUESTIONS = 0.65;
+
+/** Default temperature for structured extraction (field mapping, low variance). */
+export const AI_DEFAULT_TEMPERATURE_STRUCTURED = 0.1;
+
+/** AI generation max token limits by use case. Single source of truth. */
+export const AI_MAX_TOKENS_CHAT = 1000;
+export const AI_MAX_TOKENS_ANALYSIS = 1200;
+export const AI_MAX_TOKENS_MATCH = 1500;
+export const AI_MAX_TOKENS_RESUME = 1500;
+export const AI_MAX_TOKENS_WS = 2048;
+export const AI_MAX_TOKENS_QUESTION = 900;
+export const AI_MAX_TOKENS_FEEDBACK = 500;
+export const AI_MAX_TOKENS_CV_QUESTION = 1200;
+export const AI_MAX_TOKENS_CV_ANALYSIS = 2000;
+export const AI_MAX_TOKENS_FIELD_MAPPER = 1000;
+export const AI_MAX_TOKENS_SCORE = 2000;
 const CLAUDE_TEST_MODEL = "claude-sonnet-4-5-20250929";
 
 /**
  * Default local provider endpoints and model settings.
+ * Single source for Ollama/RamaLama-compatible local inference base URL.
  */
 export const LOCAL_AI_DEFAULT_ENDPOINT = "http://localhost:11434/v1";
-export const OLLAMA_AI_DEFAULT_ENDPOINT = "http://localhost:11434/v1";
 export const LOCAL_AI_DEFAULT_MODEL = "";
+export const LOCAL_AI_AUTO_DETECT_MODEL = "auto-detect";
 
 export const LOCAL_AI_RECOMMENDED_MODELS = ["llama3.2", "granite-code", "mistral"] as const;
 
@@ -26,7 +55,7 @@ export type LocalProviderServer = {
 
 export const LOCAL_AI_SERVERS: readonly LocalProviderServer[] = [
   { id: "ramalama", name: "RamaLama", baseUrl: LOCAL_AI_DEFAULT_ENDPOINT },
-  { id: "ollama", name: "Ollama", baseUrl: OLLAMA_AI_DEFAULT_ENDPOINT },
+  { id: "ollama", name: "Ollama", baseUrl: LOCAL_AI_DEFAULT_ENDPOINT },
 ] as const;
 
 export type AIProviderMetadata = {
@@ -171,6 +200,34 @@ export const AI_CHAT_CONTEXT_MESSAGE_LIMIT = 12;
  * Max number of stored chat messages loaded from persistence for context assembly.
  */
 export const AI_CHAT_HISTORY_FETCH_LIMIT = 20;
+
+/**
+ * Max number of recent jobs fetched for AI context (e.g. job match analysis).
+ */
+export const AI_CHAT_RECENT_JOBS_LIMIT = 10;
+
+/**
+ * Max number of most recent chat messages included in context assembly.
+ */
+export const AI_CHAT_CONTEXT_TAIL_LIMIT = 10;
+
+/** Max saved jobs in job-search context. */
+export const AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT = 10;
+
+/** Max interview sessions in interview context. */
+export const AI_CHAT_CONTEXT_INTERVIEW_SESSIONS_LIMIT = 3;
+
+/** Max portfolio projects in portfolio context. */
+export const AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT = 10;
+
+/** Max skill mappings in skills context. */
+export const AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT = 20;
+
+/** Max automation runs in automation context. */
+export const AI_CHAT_CONTEXT_AUTOMATION_RUNS_LIMIT = 5;
+
+/** Max available resumes in automation context. */
+export const AI_CHAT_CONTEXT_AVAILABLE_RESUMES_LIMIT = 10;
 
 /**
  * Canonical full-page AI chat route path.

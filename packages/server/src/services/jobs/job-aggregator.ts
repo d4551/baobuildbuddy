@@ -15,11 +15,17 @@ import type {
   StudioType,
 } from "@bao/shared";
 import {
+  API_ERROR_APPLICATION_NOT_FOUND,
+  JOB_AGGREGATOR_CACHE_EXPIRY_MS,
   JOB_EXPERIENCE_LEVELS,
   JOB_GAME_GENRES,
+  JOB_QUERY_DEFAULT_LIMIT,
+  JOB_QUERY_DEFAULT_PAGE,
+  JOB_SALARY_PARSE_MULTIPLIER,
   JOB_STUDIO_TYPES,
   JOB_SUPPORTED_PLATFORMS,
   JOB_TYPES,
+  MS_PER_DAY,
 } from "@bao/shared";
 import { and, desc, eq, gte, inArray, like, sql, type SQLWrapper } from "drizzle-orm";
 import { db } from "../../db/client";
@@ -28,7 +34,7 @@ import { createServerLogger } from "../../utils/logger";
 import { deduplicateJobs, generateContentHash } from "./deduplication";
 import { CompanyBoardsProvider } from "./providers/company-board";
 import {
-  gameDevNetProvider,
+  hitmarkerPortalProvider,
   gamesJobsDirectProvider,
   grackleProvider,
   hitmarkerProvider,
@@ -112,7 +118,14 @@ const MOBILE_STUDIO_KEYWORDS = [
   "demiurge",
 ] as const;
 const VR_STUDIO_KEYWORDS = ["meta", "oculus"] as const;
-const PLATFORM_STUDIO_KEYWORDS = ["valve", "unity", "unreal", "nvidia", "roblox", "discord"] as const;
+const PLATFORM_STUDIO_KEYWORDS = [
+  "valve",
+  "unity",
+  "unreal",
+  "nvidia",
+  "roblox",
+  "discord",
+] as const;
 const ESPORTS_STUDIO_KEYWORDS = ["esl", "faceit", "hitmarker"] as const;
 const STUDIO_KEYWORD_GROUPS: ReadonlyArray<readonly [StudioType, readonly string[]]> = [
   ["AAA", AAA_STUDIO_KEYWORDS],
@@ -135,7 +148,7 @@ export class JobAggregator {
       hitmarkerProvider,
 
       // RPA-backed scrapers
-      gameDevNetProvider,
+      hitmarkerPortalProvider,
       grackleProvider,
       workWithIndiesProvider,
       remoteGameJobsProvider,
@@ -146,12 +159,13 @@ export class JobAggregator {
       new CompanyBoardsProvider(),
     ];
 
-    // Cache jobs for 6 hours by default
-    this.cacheExpiry = 6 * 60 * 60 * 1000;
+    this.cacheExpiry = JOB_AGGREGATOR_CACHE_EXPIRY_MS;
   }
 
   private async fetchProviderJobs(): Promise<RawJob[]> {
-    const results = await Promise.allSettled(this.providers.map((provider) => provider.fetchJobs()));
+    const results = await Promise.allSettled(
+      this.providers.map((provider) => provider.fetchJobs()),
+    );
     return results.flatMap((result, index) => {
       const providerName = this.providers[index]?.name || "unknown-provider";
       if (result.status === "fulfilled") {
@@ -169,7 +183,11 @@ export class JobAggregator {
       return "skipped";
     }
 
-    const existing = await db.select().from(jobs).where(eq(jobs.contentHash, job.contentHash)).limit(1);
+    const existing = await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.contentHash, job.contentHash))
+      .limit(1);
     if (existing.length === 0) {
       await db.insert(jobs).values(job);
       return "new";
@@ -207,7 +225,7 @@ export class JobAggregator {
       conditions.push(inArray(jobs.studioType, filters.studioTypes));
     }
     if (filters.postedWithin) {
-      const cutoffDate = new Date(Date.now() - filters.postedWithin * 24 * 60 * 60 * 1000);
+      const cutoffDate = new Date(Date.now() - filters.postedWithin * MS_PER_DAY);
       conditions.push(gte(jobs.postedDate, cutoffDate.toISOString()));
     }
     return conditions;
@@ -229,7 +247,8 @@ export class JobAggregator {
       return allJobs;
     }
     return allJobs.filter(
-      (job) => Boolean(job.gameGenres) && gameGenres.some((genre) => job.gameGenres?.includes(genre)),
+      (job) =>
+        Boolean(job.gameGenres) && gameGenres.some((genre) => job.gameGenres?.includes(genre)),
     );
   }
 
@@ -238,11 +257,15 @@ export class JobAggregator {
       return allJobs;
     }
     return allJobs.filter(
-      (job) => Boolean(job.platforms) && platforms.some((platform) => job.platforms?.includes(platform)),
+      (job) =>
+        Boolean(job.platforms) && platforms.some((platform) => job.platforms?.includes(platform)),
     );
   }
 
-  private extractSalaryBounds(salary: Job["salary"]): { min: number | undefined; max: number | undefined } {
+  private extractSalaryBounds(salary: Job["salary"]): {
+    min: number | undefined;
+    max: number | undefined;
+  } {
     if (!salary) {
       return { min: undefined, max: undefined };
     }
@@ -251,8 +274,9 @@ export class JobAggregator {
       if (!numbers) {
         return { min: undefined, max: undefined };
       }
-      const min = Number.parseInt(numbers[0], 10) * 1000;
-      const max = numbers.length > 1 ? Number.parseInt(numbers[1], 10) * 1000 : min;
+      const min = Number.parseInt(numbers[0], 10) * JOB_SALARY_PARSE_MULTIPLIER;
+      const max =
+        numbers.length > 1 ? Number.parseInt(numbers[1], 10) * JOB_SALARY_PARSE_MULTIPLIER : min;
       return { min, max };
     }
     return {
@@ -261,7 +285,11 @@ export class JobAggregator {
     };
   }
 
-  private applySalaryFilter(allJobs: Job[], salaryMin: number | undefined, salaryMax: number | undefined): Job[] {
+  private applySalaryFilter(
+    allJobs: Job[],
+    salaryMin: number | undefined,
+    salaryMax: number | undefined,
+  ): Job[] {
     if (!(salaryMin || salaryMax)) {
       return allJobs;
     }
@@ -283,7 +311,9 @@ export class JobAggregator {
     filtered = this.applySalaryFilter(filtered, filters.salaryMin, filters.salaryMax);
     const minMatchScore = filters.minMatchScore;
     if (minMatchScore !== undefined) {
-      filtered = filtered.filter((job) => job.matchScore !== undefined && job.matchScore >= minMatchScore);
+      filtered = filtered.filter(
+        (job) => job.matchScore !== undefined && job.matchScore >= minMatchScore,
+      );
     }
     if (filters.featured !== undefined) {
       filtered = filtered.filter((job) => job.featured === filters.featured);
@@ -303,7 +333,9 @@ export class JobAggregator {
 
     let newCount = 0;
     let updatedCount = 0;
-    const saveResults = await Promise.allSettled(uniqueJobs.map((rawJob) => this.saveOrUpdateJob(rawJob)));
+    const saveResults = await Promise.allSettled(
+      uniqueJobs.map((rawJob) => this.saveOrUpdateJob(rawJob)),
+    );
     for (const result of saveResults) {
       if (result.status === "fulfilled") {
         if (result.value === "new") newCount += 1;
@@ -326,11 +358,16 @@ export class JobAggregator {
    * Search jobs with filters and pagination
    */
   async searchJobs(filters: JobFilters = {}): Promise<JobSearchResult> {
-    const limit = filters.limit ?? 20;
-    const page = filters.page ?? 1;
+    const limit = filters.limit ?? JOB_QUERY_DEFAULT_LIMIT;
+    const page = filters.page ?? JOB_QUERY_DEFAULT_PAGE;
     const conditions = this.buildSearchConditions(filters);
     const queryBuilder =
-      conditions.length > 0 ? db.select().from(jobs).where(and(...conditions)) : db.select().from(jobs);
+      conditions.length > 0
+        ? db
+            .select()
+            .from(jobs)
+            .where(and(...conditions))
+        : db.select().from(jobs);
     const offset = (page - 1) * limit;
     const results = await queryBuilder.orderBy(desc(jobs.postedDate)).limit(limit).offset(offset);
     const jobResults: Job[] = results.map((row) => this.dbRowToJob(row));
@@ -451,7 +488,7 @@ export class JobAggregator {
       .limit(1);
 
     if (app.length === 0) {
-      throw new Error("Application not found");
+      throw new Error(API_ERROR_APPLICATION_NOT_FOUND);
     }
 
     const timeline = app[0].timeline || [];
@@ -594,10 +631,7 @@ export class JobAggregator {
     return this.applyOptionalRowFields(baseJob, row);
   }
 
-  private applyOptionalRowFields(
-    job: Job,
-    row: typeof jobs.$inferSelect,
-  ): Job {
+  private applyOptionalRowFields(job: Job, row: typeof jobs.$inferSelect): Job {
     return {
       ...job,
       hybrid: row.hybrid ?? undefined,
@@ -614,7 +648,7 @@ export class JobAggregator {
   }
 
   private normalizeSalary(value: Record<string, unknown> | null): Job["salary"] | undefined {
-    if (!value) return ;
+    if (!value) return;
 
     if (typeof value.label === "string" && value.label.trim().length > 0) {
       return value.label;
@@ -637,7 +671,7 @@ export class JobAggregator {
       return normalized;
     }
 
-    return ;
+    return;
   }
 
   // Helper methods for data enrichment
@@ -648,24 +682,24 @@ export class JobAggregator {
   }
 
   private normalizeStudioType(value: string | null): StudioType | undefined {
-    if (!isOneOf(JOB_STUDIO_TYPES, value)) return ;
+    if (!isOneOf(JOB_STUDIO_TYPES, value)) return;
     return value;
   }
 
   private normalizeGameGenres(value: string[] | null): GameGenre[] | undefined {
-    if (!Array.isArray(value)) return ;
+    if (!Array.isArray(value)) return;
     return value.filter((genre): genre is GameGenre => isOneOf(JOB_GAME_GENRES, genre));
   }
 
   private normalizePlatforms(value: string[] | null): Platform[] | undefined {
-    if (!Array.isArray(value)) return ;
+    if (!Array.isArray(value)) return;
     return value.filter((platform): platform is Platform =>
       isOneOf(JOB_SUPPORTED_PLATFORMS, platform),
     );
   }
 
   private normalizeExperienceLevel(value: string | null): JobExperienceLevel | undefined {
-    if (!isOneOf(JOB_EXPERIENCE_LEVELS, value)) return ;
+    if (!isOneOf(JOB_EXPERIENCE_LEVELS, value)) return;
     return value;
   }
 
@@ -688,7 +722,7 @@ export class JobAggregator {
     if (titleLower.includes("junior") || titleLower.includes("jr")) return "junior";
     if (titleLower.includes("entry") || titleLower.includes("intern")) return "entry";
 
-    return ;
+    return;
   }
 
   private detectJobType(title: string): JobType {

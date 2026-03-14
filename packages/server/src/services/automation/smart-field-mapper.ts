@@ -1,12 +1,20 @@
 import type { AIResponse } from "@bao/shared";
-import { safeParseJson } from "@bao/shared";
+import {
+  AI_DEFAULT_TEMPERATURE_STRUCTURED,
+  AI_MAX_TOKENS_FIELD_MAPPER,
+  API_ERROR_NETWORK_REQUEST_FAILED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  safeParseJson,
+  SCHEMA_MAX_ITEMS_SMALL,
+  SCHEMA_MAX_LENGTH_URL,
+} from "@bao/shared";
 import { z } from "zod";
 import { config } from "../../config/env";
 import { formFieldAnalysisPrompt } from "../ai/prompts";
 
 const selectorMapSchema = z.record(
   z.string().trim().min(1).max(120),
-  z.array(z.string().trim().min(1).max(500)).min(1).max(20),
+  z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_URL)).min(1).max(SCHEMA_MAX_ITEMS_SMALL),
 );
 
 const wait = (delayMs: number): Promise<void> =>
@@ -40,7 +48,7 @@ const isRetryableFetchFailure = (result: FetchPageResult): boolean => {
   if (typeof result.statusCode !== "number") {
     return true;
   }
-  return result.statusCode === 429 || result.statusCode >= 500;
+  return result.statusCode === 429 || result.statusCode >= HTTP_STATUS_INTERNAL_SERVER_ERROR;
 };
 
 /**
@@ -149,7 +157,7 @@ export class SmartFieldMapper {
       () =>
         ({
           ok: false,
-          message: "Network request failed",
+          message: API_ERROR_NETWORK_REQUEST_FAILED,
         }) satisfies FetchPageResult,
     );
   }
@@ -167,8 +175,8 @@ export class SmartFieldMapper {
     const prompt = formFieldAnalysisPrompt(params.strippedHtml, params.fieldsNeeded);
     return params.aiService
       .generate(prompt, {
-        temperature: 0.1,
-        maxTokens: 1000,
+        temperature: AI_DEFAULT_TEMPERATURE_STRUCTURED,
+        maxTokens: AI_MAX_TOKENS_FIELD_MAPPER,
       })
       .then(
         async (response) => {

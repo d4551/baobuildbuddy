@@ -1,5 +1,10 @@
-import type { CompanyBoardATSType, CompanyBoardConfig, JobProviderSettings } from "@bao/shared";
-import { generateId } from "@bao/shared";
+import {
+  generateId,
+  settle,
+  type CompanyBoardATSType,
+  type CompanyBoardConfig,
+  type JobProviderSettings,
+} from "@bao/shared";
 import type { JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
@@ -36,10 +41,6 @@ type ATSResponseFields = {
 type ATSResponse = ATSJob[] | (ATSResponseFields & Record<string, unknown>);
 
 const REMOTE_PATTERN = /remote/i;
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 
 const resolveLocation = (location: ATSJob["location"]): string => {
   if (typeof location === "string") {
@@ -132,7 +133,7 @@ export class CompanyBoardProvider implements JobProvider {
     }
 
     const url = resolveBoardUrl(this.config.type, this.config.token, providerSettings);
-    const responseResult = await settlePromise(
+    const responseResult = await settle(
       fetch(url, {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),

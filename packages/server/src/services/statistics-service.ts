@@ -1,5 +1,9 @@
 import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
-import { isRecord } from "@bao/shared";
+import {
+  STATISTICS_AUTOMATION_RUNS_LIMIT,
+  STATISTICS_SKILL_COVERAGE_TARGET,
+} from "@bao/shared/constants/statistics";
+import { DEFAULT_PROFILE_ID, isRecord } from "@bao/shared";
 import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -66,12 +70,21 @@ export class StatisticsService {
   private async getProfileCompleteness(): Promise<number> {
     let profileCompleteness = 0;
     await this.runBestEffort(async () => {
-      const profileRows = await db.select().from(userProfile).where(eq(userProfile.id, "default"));
+      const profileRows = await db
+        .select()
+        .from(userProfile)
+        .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
       const profile = profileRows[0];
       if (!profile) {
         return;
       }
-      const fields = [profile.name, profile.email, profile.location, profile.summary, profile.currentRole];
+      const fields = [
+        profile.name,
+        profile.email,
+        profile.location,
+        profile.summary,
+        profile.currentRole,
+      ];
       const filled = fields.filter((field) => field && String(field).trim().length > 0).length;
       profileCompleteness = Math.round((filled / fields.length) * 100);
     });
@@ -170,7 +183,10 @@ export class StatisticsService {
       streak: 0,
     };
     await this.runBestEffort(async () => {
-      const gamRows = await db.select().from(gamification).where(eq(gamification.id, "default"));
+      const gamRows = await db
+        .select()
+        .from(gamification)
+        .where(eq(gamification.id, DEFAULT_PROFILE_ID));
       const gamificationRow = gamRows[0];
       if (!gamificationRow) {
         return;
@@ -198,7 +214,7 @@ export class StatisticsService {
         .select()
         .from(automationRuns)
         .orderBy(desc(automationRuns.createdAt))
-        .limit(100);
+        .limit(STATISTICS_AUTOMATION_RUNS_LIMIT);
       automationStats.totalRuns = allRuns.length;
       automationStats.successfulRuns = allRuns.filter((run) => run.status === "success").length;
       automationStats.successRate =
@@ -219,7 +235,10 @@ export class StatisticsService {
 
   async getWeeklyActivity(): Promise<WeeklyActivity> {
     // Get gamification stats for action history
-    const gamRows = await db.select().from(gamification).where(eq(gamification.id, "default"));
+    const gamRows = await db
+      .select()
+      .from(gamification)
+      .where(eq(gamification.id, DEFAULT_PROFILE_ID));
     const stats = gamRows[0]?.stats;
     const actionHistory = isRecord(stats) ? parseActionHistory(stats.actionHistory) : [];
 
@@ -256,7 +275,10 @@ export class StatisticsService {
     await this.runBestEffort(async () => {
       const skillResult = await db.select({ count: count() }).from(skillMappings);
       const mappedSkills = skillResult[0]?.count || 0;
-      skillCoverage = Math.min(100, Math.round((mappedSkills / 20) * 100));
+      skillCoverage = Math.min(
+        100,
+        Math.round((mappedSkills / STATISTICS_SKILL_COVERAGE_TARGET) * 100),
+      );
     });
 
     let applicationSuccessRate = 0;

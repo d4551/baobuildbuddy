@@ -1,11 +1,22 @@
 import {
+  AI_DEFAULT_TEMPERATURE,
+  API_ERROR_START_INTERVIEW,
+  API_ERROR_STUDIO_ID_REQUIRED,
+  API_MESSAGE_WS_INTERVIEW_CONNECTED,
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
   INTERVIEW_DEFAULT_FOCUS_AREAS,
   INTERVIEW_DEFAULT_QUESTION_COUNT,
   INTERVIEW_DEFAULT_ROLE_TYPE,
+  INTERVIEW_MAX_QUESTION_COUNT,
   INTERVIEW_UNKNOWN_STUDIO_NAME,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
   isRecord,
   safeParseJson,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LABEL,
+  SCHEMA_MAX_LENGTH_MESSAGE,
+  settle,
   toApiScopedPath,
   WS_ENDPOINTS,
 } from "@bao/shared";
@@ -51,11 +62,6 @@ type InterviewFeedback = {
   summary: string;
 };
 
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-
 type FeedbackSummary = {
   score: number;
   strengths: string[];
@@ -93,17 +99,17 @@ const getFeedbackSummary = (value: unknown): FeedbackSummary => {
 
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
   body: t.Object({
-    type: t.String({ maxLength: 50 }),
-    sessionId: t.Optional(t.String({ maxLength: 100 })),
-    content: t.Optional(t.String({ maxLength: 10000 })),
-    studioId: t.Optional(t.String({ maxLength: 100 })),
+    type: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
+    sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    content: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE })),
+    studioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
     config: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
   open(ws) {
     ws.send(
       JSON.stringify({
         type: "connected",
-        message: "Connected to BaoBuildBuddy interview system",
+        message: API_MESSAGE_WS_INTERVIEW_CONNECTED,
       }),
     );
   },
@@ -156,10 +162,14 @@ function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<s
       : INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
   let questionCount = INTERVIEW_DEFAULT_QUESTION_COUNT;
   if (typeof config.questionCount === "number" && Number.isFinite(config.questionCount)) {
-    questionCount = Math.max(1, Math.min(Math.floor(config.questionCount), 20));
+    questionCount = Math.max(
+      1,
+      Math.min(Math.floor(config.questionCount), INTERVIEW_MAX_QUESTION_COUNT),
+    );
   } else if (typeof config.questionCount === "string") {
     const parsed = Number.parseInt(config.questionCount, 10);
-    if (Number.isFinite(parsed)) questionCount = Math.max(1, Math.min(parsed, 20));
+    if (Number.isFinite(parsed))
+      questionCount = Math.max(1, Math.min(parsed, INTERVIEW_MAX_QUESTION_COUNT));
   }
   return {
     roleType: role,
@@ -190,17 +200,16 @@ function toWsQuestions(
 
 function parseFeedback(response: string): InterviewFeedback {
   const parsed = safeParseJson(response);
-  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-    const parsedRecord = parsed as Record<string, unknown>;
+  if (parsed && isRecord(parsed)) {
     return createInterviewFeedbackSummary({
-      score: typeof parsedRecord.score === "number" ? parsedRecord.score : undefined,
-      strengths: Array.isArray(parsedRecord.strengths)
-        ? parsedRecord.strengths.filter((entry): entry is string => typeof entry === "string")
+      score: typeof parsed.score === "number" ? parsed.score : undefined,
+      strengths: Array.isArray(parsed.strengths)
+        ? parsed.strengths.filter((entry): entry is string => typeof entry === "string")
         : undefined,
-      improvements: Array.isArray(parsedRecord.improvements)
-        ? parsedRecord.improvements.filter((entry): entry is string => typeof entry === "string")
+      improvements: Array.isArray(parsed.improvements)
+        ? parsed.improvements.filter((entry): entry is string => typeof entry === "string")
         : undefined,
-      summary: typeof parsedRecord.summary === "string" ? parsedRecord.summary : undefined,
+      summary: typeof parsed.summary === "string" ? parsed.summary : undefined,
     });
   }
 
@@ -238,7 +247,10 @@ function getSessionQuestions(session: InterviewSessionRow): InterviewSessionQues
   return session.questions.filter(isQuestionRecord);
 }
 
-function createFeedbackPrompt(content: string, currentQuestion: InterviewSessionQuestion | undefined): string {
+function createFeedbackPrompt(
+  content: string,
+  currentQuestion: InterviewSessionQuestion | undefined,
+): string {
   return `You are an interview coach. Evaluate this interview response.
 
 Question: ${currentQuestion?.question || "Unknown question"}
@@ -279,7 +291,9 @@ async function evaluateInterviewResponse(
   }
 
   const prompt = createFeedbackPrompt(content, currentQuestion);
-  const feedbackResult = await settle(aiServiceResult.value.generate(prompt, { temperature: 0.3 }));
+  const feedbackResult = await settle(
+    aiServiceResult.value.generate(prompt, { temperature: AI_DEFAULT_TEMPERATURE }),
+  );
   if (feedbackResult.status === "rejected") {
     return getAiFallbackFeedback();
   }
@@ -304,10 +318,10 @@ function buildSessionResponseRecord(
 }
 
 function getRecommendations(avgScore: number): string[] {
-  if (avgScore >= 80) {
+  if (avgScore >= SCORE_PASS_THRESHOLD) {
     return ["Strong performance! Focus on refining edge cases."];
   }
-  if (avgScore >= 60) {
+  if (avgScore >= SCORE_WARNING_THRESHOLD) {
     return [
       "Good foundation. Practice more specific examples.",
       "Review common follow-up questions.",
@@ -353,7 +367,7 @@ function buildFinalAnalysis(session: InterviewSessionRow, responses: JsonRecord[
 async function handleStartSession(socket: InterviewSocket, data: InterviewMessage) {
   const studioId = data.studioId;
   if (!studioId) {
-    socket.send(JSON.stringify({ type: "error", message: "studioId is required" }));
+    socket.send(JSON.stringify({ type: "error", message: API_ERROR_STUDIO_ID_REQUIRED }));
     return;
   }
 
@@ -366,7 +380,7 @@ async function handleStartSession(socket: InterviewSocket, data: InterviewMessag
         message:
           sessionResult.reason instanceof Error
             ? sessionResult.reason.message
-            : "Failed to start interview session",
+            : API_ERROR_START_INTERVIEW,
       }),
     );
     return;

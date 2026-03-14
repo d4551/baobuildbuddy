@@ -1,19 +1,31 @@
 {
   "name": "bao-build-buddy",
   "private": true,
-  "packageManager": "bun@1.3.9",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d4551/baobuildbuddy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/d4551/baobuildbuddy/issues"
+  },
+  "homepage": "https://github.com/d4551/baobuildbuddy#readme",
+  "packageManager": "bun@1.3.10",
   "engines": {
-    "bun": ">=1.3.9 <1.4.0"
+    "bun": ">=1.3.10 <1.4.0"
   },
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "dev": "NUXT_PUBLIC_API_BASE=http://localhost:3000 NUXT_PUBLIC_WS_BASE=http://localhost:3000 bun --env-file=.env run --parallel --filter '@bao/server' --filter '@bao/client' dev",
+    "dev": "bun run scripts/dev-stack.ts",
     "dev:server": "bun --env-file=.env run --filter '@bao/server' dev",
-    "dev:client": "NUXT_PUBLIC_API_BASE=http://localhost:3000 NUXT_PUBLIC_WS_BASE=http://localhost:3000 bun --env-file=.env run --filter '@bao/client' dev",
+    "dev:client": "NUXT_PUBLIC_API_BASE=http://localhost:${SERVER_PORT:-${PORT:-3000}} NUXT_PUBLIC_WS_BASE=http://localhost:${SERVER_PORT:-${PORT:-3000}} bun --env-file=.env run --filter '@bao/client' dev",
+    "dev:stack": "bun run scripts/dev-stack.ts",
     "dev:desktop": "bun run --filter '@bao/desktop' dev",
     "build": "bun run --filter '@bao/server' build && bun run --filter '@bao/client' build",
+    "start:railway": "(PORT=3000 bun run packages/server/dist/index.js &) && sleep 2 && cd packages/client && node .output/server/index.mjs",
+    "start:client": "cd packages/client && node .output/server/index.mjs",
+    "automation:browsers:install": "bun run --filter '@bao/scraper' install:browsers",
     "build:macos": "bun run build",
     "build:linux": "bun run build",
     "build:windows": "bun run build",
@@ -21,11 +33,11 @@
     "build:desktop:debug": "bun run --filter '@bao/desktop' build:debug",
     "release:refresh:all-os": "bash scripts/refresh-desktop-releases.sh",
     "release:refresh:all-os:fast": "bash scripts/refresh-desktop-releases.sh --skip-quality-gates",
-    "typecheck": "bun run --filter '@bao/server' build:types && bun run --filter '@bao/shared' typecheck && bun run --filter '@bao/server' typecheck && bun run --filter '@bao/client' typecheck",
+    "typecheck": "bun run --filter '@bao/server' build:types && bun run --filter '@bao/shared' typecheck && bun run --filter '@bao/scraper' typecheck && bun run --filter '@bao/server' typecheck && bun run --filter '@bao/client' typecheck",
     "db:generate": "bun --env-file=.env run drizzle-kit generate",
     "db:push": "bun --env-file=.env run drizzle-kit push",
     "db:studio": "bun --env-file=.env run drizzle-kit studio",
-    "test": "bun run --filter '@bao/server' test && bun run --filter '@bao/client' test",
+    "test": "bun run --filter '@bao/server' test && bun run --filter '@bao/scraper' test && bun run --filter '@bao/client' test",
     "format": "bun --bun run biome format . --write",
     "format:check": "bun --bun run biome format .",
     "validate:ui": "bun run scripts/validate-ui-accessibility.ts",
@@ -38,22 +50,31 @@
     "validate:page-seo": "bun run scripts/validate-page-seo-metadata.ts",
     "validate:i18n-ui": "bun run scripts/validate-ui-i18n.ts",
     "audit:official-llms": "bun run scripts/audit-official-llms.ts",
-    "audit:stack-versions": "for pkg in bun nuxt tailwindcss daisyui elysia @elysiajs/eden prisma @prisma/client @tauri-apps/cli @tauri-apps/api; do printf \"%s\\t\" \"$pkg\"; bunx npm view \"$pkg\" version; done",
+    "audit:integration": "bun run audit:official-llms && bun run verify:pages",
+    "verify:bun-baseline": "bash scripts/verify-bun-baseline.sh",
+    "audit:stack-versions": "for pkg in bun nuxt tailwindcss daisyui elysia @elysiajs/eden drizzle-orm drizzle-kit @tauri-apps/cli @tauri-apps/api; do printf \"%s\\t\" \"$pkg\"; bunx npm view \"$pkg\" version; done",
+    "validate:stack-alignment": "bun run verify:bun-baseline && bun run audit:stack-versions",
+    "validate:daisyui-contracts": "bun run scripts/validate-daisyui-contracts.ts",
+    "validate:alignment": "bun run validate:stack-alignment && bun run validate:ui-layout-tokens && bun run validate:daisyui-contracts",
+    "ci:alignment": "bun ci && bun run validate:alignment",
+    "release:verify": "bun run scripts/release-verify.ts",
+    "audit:full": "bun ci && bun run format:check && bun run lint && bun run test && bun run build && bun run ci:alignment && bun run audit:integration && bun run release:verify",
+    "validate:ascii": "bun run scripts/validate-ascii-geometry.ts README.md docs/STARTER_GUIDE.md",
     "verify:pages": "bun run scripts/verify-pages.ts",
-    "lint:typed": "bun --bun run eslint --config eslint.config.mjs \"packages/server/src/**/*.ts\" \"packages/shared/src/**/*.ts\" \"scripts/**/*.ts\"",
-    "lint:typed:fix": "bun --bun run eslint --config eslint.config.mjs \"packages/server/src/**/*.ts\" \"packages/shared/src/**/*.ts\" \"scripts/**/*.ts\" --fix",
-    "lint": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui-layout-tokens && bun run validate:ui && bun run lint:typed && bun --bun run biome lint . --max-diagnostics=1200 && bun run --filter '@bao/client' lint && bun run typecheck",
-    "lint:fix": "bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui-layout-tokens && bun run validate:ui && bun run lint:typed:fix && bun --bun run biome lint . --write --max-diagnostics=1200 && bun run --filter '@bao/client' lint --fix && bun run typecheck"
+    "lint:typed": "bun --bun run eslint --config eslint.config.mjs \"packages/server/src/**/*.ts\" \"packages/shared/src/**/*.ts\" \"packages/scraper/src/**/*.ts\" \"scripts/**/*.ts\"",
+    "lint:typed:fix": "bun --bun run eslint --config eslint.config.mjs \"packages/server/src/**/*.ts\" \"packages/shared/src/**/*.ts\" \"packages/scraper/src/**/*.ts\" \"scripts/**/*.ts\" --fix",
+    "lint": "bun run validate:alignment && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ascii && bun run lint:typed && bun --bun run biome lint . --max-diagnostics=1200 && bun run --filter '@bao/client' lint && bun run typecheck",
+    "lint:fix": "bun run validate:alignment && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ascii && bun run lint:typed:fix && bun --bun run biome lint . --write --max-diagnostics=1200 && bun run --filter '@bao/client' lint --fix && bun run typecheck"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.3",
+    "@biomejs/biome": "^2.4.6",
     "@eslint/js": "^10.0.1",
     "better-sqlite3": "^12.6.2",
-    "bun-types": "^1.3.9",
+    "bun-types": "^1.3.10",
     "drizzle-kit": "^0.31.9",
-    "eslint": "^10.0.0",
+    "eslint": "^10.0.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0",
+    "typescript-eslint": "^8.57.0",
     "vue-router": "^5.0.3"
   }
 }

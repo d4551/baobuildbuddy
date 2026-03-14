@@ -2,6 +2,7 @@ import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { config } from "../config/env";
 import { resolveDatabasePath } from "../config/paths";
+import { SQLITE_BUSY_TIMEOUT_MS } from "@bao/shared";
 import {
   applications,
   auth,
@@ -44,7 +45,10 @@ const dbPath = resolveDatabasePath(Bun.env.DB_PATH ?? config.dbPath);
 const sqlite = new Database(dbPath);
 sqlite.exec("PRAGMA journal_mode = WAL;");
 sqlite.exec("PRAGMA foreign_keys = ON;");
-sqlite.exec("PRAGMA busy_timeout = 30000;");
+sqlite.exec(`PRAGMA busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS};`);
 
 export const db = drizzle({ client: sqlite, schema });
 export { sqlite };
+
+/** SQL probe for health check endpoint. */
+export const HEALTHCHECK_PROBE_SQL = "SELECT 1";

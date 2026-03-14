@@ -1,11 +1,30 @@
 import {
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  API_ERROR_SKILL_MAPPING_ALREADY_DELETED,
+  API_ERROR_SKILL_MAPPING_NOT_FOUND,
+  API_MESSAGE_SKILL_ANALYSIS_COMPLETE,
+  API_MESSAGE_SKILL_MAPPING_DELETED,
+  API_ERROR_UNKNOWN,
   generateId,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_GONE,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
   isRecord,
   parseJson,
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LABEL,
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_SHORT,
+  ROUTE_GAMIFICATION_XP,
   SKILL_CATEGORY_IDS,
+  SKILLS_DEFAULT_CONFIDENCE,
   SKILL_DEMAND_LEVEL_IDS,
   SKILL_EVIDENCE_TYPE_IDS,
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
+  settle,
   type SkillCategory,
   type SkillEvidence,
   type SkillMapping,
@@ -97,10 +116,6 @@ const normalizeStringArray = (value: unknown): string[] =>
     : [];
 
 const skillMappingRoutesLogger = createServerLogger("skill-mapping-routes");
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 const SKILL_ANALYSIS_JSON_REGEX = /\{[\s\S]*\}/;
 
 type SkillAnalyzeBody = {
@@ -180,7 +195,8 @@ const mapSuggestedMappingToCreateInput = (suggestedMapping: Record<string, unkno
     industryApplications: normalizeStringArray(suggestedMapping.industryApplications),
     evidence: [] as SkillEvidence[],
     confidence:
-      typeof suggestedMapping.confidence === "number" && Number.isFinite(suggestedMapping.confidence)
+      typeof suggestedMapping.confidence === "number" &&
+      Number.isFinite(suggestedMapping.confidence)
         ? Math.max(0, Math.min(100, Math.round(suggestedMapping.confidence)))
         : 60,
     category: normalizeCategory(suggestedMapping.category),
@@ -193,9 +209,11 @@ const mapSuggestedMappingToCreateInput = (suggestedMapping: Record<string, unkno
 const autoCreateSuggestedMappings = async (suggestedMappings: Record<string, unknown>[]) => {
   const createOperations = suggestedMappings
     .map((suggestedMapping) => mapSuggestedMappingToCreateInput(suggestedMapping))
-    .filter((payload): payload is NonNullable<ReturnType<typeof mapSuggestedMappingToCreateInput>> => {
-      return payload !== null;
-    })
+    .filter(
+      (payload): payload is NonNullable<ReturnType<typeof mapSuggestedMappingToCreateInput>> => {
+        return payload !== null;
+      },
+    )
     .map((payload) => settle(skillMappingService.createMapping(payload)));
 
   const createResults = await Promise.all(createOperations);
@@ -218,11 +236,11 @@ const analyzeSkillMappings = async (
   }
 
   const response = await aiService.generate(skillAnalysisPrompt(skillsToAnalyze), {
-    temperature: 0.7,
-    maxTokens: 2000,
+    temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+    maxTokens: SCHEMA_MAX_LENGTH_LONG,
   });
   if (response.error) {
-    set.status = 500;
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return emptySkillAnalysisResponse(`AI analysis failed: ${response.error}`);
   }
 
@@ -233,7 +251,7 @@ const analyzeSkillMappings = async (
   }
 
   return {
-    message: "AI skill analysis completed successfully",
+    message: API_MESSAGE_SKILL_ANALYSIS_COMPLETE,
     detectedSkills: normalizeStringArray(parsedAnalysis.detectedSkills),
     suggestedMappings,
     recommendations: normalizeStringArray(parsedAnalysis.recommendations),
@@ -269,8 +287,8 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
     },
     {
       query: t.Object({
-        category: t.Optional(t.String({ maxLength: 50 })),
-        search: t.Optional(t.String({ maxLength: 200 })),
+        category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+        search: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
       }),
     },
   )
@@ -280,7 +298,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
       const confidence =
         typeof body.confidence === "number" && Number.isFinite(body.confidence)
           ? Math.max(0, Math.min(100, Math.round(body.confidence)))
-          : 50;
+          : SKILLS_DEFAULT_CONFIDENCE;
       const newMapping = await skillMappingService.createMapping({
         gameExpression: body.gameExpression,
         transferableSkill: body.transferableSkill,
@@ -292,19 +310,29 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         aiGenerated: body.aiGenerated === true,
         verified: false,
       });
-      set.status = 201;
-      void gamificationService.trackAction("skillsMapped", 15, "skill_mapped");
+      set.status = HTTP_STATUS_CREATED;
+      gamificationService.trackActionFireAndForget(
+        "skillsMapped",
+        ROUTE_GAMIFICATION_XP.skillsMapped,
+        "skill_mapped",
+      );
       return newMapping;
     },
     {
       body: t.Object({
-        gameExpression: t.String({ maxLength: 200 }),
-        transferableSkill: t.String({ maxLength: 200 }),
-        industryApplications: t.Optional(t.Array(t.String({ maxLength: 200 }), { maxItems: 50 })),
-        evidence: t.Optional(t.Array(t.Record(t.String(), t.Unknown()), { maxItems: 50 })),
+        gameExpression: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+        transferableSkill: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+        industryApplications: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+            maxItems: SCHEMA_MAX_ITEMS_LARGE,
+          }),
+        ),
+        evidence: t.Optional(
+          t.Array(t.Record(t.String(), t.Unknown()), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+        ),
         confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
-        category: t.Optional(t.String({ maxLength: 100 })),
-        demandLevel: t.Optional(t.String({ maxLength: 50 })),
+        category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+        demandLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
         aiGenerated: t.Optional(t.Boolean()),
       }),
     },
@@ -325,24 +353,30 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
         aiGenerated: body.aiGenerated,
       });
       if (!updated) {
-        set.status = 404;
-        return { error: "Skill mapping not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_SKILL_MAPPING_NOT_FOUND };
       }
 
       return updated;
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        gameExpression: t.Optional(t.String({ maxLength: 200 })),
-        transferableSkill: t.Optional(t.String({ maxLength: 200 })),
-        industryApplications: t.Optional(t.Array(t.String({ maxLength: 200 }), { maxItems: 50 })),
-        evidence: t.Optional(t.Array(t.Record(t.String(), t.Unknown()), { maxItems: 50 })),
+        gameExpression: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        transferableSkill: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        industryApplications: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+            maxItems: SCHEMA_MAX_ITEMS_LARGE,
+          }),
+        ),
+        evidence: t.Optional(
+          t.Array(t.Record(t.String(), t.Unknown()), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+        ),
         confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
-        category: t.Optional(t.String({ maxLength: 100 })),
-        demandLevel: t.Optional(t.String({ maxLength: 50 })),
+        category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+        demandLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
         aiGenerated: t.Optional(t.Boolean()),
       }),
     },
@@ -352,19 +386,22 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
     async ({ params, set }) => {
       const existing = await db.select().from(skillMappings).where(eq(skillMappings.id, params.id));
       if (existing.length === 0) {
-        set.status = 404;
-        return { error: "Skill mapping not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_SKILL_MAPPING_NOT_FOUND };
       }
 
       const deleted = await skillMappingService.deleteMapping(params.id);
       if (!deleted) {
-        return status(410, { error: "Skill mapping already deleted", id: params.id });
+        return status(HTTP_STATUS_GONE, {
+          error: API_ERROR_SKILL_MAPPING_ALREADY_DELETED,
+          id: params.id,
+        });
       }
 
-      return status(200, { message: "Skill mapping deleted", id: params.id });
+      return status(HTTP_STATUS_OK, { message: API_MESSAGE_SKILL_MAPPING_DELETED, id: params.id });
     },
     {
-      params: t.Object({ id: t.String({ maxLength: 100 }) }),
+      params: t.Object({ id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }),
     },
   )
   .get("/pathways", async () => {
@@ -385,7 +422,7 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
     },
     {
       query: t.Object({
-        jobId: t.Optional(t.String({ maxLength: 100 })),
+        jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
       }),
     },
   )
@@ -395,9 +432,9 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
       const analysisResult = await settle(analyzeSkillMappings(body, set));
       if (analysisResult.status === "rejected") {
         skillMappingRoutesLogger.error("AI analysis error:", analysisResult.reason);
-        set.status = 500;
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
-          message: `Error during AI analysis: ${analysisResult.reason instanceof Error ? analysisResult.reason.message : "Unknown error"}`,
+          message: `Error during AI analysis: ${analysisResult.reason instanceof Error ? analysisResult.reason.message : API_ERROR_UNKNOWN}`,
           detectedSkills: [],
           suggestedMappings: [],
           recommendations: [],

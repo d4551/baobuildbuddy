@@ -19,7 +19,9 @@ interface StudioContext {
 
 const toStudioList = (value: unknown): GameStudio[] =>
   Array.isArray(value)
-    ? value.map((entry) => toGameStudio(entry)).filter((entry): entry is GameStudio => entry !== null)
+    ? value
+        .map((entry) => toGameStudio(entry))
+        .filter((entry): entry is GameStudio => entry !== null)
     : [];
 
 function createReadStudioActions(context: StudioContext) {
@@ -34,7 +36,10 @@ function createReadStudioActions(context: StudioContext) {
     withLoadingState(context.loading, async () => {
       const { data, error } = await context.api.studios({ id }).get();
       assertApiResponse(error, context.t("apiErrors.studios.fetchFailed"));
-      const normalized = requireValue(toGameStudio(data), context.t("apiErrors.studios.invalidPayload"));
+      const normalized = requireValue(
+        toGameStudio(data),
+        context.t("apiErrors.studios.invalidPayload"),
+      );
       context.currentStudio.value = normalized;
       return normalized;
     });
@@ -69,7 +74,10 @@ function createWriteStudioActions(
     withLoadingState(context.loading, async () => {
       const { data, error } = await context.api.studios({ id }).put(updates);
       assertApiResponse(error, context.t("apiErrors.studios.updateFailed"));
-      const normalized = requireValue(toGameStudio(data), context.t("apiErrors.studios.invalidPayload"));
+      const normalized = requireValue(
+        toGameStudio(data),
+        context.t("apiErrors.studios.invalidPayload"),
+      );
       context.currentStudio.value = normalized;
       await searchStudios();
       return normalized;

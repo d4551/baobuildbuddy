@@ -1,5 +1,13 @@
 import type { ResumeData } from "@bao/shared";
-import { isRecord, safeParseJson } from "@bao/shared";
+import {
+  AI_DEFAULT_TEMPERATURE,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  AI_MAX_TOKENS_CV_ANALYSIS,
+  AI_MAX_TOKENS_CV_QUESTION,
+  API_ERROR_PARSE_RESUME_SYNTHESIS,
+  isRecord,
+  safeParseJson,
+} from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
@@ -52,7 +60,10 @@ export class CvQuestionnaireService {
       config.experienceLevel,
     );
 
-    const response = await ai.generate(prompt, { temperature: 0.7, maxTokens: 1200 });
+    const response = await ai.generate(prompt, {
+      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+      maxTokens: AI_MAX_TOKENS_CV_QUESTION,
+    });
     if (response.error) {
       throw new Error(response.error);
     }
@@ -82,14 +93,17 @@ export class CvQuestionnaireService {
     const ai = await getAIService();
     const prompt = cvQuestionnaireSynthesizePrompt(questionsAndAnswers);
 
-    const response = await ai.generate(prompt, { temperature: 0.3, maxTokens: 2000 });
+    const response = await ai.generate(prompt, {
+      temperature: AI_DEFAULT_TEMPERATURE,
+      maxTokens: AI_MAX_TOKENS_CV_ANALYSIS,
+    });
     if (response.error) {
       throw new Error(response.error);
     }
 
     const parsed = safeParseJson(extractJson(response.content));
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new Error("Failed to parse AI resume synthesis");
+      throw new Error(API_ERROR_PARSE_RESUME_SYNTHESIS);
     }
     return parsed as Partial<ResumeData>;
   }

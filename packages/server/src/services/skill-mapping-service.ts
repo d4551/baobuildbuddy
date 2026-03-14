@@ -9,9 +9,14 @@ import type {
   SkillReadinessNextStepId,
 } from "@bao/shared";
 import {
+  API_ERROR_CREATE_SKILL_MAPPING,
   generateId,
   getGamificationPathwayIcon,
   isRecord,
+  PATHWAY_SALARY_RANGES,
+  SCORE_DEVELOPING_THRESHOLD,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
   SKILL_CATEGORY_IDS,
   SKILL_EVIDENCE_TYPE_IDS,
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
@@ -114,7 +119,11 @@ const PATHWAY_DEFINITIONS: Record<SkillCategory, CareerPathwayDefinition> = {
     requiredSkills: ["Programming", "Problem Solving", "Game Engines", "Version Control"],
     estimatedTimeToEntry: "6-12 months",
     icon: resolvePathwayIcon("technical"),
-    averageSalary: { min: 70000, max: 120000, currency: "USD" },
+    averageSalary: {
+      min: PATHWAY_SALARY_RANGES.technical.min,
+      max: PATHWAY_SALARY_RANGES.technical.max,
+      currency: "USD",
+    },
     jobMarketTrend: "growing",
   },
   leadership: {
@@ -157,12 +166,17 @@ const PATHWAY_DEFINITIONS: Record<SkillCategory, CareerPathwayDefinition> = {
     ],
     estimatedTimeToEntry: "8-12 months",
     icon: resolvePathwayIcon("leadership"),
-    averageSalary: { min: 80000, max: 140000, currency: "USD" },
+    averageSalary: {
+      min: PATHWAY_SALARY_RANGES.leadership.min,
+      max: PATHWAY_SALARY_RANGES.leadership.max,
+      currency: "USD",
+    },
     jobMarketTrend: "stable",
   },
   community: {
     title: "Community Manager",
-    description: "Turn your community building experience into a career managing online communities",
+    description:
+      "Turn your community building experience into a career managing online communities",
     detailedDescription:
       "Your skills in building, moderating, and growing gaming communities are highly valuable in community management, social media, and customer success roles.",
     stages: [
@@ -195,7 +209,11 @@ const PATHWAY_DEFINITIONS: Record<SkillCategory, CareerPathwayDefinition> = {
     requiredSkills: ["Community Building", "Moderation", "Social Media", "Content Creation"],
     estimatedTimeToEntry: "6-9 months",
     icon: resolvePathwayIcon("community"),
-    averageSalary: { min: 50000, max: 90000, currency: "USD" },
+    averageSalary: {
+      min: PATHWAY_SALARY_RANGES.community.min,
+      max: PATHWAY_SALARY_RANGES.community.max,
+      currency: "USD",
+    },
     jobMarketTrend: "growing",
   },
   creative: {
@@ -233,7 +251,11 @@ const PATHWAY_DEFINITIONS: Record<SkillCategory, CareerPathwayDefinition> = {
     requiredSkills: ["Design Thinking", "Visual Design", "User Experience", "Creative Tools"],
     estimatedTimeToEntry: "10-18 months",
     icon: resolvePathwayIcon("creative"),
-    averageSalary: { min: 60000, max: 110000, currency: "USD" },
+    averageSalary: {
+      min: PATHWAY_SALARY_RANGES.creative.min,
+      max: PATHWAY_SALARY_RANGES.creative.max,
+      currency: "USD",
+    },
     jobMarketTrend: "stable",
   },
   analytical: {
@@ -272,7 +294,11 @@ const PATHWAY_DEFINITIONS: Record<SkillCategory, CareerPathwayDefinition> = {
     requiredSkills: ["Data Analysis", "Statistical Thinking", "SQL", "Visualization"],
     estimatedTimeToEntry: "8-12 months",
     icon: resolvePathwayIcon("analytical"),
-    averageSalary: { min: 65000, max: 105000, currency: "USD" },
+    averageSalary: {
+      min: PATHWAY_SALARY_RANGES.analytical.min,
+      max: PATHWAY_SALARY_RANGES.analytical.max,
+      currency: "USD",
+    },
     jobMarketTrend: "growing",
   },
   communication: {
@@ -310,7 +336,11 @@ const PATHWAY_DEFINITIONS: Record<SkillCategory, CareerPathwayDefinition> = {
     requiredSkills: ["Written Communication", "Content Strategy", "Storytelling", "Editing"],
     estimatedTimeToEntry: "6-10 months",
     icon: resolvePathwayIcon("communication"),
-    averageSalary: { min: 50000, max: 85000, currency: "USD" },
+    averageSalary: {
+      min: PATHWAY_SALARY_RANGES.communication.min,
+      max: PATHWAY_SALARY_RANGES.communication.max,
+      currency: "USD",
+    },
     jobMarketTrend: "stable",
   },
   project_management: {
@@ -353,7 +383,11 @@ const PATHWAY_DEFINITIONS: Record<SkillCategory, CareerPathwayDefinition> = {
     ],
     estimatedTimeToEntry: "10-16 months",
     icon: resolvePathwayIcon("project_management"),
-    averageSalary: { min: 75000, max: 130000, currency: "USD" },
+    averageSalary: {
+      min: PATHWAY_SALARY_RANGES.project_management.min,
+      max: PATHWAY_SALARY_RANGES.project_management.max,
+      currency: "USD",
+    },
     jobMarketTrend: "growing",
   },
 };
@@ -402,7 +436,7 @@ export class SkillMappingService {
 
     const created = await this.getMapping(id);
     if (!created) {
-      throw new Error("Failed to create skill mapping");
+      throw new Error(API_ERROR_CREATE_SKILL_MAPPING);
     }
 
     return created;
@@ -504,9 +538,7 @@ export class SkillMappingService {
     return this.buildReadinessAssessment(metrics);
   }
 
-  private groupMappingsByCategory(
-    mappings: SkillMapping[],
-  ): Record<SkillCategory, SkillMapping[]> {
+  private groupMappingsByCategory(mappings: SkillMapping[]): Record<SkillCategory, SkillMapping[]> {
     const grouped: Record<SkillCategory, SkillMapping[]> = {
       technical: [],
       leadership: [],
@@ -566,7 +598,10 @@ export class SkillMappingService {
     );
     const technicalScore = this.calculateCategoryScore(technicalSkills);
     const softSkillsScore = this.calculateCategoryScore(softSkills);
-    const industryScore = Math.min(100, mappings.flatMap((mapping) => mapping.industryApplications).length * 10);
+    const industryScore = Math.min(
+      100,
+      mappings.flatMap((mapping) => mapping.industryApplications).length * 10,
+    );
     const portfolioScore = Math.min(
       100,
       mappings.reduce((sum, mapping) => sum + mapping.evidence.length, 0) * 20,
@@ -592,7 +627,9 @@ export class SkillMappingService {
         technical: {
           score: metrics.technicalScore,
           feedbackId: this.getCategoryFeedback(metrics.technicalScore),
-          strengths: metrics.technicalSkills.slice(0, 3).map((mapping) => mapping.transferableSkill),
+          strengths: metrics.technicalSkills
+            .slice(0, 3)
+            .map((mapping) => mapping.transferableSkill),
           improvements: this.getTechnicalImprovements(metrics.technicalScore),
         },
         softSkills: {
@@ -666,9 +703,9 @@ export class SkillMappingService {
    * Get feedback bucket key for a category score.
    */
   private getCategoryFeedback(score: number): SkillReadinessFeedbackId {
-    if (score >= 80) return "excellent";
-    if (score >= 60) return "good";
-    if (score >= 40) return "developing";
+    if (score >= SCORE_PASS_THRESHOLD) return "excellent";
+    if (score >= SCORE_WARNING_THRESHOLD) return "good";
+    if (score >= SCORE_DEVELOPING_THRESHOLD) return "developing";
     return "early";
   }
 
@@ -683,15 +720,15 @@ export class SkillMappingService {
   ): SkillReadinessImprovementId[] {
     const suggestions: SkillReadinessImprovementId[] = [];
 
-    if (technical < 60) {
+    if (technical < SCORE_WARNING_THRESHOLD) {
       suggestions.push("imp_transfer_strengthen");
     }
 
-    if (soft < 60) {
+    if (soft < SCORE_WARNING_THRESHOLD) {
       suggestions.push("imp_leadership_highlight");
     }
 
-    if (portfolio < 60) {
+    if (portfolio < SCORE_WARNING_THRESHOLD) {
       suggestions.push("imp_evidence_add");
     }
 
@@ -712,7 +749,7 @@ export class SkillMappingService {
    * Get next steps based on overall readiness
    */
   private getNextSteps(overall: number): SkillReadinessNextStepId[] {
-    if (overall >= 80) {
+    if (overall >= SCORE_PASS_THRESHOLD) {
       return [
         "step_apply_roles",
         "step_network_industry",
@@ -721,7 +758,7 @@ export class SkillMappingService {
       ];
     }
 
-    if (overall >= 60) {
+    if (overall >= SCORE_WARNING_THRESHOLD) {
       return [
         "step_complete_portfolio",
         "step_map_skills_15",
@@ -730,7 +767,7 @@ export class SkillMappingService {
       ];
     }
 
-    if (overall >= 40) {
+    if (overall >= SCORE_DEVELOPING_THRESHOLD) {
       return [
         "step_map_skills_10",
         "step_start_portfolio",

@@ -1,3 +1,4 @@
+import { JOB_AGGREGATOR_CACHE_EXPIRY_MS, settle } from "@bao/shared";
 import { app } from "./app";
 import { config } from "./config/env";
 import { db, sqlite } from "./db/client";
@@ -7,15 +8,8 @@ import { JobAggregator } from "./services/jobs/job-aggregator";
 import { createServerLogger } from "./utils/logger";
 
 const logger = createServerLogger("server-lifecycle");
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 
-const runBackgroundTask = (
-  task: Promise<unknown>,
-  onError?: (error: unknown) => void,
-): void => {
+const runBackgroundTask = (task: Promise<unknown>, onError?: (error: unknown) => void): void => {
   task.then(
     () => undefined,
     (error) => {
@@ -30,37 +24,38 @@ initializeDatabase(sqlite);
 // Seed database with gaming studios (idempotent — only seeds if empty)
 runBackgroundTask(
   (async () => {
-  const seedResult = await settle(Promise.resolve().then(() => seedDatabase(db)));
-  if (seedResult.status === "rejected") {
-    logger.error(
-      "Seed failed",
-      seedResult.reason instanceof Error ? seedResult.reason.message : seedResult.reason,
-    );
-  }
+    const seedResult = await settle(Promise.resolve().then(() => seedDatabase(db)));
+    if (seedResult.status === "rejected") {
+      logger.error(
+        "Seed failed",
+        seedResult.reason instanceof Error ? seedResult.reason.message : seedResult.reason,
+      );
+    }
   })(),
 );
 
 // Job refresh: run every 6 hours (Bun-native, no cron deps)
-const JOB_REFRESH_MS = 6 * 60 * 60 * 1000;
 setInterval(() => {
   const aggregator = new JobAggregator();
   runBackgroundTask(
     (async () => {
-    const refreshResult = await settle(aggregator.refreshJobs());
-    if (refreshResult.status === "rejected") {
-      logger.error(
-        "JobRefresh failed",
-        refreshResult.reason instanceof Error ? refreshResult.reason.message : refreshResult.reason,
-      );
-      return;
-    }
+      const refreshResult = await settle(aggregator.refreshJobs());
+      if (refreshResult.status === "rejected") {
+        logger.error(
+          "JobRefresh failed",
+          refreshResult.reason instanceof Error
+            ? refreshResult.reason.message
+            : refreshResult.reason,
+        );
+        return;
+      }
 
-    logger.info(
-      `JobRefresh ${refreshResult.value.new} new, ${refreshResult.value.updated} updated (${refreshResult.value.total} total)`,
-    );
+      logger.info(
+        `JobRefresh ${refreshResult.value.new} new, ${refreshResult.value.updated} updated (${refreshResult.value.total} total)`,
+      );
     })(),
   );
-}, JOB_REFRESH_MS);
+}, JOB_AGGREGATOR_CACHE_EXPIRY_MS);
 
 // Start server
 const server = app.listen(config.port);
@@ -79,17 +74,11 @@ async function gracefulShutdown(signal: string): Promise<void> {
 
 process.on("SIGTERM", () => {
   runBackgroundTask(gracefulShutdown("SIGTERM"), (error) => {
-    logger.error(
-      "Graceful shutdown failed",
-      error instanceof Error ? error.message : error,
-    );
+    logger.error("Graceful shutdown failed", error instanceof Error ? error.message : error);
   });
 });
 process.on("SIGINT", () => {
   runBackgroundTask(gracefulShutdown("SIGINT"), (error) => {
-    logger.error(
-      "Graceful shutdown failed",
-      error instanceof Error ? error.message : error,
-    );
+    logger.error("Graceful shutdown failed", error instanceof Error ? error.message : error);
   });
 });

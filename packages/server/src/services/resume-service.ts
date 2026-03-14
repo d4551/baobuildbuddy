@@ -1,5 +1,6 @@
 import type { GamingExperience, ResumeData, ResumePersonalInfo, ResumeSkills } from "@bao/shared";
 import {
+  API_ERROR_CREATE_RESUME,
   generateId,
   isResumeTemplate,
   RESUME_DEFAULT_NAME,
@@ -141,7 +142,7 @@ export class ResumeService {
 
     const created = await this.getResume(id);
     if (!created) {
-      throw new Error("Failed to create resume");
+      throw new Error(API_ERROR_CREATE_RESUME);
     }
 
     return created;

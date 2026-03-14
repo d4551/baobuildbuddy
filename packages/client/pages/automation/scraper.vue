@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { Job } from "@bao/shared";
-import { API_ENDPOINTS, APP_ROUTES, JOB_PREVIEW_LIMIT, SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared";
+import {
+  API_ENDPOINTS,
+  APP_ROUTES,
+  formatRelativeTimeForDate,
+  JOB_PREVIEW_LIMIT,
+  SCRAPER_JOB_QUERY_LIMIT,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { resolveApiEndpoint } from "~/utils/endpoints";
@@ -22,7 +28,7 @@ const studiosFetch = useFetch(
 );
 
 const jobsFetch = useFetch(
-  resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.scraperJobsGamedev),
+  resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.scraperJobsHitmarker),
   {
     method: "POST",
     immediate: false,
@@ -77,17 +83,10 @@ function formatRunTime(value: string | null): string {
 }
 
 function relativePostedDate(date: string): string {
-  const postedDate = new Date(date);
-  if (Number.isNaN(postedDate.getTime())) return t("automation.scraper.unknownPostedDate");
-
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - postedDate.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays <= 0) return t("automation.scraper.today");
-  if (diffDays === 1) return t("automation.scraper.yesterday");
-  if (diffDays < 7) return t("automation.scraper.daysAgo", { count: diffDays });
-  if (diffDays < 30) return t("automation.scraper.weeksAgo", { count: Math.floor(diffDays / 7) });
-  return t("automation.scraper.monthsAgo", { count: Math.floor(diffDays / 30) });
+  return formatRelativeTimeForDate(date, (key, params) => t(key, params), {
+    keyPrefix: "automation.scraper",
+    unknownKey: "automation.scraper.unknownPostedDate",
+  });
 }
 
 async function refreshJobsFeed() {

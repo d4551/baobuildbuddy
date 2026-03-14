@@ -42,11 +42,14 @@ const isResumeSynthesisError = (
 
 const isResumeSynthesisSuccess = (
   value: ResumeSynthesisSuccess | ResumeSynthesisError,
-): value is ResumeSynthesisSuccess => isRecord(value) && "id" in value && typeof value.id === "string";
+): value is ResumeSynthesisSuccess =>
+  isRecord(value) && "id" in value && typeof value.id === "string";
 
 function toResumeList(value: unknown): ResumeData[] {
   return Array.isArray(value)
-    ? value.map((entry) => toResumeData(entry)).filter((entry): entry is ResumeData => entry !== null)
+    ? value
+        .map((entry) => toResumeData(entry))
+        .filter((entry): entry is ResumeData => entry !== null)
     : [];
 }
 
@@ -66,17 +69,26 @@ async function getResume(context: ResumeContext, id: string): Promise<ResumeData
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api.resumes({ id }).get();
     assertApiResponse(error, context.t("apiErrors.resumes.fetchFailed"));
-    const normalized = requireValue(toResumeData(data), context.t("apiErrors.resumes.invalidPayload"));
+    const normalized = requireValue(
+      toResumeData(data),
+      context.t("apiErrors.resumes.invalidPayload"),
+    );
     context.currentResume.value = normalized;
     return normalized;
   });
 }
 
-async function createResume(context: ResumeContext, resumeData: CreateResumeInput): Promise<ResumeData> {
+async function createResume(
+  context: ResumeContext,
+  resumeData: CreateResumeInput,
+): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api.resumes.post(resumeData);
     assertApiResponse(error, context.t("apiErrors.resumes.createFailed"));
-    const normalized = requireValue(toResumeData(data), context.t("apiErrors.resumes.invalidPayload"));
+    const normalized = requireValue(
+      toResumeData(data),
+      context.t("apiErrors.resumes.invalidPayload"),
+    );
     await fetchResumes(context);
     return normalized;
   });
@@ -90,7 +102,10 @@ async function updateResume(
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api.resumes({ id }).put(updates);
     assertApiResponse(error, context.t("apiErrors.resumes.updateFailed"));
-    const normalized = requireValue(toResumeData(data), context.t("apiErrors.resumes.invalidPayload"));
+    const normalized = requireValue(
+      toResumeData(data),
+      context.t("apiErrors.resumes.invalidPayload"),
+    );
     context.currentResume.value = normalized;
     await fetchResumes(context);
     return normalized;
@@ -114,7 +129,9 @@ async function exportResume(
   template?: ResumeTemplate,
 ): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.resumes({ id }).export.post(toExportPayload(template));
+    const { data, error } = await context.api
+      .resumes({ id })
+      .export.post(toExportPayload(template));
     assertApiResponse(error, context.t("apiErrors.resumes.exportFailed"));
     return data;
   });
@@ -126,7 +143,9 @@ async function exportResumeOnePage(
   template?: ResumeTemplate,
 ): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.resumes({ id }).export.post(toExportPayload(template));
+    const { data, error } = await context.api
+      .resumes({ id })
+      .export.post(toExportPayload(template));
     assertApiResponse(error, context.t("apiErrors.resumes.exportOnePageFailed"));
     return data;
   });
@@ -136,7 +155,10 @@ async function aiEnhance(context: ResumeContext, id: string): Promise<ResumeData
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api.resumes({ id })["ai-enhance"].post({});
     assertApiResponse(error, context.t("apiErrors.resumes.enhanceFailed"));
-    const normalized = requireValue(toResumeData(data), context.t("apiErrors.resumes.invalidPayload"));
+    const normalized = requireValue(
+      toResumeData(data),
+      context.t("apiErrors.resumes.invalidPayload"),
+    );
     context.currentResume.value = normalized;
     await fetchResumes(context);
     return normalized;
@@ -164,11 +186,18 @@ async function generateCvQuestions(
   const response = await $fetch<{
     questions?: Array<{ id: string; question: string; category: string }>;
     error?: string;
-  }>(resolveApiEndpoint(context.apiBase, context.requestUrl, API_ENDPOINTS.resumesFromQuestionsGenerate), {
-    method: "POST",
-    body: config,
-    headers: key ? { Authorization: `Bearer ${key}` } : {},
-  });
+  }>(
+    resolveApiEndpoint(
+      context.apiBase,
+      context.requestUrl,
+      API_ENDPOINTS.resumesFromQuestionsGenerate,
+    ),
+    {
+      method: "POST",
+      body: config,
+      headers: key ? { Authorization: `Bearer ${key}` } : {},
+    },
+  );
 
   if ("error" in response && response.error) {
     throw new Error(response.error);
@@ -183,7 +212,11 @@ async function synthesizeCvResume(
 ): Promise<ResumeSynthesisSuccess> {
   const key = getStoredApiKey();
   const response = await $fetch<ResumeSynthesisSuccess | ResumeSynthesisError>(
-    resolveApiEndpoint(context.apiBase, context.requestUrl, API_ENDPOINTS.resumesFromQuestionsSynthesize),
+    resolveApiEndpoint(
+      context.apiBase,
+      context.requestUrl,
+      API_ENDPOINTS.resumesFromQuestionsSynthesize,
+    ),
     {
       method: "POST",
       body: { questionsAndAnswers },
@@ -235,7 +268,12 @@ export function useResume() {
       experienceLevel?: string;
     }) => generateCvQuestions(context, config),
     synthesizeCvResume: (
-      questionsAndAnswers: Array<{ id: string; question: string; answer: string; category: string }>,
+      questionsAndAnswers: Array<{
+        id: string;
+        question: string;
+        answer: string;
+        category: string;
+      }>,
     ) => synthesizeCvResume(context, questionsAndAnswers),
   };
 }

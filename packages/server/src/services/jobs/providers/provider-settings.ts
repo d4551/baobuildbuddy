@@ -1,4 +1,7 @@
 import {
+  API_ERROR_INVALID_AUTOMATION_CONFIG,
+  API_ERROR_MISSING_JOB_PROVIDERS,
+  API_ERROR_MISSING_SETTINGS_ROW,
   automationSettingsSchema,
   DEFAULT_SETTINGS_ID,
   type JobProviderSettings,
@@ -19,18 +22,18 @@ export async function loadJobProviderSettings(): Promise<JobProviderSettings> {
     .limit(1);
 
   if (rows.length === 0) {
-    throw new Error("Missing settings row for job provider runtime configuration");
+    throw new Error(API_ERROR_MISSING_SETTINGS_ROW);
   }
 
   const automationParsed = automationSettingsSchema.safeParse(rows[0]?.automationSettings);
   if (!automationParsed.success) {
-    throw new Error("Invalid settings.automationSettings configuration");
+    throw new Error(API_ERROR_INVALID_AUTOMATION_CONFIG);
   }
 
   const jobProviderParsed = jobProviderSettingsSchema.safeParse(automationParsed.data.jobProviders);
 
   if (!jobProviderParsed.success) {
-    throw new Error("Missing or invalid settings.automationSettings.jobProviders configuration");
+    throw new Error(API_ERROR_MISSING_JOB_PROVIDERS);
   }
 
   return jobProviderParsed.data;

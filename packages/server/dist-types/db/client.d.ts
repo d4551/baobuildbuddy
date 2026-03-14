@@ -3607,3 +3607,5 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
     $client: Database;
 };
 export { sqlite };
+/** SQL probe for health check endpoint. */
+export declare const HEALTHCHECK_PROBE_SQL = "SELECT 1";

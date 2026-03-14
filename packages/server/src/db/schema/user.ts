@@ -1,8 +1,9 @@
+import { DEFAULT_PROFILE_ID } from "@bao/shared";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const userProfile = sqliteTable("user_profile", {
-  id: text("id").primaryKey().default("default"),
+  id: text("id").primaryKey().default(DEFAULT_PROFILE_ID),
   name: text("name").notNull().default(""),
   email: text("email"),
   phone: text("phone"),

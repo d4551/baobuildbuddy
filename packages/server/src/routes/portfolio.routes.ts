@@ -1,14 +1,30 @@
-import type { PortfolioMetadata } from "@bao/shared";
+import {
+  API_ERROR_EXPORT_PORTFOLIO,
+  API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE,
+  API_ERROR_PORTFOLIO_NOT_FOUND,
+  API_ERROR_PROJECT_NOT_FOUND,
+  API_ERROR_UNKNOWN,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_ITEMS_MEDIUM,
+  SCHEMA_MAX_ITEMS_SMALL,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LABEL,
+  SCHEMA_MAX_LENGTH_MICRO,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_LENGTH_URL,
+  ROUTE_GAMIFICATION_XP,
+  SCHEMA_MAX_LENGTH_DESCRIPTION,
+  type PortfolioMetadata,
+  settle,
+} from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { exportService } from "../services/export-service";
 import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
 import { createPdfAttachmentResponse } from "../utils/http-response";
-
-const settle = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
 
 export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
   .get("/", async () => {
@@ -30,8 +46,8 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
     async ({ body, set }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
-        set.status = 500;
-        return { error: "Portfolio id is not available" };
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return { error: API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE };
       }
       const newProject = await portfolioService.addProject(portfolio.id, {
         title: body.title,
@@ -47,23 +63,43 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
         engines: body.engines || [],
         sortOrder: body.sortOrder || 0,
       });
-      set.status = 201;
-      void gamificationService.trackAction("portfolioItems", 35, "portfolio_project_added");
+      set.status = HTTP_STATUS_CREATED;
+      gamificationService.trackActionFireAndForget(
+        "portfolioItems",
+        ROUTE_GAMIFICATION_XP.portfolioItems,
+        "portfolio_project_added",
+      );
       return newProject;
     },
     {
       body: t.Object({
-        title: t.String({ maxLength: 200 }),
-        description: t.String({ maxLength: 5000 }),
-        technologies: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 50 })),
-        image: t.Optional(t.String({ maxLength: 500 })),
-        liveUrl: t.Optional(t.String({ maxLength: 500 })),
-        githubUrl: t.Optional(t.String({ maxLength: 500 })),
-        tags: t.Optional(t.Array(t.String({ maxLength: 50 }), { maxItems: 30 })),
+        title: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+        description: t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION }),
+        technologies: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+            maxItems: SCHEMA_MAX_ITEMS_LARGE,
+          }),
+        ),
+        image: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+        liveUrl: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+        githubUrl: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+        tags: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+          }),
+        ),
         featured: t.Optional(t.Boolean()),
-        role: t.Optional(t.String({ maxLength: 200 })),
-        platforms: t.Optional(t.Array(t.String({ maxLength: 50 }), { maxItems: 20 })),
-        engines: t.Optional(t.Array(t.String({ maxLength: 50 }), { maxItems: 20 })),
+        role: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        platforms: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+            maxItems: SCHEMA_MAX_ITEMS_SMALL,
+          }),
+        ),
+        engines: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+            maxItems: SCHEMA_MAX_ITEMS_SMALL,
+          }),
+        ),
         sortOrder: t.Optional(t.Number()),
       }),
     },
@@ -73,8 +109,8 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
     async ({ body, set }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
-        set.status = 500;
-        return { error: "Portfolio id is not available" };
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return { error: API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE };
       }
       await portfolioService.reorderProjects(portfolio.id, body.orderedIds);
       return await portfolioService.getPortfolioPayload();
@@ -104,28 +140,44 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
       });
 
       if (!updated) {
-        set.status = 404;
-        return { error: "Project not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_PROJECT_NOT_FOUND };
       }
 
       return updated;
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
       body: t.Object({
-        title: t.Optional(t.String({ maxLength: 200 })),
-        description: t.Optional(t.String({ maxLength: 5000 })),
-        technologies: t.Optional(t.Array(t.String({ maxLength: 100 }), { maxItems: 50 })),
-        image: t.Optional(t.String({ maxLength: 500 })),
-        liveUrl: t.Optional(t.String({ maxLength: 500 })),
-        githubUrl: t.Optional(t.String({ maxLength: 500 })),
-        tags: t.Optional(t.Array(t.String({ maxLength: 50 }), { maxItems: 30 })),
+        title: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+        technologies: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+            maxItems: SCHEMA_MAX_ITEMS_LARGE,
+          }),
+        ),
+        image: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+        liveUrl: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+        githubUrl: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+        tags: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+          }),
+        ),
         featured: t.Optional(t.Boolean()),
-        role: t.Optional(t.String({ maxLength: 200 })),
-        platforms: t.Optional(t.Array(t.String({ maxLength: 50 }), { maxItems: 20 })),
-        engines: t.Optional(t.Array(t.String({ maxLength: 50 }), { maxItems: 20 })),
+        role: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        platforms: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+            maxItems: SCHEMA_MAX_ITEMS_SMALL,
+          }),
+        ),
+        engines: t.Optional(
+          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+            maxItems: SCHEMA_MAX_ITEMS_SMALL,
+          }),
+        ),
         sortOrder: t.Optional(t.Number()),
       }),
     },
@@ -135,15 +187,15 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
     async ({ params, set }) => {
       const deleted = await portfolioService.deleteProject(params.id);
       if (!deleted) {
-        set.status = 404;
-        return { error: "Project not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_PROJECT_NOT_FOUND };
       }
 
       return { success: true, id: params.id };
     },
     {
       params: t.Object({
-        id: t.String({ maxLength: 100 }),
+        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
       }),
     },
   )
@@ -152,17 +204,20 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
     async ({ set }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio) {
-        set.status = 404;
-        return { error: "Portfolio not found" };
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return { error: API_ERROR_PORTFOLIO_NOT_FOUND };
       }
 
       const metadata: PortfolioMetadata = portfolio.metadata ?? {};
-      const exportResult = await settle(exportService.exportPortfolioPDF(metadata, portfolio.projects));
+      const exportResult = await settle(
+        exportService.exportPortfolioPDF(metadata, portfolio.projects),
+      );
       if (exportResult.status === "rejected") {
-        set.status = 500;
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
-          error: "Failed to export portfolio",
-          details: exportResult.reason instanceof Error ? exportResult.reason.message : "Unknown error",
+          error: API_ERROR_EXPORT_PORTFOLIO,
+          details:
+            exportResult.reason instanceof Error ? exportResult.reason.message : API_ERROR_UNKNOWN,
         };
       }
 
@@ -173,7 +228,7 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
     },
     {
       body: t.Object({
-        format: t.Optional(t.String({ maxLength: 20 })),
+        format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
       }),
     },
   );

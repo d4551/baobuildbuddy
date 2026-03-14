@@ -37,7 +37,9 @@ const { t } = useI18n();
 
 const titleId = computed(() => `${props.id}-title`);
 const descriptionId = computed(() => `${props.id}-message`);
-const primaryActionRef = computed(() => (props.focusPrimary ? confirmButtonRef.value : cancelButtonRef.value));
+const primaryActionRef = computed(() =>
+  props.focusPrimary ? confirmButtonRef.value : cancelButtonRef.value,
+);
 
 const confirmButtonClass = computed(() =>
   props.variant === "danger" ? "btn btn-error" : "btn btn-primary",

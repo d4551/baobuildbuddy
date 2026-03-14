@@ -59,7 +59,9 @@ function focusDialogEntry(dialog: HTMLDialogElement): void {
 
 function resolveActiveElement(dialog: HTMLDialogElement): HTMLElement | null {
   const activeElement = document.activeElement;
-  return activeElement instanceof HTMLElement && dialog.contains(activeElement) ? activeElement : null;
+  return activeElement instanceof HTMLElement && dialog.contains(activeElement)
+    ? activeElement
+    : null;
 }
 
 function cycleFocus(event: KeyboardEvent, dialog: HTMLDialogElement): void {

@@ -1,13 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { AIResponse, GenerateOptions } from "@bao/shared";
+import {
+  API_ERROR_AI_STREAMING_FAILED,
+  settle,
+  toErrorMessage,
+  type AIResponse,
+  type GenerateOptions,
+} from "@bao/shared";
 import { BaseAIProvider } from "./provider-interface";
-
-const settlePromise = async <T>(operation: Promise<T>): Promise<PromiseSettledResult<T>> => {
-  const [result] = await Promise.allSettled([operation]);
-  return result;
-};
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : "Unknown error";
 
 /**
  * Anthropic Claude AI Provider
@@ -25,7 +24,7 @@ export class ClaudeProvider extends BaseAIProvider {
 
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
-    const responseResult = await settlePromise(
+    const responseResult = await settle(
       this.client.messages.create({
         model: this.model,
         max_tokens: options?.maxTokens ?? 4096,
@@ -69,7 +68,7 @@ export class ClaudeProvider extends BaseAIProvider {
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
-    const streamResult = await settlePromise(
+    const streamResult = await settle(
       Promise.resolve(
         this.client.messages.stream({
           model: this.model,
@@ -86,15 +85,17 @@ export class ClaudeProvider extends BaseAIProvider {
       ),
     );
     if (streamResult.status === "rejected") {
-      throw new Error(`Claude streaming error: ${toErrorMessage(streamResult.reason)}`);
+      throw new Error(`${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(streamResult.reason)}`);
     }
     const stream = streamResult.value;
 
     const iterator = stream[Symbol.asyncIterator]();
     const emitTextEvents = async function* (): AsyncGenerator<string> {
-      const nextEventResult = await settlePromise(iterator.next());
+      const nextEventResult = await settle(iterator.next());
       if (nextEventResult.status === "rejected") {
-        throw new Error(`Claude streaming error: ${toErrorMessage(nextEventResult.reason)}`);
+        throw new Error(
+          `${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(nextEventResult.reason)}`,
+        );
       }
       const nextEvent = nextEventResult.value;
       if (nextEvent.done) {
@@ -113,13 +114,15 @@ export class ClaudeProvider extends BaseAIProvider {
   async isAvailable(): Promise<boolean> {
     // Make a minimal request to verify API key
     return (
-      await settlePromise(
-        this.client.messages.create({
-          model: this.model,
-          max_tokens: 10,
-          messages: [{ role: "user", content: "test" }],
-        }),
-      )
-    ).status === "fulfilled";
+      (
+        await settle(
+          this.client.messages.create({
+            model: this.model,
+            max_tokens: 10,
+            messages: [{ role: "user", content: "test" }],
+          }),
+        )
+      ).status === "fulfilled"
+    );
   }
 }

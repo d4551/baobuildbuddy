@@ -1,4 +1,9 @@
-import type { SkillCategory } from "@bao/shared";
+import {
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
+  SKILLS_DEFAULT_CONFIDENCE,
+  type SkillCategory,
+} from "@bao/shared";
 
 /**
  * Non-category sentinel used by UI filters to represent all mappings.
@@ -20,7 +25,7 @@ export const SKILLS_MIN_TRANSFERABLE_SKILL_LENGTH = 2;
  */
 export const SKILLS_CONFIDENCE_MIN = 0;
 export const SKILLS_CONFIDENCE_MAX = 100;
-export const SKILLS_DEFAULT_CONFIDENCE = 50;
+export { SKILLS_DEFAULT_CONFIDENCE };
 
 /**
  * Number of top-confidence mappings shown in the skills insights preview.
@@ -29,9 +34,10 @@ export const SKILLS_TOP_MAPPINGS_PREVIEW_LIMIT = 5;
 
 /**
  * Readiness score thresholds used for progress color coding.
+ * Derived from shared score-thresholds for single source of truth.
  */
-export const SKILLS_READINESS_THRESHOLD_HIGH = 80;
-export const SKILLS_READINESS_THRESHOLD_MEDIUM = 60;
+export const SKILLS_READINESS_THRESHOLD_HIGH = SCORE_PASS_THRESHOLD;
+export const SKILLS_READINESS_THRESHOLD_MEDIUM = SCORE_WARNING_THRESHOLD;
 
 /**
  * Reusable radial dial sizing for readiness visuals.

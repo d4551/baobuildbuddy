@@ -45,9 +45,7 @@ watch(isOpen, (nextOpen) => {
 });
 
 function getActionItems(): HTMLAnchorElement[] {
-  return actionItemRefs.value.filter(
-    (element): element is HTMLAnchorElement => element !== null,
-  );
+  return actionItemRefs.value.filter((element): element is HTMLAnchorElement => element !== null);
 }
 
 function setActiveActionRef(index: number, element: Element | null): void {
@@ -108,7 +106,6 @@ function handleQuickActionKeydown(event: KeyboardEvent, index: number): void {
     getActionItems()[previousIndex]?.focus();
     return;
   }
-
 }
 
 function handleQuickActionButtonKeydown(event: KeyboardEvent): void {
@@ -140,10 +137,7 @@ function handleDocumentPointerDown(event: PointerEvent): void {
   const target = event.target;
   if (!(target instanceof Node)) return;
 
-  if (
-    actionMenuRef.value?.contains(target) ||
-    actionButtonRef.value?.contains(target)
-  ) {
+  if (actionMenuRef.value?.contains(target) || actionButtonRef.value?.contains(target)) {
     return;
   }
 

@@ -56,10 +56,17 @@ const { data, status, error, refresh } = await useAsyncData(
     ]);
 
     if (pathwaysResponse.error) {
-      throw new Error(getErrorMessage(pathwaysResponse.error, t("skillsPathwaysPage.errors.pathwaysLoadFailed")));
+      throw new Error(
+        getErrorMessage(pathwaysResponse.error, t("skillsPathwaysPage.errors.pathwaysLoadFailed")),
+      );
     }
     if (readinessResponse.error) {
-      throw new Error(getErrorMessage(readinessResponse.error, t("skillsPathwaysPage.errors.readinessLoadFailed")));
+      throw new Error(
+        getErrorMessage(
+          readinessResponse.error,
+          t("skillsPathwaysPage.errors.readinessLoadFailed"),
+        ),
+      );
     }
 
     return {
@@ -160,7 +167,9 @@ function getCategoryFeedbackLabel(
   });
 }
 
-function getReadinessImprovementLabel(item: ReadinessAssessment["improvementSuggestions"][number]): string {
+function getReadinessImprovementLabel(
+  item: ReadinessAssessment["improvementSuggestions"][number],
+): string {
   return t(`skillsPathwaysPage.readiness.improvements.${item}`);
 }
 

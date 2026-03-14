@@ -5,6 +5,8 @@ import {
   INTERVIEW_MIN_RESPONSE_LENGTH,
   INTERVIEW_PROGRESS_MAX,
   INTERVIEW_PROGRESS_MIN,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
 } from "@bao/shared";
 import { onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
@@ -593,9 +595,9 @@ async function handleCompleteInterview() {
           <div
             class="alert"
             :class="{
-              'alert-success': currentQuestion.score >= 80,
-              'alert-warning': currentQuestion.score >= 60 && currentQuestion.score < 80,
-              'alert-error': currentQuestion.score < 60,
+              'alert-success': currentQuestion.score >= SCORE_PASS_THRESHOLD,
+              'alert-warning': currentQuestion.score >= SCORE_WARNING_THRESHOLD && currentQuestion.score < SCORE_PASS_THRESHOLD,
+              'alert-error': currentQuestion.score < SCORE_WARNING_THRESHOLD,
             }"
             aria-live="polite"
           >

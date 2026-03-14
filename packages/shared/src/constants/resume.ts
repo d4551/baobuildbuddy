@@ -8,6 +8,9 @@ export const RESUME_LIST_PAGE_SIZE = 6;
  */
 export const RESUME_DEFAULT_NAME = "Untitled Resume" as const;
 
+/** Default name for resumes created from the CV questionnaire flow. */
+export const RESUME_DEFAULT_NAME_QUESTIONNAIRE = "Resume from Questionnaire";
+
 /**
  * Canonical fallback theme used for resume rendering and persistence.
  */

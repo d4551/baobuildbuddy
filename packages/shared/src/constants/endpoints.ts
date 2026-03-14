@@ -1,4 +1,9 @@
 /**
+ * OpenAPI/Swagger documentation version.
+ */
+export const OPENAPI_VERSION = "0.1.0" as const;
+
+/**
  * Canonical API prefix used by Nuxt client calls and Elysia server routes.
  */
 export const API_ENDPOINT_PREFIX = "/api";
@@ -10,7 +15,7 @@ export const API_ENDPOINTS = {
   health: `${API_ENDPOINT_PREFIX}/health`,
   aiChat: `${API_ENDPOINT_PREFIX}/ai/chat`,
   scraperStudios: `${API_ENDPOINT_PREFIX}/scraper/studios`,
-  scraperJobsGamedev: `${API_ENDPOINT_PREFIX}/scraper/jobs/gamedev`,
+  scraperJobsHitmarker: `${API_ENDPOINT_PREFIX}/scraper/jobs/hitmarker`,
   resumes: `${API_ENDPOINT_PREFIX}/resumes`,
   resumesFromQuestionsGenerate: `${API_ENDPOINT_PREFIX}/resumes/from-questions/generate`,
   resumesFromQuestionsSynthesize: `${API_ENDPOINT_PREFIX}/resumes/from-questions/synthesize`,

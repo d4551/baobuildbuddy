@@ -47,7 +47,10 @@ async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
     .filter((row): row is CoverLetterData => row !== null);
 }
 
-async function getCoverLetter(context: CoverLetterContext, id: string): Promise<CoverLetterData | null> {
+async function getCoverLetter(
+  context: CoverLetterContext,
+  id: string,
+): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const { data, error } = await context.api["cover-letters"]({ id }).get();
   context.loading.value = false;
@@ -173,7 +176,8 @@ export function useCoverLetter() {
     loading: readonly(context.loading),
     fetchCoverLetters: () => fetchCoverLetters(context),
     getCoverLetter: (id: string) => getCoverLetter(context, id),
-    createCoverLetter: (letterData: CreateCoverLetterInput) => createCoverLetter(context, letterData),
+    createCoverLetter: (letterData: CreateCoverLetterInput) =>
+      createCoverLetter(context, letterData),
     updateCoverLetter: (id: string, updates: UpdateCoverLetterInput) =>
       updateCoverLetter(context, id, updates),
     deleteCoverLetter: (id: string) => deleteCoverLetter(context, id),

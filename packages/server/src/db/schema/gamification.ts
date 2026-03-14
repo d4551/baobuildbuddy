@@ -1,8 +1,9 @@
+import { DEFAULT_PROFILE_ID } from "@bao/shared";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const gamification = sqliteTable("gamification", {
-  id: text("id").primaryKey().default("default"),
+  id: text("id").primaryKey().default(DEFAULT_PROFILE_ID),
   xp: integer("xp").default(0),
   level: integer("level").default(1),
   achievements: text("achievements", { mode: "json" }).$type<string[]>().default(sql`'[]'`),

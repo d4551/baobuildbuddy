@@ -220,7 +220,7 @@ export function isRouteActive(currentPath: string, targetPath: string): boolean 
   for (let index = 0; index < targetSegments.length; index += 1) {
     const targetSegment = targetSegments[index];
     const currentSegment = currentSegments[index];
-    if (!((targetSegment && currentSegment ) && segmentMatches(targetSegment, currentSegment))) {
+    if (!(targetSegment && currentSegment && segmentMatches(targetSegment, currentSegment))) {
       return false;
     }
   }

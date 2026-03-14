@@ -77,9 +77,7 @@ function resolveWebSocketBase(environment: WebSocketEnvironment): string {
   }
 
   if (environment.requestUrl.protocol === "https:") {
-    return resolved
-      .replace(HTTPS_PROTOCOL_PATTERN, "wss:")
-      .replace(HTTP_PROTOCOL_PATTERN, "wss:");
+    return resolved.replace(HTTPS_PROTOCOL_PATTERN, "wss:").replace(HTTP_PROTOCOL_PATTERN, "wss:");
   }
 
   return resolved.replace(HTTPS_PROTOCOL_PATTERN, "ws:").replace(HTTP_PROTOCOL_PATTERN, "ws:");
@@ -205,7 +203,9 @@ function dispatchSocketMessage(context: WebSocketContext, payload: Record<string
 function scheduleReconnect(context: WebSocketContext, connect: (path: string) => void): void {
   if (!context.state.currentPath || context.state.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
     if (context.state.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-      context.logger.error(`WebSocket gave up after ${MAX_RECONNECT_ATTEMPTS} reconnection attempts`);
+      context.logger.error(
+        `WebSocket gave up after ${MAX_RECONNECT_ATTEMPTS} reconnection attempts`,
+      );
     }
     return;
   }
@@ -322,11 +322,16 @@ function sendMessage(context: WebSocketContext, data: Record<string, unknown> | 
 function subscribeMessageHandler(context: WebSocketContext, callback: MessageHandler): () => void {
   context.state.messageHandlers.push(callback);
   return () => {
-    context.state.messageHandlers = context.state.messageHandlers.filter((handler) => handler !== callback);
+    context.state.messageHandlers = context.state.messageHandlers.filter(
+      (handler) => handler !== callback,
+    );
   };
 }
 
-function subscribeDisconnectHandler(context: WebSocketContext, callback: DisconnectHandler): () => void {
+function subscribeDisconnectHandler(
+  context: WebSocketContext,
+  callback: DisconnectHandler,
+): () => void {
   context.state.disconnectHandlers.push(callback);
   return () => {
     context.state.disconnectHandlers = context.state.disconnectHandlers.filter(

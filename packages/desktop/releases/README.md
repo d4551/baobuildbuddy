@@ -4,32 +4,7 @@ Canonical installer output manifest for this repository baseline
 
 ## Quality Gate Before Packaging
 
-Run from repo root before desktop release packaging:
-
-```bash
-bun run lint
-bun run typecheck
-bun run test
-bun run build
-bun run build:desktop
-```
-
-Desktop release packaging additionally enforces these quality checks before execution:
-
-```bash
-bun run validate:no-try-catch
-bun run validate:no-unsafe-casts
-bun run validate:no-hardcoded-paths
-bun run validate:locales
-bun run validate:page-seo
-bun run validate:i18n-ui
-bun run validate:aria
-bun run validate:ui-layout-tokens
-bun run validate:ui
-bun run lint:typed
-```
-
-Packaging docs in this file assume the above succeeds without masked diagnostics.
+For the full validation sequence and script verification commands, see [README.md § Release Validation Workflow](../../../README.md#release-validation-workflow). Packaging docs in this file assume those quality gates succeed without masked diagnostics.
 
 `release:refresh:all-os` uses a headless fallback for macOS DMG creation:
 
@@ -56,17 +31,6 @@ If a direct `bun run build:desktop` run exits with `failed to run bundle_dmg.sh`
 bash scripts/refresh-desktop-releases.sh --skip-quality-gates --skip-linux --skip-windows
 ```
 
-Expected validation outcomes:
-
-- `bun run lint`: no lint warnings or errors.
-- `bun run --filter '@bao/client' lint`: no warnings or errors.
-- `bun run typecheck`: no TypeScript diagnostics.
-- `bun run test`: all workspace test suites pass.
-- `bun run build`: all packages build successfully.
-- `CI=true bun run build:desktop`: desktop packaging build succeeds.
-- `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
-- `bun run release:refresh:all-os:fast`: desktop target artifacts are rebuilt and checksummed without rerunning quality gates.
-
 Optional SSR/page validation before packaging (when validating UI render contracts):
 
 ```bash
@@ -75,6 +39,33 @@ VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 
 ## Packaging workflow (macOS host)
+
+```mermaid
+flowchart TD
+  subgraph QualityGates["Quality gates (release:refresh:all-os)"]
+    Lint["bun run lint"]
+    Typecheck["bun run typecheck"]
+    Test["bun run test"]
+    Build["bun run build"]
+  end
+
+  subgraph Targets["Cross-target builds"]
+    MacOS["macOS DMG (aarch64-apple-darwin)"]
+    Windows["Windows x64 (cargo-xwin + NSIS)"]
+    Linux["Linux ARM64 (Docker + AppImage/deb/rpm)"]
+  end
+
+  subgraph Staging["Release staging"]
+    Stage["packages/desktop/releases/{macos,linux,windows}"]
+    Checksum["sha256.txt regeneration"]
+  end
+
+  QualityGates --> Targets
+  MacOS --> Stage
+  Windows --> Stage
+  Linux --> Stage
+  Stage --> Checksum
+```
 
 Use the canonical all-target refresh command:
 
@@ -93,8 +84,9 @@ bun run release:refresh:all-os:fast
 Host/runtime requirements:
 
 - macOS host (required for DMG generation)
-- Docker daemon running (required for Windows/Linux cross-target packaging)
-- outbound network access for Ubuntu package mirrors and Bun/Rust/AppImage downloads
+- Docker daemon running (required for Windows NSIS fallback and Linux cross-target packaging)
+- `cargo-xwin` for Windows x64 cross-compilation (`cargo install cargo-xwin`)
+- Outbound network access for Ubuntu package mirrors and Bun/Rust/AppImage downloads
 
 This command performs:
 

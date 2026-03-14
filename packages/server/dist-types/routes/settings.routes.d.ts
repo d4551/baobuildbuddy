@@ -65,7 +65,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
     settings: {
         put: {
             body: {
-                theme?: "bao-light" | "bao-dark" | undefined;
                 notifications?: {
                     achievements?: boolean | undefined;
                     dailyChallenges?: boolean | undefined;
@@ -117,15 +116,15 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         greenhouseApiBaseUrl: string;
                         greenhouseMaxPages: number;
                         greenhouseBoards: {
-                            company: string;
                             enabled: boolean;
                             board: string;
+                            company: string;
                         }[];
                         leverApiBaseUrl: string;
                         leverMaxPages: number;
                         leverCompanies: {
-                            company: string;
                             enabled: boolean;
+                            company: string;
                             slug: string;
                         }[];
                         companyBoards: {
@@ -136,7 +135,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                             priority: number;
                         }[];
                         gamingPortals: {
-                            id: "gamedev-net" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
+                            id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
                             source: string;
                             name: string;
                             enabled: boolean;
@@ -146,6 +145,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 } | undefined;
                 preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                 preferredModel?: string | undefined;
+                theme?: "bao-light" | "bao-dark" | undefined;
                 language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
             };
             params: {};
@@ -262,6 +262,9 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     profile: string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null;
+                    settings: string | number | boolean | never[] | {
+                        [x: string]: never;
+                    } | null;
                     gamification: string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null;
@@ -271,9 +274,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     resumes: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];
-                    settings: string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null;
                     chatHistory: (string | number | boolean | never[] | {
                         [x: string]: never;
                     } | null)[];

@@ -1,13 +1,14 @@
 import z from "zod";
+import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
 import { jsonObjectSchema } from "./json.schema";
 
 /**
  * Canonical automation/runtime error classification.
  */
 export const rpaRunErrorCodeSchema = z.enum([
-  "PYTHON_RUNTIME_ERROR",
-  "PYTHON_TIMEOUT",
-  "PYTHON_CANCELLED",
+  "AUTOMATION_RUNTIME_ERROR",
+  "AUTOMATION_TIMEOUT",
+  "AUTOMATION_CANCELLED",
   "SCRIPT_PROTOCOL_ERROR",
   "SCRIPT_OUTPUT_INVALID",
   "OUTPUT_PERSISTENCE_ERROR",
@@ -21,7 +22,7 @@ export const rpaRunErrorCodeSchema = z.enum([
  */
 export const errorEnvelopeSchema = z.object({
   code: rpaRunErrorCodeSchema,
-  message: z.string().min(1).max(2_000),
+  message: z.string().min(1).max(SCHEMA_MAX_LENGTH_LONG),
   details: jsonObjectSchema.optional(),
 });
 
@@ -38,7 +39,7 @@ export interface ErrorEnvelopeResult {
  * Zod schema for typed error envelopes.
  */
 export const rpaErrorEnvelopeSchema = errorEnvelopeSchema.extend({
-  source: z.string().min(1).max(200),
+  source: z.string().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
 });
 
 export type ErrorEnvelope = z.infer<typeof errorEnvelopeSchema>;

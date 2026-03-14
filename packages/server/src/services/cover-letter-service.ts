@@ -1,5 +1,6 @@
 import type { CoverLetterData, CoverLetterTemplate } from "@bao/shared";
 import {
+  API_ERROR_CREATE_COVER_LETTER,
   COVER_LETTER_DEFAULT_TEMPLATE,
   generateId,
   isCoverLetterTemplate,
@@ -96,7 +97,7 @@ export class CoverLetterService {
 
     const created = await this.getCoverLetter(id);
     if (!created) {
-      throw new Error("Failed to create cover letter");
+      throw new Error(API_ERROR_CREATE_COVER_LETTER);
     }
 
     return created;

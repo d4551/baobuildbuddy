@@ -164,11 +164,17 @@ function assertBlocksStartListeningWhenUnsupported(): void {
 }
 
 describe("useChatVoice", () => {
-  it("resolves canonical speech error code to i18n message key", assertResolvesSpeechErrorMessageKey);
+  it(
+    "resolves canonical speech error code to i18n message key",
+    assertResolvesSpeechErrorMessageKey,
+  );
   it("mirrors speech transcript into draft input", assertMirrorsTranscriptIntoDraft);
   it(
     "uses selected voice when replaying latest assistant message",
     assertReplaysAssistantMessageWithSelectedVoice,
   );
-  it("blocks startListening when speech recognition is unsupported", assertBlocksStartListeningWhenUnsupported);
+  it(
+    "blocks startListening when speech recognition is unsupported",
+    assertBlocksStartListeningWhenUnsupported,
+  );
 });
