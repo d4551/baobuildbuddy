@@ -16,8 +16,32 @@
 [![License](https://img.shields.io/github/license/d4551/baobuildbuddy)](https://github.com/d4551/baobuildbuddy/blob/main/LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/d4551/baobuildbuddy)](https://github.com/d4551/baobuildbuddy/commits/main)
 
+## Start Here First
+
+If you want the shortest possible explanation before reading the full runbook, start with:
+
+- [Explain Like I'm 5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md)
+
+That guide explains the whole system in plain language with Mermaid diagrams for:
+
+- page load and server flow
+- AI chat flow
+- job scraping and job apply automation
+- screenshots and run history
+- email generation and SMTP delivery
+
+Tiny version:
+
+- Nuxt is the screen.
+- Elysia is the traffic controller.
+- SQLite is the notebook.
+- Playwright is the robot browser.
+- Bun is the runtime, package manager, bundler, and test runner.
+- Tauri is the desktop wrapper.
+
 ## Quick links
 
+- [Explain Like I'm 5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md)
 - [Non-Technical Install (Pick Your OS)](#non-technical-install-pick-your-os)
 - [Getting Started (First-time setup)](docs/STARTER_GUIDE.md)
 - [Automation Guide](docs/AUTOMATION.md)
@@ -142,6 +166,7 @@ If you are on a different CPU architecture, use the matching artifact for that a
 
 ### Documentation index
 
+- [Explain Like I'm 5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md)
 - [First-time Setup Guide](docs/STARTER_GUIDE.md)
 - [Automation and RPA Guide](docs/AUTOMATION.md)
 - [Server routes and contracts in `packages/server`](packages/server/src/routes)

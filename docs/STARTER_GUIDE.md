@@ -7,6 +7,10 @@
 +--------------------------+
 ```
 
+Before this guide, you can read the picture-book version here:
+
+- [Explain Like I'm 5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)
+
 If you need deeper architecture and runbook details, see the full runbook: [README.md](../README.md).
 
 Use this guide if this is your first time running BaoBuildBuddy locally.
@@ -25,6 +29,12 @@ UI runtime contracts:
 - AI provider display copy/icons are locale-driven (`aiProviderCatalog.*`) with a shared icon component (`AIProviderIcon`) to avoid hardcoded provider UI metadata.
 - Interview role recommendations are derived from profile role, readiness role rankings, pathway match scoring, and live job titles; static role slug lists are removed.
 - Skills-readiness UI copy is locale-driven from typed server IDs (`feedbackId`, `improvementSuggestions`, `nextSteps`) instead of service hardcoded prose.
+
+Documentation map:
+
+- [Explain Like I'm 5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)
+- [Automation and RPA Guide](./AUTOMATION.md)
+- [Full local runbook](../README.md)
 
 ## 1) Understand what is being started
 

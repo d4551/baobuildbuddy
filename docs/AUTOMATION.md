@@ -2,6 +2,8 @@
 
 BaoBuildBuddy now runs browser automation through the Bun/TypeScript workspace package at `packages/scraper`. The server keeps process isolation with `Bun.spawn`, but the executable surface is no longer Python-based.
 
+If you want the short mental model first, read [Explain Like I'm 5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md).
+
 ## Runtime model
 
 - `packages/server/src/services/automation/rpa-runner.ts` resolves typed script IDs and spawns Bun entrypoints from `packages/scraper/src/scripts`.
@@ -85,6 +87,43 @@ Runtime-neutral error codes now use:
 - `SCRIPT_OUTPUT_INVALID`
 - `OUTPUT_PERSISTENCE_ERROR`
 - `OUTPUT_VALIDATION_ERROR`
+
+## Email response and SMTP delivery
+
+The automation email flow now has two stages:
+
+1. Generate the reply draft with the configured AI provider.
+2. Optionally deliver the reply through the configured SMTP transport.
+
+```mermaid
+flowchart LR
+  UI["automation/email page"] --> Route["POST /api/automation/email-response"]
+  Route --> Service["application-automation-service.ts"]
+  Service --> AI["AI draft generation"]
+  Service --> SMTP["email-delivery-service.ts"]
+  Service --> Runs["automation_runs table"]
+  Runs --> UI
+```
+
+When delivery is enabled, the server loads these settings from the global settings row:
+
+- SMTP host
+- SMTP port
+- transport security (`tls`, `starttls`, or `plain`)
+- username
+- from name
+- from email
+- auth method
+- stored password secret
+- connection timeout
+
+The completed run now stores:
+
+- generated reply text
+- whether the message was delivered
+- recipient email
+- delivery timestamp
+- SMTP message ID
 
 ## Scraper contract
 
