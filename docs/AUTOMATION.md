@@ -22,15 +22,19 @@ Current script registry:
 
 ```mermaid
 flowchart LR
-  UI["Nuxt /automation pages"] --> API["/api/automation/*"]
-  API --> Service["application-automation-service.ts"]
-  API --> ScraperService["scraper-service.ts"]
-  Service --> Runner["rpa-runner.ts"]
+  UI["Nuxt SSR automation pages"] --> AutomationRoutes["automation.routes.ts"]
+  UI --> ScraperRoutes["scraper.routes.ts"]
+  UI --> AutomationWs["/api/ws/automation"]
+  AutomationRoutes --> Service["application-automation-service.ts"]
+  ScraperRoutes --> ScraperService["scraper-service.ts"]
+  Service --> Runner["automation/rpa-runner.ts"]
   ScraperService --> Runner
   Runner --> Scripts["packages/scraper/src/scripts/*.ts"]
-  Scripts --> Shared["@bao/shared contracts"]
-  Service --> Runs["automation_runs persistence"]
-  Runs --> WS["WS /api/ws/automation"]
+  Scripts --> Runtime["Playwright runtime + ATS adapters + provider extractors"]
+  Runtime --> Shared["@bao/shared automation contracts"]
+  Service --> Runs["automation_runs table"]
+  ScraperService --> JobsStudios["jobs + studios tables"]
+  Runs --> AutomationWs
 ```
 
 ## Job-apply contract

@@ -2,13 +2,14 @@
 
 ### Codebase overview
 
-BaoBuildBuddy is a Bun-first monorepo (4 packages) for game-industry career automation. See `README.md` for full architecture, scripts, and troubleshooting.
+BaoBuildBuddy is a Bun-first monorepo (5 workspace packages) for game-industry career automation. See `README.md` for full architecture, scripts, and troubleshooting.
 
 | Package | Path | Role |
 |---------|------|------|
 | `@bao/server` | `packages/server` | Bun + Elysia API (port 3000) |
 | `@bao/client` | `packages/client` | Nuxt 4 SSR frontend (port 3001) |
 | `@bao/shared` | `packages/shared` | Shared types, schemas, constants |
+| `@bao/scraper` | `packages/scraper` | Bun + Playwright automation and scraper executables |
 | `@bao/desktop` | `packages/desktop` | Tauri desktop wrapper (optional) |
 
 ### Key commands
@@ -17,7 +18,7 @@ Standard commands are in `README.md` Section 10.4. The essentials:
 
 - **Dev:** `bun run dev` (starts server + client in parallel)
 - **Lint:** `bun run lint` (runs all validators + biome + eslint + typecheck)
-- **Test:** `bun run test` (server bun:test + client vitest)
+- **Test:** `bun run test` (server bun:test + scraper bun:test + client vitest)
 - **Build:** `bun run build`
 - **DB setup:** `bun run db:generate && bun run db:push`
 

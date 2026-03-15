@@ -25,6 +25,7 @@ packages/desktop/src-tauri/gen/
 .DS_Store
 Thumbs.db
 *.log
+.claude/
 
 # Editor directories and files
 .vscode/

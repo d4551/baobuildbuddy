@@ -51,13 +51,13 @@ defineProps<{
           <span v-if="resume.personalInfo?.location">{{ resume.personalInfo.location }}</span>
         </div>
         <div class="flex flex-wrap justify-center gap-3 text-sm mt-2">
-          <a v-if="resume.personalInfo?.website" :href="resume.personalInfo.website" class="link link-primary">
+          <a v-if="resume.personalInfo?.website" :href="resume.personalInfo.website" class="link link-primary" :aria-label="t('resumePreview.websiteLinkAria')">
             {{ t("resumePreview.website") }}
           </a>
-          <a v-if="resume.personalInfo?.linkedin" :href="resume.personalInfo.linkedin" class="link link-primary">
+          <a v-if="resume.personalInfo?.linkedin" :href="resume.personalInfo.linkedin" class="link link-primary" :aria-label="t('resumePreview.linkedinLinkAria')">
             {{ t("resumePreview.linkedin") }}
           </a>
-          <a v-if="resume.personalInfo?.github" :href="resume.personalInfo.github" class="link link-primary">
+          <a v-if="resume.personalInfo?.github" :href="resume.personalInfo.github" class="link link-primary" :aria-label="t('resumePreview.githubLinkAria')">
             {{ t("resumePreview.github") }}
           </a>
         </div>

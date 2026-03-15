@@ -42,6 +42,8 @@ VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 
 ```mermaid
 flowchart TD
+  Refresh["scripts/refresh-desktop-releases.sh"] --> QualityMode{"skip quality gates?"}
+
   subgraph QualityGates["Quality gates (release:refresh:all-os)"]
     Lint["bun run lint"]
     Typecheck["bun run typecheck"]
@@ -60,6 +62,8 @@ flowchart TD
     Checksum["sha256.txt regeneration"]
   end
 
+  QualityMode -->|No| QualityGates
+  QualityMode -->|Yes| Targets
   QualityGates --> Targets
   MacOS --> Stage
   Windows --> Stage

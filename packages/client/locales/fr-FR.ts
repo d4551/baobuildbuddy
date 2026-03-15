@@ -477,6 +477,9 @@ const frFROverrides = {
     printButton: "Imprimer",
     printAria: "Imprimer l'aperçu du CV",
     notFound: "CV introuvable. Veuillez sélectionner un CV à prévisualiser.",
+    websiteLinkAria: "Ouvrir le site web personnel",
+    linkedinLinkAria: "Ouvrir le profil LinkedIn",
+    githubLinkAria: "Ouvrir le profil GitHub",
   },
   portfolioPage: {
     title: "Créateur de portfolio",

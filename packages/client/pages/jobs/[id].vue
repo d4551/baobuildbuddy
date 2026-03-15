@@ -300,7 +300,7 @@ async function startJobInterview() {
 
               <div v-if="job.website">
                 <p class="text-xs text-base-content/60">{{ t("jobDetail.websiteLabel") }}</p>
-                <a :href="job.website" target="_blank" rel="noopener noreferrer" class="link link-primary">
+                <a :href="job.website" target="_blank" rel="noopener noreferrer" class="link link-primary" :aria-label="t('jobDetail.visitWebsiteAria', { company: job.company })">
                   {{ t("jobDetail.visitWebsiteButton") }}
                 </a>
               </div>

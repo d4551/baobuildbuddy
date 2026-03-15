@@ -467,6 +467,9 @@ const jaJPOverrides = {
     printButton: "印刷",
     printAria: "履歴書プレビューを印刷",
     notFound: "履歴書が見つかりません。プレビューする履歴書を選択してください。",
+    websiteLinkAria: "個人ウェブサイトを開く",
+    linkedinLinkAria: "LinkedInプロフィールを開く",
+    githubLinkAria: "GitHubプロフィールを開く",
   },
   portfolioPage: {
     title: "ポートフォリオビルダー",

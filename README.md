@@ -166,10 +166,11 @@ Treat this file as the campaign handbook for your first setup quest; once you ma
 
 This readme is your in-game tutorial before the main campaign.
 
-- `packages/server` -- Bun + Elysia API, drizzle-orm ORM, WebSocket endpoints, process orchestration
+- `packages/server` -- Bun + Elysia API, Drizzle ORM, WebSocket endpoints, process orchestration
 - `packages/client` -- Nuxt 4 (SSR-first), Tailwind CSS v4, daisyUI v5
 - `packages/shared` -- shared types, contracts, constants, schemas, validation utilities
 - `packages/scraper` -- Bun + TypeScript Playwright automation executables run via Bun subprocess I/O
+- `packages/desktop` -- Tauri desktop packaging and release staging
 
 Global flow decisions are centralized in `packages/client/constants/flow-engine.ts` (`resolveFlowReadinessState` + `resolveFlowRecommendations`) and consumed via `packages/client/composables/useFlowEngine.ts` so quick actions and next-step routing are derived from one deterministic source.
 Layout structure is centralized in `packages/client/constants/ui-layout.ts` and rendered through `PageScaffold`, `PageHeaderBlock`, `SectionGrid`, and `AppModalFrame` to keep widths, spacing, grid breakpoints, and modal sizing tokenized.
@@ -183,7 +184,7 @@ If you want the simplest path with minimal technical detail, use `docs/STARTER_G
 
 This is the canonical local setup runbook for BaoBuildBuddy. It covers:
 
-- Local install and startup for all four packages
+- Local install and startup for all five workspace packages
 - Environment configuration via `.env` and source-of-truth config files
 - Data flow between UI, API, DB, AI providers, and RPA
 - How automation and AI requests are validated, executed, and persisted
@@ -213,96 +214,57 @@ This is the canonical local setup runbook for BaoBuildBuddy. It covers:
 
 ```mermaid
 flowchart TD
-  Browser["Browser / Nuxt SSR"] -->|render + initial payload| Client["packages/client"]
-  Client --> Composables["Nuxt composables (typed)"]
-  Composables --> ChatVoice["useChatVoice + useSpeech"]
-  ChatVoice --> VoicePrefs["useState keys: AI_CHAT_AUTO_SPEAK + AI_CHAT_VOICE_ID"]
-  Composables --> Normalizers["api-normalizers.ts"]
-  Composables --> EdenClient["plugins/eden.ts (Eden Treaty client)"]
-  ServerTypes["packages/server/dist-types (generated API type contract)"]
-  EdenClient -->|function-param route calls| API_PREFIX["/api prefix (Nuxt config runtimeBase)"]
+  Browser["Browser"] --> Client["packages/client (Nuxt SSR)"]
+  Client --> Pages["pages + layouts + components"]
+  Client --> Composables["typed composables + api-normalizers.ts"]
+  Client --> EdenClient["plugins/eden.ts"]
+  Client --> FlowEngine["flow-engine.ts + ui-layout.ts"]
+
+  ServerTypes["packages/server/dist-types"]
+  Shared["packages/shared contracts"]
+  EdenClient -->|typed HTTP calls| ApiPrefix["/api"]
   EdenClient -->|type import| ServerTypes
-  API_PREFIX --> Server["packages/server (Elysia)"]
+  ApiPrefix --> App["packages/server/src/app.ts"]
+  App --> Middleware["cors + swagger + rate-limit + logger + errorHandler + authGuard"]
+  App --> Routes["17 route modules from route-modules.ts"]
+  App --> WebSockets["/api/ws/chat + /api/ws/interview + /api/ws/automation"]
+  App --> Shared
+  App --> ServerTypes
 
-  Browser -->|WebSocket| ChatWS["/api/ws/chat"]
-  Browser -->|WebSocket| InterviewWS["/api/ws/interview"]
-  Browser -->|WebSocket| AutomationWS["/api/ws/automation"]
-  Server -->|auth + error envelope| AuthMiddleware["auth middleware"]
-  Server -->|contracts| Shared["packages/shared"]
-  Server -->|build:types| ServerTypes
+  Routes --> AuthRoutes["auth + user + settings"]
+  Routes --> CareerRoutes["jobs + resume + cover-letter + portfolio + interview + studios"]
+  Routes --> AutomationRoutes["automation + scraper + automation-screenshots"]
+  Routes --> PlatformRoutes["ai + gamification + skill-mapping + search + stats"]
 
-  Server -->|register routes| RouteGroup["route modules under packages/server/src/routes/route-modules.ts"]
-  RouteGroup --> AuthRoutes["authRoutes"]
-  RouteGroup --> UserRoutes["userRoutes"]
-  RouteGroup --> SettingsRoutes["settingsRoutes"]
-  RouteGroup --> JobsRoutes["jobsRoutes"]
-  RouteGroup --> ResumeRoutes["resumeRoutes"]
-  RouteGroup --> CoverLetterRoutes["coverLetterRoutes"]
-  RouteGroup --> PortfolioRoutes["portfolioRoutes"]
-  RouteGroup --> InterviewRoutes["interviewRoutes"]
-  RouteGroup --> StudioRoutes["studioRoutes"]
-  RouteGroup --> ScraperRoutes["scraperRoutes"]
-  RouteGroup --> AiRoutes["aiRoutes"]
-  RouteGroup --> GamificationRoutes["gamificationRoutes"]
-  RouteGroup --> SkillMappingRoutes["skillMappingRoutes"]
-  RouteGroup --> SearchRoutes["searchRoutes"]
-  RouteGroup --> StatsRoutes["statsRoutes"]
-  RouteGroup --> AutomationRoutes["automationRoutes"]
-  RouteGroup --> AutomationScreenshotRoutes["automationScreenshotRoutes"]
-
-  AuthRoutes --> AuthSvc["Auth service + authGuard policy"]
-  JobsRoutes --> JobsSvc["jobs service"]
+  CareerRoutes --> JobsSvc["jobs service"]
   JobsSvc --> JobAggregator["job-aggregator.ts"]
   JobAggregator --> ProviderRegistry["provider-registry.ts"]
-  ProviderRegistry --> Greenhouse["greenhouse.ts"]
-  ProviderRegistry --> Lever["lever.ts"]
-  ProviderRegistry --> CompanyBoards["company-board.ts"]
+  ProviderRegistry --> ATSProviders["greenhouse.ts + lever.ts + company-board.ts"]
   ProviderRegistry --> GamingProviders["gaming-providers.ts"]
   JobsSvc --> MatchingSvc["matching-service.ts"]
   JobsSvc --> DedupSvc["deduplication.ts"]
 
-  ResumeRoutes --> ResumeSvc["resume service"]
-  CoverLetterRoutes --> CoverLetterSvc["cover-letter service"]
-  PortfolioRoutes --> PortfolioSvc["portfolio service"]
-  InterviewRoutes --> InterviewSvc["interview service"]
-  StudioRoutes --> StudioSvc["studio service"]
-  ScraperRoutes --> ScraperSvc["scraper service"]
-  AiRoutes --> AiSvc["AI service + context manager"]
-  GamificationRoutes --> GamificationSvc["gamification service"]
-  SkillMappingRoutes --> SkillMappingSvc["skill mapping service"]
-  SkillMappingSvc --> SkillExtractor["skill-extractor.ts"]
-  SearchRoutes --> SearchSvc["search service"]
-  StatsRoutes --> StatsSvc["statistics service"]
-  SettingsRoutes --> SettingsSvc["settings service"]
-  AutomationRoutes --> AutoSvc["application-automation-service.ts"]
-  AutoSvc --> RpaRunner["rpa-runner.ts (Bun.spawn)"]
+  CareerRoutes --> DomainServices["resume + cover-letter + portfolio + interview + studio services"]
+  PlatformRoutes --> PlatformServices["ai + gamification + skill-mapping + search + statistics"]
+  PlatformServices --> SkillExtractor["skill-extractor.ts"]
+  PlatformServices --> AiProviders["local + openai + gemini + claude + huggingface"]
+  AiProviders --> ExternalAI["provider APIs / local model endpoint"]
 
-  RpaRunner -->|JSON via stdin/stdout| Scraper["packages/scraper/src/scripts/*.ts"]
-  Scraper -->|result JSON| RpaRunner
-  RpaRunner --> AutomationSchema["automation_runs persistence"]
-  AutomationSchema --> DB[(SQLite via bun:sqlite)]
+  AutomationRoutes --> AutomationSvc["application-automation-service.ts"]
+  AutomationRoutes --> ScraperSvc["scraper-service.ts"]
+  AutomationSvc --> Runner["automation/rpa-runner.ts"]
+  ScraperSvc --> Runner
+  Runner --> ScraperPkg["packages/scraper"]
+  ScraperPkg --> Scripts["src/scripts/*.ts"]
+  Scripts --> Runtime["Playwright runtime + ATS adapters + provider extractors"]
 
-  JobsSvc --> DB
-  ResumeSvc --> DB
-  CoverLetterSvc --> DB
-  PortfolioSvc --> DB
-  InterviewSvc --> DB
-  StudioSvc --> DB
-  ScraperSvc --> DB
-  SearchSvc --> DB
-  StatsSvc --> DB
-
-  AiSvc --> AIBackends["provider-interface.ts"]
-  AIBackends --> LocalProvider["local-provider.ts"]
-  AIBackends --> OpenAIProvider["openai-provider.ts"]
-  AIBackends --> GeminiProvider["gemini-provider.ts"]
-  AIBackends --> ClaudeProvider["claude-provider.ts"]
-  AIBackends --> HuggingFaceProvider["huggingface-provider.ts"]
-  LocalProvider --> LocalModel["LOCAL_MODEL_ENDPOINT"]
-  OpenAIProvider --> OpenAIAPI["OpenAI API"]
-  GeminiProvider --> GeminiAPI["Gemini API"]
-  ClaudeProvider --> ClaudeAPI["Anthropic API"]
-  HuggingFaceProvider --> HFAPI["HuggingFace Inference API"]
+  JobsSvc --> DB[(SQLite via bun:sqlite + Drizzle)]
+  DomainServices --> DB
+  PlatformServices --> DB
+  AutomationSvc --> AutomationRuns["automation_runs"]
+  ScraperSvc --> JobsStudios["jobs + studios ingestion"]
+  AutomationRuns --> DB
+  JobsStudios --> DB
 ```
 
 ## 3) Implementation principles
@@ -1171,10 +1133,11 @@ The UI verification pipeline enforces:
 
 ```mermaid
 flowchart LR
-  Templates["Vue templates + shared UI primitives"] --> UIValidate["bun run validate:page-seo + validate:i18n-ui + validate:aria + validate:ui-layout-tokens + validate:ui"]
-  UIValidate --> UIState{"Contrast + token checks pass?"}
+  Templates["Vue templates + shared UI primitives"] --> Alignment["bun run validate:alignment"]
+  Alignment --> UIValidate["validate:page-seo + validate:i18n-ui + validate:aria + validate:ui"]
+  UIValidate --> UIState{"Layout, daisyUI, and accessibility checks pass?"}
   UIState -->|No| UIFixes["Fix theme token pairs or remove hardcoded colors"]
-  UIFixes --> UIValidate
+  UIFixes --> Alignment
   UIState -->|Yes| A11yLint["Client ESLint + vuejs-accessibility"]
   A11yLint --> LintState{"A11y errors = 0?"}
   LintState -->|No| Fixes["Fix labels, keyboard handlers, control semantics"]
@@ -1203,7 +1166,7 @@ Manual browser checklist for final sign-off:
     +-- packages/
     |   +-- server/                 Bun + Elysia API server
     |   |   +-- src/
-    |   |   |   +-- routes/         17 route modules + test files
+    |   |   |   +-- routes/         API route modules with route-level tests
     |   |   |   |   +-- auth.routes.ts
     |   |   |   |   +-- user.routes.ts
     |   |   |   |   +-- settings.routes.ts
@@ -1240,7 +1203,7 @@ Manual browser checklist for final sign-off:
     |   |   |   |   +-- skill-extractor.ts
     |   |   |   |   +-- skill-mapping-service.ts
     |   |   |   +-- db/
-    |   |   |   |   +-- schema/     13 Drizzle schema files
+    |   |   |   |   +-- schema/     Drizzle table modules + schema-modules.ts
     |   |   |   |   |   +-- user.ts, auth.ts, resumes.ts, cover-letters.ts
     |   |   |   |   |   +-- portfolios.ts, interviews.ts, studios.ts, jobs.ts
     |   |   |   |   |   +-- skill-mappings.ts, gamification.ts, settings.ts
@@ -1252,8 +1215,8 @@ Manual browser checklist for final sign-off:
     |   |   |   +-- ws/             chat.ws.ts, interview.ws.ts, automation.ws.ts
     |   |   |   +-- config/         env.ts (validation), paths.ts
     |   +-- client/                 Nuxt 4 SSR application
-    |   |   +-- pages/              28 page components across 10 feature areas
-    |   |   +-- components/         25 Vue components
+    |   |   +-- pages/              SSR routes for setup, jobs, studios, interview, AI, automation, docs
+    |   |   +-- components/         Shared UI and feature Vue components
     |   |   |   +-- ai/             AIChatBubble, AIStreamingResponse, BaoFairy
     |   |   |   +-- resume/         ResumePreview, ExperienceList, PersonalInfoForm,
     |   |   |   |                   SkillsEditor, EducationList
@@ -1263,7 +1226,7 @@ Manual browser checklist for final sign-off:
     |   |   |   +-- portfolio/      PortfolioGrid, ProjectCard
     |   |   |   +-- layout/         AppNavbar, AppSidebar, AppDock
     |   |   |   +-- ui/             ConfirmDialog, LoadingSkeleton
-    |   |   +-- composables/        25 composables
+    |   |   +-- composables/        Typed data, websocket, speech, and view-state composables
     |   |   |   +-- useApi, useAuth, useUser, useSettings, useSettingsQuery
     |   |   |   +-- useTheme, useWebSocket, useSpeech, useTTS, useSTT
     |   |   |   +-- useJobs, useSearch, useResume, useCoverLetter
@@ -1277,24 +1240,22 @@ Manual browser checklist for final sign-off:
     |   |   +-- assets/css/         main.css
     |   +-- shared/                 Cross-package contracts
     |   |   +-- src/
-    |   |   |   +-- types/          12 type definition files
+    |   |   |   +-- types/          Shared domain types
     |   |   |   |   +-- user, ai, resume, interview, jobs, cover-letter
     |   |   |   |   +-- portfolio, studio, gamification, skill-mapping
     |   |   |   |   +-- settings, search
-    |   |   |   +-- schemas/        7 validation schemas
+    |   |   |   +-- schemas/        Shared validation and protocol schemas
     |   |   |   |   +-- user.schema, resume.schema, job.schema
     |   |   |   |   +-- interview.schema, settings.schema
     |   |   |   |   +-- portfolio.schema, skill-mapping.schema
-    |   |   |   +-- constants/      7 constant files
-    |   |   |   |   +-- ai, branding, gaming-roles, gaming-technologies
-    |   |   |   |   +-- salary-ranges, state-keys, xp-levels
-    |   |   |   +-- utils/          4 utility modules
-    |   |   |       +-- validation, date-helpers, salary-parser, resume-transform
+    |   |   |   +-- constants/      Runtime, API, automation, AI, and UI contract constants
+    |   |   |   +-- utils/          Shared parsing, validation, and formatting helpers
+    |   |   |   +-- public-api.ts   Package export surface
     |   +-- scraper/                Bun automation runtime
-    |       +-- src/scripts/            Bun/TS automation entrypoints
-    |       +-- src/providers/          Playwright scraper extractors
-    |       +-- src/job-apply/          ATS adapter runtime
-    |       +-- src/runtime/            IO/protocol/browser helpers
+    |       +-- src/scripts/        Bun/TS automation entrypoints
+    |       +-- src/providers/      Playwright scraper extractors
+    |       +-- src/job-apply/      ATS adapter runtime
+    |       +-- src/runtime/        IO/protocol/browser helpers
     |       +-- package.json
     +-- scripts/
     |   +-- setup.sh                    Automated setup for macOS / Linux
@@ -1319,15 +1280,15 @@ Manual browser checklist for final sign-off:
       | |               |   |     "All your base
       | |  WORLD MAP    |   |      are belong to us."
       | |               |   |
-      | |  10 regions   |   |      Navigate 28 pages across
-      | |  28 zones     |   |      10 feature areas.
+      | |  CORE ROUTES   |   |      Navigate the SSR app across
+      | |  + FEATURES    |   |      the main product surfaces.
       | |_______________|   |
       |_____________________|
 ```
 
 | Feature area | Pages | Key composables |
 |-------------|-------|-----------------|
-| **Home & Setup** | `index.vue`, `setup.vue`, `settings.vue` | `useAuth`, `useSettings`, `useTheme` |
+| **Home, Setup & Docs** | `index.vue`, `setup.vue`, `settings.vue`, `docs/api.vue` | `useAuth`, `useSettings`, `useTheme` |
 | **Resume** | `resume/index`, `resume/build`, `resume/preview` | `useResume` |
 | **Cover Letter** | `cover-letter/index`, `cover-letter/[id]` | `useCoverLetter` |
 | **Portfolio** | `portfolio/index`, `portfolio/preview` | `usePortfolio` |

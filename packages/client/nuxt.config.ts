@@ -42,6 +42,9 @@ const apiBaseProxy =
   configuredApiProxy ||
   (configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : undefined) ||
   (!isProductionBuild ? defaultDevApiProxy : undefined);
+const HTTPS_URL_PATTERN = /^https?:\/\//u;
+const absoluteApiProxyBase =
+  apiBaseProxy && HTTPS_URL_PATTERN.test(apiBaseProxy) ? apiBaseProxy : undefined;
 const DEFAULT_APP_TITLE = `${APP_BRAND.name} - ${APP_BRAND_TAGLINE}`;
 const DEFAULT_I18N_LOCALE = DEFAULT_APP_LANGUAGE;
 const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
@@ -166,7 +169,7 @@ const resolveManualChunkName = (moduleId: string): string | undefined => {
 const resolvedApiBase =
   configuredApiBase && configuredApiBase !== "/"
     ? configuredApiBase
-    : process.env.NUXT_PUBLIC_API_PROXY || "/";
+    : apiBaseProxy || "/";
 const configuredWsBase = process.env.NUXT_PUBLIC_WS_BASE;
 const resolvedWsBase =
   configuredWsBase && configuredWsBase !== "/" ? configuredWsBase : resolvedApiBase;
@@ -241,13 +244,16 @@ export default defineNuxtConfig({
               changeOrigin: true,
             },
           },
-          ...(isProductionBuild
+          ...(absoluteApiProxyBase
             ? {
                 routeRules: {
-                  "/api/**": { proxy: `${apiBaseProxy}/api/**` },
+                  "/api/**": {
+                    proxy: `${absoluteApiProxyBase}/api/**`,
+                  },
                 },
               }
             : {}),
+          },
         }
       : {}),
   },
