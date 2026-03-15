@@ -1,9 +1,10 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
+  "$schema": "./gen/schemas/desktop-schema.json",
   "productName": "BaoBuildBuddy",
   "version": "../package.json",
   "identifier": "com.baobuildbuddy.desktop",
   "build": {
+    "beforeDevCommand": "bun run --cwd ../.. dev",
     "beforeBuildCommand": "bun run --cwd ../.. scripts/prepare-desktop-runtime.ts",
     "frontendDist": "../../client/.output/public",
     "devUrl": "http://127.0.0.1:3001"
@@ -16,11 +17,14 @@
         "title": "BaoBuildBuddy",
         "width": 1440,
         "height": 960,
+        "minWidth": 960,
+        "minHeight": 640,
+        "center": true,
         "resizable": true
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:* ws://127.0.0.1:* https://tauri.localhost tauri://localhost ipc:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: https:; font-src 'self' data:; media-src 'self' blob:"
     }
   },
   "bundle": {
