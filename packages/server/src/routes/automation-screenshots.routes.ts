@@ -12,7 +12,7 @@ import {
   settle,
   DECIMAL_RADIX,
 } from "@bao/shared";
-import { join } from "path";
+import { join } from "node:path";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";

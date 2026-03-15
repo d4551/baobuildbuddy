@@ -1,5 +1,5 @@
-import { rm } from "fs/promises";
-import { join } from "path";
+import { rm } from "node:fs/promises";
+import { join } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type PreflightCheck = {

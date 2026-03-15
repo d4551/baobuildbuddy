@@ -1,7 +1,7 @@
 import { DEFAULT_DB_PATH_RELATIVE } from "@bao/shared";
-import { existsSync, mkdirSync } from "fs";
-import { homedir } from "os";
-import { dirname, resolve } from "path";
+import { existsSync, mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, resolve } from "node:path";
 
 /**
  * Shared filesystem path utilities for server runtime and tooling configuration.

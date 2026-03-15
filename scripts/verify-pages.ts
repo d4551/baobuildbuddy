@@ -11,7 +11,7 @@ import {
   PREVIEW_SEPARATOR_LENGTH,
 } from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
-import { join } from "path";
+import { join } from "node:path";
 
 type RouteVerificationResult = {
   locale: string;

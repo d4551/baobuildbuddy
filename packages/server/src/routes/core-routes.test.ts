@@ -6,8 +6,8 @@ import {
   AUTH_API_KEY_PREFIX_PATTERN,
 } from "@bao/shared";
 import { beforeAll, describe, expect, test } from "bun:test";
-import { tmpdir } from "os";
-import { join } from "path";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { requestJson } from "../test-utils";
 
 type SearchCountSnapshot = {

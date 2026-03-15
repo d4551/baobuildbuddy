@@ -1,6 +1,6 @@
-import { cp, mkdir, mkdtemp, rm, stat } from "fs/promises";
-import { basename, dirname, join, resolve } from "path";
-import { tmpdir } from "os";
+import { cp, mkdir, mkdtemp, rm, stat } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { DISK_IMAGE_TIMEOUT_MS } from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
 

@@ -1,5 +1,5 @@
-import { mkdirSync, rmSync } from "fs";
-import { join, resolve } from "path";
+import { mkdirSync, rmSync } from "node:fs";
+import { join, resolve } from "node:path";
 import {
   DECIMAL_RADIX,
   API_ERROR_EMPTY_EMAIL_RESPONSE,

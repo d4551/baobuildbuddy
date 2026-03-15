@@ -1,6 +1,6 @@
-import { mkdirSync } from "fs";
-import { tmpdir } from "os";
-import { dirname, join } from "path";
+import { mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = "test";

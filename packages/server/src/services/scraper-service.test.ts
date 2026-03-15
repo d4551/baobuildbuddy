@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
-import { rmSync } from "fs";
-import { writeFile } from "fs/promises";
-import { join } from "path";
+import { rmSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import {
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_SETTINGS_ID,
