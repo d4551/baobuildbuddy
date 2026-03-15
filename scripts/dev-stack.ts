@@ -7,11 +7,22 @@ import {
   MAX_PORT,
   MIN_PORT,
 } from "../packages/shared/src/constants/ports";
+import { DECIMAL_RADIX } from "../packages/shared/src/constants/client-config";
+import {
+  LOOPBACK_HOST,
+  DEFAULT_HOST,
+  LOOPBACK_HOST_IPV4,
+} from "../packages/shared/src/constants/runtime";
+import {
+  PINCHTAB_POLL_INTERVAL_MS,
+  PINCHTAB_READY_TIMEOUT_MS,
+  PINCHTAB_REQUEST_TIMEOUT_MS,
+} from "../packages/shared/src/constants/scripts";
 
 type ProcessName = "server" | "client";
 
 const validatePort = (value: string | undefined, fallback: number): number => {
-  const parsed = value ? Number.parseInt(value, 10) : fallback;
+  const parsed = value ? Number.parseInt(value, DECIMAL_RADIX) : fallback;
   if (!Number.isFinite(parsed) || parsed < MIN_PORT || parsed > MAX_PORT) {
     return fallback;
   }
@@ -42,21 +53,21 @@ const resolveErrorCode = (value: unknown): string | undefined => {
 };
 
 const serverPort = validatePort(process.env.SERVER_PORT, DEFAULT_SERVER_PORT);
-const localhostHost = "localhost";
-const clientHost = process.env.NUXT_HOST ?? "localhost";
+const localhostHost = LOOPBACK_HOST;
+const clientHost = process.env.NUXT_HOST ?? LOOPBACK_HOST;
 const clientPort = validatePort(process.env.CLIENT_PORT, DEFAULT_CLIENT_DEV_PORT);
 const apiBase = `http://${localhostHost}:${toStringPort(serverPort)}`;
 const corsOrigins = [
-  `http://localhost:${toStringPort(serverPort)}`,
-  `http://127.0.0.1:${toStringPort(serverPort)}`,
-  `http://localhost:${toStringPort(clientPort)}`,
-  `http://127.0.0.1:${toStringPort(clientPort)}`,
+  `http://${LOOPBACK_HOST}:${toStringPort(serverPort)}`,
+  `http://${LOOPBACK_HOST_IPV4}:${toStringPort(serverPort)}`,
+  `http://${LOOPBACK_HOST}:${toStringPort(clientPort)}`,
+  `http://${LOOPBACK_HOST_IPV4}:${toStringPort(clientPort)}`,
 ].join(",");
 
 const serverEnv = normalizeEnv(process.env);
 serverEnv.PORT = toStringPort(serverPort);
 serverEnv.SERVER_PORT = toStringPort(serverPort);
-serverEnv.HOST = process.env.HOST ?? "0.0.0.0";
+serverEnv.HOST = process.env.HOST ?? DEFAULT_HOST;
 serverEnv.CORS_ORIGINS = corsOrigins;
 
 const clientEnv = normalizeEnv(process.env);
@@ -134,13 +145,11 @@ const trackProcess = async (name: ProcessName, proc: ChildProcess): Promise<void
   }
 };
 
-const PINCHTAB_READY_TIMEOUT_MS = 15_000;
-const PINCHTAB_POLL_INTERVAL_MS = 250;
 const TRAILING_SLASH_REGEX = /\/$/;
 
 const isPinchTabReachable = async (baseUrl: string): Promise<boolean> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 2000);
+  const timeout = setTimeout(() => controller.abort(), PINCHTAB_REQUEST_TIMEOUT_MS);
   const result = await fetch(`${baseUrl.replace(TRAILING_SLASH_REGEX, "")}/`, {
     signal: controller.signal,
   })
@@ -154,7 +163,7 @@ const describeAsyncError = (value: unknown): string =>
   value instanceof Error ? value.message : String(value);
 
 const ensurePinchTabRunning = async (): Promise<string> => {
-  const baseUrl = process.env.PINCHTAB_URL ?? `http://localhost:${DEFAULT_PINCHTAB_PORT}`;
+  const baseUrl = process.env.PINCHTAB_URL ?? `http://${LOOPBACK_HOST}:${DEFAULT_PINCHTAB_PORT}`;
   if (await isPinchTabReachable(baseUrl)) {
     write(`[bao/dev-stack] PinchTab already running at ${baseUrl}\n`);
     return baseUrl;

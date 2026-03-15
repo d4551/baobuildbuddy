@@ -10,6 +10,7 @@ import {
   MATCHING_IMPROVEMENT_THRESHOLD,
   MATCHING_STRENGTH_THRESHOLD,
   MATCHING_WEIGHTS,
+  DECIMAL_RADIX,
 } from "@bao/shared";
 
 export interface UserProfile {
@@ -56,9 +57,11 @@ function parseSalaryRange(salary: Job["salary"]): ParsedSalaryRange | null {
     if (!(numbers && numbers.length >= 1)) {
       return null;
     }
-    const min = Number.parseInt(numbers[0], 10) * JOB_SALARY_PARSE_MULTIPLIER;
+    const min = Number.parseInt(numbers[0], DECIMAL_RADIX) * JOB_SALARY_PARSE_MULTIPLIER;
     const max =
-      numbers.length > 1 ? Number.parseInt(numbers[1], 10) * JOB_SALARY_PARSE_MULTIPLIER : min;
+      numbers.length > 1
+        ? Number.parseInt(numbers[1], DECIMAL_RADIX) * JOB_SALARY_PARSE_MULTIPLIER
+        : min;
     return { min, max };
   }
 

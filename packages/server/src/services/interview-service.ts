@@ -32,6 +32,7 @@ import {
   settle,
   toErrorMessage,
   type VoiceSettings,
+  DECIMAL_RADIX,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -227,7 +228,7 @@ function parseNumber(value: unknown, fallback: number, min: number, max: number)
   }
 
   if (typeof value === "string") {
-    const parsed = Number.parseInt(value, 10);
+    const parsed = Number.parseInt(value, DECIMAL_RADIX);
     if (Number.isFinite(parsed)) {
       return Math.max(min, Math.min(parsed, max));
     }
@@ -859,7 +860,7 @@ function normalizeQuestionFeedback(
     typeof raw.score === "number"
       ? raw.score
       : typeof raw.score === "string"
-        ? Number.parseInt(raw.score, 10)
+        ? Number.parseInt(raw.score, DECIMAL_RADIX)
         : Number.NaN;
   if (!Number.isFinite(parsedScore)) return null;
 

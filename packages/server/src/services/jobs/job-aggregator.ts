@@ -16,6 +16,7 @@ import type {
 } from "@bao/shared";
 import {
   API_ERROR_APPLICATION_NOT_FOUND,
+  DECIMAL_RADIX,
   JOB_AGGREGATOR_CACHE_EXPIRY_MS,
   JOB_EXPERIENCE_LEVELS,
   JOB_GAME_GENRES,
@@ -274,9 +275,11 @@ export class JobAggregator {
       if (!numbers) {
         return { min: undefined, max: undefined };
       }
-      const min = Number.parseInt(numbers[0], 10) * JOB_SALARY_PARSE_MULTIPLIER;
+      const min = Number.parseInt(numbers[0], DECIMAL_RADIX) * JOB_SALARY_PARSE_MULTIPLIER;
       const max =
-        numbers.length > 1 ? Number.parseInt(numbers[1], 10) * JOB_SALARY_PARSE_MULTIPLIER : min;
+        numbers.length > 1
+          ? Number.parseInt(numbers[1], DECIMAL_RADIX) * JOB_SALARY_PARSE_MULTIPLIER
+          : min;
       return { min, max };
     }
     return {

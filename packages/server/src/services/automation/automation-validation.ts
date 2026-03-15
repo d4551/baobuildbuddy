@@ -1,4 +1,5 @@
 import {
+  DECIMAL_RADIX,
   API_ERROR_CUSTOM_ANSWERS_KEY_EXCEEDS,
   API_ERROR_CUSTOM_ANSWERS_KEYS,
   API_ERROR_CUSTOM_ANSWERS_MAX_COUNT,
@@ -16,6 +17,7 @@ import {
   AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH,
   AUTOMATION_MAX_JOB_URL_LENGTH,
 } from "@bao/shared";
+import { DEFAULT_HOST, LOOPBACK_HOST_IPV4 } from "@bao/shared";
 
 /** Re-export shared limits for consumers that import from this module. */
 export const MAX_JOB_URL_LENGTH = AUTOMATION_MAX_JOB_URL_LENGTH;
@@ -148,7 +150,7 @@ function isDisallowedAutomationHost(hostname: string): boolean {
     return true;
   }
 
-  if (hostname === "127.0.0.1" || hostname === "0.0.0.0") {
+  if (hostname === LOOPBACK_HOST_IPV4 || hostname === DEFAULT_HOST) {
     return true;
   }
 
@@ -168,7 +170,7 @@ function isDisallowedAutomationHost(hostname: string): boolean {
 }
 
 function isDisallowedIpv4(hostname: string): boolean {
-  const segments = hostname.split(".").map((segment) => Number.parseInt(segment, 10));
+  const segments = hostname.split(".").map((segment) => Number.parseInt(segment, DECIMAL_RADIX));
   const [first, second] = segments;
   if (Number.isNaN(first) || Number.isNaN(second)) {
     return false;
@@ -191,7 +193,7 @@ function isIpv4Address(hostname: string): boolean {
       return false;
     }
 
-    const parsed = Number.parseInt(segment, 10);
+    const parsed = Number.parseInt(segment, DECIMAL_RADIX);
     if (Number.isNaN(parsed) || parsed < 0 || parsed > 255) {
       return false;
     }

@@ -10,6 +10,7 @@ import {
   RUN_ID_MIN_LENGTH,
   RUN_ID_SAFE_PATTERN_SOURCE,
   settle,
+  DECIMAL_RADIX,
 } from "@bao/shared";
 import { join } from "path";
 import { eq } from "drizzle-orm";
@@ -51,7 +52,7 @@ const isSafeScreenshotFileName = (fileName: unknown): fileName is string =>
   ALLOWED_EXTENSIONS.has(`.${getScreenshotExtension(fileName)}`);
 
 const resolveScreenshotIndex = (indexValue: string, screenshotCount: number): number | null => {
-  const parsedIndex = Number.parseInt(indexValue, 10);
+  const parsedIndex = Number.parseInt(indexValue, DECIMAL_RADIX);
   if (Number.isNaN(parsedIndex) || parsedIndex < 0 || parsedIndex >= screenshotCount) {
     return null;
   }

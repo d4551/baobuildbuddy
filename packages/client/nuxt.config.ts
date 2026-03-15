@@ -1,8 +1,24 @@
 import {
   APP_BRAND,
+  APP_BRAND_TAGLINE,
   APP_LANGUAGE_CODES,
   DEFAULT_APP_LANGUAGE,
+  DEFAULT_APP_DESCRIPTION,
+  DECIMAL_RADIX,
   DEFAULT_CLIENT_DEV_PORT,
+  DEFAULT_I18N_LOCALE_COOKIE_KEY,
+  DEFAULT_QUERY_RETRY_COUNT,
+  DEFAULT_QUERY_STALE_TIME_MS,
+  LOCALE_CHUNK_NAME_PREFIX,
+  LOCALE_FILE_EXTENSION,
+  LOCALES_DIRECTORY_SEGMENT,
+  MODULE_PATH_SEPARATOR,
+  NODE_MODULES_PATH_SEGMENT,
+  NUXT_COMPATIBILITY_DATE,
+  PNPM_PATH_SEGMENT,
+  QUERY_REFETCH_ON_FOCUS_DISABLED,
+  VITE_BUILD_TARGET,
+  WINDOWS_PATH_SEPARATOR,
   DEFAULT_SERVER_PORT,
 } from "@bao/shared";
 
@@ -26,24 +42,9 @@ const apiBaseProxy =
   configuredApiProxy ||
   (configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : undefined) ||
   (!isProductionBuild ? defaultDevApiProxy : undefined);
-const DECIMAL_RADIX = 10;
-const DEFAULT_QUERY_STALE_TIME_MS = 60_000;
-const DEFAULT_QUERY_RETRY_COUNT = 1;
-const QUERY_REFOCUS_DISABLED = "false";
-const NUXT_COMPATIBILITY_DATE = "2025-01-01";
-const DEFAULT_APP_TITLE = `${APP_BRAND.name} - AI Career Assistant`;
-const DEFAULT_APP_DESCRIPTION = "AI-powered career assistant for the video game industry";
+const DEFAULT_APP_TITLE = `${APP_BRAND.name} - ${APP_BRAND_TAGLINE}`;
 const DEFAULT_I18N_LOCALE = DEFAULT_APP_LANGUAGE;
-const DEFAULT_I18N_LOCALE_COOKIE_KEY = "bao-locale";
 const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
-const VITE_BUILD_TARGET = "baseline-widely-available";
-const MODULE_PATH_SEPARATOR = "/";
-const WINDOWS_PATH_SEPARATOR = "\\";
-const NODE_MODULES_PATH_SEGMENT = "/node_modules/";
-const PNPM_PATH_SEGMENT = ".pnpm/";
-const LOCALES_DIRECTORY_SEGMENT = "/locales/";
-const LOCALE_FILE_EXTENSION = ".ts";
-const LOCALE_CHUNK_NAME_PREFIX = "locale-";
 
 type VendorChunkRule = {
   chunkName: string;
@@ -266,7 +267,7 @@ export default defineNuxtConfig({
         DECIMAL_RADIX,
       ),
       queryRefetchOnFocus:
-        process.env.NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS !== QUERY_REFOCUS_DISABLED,
+      process.env.NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS !== QUERY_REFETCH_ON_FOCUS_DISABLED,
       i18n: {
         defaultLocale: process.env.NUXT_PUBLIC_I18N_DEFAULT_LOCALE || DEFAULT_I18N_LOCALE,
         fallbackLocale: process.env.NUXT_PUBLIC_I18N_FALLBACK_LOCALE || DEFAULT_I18N_LOCALE,

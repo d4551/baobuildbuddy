@@ -1,4 +1,5 @@
 import {
+  DECIMAL_RADIX,
   AI_DEFAULT_TEMPERATURE,
   API_ERROR_APPLICATION_NOT_FOUND,
   API_ERROR_JOB_NOT_FOUND,
@@ -531,7 +532,7 @@ function isOneOf<T extends string>(values: readonly T[], value: string): value i
 }
 
 function parsePositiveInteger(value: string, fallback: number): number {
-  const parsedValue = Number.parseInt(value, 10);
+  const parsedValue = Number.parseInt(value, DECIMAL_RADIX);
   if (!Number.isFinite(parsedValue) || parsedValue < 1) {
     return fallback;
   }

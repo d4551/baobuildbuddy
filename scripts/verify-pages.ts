@@ -1,6 +1,15 @@
 import { APP_BRAND } from "../packages/shared/src/constants/branding";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
+import { DEFAULT_I18N_LOCALE_COOKIE_KEY } from "../packages/shared/src/constants/client-config";
+import {
+  DEFAULT_VERIFY_HOST,
+  DEFAULT_VERIFY_PORT,
+  PREVIEW_LOG_LIMIT,
+  PREVIEW_POLL_INTERVAL_MS,
+  PREVIEW_READY_TIMEOUT_MS,
+  PREVIEW_SEPARATOR_LENGTH,
+} from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { join } from "path";
 
@@ -21,22 +30,19 @@ type RouteVerificationFailure = {
 
 type PreviewProcess = ReturnType<typeof Bun.spawn>;
 
-const DEFAULT_VERIFY_HOST = process.env.VERIFY_HOST || "127.0.0.1";
-const DEFAULT_VERIFY_PORT = process.env.VERIFY_PORT || "4105";
-const DEFAULT_VERIFY_BASE_URL = `http://${DEFAULT_VERIFY_HOST}:${DEFAULT_VERIFY_PORT}`;
+const VERIFY_HOST = process.env.VERIFY_HOST || DEFAULT_VERIFY_HOST;
+const VERIFY_PORT = process.env.VERIFY_PORT || DEFAULT_VERIFY_PORT;
+const DEFAULT_VERIFY_BASE_URL = `http://${VERIFY_HOST}:${VERIFY_PORT}`;
 const EXTERNAL_VERIFY_BASE_URL = process.env.VERIFY_BASE_URL?.replace(/\/$/u, "") ?? null;
 const VERIFY_BASE_URL = EXTERNAL_VERIFY_BASE_URL ?? DEFAULT_VERIFY_BASE_URL;
 const CLIENT_PACKAGE_ROOT = join(process.cwd(), "packages", "client");
 const CLIENT_BUILD_OUTPUT_PATH = join(CLIENT_PACKAGE_ROOT, ".output", "server", "index.mjs");
-const PREVIEW_READY_TIMEOUT_MS = 60_000;
-const PREVIEW_POLL_INTERVAL_MS = 1_000;
-const PREVIEW_LOG_LIMIT = 40;
 const htmlHeadingPattern = /<h1\b[^>]*>([\s\S]*?)<\/h1>/iu;
 const htmlTitlePattern = /<title\b[^>]*>([\s\S]*?)<\/title>/iu;
 const htmlMainPattern = /<main\b[^>]*>/iu;
 const htmlTagPattern = /<[^>]+>/gu;
 const whitespacePattern = /\s+/gu;
-const lineSeparator = "-".repeat(72);
+const lineSeparator = "-".repeat(PREVIEW_SEPARATOR_LENGTH);
 const expectedBrandToken = APP_BRAND.name.toLowerCase();
 const routePaths = Array.from(new Set(Object.values(APP_ROUTES)));
 
@@ -206,7 +212,7 @@ const verifyRoute = async (
   const response = await fetch(`${VERIFY_BASE_URL}${route}`, {
     headers: {
       "accept-language": locale,
-      cookie: `bao-locale=${locale}`,
+        cookie: `${DEFAULT_I18N_LOCALE_COOKIE_KEY}=${locale}`,
     },
   });
 

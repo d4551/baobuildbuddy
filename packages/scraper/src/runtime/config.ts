@@ -1,11 +1,11 @@
-import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared";
+import { DECIMAL_RADIX, DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared";
 
 const parsePositiveInt = (rawValue: string | undefined, fallbackValue: number): number => {
   if (!rawValue) {
     return fallbackValue;
   }
 
-  const parsedValue = Number.parseInt(rawValue, 10);
+  const parsedValue = Number.parseInt(rawValue, DECIMAL_RADIX);
   return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : fallbackValue;
 };
 

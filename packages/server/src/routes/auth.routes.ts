@@ -4,13 +4,12 @@ import {
   API_MESSAGE_SAVE_API_KEY_ONCE,
   DEFAULT_PROFILE_ID,
 } from "@bao/shared";
+import { AUTH_KEY_PREFIX, AUTH_KEY_RANDOM_BYTES } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { config } from "../config/env";
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
-const API_KEY_PREFIX = "bao_";
-const API_KEY_RANDOM_BYTES = 24;
 const BASE64URL_PADDING_PATTERN = /=+$/u;
 
 const encodeBase64Url = (bytes: Uint8Array): string =>
@@ -20,9 +19,9 @@ const encodeBase64Url = (bytes: Uint8Array): string =>
     .replace(BASE64URL_PADDING_PATTERN, "");
 
 function generateApiKey(): string {
-  const bytes = new Uint8Array(API_KEY_RANDOM_BYTES);
+  const bytes = new Uint8Array(AUTH_KEY_RANDOM_BYTES);
   crypto.getRandomValues(bytes);
-  return `${API_KEY_PREFIX}${encodeBase64Url(bytes)}`;
+  return `${AUTH_KEY_PREFIX}${encodeBase64Url(bytes)}`;
 }
 
 export const authRoutes = new Elysia({ prefix: "/auth" })

@@ -1,6 +1,7 @@
 import { cp, mkdir, mkdtemp, rm, stat } from "fs/promises";
 import { basename, dirname, join, resolve } from "path";
 import { tmpdir } from "os";
+import { DISK_IMAGE_TIMEOUT_MS } from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type MountedDesktopImage = {
@@ -12,7 +13,6 @@ const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_TAURI_ROOT = join(REPO_ROOT, "packages", "desktop", "src-tauri");
 const DESKTOP_BUNDLE_GLOB = new Bun.Glob("target/**/bundle");
 const DESKTOP_TEMP_DMG_GLOB = new Bun.Glob("target/**/bundle/**/rw.*.dmg");
-const DISK_IMAGE_TIMEOUT_MS = 60_000;
 const MOUNT_LINE_SPLIT_PATTERN = /\t+/;
 const DESKTOP_MOUNTED_IMAGE_PATTERN = /\/bundle\/(?:dmg|macos)\/rw\..+\.dmg$/;
 const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;

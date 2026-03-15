@@ -19,6 +19,7 @@ import {
   settle,
   toApiScopedPath,
   WS_ENDPOINTS,
+  DECIMAL_RADIX,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -167,7 +168,7 @@ function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<s
       Math.min(Math.floor(config.questionCount), INTERVIEW_MAX_QUESTION_COUNT),
     );
   } else if (typeof config.questionCount === "string") {
-    const parsed = Number.parseInt(config.questionCount, 10);
+    const parsed = Number.parseInt(config.questionCount, DECIMAL_RADIX);
     if (Number.isFinite(parsed))
       questionCount = Math.max(1, Math.min(parsed, INTERVIEW_MAX_QUESTION_COUNT));
   }

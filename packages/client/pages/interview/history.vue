@@ -11,6 +11,7 @@ import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
+import { DECIMAL_RADIX } from "@bao/shared";
 
 const route = useRoute();
 const router = useRouter();
@@ -157,7 +158,7 @@ function parseDurationMinutes(value: string): number | null {
       continue;
     }
 
-    const amount = Number.parseInt(amountText, 10);
+    const amount = Number.parseInt(amountText, DECIMAL_RADIX);
     if (!Number.isFinite(amount)) {
       continue;
     }

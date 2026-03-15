@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -16,8 +16,6 @@ beforeAll(async () => {
 
   app = new Elysia({ prefix: "/api" }).use(routesModule.settingsRoutes);
 });
-
-afterAll(() => {});
 
 describe("settings routes", () => {
   test("GET /api/settings returns settings", async () => {

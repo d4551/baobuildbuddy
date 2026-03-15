@@ -2,6 +2,7 @@
  * Parse salary strings into structured data
  */
 
+import { DECIMAL_RADIX } from "../constants/client-config";
 import { DEFAULT_UNSPECIFIED_LABEL } from "../constants/default-labels";
 import type { SalaryRange } from "../types/jobs";
 
@@ -13,7 +14,7 @@ export function parseSalary(input: string | SalaryRange | undefined): SalaryRang
   const numbers = input.match(/[\d,]+/g);
   if (!numbers || numbers.length === 0) return;
 
-  const parsed = numbers.map((n) => Number.parseInt(n.replace(/,/g, ""), 10));
+  const parsed = numbers.map((n) => Number.parseInt(n.replace(/,/g, ""), DECIMAL_RADIX));
 
   if (parsed.length >= 2) {
     return {

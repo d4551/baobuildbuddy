@@ -40,13 +40,13 @@
     "@bogeychan/elysia-logger": "^0.1.10",
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/swagger": "^1.3.1",
-    "@google/generative-ai": "^0.24.0",
-    "@huggingface/inference": "^4.13.12",
+    "@google/generative-ai": "^0.24.1",
+    "@huggingface/inference": "^4.13.15",
     "drizzle-orm": "^0.45.1",
     "elysia": "^1.4.27",
-    "elysia-rate-limit": "^4.5.0",
+    "elysia-rate-limit": "^4.5.1",
     "openai": "^6.29.0",
-    "pdf-lib": "^1.17.0",
+    "pdf-lib": "^1.17.1",
     "pino": "^10.3.1",
     "zod": "^4.3.6"
   },
@@ -54,7 +54,7 @@
     "@sinclair/typebox": "^0.34.48",
     "@types/bun": "1.3.10",
     "drizzle-kit": "^0.31.9",
-    "pino-pretty": "^13.0.0",
+    "pino-pretty": "^13.1.3",
     "typescript": "^5.9.3"
   }
 }

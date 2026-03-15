@@ -1,6 +1,11 @@
 import {
   API_ERROR_INVALID_PORT,
   DEFAULT_CORS_ORIGINS,
+  DEFAULT_HOST,
+  LOOPBACK_HOST,
+  LOOPBACK_HOST_IPV4,
+  LOOPBACK_HOST_IPV6,
+  DEFAULT_LOG_LEVEL,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_DEFAULT,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_MAX,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_MIN,
@@ -25,13 +30,14 @@ import {
   DEFAULT_SERVER_PORT,
   DEFAULT_CLIENT_DEV_PORT,
   DEFAULT_DB_PATH_TILDE,
+  DECIMAL_RADIX,
 } from "@bao/shared";
 
 const configuredServerPort = [Bun.env.SERVER_PORT, Bun.env.PORT].find(
   (value) => value?.trim().length,
 );
 const portSource = configuredServerPort ?? `${DEFAULT_SERVER_PORT}`;
-const port = Number.parseInt(portSource, 10);
+const port = Number.parseInt(portSource, DECIMAL_RADIX);
 if (Number.isNaN(port) || port < MIN_PORT || port > MAX_PORT) {
   throw new Error(`${API_ERROR_INVALID_PORT}: ${portSource}`);
 }
@@ -42,7 +48,7 @@ function parseBoundedInt(
   min: number,
   max: number,
 ): number {
-  const parsed = Number.parseInt(value ?? "", 10);
+  const parsed = Number.parseInt(value ?? "", DECIMAL_RADIX);
   if (!Number.isFinite(parsed)) {
     return fallback;
   }
@@ -68,7 +74,7 @@ function parseCorsOrigins(value?: string): string[] {
     .filter(Boolean);
 }
 
-const host = Bun.env.HOST || "0.0.0.0";
+const host = Bun.env.HOST || DEFAULT_HOST;
 const disableAuthEnv = Bun.env.BAO_DISABLE_AUTH;
 const configuredClientPort = [Bun.env.CLIENT_PORT, Bun.env.NUXT_CLIENT_PORT].find(
   (value) => value?.trim().length,
@@ -88,19 +94,20 @@ const resolvedCorsOrigins = isProduction
       const localPorts = [port, clientPort];
       for (const localPort of localPorts) {
         const localPortValue = `${localPort}`;
-        uniqueOrigins.add(`http://localhost:${localPortValue}`);
-        uniqueOrigins.add(`http://127.0.0.1:${localPortValue}`);
+        uniqueOrigins.add(`http://${LOOPBACK_HOST}:${localPortValue}`);
+        uniqueOrigins.add(`http://${LOOPBACK_HOST_IPV4}:${localPortValue}`);
       }
       return [...uniqueOrigins];
     })();
 /** Skip auth when explicitly disabled or binding only to localhost */
-const isLocalhostOnly = host === "127.0.0.1" || host === "localhost" || host === "::1";
+const isLocalhostOnly =
+  host === LOOPBACK_HOST_IPV4 || host === LOOPBACK_HOST || host === LOOPBACK_HOST_IPV6;
 
 export const config = {
   port,
   host,
   dbPath: Bun.env.DB_PATH || DEFAULT_DB_PATH_TILDE,
-  logLevel: Bun.env.LOG_LEVEL || "info",
+  logLevel: Bun.env.LOG_LEVEL || DEFAULT_LOG_LEVEL,
   corsOrigins: resolvedCorsOrigins,
   /** When true, skip API key auth (local dev only) */
   disableAuth: disableAuthEnv === "true" || disableAuthEnv === "1" || isLocalhostOnly,

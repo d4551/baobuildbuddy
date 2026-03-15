@@ -10,6 +10,7 @@ import {
   AI_CHAT_CONTEXT_MESSAGE_LIMIT,
   AI_PROVIDER_DEFAULT_ORDER,
   API_ERROR_ALL_PROVIDERS_STREAM_FAILED,
+  DECIMAL_RADIX,
   toErrorMessage,
 } from "@bao/shared";
 import { ClaudeProvider } from "./claude-provider";
@@ -47,7 +48,7 @@ function parseQuestionCount(prompt: string): number {
   const exactMatch = prompt.match(EXACT_QUESTION_COUNT_PATTERN);
   const generateMatch = prompt.match(GENERATE_QUESTION_COUNT_PATTERN);
   const matchedValue = exactMatch?.[1] ?? generateMatch?.[1];
-  const parsed = matchedValue ? Number.parseInt(matchedValue, 10) : Number.NaN;
+  const parsed = matchedValue ? Number.parseInt(matchedValue, DECIMAL_RADIX) : Number.NaN;
   if (!Number.isFinite(parsed) || parsed < 1) {
     return 3;
   }

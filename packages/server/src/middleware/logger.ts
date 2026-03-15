@@ -1,8 +1,8 @@
-import { API_ENDPOINTS } from "@bao/shared";
+import { API_ENDPOINTS, DEFAULT_LOG_LEVEL } from "@bao/shared";
 import { createPinoLogger } from "@bogeychan/elysia-logger";
 
 export const log = createPinoLogger({
-  level: Bun.env.LOG_LEVEL || "info",
+  level: Bun.env.LOG_LEVEL || DEFAULT_LOG_LEVEL,
   transport:
     Bun.env.NODE_ENV !== "production"
       ? {

@@ -1,6 +1,7 @@
 import { mkdirSync, rmSync } from "fs";
 import { join, resolve } from "path";
 import {
+  DECIMAL_RADIX,
   API_ERROR_EMPTY_EMAIL_RESPONSE,
   API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED,
   API_MESSAGE_EMAIL_RESPONSE_GENERATED,
@@ -1486,7 +1487,7 @@ export class ApplicationAutomationService {
       return Number.isFinite(value) ? value : Number.NaN;
     }
     if (typeof value === "string") {
-      const parsed = Number.parseInt(value.trim(), 10);
+      const parsed = Number.parseInt(value.trim(), DECIMAL_RADIX);
       return Number.isFinite(parsed) ? parsed : Number.NaN;
     }
     return Number.NaN;

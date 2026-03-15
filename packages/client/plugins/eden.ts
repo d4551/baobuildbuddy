@@ -1,8 +1,9 @@
+import { AUTH_KEY_STORAGE_KEY } from "@bao/shared";
 import type { App } from "@bao/server/app";
 import { treaty } from "@elysiajs/eden";
 import { resolveApiBase } from "~/utils/endpoints";
 
-const AUTH_KEY = "bao_api_key";
+const AUTH_KEY = AUTH_KEY_STORAGE_KEY;
 
 type TreatyClient = ReturnType<typeof treaty<App>>;
 export type EdenApiNamespace = TreatyClient["api"];
@@ -35,6 +36,7 @@ export function setStoredApiKey(key: string | null): void {
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const requestUrl = useRequestURL();
+
   const configuredBase = (config.public.apiBase || "/").toString();
   const apiBase = resolveApiBase(configuredBase, requestUrl);
   const api = treaty<App>(apiBase, {

@@ -1,5 +1,7 @@
 import type { z } from "zod";
 
+const UNICODE_HEX_RADIX = 16;
+
 /**
  * Primitive JSON value.
  */
@@ -83,7 +85,7 @@ function parseUnicodeEscape(input: string, cursor: number): EscapeParseResult {
   }
   return {
     ok: true,
-    value: String.fromCodePoint(Number.parseInt(unicode, 16)),
+    value: String.fromCodePoint(Number.parseInt(unicode, UNICODE_HEX_RADIX)),
     nextCursor: cursor + 6,
   };
 }
