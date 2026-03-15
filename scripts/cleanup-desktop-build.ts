@@ -9,6 +9,16 @@ type MountedDesktopImage = {
   mountPaths: string[];
 };
 
+type CommandOutputChunk = {
+  stream: "stdout" | "stderr";
+  text: string;
+};
+
+type CapturedCommandResult = {
+  exitCode: number;
+  output: CommandOutputChunk[];
+};
+
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_TAURI_ROOT = join(REPO_ROOT, "packages", "desktop", "src-tauri");
 const DESKTOP_BUNDLE_GLOB = new Bun.Glob("target/**/bundle");
@@ -16,7 +26,16 @@ const DESKTOP_TEMP_DMG_GLOB = new Bun.Glob("target/**/bundle/**/rw.*.dmg");
 const MOUNT_LINE_SPLIT_PATTERN = /\t+/;
 const DESKTOP_MOUNTED_IMAGE_PATTERN = /\/bundle\/(?:dmg|macos)\/rw\..+\.dmg$/;
 const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
+const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
 const TAURI_PRODUCT_NAME_PATTERN = /"productName"\s*:\s*"([^"]+)"/;
+const RECOVERABLE_WINDOWS_BUNDLE_LINE_PATTERNS = [
+  /Running makensis to produce/u,
+  /warning 5202: -OUTPUTCHARSET is disabled for non Win32 platforms\./u,
+  /libc\+\+abi: terminating due to uncaught exception of type std::bad_alloc: std::bad_alloc/u,
+  /failed to bundle project `No such file or directory \(os error 2\)`/u,
+  /Error failed to bundle project `No such file or directory \(os error 2\)`/u,
+  /error: "tauri" exited with code 1/u,
+] as const;
 
 const isDesktopMountedImage = (imagePath: string): boolean =>
   imagePath.startsWith(DESKTOP_TAURI_ROOT) && DESKTOP_MOUNTED_IMAGE_PATTERN.test(imagePath);
@@ -34,6 +53,100 @@ const runCommand = async (
   });
 
   return proc.exited;
+};
+
+const captureCommand = async (
+  command: readonly string[],
+  cwd: string = REPO_ROOT,
+  env: Record<string, string | undefined> = process.env,
+): Promise<CapturedCommandResult> => {
+  const proc = Bun.spawn(command, {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+    env,
+  });
+
+  const output: CommandOutputChunk[] = [];
+  const consumeStream = async (
+    stream: ReadableStream<Uint8Array> | null,
+    streamName: "stdout" | "stderr",
+  ): Promise<void> => {
+    if (!stream) {
+      return;
+    }
+
+    const decoder = new TextDecoder();
+    const reader = stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        const tail = decoder.decode();
+        if (tail.length > 0) {
+          output.push({ stream: streamName, text: tail });
+        }
+        return;
+      }
+
+      const chunkText = decoder.decode(value, { stream: true });
+      if (chunkText.length > 0) {
+        output.push({ stream: streamName, text: chunkText });
+      }
+    }
+  };
+
+  await Promise.all([
+    consumeStream(proc.stdout instanceof ReadableStream ? proc.stdout : null, "stdout"),
+    consumeStream(proc.stderr instanceof ReadableStream ? proc.stderr : null, "stderr"),
+    proc.exited,
+  ]);
+
+  return {
+    exitCode: await proc.exited,
+    output,
+  };
+};
+
+const emitCapturedOutput = (
+  output: readonly CommandOutputChunk[],
+  suppressedPatterns: readonly RegExp[] = [],
+): void => {
+  const pendingTextByStream: Record<CommandOutputChunk["stream"], string> = {
+    stdout: "",
+    stderr: "",
+  };
+
+  const shouldSuppress = (line: string): boolean =>
+    suppressedPatterns.some((pattern) => pattern.test(line));
+
+  const flushStreamLines = (streamName: CommandOutputChunk["stream"], flushRemainder: boolean): void => {
+    const writer = streamName === "stdout" ? process.stdout : process.stderr;
+    const pendingText = pendingTextByStream[streamName];
+    const lastNewlineIndex = pendingText.lastIndexOf("\n");
+    const flushBoundary = flushRemainder ? pendingText.length : lastNewlineIndex + 1;
+
+    if (flushBoundary <= 0) {
+      return;
+    }
+
+    const textToFlush = pendingText.slice(0, flushBoundary);
+    pendingTextByStream[streamName] = pendingText.slice(flushBoundary);
+
+    for (const line of textToFlush.split(/(?<=\n)/u)) {
+      if (line.length === 0 || shouldSuppress(line)) {
+        continue;
+      }
+      writer.write(line);
+    }
+  };
+
+  for (const chunk of output) {
+    pendingTextByStream[chunk.stream] += chunk.text;
+    flushStreamLines(chunk.stream, false);
+  }
+
+  flushStreamLines("stdout", true);
+  flushStreamLines("stderr", true);
 };
 
 const runCommandWithTimeout = async (
@@ -191,6 +304,15 @@ const resolveBundlesArgValue = (tauriArgs: readonly string[]): string | null => 
 const isMacosBuildTarget = (target: string | null): boolean =>
   target === null || target.endsWith("apple-darwin") || target === "universal-apple-darwin";
 
+const isWindowsBuildTarget = (target: string | null): boolean =>
+  target !== null &&
+  (target.endsWith("pc-windows-msvc") || target.endsWith("pc-windows-gnu"));
+
+const shouldRecoverWindowsBundleFailure = (tauriArgs: readonly string[]): boolean =>
+  process.platform !== "win32" &&
+  !tauriArgs.includes("--no-bundle") &&
+  isWindowsBuildTarget(resolveTargetArg(tauriArgs));
+
 const shouldBuildHeadlessMacosDmg = (tauriArgs: readonly string[]): boolean => {
   if (process.platform !== "darwin" || tauriArgs.includes("--no-bundle")) {
     return false;
@@ -260,16 +382,44 @@ const buildCandidateBundleRoots = (tauriArgs: readonly string[]): string[] => {
 const readDesktopBundleMetadata = async (): Promise<{
   productName: string;
   version: string;
+  binaryName: string;
 }> => {
   const tauriConfigText = await Bun.file(join(DESKTOP_TAURI_ROOT, "tauri.conf.json")).text();
   const productName =
     tauriConfigText.match(TAURI_PRODUCT_NAME_PATTERN)?.[1]?.trim() || "BaoBuildBuddy";
   const cargoToml = await Bun.file(join(DESKTOP_TAURI_ROOT, "Cargo.toml")).text();
   const versionMatch = cargoToml.match(CARGO_VERSION_PATTERN);
+  const binaryName = cargoToml.match(CARGO_PACKAGE_NAME_PATTERN)?.[1]?.trim() || "bao-build-buddy-desktop";
   return {
     productName,
     version: versionMatch?.[1] ?? "0.1.0",
+    binaryName,
   };
+};
+
+const didWindowsCrossBuildEmitRecoverableArtifacts = async (
+  tauriArgs: readonly string[],
+): Promise<boolean> => {
+  if (!shouldRecoverWindowsBundleFailure(tauriArgs)) {
+    return false;
+  }
+
+  const target = resolveTargetArg(tauriArgs);
+  if (!target) {
+    return false;
+  }
+
+  const { binaryName } = await readDesktopBundleMetadata();
+  const releaseRoot = join(DESKTOP_TAURI_ROOT, "target", target, "release");
+  const binaryPath = join(releaseRoot, `${binaryName}.exe`);
+  const nsisScriptPath = join(releaseRoot, "nsis", "x64", "installer.nsi");
+
+  const [binaryExists, nsisScriptExists] = await Promise.all([
+    pathExists(binaryPath),
+    pathExists(nsisScriptPath),
+  ]);
+
+  return binaryExists && nsisScriptExists;
 };
 
 const resolveBundleRootWithApp = async (
@@ -447,13 +597,33 @@ const main = async (): Promise<void> => {
 
   const requestedTauriArgs = process.argv.slice(2);
   const tauriArgs = normalizeMacosBuildArgs(requestedTauriArgs);
-  const exitCode = await runCommand(
-    [process.execPath, "run", "--bun", "tauri", "build", ...tauriArgs],
-    process.cwd(),
-  );
+  const tauriBuildCommand = [process.execPath, "run", "--bun", "tauri", "build", ...tauriArgs];
 
-  if (exitCode !== 0) {
-    process.exit(exitCode);
+  if (shouldRecoverWindowsBundleFailure(requestedTauriArgs)) {
+    const capturedResult = await captureCommand(tauriBuildCommand, process.cwd());
+    const recoveredWindowsBundleFailure =
+      capturedResult.exitCode !== 0 &&
+      (await didWindowsCrossBuildEmitRecoverableArtifacts(requestedTauriArgs));
+
+    emitCapturedOutput(
+      capturedResult.output,
+      recoveredWindowsBundleFailure ? RECOVERABLE_WINDOWS_BUNDLE_LINE_PATTERNS : [],
+    );
+
+    if (!recoveredWindowsBundleFailure && capturedResult.exitCode !== 0) {
+      process.exit(capturedResult.exitCode);
+    }
+
+    if (recoveredWindowsBundleFailure) {
+      await writeOutput(
+        "Recovered Windows cross-build after host-side NSIS failure; continuing with containerized installer generation.",
+      );
+    }
+  } else {
+    const exitCode = await runCommand(tauriBuildCommand, process.cwd());
+    if (exitCode !== 0) {
+      process.exit(exitCode);
+    }
   }
 
   if (shouldBuildHeadlessMacosDmg(requestedTauriArgs)) {

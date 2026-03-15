@@ -109,6 +109,31 @@ require_command() {
   fi
 }
 
+is_windows_host() {
+  case "$(uname -s)" in
+    CYGWIN*|MINGW*|MSYS*|Windows_NT)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+run_containerized_windows_nsis() {
+  docker run --rm --platform linux/arm64/v8 \
+    -v "$REPO_ROOT:$REPO_ROOT" \
+    -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
+    -w "$WINDOWS_NSIS_WORKDIR" \
+    ubuntu:24.04 bash -lc '
+      set -euo pipefail
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+      apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends nsis
+      makensis -V2 installer.nsi
+    '
+}
+
 prepare_linux_builder_image() {
   if [ ! -f "$LINUX_DOCKERFILE_DIR/Dockerfile" ]; then
     die "Linux ARM64 builder Dockerfile not found: $LINUX_DOCKERFILE_DIR/Dockerfile"
@@ -351,7 +376,7 @@ if [ "$BUILD_WINDOWS" = true ]; then
 
   step "Building Windows x64 setup artifact"
   windows_setup_ok=false
-  if command_exists makensis; then
+  if is_windows_host && command_exists makensis; then
     local_makensis_exit=0
     set +e
     (
@@ -365,33 +390,14 @@ if [ "$BUILD_WINDOWS" = true ]; then
     else
       warn "Local makensis exited with code $local_makensis_exit; falling back to containerized NSIS."
       set +e
-      docker run --rm --platform linux/arm64/v8 \
-        -v "$REPO_ROOT:$REPO_ROOT" \
-        -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
-        -w "$WINDOWS_NSIS_WORKDIR" \
-        ubuntu:24.04 bash -lc '
-          set -euo pipefail
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
-          apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends nsis
-          makensis -V2 installer.nsi
-        '
+      run_containerized_windows_nsis
       [ $? -eq 0 ] && windows_setup_ok=true
       set -e
     fi
   else
+    warn "Using containerized NSIS on non-Windows host for deterministic setup generation."
     set +e
-    docker run --rm --platform linux/arm64/v8 \
-      -v "$REPO_ROOT:$REPO_ROOT" \
-      -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
-      -w "$WINDOWS_NSIS_WORKDIR" \
-      ubuntu:24.04 bash -lc '
-        set -euo pipefail
-        export DEBIAN_FRONTEND=noninteractive
-        apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
-        apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends nsis
-        makensis -V2 installer.nsi
-      '
+    run_containerized_windows_nsis
     [ $? -eq 0 ] && windows_setup_ok=true
     set -e
   fi
