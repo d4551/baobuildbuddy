@@ -175,6 +175,7 @@ Use the packaged desktop installers in `packages/desktop/releases` when you want
 | Linux (ARM64) | `<PRODUCT_NAME>_<VERSION>_aarch64.AppImage` or `<PRODUCT_NAME>_<VERSION>_arm64.deb` |
 
 If you are on a different CPU architecture, use the matching artifact for that architecture when available in releases.
+Windows desktop releases are 64-bit only. We do not ship 32-bit (`x86` / `i686`) Windows builds.
 
 ### Documentation index
 
@@ -845,6 +846,8 @@ Install locally after building:
 - macOS: open the generated `.dmg` and drag the `.app` into `Applications`
 - Linux: `chmod +x` for `.AppImage` and run directly, or install `.deb`/`.rpm` with your package manager
 - Windows: run the generated `.exe` installer (or portable `.exe`) as a normal desktop install flow
+
+Windows desktop artifacts are `x64` only. 32-bit Windows is not supported by the packaged runtime.
 
 If desktop build fails with `failed to run 'cargo metadata'`, install Rust using:
 

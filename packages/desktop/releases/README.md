@@ -104,6 +104,8 @@ This command performs:
 - containerized Windows NSIS fallback when local `makensis` is unavailable/fails
 - Linux AppImage fallback using `appimagetool` when `linuxdeploy` bundling fails
 
+Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact.
+
 Advanced target selection examples:
 
 ```bash

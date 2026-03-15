@@ -123,10 +123,12 @@ const resolveHostBunCompileTarget = (): string => {
     return process.arch === "arm64" ? "bun-linux-arm64" : "bun-linux-x64";
   }
   if (process.platform === "win32") {
-    return process.arch === "arm64" ? "bun-windows-arm64" : "bun-windows-x64";
+    return process.arch === "arm64" ? "bun-windows-arm64" : "bun-windows-x64-baseline";
   }
 
-  throw new Error(`Unsupported host platform for Bun compile target: ${process.platform}/${process.arch}`);
+  throw new Error(
+    `Unsupported host platform for Bun compile target: ${process.platform}/${process.arch}`,
+  );
 };
 
 const resolveBunCompileTarget = (tauriTarget: string | null): string => {
@@ -149,7 +151,12 @@ const resolveBunCompileTarget = (tauriTarget: string | null): string => {
       return "bun-linux-arm64-musl";
     case "x86_64-pc-windows-msvc":
     case "x86_64-pc-windows-gnu":
-      return "bun-windows-x64";
+      return "bun-windows-x64-baseline";
+    case "i686-pc-windows-msvc":
+    case "i686-pc-windows-gnu":
+      throw new Error(
+        "Unsupported desktop target for Bun compile: 32-bit Windows (i686) is not supported because Bun only provides Windows x64 and arm64 standalone runtime targets.",
+      );
     case "aarch64-pc-windows-msvc":
       return "bun-windows-arm64";
     default:
@@ -236,12 +243,17 @@ const startBuildServer = async (
   void captureStreamLines(proc.stdout, stdoutLines);
   void captureStreamLines(proc.stderr, stderrLines);
 
-  const waitResult = await captureResult(() => waitForService(`${BUILD_SERVER_API_BASE}/api/health`));
+  const waitResult = await captureResult(() =>
+    waitForService(`${BUILD_SERVER_API_BASE}/api/health`),
+  );
   if (!waitResult.ok) {
     proc.kill();
     await proc.exited.catch(() => undefined);
     const logDump = [...stdoutLines, ...stderrLines].join("\n");
-    const message = toErrorMessage(waitResult.error, `Timed out waiting for ${BUILD_SERVER_API_BASE}/api/health`);
+    const message = toErrorMessage(
+      waitResult.error,
+      `Timed out waiting for ${BUILD_SERVER_API_BASE}/api/health`,
+    );
     throw new Error(logDump.length > 0 ? `${message}\n${logDump}` : message, {
       cause: waitResult.error,
     });
@@ -327,23 +339,22 @@ const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
   await runCommand([process.execPath, "run", "--filter", "@bao/server", "build"]);
 
   await ensureBuildServerPortIsFree();
-  await writeOutput("desktop-runtime: starting temporary API server for static desktop client generation");
+  await writeOutput(
+    "desktop-runtime: starting temporary API server for static desktop client generation",
+  );
   const { proc } = await startBuildServer(tempDbPath);
 
   await withCleanup(
     async () => {
       await writeOutput("desktop-runtime: generating static Nuxt desktop frontend");
-      await runCommand(
-        [process.execPath, "run", "--filter", "@bao/client", "generate"],
-        {
-          env: {
-            ...process.env,
-            BAO_DISABLE_AUTH: "true",
-            NUXT_PUBLIC_API_BASE: BUILD_SERVER_API_BASE,
-            NUXT_PUBLIC_WS_BASE: BUILD_SERVER_WS_BASE,
-          },
+      await runCommand([process.execPath, "run", "--filter", "@bao/client", "generate"], {
+        env: {
+          ...process.env,
+          BAO_DISABLE_AUTH: "true",
+          NUXT_PUBLIC_API_BASE: BUILD_SERVER_API_BASE,
+          NUXT_PUBLIC_WS_BASE: BUILD_SERVER_WS_BASE,
         },
-      );
+      });
     },
     () => stopProcess(proc),
   );
@@ -358,7 +369,7 @@ const compileRuntimeBinary = async (
   outputPath: string,
 ): Promise<void> => {
   await mkdir(dirname(outputPath), { recursive: true });
-  await runCommand([
+  const command = [
     process.execPath,
     "build",
     "--compile",
@@ -367,7 +378,8 @@ const compileRuntimeBinary = async (
     entrypointPath,
     "--outfile",
     outputPath,
-  ]);
+  ];
+  await runCommand(command);
 };
 
 const stageScraperRuntime = async (): Promise<void> => {
@@ -432,7 +444,9 @@ const main = async (): Promise<void> => {
       await prepareRuntimeResources(tauriTarget);
 
       if (!(await Bun.file(join(CLIENT_PUBLIC_ROOT, "index.html")).exists())) {
-        throw new Error("Static desktop frontend is missing packages/client/.output/public/index.html");
+        throw new Error(
+          "Static desktop frontend is missing packages/client/.output/public/index.html",
+        );
       }
 
       await writeOutput("desktop-runtime: preparation complete");

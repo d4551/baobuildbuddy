@@ -27,6 +27,11 @@
     "active": true,
     "targets": "all",
     "category": "DeveloperTools",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      }
+    },
     "resources": [
       "gen/runtime"
     ],

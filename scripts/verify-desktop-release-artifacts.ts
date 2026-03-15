@@ -30,6 +30,11 @@ type TauriConfig = {
   readonly bundle?: {
     readonly icon?: unknown;
     readonly targets?: unknown;
+    readonly windows?: {
+      readonly webviewInstallMode?: {
+        readonly type?: unknown;
+      };
+    };
   };
 };
 
@@ -45,6 +50,7 @@ type DesktopBundleMetadata = {
   readonly identifier: string;
   readonly productName: string;
   readonly tauriTargets: string | readonly string[];
+  readonly webviewInstallMode: string | null;
   readonly version: string;
   readonly packageVersion: string;
   readonly cargoVersion: string;
@@ -115,7 +121,8 @@ const readJsonObject = async <T extends object>(absolutePath: string): Promise<T
 const bytesStartWith = (bytes: Uint8Array, signature: Uint8Array, offset = 0): boolean =>
   signature.every((byte, index) => bytes[offset + index] === byte);
 
-const pathExists = async (absolutePath: string): Promise<boolean> => Bun.file(absolutePath).exists();
+const pathExists = async (absolutePath: string): Promise<boolean> =>
+  Bun.file(absolutePath).exists();
 
 const parseCommandTargets = (argv: readonly string[]): readonly DesktopReleaseTarget[] => {
   const targetsIndex = argv.indexOf("--targets");
@@ -129,7 +136,9 @@ const parseCommandTargets = (argv: readonly string[]): readonly DesktopReleaseTa
     .map((target) => target.trim())
     .filter((target) => target.length > 0);
 
-  const parsedTargets = DESKTOP_RELEASE_TARGETS.filter((target) => requestedTargets.includes(target));
+  const parsedTargets = DESKTOP_RELEASE_TARGETS.filter((target) =>
+    requestedTargets.includes(target),
+  );
   if (parsedTargets.length === 0) {
     throw new Error(`No supported desktop targets were supplied via --targets (${rawTargets}).`);
   }
@@ -191,6 +200,7 @@ const readDesktopMetadata = async (): Promise<DesktopBundleMetadata> => {
     typeof tauriConfig.bundle?.targets === "string" || Array.isArray(tauriConfig.bundle?.targets)
       ? tauriConfig.bundle.targets
       : "all";
+  const webviewInstallMode = toText(tauriConfig.bundle?.windows?.webviewInstallMode?.type);
 
   if (!(productName && identifier && packageVersion)) {
     await writeError("Desktop package metadata is incomplete in package.json or tauri.conf.json.");
@@ -206,6 +216,7 @@ const readDesktopMetadata = async (): Promise<DesktopBundleMetadata> => {
     packageVersion,
     productName,
     tauriTargets,
+    webviewInstallMode,
     version,
   };
 };
@@ -221,9 +232,7 @@ const createReleaseArtifact = (
   target,
 });
 
-const buildMacosArtifacts = (
-  metadata: DesktopBundleMetadata,
-): readonly ReleaseArtifact[] => {
+const buildMacosArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseArtifact[] => {
   const relativePath = join(
     "macos",
     `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_MACOS_ARCH}.dmg`,
@@ -231,9 +240,7 @@ const buildMacosArtifacts = (
   return [createReleaseArtifact("macos", relativePath, "dmg")] as const;
 };
 
-const buildLinuxArtifacts = (
-  metadata: DesktopBundleMetadata,
-): readonly ReleaseArtifact[] => {
+const buildLinuxArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseArtifact[] => {
   const appImagePath = join(
     "linux",
     `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_LINUX_ARCH}.AppImage`,
@@ -254,9 +261,7 @@ const buildLinuxArtifacts = (
   ] as const;
 };
 
-const buildWindowsArtifacts = (
-  metadata: DesktopBundleMetadata,
-): readonly ReleaseArtifact[] => {
+const buildWindowsArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseArtifact[] => {
   const setupPath = join(
     "windows",
     `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-setup.exe`,
@@ -290,7 +295,8 @@ const buildArtifactsForTarget = (
 const collectExpectedArtifacts = (
   metadata: DesktopBundleMetadata,
   targets: readonly DesktopReleaseTarget[],
-): readonly ReleaseArtifact[] => targets.flatMap((target) => buildArtifactsForTarget(metadata, target));
+): readonly ReleaseArtifact[] =>
+  targets.flatMap((target) => buildArtifactsForTarget(metadata, target));
 
 const readFilePrefix = async (absolutePath: string, length: number): Promise<Uint8Array> => {
   const file = Bun.file(absolutePath);
@@ -319,11 +325,7 @@ const verifyPngIcon = async (
   const colorType = bytes[25];
   const isPng = bytesStartWith(bytes, PNG_SIGNATURE);
   const ok =
-    isPng &&
-    actualWidth === width &&
-    actualHeight === height &&
-    bitDepth === 8 &&
-    colorType === 6;
+    isPng && actualWidth === width && actualHeight === height && bitDepth === 8 && colorType === 6;
 
   return {
     details: ok
@@ -387,7 +389,9 @@ const verifyIcoIcon = async (): Promise<VerificationResult> => {
 
   return {
     details: ok
-      ? `icon.ico layers ${Array.from(layerSizes).sort((left, right) => left - right).join(",")}`
+      ? `icon.ico layers ${Array.from(layerSizes)
+          .sort((left, right) => left - right)
+          .join(",")}`
       : `icon.ico missing layers ${missingLayerSizes.join(",")} from ${Array.from(layerSizes)
           .sort((left, right) => left - right)
           .join(",")}`,
@@ -455,12 +459,21 @@ const verifyBundleConfig = (
       }
     : null;
 
+  const webviewResult: VerificationResult | null = targets.includes("windows")
+    ? {
+        details: metadata.webviewInstallMode ?? "missing",
+        label: "config:webview-install-mode",
+        ok: metadata.webviewInstallMode === "embedBootstrapper",
+      }
+    : null;
+
   return [
     versionResult,
     identifierResult,
     targetResult,
     verifyBundleIconConfig(metadata),
     ...(gtkResult ? [gtkResult] : []),
+    ...(webviewResult ? [webviewResult] : []),
   ];
 };
 
@@ -477,10 +490,7 @@ const computeSha256 = (absolutePath: string): Promise<string> =>
     stream.on("error", rejectHash);
   });
 
-const captureCommand = (
-  command: readonly string[],
-  timeoutMs: number,
-): Promise<CommandCapture> =>
+const captureCommand = (command: readonly string[], timeoutMs: number): Promise<CommandCapture> =>
   new Promise((resolveCommand) => {
     const proc = Bun.spawn(command, {
       cwd: REPO_ROOT,
@@ -495,11 +505,21 @@ const captureCommand = (
       proc.kill();
     }, timeoutMs);
 
-    const stdoutPromise = proc.stdout instanceof ReadableStream ? new Response(proc.stdout).text() : Promise.resolve("");
-    const stderrPromise = proc.stderr instanceof ReadableStream ? new Response(proc.stderr).text() : Promise.resolve("");
+    const stdoutPromise =
+      proc.stdout instanceof ReadableStream
+        ? new Response(proc.stdout).text()
+        : Promise.resolve("");
+    const stderrPromise =
+      proc.stderr instanceof ReadableStream
+        ? new Response(proc.stderr).text()
+        : Promise.resolve("");
 
     const settleCapture = async (): Promise<void> => {
-      const [exitCode, stdout, stderr] = await Promise.all([proc.exited, stdoutPromise, stderrPromise]);
+      const [exitCode, stdout, stderr] = await Promise.all([
+        proc.exited,
+        stdoutPromise,
+        stderrPromise,
+      ]);
       clearTimeout(timeout);
       resolveCommand({
         exitCode: timedOut ? 124 : exitCode,
@@ -521,13 +541,17 @@ const captureCommand = (
   });
 
 const verifyDmgArtifact = async (artifact: ReleaseArtifact): Promise<VerificationResult> => {
-  const commandResult = await captureCommand(["hdiutil", "verify", artifact.absolutePath], DISK_IMAGE_TIMEOUT_MS);
+  const commandResult = await captureCommand(
+    ["hdiutil", "verify", artifact.absolutePath],
+    DISK_IMAGE_TIMEOUT_MS,
+  );
   return {
-    details: commandResult.exitCode === 0
-      ? "hdiutil verify passed"
-      : commandResult.timedOut
-        ? "hdiutil verify timed out"
-        : commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`,
+    details:
+      commandResult.exitCode === 0
+        ? "hdiutil verify passed"
+        : commandResult.timedOut
+          ? "hdiutil verify timed out"
+          : commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`,
     label: `artifact:${artifact.relativePath}`,
     ok: commandResult.exitCode === 0,
   };
@@ -563,7 +587,8 @@ const verifyArtifactType = async (artifact: ReleaseArtifact): Promise<Verificati
 
   if (artifact.kind === "appimage") {
     const elfPrefix = await readFilePrefix(artifact.absolutePath, 11);
-    const ok = bytesStartWith(elfPrefix, Uint8Array.from([127, 69, 76, 70])) &&
+    const ok =
+      bytesStartWith(elfPrefix, Uint8Array.from([127, 69, 76, 70])) &&
       bytesStartWith(elfPrefix, APPIMAGE_SIGNATURE, 8);
     return {
       details: ok ? "AppImage ELF and AI\\x02 signature verified" : "AppImage header mismatch",
@@ -613,8 +638,12 @@ const verifyStagedDirectory = async (
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name)
     .filter((entryName) => entryName.includes(metadata.productName));
-  const unexpectedArtifacts = actualArtifacts.filter((entryName) => !expectedArtifacts.includes(entryName));
-  const missingArtifacts = expectedArtifacts.filter((entryName) => !actualArtifacts.includes(entryName));
+  const unexpectedArtifacts = actualArtifacts.filter(
+    (entryName) => !expectedArtifacts.includes(entryName),
+  );
+  const missingArtifacts = expectedArtifacts.filter(
+    (entryName) => !actualArtifacts.includes(entryName),
+  );
 
   return {
     details:
@@ -708,7 +737,10 @@ const main = async (): Promise<void> => {
     ...(await verifyIconAssets()),
     ...(await Promise.all(targets.map((target) => verifyStagedDirectory(metadata, target)))),
     ...(await Promise.all(
-      artifacts.flatMap((artifact) => [verifyArtifactPresence(artifact), verifyArtifactType(artifact)]),
+      artifacts.flatMap((artifact) => [
+        verifyArtifactPresence(artifact),
+        verifyArtifactType(artifact),
+      ]),
     )),
     ...(await verifyChecksumEntries(artifacts)),
   ];
