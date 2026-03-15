@@ -2698,6 +2698,10 @@ const esES: AppTranslationOverrides = {
     youLabel: "Tú",
     suggestionsAria: "Sugerencias de prompts contextuales del asistente",
     suggestionAria: "Usar prompt contextual: {prompt}",
+    emptyTitle: "Inicia una revisión rápida",
+    emptyDescription:
+      "Pide próximos pasos, texto de seguimiento o una revisión enfocada desde la página en la que estás.",
+    composerHint: "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
     prompts: {
       focusedEntity: "Dame coaching enfocado para {target}.",
       resume: "¿Cómo puedo mejorar este currículum para {target}?",
@@ -2753,6 +2757,19 @@ const esES: AppTranslationOverrides = {
     inputPlaceholder: "Pregunta a Bao sobre tu carrera en la industria del juego",
     inputAria: "Mensaje del chat",
     sendAria: "Enviar mensaje del chat",
+    sendButton: "Enviar",
+    emptyTitle: "Tu asistente está listo",
+    emptyDescription:
+      "Usa las sugerencias junto a la conversación o pide coaching, ayuda de redacción, investigación o guía de automatización.",
+    composerHint: "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
+    composerIdleStatus: "Listo cuando tú lo estés",
+    composerBusyStatus: "Generando una respuesta...",
+    contextPanelTitle: "Contexto actual",
+    contextPanelDescription:
+      "El asistente usa tu página activa, la entidad enfocada y las señales recientes del espacio de trabajo.",
+    promptsTitle: "Prompts sugeridos",
+    promptsDescription:
+      "Carga uno de estos prompts en el editor con el contexto actual ya visible.",
     voiceSettings: {
       legend: "Perfiles de Modelo de Voz",
       sttProviderLabel: "Proveedor de voz a texto",

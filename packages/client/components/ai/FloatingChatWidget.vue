@@ -34,7 +34,8 @@ const isSpeechSettingsOpen = ref(false);
 const draft = ref("");
 const unreadCount = ref(0);
 const panelBodyRef = useTemplateRef<HTMLElement>("floatingChatPanelBody");
-const inputRef = useTemplateRef<HTMLInputElement>("floatingChatInput");
+const inputRef = useTemplateRef<HTMLTextAreaElement>("floatingChatInput");
+const shouldStickToBottom = ref(true);
 const {
   autoSpeakReplies,
   canReplayAssistant,
@@ -64,12 +65,18 @@ const voiceErrorLabel = computed(() => {
 });
 const chatContext = computed(() => buildCurrentContext("floating-widget"));
 const renderedMessages = computed(() => buildChatMessageRenderRows(messages.value));
+const renderedMessageSignature = computed(() =>
+  renderedMessages.value
+    .map(({ message }) => [message.id, message.role, message.timestamp, message.content].join(":"))
+    .join("\n"),
+);
 const latestAssistantMessageIndex = computed(() =>
   resolveLatestAssistantMessageIndex(messages.value),
 );
 const streamingBubble = computed(() => createStreamingAssistantMessage("floatingWidget"));
 const { contextChips, contextualPrompts, currentContextLabel, focusedEntityLabel } =
   useAIChatContextSummary(chatContext, t);
+const hasConversation = computed(() => renderedMessages.value.length > 0 || streaming.value);
 
 const showWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
 
@@ -86,7 +93,7 @@ watch(
   (nextCount, previousCount) => {
     if (isOpen.value) {
       unreadCount.value = 0;
-      scrollToBottom();
+      scrollToBottom(true);
       return;
     }
 
@@ -95,9 +102,20 @@ watch(
     }
   },
 );
+watch(renderedMessageSignature, () => {
+  if (!isOpen.value) {
+    return;
+  }
+
+  if (shouldStickToBottom.value || streaming.value || loading.value) {
+    scrollToBottom(true);
+  }
+});
+
 watch(streaming, () => {
   if (streaming.value && isOpen.value) {
-    scrollToBottom();
+    shouldStickToBottom.value = true;
+    scrollToBottom(true);
   }
 });
 
@@ -107,17 +125,32 @@ watch(isOpen, (open) => {
     return;
   }
   unreadCount.value = 0;
-  scrollToBottom();
+  shouldStickToBottom.value = true;
+  scrollToBottom(true);
   requestAnimationFrame(() => {
     inputRef.value?.focus();
   });
 });
 
-function scrollToBottom() {
+function updateScrollStickiness(): void {
+  const panelBody = panelBodyRef.value;
+  if (!panelBody) return;
+  const remainingScrollDistance =
+    panelBody.scrollHeight - panelBody.scrollTop - panelBody.clientHeight;
+  shouldStickToBottom.value = remainingScrollDistance <= 96;
+}
+
+function handlePanelScroll(): void {
+  updateScrollStickiness();
+}
+
+function scrollToBottom(force = false) {
   requestAnimationFrame(() => {
     const panelBody = panelBodyRef.value;
     if (!panelBody) return;
+    if (!force && !shouldStickToBottom.value) return;
     panelBody.scrollTop = panelBody.scrollHeight;
+    updateScrollStickiness();
   });
 }
 
@@ -152,16 +185,11 @@ async function handleSendMessage() {
     stopListening();
   }
 
+  shouldStickToBottom.value = true;
   const content = draft.value.trim();
   draft.value = "";
   await sendMessage(content, { source: "floating-widget" });
-  scrollToBottom();
-}
-
-async function handleSendSuggestion(prompt: string) {
-  if (loading.value) return;
-  draft.value = prompt;
-  await handleSendMessage();
+  scrollToBottom(true);
 }
 
 async function handleSaveSpeechConfig(): Promise<void> {
@@ -180,6 +208,22 @@ async function handleSaveSpeechConfig(): Promise<void> {
   }
 
   $toast.success(t("floatingChat.voiceSettings.saveSuccess"));
+}
+
+function handlePromptInput(prompt: string): void {
+  draft.value = prompt;
+  requestAnimationFrame(() => {
+    inputRef.value?.focus();
+  });
+}
+
+function handleDraftKeydown(event: KeyboardEvent): void {
+  if (event.key !== "Enter" || event.shiftKey || event.isComposing) {
+    return;
+  }
+
+  event.preventDefault();
+  void handleSendMessage();
 }
 
 onMounted(async () => {
@@ -278,7 +322,7 @@ onUnmounted(() => {
                   class="btn btn-xs btn-soft"
                   :aria-label="t('floatingChat.suggestionAria', { prompt })"
                   :disabled="loading"
-                  @click="handleSendSuggestion(prompt)"
+                  @click="handlePromptInput(prompt)"
                 >
                   {{ prompt }}
                 </button>
@@ -294,90 +338,109 @@ onUnmounted(() => {
             aria-atomic="false"
             :aria-label="t('floatingChat.logAria')"
             :aria-busy="loading || streaming"
+            @scroll="handlePanelScroll"
           >
-            <AIChatBubble
-              v-for="(messageRow, index) in renderedMessages"
-              :key="messageRow.key"
-              :assistant-label="APP_BRAND.assistantName"
-              :context-chips="
-                index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
-                  ? contextChips
-                  : []
-              "
-              :context-chips-aria="t('floatingChat.contextChipsAria')"
-              :is-latest-assistant-message="
-                index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
-              "
-              :is-streaming="false"
-              :locale="locale.value"
-              :message="messageRow.message"
-              :user-label="t('floatingChat.youLabel')"
-            />
-            <AIChatBubble
-              v-if="streaming"
-              :assistant-label="APP_BRAND.assistantName"
-              :context-chips="contextChips"
-              :context-chips-aria="t('floatingChat.contextChipsAria')"
-              :is-latest-assistant-message="true"
-              :is-streaming="true"
-              :locale="locale.value"
-              :message="streamingBubble"
-              :user-label="t('floatingChat.youLabel')"
-            />
+            <div v-if="!hasConversation" class="flex h-full min-h-60 items-center justify-center">
+              <div class="card w-full border border-base-300 bg-base-200/60 shadow-sm">
+                <div class="card-body gap-3 p-4">
+                  <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
+                  <p class="text-sm leading-6 text-base-content/70">
+                    {{ t("floatingChat.emptyDescription") }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <template v-else>
+              <AIChatBubble
+                v-for="(messageRow, index) in renderedMessages"
+                :key="messageRow.key"
+                :assistant-label="APP_BRAND.assistantName"
+                :context-chips="
+                  index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
+                    ? contextChips
+                    : []
+                "
+                :context-chips-aria="t('floatingChat.contextChipsAria')"
+                :is-latest-assistant-message="
+                  index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
+                "
+                :is-streaming="false"
+                :locale="locale.value"
+                :message="messageRow.message"
+                :user-label="t('floatingChat.youLabel')"
+              />
+              <AIChatBubble
+                v-if="streaming"
+                :assistant-label="APP_BRAND.assistantName"
+                :context-chips="contextChips"
+                :context-chips-aria="t('floatingChat.contextChipsAria')"
+                :is-latest-assistant-message="true"
+                :is-streaming="true"
+                :locale="locale.value"
+                :message="streamingBubble"
+                :user-label="t('floatingChat.youLabel')"
+              />
+            </template>
           </div>
 
           <div class="p-3 border-t border-base-300">
-            <form class="join w-full" @submit.prevent="handleSendMessage">
-              <input
+            <form class="space-y-3" @submit.prevent="handleSendMessage">
+              <textarea
                 ref="floatingChatInput"
                 v-model="draft"
-                class="input input-bordered input-lg join-item w-full"
-                type="text"
+                rows="3"
+                class="textarea textarea-bordered min-h-24 w-full resize-y"
                 :placeholder="t('floatingChat.inputPlaceholder')"
                 :aria-label="t('floatingChat.inputAria')"
                 :disabled="loading"
-                @keyup.enter.prevent="handleSendMessage"
+                @keydown="handleDraftKeydown"
               />
-              <ChatVoiceControls
-                v-model:selected-voice-id="selectedVoiceId"
-                v-model:auto-speak-replies="autoSpeakReplies"
-                compact
-                join-item
-                :loading="loading"
-                :supports-recognition="supportsRecognition"
-                :supports-synthesis="supportsSynthesis"
-                :can-replay-assistant="canReplayAssistant"
-                :is-listening="isVoiceListening"
-                :is-speaking="isVoiceSpeaking"
-                :voices="availableVoices"
-                :support-hint-key="voiceSupportHintKey"
-                :error-label="voiceErrorLabel"
-                @toggle-listening="toggleListening"
-                @replay-assistant="speakLatestAssistantMessage"
-              />
-              <button
-                type="submit"
-                class="btn btn-primary join-item"
-                :aria-label="t('floatingChat.sendAria')"
-                :disabled="!draft.trim() || loading"
-              >
-                <span v-if="loading" class="loading loading-spinner loading-xs"></span>
-                <svg
-                  v-else
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-xs text-base-content/70">
+                  {{ t("floatingChat.composerHint") }}
+                </p>
+                <div class="flex items-center gap-2">
+                  <ChatVoiceControls
+                    v-model:selected-voice-id="selectedVoiceId"
+                    v-model:auto-speak-replies="autoSpeakReplies"
+                    compact
+                    :loading="loading"
+                    :supports-recognition="supportsRecognition"
+                    :supports-synthesis="supportsSynthesis"
+                    :can-replay-assistant="canReplayAssistant"
+                    :is-listening="isVoiceListening"
+                    :is-speaking="isVoiceSpeaking"
+                    :voices="availableVoices"
+                    :support-hint-key="voiceSupportHintKey"
+                    :error-label="voiceErrorLabel"
+                    @toggle-listening="toggleListening"
+                    @replay-assistant="speakLatestAssistantMessage"
                   />
-                </svg>
-              </button>
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :aria-label="t('floatingChat.sendAria')"
+                    :disabled="!draft.trim() || loading"
+                  >
+                    <span v-if="loading" class="loading loading-spinner loading-xs" />
+                    <svg
+                      v-else
+                      class="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </form>
             <p
               v-if="voiceSupportHintKey"

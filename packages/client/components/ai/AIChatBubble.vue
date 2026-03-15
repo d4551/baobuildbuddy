@@ -47,6 +47,14 @@ const chatBubbleClass = computed(() =>
 );
 const formattedTime = computed(() => formatChatTimestamp(props.message.timestamp, props.locale));
 const messageTitle = computed(() => (isAssistant.value ? props.assistantLabel : props.userLabel));
+const userAvatarInitial = computed(() => {
+  const trimmedLabel = props.userLabel.trim();
+  if (trimmedLabel.length === 0) {
+    return "?";
+  }
+
+  return trimmedLabel.charAt(0).toUpperCase();
+});
 const isStreamingStatusVisible = computed(
   () => isAssistant.value && props.isLatestAssistantMessage && props.isStreaming,
 );
@@ -105,8 +113,8 @@ const ariaLabel = computed(() => {
       class="chat-image avatar placeholder"
       :aria-label="userLabel"
     >
-      <div class="w-10 rounded-full bg-primary text-primary-content">
-        <span class="text-xl">{{ userLabel }}</span>
+      <div class="flex w-10 items-center justify-center rounded-full bg-primary text-primary-content">
+        <span class="text-sm font-semibold">{{ userAvatarInitial }}</span>
       </div>
     </div>
     <div class="chat-header mb-1" :class="CHAT_MESSAGE_WIDTH_CLASS">

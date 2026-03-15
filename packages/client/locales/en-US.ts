@@ -2736,6 +2736,10 @@ const enUS = {
     youLabel: "You",
     suggestionsAria: "Contextual assistant prompt suggestions",
     suggestionAria: "Use contextual prompt: {prompt}",
+    emptyTitle: "Start a quick check-in",
+    emptyDescription:
+      "Ask for next steps, follow-up copy, or a focused review from the page you are on.",
+    composerHint: "Press Enter to send. Use Shift+Enter for a new line.",
     prompts: {
       focusedEntity: "Give me focused coaching for {target}.",
       resume: "How can I improve this resume for {target}?",
@@ -2791,6 +2795,19 @@ const enUS = {
     inputPlaceholder: "Ask Bao anything about your game-industry career",
     inputAria: "Chat message",
     sendAria: "Send chat message",
+    sendButton: "Send",
+    emptyTitle: "Your assistant is ready",
+    emptyDescription:
+      "Use the suggestions beside the conversation or ask for coaching, writing help, research, or automation guidance.",
+    composerHint: "Press Enter to send. Use Shift+Enter for a new line.",
+    composerIdleStatus: "Ready when you are",
+    composerBusyStatus: "Generating a response...",
+    contextPanelTitle: "Current context",
+    contextPanelDescription:
+      "The assistant uses your active page, focused item, and recent workspace signals below.",
+    promptsTitle: "Suggested prompts",
+    promptsDescription:
+      "Load one of these prompts into the composer with the current context already in view.",
     voiceSettings: {
       legend: "Speech Model Profiles",
       sttProviderLabel: "Speech-to-text provider",
