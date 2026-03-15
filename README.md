@@ -74,10 +74,10 @@ bun run release:refresh:all-os
 
 After the full quality pass, use `bun run release:refresh:all-os:fast` for a deterministic rebuild-only packaging pass. It is equivalent to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates` and skips rerunning lint/typecheck/test/build.
 
-`release:refresh:all-os` now includes a headless fallback for macOS DMG creation using `bundle_dmg.sh --skip-jenkins` when default packaging returns a non-zero exit, when Finder-based DMG styling fails, or when the expected `.dmg` artifact is not emitted. This keeps `.dmg` output deterministic in CI while still producing valid release artifacts.
+`release:refresh:all-os` now uses `cargo tauri build` as the canonical desktop build path. On macOS it still includes a deterministic headless DMG fallback that rebuilds the image from the emitted `.app` bundle when the standard DMG step is missing or unreliable.
 
 `bun run release:refresh:all-os` must run on a macOS host with Docker available and outbound network access for Ubuntu package mirrors plus Bun/Rust/AppImage downloads used by cross-target packaging.
-The script automatically uses containerized NSIS fallback for Windows setup packaging and runs an AppImage fallback path when `linuxdeploy` fails.
+The script automatically uses containerized NSIS fallback for Windows setup packaging and runs the ARM AppImage stage separately after the Linux `deb`/`rpm` build completes.
 
 Script/runtime verification commands:
 
@@ -171,7 +171,7 @@ Use the packaged desktop installers in `packages/desktop/releases` when you want
 | Operating system | Artifact pattern |
 |------------------|--------------|
 | macOS (Apple Silicon) | `<PRODUCT_NAME>_<VERSION>_aarch64.dmg` |
-| Windows (x64) | `<PRODUCT_NAME>_<VERSION>_x64-setup.exe` |
+| Windows (x64) | `<PRODUCT_NAME>_<VERSION>_x64-setup.exe` or `<PRODUCT_NAME>_<VERSION>_x64-portable.zip` |
 | Linux (ARM64) | `<PRODUCT_NAME>_<VERSION>_aarch64.AppImage` or `<PRODUCT_NAME>_<VERSION>_arm64.deb` |
 
 If you are on a different CPU architecture, use the matching artifact for that architecture when available in releases.
@@ -823,6 +823,12 @@ Single-target local desktop build (current host target only):
 bun run build:desktop
 ```
 
+The canonical desktop build entrypoint is Tauri's Cargo CLI. `bun run build:desktop` delegates to `cargo tauri build`, so install `tauri-cli` first:
+
+```bash
+cargo install tauri-cli --version 2.10.1 --locked
+```
+
 For deterministic macOS DMG packaging in shells with non-UTF8 locale defaults:
 
 ```bash
@@ -845,9 +851,9 @@ Install locally after building:
 
 - macOS: open the generated `.dmg` and drag the `.app` into `Applications`
 - Linux: `chmod +x` for `.AppImage` and run directly, or install `.deb`/`.rpm` with your package manager
-- Windows: run the generated `-setup.exe` installer as a normal desktop install flow
+- Windows: run the generated `-setup.exe` installer, or extract `-portable.zip` and keep the bundled `gen` directory next to the executable
 
-Windows desktop artifacts are `x64` only. 32-bit Windows is not supported by the packaged runtime. The canonical release set ships the NSIS setup installer only, because the packaged app requires the bundled `gen/runtime` resources to be installed alongside the executable.
+Windows desktop artifacts are `x64` only. 32-bit Windows is not supported by the packaged runtime. The portable archive includes the packaged `gen/runtime` tree plus the bundled WebView2 bootstrapper so first launch can recover a missing WebView2 runtime instead of failing silently.
 
 If desktop build fails with `failed to run 'cargo metadata'`, install Rust using:
 
@@ -856,8 +862,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 Cross-target requirements from Tauri build contracts:
-1. **Windows** (`x86_64-pc-windows-msvc`): `cargo-xwin` (`cargo install cargo-xwin`), Docker for NSIS setup fallback when local `makensis` fails.
-2. **Linux** (`aarch64-unknown-linux-gnu`): Docker with Ubuntu 24.04 for containerized GTK/WebKit and AppImage/deb/rpm bundling.
+1. **Tauri CLI**: `cargo install tauri-cli --version 2.10.1 --locked`
+2. **Windows** (`x86_64-pc-windows-msvc`): `cargo-xwin` (`cargo install cargo-xwin`), Docker for NSIS setup fallback when local `makensis` fails.
+3. **Linux** (`aarch64-unknown-linux-gnu`): Docker with Ubuntu 24.04 for containerized GTK/WebKit packaging. The release pipeline builds `deb`/`rpm` through `cargo tauri build --bundles deb,rpm`, then creates the ARM AppImage in a separate ARM-native/emulated step.
 
 #### 8.9.4 Environment overrides for desktop
 

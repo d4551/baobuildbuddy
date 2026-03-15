@@ -10,9 +10,14 @@ import {
   DESKTOP_RELEASE_WINDOWS_ARCH,
   DESKTOP_REQUIRED_NATIVE_ICON_FILES,
   DESKTOP_REQUIRED_PNG_ICON_SPECS,
+  DESKTOP_RUNTIME_SCRAPER_DIR,
+  DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
+  DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
+  DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
   DISK_IMAGE_TIMEOUT_MS,
 } from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { captureResult, toErrorMessage } from "./utils/async-control";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -56,7 +61,7 @@ type DesktopBundleMetadata = {
   readonly cargoVersion: string;
 };
 
-type ReleaseArtifactKind = "appimage" | "deb" | "dmg" | "rpm" | "setup";
+type ReleaseArtifactKind = "appimage" | "deb" | "dmg" | "portable" | "rpm" | "setup";
 
 type ReleaseArtifact = {
   readonly kind: ReleaseArtifactKind;
@@ -104,7 +109,14 @@ const ICNS_SIGNATURE = Uint8Array.from([105, 99, 110, 115]);
 const APPIMAGE_SIGNATURE = Uint8Array.from([65, 73, 2]);
 const DEB_SIGNATURE = Uint8Array.from([33, 60, 97, 114, 99, 104, 62, 10]);
 const RPM_SIGNATURE = Uint8Array.from([237, 171, 238, 219]);
+const ZIP_SIGNATURE = Uint8Array.from([80, 75, 3, 4]);
 const WINDOWS_EXE_SIGNATURE = Uint8Array.from([77, 90]);
+const ZIP_LIST_TIMEOUT_MS = 30_000;
+const WINDOWS_NSIS_WEBVIEW_BOOTSTRAPPER_MARKER = [
+  '"/oname=gen\\runtime\\bin\\',
+  DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
+  '"',
+].join("");
 const REQUIRED_ICO_LAYER_SIZES = [16, 24, 32, 48, 64, 256] as const;
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u;
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u;
@@ -276,8 +288,15 @@ const buildWindowsArtifacts = (metadata: DesktopBundleMetadata): readonly Releas
     "windows",
     `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-setup.exe`,
   );
+  const portablePath = join(
+    "windows",
+    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable.zip`,
+  );
 
-  return [createReleaseArtifact("windows", setupPath, "setup")] as const;
+  return [
+    createReleaseArtifact("windows", setupPath, "setup"),
+    createReleaseArtifact("windows", portablePath, "portable"),
+  ] as const;
 };
 
 const buildArtifactsForTarget = (
@@ -543,6 +562,55 @@ const captureCommand = (command: readonly string[], timeoutMs: number): Promise<
     });
   });
 
+const listZipEntriesWithCommandIndex = async (
+  commandCandidates: readonly (readonly string[])[],
+  index: number,
+): Promise<readonly string[]> => {
+  const command = commandCandidates[index];
+  if (!command) {
+    throw new Error("No zip listing command succeeded.");
+  }
+
+  const commandResult = await captureCommand(command, ZIP_LIST_TIMEOUT_MS);
+  if (commandResult.exitCode === 0) {
+    const entries = commandResult.stdout
+      .split(/\r?\n/gu)
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
+    if (entries.length > 0) {
+      return entries;
+    }
+  }
+
+  return listZipEntriesWithCommandIndex(commandCandidates, index + 1);
+};
+
+const listZipEntries = async (absolutePath: string): Promise<readonly string[]> => {
+  const commandCandidates = [
+    ["unzip", "-Z1", absolutePath],
+    ["zipinfo", "-1", absolutePath],
+    ...(process.platform === "win32"
+      ? [
+          [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            [
+              "Add-Type -AssemblyName System.IO.Compression.FileSystem;",
+              `$archive = [System.IO.Compression.ZipFile]::OpenRead('${absolutePath.replaceAll("'", "''")}');`,
+              "$archive.Entries | ForEach-Object { $_.FullName };",
+              "$archive.Dispose();",
+            ].join(" "),
+          ] as const,
+        ]
+      : []),
+  ] as const;
+
+  return listZipEntriesWithCommandIndex(commandCandidates, 0).catch(() => {
+    throw new Error(`Unable to list zip entries for ${absolutePath}.`);
+  });
+};
+
 const verifyDmgArtifact = async (artifact: ReleaseArtifact): Promise<VerificationResult> => {
   const commandResult = await captureCommand(
     ["hdiutil", "verify", artifact.absolutePath],
@@ -606,6 +674,10 @@ const verifyArtifactType = async (artifact: ReleaseArtifact): Promise<Verificati
 
   if (artifact.kind === "rpm") {
     return verifyMagicArtifact(artifact, RPM_SIGNATURE);
+  }
+
+  if (artifact.kind === "portable") {
+    return verifyMagicArtifact(artifact, ZIP_SIGNATURE);
   }
 
   return verifyMagicArtifact(artifact, WINDOWS_EXE_SIGNATURE);
@@ -750,6 +822,7 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
   const requiredMarkers = [
     '"/oname=gen\\runtime\\manifest.json"',
     '"/oname=gen\\runtime\\bin\\bao-bun-runner.exe"',
+    WINDOWS_NSIS_WEBVIEW_BOOTSTRAPPER_MARKER,
     '"/oname=gen\\runtime\\server\\bao-desktop-server.exe"',
     WINDOWS_NSIS_SCRAPER_INSTALL_MARKER,
   ] as const;
@@ -768,6 +841,53 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
           : `missing ${missingMarkers.join(", ")}`,
       label: "windows:nsis-runtime-payload",
       ok: missingMarkers.length === 0,
+    },
+  ] as const;
+};
+
+const verifyWindowsPortablePayload = async (
+  artifact: ReleaseArtifact,
+  metadata: DesktopBundleMetadata,
+): Promise<readonly VerificationResult[]> => {
+  const portableRoot = `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable`;
+  const requiredEntries = [
+    `${portableRoot}/README.txt`,
+    `${portableRoot}/${metadata.binaryName}.exe`,
+    `${portableRoot}/gen/runtime/manifest.json`,
+    `${portableRoot}/gen/runtime/bin/${DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME}`,
+    `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH}.exe`,
+    `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH}.exe`,
+    `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRAPER_DIR}/package.json`,
+  ] as const;
+
+  const zipEntriesResult = await captureResult(() => listZipEntries(artifact.absolutePath));
+  if (!zipEntriesResult.ok) {
+    return [
+      {
+        details: toErrorMessage(zipEntriesResult.error),
+        label: "windows:portable-archive",
+        ok: false,
+      },
+    ] as const;
+  }
+
+  const missingEntries = requiredEntries.filter(
+    (entry) => !zipEntriesResult.value.includes(entry),
+  );
+
+  return [
+    {
+      details: artifact.relativePath,
+      label: "windows:portable-archive",
+      ok: true,
+    },
+    {
+      details:
+        missingEntries.length === 0
+          ? "portable archive bundles executable, runtime, bootstrapper, and scraper payload"
+          : `missing ${missingEntries.join(", ")}`,
+      label: "windows:portable-payload",
+      ok: missingEntries.length === 0,
     },
   ] as const;
 };
@@ -797,6 +917,10 @@ const main = async (): Promise<void> => {
   const targets = parseCommandTargets(process.argv.slice(2));
   const metadata = await readDesktopMetadata();
   const artifacts = collectExpectedArtifacts(metadata, targets);
+  const windowsPortableArtifact =
+    targets.includes("windows")
+      ? artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "portable")
+      : undefined;
 
   const results = [
     verifySemver(metadata),
@@ -804,6 +928,9 @@ const main = async (): Promise<void> => {
     ...(await verifyIconAssets()),
     ...(await Promise.all(targets.map((target) => verifyStagedDirectory(metadata, target)))),
     ...(targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
+    ...(windowsPortableArtifact
+      ? await verifyWindowsPortablePayload(windowsPortableArtifact, metadata)
+      : []),
     ...(await Promise.all(
       artifacts.flatMap((artifact) => [
         verifyArtifactPresence(artifact),

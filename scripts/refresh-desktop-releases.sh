@@ -56,10 +56,14 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RELEASE_ROOT="$REPO_ROOT/packages/desktop/releases"
+DESKTOP_PACKAGE_ROOT="$REPO_ROOT/packages/desktop"
 LINUX_DOCKERFILE_DIR="$REPO_ROOT/scripts/docker/linux-arm64-builder"
 APP_VERSION="$(cd "$REPO_ROOT" && bun --eval 'const pkg = await Bun.file("packages/desktop/package.json").json(); process.stdout.write(String(pkg.version ?? ""));')"
 APP_PRODUCT_NAME="$(cd "$REPO_ROOT" && bun --eval 'const config = await Bun.file("packages/desktop/src-tauri/tauri.conf.json").json(); process.stdout.write(String(config.productName ?? ""));')"
 APP_BINARY_NAME="$(awk -F '"' '/^name = /{print $2; exit}' "$REPO_ROOT/packages/desktop/src-tauri/Cargo.toml")"
+TAURI_CLI_VERSION="$(cd "$REPO_ROOT" && bun --eval 'const pkg = await Bun.file("packages/desktop/package.json").json(); const version = String(pkg.devDependencies?.["@tauri-apps/cli"] ?? "").replace(/^[^0-9]*/, ""); process.stdout.write(version);')"
+WINDOWS_WEBVIEW_BOOTSTRAPPER_RELATIVE_PATH="$(cd "$REPO_ROOT" && bun --eval 'const constants = await import("./packages/shared/src/constants/scripts.ts"); process.stdout.write(`${constants.DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`);')"
+WINDOWS_WEBVIEW_BOOTSTRAPPER_DISPLAY_PATH="$(printf '%s' "gen/runtime/${WINDOWS_WEBVIEW_BOOTSTRAPPER_RELATIVE_PATH}" | sed 's#/#\\\\#g')"
 
 LINUX_DOCKER_PLATFORM="linux/arm64/v8"
 LINUX_DOCKER_IMAGE="baobuildbuddy-linux-arm64-builder:ubuntu24.04-v1"
@@ -84,7 +88,6 @@ MACOS_HOST_BUNDLE_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/release/bun
 MACOS_TARGET_BUNDLE_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${MACOS_BUILD_TARGET}/release/bundle"
 WINDOWS_TARGET_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${WINDOWS_BUILD_TARGET}/release"
 
-MACOS_APP_NAME="${APP_PRODUCT_NAME}"
 MACOS_DMG_NAME="${APP_PRODUCT_NAME}_${APP_VERSION}_${MACOS_ARCH}.dmg"
 VERIFY_TARGETS=()
 
@@ -99,6 +102,9 @@ fi
 if [ -z "$APP_BINARY_NAME" ]; then
   die "Could not resolve binary name from packages/desktop/src-tauri/Cargo.toml"
 fi
+if [ -z "$TAURI_CLI_VERSION" ]; then
+  die "Could not resolve @tauri-apps/cli version from packages/desktop/package.json"
+fi
 
 command_exists() {
   command -v "$1" >/dev/null 2>&1
@@ -108,6 +114,73 @@ require_command() {
   if ! command_exists "$1"; then
     die "Required command not found: $1"
   fi
+}
+
+resolve_installed_tauri_cli_version() {
+  if ! cargo tauri --version >/dev/null 2>&1; then
+    return 1
+  fi
+
+  cargo tauri --version | awk '{print $NF}'
+}
+
+ensure_tauri_cli() {
+  local installed_version=""
+
+  if installed_version="$(resolve_installed_tauri_cli_version)"; then
+    if [ "$installed_version" = "$TAURI_CLI_VERSION" ]; then
+      return
+    fi
+
+    step "Updating tauri-cli to $TAURI_CLI_VERSION"
+  else
+    step "Installing tauri-cli $TAURI_CLI_VERSION"
+  fi
+
+  cargo install tauri-cli --version "$TAURI_CLI_VERSION" --locked
+  ok "tauri-cli $TAURI_CLI_VERSION ready"
+}
+
+run_desktop_hook() {
+  local hook_name="$1"
+  shift
+  bun "$REPO_ROOT/scripts/cleanup-desktop-build.ts" "$hook_name" "$@"
+}
+
+run_host_tauri_build() {
+  local -a tauri_args=("$@")
+
+  (
+    cd "$DESKTOP_PACKAGE_ROOT"
+    cargo tauri build "${tauri_args[@]}"
+  )
+}
+
+resolve_tauri_cache_dir() {
+  if [ -n "${TAURI_CACHE_DIR:-}" ]; then
+    printf '%s\n' "$TAURI_CACHE_DIR"
+    return
+  fi
+
+  case "$(uname -s)" in
+    Darwin)
+      printf '%s\n' "$HOME/Library/Caches/tauri"
+      ;;
+    CYGWIN*|MINGW*|MSYS*|Windows_NT)
+      if [ -n "${LOCALAPPDATA:-}" ]; then
+        printf '%s\n' "$LOCALAPPDATA/tauri"
+      else
+        printf '%s\n' "$HOME/AppData/Local/tauri"
+      fi
+      ;;
+    *)
+      if [ -n "${XDG_CACHE_HOME:-}" ]; then
+        printf '%s\n' "$XDG_CACHE_HOME/tauri"
+      else
+        printf '%s\n' "$HOME/.cache/tauri"
+      fi
+      ;;
+  esac
 }
 
 is_windows_host() {
@@ -122,16 +195,21 @@ is_windows_host() {
 }
 
 run_containerized_windows_nsis() {
+  local tauri_cache_root
+  tauri_cache_root="$(resolve_tauri_cache_dir)"
+  mkdir -p "$tauri_cache_root"
+
   docker run --rm --platform linux/arm64/v8 \
     -v "$REPO_ROOT:$REPO_ROOT" \
-    -v "$HOME/Library/Caches/tauri:$HOME/Library/Caches/tauri" \
+    -v "$tauri_cache_root:$tauri_cache_root" \
     -w "$WINDOWS_NSIS_WORKDIR" \
     ubuntu:24.04 bash -lc '
       set -euo pipefail
       export DEBIAN_FRONTEND=noninteractive
       apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
       apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends nsis
-      makensis -V2 installer.nsi
+      sed -E "s/^([[:space:]]*)File \\/a /\\1File /" installer.nsi > installer.cross-host.nsi
+      makensis -V2 installer.cross-host.nsi
     '
 }
 
@@ -141,7 +219,12 @@ prepare_linux_builder_image() {
   fi
 
   step "Preparing Linux ARM64 builder image"
-  docker build --platform "$LINUX_DOCKER_PLATFORM" -t "$LINUX_DOCKER_IMAGE" "$LINUX_DOCKERFILE_DIR" >/dev/null
+  docker build \
+    --platform "$LINUX_DOCKER_PLATFORM" \
+    --build-arg "TAURI_CLI_VERSION=$TAURI_CLI_VERSION" \
+    -t "$LINUX_DOCKER_IMAGE" \
+    "$LINUX_DOCKERFILE_DIR" \
+    >/dev/null
   ok "Linux ARM64 builder image ready"
 }
 
@@ -233,33 +316,40 @@ sha256_for_file() {
   die "No SHA-256 tool found (requires sha256sum or shasum)."
 }
 
-latest_file_or_die() {
-  local description="$1"
-  local file
-  shift
+create_zip_archive() {
+  local source_dir="$1"
+  local output_path="$2"
+  local parent_dir
+  local base_name
 
-  file="$(latest_file_from_patterns "$@")" || die "Could not resolve ${description}: $*"
-  printf '%s\n' "$file"
-}
+  parent_dir="$(dirname "$source_dir")"
+  base_name="$(basename "$source_dir")"
+  rm -f "$output_path"
 
-run_headless_macos_dmg() {
-  local app_bundle="$1"
-  local dmg_output="$2"
-
-  local dmg_script
-  dmg_script="$(latest_file_or_die "headless macOS DMG script" \
-    "$MACOS_HOST_BUNDLE_ROOT/dmg/bundle_dmg.sh" \
-    "$MACOS_TARGET_BUNDLE_ROOT/dmg/bundle_dmg.sh" \
-  )"
-
-  if [ ! -f "$dmg_script" ]; then
-    die "DMG helper script not found at $dmg_script"
+  if command_exists zip; then
+    (
+      cd "$parent_dir"
+      zip -qr -9 "$output_path" "$base_name"
+    )
+    return
   fi
 
-  mkdir -p "$(dirname "$dmg_output")"
-  rm -f "$dmg_output"
+  if command_exists ditto; then
+    ditto -c -k --keepParent "$source_dir" "$output_path"
+    return
+  fi
 
-  "$dmg_script" --skip-jenkins "$dmg_output" "$app_bundle" || die "macOS headless DMG rebuild failed using script: $dmg_script"
+  if command_exists powershell; then
+    powershell -NoProfile -Command "Compress-Archive -Path '$source_dir' -DestinationPath '$output_path' -Force" >/dev/null
+    return
+  fi
+
+  if command_exists pwsh; then
+    pwsh -NoProfile -Command "Compress-Archive -Path '$source_dir' -DestinationPath '$output_path' -Force" >/dev/null
+    return
+  fi
+
+  die "Unable to create zip archive for $source_dir (requires zip, ditto, powershell, or pwsh)."
 }
 
 if [ "$RUN_QUALITY_GATES" = true ]; then
@@ -281,45 +371,47 @@ if [ "$BUILD_MACOS" = true ]; then
 
   require_command rustc
   require_command cargo
+  ensure_tauri_cli
 
   step "Building macOS DMG artifact"
   macos_expected_dmg="$MACOS_HOST_BUNDLE_ROOT/dmg/$MACOS_DMG_NAME"
-  macos_build_reason="success"
   macos_build_exit=0
+  run_desktop_hook prebuild
   set +e
-  LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 CI=true bun run --filter '@bao/desktop' build -- \
+  LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 CI=true run_host_tauri_build \
     --target "$MACOS_BUILD_TARGET" \
-    --bundles dmg \
-    --config '{"build":{"beforeBuildCommand":""}}'
+    --bundles dmg
   macos_build_exit=$?
   set -e
 
-  if [ "$macos_build_exit" -ne 0 ] || [ ! -f "$macos_expected_dmg" ]; then
+  if [ "$macos_build_exit" -eq 0 ] && [ -f "$macos_expected_dmg" ]; then
+    ok "macOS build complete"
+  else
     if [ "$macos_build_exit" -ne 0 ]; then
-      macos_build_reason="non-zero exit code: $macos_build_exit"
+      warn "macOS DMG bundling exited with code $macos_build_exit; attempting deterministic fallback."
     else
-      macos_build_reason="missing expected artifact: $MACOS_DMG_NAME"
+      warn "macOS DMG bundling completed without the expected artifact; attempting deterministic fallback."
     fi
-    warn "macOS bundling failed; reason: $macos_build_reason. Running headless fallback with --skip-jenkins."
-    if [ "$macos_build_exit" -ne 0 ]; then
-      warn "macOS bundling exited with code $macos_build_exit."
-    else
-      warn "macOS bundling exited successfully but expected artifact was not created: $MACOS_DMG_NAME"
-    fi
-    MACOS_APP_BUNDLE="$(latest_file_or_die "macOS application bundle" \
-      "$MACOS_HOST_BUNDLE_ROOT/macos/$MACOS_APP_NAME.app" \
-      "$MACOS_TARGET_BUNDLE_ROOT/macos/$MACOS_APP_NAME.app" \
-    )"
 
-    MACOS_DMG_PATH="$MACOS_HOST_BUNDLE_ROOT/dmg/$MACOS_DMG_NAME"
-    run_headless_macos_dmg "$MACOS_APP_BUNDLE" "$MACOS_DMG_PATH"
-    if [ -f "$MACOS_DMG_PATH" ]; then
+    set +e
+    run_desktop_hook postbuild --target "$MACOS_BUILD_TARGET" --bundles dmg
+    macos_fallback_exit=$?
+    set -e
+
+    if [ "$macos_fallback_exit" -ne 0 ] || [ ! -f "$macos_expected_dmg" ]; then
+      warn "macOS DMG fallback requires an application bundle. Rebuilding the application bundle for fallback."
+      run_desktop_hook prebuild
+      LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 CI=true run_host_tauri_build \
+        --target "$MACOS_BUILD_TARGET" \
+        --bundles app
+      run_desktop_hook postbuild --target "$MACOS_BUILD_TARGET" --bundles dmg
+    fi
+
+    if [ -f "$macos_expected_dmg" ]; then
       ok "macOS fallback DMG created: $MACOS_DMG_NAME"
     else
-      die "macOS headless fallback failed to create: $MACOS_DMG_PATH"
+      die "macOS headless fallback failed to create: $macos_expected_dmg"
     fi
-  else
-    ok "macOS build complete"
   fi
 fi
 
@@ -327,6 +419,7 @@ if [ "$BUILD_WINDOWS" = true ]; then
   VERIFY_TARGETS+=("windows")
   require_command cargo
   require_command docker
+  ensure_tauri_cli
 
   if ! command_exists cargo-xwin; then
     step "Installing cargo-xwin"
@@ -335,25 +428,27 @@ if [ "$BUILD_WINDOWS" = true ]; then
   fi
 
   WINDOWS_BUNDLE_DIR="$WINDOWS_TARGET_ROOT/bundle/nsis"
+  WINDOWS_PORTABLE_DIR="$WINDOWS_TARGET_ROOT/bundle/portable"
   WINDOWS_NSIS_WORKDIR="$WINDOWS_TARGET_ROOT/nsis/x64"
   WINDOWS_EXE_PATH="$WINDOWS_TARGET_ROOT/$APP_BINARY_NAME.exe"
+  WINDOWS_PORTABLE_STAGE_DIR="$WINDOWS_PORTABLE_DIR/${APP_PRODUCT_NAME}_${APP_VERSION}_${WINDOWS_ARCH_LABEL}-portable"
+  WINDOWS_PORTABLE_ZIP_PATH="$WINDOWS_PORTABLE_DIR/${APP_PRODUCT_NAME}_${APP_VERSION}_${WINDOWS_ARCH_LABEL}-portable.zip"
+  WINDOWS_PORTABLE_BOOTSTRAPPER_PATH="$WINDOWS_TARGET_ROOT/gen/runtime/$WINDOWS_WEBVIEW_BOOTSTRAPPER_RELATIVE_PATH"
 
-  rm -rf "$WINDOWS_BUNDLE_DIR" "$WINDOWS_TARGET_ROOT/nsis"
+  rm -rf "$WINDOWS_BUNDLE_DIR" "$WINDOWS_PORTABLE_DIR" "$WINDOWS_TARGET_ROOT/nsis"
 
   step "Generating Windows x64 bundle payload"
   windows_build_exit=0
   set +e
   # Unset CI to avoid cargo-xwin --ci rejecting CI=1 (expects true/false)
   if [ -d "/opt/homebrew/opt/llvm/bin" ]; then
-    PATH="/opt/homebrew/opt/llvm/bin:$PATH" env -u CI bun run --filter '@bao/desktop' build -- \
+    PATH="/opt/homebrew/opt/llvm/bin:$PATH" CI= run_host_tauri_build \
       --target "$WINDOWS_BUILD_TARGET" \
-      --runner cargo-xwin \
-      --config '{"build":{"beforeBuildCommand":""}}'
+      --runner cargo-xwin
   else
-    env -u CI bun run --filter '@bao/desktop' build -- \
+    CI= run_host_tauri_build \
       --target "$WINDOWS_BUILD_TARGET" \
-      --runner cargo-xwin \
-      --config '{"build":{"beforeBuildCommand":""}}'
+      --runner cargo-xwin
   fi
   windows_build_exit=$?
   set -e
@@ -418,6 +513,30 @@ if [ "$BUILD_WINDOWS" = true ]; then
     cp "$WINDOWS_SETUP_SOURCE" "$WINDOWS_SETUP_TARGET"
     ok "Windows setup artifact staged"
   fi
+
+  step "Packaging Windows x64 portable archive"
+  if [ ! -d "$WINDOWS_TARGET_ROOT/gen/runtime" ]; then
+    die "Windows runtime directory not found: $WINDOWS_TARGET_ROOT/gen/runtime"
+  fi
+  if [ ! -f "$WINDOWS_PORTABLE_BOOTSTRAPPER_PATH" ]; then
+    die "Windows portable runtime is missing the bundled WebView2 bootstrapper: $WINDOWS_PORTABLE_BOOTSTRAPPER_PATH"
+  fi
+
+  mkdir -p "$WINDOWS_PORTABLE_STAGE_DIR"
+  cp "$WINDOWS_EXE_PATH" "$WINDOWS_PORTABLE_STAGE_DIR/${APP_BINARY_NAME}.exe"
+  cp -R "$WINDOWS_TARGET_ROOT/gen" "$WINDOWS_PORTABLE_STAGE_DIR/gen"
+  cat > "$WINDOWS_PORTABLE_STAGE_DIR/README.txt" <<EOF
+BaoBuildBuddy Windows portable package
+
+Run:
+  ${APP_BINARY_NAME}.exe
+
+Keep the gen directory next to the executable.
+If Microsoft Edge WebView2 is not installed yet, BaoBuildBuddy will prompt to run:
+  ${WINDOWS_WEBVIEW_BOOTSTRAPPER_DISPLAY_PATH}
+EOF
+  create_zip_archive "$WINDOWS_PORTABLE_STAGE_DIR" "$WINDOWS_PORTABLE_ZIP_PATH"
+  ok "Windows portable archive staged"
 fi
 
 LINUX_ARTIFACTS_READY=false
@@ -450,13 +569,14 @@ if [ "$BUILD_LINUX" = true ]; then
       --filter "@bao/client" \
       --filter "@bao/scraper" \
       --filter "@bao/desktop"
+    cd "$LINUX_DOCKER_BUILD_ROOT/packages/desktop"
     export CARGO_TARGET_DIR="$LINUX_DOCKER_BUILD_ROOT/$LINUX_CARGO_TARGET_DIR"
     export APPIMAGE_EXTRACT_AND_RUN=1
     export CARGO_BUILD_JOBS=1
     set +e
-    bun run --filter "@bao/desktop" build -- \
+    cargo tauri build \
       --target "$LINUX_BUILD_TARGET" \
-      --config "{\"build\":{\"beforeBuildCommand\":\"\"}}"
+      --bundles deb,rpm
     linux_build_exit=$?
     set -e
     mkdir -p "/repo/$LINUX_CARGO_TARGET_DIR/$LINUX_BUILD_TARGET"
@@ -552,7 +672,7 @@ if [ "$BUILD_LINUX" = true ]; then
 fi
 
 if [ "$BUILD_WINDOWS" = true ]; then
-  rm -f "$RELEASE_ROOT/windows"/"${APP_PRODUCT_NAME}_"*.exe
+  rm -f "$RELEASE_ROOT/windows"/"${APP_PRODUCT_NAME}_"*.exe "$RELEASE_ROOT/windows"/"${APP_PRODUCT_NAME}_"*.zip
   if latest_file_from_patterns \
     "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
     "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
@@ -561,6 +681,12 @@ if [ "$BUILD_WINDOWS" = true ]; then
       "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
       "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe"
   fi
+  if latest_file_from_patterns \
+    "$WINDOWS_TARGET_ROOT/bundle/portable/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-portable.zip" \
+    >/dev/null; then
+    copy_latest_artifact "$RELEASE_ROOT/windows" \
+      "$WINDOWS_TARGET_ROOT/bundle/portable/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-portable.zip"
+  fi
 fi
 
 step "Regenerating release checksums"
@@ -568,6 +694,9 @@ cd "$RELEASE_ROOT"
 artifacts=()
 shopt -s nullglob
 for artifact in macos/*.dmg linux/*.AppImage linux/*.deb linux/*.rpm windows/*.exe; do
+  artifacts+=("$artifact")
+done
+for artifact in windows/*.zip; do
   artifacts+=("$artifact")
 done
 shopt -u nullglob

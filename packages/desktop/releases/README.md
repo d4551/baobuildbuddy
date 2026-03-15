@@ -8,24 +8,10 @@ For the full validation sequence and script verification commands, see [README.m
 
 `release:refresh:all-os` uses a headless fallback for macOS DMG creation:
 
-- First attempt uses default DMG bundling (`bundle_dmg.sh`).
-- If default DMG creation fails, if Finder-based styling fails, or if the expected `.dmg` artifact is missing, the script falls back to `bundle_dmg.sh --skip-jenkins`.
-- The fallback produces a valid distributable `.dmg`, then continues to checksum and release staging.
+- First attempt uses `cargo tauri build --bundles dmg`.
+- If the expected `.dmg` is missing or that step exits non-zero, the script rebuilds the `.app` bundle if needed and then creates the DMG from the emitted app bundle with a deterministic headless `hdiutil` flow.
 
-If you need the same fallback manually:
-
-```bash
-APP_VERSION="$(awk -F '\"' '/^version = /{print $2; exit}' packages/desktop/src-tauri/Cargo.toml)"
-APP_PRODUCT_NAME="$(awk -F '\"' '/\"productName\"[[:space:]]*:/ {print $4; exit}' packages/desktop/src-tauri/tauri.conf.json)"
-MACOS_APP_PATH="$(/usr/bin/find packages/desktop/src-tauri/target -path "*/bundle/macos/${APP_PRODUCT_NAME}.app" -print | head -n 1)"
-MACOS_DMG_PATH="packages/desktop/src-tauri/target/release/bundle/dmg/${APP_PRODUCT_NAME}_${APP_VERSION}_aarch64.dmg"
-MACOS_DMG_SCRIPT="$(/usr/bin/find packages/desktop/src-tauri/target -path '*/bundle/dmg/bundle_dmg.sh' -print | head -n 1)"
-
-mkdir -p "$(dirname "$MACOS_DMG_PATH")"
-bash "$MACOS_DMG_SCRIPT" --skip-jenkins "$MACOS_DMG_PATH" "$MACOS_APP_PATH"
-```
-
-If a direct `bun run build:desktop` run exits with `failed to run bundle_dmg.sh` but still reports DMG completion, use the refresh fallback directly:
+If a direct `bun run build:desktop` run does not emit the expected DMG, use the refresh fallback directly:
 
 ```bash
 bash scripts/refresh-desktop-releases.sh --skip-quality-gates --skip-linux --skip-windows
@@ -89,6 +75,7 @@ Host/runtime requirements:
 
 - macOS host (required for DMG generation)
 - Docker daemon running (required for Windows NSIS fallback and Linux cross-target packaging)
+- `tauri-cli` (`cargo install tauri-cli --version 2.10.1 --locked`)
 - `cargo-xwin` for Windows x64 cross-compilation (`cargo install cargo-xwin`)
 - Outbound network access for Ubuntu package mirrors and Bun/Rust/AppImage downloads
 
@@ -97,14 +84,15 @@ This command performs:
 - release quality gates (`lint`, `typecheck`, `test`, `build`)
 - macOS DMG build (`aarch64-apple-darwin`)
 - Windows x64 setup build (`x86_64-pc-windows-msvc`)
-- Linux ARM64 AppImage/deb/rpm builds (`aarch64-unknown-linux-gnu`)
+- Linux ARM64 `deb`/`rpm` build through `cargo tauri build --bundles deb,rpm` (`aarch64-unknown-linux-gnu`)
+- Linux ARM64 AppImage build in a separate ARM-native/emulated step after `deb`/`rpm`
 - staging into `packages/desktop/releases/{macos,linux,windows}`
 - checksum regeneration in `packages/desktop/releases/sha256.txt`
 - Bun-native post-staging verification via `bun run verify:desktop-releases`
 - containerized Windows NSIS fallback when local `makensis` is unavailable/fails
-- Linux AppImage fallback using `appimagetool` when `linuxdeploy` bundling fails
+- Linux AppImage creation via `appimagetool` from the staged ARM AppDir
 
-Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact. We only ship the NSIS setup installer in the canonical release set because the app requires the bundled `gen/runtime` resource tree next to the executable.
+Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact. The canonical release set ships both the NSIS setup installer and a portable `.zip` that keeps the executable, bundled `gen/runtime` tree, and WebView2 bootstrapper together.
 
 Advanced target selection examples:
 
@@ -142,6 +130,7 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 ### Windows
 
 - `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-setup.exe`
+- `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-portable.zip`
 
 ## Integrity
 

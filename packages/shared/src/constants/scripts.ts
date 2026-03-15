@@ -69,6 +69,22 @@ export const DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH = "server/bao-desktop-server
 /** Relative output path for the compiled packaged Bun entrypoint runner executable. */
 export const DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH = "bin/bao-bun-runner" as const;
 
+/** Windows WebView2 bootstrapper basename bundled into portable desktop runtime assets. */
+export const DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_BASENAME = [
+  "MicrosoftEdge",
+  "Webview2Setup",
+].join("");
+
+/** Windows WebView2 bootstrapper filename bundled into portable desktop runtime assets. */
+export const DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME =
+  `${DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_BASENAME}.exe`;
+
+/** Relative output path for the bundled WebView2 bootstrapper used by portable Windows builds. */
+export const DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH = [
+  "bin",
+  DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_BASENAME,
+].join("/");
+
 /** Relative runtime path containing packaged scraper sources and dependencies. */
 export const DESKTOP_RUNTIME_SCRAPER_DIR = "scraper" as const;
 

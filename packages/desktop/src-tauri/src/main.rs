@@ -11,6 +11,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
 
+use rfd::{MessageButtons, MessageDialog, MessageDialogResult, MessageLevel};
 use serde::Deserialize;
 use tauri::path::BaseDirectory;
 use tauri::{Manager, RunEvent};
@@ -24,6 +25,8 @@ const READY_TIMEOUT_SECONDS: u64 = 120;
 const RUNTIME_MANIFEST_RESOURCE_PATH: &str = "gen/runtime/manifest.json";
 const STARTUP_LOG_DIRECTORY_NAME: &str = "BaoBuildBuddy";
 const STARTUP_LOG_FILE_NAME: &str = "desktop-startup.log";
+#[cfg(target_os = "windows")]
+const WINDOWS_WEBVIEW2_APP_GUID: &str = "{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}";
 const WINDOWS_BAD_IMAGE_FORMAT_EXIT_CODE: i32 = -1073741701;
 #[cfg(target_os = "windows")]
 const WINDOWS_CREATE_NO_WINDOW_FLAG: u32 = 0x08000000;
@@ -98,6 +101,8 @@ impl StackStartup {
 struct PackagedRuntimeManifest {
     server_executable: String,
     script_runner_executable: String,
+    #[cfg_attr(not(target_os = "windows"), allow(dead_code))]
+    webview_bootstrapper_executable: Option<String>,
     scraper_dir: String,
     server_host: String,
     server_port: u16,
@@ -117,6 +122,12 @@ enum RuntimeMode {
 fn main() {
     let manager = ProcessManager::default();
 
+    if let Err(error) = ensure_pre_app_runtime_requirements() {
+        let message = build_startup_failure_message(&error);
+        report_pre_app_failure("startup preflight failure", message.as_str());
+        return;
+    }
+
     let builder = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(manager)
@@ -133,11 +144,7 @@ fn main() {
         Ok(app) => app,
         Err(error) => {
             let message = format!("BaoBuildBuddy desktop wrapper failed to initialize: {error}");
-            let log_path = write_startup_log("builder failure", message.as_str());
-            eprintln!("{message}");
-            if let Some(path) = log_path {
-                eprintln!("Startup log: {}", path.display());
-            }
+            report_pre_app_failure("builder failure", message.as_str());
             return;
         }
     };
@@ -222,6 +229,36 @@ fn build_startup_failure_message(error: &io::Error) -> String {
     message
 }
 
+fn report_pre_app_failure(context: &str, message: &str) {
+    let log_path = write_startup_log(context, message);
+    let dialog_message = match log_path {
+        Some(path) => format!("{message}\n\nStartup log: {}", path.display()),
+        None => message.to_string(),
+    };
+
+    eprintln!("{message}");
+    show_native_message_dialog(
+        "BaoBuildBuddy failed to start",
+        dialog_message.as_str(),
+        MessageLevel::Error,
+        MessageButtons::Ok,
+    );
+}
+
+fn show_native_message_dialog(
+    title: &str,
+    description: &str,
+    level: MessageLevel,
+    buttons: MessageButtons,
+) -> MessageDialogResult {
+    MessageDialog::new()
+        .set_title(title)
+        .set_description(description)
+        .set_level(level)
+        .set_buttons(buttons)
+        .show()
+}
+
 fn write_startup_log(context: &str, message: &str) -> Option<PathBuf> {
     let log_path = resolve_startup_log_path();
     let parent_dir = log_path.parent()?;
@@ -269,6 +306,165 @@ fn resolve_startup_log_path() -> PathBuf {
         .join(STARTUP_LOG_DIRECTORY_NAME)
         .join("logs")
         .join(STARTUP_LOG_FILE_NAME)
+}
+
+fn ensure_pre_app_runtime_requirements() -> io::Result<()> {
+    #[cfg(target_os = "windows")]
+    {
+        return ensure_windows_webview_runtime();
+    }
+
+    #[allow(unreachable_code)]
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+fn ensure_windows_webview_runtime() -> io::Result<()> {
+    if is_windows_webview2_installed() {
+        return Ok(());
+    }
+
+    let Some(bootstrapper_path) = resolve_windows_webview_bootstrapper_path()? else {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "Microsoft Edge WebView2 Runtime is required to start BaoBuildBuddy. Use the BaoBuildBuddy setup installer or place the bundled WebView2 bootstrapper under gen\\runtime\\bin next to the portable executable.",
+        ));
+    };
+
+    let prompt = format!(
+        "BaoBuildBuddy requires Microsoft Edge WebView2 Runtime to open the desktop app.\n\nSelect Yes to run the bundled installer now.\n\nInstaller: {}",
+        bootstrapper_path.display()
+    );
+    let dialog_result = show_native_message_dialog(
+        "Install WebView2 Runtime",
+        prompt.as_str(),
+        MessageLevel::Warning,
+        MessageButtons::YesNo,
+    );
+    if dialog_result != MessageDialogResult::Yes {
+        return Err(io::Error::new(
+            io::ErrorKind::Interrupted,
+            "Microsoft Edge WebView2 Runtime installation was declined.",
+        ));
+    }
+
+    let install_status = Command::new(&bootstrapper_path).arg("/install").status()?;
+    if !install_status.success() {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            format!(
+                "Microsoft Edge WebView2 Runtime installer exited with {}",
+                format_exit_status(&install_status)
+            ),
+        ));
+    }
+
+    if is_windows_webview2_installed() {
+        return Ok(());
+    }
+
+    Err(io::Error::new(
+        io::ErrorKind::Other,
+        "Microsoft Edge WebView2 Runtime is still unavailable after the bundled installer completed.",
+    ))
+}
+
+#[cfg(target_os = "windows")]
+fn resolve_windows_webview_bootstrapper_path() -> io::Result<Option<PathBuf>> {
+    let Some(runtime_root) = resolve_current_executable_runtime_root()? else {
+        return Ok(None);
+    };
+
+    let manifest_path = runtime_root.join("manifest.json");
+    let manifest_text = fs::read_to_string(&manifest_path)?;
+    let manifest =
+        serde_json::from_str::<PackagedRuntimeManifest>(&manifest_text).map_err(|error| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("Unable to parse desktop runtime manifest: {error}"),
+            )
+        })?;
+    let Some(relative_path) = manifest.webview_bootstrapper_executable else {
+        return Ok(None);
+    };
+
+    let bootstrapper_path = runtime_root.join(relative_path);
+    Ok(bootstrapper_path.exists().then_some(bootstrapper_path))
+}
+
+#[cfg(target_os = "windows")]
+fn resolve_current_executable_runtime_root() -> io::Result<Option<PathBuf>> {
+    let current_executable = std::env::current_exe()?;
+    let Some(executable_dir) = current_executable.parent() else {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "Current executable path did not contain a parent directory.",
+        ));
+    };
+
+    let runtime_root = executable_dir.join("gen").join("runtime");
+    Ok(runtime_root
+        .join("manifest.json")
+        .exists()
+        .then_some(runtime_root))
+}
+
+#[cfg(target_os = "windows")]
+fn is_windows_webview2_installed() -> bool {
+    let registry_keys = [
+        format!(
+            r"HKLM\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{}",
+            WINDOWS_WEBVIEW2_APP_GUID
+        ),
+        format!(
+            r"HKLM\SOFTWARE\Microsoft\EdgeUpdate\Clients\{}",
+            WINDOWS_WEBVIEW2_APP_GUID
+        ),
+        format!(
+            r"HKCU\SOFTWARE\Microsoft\EdgeUpdate\Clients\{}",
+            WINDOWS_WEBVIEW2_APP_GUID
+        ),
+    ];
+
+    registry_keys
+        .iter()
+        .filter_map(|registry_key| query_windows_registry_value(registry_key.as_str(), "pv").ok())
+        .any(|value| !value.trim().is_empty())
+}
+
+#[cfg(target_os = "windows")]
+fn query_windows_registry_value(registry_key: &str, value_name: &str) -> io::Result<String> {
+    let output = Command::new("reg")
+        .args(["query", registry_key, "/v", value_name])
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .output()?;
+
+    if !output.status.success() {
+        return Ok(String::new());
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    Ok(stdout
+        .lines()
+        .find_map(|line| parse_windows_registry_value_line(line, value_name))
+        .unwrap_or_default())
+}
+
+#[cfg(target_os = "windows")]
+fn parse_windows_registry_value_line(line: &str, value_name: &str) -> Option<String> {
+    let trimmed = line.trim();
+    if !trimmed.starts_with(value_name) {
+        return None;
+    }
+
+    let columns = trimmed.split_whitespace().collect::<Vec<_>>();
+    if columns.len() < 3 {
+        return None;
+    }
+
+    Some(columns[2..].join(" "))
 }
 
 fn resolve_runtime_mode(app: &tauri::App) -> io::Result<RuntimeMode> {

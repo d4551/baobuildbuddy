@@ -1,5 +1,7 @@
 FROM ubuntu:24.04
 
+ARG TAURI_CLI_VERSION=2.10.1
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BUN_INSTALL=/root/.bun
 ENV CARGO_HOME=/root/.cargo
@@ -26,6 +28,7 @@ RUN apt-get -o Acquire::ForceIPv4=true -o Acquire::Retries=5 -o Acquire::http::T
     unzip \
   && curl -fsSL https://bun.sh/install | bash \
   && curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable \
+  && cargo install tauri-cli --version "${TAURI_CLI_VERSION}" --locked \
   && rustup target add aarch64-unknown-linux-gnu \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*

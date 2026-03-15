@@ -8,19 +8,22 @@ import {
   DESKTOP_RUNTIME_SCRAPER_DIR,
   DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
   DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
+  DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
   DESKTOP_RUNTIME_SERVER_PORT,
   DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
+  DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { dirname, extname, join, resolve } from "node:path";
 
 type DesktopRuntimeManifest = {
   serverExecutable: string;
   scriptRunnerExecutable: string;
+  webviewBootstrapperExecutable: string | null;
   scraperDir: string;
   serverHost: string;
   serverPort: number;
@@ -56,6 +59,34 @@ const TEXT_FILE_EXTENSIONS = new Set([
 
 const toExecutablePath = (relativePath: string, tauriTarget: string | null): string =>
   tauriTarget?.includes("windows") ? `${relativePath}.exe` : relativePath;
+
+const resolveTauriCacheDir = (): string => {
+  const envOverride = process.env.TAURI_CACHE_DIR?.trim();
+  if (envOverride) {
+    return envOverride;
+  }
+
+  if (process.platform === "darwin") {
+    return join(homedir(), "Library", "Caches", "tauri");
+  }
+
+  if (process.platform === "win32") {
+    const localAppData = process.env.LOCALAPPDATA?.trim();
+    return join(localAppData && localAppData.length > 0 ? localAppData : join(homedir(), "AppData", "Local"), "tauri");
+  }
+
+  const xdgCacheHome = process.env.XDG_CACHE_HOME?.trim();
+  return join(xdgCacheHome && xdgCacheHome.length > 0 ? xdgCacheHome : join(homedir(), ".cache"), "tauri");
+};
+
+const resolveWebviewBootstrapperSourcePath = (): string => {
+  const envOverride = process.env.BAO_DESKTOP_WEBVIEW_BOOTSTRAPPER_PATH?.trim();
+  if (envOverride) {
+    return envOverride;
+  }
+
+  return join(resolveTauriCacheDir(), DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME);
+};
 
 const captureStreamLines = async (
   stream: number | ReadableStream<Uint8Array> | undefined,
@@ -113,6 +144,16 @@ const parseTargetArg = (argv: readonly string[]): string | null => {
   return typeof targetValue === "string" && targetValue.trim().length > 0
     ? targetValue.trim()
     : null;
+};
+
+const resolveTargetFromEnvironment = (): string | null => {
+  const targetTriple = process.env.TAURI_ENV_TARGET_TRIPLE?.trim();
+  if (targetTriple && targetTriple.length > 0) {
+    return targetTriple;
+  }
+
+  const cargoTarget = process.env.CARGO_BUILD_TARGET?.trim();
+  return cargoTarget && cargoTarget.length > 0 ? cargoTarget : null;
 };
 
 const resolveHostBunCompileTarget = (): string => {
@@ -379,10 +420,37 @@ const stageScraperRuntime = async (): Promise<void> => {
   });
 };
 
-const writeRuntimeManifest = async (tauriTarget: string | null): Promise<void> => {
+const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<string | null> => {
+  if (!(tauriTarget?.includes("windows"))) {
+    return null;
+  }
+
+  const sourcePath = resolveWebviewBootstrapperSourcePath();
+  if (!(await Bun.file(sourcePath).exists())) {
+    throw new Error(
+      `Bundled WebView2 bootstrapper was not found at ${sourcePath}. Set BAO_DESKTOP_WEBVIEW_BOOTSTRAPPER_PATH or TAURI_CACHE_DIR before building the Windows desktop release.`,
+    );
+  }
+
+  const destinationRelativePath = toExecutablePath(
+    DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
+    tauriTarget,
+  );
+  const destinationPath = join(RUNTIME_ROOT, destinationRelativePath);
+  await mkdir(dirname(destinationPath), { recursive: true });
+  await cp(sourcePath, destinationPath, { force: true });
+  await writeOutput(`desktop-runtime: staged bundled WebView2 bootstrapper from ${sourcePath}`);
+  return destinationRelativePath;
+};
+
+const writeRuntimeManifest = async (
+  tauriTarget: string | null,
+  webviewBootstrapperExecutable: string | null,
+): Promise<void> => {
   const manifest: DesktopRuntimeManifest = {
     serverExecutable: toExecutablePath(DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH, tauriTarget),
     scriptRunnerExecutable: toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
+    webviewBootstrapperExecutable,
     scraperDir: DESKTOP_RUNTIME_SCRAPER_DIR,
     serverHost: DESKTOP_RUNTIME_HOST,
     serverPort: DESKTOP_RUNTIME_SERVER_PORT,
@@ -411,11 +479,12 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
   await compileRuntimeBinary(compileTarget, SCRIPT_RUNNER_ENTRYPOINT, scriptRunnerPath);
 
   await stageScraperRuntime();
-  await writeRuntimeManifest(tauriTarget);
+  const webviewBootstrapperExecutable = await stageWebviewBootstrapper(tauriTarget);
+  await writeRuntimeManifest(tauriTarget, webviewBootstrapperExecutable);
 };
 
 const main = async (): Promise<void> => {
-  const tauriTarget = parseTargetArg(process.argv.slice(2));
+  const tauriTarget = parseTargetArg(process.argv.slice(2)) ?? resolveTargetFromEnvironment();
   const tempRoot = await mkdtemp(join(tmpdir(), "bao-desktop-runtime-"));
   const tempDbPath = join(tempRoot, "desktop-build.db");
 
