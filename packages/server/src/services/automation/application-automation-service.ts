@@ -12,11 +12,14 @@ import {
   API_ERROR_GENERATE_EMAIL_RESPONSE,
   API_ERROR_NO_AI_PROVIDER_EMAIL,
   API_ERROR_RUN_ID_INVALID,
+  API_ERROR_SCRAPE_JOBS_FAILED,
+  API_ERROR_SCRAPE_STUDIOS_FAILED,
   AUTOMATION_CLEANUP_LIMIT,
   AUTOMATION_FINISHED_PROGRESS,
   AUTOMATION_MAX_CONCURRENT_RUNS,
   AUTOMATION_MAX_PROGRESS_STEPS,
   AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
+  AUTOMATION_SCRAPE_TARGETS,
   AUTOMATION_MIN_ID_LENGTH,
   AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH,
   AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS,
@@ -39,6 +42,7 @@ import {
   toErrorMessage,
 } from "@bao/shared";
 import type {
+  AutomationScrapeTarget,
   AutomationSettings,
   EmailResponseRequest,
   EmailResponseResult,
@@ -65,6 +69,8 @@ import {
 import { exportService } from "../export-service";
 import { gamificationService } from "../gamification-service";
 import { resumeService } from "../resume-service";
+import { scraperService } from "../scraper-service";
+import { createServerLogger } from "../../utils/logger";
 import {
   MAX_CUSTOM_ANSWER_KEY_LENGTH,
   MAX_CUSTOM_ANSWER_VALUE_LENGTH,
@@ -114,6 +120,10 @@ interface ScheduledRunMetadata {
   runAt: string;
 }
 
+interface ScrapeExecutionPayload {
+  target: AutomationScrapeTarget;
+}
+
 interface JobApplyRunPreparation {
   runId: string;
   automationSettings: AutomationSettings;
@@ -143,6 +153,8 @@ interface AutofillAnalysisOptions {
   existingAnswers: Record<string, string>;
 }
 
+type AutomationRunRow = typeof automationRuns.$inferSelect;
+
 const DEFAULT_PROGRESS = 0;
 const MIN_CONCURRENT_RUNS = 1;
 const MIN_RESUME_ID_LENGTH = 1;
@@ -169,6 +181,12 @@ const EMAIL_RESPONSE_TONES: readonly EmailResponseTone[] = [
 const MIN_SCHEDULE_LEAD_TIME_MS = 1_000;
 const MAX_RECOVERABLE_SCHEDULED_RUNS = SCHEMA_MAX_ITEMS_BOARDS;
 const RUN_ID_PATTERN = /^[0-9a-f-]+$/i;
+const SCHEDULED_ACTION_JOB_APPLY = "job_apply";
+const SCHEDULED_ACTION_EMAIL_RESPONSE = "email_response";
+const SCHEDULED_ACTION_SCRAPE_STUDIOS = "scrape_studios";
+const SCHEDULED_ACTION_SCRAPE_JOBS_HITMARKER = "scrape_jobs_hitmarker";
+const AUTOMATION_SCRAPE_TARGET_VALUES = new Set<AutomationScrapeTarget>(AUTOMATION_SCRAPE_TARGETS);
+const automationServiceLogger = createServerLogger("application-automation-service");
 
 type SchedulerTimer = ReturnType<typeof setTimeout>;
 
@@ -182,6 +200,11 @@ const toJsonRecord = (value: object): Record<string, unknown> => {
 
 const isEmailResponseTone = (value: string): value is EmailResponseTone =>
   EMAIL_RESPONSE_TONES.some((tone) => tone === value);
+
+const asJsonRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? Object.fromEntries(Object.entries(value))
+    : null;
 
 /**
  * Run-level error indicating the configured concurrency limit was exceeded.
@@ -239,7 +262,9 @@ export class ApplicationAutomationService {
   private runBackgroundTask(task: Promise<unknown>): void {
     task.then(
       () => undefined,
-      () => undefined,
+      (error: unknown) => {
+        automationServiceLogger.error("[automation] background task failed", error);
+      },
     );
   }
 
@@ -771,6 +796,19 @@ export class ApplicationAutomationService {
   }
 
   /**
+   * Attach schedule metadata to an automation input payload.
+   */
+  private withScheduleMetadata(
+    input: Record<string, unknown>,
+    runAt: string,
+  ): Record<string, unknown> {
+    return {
+      ...input,
+      schedule: { runAt },
+    };
+  }
+
+  /**
    * Parse custom-answers payload from persisted JSON.
    */
   private parseCustomAnswers(input: Record<string, unknown> | null): Record<string, string> {
@@ -829,15 +867,147 @@ export class ApplicationAutomationService {
   }
 
   /**
+   * Build a persisted input payload for a scheduled job-apply run.
+   */
+  private buildScheduledJobApplyInput(
+    payload: JobApplyExecutionPayload,
+    scheduledFor: string,
+  ): Record<string, unknown> {
+    return this.withScheduleMetadata(this.buildAuditInput(payload, true), scheduledFor);
+  }
+
+  /**
+   * Build a persisted input payload for an email automation run.
+   */
+  private buildEmailResponseInput(
+    normalized: EmailResponseExecutionPayload,
+    options: { includeAction: boolean; scheduledFor?: string },
+  ): Record<string, unknown> {
+    const baseInput: Record<string, unknown> = {
+      subject: normalized.subject,
+      message: normalized.message,
+      tone: normalized.tone,
+      deliverAfterGeneration: normalized.deliverAfterGeneration,
+      ...(normalized.sender ? { sender: normalized.sender } : {}),
+      ...(normalized.recipientEmail ? { recipientEmail: normalized.recipientEmail } : {}),
+      ...(options.includeAction ? { action: SCHEDULED_ACTION_EMAIL_RESPONSE } : {}),
+    };
+
+    return options.scheduledFor
+      ? this.withScheduleMetadata(baseInput, options.scheduledFor)
+      : baseInput;
+  }
+
+  /**
+   * Rebuild an email payload from persisted automation run input.
+   */
+  private parseScheduledEmailResponsePayload(
+    input: Record<string, unknown> | null,
+  ): EmailResponseExecutionPayload | null {
+    if (!input) {
+      return null;
+    }
+
+    const subject = typeof input.subject === "string" ? input.subject.trim() : "";
+    const message = typeof input.message === "string" ? input.message.trim() : "";
+    if (subject.length === 0 || message.length === 0) {
+      return null;
+    }
+
+    const toneCandidate = typeof input.tone === "string" ? input.tone.trim() : "";
+    const tone = isEmailResponseTone(toneCandidate)
+      ? toneCandidate
+      : DEFAULT_EMAIL_RESPONSE_TONE;
+
+    return {
+      subject,
+      message,
+      tone,
+      deliverAfterGeneration: input.deliverAfterGeneration === true,
+      ...(typeof input.sender === "string" && input.sender.trim().length > 0
+        ? { sender: input.sender.trim() }
+        : {}),
+      ...(typeof input.recipientEmail === "string" && input.recipientEmail.trim().length > 0
+        ? { recipientEmail: input.recipientEmail.trim() }
+        : {}),
+    };
+  }
+
+  /**
+   * Map a scrape target to the action string stored in scheduled-run input.
+   */
+  private resolveScrapeAction(target: AutomationScrapeTarget): string {
+    return target === "studios"
+      ? SCHEDULED_ACTION_SCRAPE_STUDIOS
+      : SCHEDULED_ACTION_SCRAPE_JOBS_HITMARKER;
+  }
+
+  /**
+   * Validate and normalize a scheduled scrape target.
+   */
+  private normalizeScrapeTarget(target: string): AutomationScrapeTarget {
+    const normalized = target.trim() as AutomationScrapeTarget;
+    if (!AUTOMATION_SCRAPE_TARGET_VALUES.has(normalized)) {
+      throw new AutomationValidationError("target must be a supported scrape target");
+    }
+    return normalized;
+  }
+
+  /**
+   * Build a persisted input payload for a scheduled scrape run.
+   */
+  private buildScrapeInput(
+    payload: ScrapeExecutionPayload,
+    options: { includeAction: boolean; scheduledFor?: string },
+  ): Record<string, unknown> {
+    const baseInput: Record<string, unknown> = {
+      target: payload.target,
+      ...(options.includeAction ? { action: this.resolveScrapeAction(payload.target) } : {}),
+    };
+
+    return options.scheduledFor
+      ? this.withScheduleMetadata(baseInput, options.scheduledFor)
+      : baseInput;
+  }
+
+  /**
+   * Rebuild a scrape payload from persisted automation run input.
+   */
+  private parseScheduledScrapePayload(
+    input: Record<string, unknown> | null,
+  ): ScrapeExecutionPayload | null {
+    if (!input || typeof input.target !== "string") {
+      return null;
+    }
+
+    const normalized = input.target.trim();
+    if (!AUTOMATION_SCRAPE_TARGET_VALUES.has(normalized as AutomationScrapeTarget)) {
+      return null;
+    }
+
+    return {
+      target: normalized as AutomationScrapeTarget,
+    };
+  }
+
+  /**
+   * Load a single automation run row.
+   */
+  private async readRunRow(runId: string): Promise<AutomationRunRow | null> {
+    const rows = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
+    return rows[0] ?? null;
+  }
+
+  /**
    * Queue a scheduled run in-memory and execute it when due.
    */
-  private queueScheduledRun(runId: string, payload: JobApplyPayload, runAt: string): void {
+  private queueScheduledRun(runId: string, runAt: string): void {
     this.clearScheduledRunTimer(runId);
 
     const delayMs = Math.max(0, new Date(runAt).getTime() - Date.now());
     const timer = setTimeout(() => {
       this.scheduledRunTimers.delete(runId);
-      this.runBackgroundTask(this.executeScheduledRun(runId, payload));
+      this.runBackgroundTask(this.executeScheduledRun(runId));
     }, delayMs);
     if (
       typeof timer === "object" &&
@@ -877,19 +1047,21 @@ export class ApplicationAutomationService {
       db
         .select()
         .from(automationRuns)
-        .where(and(eq(automationRuns.status, "pending"), eq(automationRuns.type, "job_apply")))
+        .where(eq(automationRuns.status, "pending"))
         .limit(MAX_RECOVERABLE_SCHEDULED_RUNS),
     );
 
     if (pendingRowsResult.status === "fulfilled") {
       for (const row of pendingRowsResult.value) {
-        const metadata = this.parseScheduledRunMetadata(row.input ?? null);
-        const payload = this.parseScheduledJobApplyPayload(row.input ?? null);
-        if (!(metadata && payload)) {
+        const metadata = this.parseScheduledRunMetadata(asJsonRecord(row.input));
+        if (!metadata) {
+          automationServiceLogger.warn(
+            `[automation] skipping pending run without schedule metadata: ${row.id}`,
+          );
           continue;
         }
 
-        this.queueScheduledRun(row.id, payload, metadata.runAt);
+        this.queueScheduledRun(row.id, metadata.runAt);
       }
     }
 
@@ -909,10 +1081,7 @@ export class ApplicationAutomationService {
 
     const now = new Date().toISOString();
     const runId = generateId();
-    const scheduleInput = {
-      ...this.buildAuditInput(normalized, true),
-      schedule: { runAt: scheduledFor },
-    } satisfies Record<string, unknown>;
+    const scheduleInput = this.buildScheduledJobApplyInput(normalized, scheduledFor);
 
     await db.insert(automationRuns).values({
       id: runId,
@@ -933,7 +1102,7 @@ export class ApplicationAutomationService {
       updatedAt: now,
     });
 
-    this.queueScheduledRun(runId, normalized, scheduledFor);
+    this.queueScheduledRun(runId, scheduledFor);
     broadcastAutomationEvent(
       this.createProgressEvent({
         runId,
@@ -947,38 +1116,178 @@ export class ApplicationAutomationService {
   }
 
   /**
-   * Execute a queued scheduled run, retrying when concurrency is saturated.
+   * Schedule a new email-response run for future execution.
    */
-  private async executeScheduledRun(runId: string, payload: JobApplyPayload): Promise<void> {
-    const row = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
-    if (row.length === 0 || row[0].status !== "pending") {
+  async createScheduledEmailResponseRun(
+    payload: EmailResponseRequest,
+    runAt: string,
+  ): Promise<{ runId: string; scheduledFor: string }> {
+    const normalized = this.normalizeEmailResponsePayload(payload);
+    const scheduledFor = this.normalizeScheduledRunAt(runAt);
+    const now = new Date().toISOString();
+    const runId = generateId();
+
+    await db.insert(automationRuns).values({
+      id: runId,
+      type: "email",
+      status: "pending",
+      jobId: null,
+      userId: null,
+      input: this.buildEmailResponseInput(normalized, {
+        includeAction: true,
+        scheduledFor,
+      }),
+      progress: DEFAULT_PROGRESS,
+      currentStep: null,
+      totalSteps: null,
+      exitCode: 0,
+      timedOut: false,
+      aborted: false,
+      executionMs: null,
+      startedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    this.queueScheduledRun(runId, scheduledFor);
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: SCHEDULED_ACTION_EMAIL_RESPONSE,
+        status: "pending",
+        message: `Scheduled for ${scheduledFor}`,
+      }),
+    );
+
+    return { runId, scheduledFor };
+  }
+
+  /**
+   * Schedule a new scrape run for future execution.
+   */
+  async createScheduledScrapeRun(
+    target: AutomationScrapeTarget,
+    runAt: string,
+  ): Promise<{ runId: string; scheduledFor: string }> {
+    const normalizedTarget = this.normalizeScrapeTarget(target);
+    const scheduledFor = this.normalizeScheduledRunAt(runAt);
+    const now = new Date().toISOString();
+    const runId = generateId();
+
+    await db.insert(automationRuns).values({
+      id: runId,
+      type: "scrape",
+      status: "pending",
+      jobId: null,
+      userId: null,
+      input: this.buildScrapeInput(
+        {
+          target: normalizedTarget,
+        },
+        {
+          includeAction: true,
+          scheduledFor,
+        },
+      ),
+      progress: DEFAULT_PROGRESS,
+      currentStep: null,
+      totalSteps: null,
+      exitCode: 0,
+      timedOut: false,
+      aborted: false,
+      executionMs: null,
+      startedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    this.queueScheduledRun(runId, scheduledFor);
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: this.resolveScrapeAction(normalizedTarget),
+        status: "pending",
+        message: `Scheduled for ${scheduledFor}`,
+      }),
+    );
+
+    return { runId, scheduledFor };
+  }
+
+  /**
+   * Mark a malformed scheduled run as failed.
+   */
+  private async failScheduledRunValidation(runId: string, errorMessage: string): Promise<void> {
+    const automationSettings = await this.loadAutomationSettings();
+    await this.markRunFailed(runId, errorMessage, automationSettings);
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: "automation",
+        status: "error",
+        message: errorMessage,
+      }),
+    );
+  }
+
+  /**
+   * Execute a queued scheduled run based on the persisted pending row type.
+   */
+  private async executeScheduledRun(runId: string): Promise<void> {
+    const row = await this.readRunRow(runId);
+    if (!row || row.status !== "pending") {
       return;
     }
 
-    const executionResult = await settle(this.runJobApply(runId, payload));
+    if (row.type === "job_apply") {
+      await this.executeScheduledJobApplyRun(row);
+      return;
+    }
+
+    if (row.type === "email") {
+      await this.executeScheduledEmailResponseRun(row);
+      return;
+    }
+
+    if (row.type === "scrape") {
+      await this.executeScheduledScrapeRun(row);
+      return;
+    }
+  }
+
+  /**
+   * Execute a queued scheduled job-apply run, retrying when concurrency is saturated.
+   */
+  private async executeScheduledJobApplyRun(row: AutomationRunRow): Promise<void> {
+    const input = asJsonRecord(row.input);
+    const payload = this.parseScheduledJobApplyPayload(input);
+    if (!payload) {
+      await this.failScheduledRunValidation(row.id, "Scheduled job-apply payload is invalid");
+      return;
+    }
+
+    const executionResult = await settle(this.runJobApply(row.id, payload));
     if (executionResult.status === "fulfilled") {
       return;
     }
 
     if (executionResult.reason instanceof AutomationConcurrencyLimitError) {
       const nextRunAt = new Date(Date.now() + AUTOMATION_SCHEDULE_RETRY_DELAY_MS).toISOString();
+      const normalizedPayload = this.normalizePayload(payload);
       await db
         .update(automationRuns)
         .set({
-          input: {
-            ...this.buildAuditInput(this.normalizePayload(payload), true),
-            schedule: { runAt: nextRunAt },
-          },
+          input: this.buildScheduledJobApplyInput(normalizedPayload, nextRunAt),
           status: "pending",
           updatedAt: new Date().toISOString(),
         })
-        .where(eq(automationRuns.id, runId));
+        .where(eq(automationRuns.id, row.id));
 
-      this.queueScheduledRun(runId, payload, nextRunAt);
+      this.queueScheduledRun(row.id, nextRunAt);
       broadcastAutomationEvent(
         this.createProgressEvent({
-          runId,
-          action: "job_apply",
+          runId: row.id,
+          action: SCHEDULED_ACTION_JOB_APPLY,
           status: "pending",
           message: `Concurrency limit reached, retrying at ${nextRunAt}`,
         }),
@@ -989,37 +1298,90 @@ export class ApplicationAutomationService {
     throw executionResult.reason;
   }
 
+  /**
+   * Execute a queued scheduled email-response run.
+   */
+  private async executeScheduledEmailResponseRun(row: AutomationRunRow): Promise<void> {
+    const payload = this.parseScheduledEmailResponsePayload(asJsonRecord(row.input));
+    if (!payload) {
+      await this.failScheduledRunValidation(row.id, "Scheduled email payload is invalid");
+      return;
+    }
+
+    await this.markEmailResponseRunStarted(row.id, payload);
+    await this.executeEmailResponseRun(row.id, payload);
+  }
+
+  /**
+   * Execute a queued scheduled scrape run.
+   */
+  private async executeScheduledScrapeRun(row: AutomationRunRow): Promise<void> {
+    const payload = this.parseScheduledScrapePayload(asJsonRecord(row.input));
+    if (!payload) {
+      await this.failScheduledRunValidation(row.id, "Scheduled scrape payload is invalid");
+      return;
+    }
+
+    await this.markScrapeRunStarted(row.id, payload.target);
+    await this.runScheduledScrapeTarget(row.id, payload.target);
+  }
+
   private async createEmailResponseRun(
     runId: string,
     normalized: EmailResponseExecutionPayload,
+    options: { status: "running" | "pending"; scheduledFor?: string } = { status: "running" },
   ): Promise<void> {
     const now = new Date().toISOString();
     const totalSteps = normalized.deliverAfterGeneration ? 2 : 1;
     await db.insert(automationRuns).values({
       id: runId,
       type: "email",
-      status: "running",
+      status: options.status,
       jobId: null,
       userId: null,
-      input: {
-        subject: normalized.subject,
-        message: normalized.message,
-        tone: normalized.tone,
-        ...(normalized.sender ? { sender: normalized.sender } : {}),
-        ...(normalized.recipientEmail ? { recipientEmail: normalized.recipientEmail } : {}),
-        deliverAfterGeneration: normalized.deliverAfterGeneration,
-      },
+      input: this.buildEmailResponseInput(normalized, {
+        includeAction: options.status === "pending",
+        scheduledFor: options.scheduledFor,
+      }),
       progress: DEFAULT_PROGRESS,
-      currentStep: 0,
-      totalSteps,
+      currentStep: options.status === "running" ? 0 : null,
+      totalSteps: options.status === "running" ? totalSteps : null,
       exitCode: 0,
       timedOut: false,
       aborted: false,
       executionMs: null,
-      startedAt: now,
+      startedAt: options.status === "running" ? now : null,
       createdAt: now,
       updatedAt: now,
     });
+  }
+
+  /**
+   * Mark a scheduled email-response run as running.
+   */
+  private async markEmailResponseRunStarted(
+    runId: string,
+    normalized: EmailResponseExecutionPayload,
+  ): Promise<void> {
+    const totalSteps = normalized.deliverAfterGeneration ? 2 : 1;
+    const startedAt = new Date().toISOString();
+    await db
+      .update(automationRuns)
+      .set({
+        status: "running",
+        input: this.buildEmailResponseInput(normalized, { includeAction: false }),
+        progress: DEFAULT_PROGRESS,
+        currentStep: 0,
+        totalSteps,
+        exitCode: 0,
+        timedOut: false,
+        aborted: false,
+        executionMs: null,
+        startedAt,
+        completedAt: null,
+        updatedAt: startedAt,
+      })
+      .where(eq(automationRuns.id, runId));
   }
 
   private async failEmailResponseRun(
@@ -1214,12 +1576,12 @@ export class ApplicationAutomationService {
   }
 
   /**
-   * Run an AI-assisted email response and persist output as an automation run.
+   * Execute the core email automation flow for an existing run row.
    */
-  async runEmailResponse(payload: EmailResponseRequest): Promise<EmailResponseResult> {
-    const normalized = this.normalizeEmailResponsePayload(payload);
-    const runId = generateId();
-    await this.createEmailResponseRun(runId, normalized);
+  private async executeEmailResponseRun(
+    runId: string,
+    normalized: EmailResponseExecutionPayload,
+  ): Promise<EmailResponseResult> {
     const responseResult = await settle(this.generateEmailResponse(normalized));
     if (responseResult.status === "rejected") {
       return this.failEmailResponseRun(runId, responseResult.reason);
@@ -1264,6 +1626,158 @@ export class ApplicationAutomationService {
       ...(deliveryResult.value.deliveredAt ? { deliveredAt: deliveryResult.value.deliveredAt } : {}),
       ...(deliveryResult.value.messageId ? { messageId: deliveryResult.value.messageId } : {}),
     };
+  }
+
+  /**
+   * Run an AI-assisted email response and persist output as an automation run.
+   */
+  async runEmailResponse(payload: EmailResponseRequest): Promise<EmailResponseResult> {
+    const normalized = this.normalizeEmailResponsePayload(payload);
+    const runId = generateId();
+    await this.createEmailResponseRun(runId, normalized);
+    return this.executeEmailResponseRun(runId, normalized);
+  }
+
+  /**
+   * Mark a scheduled scrape run as running.
+   */
+  private async markScrapeRunStarted(
+    runId: string,
+    target: AutomationScrapeTarget,
+  ): Promise<void> {
+    const now = new Date().toISOString();
+    await db
+      .update(automationRuns)
+      .set({
+        status: "running",
+        input: this.buildScrapeInput({ target }, { includeAction: false }),
+        progress: DEFAULT_PROGRESS,
+        currentStep: 0,
+        totalSteps: 1,
+        exitCode: 0,
+        timedOut: false,
+        aborted: false,
+        executionMs: null,
+        startedAt: now,
+        completedAt: null,
+        updatedAt: now,
+      })
+      .where(eq(automationRuns.id, runId));
+
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: this.resolveScrapeAction(target),
+        status: "running",
+        message: `Running ${target} scrape`,
+        step: 0,
+        totalSteps: 1,
+      }),
+    );
+  }
+
+  /**
+   * Persist a failed scheduled scrape run.
+   */
+  private async failScheduledScrapeRun(
+    runId: string,
+    target: AutomationScrapeTarget,
+    reason: unknown,
+    executionMs: number,
+  ): Promise<void> {
+    const automationSettings = await this.loadAutomationSettings();
+    const errorMessage = toErrorMessage(
+      reason,
+      target === "studios" ? API_ERROR_SCRAPE_STUDIOS_FAILED : API_ERROR_SCRAPE_JOBS_FAILED,
+    );
+    await this.markRunFailed(runId, errorMessage, automationSettings, {
+      exitCode: 1,
+      timedOut: false,
+      aborted: false,
+      executionMs,
+      errorEnvelope: null,
+    });
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: this.resolveScrapeAction(target),
+        status: "error",
+        message: errorMessage,
+        step: 1,
+        totalSteps: 1,
+      }),
+    );
+  }
+
+  /**
+   * Persist a successful scheduled scrape run.
+   */
+  private async completeScheduledScrapeRun(
+    runId: string,
+    target: AutomationScrapeTarget,
+    result: { scraped: number; upserted: number; errors: string[] },
+    executionMs: number,
+  ): Promise<void> {
+    const completedAt = new Date().toISOString();
+    const output = {
+      target,
+      scraped: result.scraped,
+      upserted: result.upserted,
+      errors: result.errors,
+    } satisfies Record<string, unknown>;
+
+    await db
+      .update(automationRuns)
+      .set({
+        status: "success",
+        output,
+        error: null,
+        progress: AUTOMATION_FINISHED_PROGRESS,
+        currentStep: 1,
+        totalSteps: 1,
+        exitCode: 0,
+        timedOut: false,
+        aborted: false,
+        executionMs,
+        completedAt,
+        updatedAt: completedAt,
+      })
+      .where(eq(automationRuns.id, runId));
+
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: this.resolveScrapeAction(target),
+        status: "success",
+        message: `${target} scrape completed (${result.scraped} scraped, ${result.upserted} upserted)`,
+        step: 1,
+        totalSteps: 1,
+      }),
+    );
+  }
+
+  /**
+   * Execute a scheduled scrape target and persist the run result.
+   */
+  private async runScheduledScrapeTarget(
+    runId: string,
+    target: AutomationScrapeTarget,
+  ): Promise<void> {
+    const startedAt = Date.now();
+    const scrapeResult = await settle(
+      target === "studios" ? scraperService.scrapeStudios() : scraperService.scrapeHitmarkerJobs(),
+    );
+    if (scrapeResult.status === "rejected") {
+      await this.failScheduledScrapeRun(runId, target, scrapeResult.reason, Date.now() - startedAt);
+      return;
+    }
+
+    await this.completeScheduledScrapeRun(
+      runId,
+      target,
+      scrapeResult.value,
+      Date.now() - startedAt,
+    );
   }
 
   /**
@@ -1704,16 +2218,19 @@ export class ApplicationAutomationService {
   }
 
   private async markRunStarted(runId: string): Promise<void> {
+    const startedAt = new Date().toISOString();
     await db
       .update(automationRuns)
       .set({
-        startedAt: new Date().toISOString(),
+        startedAt,
         status: "running",
         progress: DEFAULT_PROGRESS,
         exitCode: null,
         timedOut: false,
         aborted: false,
         executionMs: null,
+        completedAt: null,
+        updatedAt: startedAt,
       })
       .where(eq(automationRuns.id, runId));
   }

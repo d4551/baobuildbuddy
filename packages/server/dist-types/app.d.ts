@@ -3465,6 +3465,179 @@ export declare const app: Elysia<"/api", {
         };
     } & {
         automation: {
+            "email-response": {
+                schedule: {
+                    post: {
+                        body: {
+                            sender?: string | undefined;
+                            tone?: "professional" | "friendly" | "concise" | undefined;
+                            recipientEmail?: string | undefined;
+                            deliverAfterGeneration?: boolean | undefined;
+                            message: string;
+                            subject: string;
+                            runAt: string;
+                        };
+                        params: {};
+                        query: unknown;
+                        headers: unknown;
+                        response: {
+                            500: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            200: {
+                                id: string;
+                                aborted: boolean;
+                                error: string | {
+                                    details?: {} | undefined;
+                                    source: string;
+                                    message: string;
+                                    code: string;
+                                } | null;
+                                type: "scrape" | "job_apply" | "email";
+                                output: {
+                                    [x: string]: unknown;
+                                } | null;
+                                input: {
+                                    [x: string]: unknown;
+                                } | null;
+                                progress: number | null;
+                                status: "success" | "pending" | "running" | "error";
+                                createdAt: string;
+                                updatedAt: string;
+                                screenshots: string[] | null;
+                                totalSteps: number | null;
+                                jobId: string | null;
+                                userId: string | null;
+                                currentStep: number | null;
+                                startedAt: string | null;
+                                completedAt: string | null;
+                                exitCode: number | null;
+                                timedOut: boolean;
+                                executionMs: number | null;
+                            };
+                            400: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            404: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            409: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            422: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    } & {
+        automation: {
+            scrape: {
+                schedule: {
+                    post: {
+                        body: {
+                            target: "studios" | "jobs_hitmarker";
+                            runAt: string;
+                        };
+                        params: {};
+                        query: unknown;
+                        headers: unknown;
+                        response: {
+                            500: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            200: {
+                                id: string;
+                                aborted: boolean;
+                                error: string | {
+                                    details?: {} | undefined;
+                                    source: string;
+                                    message: string;
+                                    code: string;
+                                } | null;
+                                type: "scrape" | "job_apply" | "email";
+                                output: {
+                                    [x: string]: unknown;
+                                } | null;
+                                input: {
+                                    [x: string]: unknown;
+                                } | null;
+                                progress: number | null;
+                                status: "success" | "pending" | "running" | "error";
+                                createdAt: string;
+                                updatedAt: string;
+                                screenshots: string[] | null;
+                                totalSteps: number | null;
+                                jobId: string | null;
+                                userId: string | null;
+                                currentStep: number | null;
+                                startedAt: string | null;
+                                completedAt: string | null;
+                                exitCode: number | null;
+                                timedOut: boolean;
+                                executionMs: number | null;
+                            };
+                            400: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            404: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            409: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            422: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    } & {
+        automation: {
             runs: {
                 get: {
                     body: unknown;

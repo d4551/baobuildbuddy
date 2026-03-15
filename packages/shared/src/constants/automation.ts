@@ -4,6 +4,11 @@
 export const AUTOMATION_RUN_TYPES = ["scrape", "job_apply", "email"] as const;
 
 /**
+ * Supported scheduled scrape targets across API and client surfaces.
+ */
+export const AUTOMATION_SCRAPE_TARGETS = ["studios", "jobs_hitmarker"] as const;
+
+/**
  * Canonical automation run status lifecycle values.
  */
 export const AUTOMATION_RUN_STATUSES = ["pending", "running", "success", "error"] as const;
@@ -79,6 +84,11 @@ export const AUTOMATION_MIN_ID_LENGTH = 8;
  * Union type for an automation run type.
  */
 export type AutomationRunType = (typeof AUTOMATION_RUN_TYPES)[number];
+
+/**
+ * Union type for a scheduled scrape target.
+ */
+export type AutomationScrapeTarget = (typeof AUTOMATION_SCRAPE_TARGETS)[number];
 
 /**
  * Union type for an automation run status.

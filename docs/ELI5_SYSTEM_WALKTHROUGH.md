@@ -141,6 +141,26 @@ sequenceDiagram
   S-->>C: Draft + delivery result
 ```
 
+### 6. You schedule a robot task for later
+
+- The page tells the server what to run later and what time to use.
+- The server writes a `pending` run into the database first.
+- The server also sets a local timer.
+- If the app restarts, it reads the pending runs back out and restores the timers.
+- When the time arrives, the server looks at the run type and launches the right robot flow.
+
+```mermaid
+flowchart LR
+  Page["Automation page"] --> Route["Schedule route"]
+  Route --> DB["automation_runs row<br/>status = pending"]
+  DB --> Timer["Local timer"]
+  Restart["App restart"] --> DB
+  Timer --> Dispatch["Check run type"]
+  Dispatch --> Apply["Job apply"]
+  Dispatch --> Email["Email reply"]
+  Dispatch --> Scrape["Scraper"]
+```
+
 ## Where screenshots come from
 
 Screenshots are created by the browser robot during automation runs.
@@ -175,7 +195,7 @@ This split keeps one package from trying to do everything.
 2. Configure settings and AI providers.
 3. Refresh jobs from supported sources.
 4. Review a job and prepare a resume or cover letter.
-5. Run job-apply automation.
+5. Run or schedule job-apply, email, or scraper automation.
 6. Review screenshots and run history.
 7. Generate and optionally deliver follow-up emails.
 

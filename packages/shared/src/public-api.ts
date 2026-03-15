@@ -126,6 +126,7 @@ import {
   AUTOMATION_MAX_CONCURRENT_RUNS,
   AUTOMATION_MAX_PROGRESS_STEPS,
   AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
+  AUTOMATION_SCRAPE_TARGETS,
   AUTOMATION_MIN_ID_LENGTH,
   AUTOMATION_MAX_CUSTOM_ANSWER_COUNT,
   AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH,
@@ -145,6 +146,7 @@ export {
   AUTOMATION_MAX_CONCURRENT_RUNS,
   AUTOMATION_MAX_PROGRESS_STEPS,
   AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
+  AUTOMATION_SCRAPE_TARGETS,
   AUTOMATION_MIN_ID_LENGTH,
   AUTOMATION_MAX_CUSTOM_ANSWER_COUNT,
   AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH,
@@ -158,8 +160,12 @@ export {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
 };
-import type { AutomationRunStatus, AutomationRunType } from "./constants/automation";
-export type { AutomationRunStatus, AutomationRunType };
+import type {
+  AutomationRunStatus,
+  AutomationRunType,
+  AutomationScrapeTarget,
+} from "./constants/automation";
+export type { AutomationRunStatus, AutomationRunType, AutomationScrapeTarget };
 import { APP_BRAND, APP_SEO, THEME_NAMES } from "./constants/branding";
 export { APP_BRAND, APP_SEO, THEME_NAMES };
 import { DEFAULT_UNSPECIFIED_LABEL } from "./constants/default-labels";

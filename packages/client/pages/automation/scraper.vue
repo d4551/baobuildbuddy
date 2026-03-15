@@ -1,20 +1,34 @@
 <script setup lang="ts">
-import type { Job } from "@bao/shared";
 import {
+  APP_ROUTE_BUILDERS,
   API_ENDPOINTS,
   APP_ROUTES,
   formatRelativeTimeForDate,
   JOB_PREVIEW_LIMIT,
   SCRAPER_JOB_QUERY_LIMIT,
+  type AutomationScrapeTarget,
+  type Job,
+  type RpaRunExecutionEnvelope,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { useAutomation } from "~/composables/useAutomation";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
 type RunState = "idle" | "running" | "success" | "error";
+type ScrapePendingAction =
+  | "studios-run"
+  | "studios-schedule"
+  | "jobs_hitmarker-run"
+  | "jobs_hitmarker-schedule";
+
+const DATE_FORMAT_OPTIONS = {
+  dateStyle: "medium",
+  timeStyle: "short",
+} as const satisfies Intl.DateTimeFormatOptions;
 
 const requestUrl = useRequestURL();
 const apiBase = String(useRuntimeConfig().public.apiBase || "/");
@@ -40,6 +54,7 @@ const router = useRouter();
 const { $toast } = useNuxtApp();
 const { t, locale, fallbackLocale } = useI18n();
 const { awardForAction } = usePipelineGamification();
+const { scheduleScrape } = useAutomation();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -54,6 +69,11 @@ const studioMessage = ref("");
 const jobMessage = ref("");
 const studioLastRunAt = ref<string | null>(null);
 const jobLastRunAt = ref<string | null>(null);
+const studioRunAt = ref("");
+const jobRunAt = ref("");
+const studioScheduledRun = ref<RpaRunExecutionEnvelope | null>(null);
+const jobScheduledRun = ref<RpaRunExecutionEnvelope | null>(null);
+const pendingAction = ref<ScrapePendingAction | null>(null);
 
 await useAsyncData("automation-scraper-jobs", async () => {
   await searchJobs({ limit: SCRAPER_JOB_QUERY_LIMIT });
@@ -75,11 +95,48 @@ const jobCount = computed(() => sortedJobs.value.length);
 
 function formatRunTime(value: string | null): string {
   if (!value) return t("automation.scraper.notRunYet");
-  const formattedDate = formatDateWithLocale(value, locale.value, fallbackLocale.value, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const formattedDate = formatDateWithLocale(
+    value,
+    locale.value,
+    fallbackLocale.value,
+    DATE_FORMAT_OPTIONS,
+  );
   return formattedDate ?? t("automation.scraper.notRunYet");
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+function toLocalizedDateTime(value: string): string {
+  const formattedDate = formatDateWithLocale(
+    value,
+    locale.value,
+    fallbackLocale.value,
+    DATE_FORMAT_OPTIONS,
+  );
+  return formattedDate ?? value;
+}
+
+function resolveScheduledRunAt(run: RpaRunExecutionEnvelope): string {
+  const runInput = run.input;
+  if (!runInput || !isRecord(runInput)) {
+    return run.createdAt;
+  }
+  const scheduleValue = runInput.schedule;
+  if (!isRecord(scheduleValue)) {
+    return run.createdAt;
+  }
+  return typeof scheduleValue.runAt === "string" && scheduleValue.runAt.length > 0
+    ? scheduleValue.runAt
+    : run.createdAt;
+}
+
+function toIsoTimestamp(dateTimeLocal: string): string | null {
+  const parsed = new Date(dateTimeLocal);
+  if (Number.isNaN(parsed.getTime()) || parsed.getTime() <= Date.now()) {
+    return null;
+  }
+  return parsed.toISOString();
 }
 
 function relativePostedDate(date: string): string {
@@ -103,8 +160,11 @@ function runStateLabel(state: RunState): string {
 async function runStudios() {
   studioState.value = "running";
   studioMessage.value = "";
+  studioScheduledRun.value = null;
+  pendingAction.value = "studios-run";
 
   await studiosFetch.refresh();
+  pendingAction.value = null;
 
   if (studiosFetch.error.value) {
     studioState.value = "error";
@@ -129,8 +189,11 @@ async function runStudios() {
 async function runJobs() {
   jobState.value = "running";
   jobMessage.value = "";
+  jobScheduledRun.value = null;
+  pendingAction.value = "jobs_hitmarker-run";
 
   await jobsFetch.refresh();
+  pendingAction.value = null;
 
   if (jobsFetch.error.value) {
     jobState.value = "error";
@@ -150,6 +213,61 @@ async function runJobs() {
     : t("automation.scraper.messages.jobCompleted");
   if (jobReward) {
     $toast.success(t("automation.scraper.toasts.jobReward", { xp: jobReward }));
+  }
+}
+
+async function scheduleScrapeRun(target: AutomationScrapeTarget): Promise<void> {
+  const runAtValue = target === "studios" ? studioRunAt.value : jobRunAt.value;
+  const runAt = toIsoTimestamp(runAtValue);
+  if (!runAt) {
+    if (target === "studios") {
+      studioState.value = "error";
+      studioMessage.value = t("automation.scraper.schedule.invalidRunAt");
+    } else {
+      jobState.value = "error";
+      jobMessage.value = t("automation.scraper.schedule.invalidRunAt");
+    }
+    return;
+  }
+
+  pendingAction.value = target === "studios" ? "studios-schedule" : "jobs_hitmarker-schedule";
+  if (target === "studios") {
+    studioScheduledRun.value = null;
+  } else {
+    jobScheduledRun.value = null;
+  }
+  const scheduleResult = await settlePromise(
+    scheduleScrape({
+      target,
+      runAt,
+    }),
+    t("automation.scraper.errors.scheduleFailed"),
+  );
+  pendingAction.value = null;
+
+  if (!scheduleResult.ok) {
+    const errorMessage = getErrorMessage(
+      scheduleResult.error,
+      t("automation.scraper.errors.scheduleFailed"),
+    );
+    if (target === "studios") {
+      studioState.value = "error";
+      studioMessage.value = errorMessage;
+    } else {
+      jobState.value = "error";
+      jobMessage.value = errorMessage;
+    }
+    return;
+  }
+
+  if (target === "studios") {
+    studioState.value = "success";
+    studioMessage.value = t("automation.scraper.schedule.createdMessage");
+    studioScheduledRun.value = scheduleResult.value;
+  } else {
+    jobState.value = "success";
+    jobMessage.value = t("automation.scraper.schedule.createdMessage");
+    jobScheduledRun.value = scheduleResult.value;
   }
 }
 
@@ -202,15 +320,41 @@ async function resolvePipelineReward(
             {{ t("automation.scraper.lastRunLabel", { value: formatRunTime(studioLastRunAt) }) }}
           </p>
 
-          <div class="card-actions justify-end">
+          <fieldset class="fieldset mt-4">
+            <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
+            <input
+              v-model="studioRunAt"
+              class="input input-bordered w-full"
+              type="datetime-local"
+              :aria-label="t('automation.scraper.schedule.aria')"
+            />
+            <p class="validator-hint">{{ t("automation.scraper.schedule.hint") }}</p>
+          </fieldset>
+
+          <div class="card-actions justify-end gap-3">
             <button
               class="btn btn-primary"
               :aria-label="t('automation.scraper.studioCard.runAria')"
-              :disabled="studioState === 'running'"
+              :disabled="pendingAction !== null"
               @click="runStudios"
             >
-              <span v-if="studioState === 'running'" class="loading loading-spinner loading-xs"></span>
+              <span
+                v-if="pendingAction === 'studios-run'"
+                class="loading loading-spinner loading-xs"
+              ></span>
               <span v-else>{{ t("automation.scraper.studioCard.runButton") }}</span>
+            </button>
+            <button
+              class="btn btn-outline"
+              :aria-label="t('automation.scraper.schedule.buttonAria')"
+              :disabled="pendingAction !== null || !studioRunAt"
+              @click="scheduleScrapeRun('studios')"
+            >
+              <span
+                v-if="pendingAction === 'studios-schedule'"
+                class="loading loading-spinner loading-xs"
+              ></span>
+              <span v-else>{{ t("automation.scraper.schedule.button") }}</span>
             </button>
           </div>
 
@@ -230,6 +374,33 @@ async function resolvePipelineReward(
               <span>{{ studioMessage }}</span>
             </div>
           </div>
+
+          <div v-if="studioScheduledRun" role="alert" class="alert alert-info mt-4">
+            <div>
+              <h3 class="font-semibold">{{ t("automation.scraper.schedule.createdTitle") }}</h3>
+              <p class="text-sm">
+                {{
+                  t("automation.scraper.schedule.scheduledForLabel", {
+                    date: toLocalizedDateTime(resolveScheduledRunAt(studioScheduledRun)),
+                  })
+                }}
+              </p>
+              <p class="text-sm">
+                {{
+                  t("automation.scraper.schedule.statusLabel", {
+                    status: studioScheduledRun.status,
+                  })
+                }}
+              </p>
+            </div>
+            <NuxtLink
+              :to="APP_ROUTE_BUILDERS.automationRunDetail(studioScheduledRun.id)"
+              class="btn btn-ghost btn-sm"
+              :aria-label="t('automation.scraper.openRunDetailAria', { id: studioScheduledRun.id })"
+            >
+              {{ t("automation.scraper.openRunDetailButton") }}
+            </NuxtLink>
+          </div>
         </div>
       </div>
 
@@ -248,15 +419,41 @@ async function resolvePipelineReward(
             {{ t("automation.scraper.lastRunLabel", { value: formatRunTime(jobLastRunAt) }) }}
           </p>
 
-          <div class="card-actions justify-end">
+          <fieldset class="fieldset mt-4">
+            <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
+            <input
+              v-model="jobRunAt"
+              class="input input-bordered w-full"
+              type="datetime-local"
+              :aria-label="t('automation.scraper.schedule.aria')"
+            />
+            <p class="validator-hint">{{ t("automation.scraper.schedule.hint") }}</p>
+          </fieldset>
+
+          <div class="card-actions justify-end gap-3">
             <button
               class="btn btn-primary"
               :aria-label="t('automation.scraper.jobCard.runAria')"
-              :disabled="jobState === 'running'"
+              :disabled="pendingAction !== null"
               @click="runJobs"
             >
-              <span v-if="jobState === 'running'" class="loading loading-spinner loading-xs"></span>
+              <span
+                v-if="pendingAction === 'jobs_hitmarker-run'"
+                class="loading loading-spinner loading-xs"
+              ></span>
               <span v-else>{{ t("automation.scraper.jobCard.runButton") }}</span>
+            </button>
+            <button
+              class="btn btn-outline"
+              :aria-label="t('automation.scraper.schedule.buttonAria')"
+              :disabled="pendingAction !== null || !jobRunAt"
+              @click="scheduleScrapeRun('jobs_hitmarker')"
+            >
+              <span
+                v-if="pendingAction === 'jobs_hitmarker-schedule'"
+                class="loading loading-spinner loading-xs"
+              ></span>
+              <span v-else>{{ t("automation.scraper.schedule.button") }}</span>
             </button>
           </div>
 
@@ -275,6 +472,33 @@ async function resolvePipelineReward(
             >
               <span>{{ jobMessage }}</span>
             </div>
+          </div>
+
+          <div v-if="jobScheduledRun" role="alert" class="alert alert-info mt-4">
+            <div>
+              <h3 class="font-semibold">{{ t("automation.scraper.schedule.createdTitle") }}</h3>
+              <p class="text-sm">
+                {{
+                  t("automation.scraper.schedule.scheduledForLabel", {
+                    date: toLocalizedDateTime(resolveScheduledRunAt(jobScheduledRun)),
+                  })
+                }}
+              </p>
+              <p class="text-sm">
+                {{
+                  t("automation.scraper.schedule.statusLabel", {
+                    status: jobScheduledRun.status,
+                  })
+                }}
+              </p>
+            </div>
+            <NuxtLink
+              :to="APP_ROUTE_BUILDERS.automationRunDetail(jobScheduledRun.id)"
+              class="btn btn-ghost btn-sm"
+              :aria-label="t('automation.scraper.openRunDetailAria', { id: jobScheduledRun.id })"
+            >
+              {{ t("automation.scraper.openRunDetailButton") }}
+            </NuxtLink>
           </div>
         </div>
       </div>

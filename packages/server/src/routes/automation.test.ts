@@ -63,7 +63,7 @@ const runEmailResponseStub: RunEmailResponse = async (payload) => {
 
 let originalRunJobApply: RunJobApply | undefined;
 let originalRunEmailResponse: RunEmailResponse | undefined;
-const CLEANUP_AUTOMATION_TYPES = ["job_apply", "email"] as const;
+const CLEANUP_AUTOMATION_TYPES = ["job_apply", "email", "scrape"] as const;
 
 const requestStatusBody = async <T>(
   method: string,
@@ -314,6 +314,88 @@ function registerEmailResponseTest(): void {
   });
 }
 
+function registerScheduledEmailResponseTest(): void {
+  test("POST /api/automation/email-response/schedule creates a pending email run", async () => {
+    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const res = await requestJson<{
+      id: string;
+      status: "pending";
+      input: Record<string, unknown> | null;
+    }>(app, "POST", "/api/automation/email-response/schedule", {
+      subject: "Interview follow-up",
+      message: "Thanks again for the interview. I would love to continue the process.",
+      tone: "friendly",
+      deliverAfterGeneration: false,
+      runAt,
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("pending");
+    const input = res.body.input;
+    const scheduledRunAt =
+      input &&
+      typeof input === "object" &&
+      "schedule" in input &&
+      input.schedule &&
+      typeof input.schedule === "object" &&
+      "runAt" in input.schedule
+        ? input.schedule.runAt
+        : null;
+    expect(scheduledRunAt).toBe(runAt);
+    createdRunIds.push(res.body.id);
+
+    const run = await db
+      .select()
+      .from(automationRuns)
+      .where(and(eq(automationRuns.id, res.body.id), eq(automationRuns.type, "email")))
+      .limit(1);
+
+    expect(run.length).toBe(1);
+    expect(run[0].status).toBe("pending");
+  });
+}
+
+function registerScheduledScrapeRunTest(): void {
+  test("POST /api/automation/scrape/schedule creates a pending scrape run", async () => {
+    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const res = await requestJson<{
+      id: string;
+      status: "pending";
+      input: Record<string, unknown> | null;
+    }>(app, "POST", "/api/automation/scrape/schedule", {
+      target: "jobs_hitmarker",
+      runAt,
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("pending");
+    const input = res.body.input;
+    const scheduledRunAt =
+      input &&
+      typeof input === "object" &&
+      "schedule" in input &&
+      input.schedule &&
+      typeof input.schedule === "object" &&
+      "runAt" in input.schedule
+        ? input.schedule.runAt
+        : null;
+    const target =
+      input && typeof input === "object" && "target" in input ? input.target : null;
+    expect(scheduledRunAt).toBe(runAt);
+    expect(target).toBe("jobs_hitmarker");
+    createdRunIds.push(res.body.id);
+
+    const run = await db
+      .select()
+      .from(automationRuns)
+      .where(and(eq(automationRuns.id, res.body.id), eq(automationRuns.type, "scrape")))
+      .limit(1);
+
+    expect(run.length).toBe(1);
+    expect(run[0].status).toBe("pending");
+  });
+}
+
 describe("automation routes", () => {
   registerJobApplyValidationTest();
   registerMissingResumeTest();
@@ -321,4 +403,6 @@ describe("automation routes", () => {
   registerScheduleValidationTest();
   registerScheduleCreationTest();
   registerEmailResponseTest();
+  registerScheduledEmailResponseTest();
+  registerScheduledScrapeRunTest();
 });

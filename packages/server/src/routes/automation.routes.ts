@@ -1,7 +1,9 @@
 import {
+  AUTOMATION_SCRAPE_TARGETS,
   AUTOMATION_RUN_HISTORY_LIMIT,
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
+  type AutomationScrapeTarget,
   type EmailResponseRequest,
   API_ERROR_AUTOMATION_PAYLOAD_VALIDATION_FAILED,
   API_ERROR_AUTOMATION_RUN_NOT_FOUND,
@@ -39,6 +41,8 @@ const RUN_ID_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);
 
 const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
   AUTOMATION_RUN_TYPES;
+const [AUTOMATION_SCRAPE_TARGET_STUDIOS, AUTOMATION_SCRAPE_TARGET_JOBS_HITMARKER] =
+  AUTOMATION_SCRAPE_TARGETS;
 const [
   AUTOMATION_STATUS_PENDING,
   AUTOMATION_STATUS_RUNNING,
@@ -63,6 +67,10 @@ const EMAIL_RESPONSE_TONE_SCHEMA = t.Union([
   t.Literal("professional"),
   t.Literal("friendly"),
   t.Literal("concise"),
+]);
+const SCRAPE_TARGET_SCHEMA = t.Union([
+  t.Literal(AUTOMATION_SCRAPE_TARGET_STUDIOS),
+  t.Literal(AUTOMATION_SCRAPE_TARGET_JOBS_HITMARKER),
 ]);
 const nullableJsonRecordBodySchema = t.Union([t.Record(t.String(), t.Unknown()), t.Null()]);
 const nullableRunErrorSchema = t.Union([
@@ -116,6 +124,13 @@ type JobApplyRequestBody = {
   customAnswers?: Record<string, string>;
 };
 type ScheduleJobApplyRequestBody = JobApplyRequestBody & {
+  runAt: string;
+};
+type ScheduleEmailResponseRequestBody = EmailResponseRequest & {
+  runAt: string;
+};
+type ScheduleScrapeRequestBody = {
+  target: AutomationScrapeTarget;
   runAt: string;
 };
 
@@ -362,6 +377,97 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
           deliveredAt: t.Optional(t.String()),
           messageId: t.Optional(t.String()),
         }),
+        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+      },
+    },
+  )
+  .post(
+    "/email-response/schedule",
+    async ({ body, set }) => {
+      const payload: ScheduleEmailResponseRequestBody = body;
+      const scheduleResult = await settle(
+        applicationAutomationService.createScheduledEmailResponseRun(
+          {
+            subject: payload.subject,
+            message: payload.message,
+            ...(payload.sender ? { sender: payload.sender } : {}),
+            ...(payload.tone ? { tone: payload.tone } : {}),
+            ...(payload.recipientEmail ? { recipientEmail: payload.recipientEmail } : {}),
+            ...(payload.deliverAfterGeneration !== undefined
+              ? { deliverAfterGeneration: payload.deliverAfterGeneration }
+              : {}),
+          },
+          payload.runAt,
+        ),
+      );
+      if (scheduleResult.status === "rejected") {
+        const mapped = mapAutomationRouteError(scheduleResult.reason);
+        set.status = mapped.status;
+        return mapped.body;
+      }
+
+      const run = await readAutomationRunById(scheduleResult.value.runId);
+      if (!run) {
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
+      }
+
+      set.status = HTTP_STATUS_OK;
+      return run;
+    },
+    {
+      body: t.Object({
+        subject: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+        message: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
+        sender: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        tone: t.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
+        recipientEmail: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+        deliverAfterGeneration: t.Optional(t.Boolean()),
+        runAt: t.String({ minLength: 1 }),
+      }),
+      response: {
+        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
+        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+      },
+    },
+  )
+  .post(
+    "/scrape/schedule",
+    async ({ body, set }) => {
+      const payload: ScheduleScrapeRequestBody = body;
+      const scheduleResult = await settle(
+        applicationAutomationService.createScheduledScrapeRun(payload.target, payload.runAt),
+      );
+      if (scheduleResult.status === "rejected") {
+        const mapped = mapAutomationRouteError(scheduleResult.reason);
+        set.status = mapped.status;
+        return mapped.body;
+      }
+
+      const run = await readAutomationRunById(scheduleResult.value.runId);
+      if (!run) {
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
+      }
+
+      set.status = HTTP_STATUS_OK;
+      return run;
+    },
+    {
+      body: t.Object({
+        target: SCRAPE_TARGET_SCHEMA,
+        runAt: t.String({ minLength: 1 }),
+      }),
+      response: {
+        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
         [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
         [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
         [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,

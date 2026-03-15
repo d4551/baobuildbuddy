@@ -1,5 +1,6 @@
 import {
   API_ENDPOINTS,
+  type AutomationScrapeTarget,
   type AutomationRunStatus,
   type AutomationRunType,
   buildAutomationRunEndpoint,
@@ -26,6 +27,15 @@ interface ScheduleJobApplyBody extends JobApplyBody {
   runAt: string;
 }
 
+interface ScheduleEmailResponseBody extends EmailResponseRequest {
+  runAt: string;
+}
+
+interface ScheduleScrapeBody {
+  target: AutomationScrapeTarget;
+  runAt: string;
+}
+
 interface FetchRunsParams {
   type?: AutomationRunType;
   status?: AutomationRunStatus;
@@ -48,46 +58,38 @@ function resolveAutomationRuntime(
   };
 }
 
+function createPostMutation(runtime: AutomationRuntime) {
+  return <TResponse>(endpoint: string, body: object) =>
+    $fetch<TResponse>(resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, endpoint), {
+      method: "POST",
+      body,
+    });
+}
+
 function createRunMutations(runtime: AutomationRuntime) {
+  const postMutation = createPostMutation(runtime);
+
   const triggerJobApply = (body: JobApplyBody) =>
-    $fetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationJobApply),
-      {
-        method: "POST",
-        body,
-      },
-    );
+    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationJobApply, body);
 
   const scheduleJobApply = (body: ScheduleJobApplyBody) =>
-    $fetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(
-        runtime.apiBase,
-        runtime.requestUrl,
-        API_ENDPOINTS.automationJobApplySchedule,
-      ),
-      {
-        method: "POST",
-        body,
-      },
-    );
+    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationJobApplySchedule, body);
 
   const triggerEmailResponse = (body: EmailResponseRequest) =>
-    $fetch<EmailResponseResult>(
-      resolveApiEndpoint(
-        runtime.apiBase,
-        runtime.requestUrl,
-        API_ENDPOINTS.automationEmailResponse,
-      ),
-      {
-        method: "POST",
-        body,
-      },
-    );
+    postMutation<EmailResponseResult>(API_ENDPOINTS.automationEmailResponse, body);
+
+  const scheduleEmailResponse = (body: ScheduleEmailResponseBody) =>
+    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationEmailResponseSchedule, body);
+
+  const scheduleScrape = (body: ScheduleScrapeBody) =>
+    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationScrapeSchedule, body);
 
   return {
     triggerJobApply,
     scheduleJobApply,
     triggerEmailResponse,
+    scheduleEmailResponse,
+    scheduleScrape,
   };
 }
 

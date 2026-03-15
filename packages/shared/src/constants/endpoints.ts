@@ -23,6 +23,8 @@ export const API_ENDPOINTS = {
   automationJobApply: `${API_ENDPOINT_PREFIX}/automation/job-apply`,
   automationJobApplySchedule: `${API_ENDPOINT_PREFIX}/automation/job-apply/schedule`,
   automationEmailResponse: `${API_ENDPOINT_PREFIX}/automation/email-response`,
+  automationEmailResponseSchedule: `${API_ENDPOINT_PREFIX}/automation/email-response/schedule`,
+  automationScrapeSchedule: `${API_ENDPOINT_PREFIX}/automation/scrape/schedule`,
   automationRuns: `${API_ENDPOINT_PREFIX}/automation/runs`,
   automationScreenshotsBase: `${API_ENDPOINT_PREFIX}/automation/screenshots`,
   apiDocsUi: `${API_ENDPOINT_PREFIX}/docs/api`,

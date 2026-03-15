@@ -1,4 +1,4 @@
-import type { EmailResponseRequest, EmailResponseResult, RpaRunEvent } from "@bao/shared";
+import type { AutomationScrapeTarget, EmailResponseRequest, EmailResponseResult, RpaRunEvent } from "@bao/shared";
 interface JobApplyPayload {
     jobUrl: string;
     resumeId: string;
@@ -137,6 +137,10 @@ export declare class ApplicationAutomationService {
      */
     private parseScheduledRunMetadata;
     /**
+     * Attach schedule metadata to an automation input payload.
+     */
+    private withScheduleMetadata;
+    /**
      * Parse custom-answers payload from persisted JSON.
      */
     private parseCustomAnswers;
@@ -144,6 +148,38 @@ export declare class ApplicationAutomationService {
      * Rebuild a job-apply payload from persisted automation run input.
      */
     private parseScheduledJobApplyPayload;
+    /**
+     * Build a persisted input payload for a scheduled job-apply run.
+     */
+    private buildScheduledJobApplyInput;
+    /**
+     * Build a persisted input payload for an email automation run.
+     */
+    private buildEmailResponseInput;
+    /**
+     * Rebuild an email payload from persisted automation run input.
+     */
+    private parseScheduledEmailResponsePayload;
+    /**
+     * Map a scrape target to the action string stored in scheduled-run input.
+     */
+    private resolveScrapeAction;
+    /**
+     * Validate and normalize a scheduled scrape target.
+     */
+    private normalizeScrapeTarget;
+    /**
+     * Build a persisted input payload for a scheduled scrape run.
+     */
+    private buildScrapeInput;
+    /**
+     * Rebuild a scrape payload from persisted automation run input.
+     */
+    private parseScheduledScrapePayload;
+    /**
+     * Load a single automation run row.
+     */
+    private readRunRow;
     /**
      * Queue a scheduled run in-memory and execute it when due.
      */
@@ -164,10 +200,44 @@ export declare class ApplicationAutomationService {
         scheduledFor: string;
     }>;
     /**
-     * Execute a queued scheduled run, retrying when concurrency is saturated.
+     * Schedule a new email-response run for future execution.
+     */
+    createScheduledEmailResponseRun(payload: EmailResponseRequest, runAt: string): Promise<{
+        runId: string;
+        scheduledFor: string;
+    }>;
+    /**
+     * Schedule a new scrape run for future execution.
+     */
+    createScheduledScrapeRun(target: AutomationScrapeTarget, runAt: string): Promise<{
+        runId: string;
+        scheduledFor: string;
+    }>;
+    /**
+     * Mark a malformed scheduled run as failed.
+     */
+    private failScheduledRunValidation;
+    /**
+     * Execute a queued scheduled run based on the persisted pending row type.
      */
     private executeScheduledRun;
+    /**
+     * Execute a queued scheduled job-apply run, retrying when concurrency is saturated.
+     */
+    private executeScheduledJobApplyRun;
+    /**
+     * Execute a queued scheduled email-response run.
+     */
+    private executeScheduledEmailResponseRun;
+    /**
+     * Execute a queued scheduled scrape run.
+     */
+    private executeScheduledScrapeRun;
     private createEmailResponseRun;
+    /**
+     * Mark a scheduled email-response run as running.
+     */
+    private markEmailResponseRunStarted;
     private failEmailResponseRun;
     private generateEmailResponse;
     /**
@@ -180,9 +250,29 @@ export declare class ApplicationAutomationService {
     private deliverGeneratedEmail;
     private completeEmailResponseRun;
     /**
+     * Execute the core email automation flow for an existing run row.
+     */
+    private executeEmailResponseRun;
+    /**
      * Run an AI-assisted email response and persist output as an automation run.
      */
     runEmailResponse(payload: EmailResponseRequest): Promise<EmailResponseResult>;
+    /**
+     * Mark a scheduled scrape run as running.
+     */
+    private markScrapeRunStarted;
+    /**
+     * Persist a failed scheduled scrape run.
+     */
+    private failScheduledScrapeRun;
+    /**
+     * Persist a successful scheduled scrape run.
+     */
+    private completeScheduledScrapeRun;
+    /**
+     * Execute a scheduled scrape target and persist the run result.
+     */
+    private runScheduledScrapeTarget;
     /**
      * Update run progress metrics from script progress events.
      */

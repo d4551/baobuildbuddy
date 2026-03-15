@@ -1107,6 +1107,8 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 | `/api/automation/job-apply` | Start job application automation | `RpaRunExecutionEnvelope` (status `running`) |
 | `/api/automation/job-apply/schedule` | Schedule job application automation | `RpaRunExecutionEnvelope` (status `pending`, `input.schedule.runAt`) |
 | `/api/automation/email-response` | Generate AI email response | `{ runId, status: "success", reply, provider, model }` |
+| `/api/automation/email-response/schedule` | Schedule AI email response automation | `RpaRunExecutionEnvelope` (status `pending`, `input.schedule.runAt`) |
+| `/api/automation/scrape/schedule` | Schedule scraper automation | `RpaRunExecutionEnvelope` (status `pending`, `input.target`, `input.schedule.runAt`) |
 | `/api/gamification/progress` | XP and level progression | Gamification progress payload |
 | `/api/automation/runs` | Automation audit | Persisted run records |
 | `/api/automation/runs/:id` | Run detail | Single run snapshot |

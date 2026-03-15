@@ -9,6 +9,7 @@ If you want the short mental model first, read [Explain Like I'm 5 System Walkth
 - `packages/server/src/services/automation/rpa-runner.ts` resolves typed script IDs and spawns Bun entrypoints from `packages/scraper/src/scripts`.
 - Job-apply automation keeps the NDJSON protocol contract defined in `@bao/shared` (`RPA_PROTOCOL_VERSION = "1.0"`).
 - Scraper scripts keep plain JSON stdout payloads for row ingestion.
+- Scheduled job-apply, email, and scraper runs are persisted in `automation_runs` with `status = "pending"` and `input.schedule.runAt`, then restored in-process on boot by `application-automation-service.ts`.
 - Shared script IDs, input schemas, and normalized row schemas live in `packages/shared/src/schemas/automation-scripts.schema.ts`.
 
 Current script registry:
@@ -34,9 +35,35 @@ flowchart LR
   Runner --> Scripts["packages/scraper/src/scripts/*.ts"]
   Scripts --> Runtime["Playwright runtime + ATS adapters + provider extractors"]
   Runtime --> Shared["@bao/shared automation contracts"]
+  Service --> Scheduler["pending automation_runs + in-memory timers"]
   Service --> Runs["automation_runs table"]
+  Scheduler --> Runs
+  Scheduler --> Service
   ScraperService --> JobsStudios["jobs + studios tables"]
   Runs --> AutomationWs
+```
+
+## Persisted scheduler
+
+All automation scheduling now uses one persisted model:
+
+- `POST /api/automation/job-apply/schedule`
+- `POST /api/automation/email-response/schedule`
+- `POST /api/automation/scrape/schedule`
+
+Each route writes a `pending` row to `automation_runs`, stores the requested ISO timestamp at `input.schedule.runAt`, and queues an in-memory timer. On process restart, the service reloads pending rows and re-queues them. There is no separate cron table or shadow scheduler.
+
+```mermaid
+flowchart LR
+  UI["Automation pages"] --> Route["schedule route"]
+  Route --> Runs["automation_runs row<br/>status=pending"]
+  Runs --> Restore["service boot recovery"]
+  Restore --> Timer["in-memory timer"]
+  Timer --> Dispatch["type-based dispatcher"]
+  Dispatch --> JobApply["job apply executor"]
+  Dispatch --> Email["email executor"]
+  Dispatch --> Scrape["scrape executor"]
+  Dispatch --> Runs
 ```
 
 ## Job-apply contract
@@ -90,7 +117,7 @@ Runtime-neutral error codes now use:
 
 ## Email response and SMTP delivery
 
-The automation email flow now has two stages:
+The automation email flow now has two stages, whether it is started immediately or scheduled:
 
 1. Generate the reply draft with the configured AI provider.
 2. Optionally deliver the reply through the configured SMTP transport.
@@ -98,7 +125,9 @@ The automation email flow now has two stages:
 ```mermaid
 flowchart LR
   UI["automation/email page"] --> Route["POST /api/automation/email-response"]
+  UI --> ScheduleRoute["POST /api/automation/email-response/schedule"]
   Route --> Service["application-automation-service.ts"]
+  ScheduleRoute --> Service
   Service --> AI["AI draft generation"]
   Service --> SMTP["email-delivery-service.ts"]
   Service --> Runs["automation_runs table"]
@@ -143,6 +172,11 @@ Normalized row output is validated with shared schemas:
 
 - `scrapedJobSchema`
 - `scrapedStudioSchema`
+
+Scheduled scraping now also flows through `automation_runs`:
+
+- `target = "studios"` runs the studio scraper and persists the summary in the run output.
+- `target = "jobs_hitmarker"` runs the Hitmarker scraper and persists the summary in the run output.
 
 ## UI contract checks
 
