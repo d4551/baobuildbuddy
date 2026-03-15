@@ -158,6 +158,7 @@ run_linux_container_build() {
     -e LINUX_CARGO_TARGET_DIR="$LINUX_CARGO_TARGET_DIR" \
     -e LINUX_DOCKER_BUILD_ROOT="$LINUX_DOCKER_BUILD_ROOT" \
     -e APP_PRODUCT_NAME="$APP_PRODUCT_NAME" \
+    -e APP_BINARY_NAME="$APP_BINARY_NAME" \
     -e LINUX_ARCH="$LINUX_ARCH" \
     -e HOME="/root" \
     "$LINUX_DOCKER_IMAGE" bash -lc "$container_command"
@@ -468,7 +469,7 @@ if [ "$BUILD_LINUX" = true ]; then
     set -e
     mkdir -p "/repo/$LINUX_CARGO_TARGET_DIR/$LINUX_BUILD_TARGET"
     rm -rf "/repo/$LINUX_CARGO_TARGET_DIR/$LINUX_BUILD_TARGET/release"
-    cp -R "$CARGO_TARGET_DIR/$LINUX_BUILD_TARGET/release" "/repo/$LINUX_CARGO_TARGET_DIR/$LINUX_BUILD_TARGET/"
+    cp -RL "$CARGO_TARGET_DIR/$LINUX_BUILD_TARGET/release" "/repo/$LINUX_CARGO_TARGET_DIR/$LINUX_BUILD_TARGET/"
     exit "$linux_build_exit"
   '
   linux_build_exit=$?
@@ -498,9 +499,26 @@ if [ "$BUILD_LINUX" = true ]; then
         export APPIMAGE_EXTRACT_AND_RUN=1
         VERSION="$(awk -F "\"" "/^version = /{print \$2; exit}" packages/desktop/src-tauri/Cargo.toml)"
         LINUX_RELEASE_ROOT="/repo/$LINUX_CARGO_TARGET_DIR/${LINUX_BUILD_TARGET}/release"
+        APPDIR_ROOT="${LINUX_RELEASE_ROOT}/bundle/appimage/${APP_PRODUCT_NAME}.AppDir"
+        DESKTOP_ENTRY_ROOT="${APPDIR_ROOT}/${APP_PRODUCT_NAME}.desktop"
+        DESKTOP_ENTRY_SOURCE="${APPDIR_ROOT}/usr/share/applications/${APP_PRODUCT_NAME}.desktop"
+        ICON_ROOT="${APPDIR_ROOT}/${APP_PRODUCT_NAME}.png"
+        ICON_ALIAS_ROOT="${APPDIR_ROOT}/${APP_BINARY_NAME}.png"
+        DIRICON_ROOT="${APPDIR_ROOT}/.DirIcon"
+        if [ ! -e "$DESKTOP_ENTRY_ROOT" ] && [ -e "$DESKTOP_ENTRY_SOURCE" ]; then
+          rm -f "$DESKTOP_ENTRY_ROOT"
+          cp -L "$DESKTOP_ENTRY_SOURCE" "$DESKTOP_ENTRY_ROOT"
+        fi
+        if [ ! -e "$ICON_ALIAS_ROOT" ] && [ -e "$ICON_ROOT" ]; then
+          cp "$ICON_ROOT" "$ICON_ALIAS_ROOT"
+        fi
+        if [ ! -e "$DIRICON_ROOT" ] && [ -e "$ICON_ROOT" ]; then
+          rm -f "$DIRICON_ROOT"
+          cp "$ICON_ROOT" "$DIRICON_ROOT"
+        fi
         APPIMAGE_OUTPUT="${LINUX_RELEASE_ROOT}/bundle/appimage/${APP_PRODUCT_NAME}_${VERSION}_${LINUX_ARCH}.AppImage"
         /tmp/appimagetool-aarch64.AppImage \
-          "${LINUX_RELEASE_ROOT}/bundle/appimage/${APP_PRODUCT_NAME}.AppDir" \
+          "$APPDIR_ROOT" \
           "$APPIMAGE_OUTPUT"
     '
     ok "Linux AppImage fallback complete"
