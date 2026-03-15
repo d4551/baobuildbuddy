@@ -9,13 +9,28 @@ export interface FieldMapperAIClient {
     }) => Promise<AIResponse>;
 }
 /**
+ * Candidate context supplied to AI-assisted form analysis.
+ */
+export interface SmartFieldAnalysisContext {
+    readonly resume: Record<string, unknown>;
+    readonly coverLetter?: Record<string, unknown> | null;
+    readonly existingAnswers?: Record<string, string>;
+}
+/**
+ * AI-generated selector hints plus inferred answers for non-core form fields.
+ */
+export interface SmartFieldAnalysisResult {
+    readonly selectorMap: Record<string, string[]>;
+    readonly fieldAnswers: Record<string, string>;
+}
+/**
  * AI-powered selector mapper for job-application form fields.
  */
 export declare class SmartFieldMapper {
     /**
-     * Analyzes a job page and returns validated selector candidates for requested fields.
+     * Analyzes a job page and returns validated selector candidates plus inferred answers.
      */
-    analyze(jobUrl: string, fieldsNeeded: string[], aiService: FieldMapperAIClient): Promise<Record<string, string[]>>;
+    analyze(jobUrl: string, fieldsNeeded: string[], context: SmartFieldAnalysisContext, aiService: FieldMapperAIClient): Promise<SmartFieldAnalysisResult>;
     /**
      * Fetches page HTML and retries for transient failures.
      */
@@ -27,11 +42,11 @@ export declare class SmartFieldMapper {
     /**
      * Executes AI analysis with bounded retries and exponential backoff.
      */
-    private generateSelectorMapWithRetry;
+    private generateFieldAnalysisWithRetry;
     /**
-     * Parses and validates selector-map JSON emitted by the AI provider.
+     * Parses and validates selector/answer JSON emitted by the AI provider.
      */
-    private parseSelectorResponse;
+    private parseFieldAnalysisResponse;
     /**
      * Strips an HTML document to form-relevant elements only.
      */

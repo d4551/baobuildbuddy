@@ -31,7 +31,13 @@ import {
   settle,
   toErrorMessage,
 } from "@bao/shared";
-import type { AutomationSettings, ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
+import type {
+  AutomationSettings,
+  ErrorEnvelope,
+  ResumeData,
+  RpaRunEvent,
+  RpaRunResult,
+} from "@bao/shared";
 import { and, count, eq, inArray, ne, sql } from "drizzle-orm";
 import { config } from "../../config/env";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
@@ -42,7 +48,9 @@ import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { AIService } from "../ai/ai-service";
 import { emailResponsePrompt } from "../ai/prompts";
+import { exportService } from "../export-service";
 import { gamificationService } from "../gamification-service";
+import { resumeService } from "../resume-service";
 import {
   MAX_CUSTOM_ANSWER_KEY_LENGTH,
   MAX_CUSTOM_ANSWER_VALUE_LENGTH,
@@ -50,7 +58,11 @@ import {
   sanitizeCustomAnswers,
 } from "./automation-validation";
 import { type RpaScriptExecutionResult, runRpaScript } from "./rpa-runner";
-import { smartFieldMapper } from "./smart-field-mapper";
+import {
+  smartFieldMapper,
+  type SmartFieldAnalysisContext,
+  type SmartFieldAnalysisResult,
+} from "./smart-field-mapper";
 
 interface JobApplyPayload {
   jobUrl: string;
@@ -92,9 +104,10 @@ interface JobApplyRunPreparation {
   runId: string;
   automationSettings: AutomationSettings;
   normalized: JobApplyExecutionPayload;
-  resume: typeof resumes.$inferSelect;
+  resume: ResumeData;
   coverLetter: typeof coverLetters.$inferSelect | null;
   selectorMap: Record<string, string[]>;
+  resumeFilePath?: string;
   progressHandler: (event: RpaRunEvent) => void;
   runArtifactDir: string;
 }
@@ -108,9 +121,25 @@ interface JobApplyExecutionTracking {
   terminalPersisted: boolean;
 }
 
+interface AutofillAnalysisOptions {
+  automationSettings: AutomationSettings;
+  jobUrl: string;
+  resume: ResumeData;
+  coverLetter: typeof coverLetters.$inferSelect | null;
+  existingAnswers: Record<string, string>;
+}
+
 const DEFAULT_PROGRESS = 0;
 const MIN_CONCURRENT_RUNS = 1;
 const MIN_RESUME_ID_LENGTH = 1;
+const SMART_FIELD_CORE_KEYS = [
+  "fullName",
+  "email",
+  "phone",
+  "resume",
+  "coverLetter",
+  "submit",
+] as const;
 const SUPPORTED_SCREENSHOT_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"] as const;
 const RUN_SCREENSHOT_PREFIX = "step";
 const MIN_SCREENSHOT_RETENTION_DAYS = 1;
@@ -1213,14 +1242,14 @@ export class ApplicationAutomationService {
     runId: string,
     resumeId: string,
     automationSettings: AutomationSettings,
-  ): Promise<typeof resumes.$inferSelect> {
-    const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId)).limit(1);
-    if (resumeRows.length === 0) {
+  ): Promise<ResumeData> {
+    const resume = await resumeService.getResume(resumeId);
+    if (!resume) {
       const error = new AutomationDependencyMissingError("resume", resumeId);
       await this.markRunFailed(runId, error.message, automationSettings);
       throw error;
     }
-    return resumeRows[0];
+    return resume;
   }
 
   private async loadCoverLetterOrFail(
@@ -1245,22 +1274,189 @@ export class ApplicationAutomationService {
     return coverLetterRows[0];
   }
 
-  private async resolveSelectorMap(
-    automationSettings: AutomationSettings,
-    jobUrl: string,
-  ): Promise<Record<string, string[]>> {
-    if (!automationSettings.enableSmartSelectors) {
-      return {};
+  private collectResumeHeaderLines(resume: ResumeData): string[] {
+    const lines: string[] = [];
+    const personalInfo = resume.personalInfo;
+
+    if (resume.name) {
+      lines.push(resume.name);
+    }
+    if (personalInfo?.name && personalInfo.name !== resume.name) {
+      lines.push(personalInfo.name);
+    }
+
+    const contactLines = [
+      personalInfo?.email,
+      personalInfo?.phone,
+      personalInfo?.location,
+      personalInfo?.website,
+      personalInfo?.linkedIn,
+      personalInfo?.github,
+      personalInfo?.portfolio,
+    ].filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
+    if (contactLines.length > 0) {
+      lines.push(contactLines.join(" | "));
+    }
+
+    return lines;
+  }
+
+  private appendSection(lines: string[], title: string, entries: string[]): void {
+    if (entries.length === 0) {
+      return;
+    }
+
+    lines.push("", title, ...entries);
+  }
+
+  private collectResumeExperienceLines(resume: ResumeData): string[] {
+    const lines: string[] = [];
+
+    for (const experience of resume.experience ?? []) {
+      const headerParts = [experience.title, experience.company].filter(
+        (entry): entry is string => typeof entry === "string" && entry.trim().length > 0,
+      );
+      if (headerParts.length > 0) {
+        lines.push(headerParts.join(" - "));
+      }
+      if (experience.description?.trim()) {
+        lines.push(experience.description.trim());
+      }
+      for (const achievement of experience.achievements ?? []) {
+        if (achievement.trim().length > 0) {
+          lines.push(`- ${achievement.trim()}`);
+        }
+      }
+    }
+
+    return lines;
+  }
+
+  private collectResumeEducationLines(resume: ResumeData): string[] {
+    const lines: string[] = [];
+
+    for (const education of resume.education ?? []) {
+      const headerParts = [education.degree, education.field, education.school].filter(
+        (entry): entry is string => typeof entry === "string" && entry.trim().length > 0,
+      );
+      if (headerParts.length > 0) {
+        lines.push(headerParts.join(" - "));
+      }
+    }
+
+    return lines;
+  }
+
+  private collectResumeSkillSections(
+    resume: ResumeData,
+  ): Array<{ title: string; lines: string[] }> {
+    const skillSections = [
+      ["Technical Skills", resume.skills?.technical],
+      ["Soft Skills", resume.skills?.soft],
+      ["Gaming Skills", resume.skills?.gaming],
+    ] as const;
+
+    return skillSections.reduce<Array<{ title: string; lines: string[] }>>(
+      (sections, [title, values]) => {
+        if (Array.isArray(values) && values.length > 0) {
+          sections.push({ title, lines: [values.join(", ")] });
+        }
+        return sections;
+      },
+      [],
+    );
+  }
+
+  private serializeResumeUploadFallback(resume: ResumeData): string {
+    const lines = this.collectResumeHeaderLines(resume);
+    this.appendSection(lines, "Summary", resume.summary?.trim() ? [resume.summary.trim()] : []);
+    this.appendSection(lines, "Experience", this.collectResumeExperienceLines(resume));
+    this.appendSection(lines, "Education", this.collectResumeEducationLines(resume));
+    for (const section of this.collectResumeSkillSections(resume)) {
+      this.appendSection(lines, section.title, section.lines);
+    }
+    return lines.join("\n").trim();
+  }
+
+  private async createResumeUploadArtifact(
+    runArtifactDir: string,
+    resume: ResumeData,
+  ): Promise<string | undefined> {
+    const pdfResult = await settle(exportService.exportResumePDF(resume, resume.template));
+    if (pdfResult.status === "fulfilled") {
+      const pdfPath = join(runArtifactDir, "resume.pdf");
+      const writePdfResult = await settle(Bun.write(pdfPath, pdfResult.value));
+      if (writePdfResult.status === "fulfilled") {
+        return pdfPath;
+      }
+    }
+
+    const fallbackResumePath = join(runArtifactDir, "resume.txt");
+    const fallbackResume = this.serializeResumeUploadFallback(resume);
+    const writeFallbackResult = await settle(Bun.write(fallbackResumePath, fallbackResume));
+    if (writeFallbackResult.status === "fulfilled") {
+      return fallbackResumePath;
+    }
+
+    return;
+  }
+
+  private normalizeGeneratedFieldAnswers(
+    fieldAnswers: Record<string, string>,
+  ): Record<string, string> {
+    const reservedFieldKeys = new Set<string>(SMART_FIELD_CORE_KEYS);
+    const normalizedAnswers: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(fieldAnswers)) {
+      const normalizedKey = key.trim();
+      const normalizedValue = value.trim();
+      if (
+        normalizedKey.length === 0 ||
+        normalizedValue.length === 0 ||
+        reservedFieldKeys.has(normalizedKey)
+      ) {
+        continue;
+      }
+
+      normalizedAnswers[normalizedKey] = normalizedValue;
+    }
+
+    return normalizedAnswers;
+  }
+
+  private createEmptyAutofillAnalysis(): SmartFieldAnalysisResult {
+    return {
+      selectorMap: {},
+      fieldAnswers: {},
+    };
+  }
+
+  private buildSmartFieldAnalysisContext(
+    options: Pick<AutofillAnalysisOptions, "resume" | "coverLetter" | "existingAnswers">,
+  ): SmartFieldAnalysisContext {
+    return {
+      resume: toJsonRecord(options.resume),
+      coverLetter: options.coverLetter ? { content: options.coverLetter.content || {} } : null,
+      existingAnswers: options.existingAnswers,
+    };
+  }
+
+  private async resolveAutofillAnalysis(
+    options: AutofillAnalysisOptions,
+  ): Promise<SmartFieldAnalysisResult> {
+    if (!options.automationSettings.enableSmartSelectors) {
+      return this.createEmptyAutofillAnalysis();
     }
 
     const aiService = await this.tryLoadAIService();
     if (!aiService) {
-      return {};
+      return this.createEmptyAutofillAnalysis();
     }
 
     return smartFieldMapper.analyze(
-      jobUrl,
-      ["fullName", "email", "phone", "resume", "coverLetter", "submit"],
+      options.jobUrl,
+      [...SMART_FIELD_CORE_KEYS],
+      this.buildSmartFieldAnalysisContext(options),
       aiService,
     );
   }
@@ -1314,6 +1510,7 @@ export class ApplicationAutomationService {
       scriptInput: {
         jobUrl: preparation.normalized.jobUrl,
         resume: preparation.resume,
+        ...(preparation.resumeFilePath ? { resumeFilePath: preparation.resumeFilePath } : {}),
         coverLetter: preparation.coverLetter
           ? { content: preparation.coverLetter.content || {} }
           : null,
@@ -1435,17 +1632,35 @@ export class ApplicationAutomationService {
       normalized.coverLetterId,
       automationSettings,
     );
-    const selectorMap = await this.resolveSelectorMap(automationSettings, normalized.jobUrl);
-    const progressHandler = this.createProgressHandler(onProgress);
     const runArtifactDir = this.resolveRunArtifactDir(runId);
+    const resumeFilePath = await this.createResumeUploadArtifact(runArtifactDir, resume);
+    const autofillAnalysis = await this.resolveAutofillAnalysis({
+      automationSettings,
+      jobUrl: normalized.jobUrl,
+      resume,
+      coverLetter,
+      existingAnswers: normalized.customAnswers,
+    });
+    const selectorMap = autofillAnalysis.selectorMap;
+    const generatedFieldAnswers = this.normalizeGeneratedFieldAnswers(
+      autofillAnalysis.fieldAnswers,
+    );
+    const progressHandler = this.createProgressHandler(onProgress);
 
     return {
       runId,
       automationSettings,
-      normalized,
+      normalized: {
+        ...normalized,
+        customAnswers: {
+          ...generatedFieldAnswers,
+          ...normalized.customAnswers,
+        },
+      },
       resume,
       coverLetter,
       selectorMap,
+      resumeFilePath,
       progressHandler,
       runArtifactDir,
     };

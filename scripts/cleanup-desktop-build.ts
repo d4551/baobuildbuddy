@@ -19,11 +19,35 @@ type CapturedCommandResult = {
   output: CommandOutputChunk[];
 };
 
+const readCapturedStream = (
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  decoder: TextDecoder,
+  streamName: CommandOutputChunk["stream"],
+  output: CommandOutputChunk[],
+): Promise<void> =>
+  reader.read().then(({ done, value }) => {
+    if (done) {
+      const tail = decoder.decode();
+      if (tail.length > 0) {
+        output.push({ stream: streamName, text: tail });
+      }
+      return;
+    }
+
+    const chunkText = decoder.decode(value, { stream: true });
+    if (chunkText.length > 0) {
+      output.push({ stream: streamName, text: chunkText });
+    }
+
+    return readCapturedStream(reader, decoder, streamName, output);
+  });
+
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_TAURI_ROOT = join(REPO_ROOT, "packages", "desktop", "src-tauri");
 const DESKTOP_BUNDLE_GLOB = new Bun.Glob("target/**/bundle");
 const DESKTOP_TEMP_DMG_GLOB = new Bun.Glob("target/**/bundle/**/rw.*.dmg");
 const MOUNT_LINE_SPLIT_PATTERN = /\t+/;
+const STREAM_LINE_SPLIT_PATTERN = /(?<=\n)/u;
 const DESKTOP_MOUNTED_IMAGE_PATTERN = /\/bundle\/(?:dmg|macos)\/rw\..+\.dmg$/;
 const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
 const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
@@ -78,21 +102,8 @@ const captureCommand = async (
 
     const decoder = new TextDecoder();
     const reader = stream.getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        const tail = decoder.decode();
-        if (tail.length > 0) {
-          output.push({ stream: streamName, text: tail });
-        }
-        return;
-      }
-
-      const chunkText = decoder.decode(value, { stream: true });
-      if (chunkText.length > 0) {
-        output.push({ stream: streamName, text: chunkText });
-      }
-    }
+    await readCapturedStream(reader, decoder, streamName, output);
+    reader.releaseLock();
   };
 
   await Promise.all([
@@ -132,7 +143,7 @@ const emitCapturedOutput = (
     const textToFlush = pendingText.slice(0, flushBoundary);
     pendingTextByStream[streamName] = pendingText.slice(flushBoundary);
 
-    for (const line of textToFlush.split(/(?<=\n)/u)) {
+    for (const line of textToFlush.split(STREAM_LINE_SPLIT_PATTERN)) {
       if (line.length === 0 || shouldSuppress(line)) {
         continue;
       }

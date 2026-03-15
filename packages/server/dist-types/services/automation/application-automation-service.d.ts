@@ -192,7 +192,17 @@ export declare class ApplicationAutomationService {
     private assertConcurrencyLimit;
     private loadResumeOrFail;
     private loadCoverLetterOrFail;
-    private resolveSelectorMap;
+    private collectResumeHeaderLines;
+    private appendSection;
+    private collectResumeExperienceLines;
+    private collectResumeEducationLines;
+    private collectResumeSkillSections;
+    private serializeResumeUploadFallback;
+    private createResumeUploadArtifact;
+    private normalizeGeneratedFieldAnswers;
+    private createEmptyAutofillAnalysis;
+    private buildSmartFieldAnalysisContext;
+    private resolveAutofillAnalysis;
     private createProgressHandler;
     private markRunStarted;
     private createExecutionTracking;

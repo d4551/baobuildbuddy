@@ -68,6 +68,25 @@ type FillTextFieldStepOptions = {
 };
 
 type SelectorMapInput = JobApplyScriptEnvelope["selectorMap"];
+type LocatorControlDescriptor = {
+  tagName: string;
+  inputType: string;
+  value: string;
+  label: string;
+  text: string;
+  ariaLabel: string;
+  placeholder: string;
+};
+type UploadResumeArtifactOptions = {
+  page: Page;
+  selectors: readonly string[];
+  outputDir: string;
+  resume: Record<string, unknown>;
+  resumeFilePath?: string;
+};
+
+const BOOLEAN_TRUE_ANSWERS = new Set(["1", "checked", "on", "true", "yes"]);
+const BOOLEAN_FALSE_ANSWERS = new Set(["0", "false", "no", "off", "unchecked"]);
 
 const anchorSelectorByText = (text: string): string => `a:has-text('${text}')`;
 
@@ -152,6 +171,14 @@ const flattenJsonStrings = (value: unknown): string[] => {
   }
 
   return Object.values(value).flatMap((entry) => flattenJsonStrings(entry));
+};
+
+const normalizeAnswerText = (value: string): string =>
+  value.trim().toLowerCase().replace(/\s+/gu, " ");
+
+const serializeResumeArtifact = (resume: Record<string, unknown>): string => {
+  const lines = flattenJsonStrings(resume);
+  return lines.length > 0 ? lines.join("\n") : JSON.stringify(resume, null, 2);
 };
 
 const addStep = (
@@ -251,15 +278,226 @@ const clickFirstMatchingField = async (
   return clickResult ?? false;
 };
 
-const uploadResumeArtifact = async (
+const isTruthyAnswer = (answer: string): boolean =>
+  BOOLEAN_TRUE_ANSWERS.has(normalizeAnswerText(answer));
+
+const isFalsyAnswer = (answer: string): boolean =>
+  BOOLEAN_FALSE_ANSWERS.has(normalizeAnswerText(answer));
+
+const readLocatorDescriptors = async (locator: Locator): Promise<LocatorControlDescriptor[]> => {
+  const descriptorResult = await settle(
+    locator.evaluateAll((elements) =>
+      elements.map((element) => {
+        const input = element instanceof HTMLInputElement ? element : null;
+        const wrappingLabel = element instanceof HTMLElement ? element.closest("label") : null;
+        return {
+          tagName: element.tagName.toLowerCase(),
+          inputType: input?.type?.toLowerCase() ?? "",
+          value: input?.value?.trim() ?? "",
+          label: (wrappingLabel?.textContent ?? "").trim(),
+          text: (element.textContent ?? "").trim(),
+          ariaLabel: element.getAttribute("aria-label")?.trim() ?? "",
+          placeholder: element.getAttribute("placeholder")?.trim() ?? "",
+        };
+      }),
+    ),
+  );
+
+  return descriptorResult.status === "fulfilled" ? descriptorResult.value : [];
+};
+
+const findMatchingDescriptorIndex = (
+  descriptors: readonly LocatorControlDescriptor[],
+  answer: string,
+): number | null => {
+  const normalizedAnswer = normalizeAnswerText(answer);
+  if (normalizedAnswer.length === 0) {
+    return null;
+  }
+
+  const descriptorMatches = (descriptor: LocatorControlDescriptor): boolean => {
+    const candidates = [
+      descriptor.value,
+      descriptor.label,
+      descriptor.text,
+      descriptor.ariaLabel,
+      descriptor.placeholder,
+    ]
+      .map((candidate) => normalizeAnswerText(candidate))
+      .filter((candidate) => candidate.length > 0);
+
+    return candidates.some(
+      (candidate) =>
+        candidate === normalizedAnswer ||
+        candidate.includes(normalizedAnswer) ||
+        normalizedAnswer.includes(candidate),
+    );
+  };
+
+  const matchedIndex = descriptors.findIndex(descriptorMatches);
+  return matchedIndex >= 0 ? matchedIndex : null;
+};
+
+const selectOptionValue = async (locator: Locator, answer: string): Promise<boolean> => {
+  const normalizedAnswer = answer.trim();
+  if (normalizedAnswer.length === 0) {
+    return false;
+  }
+
+  const directSelection = await settle(locator.selectOption(normalizedAnswer, { timeout: 5_000 }));
+  if (directSelection.status === "fulfilled" && directSelection.value.length > 0) {
+    return true;
+  }
+
+  const optionResult = await settle(
+    locator.evaluate((element) => {
+      if (!(element instanceof HTMLSelectElement)) {
+        return [];
+      }
+
+      return Array.from(element.options).map((option) => ({
+        label: option.label.trim(),
+        value: option.value.trim(),
+        text: option.textContent?.trim() ?? "",
+      }));
+    }),
+  );
+  if (optionResult.status === "rejected") {
+    return false;
+  }
+
+  const normalizedTarget = normalizeAnswerText(answer);
+  const matchingOption = optionResult.value.find((option) => {
+    const candidates = [option.label, option.value, option.text]
+      .map((candidate) => normalizeAnswerText(candidate))
+      .filter((candidate) => candidate.length > 0);
+    return candidates.some(
+      (candidate) =>
+        candidate === normalizedTarget ||
+        candidate.includes(normalizedTarget) ||
+        normalizedTarget.includes(candidate),
+    );
+  });
+  if (!matchingOption) {
+    return false;
+  }
+
+  const matchedSelection = matchingOption.label
+    ? await settle(locator.selectOption({ label: matchingOption.label }, { timeout: 5_000 }))
+    : await settle(locator.selectOption(matchingOption.value, { timeout: 5_000 }));
+
+  return matchedSelection.status === "fulfilled" && matchedSelection.value.length > 0;
+};
+
+const setCheckboxValue = async (
+  locator: Locator,
+  descriptors: readonly LocatorControlDescriptor[],
+  answer: string,
+): Promise<boolean> => {
+  if (isTruthyAnswer(answer)) {
+    const checkResult = await settle(locator.first().check({ timeout: 5_000 }));
+    return checkResult.status === "fulfilled";
+  }
+
+  if (isFalsyAnswer(answer)) {
+    const uncheckResult = await settle(locator.first().uncheck({ timeout: 5_000 }));
+    return uncheckResult.status === "fulfilled";
+  }
+
+  const matchedIndex = findMatchingDescriptorIndex(descriptors, answer);
+  if (matchedIndex === null) {
+    return false;
+  }
+
+  const checkResult = await settle(locator.nth(matchedIndex).check({ timeout: 5_000 }));
+  return checkResult.status === "fulfilled";
+};
+
+const setRadioValue = async (
+  locator: Locator,
+  descriptors: readonly LocatorControlDescriptor[],
+  answer: string,
+): Promise<boolean> => {
+  const matchedIndex = findMatchingDescriptorIndex(descriptors, answer);
+  if (matchedIndex === null) {
+    if (!isTruthyAnswer(answer)) {
+      return false;
+    }
+    const fallbackCheckResult = await settle(locator.first().check({ timeout: 5_000 }));
+    return fallbackCheckResult.status === "fulfilled";
+  }
+
+  const checkResult = await settle(locator.nth(matchedIndex).check({ timeout: 5_000 }));
+  return checkResult.status === "fulfilled";
+};
+
+const applyAnswerToLocator = async (locator: Locator, answer: string): Promise<boolean> => {
+  const descriptors = await readLocatorDescriptors(locator);
+  const primaryDescriptor = descriptors[0];
+  if (!primaryDescriptor) {
+    return false;
+  }
+
+  if (primaryDescriptor.tagName === "select") {
+    return selectOptionValue(locator.first(), answer);
+  }
+
+  if (primaryDescriptor.inputType === "checkbox") {
+    return setCheckboxValue(locator, descriptors, answer);
+  }
+
+  if (primaryDescriptor.inputType === "radio") {
+    return setRadioValue(locator, descriptors, answer);
+  }
+
+  const fillResult = await settle(locator.first().fill(answer, { timeout: 5_000 }));
+  return fillResult.status === "fulfilled";
+};
+
+const fillFirstMatchingAnswer = async (
   page: Page,
   selectors: readonly string[],
+  answer: string,
+): Promise<boolean> => {
+  if (answer.trim().length === 0) {
+    return false;
+  }
+
+  const fillResult = await runOnFirstMatchingLocator(page, selectors, async (locator) => {
+    const matched = await applyAnswerToLocator(locator, answer);
+    return matched ? true : null;
+  });
+
+  return fillResult ?? false;
+};
+
+const resolveResumeArtifactPath = async (
   outputDir: string,
   resume: Record<string, unknown>,
-): Promise<boolean> => {
-  const artifactPath = join(outputDir, "resume.json");
-  const writeResult = await settle(Bun.write(artifactPath, JSON.stringify(resume, null, 2)));
-  if (writeResult.status === "rejected") {
+  resumeFilePath?: string,
+): Promise<string | null> => {
+  const providedPath = resumeFilePath?.trim();
+  if (providedPath) {
+    const providedFile = Bun.file(providedPath);
+    if (await providedFile.exists()) {
+      return providedPath;
+    }
+  }
+
+  const artifactPath = join(outputDir, "resume.txt");
+  const writeResult = await settle(Bun.write(artifactPath, serializeResumeArtifact(resume)));
+  return writeResult.status === "fulfilled" ? artifactPath : null;
+};
+
+const uploadResumeArtifact = async ({
+  page,
+  selectors,
+  outputDir,
+  resume,
+  resumeFilePath,
+}: UploadResumeArtifactOptions): Promise<boolean> => {
+  const artifactPath = await resolveResumeArtifactPath(outputDir, resume, resumeFilePath);
+  if (!artifactPath) {
     return false;
   }
 
@@ -556,12 +794,13 @@ const uploadResumeStep = async (
   adapter: JobApplyAdapter,
 ): Promise<void> => {
   emitProgress(state.emitter, "upload_resume", JOB_APPLY_STEP_INDEX.uploadResume);
-  const resumeUploaded = await uploadResumeArtifact(
-    state.session.page,
-    getAdapterSelectorList(adapter, state.payload.selectorMap, "resume"),
-    state.outputDir,
-    state.payload.resume,
-  );
+  const resumeUploaded = await uploadResumeArtifact({
+    page: state.session.page,
+    selectors: getAdapterSelectorList(adapter, state.payload.selectorMap, "resume"),
+    outputDir: state.outputDir,
+    resume: state.payload.resume,
+    resumeFilePath: state.payload.resumeFilePath,
+  });
   addStep(
     state.steps,
     "upload_resume",
@@ -581,9 +820,9 @@ const fillCustomFieldsRecursively = async (
   }
 
   const [key, value] = entry;
-  const customFieldFilled = await fillFirstMatchingField(
+  const customFieldFilled = await fillFirstMatchingAnswer(
     state.session.page,
-    getCustomFieldSelectorList(key),
+    [...getCustomSelectorList(state.payload.selectorMap, key), ...getCustomFieldSelectorList(key)],
     value,
   );
   addStep(

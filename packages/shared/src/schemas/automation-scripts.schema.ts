@@ -147,6 +147,7 @@ export const jobApplyCustomAnswersSchema = z
 export const jobApplyScriptInputSchema = z.object({
   jobUrl: z.string().trim().url().max(AUTOMATION_MAX_JOB_URL_LENGTH),
   resume: jsonObjectSchema,
+  resumeFilePath: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
   coverLetter: jobApplyCoverLetterSchema.nullable().optional(),
   customAnswers: jobApplyCustomAnswersSchema.default({}),
   selectorMap: jobApplySelectorMapSchema.default({}),

@@ -117,9 +117,9 @@ export declare function cvQuestionnaireSynthesizePrompt(questionsAndAnswers: Arr
 export declare const DOMAIN_SYSTEM_PROMPTS: Record<string, string>;
 /**
  * Form field analysis prompt for AI-powered smart selectors in RPA automation.
- * Analyzes a job application page's HTML to map field names to optimal CSS selectors.
+ * Analyzes a job application page's HTML to map field names to selectors and infer answers.
  */
-export declare function formFieldAnalysisPrompt(pageHtml: string, fieldsNeeded: string[]): string;
+export declare function formFieldAnalysisPrompt(pageHtml: string, fieldsNeeded: string[], candidateContext: string): string;
 /**
  * Gaming industry context constant for prompt injection
  */
