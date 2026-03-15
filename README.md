@@ -845,9 +845,9 @@ Install locally after building:
 
 - macOS: open the generated `.dmg` and drag the `.app` into `Applications`
 - Linux: `chmod +x` for `.AppImage` and run directly, or install `.deb`/`.rpm` with your package manager
-- Windows: run the generated `.exe` installer (or portable `.exe`) as a normal desktop install flow
+- Windows: run the generated `-setup.exe` installer as a normal desktop install flow
 
-Windows desktop artifacts are `x64` only. 32-bit Windows is not supported by the packaged runtime.
+Windows desktop artifacts are `x64` only. 32-bit Windows is not supported by the packaged runtime. The canonical release set ships the NSIS setup installer only, because the packaged app requires the bundled `gen/runtime` resources to be installed alongside the executable.
 
 If desktop build fails with `failed to run 'cargo metadata'`, install Rust using:
 

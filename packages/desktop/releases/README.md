@@ -96,7 +96,7 @@ This command performs:
 
 - release quality gates (`lint`, `typecheck`, `test`, `build`)
 - macOS DMG build (`aarch64-apple-darwin`)
-- Windows x64 portable and setup builds (`x86_64-pc-windows-msvc`)
+- Windows x64 setup build (`x86_64-pc-windows-msvc`)
 - Linux ARM64 AppImage/deb/rpm builds (`aarch64-unknown-linux-gnu`)
 - staging into `packages/desktop/releases/{macos,linux,windows}`
 - checksum regeneration in `packages/desktop/releases/sha256.txt`
@@ -104,7 +104,7 @@ This command performs:
 - containerized Windows NSIS fallback when local `makensis` is unavailable/fails
 - Linux AppImage fallback using `appimagetool` when `linuxdeploy` bundling fails
 
-Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact.
+Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact. We only ship the NSIS setup installer in the canonical release set because the app requires the bundled `gen/runtime` resource tree next to the executable.
 
 Advanced target selection examples:
 
@@ -142,7 +142,6 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 ### Windows
 
 - `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-setup.exe`
-- `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-portable.exe`
 
 ## Integrity
 

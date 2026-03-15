@@ -690,26 +690,27 @@ const prepareDesktopRuntime = async (tauriArgs: readonly string[]): Promise<void
   }
 };
 
-const main = async (): Promise<void> => {
-  await cleanupDesktopBuildArtifacts();
-
-  const requestedTauriArgs = process.argv.slice(2);
-  await prepareDesktopRuntime(requestedTauriArgs);
-
+const resolveNormalizedTauriArgs = async (
+  requestedTauriArgs: readonly string[],
+): Promise<readonly string[]> => {
   const tauriArgsResult = await captureResult(() =>
     withBeforeBuildDisabled(normalizeMacosBuildArgs(requestedTauriArgs)),
   );
   if (!tauriArgsResult.ok) {
-    await writeError(
+    throw new Error(
       toErrorMessage(
         tauriArgsResult.error,
         "Unable to normalize Tauri configuration overrides for desktop build.",
       ),
+      { cause: tauriArgsResult.error },
     );
-    process.exit(1);
   }
-  const tauriArgs = tauriArgsResult.value;
 
+  return tauriArgsResult.value;
+};
+
+const runTauriDesktopBuild = async (requestedTauriArgs: readonly string[]): Promise<void> => {
+  const tauriArgs = await resolveNormalizedTauriArgs(requestedTauriArgs);
   const tauriBuildCommand = [process.execPath, "run", "--bun", "tauri", "build", ...tauriArgs];
 
   if (shouldRecoverWindowsBundleFailure(requestedTauriArgs)) {
@@ -732,13 +733,16 @@ const main = async (): Promise<void> => {
         "Recovered Windows cross-build after host-side NSIS failure; continuing with containerized installer generation.",
       );
     }
-  } else {
-    const exitCode = await runCommand(tauriBuildCommand, process.cwd());
-    if (exitCode !== 0) {
-      process.exit(exitCode);
-    }
+    return;
   }
 
+  const exitCode = await runCommand(tauriBuildCommand, process.cwd());
+  if (exitCode !== 0) {
+    process.exit(exitCode);
+  }
+};
+
+const recoverMacosDmgIfNeeded = async (requestedTauriArgs: readonly string[]): Promise<void> => {
   if (shouldBuildHeadlessMacosDmg(requestedTauriArgs)) {
     await cleanupMacosTransientDiskImages();
     const recovered = await recoverMacosDmgBuild(requestedTauriArgs);
@@ -747,6 +751,15 @@ const main = async (): Promise<void> => {
       process.exit(1);
     }
   }
+};
+
+const main = async (): Promise<void> => {
+  await cleanupDesktopBuildArtifacts();
+
+  const requestedTauriArgs = process.argv.slice(2);
+  await prepareDesktopRuntime(requestedTauriArgs);
+  await runTauriDesktopBuild(requestedTauriArgs);
+  await recoverMacosDmgIfNeeded(requestedTauriArgs);
 };
 
 await main();

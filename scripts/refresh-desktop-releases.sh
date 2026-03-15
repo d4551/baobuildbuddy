@@ -207,17 +207,12 @@ latest_file_from_patterns() {
 
 copy_latest_artifact() {
   local destination_dir="$1"
-  local normalize_windows_portable="$2"
-  shift 2
+  shift
   local source_file
   local destination_name
 
   source_file="$(latest_file_from_patterns "$@")" || die "Could not locate artifact for destination: $destination_dir"
   destination_name="$(basename "$source_file")"
-
-  if [ "$normalize_windows_portable" = "true" ]; then
-    destination_name="${destination_name/_x64_portable.exe/_x64-portable.exe}"
-  fi
 
   cp "$source_file" "$destination_dir/$destination_name"
   ok "Staged $(basename "$destination_dir")/$destination_name"
@@ -345,7 +340,7 @@ if [ "$BUILD_WINDOWS" = true ]; then
 
   rm -rf "$WINDOWS_BUNDLE_DIR" "$WINDOWS_TARGET_ROOT/nsis"
 
-  step "Building Windows x64 portable artifact"
+  step "Generating Windows x64 bundle payload"
   windows_build_exit=0
   set +e
   # Unset CI to avoid cargo-xwin --ci rejecting CI=1 (expects true/false)
@@ -412,7 +407,6 @@ if [ "$BUILD_WINDOWS" = true ]; then
 
   mkdir -p "$WINDOWS_BUNDLE_DIR"
   WINDOWS_SETUP_TARGET="$WINDOWS_BUNDLE_DIR/${APP_PRODUCT_NAME}_${APP_VERSION}_${WINDOWS_ARCH_LABEL}-setup.exe"
-  WINDOWS_PORTABLE_TARGET="$WINDOWS_BUNDLE_DIR/${APP_PRODUCT_NAME}_${APP_VERSION}_${WINDOWS_ARCH_LABEL}-portable.exe"
   WINDOWS_SETUP_SOURCE=""
   if [ "$windows_setup_ok" = true ]; then
     WINDOWS_SETUP_SOURCE="$(latest_file_from_patterns \
@@ -424,8 +418,6 @@ if [ "$BUILD_WINDOWS" = true ]; then
     cp "$WINDOWS_SETUP_SOURCE" "$WINDOWS_SETUP_TARGET"
     ok "Windows setup artifact staged"
   fi
-  cp "$WINDOWS_EXE_PATH" "$WINDOWS_PORTABLE_TARGET"
-  ok "Windows portable artifact staged"
 fi
 
 LINUX_ARTIFACTS_READY=false
@@ -542,7 +534,7 @@ mkdir -p "$RELEASE_ROOT/macos" "$RELEASE_ROOT/linux" "$RELEASE_ROOT/windows"
 
 if [ "$BUILD_MACOS" = true ]; then
   rm -f "$RELEASE_ROOT/macos"/"${APP_PRODUCT_NAME}_"*.dmg
-  copy_latest_artifact "$RELEASE_ROOT/macos" false \
+  copy_latest_artifact "$RELEASE_ROOT/macos" \
     "$MACOS_HOST_BUNDLE_ROOT/dmg/${APP_PRODUCT_NAME}_*_${MACOS_ARCH}.dmg" \
     "$MACOS_TARGET_BUNDLE_ROOT/dmg/${APP_PRODUCT_NAME}_*_${MACOS_ARCH}.dmg"
 fi
@@ -551,24 +543,21 @@ if [ "$BUILD_LINUX" = true ]; then
   rm -f "$RELEASE_ROOT/linux"/"${APP_PRODUCT_NAME}_"*.AppImage \
     "$RELEASE_ROOT/linux"/"${APP_PRODUCT_NAME}_"*.deb \
     "$RELEASE_ROOT/linux"/"${APP_PRODUCT_NAME}-"*.rpm
-  copy_latest_artifact "$RELEASE_ROOT/linux" false \
+  copy_latest_artifact "$RELEASE_ROOT/linux" \
     "$LINUX_TARGET_ROOT/bundle/appimage/${APP_PRODUCT_NAME}_*_${LINUX_ARCH}.AppImage"
-  copy_latest_artifact "$RELEASE_ROOT/linux" false \
+  copy_latest_artifact "$RELEASE_ROOT/linux" \
     "$LINUX_TARGET_ROOT/bundle/deb/${APP_PRODUCT_NAME}_*_${LINUX_DEB_ARCH}.deb"
-  copy_latest_artifact "$RELEASE_ROOT/linux" false \
+  copy_latest_artifact "$RELEASE_ROOT/linux" \
     "$LINUX_TARGET_ROOT/bundle/rpm/${APP_PRODUCT_NAME}-*.${LINUX_ARCH}.rpm"
 fi
 
 if [ "$BUILD_WINDOWS" = true ]; then
   rm -f "$RELEASE_ROOT/windows"/"${APP_PRODUCT_NAME}_"*.exe
-  copy_latest_artifact "$RELEASE_ROOT/windows" true \
-    "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-portable.exe" \
-    "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}_portable.exe"
   if latest_file_from_patterns \
     "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
     "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
     >/dev/null; then
-    copy_latest_artifact "$RELEASE_ROOT/windows" false \
+    copy_latest_artifact "$RELEASE_ROOT/windows" \
       "$WINDOWS_TARGET_ROOT/bundle/nsis/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe" \
       "$WINDOWS_TARGET_ROOT/nsis/x64/${APP_PRODUCT_NAME}_*_${WINDOWS_ARCH_LABEL}-setup.exe"
   fi

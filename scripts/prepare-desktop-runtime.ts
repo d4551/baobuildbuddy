@@ -194,16 +194,25 @@ const isServiceReady = async (url: string): Promise<boolean> => {
   return fetchResult;
 };
 
-const waitForService = async (url: string): Promise<void> => {
-  const deadline = Date.now() + READY_TIMEOUT_MS;
-  while (Date.now() < deadline) {
-    if (await isServiceReady(url)) {
-      return;
-    }
-    await Bun.sleep(POLL_INTERVAL_MS);
+const waitForCondition = async (
+  condition: () => Promise<boolean>,
+  timeoutMessage: string,
+  deadline: number = Date.now() + READY_TIMEOUT_MS,
+): Promise<void> => {
+  if (await condition()) {
+    return;
   }
 
-  throw new Error(`Timed out waiting for ${url}`);
+  if (Date.now() >= deadline) {
+    throw new Error(timeoutMessage);
+  }
+
+  await Bun.sleep(POLL_INTERVAL_MS);
+  await waitForCondition(condition, timeoutMessage, deadline);
+};
+
+const waitForService = async (url: string): Promise<void> => {
+  await waitForCondition(() => isServiceReady(url), `Timed out waiting for ${url}`);
 };
 
 const ensureBuildServerPortIsFree = async (): Promise<void> => {
@@ -240,8 +249,8 @@ const startBuildServer = async (
     stderr: "pipe",
   });
 
-  void captureStreamLines(proc.stdout, stdoutLines);
-  void captureStreamLines(proc.stderr, stderrLines);
+  captureStreamLines(proc.stdout, stdoutLines).catch(() => undefined);
+  captureStreamLines(proc.stderr, stderrLines).catch(() => undefined);
 
   const waitResult = await captureResult(() =>
     waitForService(`${BUILD_SERVER_API_BASE}/api/health`),
@@ -274,64 +283,42 @@ const isTextFile = (filePath: string): boolean => {
   return extension.length === 0 || TEXT_FILE_EXTENSIONS.has(extension);
 };
 
+const visitTextFiles = async (
+  path: string,
+  visitor: (filePath: string) => Promise<void>,
+): Promise<void> => {
+  const currentStat = await stat(path);
+  if (currentStat.isDirectory()) {
+    const entries = await readdir(path, { withFileTypes: true });
+    await Promise.all(entries.map((entry) => visitTextFiles(join(path, entry.name), visitor)));
+    return;
+  }
+
+  if (isTextFile(path)) {
+    await visitor(path);
+  }
+};
+
 const rewriteGeneratedRuntimeBase = async (directoryPath: string): Promise<void> => {
-  const pendingPaths = [directoryPath];
-  while (pendingPaths.length > 0) {
-    const currentPath = pendingPaths.pop();
-    if (!currentPath) {
-      continue;
-    }
-
-    const currentStat = await stat(currentPath);
-    if (currentStat.isDirectory()) {
-      const entries = await readdir(currentPath, { withFileTypes: true });
-      for (const entry of entries) {
-        pendingPaths.push(join(currentPath, entry.name));
-      }
-      continue;
-    }
-
-    if (!isTextFile(currentPath)) {
-      continue;
-    }
-
-    const sourceText = await readFile(currentPath, "utf8");
+  await visitTextFiles(directoryPath, async (filePath) => {
+    const sourceText = await readFile(filePath, "utf8");
     const nextText = sourceText
       .replaceAll(BUILD_SERVER_API_BASE, DESKTOP_RUNTIME_API_BASE)
       .replaceAll(BUILD_SERVER_WS_BASE, DESKTOP_RUNTIME_WS_BASE);
 
     if (nextText !== sourceText) {
-      await writeFile(currentPath, nextText, "utf8");
+      await writeFile(filePath, nextText, "utf8");
     }
-  }
+  });
 };
 
 const assertNoBuildRuntimeLeak = async (directoryPath: string): Promise<void> => {
-  const pendingPaths = [directoryPath];
-  while (pendingPaths.length > 0) {
-    const currentPath = pendingPaths.pop();
-    if (!currentPath) {
-      continue;
-    }
-
-    const currentStat = await stat(currentPath);
-    if (currentStat.isDirectory()) {
-      const entries = await readdir(currentPath, { withFileTypes: true });
-      for (const entry of entries) {
-        pendingPaths.push(join(currentPath, entry.name));
-      }
-      continue;
-    }
-
-    if (!isTextFile(currentPath)) {
-      continue;
-    }
-
-    const fileText = await readFile(currentPath, "utf8");
+  await visitTextFiles(directoryPath, async (filePath) => {
+    const fileText = await readFile(filePath, "utf8");
     if (fileText.includes(BUILD_SERVER_API_BASE) || fileText.includes(BUILD_SERVER_WS_BASE)) {
-      throw new Error(`Build-only desktop API endpoint leaked into ${currentPath}`);
+      throw new Error(`Build-only desktop API endpoint leaked into ${filePath}`);
     }
-  }
+  });
 };
 
 const buildDesktopClient = async (tempDbPath: string): Promise<void> => {

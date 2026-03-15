@@ -31,7 +31,7 @@ type BrowserCheckResult = {
 };
 
 type StaticServerHandle = {
-  stop(closeActiveConnections?: boolean): void;
+  stop(closeActiveConnections?: boolean): Promise<void>;
 };
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
@@ -73,6 +73,8 @@ const BUILD_WS_LEAK_MARKERS = [
   `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`,
   `ws:\\/\\/${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`,
 ];
+const LEADING_PATHNAME_SLASH_PATTERN = /^\/+/u;
+const TRAILING_PATHNAME_SLASH_PATTERN = /\/+$/u;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -157,20 +159,31 @@ const isServiceReady = async (url: string): Promise<boolean> =>
     () => false,
   );
 
-const waitForService = async (url: string): Promise<void> => {
-  const deadline = Date.now() + READY_TIMEOUT_MS;
-  while (Date.now() < deadline) {
-    if (await isServiceReady(url)) {
-      return;
-    }
-    await Bun.sleep(POLL_INTERVAL_MS);
+const waitForCondition = async (
+  condition: () => Promise<boolean>,
+  timeoutMessage: string,
+  deadline: number = Date.now() + READY_TIMEOUT_MS,
+): Promise<void> => {
+  if (await condition()) {
+    return;
   }
 
-  throw new Error(`Timed out waiting for ${url}`);
+  if (Date.now() >= deadline) {
+    throw new Error(timeoutMessage);
+  }
+
+  await Bun.sleep(POLL_INTERVAL_MS);
+  await waitForCondition(condition, timeoutMessage, deadline);
+};
+
+const waitForService = async (url: string): Promise<void> => {
+  await waitForCondition(() => isServiceReady(url), `Timed out waiting for ${url}`);
 };
 
 const normalizePathname = (pathname: string): string =>
-  pathname.replace(/^\/+/u, "").replace(/\/+$/u, "");
+  pathname
+    .replace(LEADING_PATHNAME_SLASH_PATTERN, "")
+    .replace(TRAILING_PATHNAME_SLASH_PATTERN, "");
 
 const fileExists = async (filePath: string): Promise<boolean> =>
   stat(filePath).then(
@@ -183,37 +196,41 @@ const isTextFile = (filePath: string): boolean => {
   return extension.length === 0 || TEXT_FILE_EXTENSIONS.has(extension);
 };
 
-const findFirstMarkerMatch = async (
-  directoryPath: string,
-  markers: readonly string[],
-): Promise<string | null> => {
-  const pendingPaths = [directoryPath];
-  while (pendingPaths.length > 0) {
-    const currentPath = pendingPaths.pop();
-    if (!currentPath) {
-      continue;
-    }
-
-    const currentStat = await stat(currentPath);
-    if (currentStat.isDirectory()) {
-      const entries = await readdir(currentPath, { withFileTypes: true });
-      for (const entry of entries) {
-        pendingPaths.push(join(currentPath, entry.name));
-      }
-      continue;
-    }
-
-    if (!isTextFile(currentPath)) {
-      continue;
-    }
-
-    const fileText = await readFile(currentPath, "utf8");
-    if (markers.some((marker) => fileText.includes(marker))) {
-      return currentPath;
-    }
+const visitTextFiles = async (
+  path: string,
+  visitor: (filePath: string) => Promise<void>,
+): Promise<void> => {
+  const currentStat = await stat(path);
+  if (currentStat.isDirectory()) {
+    const entries = await readdir(path, { withFileTypes: true });
+    await Promise.all(entries.map((entry) => visitTextFiles(join(path, entry.name), visitor)));
+    return;
   }
 
-  return null;
+  if (isTextFile(path)) {
+    await visitor(path);
+  }
+};
+
+const findFirstMarkerMatch = async (
+  path: string,
+  markers: readonly string[],
+): Promise<string | null> => {
+  const currentStat = await stat(path);
+  if (currentStat.isDirectory()) {
+    const entries = await readdir(path, { withFileTypes: true });
+    const matches = await Promise.all(
+      entries.map((entry) => findFirstMarkerMatch(join(path, entry.name), markers)),
+    );
+    return matches.find((match): match is string => typeof match === "string") ?? null;
+  }
+
+  if (!isTextFile(path)) {
+    return null;
+  }
+
+  const fileText = await readFile(path, "utf8");
+  return markers.some((marker) => fileText.includes(marker)) ? path : null;
 };
 
 const findLeakedBuildEndpoint = (directoryPath: string): Promise<string | null> =>
@@ -223,36 +240,17 @@ const rewriteTextTree = async (
   directoryPath: string,
   replacements: readonly [string, string][],
 ): Promise<void> => {
-  const pendingPaths = [directoryPath];
-  while (pendingPaths.length > 0) {
-    const currentPath = pendingPaths.pop();
-    if (!currentPath) {
-      continue;
-    }
-
-    const currentStat = await stat(currentPath);
-    if (currentStat.isDirectory()) {
-      const entries = await readdir(currentPath, { withFileTypes: true });
-      for (const entry of entries) {
-        pendingPaths.push(join(currentPath, entry.name));
-      }
-      continue;
-    }
-
-    if (!isTextFile(currentPath)) {
-      continue;
-    }
-
-    const sourceText = await readFile(currentPath, "utf8");
+  await visitTextFiles(directoryPath, async (filePath) => {
+    const sourceText = await readFile(filePath, "utf8");
     let nextText = sourceText;
     for (const [fromValue, toValue] of replacements) {
       nextText = nextText.replaceAll(fromValue, toValue);
     }
 
     if (nextText !== sourceText) {
-      await writeFile(currentPath, nextText, "utf8");
+      await writeFile(filePath, nextText, "utf8");
     }
-  }
+  });
 };
 
 const createVerificationFrontendRoot = async (): Promise<string> => {
@@ -274,14 +272,21 @@ const resolveStaticAssetPath = async (frontendRoot: string, pathname: string): P
       ? ["index.html"]
       : [normalizedPath, join(normalizedPath, "index.html")];
 
-  for (const relativePath of candidateRelativePaths) {
-    const absolutePath = resolve(frontendRoot, relativePath);
-    if (!absolutePath.startsWith(frontendRoot)) {
-      continue;
-    }
-    if (await fileExists(absolutePath)) {
-      return absolutePath;
-    }
+  const candidateMatches = await Promise.all(
+    candidateRelativePaths.map(async (relativePath) => {
+      const absolutePath = resolve(frontendRoot, relativePath);
+      if (!absolutePath.startsWith(frontendRoot)) {
+        return null;
+      }
+
+      return (await fileExists(absolutePath)) ? absolutePath : null;
+    }),
+  );
+  const existingCandidate = candidateMatches.find(
+    (match): match is string => typeof match === "string",
+  );
+  if (existingCandidate) {
+    return existingCandidate;
   }
 
   const notFoundPath = join(frontendRoot, "404.html");
@@ -304,8 +309,8 @@ const startStaticFrontendServer = (frontendRoot: string): StaticServerHandle => 
   });
 
   return {
-    stop(closeActiveConnections = false): void {
-      void server.stop(closeActiveConnections);
+    async stop(closeActiveConnections = false): Promise<void> {
+      await server.stop(closeActiveConnections);
     },
   };
 };
@@ -439,6 +444,86 @@ const stopProcess = async (proc: ReturnType<typeof Bun.spawn>): Promise<void> =>
   await proc.exited.catch(() => undefined);
 };
 
+const assertGeneratedFrontendIsReady = async (): Promise<void> => {
+  const manifest = await readManifest();
+  const indexFile = Bun.file(join(CLIENT_PUBLIC_ROOT, "index.html"));
+  if (!(await indexFile.exists())) {
+    throw new Error("Generated desktop frontend is missing packages/client/.output/public/index.html");
+  }
+
+  const leakedBuildFile = await findLeakedBuildEndpoint(CLIENT_PUBLIC_ROOT);
+  if (leakedBuildFile) {
+    throw new Error(`Temporary build endpoint leaked into generated frontend: ${leakedBuildFile}`);
+  }
+
+  if (!manifest.corsOrigins.includes(DESKTOP_RUNTIME_CORS_ORIGINS[0])) {
+    throw new Error("Desktop runtime manifest is missing the primary packaged CORS origin.");
+  }
+};
+
+const prepareVerificationFrontendRoot = async (): Promise<string> => {
+  await assertGeneratedFrontendIsReady();
+  const verificationFrontendRoot = await createVerificationFrontendRoot();
+  const leakedProductionRuntimeFile = await findFirstMarkerMatch(verificationFrontendRoot, [
+    DESKTOP_RUNTIME_API_BASE,
+    DESKTOP_RUNTIME_WS_BASE,
+    DESKTOP_RUNTIME_API_BASE.replaceAll("/", "\\/"),
+    DESKTOP_RUNTIME_WS_BASE.replaceAll("/", "\\/"),
+  ]);
+  if (leakedProductionRuntimeFile) {
+    throw new Error(
+      `Verification frontend still references the packaged runtime default endpoints: ${leakedProductionRuntimeFile}`,
+    );
+  }
+
+  return verificationFrontendRoot;
+};
+
+const assertBrowserChecksPassed = (browserResult: BrowserCheckResult): void => {
+  if (browserResult.pageTitle.trim().length === 0) {
+    throw new Error("Generated desktop frontend did not expose a document title.");
+  }
+  if (browserResult.healthStatus !== "healthy" && browserResult.healthStatus !== "degraded") {
+    throw new Error(`Unexpected desktop API health status from browser: ${browserResult.healthStatus}`);
+  }
+  if (!browserResult.websocketOpened) {
+    throw new Error("Desktop automation WebSocket did not open from the generated frontend.");
+  }
+};
+
+const verifyPackagedRuntime = async (
+  manifest: DesktopRuntimeManifest,
+  verificationFrontendRoot: string,
+): Promise<void> => {
+  let serverProcess: ReturnType<typeof Bun.spawn> | null = null;
+  let staticServer: StaticServerHandle | null = null;
+
+  await withCleanup(
+    async () => {
+      await writeOutput("desktop-runtime: launching packaged server executable");
+      serverProcess = await startPackagedServer(manifest);
+      staticServer = startStaticFrontendServer(verificationFrontendRoot);
+
+      await verifyCorsContract(VERIFY_API_BASE, manifest, DESKTOP_RUNTIME_CORS_ORIGINS[0]);
+      await verifyCorsContract(VERIFY_API_BASE, manifest, VERIFY_FRONTEND_ORIGIN);
+      const browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
+      assertBrowserChecksPassed(browserResult);
+
+      await writeOutput(
+        `desktop-runtime: verified frontend "${browserResult.pageTitle}" against ${VERIFY_API_BASE}`,
+      );
+      await writeOutput("desktop-runtime: verification passed");
+    },
+    async () => {
+      await staticServer?.stop(true);
+      if (serverProcess) {
+        await stopProcess(serverProcess);
+      }
+      await rm(verificationFrontendRoot, { recursive: true, force: true });
+    },
+  );
+};
+
 const main = async (): Promise<void> => {
   const tauriTarget = parseTargetArg(process.argv.slice(2));
   await writeOutput("desktop-runtime: preparing runtime before verification");
@@ -452,64 +537,8 @@ const main = async (): Promise<void> => {
   );
 
   const manifest = await readManifest();
-  const indexFile = Bun.file(join(CLIENT_PUBLIC_ROOT, "index.html"));
-  if (!(await indexFile.exists())) {
-    throw new Error("Generated desktop frontend is missing packages/client/.output/public/index.html");
-  }
-
-  const leakedBuildFile = await findLeakedBuildEndpoint(CLIENT_PUBLIC_ROOT);
-  if (leakedBuildFile) {
-    throw new Error(`Temporary build endpoint leaked into generated frontend: ${leakedBuildFile}`);
-  }
-
-  const verificationFrontendRoot = await createVerificationFrontendRoot();
-  const leakedProductionRuntimeFile = await findFirstMarkerMatch(verificationFrontendRoot, [
-    DESKTOP_RUNTIME_API_BASE,
-    DESKTOP_RUNTIME_WS_BASE,
-    DESKTOP_RUNTIME_API_BASE.replaceAll("/", "\\/"),
-    DESKTOP_RUNTIME_WS_BASE.replaceAll("/", "\\/"),
-  ]);
-  if (leakedProductionRuntimeFile) {
-    throw new Error(
-      `Verification frontend still references the packaged runtime default endpoints: ${leakedProductionRuntimeFile}`,
-    );
-  }
-  let serverProcess: ReturnType<typeof Bun.spawn> | null = null;
-  let staticServer: StaticServerHandle | null = null;
-
-  await withCleanup(
-    async () => {
-      await writeOutput("desktop-runtime: launching packaged server executable");
-      serverProcess = await startPackagedServer(manifest);
-      staticServer = startStaticFrontendServer(verificationFrontendRoot);
-
-      await verifyCorsContract(VERIFY_API_BASE, manifest, DESKTOP_RUNTIME_CORS_ORIGINS[0]);
-      await verifyCorsContract(VERIFY_API_BASE, manifest, VERIFY_FRONTEND_ORIGIN);
-      const browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
-
-      if (browserResult.pageTitle.trim().length === 0) {
-        throw new Error("Generated desktop frontend did not expose a document title.");
-      }
-      if (browserResult.healthStatus !== "healthy" && browserResult.healthStatus !== "degraded") {
-        throw new Error(`Unexpected desktop API health status from browser: ${browserResult.healthStatus}`);
-      }
-      if (!browserResult.websocketOpened) {
-        throw new Error("Desktop automation WebSocket did not open from the generated frontend.");
-      }
-
-      await writeOutput(
-        `desktop-runtime: verified frontend "${browserResult.pageTitle}" against ${VERIFY_API_BASE}`,
-      );
-      await writeOutput("desktop-runtime: verification passed");
-    },
-    async () => {
-      staticServer?.stop(true);
-      if (serverProcess) {
-        await stopProcess(serverProcess);
-      }
-      await rm(verificationFrontendRoot, { recursive: true, force: true });
-    },
-  );
+  const verificationFrontendRoot = await prepareVerificationFrontendRoot();
+  await verifyPackagedRuntime(manifest, verificationFrontendRoot);
 };
 
 await main().catch(async (error: unknown) => {

@@ -56,7 +56,7 @@ type DesktopBundleMetadata = {
   readonly cargoVersion: string;
 };
 
-type ReleaseArtifactKind = "appimage" | "deb" | "dmg" | "portable" | "rpm" | "setup";
+type ReleaseArtifactKind = "appimage" | "deb" | "dmg" | "rpm" | "setup";
 
 type ReleaseArtifact = {
   readonly kind: ReleaseArtifactKind;
@@ -87,6 +87,16 @@ const DESKTOP_PACKAGE_JSON_PATH = join(DESKTOP_ROOT, "package.json");
 const DESKTOP_TAURI_CONFIG_PATH = join(DESKTOP_TAURI_ROOT, "tauri.conf.json");
 const DESKTOP_CARGO_TOML_PATH = join(DESKTOP_TAURI_ROOT, "Cargo.toml");
 const DESKTOP_RELEASE_CHECKSUM_PATH = join(DESKTOP_RELEASE_ROOT, "sha256.txt");
+const DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
+  DESKTOP_TAURI_ROOT,
+  "target",
+  "x86_64-pc-windows-msvc",
+  "release",
+  "nsis",
+  "x64",
+  "installer.nsi",
+);
+const WINDOWS_NSIS_SCRAPER_INSTALL_MARKER = ["$INSTDIR", "gen", "runtime", "scraper"].join("\\");
 
 const PNG_SIGNATURE = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const ICO_SIGNATURE = Uint8Array.from([0, 0, 1, 0]);
@@ -266,15 +276,8 @@ const buildWindowsArtifacts = (metadata: DesktopBundleMetadata): readonly Releas
     "windows",
     `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-setup.exe`,
   );
-  const portablePath = join(
-    "windows",
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable.exe`,
-  );
 
-  return [
-    createReleaseArtifact("windows", setupPath, "setup"),
-    createReleaseArtifact("windows", portablePath, "portable"),
-  ] as const;
+  return [createReleaseArtifact("windows", setupPath, "setup")] as const;
 };
 
 const buildArtifactsForTarget = (
@@ -676,6 +679,33 @@ const readChecksumEntries = async (): Promise<Map<string, string>> => {
   return entries;
 };
 
+const verifyChecksumManifest = async (
+  artifacts: readonly ReleaseArtifact[],
+  targets: readonly DesktopReleaseTarget[],
+): Promise<VerificationResult> => {
+  const checksumEntries = await readChecksumEntries();
+  const selectedTargetPrefixes = new Set(targets.map((target) => `${target}/`));
+  const expectedPaths = new Set(artifacts.map((artifact) => artifact.relativePath));
+  const actualPaths = Array.from(checksumEntries.keys())
+    .filter((relativePath) =>
+      Array.from(selectedTargetPrefixes).some((prefix) => relativePath.startsWith(prefix)),
+    )
+    .sort();
+  const missingEntries = Array.from(expectedPaths)
+    .filter((relativePath) => !checksumEntries.has(relativePath))
+    .sort();
+  const unexpectedEntries = actualPaths.filter((relativePath) => !expectedPaths.has(relativePath));
+
+  return {
+    details:
+      missingEntries.length === 0 && unexpectedEntries.length === 0
+        ? actualPaths.join(", ")
+        : `missing=[${missingEntries.join(", ")}] unexpected=[${unexpectedEntries.join(", ")}]`,
+    label: "checksum:manifest",
+    ok: missingEntries.length === 0 && unexpectedEntries.length === 0,
+  };
+};
+
 const verifyChecksumEntries = async (
   artifacts: readonly ReleaseArtifact[],
 ): Promise<readonly VerificationResult[]> => {
@@ -704,6 +734,43 @@ const verifySemver = (metadata: DesktopBundleMetadata): VerificationResult => ({
   label: "config:version-format",
   ok: SEMVER_PATTERN.test(metadata.version),
 });
+
+const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]> => {
+  if (!(await pathExists(DESKTOP_WINDOWS_NSIS_SCRIPT_PATH))) {
+    return [
+      {
+        details: `missing ${DESKTOP_WINDOWS_NSIS_SCRIPT_PATH}`,
+        label: "windows:nsis-script",
+        ok: false,
+      },
+    ] as const;
+  }
+
+  const installerScript = await Bun.file(DESKTOP_WINDOWS_NSIS_SCRIPT_PATH).text();
+  const requiredMarkers = [
+    '"/oname=gen\\runtime\\manifest.json"',
+    '"/oname=gen\\runtime\\bin\\bao-bun-runner.exe"',
+    '"/oname=gen\\runtime\\server\\bao-desktop-server.exe"',
+    WINDOWS_NSIS_SCRAPER_INSTALL_MARKER,
+  ] as const;
+  const missingMarkers = requiredMarkers.filter((marker) => !installerScript.includes(marker));
+
+  return [
+    {
+      details: DESKTOP_WINDOWS_NSIS_SCRIPT_PATH,
+      label: "windows:nsis-script",
+      ok: true,
+    },
+    {
+      details:
+        missingMarkers.length === 0
+          ? "installer bundles manifest, runner, server, and scraper runtime"
+          : `missing ${missingMarkers.join(", ")}`,
+      label: "windows:nsis-runtime-payload",
+      ok: missingMarkers.length === 0,
+    },
+  ] as const;
+};
 
 const writeResults = async (results: readonly VerificationResult[]): Promise<void> => {
   await writeOutput(
@@ -736,12 +803,14 @@ const main = async (): Promise<void> => {
     ...verifyBundleConfig(metadata, targets),
     ...(await verifyIconAssets()),
     ...(await Promise.all(targets.map((target) => verifyStagedDirectory(metadata, target)))),
+    ...(targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
     ...(await Promise.all(
       artifacts.flatMap((artifact) => [
         verifyArtifactPresence(artifact),
         verifyArtifactType(artifact),
       ]),
     )),
+    await verifyChecksumManifest(artifacts, targets),
     ...(await verifyChecksumEntries(artifacts)),
   ];
 
