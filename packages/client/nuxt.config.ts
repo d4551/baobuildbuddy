@@ -253,8 +253,7 @@ export default defineNuxtConfig({
                 },
               }
             : {}),
-          },
-        }
+      }
       : {}),
   },
 

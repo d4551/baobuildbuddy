@@ -72,7 +72,7 @@ onUnmounted(() => {
       :aria-label="t('a11y.toggleSidebarNavigation')"
     />
     <div class="drawer-content flex min-h-screen flex-col">
-      <a :href="`#${APP_MAIN_CONTENT_ID}`" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn btn-primary btn-sm">{{ t("a11y.skipToContent") }}</a>
+      <a :href="`#${APP_MAIN_CONTENT_ID}`" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn btn-primary btn-sm" :aria-label="t('a11y.skipToContent')">{{ t("a11y.skipToContent") }}</a>
       <AppNavbar />
       <main
         :id="APP_MAIN_CONTENT_ID"
