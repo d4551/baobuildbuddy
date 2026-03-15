@@ -5,7 +5,7 @@ import type {
   UserGamificationData,
   UserProfile,
 } from "@bao/shared";
-import { APP_BRAND, formatRelativeTime, getXPProgress } from "@bao/shared";
+import { APP_BRAND, APP_ROUTES, formatRelativeTime, getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_A11Y_KEYS,
@@ -473,39 +473,66 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
       </button>
     </div>
 
-    <div v-else-if="uiState === 'empty'" class="card card-border bg-base-100">
-      <div class="card-body items-start gap-4">
-        <h2 class="card-title">{{ t(DASHBOARD_COPY_KEYS.emptyStateTitle) }}</h2>
-        <p class="text-sm text-base-content/70">{{ t(DASHBOARD_COPY_KEYS.emptyStateDescription) }}</p>
-        <h3 class="text-sm font-semibold">{{ t(DASHBOARD_COPY_KEYS.onboardingChecklistTitle) }}</h3>
-        <ul class="steps steps-vertical w-full lg:steps-horizontal">
-          <li v-for="step in DASHBOARD_ONBOARDING_STEPS" :key="step.id" class="step step-primary">
-            <NuxtLink :to="step.to" class="link link-hover">
-              {{ t(step.labelKey) }}
-            </NuxtLink>
-          </li>
-        </ul>
-        <div class="card-actions">
-          <NuxtLink :to="primaryFlowRoute" class="btn btn-primary">
-            {{ primaryFlowLabel }}
-          </NuxtLink>
+    <section
+      v-else-if="uiState === 'empty'"
+      class="hero overflow-hidden rounded-box border border-base-300 bg-gradient-to-br from-base-100 via-base-100 to-primary/10 shadow-sm"
+    >
+      <div class="hero-content w-full max-w-none px-0">
+        <div class="card w-full bg-base-100/90 backdrop-blur">
+          <div class="card-body gap-5 p-6 lg:p-8">
+            <div class="space-y-2">
+              <div class="badge badge-primary badge-outline w-fit">{{ t(DASHBOARD_COPY_KEYS.pageTitle) }}</div>
+              <h2 class="card-title text-2xl">{{ t(DASHBOARD_COPY_KEYS.emptyStateTitle) }}</h2>
+              <p class="text-sm text-base-content/70">
+                {{ t(DASHBOARD_COPY_KEYS.emptyStateDescription) }}
+              </p>
+            </div>
+
+            <div class="space-y-3">
+              <h3 class="text-sm font-semibold">{{ t(DASHBOARD_COPY_KEYS.onboardingChecklistTitle) }}</h3>
+              <ul class="steps steps-vertical w-full lg:steps-horizontal">
+                <li v-for="step in DASHBOARD_ONBOARDING_STEPS" :key="step.id" class="step step-primary">
+                  <NuxtLink :to="step.to" class="link link-hover">
+                    {{ t(step.labelKey) }}
+                  </NuxtLink>
+                </li>
+              </ul>
+            </div>
+
+            <div class="card-actions flex-wrap">
+              <NuxtLink :to="primaryFlowRoute" class="btn btn-primary">
+                {{ primaryFlowLabel }}
+              </NuxtLink>
+              <NuxtLink :to="APP_ROUTES.jobs" class="btn btn-soft btn-primary">
+                {{ t("dashboard.quickActions.actions.browseJobs") }}
+              </NuxtLink>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <div v-else class="space-y-6">
-      <section class="card bg-gradient-to-br from-primary to-secondary text-primary-content">
-        <div class="card-body gap-3">
-          <h2 class="card-title text-2xl">{{ welcomeHeading }}</h2>
-          <p class="text-base opacity-90">{{ t(DASHBOARD_COPY_KEYS.welcomeDescription) }}</p>
-          <div class="badge badge-outline badge-lg text-primary-content border-primary-content/40 text-rotate w-fit bg-transparent">
-            <Transition name="hero-text-rotate" mode="out-in">
-              <span :key="activeHeroPhrase">{{ activeHeroPhrase }}</span>
-            </Transition>
+      <section class="card card-border overflow-hidden bg-base-100 shadow-sm">
+        <div class="card-body relative gap-4 bg-gradient-to-br from-primary/12 via-base-100 to-secondary/12">
+          <div class="absolute right-0 top-0 h-32 w-32 rounded-full bg-primary/10 blur-3xl" aria-hidden="true"></div>
+          <div class="absolute bottom-0 left-0 h-28 w-28 rounded-full bg-secondary/10 blur-3xl" aria-hidden="true"></div>
+          <div class="relative space-y-3">
+            <div class="badge badge-primary badge-soft w-fit">{{ t(DASHBOARD_COPY_KEYS.pipelineTitle) }}</div>
+            <h2 class="card-title text-2xl md:text-3xl">{{ welcomeHeading }}</h2>
+            <p class="text-base text-base-content/70">{{ t(DASHBOARD_COPY_KEYS.welcomeDescription) }}</p>
+            <div class="badge badge-outline badge-lg text-rotate w-fit bg-base-100/70">
+              <Transition name="hero-text-rotate" mode="out-in">
+                <span :key="activeHeroPhrase">{{ activeHeroPhrase }}</span>
+              </Transition>
+            </div>
           </div>
-          <div v-if="!dashboard?.profile?.name" class="card-actions mt-2">
-            <NuxtLink :to="primaryFlowRoute" class="btn btn-primary-content">
+          <div v-if="!dashboard?.profile?.name" class="card-actions relative mt-1 flex-wrap">
+            <NuxtLink :to="primaryFlowRoute" class="btn btn-primary">
               {{ primaryFlowLabel }}
+            </NuxtLink>
+            <NuxtLink :to="APP_ROUTES.setup" class="btn btn-ghost">
+              {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
             </NuxtLink>
           </div>
         </div>
@@ -657,7 +684,7 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
               v-for="action in dashboardQuickActions"
               :key="action.id"
               :to="action.to"
-              class="btn btn-outline justify-start sm:justify-center"
+              class="btn btn-soft btn-primary justify-start border-primary/20 bg-primary/5 text-primary hover:border-primary sm:justify-center"
               :aria-label="t(action.labelKey)"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

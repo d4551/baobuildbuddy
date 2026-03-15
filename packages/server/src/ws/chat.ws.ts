@@ -207,7 +207,7 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
   open(ws) {
     sendSocketPayload(ws, {
       type: "connected",
-      message: `Connected to ${APP_BRAND.assistantName} AI chat`,
+      message: `Connected to ${APP_BRAND.assistantName} chat`,
     });
   },
   async message(ws, data) {
@@ -221,13 +221,13 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
 function generateFallbackResponse(input: string): string {
   const lower = input.toLowerCase();
   if (lower.includes("resume")) {
-    return "I can help with your resume! Head to the Resume Builder to create or enhance your resume. Once you configure an AI provider, I can offer personalized suggestions.";
+    return "I can help tighten your resume. Head to the Resume workspace to build or refine it, and once an AI provider is configured I can give targeted feedback.";
   }
   if (lower.includes("job") || lower.includes("work") || lower.includes("career")) {
-    return "Check out the Job Board to browse gaming industry opportunities! I can help match you with the right roles once an AI provider is configured.";
+    return "Open Jobs to review live game-industry roles. Once an AI provider is configured, I can help prioritize fit, positioning, and next steps.";
   }
   if (lower.includes("interview")) {
-    return "The Interview Prep section lets you practice with AI-powered mock interviews tailored to specific studios. Configure an AI provider to get started!";
+    return "Interview Prep lets you rehearse studio-specific interviews and review feedback. Configure an AI provider to unlock guided practice.";
   }
   if (
     lower.includes("automate") ||
@@ -236,10 +236,10 @@ function generateFallbackResponse(input: string): string {
     lower.includes("auto-apply") ||
     lower.includes("auto apply")
   ) {
-    return "I can help automate job applications! Head to the Automation page to set up an RPA run, or configure an AI provider so I can guide you through the process right here in chat.";
+    return "Automation can handle repetitive application work. Open the Automation workspace to configure a run, or connect an AI provider so I can guide the setup here in chat.";
   }
   if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
-    return `Hello! I'm ${APP_BRAND.assistantName}, your AI career assistant for the game industry. I can help with resumes, job searching, interview prep, and skill mapping. What would you like to work on?`;
+    return `Hello. I’m ${APP_BRAND.assistantName}, your hiring copilot for game-industry roles. I can help with resumes, opportunity research, interview prep, and workflow execution. What are we moving forward today?`;
   }
-  return `I'm ${APP_BRAND.assistantName}, your game industry career assistant! Configure an AI provider in Settings to unlock my full capabilities. I can help with resumes, job matching, interview prep, and more.`;
+  return `I’m ${APP_BRAND.assistantName}. Configure an AI provider in Settings to unlock guided help across resumes, role targeting, interview prep, and automation workflows.`;
 }

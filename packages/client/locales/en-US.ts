@@ -3,11 +3,12 @@
  */
 const enUS = {
   meta: {
-    title: "BaoBuildBuddy - AI Career Assistant",
-    description: "AI-powered career assistant for the video game industry",
+    title: "Career OS for Game Industry Hiring",
+    description:
+      "Plan applications, tailor resumes, prep interviews, and run job-search automation from one workspace built for game industry hiring.",
   },
   app: {
-    tagline: "AI Career Assistant for Game Dev",
+    tagline: "Career OS for Game Industry Hiring",
   },
   common: {
     relativeTime: {
@@ -247,22 +248,22 @@ const enUS = {
   dashboard: {
     pageTitle: "Dashboard",
     seoDescription:
-      "Track opportunities, resume progress, interview practice, and activity signals in one operational dashboard.",
-    welcomeDescription: "Your AI-powered career operating system for the video game industry.",
+      "Track live opportunities, application assets, interview prep, and automation health in one operating dashboard.",
+    welcomeDescription: "Run your job search like a disciplined studio pipeline.",
     welcomeHeading: {
       named: "Welcome, {name}!",
       fallback: "Welcome!",
     },
-    emptyStateTitle: "Kick off your career workspace",
+    emptyStateTitle: "Stand up your hiring workspace",
     emptyStateDescription:
-      "Complete setup, add your first resume, and start tracking opportunities to populate this dashboard.",
-    onboardingChecklistTitle: "Finish these onboarding steps",
+      "Connect your profile, add your core assets, and start tracking live opportunities to unlock the full dashboard.",
+    onboardingChecklistTitle: "Complete the operating baseline",
     setupCtaLabel: "Complete Setup",
-    metricsSummaryLabel: "{brand} snapshot",
-    pipelineTitle: "Career Pipeline",
+    metricsSummaryLabel: "{brand} operating snapshot",
+    pipelineTitle: "Hiring Pipeline",
     pipelineDescription:
-      "Keep momentum across discovery, scraping, resume customization, application automation, and XP progression.",
-    pipelineAria: "Career workflow pipeline",
+      "Keep momentum across sourcing, tailoring, automation, interview prep, and compounding progress.",
+    pipelineAria: "Hiring workflow pipeline",
     pipelineNextStepLabel: "Next step: {step}",
     dailyChallengeTitle: "Daily Challenge",
     dailyChallengeXpLabel: "+{xp} XP",
@@ -276,10 +277,10 @@ const enUS = {
     loadErrorFallback: "Failed to load dashboard data",
     activityFallback: "Activity",
     heroPhrases: {
-      findDreamRole: "Find your dream role",
-      buildPortfolio: "Build your portfolio",
-      prepareInterviews: "Prepare for interviews",
-      levelUpSkills: "Level up your career skills",
+      findDreamRole: "Source better-fit roles",
+      buildPortfolio: "Sharpen your proof of work",
+      prepareInterviews: "Rehearse the hard conversations",
+      levelUpSkills: "Close the gaps that matter",
     },
     onboarding: {
       profile: "Profile",
@@ -2113,17 +2114,17 @@ const enUS = {
     },
   },
   setup: {
-    title: "Welcome to {brand}",
+    title: "Set up {brand}",
     seoTitle: "{brand} Setup",
     seoDescription:
-      "Complete profile details, configure AI providers, and launch your career workspace.",
+      "Configure profile context, local AI, and provider fallbacks so your hiring workspace is production-ready.",
     stepsAriaLabel: "Setup progress",
     steps: {
       profile: "Profile",
       localAi: "Local AI",
       done: "Done",
     },
-    profileTitle: "Tell us about yourself",
+    profileTitle: "Set your operator profile",
     nameLegend: "Your Name",
     namePlaceholder: "Enter your name",
     nameAria: "Your name",
@@ -2137,7 +2138,7 @@ const enUS = {
     backToProfileAria: "Back to profile step",
     aiConfigTitle: "Configure AI (Local-first)",
     localFirstInfo:
-      "{brand} prefers local providers first. Use RamaLama or Ollama for private, offline usage, and add cloud keys only if you want a backup.",
+      "{brand} runs local-first. Use RamaLama or Ollama for private, offline workflows, then add cloud providers only when you want fallback capacity.",
     localEndpointLegend: "Local endpoint",
     localEndpointAria: "Local model API endpoint",
     localEndpointExamples: "Examples: RamaLama /v1, Ollama /v1",
@@ -2152,11 +2153,12 @@ const enUS = {
     testProviderAria: "Test {provider} API credential",
     testButton: "Test",
     doneTitle: "You're all set",
-    doneDescription: "{assistant} is ready to help you with your game industry career.",
+    doneDescription:
+      "{assistant} is ready to help you plan, tailor, and execute your next move in game industry hiring.",
     successStatusAria: "Setup completion status",
     backToAiConfigAria: "Back to AI configuration step",
-    launchAria: "Finish setup and launch application",
-    launchButton: "Launch {brand}",
+    launchAria: "Finish setup and open workspace",
+    launchButton: "Open Workspace",
     providerReachable: "{provider} is reachable",
     providerTestFailed: "{provider} test failed",
     providerTestErrorFallback: "Failed to test provider",
@@ -2786,8 +2788,8 @@ const enUS = {
     title: "Chat with {brand}",
     seoTitle: "{brand} AI Chat",
     seoDescription:
-      "Chat with your AI career copilot for resume strategy, interview prep, and automation planning.",
-    subtitle: "Your AI career assistant for the game industry",
+      "Work with your hiring copilot on resume strategy, interview prep, opportunity research, and automation planning.",
+    subtitle: "Your hiring copilot for game industry roles",
     clearAria: "Clear chat conversation",
     clearButton: "Clear",
     logAria: "AI chat conversation",
@@ -2798,7 +2800,7 @@ const enUS = {
     sendButton: "Send",
     emptyTitle: "Your assistant is ready",
     emptyDescription:
-      "Use the suggestions beside the conversation or ask for coaching, writing help, research, or automation guidance.",
+      "Use the suggested prompts or ask for coaching, writing help, opportunity research, or automation guidance.",
     composerHint: "Press Enter to send. Use Shift+Enter for a new line.",
     composerIdleStatus: "Ready when you are",
     composerBusyStatus: "Generating a response...",
@@ -2836,7 +2838,7 @@ const enUS = {
   aiChatCommon: {
     youLabel: "You",
     defaultGreeting:
-      "Hi! I'm {brand}, your AI career assistant for the game industry. How can I help today?",
+      "Hi, I’m Bao, your hiring copilot for game industry roles. What are we moving forward today?",
     unableToProcessFallback: "I'm sorry, I couldn't process that request.",
     requestErrorFallback: "I hit an error processing that request. Please try again.",
     requestErrorToast: "Chat request failed. Please try again.",
