@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_BRAND } from "@bao/shared";
+const { resolvedBrand } = useBrand();
 
 defineProps<{
   text: string;
@@ -16,7 +16,7 @@ defineProps<{
         </svg>
       </div>
     </div>
-    <div class="chat-header mb-1">{{ APP_BRAND.assistantName }}</div>
+    <div class="chat-header mb-1">{{ resolvedBrand.assistantName }}</div>
     <div class="chat-bubble chat-bubble-primary">
       <span v-if="!text && streaming" class="loading loading-dots loading-sm"></span>
       <template v-else>

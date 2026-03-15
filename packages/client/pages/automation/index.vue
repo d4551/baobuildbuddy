@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DashboardStats } from "@bao/shared";
+import type { DashboardStats, RpaCapabilityAuditEntry, RpaCapabilityAuditReport } from "@bao/shared";
 import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
@@ -10,6 +10,7 @@ import { createFlowEngineInput, type FlowActionId } from "~/constants/flow-engin
 import { getErrorMessage } from "~/utils/errors";
 
 const AUTOMATION_HUB_ASYNC_DATA_KEY = "automation-hub-stats";
+const AUTOMATION_HUB_CAPABILITIES_ASYNC_DATA_KEY = "automation-hub-capabilities";
 
 type AutomationHubUiState = "idle" | "loading" | "error" | "success";
 
@@ -26,6 +27,7 @@ interface AutomationHubCard {
 
 const api = useApi();
 const { t } = useI18n();
+const { getRpaCapabilities } = useAutomation();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -49,6 +51,20 @@ const { data, status, error, refresh } = await useAsyncData<DashboardStats>(
   },
 );
 
+const {
+  data: capabilityAuditData,
+  status: capabilityAuditStatus,
+  error: capabilityAuditError,
+  refresh: refreshCapabilityAudit,
+} = await useAsyncData<RpaCapabilityAuditReport>(
+  AUTOMATION_HUB_CAPABILITIES_ASYNC_DATA_KEY,
+  () => getRpaCapabilities(),
+  {
+    lazy: false,
+    server: true,
+  },
+);
+
 const stats = computed(() => data.value ?? null);
 const uiState = computed<AutomationHubUiState>(() => {
   if (status.value === "pending") return "loading";
@@ -60,6 +76,11 @@ const uiState = computed<AutomationHubUiState>(() => {
 const totalRuns = computed(() => stats.value?.automation.totalRuns ?? 0);
 const todayRuns = computed(() => stats.value?.automation.todayRuns ?? 0);
 const successRate = computed(() => stats.value?.automation.successRate ?? 0);
+const capabilityAudit = computed(() => capabilityAuditData.value ?? null);
+const capabilitySummary = computed(() => capabilityAudit.value?.summary ?? null);
+const capabilityEntries = computed<readonly RpaCapabilityAuditEntry[]>(
+  () => capabilityAudit.value?.capabilities ?? [],
+);
 
 const pipelineSteps = computed<readonly DashboardPipelineStepViewModel[]>(() => {
   const resolvedStats = stats.value;
@@ -187,7 +208,27 @@ const primaryCardId = computed<AutomationHubCardId | null>(() => {
 });
 
 async function retryLoad(): Promise<void> {
-  await refresh();
+  await Promise.all([refresh(), refreshCapabilityAudit()]);
+}
+
+function capabilityStatusClass(value: boolean, issueCount = 0): string {
+  if (value) {
+    return "badge badge-success badge-soft";
+  }
+  if (issueCount > 0) {
+    return "badge badge-warning badge-soft";
+  }
+  return "badge badge-error badge-soft";
+}
+
+function capabilityStatusLabel(value: boolean, issueCount = 0): string {
+  if (value) {
+    return t("automation.hub.audit.available");
+  }
+  if (issueCount > 0) {
+    return t("automation.hub.audit.needsConfig");
+  }
+  return t("automation.hub.audit.unavailable");
 }
 </script>
 
@@ -253,6 +294,113 @@ async function retryLoad(): Promise<void> {
         :steps="pipelineSteps"
         :next-step-label="nextPipelineStepLabel"
       />
+
+      <section class="card card-border bg-base-100" :aria-label="t('automation.hub.audit.aria')">
+        <div class="card-body gap-4">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 class="card-title">{{ t("automation.hub.audit.title") }}</h2>
+              <p class="text-sm text-base-content/70">
+                {{ t("automation.hub.audit.description") }}
+              </p>
+            </div>
+            <NuxtLink
+              :to="APP_ROUTES.automationScraper"
+              class="btn btn-outline btn-sm"
+              :aria-label="t('automation.hub.audit.openScraperAria')"
+            >
+              {{ t("automation.hub.audit.openScraperButton") }}
+            </NuxtLink>
+          </div>
+
+          <LoadingSkeleton v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'" variant="stats" :lines="3" />
+
+          <div
+            v-else-if="capabilityAuditStatus === 'error'"
+            role="alert"
+            class="alert alert-warning alert-soft"
+          >
+            <span>{{ getErrorMessage(capabilityAuditError, t("automation.hub.audit.loadErrorFallback")) }}</span>
+          </div>
+
+          <template v-else-if="capabilitySummary">
+            <div class="stats stats-vertical lg:stats-horizontal border border-base-300 bg-base-100 shadow-sm">
+              <div class="stat">
+                <div class="stat-title">{{ t("automation.hub.audit.summary.total") }}</div>
+                <div class="stat-value text-primary">{{ capabilitySummary.total }}</div>
+                <div class="stat-desc">{{ t("automation.hub.audit.summary.totalDesc") }}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-title">{{ t("automation.hub.audit.summary.configured") }}</div>
+                <div class="stat-value text-success">{{ capabilitySummary.configured }}</div>
+                <div class="stat-desc">{{ t("automation.hub.audit.summary.configuredDesc") }}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-title">{{ t("automation.hub.audit.summary.live") }}</div>
+                <div class="stat-value text-secondary">{{ capabilitySummary.liveUpdatesAvailable }}</div>
+                <div class="stat-desc">{{ t("automation.hub.audit.summary.liveDesc") }}</div>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="table table-zebra" :aria-label="t('automation.hub.audit.tableAria')">
+                <thead>
+                  <tr>
+                    <th>{{ t("automation.hub.audit.columns.name") }}</th>
+                    <th>{{ t("automation.hub.audit.columns.category") }}</th>
+                    <th>{{ t("automation.hub.audit.columns.configured") }}</th>
+                    <th>{{ t("automation.hub.audit.columns.manual") }}</th>
+                    <th>{{ t("automation.hub.audit.columns.scheduled") }}</th>
+                    <th>{{ t("automation.hub.audit.columns.history") }}</th>
+                    <th>{{ t("automation.hub.audit.columns.live") }}</th>
+                    <th>{{ t("automation.hub.audit.columns.notes") }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="capability in capabilityEntries" :key="capability.id">
+                    <td class="font-medium">{{ capability.name }}</td>
+                    <td>
+                      <span class="badge badge-outline">
+                        {{ t(`automation.hub.audit.category.${capability.category}`) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        :class="capabilityStatusClass(capability.configured, capability.issues.length)"
+                      >
+                        {{ capabilityStatusLabel(capability.configured, capability.issues.length) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span :class="capabilityStatusClass(capability.manualRunAvailable)">
+                        {{ capabilityStatusLabel(capability.manualRunAvailable) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span :class="capabilityStatusClass(capability.scheduledRunAvailable)">
+                        {{ capabilityStatusLabel(capability.scheduledRunAvailable) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span :class="capabilityStatusClass(capability.runHistoryAvailable)">
+                        {{ capabilityStatusLabel(capability.runHistoryAvailable) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span :class="capabilityStatusClass(capability.liveUpdatesAvailable)">
+                        {{ capabilityStatusLabel(capability.liveUpdatesAvailable) }}
+                      </span>
+                    </td>
+                    <td class="max-w-xs text-sm text-base-content/70">
+                      {{ capability.issues[0] || t("automation.hub.audit.noIssues") }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
+        </div>
+      </section>
 
       <SectionGrid grid-token="twoToFour">
         <div

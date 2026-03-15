@@ -2,7 +2,6 @@ import {
   AI_DEFAULT_TEMPERATURE,
   API_ERROR_START_INTERVIEW,
   API_ERROR_STUDIO_ID_REQUIRED,
-  API_MESSAGE_WS_INTERVIEW_CONNECTED,
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
   INTERVIEW_DEFAULT_FOCUS_AREAS,
   INTERVIEW_DEFAULT_QUESTION_COUNT,
@@ -20,6 +19,7 @@ import {
   toApiScopedPath,
   WS_ENDPOINTS,
   DECIMAL_RADIX,
+  resolveBrandSettings,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -106,11 +106,13 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
     studioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
     config: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
-  open(ws) {
+  async open(ws) {
+    const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+    const runtimeBrand = resolveBrandSettings(settingsRows[0]?.brandSettings);
     ws.send(
       JSON.stringify({
         type: "connected",
-        message: API_MESSAGE_WS_INTERVIEW_CONNECTED,
+        message: `Connected to ${runtimeBrand.assistantName} interview coaching`,
       }),
     );
   },

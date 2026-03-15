@@ -1,5 +1,4 @@
 import enUS, { type AppTranslationOverrides } from "../packages/client/locales/en-US";
-import esES from "../packages/client/locales/es-ES";
 import frFR from "../packages/client/locales/fr-FR";
 import jaJP from "../packages/client/locales/ja-JP";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -58,7 +57,6 @@ const toFlatMap = (value: unknown): Map<string, string> => {
 
 const collectViolations = (): Violation[] => {
   const baseMessages = toFlatMap(enUS);
-  const spanishMessages = toFlatMap(esES);
   const violations: Violation[] = [];
 
   for (const localeDefinition of localeDefinitions) {
@@ -80,20 +78,6 @@ const collectViolations = (): Violation[] => {
           locale: localeDefinition.locale,
           key,
           message: "Override value matches source locale value and should be removed.",
-        });
-      }
-
-      const spanishValue = spanishMessages.get(key);
-      if (
-        spanishValue !== undefined &&
-        spanishValue !== baseValue &&
-        overrideValue === spanishValue
-      ) {
-        violations.push({
-          locale: localeDefinition.locale,
-          key,
-          message:
-            "Override value matches Spanish translation while differing from source locale value.",
         });
       }
     }

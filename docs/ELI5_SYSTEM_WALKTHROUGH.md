@@ -4,6 +4,8 @@ This is the smallest mental model of the system.
 
 If the main [README](../README.md) feels like the full game manual, this file is the picture book version.
 
+If what you really want is "show me how to make local AI work," jump to [LOCAL_AI_SETUP.md](./LOCAL_AI_SETUP.md).
+
 ## The tiny version
 
 BaoBuildBuddy is a helper for game-job hunting.
@@ -210,5 +212,6 @@ This split keeps one package from trying to do everything.
 ## Read next
 
 - Full runbook: [README.md](../README.md)
+- Local AI setup: [LOCAL_AI_SETUP.md](./LOCAL_AI_SETUP.md)
 - First-time setup: [STARTER_GUIDE.md](./STARTER_GUIDE.md)
 - Automation details: [AUTOMATION.md](./AUTOMATION.md)

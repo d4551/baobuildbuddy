@@ -168,9 +168,9 @@ export declare const studioRoutes: Elysia<"/studios", {
         ":id": {
             put: {
                 body: {
+                    name?: string | undefined;
                     type?: string | undefined;
                     description?: string | undefined;
-                    name?: string | undefined;
                     location?: string | undefined;
                     website?: string | undefined;
                     size?: string | undefined;

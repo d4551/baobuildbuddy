@@ -1,4 +1,4 @@
-import { type AutomationScriptId, type ScrapedJob } from "@bao/shared";
+import { type AutomationScriptId, type AutomationJobScrapeTarget, type GamingPortalId, type ScrapedJob } from "@bao/shared";
 export type { ScrapedJob };
 type ScriptReferenceOverride = {
     scriptPath: string;
@@ -8,8 +8,20 @@ type ScriptReferenceOverride = {
  */
 export declare class ScraperService {
     private resolvePortalSourceUrl;
+    /**
+     * Resolve the configured automation script id for a portal-backed scraper.
+     */
+    private resolvePortalScriptId;
     private upsertStudioRow;
     private insertScrapedJobIfMissing;
+    /**
+     * Scrape normalized rows for a configured gaming portal.
+     */
+    private scrapePortalJobsRaw;
+    /**
+     * Scrape and upsert jobs for a configured gaming portal.
+     */
+    private scrapePortalJobs;
     /**
      * Runs a Bun automation scraper script and returns parsed JSON payload.
      */
@@ -58,6 +70,22 @@ export declare class ScraperService {
      * Scrapes and upserts Hitmarker jobs with row-level error reporting.
      */
     scrapeHitmarkerJobs(scriptReference?: AutomationScriptId | ScriptReferenceOverride): Promise<{
+        scraped: number;
+        upserted: number;
+        errors: string[];
+    }>;
+    /**
+     * Scrapes and upserts jobs for a supported job-board scrape target.
+     */
+    scrapeJobsForTarget(target: AutomationJobScrapeTarget): Promise<{
+        scraped: number;
+        upserted: number;
+        errors: string[];
+    }>;
+    /**
+     * Scrapes and upserts jobs for a supported gaming portal id.
+     */
+    scrapeJobsForPortal(portalId: GamingPortalId): Promise<{
         scraped: number;
         upserted: number;
         errors: string[];

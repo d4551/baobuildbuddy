@@ -7,7 +7,7 @@ type ScraperOperationResult = Awaited<ReturnType<typeof scraperService.scrapeStu
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 let originalScrapeStudios: typeof scraperService.scrapeStudios;
-let originalScrapeHitmarkerJobs: typeof scraperService.scrapeHitmarkerJobs;
+let originalScrapeJobsForPortal: typeof scraperService.scrapeJobsForPortal;
 
 const successfulScraperResult: ScraperOperationResult = {
   scraped: 2,
@@ -15,11 +15,13 @@ const successfulScraperResult: ScraperOperationResult = {
   errors: [],
 };
 
-const successfulScrapeHitmarkerJobs = (): Promise<ScraperOperationResult> => Promise.resolve(successfulScraperResult);
+const successfulScrapeJobsForPortal = (): Promise<ScraperOperationResult> =>
+  Promise.resolve(successfulScraperResult);
 
 const failedScrapeStudios = (): Promise<ScraperOperationResult> => Promise.reject(new Error("studio scrape script failed"));
 
-const failedScrapeJobs = (): Promise<ScraperOperationResult> => Promise.reject(new Error("hitmarker scrape script failed"));
+const failedScrapeJobs = (): Promise<ScraperOperationResult> =>
+  Promise.reject(new Error("portal scrape script failed"));
 
 beforeAll(async () => {
   const initModule = await import("../db/init");
@@ -33,12 +35,12 @@ beforeAll(async () => {
 
   app = new Elysia({ prefix: "/api" }).use(routesModule.scraperRoutes);
   originalScrapeStudios = scraperService.scrapeStudios.bind(scraperService);
-  originalScrapeHitmarkerJobs = scraperService.scrapeHitmarkerJobs.bind(scraperService);
+  originalScrapeJobsForPortal = scraperService.scrapeJobsForPortal.bind(scraperService);
 });
 
 const restoreScraperService = (): void => {
   scraperService.scrapeStudios = originalScrapeStudios;
-  scraperService.scrapeHitmarkerJobs = originalScrapeHitmarkerJobs;
+  scraperService.scrapeJobsForPortal = originalScrapeJobsForPortal;
 };
 
 beforeEach(() => {
@@ -49,7 +51,7 @@ afterAll(() => {
   restoreScraperService();
 });
 
-describe("scraper routes", () => {
+function registerStudioScraperRouteTests(): void {
   test("POST /api/scraper/studios returns scrape result contract on success", async () => {
     scraperService.scrapeStudios = () => Promise.resolve(successfulScraperResult);
 
@@ -75,9 +77,11 @@ describe("scraper routes", () => {
     expect(result.body.error).toBe(API_ERROR_SCRAPE_STUDIOS_FAILED);
     expect(result.body.details).toContain("studio scrape script failed");
   });
+}
 
+function registerJobScraperRouteTests(): void {
   test("POST /api/scraper/jobs/hitmarker returns scrape result contract on success", async () => {
-    scraperService.scrapeHitmarkerJobs = successfulScrapeHitmarkerJobs;
+    scraperService.scrapeJobsForPortal = successfulScrapeJobsForPortal;
 
     const result = await requestJson<ScraperOperationResult>(app, "POST", "/api/scraper/jobs/hitmarker");
 
@@ -87,17 +91,34 @@ describe("scraper routes", () => {
     expect(result.body.errors).toEqual([]);
   });
 
-  test("POST /api/scraper/jobs/hitmarker forwards service errors as API error payload", async () => {
-    scraperService.scrapeHitmarkerJobs = failedScrapeJobs;
+  test("POST /api/scraper/jobs/grackle forwards service errors as API error payload", async () => {
+    scraperService.scrapeJobsForPortal = failedScrapeJobs;
 
     const result = await requestJson<{ error: string; details: string }>(
       app,
       "POST",
-      "/api/scraper/jobs/hitmarker",
+      "/api/scraper/jobs/grackle",
     );
 
     expect(result.status).toBe(500);
     expect(result.body.error).toBe(API_ERROR_SCRAPE_JOBS_FAILED);
-    expect(result.body.details).toContain("hitmarker scrape script failed");
+    expect(result.body.details).toContain("portal scrape script failed");
   });
+
+  test("POST /api/scraper/jobs/:portalId rejects unsupported portals", async () => {
+    const result = await requestJson<{ error: string; details: string }>(
+      app,
+      "POST",
+      "/api/scraper/jobs/not-a-portal",
+    );
+
+    expect(result.status).toBe(400);
+    expect(result.body.error).toBe(API_ERROR_SCRAPE_JOBS_FAILED);
+    expect(result.body.details).toContain("Unsupported scraper portal");
+  });
+}
+
+describe("scraper routes", () => {
+  registerStudioScraperRouteTests();
+  registerJobScraperRouteTests();
 });

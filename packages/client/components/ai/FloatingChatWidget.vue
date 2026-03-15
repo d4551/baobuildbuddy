@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   AI_CHAT_PAGE_PATH,
-  APP_BRAND,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
@@ -18,6 +17,7 @@ const route = useRoute();
 const { messages, loading, streaming, sendMessage, clearMessages, buildCurrentContext } = useAI();
 const { $toast } = useNuxtApp();
 const { t, locale } = useI18n();
+const { resolvedBrand } = useBrand();
 const {
   speechProviderOptions,
   speechConfig,
@@ -251,7 +251,7 @@ onUnmounted(() => {
         <div class="card-body p-0 h-full">
           <header class="flex items-center justify-between p-3 border-b border-base-300">
             <div>
-              <h2 class="font-semibold text-sm">{{ APP_BRAND.assistantName }}</h2>
+              <h2 class="font-semibold text-sm">{{ resolvedBrand.assistantName }}</h2>
               <div class="mt-1 flex items-center gap-2">
                 <p class="text-xs text-base-content/60">{{ t("floatingChat.subtitle") }}</p>
                 <span
@@ -354,7 +354,7 @@ onUnmounted(() => {
               <AIChatBubble
                 v-for="(messageRow, index) in renderedMessages"
                 :key="messageRow.key"
-                :assistant-label="APP_BRAND.assistantName"
+                :assistant-label="resolvedBrand.assistantName"
                 :context-chips="
                   index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
                     ? contextChips
@@ -371,7 +371,7 @@ onUnmounted(() => {
               />
               <AIChatBubble
                 v-if="streaming"
-                :assistant-label="APP_BRAND.assistantName"
+                :assistant-label="resolvedBrand.assistantName"
                 :context-chips="contextChips"
                 :context-chips-aria="t('floatingChat.contextChipsAria')"
                 :is-latest-assistant-message="true"
@@ -390,7 +390,7 @@ onUnmounted(() => {
                 v-model="draft"
                 rows="3"
                 class="textarea textarea-bordered min-h-24 w-full resize-y"
-                :placeholder="t('floatingChat.inputPlaceholder')"
+                :placeholder="t('floatingChat.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
                 :aria-label="t('floatingChat.inputAria')"
                 :disabled="loading"
                 @keydown="handleDraftKeydown"

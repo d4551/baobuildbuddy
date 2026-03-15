@@ -3,6 +3,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { DISK_IMAGE_TIMEOUT_MS } from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { captureResult, toErrorMessage } from "./utils/async-control";
 
 type MountedDesktopImage = {
   imagePath: string;
@@ -44,6 +45,7 @@ const readCapturedStream = (
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_TAURI_ROOT = join(REPO_ROOT, "packages", "desktop", "src-tauri");
+const PREPARE_DESKTOP_RUNTIME_SCRIPT = join(REPO_ROOT, "scripts", "prepare-desktop-runtime.ts");
 const DESKTOP_BUNDLE_GLOB = new Bun.Glob("target/**/bundle");
 const DESKTOP_TEMP_DMG_GLOB = new Bun.Glob("target/**/bundle/**/rw.*.dmg");
 const MOUNT_LINE_SPLIT_PATTERN = /\t+/;
@@ -51,7 +53,6 @@ const STREAM_LINE_SPLIT_PATTERN = /(?<=\n)/u;
 const DESKTOP_MOUNTED_IMAGE_PATTERN = /\/bundle\/(?:dmg|macos)\/rw\..+\.dmg$/;
 const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
 const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
-const TAURI_PRODUCT_NAME_PATTERN = /"productName"\s*:\s*"([^"]+)"/;
 const RECOVERABLE_WINDOWS_BUNDLE_LINE_PATTERNS = [
   /Running makensis to produce/u,
   /warning 5202: -OUTPUTCHARSET is disabled for non Win32 platforms\./u,
@@ -207,6 +208,19 @@ const pathExists = async (candidatePath: string): Promise<boolean> =>
     () => false,
   );
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const readJsonObject = async (absolutePath: string): Promise<Record<string, unknown>> => {
+  const parsed: unknown = JSON.parse(await Bun.file(absolutePath).text());
+  if (isRecord(parsed)) {
+    return parsed;
+  }
+
+  await writeError(`Expected JSON object at ${absolutePath}.`);
+  process.exit(1);
+};
+
 const parseMountedDesktopImages = (infoText: string): MountedDesktopImage[] =>
   infoText.split("================================================").flatMap((sectionText) => {
     const lines = sectionText
@@ -300,6 +314,9 @@ const resolveTargetArg = (tauriArgs: readonly string[]): string | null => {
 const resolveBundlesArgIndex = (tauriArgs: readonly string[]): number =>
   tauriArgs.findIndex((argument) => argument === "--bundles" || argument === "-b");
 
+const resolveConfigArgIndex = (tauriArgs: readonly string[]): number =>
+  tauriArgs.findIndex((argument) => argument === "--config" || argument === "-c");
+
 const resolveBundlesArgValue = (tauriArgs: readonly string[]): string | null => {
   const bundlesIndex = resolveBundlesArgIndex(tauriArgs);
   if (bundlesIndex === -1) {
@@ -380,6 +397,52 @@ const resolveMacosArchLabel = (tauriArgs: readonly string[]): string => {
   return process.arch;
 };
 
+const mergeConfigObjects = (
+  current: Record<string, unknown>,
+  override: Record<string, unknown>,
+): Record<string, unknown> => {
+  const merged: Record<string, unknown> = { ...current };
+  for (const [key, overrideValue] of Object.entries(override)) {
+    const currentValue = merged[key];
+    if (isRecord(currentValue) && isRecord(overrideValue)) {
+      merged[key] = mergeConfigObjects(currentValue, overrideValue);
+      continue;
+    }
+
+    merged[key] = overrideValue;
+  }
+
+  return merged;
+};
+
+const withBeforeBuildDisabled = (tauriArgs: readonly string[]): string[] => {
+  const configOverride = {
+    build: {
+      beforeBuildCommand: "",
+    },
+  } satisfies Record<string, unknown>;
+  const nextArgs = [...tauriArgs];
+  const configIndex = resolveConfigArgIndex(nextArgs);
+
+  if (configIndex === -1) {
+    nextArgs.push("--config", JSON.stringify(configOverride));
+    return nextArgs;
+  }
+
+  const configValue = nextArgs[configIndex + 1];
+  let parsedConfig: Record<string, unknown> = {};
+  if (typeof configValue === "string" && configValue.trim().length > 0) {
+    const rawConfig: unknown = JSON.parse(configValue);
+    if (!isRecord(rawConfig)) {
+      throw new Error("Expected --config value to be a JSON object.");
+    }
+    parsedConfig = rawConfig;
+  }
+
+  nextArgs[configIndex + 1] = JSON.stringify(mergeConfigObjects(parsedConfig, configOverride));
+  return nextArgs;
+};
+
 const buildCandidateBundleRoots = (tauriArgs: readonly string[]): string[] => {
   const target = resolveTargetArg(tauriArgs);
   const targetedBundleRoot = target
@@ -395,15 +458,26 @@ const readDesktopBundleMetadata = async (): Promise<{
   version: string;
   binaryName: string;
 }> => {
-  const tauriConfigText = await Bun.file(join(DESKTOP_TAURI_ROOT, "tauri.conf.json")).text();
-  const productName =
-    tauriConfigText.match(TAURI_PRODUCT_NAME_PATTERN)?.[1]?.trim() || "BaoBuildBuddy";
+  const tauriConfigPath = join(DESKTOP_TAURI_ROOT, "tauri.conf.json");
+  const tauriConfig = await readJsonObject(tauriConfigPath);
   const cargoToml = await Bun.file(join(DESKTOP_TAURI_ROOT, "Cargo.toml")).text();
+  const packageJsonPathValue = tauriConfig.version;
   const versionMatch = cargoToml.match(CARGO_VERSION_PATTERN);
+  const configuredVersion =
+    typeof packageJsonPathValue === "string" && packageJsonPathValue.endsWith(".json")
+      ? (await readJsonObject(join(DESKTOP_TAURI_ROOT, packageJsonPathValue))).version
+      : packageJsonPathValue;
+  const resolvedVersion =
+    typeof configuredVersion === "string" && configuredVersion.trim().length > 0
+      ? configuredVersion.trim()
+      : versionMatch?.[1] ?? "0.1.0";
   const binaryName = cargoToml.match(CARGO_PACKAGE_NAME_PATTERN)?.[1]?.trim() || "bao-build-buddy-desktop";
   return {
-    productName,
-    version: versionMatch?.[1] ?? "0.1.0",
+    productName:
+      typeof tauriConfig.productName === "string" && tauriConfig.productName.trim().length > 0
+        ? tauriConfig.productName.trim()
+        : "BaoBuildBuddy",
+    version: resolvedVersion,
     binaryName,
   };
 };
@@ -603,11 +677,39 @@ const cleanupMacosTransientDiskImages = async (): Promise<void> => {
   await removeTemporaryDiskImagesAtIndex(temporaryDiskImages, 0);
 };
 
+const prepareDesktopRuntime = async (tauriArgs: readonly string[]): Promise<void> => {
+  const target = resolveTargetArg(tauriArgs);
+  const prepareCommand = [
+    process.execPath,
+    PREPARE_DESKTOP_RUNTIME_SCRIPT,
+    ...(target ? ["--target", target] : []),
+  ];
+  const exitCode = await runCommand(prepareCommand, REPO_ROOT);
+  if (exitCode !== 0) {
+    process.exit(exitCode);
+  }
+};
+
 const main = async (): Promise<void> => {
   await cleanupDesktopBuildArtifacts();
 
   const requestedTauriArgs = process.argv.slice(2);
-  const tauriArgs = normalizeMacosBuildArgs(requestedTauriArgs);
+  await prepareDesktopRuntime(requestedTauriArgs);
+
+  const tauriArgsResult = await captureResult(() =>
+    withBeforeBuildDisabled(normalizeMacosBuildArgs(requestedTauriArgs)),
+  );
+  if (!tauriArgsResult.ok) {
+    await writeError(
+      toErrorMessage(
+        tauriArgsResult.error,
+        "Unable to normalize Tauri configuration overrides for desktop build.",
+      ),
+    );
+    process.exit(1);
+  }
+  const tauriArgs = tauriArgsResult.value;
+
   const tauriBuildCommand = [process.execPath, "run", "--bun", "tauri", "build", ...tauriArgs];
 
   if (shouldRecoverWindowsBundleFailure(requestedTauriArgs)) {

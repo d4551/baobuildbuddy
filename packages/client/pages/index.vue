@@ -5,7 +5,7 @@ import type {
   UserGamificationData,
   UserProfile,
 } from "@bao/shared";
-import { APP_BRAND, APP_ROUTES, formatRelativeTime, getXPProgress } from "@bao/shared";
+import { APP_ROUTES, formatRelativeTime, getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_A11Y_KEYS,
@@ -92,10 +92,11 @@ type DashboardUiState = "idle" | "loading" | "error" | "empty" | "success";
 const api = useApi();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
+const { resolvedBrand } = useBrand();
 
 if (import.meta.server) {
   useServerSeoMeta({
-    title: `${APP_BRAND.name} ${t(DASHBOARD_COPY_KEYS.pageTitle)}`,
+    title: t(DASHBOARD_COPY_KEYS.pageTitle),
     description: t(DASHBOARD_COPY_KEYS.seoDescription),
   });
 }
@@ -447,7 +448,7 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
     <PageHeaderBlock
       title-id="dashboard-title"
       :title="t(DASHBOARD_COPY_KEYS.pageTitle)"
-      :description="t(DASHBOARD_COPY_KEYS.metricsSummaryLabel, { brand: APP_BRAND.name })"
+      :description="t(DASHBOARD_COPY_KEYS.metricsSummaryLabel, { brand: resolvedBrand.name })"
       description-class="text-sm text-base-content/60"
     />
 

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { CHAT_PAGE_CONTAINER_CLASS } from "~/constants/chat";
 import {
@@ -16,10 +15,11 @@ definePageMeta({
 const CHAT_SCROLL_STICKY_THRESHOLD_PX = 96;
 
 const { t, locale } = useI18n();
+const { resolvedBrand } = useBrand();
 
 if (import.meta.server) {
   useServerSeoMeta({
-    title: t("aiChatPage.seoTitle", { brand: APP_BRAND.name }),
+    title: t("aiChatPage.seoTitle", { brand: resolvedBrand.value.name }),
     description: t("aiChatPage.seoDescription"),
   });
 }
@@ -201,7 +201,7 @@ onMounted(async () => {
               <div class="space-y-3">
                 <div>
                   <h1 class="text-3xl font-bold">
-                    {{ t("aiChatPage.title", { brand: APP_BRAND.name }) }}
+                    {{ t("aiChatPage.title", { brand: resolvedBrand.name }) }}
                   </h1>
                   <p class="text-base text-base-content/70">{{ t("aiChatPage.subtitle") }}</p>
                 </div>
@@ -279,7 +279,7 @@ onMounted(async () => {
               <AIChatBubble
                 v-for="(messageRow, index) in renderedMessages"
                 :key="messageRow.key"
-                :assistant-label="APP_BRAND.assistantName"
+                :assistant-label="resolvedBrand.assistantName"
                 :context-chips="
                   index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
                     ? contextChips
@@ -296,7 +296,7 @@ onMounted(async () => {
               />
               <AIChatBubble
                 v-if="streaming"
-                :assistant-label="APP_BRAND.assistantName"
+                :assistant-label="resolvedBrand.assistantName"
                 :context-chips="contextChips"
                 :context-chips-aria="t('floatingChat.contextChipsAria')"
                 :is-latest-assistant-message="true"
@@ -320,7 +320,7 @@ onMounted(async () => {
                   v-model="input"
                   rows="3"
                   class="textarea textarea-bordered min-h-28 w-full resize-y"
-                  :placeholder="t('aiChatPage.inputPlaceholder')"
+                  :placeholder="t('aiChatPage.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
                   :disabled="loading"
                   :aria-label="t('aiChatPage.inputAria')"
                   @keydown="handleComposerKeydown"

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {
   AI_PROVIDER_CATALOG,
-  APP_BRAND,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
+  OLLAMA_WEBSITE_URL,
   type DashboardStats,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
@@ -16,10 +16,11 @@ definePageMeta({
 });
 
 const { t } = useI18n();
+const { resolvedBrand } = useBrand();
 
 if (import.meta.server) {
   useServerSeoMeta({
-    title: t("setup.seoTitle", { brand: APP_BRAND.name }),
+    title: t("setup.seoTitle", { brand: resolvedBrand.value.name }),
     description: t("setup.seoDescription"),
   });
 }
@@ -29,7 +30,12 @@ type CloudProvider = Exclude<SetupProvider, "local">;
 type TestResult = { valid: boolean; provider: string };
 type SetupStep = 1 | 2 | 3;
 
-const CLOUD_PROVIDER_IDS: readonly CloudProvider[] = ["gemini", "openai", "claude", "huggingface"];
+const CLOUD_PROVIDER_IDS: readonly CloudProvider[] = [
+  "gemini",
+  "openai",
+  "claude",
+  "huggingface",
+];
 const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
   gemini: "geminiApiKey",
   openai: "openaiApiKey",
@@ -39,7 +45,8 @@ const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
 
 const { updateProfile } = useUser();
 const { settings, fetchSettings, updateApiKeys, testApiKey } = useSettings();
-const { checkAuthStatus, initAuth, getStoredApiKey, setStoredApiKey } = useAuth();
+const { checkAuthStatus, initAuth, getStoredApiKey, setStoredApiKey } =
+  useAuth();
 const router = useRouter();
 const api = useApi();
 const { $toast } = useNuxtApp();
@@ -145,8 +152,12 @@ const setupCompletionFlowInput = computed(() =>
     isSetupComplete: true,
   }),
 );
-const { primaryAction: setupCompletionPrimaryAction } = useFlowEngine(setupCompletionFlowInput);
-const postSetupFlowTarget = computed(() => setupCompletionPrimaryAction.value.to);
+const { primaryAction: setupCompletionPrimaryAction } = useFlowEngine(
+  setupCompletionFlowInput,
+);
+const postSetupFlowTarget = computed(
+  () => setupCompletionPrimaryAction.value.to,
+);
 
 async function handleTestProvider(provider: SetupProvider): Promise<void> {
   const key = getProviderTestKey(provider);
@@ -167,7 +178,12 @@ async function handleTestProvider(provider: SetupProvider): Promise<void> {
   }
 
   if (!providerTestResult.ok) {
-    $toast.error(getErrorMessage(providerTestResult.error, t("setup.providerTestErrorFallback")));
+    $toast.error(
+      getErrorMessage(
+        providerTestResult.error,
+        t("setup.providerTestErrorFallback"),
+      ),
+    );
     testResults.value[provider] = { valid: false, provider };
     return;
   }
@@ -175,9 +191,13 @@ async function handleTestProvider(provider: SetupProvider): Promise<void> {
   const result = providerTestResult.value;
   testResults.value[provider] = result;
   if (result?.valid) {
-    $toast.success(t("setup.providerReachable", { provider: getProviderLabel(provider) }));
+    $toast.success(
+      t("setup.providerReachable", { provider: getProviderLabel(provider) }),
+    );
   } else {
-    $toast.error(t("setup.providerTestFailed", { provider: getProviderLabel(provider) }));
+    $toast.error(
+      t("setup.providerTestFailed", { provider: getProviderLabel(provider) }),
+    );
   }
 }
 
@@ -187,11 +207,16 @@ async function handleComplete(): Promise<void> {
   const trimmedRole = currentRole.value.trim();
 
   const authStatus = await checkAuthStatus();
-  const authInitResult = await settlePromise(initAuth(), t("apiErrors.auth.initFailed"));
+  const authInitResult = await settlePromise(
+    initAuth(),
+    t("apiErrors.auth.initFailed"),
+  );
   if (!authInitResult.ok) {
     if (authStatus.authRequired) {
       saving.value = false;
-      $toast.error(getErrorMessage(authInitResult.error, t("apiErrors.auth.initFailed")));
+      $toast.error(
+        getErrorMessage(authInitResult.error, t("apiErrors.auth.initFailed")),
+      );
       return;
     }
   } else {
@@ -217,13 +242,19 @@ async function handleComplete(): Promise<void> {
     );
     if (!profileUpdateResult.ok) {
       saving.value = false;
-      $toast.error(getErrorMessage(profileUpdateResult.error, t("setup.completeErrorFallback")));
+      $toast.error(
+        getErrorMessage(
+          profileUpdateResult.error,
+          t("setup.completeErrorFallback"),
+        ),
+      );
       return;
     }
   }
 
   const update: Record<string, string> = {
-    localModelEndpoint: localModelEndpoint.value.trim() || LOCAL_AI_DEFAULT_ENDPOINT,
+    localModelEndpoint:
+      localModelEndpoint.value.trim() || LOCAL_AI_DEFAULT_ENDPOINT,
     localModelName: localModelName.value.trim() || LOCAL_AI_DEFAULT_MODEL,
   };
 
@@ -240,7 +271,12 @@ async function handleComplete(): Promise<void> {
   );
   saving.value = false;
   if (!apiKeyUpdateResult.ok) {
-    $toast.error(getErrorMessage(apiKeyUpdateResult.error, t("setup.completeErrorFallback")));
+    $toast.error(
+      getErrorMessage(
+        apiKeyUpdateResult.error,
+        t("setup.completeErrorFallback"),
+      ),
+    );
     return;
   }
 
@@ -253,8 +289,13 @@ async function handleComplete(): Promise<void> {
   <PageScaffold tag="main" width-token="narrow" labelled-by="setup-title">
     <div class="card bg-base-100 shadow-xl">
       <div class="card-body">
-        <h1 id="setup-title" class="card-title text-2xl text-primary mb-4">{{ t("setup.title", { brand: APP_BRAND.name }) }}</h1>
-        <ul class="steps steps-horizontal w-full mb-8" :aria-label="t('setup.stepsAriaLabel')">
+        <h1 id="setup-title" class="card-title text-2xl text-primary mb-4">
+          {{ t("setup.title", { brand: resolvedBrand.name }) }}
+        </h1>
+        <ul
+          class="steps steps-horizontal w-full mb-8"
+          :aria-label="t('setup.stepsAriaLabel')"
+        >
           <li
             class="step"
             :class="{ 'step-primary': step >= 1 }"
@@ -302,7 +343,11 @@ async function handleComplete(): Promise<void> {
           </label>
 
           <div class="flex justify-end">
-            <button class="btn btn-primary" :aria-label="t('setup.nextToLocalAiAria')" @click="step = 2">
+            <button
+              class="btn btn-primary"
+              :aria-label="t('setup.nextToLocalAiAria')"
+              @click="step = 2"
+            >
               {{ t("setup.nextButton") }}
             </button>
           </div>
@@ -311,7 +356,45 @@ async function handleComplete(): Promise<void> {
         <div v-if="step === 2" class="space-y-5">
           <h2 class="text-lg font-semibold">{{ t("setup.aiConfigTitle") }}</h2>
           <div role="alert" class="alert alert-info alert-soft">
-            <span>{{ t("setup.localFirstInfo", { brand: APP_BRAND.name }) }}</span>
+            <span>{{
+              t("setup.localFirstInfo", { brand: resolvedBrand.name })
+            }}</span>
+          </div>
+
+          <div
+            role="alert"
+            class="alert alert-info alert-soft alert-vertical sm:alert-horizontal"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <h3 class="font-semibold">
+                {{ t("settings.aiProviders.ollamaTipTitle") }}
+              </h3>
+              <p class="text-sm">
+                {{ t("settings.aiProviders.ollamaTipDescription") }}
+                <NuxtLink
+                  :to="OLLAMA_WEBSITE_URL"
+                  target="_blank"
+                  class="link link-primary"
+                  :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
+                >
+                  {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
+                </NuxtLink>
+              </p>
+            </div>
           </div>
 
           <label class="floating-label w-full">
@@ -341,29 +424,54 @@ async function handleComplete(): Promise<void> {
             :aria-label="t('setup.testLocalAria')"
             @click="handleTestProvider('local')"
           >
-            <span v-if="testing && testingProvider === 'local'" class="loading loading-spinner loading-xs"></span>
+            <span
+              v-if="testing && testingProvider === 'local'"
+              class="loading loading-spinner loading-xs"
+            ></span>
             {{ t("setup.testLocalButton") }}
           </button>
 
           <details class="collapse collapse-arrow bg-base-200">
-            <summary class="collapse-title font-medium">{{ t("setup.cloudOptionalTitle") }}</summary>
+            <summary class="collapse-title font-medium">
+              {{ t("setup.cloudOptionalTitle") }}
+            </summary>
             <div class="collapse-content space-y-4">
-              <fieldset v-for="provider in CLOUD_PROVIDER_IDS" :key="provider" class="fieldset">
+              <fieldset
+                v-for="provider in CLOUD_PROVIDER_IDS"
+                :key="provider"
+                class="fieldset"
+              >
                 <legend class="fieldset-legend">
-                  {{ t("setup.cloudProviderLegend", { provider: getProviderLabel(provider) }) }}
+                  {{
+                    t("setup.cloudProviderLegend", {
+                      provider: getProviderLabel(provider),
+                    })
+                  }}
                 </legend>
                 <div class="join w-full">
                   <input
                     v-model="providerCredentials[provider]"
                     type="password"
-                    :placeholder="t('setup.cloudProviderPlaceholder', { provider: getProviderLabel(provider) })"
+                    :placeholder="
+                      t('setup.cloudProviderPlaceholder', {
+                        provider: getProviderLabel(provider),
+                      })
+                    "
                     class="input join-item w-full"
-                    :aria-label="t('setup.cloudProviderAria', { provider: getProviderLabel(provider) })"
+                    :aria-label="
+                      t('setup.cloudProviderAria', {
+                        provider: getProviderLabel(provider),
+                      })
+                    "
                   />
                   <button
                     class="btn btn-outline join-item"
                     :disabled="testing || !providerCredentials[provider].trim()"
-                    :aria-label="t('setup.testProviderAria', { provider: getProviderLabel(provider) })"
+                    :aria-label="
+                      t('setup.testProviderAria', {
+                        provider: getProviderLabel(provider),
+                      })
+                    "
                     @click="handleTestProvider(provider)"
                   >
                     {{ t("setup.testButton") }}
@@ -374,10 +482,18 @@ async function handleComplete(): Promise<void> {
           </details>
 
           <div class="flex justify-between">
-            <button class="btn btn-ghost" :aria-label="t('setup.backToProfileAria')" @click="step = 1">
+            <button
+              class="btn btn-ghost"
+              :aria-label="t('setup.backToProfileAria')"
+              @click="step = 1"
+            >
               {{ t("setup.backButton") }}
             </button>
-            <button class="btn btn-primary" :aria-label="t('setup.nextToDoneAria')" @click="step = 3">
+            <button
+              class="btn btn-primary"
+              :aria-label="t('setup.nextToDoneAria')"
+              @click="step = 3"
+            >
               {{ t("setup.nextButton") }}
             </button>
           </div>
@@ -403,16 +519,32 @@ async function handleComplete(): Promise<void> {
           </div>
           <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
           <p class="text-base-content/70">
-            {{ t("setup.doneDescription", { assistant: APP_BRAND.assistantName }) }}
+            {{
+              t("setup.doneDescription", {
+                assistant: resolvedBrand.assistantName,
+              })
+            }}
           </p>
 
           <div class="flex justify-center gap-2">
-            <button class="btn btn-ghost" :aria-label="t('setup.backToAiConfigAria')" @click="step = 2">
+            <button
+              class="btn btn-ghost"
+              :aria-label="t('setup.backToAiConfigAria')"
+              @click="step = 2"
+            >
               {{ t("setup.backButton") }}
             </button>
-            <button class="btn btn-primary" :disabled="saving" :aria-label="t('setup.launchAria')" @click="handleComplete">
-              <span v-if="saving" class="loading loading-spinner loading-xs"></span>
-              {{ t("setup.launchButton", { brand: APP_BRAND.name }) }}
+            <button
+              class="btn btn-primary"
+              :disabled="saving"
+              :aria-label="t('setup.launchAria')"
+              @click="handleComplete"
+            >
+              <span
+                v-if="saving"
+                class="loading loading-spinner loading-xs"
+              ></span>
+              {{ t("setup.launchButton", { brand: resolvedBrand.name }) }}
             </button>
           </div>
         </div>

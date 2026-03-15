@@ -213,6 +213,25 @@ export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWith
         }, {}, {
             length: number | undefined;
         }>;
+        brandSettings: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+            name: "brand_settings";
+            tableName: "settings";
+            dataType: "json";
+            columnType: "SQLiteTextJson";
+            data: import("@bao/shared").BrandSettings;
+            driverParam: string;
+            notNull: false;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            $type: import("@bao/shared").BrandSettings;
+        }>;
         notifications: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "notifications";
             tableName: "settings";

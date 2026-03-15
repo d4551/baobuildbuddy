@@ -2,6 +2,7 @@ import type { AutomationSettings, EmailTransportSettings } from "@bao/shared";
 import {
   AI_PROVIDER_DEFAULT_ORDER,
   DEFAULT_SETTINGS_ID,
+  DEFAULT_BRAND_SETTINGS,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
   THEME_NAMES,
@@ -21,6 +22,9 @@ export const settings = sqliteTable("settings", {
   preferredModel: text("preferred_model"),
   theme: text("theme").default(THEME_NAMES.light),
   language: text("language").default("en-US"),
+  brandSettings: text("brand_settings", { mode: "json" })
+    .$type<typeof DEFAULT_BRAND_SETTINGS>()
+    .default(sql.raw(`'${JSON.stringify(DEFAULT_BRAND_SETTINGS).replaceAll("'", "''")}'`)),
   notifications: text("notifications", { mode: "json" })
     .$type<Record<string, boolean>>()
     .default(sql`'{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}'`),

@@ -5,6 +5,7 @@ import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import { resumes } from "../db/schema/resumes";
 import { applicationAutomationService } from "../services/automation/application-automation-service";
+import { scraperService } from "../services/scraper-service";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -12,6 +13,7 @@ const resumeId = generateId();
 const createdRunIds: string[] = [];
 type RunJobApply = typeof applicationAutomationService.runJobApply;
 type RunEmailResponse = typeof applicationAutomationService.runEmailResponse;
+type ScrapeJobsForTarget = typeof scraperService.scrapeJobsForTarget;
 const runJobApplyStub: RunJobApply = () => Promise.resolve();
 const runEmailResponseStub: RunEmailResponse = async (payload) => {
   const now = new Date().toISOString();
@@ -63,6 +65,7 @@ const runEmailResponseStub: RunEmailResponse = async (payload) => {
 
 let originalRunJobApply: RunJobApply | undefined;
 let originalRunEmailResponse: RunEmailResponse | undefined;
+let originalScrapeJobsForTarget: ScrapeJobsForTarget | undefined;
 const CLEANUP_AUTOMATION_TYPES = ["job_apply", "email", "scrape"] as const;
 
 const requestStatusBody = async <T>(
@@ -130,6 +133,10 @@ afterAll(async () => {
   if (originalRunEmailResponse) {
     applicationAutomationService.runEmailResponse = originalRunEmailResponse;
     originalRunEmailResponse = undefined;
+  }
+  if (originalScrapeJobsForTarget) {
+    scraperService.scrapeJobsForTarget = originalScrapeJobsForTarget;
+    originalScrapeJobsForTarget = undefined;
   }
 });
 
@@ -363,7 +370,7 @@ function registerScheduledScrapeRunTest(): void {
       status: "pending";
       input: Record<string, unknown> | null;
     }>(app, "POST", "/api/automation/scrape/schedule", {
-      target: "jobs_hitmarker",
+      target: "jobs_grackle",
       runAt,
     });
 
@@ -382,7 +389,7 @@ function registerScheduledScrapeRunTest(): void {
     const target =
       input && typeof input === "object" && "target" in input ? input.target : null;
     expect(scheduledRunAt).toBe(runAt);
-    expect(target).toBe("jobs_hitmarker");
+    expect(target).toBe("jobs_grackle");
     createdRunIds.push(res.body.id);
 
     const run = await db
@@ -396,6 +403,64 @@ function registerScheduledScrapeRunTest(): void {
   });
 }
 
+function registerImmediateScrapeRunTest(): void {
+  test("POST /api/automation/scrape executes a scrape run and persists history", async () => {
+    originalScrapeJobsForTarget = scraperService.scrapeJobsForTarget.bind(scraperService);
+    scraperService.scrapeJobsForTarget = () =>
+      Promise.resolve({
+        scraped: 4,
+        upserted: 3,
+        errors: [],
+      });
+
+    const res = await requestJson<{
+      id: string;
+      status: "success";
+      output: Record<string, unknown> | null;
+    }>(app, "POST", "/api/automation/scrape", {
+      target: "jobs_grackle",
+    }).finally(() => {
+      if (originalScrapeJobsForTarget) {
+        scraperService.scrapeJobsForTarget = originalScrapeJobsForTarget;
+        originalScrapeJobsForTarget = undefined;
+      }
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.output?.target).toBe("jobs_grackle");
+    createdRunIds.push(res.body.id);
+
+    const run = await db
+      .select()
+      .from(automationRuns)
+      .where(and(eq(automationRuns.id, res.body.id), eq(automationRuns.type, "scrape")))
+      .limit(1);
+
+    expect(run.length).toBe(1);
+    expect(run[0].status).toBe("success");
+    expect(run[0].output).not.toBeNull();
+  });
+}
+
+function registerCapabilityAuditRouteTest(): void {
+  test("GET /api/automation/capabilities returns the full RPA capability audit", async () => {
+    const res = await requestJson<{
+      generatedAt: string;
+      summary: { total: number };
+      capabilities: Array<{ id: string; target: string | null }>;
+    }>(app, "GET", "/api/automation/capabilities");
+
+    expect(res.status).toBe(200);
+    expect(res.body.generatedAt.length).toBeGreaterThan(0);
+    expect(res.body.summary.total).toBeGreaterThanOrEqual(8);
+    expect(res.body.capabilities.some((capability) => capability.id === "job_apply")).toBe(true);
+    expect(
+      res.body.capabilities.some((capability) => capability.target === "jobs_pocketgamer"),
+    ).toBe(true);
+  });
+}
+
 describe("automation routes", () => {
   registerJobApplyValidationTest();
   registerMissingResumeTest();
@@ -404,5 +469,7 @@ describe("automation routes", () => {
   registerScheduleCreationTest();
   registerEmailResponseTest();
   registerScheduledEmailResponseTest();
+  registerImmediateScrapeRunTest();
   registerScheduledScrapeRunTest();
+  registerCapabilityAuditRouteTest();
 });

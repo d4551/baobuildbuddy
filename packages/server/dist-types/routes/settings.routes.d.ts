@@ -1,4 +1,4 @@
-import type { AutomationSettings, EmailTransportSettings } from "@bao/shared";
+import type { AutomationSettings, BrandSettings, EmailTransportSettings } from "@bao/shared";
 import { Elysia } from "elysia";
 export declare const settingsRoutes: Elysia<"/settings", {
     decorator: {};
@@ -36,6 +36,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 200: {
                     error: string;
                 } | {
+                    brandSettings: BrandSettings;
                     geminiApiKey: string | null;
                     openaiApiKey: string | null;
                     claudeApiKey: string | null;
@@ -130,16 +131,16 @@ export declare const settingsRoutes: Elysia<"/settings", {
                             slug: string;
                         }[];
                         companyBoards: {
-                            type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
                             name: string;
+                            type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
                             token: string;
                             enabled: boolean;
                             priority: number;
                         }[];
                         gamingPortals: {
+                            name: string;
                             id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
                             source: string;
-                            name: string;
                             enabled: boolean;
                             fallbackUrl: string;
                         }[];
@@ -159,6 +160,85 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 preferredModel?: string | undefined;
                 theme?: "bao-light" | "bao-dark" | undefined;
                 language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
+                brandSettings?: {
+                    name?: string | undefined;
+                    assistantName?: string | undefined;
+                    apiName?: string | undefined;
+                    logoPath?: string | undefined;
+                    faviconPath?: string | undefined;
+                    typography?: {
+                        fontStylesheetUrl?: string | undefined;
+                        displayFontFamily?: string | undefined;
+                        bodyFontFamily?: string | undefined;
+                        monoFontFamily?: string | undefined;
+                    } | undefined;
+                    lightTheme?: {
+                        success?: string | undefined;
+                        error?: string | undefined;
+                        base100?: string | undefined;
+                        base200?: string | undefined;
+                        base300?: string | undefined;
+                        baseContent?: string | undefined;
+                        primary?: string | undefined;
+                        primaryContent?: string | undefined;
+                        secondary?: string | undefined;
+                        secondaryContent?: string | undefined;
+                        accent?: string | undefined;
+                        accentContent?: string | undefined;
+                        neutral?: string | undefined;
+                        neutralContent?: string | undefined;
+                        info?: string | undefined;
+                        infoContent?: string | undefined;
+                        successContent?: string | undefined;
+                        warning?: string | undefined;
+                        warningContent?: string | undefined;
+                        errorContent?: string | undefined;
+                        radiusSelector?: string | undefined;
+                        radiusField?: string | undefined;
+                        radiusBox?: string | undefined;
+                        sizeSelector?: string | undefined;
+                        sizeField?: string | undefined;
+                        border?: string | undefined;
+                        depth?: string | undefined;
+                        noise?: string | undefined;
+                    } | undefined;
+                    darkTheme?: {
+                        success?: string | undefined;
+                        error?: string | undefined;
+                        base100?: string | undefined;
+                        base200?: string | undefined;
+                        base300?: string | undefined;
+                        baseContent?: string | undefined;
+                        primary?: string | undefined;
+                        primaryContent?: string | undefined;
+                        secondary?: string | undefined;
+                        secondaryContent?: string | undefined;
+                        accent?: string | undefined;
+                        accentContent?: string | undefined;
+                        neutral?: string | undefined;
+                        neutralContent?: string | undefined;
+                        info?: string | undefined;
+                        infoContent?: string | undefined;
+                        successContent?: string | undefined;
+                        warning?: string | undefined;
+                        warningContent?: string | undefined;
+                        errorContent?: string | undefined;
+                        radiusSelector?: string | undefined;
+                        radiusField?: string | undefined;
+                        radiusBox?: string | undefined;
+                        sizeSelector?: string | undefined;
+                        sizeField?: string | undefined;
+                        border?: string | undefined;
+                        depth?: string | undefined;
+                        noise?: string | undefined;
+                    } | undefined;
+                    content?: {
+                        tagline?: string | undefined;
+                        defaultTitle?: string | undefined;
+                        defaultDescription?: string | undefined;
+                        contentOverrides?: {} | undefined;
+                    } | undefined;
+                } | undefined;
             };
             params: {};
             query: unknown;

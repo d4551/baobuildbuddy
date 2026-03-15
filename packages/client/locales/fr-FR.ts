@@ -7,7 +7,7 @@ import type { AppTranslationOverrides } from "./en-US";
 
 const frFROverrides = {
   meta: {
-    title: "BaoBuildBuddy - Assistant de Carrière IA",
+    title: "{brand} - Assistant de Carrière IA",
     description: "Assistant de carrière IA pour l'industrie du jeu vidéo",
   },
   app: {
@@ -85,23 +85,29 @@ const frFROverrides = {
     title: "Parcours de carrière",
     readiness: {
       feedback: {
-        empty: "Les données de préparation pour {category} ne sont pas encore disponibles.",
-        early: "Niveau initial en {category}. Ajoutez davantage de correspondances et de preuves.",
+        empty:
+          "Les données de préparation pour {category} ne sont pas encore disponibles.",
+        early:
+          "Niveau initial en {category}. Ajoutez davantage de correspondances et de preuves.",
         developing:
           "Niveau en progression en {category}. Continuez à ajouter des exemples et des preuves.",
         good: "Bon niveau en {category}. Continuez à approfondir cette compétence.",
-        excellent: "Excellent niveau en {category}. Vous êtes bien préparé sur cet axe.",
+        excellent:
+          "Excellent niveau en {category}. Vous êtes bien préparé sur cet axe.",
       },
       improvements: {
         imp_tech_map:
           "Cartographiez plus de compétences techniques de jeu vers des compétences professionnelles.",
         imp_conf_up:
           "Augmentez le niveau de confiance de vos correspondances techniques existantes.",
-        imp_lead_comm: "Ajoutez davantage d'expériences de leadership et de communication.",
-        imp_team_examples: "Ajoutez des exemples concrets de collaboration d'équipe.",
+        imp_lead_comm:
+          "Ajoutez davantage d'expériences de leadership et de communication.",
+        imp_team_examples:
+          "Ajoutez des exemples concrets de collaboration d'équipe.",
         imp_industry_research:
           "Étudiez davantage d'applications métier pour vos compétences cartographiées.",
-        imp_role_link: "Reliez vos compétences cartographiées à des rôles cibles précis.",
+        imp_role_link:
+          "Reliez vos compétences cartographiées à des rôles cibles précis.",
         imp_evidence_add:
           "Ajoutez des preuves (captures, clips, documents) à vos compétences cartographiées.",
         imp_portfolio_build:
@@ -114,27 +120,41 @@ const frFROverrides = {
           "Mettez en avant vos expériences de leadership et de communication issues du jeu.",
         imp_coverage_broaden:
           "Élargissez la couverture en cartographiant 10 à 15 compétences variées.",
-        imp_examples_refine: "Affinez vos correspondances actuelles avec des exemples plus précis.",
-        imp_certs_pursue: "Visez des certifications qui valident vos compétences techniques.",
-        imp_network_pro: "Développez votre réseau avec des professionnels de votre secteur cible.",
+        imp_examples_refine:
+          "Affinez vos correspondances actuelles avec des exemples plus précis.",
+        imp_certs_pursue:
+          "Visez des certifications qui valident vos compétences techniques.",
+        imp_network_pro:
+          "Développez votre réseau avec des professionnels de votre secteur cible.",
       },
       nextStepItems: {
         step_apply_roles: "Commencez à candidater sur des rôles cibles.",
-        step_network_industry: "Développez votre réseau avec des professionnels du secteur.",
+        step_network_industry:
+          "Développez votre réseau avec des professionnels du secteur.",
         step_prepare_interviews: "Préparez vos entretiens techniques.",
         step_polish_linkedin: "Optimisez votre profil LinkedIn.",
-        step_complete_portfolio: "Complétez votre portfolio avec 3 à 5 projets solides.",
-        step_map_skills_15: "Ajoutez 5 compétences cartographiées pour atteindre 15+.",
-        step_evidence_top: "Ajoutez des preuves à vos 10 compétences les plus fortes.",
-        step_research_targets: "Étudiez les entreprises et rôles que vous ciblez.",
+        step_complete_portfolio:
+          "Complétez votre portfolio avec 3 à 5 projets solides.",
+        step_map_skills_15:
+          "Ajoutez 5 compétences cartographiées pour atteindre 15+.",
+        step_evidence_top:
+          "Ajoutez des preuves à vos 10 compétences les plus fortes.",
+        step_research_targets:
+          "Étudiez les entreprises et rôles que vous ciblez.",
         step_map_skills_10:
           "Cartographiez 10+ compétences issues du jeu vers des compétences carrière.",
-        step_start_portfolio: "Commencez à construire des projets de portfolio.",
-        step_evidence_abilities: "Ajoutez des preuves pour démontrer concrètement vos capacités.",
-        step_explore_pathways: "Explorez des parcours de carrière alignés avec vos compétences.",
-        step_map_skills_5: "Cartographiez vos 5 premières compétences issues du jeu.",
-        step_explore_categories: "Explorez différentes catégories de compétences.",
-        step_learn_careers: "Découvrez les options de carrière dans l'industrie du jeu.",
+        step_start_portfolio:
+          "Commencez à construire des projets de portfolio.",
+        step_evidence_abilities:
+          "Ajoutez des preuves pour démontrer concrètement vos capacités.",
+        step_explore_pathways:
+          "Explorez des parcours de carrière alignés avec vos compétences.",
+        step_map_skills_5:
+          "Cartographiez vos 5 premières compétences issues du jeu.",
+        step_explore_categories:
+          "Explorez différentes catégories de compétences.",
+        step_learn_careers:
+          "Découvrez les options de carrière dans l'industrie du jeu.",
         step_setup_profile: "Mettez en place votre profil professionnel.",
       },
     },
@@ -163,8 +183,10 @@ const frFROverrides = {
       "Entraînez-vous avec des scénarios d'entretien orientés poste ou studio, puis révisez les retours notés.",
     title: "Centre de préparation aux entretiens",
     errors: {
-      bootstrapLoadFailed: "Impossible de charger les données du centre d'entretien",
-      roleRecommendationsFailed: "Impossible de charger les recommandations de rôle personnalisées",
+      bootstrapLoadFailed:
+        "Impossible de charger les données du centre d'entretien",
+      roleRecommendationsFailed:
+        "Impossible de charger les recommandations de rôle personnalisées",
     },
   },
   settings: {
@@ -185,8 +207,10 @@ const frFROverrides = {
       githubLegend: "Profil GitHub",
       linkedinLegend: "Profil LinkedIn",
       summaryLegend: "Résumé",
-      technicalSkillsLegend: "Compétences techniques (séparées par des virgules)",
-      softSkillsLegend: "Compétences relationnelles (séparées par des virgules)",
+      technicalSkillsLegend:
+        "Compétences techniques (séparées par des virgules)",
+      softSkillsLegend:
+        "Compétences relationnelles (séparées par des virgules)",
       saveButton: "Enregistrer le profil",
     },
     preferences: {
@@ -200,13 +224,17 @@ const frFROverrides = {
     },
     automation: {
       title: "Automatisation",
-      subtitle: "Configurez le comportement des scripts RPA et le navigateur par défaut.",
+      subtitle:
+        "Configurez le comportement des scripts RPA et le navigateur par défaut.",
       headlessTitle: "Mode sans tête",
-      headlessDescription: "Exécuter le navigateur sans interface graphique visible.",
+      headlessDescription:
+        "Exécuter le navigateur sans interface graphique visible.",
       smartSelectorsTitle: "Sélecteurs intelligents",
-      smartSelectorsDescription: "Utiliser l'IA pour détecter les champs de formulaire.",
+      smartSelectorsDescription:
+        "Utiliser l'IA pour détecter les champs de formulaire.",
       autoScreenshotsTitle: "Captures d'écran automatiques",
-      autoScreenshotsDescription: "Sauvegarder les captures d'écran à chaque étape.",
+      autoScreenshotsDescription:
+        "Sauvegarder les captures d'écran à chaque étape.",
       timeoutLegend: "Délai d'attente (secondes)",
       retentionLegend: "Rétention des captures (jours)",
       concurrentRunsLegend: "Exécutions simultanées max",
@@ -231,6 +259,58 @@ const frFROverrides = {
       preferredProviderHint:
         "Le système IA essaiera ce fournisseur en premier, puis se rabattra sur les autres.",
       preferredProviderSaved: "Fournisseur préféré mis à jour",
+      ollamaTipTitle: "Astuce : Ollama s'installe en dehors de l'app",
+      ollamaTipDescription:
+        "Installez-le d'abord puis suivez la configuration officielle d'Ollama pour votre machine ou votre projet sur",
+      ollamaTipLinkAria: "Ouvrir le site Ollama dans un nouvel onglet",
+    },
+    brand: {
+      title: "Plan de contrôle de marque",
+      subtitle:
+        "Identité white-label, typographie, jetons de thème sémantiques et contenu localisé depuis une configuration persistée unique.",
+      infoTitle: "Un contrat pour chaque surface de marque",
+      infoDescription:
+        "Prévisualisez l'identité, la typographie, les jetons de thème et le contenu localisé avant de publier les changements dans tout le produit.",
+      previewEyebrow: "Aperçu en direct",
+      previewTitle: "Aperçu de la surface de marque",
+      previewSubtitle:
+        "Validez le logo, le ton, le contraste des jetons et les remplacements de contenu avant d'enregistrer la prochaine variante.",
+      previewLogoAlt: "Aperçu du logo {brand}",
+      previewPrimaryAction: "Ouvrir l'espace de travail",
+      previewSecondaryAction: "Relire le contenu",
+      editorTabsAria: "Sections de l'éditeur de marque",
+      assetPathHint:
+        "Utilisez un chemin d'actif public ou une URL absolue que le client peut charger directement.",
+      fontStylesheetHint:
+        "Chargez la feuille de style hébergée de vos polices avant d'appliquer les piles `font-family` ci-dessous.",
+      tabs: {
+        identity: "Identité",
+        identityDescription:
+          "Ajustez les noms, la voix de l'assistant et les ressources de logo pour le package de marque actif.",
+        typography: "Typographie",
+        typographyDescription:
+          "Définissez la feuille de style hébergée et les piles display, body et mono utilisées dans toute l'interface.",
+        themes: "Jetons de thème",
+        themesDescription:
+          "Modifiez les objets de jetons daisyUI clair et sombre qui définissent les couleurs sémantiques, rayons, bordures et profondeurs.",
+        content: "Contenu",
+        contentDescription:
+          "Ajustez le contenu SEO par défaut et les remplacements de locale à l'exécution sans toucher au catalogue source.",
+      },
+      stats: {
+        product: "Produit",
+        productDescription:
+          "Nom principal de l'application visible par les clients.",
+        assistant: "Copilote",
+        assistantDescription:
+          "Personnalité d'assistant affichée par défaut dans les surfaces de chat.",
+        locales: "Langues",
+        localesDescription:
+          "Langues d'interface prises en charge et exposées dans les paramètres.",
+        overrides: "Surcharges",
+        overridesDescription:
+          "Clés de contenu personnalisées fusionnées dans le catalogue actif.",
+      },
     },
     toasts: {
       apiKeysSaved: "Clés API enregistrées",
@@ -249,19 +329,23 @@ const frFROverrides = {
   aiProviderCatalog: {
     local: {
       name: "Modèle local",
-      description: "RamaLama ou Ollama avec une exécution privée, locale d'abord.",
+      description:
+        "RamaLama ou Ollama avec une exécution privée, locale d'abord.",
     },
     gemini: {
-      description: "Fournisseur cloud principal pour QA générale et génération de contenu.",
+      description:
+        "Fournisseur cloud principal pour QA générale et génération de contenu.",
     },
     claude: {
-      description: "Fournisseur à long contexte pour les workflows d'analyse approfondie.",
+      description:
+        "Fournisseur à long contexte pour les workflows d'analyse approfondie.",
     },
     openai: {
       description: "Famille GPT pour le chat et la génération polyvalente.",
     },
     huggingface: {
-      description: "Solution cloud de secours avec un large catalogue de modèles ouverts.",
+      description:
+        "Solution cloud de secours avec un large catalogue de modèles ouverts.",
     },
   },
   setup: {
@@ -286,7 +370,8 @@ const frFROverrides = {
       loading: "Chargement de la spécification API",
       errorRetryable: "Le service est temporairement indisponible. Réessayez.",
       errorNonRetryable: "Impossible de charger la documentation API.",
-      unauthorized: "Vous n'êtes pas autorisé à consulter la documentation API.",
+      unauthorized:
+        "Vous n'êtes pas autorisé à consulter la documentation API.",
       empty: "Aucun endpoint API n'a été trouvé.",
     },
     actions: {
@@ -312,7 +397,8 @@ const frFROverrides = {
       requestBodyIntro: "Corps de la requête",
       requestBodyAria: "Charge JSON du corps de la requête",
       bodyPlaceholder: '{\n  "exemple": "valeur"\n}',
-      noRequestBodyTemplate: "Aucun modèle de corps n'a été fourni par la spécification OpenAPI.",
+      noRequestBodyTemplate:
+        "Aucun modèle de corps n'a été fourni par la spécification OpenAPI.",
       parameterLabel: "Paramètre {name}",
       send: "Envoyer la requête",
       sending: "Envoi",
@@ -354,6 +440,42 @@ const frFROverrides = {
     hub: {
       pageTitle: "Centre d'automatisation",
       title: "Automatisation",
+      audit: {
+        title: "Audit des capacités RPA",
+        description:
+          "Vérifie quels flux d'automatisation navigateur sont implémentés, configurés et observables.",
+        aria: "Audit des capacités RPA",
+        openScraperButton: "Ouvrir le centre de scraping",
+        openScraperAria:
+          "Ouvrir le centre de scraping avec les cibles RPA étendues",
+        loadErrorFallback: "Impossible de charger l'audit des capacités RPA.",
+        available: "Disponible",
+        needsConfig: "Configuration requise",
+        unavailable: "Indisponible",
+        noIssues: "Aucun problème détecté.",
+        category: {
+          job_apply: "Candidature",
+          scrape: "Scraping",
+        },
+        summary: {
+          total: "Capacités",
+          totalDesc: "Flux RPA implémentés",
+          configured: "Configurées",
+          configuredDesc: "Prêtes dans l'environnement actuel",
+          live: "Événements en direct",
+          liveDesc: "Émettent des mises à jour d'exécution",
+        },
+        tableAria: "Détails de l'audit des capacités RPA",
+        columns: {
+          name: "Capacité",
+          category: "Catégorie",
+          configured: "Configurée",
+          manual: "Manuel",
+          scheduled: "Planifiée",
+          history: "Historique",
+          live: "Direct",
+        },
+      },
     },
     runs: {
       title: "Exécutions d'automatisation",
@@ -370,7 +492,8 @@ const frFROverrides = {
       title: "Automatisation des candidatures",
       stream: {
         title: "Flux d'exécution en direct",
-        subtitle: "Suivez la progression pendant l'exécution de l'automatisation.",
+        subtitle:
+          "Suivez la progression pendant l'exécution de l'automatisation.",
         aria: "Résumé de l'état d'exécution en direct",
         runIdTitle: "ID d'exécution",
         statusTitle: "Statut",
@@ -383,7 +506,8 @@ const frFROverrides = {
         cancelButton: "Arrêter le flux",
         cancelAria: "Arrêter l'abonnement au flux",
         errorTitle: "Erreur du flux",
-        startErrorFallback: "Impossible de démarrer le flux en direct pour cette exécution.",
+        startErrorFallback:
+          "Impossible de démarrer le flux en direct pour cette exécution.",
         states: {
           idle: "Inactif",
           loading: "Connexion au flux",
@@ -497,7 +621,8 @@ const frFROverrides = {
       featuredProjectsTitle: "Projets mis en avant",
       moreProjectsTitle: "Plus de projets",
       viewButton: "Voir",
-      emptyState: "Aucun projet à afficher. Ajoutez des projets dans l'éditeur de portfolio.",
+      emptyState:
+        "Aucun projet à afficher. Ajoutez des projets dans l'éditeur de portfolio.",
       notFound: "Portfolio introuvable. Créez d'abord votre portfolio.",
     },
   },
@@ -518,7 +643,8 @@ const frFROverrides = {
   interviewSession: {
     title: "Entraînement d'entretien",
     timeLabel: "Temps",
-    timeAria: "Temps d'entretien écoulé : {minutes} minutes et {seconds} secondes",
+    timeAria:
+      "Temps d'entretien écoulé : {minutes} minutes et {seconds} secondes",
     progressLabel: "Question {current} sur {total}",
     progressAria: "Progression de l'entretien",
     jobTargetBadge: "Poste ciblé",
@@ -577,7 +703,8 @@ const frFROverrides = {
     clearButton: "Effacer",
     logAria: "Conversation de chat IA",
     youLabel: "Vous",
-    inputPlaceholder: "Demandez à Bao quelque chose sur votre carrière dans l'industrie du jeu",
+    inputPlaceholder:
+      "Demandez à {assistant} quelque chose sur votre carrière dans l'industrie du jeu",
     inputAria: "Message du chat",
     sendAria: "Envoyer le message du chat",
     voiceSettings: {
@@ -592,10 +719,12 @@ const frFROverrides = {
       ttsModelAria: "Sélection du modèle de synthèse vocale",
       hint: "Ces profils fournisseur/modèle sont sauvegardés pour les flux vocaux du chat et de l'automatisation.",
       saveButton: "Sauvegarder le profil de voix",
-      saveAria: "Enregistrer les préférences de fournisseur et de modèle de voix",
+      saveAria:
+        "Enregistrer les préférences de fournisseur et de modèle de voix",
       saveSuccess: "Profil de voix sauvegardé",
       saveErrorFallback: "Échec de l'enregistrement du profil de voix",
-      unsavedHint: "Vous avez des modifications de profil de voix non enregistrées.",
+      unsavedHint:
+        "Vous avez des modifications de profil de voix non enregistrées.",
       providers: {
         browser: "Navigateur",
         custom: "Personnalisé",

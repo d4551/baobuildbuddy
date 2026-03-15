@@ -3,7 +3,7 @@
  */
 const enUS = {
   meta: {
-    title: "Career OS for Game Industry Hiring",
+    title: "{brand}",
     description:
       "Plan applications, tailor resumes, prep interviews, and run job-search automation from one workspace built for game industry hiring.",
   },
@@ -170,9 +170,11 @@ const enUS = {
   },
   apiDocs: {
     seoTitle: "API Documentation",
-    seoDescription: "Explore available server endpoints and test requests directly from the app.",
+    seoDescription:
+      "Explore available server endpoints and test requests directly from the app.",
     title: "API Reference",
-    intro: "Review your API surface and run endpoint checks in the integrated tester.",
+    intro:
+      "Review your API surface and run endpoint checks in the integrated tester.",
     endpointNavigator: "Endpoint Navigation",
     groups: {
       untagged: "Untagged",
@@ -207,7 +209,8 @@ const enUS = {
       requestBodyIntro: "Request body",
       requestBodyAria: "Request body JSON payload",
       bodyPlaceholder: '{\n  "example": "value"\n}',
-      noRequestBodyTemplate: "No body template was provided by the OpenAPI specification.",
+      noRequestBodyTemplate:
+        "No body template was provided by the OpenAPI specification.",
       parameterLabel: "Parameter {name}",
       send: "Send request",
       sending: "Sending",
@@ -249,7 +252,8 @@ const enUS = {
     pageTitle: "Dashboard",
     seoDescription:
       "Track live opportunities, application assets, interview prep, and automation health in one operating dashboard.",
-    welcomeDescription: "Run your job search like a disciplined studio pipeline.",
+    welcomeDescription:
+      "Run your job search like a disciplined studio pipeline.",
     welcomeHeading: {
       named: "Welcome, {name}!",
       fallback: "Welcome!",
@@ -510,7 +514,8 @@ const enUS = {
     seoDescription:
       "Translate gaming experience into career-ready competencies with confidence scoring, category mapping, and AI-assisted analysis.",
     title: "Skill Mapper",
-    subtitle: "Convert gaming achievements into clear professional capability signals.",
+    subtitle:
+      "Convert gaming achievements into clear professional capability signals.",
     description:
       "Map your gameplay achievements to transferable workplace skills, then reuse these mappings across resumes and interviews.",
     gamification: {
@@ -547,10 +552,12 @@ const enUS = {
       topMappingsDescription:
         "Highest-confidence transferable skills, ranked by mapping confidence score.",
       topMappingsAria: "Top skill mappings by confidence",
-      topMappingsEmpty: "No top mappings yet. Add or analyze mappings to populate this list.",
+      topMappingsEmpty:
+        "No top mappings yet. Add or analyze mappings to populate this list.",
     },
     filters: {
-      searchPlaceholder: "Search by gaming experience, transferable skill, or application...",
+      searchPlaceholder:
+        "Search by gaming experience, transferable skill, or application...",
       searchAria: "Search skill mappings",
       categoryGroupAria: "Filter mappings by category",
       allAria: "Show all categories",
@@ -558,7 +565,8 @@ const enUS = {
       clearButton: "Clear Filters",
       clearAria: "Clear active skill mapping filters",
     },
-    emptyState: "No skill mappings found. Add your first mapping to get started.",
+    emptyState:
+      "No skill mappings found. Add your first mapping to get started.",
     categories: {
       leadership: "Leadership",
       community: "Community Management",
@@ -589,13 +597,15 @@ const enUS = {
     createModal: {
       title: "Add Skill Mapping",
       gameExpressionLegend: "Gaming Experience",
-      gameExpressionPlaceholder: "e.g. Led a 40-person raid group to a world-first clear",
+      gameExpressionPlaceholder:
+        "e.g. Led a 40-person raid group to a world-first clear",
       gameExpressionAria: "Gaming experience",
       gameExpressionHint: "Gaming experience must be at least 2 characters.",
       transferableSkillLegend: "Transferable Skill",
       transferableSkillPlaceholder: "e.g. Team Leadership and Coordination",
       transferableSkillAria: "Transferable skill",
-      transferableSkillHint: "Transferable skill must be at least 2 characters.",
+      transferableSkillHint:
+        "Transferable skill must be at least 2 characters.",
       categoryLegend: "Category",
       categoryAria: "Skill category",
       applicationsLegend: "Industry Applications",
@@ -629,7 +639,8 @@ const enUS = {
     errors: {
       fetchFailed: "Failed to fetch skill mappings",
       gameExpressionMinLength: "Game experience must be at least 2 characters",
-      transferableSkillMinLength: "Transferable skill must be at least 2 characters",
+      transferableSkillMinLength:
+        "Transferable skill must be at least 2 characters",
       addFailed: "Failed to add skill mapping",
       deleteFailed: "Failed to delete skill mapping",
       analysisFailed: "Failed to analyze skills",
@@ -666,29 +677,39 @@ const enUS = {
       nextStepsTitle: "Next steps",
       feedback: {
         empty: "{category} readiness data is not available yet.",
-        early: "Early stage {category}. Focus on adding more mappings and evidence.",
-        developing: "Developing {category}. Keep adding mapped examples and proof.",
+        early:
+          "Early stage {category}. Focus on adding more mappings and evidence.",
+        developing:
+          "Developing {category}. Keep adding mapped examples and proof.",
         good: "Good {category}. Continue building depth to strengthen this area.",
         excellent: "Excellent {category}. You are well-prepared in this area.",
       },
       improvements: {
-        imp_tech_map: "Map more technical gaming skills to career-ready technical skills.",
-        imp_conf_up: "Increase confidence ratings for your existing technical mappings.",
+        imp_tech_map:
+          "Map more technical gaming skills to career-ready technical skills.",
+        imp_conf_up:
+          "Increase confidence ratings for your existing technical mappings.",
         imp_lead_comm: "Map more leadership and communication experiences.",
         imp_team_examples: "Add concrete team collaboration examples.",
-        imp_industry_research: "Research additional industry applications for your mapped skills.",
+        imp_industry_research:
+          "Research additional industry applications for your mapped skills.",
         imp_role_link: "Connect mapped skills to specific target job roles.",
         imp_evidence_add:
           "Add evidence for your mapped skills with clips, screenshots, or documents.",
-        imp_portfolio_build: "Build portfolio projects to demonstrate applied skills.",
-        imp_achievements_doc: "Document measurable achievements for your strongest mappings.",
+        imp_portfolio_build:
+          "Build portfolio projects to demonstrate applied skills.",
+        imp_achievements_doc:
+          "Document measurable achievements for your strongest mappings.",
         imp_transfer_strengthen:
           "Strengthen technical transfer by mapping game mechanics to engineering concepts.",
         imp_leadership_highlight:
           "Highlight leadership and communication experience from gaming contexts.",
-        imp_coverage_broaden: "Broaden skill coverage by mapping 10-15 diverse skills.",
-        imp_examples_refine: "Refine current mappings with more specific examples.",
-        imp_certs_pursue: "Pursue certifications that validate your technical strengths.",
+        imp_coverage_broaden:
+          "Broaden skill coverage by mapping 10-15 diverse skills.",
+        imp_examples_refine:
+          "Refine current mappings with more specific examples.",
+        imp_certs_pursue:
+          "Pursue certifications that validate your technical strengths.",
         imp_network_pro: "Network with professionals in your target industry.",
       },
       nextStepItems: {
@@ -696,20 +717,24 @@ const enUS = {
         step_network_industry: "Network with industry professionals.",
         step_prepare_interviews: "Prepare for technical interviews.",
         step_polish_linkedin: "Polish your LinkedIn profile.",
-        step_complete_portfolio: "Complete your portfolio with 3-5 strong projects.",
+        step_complete_portfolio:
+          "Complete your portfolio with 3-5 strong projects.",
         step_map_skills_15: "Map 5 more skills to reach 15+ total.",
         step_evidence_top: "Add evidence to your top 10 skills.",
         step_research_targets: "Research target companies and roles.",
         step_map_skills_10: "Map 10+ gaming skills to career skills.",
         step_start_portfolio: "Start building portfolio projects.",
         step_evidence_abilities: "Add evidence to demonstrate your abilities.",
-        step_explore_pathways: "Explore career pathways that match your skills.",
+        step_explore_pathways:
+          "Explore career pathways that match your skills.",
         step_map_skills_5: "Map your first 5 gaming skills.",
         step_explore_categories: "Explore different skill categories.",
-        step_learn_careers: "Learn about career options in the gaming industry.",
+        step_learn_careers:
+          "Learn about career options in the gaming industry.",
         step_setup_profile: "Set up your professional profile.",
       },
-      emptyState: "Readiness data is not available yet. Add skill mappings and run analysis first.",
+      emptyState:
+        "Readiness data is not available yet. Add skill mappings and run analysis first.",
     },
     pathways: {
       title: "Pathway Recommendations",
@@ -723,7 +748,8 @@ const enUS = {
         stable: "Stable",
         declining: "Declining",
       },
-      emptyState: "No pathways available yet. Add more mapped skills to generate recommendations.",
+      emptyState:
+        "No pathways available yet. Add more mapped skills to generate recommendations.",
     },
     errors: {
       loadFailed: "Failed to load career pathways data",
@@ -782,7 +808,8 @@ const enUS = {
       summary: "{completed} of {total} sections completed",
       jumpAria: "Jump to {section} section",
       nextStep: "Next recommended section: {section}",
-      complete: "All sections completed. Your resume is ready for final polish.",
+      complete:
+        "All sections completed. Your resume is ready for final polish.",
       quickActions: {
         coverLetter: "Cover Letter",
         coverLetterAria: "Open cover-letter builder with this resume context",
@@ -898,7 +925,8 @@ const enUS = {
     },
     gaming: {
       title: "Gaming Career Context",
-      description: "Capture game-domain specifics to improve resume tailoring and AI scoring.",
+      description:
+        "Capture game-domain specifics to improve resume tailoring and AI scoring.",
       rolesLegend: "Target Roles",
       rolesAria: "Target game-industry roles",
       rolesPlaceholder: "Gameplay Engineer, Technical Artist",
@@ -907,7 +935,8 @@ const enUS = {
       genresPlaceholder: "RPG, Action, Strategy",
       achievementsLegend: "Key Achievements",
       achievementsAria: "Gaming achievements",
-      achievementsPlaceholder: "Shipped titles, competition wins, major milestones",
+      achievementsPlaceholder:
+        "Shipped titles, competition wins, major milestones",
     },
     createModal: {
       title: "Create Resume",
@@ -946,7 +975,8 @@ const enUS = {
       nameMinLength: "Name must be at least 2 characters",
       invalidEmail: "Enter a valid email address",
       summaryMinLength: "Summary must be at least 50 characters",
-      invalidExperience: "Each experience item requires title, company, and valid dates",
+      invalidExperience:
+        "Each experience item requires title, company, and valid dates",
       invalidEducation: "Each education item requires degree and school",
       invalidProjects: "Each project item requires a name and description",
       resumeSaved: "Resume saved",
@@ -1094,7 +1124,8 @@ const enUS = {
       resumeAria: "Select resume context",
       resumeNoneOption: "No resume selected",
       jobDescriptionLegend: "Job Description (optional)",
-      jobDescriptionPlaceholder: "Paste a job description for better personalization.",
+      jobDescriptionPlaceholder:
+        "Paste a job description for better personalization.",
       jobDescriptionAria: "Job description context",
       jobDescriptionHint: "When provided, include at least {count} characters.",
       templateLegend: "Template",
@@ -1118,7 +1149,8 @@ const enUS = {
       fetchFailed: "Failed to fetch cover letters",
       companyMinLength: "Company name must be at least {count} characters",
       positionMinLength: "Position must be at least {count} characters",
-      jobDescriptionMinLength: "Job description must be at least {count} characters when provided",
+      jobDescriptionMinLength:
+        "Job description must be at least {count} characters when provided",
       generated: "Cover letter generated",
       generatedWithoutRedirect: "Cover letter generated",
       generateFailed: "Failed to generate cover letter",
@@ -1181,7 +1213,8 @@ const enUS = {
     },
     regenerateDialog: {
       title: "Regenerate Content",
-      message: "This will replace the current editor content with a newly generated draft.",
+      message:
+        "This will replace the current editor content with a newly generated draft.",
       confirmButton: "Regenerate",
       cancelButton: "Cancel",
     },
@@ -1228,7 +1261,8 @@ const enUS = {
       featuredProjectsTitle: "Featured Projects",
       moreProjectsTitle: "More Projects",
       viewButton: "View",
-      emptyState: "No projects to display. Add projects in the portfolio builder.",
+      emptyState:
+        "No projects to display. Add projects in the portfolio builder.",
       notFound: "Portfolio not found. Please create your portfolio first.",
     },
     stats: {
@@ -1267,7 +1301,8 @@ const enUS = {
       websitePlaceholder: "https://yourwebsite.com",
       websiteAria: "Portfolio website",
       bioLegend: "Bio",
-      bioPlaceholder: "Tell the world about yourself and your game development experience...",
+      bioPlaceholder:
+        "Tell the world about yourself and your game development experience...",
       bioAria: "Portfolio bio",
       saveButton: "Save Portfolio Info",
       saveAria: "Save portfolio profile",
@@ -1276,7 +1311,8 @@ const enUS = {
       title: "Projects",
       addButton: "Add Project",
       addAria: "Open project creation dialog",
-      emptyState: "No projects yet. Add your first project to showcase your work.",
+      emptyState:
+        "No projects yet. Add your first project to showcase your work.",
       filteredEmptyState: "No projects match your current search.",
       reorderCardAria: "Reorder card for project {title}",
       featuredBadge: "Featured",
@@ -1299,7 +1335,8 @@ const enUS = {
       projectTitleAria: "Project title",
       projectTitleHint: "Project title must be at least {count} characters.",
       descriptionLegend: "Description",
-      descriptionPlaceholder: "Describe your project, your role, and key achievements...",
+      descriptionPlaceholder:
+        "Describe your project, your role, and key achievements...",
       descriptionAria: "Project description",
       descriptionHint: "Description must be at least {count} characters.",
       projectUrlLegend: "Project URL (optional)",
@@ -1338,8 +1375,10 @@ const enUS = {
       projectDeleted: "Project deleted",
       exported: "Portfolio exported",
       exportFailed: "Failed to export portfolio",
-      projectTitleMinLength: "Project title must be at least {count} characters",
-      projectDescriptionMinLength: "Project description must be at least {count} characters",
+      projectTitleMinLength:
+        "Project title must be at least {count} characters",
+      projectDescriptionMinLength:
+        "Project description must be at least {count} characters",
       projectIdMissing: "Project ID is missing",
       projectSaveFailed: "Failed to save project",
       projectDeleteFailed: "Failed to delete project",
@@ -1710,6 +1749,42 @@ const enUS = {
         successRateTitle: "Success Rate",
         successRateDescription: "Completed run history",
       },
+      audit: {
+        title: "RPA Capability Audit",
+        description:
+          "Verify which browser-automation workflows are implemented, configured, and fully observable.",
+        aria: "RPA capability audit",
+        openScraperButton: "Open Scraper Hub",
+        openScraperAria: "Open scraper hub with expanded RPA targets",
+        loadErrorFallback: "Failed to load the RPA capability audit.",
+        available: "Available",
+        needsConfig: "Needs Config",
+        unavailable: "Unavailable",
+        noIssues: "No issues detected.",
+        category: {
+          job_apply: "Job Apply",
+          scrape: "Scrape",
+        },
+        summary: {
+          total: "Capabilities",
+          totalDesc: "Implemented RPA workflows",
+          configured: "Configured",
+          configuredDesc: "Ready in the current environment",
+          live: "Live Events",
+          liveDesc: "Emit run progress updates",
+        },
+        tableAria: "RPA capability audit details",
+        columns: {
+          name: "Capability",
+          category: "Category",
+          configured: "Configured",
+          manual: "Manual",
+          scheduled: "Scheduled",
+          history: "History",
+          live: "Live",
+          notes: "Notes",
+        },
+      },
       cards: {
         scraper: {
           title: "Scraper Workflows",
@@ -1724,12 +1799,14 @@ const enUS = {
         },
         emailResponse: {
           title: "Email Response",
-          description: "Generate AI-assisted email replies and track each run for auditability.",
+          description:
+            "Generate AI-assisted email replies and track each run for auditability.",
           button: "Open Email Response",
         },
         runHistory: {
           title: "Run History",
-          description: "Inspect full payloads, screenshots, and execution output.",
+          description:
+            "Inspect full payloads, screenshots, and execution output.",
           button: "Open Run History",
         },
       },
@@ -1872,17 +1949,20 @@ const enUS = {
       openRunsButton: "View Runs",
       openRunsAria: "Open automation runs page",
       subjectLegend: "Subject",
-      subjectPlaceholder: "Interview follow-up regarding gameplay engineer role",
+      subjectPlaceholder:
+        "Interview follow-up regarding gameplay engineer role",
       subjectAria: "Email subject",
       subjectHint: "Subject should be at least 3 characters.",
       senderLegend: "Sender (optional)",
       senderPlaceholder: "recruiter{'@'}studio.com",
       senderAria: "Sender email or name",
-      senderHint: "If this is an email address, it can be reused as the delivery recipient.",
+      senderHint:
+        "If this is an email address, it can be reused as the delivery recipient.",
       recipientLegend: "Recipient (optional)",
       recipientPlaceholder: "reply-to{'@'}studio.com",
       recipientAria: "Outbound delivery recipient email",
-      recipientHint: "Leave blank to reuse the sender email when delivery is enabled.",
+      recipientHint:
+        "Leave blank to reuse the sender email when delivery is enabled.",
       toneLegend: "Tone",
       toneAria: "Preferred response tone",
       tones: {
@@ -1891,7 +1971,8 @@ const enUS = {
         concise: "Concise",
       },
       messageLegend: "Incoming Message",
-      messagePlaceholder: "Paste the incoming email message to draft a response.",
+      messagePlaceholder:
+        "Paste the incoming email message to draft a response.",
       messageAria: "Incoming email message",
       messageHint: "Message should be at least 10 characters.",
       deliverLabel: "Deliver after generation",
@@ -1908,7 +1989,8 @@ const enUS = {
         aria: "Email automation scheduled run time",
         button: "Schedule Run",
         buttonAria: "Schedule email automation run",
-        invalidRunAt: "Choose a future date and time for the scheduled email run.",
+        invalidRunAt:
+          "Choose a future date and time for the scheduled email run.",
         createdTitle: "Email run scheduled",
         scheduledForLabel: "Scheduled for: {date}",
         statusLabel: "Status: {status}",
@@ -1953,7 +2035,8 @@ const enUS = {
       noScreenshots: "No screenshots available.",
       screenshotAlt: "Automation screenshot {index}",
       screenshotLinkLabel: "Open screenshot {index}",
-      screenshotLoadError: "Screenshot {index} could not be loaded in preview mode.",
+      screenshotLoadError:
+        "Screenshot {index} could not be loaded in preview mode.",
       loadingAria: "Loading automation run detail",
       retryButton: "Retry",
       retryAria: "Retry loading automation run detail",
@@ -2031,7 +2114,8 @@ const enUS = {
       },
       jobCard: {
         title: "Job Scraper",
-        description: "Fetch latest game-industry openings and sync them to the job board.",
+        description:
+          "Fetch latest game-industry openings and sync them to the job board.",
         runAria: "Run job scraper",
         runButton: "Run Job Scraper",
       },
@@ -2047,7 +2131,8 @@ const enUS = {
       table: {
         title: "Scraped Jobs Ready for Interview",
         openBoardButton: "Open Job Board",
-        emptyState: "No jobs found yet. Run the job scraper to populate interview targets.",
+        emptyState:
+          "No jobs found yet. Run the job scraper to populate interview targets.",
         aria: "Scraped jobs available for interview",
         interviewButton: "Interview This Job",
         interviewAria: "Start interview for {title} at {company}",
@@ -2060,8 +2145,10 @@ const enUS = {
       },
       messages: {
         studioCompleted: "Studio scrape completed. Directory data refreshed.",
-        studioCompletedWithXp: "Studio scrape completed (+{xp} XP). Directory data refreshed.",
-        jobCompleted: "Job scrape completed. Feed refreshed and ready for interview practice.",
+        studioCompletedWithXp:
+          "Studio scrape completed (+{xp} XP). Directory data refreshed.",
+        jobCompleted:
+          "Job scrape completed. Feed refreshed and ready for interview practice.",
         jobCompletedWithXp:
           "Job scrape completed (+{xp} XP). Feed refreshed and ready for interview practice.",
       },
@@ -2071,7 +2158,8 @@ const enUS = {
         aria: "Scheduled scrape run time",
         button: "Schedule Run",
         buttonAria: "Schedule scraper run",
-        invalidRunAt: "Choose a future date and time for the scheduled scraper run.",
+        invalidRunAt:
+          "Choose a future date and time for the scheduled scraper run.",
         createdTitle: "Scrape run scheduled",
         createdMessage: "Scrape run scheduled successfully.",
         scheduledForLabel: "Scheduled for: {date}",
@@ -2098,11 +2186,13 @@ const enUS = {
     },
     gemini: {
       name: "Google Gemini",
-      description: "Primary cloud provider for general QA and content generation.",
+      description:
+        "Primary cloud provider for general QA and content generation.",
     },
     claude: {
       name: "Anthropic Claude",
-      description: "Long-context reasoning provider for analysis-heavy workflows.",
+      description:
+        "Long-context reasoning provider for analysis-heavy workflows.",
     },
     openai: {
       name: "OpenAI",
@@ -2322,17 +2412,20 @@ const enUS = {
       items: {
         resume: {
           title: "Resume",
-          description: "Maintain at least one current resume aligned to your target roles.",
+          description:
+            "Maintain at least one current resume aligned to your target roles.",
           cta: "Open Resume",
         },
         coverLetter: {
           title: "Cover Letter",
-          description: "Keep reusable cover-letter drafts ready for role and studio tailoring.",
+          description:
+            "Keep reusable cover-letter drafts ready for role and studio tailoring.",
           cta: "Open Cover Letters",
         },
         portfolio: {
           title: "Portfolio",
-          description: "Showcase featured projects so your interview examples stay concrete.",
+          description:
+            "Showcase featured projects so your interview examples stay concrete.",
           cta: "Open Portfolio",
         },
       },
@@ -2358,7 +2451,8 @@ const enUS = {
     recent: {
       title: "Recent Sessions",
       viewAllButton: "View All",
-      emptyState: "No interview sessions yet. Start your first run from a job or studio context.",
+      emptyState:
+        "No interview sessions yet. Start your first run from a job or studio context.",
       tableAria: "Recent interview sessions",
       notAvailable: "N/A",
       viewSessionAria: "View interview session {id}",
@@ -2381,7 +2475,8 @@ const enUS = {
     config: {
       dialogAria: "Configure interview session dialog",
       title: "Configure Interview Session",
-      subtitle: "Pick a context, tune session options, then launch your practice run.",
+      subtitle:
+        "Pick a context, tune session options, then launch your practice run.",
       switchToJobAria: "Switch to scraped job mode",
       modeJobButton: "Scraped Job",
       switchToStudioAria: "Switch to studio mode",
@@ -2401,7 +2496,8 @@ const enUS = {
       studioLegend: "Studio",
       studioAria: "Studio",
       selectStudioOption: "Select a studio",
-      noStudiosHint: "No studios found yet. Run studio scraping or create a studio profile first.",
+      noStudiosHint:
+        "No studios found yet. Run studio scraping or create a studio profile first.",
       roleLegend: "Role",
       roleAria: "Role",
       experienceLegend: "Experience level",
@@ -2498,7 +2594,8 @@ const enUS = {
     seoDescription:
       "Manage profile identity, AI providers, notification preferences, and automation defaults from one control plane.",
     title: "Settings & Profile",
-    subtitle: "Centralize your identity, assistant behavior, and automation defaults in one place.",
+    subtitle:
+      "Centralize your identity, assistant behavior, and automation defaults in one place.",
     saveState: {
       idle: "Idle",
       saving: "Saving",
@@ -2616,7 +2713,7 @@ const enUS = {
       usernamePlaceholder: "mailer{'@'}studio.com",
       usernameAria: "SMTP username",
       fromNameLegend: "From name",
-      fromNamePlaceholder: "BaoBuildBuddy",
+      fromNamePlaceholder: "{brand}",
       fromNameAria: "Outbound sender display name",
       fromEmailLegend: "From email",
       fromEmailPlaceholder: "mailer{'@'}studio.com",
@@ -2625,7 +2722,8 @@ const enUS = {
       passwordLegend: "Password",
       passwordPlaceholder: "Store or replace the SMTP password",
       passwordAria: "SMTP password",
-      passwordHint: "Save a password if this transport requires authenticated delivery.",
+      passwordHint:
+        "Save a password if this transport requires authenticated delivery.",
       passwordStoredHint:
         "A password is already stored. Saving a new value will replace it, or clear it below.",
       clearPasswordAria: "Clear stored email delivery password",
@@ -2637,7 +2735,8 @@ const enUS = {
     },
     aiProviders: {
       title: "AI Providers",
-      subtitle: "Keep local providers as primary and cloud providers as controlled fallbacks.",
+      subtitle:
+        "Keep local providers as primary and cloud providers as controlled fallbacks.",
       expandAria: "Expand {provider} provider settings",
       configuredBadge: "Configured",
       endpointLabel: "Endpoint URL",
@@ -2660,9 +2759,106 @@ const enUS = {
       preferredProviderHint:
         "The AI system will try this provider first, then fall back to others.",
       preferredProviderSaved: "Preferred provider updated",
+      ollamaTipTitle: "Hot tip: Ollama runs outside this app",
+      ollamaTipDescription:
+        "Install it first and follow Ollama's setup for your own machine or project at",
+      ollamaTipLinkLabel: "ollama.com",
+      ollamaTipLinkAria: "Open Ollama website in a new tab",
+    },
+    brand: {
+      title: "Brand Control Plane",
+      subtitle:
+        "White-label identity, typography, semantic theme tokens, and locale copy from one persisted configuration.",
+      infoTitle: "One contract for every brand surface",
+      infoDescription:
+        "Preview identity, typography, theme tokens, and localized copy before publishing changes across the product.",
+      previewEyebrow: "Live preview",
+      previewTitle: "Brand surface preview",
+      previewSubtitle:
+        "Validate logo, tone, token contrast, and copy overrides before you save the next variant.",
+      previewLogoAlt: "{brand} logo preview",
+      previewPrimaryAction: "Open workspace",
+      previewSecondaryAction: "Review copy",
+      editorTabsAria: "Brand editor sections",
+      nameLegend: "Product name",
+      nameAria: "Product name",
+      assistantNameLegend: "Assistant name",
+      assistantNameAria: "Assistant name",
+      apiNameLegend: "API name",
+      apiNameAria: "API name",
+      taglineLegend: "Tagline",
+      taglineAria: "Tagline",
+      logoPathLegend: "Logo path or URL",
+      logoPathAria: "Logo path or URL",
+      faviconPathLegend: "Favicon path or URL",
+      faviconPathAria: "Favicon path or URL",
+      assetPathPlaceholder: "/branding/logo.svg",
+      assetPathHint:
+        "Use a public asset path or absolute URL that the client can load directly.",
+      defaultTitleLegend: "Default SEO title",
+      defaultTitleAria: "Default SEO title",
+      defaultDescriptionLegend: "Default SEO description",
+      defaultDescriptionAria: "Default SEO description",
+      fontStylesheetLegend: "Font stylesheet URL",
+      fontStylesheetAria: "Font stylesheet URL",
+      fontStylesheetPlaceholder: "https://fonts.googleapis.com/css2?...",
+      fontStylesheetHint:
+        "Load the hosted stylesheet for your chosen typefaces before applying the font-family stacks below.",
+      displayFontLegend: "Display font-family",
+      displayFontAria: "Display font-family",
+      bodyFontLegend: "Body font-family",
+      bodyFontAria: "Body font-family",
+      monoFontLegend: "Mono font-family",
+      monoFontAria: "Mono font-family",
+      lightThemeLegend: "Light theme JSON",
+      lightThemeAria: "Light theme JSON",
+      darkThemeLegend: "Dark theme JSON",
+      darkThemeAria: "Dark theme JSON",
+      themeJsonHint:
+        "Provide a full daisyUI token object. Keys must match the brand theme contract exactly.",
+      contentOverridesLegend: "Content overrides JSON",
+      contentOverridesAria: "Content overrides JSON",
+      contentOverridesHint:
+        "Use dot-delimited locale keys such as `dashboard.pageTitle` to override any user-facing copy.",
+      saveAria: "Save brand control plane settings",
+      saveButton: "Save Brand Settings",
+      tabs: {
+        identity: "Identity",
+        identityDescription:
+          "Adjust naming, assistant voice, and logo assets for the active brand package.",
+        typography: "Typography",
+        typographyDescription:
+          "Set the hosted font stylesheet and the display, body, and mono stacks used across the interface.",
+        themes: "Theme tokens",
+        themesDescription:
+          "Edit the light and dark daisyUI token objects that define semantic color, radius, border, and depth values.",
+        content: "Content",
+        contentDescription:
+          "Tune default SEO copy and runtime locale overrides without touching the source catalog.",
+      },
+      stats: {
+        product: "Product",
+        productDescription: "Primary customer-facing application name.",
+        assistant: "Assistant",
+        assistantDescription:
+          "Default assistant persona shown across chat surfaces.",
+        locales: "Locales",
+        localesDescription:
+          "Supported interface languages exposed in settings.",
+        overrides: "Overrides",
+        overridesDescription:
+          "Custom copy keys merged into the active locale catalog.",
+      },
+      errors: {
+        invalidLightTheme: "Light theme JSON is invalid.",
+        invalidDarkTheme: "Dark theme JSON is invalid.",
+        invalidContentOverrides: "Content overrides JSON is invalid.",
+        failedToSave: "Failed to save brand settings",
+      },
     },
     toasts: {
       apiKeysSaved: "API keys saved",
+      brandSaved: "Brand settings saved",
       emailDeliverySaved: "Email delivery settings saved",
       emailDeliveryPasswordSaved: "Email delivery password saved",
       emailDeliveryPasswordCleared: "Email delivery password cleared",
@@ -2675,12 +2871,14 @@ const enUS = {
       failedToTestProvider: "Failed to test provider",
       failedToSaveApiKeys: "Failed to save API keys",
       failedToSaveEmailDelivery: "Failed to save email delivery settings",
-      failedToSaveEmailDeliveryPassword: "Failed to save email delivery password",
+      failedToSaveEmailDeliveryPassword:
+        "Failed to save email delivery password",
       failedToSaveTheme: "Failed to save theme",
       failedToSavePreferences: "Failed to save preferences",
       nameTooShort: "Name must be at least 2 characters",
       invalidEmail: "Enter a valid email address",
-      invalidEmailDeliverySender: "Enter a valid sender email for email delivery",
+      invalidEmailDeliverySender:
+        "Enter a valid sender email for email delivery",
       failedToSaveProfile: "Failed to save profile",
       failedToSaveAutomation: "Failed to save automation settings",
     },
@@ -2755,8 +2953,10 @@ const enUS = {
         job: "Summarize the fit and next steps for {target}.",
         resume: "Identify the strongest upgrades for {target}.",
         studio: "Coach me on how to approach {target}.",
-        interviewSession: "Review the signals and coaching points for {target}.",
-        automationRun: "Explain what happened in {target} and what to fix next.",
+        interviewSession:
+          "Review the signals and coaching points for {target}.",
+        automationRun:
+          "Explain what happened in {target} and what to fix next.",
       },
     },
     inputPlaceholder: "Ask about interview prep, jobs, resumes...",
@@ -2794,7 +2994,8 @@ const enUS = {
     clearButton: "Clear",
     logAria: "AI chat conversation",
     youLabel: "You",
-    inputPlaceholder: "Ask Bao anything about your game-industry career",
+    inputPlaceholder:
+      "Ask {assistant} anything about your game-industry career",
     inputAria: "Chat message",
     sendAria: "Send chat message",
     sendButton: "Send",
@@ -2838,9 +3039,10 @@ const enUS = {
   aiChatCommon: {
     youLabel: "You",
     defaultGreeting:
-      "Hi, I’m Bao, your hiring copilot for game industry roles. What are we moving forward today?",
+      "Hi, I’m {assistant}, your hiring copilot for game industry roles. What are we moving forward today?",
     unableToProcessFallback: "I'm sorry, I couldn't process that request.",
-    requestErrorFallback: "I hit an error processing that request. Please try again.",
+    requestErrorFallback:
+      "I hit an error processing that request. Please try again.",
     requestErrorToast: "Chat request failed. Please try again.",
     timeAt: "at {time}",
     voice: {
@@ -2860,18 +3062,22 @@ const enUS = {
       idleStatus: "Voice ready",
       unsupportedHint: "Voice controls are unavailable in this browser.",
       recognitionUnsupportedHint: "Voice input is unavailable in this browser.",
-      synthesisUnsupportedHint: "Voice playback is unavailable in this browser.",
+      synthesisUnsupportedHint:
+        "Voice playback is unavailable in this browser.",
       errorLabel: "Voice error: {error}",
       errors: {
         unsupportedRecognition: "Voice input is not supported by this browser.",
-        unsupportedSynthesis: "Voice playback is not supported by this browser.",
-        startFailed: "Voice input could not start. Verify microphone permissions.",
+        unsupportedSynthesis:
+          "Voice playback is not supported by this browser.",
+        startFailed:
+          "Voice input could not start. Verify microphone permissions.",
         noSpeech: "No speech was detected. Try speaking again.",
         aborted: "Voice input was stopped before completion.",
         audioCapture: "No microphone source is available.",
         network: "A network issue interrupted voice processing.",
         notAllowed: "Microphone permission was denied.",
-        serviceNotAllowed: "Speech service access is blocked in this environment.",
+        serviceNotAllowed:
+          "Speech service access is blocked in this environment.",
         badGrammar: "Voice grammar parsing failed.",
         languageNotSupported: "Selected speech language is not supported.",
         canceled: "Voice playback was canceled.",
@@ -2880,7 +3086,8 @@ const enUS = {
         audioHardware: "Audio hardware is unavailable.",
         synthesisUnavailable: "Speech synthesis is currently unavailable.",
         synthesisFailed: "Speech synthesis failed to generate audio.",
-        languageUnavailable: "Speech synthesis does not support the selected language.",
+        languageUnavailable:
+          "Speech synthesis does not support the selected language.",
         voiceUnavailable: "Selected voice is unavailable on this device.",
         textTooLong: "The message is too long for speech playback.",
         invalidArgument: "Voice playback received an invalid argument.",
@@ -2918,7 +3125,8 @@ type LocaleMessageOverrides<T> = {
         : T[K];
 };
 
-export type AppTranslationOverrides = LocaleMessageOverrides<AppTranslationSchema>;
+export type AppTranslationOverrides =
+  LocaleMessageOverrides<AppTranslationSchema>;
 
 /**
  * Default English locale message catalog.

@@ -6,31 +6,41 @@ import { STATE_KEYS, THEME_NAMES } from "@bao/shared";
 export function useTheme() {
   const theme = useState<"bao-light" | "bao-dark">(STATE_KEYS.APP_THEME, () => THEME_NAMES.light);
 
-  function applyTheme(newTheme: "bao-light" | "bao-dark") {
+  function setTheme(
+    newTheme: "bao-light" | "bao-dark",
+    options: { persistLocal?: boolean } = {},
+  ) {
     theme.value = newTheme;
     if (import.meta.client) {
       document.documentElement.setAttribute("data-theme", newTheme);
-      localStorage.setItem(THEME_NAMES.storageKey, newTheme);
+      if (options.persistLocal !== false) {
+        localStorage.setItem(THEME_NAMES.storageKey, newTheme);
+      }
     }
   }
 
   function toggleTheme() {
-    applyTheme(theme.value === THEME_NAMES.light ? THEME_NAMES.dark : THEME_NAMES.light);
+    setTheme(theme.value === THEME_NAMES.light ? THEME_NAMES.dark : THEME_NAMES.light);
   }
 
-  function initTheme() {
+  function initTheme(preferredTheme?: "bao-light" | "bao-dark") {
     if (import.meta.client) {
       const saved = localStorage.getItem(THEME_NAMES.storageKey) as "bao-light" | "bao-dark" | null;
       if (saved) {
-        applyTheme(saved);
+        setTheme(saved, { persistLocal: false });
+      } else if (preferredTheme) {
+        setTheme(preferredTheme, { persistLocal: false });
       } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        applyTheme(THEME_NAMES.dark);
+        setTheme(THEME_NAMES.dark, { persistLocal: false });
       }
+    } else if (preferredTheme) {
+      theme.value = preferredTheme;
     }
   }
 
   return {
     theme: readonly(theme),
+    setTheme,
     toggleTheme,
     initTheme,
   };

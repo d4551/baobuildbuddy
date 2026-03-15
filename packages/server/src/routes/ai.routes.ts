@@ -42,6 +42,7 @@ import {
   SCHEMA_MAX_ITEMS_XXLARGE,
   safeParseJson,
   MS_PER_MINUTE,
+  resolveBrandSettings,
   settle,
   toErrorMessage,
 } from "@bao/shared";
@@ -57,11 +58,11 @@ import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
 import { contextManager } from "../services/ai/context-manager";
 import {
+  buildSystemPrompt,
   coverLetterPrompt,
   jobMatchPrompt,
   resumeEnhancePrompt,
   resumeScorePrompt,
-  SYSTEM_PROMPT,
 } from "../services/ai/prompts";
 import { applicationAutomationService } from "../services/automation/application-automation-service";
 import { mapAutomationRouteError } from "../utils/automation-route-error";
@@ -73,11 +74,14 @@ const aiRoutesLogger = createServerLogger("ai-routes");
 /**
  * Helper function to load settings and create AI service
  */
-async function getAIService() {
+async function getAISettingsRow() {
   const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+  return settingsRows[0];
+}
 
-  const settingsRow = settingsRows[0];
-  const aiService = AIService.fromSettings(settingsRow);
+async function getAIService(settingsRow?: Awaited<ReturnType<typeof getAISettingsRow>>) {
+  const resolvedSettingsRow = settingsRow ?? (await getAISettingsRow());
+  const aiService = AIService.fromSettings(resolvedSettingsRow);
   return aiService;
 }
 
@@ -725,16 +729,19 @@ const handleChatRoute = async (
     };
   }
 
-  const aiService = await getAIService();
   const clientContext = normalizeClientChatContext(body.context);
   const preferredDomain = clientContext?.domain ?? contextManager.inferDomain(body.message);
+  const settingsRow = await getAISettingsRow();
+  const runtimeBrand = resolveBrandSettings(settingsRow?.brandSettings);
+  const aiService = await getAIService(settingsRow);
   const contextualConversation = await contextManager.buildContext(
     sessionId,
     body.message,
     preferredDomain,
+    runtimeBrand,
   );
   const systemPrompt = composeChatSystemPrompt(
-    SYSTEM_PROMPT,
+    buildSystemPrompt(runtimeBrand),
     contextualConversation.systemPrompt,
     clientContext,
   );

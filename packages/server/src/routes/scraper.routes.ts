@@ -2,10 +2,12 @@ import {
   API_ERROR_SCRAPE_JOBS_FAILED,
   API_ERROR_SCRAPE_STUDIOS_FAILED,
   API_ERROR_UNKNOWN,
+  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  isAutomationScrapePortalId,
   settle,
 } from "@bao/shared";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { scraperService } from "../services/scraper-service";
 
 export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] })
@@ -23,17 +25,34 @@ export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] 
     }
     return scrapeStudiosResult.value;
   })
-  .post("/jobs/hitmarker", async ({ set }) => {
-    const scrapeJobsResult = await settle(scraperService.scrapeHitmarkerJobs());
-    if (scrapeJobsResult.status === "rejected") {
-      set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-      return {
-        error: API_ERROR_SCRAPE_JOBS_FAILED,
-        details:
-          scrapeJobsResult.reason instanceof Error
-            ? scrapeJobsResult.reason.message
-            : API_ERROR_UNKNOWN,
-      };
-    }
-    return scrapeJobsResult.value;
-  });
+  .post(
+    "/jobs/:portalId",
+    async ({ params, set }) => {
+      const portalId = params.portalId.trim();
+      if (!isAutomationScrapePortalId(portalId)) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return {
+          error: API_ERROR_SCRAPE_JOBS_FAILED,
+          details: `Unsupported scraper portal: ${params.portalId}`,
+        };
+      }
+
+      const scrapeJobsResult = await settle(scraperService.scrapeJobsForPortal(portalId));
+      if (scrapeJobsResult.status === "rejected") {
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return {
+          error: API_ERROR_SCRAPE_JOBS_FAILED,
+          details:
+            scrapeJobsResult.reason instanceof Error
+              ? scrapeJobsResult.reason.message
+              : API_ERROR_UNKNOWN,
+        };
+      }
+      return scrapeJobsResult.value;
+    },
+    {
+      params: t.Object({
+        portalId: t.String({ minLength: 1 }),
+      }),
+    },
+  );

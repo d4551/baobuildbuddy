@@ -59,8 +59,8 @@ export declare const userRoutes: Elysia<"/user", {
         profile: {
             put: {
                 body: {
-                    email?: string | undefined;
                     name?: string | undefined;
+                    email?: string | undefined;
                     location?: string | undefined;
                     website?: string | undefined;
                     phone?: string | undefined;

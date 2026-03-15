@@ -1,3 +1,10 @@
+import {
+  automationScrapeTargetToPortalId,
+  isAutomationJobScrapeTarget,
+  type AutomationScrapePortalId,
+  type AutomationScrapeTarget,
+} from "./automation";
+
 /**
  * OpenAPI/Swagger documentation version.
  */
@@ -24,7 +31,9 @@ export const API_ENDPOINTS = {
   automationJobApplySchedule: `${API_ENDPOINT_PREFIX}/automation/job-apply/schedule`,
   automationEmailResponse: `${API_ENDPOINT_PREFIX}/automation/email-response`,
   automationEmailResponseSchedule: `${API_ENDPOINT_PREFIX}/automation/email-response/schedule`,
+  automationScrape: `${API_ENDPOINT_PREFIX}/automation/scrape`,
   automationScrapeSchedule: `${API_ENDPOINT_PREFIX}/automation/scrape/schedule`,
+  automationCapabilities: `${API_ENDPOINT_PREFIX}/automation/capabilities`,
   automationRuns: `${API_ENDPOINT_PREFIX}/automation/runs`,
   automationScreenshotsBase: `${API_ENDPOINT_PREFIX}/automation/screenshots`,
   apiDocsUi: `${API_ENDPOINT_PREFIX}/docs/api`,
@@ -41,6 +50,30 @@ export const API_ENDPOINTS = {
  */
 export function buildResumeExportEndpoint(resumeId: string): string {
   return `${API_ENDPOINTS.resumes}/${encodeURIComponent(resumeId.trim())}/export`;
+}
+
+/**
+ * Builds the manual scraper endpoint for a gaming-portal job source.
+ *
+ * @param portalId Supported RPA portal identifier.
+ * @returns Canonical API endpoint path for the portal scraper.
+ */
+export function buildScraperJobsEndpoint(portalId: AutomationScrapePortalId): string {
+  return `${API_ENDPOINT_PREFIX}/scraper/jobs/${encodeURIComponent(portalId.trim())}`;
+}
+
+/**
+ * Builds the canonical scraper endpoint for a supported scrape target.
+ *
+ * @param target Supported scrape target.
+ * @returns Manual scraper API endpoint path.
+ */
+export function buildScraperEndpoint(target: AutomationScrapeTarget): string {
+  if (!isAutomationJobScrapeTarget(target)) {
+    return API_ENDPOINTS.scraperStudios;
+  }
+
+  return buildScraperJobsEndpoint(automationScrapeTargetToPortalId(target));
 }
 
 /**

@@ -1,11 +1,19 @@
+import { type BrandSettings } from "@bao/shared";
 /**
- * AI Prompt Templates for BaoBuildBuddy Career Assistant
- * Specialized for video game industry career guidance
+ * AI prompt templates specialized for video game industry career guidance.
  */
+type BrandPromptIdentity = Pick<BrandSettings, "name" | "assistantName">;
 /**
- * Core system prompt defining BaoBuildBuddy's personality and expertise
+ * Builds the primary career-assistant system prompt for a brand identity.
+ *
+ * @param brand Brand identity presented to the end user.
+ * @returns Fully rendered system prompt.
  */
-export declare const SYSTEM_PROMPT = "You are BaoBuildBuddy, a friendly and knowledgeable AI career assistant specializing in the video game industry. You have a warm, supportive personality inspired by helpful fairy companions in games.\n\nYour expertise includes:\n- Video game industry career paths (development, design, art, production, QA, etc.)\n- Major game studios and publishers (AAA, indie, mobile)\n- Gaming industry hiring practices and culture\n- Technical skills relevant to game development\n- Portfolio and resume optimization for gaming careers\n- Interview preparation for game industry roles\n\nYour communication style:\n- Friendly and encouraging, but professional\n- Use gaming references naturally when appropriate\n- Be specific and actionable in your advice\n- Celebrate achievements and progress\n- Acknowledge challenges while staying positive\n\nRemember:\n- You're helping people pursue their dreams in gaming\n- The game industry values passion, creativity, and continuous learning\n- Every person's career journey is unique\n- Technical skills matter, but so do soft skills and cultural fit";
+export declare function buildSystemPrompt(brand: BrandPromptIdentity): string;
+/**
+ * Core system prompt defining the default assistant personality and expertise.
+ */
+export declare const SYSTEM_PROMPT: string;
 /**
  * Resume enhancement prompt
  */
@@ -112,7 +120,14 @@ export declare function cvQuestionnaireSynthesizePrompt(questionsAndAnswers: Arr
     category: string;
 }>): string;
 /**
- * Domain-specific system prompts for contextual AI conversations
+ * Builds domain-specific system prompts for contextual AI conversations.
+ *
+ * @param brand Brand identity presented to the end user.
+ * @returns Domain prompt map keyed by chat domain.
+ */
+export declare function buildDomainSystemPrompts(brand: BrandPromptIdentity): Record<string, string>;
+/**
+ * Domain-specific system prompts for contextual AI conversations.
  */
 export declare const DOMAIN_SYSTEM_PROMPTS: Record<string, string>;
 /**

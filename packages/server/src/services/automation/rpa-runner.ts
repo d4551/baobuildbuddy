@@ -227,12 +227,21 @@ const resolveAutomationScriptPath = (options: RunAutomationScriptOptions): strin
   return resolve(SCRAPER_DIR, automationScriptEntryById[parsedScriptId.data]);
 };
 
+const resolveAutomationCommand = (scriptPath: string): string[] => {
+  const scriptRunnerPath = process.env.BAO_SCRIPT_RUNNER_PATH?.trim();
+  if (scriptRunnerPath && scriptRunnerPath.length > 0) {
+    return [scriptRunnerPath, SCRAPER_DIR, scriptPath];
+  }
+
+  return [process.execPath, scriptPath];
+};
+
 const spawnAutomationProcess = (
   scriptPath: string,
   signal: AbortSignal,
   killSignal: number | string | undefined,
 ): ReturnType<typeof Bun.spawn> =>
-  Bun.spawn([process.execPath, scriptPath], {
+  Bun.spawn(resolveAutomationCommand(scriptPath), {
     cwd: SCRAPER_DIR,
     stdin: "pipe",
     stdout: "pipe",

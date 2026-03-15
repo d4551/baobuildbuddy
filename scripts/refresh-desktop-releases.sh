@@ -57,8 +57,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RELEASE_ROOT="$REPO_ROOT/packages/desktop/releases"
 LINUX_DOCKERFILE_DIR="$REPO_ROOT/scripts/docker/linux-arm64-builder"
-APP_VERSION="$(awk -F '"' '/^version = /{print $2; exit}' "$REPO_ROOT/packages/desktop/src-tauri/Cargo.toml")"
-APP_PRODUCT_NAME="$(awk -F '"' '/"productName"[[:space:]]*:/ {print $4; exit}' "$REPO_ROOT/packages/desktop/src-tauri/tauri.conf.json")"
+APP_VERSION="$(cd "$REPO_ROOT" && bun --eval 'const pkg = await Bun.file("packages/desktop/package.json").json(); process.stdout.write(String(pkg.version ?? ""));')"
+APP_PRODUCT_NAME="$(cd "$REPO_ROOT" && bun --eval 'const config = await Bun.file("packages/desktop/src-tauri/tauri.conf.json").json(); process.stdout.write(String(config.productName ?? ""));')"
 APP_BINARY_NAME="$(awk -F '"' '/^name = /{print $2; exit}' "$REPO_ROOT/packages/desktop/src-tauri/Cargo.toml")"
 
 LINUX_DOCKER_PLATFORM="linux/arm64/v8"
@@ -86,11 +86,12 @@ WINDOWS_TARGET_ROOT="$REPO_ROOT/packages/desktop/src-tauri/target/${WINDOWS_BUIL
 
 MACOS_APP_NAME="${APP_PRODUCT_NAME}"
 MACOS_DMG_NAME="${APP_PRODUCT_NAME}_${APP_VERSION}_${MACOS_ARCH}.dmg"
+VERIFY_TARGETS=()
 
 cd "$REPO_ROOT"
 
 if [ -z "$APP_VERSION" ]; then
-  die "Could not resolve desktop app version from packages/desktop/src-tauri/Cargo.toml"
+  die "Could not resolve desktop app version from packages/desktop/package.json"
 fi
 if [ -z "$APP_PRODUCT_NAME" ]; then
   die "Could not resolve productName from packages/desktop/src-tauri/tauri.conf.json"
@@ -277,6 +278,7 @@ else
 fi
 
 if [ "$BUILD_MACOS" = true ]; then
+  VERIFY_TARGETS+=("macos")
   if [ "$(uname -s)" != "Darwin" ]; then
     die "macOS artifact build requires a macOS host."
   fi
@@ -326,6 +328,7 @@ if [ "$BUILD_MACOS" = true ]; then
 fi
 
 if [ "$BUILD_WINDOWS" = true ]; then
+  VERIFY_TARGETS+=("windows")
   require_command cargo
   require_command docker
 
@@ -426,6 +429,7 @@ fi
 
 LINUX_ARTIFACTS_READY=false
 if [ "$BUILD_LINUX" = true ]; then
+  VERIFY_TARGETS+=("linux")
   require_command docker
   prepare_linux_builder_image
 
@@ -444,7 +448,15 @@ if [ "$BUILD_LINUX" = true ]; then
       --exclude=packages/desktop/src-tauri/target-linux \
       -C /repo -cf - . | tar -C "$LINUX_DOCKER_BUILD_ROOT" -xf -
     cd "$LINUX_DOCKER_BUILD_ROOT"
-    bun install --frozen-lockfile --filter "@bao/desktop"
+    # Desktop runtime preparation builds multiple workspaces inside the container,
+    # but it does not need the root dev-only toolchain packages.
+    bun install --frozen-lockfile \
+      --filter "!./" \
+      --filter "@bao/shared" \
+      --filter "@bao/server" \
+      --filter "@bao/client" \
+      --filter "@bao/scraper" \
+      --filter "@bao/desktop"
     export CARGO_TARGET_DIR="$LINUX_DOCKER_BUILD_ROOT/$LINUX_CARGO_TARGET_DIR"
     export APPIMAGE_EXTRACT_AND_RUN=1
     export CARGO_BUILD_JOBS=1
@@ -563,6 +575,37 @@ while IFS= read -r artifact; do
 done < <(printf '%s\n' "${artifacts[@]}" | LC_ALL=C sort)
 
 ok "Updated $RELEASE_ROOT/sha256.txt"
+
+step "Verifying desktop release artifacts"
+VERIFY_TARGETS_CSV="$(IFS=,; printf '%s' "${VERIFY_TARGETS[*]}")"
+cd "$REPO_ROOT"
+bun run scripts/verify-desktop-release-artifacts.ts --targets "$VERIFY_TARGETS_CSV"
+ok "Desktop release artifacts verified"
+
+NATIVE_RUNTIME_VERIFY_TARGET=""
+case "$(uname -s)" in
+  Darwin)
+    if [ "$BUILD_MACOS" = true ]; then
+      NATIVE_RUNTIME_VERIFY_TARGET="$MACOS_BUILD_TARGET"
+    fi
+    ;;
+  Linux)
+    if [ "$BUILD_LINUX" = true ]; then
+      NATIVE_RUNTIME_VERIFY_TARGET="$LINUX_BUILD_TARGET"
+    fi
+    ;;
+  CYGWIN*|MINGW*|MSYS*|Windows_NT)
+    if [ "$BUILD_WINDOWS" = true ]; then
+      NATIVE_RUNTIME_VERIFY_TARGET="$WINDOWS_BUILD_TARGET"
+    fi
+    ;;
+esac
+
+if [ -n "$NATIVE_RUNTIME_VERIFY_TARGET" ]; then
+  step "Verifying packaged desktop runtime"
+  bun run verify:desktop-runtime --target "$NATIVE_RUNTIME_VERIFY_TARGET"
+  ok "Packaged desktop runtime verified"
+fi
 
 step "Release artifact summary"
 ls -lh "$RELEASE_ROOT/macos" "$RELEASE_ROOT/linux" "$RELEASE_ROOT/windows"

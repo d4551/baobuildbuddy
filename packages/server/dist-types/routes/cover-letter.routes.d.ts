@@ -115,8 +115,8 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         ":id": {
             put: {
                 body: {
-                    company?: string | undefined;
                     content?: {} | undefined;
+                    company?: string | undefined;
                     template?: string | undefined;
                     position?: string | undefined;
                     jobInfo?: {} | undefined;

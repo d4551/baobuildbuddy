@@ -2,6 +2,7 @@
 import type {
   AppSettings,
   AutomationSettings,
+  BrandSettings,
   EmailTransportSettings,
   UserProfile,
 } from "@bao/shared";
@@ -10,6 +11,9 @@ import {
   type AIProviderType,
   APP_LANGUAGE_OPTIONS,
   APP_LANGUAGE_LABELS,
+  brandContentSettingsSchema,
+  brandThemePaletteSchema,
+  DEFAULT_BRAND_SETTINGS,
   type AppLanguageCode,
   AUTOMATION_BROWSER_OPTIONS,
   DEFAULT_APP_LANGUAGE,
@@ -22,6 +26,10 @@ import {
   isValidEmail,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
+  OLLAMA_WEBSITE_URL,
+  parseJson,
+  resolveBrandSettings,
+  THEME_NAMES,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -37,6 +45,7 @@ type SettingsWithFlags = AppSettings & {
 };
 
 type SaveState = "idle" | "saving" | "success" | "error";
+type BrandEditorPanel = "identity" | "typography" | "themes" | "content";
 
 type ProviderField =
   | "localModelEndpoint"
@@ -56,6 +65,16 @@ type ProviderInputConfig = {
 type ProfileUpdatePayload = Partial<UserProfile> &
   Pick<UserProfile, "name" | "technicalSkills" | "softSkills">;
 
+const BRAND_EDITOR_PANELS = [
+  { id: "identity", labelKey: "settings.brand.tabs.identity" },
+  { id: "typography", labelKey: "settings.brand.tabs.typography" },
+  { id: "themes", labelKey: "settings.brand.tabs.themes" },
+  { id: "content", labelKey: "settings.brand.tabs.content" },
+] as const satisfies ReadonlyArray<{
+  id: BrandEditorPanel;
+  labelKey: string;
+}>;
+
 const {
   settings,
   fetchSettings,
@@ -64,7 +83,13 @@ const {
   testApiKey,
   loading: settingsLoading,
 } = useSettings();
-const { profile, fetchProfile, updateProfile, loading: profileLoading } = useUser();
+const {
+  profile,
+  fetchProfile,
+  updateProfile,
+  loading: profileLoading,
+} = useUser();
+const { resolvedBrand } = useBrand();
 const { theme, toggleTheme } = useTheme();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
@@ -93,7 +118,8 @@ const providerInputs = computed<ProviderInputConfig[]>(() =>
   })),
 );
 
-const buildLanguageLabel = (value: AppLanguageCode): string => APP_LANGUAGE_LABELS[value] || value;
+const buildLanguageLabel = (value: AppLanguageCode): string =>
+  APP_LANGUAGE_LABELS[value] || value;
 
 const languageOptions = computed(() =>
   APP_LANGUAGE_OPTIONS.map((option) => ({
@@ -114,24 +140,56 @@ const apiKeys = reactive<Record<ProviderField, string>>({
   localModelName: LOCAL_AI_DEFAULT_MODEL,
 });
 
-const testResults = reactive<Record<AIProviderType, { valid: boolean } | null>>({
-  local: null,
-  gemini: null,
-  openai: null,
-  claude: null,
-  huggingface: null,
-});
+const testResults = reactive<Record<AIProviderType, { valid: boolean } | null>>(
+  {
+    local: null,
+    gemini: null,
+    openai: null,
+    claude: null,
+    huggingface: null,
+  },
+);
 
 const testingProvider = ref<AIProviderType | null>(null);
 const preferencesLanguage = ref(DEFAULT_APP_LANGUAGE);
 const preferredProviderSelection = ref<AIProviderType>("local");
 const preferencesSaveState = ref<SaveState>("idle");
 const profileSaveState = ref<SaveState>("idle");
+const brandSaveState = ref<SaveState>("idle");
+const brandEditorPanel = ref<BrandEditorPanel>("identity");
+
+const brandFieldsetClass =
+  "fieldset rounded-box border border-base-300/70 bg-base-200/40 p-4 shadow-sm";
 
 const notificationForm = reactive({ ...DEFAULT_NOTIFICATION_PREFERENCES });
-const automationForm = reactive<AutomationSettings>({ ...DEFAULT_AUTOMATION_SETTINGS });
-const emailTransportForm = reactive<EmailTransportSettings>({ ...DEFAULT_EMAIL_TRANSPORT_SETTINGS });
+const automationForm = reactive<AutomationSettings>({
+  ...DEFAULT_AUTOMATION_SETTINGS,
+});
+const emailTransportForm = reactive<EmailTransportSettings>({
+  ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+});
 const emailTransportPasswordDraft = ref("");
+const brandForm = reactive({
+  name: DEFAULT_BRAND_SETTINGS.name,
+  assistantName: DEFAULT_BRAND_SETTINGS.assistantName,
+  apiName: DEFAULT_BRAND_SETTINGS.apiName,
+  logoPath: DEFAULT_BRAND_SETTINGS.logoPath,
+  faviconPath: DEFAULT_BRAND_SETTINGS.faviconPath,
+  fontStylesheetUrl: DEFAULT_BRAND_SETTINGS.typography.fontStylesheetUrl,
+  displayFontFamily: DEFAULT_BRAND_SETTINGS.typography.displayFontFamily,
+  bodyFontFamily: DEFAULT_BRAND_SETTINGS.typography.bodyFontFamily,
+  monoFontFamily: DEFAULT_BRAND_SETTINGS.typography.monoFontFamily,
+  tagline: DEFAULT_BRAND_SETTINGS.content.tagline,
+  defaultTitle: DEFAULT_BRAND_SETTINGS.content.defaultTitle,
+  defaultDescription: DEFAULT_BRAND_SETTINGS.content.defaultDescription,
+  lightThemeJson: JSON.stringify(DEFAULT_BRAND_SETTINGS.lightTheme, null, 2),
+  darkThemeJson: JSON.stringify(DEFAULT_BRAND_SETTINGS.darkTheme, null, 2),
+  contentOverridesJson: JSON.stringify(
+    DEFAULT_BRAND_SETTINGS.content.contentOverrides,
+    null,
+    2,
+  ),
+});
 
 const profileForm = reactive({
   name: "",
@@ -159,18 +217,25 @@ watch(
   (currentSettings) => {
     if (!currentSettings) return;
 
-    apiKeys.localModelEndpoint = currentSettings.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT;
-    apiKeys.localModelName = currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
+    apiKeys.localModelEndpoint =
+      currentSettings.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT;
+    apiKeys.localModelName =
+      currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
 
-    preferencesLanguage.value = currentSettings.language || DEFAULT_APP_LANGUAGE;
-    const isKnownProvider = (v: string): v is AIProviderType => v in providerFieldById;
+    preferencesLanguage.value =
+      currentSettings.language || DEFAULT_APP_LANGUAGE;
+    const isKnownProvider = (v: string): v is AIProviderType =>
+      v in providerFieldById;
     const saved = currentSettings.preferredProvider ?? "";
     preferredProviderSelection.value = isKnownProvider(saved) ? saved : "local";
 
-    notificationForm.achievements = currentSettings.notifications?.achievements ?? true;
-    notificationForm.dailyChallenges = currentSettings.notifications?.dailyChallenges ?? true;
+    notificationForm.achievements =
+      currentSettings.notifications?.achievements ?? true;
+    notificationForm.dailyChallenges =
+      currentSettings.notifications?.dailyChallenges ?? true;
     notificationForm.levelUp = currentSettings.notifications?.levelUp ?? true;
-    notificationForm.jobAlerts = currentSettings.notifications?.jobAlerts ?? true;
+    notificationForm.jobAlerts =
+      currentSettings.notifications?.jobAlerts ?? true;
 
     if (currentSettings.automationSettings) {
       Object.assign(automationForm, {
@@ -183,6 +248,27 @@ watch(
       ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,
       ...currentSettings.emailTransportSettings,
     });
+
+    const nextBrand = currentSettings.brandSettings ?? DEFAULT_BRAND_SETTINGS;
+    brandForm.name = nextBrand.name;
+    brandForm.assistantName = nextBrand.assistantName;
+    brandForm.apiName = nextBrand.apiName;
+    brandForm.logoPath = nextBrand.logoPath;
+    brandForm.faviconPath = nextBrand.faviconPath;
+    brandForm.fontStylesheetUrl = nextBrand.typography.fontStylesheetUrl;
+    brandForm.displayFontFamily = nextBrand.typography.displayFontFamily;
+    brandForm.bodyFontFamily = nextBrand.typography.bodyFontFamily;
+    brandForm.monoFontFamily = nextBrand.typography.monoFontFamily;
+    brandForm.tagline = nextBrand.content.tagline;
+    brandForm.defaultTitle = nextBrand.content.defaultTitle;
+    brandForm.defaultDescription = nextBrand.content.defaultDescription;
+    brandForm.lightThemeJson = JSON.stringify(nextBrand.lightTheme, null, 2);
+    brandForm.darkThemeJson = JSON.stringify(nextBrand.darkTheme, null, 2);
+    brandForm.contentOverridesJson = JSON.stringify(
+      nextBrand.content.contentOverrides,
+      null,
+      2,
+    );
   },
   { immediate: true },
 );
@@ -192,6 +278,116 @@ const emailDeliveryConfigured = computed(() =>
     settings.value?.emailTransportSettings ?? emailTransportForm,
     settings.value?.hasEmailTransportPassword ?? false,
   ),
+);
+
+const showOllamaHotTip = computed(
+  () => preferredProviderSelection.value === "local",
+);
+
+function parseBrandContentOverrides(): Record<string, string> {
+  return (
+    parseJson(
+      brandForm.contentOverridesJson,
+      brandContentSettingsSchema.shape.contentOverrides,
+    ) ?? {}
+  );
+}
+
+const brandDraft = computed(() =>
+  resolveBrandSettings({
+    name: brandForm.name.trim() || DEFAULT_BRAND_SETTINGS.name,
+    assistantName:
+      brandForm.assistantName.trim() || DEFAULT_BRAND_SETTINGS.assistantName,
+    apiName: brandForm.apiName.trim() || DEFAULT_BRAND_SETTINGS.apiName,
+    logoPath: brandForm.logoPath.trim() || DEFAULT_BRAND_SETTINGS.logoPath,
+    faviconPath:
+      brandForm.faviconPath.trim() || DEFAULT_BRAND_SETTINGS.faviconPath,
+    typography: {
+      fontStylesheetUrl: brandForm.fontStylesheetUrl.trim(),
+      displayFontFamily:
+        brandForm.displayFontFamily.trim() ||
+        DEFAULT_BRAND_SETTINGS.typography.displayFontFamily,
+      bodyFontFamily:
+        brandForm.bodyFontFamily.trim() ||
+        DEFAULT_BRAND_SETTINGS.typography.bodyFontFamily,
+      monoFontFamily:
+        brandForm.monoFontFamily.trim() ||
+        DEFAULT_BRAND_SETTINGS.typography.monoFontFamily,
+    },
+    lightTheme:
+      parseJson(brandForm.lightThemeJson, brandThemePaletteSchema) ??
+      DEFAULT_BRAND_SETTINGS.lightTheme,
+    darkTheme:
+      parseJson(brandForm.darkThemeJson, brandThemePaletteSchema) ??
+      DEFAULT_BRAND_SETTINGS.darkTheme,
+    content: {
+      tagline:
+        brandForm.tagline.trim() || DEFAULT_BRAND_SETTINGS.content.tagline,
+      defaultTitle:
+        brandForm.defaultTitle.trim() ||
+        DEFAULT_BRAND_SETTINGS.content.defaultTitle,
+      defaultDescription:
+        brandForm.defaultDescription.trim() ||
+        DEFAULT_BRAND_SETTINGS.content.defaultDescription,
+      contentOverrides: parseBrandContentOverrides(),
+    },
+  }),
+);
+
+const brandPreviewInitial = computed(() => {
+  const value = brandDraft.value.name.trim().charAt(0).toUpperCase();
+  return value.length > 0
+    ? value
+    : DEFAULT_BRAND_SETTINGS.name.trim().charAt(0).toUpperCase();
+});
+
+const brandPreviewShellStyle = computed<Record<string, string>>(() => ({
+  background: `linear-gradient(135deg, ${brandDraft.value.lightTheme.base100}, ${brandDraft.value.lightTheme.base200})`,
+  color: brandDraft.value.lightTheme.baseContent,
+  fontFamily: brandDraft.value.typography.bodyFontFamily,
+}));
+
+const brandPreviewHeadingStyle = computed<Record<string, string>>(() => ({
+  fontFamily: brandDraft.value.typography.displayFontFamily,
+  color: brandDraft.value.lightTheme.baseContent,
+}));
+
+const brandPreviewPrimaryBadgeStyle = computed<Record<string, string>>(() => ({
+  backgroundColor: brandDraft.value.lightTheme.primary,
+  color: brandDraft.value.lightTheme.primaryContent,
+}));
+
+const brandPreviewSecondaryBadgeStyle = computed<Record<string, string>>(
+  () => ({
+    backgroundColor: brandDraft.value.lightTheme.base100,
+    borderColor: brandDraft.value.lightTheme.base300,
+    color: brandDraft.value.lightTheme.baseContent,
+  }),
+);
+
+const brandPreviewPrimaryActionStyle = computed<Record<string, string>>(() => ({
+  backgroundColor: brandDraft.value.lightTheme.accent,
+  color: brandDraft.value.lightTheme.accentContent,
+}));
+
+const brandPreviewSecondaryActionStyle = computed<Record<string, string>>(
+  () => ({
+    backgroundColor: brandDraft.value.lightTheme.base100,
+    borderColor: brandDraft.value.lightTheme.base300,
+    color: brandDraft.value.lightTheme.baseContent,
+  }),
+);
+
+const brandLightSwatchStyle = computed<Record<string, string>>(() => ({
+  background: `linear-gradient(135deg, ${brandDraft.value.lightTheme.base100}, ${brandDraft.value.lightTheme.primary})`,
+}));
+
+const brandDarkSwatchStyle = computed<Record<string, string>>(() => ({
+  background: `linear-gradient(135deg, ${brandDraft.value.darkTheme.base100}, ${brandDraft.value.darkTheme.primary})`,
+}));
+
+const brandOverrideCount = computed(
+  () => Object.keys(brandDraft.value.content.contentOverrides).length,
 );
 
 watch(
@@ -237,14 +433,19 @@ function providerKeyLabel(providerId: AIProviderType): string {
   return t("settings.aiProviders.credentialLabel");
 }
 
-function providerPlaceholder(providerId: AIProviderType, providerLabel: string): string {
+function providerPlaceholder(
+  providerId: AIProviderType,
+  providerLabel: string,
+): string {
   if (providerId === "local") {
     return LOCAL_AI_DEFAULT_ENDPOINT;
   }
   if (providerId === "huggingface") {
     return t("settings.aiProviders.huggingFacePlaceholder");
   }
-  return t("settings.aiProviders.apiKeyPlaceholder", { provider: providerLabel });
+  return t("settings.aiProviders.apiKeyPlaceholder", {
+    provider: providerLabel,
+  });
 }
 
 function saveStateLabel(value: SaveState): string {
@@ -254,9 +455,63 @@ function saveStateLabel(value: SaveState): string {
   return t("settings.saveState.idle");
 }
 
-function browserOptionLabel(browser: (typeof AUTOMATION_BROWSER_OPTIONS)[number]): string {
-  if (browser === "chrome") return t("settings.automation.browserOptions.chrome");
-  if (browser === "chromium") return t("settings.automation.browserOptions.chromium");
+function focusBrandEditorTab(panel: BrandEditorPanel): void {
+  if (!import.meta.client) return;
+
+  requestAnimationFrame(() => {
+    document.getElementById(`brand-tab-${panel}`)?.focus();
+  });
+}
+
+function setBrandEditorPanel(
+  panel: BrandEditorPanel,
+  options?: { focusTab?: boolean },
+): void {
+  brandEditorPanel.value = panel;
+  if (options?.focusTab) {
+    focusBrandEditorTab(panel);
+  }
+}
+
+function handleBrandTabKeydown(
+  event: KeyboardEvent,
+  panel: BrandEditorPanel,
+): void {
+  const currentIndex = BRAND_EDITOR_PANELS.findIndex(
+    (entry) => entry.id === panel,
+  );
+  if (currentIndex === -1) return;
+
+  let nextPanel: BrandEditorPanel | null = null;
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    nextPanel =
+      BRAND_EDITOR_PANELS[(currentIndex + 1) % BRAND_EDITOR_PANELS.length]
+        ?.id ?? null;
+  } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    nextPanel =
+      BRAND_EDITOR_PANELS[
+        (currentIndex - 1 + BRAND_EDITOR_PANELS.length) %
+          BRAND_EDITOR_PANELS.length
+      ]?.id ?? null;
+  } else if (event.key === "Home") {
+    nextPanel = BRAND_EDITOR_PANELS[0]?.id ?? null;
+  } else if (event.key === "End") {
+    nextPanel = BRAND_EDITOR_PANELS[BRAND_EDITOR_PANELS.length - 1]?.id ?? null;
+  }
+
+  if (!nextPanel) return;
+
+  event.preventDefault();
+  setBrandEditorPanel(nextPanel, { focusTab: true });
+}
+
+function browserOptionLabel(
+  browser: (typeof AUTOMATION_BROWSER_OPTIONS)[number],
+): string {
+  if (browser === "chrome")
+    return t("settings.automation.browserOptions.chrome");
+  if (browser === "chromium")
+    return t("settings.automation.browserOptions.chromium");
   return t("settings.automation.browserOptions.edge");
 }
 
@@ -312,7 +567,10 @@ async function handleTest(providerId: AIProviderType) {
   testingProvider.value = null;
 
   if (!providerTestResult.ok) {
-    showToastError(providerTestResult.error, t("settings.errors.failedToTestProvider"));
+    showToastError(
+      providerTestResult.error,
+      t("settings.errors.failedToTestProvider"),
+    );
     testResults[providerId] = { valid: false };
     return;
   }
@@ -332,7 +590,10 @@ async function handleSavePreferredProvider() {
     t("settings.errors.failedToSavePreferences"),
   );
   if (!providerSaveResult.ok) {
-    showToastError(providerSaveResult.error, t("settings.errors.failedToSavePreferences"));
+    showToastError(
+      providerSaveResult.error,
+      t("settings.errors.failedToSavePreferences"),
+    );
     return;
   }
   $toast.success(t("settings.aiProviders.preferredProviderSaved"));
@@ -344,24 +605,32 @@ async function handleSaveKeys() {
     localModelName: apiKeys.localModelName || LOCAL_AI_DEFAULT_MODEL,
   };
 
-  if (apiKeys.geminiApiKey.trim()) payload.geminiApiKey = apiKeys.geminiApiKey.trim();
-  if (apiKeys.openaiApiKey.trim()) payload.openaiApiKey = apiKeys.openaiApiKey.trim();
-  if (apiKeys.claudeApiKey.trim()) payload.claudeApiKey = apiKeys.claudeApiKey.trim();
-  if (apiKeys.huggingfaceToken.trim()) payload.huggingfaceToken = apiKeys.huggingfaceToken.trim();
+  if (apiKeys.geminiApiKey.trim())
+    payload.geminiApiKey = apiKeys.geminiApiKey.trim();
+  if (apiKeys.openaiApiKey.trim())
+    payload.openaiApiKey = apiKeys.openaiApiKey.trim();
+  if (apiKeys.claudeApiKey.trim())
+    payload.claudeApiKey = apiKeys.claudeApiKey.trim();
+  if (apiKeys.huggingfaceToken.trim())
+    payload.huggingfaceToken = apiKeys.huggingfaceToken.trim();
 
   const saveKeysResult = await settlePromise(
     updateApiKeys(payload),
     t("settings.errors.failedToSaveApiKeys"),
   );
   if (!saveKeysResult.ok) {
-    showToastError(saveKeysResult.error, t("settings.errors.failedToSaveApiKeys"));
+    showToastError(
+      saveKeysResult.error,
+      t("settings.errors.failedToSaveApiKeys"),
+    );
     return;
   }
   $toast.success(t("settings.toasts.apiKeysSaved"));
 }
 
 async function handleToggleTheme() {
-  const nextTheme = theme.value === "bao-light" ? "bao-dark" : "bao-light";
+  const nextTheme =
+    theme.value === THEME_NAMES.light ? THEME_NAMES.dark : THEME_NAMES.light;
   toggleTheme();
 
   const themeSaveResult = await settlePromise(
@@ -369,7 +638,10 @@ async function handleToggleTheme() {
     t("settings.errors.failedToSaveTheme"),
   );
   if (!themeSaveResult.ok) {
-    showToastError(themeSaveResult.error, t("settings.errors.failedToSaveTheme"));
+    showToastError(
+      themeSaveResult.error,
+      t("settings.errors.failedToSaveTheme"),
+    );
     return;
   }
   $toast.success(t("settings.toasts.themeSaved"));
@@ -393,7 +665,10 @@ async function handleSavePreferences() {
 
   if (!preferenceSaveResult.ok) {
     preferencesSaveState.value = "error";
-    showToastError(preferenceSaveResult.error, t("settings.errors.failedToSavePreferences"));
+    showToastError(
+      preferenceSaveResult.error,
+      t("settings.errors.failedToSavePreferences"),
+    );
     return;
   }
 
@@ -459,12 +734,102 @@ async function handleSaveProfile() {
   );
   if (!profileSaveResult.ok) {
     profileSaveState.value = "error";
-    showToastError(profileSaveResult.error, t("settings.errors.failedToSaveProfile"));
+    showToastError(
+      profileSaveResult.error,
+      t("settings.errors.failedToSaveProfile"),
+    );
     return;
   }
 
   profileSaveState.value = "success";
   $toast.success(t("settings.toasts.profileSaved"));
+}
+
+function buildBrandPayload(): Partial<BrandSettings> | null {
+  const lightTheme = parseJson(
+    brandForm.lightThemeJson,
+    brandThemePaletteSchema,
+  );
+  if (!lightTheme) {
+    $toast.error(t("settings.brand.errors.invalidLightTheme"));
+    return null;
+  }
+
+  const darkTheme = parseJson(brandForm.darkThemeJson, brandThemePaletteSchema);
+  if (!darkTheme) {
+    $toast.error(t("settings.brand.errors.invalidDarkTheme"));
+    return null;
+  }
+
+  const contentCandidate = parseJson(
+    JSON.stringify({
+      tagline:
+        brandForm.tagline.trim() || DEFAULT_BRAND_SETTINGS.content.tagline,
+      defaultTitle:
+        brandForm.defaultTitle.trim() ||
+        DEFAULT_BRAND_SETTINGS.content.defaultTitle,
+      defaultDescription:
+        brandForm.defaultDescription.trim() ||
+        DEFAULT_BRAND_SETTINGS.content.defaultDescription,
+      contentOverrides: parseBrandContentOverrides(),
+    }),
+    brandContentSettingsSchema,
+  );
+  if (!contentCandidate) {
+    $toast.error(t("settings.brand.errors.invalidContentOverrides"));
+    return null;
+  }
+
+  return {
+    name: brandForm.name.trim() || DEFAULT_BRAND_SETTINGS.name,
+    assistantName:
+      brandForm.assistantName.trim() || DEFAULT_BRAND_SETTINGS.assistantName,
+    apiName: brandForm.apiName.trim() || DEFAULT_BRAND_SETTINGS.apiName,
+    logoPath: brandForm.logoPath.trim() || DEFAULT_BRAND_SETTINGS.logoPath,
+    faviconPath:
+      brandForm.faviconPath.trim() || DEFAULT_BRAND_SETTINGS.faviconPath,
+    typography: {
+      fontStylesheetUrl: brandForm.fontStylesheetUrl.trim(),
+      displayFontFamily:
+        brandForm.displayFontFamily.trim() ||
+        DEFAULT_BRAND_SETTINGS.typography.displayFontFamily,
+      bodyFontFamily:
+        brandForm.bodyFontFamily.trim() ||
+        DEFAULT_BRAND_SETTINGS.typography.bodyFontFamily,
+      monoFontFamily:
+        brandForm.monoFontFamily.trim() ||
+        DEFAULT_BRAND_SETTINGS.typography.monoFontFamily,
+    },
+    lightTheme,
+    darkTheme,
+    content: contentCandidate,
+  };
+}
+
+async function handleSaveBrand() {
+  const brandPayload = buildBrandPayload();
+  if (!brandPayload) {
+    brandSaveState.value = "error";
+    return;
+  }
+
+  brandSaveState.value = "saving";
+  const brandSaveResult = await settlePromise(
+    updateSettings({ brandSettings: brandPayload }),
+    t("settings.brand.errors.failedToSave"),
+  );
+
+  if (!brandSaveResult.ok) {
+    brandSaveState.value = "error";
+    showToastError(
+      brandSaveResult.error,
+      t("settings.brand.errors.failedToSave"),
+    );
+    return;
+  }
+
+  brandSaveState.value = "success";
+  $toast.success(t("settings.toasts.brandSaved"));
 }
 
 async function handleSaveAutomation() {
@@ -473,7 +838,10 @@ async function handleSaveAutomation() {
     t("settings.errors.failedToSaveAutomation"),
   );
   if (!automationSaveResult.ok) {
-    showToastError(automationSaveResult.error, t("settings.errors.failedToSaveAutomation"));
+    showToastError(
+      automationSaveResult.error,
+      t("settings.errors.failedToSaveAutomation"),
+    );
     return;
   }
   $toast.success(t("settings.toasts.automationSaved"));
@@ -499,7 +867,10 @@ async function handleSaveEmailDeliverySettings() {
     t("settings.errors.failedToSaveEmailDelivery"),
   );
   if (!emailDeliverySaveResult.ok) {
-    showToastError(emailDeliverySaveResult.error, t("settings.errors.failedToSaveEmailDelivery"));
+    showToastError(
+      emailDeliverySaveResult.error,
+      t("settings.errors.failedToSaveEmailDelivery"),
+    );
     return;
   }
 
@@ -508,7 +879,9 @@ async function handleSaveEmailDeliverySettings() {
 
 async function handleSaveEmailDeliveryPassword() {
   const passwordSaveResult = await settlePromise(
-    updateApiKeys({ emailTransportPassword: emailTransportPasswordDraft.value }),
+    updateApiKeys({
+      emailTransportPassword: emailTransportPasswordDraft.value,
+    }),
     t("settings.errors.failedToSaveEmailDeliveryPassword"),
   );
   if (!passwordSaveResult.ok) {
@@ -544,7 +917,9 @@ async function handleClearEmailDeliveryPassword() {
 <template>
   <PageScaffold labelled-by="settings-page-title">
     <section class="hero rounded-box bg-base-200 border border-base-300">
-      <div class="hero-content w-full flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div
+        class="hero-content w-full flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between"
+      >
         <PageHeaderBlock
           title-id="settings-page-title"
           :title="t('settings.title')"
@@ -554,14 +929,26 @@ async function handleClearEmailDeliveryPassword() {
       </div>
     </section>
 
-    <LoadingSkeleton v-if="settingsLoading && profileLoading && !settings && !profile" :lines="8" />
+    <LoadingSkeleton
+      v-if="settingsLoading && profileLoading && !settings && !profile"
+      :lines="8"
+    />
 
     <div v-else class="space-y-6">
       <div class="card card-border bg-base-100">
         <div class="card-body">
           <div class="flex items-center justify-between gap-3">
             <h2 class="card-title">{{ t("settings.profile.title") }}</h2>
-            <span class="badge" :class="profileSaveState === 'success' ? 'badge-success' : profileSaveState === 'error' ? 'badge-error' : 'badge-ghost'">
+            <span
+              class="badge"
+              :class="
+                profileSaveState === 'success'
+                  ? 'badge-success'
+                  : profileSaveState === 'error'
+                    ? 'badge-error'
+                    : 'badge-ghost'
+              "
+            >
               {{ saveStateLabel(profileSaveState) }}
             </span>
           </div>
@@ -588,7 +975,9 @@ async function handleClearEmailDeliveryPassword() {
                 class="input validator w-full"
                 :aria-label="t('settings.profile.emailAria')"
               />
-              <p class="validator-hint">{{ t("settings.profile.emailHint") }}</p>
+              <p class="validator-hint">
+                {{ t("settings.profile.emailHint") }}
+              </p>
             </label>
 
             <label class="floating-label w-full">
@@ -610,7 +999,9 @@ async function handleClearEmailDeliveryPassword() {
             </label>
 
             <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("settings.profile.locationLegend") }}</legend>
+              <legend class="fieldset-legend">
+                {{ t("settings.profile.locationLegend") }}
+              </legend>
               <input
                 v-model="profileForm.location"
                 class="input w-full"
@@ -619,7 +1010,9 @@ async function handleClearEmailDeliveryPassword() {
             </fieldset>
 
             <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("settings.profile.yearsExperienceLegend") }}</legend>
+              <legend class="fieldset-legend">
+                {{ t("settings.profile.yearsExperienceLegend") }}
+              </legend>
               <input
                 v-model.number="profileForm.yearsExperience"
                 type="number"
@@ -631,12 +1024,20 @@ async function handleClearEmailDeliveryPassword() {
             </fieldset>
 
             <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("settings.profile.githubLegend") }}</legend>
-              <input v-model="profileForm.github" class="input w-full" :aria-label="t('settings.profile.githubAria')" />
+              <legend class="fieldset-legend">
+                {{ t("settings.profile.githubLegend") }}
+              </legend>
+              <input
+                v-model="profileForm.github"
+                class="input w-full"
+                :aria-label="t('settings.profile.githubAria')"
+              />
             </fieldset>
 
             <fieldset class="fieldset">
-              <legend class="fieldset-legend">{{ t("settings.profile.linkedinLegend") }}</legend>
+              <legend class="fieldset-legend">
+                {{ t("settings.profile.linkedinLegend") }}
+              </legend>
               <input
                 v-model="profileForm.linkedin"
                 class="input w-full"
@@ -645,7 +1046,9 @@ async function handleClearEmailDeliveryPassword() {
             </fieldset>
 
             <fieldset class="fieldset md:col-span-2">
-              <legend class="fieldset-legend">{{ t("settings.profile.summaryLegend") }}</legend>
+              <legend class="fieldset-legend">
+                {{ t("settings.profile.summaryLegend") }}
+              </legend>
               <textarea
                 v-model="profileForm.summary"
                 class="textarea w-full"
@@ -655,7 +1058,9 @@ async function handleClearEmailDeliveryPassword() {
             </fieldset>
 
             <fieldset class="fieldset md:col-span-2">
-              <legend class="fieldset-legend">{{ t("settings.profile.technicalSkillsLegend") }}</legend>
+              <legend class="fieldset-legend">
+                {{ t("settings.profile.technicalSkillsLegend") }}
+              </legend>
               <input
                 v-model="profileForm.technicalSkillsText"
                 class="input w-full"
@@ -665,7 +1070,9 @@ async function handleClearEmailDeliveryPassword() {
             </fieldset>
 
             <fieldset class="fieldset md:col-span-2">
-              <legend class="fieldset-legend">{{ t("settings.profile.softSkillsLegend") }}</legend>
+              <legend class="fieldset-legend">
+                {{ t("settings.profile.softSkillsLegend") }}
+              </legend>
               <input
                 v-model="profileForm.softSkillsText"
                 class="input w-full"
@@ -682,14 +1089,537 @@ async function handleClearEmailDeliveryPassword() {
               :disabled="profileSaveState === 'saving'"
               @click="handleSaveProfile"
             >
-              <span v-if="profileSaveState === 'saving'" class="loading loading-spinner loading-xs"></span>
+              <span
+                v-if="profileSaveState === 'saving'"
+                class="loading loading-spinner loading-xs"
+              ></span>
               {{ t("settings.profile.saveButton") }}
             </button>
           </div>
         </div>
       </div>
 
-      <div class="divider divider-primary">{{ t("settings.preferences.title") }}</div>
+      <div class="card card-border bg-base-100 shadow-sm">
+        <div class="card-body gap-6">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h2 class="card-title">{{ t("settings.brand.title") }}</h2>
+              <p class="text-sm text-base-content/70">
+                {{ t("settings.brand.subtitle") }}
+              </p>
+            </div>
+            <span
+              class="badge"
+              :class="
+                brandSaveState === 'success'
+                  ? 'badge-success'
+                  : brandSaveState === 'error'
+                    ? 'badge-error'
+                    : 'badge-ghost'
+              "
+              role="status"
+              aria-live="polite"
+            >
+              {{ saveStateLabel(brandSaveState) }}
+            </span>
+          </div>
+
+          <div role="alert" class="alert alert-info alert-soft">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <h3 class="font-semibold">{{ t("settings.brand.infoTitle") }}</h3>
+              <p class="text-sm">{{ t("settings.brand.infoDescription") }}</p>
+            </div>
+          </div>
+
+          <SectionGrid
+            grid-token="twoColumnWide"
+            extra-class="items-start gap-6"
+          >
+            <div class="space-y-4 xl:sticky xl:top-24">
+              <div class="card card-border bg-base-200/30 shadow-sm">
+                <div class="card-body gap-4">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <p
+                        class="text-xs font-semibold uppercase tracking-[0.24em] text-base-content/45"
+                      >
+                        {{ t("settings.brand.previewEyebrow") }}
+                      </p>
+                      <h3 class="card-title mt-2">
+                        {{ t("settings.brand.previewTitle") }}
+                      </h3>
+                      <p class="text-sm text-base-content/70">
+                        {{ t("settings.brand.previewSubtitle") }}
+                      </p>
+                    </div>
+                    <span class="badge badge-outline">{{
+                      brandDraft.assistantName
+                    }}</span>
+                  </div>
+
+                  <div
+                    class="rounded-box border border-base-300/60 p-5 shadow-sm"
+                    :style="brandPreviewShellStyle"
+                  >
+                    <div class="flex items-center gap-3">
+                      <img
+                        v-if="brandDraft.logoPath.length > 0"
+                        :src="brandDraft.logoPath"
+                        :alt="
+                          t('settings.brand.previewLogoAlt', {
+                            brand: brandDraft.name,
+                          })
+                        "
+                        class="h-10 w-10 rounded-box border border-white/20 bg-white/80 object-contain p-1 shadow-sm"
+                      />
+                      <div
+                        v-else
+                        class="flex h-10 w-10 items-center justify-center rounded-box border border-white/20 bg-white/80 text-sm font-semibold shadow-sm"
+                      >
+                        {{ brandPreviewInitial }}
+                      </div>
+                      <div class="min-w-0">
+                        <p
+                          class="text-xs uppercase tracking-[0.2em] opacity-60"
+                        >
+                          {{ t("settings.brand.previewEyebrow") }}
+                        </p>
+                        <p class="truncate text-sm font-medium opacity-80">
+                          {{ brandDraft.apiName }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="mt-5 space-y-2">
+                      <h4
+                        class="text-2xl font-semibold"
+                        :style="brandPreviewHeadingStyle"
+                      >
+                        {{ brandDraft.name }}
+                      </h4>
+                      <p class="max-w-md text-sm opacity-80">
+                        {{ brandDraft.content.tagline }}
+                      </p>
+                      <p class="max-w-md text-xs opacity-65">
+                        {{ brandDraft.content.defaultDescription }}
+                      </p>
+                    </div>
+
+                    <div class="mt-5 flex flex-wrap gap-2">
+                      <span
+                        class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
+                        :style="brandPreviewPrimaryBadgeStyle"
+                      >
+                        {{ brandDraft.assistantName }}
+                      </span>
+                      <span
+                        class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+                        :style="brandPreviewSecondaryBadgeStyle"
+                      >
+                        {{ brandDraft.apiName }}
+                      </span>
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap gap-3">
+                      <span
+                        class="inline-flex items-center rounded-field px-4 py-2 text-sm font-medium shadow-sm"
+                        :style="brandPreviewPrimaryActionStyle"
+                      >
+                        {{ t("settings.brand.previewPrimaryAction") }}
+                      </span>
+                      <span
+                        class="inline-flex items-center rounded-field border px-4 py-2 text-sm font-medium"
+                        :style="brandPreviewSecondaryActionStyle"
+                      >
+                        {{ t("settings.brand.previewSecondaryAction") }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="stats stats-vertical border border-base-300 bg-base-100 shadow-sm sm:stats-horizontal xl:stats-vertical"
+              >
+                <div class="stat">
+                  <div class="stat-title">
+                    {{ t("settings.brand.stats.product") }}
+                  </div>
+                  <div class="stat-value text-lg">{{ brandDraft.name }}</div>
+                  <div class="stat-desc">
+                    {{ t("settings.brand.stats.productDescription") }}
+                  </div>
+                </div>
+                <div class="stat">
+                  <div class="stat-title">
+                    {{ t("settings.brand.stats.assistant") }}
+                  </div>
+                  <div class="stat-value text-lg">
+                    {{ brandDraft.assistantName }}
+                  </div>
+                  <div class="stat-desc">
+                    {{ t("settings.brand.stats.assistantDescription") }}
+                  </div>
+                </div>
+                <div class="stat">
+                  <div class="stat-title">
+                    {{ t("settings.brand.stats.locales") }}
+                  </div>
+                  <div class="stat-value text-lg">
+                    {{ languageOptions.length }}
+                  </div>
+                  <div class="stat-desc">
+                    {{ t("settings.brand.stats.localesDescription") }}
+                  </div>
+                </div>
+                <div class="stat">
+                  <div class="stat-title">
+                    {{ t("settings.brand.stats.overrides") }}
+                  </div>
+                  <div class="stat-value text-lg">{{ brandOverrideCount }}</div>
+                  <div class="stat-desc">
+                    {{ t("settings.brand.stats.overridesDescription") }}
+                  </div>
+                </div>
+              </div>
+
+              <SectionGrid grid-token="twoColumn" extra-class="gap-3">
+                <div
+                  class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm"
+                >
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <h4 class="font-medium">
+                      {{ t("settings.brand.lightThemeLegend") }}
+                    </h4>
+                    <span class="badge badge-ghost">{{
+                      THEME_NAMES.light
+                    }}</span>
+                  </div>
+                  <div
+                    class="h-20 rounded-box border border-base-300/70 shadow-inner"
+                    :style="brandLightSwatchStyle"
+                  ></div>
+                </div>
+                <div
+                  class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm"
+                >
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <h4 class="font-medium">
+                      {{ t("settings.brand.darkThemeLegend") }}
+                    </h4>
+                    <span class="badge badge-ghost">{{
+                      THEME_NAMES.dark
+                    }}</span>
+                  </div>
+                  <div
+                    class="h-20 rounded-box border border-base-300/70 shadow-inner"
+                    :style="brandDarkSwatchStyle"
+                  ></div>
+                </div>
+              </SectionGrid>
+            </div>
+
+            <div class="space-y-4">
+              <div
+                role="tablist"
+                class="tabs tabs-lift tabs-sm overflow-x-auto md:tabs-md"
+                :aria-label="t('settings.brand.editorTabsAria')"
+              >
+                <button
+                  v-for="panel in BRAND_EDITOR_PANELS"
+                  :id="`brand-tab-${panel.id}`"
+                  :key="panel.id"
+                  type="button"
+                  role="tab"
+                  class="tab"
+                  :class="{ 'tab-active': brandEditorPanel === panel.id }"
+                  :aria-label="t(panel.labelKey)"
+                  :aria-selected="brandEditorPanel === panel.id"
+                  :aria-controls="`brand-panel-${panel.id}`"
+                  :tabindex="brandEditorPanel === panel.id ? 0 : -1"
+                  @click="setBrandEditorPanel(panel.id)"
+                  @keydown="handleBrandTabKeydown($event, panel.id)"
+                >
+                  {{ t(panel.labelKey) }}
+                </button>
+              </div>
+
+              <div
+                v-show="brandEditorPanel === 'identity'"
+                id="brand-panel-identity"
+                role="tabpanel"
+                aria-labelledby="brand-tab-identity"
+                :aria-hidden="brandEditorPanel !== 'identity'"
+                class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
+              >
+                <p class="mb-4 text-sm text-base-content/70">
+                  {{ t("settings.brand.tabs.identityDescription") }}
+                </p>
+                <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+                  <fieldset :class="brandFieldsetClass">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.nameLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.name"
+                      class="input w-full"
+                      :aria-label="t('settings.brand.nameAria')"
+                    />
+                  </fieldset>
+
+                  <fieldset :class="brandFieldsetClass">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.assistantNameLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.assistantName"
+                      class="input w-full"
+                      :aria-label="t('settings.brand.assistantNameAria')"
+                    />
+                  </fieldset>
+
+                  <fieldset :class="brandFieldsetClass">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.apiNameLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.apiName"
+                      class="input w-full"
+                      :aria-label="t('settings.brand.apiNameAria')"
+                    />
+                  </fieldset>
+
+                  <fieldset :class="brandFieldsetClass">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.taglineLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.tagline"
+                      class="input w-full"
+                      :aria-label="t('settings.brand.taglineAria')"
+                    />
+                  </fieldset>
+
+                  <fieldset :class="brandFieldsetClass">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.logoPathLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.logoPath"
+                      class="input w-full"
+                      :placeholder="t('settings.brand.assetPathPlaceholder')"
+                      :aria-label="t('settings.brand.logoPathAria')"
+                    />
+                    <p class="label">{{ t("settings.brand.assetPathHint") }}</p>
+                  </fieldset>
+
+                  <fieldset :class="brandFieldsetClass">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.faviconPathLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.faviconPath"
+                      class="input w-full"
+                      :placeholder="t('settings.brand.assetPathPlaceholder')"
+                      :aria-label="t('settings.brand.faviconPathAria')"
+                    />
+                    <p class="label">{{ t("settings.brand.assetPathHint") }}</p>
+                  </fieldset>
+                </SectionGrid>
+              </div>
+
+              <div
+                v-show="brandEditorPanel === 'typography'"
+                id="brand-panel-typography"
+                role="tabpanel"
+                aria-labelledby="brand-tab-typography"
+                :aria-hidden="brandEditorPanel !== 'typography'"
+                class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
+              >
+                <p class="mb-4 text-sm text-base-content/70">
+                  {{ t("settings.brand.tabs.typographyDescription") }}
+                </p>
+                <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.fontStylesheetLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.fontStylesheetUrl"
+                      class="input w-full"
+                      :placeholder="
+                        t('settings.brand.fontStylesheetPlaceholder')
+                      "
+                      :aria-label="t('settings.brand.fontStylesheetAria')"
+                    />
+                    <p class="label">
+                      {{ t("settings.brand.fontStylesheetHint") }}
+                    </p>
+                  </fieldset>
+
+                  <fieldset :class="brandFieldsetClass">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.displayFontLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.displayFontFamily"
+                      class="input w-full"
+                      :aria-label="t('settings.brand.displayFontAria')"
+                    />
+                  </fieldset>
+
+                  <fieldset :class="brandFieldsetClass">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.bodyFontLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.bodyFontFamily"
+                      class="input w-full"
+                      :aria-label="t('settings.brand.bodyFontAria')"
+                    />
+                  </fieldset>
+
+                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.monoFontLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.monoFontFamily"
+                      class="input w-full"
+                      :aria-label="t('settings.brand.monoFontAria')"
+                    />
+                  </fieldset>
+                </SectionGrid>
+              </div>
+
+              <div
+                v-show="brandEditorPanel === 'themes'"
+                id="brand-panel-themes"
+                role="tabpanel"
+                aria-labelledby="brand-tab-themes"
+                :aria-hidden="brandEditorPanel !== 'themes'"
+                class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
+              >
+                <p class="mb-4 text-sm text-base-content/70">
+                  {{ t("settings.brand.tabs.themesDescription") }}
+                </p>
+                <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.lightThemeLegend") }}
+                    </legend>
+                    <textarea
+                      v-model="brandForm.lightThemeJson"
+                      class="textarea font-mono w-full"
+                      rows="12"
+                      :aria-label="t('settings.brand.lightThemeAria')"
+                    ></textarea>
+                    <p class="label">{{ t("settings.brand.themeJsonHint") }}</p>
+                  </fieldset>
+
+                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.darkThemeLegend") }}
+                    </legend>
+                    <textarea
+                      v-model="brandForm.darkThemeJson"
+                      class="textarea font-mono w-full"
+                      rows="12"
+                      :aria-label="t('settings.brand.darkThemeAria')"
+                    ></textarea>
+                    <p class="label">{{ t("settings.brand.themeJsonHint") }}</p>
+                  </fieldset>
+                </SectionGrid>
+              </div>
+
+              <div
+                v-show="brandEditorPanel === 'content'"
+                id="brand-panel-content"
+                role="tabpanel"
+                aria-labelledby="brand-tab-content"
+                :aria-hidden="brandEditorPanel !== 'content'"
+                class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
+              >
+                <p class="mb-4 text-sm text-base-content/70">
+                  {{ t("settings.brand.tabs.contentDescription") }}
+                </p>
+                <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.defaultTitleLegend") }}
+                    </legend>
+                    <input
+                      v-model="brandForm.defaultTitle"
+                      class="input w-full"
+                      :aria-label="t('settings.brand.defaultTitleAria')"
+                    />
+                  </fieldset>
+
+                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.defaultDescriptionLegend") }}
+                    </legend>
+                    <textarea
+                      v-model="brandForm.defaultDescription"
+                      class="textarea w-full"
+                      rows="4"
+                      :aria-label="t('settings.brand.defaultDescriptionAria')"
+                    ></textarea>
+                  </fieldset>
+
+                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.brand.contentOverridesLegend") }}
+                    </legend>
+                    <textarea
+                      v-model="brandForm.contentOverridesJson"
+                      class="textarea font-mono w-full"
+                      rows="10"
+                      :aria-label="t('settings.brand.contentOverridesAria')"
+                    ></textarea>
+                    <p class="label">
+                      {{ t("settings.brand.contentOverridesHint") }}
+                    </p>
+                  </fieldset>
+                </SectionGrid>
+              </div>
+
+              <div class="card-actions justify-end pt-2">
+                <button
+                  class="btn btn-primary"
+                  :aria-label="t('settings.brand.saveAria')"
+                  :disabled="brandSaveState === 'saving'"
+                  @click="handleSaveBrand"
+                >
+                  <span
+                    v-if="brandSaveState === 'saving'"
+                    class="loading loading-spinner loading-xs"
+                  ></span>
+                  {{ t("settings.brand.saveButton") }}
+                </button>
+              </div>
+            </div>
+          </SectionGrid>
+        </div>
+      </div>
+
+      <div class="divider divider-primary">
+        {{ t("settings.preferences.title") }}
+      </div>
 
       <SectionGrid grid-token="twoColumnXl">
         <div class="card card-border bg-base-100">
@@ -700,69 +1630,99 @@ async function handleClearEmailDeliveryPassword() {
               <div class="flex items-center justify-between">
                 <span>{{ t("settings.preferences.themeLabel") }}</span>
                 <label class="flex items-center gap-3 cursor-pointer">
-                  <span class="text-sm">{{ t("settings.preferences.lightTheme") }}</span>
+                  <span class="text-sm">{{
+                    t("settings.preferences.lightTheme")
+                  }}</span>
                   <input
                     type="checkbox"
                     class="toggle toggle-primary theme-controller"
-                    value="bao-dark"
-                    :checked="theme === 'bao-dark'"
+                    :value="THEME_NAMES.dark"
+                    :checked="theme === THEME_NAMES.dark"
                     :aria-label="t('settings.preferences.toggleThemeAria')"
                     @change="handleToggleTheme"
                   />
-                  <span class="text-sm">{{ t("settings.preferences.darkTheme") }}</span>
+                  <span class="text-sm">{{
+                    t("settings.preferences.darkTheme")
+                  }}</span>
                 </label>
               </div>
 
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.preferences.languageLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.preferences.languageLegend") }}
+                </legend>
                 <select
                   v-model="preferencesLanguage"
                   class="select w-full"
                   :aria-label="t('settings.preferences.languageAria')"
                 >
-                  <option v-for="option in languageOptions" :key="option.value" :value="option.value">
+                  <option
+                    v-for="option in languageOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
                     {{ option.label }}
                   </option>
                 </select>
               </fieldset>
 
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.preferences.notificationsLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.preferences.notificationsLegend") }}
+                </legend>
                 <label class="label cursor-pointer justify-start gap-3">
                   <input
                     v-model="notificationForm.achievements"
                     type="checkbox"
                     class="checkbox checkbox-sm"
-                    :aria-label="t('settings.preferences.notifications.achievementsAria')"
+                    :aria-label="
+                      t('settings.preferences.notifications.achievementsAria')
+                    "
                   />
-                  <span class="label-text">{{ t("settings.preferences.notifications.achievements") }}</span>
+                  <span class="label-text">{{
+                    t("settings.preferences.notifications.achievements")
+                  }}</span>
                 </label>
                 <label class="label cursor-pointer justify-start gap-3">
                   <input
                     v-model="notificationForm.dailyChallenges"
                     type="checkbox"
                     class="checkbox checkbox-sm"
-                    :aria-label="t('settings.preferences.notifications.dailyChallengesAria')"
+                    :aria-label="
+                      t(
+                        'settings.preferences.notifications.dailyChallengesAria',
+                      )
+                    "
                   />
-                  <span class="label-text">{{ t("settings.preferences.notifications.dailyChallenges") }}</span>
+                  <span class="label-text">{{
+                    t("settings.preferences.notifications.dailyChallenges")
+                  }}</span>
                 </label>
                 <label class="label cursor-pointer justify-start gap-3">
                   <input
                     v-model="notificationForm.levelUp"
                     type="checkbox"
                     class="checkbox checkbox-sm"
-                    :aria-label="t('settings.preferences.notifications.levelUpAria')"
+                    :aria-label="
+                      t('settings.preferences.notifications.levelUpAria')
+                    "
                   />
-                  <span class="label-text">{{ t("settings.preferences.notifications.levelUp") }}</span>
+                  <span class="label-text">{{
+                    t("settings.preferences.notifications.levelUp")
+                  }}</span>
                 </label>
                 <label class="label cursor-pointer justify-start gap-3">
                   <input
                     v-model="notificationForm.jobAlerts"
                     type="checkbox"
                     class="checkbox checkbox-sm"
-                    :aria-label="t('settings.preferences.notifications.jobAlertsAria')"
+                    :aria-label="
+                      t('settings.preferences.notifications.jobAlertsAria')
+                    "
                   />
-                  <span class="label-text">{{ t("settings.preferences.notifications.jobAlerts") }}</span>
+                  <span class="label-text">{{
+                    t("settings.preferences.notifications.jobAlerts")
+                  }}</span>
                 </label>
               </fieldset>
             </div>
@@ -774,7 +1734,10 @@ async function handleClearEmailDeliveryPassword() {
                 :disabled="preferencesSaveState === 'saving'"
                 @click="handleSavePreferences"
               >
-                <span v-if="preferencesSaveState === 'saving'" class="loading loading-spinner loading-xs"></span>
+                <span
+                  v-if="preferencesSaveState === 'saving'"
+                  class="loading loading-spinner loading-xs"
+                ></span>
                 {{ t("settings.preferences.saveButton") }}
               </button>
             </div>
@@ -791,8 +1754,12 @@ async function handleClearEmailDeliveryPassword() {
             <div class="space-y-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <span class="font-medium">{{ t("settings.automation.headlessTitle") }}</span>
-                  <p class="text-sm text-base-content/60">{{ t("settings.automation.headlessDescription") }}</p>
+                  <span class="font-medium">{{
+                    t("settings.automation.headlessTitle")
+                  }}</span>
+                  <p class="text-sm text-base-content/60">
+                    {{ t("settings.automation.headlessDescription") }}
+                  </p>
                 </div>
                 <input
                   v-model="automationForm.headless"
@@ -804,8 +1771,12 @@ async function handleClearEmailDeliveryPassword() {
 
               <div class="flex items-center justify-between">
                 <div>
-                  <span class="font-medium">{{ t("settings.automation.smartSelectorsTitle") }}</span>
-                  <p class="text-sm text-base-content/60">{{ t("settings.automation.smartSelectorsDescription") }}</p>
+                  <span class="font-medium">{{
+                    t("settings.automation.smartSelectorsTitle")
+                  }}</span>
+                  <p class="text-sm text-base-content/60">
+                    {{ t("settings.automation.smartSelectorsDescription") }}
+                  </p>
                 </div>
                 <input
                   v-model="automationForm.enableSmartSelectors"
@@ -817,8 +1788,12 @@ async function handleClearEmailDeliveryPassword() {
 
               <div class="flex items-center justify-between">
                 <div>
-                  <span class="font-medium">{{ t("settings.automation.autoScreenshotsTitle") }}</span>
-                  <p class="text-sm text-base-content/60">{{ t("settings.automation.autoScreenshotsDescription") }}</p>
+                  <span class="font-medium">{{
+                    t("settings.automation.autoScreenshotsTitle")
+                  }}</span>
+                  <p class="text-sm text-base-content/60">
+                    {{ t("settings.automation.autoScreenshotsDescription") }}
+                  </p>
                 </div>
                 <input
                   v-model="automationForm.autoSaveScreenshots"
@@ -829,7 +1804,9 @@ async function handleClearEmailDeliveryPassword() {
               </div>
 
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.automation.timeoutLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.automation.timeoutLegend") }}
+                </legend>
                 <input
                   v-model.number="automationForm.defaultTimeout"
                   type="number"
@@ -841,7 +1818,9 @@ async function handleClearEmailDeliveryPassword() {
               </fieldset>
 
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.automation.retentionLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.automation.retentionLegend") }}
+                </legend>
                 <input
                   v-model.number="automationForm.screenshotRetention"
                   type="number"
@@ -853,7 +1832,9 @@ async function handleClearEmailDeliveryPassword() {
               </fieldset>
 
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.automation.concurrentRunsLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.automation.concurrentRunsLegend") }}
+                </legend>
                 <input
                   v-model.number="automationForm.maxConcurrentRuns"
                   type="number"
@@ -865,13 +1846,19 @@ async function handleClearEmailDeliveryPassword() {
               </fieldset>
 
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.automation.defaultBrowserLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.automation.defaultBrowserLegend") }}
+                </legend>
                 <select
                   v-model="automationForm.defaultBrowser"
                   class="select w-full"
                   :aria-label="t('settings.automation.defaultBrowserAria')"
                 >
-                  <option v-for="browser in automationBrowserOptions" :key="browser" :value="browser">
+                  <option
+                    v-for="browser in automationBrowserOptions"
+                    :key="browser"
+                    :value="browser"
+                  >
                     {{ browserOptionLabel(browser) }}
                   </option>
                 </select>
@@ -894,14 +1881,18 @@ async function handleClearEmailDeliveryPassword() {
           <div class="card-body">
             <div class="flex items-center justify-between gap-3">
               <div>
-                <h2 class="card-title">{{ t("settings.emailDelivery.title") }}</h2>
+                <h2 class="card-title">
+                  {{ t("settings.emailDelivery.title") }}
+                </h2>
                 <p class="text-sm text-base-content/70">
                   {{ t("settings.emailDelivery.subtitle") }}
                 </p>
               </div>
               <span
                 class="badge"
-                :class="emailDeliveryConfigured ? 'badge-success' : 'badge-warning'"
+                :class="
+                  emailDeliveryConfigured ? 'badge-success' : 'badge-warning'
+                "
               >
                 {{
                   emailDeliveryConfigured
@@ -913,7 +1904,9 @@ async function handleClearEmailDeliveryPassword() {
 
             <div class="space-y-4">
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.emailDelivery.hostLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.emailDelivery.hostLegend") }}
+                </legend>
                 <input
                   v-model="emailTransportForm.host"
                   class="input w-full"
@@ -925,7 +1918,9 @@ async function handleClearEmailDeliveryPassword() {
 
               <SectionGrid grid-token="twoColumn">
                 <fieldset class="fieldset">
-                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.portLegend") }}</legend>
+                  <legend class="fieldset-legend">
+                    {{ t("settings.emailDelivery.portLegend") }}
+                  </legend>
                   <input
                     v-model.number="emailTransportForm.port"
                     class="input w-full"
@@ -937,7 +1932,9 @@ async function handleClearEmailDeliveryPassword() {
                 </fieldset>
 
                 <fieldset class="fieldset">
-                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.timeoutLegend") }}</legend>
+                  <legend class="fieldset-legend">
+                    {{ t("settings.emailDelivery.timeoutLegend") }}
+                  </legend>
                   <input
                     v-model.number="emailTransportForm.connectionTimeoutSeconds"
                     class="input w-full"
@@ -951,7 +1948,9 @@ async function handleClearEmailDeliveryPassword() {
 
               <SectionGrid grid-token="twoColumn">
                 <fieldset class="fieldset">
-                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.securityLegend") }}</legend>
+                  <legend class="fieldset-legend">
+                    {{ t("settings.emailDelivery.securityLegend") }}
+                  </legend>
                   <select
                     v-model="emailTransportForm.security"
                     class="select w-full"
@@ -968,7 +1967,9 @@ async function handleClearEmailDeliveryPassword() {
                 </fieldset>
 
                 <fieldset class="fieldset">
-                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.authLegend") }}</legend>
+                  <legend class="fieldset-legend">
+                    {{ t("settings.emailDelivery.authLegend") }}
+                  </legend>
                   <select
                     v-model="emailTransportForm.authMethod"
                     class="select w-full"
@@ -987,42 +1988,60 @@ async function handleClearEmailDeliveryPassword() {
 
               <SectionGrid grid-token="twoColumn">
                 <fieldset class="fieldset">
-                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.usernameLegend") }}</legend>
+                  <legend class="fieldset-legend">
+                    {{ t("settings.emailDelivery.usernameLegend") }}
+                  </legend>
                   <input
                     v-model="emailTransportForm.username"
                     class="input w-full"
                     type="text"
-                    :placeholder="t('settings.emailDelivery.usernamePlaceholder')"
+                    :placeholder="
+                      t('settings.emailDelivery.usernamePlaceholder')
+                    "
                     :aria-label="t('settings.emailDelivery.usernameAria')"
                   />
                 </fieldset>
 
                 <fieldset class="fieldset">
-                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.fromNameLegend") }}</legend>
+                  <legend class="fieldset-legend">
+                    {{ t("settings.emailDelivery.fromNameLegend") }}
+                  </legend>
                   <input
                     v-model="emailTransportForm.fromName"
                     class="input w-full"
                     type="text"
-                    :placeholder="t('settings.emailDelivery.fromNamePlaceholder')"
+                    :placeholder="
+                      t('settings.emailDelivery.fromNamePlaceholder', {
+                        brand: resolvedBrand.name,
+                      })
+                    "
                     :aria-label="t('settings.emailDelivery.fromNameAria')"
                   />
                 </fieldset>
               </SectionGrid>
 
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.emailDelivery.fromEmailLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.emailDelivery.fromEmailLegend") }}
+                </legend>
                 <input
                   v-model="emailTransportForm.fromEmail"
                   class="input w-full"
                   type="email"
-                  :placeholder="t('settings.emailDelivery.fromEmailPlaceholder')"
+                  :placeholder="
+                    t('settings.emailDelivery.fromEmailPlaceholder')
+                  "
                   :aria-label="t('settings.emailDelivery.fromEmailAria')"
                 />
-                <p class="label">{{ t("settings.emailDelivery.fromEmailHint") }}</p>
+                <p class="label">
+                  {{ t("settings.emailDelivery.fromEmailHint") }}
+                </p>
               </fieldset>
 
               <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("settings.emailDelivery.passwordLegend") }}</legend>
+                <legend class="fieldset-legend">
+                  {{ t("settings.emailDelivery.passwordLegend") }}
+                </legend>
                 <input
                   v-model="emailTransportPasswordDraft"
                   class="input w-full"
@@ -1068,7 +2087,9 @@ async function handleClearEmailDeliveryPassword() {
         </div>
       </SectionGrid>
 
-      <div class="divider divider-primary">{{ t("settings.aiProviders.title") }}</div>
+      <div class="divider divider-primary">
+        {{ t("settings.aiProviders.title") }}
+      </div>
 
       <div class="card card-border bg-base-100">
         <div class="card-body">
@@ -1078,19 +2099,64 @@ async function handleClearEmailDeliveryPassword() {
           </p>
 
           <fieldset class="fieldset mb-4">
-            <legend class="fieldset-legend">{{ t("settings.aiProviders.preferredProviderLegend") }}</legend>
+            <legend class="fieldset-legend">
+              {{ t("settings.aiProviders.preferredProviderLegend") }}
+            </legend>
             <select
               v-model="preferredProviderSelection"
               class="select w-full"
               :aria-label="t('settings.aiProviders.preferredProviderAria')"
               @change="handleSavePreferredProvider"
             >
-              <option v-for="provider in providerInputs" :key="provider.id" :value="provider.id">
+              <option
+                v-for="provider in providerInputs"
+                :key="provider.id"
+                :value="provider.id"
+              >
                 {{ provider.label }}
               </option>
             </select>
-            <p class="text-xs text-base-content/50 mt-1">{{ t("settings.aiProviders.preferredProviderHint") }}</p>
+            <p class="text-xs text-base-content/50 mt-1">
+              {{ t("settings.aiProviders.preferredProviderHint") }}
+            </p>
           </fieldset>
+
+          <div
+            v-if="showOllamaHotTip"
+            role="alert"
+            class="alert alert-info alert-soft alert-vertical mb-4 sm:alert-horizontal"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <h3 class="font-semibold">
+                {{ t("settings.aiProviders.ollamaTipTitle") }}
+              </h3>
+              <p class="text-sm">
+                {{ t("settings.aiProviders.ollamaTipDescription") }}
+                <NuxtLink
+                  :to="OLLAMA_WEBSITE_URL"
+                  target="_blank"
+                  class="link link-primary"
+                  :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
+                >
+                  {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
+                </NuxtLink>
+              </p>
+            </div>
+          </div>
 
           <div class="space-y-4">
             <div
@@ -1101,24 +2167,40 @@ async function handleClearEmailDeliveryPassword() {
               <input
                 type="radio"
                 name="provider-accordion"
-                :aria-label="t('settings.aiProviders.expandAria', { provider: provider.label })"
+                :aria-label="
+                  t('settings.aiProviders.expandAria', {
+                    provider: provider.label,
+                  })
+                "
               />
               <div class="collapse-title font-medium flex items-center gap-2">
-                <AIProviderIcon :provider-id="provider.id" class="h-5 w-5 text-primary" />
+                <AIProviderIcon
+                  :provider-id="provider.id"
+                  class="h-5 w-5 text-primary"
+                />
                 {{ provider.label }}
-                <span v-if="isProviderConfigured(provider.id)" class="badge badge-success badge-xs">
+                <span
+                  v-if="isProviderConfigured(provider.id)"
+                  class="badge badge-success badge-xs"
+                >
                   {{ t("settings.aiProviders.configuredBadge") }}
                 </span>
               </div>
               <div class="collapse-content space-y-3">
-                <p class="text-sm text-base-content/60">{{ provider.description }}</p>
+                <p class="text-sm text-base-content/60">
+                  {{ provider.description }}
+                </p>
                 <fieldset class="fieldset">
-                  <legend class="fieldset-legend">{{ providerKeyLabel(provider.id) }}</legend>
+                  <legend class="fieldset-legend">
+                    {{ providerKeyLabel(provider.id) }}
+                  </legend>
                   <div class="join w-full">
                     <input
                       v-model="apiKeys[provider.field]"
                       :type="provider.id === 'local' ? 'text' : 'password'"
-                      :placeholder="providerPlaceholder(provider.id, provider.label)"
+                      :placeholder="
+                        providerPlaceholder(provider.id, provider.label)
+                      "
                       class="input join-item w-full"
                       :aria-label="providerKeyLabel(provider.id)"
                     />
@@ -1128,19 +2210,26 @@ async function handleClearEmailDeliveryPassword() {
                       :aria-label="t('settings.aiProviders.testAria')"
                       @click="handleTest(provider.id)"
                     >
-                      <span v-if="testingProvider === provider.id" class="loading loading-spinner loading-xs"></span>
+                      <span
+                        v-if="testingProvider === provider.id"
+                        class="loading loading-spinner loading-xs"
+                      ></span>
                       {{ t("settings.aiProviders.testButton") }}
                     </button>
                   </div>
                 </fieldset>
 
                 <fieldset v-if="provider.id === 'local'" class="fieldset">
-                  <legend class="fieldset-legend">{{ t("settings.aiProviders.localModelLegend") }}</legend>
+                  <legend class="fieldset-legend">
+                    {{ t("settings.aiProviders.localModelLegend") }}
+                  </legend>
                   <input
                     v-model="apiKeys.localModelName"
                     type="text"
                     class="input w-full"
-                    :placeholder="t('settings.aiProviders.localModelPlaceholder')"
+                    :placeholder="
+                      t('settings.aiProviders.localModelPlaceholder')
+                    "
                     :aria-label="t('settings.aiProviders.localModelAria')"
                   />
                 </fieldset>
@@ -1148,9 +2237,17 @@ async function handleClearEmailDeliveryPassword() {
                 <span
                   v-if="testResults[provider.id]"
                   class="badge"
-                  :class="testResults[provider.id]?.valid ? 'badge-success' : 'badge-error'"
+                  :class="
+                    testResults[provider.id]?.valid
+                      ? 'badge-success'
+                      : 'badge-error'
+                  "
                 >
-                  {{ testResults[provider.id]?.valid ? t("settings.aiProviders.connectedBadge") : t("settings.aiProviders.failedBadge") }}
+                  {{
+                    testResults[provider.id]?.valid
+                      ? t("settings.aiProviders.connectedBadge")
+                      : t("settings.aiProviders.failedBadge")
+                  }}
                 </span>
               </div>
             </div>

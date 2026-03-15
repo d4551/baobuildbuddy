@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FAB_QUICK_ACTIONS } from "~/constants/dashboard";
 import { QUICK_ACTION_MENU_ID } from "~/constants/layout";
 
 const { t } = useI18n();
+const { resolvedBrand } = useBrand();
 const route = useRoute();
 const isOpen = ref(false);
 const activeActionIndex = ref(0);
@@ -159,7 +159,7 @@ onUnmounted(() => {
   <div
     class="fab z-[50] left-6 bottom-24 hidden lg:flex"
     role="region"
-    :aria-label="t('quickFab.groupAria', { brand: APP_BRAND.name })"
+    :aria-label="t('quickFab.groupAria', { brand: resolvedBrand.name })"
   >
     <button
       ref="quickActionToggle"

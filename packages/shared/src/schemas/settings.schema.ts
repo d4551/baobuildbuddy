@@ -25,6 +25,7 @@ import {
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "../types/settings";
+import { DEFAULT_BRAND_SETTINGS } from "../constants/branding";
 
 export const apiKeyConfigSchema = z.object({
   provider: z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]),
@@ -210,6 +211,83 @@ export const emailTransportSettingsSchema = z
   })
   .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS);
 
+export const brandThemePaletteSchema = z.object({
+  base100: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  base200: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  base300: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  baseContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  primary: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  primaryContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  secondary: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  secondaryContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  accent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  accentContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  neutral: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  neutralContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  info: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  infoContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  success: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  successContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  warning: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  warningContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  error: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  errorContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  radiusSelector: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  radiusField: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  radiusBox: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  sizeSelector: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  sizeField: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  border: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  depth: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  noise: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+});
+
+export const brandTypographySettingsSchema = z.object({
+  fontStylesheetUrl: z.string().trim().max(SCHEMA_MAX_LENGTH_LONG).default(""),
+  displayFontFamily: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+  bodyFontFamily: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+  monoFontFamily: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+});
+
+export const brandContentSettingsSchema = z.object({
+  tagline: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  defaultTitle: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  defaultDescription: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+  contentOverrides: z
+    .record(
+      z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+      z.string().trim().max(SCHEMA_MAX_LENGTH_LONG),
+    )
+    .default({}),
+});
+
+export const brandSettingsSchema = z.object({
+  name: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  assistantName: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  apiName: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  logoPath: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+  faviconPath: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+  typography: brandTypographySettingsSchema,
+  lightTheme: brandThemePaletteSchema,
+  darkTheme: brandThemePaletteSchema,
+  content: brandContentSettingsSchema,
+});
+
+export const brandThemePalettePatchSchema = brandThemePaletteSchema.partial();
+export const brandTypographySettingsPatchSchema = brandTypographySettingsSchema.partial();
+export const brandContentSettingsPatchSchema = brandContentSettingsSchema.partial();
+export const brandSettingsPatchSchema = z.object({
+  name: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT).optional(),
+  assistantName: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT).optional(),
+  apiName: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT).optional(),
+  logoPath: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
+  faviconPath: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
+  typography: brandTypographySettingsPatchSchema.optional(),
+  lightTheme: brandThemePalettePatchSchema.optional(),
+  darkTheme: brandThemePalettePatchSchema.optional(),
+  content: brandContentSettingsPatchSchema.optional(),
+});
+
 export const automationSettingsSchema = z
   .object({
     headless: z.boolean().default(true),
@@ -236,6 +314,7 @@ export const settingsSchema = z.object({
   preferredModels: preferredModelsSchema.optional(),
   theme: z.enum(["bao-light", "bao-dark"]).default("bao-light"),
   language: z.enum(APP_LANGUAGE_CODES).default(DEFAULT_APP_LANGUAGE),
+  brandSettings: brandSettingsSchema.default(DEFAULT_BRAND_SETTINGS),
   notifications: notificationPreferencesSchema,
   automationSettings: automationSettingsSchema,
   emailTransportSettings: emailTransportSettingsSchema,

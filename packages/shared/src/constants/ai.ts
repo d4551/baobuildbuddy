@@ -43,7 +43,16 @@ export const LOCAL_AI_DEFAULT_ENDPOINT = "http://localhost:11434/v1";
 export const LOCAL_AI_DEFAULT_MODEL = "";
 export const LOCAL_AI_AUTO_DETECT_MODEL = "auto-detect";
 
-export const LOCAL_AI_RECOMMENDED_MODELS = ["llama3.2", "granite-code", "mistral"] as const;
+/**
+ * Canonical Ollama product URL used when guiding users through vendor-owned local model setup.
+ */
+export const OLLAMA_WEBSITE_URL = "https://ollama.com";
+
+export const LOCAL_AI_RECOMMENDED_MODELS = [
+  "llama3.2",
+  "granite-code",
+  "mistral",
+] as const;
 
 export type LocalModelName = (typeof LOCAL_AI_RECOMMENDED_MODELS)[number];
 
@@ -89,7 +98,11 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderMetadata[] = [
     nameKey: "aiProviderCatalog.claude.name",
     descriptionKey: "aiProviderCatalog.claude.description",
     iconId: "claude",
-    modelHints: ["claude-sonnet-4-5-20250929", "claude-3-5-sonnet-20241022", "claude-3-opus"],
+    modelHints: [
+      "claude-sonnet-4-5-20250929",
+      "claude-3-5-sonnet-20241022",
+      "claude-3-opus",
+    ],
     requiresCredential: true,
   },
   {
@@ -105,7 +118,10 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderMetadata[] = [
     nameKey: "aiProviderCatalog.huggingface.name",
     descriptionKey: "aiProviderCatalog.huggingface.description",
     iconId: "huggingface",
-    modelHints: ["Qwen/Qwen2.5-Coder-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"],
+    modelHints: [
+      "Qwen/Qwen2.5-Coder-32B-Instruct",
+      "meta-llama/Llama-3.3-70B-Instruct",
+    ],
     requiresCredential: false,
   },
 ];
@@ -148,7 +164,8 @@ export const AI_PROVIDER_TEST_STRATEGIES = {
         messages: [{ role: "user", content: "hi" }],
       }),
     }),
-    isSuccess: (status: number) => (status >= 200 && status < 300) || status === 429,
+    isSuccess: (status: number) =>
+      (status >= 200 && status < 300) || status === 429,
   },
   local: {
     provider: "local" as const,
@@ -299,7 +316,9 @@ export const AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS: Readonly<
 /**
  * i18n translation keys for floating chat suggested prompts by contextual domain.
  */
-export const AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS: Readonly<Record<AIChatContextDomain, string>> = {
+export const AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS: Readonly<
+  Record<AIChatContextDomain, string>
+> = {
   resume: "floatingChat.prompts.resume",
   job_search: "floatingChat.prompts.jobSearch",
   interview: "floatingChat.prompts.interview",
@@ -312,7 +331,8 @@ export const AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS: Readonly<Record<AIChatContext
 /**
  * i18n translation key for focused-entity prompt suggestion in floating chat.
  */
-export const AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY = "floatingChat.prompts.focusedEntity";
+export const AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY =
+  "floatingChat.prompts.focusedEntity";
 
 /**
  * Default BCP 47 locale used by browser voice APIs when no UI locale is provided.
@@ -364,7 +384,9 @@ export type AIChatVoiceErrorCode =
 /**
  * Canonical i18n message keys for each voice error code.
  */
-export const AI_CHAT_VOICE_ERROR_MESSAGE_KEYS: Readonly<Record<AIChatVoiceErrorCode, string>> = {
+export const AI_CHAT_VOICE_ERROR_MESSAGE_KEYS: Readonly<
+  Record<AIChatVoiceErrorCode, string>
+> = {
   unsupportedRecognition: "aiChatCommon.voice.errors.unsupportedRecognition",
   unsupportedSynthesis: "aiChatCommon.voice.errors.unsupportedSynthesis",
   startFailed: "aiChatCommon.voice.errors.startFailed",
@@ -426,7 +448,11 @@ export const AI_CHAT_VOICE_SYNTHESIS_ERROR_CODE_MAP = {
  * @param path Route path.
  * @returns Matching domain or `general`.
  */
-export function inferAIChatDomainFromRoutePath(path: string): AIChatContextDomain {
-  const matchedRule = AI_CHAT_ROUTE_DOMAIN_RULES.find((rule) => path.startsWith(rule.prefix));
+export function inferAIChatDomainFromRoutePath(
+  path: string,
+): AIChatContextDomain {
+  const matchedRule = AI_CHAT_ROUTE_DOMAIN_RULES.find((rule) =>
+    path.startsWith(rule.prefix),
+  );
   return matchedRule?.domain ?? AI_CHAT_DEFAULT_DOMAIN;
 }

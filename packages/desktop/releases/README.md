@@ -100,6 +100,7 @@ This command performs:
 - Linux ARM64 AppImage/deb/rpm builds (`aarch64-unknown-linux-gnu`)
 - staging into `packages/desktop/releases/{macos,linux,windows}`
 - checksum regeneration in `packages/desktop/releases/sha256.txt`
+- Bun-native post-staging verification via `bun run verify:desktop-releases`
 - containerized Windows NSIS fallback when local `makensis` is unavailable/fails
 - Linux AppImage fallback using `appimagetool` when `linuxdeploy` bundling fails
 
@@ -144,3 +145,4 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 ## Integrity
 
 - SHA-256 checksums are recorded in `sha256.txt`.
+- Run `bun run verify:desktop-releases` to validate version alignment, required Tauri icons, staged artifact names, bundle signatures, DMG integrity, and checksum matches.

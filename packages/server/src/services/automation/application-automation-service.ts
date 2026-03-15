@@ -19,17 +19,22 @@ import {
   AUTOMATION_MAX_CONCURRENT_RUNS,
   AUTOMATION_MAX_PROGRESS_STEPS,
   AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
+  AUTOMATION_SCRAPE_JOB_TARGETS,
   AUTOMATION_SCRAPE_TARGETS,
   AUTOMATION_MIN_ID_LENGTH,
   AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH,
   AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS,
   AUTOMATION_MAX_SCREENSHOT_RETENTION_DAYS,
   AUTOMATION_SCHEDULE_RETRY_DELAY_MS,
+  automationScrapeTargetToAction,
+  automationScrapeTargetToPortalId,
   automationSettingsSchema,
+  buildRpaCapabilityIdFromScrapeTarget,
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   emailTransportSettingsSchema,
   generateId,
+  isAutomationJobScrapeTarget,
   isEmailTransportConfigured,
   isValidEmail,
   MS_PER_DAY,
@@ -49,6 +54,9 @@ import type {
   EmailResponseTone,
   ErrorEnvelope,
   ResumeData,
+  RpaCapabilityAuditEntry,
+  RpaCapabilityAuditReport,
+  RpaCapabilityAuditSummary,
   RpaRunEvent,
   RpaRunResult,
 } from "@bao/shared";
@@ -70,6 +78,7 @@ import { exportService } from "../export-service";
 import { gamificationService } from "../gamification-service";
 import { resumeService } from "../resume-service";
 import { scraperService } from "../scraper-service";
+import { loadJobProviderSettings } from "../jobs/providers/provider-settings";
 import { createServerLogger } from "../../utils/logger";
 import {
   MAX_CUSTOM_ANSWER_KEY_LENGTH,
@@ -123,6 +132,73 @@ interface ScheduledRunMetadata {
 interface ScrapeExecutionPayload {
   target: AutomationScrapeTarget;
 }
+
+interface ScrapePortalAuditConfig {
+  name: string;
+  enabled: boolean;
+  fallbackUrl: string;
+}
+
+interface ScrapePortalAuditSnapshot {
+  portalConfigById: Map<string, ScrapePortalAuditConfig>;
+  sharedSettingsIssue: string | null;
+}
+
+const createJobApplyCapabilityAuditEntry = (): RpaCapabilityAuditEntry => ({
+  id: "job_apply",
+  category: "job_apply",
+  name: "Job Apply",
+  target: null,
+  implemented: true,
+  configured: true,
+  enabled: true,
+  manualRunAvailable: true,
+  scheduledRunAvailable: true,
+  runHistoryAvailable: true,
+  liveUpdatesAvailable: true,
+  issues: [],
+});
+
+const createStudioScrapeCapabilityAuditEntry = (): RpaCapabilityAuditEntry => ({
+  id: buildRpaCapabilityIdFromScrapeTarget("studios"),
+  category: "scrape",
+  name: "Studios",
+  target: "studios",
+  implemented: true,
+  configured: true,
+  enabled: true,
+  manualRunAvailable: true,
+  scheduledRunAvailable: true,
+  runHistoryAvailable: true,
+  liveUpdatesAvailable: true,
+  issues: [],
+});
+
+const summarizeRpaCapabilities = (
+  capabilities: readonly RpaCapabilityAuditEntry[],
+): RpaCapabilityAuditSummary =>
+  capabilities.reduce<RpaCapabilityAuditSummary>(
+    (accumulator, capability) => ({
+      total: accumulator.total + 1,
+      configured: accumulator.configured + (capability.configured ? 1 : 0),
+      manualRunAvailable:
+        accumulator.manualRunAvailable + (capability.manualRunAvailable ? 1 : 0),
+      scheduledRunAvailable:
+        accumulator.scheduledRunAvailable + (capability.scheduledRunAvailable ? 1 : 0),
+      runHistoryAvailable:
+        accumulator.runHistoryAvailable + (capability.runHistoryAvailable ? 1 : 0),
+      liveUpdatesAvailable:
+        accumulator.liveUpdatesAvailable + (capability.liveUpdatesAvailable ? 1 : 0),
+    }),
+    {
+      total: 0,
+      configured: 0,
+      manualRunAvailable: 0,
+      scheduledRunAvailable: 0,
+      runHistoryAvailable: 0,
+      liveUpdatesAvailable: 0,
+    },
+  );
 
 interface JobApplyRunPreparation {
   runId: string;
@@ -183,8 +259,6 @@ const MAX_RECOVERABLE_SCHEDULED_RUNS = SCHEMA_MAX_ITEMS_BOARDS;
 const RUN_ID_PATTERN = /^[0-9a-f-]+$/i;
 const SCHEDULED_ACTION_JOB_APPLY = "job_apply";
 const SCHEDULED_ACTION_EMAIL_RESPONSE = "email_response";
-const SCHEDULED_ACTION_SCRAPE_STUDIOS = "scrape_studios";
-const SCHEDULED_ACTION_SCRAPE_JOBS_HITMARKER = "scrape_jobs_hitmarker";
 const AUTOMATION_SCRAPE_TARGET_VALUES = new Set<AutomationScrapeTarget>(AUTOMATION_SCRAPE_TARGETS);
 const automationServiceLogger = createServerLogger("application-automation-service");
 
@@ -937,9 +1011,7 @@ export class ApplicationAutomationService {
    * Map a scrape target to the action string stored in scheduled-run input.
    */
   private resolveScrapeAction(target: AutomationScrapeTarget): string {
-    return target === "studios"
-      ? SCHEDULED_ACTION_SCRAPE_STUDIOS
-      : SCHEDULED_ACTION_SCRAPE_JOBS_HITMARKER;
+    return automationScrapeTargetToAction(target);
   }
 
   /**
@@ -988,6 +1060,19 @@ export class ApplicationAutomationService {
     return {
       target: normalized as AutomationScrapeTarget,
     };
+  }
+
+  /**
+   * Execute the concrete scraper service call for a supported scrape target.
+   */
+  private executeScrapeTarget(
+    target: AutomationScrapeTarget,
+  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+    if (!isAutomationJobScrapeTarget(target)) {
+      return scraperService.scrapeStudios();
+    }
+
+    return scraperService.scrapeJobsForTarget(target);
   }
 
   /**
@@ -1215,6 +1300,161 @@ export class ApplicationAutomationService {
   }
 
   /**
+   * Create a pending scrape run for immediate execution.
+   */
+  async createScrapeRun(target: AutomationScrapeTarget): Promise<string> {
+    const normalizedTarget = this.normalizeScrapeTarget(target);
+    const now = new Date().toISOString();
+    const runId = generateId();
+
+    await db.insert(automationRuns).values({
+      id: runId,
+      type: "scrape",
+      status: "pending",
+      jobId: null,
+      userId: null,
+      input: this.buildScrapeInput(
+        {
+          target: normalizedTarget,
+        },
+        {
+          includeAction: false,
+        },
+      ),
+      progress: DEFAULT_PROGRESS,
+      currentStep: null,
+      totalSteps: null,
+      exitCode: 0,
+      timedOut: false,
+      aborted: false,
+      executionMs: null,
+      startedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: this.resolveScrapeAction(normalizedTarget),
+        status: "pending",
+        message: `Queued ${normalizedTarget} scrape`,
+      }),
+    );
+
+    return runId;
+  }
+
+  /**
+   * Execute a scrape run immediately and persist the final run outcome.
+   */
+  async runScrape(target: AutomationScrapeTarget): Promise<string> {
+    const normalizedTarget = this.normalizeScrapeTarget(target);
+    const runId = await this.createScrapeRun(normalizedTarget);
+    await this.executeScrapeRun(runId, normalizedTarget);
+    return runId;
+  }
+
+  private async loadScrapePortalAuditSnapshot(): Promise<ScrapePortalAuditSnapshot> {
+    const providerSettingsResult = await settle(loadJobProviderSettings());
+    const portalConfigById = new Map<string, ScrapePortalAuditConfig>();
+    const sharedSettingsIssue =
+      providerSettingsResult.status === "rejected"
+        ? toErrorMessage(providerSettingsResult.reason, "Job provider settings are unavailable.")
+        : null;
+
+    if (providerSettingsResult.status === "fulfilled") {
+      for (const portal of providerSettingsResult.value.gamingPortals) {
+        portalConfigById.set(portal.id, {
+          name: portal.name,
+          enabled: portal.enabled,
+          fallbackUrl: portal.fallbackUrl,
+        });
+      }
+    }
+
+    return {
+      portalConfigById,
+      sharedSettingsIssue,
+    };
+  }
+
+  private buildScrapeCapabilityIssues(
+    configuredPortal: ScrapePortalAuditConfig | null,
+    portalId: string,
+    sharedSettingsIssue: string | null,
+  ): string[] {
+    if (sharedSettingsIssue) {
+      return [sharedSettingsIssue];
+    }
+
+    if (!configuredPortal) {
+      return [`Missing ${portalId} gaming portal configuration.`];
+    }
+
+    const issues: string[] = [];
+    if (!configuredPortal.enabled) {
+      issues.push(`${configuredPortal.name} is disabled in job provider settings.`);
+    }
+    if (configuredPortal.fallbackUrl.trim().length === 0) {
+      issues.push(`${configuredPortal.name} is missing a fallback URL.`);
+    }
+    return issues;
+  }
+
+  private buildJobScrapeCapabilityAuditEntry(
+    target: (typeof AUTOMATION_SCRAPE_JOB_TARGETS)[number],
+    auditSnapshot: ScrapePortalAuditSnapshot,
+  ): RpaCapabilityAuditEntry {
+    const portalId = automationScrapeTargetToPortalId(target);
+    const configuredPortal = auditSnapshot.portalConfigById.get(portalId) ?? null;
+    const issues = this.buildScrapeCapabilityIssues(
+      configuredPortal,
+      portalId,
+      auditSnapshot.sharedSettingsIssue,
+    );
+    const enabled = configuredPortal?.enabled === true;
+    const configured = Boolean(
+      configuredPortal?.enabled && configuredPortal.fallbackUrl.trim().length > 0,
+    );
+
+    return {
+      id: buildRpaCapabilityIdFromScrapeTarget(target),
+      category: "scrape",
+      name: configuredPortal?.name ?? portalId,
+      target,
+      implemented: true,
+      configured,
+      enabled,
+      manualRunAvailable: true,
+      scheduledRunAvailable: true,
+      runHistoryAvailable: true,
+      liveUpdatesAvailable: true,
+      issues,
+    };
+  }
+
+  /**
+   * Build an up-to-date audit report for the full RPA capability surface.
+   */
+  async getRpaCapabilityAudit(): Promise<RpaCapabilityAuditReport> {
+    const auditSnapshot = await this.loadScrapePortalAuditSnapshot();
+    const capabilities: RpaCapabilityAuditEntry[] = [
+      createJobApplyCapabilityAuditEntry(),
+      createStudioScrapeCapabilityAuditEntry(),
+      ...AUTOMATION_SCRAPE_JOB_TARGETS.map((target) =>
+        this.buildJobScrapeCapabilityAuditEntry(target, auditSnapshot),
+      ),
+    ];
+
+    return {
+      generatedAt: new Date().toISOString(),
+      summary: summarizeRpaCapabilities(capabilities),
+      capabilities,
+    };
+  }
+
+  /**
    * Mark a malformed scheduled run as failed.
    */
   private async failScheduledRunValidation(runId: string, errorMessage: string): Promise<void> {
@@ -1322,8 +1562,7 @@ export class ApplicationAutomationService {
       return;
     }
 
-    await this.markScrapeRunStarted(row.id, payload.target);
-    await this.runScheduledScrapeTarget(row.id, payload.target);
+    await this.executeScrapeRun(row.id, payload.target);
   }
 
   private async createEmailResponseRun(
@@ -1639,7 +1878,7 @@ export class ApplicationAutomationService {
   }
 
   /**
-   * Mark a scheduled scrape run as running.
+   * Mark a scrape run as running.
    */
   private async markScrapeRunStarted(
     runId: string,
@@ -1677,9 +1916,9 @@ export class ApplicationAutomationService {
   }
 
   /**
-   * Persist a failed scheduled scrape run.
+   * Persist a failed scrape run.
    */
-  private async failScheduledScrapeRun(
+  private async failScrapeRun(
     runId: string,
     target: AutomationScrapeTarget,
     reason: unknown,
@@ -1710,9 +1949,9 @@ export class ApplicationAutomationService {
   }
 
   /**
-   * Persist a successful scheduled scrape run.
+   * Persist a successful scrape run.
    */
-  private async completeScheduledScrapeRun(
+  private async completeScrapeRun(
     runId: string,
     target: AutomationScrapeTarget,
     result: { scraped: number; upserted: number; errors: string[] },
@@ -1757,27 +1996,21 @@ export class ApplicationAutomationService {
   }
 
   /**
-   * Execute a scheduled scrape target and persist the run result.
+   * Execute a scrape target and persist the run result.
    */
-  private async runScheduledScrapeTarget(
+  private async executeScrapeRun(
     runId: string,
     target: AutomationScrapeTarget,
   ): Promise<void> {
     const startedAt = Date.now();
-    const scrapeResult = await settle(
-      target === "studios" ? scraperService.scrapeStudios() : scraperService.scrapeHitmarkerJobs(),
-    );
+    await this.markScrapeRunStarted(runId, target);
+    const scrapeResult = await settle(this.executeScrapeTarget(target));
     if (scrapeResult.status === "rejected") {
-      await this.failScheduledScrapeRun(runId, target, scrapeResult.reason, Date.now() - startedAt);
+      await this.failScrapeRun(runId, target, scrapeResult.reason, Date.now() - startedAt);
       return;
     }
 
-    await this.completeScheduledScrapeRun(
-      runId,
-      target,
-      scrapeResult.value,
-      Date.now() - startedAt,
-    );
+    await this.completeScrapeRun(runId, target, scrapeResult.value, Date.now() - startedAt);
   }
 
   /**

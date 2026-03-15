@@ -1,4 +1,4 @@
-import type { AutomationScrapeTarget, EmailResponseRequest, EmailResponseResult, RpaRunEvent } from "@bao/shared";
+import type { AutomationScrapeTarget, EmailResponseRequest, EmailResponseResult, RpaCapabilityAuditReport, RpaRunEvent } from "@bao/shared";
 interface JobApplyPayload {
     jobUrl: string;
     resumeId: string;
@@ -177,6 +177,10 @@ export declare class ApplicationAutomationService {
      */
     private parseScheduledScrapePayload;
     /**
+     * Execute the concrete scraper service call for a supported scrape target.
+     */
+    private executeScrapeTarget;
+    /**
      * Load a single automation run row.
      */
     private readRunRow;
@@ -213,6 +217,21 @@ export declare class ApplicationAutomationService {
         runId: string;
         scheduledFor: string;
     }>;
+    /**
+     * Create a pending scrape run for immediate execution.
+     */
+    createScrapeRun(target: AutomationScrapeTarget): Promise<string>;
+    /**
+     * Execute a scrape run immediately and persist the final run outcome.
+     */
+    runScrape(target: AutomationScrapeTarget): Promise<string>;
+    private loadScrapePortalAuditSnapshot;
+    private buildScrapeCapabilityIssues;
+    private buildJobScrapeCapabilityAuditEntry;
+    /**
+     * Build an up-to-date audit report for the full RPA capability surface.
+     */
+    getRpaCapabilityAudit(): Promise<RpaCapabilityAuditReport>;
     /**
      * Mark a malformed scheduled run as failed.
      */
@@ -258,21 +277,21 @@ export declare class ApplicationAutomationService {
      */
     runEmailResponse(payload: EmailResponseRequest): Promise<EmailResponseResult>;
     /**
-     * Mark a scheduled scrape run as running.
+     * Mark a scrape run as running.
      */
     private markScrapeRunStarted;
     /**
-     * Persist a failed scheduled scrape run.
+     * Persist a failed scrape run.
      */
-    private failScheduledScrapeRun;
+    private failScrapeRun;
     /**
-     * Persist a successful scheduled scrape run.
+     * Persist a successful scrape run.
      */
-    private completeScheduledScrapeRun;
+    private completeScrapeRun;
     /**
-     * Execute a scheduled scrape target and persist the run result.
+     * Execute a scrape target and persist the run result.
      */
-    private runScheduledScrapeTarget;
+    private executeScrapeRun;
     /**
      * Update run progress metrics from script progress events.
      */

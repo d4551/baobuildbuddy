@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_BRAND, APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -11,6 +11,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { resolvedBrand } = useBrand();
 const message = computed(() => {
   return props.error.statusMessage || props.error.message || t("errorPage.fallbackMessage");
 });
@@ -20,7 +21,7 @@ const message = computed(() => {
   <div class="min-h-screen hero bg-base-200">
     <div class="hero-content text-center">
       <div class="max-w-lg space-y-4">
-        <h1 class="text-4xl font-bold">{{ t("errorPage.title", { brand: APP_BRAND.name }) }}</h1>
+        <h1 class="text-4xl font-bold">{{ t("errorPage.title", { brand: resolvedBrand.name }) }}</h1>
         <p class="text-base-content/70">
           {{ message }}
         </p>

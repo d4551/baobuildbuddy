@@ -1,60 +1,49 @@
 <script setup lang="ts">
 import {
+  AUTOMATION_SCRAPE_TARGETS,
   APP_ROUTE_BUILDERS,
-  API_ENDPOINTS,
   APP_ROUTES,
   formatRelativeTimeForDate,
   JOB_PREVIEW_LIMIT,
   SCRAPER_JOB_QUERY_LIMIT,
   type AutomationScrapeTarget,
   type Job,
+  type RpaCapabilityAuditEntry,
+  type RpaCapabilityAuditReport,
   type RpaRunExecutionEnvelope,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { useAutomation } from "~/composables/useAutomation";
-import { resolveApiEndpoint } from "~/utils/endpoints";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
 type RunState = "idle" | "running" | "success" | "error";
-type ScrapePendingAction =
-  | "studios-run"
-  | "studios-schedule"
-  | "jobs_hitmarker-run"
-  | "jobs_hitmarker-schedule";
+type ScrapePendingAction = `${AutomationScrapeTarget}-run` | `${AutomationScrapeTarget}-schedule`;
+type TargetRecord<TValue> = Record<AutomationScrapeTarget, TValue>;
+type ScrapeCapabilityCard = RpaCapabilityAuditEntry & {
+  readonly category: "scrape";
+  readonly target: AutomationScrapeTarget;
+};
 
 const DATE_FORMAT_OPTIONS = {
   dateStyle: "medium",
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
-
-const requestUrl = useRequestURL();
-const apiBase = String(useRuntimeConfig().public.apiBase || "/");
-
-const studiosFetch = useFetch(
-  resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.scraperStudios),
-  {
-    method: "POST",
-    immediate: false,
-  },
-);
-
-const jobsFetch = useFetch(
-  resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.scraperJobsHitmarker),
-  {
-    method: "POST",
-    immediate: false,
-  },
-);
+const RUN_STATE_BADGE_CLASS: Record<RunState, string> = {
+  idle: "badge-ghost",
+  running: "badge-info",
+  success: "badge-success",
+  error: "badge-error",
+};
 
 const { jobs, searchJobs, loading: jobsLoading } = useJobs();
 const router = useRouter();
 const { $toast } = useNuxtApp();
 const { t, locale, fallbackLocale } = useI18n();
 const { awardForAction } = usePipelineGamification();
-const { scheduleScrape } = useAutomation();
+const { getRpaCapabilities, scheduleScrape, triggerScrape } = useAutomation();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -63,17 +52,35 @@ if (import.meta.server) {
   });
 }
 
-const studioState = ref<RunState>("idle");
-const jobState = ref<RunState>("idle");
-const studioMessage = ref("");
-const jobMessage = ref("");
-const studioLastRunAt = ref<string | null>(null);
-const jobLastRunAt = ref<string | null>(null);
-const studioRunAt = ref("");
-const jobRunAt = ref("");
-const studioScheduledRun = ref<RpaRunExecutionEnvelope | null>(null);
-const jobScheduledRun = ref<RpaRunExecutionEnvelope | null>(null);
+const createTargetRecord = <TValue>(factory: () => TValue): TargetRecord<TValue> =>
+  Object.fromEntries(
+    AUTOMATION_SCRAPE_TARGETS.map((target) => [target, factory()]),
+  ) as TargetRecord<TValue>;
+
+const isScrapeCapabilityCard = (
+  capability: RpaCapabilityAuditEntry,
+): capability is ScrapeCapabilityCard => capability.category === "scrape" && capability.target !== null;
+
+const runStates = reactive(createTargetRecord<RunState>(() => "idle"));
+const runMessages = reactive(createTargetRecord<string>(() => ""));
+const lastRunAt = reactive(createTargetRecord<string | null>(() => null));
+const scheduledRunAt = reactive(createTargetRecord<string>(() => ""));
+const latestRuns = reactive(createTargetRecord<RpaRunExecutionEnvelope | null>(() => null));
 const pendingAction = ref<ScrapePendingAction | null>(null);
+
+const {
+  data: capabilityAuditData,
+  status: capabilityAuditStatus,
+  error: capabilityAuditError,
+  refresh: refreshCapabilityAudit,
+} = await useAsyncData<RpaCapabilityAuditReport>(
+  "automation-scraper-capabilities",
+  () => getRpaCapabilities(),
+  {
+    lazy: false,
+    server: true,
+  },
+);
 
 await useAsyncData("automation-scraper-jobs", async () => {
   await searchJobs({ limit: SCRAPER_JOB_QUERY_LIMIT });
@@ -92,6 +99,29 @@ const sortedJobs = computed(() => {
 
 const topJobs = computed<Job[]>(() => sortedJobs.value.slice(0, JOB_PREVIEW_LIMIT));
 const jobCount = computed(() => sortedJobs.value.length);
+const capabilityAudit = computed(() => capabilityAuditData.value ?? null);
+const scrapeCapabilities = computed<readonly ScrapeCapabilityCard[]>(() =>
+  (capabilityAudit.value?.capabilities ?? []).filter(isScrapeCapabilityCard),
+);
+const configuredCapabilityCount = computed(
+  () => scrapeCapabilities.value.filter((capability) => capability.configured).length,
+);
+const availableManualRunCount = computed(
+  () => scrapeCapabilities.value.filter((capability) => capability.manualRunAvailable).length,
+);
+const overallJobState = computed<RunState>(() => {
+  const jobTargets = scrapeCapabilities.value.filter((capability) => capability.target !== "studios");
+  if (jobTargets.some((capability) => runStates[capability.target] === "running")) {
+    return "running";
+  }
+  if (jobTargets.some((capability) => runStates[capability.target] === "error")) {
+    return "error";
+  }
+  if (jobTargets.some((capability) => runStates[capability.target] === "success")) {
+    return "success";
+  }
+  return "idle";
+});
 
 function formatRunTime(value: string | null): string {
   if (!value) return t("automation.scraper.notRunYet");
@@ -157,85 +187,69 @@ function runStateLabel(state: RunState): string {
   return t("automation.scraper.state.idle");
 }
 
-async function runStudios() {
-  studioState.value = "running";
-  studioMessage.value = "";
-  studioScheduledRun.value = null;
-  pendingAction.value = "studios-run";
-
-  await studiosFetch.refresh();
-  pendingAction.value = null;
-
-  if (studiosFetch.error.value) {
-    studioState.value = "error";
-    studioMessage.value = getErrorMessage(
-      studiosFetch.error.value,
-      t("automation.scraper.errors.studioFailed"),
-    );
-    return;
-  }
-
-  studioState.value = "success";
-  studioLastRunAt.value = new Date().toISOString();
-  const studioReward = await resolvePipelineReward("scraperStudios");
-  studioMessage.value = studioReward
-    ? t("automation.scraper.messages.studioCompletedWithXp", { xp: studioReward })
-    : t("automation.scraper.messages.studioCompleted");
-  if (studioReward) {
-    $toast.success(t("automation.scraper.toasts.studioReward", { xp: studioReward }));
-  }
+function runStateBadgeClass(state: RunState): string {
+  return RUN_STATE_BADGE_CLASS[state];
 }
 
-async function runJobs() {
-  jobState.value = "running";
-  jobMessage.value = "";
-  jobScheduledRun.value = null;
-  pendingAction.value = "jobs_hitmarker-run";
-
-  await jobsFetch.refresh();
-  pendingAction.value = null;
-
-  if (jobsFetch.error.value) {
-    jobState.value = "error";
-    jobMessage.value = getErrorMessage(
-      jobsFetch.error.value,
-      t("automation.scraper.errors.jobFailed"),
-    );
-    return;
+function capabilityAvailabilityLabel(capability: ScrapeCapabilityCard): string {
+  if (capability.configured) {
+    return t("automation.hub.audit.available");
   }
-
-  await refreshJobsFeed();
-  jobState.value = "success";
-  jobLastRunAt.value = new Date().toISOString();
-  const jobReward = await resolvePipelineReward("scraperJobs");
-  jobMessage.value = jobReward
-    ? t("automation.scraper.messages.jobCompletedWithXp", { xp: jobReward })
-    : t("automation.scraper.messages.jobCompleted");
-  if (jobReward) {
-    $toast.success(t("automation.scraper.toasts.jobReward", { xp: jobReward }));
+  if (capability.enabled) {
+    return t("automation.hub.audit.needsConfig");
   }
+  return t("automation.hub.audit.unavailable");
+}
+
+function capabilityAvailabilityBadgeClass(capability: ScrapeCapabilityCard): string {
+  if (capability.configured) {
+    return "badge-success";
+  }
+  if (capability.enabled) {
+    return "badge-warning";
+  }
+  return "badge-error";
+}
+
+function latestRunNoticeText(target: AutomationScrapeTarget): string {
+  const run = latestRuns[target];
+  if (!run) {
+    return "";
+  }
+  if (run.status === "pending") {
+    return t("automation.scraper.schedule.scheduledForLabel", {
+      date: toLocalizedDateTime(resolveScheduledRunAt(run)),
+    });
+  }
+  return t("automation.scraper.lastRunLabel", {
+    value: formatRunTime(lastRunAt[target]),
+  });
+}
+
+function latestRunStatusText(target: AutomationScrapeTarget): string {
+  const run = latestRuns[target];
+  if (!run) {
+    return "";
+  }
+  return t("automation.scraper.schedule.statusLabel", {
+    status: run.status,
+  });
+}
+
+function isPendingAction(target: AutomationScrapeTarget, action: "run" | "schedule"): boolean {
+  return pendingAction.value === `${target}-${action}`;
 }
 
 async function scheduleScrapeRun(target: AutomationScrapeTarget): Promise<void> {
-  const runAtValue = target === "studios" ? studioRunAt.value : jobRunAt.value;
-  const runAt = toIsoTimestamp(runAtValue);
+  const runAt = toIsoTimestamp(scheduledRunAt[target]);
   if (!runAt) {
-    if (target === "studios") {
-      studioState.value = "error";
-      studioMessage.value = t("automation.scraper.schedule.invalidRunAt");
-    } else {
-      jobState.value = "error";
-      jobMessage.value = t("automation.scraper.schedule.invalidRunAt");
-    }
+    runStates[target] = "error";
+    runMessages[target] = t("automation.scraper.schedule.invalidRunAt");
     return;
   }
 
-  pendingAction.value = target === "studios" ? "studios-schedule" : "jobs_hitmarker-schedule";
-  if (target === "studios") {
-    studioScheduledRun.value = null;
-  } else {
-    jobScheduledRun.value = null;
-  }
+  pendingAction.value = `${target}-schedule`;
+  latestRuns[target] = null;
   const scheduleResult = await settlePromise(
     scheduleScrape({
       target,
@@ -246,28 +260,67 @@ async function scheduleScrapeRun(target: AutomationScrapeTarget): Promise<void> 
   pendingAction.value = null;
 
   if (!scheduleResult.ok) {
-    const errorMessage = getErrorMessage(
+    runStates[target] = "error";
+    runMessages[target] = getErrorMessage(
       scheduleResult.error,
       t("automation.scraper.errors.scheduleFailed"),
     );
-    if (target === "studios") {
-      studioState.value = "error";
-      studioMessage.value = errorMessage;
-    } else {
-      jobState.value = "error";
-      jobMessage.value = errorMessage;
-    }
     return;
   }
 
-  if (target === "studios") {
-    studioState.value = "success";
-    studioMessage.value = t("automation.scraper.schedule.createdMessage");
-    studioScheduledRun.value = scheduleResult.value;
-  } else {
-    jobState.value = "success";
-    jobMessage.value = t("automation.scraper.schedule.createdMessage");
-    jobScheduledRun.value = scheduleResult.value;
+  runStates[target] = "success";
+  runMessages[target] = t("automation.scraper.schedule.createdMessage");
+  latestRuns[target] = scheduleResult.value;
+}
+
+async function runScrapeTarget(target: AutomationScrapeTarget): Promise<void> {
+  runStates[target] = "running";
+  runMessages[target] = "";
+  latestRuns[target] = null;
+  pendingAction.value = `${target}-run`;
+
+  const runResult = await settlePromise(
+    triggerScrape({ target }),
+    target === "studios"
+      ? t("automation.scraper.errors.studioFailed")
+      : t("automation.scraper.errors.jobFailed"),
+  );
+  pendingAction.value = null;
+
+  if (!runResult.ok) {
+    runStates[target] = "error";
+    runMessages[target] = getErrorMessage(
+      runResult.error,
+      target === "studios"
+        ? t("automation.scraper.errors.studioFailed")
+        : t("automation.scraper.errors.jobFailed"),
+    );
+    return;
+  }
+
+  if (target !== "studios") {
+    await refreshJobsFeed();
+  }
+  await refreshCapabilityAudit();
+
+  runStates[target] = "success";
+  lastRunAt[target] = runResult.value.completedAt ?? runResult.value.updatedAt;
+  latestRuns[target] = runResult.value;
+
+  const reward = await resolvePipelineReward(target === "studios" ? "scraperStudios" : "scraperJobs");
+  runMessages[target] = reward
+    ? target === "studios"
+      ? t("automation.scraper.messages.studioCompletedWithXp", { xp: reward })
+      : t("automation.scraper.messages.jobCompletedWithXp", { xp: reward })
+    : target === "studios"
+      ? t("automation.scraper.messages.studioCompleted")
+      : t("automation.scraper.messages.jobCompleted");
+  if (reward) {
+    $toast.success(
+      target === "studios"
+        ? t("automation.scraper.toasts.studioReward", { xp: reward })
+        : t("automation.scraper.toasts.jobReward", { xp: reward }),
+    );
   }
 }
 
@@ -288,6 +341,24 @@ async function resolvePipelineReward(
   }
   return rewardResult.value.awarded ? rewardResult.value.amount : null;
 }
+
+function cardDescription(target: AutomationScrapeTarget): string {
+  return target === "studios"
+    ? t("automation.scraper.studioCard.description")
+    : t("automation.scraper.jobCard.description");
+}
+
+function cardRunAria(target: AutomationScrapeTarget): string {
+  return target === "studios"
+    ? t("automation.scraper.studioCard.runAria")
+    : t("automation.scraper.jobCard.runAria");
+}
+
+function cardRunButtonLabel(target: AutomationScrapeTarget): string {
+  return target === "studios"
+    ? t("automation.scraper.studioCard.runButton")
+    : t("automation.scraper.jobCard.runButton");
+}
 </script>
 
 <template>
@@ -298,235 +369,220 @@ async function resolvePipelineReward(
       :description="t('automation.scraper.subtitle')"
     />
 
-    <ul class="steps steps-vertical lg:steps-horizontal w-full" :aria-label="t('automation.scraper.stepsAria')">
+    <div
+      role="alert"
+      class="alert alert-info alert-soft alert-vertical gap-4 rounded-box border border-info/20 bg-base-100 sm:alert-horizontal"
+    >
+      <div class="space-y-1">
+        <p class="font-display text-sm font-semibold uppercase tracking-[0.24em] text-info">
+          {{ t("automation.hub.audit.title") }}
+        </p>
+        <p class="text-sm text-base-content/75">
+          {{ t("automation.hub.audit.description") }}
+        </p>
+      </div>
+      <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-info btn-soft btn-sm">
+        {{ t("automation.hub.viewRunsButton") }}
+      </NuxtLink>
+    </div>
+
+    <ul
+      class="steps steps-vertical w-full rounded-box border border-base-300 bg-base-100 p-4 shadow-sm lg:steps-horizontal"
+      :aria-label="t('automation.scraper.stepsAria')"
+    >
       <li class="step step-primary">{{ t("automation.scraper.steps.run") }}</li>
       <li class="step">{{ t("automation.scraper.steps.review") }}</li>
       <li class="step">{{ t("automation.scraper.steps.interview") }}</li>
     </ul>
 
-    <SectionGrid grid-token="twoColumnXl">
-      <div class="card card-border bg-base-100">
-        <div class="card-body">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="card-title">{{ t("automation.scraper.studioCard.title") }}</h2>
-            <span class="badge" :class="studioState === 'success' ? 'badge-success' : studioState === 'error' ? 'badge-error' : 'badge-ghost'">
-              {{ runStateLabel(studioState) }}
-            </span>
-          </div>
-          <p class="text-sm text-base-content/70">
-            {{ t("automation.scraper.studioCard.description") }}
-          </p>
-          <p class="text-xs text-base-content/60">
-            {{ t("automation.scraper.lastRunLabel", { value: formatRunTime(studioLastRunAt) }) }}
-          </p>
+    <LoadingSkeleton
+      v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'"
+      :lines="6"
+    />
 
-          <fieldset class="fieldset mt-4">
-            <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
-            <input
-              v-model="studioRunAt"
-              class="input input-bordered w-full"
-              type="datetime-local"
-              :aria-label="t('automation.scraper.schedule.aria')"
-            />
-            <p class="validator-hint">{{ t("automation.scraper.schedule.hint") }}</p>
-          </fieldset>
-
-          <div class="card-actions justify-end gap-3">
-            <button
-              class="btn btn-primary"
-              :aria-label="t('automation.scraper.studioCard.runAria')"
-              :disabled="pendingAction !== null"
-              @click="runStudios"
-            >
-              <span
-                v-if="pendingAction === 'studios-run'"
-                class="loading loading-spinner loading-xs"
-              ></span>
-              <span v-else>{{ t("automation.scraper.studioCard.runButton") }}</span>
-            </button>
-            <button
-              class="btn btn-outline"
-              :aria-label="t('automation.scraper.schedule.buttonAria')"
-              :disabled="pendingAction !== null || !studioRunAt"
-              @click="scheduleScrapeRun('studios')"
-            >
-              <span
-                v-if="pendingAction === 'studios-schedule'"
-                class="loading loading-spinner loading-xs"
-              ></span>
-              <span v-else>{{ t("automation.scraper.schedule.button") }}</span>
-            </button>
-          </div>
-
-          <div v-if="studioState !== 'idle'" class="mt-2">
-            <div
-              v-if="studioState === 'success'"
-              role="alert"
-              class="alert alert-success alert-vertical sm:alert-horizontal"
-            >
-              <span>{{ studioMessage }}</span>
-            </div>
-            <div
-              v-else-if="studioState === 'error'"
-              role="alert"
-              class="alert alert-error alert-vertical sm:alert-horizontal"
-            >
-              <span>{{ studioMessage }}</span>
-            </div>
-          </div>
-
-          <div v-if="studioScheduledRun" role="alert" class="alert alert-info mt-4">
-            <div>
-              <h3 class="font-semibold">{{ t("automation.scraper.schedule.createdTitle") }}</h3>
-              <p class="text-sm">
-                {{
-                  t("automation.scraper.schedule.scheduledForLabel", {
-                    date: toLocalizedDateTime(resolveScheduledRunAt(studioScheduledRun)),
-                  })
-                }}
-              </p>
-              <p class="text-sm">
-                {{
-                  t("automation.scraper.schedule.statusLabel", {
-                    status: studioScheduledRun.status,
-                  })
-                }}
-              </p>
-            </div>
-            <NuxtLink
-              :to="APP_ROUTE_BUILDERS.automationRunDetail(studioScheduledRun.id)"
-              class="btn btn-ghost btn-sm"
-              :aria-label="t('automation.scraper.openRunDetailAria', { id: studioScheduledRun.id })"
-            >
-              {{ t("automation.scraper.openRunDetailButton") }}
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
-
-      <div class="card card-border bg-base-100">
-        <div class="card-body">
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="card-title">{{ t("automation.scraper.jobCard.title") }}</h2>
-            <span class="badge" :class="jobState === 'success' ? 'badge-success' : jobState === 'error' ? 'badge-error' : 'badge-ghost'">
-              {{ runStateLabel(jobState) }}
-            </span>
-          </div>
-          <p class="text-sm text-base-content/70">
-            {{ t("automation.scraper.jobCard.description") }}
-          </p>
-          <p class="text-xs text-base-content/60">
-            {{ t("automation.scraper.lastRunLabel", { value: formatRunTime(jobLastRunAt) }) }}
-          </p>
-
-          <fieldset class="fieldset mt-4">
-            <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
-            <input
-              v-model="jobRunAt"
-              class="input input-bordered w-full"
-              type="datetime-local"
-              :aria-label="t('automation.scraper.schedule.aria')"
-            />
-            <p class="validator-hint">{{ t("automation.scraper.schedule.hint") }}</p>
-          </fieldset>
-
-          <div class="card-actions justify-end gap-3">
-            <button
-              class="btn btn-primary"
-              :aria-label="t('automation.scraper.jobCard.runAria')"
-              :disabled="pendingAction !== null"
-              @click="runJobs"
-            >
-              <span
-                v-if="pendingAction === 'jobs_hitmarker-run'"
-                class="loading loading-spinner loading-xs"
-              ></span>
-              <span v-else>{{ t("automation.scraper.jobCard.runButton") }}</span>
-            </button>
-            <button
-              class="btn btn-outline"
-              :aria-label="t('automation.scraper.schedule.buttonAria')"
-              :disabled="pendingAction !== null || !jobRunAt"
-              @click="scheduleScrapeRun('jobs_hitmarker')"
-            >
-              <span
-                v-if="pendingAction === 'jobs_hitmarker-schedule'"
-                class="loading loading-spinner loading-xs"
-              ></span>
-              <span v-else>{{ t("automation.scraper.schedule.button") }}</span>
-            </button>
-          </div>
-
-          <div v-if="jobState !== 'idle'" class="mt-2">
-            <div
-              v-if="jobState === 'success'"
-              role="alert"
-              class="alert alert-success alert-vertical sm:alert-horizontal"
-            >
-              <span>{{ jobMessage }}</span>
-            </div>
-            <div
-              v-else-if="jobState === 'error'"
-              role="alert"
-              class="alert alert-error alert-vertical sm:alert-horizontal"
-            >
-              <span>{{ jobMessage }}</span>
-            </div>
-          </div>
-
-          <div v-if="jobScheduledRun" role="alert" class="alert alert-info mt-4">
-            <div>
-              <h3 class="font-semibold">{{ t("automation.scraper.schedule.createdTitle") }}</h3>
-              <p class="text-sm">
-                {{
-                  t("automation.scraper.schedule.scheduledForLabel", {
-                    date: toLocalizedDateTime(resolveScheduledRunAt(jobScheduledRun)),
-                  })
-                }}
-              </p>
-              <p class="text-sm">
-                {{
-                  t("automation.scraper.schedule.statusLabel", {
-                    status: jobScheduledRun.status,
-                  })
-                }}
-              </p>
-            </div>
-            <NuxtLink
-              :to="APP_ROUTE_BUILDERS.automationRunDetail(jobScheduledRun.id)"
-              class="btn btn-ghost btn-sm"
-              :aria-label="t('automation.scraper.openRunDetailAria', { id: jobScheduledRun.id })"
-            >
-              {{ t("automation.scraper.openRunDetailButton") }}
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
-    </SectionGrid>
-
-    <div class="stats stats-vertical lg:stats-horizontal w-full border border-base-300 bg-base-100 shadow-sm">
-      <div class="stat">
-        <div class="stat-title">{{ t("automation.scraper.stats.availableJobsTitle") }}</div>
-        <div class="stat-value text-primary">{{ jobCount }}</div>
-        <div class="stat-desc">{{ t("automation.scraper.stats.availableJobsDescription") }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-title">{{ t("automation.scraper.stats.jobStatusTitle") }}</div>
-        <div class="stat-value text-lg">{{ runStateLabel(jobState) }}</div>
-        <div class="stat-desc">{{ t("automation.scraper.stats.jobStatusDescription") }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-title">{{ t("automation.scraper.stats.interviewEntryTitle") }}</div>
-        <div class="stat-value text-lg">{{ t("automation.scraper.stats.interviewEntryValue") }}</div>
-        <div class="stat-desc">{{ t("automation.scraper.stats.interviewEntryDescription") }}</div>
-      </div>
+    <div
+      v-else-if="capabilityAuditStatus === 'error'"
+      role="alert"
+      class="alert alert-warning alert-soft"
+    >
+      <span>{{ getErrorMessage(capabilityAuditError, t("automation.scraper.errors.scheduleFailed")) }}</span>
     </div>
 
+    <template v-else>
+      <div
+        class="stats stats-vertical w-full border border-base-300 bg-base-100 shadow-sm lg:stats-horizontal"
+      >
+        <div class="stat">
+          <div class="stat-title">{{ t("automation.hub.audit.summary.total") }}</div>
+          <div class="stat-value text-primary">{{ scrapeCapabilities.length }}</div>
+          <div class="stat-desc">{{ t("automation.hub.audit.summary.totalDesc") }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">{{ t("automation.hub.audit.summary.configured") }}</div>
+          <div class="stat-value text-secondary">{{ configuredCapabilityCount }}</div>
+          <div class="stat-desc">{{ t("automation.hub.audit.summary.configuredDesc") }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">{{ t("automation.scraper.stats.availableJobsTitle") }}</div>
+          <div class="stat-value text-accent">{{ jobCount }}</div>
+          <div class="stat-desc">{{ t("automation.scraper.stats.availableJobsDescription") }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">{{ t("automation.scraper.stats.jobStatusTitle") }}</div>
+          <div class="stat-value text-lg">{{ runStateLabel(overallJobState) }}</div>
+          <div class="stat-desc">
+            {{
+              t("automation.hub.audit.columns.manual")
+            }}:
+            {{ availableManualRunCount }}
+          </div>
+        </div>
+      </div>
+
+      <SectionGrid grid-token="twoColumnXl">
+        <div
+          v-for="capability in scrapeCapabilities"
+          :key="capability.id"
+          class="card card-border rounded-box border border-base-300 bg-base-100 shadow-sm"
+        >
+          <div class="card-body gap-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="space-y-2">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="card-title">{{ capability.name }}</h2>
+                  <span class="badge badge-soft badge-sm" :class="capabilityAvailabilityBadgeClass(capability)">
+                    {{ capabilityAvailabilityLabel(capability) }}
+                  </span>
+                  <span class="badge badge-sm" :class="runStateBadgeClass(runStates[capability.target])">
+                    {{ runStateLabel(runStates[capability.target]) }}
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs">
+                  <span class="badge badge-outline badge-sm">
+                    {{ t("automation.hub.audit.columns.manual") }}
+                  </span>
+                  <span class="badge badge-outline badge-sm">
+                    {{ t("automation.hub.audit.columns.scheduled") }}
+                  </span>
+                  <span class="badge badge-outline badge-sm">
+                    {{ t("automation.hub.audit.columns.history") }}
+                  </span>
+                  <span class="badge badge-outline badge-sm">
+                    {{ t("automation.hub.audit.columns.live") }}
+                  </span>
+                </div>
+              </div>
+              <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-ghost btn-sm">
+                {{ t("automation.hub.viewRunsButton") }}
+              </NuxtLink>
+            </div>
+
+            <p class="text-sm text-base-content/70">
+              {{ cardDescription(capability.target) }}
+            </p>
+            <p class="text-xs text-base-content/60">
+              {{ t("automation.scraper.lastRunLabel", { value: formatRunTime(lastRunAt[capability.target]) }) }}
+            </p>
+
+            <div v-if="capability.issues.length > 0" role="alert" class="alert alert-warning alert-soft">
+              <div class="space-y-1">
+                <p class="font-medium">{{ capabilityAvailabilityLabel(capability) }}</p>
+                <ul class="space-y-1 text-sm">
+                  <li v-for="issue in capability.issues" :key="issue">
+                    {{ issue }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <fieldset class="fieldset rounded-box border border-base-300 bg-base-200/50 p-4">
+              <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
+              <input
+                v-model="scheduledRunAt[capability.target]"
+                class="input input-bordered w-full"
+                type="datetime-local"
+                :aria-label="t('automation.scraper.schedule.aria')"
+              />
+              <p class="label">{{ t("automation.scraper.schedule.hint") }}</p>
+            </fieldset>
+
+            <div class="card-actions justify-end gap-3">
+              <button
+                class="btn btn-primary"
+                :aria-label="cardRunAria(capability.target)"
+                :disabled="pendingAction !== null || !capability.configured"
+                @click="runScrapeTarget(capability.target)"
+              >
+                <span v-if="isPendingAction(capability.target, 'run')" class="loading loading-spinner loading-xs"></span>
+                <span>{{ cardRunButtonLabel(capability.target) }}</span>
+              </button>
+              <button
+                class="btn btn-outline"
+                :aria-label="t('automation.scraper.schedule.buttonAria')"
+                :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt[capability.target]"
+                @click="scheduleScrapeRun(capability.target)"
+              >
+                <span v-if="isPendingAction(capability.target, 'schedule')" class="loading loading-spinner loading-xs"></span>
+                <span>{{ t("automation.scraper.schedule.button") }}</span>
+              </button>
+            </div>
+
+            <div v-if="runStates[capability.target] !== 'idle'" class="mt-2">
+              <div
+                v-if="runStates[capability.target] === 'success'"
+                role="alert"
+                class="alert alert-success alert-vertical sm:alert-horizontal"
+              >
+                <span>{{ runMessages[capability.target] }}</span>
+              </div>
+              <div
+                v-else-if="runStates[capability.target] === 'error'"
+                role="alert"
+                class="alert alert-error alert-vertical sm:alert-horizontal"
+              >
+                <span>{{ runMessages[capability.target] }}</span>
+              </div>
+            </div>
+
+            <div
+              v-if="latestRuns[capability.target]"
+              role="alert"
+              class="alert alert-info alert-vertical gap-3 sm:alert-horizontal"
+            >
+              <div class="space-y-1">
+                <p class="font-medium">
+                  {{ latestRunNoticeText(capability.target) }}
+                </p>
+                <p class="text-sm">
+                  {{ latestRunStatusText(capability.target) }}
+                </p>
+              </div>
+              <NuxtLink
+                :to="APP_ROUTE_BUILDERS.automationRunDetail(latestRuns[capability.target].id)"
+                class="btn btn-ghost btn-sm"
+                :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRuns[capability.target].id })"
+              >
+                {{ t("automation.scraper.openRunDetailButton") }}
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
+      </SectionGrid>
+    </template>
+
     <div class="card card-border bg-base-100">
-      <div class="card-body">
-        <div class="flex items-center justify-between mb-3">
+      <div class="card-body gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
           <h2 class="card-title">{{ t("automation.scraper.table.title") }}</h2>
-          <NuxtLink :to="APP_ROUTES.jobs" class="btn btn-ghost btn-sm">{{ t("automation.scraper.table.openBoardButton") }}</NuxtLink>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-soft badge-primary">
+              {{ t("automation.scraper.stats.interviewEntryTitle") }}:
+              {{ t("automation.scraper.stats.interviewEntryValue") }}
+            </span>
+            <NuxtLink :to="APP_ROUTES.jobs" class="btn btn-ghost btn-sm">
+              {{ t("automation.scraper.table.openBoardButton") }}
+            </NuxtLink>
+          </div>
         </div>
 
         <LoadingSkeleton v-if="jobsLoading && topJobs.length === 0" :lines="4" />
@@ -535,8 +591,8 @@ async function resolvePipelineReward(
           <span>{{ t("automation.scraper.table.emptyState") }}</span>
         </div>
 
-        <div v-else class="overflow-x-auto">
-          <table class="table" :aria-label="t('automation.scraper.table.aria')">
+        <div v-else class="overflow-x-auto rounded-box border border-base-300">
+          <table class="table table-zebra" :aria-label="t('automation.scraper.table.aria')">
             <thead>
               <tr>
                 <th>{{ t("automation.scraper.table.columns.role") }}</th>
@@ -548,9 +604,32 @@ async function resolvePipelineReward(
             </thead>
             <tbody>
               <tr v-for="job in topJobs" :key="job.id" class="hover:bg-base-200">
-                <td>{{ job.title }}</td>
-                <td>{{ job.company }}</td>
-                <td>{{ job.location }}</td>
+                <td>
+                  <div class="space-y-1">
+                    <div class="font-medium">{{ job.title }}</div>
+                    <div class="flex flex-wrap gap-2">
+                      <span v-if="job.remote" class="badge badge-ghost badge-sm">
+                        {{ t("jobCard.remoteBadge") }}
+                      </span>
+                      <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
+                        {{ t("jobCard.hybridBadge") }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="space-y-1">
+                    <div class="font-medium">{{ job.company }}</div>
+                    <div v-if="job.source" class="text-xs text-base-content/60">
+                      {{ job.source }}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span>{{ job.location }}</span>
+                  </div>
+                </td>
                 <td>{{ relativePostedDate(job.postedDate) }}</td>
                 <td class="text-right">
                   <button

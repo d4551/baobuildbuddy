@@ -18,17 +18,14 @@
 
 ## Start Here First
 
-If you want the shortest possible explanation before reading the full runbook, start with:
+`README.md` is the full local runbook. If you are new, non-technical, or just want the fastest setup path, start with one of these shorter guides first:
 
-- [Explain Like I'm 5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md)
-
-That guide explains the whole system in plain language with Mermaid diagrams for:
-
-- page load and server flow
-- AI chat flow
-- job scraping and job apply automation
-- screenshots and run history
-- email generation and SMTP delivery
+| If you want to... | Start here |
+|---|---|
+| understand the app in plain English | [Explain Like I'm 5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md) |
+| get BaoBuildBuddy running for the first time | [First-Time Setup Guide](docs/STARTER_GUIDE.md) |
+| set up local AI with Ollama | [Local AI Setup Guide](docs/LOCAL_AI_SETUP.md) |
+| learn the automation flows | [Automation Guide](docs/AUTOMATION.md) |
 
 Tiny version:
 
@@ -39,12 +36,27 @@ Tiny version:
 - Bun is the runtime, package manager, bundler, and test runner.
 - Tauri is the desktop wrapper.
 
+## Local AI Quick Path
+
+If you want BaoBuildBuddy to use AI on your own computer without starting with cloud API keys:
+
+1. Install Ollama from [ollama.com/download](https://ollama.com/download/).
+2. Read the official [Ollama Quickstart](https://docs.ollama.com/quickstart) if you want the vendor walkthrough.
+3. Download a first model with `ollama pull llama3.2`.
+4. Open BaoBuildBuddy and go to **Settings > AI Providers**.
+5. Use `http://localhost:11434/v1` as the local endpoint and leave the model blank if you want auto-detect.
+
+For the full beginner walkthrough, use [docs/LOCAL_AI_SETUP.md](docs/LOCAL_AI_SETUP.md).
+
 ## Quick links
 
 - [Explain Like I'm 5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md)
+- [Local AI Setup Guide](docs/LOCAL_AI_SETUP.md)
 - [Non-Technical Install (Pick Your OS)](#non-technical-install-pick-your-os)
 - [Getting Started (First-time setup)](docs/STARTER_GUIDE.md)
 - [Automation Guide](docs/AUTOMATION.md)
+- [Ollama Download](https://ollama.com/download/)
+- [Ollama Quickstart](https://docs.ollama.com/quickstart)
 - [Desktop (Tauri) Packaging](#89-desktop-tauri-installer-path)
 
 ## Release Validation Workflow
@@ -167,6 +179,7 @@ If you are on a different CPU architecture, use the matching artifact for that a
 ### Documentation index
 
 - [Explain Like I'm 5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md)
+- [Local AI Setup Guide](docs/LOCAL_AI_SETUP.md)
 - [First-time Setup Guide](docs/STARTER_GUIDE.md)
 - [Automation and RPA Guide](docs/AUTOMATION.md)
 - [Server routes and contracts in `packages/server`](packages/server/src/routes)
@@ -529,6 +542,12 @@ The AI subsystem lives under `packages/server/src/services/ai/` with these files
 - `CLAUDE_API_KEY` -- optional cloud Anthropic
 - `HUGGINGFACE_TOKEN` -- optional cloud HuggingFace
 
+For a beginner-friendly Ollama walkthrough, see [docs/LOCAL_AI_SETUP.md](docs/LOCAL_AI_SETUP.md).
+Official Ollama references:
+
+- [Ollama Download](https://ollama.com/download/)
+- [Ollama Quickstart](https://docs.ollama.com/quickstart)
+
 ### 6.2 Provider selection
 
 1. Local provider is used when `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` are set.
@@ -819,6 +838,8 @@ Current verified artifacts are cataloged in `packages/desktop/releases/README.md
 
 Release checksums are generated in `packages/desktop/releases/sha256.txt`.
 
+Run `bun run verify:desktop-releases` to re-check desktop version alignment, required Tauri icon assets, staged artifact names, platform bundle signatures, DMG integrity, and checksum matches.
+
 Install locally after building:
 
 - macOS: open the generated `.dmg` and drag the `.app` into `Applications`
@@ -1108,7 +1129,9 @@ curl -fsS "${API_BASE}/api/stats/dashboard" | head
 | `/api/automation/job-apply/schedule` | Schedule job application automation | `RpaRunExecutionEnvelope` (status `pending`, `input.schedule.runAt`) |
 | `/api/automation/email-response` | Generate AI email response | `{ runId, status: "success", reply, provider, model }` |
 | `/api/automation/email-response/schedule` | Schedule AI email response automation | `RpaRunExecutionEnvelope` (status `pending`, `input.schedule.runAt`) |
+| `/api/automation/scrape` | Run scraper automation now | `RpaRunExecutionEnvelope` (status `success` or `error`, `input.target`, `output.scraped`) |
 | `/api/automation/scrape/schedule` | Schedule scraper automation | `RpaRunExecutionEnvelope` (status `pending`, `input.target`, `input.schedule.runAt`) |
+| `/api/automation/capabilities` | Audit implemented RPA capabilities | Capability summary with configuration/readiness rows |
 | `/api/gamification/progress` | XP and level progression | Gamification progress payload |
 | `/api/automation/runs` | Automation audit | Persisted run records |
 | `/api/automation/runs/:id` | Run detail | Single run snapshot |

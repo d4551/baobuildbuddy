@@ -1,6 +1,8 @@
 import type {
   AIProviderType,
   AutomationSettings,
+  BrandSettings,
+  BrandSettingsPatch,
   EmailTransportSettings,
   NotificationPreferences,
 } from "@bao/shared";
@@ -16,6 +18,8 @@ import {
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
   automationSettingsSchema,
+  brandSettingsPatchSchema,
+  brandSettingsSchema,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
   DEFAULT_SETTINGS_ID,
@@ -28,6 +32,7 @@ import {
   SCHEMA_MAX_LENGTH_EMAIL,
   SCHEMA_MAX_LENGTH_LONG,
   SCHEMA_MAX_LENGTH_MODEL,
+  SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
   SCHEMA_MAX_LENGTH_SETTINGS_URL,
   SCHEMA_MAX_LENGTH_MICRO,
@@ -41,6 +46,8 @@ import {
   SCHEMA_MAX_LENGTH_ID,
   settle,
   SPEECH_PROVIDER_OPTIONS,
+  mergeBrandSettings,
+  resolveBrandSettings,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -173,6 +180,74 @@ const emailTransportAuthModeBodySchema = t.Union([
   t.Literal(EMAIL_TRANSPORT_AUTH_PLAIN),
   t.Literal(EMAIL_TRANSPORT_AUTH_LOGIN),
 ]);
+
+const brandThemePaletteBodySchema = t.Object({
+  base100: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  base200: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  base300: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  baseContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  primary: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  primaryContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  secondary: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  secondaryContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  accent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  accentContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  neutral: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  neutralContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  info: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  infoContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  success: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  successContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  warning: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  warningContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  error: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  errorContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  radiusSelector: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  radiusField: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  radiusBox: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  sizeSelector: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  sizeField: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  border: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  depth: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  noise: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+});
+
+const brandThemePalettePatchBodySchema = t.Partial(brandThemePaletteBodySchema);
+
+const brandTypographyBodySchema = t.Object({
+  fontStylesheetUrl: t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG }),
+  displayFontFamily: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+  bodyFontFamily: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+  monoFontFamily: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+});
+
+const brandTypographyPatchBodySchema = t.Partial(brandTypographyBodySchema);
+
+const brandContentBodySchema = t.Object({
+  tagline: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  defaultTitle: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  defaultDescription: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+  contentOverrides: t.Record(
+    t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG }),
+  ),
+});
+
+const brandContentPatchBodySchema = t.Partial(brandContentBodySchema);
+
+const brandSettingsPatchBodySchema = t.Partial(
+  t.Object({
+    name: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    assistantName: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    apiName: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    logoPath: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    faviconPath: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    typography: brandTypographyPatchBodySchema,
+    lightTheme: brandThemePalettePatchBodySchema,
+    darkTheme: brandThemePalettePatchBodySchema,
+    content: brandContentPatchBodySchema,
+  }),
+);
 
 const languageBodySchema = t.Union([
   t.Literal(APP_LANGUAGE_EN_US),
@@ -366,6 +441,23 @@ const mergeEmailTransportSettings = (
   return mergedParsed.data;
 };
 
+const mergePersistedBrandSettings = (
+  current: BrandSettings | null | undefined,
+  patch: BrandSettingsPatch | null | undefined,
+): BrandSettings | null => {
+  const currentParsed = brandSettingsSchema.safeParse(resolveBrandSettings(current));
+  const patchParsed = brandSettingsPatchSchema.safeParse(patch ?? {});
+
+  if (!(currentParsed.success && patchParsed.success)) {
+    return null;
+  }
+
+  const mergedCandidate = mergeBrandSettings(currentParsed.data, patchParsed.data);
+  const mergedParsed = brandSettingsSchema.safeParse(mergedCandidate);
+
+  return mergedParsed.success ? mergedParsed.data : null;
+};
+
 const readOrCreateSettingsRow = async () => {
   let rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
   if (rows.length === 0) {
@@ -381,6 +473,7 @@ interface SettingsUpdateInput {
   preferredModel?: string;
   theme?: "bao-light" | "bao-dark";
   language?: (typeof APP_LANGUAGE_CODES)[number];
+  brandSettings?: BrandSettingsPatch;
   notifications?: Partial<NotificationPreferences>;
   automationSettings?: Partial<AutomationSettings>;
   emailTransportSettings?: Partial<EmailTransportSettings>;
@@ -396,6 +489,17 @@ const buildSettingsUpdate = (
   if (body.preferredModel !== undefined) update.preferredModel = body.preferredModel;
   if (body.theme !== undefined) update.theme = body.theme;
   if (body.language !== undefined) update.language = body.language;
+  if (body.brandSettings !== undefined) {
+    const mergedBrandSettings = mergePersistedBrandSettings(
+      existingRow.brandSettings,
+      body.brandSettings,
+    );
+    if (!mergedBrandSettings) {
+      return null;
+    }
+
+    update.brandSettings = mergedBrandSettings;
+  }
 
   if (body.notifications !== undefined) {
     const mergedNotifications = mergeNotifications(existingRow.notifications, body.notifications);
@@ -454,6 +558,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
 
     return {
       ...publicRow,
+      brandSettings: resolveBrandSettings(row.brandSettings),
       geminiApiKey: row.geminiApiKey
         ? `***${row.geminiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
         : null,
@@ -505,6 +610,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
         preferredModel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
         theme: t.Optional(t.Union([t.Literal("bao-light"), t.Literal("bao-dark")])),
         language: t.Optional(languageBodySchema),
+        brandSettings: t.Optional(brandSettingsPatchBodySchema),
         notifications: t.Optional(
           t.Object({
             achievements: t.Optional(t.Boolean()),

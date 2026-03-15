@@ -11,10 +11,23 @@ Before this guide, you can read the picture-book version here:
 
 - [Explain Like I'm 5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)
 
+If your main goal is "I just want local AI working on my computer," use this first:
+
+- [Local AI Setup Guide](./LOCAL_AI_SETUP.md)
+
 If you need deeper architecture and runbook details, see the full runbook: [README.md](../README.md).
 
 Use this guide if this is your first time running BaoBuildBuddy locally.
 Think of it as the tutorial level: follow each checkpoint in order before unlocking the rest of the project.
+
+## Choose your path
+
+| If you want to... | Read this |
+|---|---|
+| understand what the app does in simple terms | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md) |
+| set up local AI with Ollama | [Local AI Setup Guide](./LOCAL_AI_SETUP.md) |
+| do the full first-time local setup | keep reading this guide |
+| read the full technical runbook | [README.md](../README.md) |
 
 ## Release Validation and Rebuild
 
@@ -33,6 +46,7 @@ UI runtime contracts:
 Documentation map:
 
 - [Explain Like I'm 5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)
+- [Local AI Setup Guide](./LOCAL_AI_SETUP.md)
 - [Automation and RPA Guide](./AUTOMATION.md)
 - [Full local runbook](../README.md)
 
@@ -67,6 +81,7 @@ Optional but recommended:
 - curl
 - jq
 - At least one AI provider API key (HuggingFace token, OpenAI, Gemini, or Claude)
+- Ollama for local AI: [Download](https://ollama.com/download/) and [Quickstart](https://docs.ollama.com/quickstart)
 
 ### 2.1 Installables (quick install commands)
 
@@ -275,6 +290,7 @@ Then add these when you are ready:
 
 - `BAO_DISABLE_AUTH=true` for local dev if you want to skip API key gating.
 - `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` for local model.
+  For the easiest path, set `LOCAL_MODEL_ENDPOINT=http://localhost:11434/v1` and leave `LOCAL_MODEL_NAME` blank so BaoBuildBuddy can auto-detect the model.
 - `OPENAI_API_KEY`, `GEMINI_API_KEY`, `CLAUDE_API_KEY`, `HUGGINGFACE_TOKEN` as needed.
 
 For RPA/automation support, add:
@@ -330,7 +346,7 @@ Then open `http://localhost:3001` in your browser and confirm:
 
 1. Open **Settings**.
 2. Configure your preferred AI mode:
-   - local model endpoint (recommended first) or
+   - local model endpoint (recommended first, see [Local AI Setup Guide](./LOCAL_AI_SETUP.md)) or
    - provider API key.
 3. Save settings.
 4. Open **Resume** and create your first resume record.

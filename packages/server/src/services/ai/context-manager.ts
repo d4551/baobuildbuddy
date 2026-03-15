@@ -6,9 +6,11 @@ import {
   AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT,
   AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT,
   AI_CHAT_HISTORY_FETCH_LIMIT,
+  resolveBrandSettings,
   DEFAULT_PROFILE_ID,
   settle,
   type AIChatContextDomain,
+  type BrandSettings,
   type ChatMessage,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
@@ -21,7 +23,7 @@ import { portfolioProjects } from "../../db/schema/portfolios";
 import { resumes } from "../../db/schema/resumes";
 import { skillMappings } from "../../db/schema/skill-mappings";
 import { userProfile } from "../../db/schema/user";
-import { DOMAIN_SYSTEM_PROMPTS, GAMING_INDUSTRY_CONTEXT } from "./prompts";
+import { buildDomainSystemPrompts, GAMING_INDUSTRY_CONTEXT } from "./prompts";
 
 interface ConversationContext {
   systemPrompt: string;
@@ -63,12 +65,18 @@ export class ConversationContextManager {
     sessionId: string,
     currentMessage: string,
     preferredDomain?: AIChatContextDomain,
+    runtimeBrand?: BrandSettings | null,
   ): Promise<ConversationContext> {
     const domain = preferredDomain ?? this.inferDomain(currentMessage);
     const messages = await this.loadConversationMessages(sessionId, currentMessage);
     const profile = await this.loadDefaultProfile();
     const domainContext = await this.loadDomainContext(domain);
-    const systemPrompt = this.buildSystemPrompt(domain, profile, domainContext);
+    const systemPrompt = this.buildSystemPrompt(
+      domain,
+      profile,
+      domainContext,
+      runtimeBrand ?? resolveBrandSettings(undefined),
+    );
     return { systemPrompt, messages };
   }
 
@@ -127,8 +135,10 @@ export class ConversationContextManager {
     domain: AIChatContextDomain,
     profile: typeof userProfile.$inferSelect | null,
     domainContext: string | null,
+    runtimeBrand: BrandSettings,
   ): string {
-    let systemPrompt = DOMAIN_SYSTEM_PROMPTS[domain] || DOMAIN_SYSTEM_PROMPTS.general;
+    const domainSystemPrompts = buildDomainSystemPrompts(runtimeBrand);
+    let systemPrompt = domainSystemPrompts[domain] || domainSystemPrompts.general;
 
     if (profile) {
       systemPrompt += `\n\nUser Context:\nName: ${profile.name || "Not set"}\nCurrent Role: ${profile.currentRole || "Not set"}\nYears Experience: ${profile.yearsExperience || "Not set"}\nLocation: ${profile.location || "Not set"}`;

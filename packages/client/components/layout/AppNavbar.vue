@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  APP_BRAND,
   APP_LANGUAGE_LABELS,
   APP_ROUTES,
   THEME_NAMES,
@@ -11,6 +10,7 @@ import { useI18n } from "vue-i18n";
 import { APP_DRAWER_ID } from "~/constants/layout";
 
 const { theme, toggleTheme } = useTheme();
+const { resolvedBrand } = useBrand();
 const { t, locale, availableLocales } = useI18n();
 const localeMenuRef = useTemplateRef<HTMLDetailsElement>("localeMenu");
 const isLocaleMenuOpen = ref(false);
@@ -47,12 +47,12 @@ function syncLocaleMenuState(): void {
         </svg>
       </label>
       <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-ghost gap-2 text-xl font-bold text-primary lg:hidden">
-        <img :src="APP_BRAND.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
-        <span>{{ APP_BRAND.name }}</span>
+        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
+        <span>{{ resolvedBrand.name }}</span>
       </NuxtLink>
     </div>
     <div class="navbar-center hidden lg:flex">
-      <span class="text-sm text-base-content/60">{{ t("app.tagline") }}</span>
+      <span class="text-sm text-base-content/60">{{ resolvedBrand.content.tagline }}</span>
     </div>
     <div class="navbar-end gap-1">
       <label class="swap swap-rotate btn btn-ghost btn-circle" :aria-label="t('a11y.toggleTheme')">

@@ -41,14 +41,21 @@ const RUN_ID_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);
 
 const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
   AUTOMATION_RUN_TYPES;
-const [AUTOMATION_SCRAPE_TARGET_STUDIOS, AUTOMATION_SCRAPE_TARGET_JOBS_HITMARKER] =
-  AUTOMATION_SCRAPE_TARGETS;
 const [
   AUTOMATION_STATUS_PENDING,
   AUTOMATION_STATUS_RUNNING,
   AUTOMATION_STATUS_SUCCESS,
   AUTOMATION_STATUS_ERROR,
 ] = AUTOMATION_RUN_STATUSES;
+const [
+  SCRAPE_TARGET_STUDIOS,
+  SCRAPE_TARGET_HITMARKER,
+  SCRAPE_TARGET_GRACKLE,
+  SCRAPE_TARGET_WORKWITHINDIES,
+  SCRAPE_TARGET_REMOTEGAMEJOBS,
+  SCRAPE_TARGET_GAMESJOBSDIRECT,
+  SCRAPE_TARGET_POCKETGAMER,
+] = AUTOMATION_SCRAPE_TARGETS;
 
 const automationRoutesLogger = createServerLogger("automation-routes");
 
@@ -69,8 +76,13 @@ const EMAIL_RESPONSE_TONE_SCHEMA = t.Union([
   t.Literal("concise"),
 ]);
 const SCRAPE_TARGET_SCHEMA = t.Union([
-  t.Literal(AUTOMATION_SCRAPE_TARGET_STUDIOS),
-  t.Literal(AUTOMATION_SCRAPE_TARGET_JOBS_HITMARKER),
+  t.Literal(SCRAPE_TARGET_STUDIOS),
+  t.Literal(SCRAPE_TARGET_HITMARKER),
+  t.Literal(SCRAPE_TARGET_GRACKLE),
+  t.Literal(SCRAPE_TARGET_WORKWITHINDIES),
+  t.Literal(SCRAPE_TARGET_REMOTEGAMEJOBS),
+  t.Literal(SCRAPE_TARGET_GAMESJOBSDIRECT),
+  t.Literal(SCRAPE_TARGET_POCKETGAMER),
 ]);
 const nullableJsonRecordBodySchema = t.Union([t.Record(t.String(), t.Unknown()), t.Null()]);
 const nullableRunErrorSchema = t.Union([
@@ -113,6 +125,32 @@ const routeErrorBodySchema = t.Object({
     details: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
 });
+const capabilityAuditEntryBodySchema = t.Object({
+  id: t.String({ minLength: 1 }),
+  category: t.Union([t.Literal("job_apply"), t.Literal("scrape")]),
+  name: t.String({ minLength: 1 }),
+  target: t.Union([SCRAPE_TARGET_SCHEMA, t.Null()]),
+  implemented: t.Boolean(),
+  configured: t.Boolean(),
+  enabled: t.Boolean(),
+  manualRunAvailable: t.Boolean(),
+  scheduledRunAvailable: t.Boolean(),
+  runHistoryAvailable: t.Boolean(),
+  liveUpdatesAvailable: t.Boolean(),
+  issues: t.Array(t.String({ minLength: 1 })),
+});
+const capabilityAuditReportBodySchema = t.Object({
+  generatedAt: t.String({ minLength: 1 }),
+  summary: t.Object({
+    total: t.Number(),
+    configured: t.Number(),
+    manualRunAvailable: t.Number(),
+    scheduledRunAvailable: t.Number(),
+    runHistoryAvailable: t.Number(),
+    liveUpdatesAvailable: t.Number(),
+  }),
+  capabilities: t.Array(capabilityAuditEntryBodySchema),
+});
 
 type AutomationDbRow = typeof automationRuns.$inferSelect;
 type AutomationJsonObject = NonNullable<RpaRunExecutionEnvelope["input"]>;
@@ -122,6 +160,9 @@ type JobApplyRequestBody = {
   coverLetterId?: string;
   jobId?: string;
   customAnswers?: Record<string, string>;
+};
+type RunScrapeRequestBody = {
+  target: AutomationScrapeTarget;
 };
 type ScheduleJobApplyRequestBody = JobApplyRequestBody & {
   runAt: string;
@@ -440,6 +481,40 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
     },
   )
   .post(
+    "/scrape",
+    async ({ body, set }) => {
+      const payload: RunScrapeRequestBody = body;
+      const runResult = await settle(applicationAutomationService.runScrape(payload.target));
+      if (runResult.status === "rejected") {
+        const mapped = mapAutomationRouteError(runResult.reason);
+        set.status = mapped.status;
+        return mapped.body;
+      }
+
+      const run = await readAutomationRunById(runResult.value);
+      if (!run) {
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND);
+      }
+
+      set.status = HTTP_STATUS_OK;
+      return run;
+    },
+    {
+      body: t.Object({
+        target: SCRAPE_TARGET_SCHEMA,
+      }),
+      response: {
+        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
+        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+      },
+    },
+  )
+  .post(
     "/scrape/schedule",
     async ({ body, set }) => {
       const payload: ScheduleScrapeRequestBody = body;
@@ -472,6 +547,25 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
         [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
         [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
         [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+      },
+    },
+  )
+  .get(
+    "/capabilities",
+    async ({ set }) => {
+      const auditResult = await settle(applicationAutomationService.getRpaCapabilityAudit());
+      if (auditResult.status === "rejected") {
+        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        return toRouteError("SCRIPT_OUTPUT_INVALID", "Failed to load RPA capability audit.");
+      }
+
+      set.status = HTTP_STATUS_OK;
+      return auditResult.value;
+    },
+    {
+      response: {
+        [HTTP_STATUS_OK]: capabilityAuditReportBodySchema,
         [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
       },
     },

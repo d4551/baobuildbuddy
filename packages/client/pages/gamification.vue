@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
-import { APP_BRAND, APP_ROUTES, getXPProgress } from "@bao/shared";
+import { APP_ROUTES, getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {
@@ -28,11 +28,12 @@ type GamificationUiState = "idle" | "loading" | "error" | "empty" | "success";
 const api = useApi();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
+const { resolvedBrand } = useBrand();
 const completingChallenge = ref<string | null>(null);
 
 if (import.meta.server) {
   useServerSeoMeta({
-    title: t("gamificationPage.seoTitle", { brand: APP_BRAND.name }),
+    title: t("gamificationPage.seoTitle", { brand: resolvedBrand.value.name }),
     description: t("gamificationPage.seoDescription"),
   });
 }
@@ -175,7 +176,7 @@ async function requestData<T>(
   <section class="space-y-6" aria-labelledby="gamification-title">
     <header class="space-y-1">
       <h1 id="gamification-title" class="text-3xl font-bold">{{ t("gamificationPage.pageTitle") }}</h1>
-      <p class="text-sm text-base-content/60">{{ t("gamificationPage.metricsSummary", { brand: APP_BRAND.name }) }}</p>
+      <p class="text-sm text-base-content/60">{{ t("gamificationPage.metricsSummary", { brand: resolvedBrand.name }) }}</p>
     </header>
 
     <LoadingSkeleton

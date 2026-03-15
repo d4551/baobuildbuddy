@@ -2,8 +2,8 @@ import {
   AI_DEFAULT_TEMPERATURE_CREATIVE,
   API_ERROR_GENERATE_RESPONSE,
   AI_MAX_TOKENS_WS,
-  APP_BRAND,
   generateId,
+  resolveBrandSettings,
   safeParseJson,
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_MESSAGE,
@@ -41,6 +41,8 @@ type AutomationActionPayload = {
   resumeId?: string;
   coverLetterId?: string;
 };
+
+type RuntimeBrand = ReturnType<typeof resolveBrandSettings>;
 
 const JOB_APPLY_ACTION_PATTERN = /\{"action"\s*:\s*"job_apply"[^{}]*\}/;
 
@@ -95,6 +97,10 @@ async function saveChatMessage(
 async function getSettingsRow(): Promise<SettingsRow | undefined> {
   const rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
   return rows[0];
+}
+
+function resolveRuntimeBrand(config: SettingsRow | undefined): RuntimeBrand {
+  return resolveBrandSettings(config?.brandSettings);
 }
 
 async function createAiService(config: SettingsRow | undefined): Promise<AIServiceInstance> {
@@ -177,7 +183,10 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
   }
 
   const aiService = await createAiService(settingsResult.value);
-  const contextResult = await settle(contextManager.buildContext(sessionId, data.content));
+  const runtimeBrand = resolveRuntimeBrand(settingsResult.value);
+  const contextResult = await settle(
+    contextManager.buildContext(sessionId, data.content, undefined, runtimeBrand),
+  );
   const responseText =
     contextResult.status === "fulfilled"
       ? await streamAssistantResponse({
@@ -187,7 +196,7 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
           context: contextResult.value,
           sessionId,
         })
-      : generateFallbackResponse(data.content);
+      : generateFallbackResponse(data.content, runtimeBrand);
 
   if (contextResult.status === "rejected") {
     sendSocketPayload(socket, { type: "response", content: responseText, sessionId });
@@ -204,10 +213,11 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
     content: t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
     sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
   }),
-  open(ws) {
+  async open(ws) {
+    const brand = resolveRuntimeBrand(await getSettingsRow());
     sendSocketPayload(ws, {
       type: "connected",
-      message: `Connected to ${APP_BRAND.assistantName} chat`,
+      message: `Connected to ${brand.assistantName} chat`,
     });
   },
   async message(ws, data) {
@@ -218,7 +228,7 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
   },
 });
 
-function generateFallbackResponse(input: string): string {
+function generateFallbackResponse(input: string, brand: RuntimeBrand): string {
   const lower = input.toLowerCase();
   if (lower.includes("resume")) {
     return "I can help tighten your resume. Head to the Resume workspace to build or refine it, and once an AI provider is configured I can give targeted feedback.";
@@ -239,7 +249,7 @@ function generateFallbackResponse(input: string): string {
     return "Automation can handle repetitive application work. Open the Automation workspace to configure a run, or connect an AI provider so I can guide the setup here in chat.";
   }
   if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
-    return `Hello. I’m ${APP_BRAND.assistantName}, your hiring copilot for game-industry roles. I can help with resumes, opportunity research, interview prep, and workflow execution. What are we moving forward today?`;
+    return `Hello. I’m ${brand.assistantName}, your hiring copilot for game-industry roles. I can help with resumes, opportunity research, interview prep, and workflow execution. What are we moving forward today?`;
   }
-  return `I’m ${APP_BRAND.assistantName}. Configure an AI provider in Settings to unlock guided help across resumes, role targeting, interview prep, and automation workflows.`;
+  return `I’m ${brand.assistantName}. Configure an AI provider in Settings to unlock guided help across resumes, role targeting, interview prep, and automation workflows.`;
 }

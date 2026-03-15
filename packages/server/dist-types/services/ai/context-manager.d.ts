@@ -1,4 +1,4 @@
-import { type AIChatContextDomain, type ChatMessage } from "@bao/shared";
+import { type AIChatContextDomain, type BrandSettings, type ChatMessage } from "@bao/shared";
 interface ConversationContext {
     systemPrompt: string;
     messages: Array<Pick<ChatMessage, "role" | "content">>;
@@ -12,7 +12,7 @@ export declare class ConversationContextManager {
     /**
      * Build full context for AI call with conversation history and domain-specific data
      */
-    buildContext(sessionId: string, currentMessage: string, preferredDomain?: AIChatContextDomain): Promise<ConversationContext>;
+    buildContext(sessionId: string, currentMessage: string, preferredDomain?: AIChatContextDomain, runtimeBrand?: BrandSettings | null): Promise<ConversationContext>;
     /**
      * Loads recent conversation history and appends the current user message once.
      */

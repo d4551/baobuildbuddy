@@ -5,6 +5,10 @@
 
 /* Centralized palette tokens with WCAG-oriented contrast pairs. */
 :root {
+  --brand-font-display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  --brand-font-body: "DM Sans", "Inter", "Segoe UI", sans-serif;
+  --brand-font-mono:
+    "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
   --bao-light-base-100: oklch(99% 0.005 255);
   --bao-light-base-200: oklch(96% 0.008 255);
   --bao-light-base-300: oklch(92% 0.012 255);
@@ -27,6 +31,14 @@
   --bao-light-warning-content: oklch(18% 0.035 90);
   --bao-light-error: oklch(45% 0.16 30);
   --bao-light-error-content: oklch(98% 0.01 30);
+  --bao-light-radius-selector: 0.5rem;
+  --bao-light-radius-field: 0.5rem;
+  --bao-light-radius-box: 1rem;
+  --bao-light-size-selector: 0.25rem;
+  --bao-light-size-field: 0.25rem;
+  --bao-light-border-size: 1px;
+  --bao-light-depth: 1;
+  --bao-light-noise: 0;
 
   --bao-dark-base-100: oklch(14% 0.02 260);
   --bao-dark-base-200: oklch(11% 0.024 260);
@@ -50,6 +62,14 @@
   --bao-dark-warning-content: oklch(15% 0.03 90);
   --bao-dark-error: oklch(72% 0.15 30);
   --bao-dark-error-content: oklch(15% 0.03 30);
+  --bao-dark-radius-selector: 0.5rem;
+  --bao-dark-radius-field: 0.5rem;
+  --bao-dark-radius-box: 1rem;
+  --bao-dark-size-selector: 0.25rem;
+  --bao-dark-size-field: 0.25rem;
+  --bao-dark-border-size: 1px;
+  --bao-dark-depth: 1;
+  --bao-dark-noise: 1;
 }
 
 @plugin "daisyui/theme" {
@@ -77,14 +97,14 @@
   --color-warning-content: var(--bao-light-warning-content);
   --color-error: var(--bao-light-error);
   --color-error-content: var(--bao-light-error-content);
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 0;
+  --radius-selector: var(--bao-light-radius-selector, 0.5rem);
+  --radius-field: var(--bao-light-radius-field, 0.5rem);
+  --radius-box: var(--bao-light-radius-box, 1rem);
+  --size-selector: var(--bao-light-size-selector, 0.25rem);
+  --size-field: var(--bao-light-size-field, 0.25rem);
+  --border: var(--bao-light-border-size, 1px);
+  --depth: var(--bao-light-depth, 1);
+  --noise: var(--bao-light-noise, 0);
 }
 
 @plugin "daisyui/theme" {
@@ -112,14 +132,37 @@
   --color-warning-content: var(--bao-dark-warning-content);
   --color-error: var(--bao-dark-error);
   --color-error-content: var(--bao-dark-error-content);
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 1;
+  --radius-selector: var(--bao-dark-radius-selector, 0.5rem);
+  --radius-field: var(--bao-dark-radius-field, 0.5rem);
+  --radius-box: var(--bao-dark-radius-box, 1rem);
+  --size-selector: var(--bao-dark-size-selector, 0.25rem);
+  --size-field: var(--bao-dark-size-field, 0.25rem);
+  --border: var(--bao-dark-border-size, 1px);
+  --depth: var(--bao-dark-depth, 1);
+  --noise: var(--bao-dark-noise, 1);
+}
+
+body {
+  font-family: var(--brand-font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.card-title,
+.navbar .text-xl,
+.brand-display {
+  font-family: var(--brand-font-display);
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--brand-font-mono);
 }
 
 .page-enter-active,

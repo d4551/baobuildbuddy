@@ -8,7 +8,9 @@ import {
   LAYOUT_DESKTOP_MEDIA_QUERY,
 } from "~/constants/layout";
 
-const { initTheme } = useTheme();
+const { initTheme, theme, setTheme } = useTheme();
+const { settings } = useSettings();
+const { brandCssVars } = useBrand();
 const { t } = useI18n();
 const route = useRoute();
 const isDrawerOpen = ref(false);
@@ -18,6 +20,7 @@ let removeMediaQueryListener: (() => void) | null = null;
 
 const shellStyle = computed(() => ({
   "--layout-content-max-width": `${LAYOUT_CONTENT_MAX_WIDTH_REM}rem`,
+  ...brandCssVars.value,
 }));
 
 const showFloatingChatWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
@@ -30,7 +33,7 @@ function syncDrawerForViewport(isDesktop: boolean): void {
 }
 
 onMounted(() => {
-  initTheme();
+  initTheme(settings.value?.theme);
 
   desktopMediaQueryList = window.matchMedia(LAYOUT_DESKTOP_MEDIA_QUERY);
   const handleViewportChange = (event: MediaQueryListEvent) => {
@@ -43,6 +46,16 @@ onMounted(() => {
     desktopMediaQueryList?.removeEventListener("change", handleViewportChange);
   };
 });
+
+watch(
+  () => settings.value?.theme,
+  (nextTheme) => {
+    if (nextTheme) {
+      setTheme(nextTheme, { persistLocal: false });
+    }
+  },
+  { immediate: true },
+);
 
 watch(
   () => route.fullPath,
@@ -63,7 +76,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="drawer lg:drawer-open min-h-screen" :style="shellStyle">
+  <div class="drawer lg:drawer-open min-h-screen" :data-theme="theme" :style="shellStyle">
     <input
       :id="APP_DRAWER_ID"
       type="checkbox"

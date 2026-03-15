@@ -38,10 +38,12 @@ export declare const scraperRoutes: Elysia<"/scraper", {
 } & {
     scraper: {
         jobs: {
-            hitmarker: {
+            ":portalId": {
                 post: {
                     body: unknown;
-                    params: {};
+                    params: {
+                        portalId: string;
+                    };
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -52,6 +54,15 @@ export declare const scraperRoutes: Elysia<"/scraper", {
                         } | {
                             error: string;
                             details: string;
+                        };
+                        422: {
+                            type: "validation";
+                            on: string;
+                            summary?: string;
+                            message?: string;
+                            found?: unknown;
+                            property?: string;
+                            expected?: string;
                         };
                     };
                 };

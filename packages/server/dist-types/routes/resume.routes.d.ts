@@ -118,8 +118,8 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 }[] | undefined;
                 personalInfo?: {
                     portfolio?: string | undefined;
-                    email?: string | undefined;
                     name?: string | undefined;
+                    email?: string | undefined;
                     location?: string | undefined;
                     website?: string | undefined;
                     phone?: string | undefined;
@@ -217,8 +217,8 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     }[] | undefined;
                     personalInfo?: {
                         portfolio?: string | undefined;
-                        email?: string | undefined;
                         name?: string | undefined;
+                        email?: string | undefined;
                         location?: string | undefined;
                         website?: string | undefined;
                         phone?: string | undefined;

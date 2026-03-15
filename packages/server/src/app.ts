@@ -40,6 +40,25 @@ import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
 import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 
+const getRequestOrigin = (request: Request): string | null =>
+  request.headers.get("origin") ?? request.headers.get("Origin");
+
+const applyAllowedOriginHeader = (
+  headers: Record<string, string | number>,
+  request: Request,
+): void => {
+  const requestOrigin = getRequestOrigin(request);
+  if (!(requestOrigin && config.corsOrigins.includes(requestOrigin))) {
+    return;
+  }
+
+  headers["access-control-allow-origin"] = requestOrigin;
+  const varyHeader = typeof headers.vary === "string" ? headers.vary : "";
+  if (varyHeader !== "Origin" && varyHeader !== "*") {
+    headers.vary = varyHeader ? `${varyHeader}, Origin` : "Origin";
+  }
+};
+
 const OPENAPI_TAGS = [
   { name: "Health", description: "Service health and readiness endpoints." },
   { name: "Auth", description: "Authentication bootstrap and API key lifecycle endpoints." },
@@ -61,6 +80,9 @@ const OPENAPI_TAGS = [
 ] as const;
 
 export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticResponse: true })
+  .onRequest(({ request, set }) => {
+    applyAllowedOriginHeader(set.headers, request);
+  })
   .use(
     cors({
       origin: config.corsOrigins,

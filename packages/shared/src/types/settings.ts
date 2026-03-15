@@ -166,6 +166,102 @@ export interface EmailTransportSettings {
 }
 
 /**
+ * Complete daisyUI palette tokens for one brand theme variant.
+ */
+export interface BrandThemePalette {
+  base100: string;
+  base200: string;
+  base300: string;
+  baseContent: string;
+  primary: string;
+  primaryContent: string;
+  secondary: string;
+  secondaryContent: string;
+  accent: string;
+  accentContent: string;
+  neutral: string;
+  neutralContent: string;
+  info: string;
+  infoContent: string;
+  success: string;
+  successContent: string;
+  warning: string;
+  warningContent: string;
+  error: string;
+  errorContent: string;
+  radiusSelector: string;
+  radiusField: string;
+  radiusBox: string;
+  sizeSelector: string;
+  sizeField: string;
+  border: string;
+  depth: string;
+  noise: string;
+}
+
+/**
+ * Typography controls for the app shell and component surfaces.
+ */
+export interface BrandTypographySettings {
+  fontStylesheetUrl: string;
+  displayFontFamily: string;
+  bodyFontFamily: string;
+  monoFontFamily: string;
+}
+
+/**
+ * Copy and metadata controls for white-label brand customization.
+ */
+export interface BrandContentSettings {
+  tagline: string;
+  defaultTitle: string;
+  defaultDescription: string;
+  contentOverrides: Record<string, string>;
+}
+
+/**
+ * Persisted brand control-plane settings.
+ */
+export interface BrandSettings {
+  name: string;
+  assistantName: string;
+  apiName: string;
+  logoPath: string;
+  faviconPath: string;
+  typography: BrandTypographySettings;
+  lightTheme: BrandThemePalette;
+  darkTheme: BrandThemePalette;
+  content: BrandContentSettings;
+}
+
+/**
+ * Partial theme-token override payload for a white-label brand.
+ */
+export type BrandThemePalettePatch = Partial<BrandThemePalette>;
+
+/**
+ * Partial typography override payload for a white-label brand.
+ */
+export type BrandTypographySettingsPatch = Partial<BrandTypographySettings>;
+
+/**
+ * Partial content override payload for a white-label brand.
+ */
+export type BrandContentSettingsPatch = Partial<BrandContentSettings>;
+
+/**
+ * Patch payload used by the brand control plane.
+ */
+export type BrandSettingsPatch = Partial<
+  Pick<BrandSettings, "name" | "assistantName" | "apiName" | "logoPath" | "faviconPath">
+> & {
+  typography?: BrandTypographySettingsPatch;
+  lightTheme?: BrandThemePalettePatch;
+  darkTheme?: BrandThemePalettePatch;
+  content?: BrandContentSettingsPatch;
+};
+
+/**
  * Global settings row identifier.
  */
 export const DEFAULT_SETTINGS_ID = "default";
@@ -253,6 +349,7 @@ export interface AppSettings {
   preferredProvider: AIProviderType;
   theme: "bao-light" | "bao-dark";
   language: AppLanguageCode;
+  brandSettings?: BrandSettings;
   notifications: NotificationPreferences;
   automationSettings?: AutomationSettings;
   emailTransportSettings?: EmailTransportSettings;

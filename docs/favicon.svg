@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="faviconTitle faviconDesc">
+  <title id="faviconTitle">BaoBuildBuddy favicon</title>
+  <desc id="faviconDesc">A dumpling icon on a blue circular badge.</desc>
+  <defs>
+    <linearGradient id="bg" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5663d8" />
+      <stop offset="1" stop-color="#3f92bd" />
+    </linearGradient>
+    <linearGradient id="bao" x1="18" y1="18" x2="43" y2="45" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff4de" />
+      <stop offset="1" stop-color="#f5d59c" />
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#bg)" />
+  <path
+    d="M15 36c0-8.8 7.7-15.8 17-15.8S49 27.2 49 36c0 8.2-7.8 13.8-17 13.8S15 44.2 15 36Z"
+    fill="url(#bao)"
+    stroke="#e0a84f"
+    stroke-linejoin="round"
+    stroke-width="2.2"
+  />
+  <path d="M23 27.8c2 2.3 2.9 4.5 3.1 6.9" fill="none" stroke="#e0a84f" stroke-linecap="round" stroke-width="1.8" />
+  <path d="M31.8 24.8c1.3 2.8 1.8 5.5 1.5 8.1" fill="none" stroke="#e0a84f" stroke-linecap="round" stroke-width="1.8" />
+  <path d="M40.8 27.6c-1.5 2.1-2.3 4.4-2.5 6.8" fill="none" stroke="#e0a84f" stroke-linecap="round" stroke-width="1.8" />
+  <circle cx="49.5" cy="18.5" r="3.5" fill="#7fd3a0" />
+  <path d="M49.5 13.5v10M44.5 18.5h10" stroke="#f6fffa" stroke-linecap="round" stroke-width="1.8" />
+</svg>

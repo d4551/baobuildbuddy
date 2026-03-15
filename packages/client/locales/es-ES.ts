@@ -5,7 +5,7 @@ import type { AppTranslationOverrides } from "./en-US";
 
 const esES: AppTranslationOverrides = {
   meta: {
-    title: "BaoBuildBuddy - Asistente de Carrera con IA",
+    title: "{brand} - Asistente de Carrera con IA",
     description: "Asistente de carrera con IA para la industria de videojuegos",
   },
   app: {
@@ -182,9 +182,11 @@ const esES: AppTranslationOverrides = {
     },
     state: {
       loading: "Cargando especificación de API",
-      errorRetryable: "El servicio no está disponible temporalmente. Reintenta.",
+      errorRetryable:
+        "El servicio no está disponible temporalmente. Reintenta.",
       errorNonRetryable: "No se pudo cargar la documentación de la API.",
-      unauthorized: "No tienes autorización para ver la documentación de la API.",
+      unauthorized:
+        "No tienes autorización para ver la documentación de la API.",
       empty: "No se encontraron endpoints de API.",
     },
     actions: {
@@ -210,7 +212,8 @@ const esES: AppTranslationOverrides = {
       requestBodyIntro: "Cuerpo de solicitud",
       requestBodyAria: "Carga JSON del cuerpo de solicitud",
       bodyPlaceholder: '{\n  "example": "value"\n}',
-      noRequestBodyTemplate: "La especificación de OpenAPI no proporcionó una plantilla de cuerpo.",
+      noRequestBodyTemplate:
+        "La especificación de OpenAPI no proporcionó una plantilla de cuerpo.",
       parameterLabel: "Parámetro {name}",
       send: "Enviar solicitud",
       sending: "Enviando",
@@ -252,7 +255,8 @@ const esES: AppTranslationOverrides = {
     pageTitle: "Panel",
     seoDescription:
       "Seguimiento de oportunidades, progreso del currículum, práctica de entrevistas y señales de actividad en un panel operativo.",
-    welcomeDescription: "Tu sistema operativo de carrera con IA para la industria de videojuegos.",
+    welcomeDescription:
+      "Tu sistema operativo de carrera con IA para la industria de videojuegos.",
     welcomeHeading: {
       named: "¡Bienvenido, {name}!",
       fallback: "¡Bienvenido!",
@@ -438,12 +442,14 @@ const esES: AppTranslationOverrides = {
       },
       genre: "{value}",
     },
-    emptyState: "No se encontraron empleos. Prueba ajustando filtros o búsqueda.",
+    emptyState:
+      "No se encontraron empleos. Prueba ajustando filtros o búsqueda.",
     openJobAria: "Abrir detalles del empleo {title} en {company}",
     remoteBadge: "Remoto",
     matchScoreAria: "Puntuación de coincidencia",
     matchBreakdown: {
-      overallProgressAria: "Puntuación de coincidencia general: {score} por ciento",
+      overallProgressAria:
+        "Puntuación de coincidencia general: {score} por ciento",
       skillsMatchLabel: "Coincidencia de Habilidades",
       skillsProgressAria: "Progreso de coincidencia de habilidades",
       experienceMatchLabel: "Coincidencia de Experiencia",
@@ -494,7 +500,8 @@ const esES: AppTranslationOverrides = {
     gpaLabel: "Promedio: {gpa}",
     printButton: "Imprimir",
     printAria: "Imprimir vista previa del currículum",
-    notFound: "No se encontró el currículum. Selecciona uno para previsualizar.",
+    notFound:
+      "No se encontró el currículum. Selecciona uno para previsualizar.",
     website: "Sitio Web",
     websiteLinkAria: "Abrir sitio web personal",
     linkedin: "LinkedIn",
@@ -513,7 +520,8 @@ const esES: AppTranslationOverrides = {
     seoDescription:
       "Traduce la experiencia en juegos en competencias profesionales con puntuación de confianza, mapeo de categorías y análisis asistido por IA.",
     title: "Mapeador de Habilidades",
-    subtitle: "Convierte logros de juegos en señales claras de capacidad profesional.",
+    subtitle:
+      "Convierte logros de juegos en señales claras de capacidad profesional.",
     description:
       "Mapea tus logros de juego a habilidades transferibles al trabajo, luego reutiliza estos mapeos en currículums y entrevistas.",
     gamification: {
@@ -550,10 +558,12 @@ const esES: AppTranslationOverrides = {
       topMappingsDescription:
         "Habilidades transferibles con mayor confianza, ordenadas por puntuación.",
       topMappingsAria: "Mejores mapeos de habilidades por confianza",
-      topMappingsEmpty: "Sin mapeos destacados aún. Añade o analiza mapeos para llenar esta lista.",
+      topMappingsEmpty:
+        "Sin mapeos destacados aún. Añade o analiza mapeos para llenar esta lista.",
     },
     filters: {
-      searchPlaceholder: "Buscar por experiencia de juego, habilidad transferible o aplicación...",
+      searchPlaceholder:
+        "Buscar por experiencia de juego, habilidad transferible o aplicación...",
       searchAria: "Buscar mapeos de habilidades",
       categoryGroupAria: "Filtrar mapeos por categoría",
       allAria: "Mostrar todas las categorías",
@@ -595,11 +605,13 @@ const esES: AppTranslationOverrides = {
       gameExpressionPlaceholder:
         "ej. Lideré un grupo de raid de 40 personas hasta un primer mundial",
       gameExpressionAria: "Experiencia de juego",
-      gameExpressionHint: "La experiencia de juego debe tener al menos 2 caracteres.",
+      gameExpressionHint:
+        "La experiencia de juego debe tener al menos 2 caracteres.",
       transferableSkillLegend: "Habilidad Transferible",
       transferableSkillPlaceholder: "ej. Liderazgo y Coordinación de Equipo",
       transferableSkillAria: "Habilidad transferible",
-      transferableSkillHint: "La habilidad transferible debe tener al menos 2 caracteres.",
+      transferableSkillHint:
+        "La habilidad transferible debe tener al menos 2 caracteres.",
       categoryLegend: "Categoría",
       categoryAria: "Categoría de habilidad",
       applicationsLegend: "Aplicaciones Industriales",
@@ -628,12 +640,15 @@ const esES: AppTranslationOverrides = {
       mappingAddedWithXp: "Mapeo de habilidad añadido (+{xp} XP)",
       mappingDeleted: "Mapeo de habilidad eliminado",
       analysisCompleted: "Habilidades analizadas correctamente",
-      analysisCompletedWithXp: "Habilidades analizadas correctamente (+{xp} XP)",
+      analysisCompletedWithXp:
+        "Habilidades analizadas correctamente (+{xp} XP)",
     },
     errors: {
       fetchFailed: "Error al obtener mapeos de habilidades",
-      gameExpressionMinLength: "La experiencia de juego debe tener al menos 2 caracteres",
-      transferableSkillMinLength: "La habilidad transferible debe tener al menos 2 caracteres",
+      gameExpressionMinLength:
+        "La experiencia de juego debe tener al menos 2 caracteres",
+      transferableSkillMinLength:
+        "La habilidad transferible debe tener al menos 2 caracteres",
       addFailed: "Error al añadir mapeo de habilidad",
       deleteFailed: "Error al eliminar mapeo de habilidad",
       analysisFailed: "Error al analizar habilidades",
@@ -663,56 +678,74 @@ const esES: AppTranslationOverrides = {
     readiness: {
       title: "Tu Preparación Profesional",
       overallReadinessLabel: "Preparación general",
-      overallReadinessAria: "Puntuación de preparación general {score} por ciento",
+      overallReadinessAria:
+        "Puntuación de preparación general {score} por ciento",
       categoryScoresLabel: "Puntuaciones por categoría",
-      categoryScoreAria: "Puntuación de preparación {category} {score} por ciento",
+      categoryScoreAria:
+        "Puntuación de preparación {category} {score} por ciento",
       topImprovementsTitle: "Principales mejoras",
       nextStepsTitle: "Próximos pasos",
       feedback: {
         empty: "Aún no hay datos de preparación para {category}.",
-        early: "Etapa inicial en {category}. Enfócate en añadir más mapeos y evidencia.",
-        developing: "Desarrollo en {category}. Sigue añadiendo ejemplos mapeados y evidencia.",
+        early:
+          "Etapa inicial en {category}. Enfócate en añadir más mapeos y evidencia.",
+        developing:
+          "Desarrollo en {category}. Sigue añadiendo ejemplos mapeados y evidencia.",
         good: "Buen nivel en {category}. Sigue profundizando para fortalecer esta área.",
-        excellent: "Excelente nivel en {category}. Estás bien preparado en esta área.",
+        excellent:
+          "Excelente nivel en {category}. Estás bien preparado en esta área.",
       },
       improvements: {
         imp_tech_map:
           "Mapea más habilidades técnicas de juego a habilidades técnicas profesionales.",
         imp_conf_up: "Aumenta la confianza de tus mapeos técnicos existentes.",
         imp_lead_comm: "Mapea más experiencias de liderazgo y comunicación.",
-        imp_team_examples: "Añade ejemplos concretos de colaboración en equipo.",
+        imp_team_examples:
+          "Añade ejemplos concretos de colaboración en equipo.",
         imp_industry_research:
           "Investiga más aplicaciones de industria para tus habilidades mapeadas.",
-        imp_role_link: "Conecta habilidades mapeadas con roles objetivo concretos.",
+        imp_role_link:
+          "Conecta habilidades mapeadas con roles objetivo concretos.",
         imp_evidence_add:
           "Añade evidencia a tus habilidades mapeadas con clips, capturas o documentos.",
-        imp_portfolio_build: "Construye proyectos de portafolio para demostrar habilidades.",
-        imp_achievements_doc: "Documenta logros medibles para tus mejores mapeos.",
+        imp_portfolio_build:
+          "Construye proyectos de portafolio para demostrar habilidades.",
+        imp_achievements_doc:
+          "Documenta logros medibles para tus mejores mapeos.",
         imp_transfer_strengthen:
           "Refuerza la transferencia técnica mapeando mecánicas de juego a conceptos de ingeniería.",
         imp_leadership_highlight:
           "Destaca experiencias de liderazgo y comunicación desde contextos de juego.",
-        imp_coverage_broaden: "Amplía cobertura mapeando entre 10 y 15 habilidades diversas.",
-        imp_examples_refine: "Refina tus mapeos actuales con ejemplos más específicos.",
-        imp_certs_pursue: "Busca certificaciones que validen tus fortalezas técnicas.",
-        imp_network_pro: "Haz networking con profesionales de tu industria objetivo.",
+        imp_coverage_broaden:
+          "Amplía cobertura mapeando entre 10 y 15 habilidades diversas.",
+        imp_examples_refine:
+          "Refina tus mapeos actuales con ejemplos más específicos.",
+        imp_certs_pursue:
+          "Busca certificaciones que validen tus fortalezas técnicas.",
+        imp_network_pro:
+          "Haz networking con profesionales de tu industria objetivo.",
       },
       nextStepItems: {
         step_apply_roles: "Empieza a postular a roles objetivo.",
         step_network_industry: "Conecta con profesionales del sector.",
         step_prepare_interviews: "Prepárate para entrevistas técnicas.",
         step_polish_linkedin: "Optimiza tu perfil de LinkedIn.",
-        step_complete_portfolio: "Completa tu portafolio con 3-5 proyectos sólidos.",
+        step_complete_portfolio:
+          "Completa tu portafolio con 3-5 proyectos sólidos.",
         step_map_skills_15: "Mapea 5 habilidades más para llegar a 15 o más.",
         step_evidence_top: "Añade evidencia a tus 10 habilidades principales.",
         step_research_targets: "Investiga empresas y roles objetivo.",
         step_map_skills_10: "Mapea 10 o más habilidades de juego a carrera.",
         step_start_portfolio: "Empieza a construir proyectos de portafolio.",
-        step_evidence_abilities: "Añade evidencia para demostrar tus capacidades.",
-        step_explore_pathways: "Explora rutas de carrera que encajen con tus habilidades.",
+        step_evidence_abilities:
+          "Añade evidencia para demostrar tus capacidades.",
+        step_explore_pathways:
+          "Explora rutas de carrera que encajen con tus habilidades.",
         step_map_skills_5: "Mapea tus primeras 5 habilidades de juego.",
-        step_explore_categories: "Explora diferentes categorías de habilidades.",
-        step_learn_careers: "Conoce opciones profesionales de la industria del juego.",
+        step_explore_categories:
+          "Explora diferentes categorías de habilidades.",
+        step_learn_careers:
+          "Conoce opciones profesionales de la industria del juego.",
         step_setup_profile: "Configura tu perfil profesional.",
       },
       emptyState:
@@ -722,7 +755,8 @@ const esES: AppTranslationOverrides = {
       title: "Recomendaciones de Rutas",
       requiredSkillsTitle: "Habilidades requeridas",
       matchScoreLabel: "Puntuación de coincidencia",
-      matchScoreAria: "Puntuación de coincidencia de ruta {title} {score} por ciento",
+      matchScoreAria:
+        "Puntuación de coincidencia de ruta {title} {score} por ciento",
       estimatedTimeLabel: "Tiempo estimado para entrar:",
       marketTrendLabel: "Tendencia del mercado:",
       marketTrend: {
@@ -790,10 +824,12 @@ const esES: AppTranslationOverrides = {
       summary: "{completed} de {total} secciones completadas",
       jumpAria: "Ir a la sección {section}",
       nextStep: "Siguiente sección recomendada: {section}",
-      complete: "Todas las secciones completadas. Tu currículum está listo para el toque final.",
+      complete:
+        "Todas las secciones completadas. Tu currículum está listo para el toque final.",
       quickActions: {
         coverLetter: "Carta de Presentación",
-        coverLetterAria: "Abrir constructor de carta con contexto de este currículum",
+        coverLetterAria:
+          "Abrir constructor de carta con contexto de este currículum",
         portfolio: "Portafolio",
         portfolioAria: "Abrir constructor de portafolio",
         interview: "Preparación Entrevista",
@@ -916,7 +952,8 @@ const esES: AppTranslationOverrides = {
       genresPlaceholder: "RPG, Acción, Estrategia",
       achievementsLegend: "Logros Clave",
       achievementsAria: "Logros en juegos",
-      achievementsPlaceholder: "Títulos publicados, victorias en competiciones, hitos importantes",
+      achievementsPlaceholder:
+        "Títulos publicados, victorias en competiciones, hitos importantes",
     },
     createModal: {
       title: "Crear Currículum",
@@ -944,18 +981,21 @@ const esES: AppTranslationOverrides = {
     },
     deleteDialog: {
       title: "Eliminar Currículum",
-      message: "Esta acción no se puede deshacer. ¿Eliminar este currículum permanentemente?",
+      message:
+        "Esta acción no se puede deshacer. ¿Eliminar este currículum permanentemente?",
       confirmButton: "Eliminar",
       cancelButton: "Cancelar",
     },
     toasts: {
-      resumeNameMinLength: "El nombre del currículum debe tener al menos 2 caracteres",
+      resumeNameMinLength:
+        "El nombre del currículum debe tener al menos 2 caracteres",
       resumeCreated: "Currículum creado",
       resumeCreateFailed: "Error al crear currículum",
       nameMinLength: "El nombre debe tener al menos 2 caracteres",
       invalidEmail: "Introduce una dirección de email válida",
       summaryMinLength: "El resumen debe tener al menos 50 caracteres",
-      invalidExperience: "Cada experiencia requiere puesto, empresa y fechas válidas",
+      invalidExperience:
+        "Cada experiencia requiere puesto, empresa y fechas válidas",
       invalidEducation: "Cada formación requiere título y centro",
       invalidProjects: "Cada proyecto requiere nombre y descripción",
       resumeSaved: "Currículum guardado",
@@ -1090,11 +1130,13 @@ const esES: AppTranslationOverrides = {
     },
     generate: {
       title: "Generar Carta de Presentación",
-      subtitle: "Proporciona contexto del rol y genera un borrador para refinar.",
+      subtitle:
+        "Proporciona contexto del rol y genera un borrador para refinar.",
       companyLegend: "Empresa",
       companyPlaceholder: "ej. Riot Games",
       companyAria: "Empresa objetivo",
-      companyHint: "El nombre de la empresa debe tener al menos {count} caracteres.",
+      companyHint:
+        "El nombre de la empresa debe tener al menos {count} caracteres.",
       positionLegend: "Puesto",
       positionPlaceholder: "ej. Ingeniero de Gameplay Senior",
       positionAria: "Puesto objetivo",
@@ -1103,9 +1145,11 @@ const esES: AppTranslationOverrides = {
       resumeAria: "Seleccionar contexto de currículum",
       resumeNoneOption: "Sin currículum seleccionado",
       jobDescriptionLegend: "Descripción del Puesto (opcional)",
-      jobDescriptionPlaceholder: "Pega una descripción del puesto para mejor personalización.",
+      jobDescriptionPlaceholder:
+        "Pega una descripción del puesto para mejor personalización.",
       jobDescriptionAria: "Contexto de descripción del puesto",
-      jobDescriptionHint: "Cuando se proporcione, incluir al menos {count} caracteres.",
+      jobDescriptionHint:
+        "Cuando se proporcione, incluir al menos {count} caracteres.",
       templateLegend: "Plantilla",
       templateAria: "Plantilla de carta",
       cancelButton: "Cancelar",
@@ -1125,7 +1169,8 @@ const esES: AppTranslationOverrides = {
       deleted: "Carta eliminada",
       deleteFailed: "Error al eliminar carta",
       fetchFailed: "Error al obtener cartas de presentación",
-      companyMinLength: "El nombre de la empresa debe tener al menos {count} caracteres",
+      companyMinLength:
+        "El nombre de la empresa debe tener al menos {count} caracteres",
       positionMinLength: "El puesto debe tener al menos {count} caracteres",
       jobDescriptionMinLength:
         "La descripción del puesto debe tener al menos {count} caracteres cuando se proporcione",
@@ -1166,7 +1211,8 @@ const esES: AppTranslationOverrides = {
       companyLegend: "Empresa",
       companyPlaceholder: "Nombre de la empresa",
       companyAria: "Nombre de la empresa",
-      companyHint: "El nombre de la empresa debe tener al menos {count} caracteres.",
+      companyHint:
+        "El nombre de la empresa debe tener al menos {count} caracteres.",
       positionLegend: "Puesto",
       positionPlaceholder: "Título del puesto",
       positionAria: "Título del puesto",
@@ -1191,7 +1237,8 @@ const esES: AppTranslationOverrides = {
     },
     regenerateDialog: {
       title: "Regenerar Contenido",
-      message: "Esto reemplazará el contenido actual con un borrador nuevo generado.",
+      message:
+        "Esto reemplazará el contenido actual con un borrador nuevo generado.",
       confirmButton: "Regenerar",
       cancelButton: "Cancelar",
     },
@@ -1202,13 +1249,15 @@ const esES: AppTranslationOverrides = {
     },
     toasts: {
       loadFailed: "Error al cargar la carta",
-      companyMinLength: "El nombre de la empresa debe tener al menos {count} caracteres",
+      companyMinLength:
+        "El nombre de la empresa debe tener al menos {count} caracteres",
       positionMinLength: "El puesto debe tener al menos {count} caracteres",
       saved: "Carta guardada",
       saveFailed: "Error al guardar la carta",
       regenerated: "Carta regenerada",
       regenerateFailed: "Error al regenerar la carta",
-      regenerateMissingContent: "Generación completada pero no devolvió contenido",
+      regenerateMissingContent:
+        "Generación completada pero no devolvió contenido",
       exportEmpty: "Añade contenido antes de exportar",
       exported: "Carta exportada",
       exportFailed: "Error al exportar la carta",
@@ -1238,7 +1287,8 @@ const esES: AppTranslationOverrides = {
       featuredProjectsTitle: "Proyectos Destacados",
       moreProjectsTitle: "Más Proyectos",
       viewButton: "Ver",
-      emptyState: "No hay proyectos para mostrar. Añade proyectos en el editor del portafolio.",
+      emptyState:
+        "No hay proyectos para mostrar. Añade proyectos en el editor del portafolio.",
       notFound: "No se encontró el portafolio. Crea tu portafolio primero.",
     },
     stats: {
@@ -1277,7 +1327,8 @@ const esES: AppTranslationOverrides = {
       websitePlaceholder: "https://tusitio.com",
       websiteAria: "Sitio web del portafolio",
       bioLegend: "Biografía",
-      bioPlaceholder: "Cuéntale al mundo sobre ti y tu experiencia en desarrollo de juegos...",
+      bioPlaceholder:
+        "Cuéntale al mundo sobre ti y tu experiencia en desarrollo de juegos...",
       bioAria: "Biografía del portafolio",
       saveButton: "Guardar Info del Portafolio",
       saveAria: "Guardar perfil del portafolio",
@@ -1286,7 +1337,8 @@ const esES: AppTranslationOverrides = {
       title: "Proyectos",
       addButton: "Añadir Proyecto",
       addAria: "Abrir diálogo de creación de proyecto",
-      emptyState: "Sin proyectos aún. Añade tu primer proyecto para mostrar tu trabajo.",
+      emptyState:
+        "Sin proyectos aún. Añade tu primer proyecto para mostrar tu trabajo.",
       filteredEmptyState: "Ningún proyecto coincide con tu búsqueda.",
       reorderCardAria: "Reordenar tarjeta del proyecto {title}",
       featuredBadge: "Destacado",
@@ -1307,7 +1359,8 @@ const esES: AppTranslationOverrides = {
       projectTitleLegend: "Título del Proyecto",
       projectTitlePlaceholder: "ej. RPG Dungeon Crawler",
       projectTitleAria: "Título del proyecto",
-      projectTitleHint: "El título del proyecto debe tener al menos {count} caracteres.",
+      projectTitleHint:
+        "El título del proyecto debe tener al menos {count} caracteres.",
       descriptionLegend: "Descripción",
       descriptionPlaceholder: "Describe tu proyecto, tu rol y logros clave...",
       descriptionAria: "Descripción del proyecto",
@@ -1348,7 +1401,8 @@ const esES: AppTranslationOverrides = {
       projectDeleted: "Proyecto eliminado",
       exported: "Portafolio exportado",
       exportFailed: "Error al exportar portafolio",
-      projectTitleMinLength: "El título del proyecto debe tener al menos {count} caracteres",
+      projectTitleMinLength:
+        "El título del proyecto debe tener al menos {count} caracteres",
       projectDescriptionMinLength:
         "La descripción del proyecto debe tener al menos {count} caracteres",
       projectIdMissing: "Falta el ID del proyecto",
@@ -1381,7 +1435,8 @@ const esES: AppTranslationOverrides = {
     submitHint: "Pulsa Ctrl+Enter para enviar",
     submitButton: "Enviar Respuesta",
     submitAria: "Enviar respuesta de entrevista",
-    completeMessage: "Entrevista completada. Todas las preguntas han sido respondidas.",
+    completeMessage:
+      "Entrevista completada. Todas las preguntas han sido respondidas.",
   },
   interviewScoreCard: {
     title: "Análisis de rendimiento en entrevista",
@@ -1487,7 +1542,8 @@ const esES: AppTranslationOverrides = {
     softPlaceholder: "ej. Liderazgo, Comunicación, Resolución de Problemas",
     softAria: "Entrada de habilidad blanda",
     gamingTitle: "Habilidades de la Industria del Juego",
-    gamingPlaceholder: "ej. Diseño de Juegos, Diseño de Niveles, Sistemas Multijugador",
+    gamingPlaceholder:
+      "ej. Diseño de Juegos, Diseño de Niveles, Sistemas Multijugador",
     gamingAria: "Entrada de habilidad de juegos",
     addButton: "Añadir",
     addSkillAria: "Añadir habilidad a {category}",
@@ -1675,7 +1731,8 @@ const esES: AppTranslationOverrides = {
     retryAria: "Reintentar carga de analíticas",
     retryButton: "Reintentar",
     progressAria: "Progreso de {label}",
-    remoteWorkProgressAria: "Disponibilidad de trabajo remoto: {value} por ciento",
+    remoteWorkProgressAria:
+      "Disponibilidad de trabajo remoto: {value} por ciento",
     overview: {
       totalStudiosTitle: "Total de Estudios",
       totalStudiosDesc: "En base de datos",
@@ -1710,7 +1767,8 @@ const esES: AppTranslationOverrides = {
         "Pasa del descubrimiento de empleos a extracción, personalización, automatización y progresión XP en un solo flujo.",
       pipelineAria: "Flujo de trabajo de carrera",
       pipelineNextStepLabel: "Siguiente hito del flujo: {step}",
-      loadErrorFallback: "Error al cargar métricas del centro de automatización",
+      loadErrorFallback:
+        "Error al cargar métricas del centro de automatización",
       retryButtonLabel: "Reintentar",
       retryAria: "Reintentar carga de métricas del centro de automatización",
       stats: {
@@ -1721,10 +1779,48 @@ const esES: AppTranslationOverrides = {
         successRateTitle: "Tasa de Éxito",
         successRateDescription: "Historial de ejecuciones completadas",
       },
+      audit: {
+        title: "Auditoría de Capacidades RPA",
+        description:
+          "Verifica qué flujos de automatización del navegador están implementados, configurados y son observables.",
+        aria: "Auditoría de capacidades RPA",
+        openScraperButton: "Abrir Centro de Extracción",
+        openScraperAria:
+          "Abrir el centro de extracción con destinos RPA ampliados",
+        loadErrorFallback: "No se pudo cargar la auditoría de capacidades RPA.",
+        available: "Disponible",
+        needsConfig: "Requiere Configuración",
+        unavailable: "No Disponible",
+        noIssues: "No se detectaron incidencias.",
+        category: {
+          job_apply: "Solicitud",
+          scrape: "Extracción",
+        },
+        summary: {
+          total: "Capacidades",
+          totalDesc: "Flujos RPA implementados",
+          configured: "Configuradas",
+          configuredDesc: "Listas en el entorno actual",
+          live: "Eventos en Vivo",
+          liveDesc: "Emiten actualizaciones de progreso",
+        },
+        tableAria: "Detalle de la auditoría de capacidades RPA",
+        columns: {
+          name: "Capacidad",
+          category: "Categoría",
+          configured: "Configurada",
+          manual: "Manual",
+          scheduled: "Programada",
+          history: "Historial",
+          live: "En Vivo",
+          notes: "Notas",
+        },
+      },
       cards: {
         scraper: {
           title: "Flujos de Extracción",
-          description: "Ejecuta extractores de estudios y empleos para actualizar datos.",
+          description:
+            "Ejecuta extractores de estudios y empleos para actualizar datos.",
           button: "Abrir Centro de Extracción",
         },
         jobApply: {
@@ -1735,12 +1831,14 @@ const esES: AppTranslationOverrides = {
         },
         emailResponse: {
           title: "Respuesta por Email",
-          description: "Genera respuestas de email asistidas por IA y sigue cada ejecución.",
+          description:
+            "Genera respuestas de email asistidas por IA y sigue cada ejecución.",
           button: "Abrir Respuesta por Email",
         },
         runHistory: {
           title: "Historial de Ejecuciones",
-          description: "Inspecciona payloads completos, capturas y salida de ejecución.",
+          description:
+            "Inspecciona payloads completos, capturas y salida de ejecución.",
           button: "Abrir Historial",
         },
       },
@@ -1825,7 +1923,8 @@ const esES: AppTranslationOverrides = {
       },
       stream: {
         title: "Stream de ejecución en vivo",
-        subtitle: "Sigue las actualizaciones de progreso mientras se ejecuta la automatización.",
+        subtitle:
+          "Sigue las actualizaciones de progreso mientras se ejecuta la automatización.",
         aria: "Resumen del estado de ejecución en vivo",
         runIdTitle: "ID de ejecución",
         statusTitle: "Estado",
@@ -1838,7 +1937,8 @@ const esES: AppTranslationOverrides = {
         cancelButton: "Detener stream",
         cancelAria: "Detener suscripción al stream",
         errorTitle: "Error del stream",
-        startErrorFallback: "No se pudo iniciar el stream en vivo para esta ejecución.",
+        startErrorFallback:
+          "No se pudo iniciar el stream en vivo para esta ejecución.",
         states: {
           idle: "Inactivo",
           loading: "Conectando al stream",
@@ -1883,7 +1983,8 @@ const esES: AppTranslationOverrides = {
       openRunsButton: "Ver Ejecuciones",
       openRunsAria: "Abrir página de ejecuciones",
       subjectLegend: "Asunto",
-      subjectPlaceholder: "Seguimiento de entrevista para puesto de ingeniero de gameplay",
+      subjectPlaceholder:
+        "Seguimiento de entrevista para puesto de ingeniero de gameplay",
       subjectAria: "Asunto del email",
       subjectHint: "El asunto debe tener al menos 3 caracteres.",
       senderLegend: "Remitente (opcional)",
@@ -1902,29 +2003,34 @@ const esES: AppTranslationOverrides = {
       recipientHint:
         "Déjalo vacío para reutilizar el email del remitente cuando la entrega esté habilitada.",
       messageLegend: "Mensaje Entrante",
-      messagePlaceholder: "Pega el mensaje de email entrante para redactar una respuesta.",
+      messagePlaceholder:
+        "Pega el mensaje de email entrante para redactar una respuesta.",
       messageAria: "Mensaje de email entrante",
       messageHint: "El mensaje debe tener al menos 10 caracteres.",
       deliverLabel: "Entregar después de generar",
-      deliverAria: "Enviar la respuesta generada mediante la entrega de email configurada",
+      deliverAria:
+        "Enviar la respuesta generada mediante la entrega de email configurada",
       deliveryConfiguredDescription:
         "Hay un transporte de entrega configurado. Actívalo para enviar el borrador inmediatamente.",
       deliveryUnavailableDescription:
         "Configura la entrega de email en Ajustes antes de enviar respuestas automáticamente.",
       configureDeliveryButton: "Configurar Entrega",
-      configureDeliveryAria: "Abrir ajustes para configurar la entrega de email",
+      configureDeliveryAria:
+        "Abrir ajustes para configurar la entrega de email",
       schedule: {
         legend: "Programar Ejecución",
         hint: "Elige cuándo debe ejecutarse esta automatización de email.",
         aria: "Fecha y hora programadas para la automatización de email",
         button: "Programar Ejecución",
         buttonAria: "Programar automatización de email",
-        invalidRunAt: "Elige una fecha y hora futuras para la ejecución programada.",
+        invalidRunAt:
+          "Elige una fecha y hora futuras para la ejecución programada.",
         createdTitle: "Ejecución de email programada",
         scheduledForLabel: "Programada para: {date}",
         statusLabel: "Estado: {status}",
       },
-      invalidRecipient: "Introduce una dirección de email válida para la entrega.",
+      invalidRecipient:
+        "Introduce una dirección de email válida para la entrega.",
       generateButton: "Generar Respuesta",
       generateAria: "Generar respuesta de email",
       generatedTitle: "Respuesta generada",
@@ -2036,7 +2142,8 @@ const esES: AppTranslationOverrides = {
       lastRunLabel: "Última ejecución: {value}",
       studioCard: {
         title: "Extractor de Estudios",
-        description: "Obtén los últimos perfiles de estudios y metadatos de entrevista.",
+        description:
+          "Obtén los últimos perfiles de estudios y metadatos de entrevista.",
         runAria: "Ejecutar extractor de estudios",
         runButton: "Ejecutar Extractor de Estudios",
       },
@@ -2059,7 +2166,8 @@ const esES: AppTranslationOverrides = {
       table: {
         title: "Empleos Extraídos Listos para Entrevista",
         openBoardButton: "Abrir Bolsa de Empleo",
-        emptyState: "Sin empleos aún. Ejecuta el extractor para poblar objetivos de entrevista.",
+        emptyState:
+          "Sin empleos aún. Ejecuta el extractor para poblar objetivos de entrevista.",
         aria: "Empleos extraídos disponibles para entrevista",
         interviewButton: "Entrevista para este Empleo",
         interviewAria: "Iniciar entrevista para {title} en {company}",
@@ -2071,8 +2179,10 @@ const esES: AppTranslationOverrides = {
         },
       },
       messages: {
-        studioCompleted: "Extracción de estudios completada. Datos del directorio actualizados.",
-        studioCompletedWithXp: "Extracción de estudios completada (+{xp} XP). Datos actualizados.",
+        studioCompleted:
+          "Extracción de estudios completada. Datos del directorio actualizados.",
+        studioCompletedWithXp:
+          "Extracción de estudios completada (+{xp} XP). Datos actualizados.",
         jobCompleted:
           "Extracción de empleos completada. Feed actualizado y listo para entrevistas.",
         jobCompletedWithXp:
@@ -2084,14 +2194,16 @@ const esES: AppTranslationOverrides = {
         aria: "Fecha y hora programadas para la extracción",
         button: "Programar Ejecución",
         buttonAria: "Programar ejecución del extractor",
-        invalidRunAt: "Elige una fecha y hora futuras para la ejecución programada.",
+        invalidRunAt:
+          "Elige una fecha y hora futuras para la ejecución programada.",
         createdTitle: "Ejecución de extracción programada",
         createdMessage: "La ejecución de extracción se programó correctamente.",
         scheduledForLabel: "Programada para: {date}",
         statusLabel: "Estado: {status}",
       },
       openRunDetailButton: "Abrir Detalle",
-      openRunDetailAria: "Abrir detalle de ejecución de automatización para {id}",
+      openRunDetailAria:
+        "Abrir detalle de ejecución de automatización para {id}",
       toasts: {
         studioReward: "Extracción de estudios completada (+{xp} XP)",
         jobReward: "Extracción de empleos completada (+{xp} XP)",
@@ -2111,11 +2223,13 @@ const esES: AppTranslationOverrides = {
     },
     gemini: {
       name: "Google Gemini",
-      description: "Proveedor cloud principal para QA general y generación de contenido.",
+      description:
+        "Proveedor cloud principal para QA general y generación de contenido.",
     },
     claude: {
       name: "Anthropic Claude",
-      description: "Proveedor de razonamiento de largo contexto para flujos analíticos.",
+      description:
+        "Proveedor de razonamiento de largo contexto para flujos analíticos.",
     },
     openai: {
       name: "OpenAI",
@@ -2245,7 +2359,8 @@ const esES: AppTranslationOverrides = {
     errors: {
       usageLoadFailed: "Error al cargar métricas de uso de IA.",
       modelsLoadFailed: "Error al cargar catálogo de modelos.",
-      localConnectivityFailed: "Error al verificar conectividad del proveedor local.",
+      localConnectivityFailed:
+        "Error al verificar conectividad del proveedor local.",
       providerTestFailed: "Error en la prueba del proveedor.",
       preferenceSaveFailed: "Error al guardar preferencia de IA.",
     },
@@ -2335,12 +2450,14 @@ const esES: AppTranslationOverrides = {
       items: {
         resume: {
           title: "Currículum",
-          description: "Mantén al menos un currículum actual alineado con tus roles objetivo.",
+          description:
+            "Mantén al menos un currículum actual alineado con tus roles objetivo.",
           cta: "Abrir Currículum",
         },
         coverLetter: {
           title: "Carta de Presentación",
-          description: "Mantén borradores de carta listos para personalizar por rol y estudio.",
+          description:
+            "Mantén borradores de carta listos para personalizar por rol y estudio.",
           cta: "Abrir Cartas",
         },
         portfolio: {
@@ -2372,7 +2489,8 @@ const esES: AppTranslationOverrides = {
     recent: {
       title: "Sesiones Recientes",
       viewAllButton: "Ver Todas",
-      emptyState: "Sin sesiones de entrevista aún. Inicia tu primera desde un empleo o estudio.",
+      emptyState:
+        "Sin sesiones de entrevista aún. Inicia tu primera desde un empleo o estudio.",
       tableAria: "Sesiones de entrevista recientes",
       notAvailable: "N/D",
       viewSessionAria: "Ver sesión de entrevista {id}",
@@ -2415,7 +2533,8 @@ const esES: AppTranslationOverrides = {
       studioLegend: "Estudio",
       studioAria: "Estudio",
       selectStudioOption: "Seleccionar un estudio",
-      noStudiosHint: "Sin estudios aún. Ejecuta extracción o crea un perfil de estudio primero.",
+      noStudiosHint:
+        "Sin estudios aún. Ejecuta extracción o crea un perfil de estudio primero.",
       roleLegend: "Rol",
       roleAria: "Rol",
       experienceLegend: "Nivel de experiencia",
@@ -2461,7 +2580,8 @@ const esES: AppTranslationOverrides = {
     },
     errors: {
       bootstrapLoadFailed: "Error al cargar los datos del hub de entrevistas",
-      roleRecommendationsFailed: "Error al cargar recomendaciones de rol personalizadas",
+      roleRecommendationsFailed:
+        "Error al cargar recomendaciones de rol personalizadas",
       startFailed: "Error al iniciar sesión de entrevista",
       jobLoadFailed: "Error al cargar detalles del empleo seleccionado",
     },
@@ -2469,7 +2589,8 @@ const esES: AppTranslationOverrides = {
   interviewSession: {
     title: "Práctica de Entrevista",
     timeLabel: "Tiempo",
-    timeAria: "Tiempo transcurrido de entrevista {minutes} minutos y {seconds} segundos",
+    timeAria:
+      "Tiempo transcurrido de entrevista {minutes} minutos y {seconds} segundos",
     avatarLabelAi: "IA",
     progressLabel: "Pregunta {current} de {total}",
     progressAria: "Progreso de entrevista",
@@ -2575,7 +2696,8 @@ const esES: AppTranslationOverrides = {
     },
     automation: {
       title: "Automatización y RPA",
-      subtitle: "Configura valores por defecto de automatización del navegador para solicitudes.",
+      subtitle:
+        "Configura valores por defecto de automatización del navegador para solicitudes.",
       headlessTitle: "Modo Sin Interfaz",
       headlessDescription: "Ejecutar automatización sin interfaz visible",
       headlessAria: "Modo sin interfaz",
@@ -2601,9 +2723,60 @@ const esES: AppTranslationOverrides = {
       saveAria: "Guardar configuración de automatización",
       saveButton: "Guardar Automatización",
     },
+    emailDelivery: {
+      title: "Entrega de correo",
+      subtitle:
+        "Configura el transporte SMTP saliente que se usa cuando la automatización envía una respuesta generada.",
+      configuredBadge: "Listo",
+      incompleteBadge: "Necesita configuración",
+      hostLegend: "Host SMTP",
+      hostPlaceholder: "smtp.mailprovider.com",
+      hostAria: "Host del servidor SMTP",
+      portLegend: "Puerto",
+      portAria: "Puerto del servidor SMTP",
+      timeoutLegend: "Tiempo de conexión (segundos)",
+      timeoutAria: "Tiempo de conexión SMTP en segundos",
+      securityLegend: "Seguridad",
+      securityAria: "Modo de seguridad del transporte SMTP",
+      securityOptions: {
+        tls: "TLS implícito",
+        starttls: "STARTTLS",
+        plain: "TCP simple",
+      },
+      authLegend: "Autenticación",
+      authAria: "Modo de autenticación SMTP",
+      authOptions: {
+        plain: "AUTH PLAIN",
+        login: "AUTH LOGIN",
+      },
+      usernameLegend: "Usuario",
+      usernamePlaceholder: "mailer{'@'}studio.com",
+      usernameAria: "Usuario SMTP",
+      fromNameLegend: "Nombre del remitente",
+      fromNamePlaceholder: "{brand}",
+      fromNameAria: "Nombre visible del remitente",
+      fromEmailLegend: "Correo del remitente",
+      fromEmailPlaceholder: "mailer{'@'}studio.com",
+      fromEmailAria: "Correo del remitente saliente",
+      fromEmailHint: "Esta dirección se usa en la cabecera From del mensaje.",
+      passwordLegend: "Contraseña",
+      passwordPlaceholder: "Guardar o reemplazar la contraseña SMTP",
+      passwordAria: "Contraseña SMTP",
+      passwordHint:
+        "Guarda una contraseña si este transporte requiere envío autenticado.",
+      passwordStoredHint:
+        "Ya hay una contraseña guardada. Guardar un nuevo valor la reemplazará, o puedes borrarla abajo.",
+      clearPasswordAria: "Borrar contraseña guardada para entrega de correo",
+      clearPasswordButton: "Borrar contraseña",
+      savePasswordAria: "Guardar contraseña para entrega de correo",
+      savePasswordButton: "Guardar contraseña",
+      saveAria: "Guardar configuración de entrega de correo",
+      saveButton: "Guardar entrega de correo",
+    },
     aiProviders: {
       title: "Proveedores de IA",
-      subtitle: "Mantén proveedores locales como principales y cloud como respaldo controlado.",
+      subtitle:
+        "Mantén proveedores locales como principales y cloud como respaldo controlado.",
       expandAria: "Expandir configuración de {provider}",
       configuredBadge: "Configurado",
       endpointLabel: "URL del Endpoint",
@@ -2626,9 +2799,111 @@ const esES: AppTranslationOverrides = {
       preferredProviderHint:
         "El sistema de IA intentará este proveedor primero y luego recurrirá a otros.",
       preferredProviderSaved: "Proveedor preferido actualizado",
+      ollamaTipTitle: "Consejo: Ollama va por fuera de esta app",
+      ollamaTipDescription:
+        "Instálalo primero y sigue la configuración oficial de Ollama para tu propia máquina o proyecto en",
+      ollamaTipLinkLabel: "ollama.com",
+      ollamaTipLinkAria: "Abrir sitio web de Ollama en una pestaña nueva",
+    },
+    brand: {
+      title: "Plano de control de marca",
+      subtitle:
+        "Identidad white-label, tipografía, tokens semánticos de tema y copy localizado desde una sola configuración persistida.",
+      infoTitle: "Un solo contrato para cada superficie de marca",
+      infoDescription:
+        "Previsualiza identidad, tipografía, tokens de tema y copy localizado antes de publicar cambios en todo el producto.",
+      previewEyebrow: "Vista previa en vivo",
+      previewTitle: "Vista previa de la marca",
+      previewSubtitle:
+        "Valida logo, tono, contraste de tokens y overrides de copy antes de guardar la siguiente variante.",
+      previewLogoAlt: "Vista previa del logo de {brand}",
+      previewPrimaryAction: "Abrir espacio de trabajo",
+      previewSecondaryAction: "Revisar copy",
+      editorTabsAria: "Secciones del editor de marca",
+      nameLegend: "Nombre del producto",
+      nameAria: "Nombre del producto",
+      assistantNameLegend: "Nombre del asistente",
+      assistantNameAria: "Nombre del asistente",
+      apiNameLegend: "Nombre de la API",
+      apiNameAria: "Nombre de la API",
+      taglineLegend: "Eslogan",
+      taglineAria: "Eslogan",
+      logoPathLegend: "Ruta o URL del logo",
+      logoPathAria: "Ruta o URL del logo",
+      faviconPathLegend: "Ruta o URL del favicon",
+      faviconPathAria: "Ruta o URL del favicon",
+      assetPathPlaceholder: "/branding/logo.svg",
+      assetPathHint:
+        "Usa una ruta de recurso pública o una URL absoluta que el cliente pueda cargar directamente.",
+      defaultTitleLegend: "Título SEO por defecto",
+      defaultTitleAria: "Título SEO por defecto",
+      defaultDescriptionLegend: "Descripción SEO por defecto",
+      defaultDescriptionAria: "Descripción SEO por defecto",
+      fontStylesheetLegend: "URL de la hoja de estilos de fuentes",
+      fontStylesheetAria: "URL de la hoja de estilos de fuentes",
+      fontStylesheetPlaceholder: "https://fonts.googleapis.com/css2?...",
+      fontStylesheetHint:
+        "Carga la hoja de estilos alojada de tus tipografías antes de aplicar las pilas de font-family de abajo.",
+      displayFontLegend: "font-family de display",
+      displayFontAria: "font-family de display",
+      bodyFontLegend: "font-family del cuerpo",
+      bodyFontAria: "font-family del cuerpo",
+      monoFontLegend: "font-family mono",
+      monoFontAria: "font-family mono",
+      lightThemeLegend: "JSON del tema claro",
+      lightThemeAria: "JSON del tema claro",
+      darkThemeLegend: "JSON del tema oscuro",
+      darkThemeAria: "JSON del tema oscuro",
+      themeJsonHint:
+        "Proporciona un objeto completo de tokens daisyUI. Las claves deben coincidir exactamente con el contrato de tema de marca.",
+      contentOverridesLegend: "JSON de overrides de contenido",
+      contentOverridesAria: "JSON de overrides de contenido",
+      contentOverridesHint:
+        "Usa claves de locale con puntos como `dashboard.pageTitle` para sobrescribir cualquier copy visible para usuarios.",
+      saveAria: "Guardar configuración del plano de control de marca",
+      saveButton: "Guardar marca",
+      tabs: {
+        identity: "Identidad",
+        identityDescription:
+          "Ajusta nombres, voz del asistente y recursos del logo para el paquete de marca activo.",
+        typography: "Tipografía",
+        typographyDescription:
+          "Define la hoja de estilos alojada y las pilas display, body y mono usadas en toda la interfaz.",
+        themes: "Tokens de tema",
+        themesDescription:
+          "Edita los objetos de tokens daisyUI claros y oscuros que definen color semántico, radio, borde y profundidad.",
+        content: "Contenido",
+        contentDescription:
+          "Ajusta el copy SEO por defecto y los overrides de locale en tiempo de ejecución sin tocar el catálogo fuente.",
+      },
+      stats: {
+        product: "Producto",
+        productDescription:
+          "Nombre principal de la aplicación visible para clientes.",
+        assistant: "Asistente",
+        assistantDescription:
+          "Persona del asistente mostrada por defecto en las superficies de chat.",
+        locales: "Idiomas",
+        localesDescription:
+          "Idiomas de interfaz compatibles expuestos en configuración.",
+        overrides: "Overrides",
+        overridesDescription:
+          "Claves de copy personalizadas mezcladas en el catálogo activo.",
+      },
+      errors: {
+        invalidLightTheme: "El JSON del tema claro no es válido.",
+        invalidDarkTheme: "El JSON del tema oscuro no es válido.",
+        invalidContentOverrides:
+          "El JSON de overrides de contenido no es válido.",
+        failedToSave: "No se pudo guardar la configuración de marca",
+      },
     },
     toasts: {
       apiKeysSaved: "Claves API guardadas",
+      brandSaved: "Configuración de marca guardada",
+      emailDeliverySaved: "Configuración de entrega de correo guardada",
+      emailDeliveryPasswordSaved: "Contraseña de entrega de correo guardada",
+      emailDeliveryPasswordCleared: "Contraseña de entrega de correo eliminada",
       themeSaved: "Tema guardado",
       preferencesSaved: "Preferencias guardadas",
       profileSaved: "Perfil guardado",
@@ -2637,12 +2912,19 @@ const esES: AppTranslationOverrides = {
     errors: {
       failedToTestProvider: "Error al probar proveedor",
       failedToSaveApiKeys: "Error al guardar claves API",
+      failedToSaveEmailDelivery:
+        "Error al guardar la configuración de entrega de correo",
+      failedToSaveEmailDeliveryPassword:
+        "Error al guardar la contraseña de entrega de correo",
       failedToSaveTheme: "Error al guardar tema",
       failedToSavePreferences: "Error al guardar preferencias",
       nameTooShort: "El nombre debe tener al menos 2 caracteres",
       invalidEmail: "Introduce una dirección de email válida",
+      invalidEmailDeliverySender:
+        "Introduce un remitente válido para entrega de correo",
       failedToSaveProfile: "Error al guardar perfil",
-      failedToSaveAutomation: "Error al guardar configuración de automatización",
+      failedToSaveAutomation:
+        "Error al guardar configuración de automatización",
     },
   },
   quickFab: {
@@ -2701,7 +2983,8 @@ const esES: AppTranslationOverrides = {
     emptyTitle: "Inicia una revisión rápida",
     emptyDescription:
       "Pide próximos pasos, texto de seguimiento o una revisión enfocada desde la página en la que estás.",
-    composerHint: "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
+    composerHint:
+      "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
     prompts: {
       focusedEntity: "Dame coaching enfocado para {target}.",
       resume: "¿Cómo puedo mejorar este currículum para {target}?",
@@ -2709,17 +2992,20 @@ const esES: AppTranslationOverrides = {
       interview: "Genera preguntas de preparación para entrevista en {target}.",
       portfolio: "¿Cómo puedo adaptar mi portafolio para {target}?",
       skills: "¿Qué habilidades debería priorizar para {target}?",
-      automation: "¿Cómo puedo optimizar este flujo de automatización para {target}?",
+      automation:
+        "¿Cómo puedo optimizar este flujo de automatización para {target}?",
       general: "¿En qué debería enfocarme en mi búsqueda de empleo?",
       entity: {
         job: "Resume el encaje y los próximos pasos para {target}.",
         resume: "Identifica las mejoras más fuertes para {target}.",
         studio: "Oriéntame sobre cómo acercarme a {target}.",
-        interviewSession: "Revisa las señales y puntos de coaching de {target}.",
+        interviewSession:
+          "Revisa las señales y puntos de coaching de {target}.",
         automationRun: "Explica qué pasó en {target} y qué corregir después.",
       },
     },
-    inputPlaceholder: "Pregunta sobre preparación de entrevistas, empleos, currículums...",
+    inputPlaceholder:
+      "Pregunta sobre preparación de entrevistas, empleos, currículums...",
     inputAria: "Mensaje del chat flotante",
     sendAria: "Enviar mensaje del chat flotante",
     hideAria: "Ocultar asistente de chat flotante",
@@ -2754,14 +3040,16 @@ const esES: AppTranslationOverrides = {
     clearButton: "Limpiar",
     logAria: "Conversación del chat con IA",
     youLabel: "Tú",
-    inputPlaceholder: "Pregunta a Bao sobre tu carrera en la industria del juego",
+    inputPlaceholder:
+      "Pregunta a {assistant} sobre tu carrera en la industria del juego",
     inputAria: "Mensaje del chat",
     sendAria: "Enviar mensaje del chat",
     sendButton: "Enviar",
     emptyTitle: "Tu asistente está listo",
     emptyDescription:
       "Usa las sugerencias junto a la conversación o pide coaching, ayuda de redacción, investigación o guía de automatización.",
-    composerHint: "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
+    composerHint:
+      "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
     composerIdleStatus: "Listo cuando tú lo estés",
     composerBusyStatus: "Generando una respuesta...",
     contextPanelTitle: "Contexto actual",
@@ -2800,7 +3088,8 @@ const esES: AppTranslationOverrides = {
     defaultGreeting:
       "¡Hola! Soy {brand}, tu asistente de carrera con IA para la industria del juego. ¿En qué puedo ayudarte hoy?",
     unableToProcessFallback: "Lo siento, no pude procesar esa solicitud.",
-    requestErrorFallback: "Ocurrió un error al procesar la solicitud. Inténtalo de nuevo.",
+    requestErrorFallback:
+      "Ocurrió un error al procesar la solicitud. Inténtalo de nuevo.",
     requestErrorToast: "Error en la solicitud del chat. Inténtalo de nuevo.",
     timeAt: "a las {time}",
     voice: {
@@ -2818,20 +3107,27 @@ const esES: AppTranslationOverrides = {
       listeningStatus: "Escuchando...",
       speakingStatus: "Leyendo respuesta...",
       idleStatus: "Voz lista",
-      unsupportedHint: "Los controles de voz no están disponibles en este navegador.",
-      recognitionUnsupportedHint: "La entrada de voz no está disponible en este navegador.",
-      synthesisUnsupportedHint: "La reproducción de voz no está disponible en este navegador.",
+      unsupportedHint:
+        "Los controles de voz no están disponibles en este navegador.",
+      recognitionUnsupportedHint:
+        "La entrada de voz no está disponible en este navegador.",
+      synthesisUnsupportedHint:
+        "La reproducción de voz no está disponible en este navegador.",
       errorLabel: "Error de voz: {error}",
       errors: {
-        unsupportedRecognition: "La entrada de voz no es compatible con este navegador.",
-        unsupportedSynthesis: "La reproducción de voz no es compatible con este navegador.",
-        startFailed: "No se pudo iniciar la entrada de voz. Verifica los permisos del micrófono.",
+        unsupportedRecognition:
+          "La entrada de voz no es compatible con este navegador.",
+        unsupportedSynthesis:
+          "La reproducción de voz no es compatible con este navegador.",
+        startFailed:
+          "No se pudo iniciar la entrada de voz. Verifica los permisos del micrófono.",
         noSpeech: "No se detectó voz. Intenta hablar de nuevo.",
         aborted: "La entrada de voz se detuvo antes de completarse.",
         audioCapture: "No hay fuente de micrófono disponible.",
         network: "Un problema de red interrumpió el procesamiento de voz.",
         notAllowed: "Se denegó el permiso del micrófono.",
-        serviceNotAllowed: "El acceso al servicio de voz está bloqueado en este entorno.",
+        serviceNotAllowed:
+          "El acceso al servicio de voz está bloqueado en este entorno.",
         badGrammar: "Error en el análisis gramatical de voz.",
         languageNotSupported: "El idioma de voz seleccionado no es compatible.",
         canceled: "La reproducción de voz fue cancelada.",
@@ -2841,9 +3137,11 @@ const esES: AppTranslationOverrides = {
         synthesisUnavailable: "La síntesis de voz no está disponible.",
         synthesisFailed: "La síntesis de voz no pudo generar audio.",
         languageUnavailable: "La síntesis no soporta el idioma seleccionado.",
-        voiceUnavailable: "La voz seleccionada no está disponible en este dispositivo.",
+        voiceUnavailable:
+          "La voz seleccionada no está disponible en este dispositivo.",
         textTooLong: "El mensaje es demasiado largo para reproducción de voz.",
-        invalidArgument: "La reproducción de voz recibió un argumento inválido.",
+        invalidArgument:
+          "La reproducción de voz recibió un argumento inválido.",
         unknown: "Ocurrió un error de voz desconocido.",
       },
     },

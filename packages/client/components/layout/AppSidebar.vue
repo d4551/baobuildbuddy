@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { APP_BRAND } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
@@ -10,6 +9,7 @@ import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation
 const route = useRoute();
 const sidebarItems = getSidebarNavigationItems();
 const { t } = useI18n();
+const { resolvedBrand } = useBrand();
 const { settings, fetchSettings, isAiConfigurationIncomplete } = useSettings();
 
 const shortcutByNavigationId = new Map(
@@ -59,8 +59,8 @@ onMounted(() => {
     <ul class="menu min-h-full w-full p-4 pt-6 gap-1">
       <li class="menu-title px-2 pb-4">
         <span class="flex items-center gap-2 text-lg font-bold text-primary is-drawer-close:hidden">
-          <img :src="APP_BRAND.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
-          <span>{{ APP_BRAND.name }}</span>
+          <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
+          <span>{{ resolvedBrand.name }}</span>
         </span>
       </li>
       <li v-for="item in sidebarItems" :key="item.id">

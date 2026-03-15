@@ -23,6 +23,72 @@ export const PREVIEW_SEPARATOR_LENGTH = 72 as const;
 /** Maximum allowed timeout for desktop image inspection when detaching. */
 export const DISK_IMAGE_TIMEOUT_MS = 60_000 as const;
 
+/** Supported desktop release staging targets. */
+export const DESKTOP_RELEASE_TARGETS = ["macos", "linux", "windows"] as const;
+
+/** Canonical macOS desktop release architecture label. */
+export const DESKTOP_RELEASE_MACOS_ARCH = "aarch64" as const;
+
+/** Canonical Linux desktop release architecture label. */
+export const DESKTOP_RELEASE_LINUX_ARCH = "aarch64" as const;
+
+/** Canonical Debian package architecture label used by desktop releases. */
+export const DESKTOP_RELEASE_LINUX_DEB_ARCH = "arm64" as const;
+
+/** Canonical Windows desktop release architecture label. */
+export const DESKTOP_RELEASE_WINDOWS_ARCH = "x64" as const;
+
+/** Relative resource directory bundled into the packaged desktop application. */
+export const DESKTOP_RUNTIME_RESOURCE_DIR = "gen/runtime" as const;
+
+/** Relative runtime manifest path bundled into the packaged desktop application. */
+export const DESKTOP_RUNTIME_MANIFEST_PATH = `${DESKTOP_RUNTIME_RESOURCE_DIR}/manifest.json` as const;
+
+/** Default loopback host used by the packaged desktop server runtime. */
+export const DESKTOP_RUNTIME_HOST = "127.0.0.1" as const;
+
+/** Default loopback port used by the packaged desktop server runtime. */
+export const DESKTOP_RUNTIME_SERVER_PORT = 3000 as const;
+
+/** Absolute HTTP base used by the packaged desktop client to reach the local server. */
+export const DESKTOP_RUNTIME_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_SERVER_PORT}` as const;
+
+/** Absolute WebSocket base used by the packaged desktop client to reach the local server. */
+export const DESKTOP_RUNTIME_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_SERVER_PORT}` as const;
+
+/** Packaged desktop webview origins that are allowed to access the local desktop server. */
+export const DESKTOP_RUNTIME_CORS_ORIGINS = [
+  "http://tauri.localhost",
+  "https://tauri.localhost",
+  "tauri://localhost",
+] as const;
+
+/** Relative output path for the compiled packaged desktop server executable. */
+export const DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH = "server/bao-desktop-server" as const;
+
+/** Relative output path for the compiled packaged Bun entrypoint runner executable. */
+export const DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH = "bin/bao-bun-runner" as const;
+
+/** Relative runtime path containing packaged scraper sources and dependencies. */
+export const DESKTOP_RUNTIME_SCRAPER_DIR = "scraper" as const;
+
+/** Temporary loopback port used while prerendering the desktop static client build. */
+export const DESKTOP_RUNTIME_BUILD_SERVER_PORT = 3399 as const;
+
+/** Loopback port used by desktop runtime smoke tests for serving generated static assets. */
+export const DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT = 4106 as const;
+
+/** Required desktop PNG icon outputs recommended by Tauri for cross-platform bundling. */
+export const DESKTOP_REQUIRED_PNG_ICON_SPECS = [
+  { relativePath: "32x32.png", width: 32, height: 32 },
+  { relativePath: "128x128.png", width: 128, height: 128 },
+  { relativePath: "128x128@2x.png", width: 256, height: 256 },
+  { relativePath: "icon.png", width: 512, height: 512 },
+] as const;
+
+/** Required native desktop icon files recommended by Tauri for macOS and Windows bundling. */
+export const DESKTOP_REQUIRED_NATIVE_ICON_FILES = ["icon.icns", "icon.ico"] as const;
+
 /** Timeout for PinchTab reachability checks. */
 export const PINCHTAB_REQUEST_TIMEOUT_MS = 2_000 as const;
 

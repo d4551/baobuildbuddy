@@ -32,6 +32,7 @@ import {
   type PortfolioProject,
   RESUME_TEMPLATE_DEFAULT,
   RESUME_TEMPLATE_OPTIONS,
+  resolveBrandSettings,
   type ResumeData,
   type ResumeEducationItem,
   type ResumeExperienceItem,
@@ -722,6 +723,7 @@ export const toAppSettings = (value: unknown): AppSettings | null => {
     preferredProvider: normalizeAIProvider(value.preferredProvider),
     theme: value.theme === "bao-dark" ? "bao-dark" : "bao-light",
     language: asEnum(value.language, APP_LANGUAGE_CODES) ?? DEFAULT_APP_LANGUAGE,
+    brandSettings: resolveBrandSettings(isRecord(value.brandSettings) ? value.brandSettings : null),
     notifications: {
       achievements: asBoolean(notificationsRecord.achievements) ?? true,
       dailyChallenges: asBoolean(notificationsRecord.dailyChallenges) ?? true,

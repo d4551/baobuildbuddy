@@ -45,6 +45,11 @@ mkdirSync(AUTOMATION_SCREENSHOT_DIR, { recursive: true });
  * reliably even when drizzle-kit executes the config in CJS mode.
  */
 const resolveScraperDir = (): string => {
+  const configuredScraperDir = process.env.BAO_SCRAPER_DIR?.trim();
+  if (configuredScraperDir && configuredScraperDir.length > 0) {
+    return resolve(configuredScraperDir);
+  }
+
   const cwd = process.cwd();
   const candidates = [
     resolve(cwd, "packages", "scraper"),

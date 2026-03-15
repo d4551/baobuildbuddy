@@ -1,5 +1,6 @@
 import {
   API_ERROR_INVALID_SCRAPER_JSON,
+  automationScrapeTargetToPortalId,
   automationScriptIdSchema,
   generateId,
   gamingPortalScraperScriptIdByPortalId,
@@ -8,6 +9,7 @@ import {
   scrapedStudioSchema,
   safeParseJson,
   type AutomationScriptId,
+  type AutomationJobScrapeTarget,
   type GamingPortalId,
   type ScrapedJob,
   type ScrapedStudio,
@@ -42,6 +44,14 @@ const DEFAULT_JOB_TYPE = "full-time";
 const DEFAULT_JOB_SOURCE = "unknown-source";
 const CONTENT_HASH_PREFIX = "job";
 const CONTENT_HASH_LENGTH = 24;
+const PORTAL_SCRIPT_ID_BY_ID = {
+  hitmarker: HITMARKER_SCRIPT_ID,
+  grackle: GRACKLE_SCRIPT_ID,
+  workwithindies: WORKWITHINDIES_SCRIPT_ID,
+  remotegamejobs: REMOTEGAMEJOBS_SCRIPT_ID,
+  gamesjobsdirect: GAMESJOBSDIRECT_SCRIPT_ID,
+  pocketgamer: POCKETGAMER_SCRIPT_ID,
+} as const satisfies Record<GamingPortalId, AutomationScriptId>;
 export type { ScrapedJob };
 
 type ScriptRows<T> = {
@@ -176,6 +186,13 @@ export class ScraperService {
     return portalConfig?.fallbackUrl ?? null;
   }
 
+  /**
+   * Resolve the configured automation script id for a portal-backed scraper.
+   */
+  private resolvePortalScriptId(portalId: GamingPortalId): AutomationScriptId {
+    return PORTAL_SCRIPT_ID_BY_ID[portalId];
+  }
+
   private async upsertStudioRow(studioRow: ScrapedStudio, now: string): Promise<void> {
     const id = studioRow.id || generateId();
     const studioData = {
@@ -241,6 +258,79 @@ export class ScraperService {
       updatedAt: now,
     });
     return true;
+  }
+
+  /**
+   * Scrape normalized rows for a configured gaming portal.
+   */
+  private async scrapePortalJobsRaw(
+    portalId: GamingPortalId,
+    sourceUrl?: string,
+    scriptReference?: AutomationScriptId | ScriptReferenceOverride,
+  ): Promise<ScrapedJob[]> {
+    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl(portalId));
+    if (!resolvedSourceUrl) {
+      return [];
+    }
+
+    const effectiveReference = scriptReference
+      ? resolveScriptReference(scriptReference)
+      : { scriptId: this.resolvePortalScriptId(portalId) };
+    const scriptResult = await this.runScraperScript(effectiveReference, {
+      sourceUrl: resolvedSourceUrl,
+    });
+    if (!scriptResult.ok) {
+      return [];
+    }
+    return this.parseJobRows(scriptResult.parsed).rows;
+  }
+
+  /**
+   * Scrape and upsert jobs for a configured gaming portal.
+   */
+  private async scrapePortalJobs(
+    portalId: GamingPortalId,
+    scriptReference?: AutomationScriptId | ScriptReferenceOverride,
+  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+    const errors: string[] = [];
+    let scraped = 0;
+    let upserted = 0;
+
+    const resolvedSourceUrl = await this.resolvePortalSourceUrl(portalId);
+    if (!resolvedSourceUrl) {
+      errors.push(`Missing enabled ${portalId} portal fallbackUrl.`);
+      return { scraped, upserted, errors };
+    }
+
+    const effectiveReference = scriptReference
+      ? resolveScriptReference(scriptReference)
+      : { scriptId: this.resolvePortalScriptId(portalId) };
+    const scriptResult = await this.runScraperScript(effectiveReference, {
+      sourceUrl: resolvedSourceUrl,
+    });
+    if (!scriptResult.ok) {
+      errors.push(scriptResult.error);
+      return { scraped, upserted, errors };
+    }
+
+    const parsedRows = this.parseJobRows(scriptResult.parsed);
+    scraped = parsedRows.rows.length;
+    errors.push(...parsedRows.rowErrors);
+
+    const normalizedResult = toJobSearchResult(parsedRows.rows);
+    const now = new Date().toISOString();
+    await Promise.allSettled(
+      normalizedResult.jobs.map((job) =>
+        runWithErrorCollection(async () => {
+          const inserted = await this.insertScrapedJobIfMissing(job, now);
+          if (inserted) {
+            upserted += 1;
+          }
+        }, errors),
+      ),
+    );
+
+    return { scraped, upserted, errors };
   }
 
   /**
@@ -377,113 +467,42 @@ export class ScraperService {
     sourceUrl?: string,
     scriptReference: AutomationScriptId | ScriptReferenceOverride = HITMARKER_SCRIPT_ID,
   ): Promise<ScrapedJob[]> {
-    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("hitmarker"));
-    if (!resolvedSourceUrl) {
-      return [];
-    }
-
-    const scriptResult = await this.runScraperScript(resolveScriptReference(scriptReference), {
-      sourceUrl: resolvedSourceUrl,
-    });
-    if (!scriptResult.ok) {
-      return [];
-    }
-    return this.parseJobRows(scriptResult.parsed).rows;
+    return this.scrapePortalJobsRaw("hitmarker", sourceUrl, scriptReference);
   }
 
   /**
    * Scrapes jobs from Grackle and validates normalized output shape.
    */
   async scrapeGrackleJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("grackle"));
-    if (!resolvedSourceUrl) {
-      return [];
-    }
-
-    const scriptResult = await this.runScraperScript(
-      { scriptId: GRACKLE_SCRIPT_ID },
-      { sourceUrl: resolvedSourceUrl },
-    );
-    if (!scriptResult.ok) {
-      return [];
-    }
-    return this.parseJobRows(scriptResult.parsed).rows;
+    return this.scrapePortalJobsRaw("grackle", sourceUrl);
   }
 
   /**
    * Scrapes jobs from WorkWithIndies and validates normalized output shape.
    */
   async scrapeWorkWithIndiesJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("workwithindies"));
-    if (!resolvedSourceUrl) {
-      return [];
-    }
-
-    const scriptResult = await this.runScraperScript(
-      { scriptId: WORKWITHINDIES_SCRIPT_ID },
-      { sourceUrl: resolvedSourceUrl },
-    );
-    if (!scriptResult.ok) {
-      return [];
-    }
-    return this.parseJobRows(scriptResult.parsed).rows;
+    return this.scrapePortalJobsRaw("workwithindies", sourceUrl);
   }
 
   /**
    * Scrapes jobs from RemoteGameJobs and validates normalized output shape.
    */
   async scrapeRemoteGameJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("remotegamejobs"));
-    if (!resolvedSourceUrl) {
-      return [];
-    }
-
-    const scriptResult = await this.runScraperScript(
-      { scriptId: REMOTEGAMEJOBS_SCRIPT_ID },
-      { sourceUrl: resolvedSourceUrl },
-    );
-    if (!scriptResult.ok) {
-      return [];
-    }
-    return this.parseJobRows(scriptResult.parsed).rows;
+    return this.scrapePortalJobsRaw("remotegamejobs", sourceUrl);
   }
 
   /**
    * Scrapes jobs from GamesJobsDirect and validates normalized output shape.
    */
   async scrapeGamesJobsDirectRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("gamesjobsdirect"));
-    if (!resolvedSourceUrl) {
-      return [];
-    }
-
-    const scriptResult = await this.runScraperScript(
-      { scriptId: GAMESJOBSDIRECT_SCRIPT_ID },
-      { sourceUrl: resolvedSourceUrl },
-    );
-    if (!scriptResult.ok) {
-      return [];
-    }
-    return this.parseJobRows(scriptResult.parsed).rows;
+    return this.scrapePortalJobsRaw("gamesjobsdirect", sourceUrl);
   }
 
   /**
    * Scrapes jobs from PocketGamer and validates normalized output shape.
    */
   async scrapePocketGamerJobsRaw(sourceUrl?: string): Promise<ScrapedJob[]> {
-    const resolvedSourceUrl = sourceUrl ?? (await this.resolvePortalSourceUrl("pocketgamer"));
-    if (!resolvedSourceUrl) {
-      return [];
-    }
-
-    const scriptResult = await this.runScraperScript(
-      { scriptId: POCKETGAMER_SCRIPT_ID },
-      { sourceUrl: resolvedSourceUrl },
-    );
-    if (!scriptResult.ok) {
-      return [];
-    }
-    return this.parseJobRows(scriptResult.parsed).rows;
+    return this.scrapePortalJobsRaw("pocketgamer", sourceUrl);
   }
 
   /**
@@ -492,42 +511,25 @@ export class ScraperService {
   async scrapeHitmarkerJobs(
     scriptReference: AutomationScriptId | ScriptReferenceOverride = HITMARKER_SCRIPT_ID,
   ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
-    const errors: string[] = [];
-    let scraped = 0;
-    let upserted = 0;
+    return this.scrapePortalJobs("hitmarker", scriptReference);
+  }
 
-    const resolvedSourceUrl = await this.resolvePortalSourceUrl("hitmarker");
-    if (!resolvedSourceUrl) {
-      errors.push("Missing enabled Hitmarker portal fallbackUrl.");
-      return { scraped, upserted, errors };
-    }
+  /**
+   * Scrapes and upserts jobs for a supported job-board scrape target.
+   */
+  async scrapeJobsForTarget(
+    target: AutomationJobScrapeTarget,
+  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+    return this.scrapePortalJobs(automationScrapeTargetToPortalId(target));
+  }
 
-    const scriptResult = await this.runScraperScript(resolveScriptReference(scriptReference), {
-      sourceUrl: resolvedSourceUrl,
-    });
-    if (!scriptResult.ok) {
-      errors.push(scriptResult.error);
-      return { scraped, upserted, errors };
-    }
-
-    const parsedRows = this.parseJobRows(scriptResult.parsed);
-    scraped = parsedRows.rows.length;
-    errors.push(...parsedRows.rowErrors);
-
-    const normalizedResult = toJobSearchResult(parsedRows.rows);
-    const now = new Date().toISOString();
-    await Promise.allSettled(
-      normalizedResult.jobs.map((job) =>
-        runWithErrorCollection(async () => {
-          const inserted = await this.insertScrapedJobIfMissing(job, now);
-          if (inserted) {
-            upserted += 1;
-          }
-        }, errors),
-      ),
-    );
-
-    return { scraped, upserted, errors };
+  /**
+   * Scrapes and upserts jobs for a supported gaming portal id.
+   */
+  async scrapeJobsForPortal(
+    portalId: GamingPortalId,
+  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+    return this.scrapePortalJobs(portalId);
   }
 }
 

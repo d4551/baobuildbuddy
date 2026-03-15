@@ -1,0 +1,448 @@
+import {
+  DESKTOP_RUNTIME_API_BASE,
+  DESKTOP_RUNTIME_BUILD_SERVER_PORT,
+  DESKTOP_RUNTIME_CORS_ORIGINS,
+  DESKTOP_RUNTIME_HOST,
+  DESKTOP_RUNTIME_MANIFEST_PATH,
+  DESKTOP_RUNTIME_RESOURCE_DIR,
+  DESKTOP_RUNTIME_SCRAPER_DIR,
+  DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
+  DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
+  DESKTOP_RUNTIME_SERVER_PORT,
+  DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
+  DESKTOP_RUNTIME_WS_BASE,
+} from "../packages/shared/src/constants/scripts";
+import { writeError, writeOutput } from "./utils/cli-output";
+import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
+import { cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, extname, join, resolve } from "node:path";
+
+type DesktopRuntimeManifest = {
+  serverExecutable: string;
+  scriptRunnerExecutable: string;
+  scraperDir: string;
+  serverHost: string;
+  serverPort: number;
+  corsOrigins: string[];
+};
+
+const REPO_ROOT = resolve(import.meta.dir, "..");
+const CLIENT_ROOT = join(REPO_ROOT, "packages", "client");
+const CLIENT_PUBLIC_ROOT = join(CLIENT_ROOT, ".output", "public");
+const DESKTOP_TAURI_ROOT = join(REPO_ROOT, "packages", "desktop", "src-tauri");
+const RUNTIME_ROOT = join(DESKTOP_TAURI_ROOT, DESKTOP_RUNTIME_RESOURCE_DIR);
+const RUNTIME_MANIFEST_PATH = join(DESKTOP_TAURI_ROOT, DESKTOP_RUNTIME_MANIFEST_PATH);
+const SCRAPER_ROOT = join(REPO_ROOT, "packages", "scraper");
+const SERVER_ENTRYPOINT = join(REPO_ROOT, "packages", "server", "src", "index.ts");
+const SERVER_DIST_ENTRYPOINT = join(REPO_ROOT, "packages", "server", "dist", "index.js");
+const SCRIPT_RUNNER_ENTRYPOINT = join(REPO_ROOT, "scripts", "desktop-bun-entrypoint-runner.ts");
+const BUILD_SERVER_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`;
+const BUILD_SERVER_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`;
+const READY_TIMEOUT_MS = 60_000;
+const POLL_INTERVAL_MS = 250;
+const LOG_LINE_LIMIT = 60;
+const TEXT_FILE_EXTENSIONS = new Set([
+  ".css",
+  ".html",
+  ".js",
+  ".json",
+  ".map",
+  ".mjs",
+  ".svg",
+  ".txt",
+  ".xml",
+]);
+
+const toExecutablePath = (relativePath: string, tauriTarget: string | null): string =>
+  tauriTarget?.includes("windows") ? `${relativePath}.exe` : relativePath;
+
+const captureStreamLines = async (
+  stream: number | ReadableStream<Uint8Array> | undefined,
+  target: string[],
+): Promise<void> => {
+  if (!(stream instanceof ReadableStream)) {
+    return;
+  }
+
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let pending = "";
+
+  const pushLine = (value: string): void => {
+    const normalized = value.trim();
+    if (normalized.length === 0) {
+      return;
+    }
+    target.push(normalized);
+    if (target.length > LOG_LINE_LIMIT) {
+      target.shift();
+    }
+  };
+
+  const readChunk = async (): Promise<void> => {
+    const result = await reader.read();
+    if (result.done) {
+      const trailing = `${pending}${decoder.decode()}`.trim();
+      if (trailing.length > 0) {
+        pushLine(trailing);
+      }
+      return;
+    }
+
+    const decoded = `${pending}${decoder.decode(result.value, { stream: true })}`;
+    const lines = decoded.split(/\r?\n/gu);
+    pending = lines.pop() ?? "";
+    for (const line of lines) {
+      pushLine(line);
+    }
+
+    await readChunk();
+  };
+
+  await readChunk();
+};
+
+const parseTargetArg = (argv: readonly string[]): string | null => {
+  const targetIndex = argv.findIndex((argument) => argument === "--target" || argument === "-t");
+  if (targetIndex === -1) {
+    return null;
+  }
+
+  const targetValue = argv[targetIndex + 1];
+  return typeof targetValue === "string" && targetValue.trim().length > 0
+    ? targetValue.trim()
+    : null;
+};
+
+const resolveHostBunCompileTarget = (): string => {
+  if (process.platform === "darwin") {
+    return process.arch === "arm64" ? "bun-darwin-arm64" : "bun-darwin-x64";
+  }
+  if (process.platform === "linux") {
+    return process.arch === "arm64" ? "bun-linux-arm64" : "bun-linux-x64";
+  }
+  if (process.platform === "win32") {
+    return process.arch === "arm64" ? "bun-windows-arm64" : "bun-windows-x64";
+  }
+
+  throw new Error(`Unsupported host platform for Bun compile target: ${process.platform}/${process.arch}`);
+};
+
+const resolveBunCompileTarget = (tauriTarget: string | null): string => {
+  if (tauriTarget === null) {
+    return resolveHostBunCompileTarget();
+  }
+
+  switch (tauriTarget) {
+    case "aarch64-apple-darwin":
+      return "bun-darwin-arm64";
+    case "x86_64-apple-darwin":
+      return "bun-darwin-x64";
+    case "aarch64-unknown-linux-gnu":
+      return "bun-linux-arm64";
+    case "x86_64-unknown-linux-gnu":
+      return "bun-linux-x64";
+    case "x86_64-unknown-linux-musl":
+      return "bun-linux-x64-musl";
+    case "aarch64-unknown-linux-musl":
+      return "bun-linux-arm64-musl";
+    case "x86_64-pc-windows-msvc":
+    case "x86_64-pc-windows-gnu":
+      return "bun-windows-x64";
+    case "aarch64-pc-windows-msvc":
+      return "bun-windows-arm64";
+    default:
+      throw new Error(`Unsupported desktop target for Bun compile: ${tauriTarget}`);
+  }
+};
+
+const runCommand = async (
+  command: readonly string[],
+  options: {
+    cwd?: string;
+    env?: Record<string, string | undefined>;
+  } = {},
+): Promise<void> => {
+  const proc = Bun.spawn(command, {
+    cwd: options.cwd ?? REPO_ROOT,
+    env: options.env ?? process.env,
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+  const exitCode = await proc.exited;
+  if (exitCode !== 0) {
+    throw new Error(`${command.join(" ")} exited with code ${exitCode}`);
+  }
+};
+
+const isServiceReady = async (url: string): Promise<boolean> => {
+  const fetchResult = await Promise.resolve(
+    fetch(url, { signal: AbortSignal.timeout(POLL_INTERVAL_MS) }),
+  ).then(
+    (response) => response.ok,
+    () => false,
+  );
+
+  return fetchResult;
+};
+
+const waitForService = async (url: string): Promise<void> => {
+  const deadline = Date.now() + READY_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    if (await isServiceReady(url)) {
+      return;
+    }
+    await Bun.sleep(POLL_INTERVAL_MS);
+  }
+
+  throw new Error(`Timed out waiting for ${url}`);
+};
+
+const ensureBuildServerPortIsFree = async (): Promise<void> => {
+  if (await isServiceReady(`${BUILD_SERVER_API_BASE}/api/health`)) {
+    throw new Error(
+      `Desktop runtime build port ${DESKTOP_RUNTIME_BUILD_SERVER_PORT} is already serving HTTP traffic.`,
+    );
+  }
+};
+
+const startBuildServer = async (
+  tempDbPath: string,
+): Promise<{
+  proc: ReturnType<typeof Bun.spawn>;
+}> => {
+  const stdoutLines: string[] = [];
+  const stderrLines: string[] = [];
+  const env = {
+    ...process.env,
+    BAO_DISABLE_AUTH: "true",
+    CLIENT_PORT: `${DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT}`,
+    CORS_ORIGINS: DESKTOP_RUNTIME_CORS_ORIGINS.join(","),
+    DB_PATH: tempDbPath,
+    HOST: DESKTOP_RUNTIME_HOST,
+    LOG_LEVEL: "warn",
+    PORT: `${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`,
+  };
+
+  const proc = Bun.spawn([process.execPath, SERVER_DIST_ENTRYPOINT], {
+    cwd: REPO_ROOT,
+    env,
+    stdin: "ignore",
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+
+  void captureStreamLines(proc.stdout, stdoutLines);
+  void captureStreamLines(proc.stderr, stderrLines);
+
+  const waitResult = await captureResult(() => waitForService(`${BUILD_SERVER_API_BASE}/api/health`));
+  if (!waitResult.ok) {
+    proc.kill();
+    await proc.exited.catch(() => undefined);
+    const logDump = [...stdoutLines, ...stderrLines].join("\n");
+    const message = toErrorMessage(waitResult.error, `Timed out waiting for ${BUILD_SERVER_API_BASE}/api/health`);
+    throw new Error(logDump.length > 0 ? `${message}\n${logDump}` : message, {
+      cause: waitResult.error,
+    });
+  }
+
+  return {
+    proc,
+  };
+};
+
+const stopProcess = async (proc: ReturnType<typeof Bun.spawn>): Promise<void> => {
+  proc.kill();
+  await proc.exited.catch(() => undefined);
+};
+
+const isTextFile = (filePath: string): boolean => {
+  const extension = extname(filePath).toLowerCase();
+  return extension.length === 0 || TEXT_FILE_EXTENSIONS.has(extension);
+};
+
+const rewriteGeneratedRuntimeBase = async (directoryPath: string): Promise<void> => {
+  const pendingPaths = [directoryPath];
+  while (pendingPaths.length > 0) {
+    const currentPath = pendingPaths.pop();
+    if (!currentPath) {
+      continue;
+    }
+
+    const currentStat = await stat(currentPath);
+    if (currentStat.isDirectory()) {
+      const entries = await readdir(currentPath, { withFileTypes: true });
+      for (const entry of entries) {
+        pendingPaths.push(join(currentPath, entry.name));
+      }
+      continue;
+    }
+
+    if (!isTextFile(currentPath)) {
+      continue;
+    }
+
+    const sourceText = await readFile(currentPath, "utf8");
+    const nextText = sourceText
+      .replaceAll(BUILD_SERVER_API_BASE, DESKTOP_RUNTIME_API_BASE)
+      .replaceAll(BUILD_SERVER_WS_BASE, DESKTOP_RUNTIME_WS_BASE);
+
+    if (nextText !== sourceText) {
+      await writeFile(currentPath, nextText, "utf8");
+    }
+  }
+};
+
+const assertNoBuildRuntimeLeak = async (directoryPath: string): Promise<void> => {
+  const pendingPaths = [directoryPath];
+  while (pendingPaths.length > 0) {
+    const currentPath = pendingPaths.pop();
+    if (!currentPath) {
+      continue;
+    }
+
+    const currentStat = await stat(currentPath);
+    if (currentStat.isDirectory()) {
+      const entries = await readdir(currentPath, { withFileTypes: true });
+      for (const entry of entries) {
+        pendingPaths.push(join(currentPath, entry.name));
+      }
+      continue;
+    }
+
+    if (!isTextFile(currentPath)) {
+      continue;
+    }
+
+    const fileText = await readFile(currentPath, "utf8");
+    if (fileText.includes(BUILD_SERVER_API_BASE) || fileText.includes(BUILD_SERVER_WS_BASE)) {
+      throw new Error(`Build-only desktop API endpoint leaked into ${currentPath}`);
+    }
+  }
+};
+
+const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
+  await writeOutput("desktop-runtime: building server bundle for desktop prerender");
+  await runCommand([process.execPath, "run", "--filter", "@bao/server", "build"]);
+
+  await ensureBuildServerPortIsFree();
+  await writeOutput("desktop-runtime: starting temporary API server for static desktop client generation");
+  const { proc } = await startBuildServer(tempDbPath);
+
+  await withCleanup(
+    async () => {
+      await writeOutput("desktop-runtime: generating static Nuxt desktop frontend");
+      await runCommand(
+        [process.execPath, "run", "--filter", "@bao/client", "generate"],
+        {
+          env: {
+            ...process.env,
+            BAO_DISABLE_AUTH: "true",
+            NUXT_PUBLIC_API_BASE: BUILD_SERVER_API_BASE,
+            NUXT_PUBLIC_WS_BASE: BUILD_SERVER_WS_BASE,
+          },
+        },
+      );
+    },
+    () => stopProcess(proc),
+  );
+
+  await rewriteGeneratedRuntimeBase(CLIENT_PUBLIC_ROOT);
+  await assertNoBuildRuntimeLeak(CLIENT_PUBLIC_ROOT);
+};
+
+const compileRuntimeBinary = async (
+  compileTarget: string,
+  entrypointPath: string,
+  outputPath: string,
+): Promise<void> => {
+  await mkdir(dirname(outputPath), { recursive: true });
+  await runCommand([
+    process.execPath,
+    "build",
+    "--compile",
+    "--target",
+    compileTarget,
+    entrypointPath,
+    "--outfile",
+    outputPath,
+  ]);
+};
+
+const stageScraperRuntime = async (): Promise<void> => {
+  const destinationPath = join(RUNTIME_ROOT, DESKTOP_RUNTIME_SCRAPER_DIR);
+  await writeOutput("desktop-runtime: staging scraper runtime resources");
+  await cp(SCRAPER_ROOT, destinationPath, {
+    recursive: true,
+    dereference: true,
+    force: true,
+  });
+};
+
+const writeRuntimeManifest = async (tauriTarget: string | null): Promise<void> => {
+  const manifest: DesktopRuntimeManifest = {
+    serverExecutable: toExecutablePath(DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH, tauriTarget),
+    scriptRunnerExecutable: toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
+    scraperDir: DESKTOP_RUNTIME_SCRAPER_DIR,
+    serverHost: DESKTOP_RUNTIME_HOST,
+    serverPort: DESKTOP_RUNTIME_SERVER_PORT,
+    corsOrigins: [...DESKTOP_RUNTIME_CORS_ORIGINS],
+  };
+
+  await mkdir(resolve(RUNTIME_MANIFEST_PATH, ".."), { recursive: true });
+  await writeFile(RUNTIME_MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+};
+
+const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void> => {
+  const compileTarget = resolveBunCompileTarget(tauriTarget);
+  const serverExecutablePath = join(
+    RUNTIME_ROOT,
+    toExecutablePath(DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH, tauriTarget),
+  );
+  const scriptRunnerPath = join(
+    RUNTIME_ROOT,
+    toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
+  );
+
+  await writeOutput(`desktop-runtime: compiling bundled desktop server (${compileTarget})`);
+  await compileRuntimeBinary(compileTarget, SERVER_ENTRYPOINT, serverExecutablePath);
+
+  await writeOutput(`desktop-runtime: compiling bundled Bun script runner (${compileTarget})`);
+  await compileRuntimeBinary(compileTarget, SCRIPT_RUNNER_ENTRYPOINT, scriptRunnerPath);
+
+  await stageScraperRuntime();
+  await writeRuntimeManifest(tauriTarget);
+};
+
+const main = async (): Promise<void> => {
+  const tauriTarget = parseTargetArg(process.argv.slice(2));
+  const tempRoot = await mkdtemp(join(tmpdir(), "bao-desktop-runtime-"));
+  const tempDbPath = join(tempRoot, "desktop-build.db");
+
+  await withCleanup(
+    async () => {
+      await writeOutput(
+        `desktop-runtime: preparing resources${tauriTarget ? ` for ${tauriTarget}` : ""}`,
+      );
+      await rm(RUNTIME_ROOT, { recursive: true, force: true });
+      await mkdir(RUNTIME_ROOT, { recursive: true });
+
+      await buildDesktopClient(tempDbPath);
+      await prepareRuntimeResources(tauriTarget);
+
+      if (!(await Bun.file(join(CLIENT_PUBLIC_ROOT, "index.html")).exists())) {
+        throw new Error("Static desktop frontend is missing packages/client/.output/public/index.html");
+      }
+
+      await writeOutput("desktop-runtime: preparation complete");
+    },
+    () => rm(tempRoot, { recursive: true, force: true }),
+  );
+};
+
+await main().catch(async (error: unknown) => {
+  const message = toErrorMessage(error);
+  await writeError(`desktop-runtime: preparation failed: ${message}`);
+  process.exit(1);
+});

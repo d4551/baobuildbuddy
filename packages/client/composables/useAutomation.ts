@@ -6,6 +6,7 @@ import {
   buildAutomationRunEndpoint,
   type EmailResponseRequest,
   type EmailResponseResult,
+  type RpaCapabilityAuditReport,
   type RpaRunEvent,
   type RpaRunExecutionEnvelope,
   rpaRunEventSchema,
@@ -34,6 +35,10 @@ interface ScheduleEmailResponseBody extends EmailResponseRequest {
 interface ScheduleScrapeBody {
   target: AutomationScrapeTarget;
   runAt: string;
+}
+
+interface RunScrapeBody {
+  target: AutomationScrapeTarget;
 }
 
 interface FetchRunsParams {
@@ -81,6 +86,9 @@ function createRunMutations(runtime: AutomationRuntime) {
   const scheduleEmailResponse = (body: ScheduleEmailResponseBody) =>
     postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationEmailResponseSchedule, body);
 
+  const triggerScrape = (body: RunScrapeBody) =>
+    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationScrape, body);
+
   const scheduleScrape = (body: ScheduleScrapeBody) =>
     postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationScrapeSchedule, body);
 
@@ -89,6 +97,7 @@ function createRunMutations(runtime: AutomationRuntime) {
     scheduleJobApply,
     triggerEmailResponse,
     scheduleEmailResponse,
+    triggerScrape,
     scheduleScrape,
   };
 }
@@ -120,11 +129,23 @@ function createRunQueries(runtime: AutomationRuntime) {
       query: params,
     });
 
+  const fetchRpaCapabilities = () =>
+    useFetch<RpaCapabilityAuditReport>(
+      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationCapabilities),
+    );
+
+  const getRpaCapabilities = () =>
+    $fetch<RpaCapabilityAuditReport>(
+      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationCapabilities),
+    );
+
   return {
     fetchRuns,
     fetchRun,
     getRun,
     getRuns,
+    fetchRpaCapabilities,
+    getRpaCapabilities,
   };
 }
 

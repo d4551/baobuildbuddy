@@ -14,7 +14,6 @@ import {
   AI_CHAT_ENTITY_ROUTE_PATHS,
   AI_CHAT_PAGE_PATH,
   AI_CHAT_ROUTE_QUERY_KEYS,
-  APP_BRAND,
   generateId,
   inferAIChatDomainFromRoutePath,
   STATE_KEYS,
@@ -445,7 +444,11 @@ function createDataActions(input: DataActionInput) {
   };
 }
 
-function initializeAIState(t: ReturnType<typeof useI18n>["t"]): AIStateRefs {
+function initializeAIState(
+  t: ReturnType<typeof useI18n>["t"],
+  brandName: string,
+  assistantName: string,
+): AIStateRefs {
   const messages = useState<ChatMessage[]>(STATE_KEYS.AI_MESSAGES, () => []);
   const state: AIStateRefs = {
     messages,
@@ -460,7 +463,7 @@ function initializeAIState(t: ReturnType<typeof useI18n>["t"]): AIStateRefs {
     buildAssistantGreetingMessage: () =>
       createChatMessage({
         role: "assistant",
-        content: t("aiChatCommon.defaultGreeting", { brand: APP_BRAND.name }),
+        content: t("aiChatCommon.defaultGreeting", { brand: brandName, assistant: assistantName }),
         timestamp: new Date().toISOString(),
       }),
   };
@@ -478,7 +481,12 @@ export function useAI() {
   const route = useRoute();
   const { $toast } = useNuxtApp();
   const { t } = useI18n();
-  const state = initializeAIState(t);
+  const { resolvedBrand } = useBrand();
+  const state = initializeAIState(
+    t,
+    resolvedBrand.value.name,
+    resolvedBrand.value.assistantName,
+  );
 
   const buildCurrentContext = createContextBuilder({
     route,
