@@ -35,6 +35,8 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 .venv/
+__pycache__/
+*.pyc
 
 # Railway CLI (contains project link - do not commit)
 .railway/

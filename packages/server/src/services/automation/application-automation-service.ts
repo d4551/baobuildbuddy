@@ -411,7 +411,7 @@ export class ApplicationAutomationService {
   }
 
   /**
-   * Copy screenshots from the Python process into the managed run directory.
+   * Copy screenshots from the automation process into the managed run directory.
    */
   private async copyAndIndexScreenshots(
     runId: string,

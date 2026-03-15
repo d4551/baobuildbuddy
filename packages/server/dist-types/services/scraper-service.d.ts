@@ -4,7 +4,7 @@ type ScriptReferenceOverride = {
     scriptPath: string;
 };
 /**
- * Scraper service for studio/job ingestion via Python scripts.
+ * Scraper service for studio/job ingestion via Bun automation scripts.
  */
 export declare class ScraperService {
     private resolvePortalSourceUrl;

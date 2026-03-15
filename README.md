@@ -169,7 +169,7 @@ This readme is your in-game tutorial before the main campaign.
 - `packages/server` -- Bun + Elysia API, drizzle-orm ORM, WebSocket endpoints, process orchestration
 - `packages/client` -- Nuxt 4 (SSR-first), Tailwind CSS v4, daisyUI v5
 - `packages/shared` -- shared types, contracts, constants, schemas, validation utilities
-- `packages/scraper` -- Python RPA scripts executed via Bun native subprocess I/O
+- `packages/scraper` -- Bun + TypeScript Playwright automation executables run via Bun subprocess I/O
 
 Global flow decisions are centralized in `packages/client/constants/flow-engine.ts` (`resolveFlowReadinessState` + `resolveFlowRecommendations`) and consumed via `packages/client/composables/useFlowEngine.ts` so quick actions and next-step routing are derived from one deterministic source.
 Layout structure is centralized in `packages/client/constants/ui-layout.ts` and rendered through `PageScaffold`, `PageHeaderBlock`, `SectionGrid`, and `AppModalFrame` to keep widths, spacing, grid breakpoints, and modal sizing tokenized.
@@ -277,7 +277,7 @@ flowchart TD
   AutomationRoutes --> AutoSvc["application-automation-service.ts"]
   AutoSvc --> RpaRunner["rpa-runner.ts (Bun.spawn)"]
 
-  RpaRunner -->|JSON via stdin/stdout| Scraper["packages/scraper/*.py"]
+  RpaRunner -->|JSON via stdin/stdout| Scraper["packages/scraper/src/scripts/*.ts"]
   Scraper -->|result JSON| RpaRunner
   RpaRunner --> AutomationSchema["automation_runs persistence"]
   AutomationSchema --> DB[(SQLite via bun:sqlite)]
@@ -307,7 +307,7 @@ flowchart TD
 
 ## 3) Implementation principles
 
-Each Elysia route module owns its service directly -- routes call services, services call the database or external providers. Typed contracts in `packages/shared` are the source of truth for request/response shapes across client and server. Python automation runs in a Bun subprocess with JSON over stdin/stdout. Runtime values are sourced from environment configuration and persisted settings in the `settings` table.
+Each Elysia route module owns its service directly -- routes call services, services call the database or external providers. Typed contracts in `packages/shared` are the source of truth for request/response shapes across client and server. Bun automation executables run in isolated Bun subprocesses with JSON/NDJSON over stdin/stdout. Runtime values are sourced from environment configuration and persisted settings in the `settings` table.
 
 ## 3.1 Internationalization and language support
 
@@ -373,15 +373,15 @@ Automation execution is invoked from `automationRoutes` and routed through `appl
    - type (`job_apply`)
    - status (`pending` / `running` / `success` / `error`)
    - input/output snapshots and metadata
-4. `rpa-runner.ts` starts Python with `Bun.spawn`.
+4. `rpa-runner.ts` starts the Bun automation executable with `Bun.spawn`.
 5. Request payload is sent as JSON on `stdin`.
-6. Python script executes RPA operations (navigation, field population, clicks, screenshot).
-7. Script prints structured JSON result to `stdout`.
+6. The Bun/TypeScript script executes Playwright RPA operations (navigation, field population, clicks, screenshot).
+7. The script prints structured NDJSON/JSON protocol output for the server to parse.
 8. `rpa-runner.ts` parses and persists result, then updates the run status.
 
 ### 4.2 Required script contract
 
-Python script must read JSON from `stdin`, produce JSON on `stdout`, and exit non-zero on hard failure.
+Automation scripts must read JSON from `stdin`, produce protocol-compliant JSON/NDJSON on `stdout`, and exit non-zero on hard failure.
 
 **Input payload:**
 
@@ -591,9 +591,9 @@ This section is the canonical first-run path for new developers. It starts from 
 
 ### 8.1 What happens during first setup
 
-1. Required tool checks (`bun`, `git`, optional Python 3.10+, optional Chrome).
+1. Required tool checks (`bun`, `git`, optional Chrome/Chromium).
 2. Dependency installation across workspace packages.
-3. Python virtual environment bootstrap and scraper dependency install.
+3. Playwright browser install for the Bun automation runtime.
 4. `.env` creation from `.env.example` if missing.
 5. SQLite schema generation and push (`db:generate`, `db:push`).
 6. Optional verification (`typecheck`, `lint`, `test`).
@@ -604,7 +604,6 @@ This section is the canonical first-run path for new developers. It starts from 
 |--------------------|----------------------------------------|
 | Bun (>=1.3.10)    | Runtime, package manager, test runner  |
 | Git                | Source control                         |
-| Python 3.10+       | RPA script execution (Playwright)      |
 | Rust + Cargo       | Desktop installer builds (Tauri)       |
 
 Optional: `curl`, `jq` for diagnostics. At least one AI provider API key for AI features. Playwright bundles its own Chromium.
@@ -621,7 +620,6 @@ Use one command per tool based on your platform. Bun is pinned in this repo to t
 |------|-------------------|------------------|------------------|
 | Bun (from `packageManager`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
 | Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
-| Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
 | Rust | `brew install rustup-init && rustup-init` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
 
 If your Linux distro does not ship `chromium-browser`, install `google-chrome-stable` from Google's official package repository.

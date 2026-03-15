@@ -150,6 +150,9 @@ const isPinchTabReachable = async (baseUrl: string): Promise<boolean> => {
   return result;
 };
 
+const describeAsyncError = (value: unknown): string =>
+  value instanceof Error ? value.message : String(value);
+
 const ensurePinchTabRunning = async (): Promise<string> => {
   const baseUrl = process.env.PINCHTAB_URL ?? `http://localhost:${DEFAULT_PINCHTAB_PORT}`;
   if (await isPinchTabReachable(baseUrl)) {
@@ -211,15 +214,23 @@ const main = async (): Promise<void> => {
   write(`[bao/dev-stack] launching client on port ${toStringPort(clientPort)}\n`);
   const client = spawnClient();
 
-  trackProcess("server", server).catch(() => undefined);
-  trackProcess("client", client).catch(() => undefined);
+  trackProcess("server", server).catch((error: unknown) => {
+    write(`[bao/dev-stack] failed to track server process: ${describeAsyncError(error)}\n`);
+  });
+  trackProcess("client", client).catch((error: unknown) => {
+    write(`[bao/dev-stack] failed to track client process: ${describeAsyncError(error)}\n`);
+  });
 };
 
 process.once("SIGINT", () => {
-  shutdown("signal: SIGINT").catch(() => undefined);
+  shutdown("signal: SIGINT").catch((error: unknown) => {
+    write(`[bao/dev-stack] failed to handle SIGINT shutdown: ${describeAsyncError(error)}\n`);
+  });
 });
 process.once("SIGTERM", () => {
-  shutdown("signal: SIGTERM").catch(() => undefined);
+  shutdown("signal: SIGTERM").catch((error: unknown) => {
+    write(`[bao/dev-stack] failed to handle SIGTERM shutdown: ${describeAsyncError(error)}\n`);
+  });
 });
 
 main().catch((err: unknown) => {

@@ -50,7 +50,6 @@ Required:
 
 - Bun runtime pinned to `bun@1.3.10` via `packageManager` in root `package.json`
 - Git
-- Python 3.10+
 - Rust + Cargo (for desktop builds)
 
 Optional but recommended:
@@ -65,7 +64,6 @@ Optional but recommended:
 |------|-------------------|------------------|------------------|
 | Bun (from `packageManager` = `bun@1.3.10`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
 | Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
-| Python 3.10+ | `brew install python@3.12` | `sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip` | `winget install --id Python.Python.3.12 -e` |
 | Rust | `brew install rustup-init && rustup-init` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
 
 Playwright bundles its own Chromium — no separate Chrome or PHP install needed.
@@ -89,23 +87,22 @@ Verify each tool is on `PATH`:
 ```bash
 bun --version
 git --version
-python3 --version
-google-chrome --version
+rustc --version
 ```
 
-On Windows use `python --version` and check Chrome with:
+On Windows you can verify Rust with:
 
 ```powershell
-(Get-Command python).Source
-(Get-Item "$env:ProgramFiles\Google\Chrome\Application\chrome.exe").FullName
+rustc --version
+cargo --version
 ```
 
 Expected pre-flight state before running setup:
 
 - ✅ Bun runtime matches manifest baseline (`packageManager` in root `package.json`)
 - ✅ Git available
-- ✅ Python 3.10+ available
-- ✅ Chrome or Chromium available
+- ✅ Rust toolchain available when desktop builds are needed
+- ✅ Playwright Chromium is installed by `bun run automation:browsers:install`
 
 ## 2.6 Version drift check (recommended before first build)
 

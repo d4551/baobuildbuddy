@@ -18,12 +18,27 @@ import { HuggingFaceProvider } from "./huggingface-provider";
 import { LocalProvider } from "./local-provider";
 import { OpenAIProvider } from "./openai-provider";
 import type { AIProvider } from "./provider-interface";
+import { createServerLogger } from "../../utils/logger";
 
 const TEST_AI_PROVIDER_NAME = "local" as const;
 const TEST_AI_MODEL_NAME = "deterministic-test-model";
 const TEST_AI_MAX_QUESTION_COUNT = 12;
 const EXACT_QUESTION_COUNT_PATTERN = /exactly\s+(\d+)\s+questions/i;
 const GENERATE_QUESTION_COUNT_PATTERN = /generate\s+(\d+)\s+interview questions/i;
+const aiServiceLogger = createServerLogger("ai-service");
+const describeProviderError = (
+  providerName: AIProviderType,
+  operation: string,
+  error: unknown,
+): string => {
+  const errorMessage = toErrorMessage(error);
+  aiServiceLogger.error("AI provider operation failed", {
+    providerName,
+    operation,
+    error: errorMessage,
+  });
+  return errorMessage;
+};
 type AvailabilityResult = { isAvailable: boolean; error: string | null };
 type GenerationAttempt = { response: AIResponse | null; error: string | null };
 type StreamAttempt = { result: IteratorResult<string> | null; error: string | null };
@@ -450,7 +465,10 @@ export class AIService {
     const availability: AvailabilityResult = await provider
       .isAvailable()
       .then((isAvailable) => ({ isAvailable, error: null }))
-      .catch((error: unknown) => ({ isAvailable: false, error: toErrorMessage(error) }));
+      .catch((error: unknown) => ({
+        isAvailable: false,
+        error: describeProviderError(providerName, "isAvailable", error),
+      }));
     if (availability.error) {
       AIService.pushProviderError(errors, providerName, availability.error);
       return null;
@@ -476,7 +494,10 @@ export class AIService {
     const generationResult: GenerationAttempt = await provider
       .generate(contextualPrompt, providerOptions)
       .then((response) => ({ response, error: null }))
-      .catch((error: unknown) => ({ response: null, error: toErrorMessage(error) }));
+      .catch((error: unknown) => ({
+        response: null,
+        error: describeProviderError(providerName, "generate", error),
+      }));
     if (generationResult.error) {
       AIService.pushProviderError(errors, providerName, generationResult.error);
       return null;
@@ -544,7 +565,10 @@ export class AIService {
     const nextChunk: StreamAttempt = await iterator
       .next()
       .then((result) => ({ result, error: null }))
-      .catch((error: unknown) => ({ result: null, error: toErrorMessage(error) }));
+      .catch((error: unknown) => ({
+        result: null,
+        error: describeProviderError(providerName, "stream", error),
+      }));
     if (nextChunk.error) {
       AIService.pushProviderError(errors, providerName, nextChunk.error);
       return { hasYielded, failed: true };

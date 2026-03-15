@@ -3,7 +3,7 @@ import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES } from "../constants/auto
 import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
 
 /**
- * Canonical protocol version emitted by Python automation scripts.
+ * Canonical protocol version emitted by Bun automation scripts.
  */
 export const RPA_PROTOCOL_VERSION = "1.0" as const;
 

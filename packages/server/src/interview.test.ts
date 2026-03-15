@@ -1,5 +1,13 @@
 import type { Database } from "bun:sqlite";
-import { afterAll, beforeAll, beforeEach, describe, expect, setDefaultTimeout, test } from "bun:test";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  setDefaultTimeout,
+  test,
+} from "bun:test";
 
 /** AI-backed interview tests require additional headroom for cold-start provider calls. */
 const INTERVIEW_TEST_TIMEOUT_MS = 15_000;

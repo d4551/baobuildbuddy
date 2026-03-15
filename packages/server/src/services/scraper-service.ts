@@ -164,7 +164,7 @@ const toJobSearchResult = (rows: ScrapedJob[]): JobSearchResult => ({
 });
 
 /**
- * Scraper service for studio/job ingestion via Python scripts.
+ * Scraper service for studio/job ingestion via Bun automation scripts.
  */
 export class ScraperService {
   private async resolvePortalSourceUrl(portalId: GamingPortalId): Promise<string | null> {

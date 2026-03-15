@@ -24,7 +24,7 @@ export const rpaRunStepSchema = z.object({
 });
 
 /**
- * Terminal script result contract emitted by the Python runner.
+ * Terminal script result contract emitted by the automation runner.
  */
 export const rpaRunResultSchema = z.object({
   success: z.boolean(),

@@ -14,8 +14,8 @@
   "homepage": "https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop",
   "scripts": {
     "dev": "bun run --bun tauri dev",
-    "build": "bun ../../scripts/cleanup-desktop-build.ts && bun run --bun tauri build",
-    "build:debug": "bun ../../scripts/cleanup-desktop-build.ts && bun run --bun tauri build --debug",
+    "build": "bun ../../scripts/cleanup-desktop-build.ts",
+    "build:debug": "bun ../../scripts/cleanup-desktop-build.ts --debug",
     "format": "bun run --bun biome format .",
     "typecheck": "echo \"No JS/TS typecheck output; managed by Rust tooling in src-tauri\"",
     "lint": "echo \"No separate desktop lint task\""

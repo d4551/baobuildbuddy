@@ -1,5 +1,6 @@
-import { writeError, writeOutput } from "./utils/cli-output";
 import { rm } from "fs/promises";
+import { join } from "path";
+import { writeError, writeOutput } from "./utils/cli-output";
 
 type PreflightCheck = {
   label: string;
@@ -13,10 +14,10 @@ type NetworkTarget = {
 };
 
 const NETWORK_TIMEOUT_MS = 8_000;
-const DESKTOP_TAURI_ROOT = Bun.resolveSync("packages/desktop/src-tauri", process.cwd());
+const DESKTOP_TAURI_ROOT = join(process.cwd(), "packages", "desktop", "src-tauri");
 const DESKTOP_TAURI_TARGET_DIRS = [
-  Bun.resolveSync("target", DESKTOP_TAURI_ROOT),
-  Bun.resolveSync("target-linux", DESKTOP_TAURI_ROOT),
+  join(DESKTOP_TAURI_ROOT, "target"),
+  join(DESKTOP_TAURI_ROOT, "target-linux"),
 ] as const;
 const NETWORK_TARGETS: readonly NetworkTarget[] = [
   { label: "bun.sh", url: "https://bun.sh" },
@@ -38,27 +39,55 @@ const runCommand = async (
   return proc.exited;
 };
 
-const readCommand = async (command: readonly string[]): Promise<string | null> => {
+const readStreamText = async (
+  stream: number | ReadableStream<Uint8Array> | undefined,
+): Promise<string> => {
+  if (!(stream instanceof ReadableStream)) {
+    return "";
+  }
+
+  return new Response(stream).text();
+};
+
+const readCommand = async (
+  command: readonly string[],
+): Promise<{
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}> => {
   const proc = Bun.spawn(command, {
     cwd: process.cwd(),
     stdout: "pipe",
     stderr: "pipe",
+    env: process.env,
   });
-  const exitCode = await proc.exited;
-  if (exitCode !== 0 || !(proc.stdout instanceof ReadableStream)) {
-    return null;
-  }
+  const [exitCode, stdout, stderr] = await Promise.all([
+    proc.exited,
+    readStreamText(proc.stdout),
+    readStreamText(proc.stderr),
+  ]);
 
-  const output = await new Response(proc.stdout).text();
-  return output.trim().length > 0 ? output.trim() : null;
+  return {
+    exitCode,
+    stdout: stdout.trim(),
+    stderr: stderr.trim(),
+  };
 };
 
 const checkCommand = async (label: string, command: readonly string[]): Promise<PreflightCheck> => {
-  const output = await readCommand(command);
+  const result = await readCommand(command);
+  const details =
+    result.stdout.length > 0
+      ? result.stdout
+      : result.stderr.length > 0
+        ? result.stderr
+        : `${command[0]} exited with code ${result.exitCode}`;
+
   return {
     label,
-    ok: output !== null,
-    details: output ?? `${command[0]} not available`,
+    ok: result.exitCode === 0,
+    details,
   };
 };
 
@@ -95,7 +124,7 @@ const collectPreflightChecks = async (): Promise<PreflightCheck[]> => {
 
   const toolChecks = await Promise.all([
     checkCommand("bun", [process.execPath, "--version"]),
-    checkCommand("docker", ["docker", "info", "--format", "{{.ServerVersion}}"]),
+    checkCommand("docker", ["docker", "system", "info", "--format", "{{.ServerVersion}}"]),
     checkCommand("rustc", ["rustc", "--version"]),
     checkCommand("cargo", ["cargo", "--version"]),
     checkCommand("xcode-select", ["xcode-select", "-p"]),

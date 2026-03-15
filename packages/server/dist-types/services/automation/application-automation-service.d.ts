@@ -93,7 +93,7 @@ export declare class ApplicationAutomationService {
      */
     private resolveRunArtifactDir;
     /**
-     * Copy screenshots from the Python process into the managed run directory.
+     * Copy screenshots from the automation process into the managed run directory.
      */
     private copyAndIndexScreenshots;
     private copySingleScreenshot;

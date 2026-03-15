@@ -8,12 +8,7 @@ import { extractRemoteGameJobs } from "./remotegamejobs";
 import type { PageEvaluator } from "./provider-types";
 import { extractWorkWithIndiesJobs } from "./workwithindies";
 
-const DOM_GLOBAL_KEYS = [
-  "window",
-  "document",
-  "HTMLElement",
-  "HTMLAnchorElement",
-] as const;
+const DOM_GLOBAL_KEYS = ["window", "document", "HTMLElement", "HTMLAnchorElement"] as const;
 const DOM_GLOBAL_ABSENT = Symbol("dom-global-absent");
 
 type DomGlobalKey = (typeof DOM_GLOBAL_KEYS)[number];
@@ -26,9 +21,7 @@ const captureDomGlobals = (): DomGlobalState => {
   return Object.fromEntries(
     DOM_GLOBAL_KEYS.map((key) => [
       key,
-      Reflect.has(globalThis, key)
-        ? Reflect.get(globalThis, key)
-        : DOM_GLOBAL_ABSENT,
+      Reflect.has(globalThis, key) ? Reflect.get(globalThis, key) : DOM_GLOBAL_ABSENT,
     ]),
   ) as DomGlobalState;
 };
