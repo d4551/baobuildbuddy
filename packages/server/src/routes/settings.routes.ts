@@ -1,4 +1,9 @@
-import type { AIProviderType, AutomationSettings, NotificationPreferences } from "@bao/shared";
+import type {
+  AIProviderType,
+  AutomationSettings,
+  EmailTransportSettings,
+  NotificationPreferences,
+} from "@bao/shared";
 import {
   AI_PROVIDER_ID_LIST,
   API_ERROR_INIT_SETTINGS_ROW,
@@ -11,9 +16,16 @@ import {
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
   automationSettingsSchema,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
   DEFAULT_SETTINGS_ID,
+  EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
+  EMAIL_TRANSPORT_SECURITY_OPTIONS,
+  emailTransportSettingsSchema,
+  MAX_PORT,
+  MIN_PORT,
   SCHEMA_MAX_LENGTH_API_KEY,
+  SCHEMA_MAX_LENGTH_EMAIL,
   SCHEMA_MAX_LENGTH_LONG,
   SCHEMA_MAX_LENGTH_MODEL,
   SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
@@ -67,6 +79,8 @@ const GAMING_PORTAL_IDS = [
 
 const LANGUAGE_CODES = APP_LANGUAGE_CODES;
 const AUTOMATION_BROWSER_IDS = AUTOMATION_BROWSER_OPTIONS;
+const EMAIL_TRANSPORT_SECURITY_IDS = EMAIL_TRANSPORT_SECURITY_OPTIONS;
+const EMAIL_TRANSPORT_AUTH_MODE_IDS = EMAIL_TRANSPORT_AUTH_MODE_OPTIONS;
 const SPEECH_PROVIDER_IDS = SPEECH_PROVIDER_OPTIONS;
 
 const [
@@ -100,6 +114,12 @@ const [AUTOMATION_BROWSER_CHROME, AUTOMATION_BROWSER_CHROMIUM, AUTOMATION_BROWSE
   AUTOMATION_BROWSER_IDS;
 const [APP_LANGUAGE_EN_US, APP_LANGUAGE_ES_ES, APP_LANGUAGE_FR_FR, APP_LANGUAGE_JA_JP] =
   LANGUAGE_CODES;
+const [
+  EMAIL_TRANSPORT_SECURITY_TLS,
+  EMAIL_TRANSPORT_SECURITY_STARTTLS,
+  EMAIL_TRANSPORT_SECURITY_PLAIN,
+] = EMAIL_TRANSPORT_SECURITY_IDS;
+const [EMAIL_TRANSPORT_AUTH_PLAIN, EMAIL_TRANSPORT_AUTH_LOGIN] = EMAIL_TRANSPORT_AUTH_MODE_IDS;
 
 const speechProviderBodySchema = t.Union([
   t.Literal(SPEECH_PROVIDER_BROWSER),
@@ -141,6 +161,17 @@ const browserBodySchema = t.Union([
   t.Literal(AUTOMATION_BROWSER_CHROME),
   t.Literal(AUTOMATION_BROWSER_CHROMIUM),
   t.Literal(AUTOMATION_BROWSER_EDGE),
+]);
+
+const emailTransportSecurityBodySchema = t.Union([
+  t.Literal(EMAIL_TRANSPORT_SECURITY_TLS),
+  t.Literal(EMAIL_TRANSPORT_SECURITY_STARTTLS),
+  t.Literal(EMAIL_TRANSPORT_SECURITY_PLAIN),
+]);
+
+const emailTransportAuthModeBodySchema = t.Union([
+  t.Literal(EMAIL_TRANSPORT_AUTH_PLAIN),
+  t.Literal(EMAIL_TRANSPORT_AUTH_LOGIN),
 ]);
 
 const languageBodySchema = t.Union([
@@ -244,6 +275,7 @@ const jsonValueBodySchema = t.Recursive((Self) =>
 const nullableJsonValueBodySchema = t.Union([jsonValueBodySchema, t.Null()]);
 
 const automationSettingsPatchSchema = automationSettingsSchema.removeDefault().partial();
+const emailTransportSettingsPatchSchema = emailTransportSettingsSchema.removeDefault().partial();
 
 const normalizeNotificationPreferences = (
   current: Record<string, boolean> | NotificationPreferences | null | undefined,
@@ -308,7 +340,96 @@ const mergeAutomationSettings = (
   return mergedParsed.data;
 };
 
-export const settingsRoutes = new Elysia({ prefix: "/settings" })
+const mergeEmailTransportSettings = (
+  current: EmailTransportSettings | null | undefined,
+  patch: Partial<EmailTransportSettings> | null | undefined,
+): EmailTransportSettings | null => {
+  const currentParsed = emailTransportSettingsSchema.safeParse(
+    current ?? DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  );
+  const patchParsed = emailTransportSettingsPatchSchema.safeParse(patch ?? {});
+
+  if (!(currentParsed.success && patchParsed.success)) {
+    return null;
+  }
+
+  const mergedCandidate: EmailTransportSettings = {
+    ...currentParsed.data,
+    ...patchParsed.data,
+  };
+
+  const mergedParsed = emailTransportSettingsSchema.safeParse(mergedCandidate);
+  if (!mergedParsed.success) {
+    return null;
+  }
+
+  return mergedParsed.data;
+};
+
+const readOrCreateSettingsRow = async () => {
+  let rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+  if (rows.length === 0) {
+    await db.insert(settings).values({ id: DEFAULT_SETTINGS_ID });
+    rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+  }
+
+  return rows[0] ?? null;
+};
+
+interface SettingsUpdateInput {
+  preferredProvider?: AIProviderType;
+  preferredModel?: string;
+  theme?: "bao-light" | "bao-dark";
+  language?: (typeof APP_LANGUAGE_CODES)[number];
+  notifications?: Partial<NotificationPreferences>;
+  automationSettings?: Partial<AutomationSettings>;
+  emailTransportSettings?: Partial<EmailTransportSettings>;
+}
+
+const buildSettingsUpdate = (
+  existingRow: typeof settings.$inferSelect,
+  body: SettingsUpdateInput,
+): Partial<typeof settings.$inferInsert> | null => {
+  const update: Partial<typeof settings.$inferInsert> = {};
+
+  if (body.preferredProvider !== undefined) update.preferredProvider = body.preferredProvider;
+  if (body.preferredModel !== undefined) update.preferredModel = body.preferredModel;
+  if (body.theme !== undefined) update.theme = body.theme;
+  if (body.language !== undefined) update.language = body.language;
+
+  if (body.notifications !== undefined) {
+    const mergedNotifications = mergeNotifications(existingRow.notifications, body.notifications);
+    update.notifications = toNotificationRecord(mergedNotifications);
+  }
+
+  if (body.automationSettings !== undefined) {
+    const mergedAutomationSettings = mergeAutomationSettings(
+      existingRow.automationSettings,
+      body.automationSettings,
+    );
+    if (!mergedAutomationSettings) {
+      return null;
+    }
+
+    update.automationSettings = mergedAutomationSettings;
+  }
+
+  if (body.emailTransportSettings !== undefined) {
+    const mergedEmailTransportSettings = mergeEmailTransportSettings(
+      existingRow.emailTransportSettings,
+      body.emailTransportSettings,
+    );
+    if (!mergedEmailTransportSettings) {
+      return null;
+    }
+
+    update.emailTransportSettings = mergedEmailTransportSettings;
+  }
+
+  return update;
+};
+
+export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings"] })
   .use(
     rateLimit({
       scoping: "scoped",
@@ -329,8 +450,10 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       return { error: API_ERROR_LOAD_SETTINGS };
     }
 
+    const { emailTransportPassword, ...publicRow } = row;
+
     return {
-      ...row,
+      ...publicRow,
       geminiApiKey: row.geminiApiKey
         ? `***${row.geminiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
         : null,
@@ -347,54 +470,26 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       hasOpenaiKey: Boolean(row.openaiApiKey),
       hasClaudeKey: Boolean(row.claudeApiKey),
       hasHuggingfaceToken: Boolean(row.huggingfaceToken),
+      hasEmailTransportPassword: Boolean(emailTransportPassword),
       hasLocalKey: Boolean(row.localModelEndpoint),
     };
   })
   .put(
     "/",
     async ({ body, set }) => {
-      let existing = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
-      if (existing.length === 0) {
-        await db.insert(settings).values({ id: DEFAULT_SETTINGS_ID });
-        existing = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
-      }
-
-      const existingRow = existing[0];
+      const existingRow = await readOrCreateSettingsRow();
       if (!existingRow) {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return { success: false, error: API_ERROR_INIT_SETTINGS_ROW };
       }
 
-      const update: Partial<typeof settings.$inferInsert> = {};
-
-      if (body.preferredProvider !== undefined) update.preferredProvider = body.preferredProvider;
-      if (body.preferredModel !== undefined) update.preferredModel = body.preferredModel;
-      if (body.theme !== undefined) update.theme = body.theme;
-      if (body.language !== undefined) update.language = body.language;
-
-      if (body.notifications !== undefined) {
-        const mergedNotifications = mergeNotifications(
-          existingRow.notifications,
-          body.notifications,
-        );
-        update.notifications = toNotificationRecord(mergedNotifications);
-      }
-
-      if (body.automationSettings !== undefined) {
-        const mergedAutomationSettings = mergeAutomationSettings(
-          existingRow.automationSettings,
-          body.automationSettings,
-        );
-
-        if (!mergedAutomationSettings) {
-          set.status = HTTP_STATUS_UNPROCESSABLE_ENTITY;
-          return {
-            success: false,
-            error: API_ERROR_INVALID_AUTOMATION_PAYLOAD,
-          };
-        }
-
-        update.automationSettings = mergedAutomationSettings;
+      const update = buildSettingsUpdate(existingRow, body);
+      if (!update) {
+        set.status = HTTP_STATUS_UNPROCESSABLE_ENTITY;
+        return {
+          success: false,
+          error: API_ERROR_INVALID_AUTOMATION_PAYLOAD,
+        };
       }
 
       await db
@@ -431,6 +526,18 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
             jobProviders: t.Optional(jobProviderSettingsBodySchema),
           }),
         ),
+        emailTransportSettings: t.Optional(
+          t.Object({
+            host: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL })),
+            port: t.Optional(t.Number({ minimum: MIN_PORT, maximum: MAX_PORT })),
+            security: t.Optional(emailTransportSecurityBodySchema),
+            username: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+            fromEmail: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+            fromName: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL })),
+            authMethod: t.Optional(emailTransportAuthModeBodySchema),
+            connectionTimeoutSeconds: t.Optional(t.Number({ minimum: 1, maximum: 120 })),
+          }),
+        ),
       }),
     },
   )
@@ -450,6 +557,10 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
       if (body.localModelEndpoint !== undefined)
         update.localModelEndpoint = body.localModelEndpoint;
       if (body.localModelName !== undefined) update.localModelName = body.localModelName;
+      if (body.emailTransportPassword !== undefined) {
+        update.emailTransportPassword =
+          body.emailTransportPassword.length > 0 ? body.emailTransportPassword : null;
+      }
       update.updatedAt = new Date().toISOString();
 
       await db.update(settings).set(update).where(eq(settings.id, DEFAULT_SETTINGS_ID));
@@ -463,6 +574,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings" })
         huggingfaceToken: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
         localModelEndpoint: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
         localModelName: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
+        emailTransportPassword: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
       }),
     },
   )

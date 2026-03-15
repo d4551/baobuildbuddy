@@ -35,6 +35,8 @@ const runEmailResponseStub: RunEmailResponse = async (payload) => {
       reply: "Stubbed email response",
       provider: "stub-provider",
       model: "stub-model",
+      delivered: payload.deliverAfterGeneration === true,
+      ...(payload.recipientEmail ? { recipientEmail: payload.recipientEmail } : {}),
     },
     progress: 100,
     currentStep: 1,
@@ -54,6 +56,8 @@ const runEmailResponseStub: RunEmailResponse = async (payload) => {
     reply: "Stubbed email response",
     provider: "stub-provider",
     model: "stub-model",
+    delivered: payload.deliverAfterGeneration === true,
+    ...(payload.recipientEmail ? { recipientEmail: payload.recipientEmail } : {}),
   };
 };
 
@@ -276,10 +280,14 @@ function registerEmailResponseTest(): void {
       reply: string;
       provider: string;
       model: string;
+      delivered: boolean;
+      recipientEmail?: string;
     }>(app, "POST", "/api/automation/email-response", {
       subject: "Interview follow-up",
       message: "Thanks for the interview. Can we discuss next steps?",
       tone: "professional",
+      recipientEmail: "recruiter@example.com",
+      deliverAfterGeneration: true,
     }).finally(() => {
       if (originalRunEmailResponse) {
         applicationAutomationService.runEmailResponse = originalRunEmailResponse;
@@ -290,6 +298,8 @@ function registerEmailResponseTest(): void {
     expect(res.status).toBe(200);
     expect(res.body.status).toBe("success");
     expect(res.body.reply.length).toBeGreaterThan(0);
+    expect(res.body.delivered).toBe(true);
+    expect(res.body.recipientEmail).toBe("recruiter@example.com");
     createdRunIds.push(res.body.runId);
 
     const run = await db

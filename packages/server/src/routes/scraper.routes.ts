@@ -8,7 +8,7 @@ import {
 import { Elysia } from "elysia";
 import { scraperService } from "../services/scraper-service";
 
-export const scraperRoutes = new Elysia({ prefix: "/scraper" })
+export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] })
   .post("/studios", async ({ set }) => {
     const scrapeStudiosResult = await settle(scraperService.scrapeStudios());
     if (scrapeStudiosResult.status === "rejected") {

@@ -28,6 +28,9 @@ export const API_ERROR_GENERATE_AI_RESPONSE = "Failed to generate AI response";
 export const API_ERROR_START_INTERVIEW = "Failed to start interview session";
 export const API_ERROR_GENERATE_RESPONSE = "Failed to generate response";
 export const API_ERROR_GENERATE_EMAIL_RESPONSE = "Failed to generate email response";
+export const API_ERROR_EMAIL_DELIVERY_FAILED = "Failed to deliver email response";
+export const API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING =
+  "Email delivery settings are incomplete";
 export const API_ERROR_INVALID_SCRAPER_JSON = "Scraper script returned invalid JSON";
 export const API_ERROR_AI_SCORING_FAILED = "AI scoring failed";
 export const API_ERROR_AI_ENHANCEMENT_FAILED = "AI enhancement failed";

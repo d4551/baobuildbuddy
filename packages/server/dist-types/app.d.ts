@@ -68,8 +68,8 @@ export declare const app: Elysia<"/api", {
                 headers: unknown;
                 response: {
                     200: {
-                        timestamp: string;
                         status: string;
+                        timestamp: string;
                         database: string;
                         uptime: number;
                     };
@@ -265,6 +265,7 @@ export declare const app: Elysia<"/api", {
                         hasOpenaiKey: boolean;
                         hasClaudeKey: boolean;
                         hasHuggingfaceToken: boolean;
+                        hasEmailTransportPassword: boolean;
                         hasLocalKey: boolean;
                         id: string;
                         localModelEndpoint: string | null;
@@ -275,6 +276,7 @@ export declare const app: Elysia<"/api", {
                         language: string | null;
                         notifications: Record<string, boolean> | null;
                         automationSettings: import("@bao/shared").AutomationSettings | null;
+                        emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
                         createdAt: string;
                         updatedAt: string;
                         error?: undefined;
@@ -364,6 +366,16 @@ export declare const app: Elysia<"/api", {
                             }[];
                         } | undefined;
                     } | undefined;
+                    emailTransportSettings?: {
+                        host?: string | undefined;
+                        port?: number | undefined;
+                        security?: "tls" | "starttls" | "plain" | undefined;
+                        username?: string | undefined;
+                        fromEmail?: string | undefined;
+                        fromName?: string | undefined;
+                        authMethod?: "plain" | "login" | undefined;
+                        connectionTimeoutSeconds?: number | undefined;
+                    } | undefined;
                     preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                     preferredModel?: string | undefined;
                     theme?: "bao-light" | "bao-dark" | undefined;
@@ -403,6 +415,7 @@ export declare const app: Elysia<"/api", {
                         huggingfaceToken?: string | undefined;
                         localModelEndpoint?: string | undefined;
                         localModelName?: string | undefined;
+                        emailTransportPassword?: string | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -2424,10 +2437,15 @@ export declare const app: Elysia<"/api", {
                             };
                             state: {
                                 hasResumes: boolean;
+                                resumeCount: number;
                                 hasJobs: boolean;
+                                jobCount: number;
                                 hasStudios: boolean;
+                                studioCount: number;
                                 hasInterviewSessions: boolean;
+                                interviewSessionCount: number;
                                 hasPortfolioProjects: boolean;
+                                portfolioProjectCount: number;
                             };
                         } | undefined;
                         message: string;
@@ -3245,9 +3263,9 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
+                            status: "success" | "pending" | "running" | "error";
                             createdAt: string;
                             updatedAt: string;
-                            status: "success" | "pending" | "running" | "error";
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -3332,9 +3350,9 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
+                                status: "success" | "pending" | "running" | "error";
                                 createdAt: string;
                                 updatedAt: string;
-                                status: "success" | "pending" | "running" | "error";
                                 screenshots: string[] | null;
                                 totalSteps: number | null;
                                 jobId: string | null;
@@ -3386,6 +3404,8 @@ export declare const app: Elysia<"/api", {
                     body: {
                         sender?: string | undefined;
                         tone?: "professional" | "friendly" | "concise" | undefined;
+                        recipientEmail?: string | undefined;
+                        deliverAfterGeneration?: boolean | undefined;
                         message: string;
                         subject: string;
                     };
@@ -3401,11 +3421,15 @@ export declare const app: Elysia<"/api", {
                             };
                         };
                         200: {
+                            recipientEmail?: string | undefined;
+                            deliveredAt?: string | undefined;
+                            messageId?: string | undefined;
                             provider: string;
                             model: string;
                             runId: string;
                             status: "success";
                             reply: string;
+                            delivered: boolean;
                         };
                         400: {
                             error: {
@@ -3468,9 +3492,9 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
+                            status: "success" | "pending" | "running" | "error";
                             createdAt: string;
                             updatedAt: string;
-                            status: "success" | "pending" | "running" | "error";
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -3524,9 +3548,9 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
+                                status: "success" | "pending" | "running" | "error";
                                 createdAt: string;
                                 updatedAt: string;
-                                status: "success" | "pending" | "running" | "error";
                                 screenshots: string[] | null;
                                 totalSteps: number | null;
                                 jobId: string | null;

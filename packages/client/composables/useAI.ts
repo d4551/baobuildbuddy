@@ -49,6 +49,7 @@ interface EntityContextInput {
   jobs: readonly Job[];
   resumes: readonly ResumeData[];
   studio: GameStudio | null;
+  interviewSessions: readonly InterviewSession[];
 }
 
 interface ContextBuilderInput {
@@ -147,6 +148,25 @@ function toEntity(type: AIChatContextEntityType, id: string, label?: string): AI
   return { type, id, label };
 }
 
+function buildInterviewSessionLabel(session: InterviewSession): string {
+  const role =
+    session.role?.trim() ||
+    session.config.targetJob?.title?.trim() ||
+    session.config.roleType.trim() ||
+    "";
+  const studio =
+    session.studioName?.trim() ||
+    session.config.targetJob?.company?.trim() ||
+    session.studioId.trim() ||
+    "";
+
+  if (role.length > 0 && studio.length > 0) {
+    return `${role} at ${studio}`;
+  }
+
+  return role || studio;
+}
+
 function resolveJobContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
   const routeId = input.routeParams[AI_CHAT_ROUTE_QUERY_KEYS.id];
   if (!(input.path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.jobs}/`) && routeId)) {
@@ -204,7 +224,14 @@ function resolveStudioQueryContextEntity(
 function resolveSessionContextEntity(input: EntityContextInput): AIChatContextEntity | undefined {
   const interviewSessionId = input.routeQuery[AI_CHAT_ROUTE_QUERY_KEYS.id];
   if (input.path.startsWith(AI_CHAT_ENTITY_ROUTE_PATHS.interviewSession) && interviewSessionId) {
-    return toEntity("interview_session", interviewSessionId);
+    const interviewSession = input.interviewSessions.find(
+      (session) => session.id === interviewSessionId,
+    );
+    return toEntity(
+      "interview_session",
+      interviewSessionId,
+      interviewSession ? buildInterviewSessionLabel(interviewSession) : undefined,
+    );
   }
 
   const routeId = input.routeParams[AI_CHAT_ROUTE_QUERY_KEYS.id];
@@ -270,6 +297,7 @@ function createContextBuilder(input: ContextBuilderInput) {
       jobs: input.jobs.value,
       resumes: input.resumes.value,
       studio: input.currentStudio.value,
+      interviewSessions: input.interviewSessions.value,
     });
 
     const context: AIChatContext = {
@@ -283,10 +311,15 @@ function createContextBuilder(input: ContextBuilderInput) {
       },
       state: {
         hasResumes: input.resumes.value.length > 0,
+        resumeCount: input.resumes.value.length,
         hasJobs: input.jobs.value.length > 0,
+        jobCount: input.jobs.value.length,
         hasStudios: input.currentStudio.value !== null,
+        studioCount: input.currentStudio.value ? 1 : 0,
         hasInterviewSessions: input.interviewSessions.value.length > 0,
+        interviewSessionCount: input.interviewSessions.value.length,
         hasPortfolioProjects: (input.portfolioData.value?.projects.length ?? 0) > 0,
+        portfolioProjectCount: input.portfolioData.value?.projects.length ?? 0,
       },
     };
 

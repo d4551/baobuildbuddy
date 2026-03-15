@@ -291,7 +291,7 @@ const getRecommendations = async (): Promise<JobRecommendationsResponse> => {
   };
 };
 
-export const jobsRoutes = new Elysia({ prefix: "/jobs" })
+export const jobsRoutes = new Elysia({ prefix: "/jobs", tags: ["Jobs"] })
   .get("/", async ({ query }) => listJobs(query), {
     query: t.Object({
       q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),

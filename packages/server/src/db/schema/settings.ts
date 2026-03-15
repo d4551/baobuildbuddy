@@ -1,4 +1,4 @@
-import type { AutomationSettings } from "@bao/shared";
+import type { AutomationSettings, EmailTransportSettings } from "@bao/shared";
 import {
   AI_PROVIDER_DEFAULT_ORDER,
   DEFAULT_SETTINGS_ID,
@@ -29,6 +29,12 @@ export const settings = sqliteTable("settings", {
     .default(
       sql`'{"headless":true,"defaultTimeout":30,"screenshotRetention":7,"maxConcurrentRuns":1,"defaultBrowser":"chrome","enableSmartSelectors":true,"autoSaveScreenshots":true}'`,
     ),
+  emailTransportSettings: text("email_transport_settings", { mode: "json" })
+    .$type<EmailTransportSettings>()
+    .default(
+      sql`'{"host":"","port":587,"security":"starttls","username":"","fromEmail":"","fromName":"","authMethod":"plain","connectionTimeoutSeconds":15}'`,
+    ),
+  emailTransportPassword: text("email_transport_password"),
   createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
 });

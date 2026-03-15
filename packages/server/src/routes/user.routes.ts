@@ -14,7 +14,7 @@ import { Elysia, t } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
 
-export const userRoutes = new Elysia({ prefix: "/user" })
+export const userRoutes = new Elysia({ prefix: "/user", tags: ["User"] })
   .get("/profile", async () => {
     const rows = await db.select().from(userProfile).where(eq(userProfile.id, DEFAULT_PROFILE_ID));
     if (rows.length === 0) {

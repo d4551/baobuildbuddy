@@ -5,7 +5,7 @@ import { searchService } from "../services/search-service";
 const searchTypes = ["jobs", "studios", "skills", "resumes"] as const;
 type SearchType = (typeof searchTypes)[number];
 
-export const searchRoutes = new Elysia({ prefix: "/search" })
+export const searchRoutes = new Elysia({ prefix: "/search", tags: ["Search"] })
   .get(
     "/",
     ({ query }) => {

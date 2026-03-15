@@ -2,6 +2,7 @@ import {
   AUTOMATION_RUN_HISTORY_LIMIT,
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
+  type EmailResponseRequest,
   API_ERROR_AUTOMATION_PAYLOAD_VALIDATION_FAILED,
   API_ERROR_AUTOMATION_RUN_NOT_FOUND,
   HTTP_STATUS_BAD_REQUEST,
@@ -19,6 +20,7 @@ import {
   rpaRunExecutionEnvelopeSchema,
   RUN_ID_MIN_LENGTH,
   RUN_ID_SAFE_PATTERN_SOURCE,
+  SCHEMA_MAX_LENGTH_EMAIL,
   SCHEMA_MAX_LENGTH_EMAIL_MESSAGE,
   SCHEMA_MAX_LENGTH_SHORT,
   settle,
@@ -115,13 +117,6 @@ type JobApplyRequestBody = {
 };
 type ScheduleJobApplyRequestBody = JobApplyRequestBody & {
   runAt: string;
-};
-type EmailResponseTone = "professional" | "friendly" | "concise";
-type EmailResponseRequestBody = {
-  subject: string;
-  message: string;
-  sender?: string;
-  tone?: EmailResponseTone;
 };
 
 const isAutomationRunType = (value: string): value is (typeof AUTOMATION_RUN_TYPES)[number] =>
@@ -237,7 +232,7 @@ const runJobApplyInBackground = (runId: string, payload: JobApplyRequestBody): v
 /**
  * Automation API routes for RPA-driven workflows and run history.
  */
-export const automationRoutes = new Elysia({ prefix: "/automation" })
+export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Automation"] })
   .use(automationRateLimit)
   .post(
     "/job-apply",
@@ -333,7 +328,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
   .post(
     "/email-response",
     async ({ body, set }) => {
-      const payload: EmailResponseRequestBody = body;
+      const payload: EmailResponseRequest = body;
       const emailResponseResult = await settle(
         applicationAutomationService.runEmailResponse(payload),
       );
@@ -352,6 +347,8 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
         message: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
         sender: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
         tone: t.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
+        recipientEmail: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+        deliverAfterGeneration: t.Optional(t.Boolean()),
       }),
       response: {
         [HTTP_STATUS_OK]: t.Object({
@@ -360,6 +357,10 @@ export const automationRoutes = new Elysia({ prefix: "/automation" })
           reply: t.String(),
           provider: t.String(),
           model: t.String(),
+          delivered: t.Boolean(),
+          recipientEmail: t.Optional(t.String()),
+          deliveredAt: t.Optional(t.String()),
+          messageId: t.Optional(t.String()),
         }),
         [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
         [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,

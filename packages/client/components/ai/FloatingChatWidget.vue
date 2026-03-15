@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import {
-  AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS,
-  AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS,
-  AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY,
   AI_CHAT_PAGE_PATH,
   APP_BRAND,
 } from "@bao/shared";
@@ -71,32 +68,8 @@ const latestAssistantMessageIndex = computed(() =>
   resolveLatestAssistantMessageIndex(messages.value),
 );
 const streamingBubble = computed(() => createStreamingAssistantMessage("floatingWidget"));
-const currentContextLabel = computed(() => {
-  const domain = chatContext.value.domain ?? "general";
-  return t(AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS[domain]);
-});
-const focusedEntityLabel = computed(() => {
-  const entity = chatContext.value.entity;
-  if (!entity) return "";
-  return entity.label || entity.id;
-});
-const contextualPrompts = computed(() => {
-  const target = focusedEntityLabel.value || currentContextLabel.value;
-  const domain = chatContext.value.domain ?? "general";
-  const prompts: string[] = [];
-
-  const pushPrompt = (key: string) => {
-    prompts.push(t(key, { target }));
-  };
-
-  if (focusedEntityLabel.value) {
-    pushPrompt(AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY);
-  }
-
-  pushPrompt(AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS[domain]);
-  pushPrompt(AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS.general);
-  return [...new Set(prompts)];
-});
+const { contextChips, contextualPrompts, currentContextLabel, focusedEntityLabel } =
+  useAIChatContextSummary(chatContext, t);
 
 const showWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
 
@@ -251,6 +224,15 @@ onUnmounted(() => {
                   {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
                 </span>
               </div>
+              <ul
+                v-if="contextChips.length > 0"
+                class="mt-2 flex flex-wrap gap-2"
+                :aria-label="t('floatingChat.contextChipsAria')"
+              >
+                <li v-for="chip in contextChips" :key="chip">
+                  <span class="badge badge-ghost badge-xs">{{ chip }}</span>
+                </li>
+              </ul>
             </div>
             <div class="flex items-center gap-1">
               <NuxtLink
@@ -317,6 +299,12 @@ onUnmounted(() => {
               v-for="(messageRow, index) in renderedMessages"
               :key="messageRow.key"
               :assistant-label="APP_BRAND.assistantName"
+              :context-chips="
+                index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
+                  ? contextChips
+                  : []
+              "
+              :context-chips-aria="t('floatingChat.contextChipsAria')"
               :is-latest-assistant-message="
                 index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
               "
@@ -328,6 +316,8 @@ onUnmounted(() => {
             <AIChatBubble
               v-if="streaming"
               :assistant-label="APP_BRAND.assistantName"
+              :context-chips="contextChips"
+              :context-chips-aria="t('floatingChat.contextChipsAria')"
               :is-latest-assistant-message="true"
               :is-streaming="true"
               :locale="locale.value"

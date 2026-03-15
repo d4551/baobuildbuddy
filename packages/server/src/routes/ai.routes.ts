@@ -125,10 +125,15 @@ const chatContextSchema = t.Object({
   ),
   state: t.Object({
     hasResumes: t.Boolean(),
+    resumeCount: t.Number(),
     hasJobs: t.Boolean(),
+    jobCount: t.Number(),
     hasStudios: t.Boolean(),
+    studioCount: t.Number(),
     hasInterviewSessions: t.Boolean(),
+    interviewSessionCount: t.Number(),
     hasPortfolioProjects: t.Boolean(),
+    portfolioProjectCount: t.Number(),
   }),
 });
 
@@ -202,7 +207,7 @@ function serializeClientChatContext(context: AIChatContext): string {
     `Client Source: ${context.source}`,
     `Route Path: ${context.route.path}`,
     `Route Domain: ${context.domain ?? inferAIChatDomainFromRoutePath(context.route.path)}`,
-    `State Snapshot: hasResumes=${context.state.hasResumes}, hasJobs=${context.state.hasJobs}, hasStudios=${context.state.hasStudios}, hasInterviewSessions=${context.state.hasInterviewSessions}, hasPortfolioProjects=${context.state.hasPortfolioProjects}`,
+    `State Snapshot: hasResumes=${context.state.hasResumes}, resumeCount=${context.state.resumeCount}, hasJobs=${context.state.hasJobs}, jobCount=${context.state.jobCount}, hasStudios=${context.state.hasStudios}, studioCount=${context.state.studioCount}, hasInterviewSessions=${context.state.hasInterviewSessions}, interviewSessionCount=${context.state.interviewSessionCount}, hasPortfolioProjects=${context.state.hasPortfolioProjects}, portfolioProjectCount=${context.state.portfolioProjectCount}`,
   ];
 
   if (context.route.name) {
@@ -850,7 +855,7 @@ const handleMatchJobsRoute = async (body: MatchJobsBody, set: RouteSetState) => 
 /**
  * AI route group for chat, content generation, matching, and automation triggers.
  */
-export const aiRoutes = new Elysia({ prefix: "/ai" })
+export const aiRoutes = new Elysia({ prefix: "/ai", tags: ["AI"] })
   .use(
     rateLimit({
       scoping: "scoped",

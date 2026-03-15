@@ -1,4 +1,4 @@
-import type { AutomationSettings } from "@bao/shared";
+import type { AutomationSettings, EmailTransportSettings } from "@bao/shared";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared";
 export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "settings";
@@ -250,6 +250,44 @@ export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWith
             generated: undefined;
         }, {}, {
             $type: AutomationSettings;
+        }>;
+        emailTransportSettings: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+            name: "email_transport_settings";
+            tableName: "settings";
+            dataType: "json";
+            columnType: "SQLiteTextJson";
+            data: EmailTransportSettings;
+            driverParam: string;
+            notNull: false;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            $type: EmailTransportSettings;
+        }>;
+        emailTransportPassword: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+            name: "email_transport_password";
+            tableName: "settings";
+            dataType: "string";
+            columnType: "SQLiteText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            length: number | undefined;
         }>;
         createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "created_at";

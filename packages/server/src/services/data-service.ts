@@ -292,6 +292,7 @@ export class DataService {
       if (s.openaiApiKey) s.openaiApiKey = "***REDACTED***";
       if (s.claudeApiKey) s.claudeApiKey = "***REDACTED***";
       if (s.huggingfaceToken) s.huggingfaceToken = "***REDACTED***";
+      if (s.emailTransportPassword) s.emailTransportPassword = "***REDACTED***";
       safeSettings = s;
     }
 
@@ -356,8 +357,14 @@ export class DataService {
 
   private sanitizeImportedSettings(value: unknown): Record<string, unknown> {
     const settingsRecord = isRecord(value) ? { ...value } : {};
-    const apiKeys = ["geminiApiKey", "openaiApiKey", "claudeApiKey", "huggingfaceToken"] as const;
-    for (const key of apiKeys) {
+    const secretKeys = [
+      "geminiApiKey",
+      "openaiApiKey",
+      "claudeApiKey",
+      "huggingfaceToken",
+      "emailTransportPassword",
+    ] as const;
+    for (const key of secretKeys) {
       if (settingsRecord[key] === "***REDACTED***") {
         settingsRecord[key] = undefined;
       }

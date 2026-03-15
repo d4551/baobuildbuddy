@@ -259,7 +259,7 @@ const analyzeSkillMappings = async (
   };
 };
 
-export const skillMappingRoutes = new Elysia({ prefix: "/skills" })
+export const skillMappingRoutes = new Elysia({ prefix: "/skills", tags: ["Skill Mapping"] })
   .use(skillAnalysisRateLimit)
   .get(
     "/mappings",

@@ -24,7 +24,7 @@ function generateApiKey(): string {
   return `${AUTH_KEY_PREFIX}${encodeBase64Url(bytes)}`;
 }
 
-export const authRoutes = new Elysia({ prefix: "/auth" })
+export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
   .get("/status", async () => {
     if (config.disableAuth) {
       return { configured: false, authRequired: false };

@@ -40,6 +40,26 @@ import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
 import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 
+const OPENAPI_TAGS = [
+  { name: "Health", description: "Service health and readiness endpoints." },
+  { name: "Auth", description: "Authentication bootstrap and API key lifecycle endpoints." },
+  { name: "User", description: "User profile read and update endpoints." },
+  { name: "Settings", description: "Application configuration and secret-management endpoints." },
+  { name: "Jobs", description: "Job discovery, saved jobs, applications, and recommendations." },
+  { name: "Resumes", description: "Resume authoring, generation, and export endpoints." },
+  { name: "Cover Letters", description: "Cover letter CRUD, generation, and export endpoints." },
+  { name: "Portfolio", description: "Portfolio profile and project management endpoints." },
+  { name: "Interview", description: "Interview prep, sessions, and analytics endpoints." },
+  { name: "Studios", description: "Studio directory CRUD and analytics endpoints." },
+  { name: "Scraper", description: "Manual scraper trigger endpoints." },
+  { name: "AI", description: "AI chat, analysis, matching, and provider introspection endpoints." },
+  { name: "Gamification", description: "XP, achievements, challenges, and streak endpoints." },
+  { name: "Skill Mapping", description: "Transferable skill analysis and CRUD endpoints." },
+  { name: "Search", description: "Global search and autocomplete endpoints." },
+  { name: "Stats", description: "Dashboard and trend reporting endpoints." },
+  { name: "Automation", description: "Automation execution, scheduling, history, and artifacts." },
+] as const;
+
 export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticResponse: true })
   .use(
     cors({
@@ -57,6 +77,7 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
           version: OPENAPI_VERSION,
           description: "AI-powered career assistant for the video game industry",
         },
+        tags: [...OPENAPI_TAGS],
       },
     }),
   )
@@ -96,6 +117,9 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
     {
       response: {
         [HTTP_STATUS_OK]: "HealthResponse",
+      },
+      detail: {
+        tags: ["Health"],
       },
     },
   )

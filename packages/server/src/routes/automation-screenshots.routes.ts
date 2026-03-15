@@ -106,6 +106,7 @@ const readScreenshotPayload = async (filePath: string): Promise<BinaryPayload | 
  */
 export const automationScreenshotRoutes = new Elysia({
   prefix: "/automation/screenshots",
+  tags: ["Automation"],
 }).get(
   "/:runId/:index",
   async ({ params, set }) => {

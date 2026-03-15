@@ -27,7 +27,7 @@ export interface StudioAnalytics {
   topTechnologies: Array<{ name: string; count: number }>;
 }
 
-export const studioRoutes = new Elysia({ prefix: "/studios" })
+export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] })
   .get(
     "/",
     async ({ query }) => {

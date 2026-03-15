@@ -264,7 +264,7 @@ const handleResumeAiScore = async (
   };
 };
 
-export const resumeRoutes = new Elysia({ prefix: "/resumes" })
+export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] })
   .post(
     "/from-questions/generate",
     async ({ body, set }) => {

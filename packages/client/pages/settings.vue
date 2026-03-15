@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import type { AppSettings, AutomationSettings, UserProfile } from "@bao/shared";
+import type {
+  AppSettings,
+  AutomationSettings,
+  EmailTransportSettings,
+  UserProfile,
+} from "@bao/shared";
 import {
   AI_PROVIDER_CATALOG,
   type AIProviderType,
@@ -9,7 +14,12 @@ import {
   AUTOMATION_BROWSER_OPTIONS,
   DEFAULT_APP_LANGUAGE,
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
+  EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
+  EMAIL_TRANSPORT_SECURITY_OPTIONS,
+  isEmailTransportConfigured,
+  isValidEmail,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
 } from "@bao/shared";
@@ -21,6 +31,7 @@ type SettingsWithFlags = AppSettings & {
   hasGeminiKey?: boolean;
   hasOpenaiKey?: boolean;
   hasClaudeKey?: boolean;
+  hasEmailTransportPassword?: boolean;
   hasHuggingfaceToken?: boolean;
   hasLocalKey?: boolean;
 };
@@ -91,6 +102,8 @@ const languageOptions = computed(() =>
   })),
 );
 const automationBrowserOptions = AUTOMATION_BROWSER_OPTIONS;
+const emailTransportSecurityOptions = EMAIL_TRANSPORT_SECURITY_OPTIONS;
+const emailTransportAuthModeOptions = EMAIL_TRANSPORT_AUTH_MODE_OPTIONS;
 
 const apiKeys = reactive<Record<ProviderField, string>>({
   geminiApiKey: "",
@@ -114,10 +127,11 @@ const preferencesLanguage = ref(DEFAULT_APP_LANGUAGE);
 const preferredProviderSelection = ref<AIProviderType>("local");
 const preferencesSaveState = ref<SaveState>("idle");
 const profileSaveState = ref<SaveState>("idle");
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const notificationForm = reactive({ ...DEFAULT_NOTIFICATION_PREFERENCES });
 const automationForm = reactive<AutomationSettings>({ ...DEFAULT_AUTOMATION_SETTINGS });
+const emailTransportForm = reactive<EmailTransportSettings>({ ...DEFAULT_EMAIL_TRANSPORT_SETTINGS });
+const emailTransportPasswordDraft = ref("");
 
 const profileForm = reactive({
   name: "",
@@ -164,8 +178,20 @@ watch(
         ...currentSettings.automationSettings,
       });
     }
+
+    Object.assign(emailTransportForm, {
+      ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+      ...currentSettings.emailTransportSettings,
+    });
   },
   { immediate: true },
+);
+
+const emailDeliveryConfigured = computed(() =>
+  isEmailTransportConfigured(
+    settings.value?.emailTransportSettings ?? emailTransportForm,
+    settings.value?.hasEmailTransportPassword ?? false,
+  ),
 );
 
 watch(
@@ -232,6 +258,27 @@ function browserOptionLabel(browser: (typeof AUTOMATION_BROWSER_OPTIONS)[number]
   if (browser === "chrome") return t("settings.automation.browserOptions.chrome");
   if (browser === "chromium") return t("settings.automation.browserOptions.chromium");
   return t("settings.automation.browserOptions.edge");
+}
+
+function emailTransportSecurityLabel(
+  security: (typeof EMAIL_TRANSPORT_SECURITY_OPTIONS)[number],
+): string {
+  if (security === "tls") {
+    return t("settings.emailDelivery.securityOptions.tls");
+  }
+  if (security === "plain") {
+    return t("settings.emailDelivery.securityOptions.plain");
+  }
+  return t("settings.emailDelivery.securityOptions.starttls");
+}
+
+function emailTransportAuthModeLabel(
+  authMode: (typeof EMAIL_TRANSPORT_AUTH_MODE_OPTIONS)[number],
+): string {
+  if (authMode === "login") {
+    return t("settings.emailDelivery.authOptions.login");
+  }
+  return t("settings.emailDelivery.authOptions.plain");
 }
 
 function isProviderConfigured(providerId: AIProviderType): boolean {
@@ -363,7 +410,7 @@ async function handleSaveProfile() {
   }
 
   const email = profileForm.email.trim();
-  if (!emailPattern.test(email)) {
+  if (!isValidEmail(email)) {
     profileSaveState.value = "error";
     $toast.error(t("settings.errors.invalidEmail"));
     return;
@@ -430,6 +477,67 @@ async function handleSaveAutomation() {
     return;
   }
   $toast.success(t("settings.toasts.automationSaved"));
+}
+
+async function handleSaveEmailDeliverySettings() {
+  const senderEmail = emailTransportForm.fromEmail.trim();
+  if (senderEmail.length > 0 && !isValidEmail(senderEmail)) {
+    $toast.error(t("settings.errors.invalidEmailDeliverySender"));
+    return;
+  }
+
+  const emailDeliverySaveResult = await settlePromise(
+    updateSettings({
+      emailTransportSettings: {
+        ...emailTransportForm,
+        host: emailTransportForm.host.trim(),
+        username: emailTransportForm.username.trim(),
+        fromEmail: senderEmail,
+        fromName: emailTransportForm.fromName.trim(),
+      },
+    }),
+    t("settings.errors.failedToSaveEmailDelivery"),
+  );
+  if (!emailDeliverySaveResult.ok) {
+    showToastError(emailDeliverySaveResult.error, t("settings.errors.failedToSaveEmailDelivery"));
+    return;
+  }
+
+  $toast.success(t("settings.toasts.emailDeliverySaved"));
+}
+
+async function handleSaveEmailDeliveryPassword() {
+  const passwordSaveResult = await settlePromise(
+    updateApiKeys({ emailTransportPassword: emailTransportPasswordDraft.value }),
+    t("settings.errors.failedToSaveEmailDeliveryPassword"),
+  );
+  if (!passwordSaveResult.ok) {
+    showToastError(
+      passwordSaveResult.error,
+      t("settings.errors.failedToSaveEmailDeliveryPassword"),
+    );
+    return;
+  }
+
+  emailTransportPasswordDraft.value = "";
+  $toast.success(t("settings.toasts.emailDeliveryPasswordSaved"));
+}
+
+async function handleClearEmailDeliveryPassword() {
+  const passwordClearResult = await settlePromise(
+    updateApiKeys({ emailTransportPassword: "" }),
+    t("settings.errors.failedToSaveEmailDeliveryPassword"),
+  );
+  if (!passwordClearResult.ok) {
+    showToastError(
+      passwordClearResult.error,
+      t("settings.errors.failedToSaveEmailDeliveryPassword"),
+    );
+    return;
+  }
+
+  emailTransportPasswordDraft.value = "";
+  $toast.success(t("settings.toasts.emailDeliveryPasswordCleared"));
 }
 </script>
 
@@ -777,6 +885,183 @@ async function handleSaveAutomation() {
                 @click="handleSaveAutomation"
               >
                 {{ t("settings.automation.saveButton") }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-border bg-base-100">
+          <div class="card-body">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h2 class="card-title">{{ t("settings.emailDelivery.title") }}</h2>
+                <p class="text-sm text-base-content/70">
+                  {{ t("settings.emailDelivery.subtitle") }}
+                </p>
+              </div>
+              <span
+                class="badge"
+                :class="emailDeliveryConfigured ? 'badge-success' : 'badge-warning'"
+              >
+                {{
+                  emailDeliveryConfigured
+                    ? t("settings.emailDelivery.configuredBadge")
+                    : t("settings.emailDelivery.incompleteBadge")
+                }}
+              </span>
+            </div>
+
+            <div class="space-y-4">
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">{{ t("settings.emailDelivery.hostLegend") }}</legend>
+                <input
+                  v-model="emailTransportForm.host"
+                  class="input w-full"
+                  type="text"
+                  :placeholder="t('settings.emailDelivery.hostPlaceholder')"
+                  :aria-label="t('settings.emailDelivery.hostAria')"
+                />
+              </fieldset>
+
+              <SectionGrid grid-token="twoColumn">
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.portLegend") }}</legend>
+                  <input
+                    v-model.number="emailTransportForm.port"
+                    class="input w-full"
+                    type="number"
+                    min="1"
+                    max="65535"
+                    :aria-label="t('settings.emailDelivery.portAria')"
+                  />
+                </fieldset>
+
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.timeoutLegend") }}</legend>
+                  <input
+                    v-model.number="emailTransportForm.connectionTimeoutSeconds"
+                    class="input w-full"
+                    type="number"
+                    min="1"
+                    max="120"
+                    :aria-label="t('settings.emailDelivery.timeoutAria')"
+                  />
+                </fieldset>
+              </SectionGrid>
+
+              <SectionGrid grid-token="twoColumn">
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.securityLegend") }}</legend>
+                  <select
+                    v-model="emailTransportForm.security"
+                    class="select w-full"
+                    :aria-label="t('settings.emailDelivery.securityAria')"
+                  >
+                    <option
+                      v-for="security in emailTransportSecurityOptions"
+                      :key="security"
+                      :value="security"
+                    >
+                      {{ emailTransportSecurityLabel(security) }}
+                    </option>
+                  </select>
+                </fieldset>
+
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.authLegend") }}</legend>
+                  <select
+                    v-model="emailTransportForm.authMethod"
+                    class="select w-full"
+                    :aria-label="t('settings.emailDelivery.authAria')"
+                  >
+                    <option
+                      v-for="authMode in emailTransportAuthModeOptions"
+                      :key="authMode"
+                      :value="authMode"
+                    >
+                      {{ emailTransportAuthModeLabel(authMode) }}
+                    </option>
+                  </select>
+                </fieldset>
+              </SectionGrid>
+
+              <SectionGrid grid-token="twoColumn">
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.usernameLegend") }}</legend>
+                  <input
+                    v-model="emailTransportForm.username"
+                    class="input w-full"
+                    type="text"
+                    :placeholder="t('settings.emailDelivery.usernamePlaceholder')"
+                    :aria-label="t('settings.emailDelivery.usernameAria')"
+                  />
+                </fieldset>
+
+                <fieldset class="fieldset">
+                  <legend class="fieldset-legend">{{ t("settings.emailDelivery.fromNameLegend") }}</legend>
+                  <input
+                    v-model="emailTransportForm.fromName"
+                    class="input w-full"
+                    type="text"
+                    :placeholder="t('settings.emailDelivery.fromNamePlaceholder')"
+                    :aria-label="t('settings.emailDelivery.fromNameAria')"
+                  />
+                </fieldset>
+              </SectionGrid>
+
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">{{ t("settings.emailDelivery.fromEmailLegend") }}</legend>
+                <input
+                  v-model="emailTransportForm.fromEmail"
+                  class="input w-full"
+                  type="email"
+                  :placeholder="t('settings.emailDelivery.fromEmailPlaceholder')"
+                  :aria-label="t('settings.emailDelivery.fromEmailAria')"
+                />
+                <p class="label">{{ t("settings.emailDelivery.fromEmailHint") }}</p>
+              </fieldset>
+
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">{{ t("settings.emailDelivery.passwordLegend") }}</legend>
+                <input
+                  v-model="emailTransportPasswordDraft"
+                  class="input w-full"
+                  type="password"
+                  :placeholder="t('settings.emailDelivery.passwordPlaceholder')"
+                  :aria-label="t('settings.emailDelivery.passwordAria')"
+                />
+                <p class="label">
+                  {{
+                    settings?.hasEmailTransportPassword
+                      ? t("settings.emailDelivery.passwordStoredHint")
+                      : t("settings.emailDelivery.passwordHint")
+                  }}
+                </p>
+              </fieldset>
+            </div>
+
+            <div class="card-actions justify-end gap-2 mt-2">
+              <button
+                class="btn btn-outline"
+                :disabled="!settings?.hasEmailTransportPassword"
+                :aria-label="t('settings.emailDelivery.clearPasswordAria')"
+                @click="handleClearEmailDeliveryPassword"
+              >
+                {{ t("settings.emailDelivery.clearPasswordButton") }}
+              </button>
+              <button
+                class="btn btn-secondary"
+                :aria-label="t('settings.emailDelivery.savePasswordAria')"
+                @click="handleSaveEmailDeliveryPassword"
+              >
+                {{ t("settings.emailDelivery.savePasswordButton") }}
+              </button>
+              <button
+                class="btn btn-primary"
+                :aria-label="t('settings.emailDelivery.saveAria')"
+                @click="handleSaveEmailDeliverySettings"
+              >
+                {{ t("settings.emailDelivery.saveButton") }}
               </button>
             </div>
           </div>

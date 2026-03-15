@@ -202,7 +202,7 @@ const handleGenerateCoverLetter = async (body: GenerateCoverLetterBody, set: Rou
   };
 };
 
-export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters" })
+export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["Cover Letters"] })
   .get("/", async () => {
     const all = await db.select().from(coverLetters).orderBy(desc(coverLetters.createdAt));
     return all;

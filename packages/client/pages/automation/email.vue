@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared";
+import {
+  APP_ROUTE_BUILDERS,
+  APP_ROUTES,
+  isEmailTransportConfigured,
+  isValidEmail,
+} from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
@@ -11,10 +16,13 @@ interface EmailFormState {
   message: string;
   sender: string;
   tone: EmailResponseTone;
+  recipientEmail: string;
+  deliverAfterGeneration: boolean;
 }
 
 const { t } = useI18n();
 const { triggerEmailResponse } = useAutomation();
+const { settings, fetchSettings } = useSettings();
 
 const toneOptions: readonly EmailResponseTone[] = ["professional", "friendly", "concise"] as const;
 
@@ -23,6 +31,8 @@ const form = reactive<EmailFormState>({
   message: "",
   sender: "",
   tone: "professional",
+  recipientEmail: "",
+  deliverAfterGeneration: false,
 });
 
 const pending = ref(false);
@@ -32,11 +42,52 @@ const lastResult = ref<{
   reply: string;
   provider: string;
   model: string;
+  delivered: boolean;
+  recipientEmail?: string;
+  deliveredAt?: string;
+  messageId?: string;
 } | null>(null);
+
+await useAsyncData("automation-email-settings", async () => {
+  if (!settings.value) {
+    await fetchSettings();
+  }
+  return true;
+});
+
+const emailDeliveryConfigured = computed(() =>
+  isEmailTransportConfigured(
+    settings.value?.emailTransportSettings,
+    settings.value?.hasEmailTransportPassword ?? false,
+  ),
+);
+
+const resolvedRecipientEmail = computed(() => {
+  const explicitRecipient = form.recipientEmail.trim();
+  if (explicitRecipient.length > 0) {
+    return explicitRecipient;
+  }
+
+  const sender = form.sender.trim();
+  return isValidEmail(sender) ? sender : "";
+});
 
 async function submitEmailResponse(): Promise<void> {
   submitError.value = "";
   lastResult.value = null;
+
+  if (form.deliverAfterGeneration) {
+    if (!emailDeliveryConfigured.value) {
+      submitError.value = t("automation.email.deliveryUnavailableDescription");
+      return;
+    }
+
+    if (!isValidEmail(resolvedRecipientEmail.value)) {
+      submitError.value = t("automation.email.invalidRecipient");
+      return;
+    }
+  }
+
   pending.value = true;
 
   const responseResult = await settlePromise(
@@ -45,6 +96,8 @@ async function submitEmailResponse(): Promise<void> {
       message: form.message.trim(),
       tone: form.tone,
       ...(form.sender.trim() ? { sender: form.sender.trim() } : {}),
+      ...(resolvedRecipientEmail.value ? { recipientEmail: resolvedRecipientEmail.value } : {}),
+      deliverAfterGeneration: form.deliverAfterGeneration,
     }),
     t("automation.email.submitErrorFallback"),
   );
@@ -64,6 +117,10 @@ async function submitEmailResponse(): Promise<void> {
     reply: response.reply,
     provider: response.provider,
     model: response.model,
+    delivered: response.delivered,
+    recipientEmail: response.recipientEmail,
+    deliveredAt: response.deliveredAt,
+    messageId: response.messageId,
   };
 }
 
@@ -117,6 +174,20 @@ if (import.meta.server) {
               :placeholder="t('automation.email.senderPlaceholder')"
               :aria-label="t('automation.email.senderAria')"
             />
+            <p class="validator-hint">{{ t("automation.email.senderHint") }}</p>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">{{ t("automation.email.recipientLegend") }}</legend>
+            <input
+              v-model="form.recipientEmail"
+              class="input input-bordered w-full"
+              type="email"
+              maxlength="320"
+              :placeholder="t('automation.email.recipientPlaceholder')"
+              :aria-label="t('automation.email.recipientAria')"
+            />
+            <p class="validator-hint">{{ t("automation.email.recipientHint") }}</p>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -145,6 +216,36 @@ if (import.meta.server) {
             />
             <p class="validator-hint">{{ t("automation.email.messageHint") }}</p>
           </fieldset>
+
+          <div class="rounded-box border border-base-300 bg-base-200/60 p-4">
+            <label class="label cursor-pointer justify-start gap-3">
+              <input
+                v-model="form.deliverAfterGeneration"
+                type="checkbox"
+                class="checkbox checkbox-primary"
+                :disabled="!emailDeliveryConfigured"
+                :aria-label="t('automation.email.deliverAria')"
+              />
+              <span class="label-text font-medium">
+                {{ t("automation.email.deliverLabel") }}
+              </span>
+            </label>
+            <p class="mt-2 text-sm text-base-content/70">
+              {{
+                emailDeliveryConfigured
+                  ? t("automation.email.deliveryConfiguredDescription")
+                  : t("automation.email.deliveryUnavailableDescription")
+              }}
+            </p>
+            <NuxtLink
+              v-if="!emailDeliveryConfigured"
+              :to="APP_ROUTES.settings"
+              class="btn btn-link btn-sm px-0"
+              :aria-label="t('automation.email.configureDeliveryAria')"
+            >
+              {{ t("automation.email.configureDeliveryButton") }}
+            </NuxtLink>
+          </div>
         </div>
 
         <div class="mt-6">
@@ -170,9 +271,21 @@ if (import.meta.server) {
       <div class="card-body">
         <div role="alert" class="alert alert-success">
           <div>
-            <h3 class="font-semibold">{{ t("automation.email.generatedTitle") }}</h3>
+            <h3 class="font-semibold">
+              {{
+                lastResult.delivered
+                  ? t("automation.email.deliveredTitle")
+                  : t("automation.email.generatedTitle")
+              }}
+            </h3>
             <p class="text-sm">{{ t("automation.email.generatedProvider", { provider: lastResult.provider, model: lastResult.model }) }}</p>
             <p class="text-sm">{{ t("automation.email.runIdLabel", { id: lastResult.runId }) }}</p>
+            <p v-if="lastResult.recipientEmail" class="text-sm">
+              {{ t("automation.email.recipientLabel", { email: lastResult.recipientEmail }) }}
+            </p>
+            <p v-if="lastResult.messageId" class="text-sm">
+              {{ t("automation.email.messageIdLabel", { id: lastResult.messageId }) }}
+            </p>
           </div>
         </div>
 

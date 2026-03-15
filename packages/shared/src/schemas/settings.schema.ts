@@ -1,6 +1,7 @@
 import z from "zod";
 import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
 import {
+  SCHEMA_MAX_LENGTH_EMAIL,
   SCHEMA_MAX_LENGTH_LONG,
   SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_PAGES_MAX,
@@ -12,11 +13,18 @@ import {
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
   DEFAULT_APP_LANGUAGE,
+  EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
+  EMAIL_TRANSPORT_SECURITY_OPTIONS,
   DEFAULT_SPEECH_SETTINGS,
   SPEECH_PROVIDER_OPTIONS,
 } from "../constants/settings";
+import { MAX_PORT, MIN_PORT } from "../constants/ports";
 import type { AIProviderType } from "../types/ai";
-import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES } from "../types/settings";
+import {
+  DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+} from "../types/settings";
 
 export const apiKeyConfigSchema = z.object({
   provider: z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]),
@@ -159,6 +167,49 @@ export const speechSettingsSchema = z.object({
   tts: textToSpeechSettingsSchema.default(DEFAULT_SPEECH_SETTINGS.tts),
 });
 
+export const emailTransportSecuritySchema = z.enum(EMAIL_TRANSPORT_SECURITY_OPTIONS);
+
+export const emailTransportAuthModeSchema = z.enum(EMAIL_TRANSPORT_AUTH_MODE_OPTIONS);
+
+export const emailTransportSettingsSchema = z
+  .object({
+    host: z
+      .string()
+      .trim()
+      .max(SCHEMA_MAX_LENGTH_SHORT)
+      .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.host),
+    port: z
+      .number()
+      .int()
+      .min(MIN_PORT)
+      .max(MAX_PORT)
+      .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.port),
+    security: emailTransportSecuritySchema.default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.security),
+    username: z
+      .string()
+      .trim()
+      .max(SCHEMA_MAX_LENGTH_EMAIL)
+      .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.username),
+    fromEmail: z
+      .string()
+      .trim()
+      .max(SCHEMA_MAX_LENGTH_EMAIL)
+      .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.fromEmail),
+    fromName: z
+      .string()
+      .trim()
+      .max(SCHEMA_MAX_LENGTH_SHORT)
+      .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.fromName),
+    authMethod: emailTransportAuthModeSchema.default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.authMethod),
+    connectionTimeoutSeconds: z
+      .number()
+      .int()
+      .min(1)
+      .max(120)
+      .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.connectionTimeoutSeconds),
+  })
+  .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS);
+
 export const automationSettingsSchema = z
   .object({
     headless: z.boolean().default(true),
@@ -187,6 +238,7 @@ export const settingsSchema = z.object({
   language: z.enum(APP_LANGUAGE_CODES).default(DEFAULT_APP_LANGUAGE),
   notifications: notificationPreferencesSchema,
   automationSettings: automationSettingsSchema,
+  emailTransportSettings: emailTransportSettingsSchema,
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

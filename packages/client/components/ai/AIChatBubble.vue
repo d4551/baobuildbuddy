@@ -13,11 +13,15 @@ const props = withDefaults(
     userLabel: string;
     assistantLabel: string;
     isLatestAssistantMessage?: boolean;
+    contextChips?: string[];
+    contextChipsAria?: string;
   }>(),
   {
     locale: DEFAULT_APP_LANGUAGE,
     isStreaming: false,
     isLatestAssistantMessage: false,
+    contextChips: () => [],
+    contextChipsAria: "",
   },
 );
 
@@ -119,6 +123,15 @@ const ariaLabel = computed(() => {
       class="chat-bubble whitespace-pre-wrap break-words"
       :class="[chatBubbleClass, CHAT_BUBBLE_SIZE_CLASS, CHAT_MESSAGE_WIDTH_CLASS]"
     >
+      <ul
+        v-if="props.contextChips.length > 0"
+        class="mb-2 flex flex-wrap gap-1"
+        :aria-label="props.contextChipsAria || undefined"
+      >
+        <li v-for="chip in props.contextChips" :key="chip">
+          <span class="badge badge-outline badge-xs">{{ chip }}</span>
+        </li>
+      </ul>
       <span
         v-if="isStreaming && !message.content"
         class="loading loading-dots loading-sm"

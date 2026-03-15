@@ -66,9 +66,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                             [x: string]: unknown;
                         } | null;
                         progress: number | null;
+                        status: "success" | "pending" | "running" | "error";
                         createdAt: string;
                         updatedAt: string;
-                        status: "success" | "pending" | "running" | "error";
                         screenshots: string[] | null;
                         totalSteps: number | null;
                         jobId: string | null;
@@ -153,9 +153,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
+                            status: "success" | "pending" | "running" | "error";
                             createdAt: string;
                             updatedAt: string;
-                            status: "success" | "pending" | "running" | "error";
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -207,6 +207,8 @@ export declare const automationRoutes: Elysia<"/automation", {
                 body: {
                     sender?: string | undefined;
                     tone?: "professional" | "friendly" | "concise" | undefined;
+                    recipientEmail?: string | undefined;
+                    deliverAfterGeneration?: boolean | undefined;
                     message: string;
                     subject: string;
                 };
@@ -222,11 +224,15 @@ export declare const automationRoutes: Elysia<"/automation", {
                         };
                     };
                     200: {
+                        recipientEmail?: string | undefined;
+                        deliveredAt?: string | undefined;
+                        messageId?: string | undefined;
                         provider: string;
                         model: string;
                         runId: string;
                         status: "success";
                         reply: string;
+                        delivered: boolean;
                     };
                     400: {
                         error: {
@@ -289,9 +295,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                             [x: string]: unknown;
                         } | null;
                         progress: number | null;
+                        status: "success" | "pending" | "running" | "error";
                         createdAt: string;
                         updatedAt: string;
-                        status: "success" | "pending" | "running" | "error";
                         screenshots: string[] | null;
                         totalSteps: number | null;
                         jobId: string | null;
@@ -345,9 +351,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
+                            status: "success" | "pending" | "running" | "error";
                             createdAt: string;
                             updatedAt: string;
-                            status: "success" | "pending" | "running" | "error";
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;

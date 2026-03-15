@@ -311,7 +311,7 @@ function resolveQuestionId(
   return session.questions[fallbackIndex]?.id;
 }
 
-export const interviewRoutes = new Elysia({ prefix: "/interview" })
+export const interviewRoutes = new Elysia({ prefix: "/interview", tags: ["Interview"] })
   .post(
     "/sessions",
     async ({ body, set }) => {

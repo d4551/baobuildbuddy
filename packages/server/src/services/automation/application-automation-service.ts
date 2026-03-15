@@ -2,8 +2,11 @@ import { mkdirSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
   DECIMAL_RADIX,
+  API_ERROR_EMAIL_DELIVERY_FAILED,
+  API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING,
   API_ERROR_EMPTY_EMAIL_RESPONSE,
   API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED,
+  API_MESSAGE_EMAIL_RESPONSE_DELIVERED,
   API_MESSAGE_EMAIL_RESPONSE_GENERATED,
   API_MESSAGE_JOB_APPLICATION_AUTOMATION_COMPLETED,
   API_ERROR_GENERATE_EMAIL_RESPONSE,
@@ -21,7 +24,11 @@ import {
   AUTOMATION_SCHEDULE_RETRY_DELAY_MS,
   automationSettingsSchema,
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  emailTransportSettingsSchema,
   generateId,
+  isEmailTransportConfigured,
+  isValidEmail,
   MS_PER_DAY,
   ROUTE_GAMIFICATION_XP,
   RPA_PROTOCOL_VERSION,
@@ -33,6 +40,9 @@ import {
 } from "@bao/shared";
 import type {
   AutomationSettings,
+  EmailResponseRequest,
+  EmailResponseResult,
+  EmailResponseTone,
   ErrorEnvelope,
   ResumeData,
   RpaRunEvent,
@@ -48,6 +58,10 @@ import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { AIService } from "../ai/ai-service";
 import { emailResponsePrompt } from "../ai/prompts";
+import {
+  emailDeliveryService,
+  type EmailTransportRuntimeConfig,
+} from "../email-delivery-service";
 import { exportService } from "../export-service";
 import { gamificationService } from "../gamification-service";
 import { resumeService } from "../resume-service";
@@ -80,20 +94,20 @@ interface JobApplyExecutionPayload {
   customAnswers: Record<string, string>;
 }
 
-type EmailResponseTone = "professional" | "friendly" | "concise";
-
-interface EmailResponsePayload {
-  subject: string;
-  message: string;
-  sender?: string;
-  tone?: EmailResponseTone;
-}
-
 interface EmailResponseExecutionPayload {
   subject: string;
   message: string;
   sender?: string;
   tone: EmailResponseTone;
+  recipientEmail?: string;
+  deliverAfterGeneration: boolean;
+}
+
+interface EmailDeliveryDetails {
+  delivered: boolean;
+  recipientEmail?: string;
+  deliveredAt?: string;
+  messageId?: string;
 }
 
 interface ScheduledRunMetadata {
@@ -315,6 +329,37 @@ export class ApplicationAutomationService {
   }
 
   /**
+   * Resolve a validated SMTP delivery configuration from persisted settings.
+   */
+  private async loadEmailTransportConfig(): Promise<EmailTransportRuntimeConfig> {
+    const settingsQueryResult = await settle(
+      db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID)).limit(1),
+    );
+    if (settingsQueryResult.status === "rejected") {
+      throw new Error(API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING);
+    }
+
+    const [row] = settingsQueryResult.value;
+    const parsedTransportSettings = emailTransportSettingsSchema.safeParse(
+      row?.emailTransportSettings ?? DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+    );
+
+    if (!parsedTransportSettings.success) {
+      throw new Error(API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING);
+    }
+
+    const hasPassword = Boolean(row?.emailTransportPassword);
+    if (!isEmailTransportConfigured(parsedTransportSettings.data, hasPassword)) {
+      throw new Error(API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING);
+    }
+
+    return {
+      ...parsedTransportSettings.data,
+      password: row?.emailTransportPassword ?? null,
+    };
+  }
+
+  /**
    * Normalize and validate the inbound execution payload.
    */
   private normalizePayload(payload: JobApplyPayload): JobApplyExecutionPayload {
@@ -374,13 +419,39 @@ export class ApplicationAutomationService {
    * Normalize and validate an email-response automation payload.
    */
   private normalizeEmailResponsePayload(
-    payload: EmailResponsePayload,
+    payload: EmailResponseRequest,
   ): EmailResponseExecutionPayload {
     const subject = payload.subject?.trim() ?? "";
     const message = payload.message?.trim() ?? "";
     const sender = payload.sender?.trim();
-    const toneRaw = payload.tone?.trim();
+    const explicitRecipient = payload.recipientEmail?.trim();
+    const deliverAfterGeneration = payload.deliverAfterGeneration === true;
+    this.validateEmailResponseTextLengths(subject, message, sender);
+    const recipientEmail = this.resolveEmailResponseRecipientEmail(
+      sender,
+      explicitRecipient,
+      deliverAfterGeneration,
+    );
+    const tone = this.normalizeEmailResponseTone(payload.tone);
 
+    return {
+      subject,
+      message,
+      tone,
+      deliverAfterGeneration,
+      ...(sender ? { sender } : {}),
+      ...(recipientEmail ? { recipientEmail } : {}),
+    };
+  }
+
+  /**
+   * Validates normalized email response text fields against persisted limits.
+   */
+  private validateEmailResponseTextLengths(
+    subject: string,
+    message: string,
+    sender?: string,
+  ): void {
     if (subject.length === 0 || subject.length > MAX_EMAIL_SUBJECT_LENGTH) {
       throw new AutomationValidationError(
         `subject is required and must be <= ${MAX_EMAIL_SUBJECT_LENGTH} characters`,
@@ -398,15 +469,41 @@ export class ApplicationAutomationService {
         `sender must be <= ${MAX_EMAIL_SENDER_LENGTH} characters`,
       );
     }
+  }
 
-    const tone = toneRaw && isEmailResponseTone(toneRaw) ? toneRaw : DEFAULT_EMAIL_RESPONSE_TONE;
+  /**
+   * Resolves the target recipient from explicit input or an email-like sender field.
+   */
+  private resolveEmailResponseRecipientEmail(
+    sender: string | undefined,
+    explicitRecipient: string | undefined,
+    deliverAfterGeneration: boolean,
+  ): string | undefined {
+    if (explicitRecipient && !isValidEmail(explicitRecipient)) {
+      throw new AutomationValidationError("recipientEmail must be a valid email address");
+    }
 
-    return {
-      subject,
-      message,
-      tone,
-      ...(sender ? { sender } : {}),
-    };
+    const inferredRecipient = sender && isValidEmail(sender) ? sender : undefined;
+    const recipientEmail = explicitRecipient || inferredRecipient;
+    if (deliverAfterGeneration && !recipientEmail) {
+      throw new AutomationValidationError("recipientEmail is required when delivery is enabled");
+    }
+
+    return recipientEmail;
+  }
+
+  /**
+   * Maps optional tone input to a supported automation email tone.
+   */
+  private normalizeEmailResponseTone(
+    toneValue: EmailResponseRequest["tone"],
+  ): EmailResponseTone {
+    const normalizedTone = toneValue?.trim();
+    if (normalizedTone && isEmailResponseTone(normalizedTone)) {
+      return normalizedTone;
+    }
+
+    return DEFAULT_EMAIL_RESPONSE_TONE;
   }
 
   /**
@@ -897,6 +994,7 @@ export class ApplicationAutomationService {
     normalized: EmailResponseExecutionPayload,
   ): Promise<void> {
     const now = new Date().toISOString();
+    const totalSteps = normalized.deliverAfterGeneration ? 2 : 1;
     await db.insert(automationRuns).values({
       id: runId,
       type: "email",
@@ -908,10 +1006,12 @@ export class ApplicationAutomationService {
         message: normalized.message,
         tone: normalized.tone,
         ...(normalized.sender ? { sender: normalized.sender } : {}),
+        ...(normalized.recipientEmail ? { recipientEmail: normalized.recipientEmail } : {}),
+        deliverAfterGeneration: normalized.deliverAfterGeneration,
       },
       progress: DEFAULT_PROGRESS,
       currentStep: 0,
-      totalSteps: 1,
+      totalSteps,
       exitCode: 0,
       timedOut: false,
       aborted: false,
@@ -922,8 +1022,19 @@ export class ApplicationAutomationService {
     });
   }
 
-  private async failEmailResponseRun(runId: string, error: unknown): Promise<never> {
-    const message = toErrorMessage(error, API_ERROR_GENERATE_EMAIL_RESPONSE);
+  private async failEmailResponseRun(
+    runId: string,
+    error: unknown,
+    partialResult?: {
+      reply: string;
+      provider: string;
+      model: string;
+    },
+  ): Promise<never> {
+    const message = toErrorMessage(
+      error,
+      partialResult ? API_ERROR_EMAIL_DELIVERY_FAILED : API_ERROR_GENERATE_EMAIL_RESPONSE,
+    );
     const completedAt = new Date().toISOString();
     await db
       .update(automationRuns)
@@ -932,11 +1043,19 @@ export class ApplicationAutomationService {
         output: {
           success: false,
           error: message,
+          ...(partialResult
+            ? {
+                reply: partialResult.reply,
+                provider: partialResult.provider,
+                model: partialResult.model,
+                delivered: false,
+              }
+            : {}),
         },
         error: message,
         progress: AUTOMATION_FINISHED_PROGRESS,
-        currentStep: 1,
-        totalSteps: 1,
+        currentStep: partialResult ? 2 : 1,
+        totalSteps: partialResult ? 2 : 1,
         completedAt,
         updatedAt: completedAt,
       })
@@ -947,8 +1066,8 @@ export class ApplicationAutomationService {
         action: "email_response",
         status: "error",
         message,
-        step: 1,
-        totalSteps: 1,
+        step: partialResult ? 2 : 1,
+        totalSteps: partialResult ? 2 : 1,
       }),
     );
     throw error instanceof Error ? error : new Error(message);
@@ -982,9 +1101,78 @@ export class ApplicationAutomationService {
     return { reply, provider: aiResult.provider, model: aiResult.model };
   }
 
-  private async completeEmailResponseRun(
+  /**
+   * Persist draft-generation progress before attempting SMTP delivery.
+   */
+  private async markEmailResponseDraftGenerated(
     runId: string,
     result: { reply: string; provider: string; model: string },
+    recipientEmail?: string,
+  ): Promise<void> {
+    const updatedAt = new Date().toISOString();
+    await db
+      .update(automationRuns)
+      .set({
+        output: {
+          success: true,
+          reply: result.reply,
+          provider: result.provider,
+          model: result.model,
+          delivered: false,
+          ...(recipientEmail ? { recipientEmail } : {}),
+        },
+        progress: Math.round(AUTOMATION_FINISHED_PROGRESS / 2),
+        currentStep: 1,
+        totalSteps: 2,
+        updatedAt,
+      })
+      .where(eq(automationRuns.id, runId));
+    broadcastAutomationEvent(
+      this.createProgressEvent({
+        runId,
+        action: "email_response",
+        status: "running",
+        message: API_MESSAGE_EMAIL_RESPONSE_GENERATED,
+        step: 1,
+        totalSteps: 2,
+      }),
+    );
+  }
+
+  /**
+   * Deliver a generated reply through the configured SMTP transport.
+   */
+  private async deliverGeneratedEmail(
+    normalized: EmailResponseExecutionPayload,
+    reply: string,
+  ): Promise<EmailDeliveryDetails> {
+    if (!normalized.recipientEmail) {
+      throw new Error("recipientEmail is required for email delivery");
+    }
+
+    const deliveryConfig = await this.loadEmailTransportConfig();
+    const deliveryResult = await emailDeliveryService.send(deliveryConfig, {
+      recipientEmail: normalized.recipientEmail,
+      subject: normalized.subject,
+      body: reply,
+    });
+
+    return {
+      delivered: true,
+      recipientEmail: deliveryResult.recipientEmail,
+      deliveredAt: deliveryResult.deliveredAt,
+      messageId: deliveryResult.messageId,
+    };
+  }
+
+  private async completeEmailResponseRun(
+    runId: string,
+    result: {
+      reply: string;
+      provider: string;
+      model: string;
+      delivery: EmailDeliveryDetails;
+    },
   ): Promise<void> {
     const completedAt = new Date().toISOString();
     await db
@@ -996,11 +1184,17 @@ export class ApplicationAutomationService {
           reply: result.reply,
           provider: result.provider,
           model: result.model,
+          delivered: result.delivery.delivered,
+          ...(result.delivery.recipientEmail
+            ? { recipientEmail: result.delivery.recipientEmail }
+            : {}),
+          ...(result.delivery.deliveredAt ? { deliveredAt: result.delivery.deliveredAt } : {}),
+          ...(result.delivery.messageId ? { messageId: result.delivery.messageId } : {}),
         },
         error: null,
         progress: AUTOMATION_FINISHED_PROGRESS,
-        currentStep: 1,
-        totalSteps: 1,
+        currentStep: result.delivery.delivered ? 2 : 1,
+        totalSteps: result.delivery.delivered ? 2 : 1,
         completedAt,
         updatedAt: completedAt,
       })
@@ -1010,9 +1204,11 @@ export class ApplicationAutomationService {
         runId,
         action: "email_response",
         status: "success",
-        message: API_MESSAGE_EMAIL_RESPONSE_GENERATED,
-        step: 1,
-        totalSteps: 1,
+        message: result.delivery.delivered
+          ? API_MESSAGE_EMAIL_RESPONSE_DELIVERED
+          : API_MESSAGE_EMAIL_RESPONSE_GENERATED,
+        step: result.delivery.delivered ? 2 : 1,
+        totalSteps: result.delivery.delivered ? 2 : 1,
       }),
     );
   }
@@ -1020,13 +1216,7 @@ export class ApplicationAutomationService {
   /**
    * Run an AI-assisted email response and persist output as an automation run.
    */
-  async runEmailResponse(payload: EmailResponsePayload): Promise<{
-    runId: string;
-    status: "success";
-    reply: string;
-    provider: string;
-    model: string;
-  }> {
+  async runEmailResponse(payload: EmailResponseRequest): Promise<EmailResponseResult> {
     const normalized = this.normalizeEmailResponsePayload(payload);
     const runId = generateId();
     await this.createEmailResponseRun(runId, normalized);
@@ -1034,8 +1224,46 @@ export class ApplicationAutomationService {
     if (responseResult.status === "rejected") {
       return this.failEmailResponseRun(runId, responseResult.reason);
     }
-    await this.completeEmailResponseRun(runId, responseResult.value);
-    return { runId, status: "success", ...responseResult.value };
+
+    if (normalized.deliverAfterGeneration) {
+      await this.markEmailResponseDraftGenerated(
+        runId,
+        responseResult.value,
+        normalized.recipientEmail,
+      );
+    }
+
+    const noDelivery: EmailDeliveryDetails = {
+      delivered: false,
+      ...(normalized.recipientEmail ? { recipientEmail: normalized.recipientEmail } : {}),
+    };
+    const deliveryResult: PromiseSettledResult<EmailDeliveryDetails> =
+      normalized.deliverAfterGeneration
+        ? await settle(this.deliverGeneratedEmail(normalized, responseResult.value.reply))
+        : {
+            status: "fulfilled",
+            value: noDelivery,
+          };
+
+    if (deliveryResult.status === "rejected") {
+      return this.failEmailResponseRun(runId, deliveryResult.reason, responseResult.value);
+    }
+
+    await this.completeEmailResponseRun(runId, {
+      ...responseResult.value,
+      delivery: deliveryResult.value,
+    });
+    return {
+      runId,
+      status: "success",
+      ...responseResult.value,
+      delivered: deliveryResult.value.delivered,
+      ...(deliveryResult.value.recipientEmail
+        ? { recipientEmail: deliveryResult.value.recipientEmail }
+        : {}),
+      ...(deliveryResult.value.deliveredAt ? { deliveredAt: deliveryResult.value.deliveredAt } : {}),
+      ...(deliveryResult.value.messageId ? { messageId: deliveryResult.value.messageId } : {}),
+    };
   }
 
   /**

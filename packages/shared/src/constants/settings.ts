@@ -40,6 +40,31 @@ export const AUTOMATION_BROWSER_OPTIONS = ["chrome", "chromium", "edge"] as cons
 export type AutomationBrowserOption = (typeof AUTOMATION_BROWSER_OPTIONS)[number];
 
 /**
+ * Supported SMTP transport security modes for outbound email delivery.
+ */
+export const EMAIL_TRANSPORT_SECURITY_OPTIONS = ["tls", "starttls", "plain"] as const;
+
+/**
+ * SMTP transport security mode union derived from `EMAIL_TRANSPORT_SECURITY_OPTIONS`.
+ */
+export type EmailTransportSecurityOption = (typeof EMAIL_TRANSPORT_SECURITY_OPTIONS)[number];
+
+/**
+ * Supported SMTP authentication modes.
+ */
+export const EMAIL_TRANSPORT_AUTH_MODE_OPTIONS = ["plain", "login"] as const;
+
+/**
+ * SMTP authentication mode union derived from `EMAIL_TRANSPORT_AUTH_MODE_OPTIONS`.
+ */
+export type EmailTransportAuthModeOption = (typeof EMAIL_TRANSPORT_AUTH_MODE_OPTIONS)[number];
+
+/**
+ * Default timeout applied to SMTP connections when the user has not configured a value.
+ */
+export const DEFAULT_EMAIL_TRANSPORT_CONNECTION_TIMEOUT_SECONDS = 15;
+
+/**
  * Supported speech provider ids for STT/TTS runtime routing.
  */
 export const SPEECH_PROVIDER_OPTIONS = [

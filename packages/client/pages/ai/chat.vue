@@ -22,7 +22,7 @@ if (import.meta.server) {
   });
 }
 
-const { messages, loading, streaming, sendMessage, clearMessages } = useAI();
+const { messages, loading, streaming, sendMessage, clearMessages, buildCurrentContext } = useAI();
 const { $toast } = useNuxtApp();
 const {
   speechProviderOptions,
@@ -69,6 +69,9 @@ const latestAssistantMessageIndex = computed(() =>
   resolveLatestAssistantMessageIndex(messages.value),
 );
 const streamingBubble = computed(() => createStreamingAssistantMessage("chatPage"));
+const chatContext = computed(() => buildCurrentContext("chat-page"));
+const { contextChips, contextualPrompts, currentContextLabel, focusedEntityLabel } =
+  useAIChatContextSummary(chatContext, t);
 
 watch(
   () => messages.value.length,
@@ -130,6 +133,34 @@ onMounted(async () => {
       <div>
         <h1 class="text-3xl font-bold">{{ t("aiChatPage.title", { brand: APP_BRAND.name }) }}</h1>
         <p class="text-base-content/70">{{ t("aiChatPage.subtitle") }}</p>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="badge badge-soft badge-info">
+            {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
+          </span>
+          <span v-if="focusedEntityLabel" class="badge badge-soft badge-primary">
+            {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
+          </span>
+          <span
+            v-for="chip in contextChips"
+            :key="chip"
+            class="badge badge-ghost"
+          >
+            {{ chip }}
+          </span>
+        </div>
+        <ul class="mt-3 flex flex-wrap gap-2" :aria-label="t('floatingChat.suggestionsAria')">
+          <li v-for="prompt in contextualPrompts" :key="prompt">
+            <button
+              type="button"
+              class="btn btn-xs btn-soft"
+              :aria-label="t('floatingChat.suggestionAria', { prompt })"
+              :disabled="loading"
+              @click="input = prompt"
+            >
+              {{ prompt }}
+            </button>
+          </li>
+        </ul>
       </div>
       <button
         type="button"
@@ -153,6 +184,12 @@ onMounted(async () => {
         v-for="(messageRow, index) in renderedMessages"
         :key="messageRow.key"
         :assistant-label="APP_BRAND.assistantName"
+        :context-chips="
+          index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
+            ? contextChips
+            : []
+        "
+        :context-chips-aria="t('floatingChat.contextChipsAria')"
         :is-latest-assistant-message="
           index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
         "
@@ -164,6 +201,8 @@ onMounted(async () => {
       <AIChatBubble
         v-if="streaming"
         :assistant-label="APP_BRAND.assistantName"
+        :context-chips="contextChips"
+        :context-chips-aria="t('floatingChat.contextChipsAria')"
         :is-latest-assistant-message="true"
         :is-streaming="true"
         :locale="locale.value"

@@ -3,6 +3,8 @@ import {
   type AutomationRunStatus,
   type AutomationRunType,
   buildAutomationRunEndpoint,
+  type EmailResponseRequest,
+  type EmailResponseResult,
   type RpaRunEvent,
   type RpaRunExecutionEnvelope,
   rpaRunEventSchema,
@@ -22,23 +24,6 @@ interface JobApplyBody {
 
 interface ScheduleJobApplyBody extends JobApplyBody {
   runAt: string;
-}
-
-type EmailResponseTone = "professional" | "friendly" | "concise";
-
-interface EmailResponseBody {
-  subject: string;
-  message: string;
-  sender?: string;
-  tone?: EmailResponseTone;
-}
-
-interface EmailAutomationResponse {
-  runId: string;
-  status: Extract<AutomationRunStatus, "success">;
-  reply: string;
-  provider: string;
-  model: string;
 }
 
 interface FetchRunsParams {
@@ -86,8 +71,8 @@ function createRunMutations(runtime: AutomationRuntime) {
       },
     );
 
-  const triggerEmailResponse = (body: EmailResponseBody) =>
-    $fetch<EmailAutomationResponse>(
+  const triggerEmailResponse = (body: EmailResponseRequest) =>
+    $fetch<EmailResponseResult>(
       resolveApiEndpoint(
         runtime.apiBase,
         runtime.requestUrl,

@@ -5,9 +5,14 @@
 import type {
   AppLanguageCode,
   AutomationBrowserOption,
+  EmailTransportAuthModeOption,
+  EmailTransportSecurityOption,
   SpeechProviderOption,
 } from "../constants/settings";
-import { DEFAULT_SPEECH_SETTINGS } from "../constants/settings";
+import {
+  DEFAULT_EMAIL_TRANSPORT_CONNECTION_TIMEOUT_SECONDS,
+  DEFAULT_SPEECH_SETTINGS,
+} from "../constants/settings";
 import type { AIProviderType } from "./ai";
 
 /**
@@ -147,6 +152,20 @@ export interface AutomationSettings {
 }
 
 /**
+ * Outbound SMTP delivery settings.
+ */
+export interface EmailTransportSettings {
+  host: string;
+  port: number;
+  security: EmailTransportSecurityOption;
+  username: string;
+  fromEmail: string;
+  fromName: string;
+  authMethod: EmailTransportAuthModeOption;
+  connectionTimeoutSeconds: number;
+}
+
+/**
  * Global settings row identifier.
  */
 export const DEFAULT_SETTINGS_ID = "default";
@@ -205,6 +224,20 @@ export const DEFAULT_AUTOMATION_SETTINGS: AutomationSettings = {
 };
 
 /**
+ * Default outbound email delivery settings.
+ */
+export const DEFAULT_EMAIL_TRANSPORT_SETTINGS: EmailTransportSettings = {
+  host: "",
+  port: 587,
+  security: "starttls",
+  username: "",
+  fromEmail: "",
+  fromName: "",
+  authMethod: "plain",
+  connectionTimeoutSeconds: DEFAULT_EMAIL_TRANSPORT_CONNECTION_TIMEOUT_SECONDS,
+};
+
+/**
  * Persisted application settings.
  */
 export interface AppSettings {
@@ -222,10 +255,12 @@ export interface AppSettings {
   language: AppLanguageCode;
   notifications: NotificationPreferences;
   automationSettings?: AutomationSettings;
+  emailTransportSettings?: EmailTransportSettings;
   hasGeminiKey?: boolean;
   hasOpenaiKey?: boolean;
   hasClaudeKey?: boolean;
   hasHuggingfaceToken?: boolean;
+  hasEmailTransportPassword?: boolean;
   hasLocalKey?: boolean;
 }
 

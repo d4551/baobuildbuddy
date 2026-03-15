@@ -8,7 +8,7 @@ import {
 import { Elysia, t } from "elysia";
 import { gamificationService } from "../services/gamification-service";
 
-export const gamificationRoutes = new Elysia({ prefix: "/gamification" })
+export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["Gamification"] })
   .get("/progress", async () => {
     return gamificationService.getProgress();
   })

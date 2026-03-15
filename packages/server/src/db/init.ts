@@ -44,6 +44,8 @@ const TABLE_DEFINITIONS = [
       language TEXT DEFAULT 'en-US',
       notifications TEXT DEFAULT '{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}',
       automation_settings TEXT DEFAULT '{"headless":true,"defaultTimeout":30,"screenshotRetention":7,"maxConcurrentRuns":1,"defaultBrowser":"chrome","enableSmartSelectors":true,"autoSaveScreenshots":true}',
+      email_transport_settings TEXT DEFAULT '{"host":"","port":587,"security":"starttls","username":"","fromEmail":"","fromName":"","authMethod":"plain","connectionTimeoutSeconds":15}',
+      email_transport_password TEXT,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
@@ -243,12 +245,19 @@ const INDEXES = [
 ] as const;
 
 const AUTOMATION_RUNS_TABLE_NAME = "automation_runs";
+const SETTINGS_TABLE_NAME = "settings";
 
 const AUTOMATION_RUNS_REQUIRED_COLUMNS = {
   exit_code: "INTEGER",
   timed_out: "INTEGER NOT NULL DEFAULT 0",
   aborted: "INTEGER NOT NULL DEFAULT 0",
   execution_ms: "INTEGER",
+} as const;
+
+const SETTINGS_REQUIRED_COLUMNS = {
+  email_transport_settings:
+    `TEXT DEFAULT '{"host":"","port":587,"security":"starttls","username":"","fromEmail":"","fromName":"","authMethod":"plain","connectionTimeoutSeconds":15}'`,
+  email_transport_password: "TEXT",
 } as const;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -284,6 +293,17 @@ const ensureAutomationRunColumns = (sqlite: Database): void => {
   }
 };
 
+const ensureSettingsColumns = (sqlite: Database): void => {
+  const existingColumns = readTableColumnNames(sqlite, SETTINGS_TABLE_NAME);
+
+  for (const [columnName, columnDefinition] of Object.entries(SETTINGS_REQUIRED_COLUMNS)) {
+    if (existingColumns.has(columnName)) {
+      continue;
+    }
+    sqlite.exec(`ALTER TABLE ${SETTINGS_TABLE_NAME} ADD COLUMN ${columnName} ${columnDefinition}`);
+  }
+};
+
 /**
  * Initialize SQLite schema for all supported tables.
  */
@@ -293,6 +313,7 @@ export function initializeDatabase(sqlite: Database): void {
   }
 
   ensureAutomationRunColumns(sqlite);
+  ensureSettingsColumns(sqlite);
 
   for (const indexSql of INDEXES) {
     sqlite.exec(indexSql);

@@ -1,4 +1,4 @@
-import type { AutomationSettings } from "@bao/shared";
+import type { AutomationSettings, EmailTransportSettings } from "@bao/shared";
 import { Elysia } from "elysia";
 export declare const settingsRoutes: Elysia<"/settings", {
     decorator: {};
@@ -44,6 +44,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     hasOpenaiKey: boolean;
                     hasClaudeKey: boolean;
                     hasHuggingfaceToken: boolean;
+                    hasEmailTransportPassword: boolean;
                     hasLocalKey: boolean;
                     id: string;
                     localModelEndpoint: string | null;
@@ -54,6 +55,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     language: string | null;
                     notifications: Record<string, boolean> | null;
                     automationSettings: AutomationSettings | null;
+                    emailTransportSettings: EmailTransportSettings | null;
                     createdAt: string;
                     updatedAt: string;
                     error?: undefined;
@@ -143,6 +145,16 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         }[];
                     } | undefined;
                 } | undefined;
+                emailTransportSettings?: {
+                    host?: string | undefined;
+                    port?: number | undefined;
+                    security?: "tls" | "starttls" | "plain" | undefined;
+                    username?: string | undefined;
+                    fromEmail?: string | undefined;
+                    fromName?: string | undefined;
+                    authMethod?: "plain" | "login" | undefined;
+                    connectionTimeoutSeconds?: number | undefined;
+                } | undefined;
                 preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                 preferredModel?: string | undefined;
                 theme?: "bao-light" | "bao-dark" | undefined;
@@ -182,6 +194,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     huggingfaceToken?: string | undefined;
                     localModelEndpoint?: string | undefined;
                     localModelName?: string | undefined;
+                    emailTransportPassword?: string | undefined;
                 };
                 params: {};
                 query: unknown;

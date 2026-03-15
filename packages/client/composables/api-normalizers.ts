@@ -4,6 +4,7 @@ import {
   APP_LANGUAGE_CODES,
   type AppSettings,
   type AutomationSettings,
+  type EmailTransportSettings,
   asBoolean,
   asNumber,
   asRecord,
@@ -13,6 +14,7 @@ import {
   type CoverLetterData,
   DEFAULT_APP_LANGUAGE,
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_SPEECH_SETTINGS,
   type GameStudio,
   isCoverLetterTemplate,
@@ -219,6 +221,29 @@ const normalizeAutomationSettings = (value: unknown): AutomationSettings | undef
     autoSaveScreenshots:
       asBoolean(value.autoSaveScreenshots) ?? DEFAULT_AUTOMATION_SETTINGS.autoSaveScreenshots,
     speech: normalizeSpeechSettings(value.speech),
+  };
+};
+
+const normalizeEmailTransportSettings = (value: unknown): EmailTransportSettings | undefined => {
+  if (!isRecord(value)) {
+    return;
+  }
+
+  const security =
+    value.security === "tls" || value.security === "plain" ? value.security : "starttls";
+  const authMethod = value.authMethod === "login" ? "login" : "plain";
+
+  return {
+    host: asString(value.host) ?? DEFAULT_EMAIL_TRANSPORT_SETTINGS.host,
+    port: asNumber(value.port) ?? DEFAULT_EMAIL_TRANSPORT_SETTINGS.port,
+    security,
+    username: asString(value.username) ?? DEFAULT_EMAIL_TRANSPORT_SETTINGS.username,
+    fromEmail: asString(value.fromEmail) ?? DEFAULT_EMAIL_TRANSPORT_SETTINGS.fromEmail,
+    fromName: asString(value.fromName) ?? DEFAULT_EMAIL_TRANSPORT_SETTINGS.fromName,
+    authMethod,
+    connectionTimeoutSeconds:
+      asNumber(value.connectionTimeoutSeconds) ??
+      DEFAULT_EMAIL_TRANSPORT_SETTINGS.connectionTimeoutSeconds,
   };
 };
 
@@ -704,10 +729,12 @@ export const toAppSettings = (value: unknown): AppSettings | null => {
       jobAlerts: asBoolean(notificationsRecord.jobAlerts) ?? true,
     },
     automationSettings: normalizeAutomationSettings(value.automationSettings),
+    emailTransportSettings: normalizeEmailTransportSettings(value.emailTransportSettings),
     hasGeminiKey: asBoolean(value.hasGeminiKey),
     hasOpenaiKey: asBoolean(value.hasOpenaiKey),
     hasClaudeKey: asBoolean(value.hasClaudeKey),
     hasHuggingfaceToken: asBoolean(value.hasHuggingfaceToken),
+    hasEmailTransportPassword: asBoolean(value.hasEmailTransportPassword),
     hasLocalKey: asBoolean(value.hasLocalKey),
   };
 };

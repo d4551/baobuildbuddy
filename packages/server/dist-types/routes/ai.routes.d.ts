@@ -79,10 +79,15 @@ export declare const aiRoutes: Elysia<"/ai", {
                         };
                         state: {
                             hasResumes: boolean;
+                            resumeCount: number;
                             hasJobs: boolean;
+                            jobCount: number;
                             hasStudios: boolean;
+                            studioCount: number;
                             hasInterviewSessions: boolean;
+                            interviewSessionCount: number;
                             hasPortfolioProjects: boolean;
+                            portfolioProjectCount: number;
                         };
                     } | undefined;
                     message: string;

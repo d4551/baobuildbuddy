@@ -1,17 +1,10 @@
-import type { RpaRunEvent } from "@bao/shared";
+import type { EmailResponseRequest, EmailResponseResult, RpaRunEvent } from "@bao/shared";
 interface JobApplyPayload {
     jobUrl: string;
     resumeId: string;
     coverLetterId?: string;
     jobId?: string;
     customAnswers?: Record<string, string>;
-}
-type EmailResponseTone = "professional" | "friendly" | "concise";
-interface EmailResponsePayload {
-    subject: string;
-    message: string;
-    sender?: string;
-    tone?: EmailResponseTone;
 }
 /**
  * Run-level error indicating the configured concurrency limit was exceeded.
@@ -73,6 +66,10 @@ export declare class ApplicationAutomationService {
      */
     private tryLoadAIService;
     /**
+     * Resolve a validated SMTP delivery configuration from persisted settings.
+     */
+    private loadEmailTransportConfig;
+    /**
      * Normalize and validate the inbound execution payload.
      */
     private normalizePayload;
@@ -84,6 +81,18 @@ export declare class ApplicationAutomationService {
      * Normalize and validate an email-response automation payload.
      */
     private normalizeEmailResponsePayload;
+    /**
+     * Validates normalized email response text fields against persisted limits.
+     */
+    private validateEmailResponseTextLengths;
+    /**
+     * Resolves the target recipient from explicit input or an email-like sender field.
+     */
+    private resolveEmailResponseRecipientEmail;
+    /**
+     * Maps optional tone input to a supported automation email tone.
+     */
+    private normalizeEmailResponseTone;
     /**
      * Normalize a scheduled run datetime with strict bounds.
      */
@@ -161,17 +170,19 @@ export declare class ApplicationAutomationService {
     private createEmailResponseRun;
     private failEmailResponseRun;
     private generateEmailResponse;
+    /**
+     * Persist draft-generation progress before attempting SMTP delivery.
+     */
+    private markEmailResponseDraftGenerated;
+    /**
+     * Deliver a generated reply through the configured SMTP transport.
+     */
+    private deliverGeneratedEmail;
     private completeEmailResponseRun;
     /**
      * Run an AI-assisted email response and persist output as an automation run.
      */
-    runEmailResponse(payload: EmailResponsePayload): Promise<{
-        runId: string;
-        status: "success";
-        reply: string;
-        provider: string;
-        model: string;
-    }>;
+    runEmailResponse(payload: EmailResponseRequest): Promise<EmailResponseResult>;
     /**
      * Update run progress metrics from script progress events.
      */

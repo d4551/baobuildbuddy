@@ -457,6 +457,8 @@ import {
   API_ERROR_EXPORT_COVER_LETTER,
   API_ERROR_EXPORT_PORTFOLIO,
   API_ERROR_EXPORT_RESUME,
+  API_ERROR_EMAIL_DELIVERY_FAILED,
+  API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING,
   API_ERROR_GENERATE_AI_RESPONSE,
   API_ERROR_GENERATE_COVER_LETTER,
   API_ERROR_GENERATE_EMAIL_RESPONSE,
@@ -571,6 +573,7 @@ import {
   API_MESSAGE_STUDIO_DELETED,
   API_MESSAGE_WS_INTERVIEW_CONNECTED,
   API_MESSAGE_EMAIL_RESPONSE_GENERATED,
+  API_MESSAGE_EMAIL_RESPONSE_DELIVERED,
   API_MESSAGE_JOB_APPLICATION_AUTOMATION_COMPLETED,
 } from "./constants/api-messages";
 export {
@@ -593,6 +596,8 @@ export {
   API_ERROR_EXPORT_COVER_LETTER,
   API_ERROR_EXPORT_PORTFOLIO,
   API_ERROR_EXPORT_RESUME,
+  API_ERROR_EMAIL_DELIVERY_FAILED,
+  API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING,
   API_ERROR_GENERATE_AI_RESPONSE,
   API_ERROR_GENERATE_COVER_LETTER,
   API_ERROR_GENERATE_EMAIL_RESPONSE,
@@ -707,6 +712,7 @@ export {
   API_MESSAGE_STUDIO_DELETED,
   API_MESSAGE_WS_INTERVIEW_CONNECTED,
   API_MESSAGE_EMAIL_RESPONSE_GENERATED,
+  API_MESSAGE_EMAIL_RESPONSE_DELIVERED,
   API_MESSAGE_JOB_APPLICATION_AUTOMATION_COMPLETED,
 };
 export {
@@ -965,9 +971,12 @@ import {
   APP_LANGUAGE_LABELS,
   APP_LANGUAGE_OPTIONS,
   AUTOMATION_BROWSER_OPTIONS,
+  DEFAULT_EMAIL_TRANSPORT_CONNECTION_TIMEOUT_SECONDS,
   DEFAULT_APP_LANGUAGE,
   DEFAULT_SPEECH_LOCALE,
   DEFAULT_SPEECH_SETTINGS,
+  EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
+  EMAIL_TRANSPORT_SECURITY_OPTIONS,
   SPEECH_MODEL_OPTIONS,
   SPEECH_PROVIDER_OPTIONS,
 } from "./constants/settings";
@@ -976,18 +985,29 @@ export {
   APP_LANGUAGE_LABELS,
   APP_LANGUAGE_OPTIONS,
   AUTOMATION_BROWSER_OPTIONS,
+  DEFAULT_EMAIL_TRANSPORT_CONNECTION_TIMEOUT_SECONDS,
   DEFAULT_APP_LANGUAGE,
   DEFAULT_SPEECH_LOCALE,
   DEFAULT_SPEECH_SETTINGS,
+  EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
+  EMAIL_TRANSPORT_SECURITY_OPTIONS,
   SPEECH_MODEL_OPTIONS,
   SPEECH_PROVIDER_OPTIONS,
 };
 import type {
   AppLanguageCode,
   AutomationBrowserOption,
+  EmailTransportAuthModeOption,
+  EmailTransportSecurityOption,
   SpeechProviderOption,
 } from "./constants/settings";
-export type { AppLanguageCode, AutomationBrowserOption, SpeechProviderOption };
+export type {
+  AppLanguageCode,
+  AutomationBrowserOption,
+  EmailTransportAuthModeOption,
+  EmailTransportSecurityOption,
+  SpeechProviderOption,
+};
 import { STATE_KEYS } from "./constants/state-keys";
 export { STATE_KEYS };
 import type { StateKey } from "./constants/state-keys";
@@ -1048,6 +1068,18 @@ export type {
   ScrapedStudio,
   ScraperScriptEnvelope,
 };
+import {
+  emailResponseRequestSchema,
+  emailResponseResultSchema,
+  emailResponseToneSchema,
+} from "./schemas/automation-email.schema";
+export { emailResponseRequestSchema, emailResponseResultSchema, emailResponseToneSchema };
+import type {
+  EmailResponseRequest,
+  EmailResponseResult,
+  EmailResponseTone,
+} from "./schemas/automation-email.schema";
+export type { EmailResponseRequest, EmailResponseResult, EmailResponseTone };
 import {
   errorEnvelopeSchema,
   rpaErrorEnvelopeSchema,
@@ -1197,6 +1229,9 @@ import {
   companyBoardApiTemplatesSchema,
   companyBoardConfigSchema,
   companyBoardTypeSchema,
+  emailTransportAuthModeSchema,
+  emailTransportSecuritySchema,
+  emailTransportSettingsSchema,
   gamingPortalConfigSchema,
   gamingPortalIdSchema,
   greenhouseBoardConfigSchema,
@@ -1215,6 +1250,9 @@ export {
   companyBoardApiTemplatesSchema,
   companyBoardConfigSchema,
   companyBoardTypeSchema,
+  emailTransportAuthModeSchema,
+  emailTransportSecuritySchema,
+  emailTransportSettingsSchema,
   gamingPortalConfigSchema,
   gamingPortalIdSchema,
   greenhouseBoardConfigSchema,
@@ -1463,12 +1501,14 @@ export type {
 };
 import {
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
   DEFAULT_PROFILE_ID,
   DEFAULT_SETTINGS_ID,
 } from "./types/settings";
 export {
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
   DEFAULT_PROFILE_ID,
   DEFAULT_SETTINGS_ID,
@@ -1479,6 +1519,7 @@ import type {
   AutomationSettings,
   CompanyBoardATSType,
   CompanyBoardConfig,
+  EmailTransportSettings,
   GamingPortalConfig,
   GamingPortalId,
   GreenhouseBoardConfig,
@@ -1496,6 +1537,7 @@ export type {
   AutomationSettings,
   CompanyBoardATSType,
   CompanyBoardConfig,
+  EmailTransportSettings,
   GamingPortalConfig,
   GamingPortalId,
   GreenhouseBoardConfig,
@@ -1627,5 +1669,7 @@ import {
   isRecord,
 } from "./utils/type-guards";
 export { asBoolean, asNumber, asRecord, asString, asStringArray, asUnknownArray, isRecord };
+import { isEmailTransportConfigured } from "./utils/email-transport";
+export { isEmailTransportConfigured };
 import { generateId, isValidEmail, isValidUrl, slugify } from "./utils/validation";
 export { generateId, isValidEmail, isValidUrl, slugify };

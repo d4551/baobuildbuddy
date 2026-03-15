@@ -26,7 +26,7 @@ import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
 import { createPdfAttachmentResponse } from "../utils/http-response";
 
-export const portfolioRoutes = new Elysia({ prefix: "/portfolio" })
+export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfolio"] })
   .get("/", async () => {
     return await portfolioService.getPortfolioPayload();
   })
