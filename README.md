@@ -203,7 +203,7 @@ Windows desktop releases are 64-bit only. We do not ship 32-bit (`x86` / `i686`)
 ```text ascii-box
 /------------------------------\
 |           BAO WORLD          |
-|     Press START to begin!     |
+|     Press START to begin!    |
 |------------------------------|
 | 1) Prepare environment       |
 | 2) Configure services        |
@@ -495,8 +495,8 @@ It passes payload to stdin, reads both stdout/stderr, and fails with structured 
      |  | Lever     | |      so the aggregator doesn't have to
      |  | Company   | |      care which ATS you're scraping.
      |  +-----------+ |
-      \             /
-       '-----------'
+      \              /
+       '------------'
 ```
 
 The job aggregation system lives under `packages/server/src/services/jobs/` and consists of:
@@ -529,7 +529,7 @@ The aggregator calls each registered provider, deduplicates results, runs matchi
                 |  [2] OpenAI Knight  |
                 |  [3] Gemini Ranger  |      "Would you kindly"
                 |  [4] Claude Healer  |       configure at least
-                |  [5] HF Summoner   |       one provider?
+                |  [5] HF Summoner    |       one provider?
                  \                   /
                   \_________________/
 ```
@@ -578,10 +578,10 @@ All AI calls are server-owned. The client communicates through API routes and We
     |     SERVICE INVENTORY      |
     |____________________________|
     |                            |
-    | "I used to be an          |
-    |  adventurer like you,     |
-    |  then I took a service    |
-    |  layer to the knee."      |
+    | "I used to be an           |
+    |  adventurer like you,      |
+    |  then I took a service     |
+    |  layer to the knee."       |
     |____________________________|
 ```
 
@@ -605,7 +605,7 @@ Beyond the route-specific services, the server includes:
           /    ||||    \     inventory before proceeding.
          / ,   ||||   , \
         /  |   ||||   |  \   Missing items = Game Over.
-             /___|___||||___|___\
+       /___|___||||___|___\
 ```
 
 This section is the canonical first-run path for new developers. It starts from a fresh clone and ends with a fully running stack with validation checks.
@@ -766,12 +766,12 @@ If all three requests respond, the API stack is reachable from defaults.
      ______________________
     /|                     |\     Desktop packaging uses a native shell and
    / |        TAURI        | \    no separate Electron runtime.
-  /__|_____________________|\    It launches the existing Bun stack and opens
-  |  |                     |  it in a desktop window.
-  |__|  .-.\           .-. |  This keeps one codebase for web + desktop.
-  |  |  |o|           |o| |
-  |  |  '-'           '-' |
-  |  |_____________________|
+  /__|_____________________|  \    It launches the existing Bun stack and opens
+  |  |                        |  it in a desktop window.
+  |__|  .-.\          /.-.    |  This keeps one codebase for web + desktop.
+  |  |  |o|           |o|     |
+  |  |  '-'           '-'     |
+  |  |_____________________   |
   |___________________________|
 ```
 
@@ -982,13 +982,13 @@ Required `jobProviders` keys:
 ## 10) Start procedures
 
 ```text
-     _____________
-    |  ___  ___  |
-    | | 1 || 2 | |      PLAYER SELECT
-    | |___||___| |
-    |  ___  ___  |      1 = Full stack   (bun run dev / scripts/dev-stack.ts)
-    | | 3 || 4 | |      2 = Server only  (bun run dev:server)
-    | |___||___| |      3 = Client only  (bun run dev:client)
+     ______________
+    |  ___  ___   |
+    | | 1 || 2 |  |      PLAYER SELECT
+    | |___||___|  |
+    |  ___  ___   |      1 = Full stack   (bun run dev / scripts/dev-stack.ts)
+    | | 3 || 4 |  |      2 = Server only  (bun run dev:server)
+    | |___||___|  |      3 = Client only  (bun run dev:client)
     |_____________|      4 = Split terminals
 
      "Press START to begin"
@@ -1356,8 +1356,8 @@ Manual browser checklist for final sign-off:
       | |               |   |     "All your base
       | |  WORLD MAP    |   |      are belong to us."
       | |               |   |
-      | |  CORE ROUTES   |   |      Navigate the SSR app across
-      | |  + FEATURES    |   |      the main product surfaces.
+      | |  CORE ROUTES  |   |      Navigate the SSR app across
+      | |  + FEATURES   |   |      the main product surfaces.
       | |_______________|   |
       |_____________________|
 ```
@@ -1544,21 +1544,21 @@ bun run scripts/validate-ascii-geometry.ts README.md
   +============================================================+
   |                                                            |
   |    __  __ ___ ____ ____ ___ ___  _   _                     |
-  |   |  \/  |_ _/ ___/ ___|_ _/ _ \| \ | |                   |
-  |   | |\/| || |\___ \___ \| | | | |  \| |                   |
-  |   | |  | || | ___) |__) | | |_| | |\  |                   |
-  |   |_|  |_|___|____/____/___\___/|_| \_|                   |
+  |   |  \/  |_ _/ ___/ ___|_ _/ _ \| \ | |                    |
+  |   | |\/| || |\___ \___ \| | | | |  \| |                    |
+  |   | |  | || | ___) |__) | | |_| | |\  |                    |
+  |   |_|  |_|___|____/____/___\___/|_| \_|                    |
   |                                                            |
   |     ____ ___  __  __ ____  _     _____ _____ _____         |
-  |    / ___/ _ \|  \/  |  _ \| |   | ____|_   _| ____|       |
-  |   | |  | | | | |\/| | |_) | |   |  _|   | | |  _|         |
-  |   | |__| |_| | |  | |  __/| |___| |___  | | | |___        |
-  |    \____\___/|_|  |_|_|   |_____|_____| |_| |_____|       |
+  |    / ___/ _ \|  \/  |  _ \| |   | ____|_   _| ____|        |
+  |   | |  | | | | |\/| | |_) | |   |  _|   | | |  _|          |
+  |   | |__| |_| | |  | |  __/| |___| |___  | | | |___         |
+  |    \____\___/|_|  |_|_|   |_____|_____| |_| |_____|        |
   |                                                            |
-  |                  BaoBuildBuddy is ready.                 |
+  |                  BaoBuildBuddy is ready.                   |
   |                                                            |
   |               "Thank you Mario!                            |
-  |                But our princess is in                       |
+  |                But our princess is in                      |
   |                another castle."                            |
   |                                                            |
   |               Just kidding. You're done.                   |
