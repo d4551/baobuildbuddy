@@ -374,12 +374,12 @@ Provider configuration for job ingestion is stored in `settings.automationSettin
 
 ```text
      _____________
-    |  ___  ___  |
-    | | 1 || 2 | |      PLAYER SELECT
-    | |___||___| |
-    |  ___  ___  |      1 = Full stack   (bun run dev / scripts/dev-stack.ts)
-    | | 3 || 4 | |      2 = Server only  (bun run dev:server)
-    | |___||___| |      3 = Client only  (bun run dev:client)
+    |  ___  ___   |
+    | | 1 || 2 |  |      PLAYER SELECT
+    | |___||___|  |
+    |  ___  ___   |      1 = Full stack   (bun run dev / scripts/dev-stack.ts)
+    | | 3 || 4 |  |      2 = Server only  (bun run dev:server)
+    | |___||___|  |      3 = Client only  (bun run dev:client)
     |_____________|      4 = Split terminals
 
      "Press START to begin"
@@ -624,7 +624,7 @@ The aggregator calls each provider, deduplicates results, scores them against yo
                 |  [2] OpenAI Knight  |
                 |  [3] Gemini Ranger  |      "Would you kindly"
                 |  [4] Claude Healer  |       configure at least
-                |  [5] HF Summoner   |       one provider?
+                |  [5] HF Summoner    |       one provider?
                  \                   /
                   \_________________/
 ```
@@ -660,10 +660,10 @@ All AI calls are server-owned. The client communicates through API routes and We
     |     SERVICE INVENTORY      |
     |____________________________|
     |                            |
-    | "I used to be an          |
-    |  adventurer like you,     |
-    |  then I took a service    |
-    |  layer to the knee."      |
+    | "I used to be an           |
+    |  adventurer like you,      |
+    |  then I took a service     |
+    |  layer to the knee."       |
     |____________________________|
 ```
 
@@ -863,8 +863,8 @@ Migrations live in `packages/server/src/db/migrations/`. Seed data in `packages/
       | |               |   |     "All your base
       | |  WORLD MAP    |   |      are belong to us."
       | |               |   |
-      | |  CORE ROUTES   |   |      Navigate the SSR app across
-      | |  + FEATURES    |   |      the main product surfaces.
+      | |  CORE ROUTES  |   |      Navigate the SSR app across
+      | |  + FEATURES   |   |      the main product surfaces.
       | |_______________|   |
       |_____________________|
 ```
@@ -1051,12 +1051,12 @@ bun run release:refresh:all-os
      ______________________
     /|                     |\    Desktop packaging uses a native shell and
    / |        TAURI        | \   no separate Electron runtime.
-  /__|_____________________|  \  It launches the existing Bun stack and opens
-  |  |                        |  it in a desktop window.
-  |__|  .-.\         /.-.     |  This keeps one codebase for web + desktop.
-  |  |  |o|           |o|     |
-  |  |  '-'           '-'     |
-  |  |_____________________   |
+  /__|_____________________|__\  It launches the existing Bun stack and opens
+  |  |                     |  |  it in a desktop window.
+  |__|  .-.\         /.-.  |__|  This keeps one codebase for web + desktop.
+  |  |  |o|           |o|  |  |
+  |  |  '-'           '-'  |  |
+  |  |_____________________|  |
   |___________________________|
 ```
 
