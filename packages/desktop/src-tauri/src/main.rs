@@ -101,6 +101,7 @@ impl StackStartup {
 struct PackagedRuntimeManifest {
     server_executable: String,
     script_runner_executable: String,
+    script_runner_entrypoint: Option<String>,
     #[cfg_attr(not(target_os = "windows"), allow(dead_code))]
     webview_bootstrapper_executable: Option<String>,
     scraper_dir: String,
@@ -650,6 +651,13 @@ fn launch_packaged_server(runtime: &PackagedRuntime) -> io::Result<Child> {
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit());
+
+    if let Some(script_runner_entrypoint) = runtime.manifest.script_runner_entrypoint.as_ref() {
+        command.env(
+            "BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH",
+            runtime.root.join(script_runner_entrypoint),
+        );
+    }
 
     configure_background_process(&mut command);
     command.spawn()

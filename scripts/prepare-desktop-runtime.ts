@@ -3,9 +3,11 @@ import {
   DESKTOP_RUNTIME_BUILD_SERVER_PORT,
   DESKTOP_RUNTIME_CORS_ORIGINS,
   DESKTOP_RUNTIME_HOST,
+  DESKTOP_RUNTIME_LINUX_BUN_PATH,
   DESKTOP_RUNTIME_MANIFEST_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
   DESKTOP_RUNTIME_SCRAPER_DIR,
+  DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH,
   DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
   DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
   DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
@@ -27,6 +29,7 @@ import { dirname, extname, join, resolve } from "node:path";
 type DesktopRuntimeManifest = {
   serverExecutable: string;
   scriptRunnerExecutable: string;
+  scriptRunnerEntrypoint: string | null;
   webviewBootstrapperExecutable: string | null;
   scraperDir: string;
   serverHost: string;
@@ -44,8 +47,6 @@ const SCRAPER_ROOT = join(REPO_ROOT, "packages", "scraper");
 const SERVER_ENTRYPOINT = join(REPO_ROOT, "packages", "server", "src", "index.ts");
 const SERVER_DIST_ENTRYPOINT = join(REPO_ROOT, "packages", "server", "dist", "index.js");
 const SCRIPT_RUNNER_ENTRYPOINT = join(REPO_ROOT, "scripts", "desktop-bun-entrypoint-runner.ts");
-const LINUX_SCRIPT_RUNNER_BUN_BASENAME = "bao-bun";
-const LINUX_SCRIPT_RUNNER_ENTRYPOINT_BASENAME = "bao-bun-entrypoint-runner.mjs";
 const BUILD_SERVER_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`;
 const BUILD_SERVER_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`;
 const READY_TIMEOUT_MS = 60_000;
@@ -639,37 +640,29 @@ const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<str
   return destinationRelativePath;
 };
 
-const stageLinuxScriptRunner = async (tauriTarget: string | null): Promise<void> => {
-  const scriptRunnerPath = join(
-    RUNTIME_ROOT,
-    toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
-  );
-  const scriptRunnerDirectory = dirname(scriptRunnerPath);
-  const bunBinaryPath = join(scriptRunnerDirectory, LINUX_SCRIPT_RUNNER_BUN_BASENAME);
-  const entrypointPath = join(scriptRunnerDirectory, LINUX_SCRIPT_RUNNER_ENTRYPOINT_BASENAME);
-  const wrapperScript = [
-    "#!/bin/sh",
-    "set -eu",
-    'SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)',
-    `exec "$SCRIPT_DIR/${LINUX_SCRIPT_RUNNER_BUN_BASENAME}" "$SCRIPT_DIR/${LINUX_SCRIPT_RUNNER_ENTRYPOINT_BASENAME}" "$@"`,
-    "",
-  ].join("\n");
+const stageLinuxScriptRunnerRuntime = async (): Promise<void> => {
+  const bunBinaryPath = join(RUNTIME_ROOT, DESKTOP_RUNTIME_LINUX_BUN_PATH);
+  const entrypointPath = join(RUNTIME_ROOT, DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH);
 
-  await mkdir(scriptRunnerDirectory, { recursive: true });
+  await mkdir(dirname(bunBinaryPath), { recursive: true });
   await cp(process.execPath, bunBinaryPath, { force: true });
   await cp(SCRIPT_RUNNER_ENTRYPOINT, entrypointPath, { force: true });
-  await writeFile(scriptRunnerPath, wrapperScript, "utf8");
   await chmod(bunBinaryPath, 0o755);
-  await chmod(scriptRunnerPath, 0o755);
 };
 
 const writeRuntimeManifest = async (
   tauriTarget: string | null,
   webviewBootstrapperExecutable: string | null,
 ): Promise<void> => {
+  const isLinuxRuntimeTarget = isLinuxTarget(tauriTarget);
   const manifest: DesktopRuntimeManifest = {
     serverExecutable: toExecutablePath(DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH, tauriTarget),
-    scriptRunnerExecutable: toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
+    scriptRunnerExecutable: isLinuxRuntimeTarget
+      ? DESKTOP_RUNTIME_LINUX_BUN_PATH
+      : toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
+    scriptRunnerEntrypoint: isLinuxRuntimeTarget
+      ? DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH
+      : null,
     webviewBootstrapperExecutable,
     scraperDir: DESKTOP_RUNTIME_SCRAPER_DIR,
     serverHost: DESKTOP_RUNTIME_HOST,
@@ -697,9 +690,9 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
 
   if (isLinuxTarget(tauriTarget)) {
     await writeOutput(
-      `desktop-runtime: staging bundled Bun runtime and shell wrapper for Linux script execution (${compileTarget})`,
+      `desktop-runtime: staging bundled Bun runtime and entrypoint helper for Linux script execution (${compileTarget})`,
     );
-    await stageLinuxScriptRunner(tauriTarget);
+    await stageLinuxScriptRunnerRuntime();
   } else {
     await writeOutput(`desktop-runtime: compiling bundled Bun script runner (${compileTarget})`);
     await compileRuntimeBinary(compileTarget, SCRIPT_RUNNER_ENTRYPOINT, scriptRunnerPath);

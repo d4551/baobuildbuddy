@@ -87,6 +87,13 @@ export const DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH = "server/bao-desktop-server
 /** Relative output path for the compiled packaged Bun entrypoint runner executable. */
 export const DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH = "bin/bao-bun-runner" as const;
 
+/** Relative runtime path for the bundled Bun binary used by Linux packaged automation execution. */
+export const DESKTOP_RUNTIME_LINUX_BUN_PATH = "bin/bao-bun" as const;
+
+/** Relative runtime path for the bundled Bun entrypoint helper used by Linux packaged automation execution. */
+export const DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH =
+  "bin/bao-bun-entrypoint-runner.mjs" as const;
+
 /** Windows WebView2 bootstrapper basename bundled into portable desktop runtime assets. */
 export const DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_BASENAME = [
   "MicrosoftEdge",

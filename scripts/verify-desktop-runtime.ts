@@ -23,6 +23,7 @@ import { pathToFileURL } from "node:url";
 type DesktopRuntimeManifest = {
   serverExecutable: string;
   scriptRunnerExecutable: string;
+  scriptRunnerEntrypoint: string | null;
   scraperDir: string;
   serverHost: string;
   serverPort: number;
@@ -122,6 +123,7 @@ const readManifest = async (): Promise<DesktopRuntimeManifest> => {
   const {
     serverExecutable,
     scriptRunnerExecutable,
+    scriptRunnerEntrypoint,
     scraperDir,
     serverHost,
     serverPort,
@@ -131,6 +133,11 @@ const readManifest = async (): Promise<DesktopRuntimeManifest> => {
   if (
     typeof serverExecutable !== "string" ||
     typeof scriptRunnerExecutable !== "string" ||
+    !(
+      scriptRunnerEntrypoint === null ||
+      typeof scriptRunnerEntrypoint === "string" ||
+      typeof scriptRunnerEntrypoint === "undefined"
+    ) ||
     typeof scraperDir !== "string" ||
     typeof serverHost !== "string" ||
     typeof serverPort !== "number" ||
@@ -151,6 +158,8 @@ const readManifest = async (): Promise<DesktopRuntimeManifest> => {
   return {
     serverExecutable,
     scriptRunnerExecutable,
+    scriptRunnerEntrypoint:
+      typeof scriptRunnerEntrypoint === "string" ? scriptRunnerEntrypoint : null,
     scraperDir,
     serverHost,
     serverPort,
@@ -448,7 +457,19 @@ const startPackagedServer = async (
 ): Promise<ReturnType<typeof Bun.spawn>> => {
   const serverExecutablePath = join(RUNTIME_ROOT, manifest.serverExecutable);
   const scriptRunnerPath = join(RUNTIME_ROOT, manifest.scriptRunnerExecutable);
+  const scriptRunnerEntrypointPath = manifest.scriptRunnerEntrypoint
+    ? join(RUNTIME_ROOT, manifest.scriptRunnerEntrypoint)
+    : null;
   const scraperDirPath = join(RUNTIME_ROOT, manifest.scraperDir);
+
+  if (!(await fileExists(scriptRunnerPath))) {
+    throw new Error(`Packaged desktop script runner is missing ${scriptRunnerPath}`);
+  }
+  if (scriptRunnerEntrypointPath && !(await fileExists(scriptRunnerEntrypointPath))) {
+    throw new Error(
+      `Packaged desktop script runner entrypoint is missing ${scriptRunnerEntrypointPath}`,
+    );
+  }
 
   const overrideCorsOrigins = Array.from(
     new Set([...manifest.corsOrigins, VERIFY_FRONTEND_ORIGIN]),
@@ -461,6 +482,7 @@ const startPackagedServer = async (
       BAO_DISABLE_AUTH: "true",
       BAO_SCRAPER_DIR: scraperDirPath,
       BAO_SCRIPT_RUNNER_PATH: scriptRunnerPath,
+      BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH: scriptRunnerEntrypointPath ?? undefined,
       CORS_ORIGINS: overrideCorsOrigins,
       HOST: manifest.serverHost,
       NODE_ENV: "production",
