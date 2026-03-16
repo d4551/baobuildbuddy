@@ -308,10 +308,6 @@ const buildMacosArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseA
 };
 
 const buildLinuxArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseArtifact[] => {
-  const appImagePath = join(
-    "linux",
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_LINUX_ARCH}.AppImage`,
-  );
   const debPath = join(
     "linux",
     `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_LINUX_DEB_ARCH}.deb`,
@@ -322,7 +318,6 @@ const buildLinuxArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseA
   );
 
   return [
-    createReleaseArtifact("linux", appImagePath, "appimage"),
     createReleaseArtifact("linux", debPath, "deb"),
     createReleaseArtifact("linux", rpmPath, "rpm"),
   ] as const;
@@ -513,7 +508,7 @@ const verifyBundleConfig = (
     ok:
       metadata.tauriTargets === "all" ||
       (Array.isArray(metadata.tauriTargets) &&
-        ["appimage", "deb", "dmg", "nsis", "rpm"].every((target) =>
+        ["deb", "dmg", "nsis", "rpm"].every((target) =>
           metadata.tauriTargets.includes(target),
         )),
   };

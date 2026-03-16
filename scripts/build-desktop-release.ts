@@ -292,10 +292,17 @@ const runTauriBuildFlow = async (
     return [buildCommand.join(" "), bundleCommand.join(" ")];
   }
 
+  // On Linux aarch64, linuxdeploy-plugin-gtk crashes with std::runtime_error
+  // during AppImage bundling (linuxdeploy 1-alpha is unstable on ARM64).
+  // Restrict to deb and rpm which build reliably.
+  const linuxBundleArgs =
+    hostTarget.artifactLabel === "linux" ? ["--bundles", "deb,rpm"] : [];
+
   const buildCommand = [
     process.execPath,
     "tauri",
     "build",
+    ...linuxBundleArgs,
     ...tauriArgs,
   ] as const;
   const buildExitCode = await runCommand(buildCommand, {
@@ -372,11 +379,6 @@ const stageLinuxArtifacts = async (
     "bundle",
   );
   const artifactPaths = [
-    join(
-      bundleRoot,
-      "appimage",
-      `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_LINUX_ARCH}.AppImage`,
-    ),
     join(
       bundleRoot,
       "deb",
