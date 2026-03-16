@@ -1,5 +1,12 @@
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
+import {
+  DESKTOP_RELEASE_LINUX_TARGET,
+  DESKTOP_RELEASE_MACOS_TARGET,
+  DESKTOP_RELEASE_METADATA_DIR,
+  DESKTOP_RELEASE_PROVENANCE_FILENAME,
+  DESKTOP_RELEASE_WINDOWS_TARGET,
+} from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type PreflightCheck = {
@@ -15,6 +22,7 @@ type NetworkTarget = {
 
 const NETWORK_TIMEOUT_MS = 8_000;
 const DESKTOP_TAURI_ROOT = join(process.cwd(), "packages", "desktop", "src-tauri");
+const DESKTOP_RELEASE_ROOT = join(process.cwd(), "packages", "desktop", "releases");
 const DESKTOP_TAURI_TARGET_DIRS = [
   join(DESKTOP_TAURI_ROOT, "target"),
   join(DESKTOP_TAURI_ROOT, "target-linux"),
@@ -118,16 +126,17 @@ const checkNetworkTarget = async (target: NetworkTarget): Promise<PreflightCheck
 const collectPreflightChecks = async (): Promise<PreflightCheck[]> => {
   const platformCheck: PreflightCheck = {
     label: "platform",
-    ok: process.platform === "darwin",
+    ok: ["darwin", "linux", "win32"].includes(process.platform),
     details: process.platform,
   };
 
   const toolChecks = await Promise.all([
     checkCommand("bun", [process.execPath, "--version"]),
-    checkCommand("docker", ["docker", "system", "info", "--format", "{{.ServerVersion}}"]),
     checkCommand("rustc", ["rustc", "--version"]),
     checkCommand("cargo", ["cargo", "--version"]),
-    checkCommand("xcode-select", ["xcode-select", "-p"]),
+    ...(process.platform === "darwin"
+      ? [checkCommand("xcode-select", ["xcode-select", "-p"])]
+      : []),
   ]);
 
   const networkChecks = await Promise.all(
@@ -135,6 +144,31 @@ const collectPreflightChecks = async (): Promise<PreflightCheck[]> => {
   );
 
   return [platformCheck, ...toolChecks, ...networkChecks];
+};
+
+const resolveHostDesktopTarget = (): string | null => {
+  if (process.platform === "darwin" && process.arch === "arm64") {
+    return DESKTOP_RELEASE_MACOS_TARGET;
+  }
+
+  if (process.platform === "win32" && process.arch === "x64") {
+    return DESKTOP_RELEASE_WINDOWS_TARGET;
+  }
+
+  if (process.platform === "linux" && process.arch === "arm64") {
+    return DESKTOP_RELEASE_LINUX_TARGET;
+  }
+
+  return null;
+};
+
+const assembledDesktopReleasesExist = async (): Promise<boolean> => {
+  const [provenanceExists, metadataExists] = await Promise.all([
+    Bun.file(join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_PROVENANCE_FILENAME)).exists(),
+    Bun.file(join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_METADATA_DIR)).exists(),
+  ]);
+
+  return provenanceExists && metadataExists;
 };
 
 const cleanDesktopBuildArtifacts = async (): Promise<void> => {
@@ -186,14 +220,28 @@ const main = async (): Promise<void> => {
     process.exit(buildExitCode);
   }
 
-  const refreshExitCode = await runCommand([
+  const hostDesktopTarget = resolveHostDesktopTarget();
+  const runtimeVerifyExitCode = await runCommand([
     process.execPath,
     "run",
-    "release:refresh:all-os:fast",
+    "verify:desktop-runtime",
+    ...(hostDesktopTarget ? ["--target", hostDesktopTarget] : []),
   ]);
-  if (refreshExitCode !== 0) {
-    await writeError("bun run release:refresh:all-os:fast failed.");
-    process.exit(refreshExitCode);
+  if (runtimeVerifyExitCode !== 0) {
+    await writeError("bun run verify:desktop-runtime failed.");
+    process.exit(runtimeVerifyExitCode);
+  }
+
+  if (await assembledDesktopReleasesExist()) {
+    const releasesVerifyExitCode = await runCommand([
+      process.execPath,
+      "run",
+      "verify:desktop-releases",
+    ]);
+    if (releasesVerifyExitCode !== 0) {
+      await writeError("bun run verify:desktop-releases failed.");
+      process.exit(releasesVerifyExitCode);
+    }
   }
 
   await writeOutput("release:verify passed.");

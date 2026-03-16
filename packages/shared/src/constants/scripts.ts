@@ -26,17 +26,35 @@ export const DISK_IMAGE_TIMEOUT_MS = 60_000 as const;
 /** Supported desktop release staging targets. */
 export const DESKTOP_RELEASE_TARGETS = ["macos", "linux", "windows"] as const;
 
+/** Default root used to stage native per-platform desktop release outputs before assembly. */
+export const DESKTOP_RELEASE_STAGING_ROOT = ".desktop-release-artifacts" as const;
+
+/** Metadata directory stored alongside assembled desktop release artifacts. */
+export const DESKTOP_RELEASE_METADATA_DIR = "metadata" as const;
+
+/** Per-target provenance manifest filename for assembled desktop release artifacts. */
+export const DESKTOP_RELEASE_PROVENANCE_FILENAME = "provenance.json" as const;
+
 /** Canonical macOS desktop release architecture label. */
 export const DESKTOP_RELEASE_MACOS_ARCH = "aarch64" as const;
 
+/** Canonical macOS desktop release target triple. */
+export const DESKTOP_RELEASE_MACOS_TARGET = "aarch64-apple-darwin" as const;
+
 /** Canonical Linux desktop release architecture label. */
 export const DESKTOP_RELEASE_LINUX_ARCH = "aarch64" as const;
+
+/** Canonical Linux desktop release target triple. */
+export const DESKTOP_RELEASE_LINUX_TARGET = "aarch64-unknown-linux-gnu" as const;
 
 /** Canonical Debian package architecture label used by desktop releases. */
 export const DESKTOP_RELEASE_LINUX_DEB_ARCH = "arm64" as const;
 
 /** Canonical Windows desktop release architecture label. */
 export const DESKTOP_RELEASE_WINDOWS_ARCH = "x64" as const;
+
+/** Canonical Windows desktop release target triple. */
+export const DESKTOP_RELEASE_WINDOWS_TARGET = "x86_64-pc-windows-msvc" as const;
 
 /** Relative resource directory bundled into the packaged desktop application. */
 export const DESKTOP_RUNTIME_RESOURCE_DIR = "gen/runtime" as const;

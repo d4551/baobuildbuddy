@@ -3,9 +3,11 @@ import { createReadStream } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import {
+  DESKTOP_RELEASE_METADATA_DIR,
   DESKTOP_RELEASE_LINUX_ARCH,
   DESKTOP_RELEASE_LINUX_DEB_ARCH,
   DESKTOP_RELEASE_MACOS_ARCH,
+  DESKTOP_RELEASE_PROVENANCE_FILENAME,
   DESKTOP_RELEASE_TARGETS,
   DESKTOP_RELEASE_WINDOWS_ARCH,
   DESKTOP_REQUIRED_NATIVE_ICON_FILES,
@@ -76,6 +78,26 @@ type VerificationResult = {
   readonly details: string;
 };
 
+type ReleaseProvenance = {
+  readonly schemaVersion?: unknown;
+  readonly target?: unknown;
+  readonly strategy?: unknown;
+  readonly tauriCli?: unknown;
+  readonly hostPlatform?: unknown;
+  readonly hostArch?: unknown;
+  readonly tauriTarget?: unknown;
+  readonly artifactNames?: unknown;
+  readonly buildCommands?: unknown;
+  readonly builtAt?: unknown;
+};
+
+type AssembledReleaseProvenance = {
+  readonly schemaVersion?: unknown;
+  readonly assembledAt?: unknown;
+  readonly sourceRoot?: unknown;
+  readonly targets?: unknown;
+};
+
 type CommandCapture = {
   readonly exitCode: number;
   readonly stdout: string;
@@ -92,13 +114,14 @@ const DESKTOP_PACKAGE_JSON_PATH = join(DESKTOP_ROOT, "package.json");
 const DESKTOP_TAURI_CONFIG_PATH = join(DESKTOP_TAURI_ROOT, "tauri.conf.json");
 const DESKTOP_CARGO_TOML_PATH = join(DESKTOP_TAURI_ROOT, "Cargo.toml");
 const DESKTOP_RELEASE_CHECKSUM_PATH = join(DESKTOP_RELEASE_ROOT, "sha256.txt");
+const DESKTOP_RELEASE_PROVENANCE_PATH = join(
+  DESKTOP_RELEASE_ROOT,
+  DESKTOP_RELEASE_PROVENANCE_FILENAME,
+);
+const DESKTOP_RELEASE_METADATA_ROOT = join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_METADATA_DIR);
 const DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
-  DESKTOP_TAURI_ROOT,
-  "target",
-  "x86_64-pc-windows-msvc",
-  "release",
-  "nsis",
-  "x64",
+  DESKTOP_RELEASE_METADATA_ROOT,
+  "windows",
   "installer.nsi",
 );
 const WINDOWS_NSIS_SCRAPER_INSTALL_MARKER = ["$INSTDIR", "gen", "runtime", "scraper"].join("\\");
@@ -241,6 +264,27 @@ const readDesktopMetadata = async (): Promise<DesktopBundleMetadata> => {
     webviewInstallMode,
     version,
   };
+};
+
+const readReleaseProvenance = async (): Promise<ReadonlyMap<DesktopReleaseTarget, ReleaseProvenance>> => {
+  if (!(await pathExists(DESKTOP_RELEASE_PROVENANCE_PATH))) {
+    throw new Error(`Missing release provenance manifest: ${DESKTOP_RELEASE_PROVENANCE_PATH}`);
+  }
+
+  const parsed = await readJsonObject<AssembledReleaseProvenance>(DESKTOP_RELEASE_PROVENANCE_PATH);
+  if (!isRecord(parsed.targets)) {
+    throw new Error("Release provenance manifest is missing target entries.");
+  }
+
+  const provenanceEntries = new Map<DesktopReleaseTarget, ReleaseProvenance>();
+  for (const target of DESKTOP_RELEASE_TARGETS) {
+    const entry = parsed.targets[target];
+    if (isRecord(entry)) {
+      provenanceEntries.set(target, entry);
+    }
+  }
+
+  return provenanceEntries;
 };
 
 const createReleaseArtifact = (
@@ -497,6 +541,63 @@ const verifyBundleConfig = (
     ...(gtkResult ? [gtkResult] : []),
     ...(webviewResult ? [webviewResult] : []),
   ];
+};
+
+const expectedHostPlatformForTarget = (target: DesktopReleaseTarget): NodeJS.Platform =>
+  target === "macos" ? "darwin" : target === "windows" ? "win32" : "linux";
+
+const verifyReleaseProvenance = async (
+  metadata: DesktopBundleMetadata,
+  targets: readonly DesktopReleaseTarget[],
+): Promise<readonly VerificationResult[]> => {
+  const provenanceEntriesResult = await captureResult(() => readReleaseProvenance());
+  if (!provenanceEntriesResult.ok) {
+    return [
+      {
+        details: toErrorMessage(provenanceEntriesResult.error),
+        label: "provenance:manifest",
+        ok: false,
+      },
+    ] as const;
+  }
+
+  const provenanceEntries = provenanceEntriesResult.value;
+  return targets.map((target) => {
+    const provenance = provenanceEntries.get(target);
+    if (!provenance) {
+      return {
+        details: `missing provenance entry for ${target}`,
+        label: `provenance:${target}`,
+        ok: false,
+      };
+    }
+
+    const artifactNames = Array.isArray(provenance.artifactNames)
+      ? provenance.artifactNames.filter((artifactName): artifactName is string =>
+        typeof artifactName === "string")
+      : [];
+    const expectedArtifactNames = buildArtifactsForTarget(metadata, target)
+      .map((artifact) => basename(artifact.relativePath))
+      .sort((left, right) => left.localeCompare(right));
+    const actualArtifactNames = [...artifactNames].sort((left, right) => left.localeCompare(right));
+    const details = [
+      `strategy=${toText(provenance.strategy) ?? "missing"}`,
+      `tauriCli=${toText(provenance.tauriCli) ?? "missing"}`,
+      `hostPlatform=${toText(provenance.hostPlatform) ?? "missing"}`,
+      `artifacts=${actualArtifactNames.join(",") || "missing"}`,
+    ].join(" ");
+
+    return {
+      details,
+      label: `provenance:${target}`,
+      ok:
+        provenance.strategy === "matching-host-native" &&
+        provenance.tauriCli === "repo-local-bun" &&
+        provenance.hostPlatform === expectedHostPlatformForTarget(target) &&
+        actualArtifactNames.length === expectedArtifactNames.length &&
+        actualArtifactNames.every((artifactName, index) => artifactName === expectedArtifactNames[index]),
+    };
+  });
 };
 
 const computeSha256 = (absolutePath: string): Promise<string> =>
@@ -925,6 +1026,7 @@ const main = async (): Promise<void> => {
   const results = [
     verifySemver(metadata),
     ...verifyBundleConfig(metadata, targets),
+    ...(await verifyReleaseProvenance(metadata, targets)),
     ...(await verifyIconAssets()),
     ...(await Promise.all(targets.map((target) => verifyStagedDirectory(metadata, target)))),
     ...(targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
