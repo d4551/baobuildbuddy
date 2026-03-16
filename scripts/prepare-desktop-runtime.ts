@@ -45,6 +45,7 @@ const BUILD_SERVER_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUI
 const READY_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 250;
 const LOG_LINE_LIMIT = 60;
+const COMPILE_RETRY_LIMIT = 2;
 const TEXT_FILE_EXTENSIONS = new Set([
   ".css",
   ".html",
@@ -56,6 +57,8 @@ const TEXT_FILE_EXTENSIONS = new Set([
   ".txt",
   ".xml",
 ]);
+const BUN_COMPILE_EXTRACTION_FAILURE_PATTERN =
+  /Failed to extract executable for '.+?'\. The download may be incomplete\./u;
 
 const toExecutablePath = (relativePath: string, tauriTarget: string | null): string =>
   tauriTarget?.includes("windows") ? `${relativePath}.exe` : relativePath;
@@ -222,6 +225,52 @@ const runCommand = async (
   if (exitCode !== 0) {
     throw new Error(`${command.join(" ")} exited with code ${exitCode}`);
   }
+};
+
+const readStreamText = async (stream: number | ReadableStream<Uint8Array> | undefined): Promise<string> => {
+  if (!(stream instanceof ReadableStream)) {
+    return "";
+  }
+
+  return await new Response(stream).text();
+};
+
+const runCommandCaptured = async (
+  command: readonly string[],
+  options: {
+    cwd?: string;
+    env?: Record<string, string | undefined>;
+  } = {},
+): Promise<{
+  readonly exitCode: number;
+  readonly stdout: string;
+  readonly stderr: string;
+}> => {
+  const proc = Bun.spawn(command, {
+    cwd: options.cwd ?? REPO_ROOT,
+    env: options.env ?? process.env,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+
+  const [stdout, stderr, exitCode] = await Promise.all([
+    readStreamText(proc.stdout),
+    readStreamText(proc.stderr),
+    proc.exited,
+  ]);
+
+  if (stdout.length > 0) {
+    process.stdout.write(stdout);
+  }
+  if (stderr.length > 0) {
+    process.stderr.write(stderr);
+  }
+
+  return {
+    exitCode,
+    stdout,
+    stderr,
+  };
 };
 
 const isServiceReady = async (url: string): Promise<boolean> => {
@@ -407,7 +456,30 @@ const compileRuntimeBinary = async (
     "--outfile",
     outputPath,
   ];
-  await runCommand(command);
+
+  for (let attempt = 1; attempt <= COMPILE_RETRY_LIMIT; attempt += 1) {
+    const result = await runCommandCaptured(command);
+    if (result.exitCode === 0) {
+      return;
+    }
+
+    const combinedOutput = `${result.stdout}\n${result.stderr}`;
+    const canRetryExtractionFailure = process.platform === "win32" &&
+      compileTarget.startsWith("bun-windows-") &&
+      attempt < COMPILE_RETRY_LIMIT &&
+      BUN_COMPILE_EXTRACTION_FAILURE_PATTERN.test(combinedOutput);
+
+    if (canRetryExtractionFailure) {
+      await writeOutput(
+        `desktop-runtime: Bun compile target download for ${compileTarget} was incomplete; clearing Bun package cache and retrying`,
+      );
+      await runCommand([process.execPath, "pm", "cache", "rm"]);
+      await rm(outputPath, { force: true });
+      continue;
+    }
+
+    throw new Error(`${command.join(" ")} exited with code ${result.exitCode}`);
+  }
 };
 
 const stageScraperRuntime = async (): Promise<void> => {
