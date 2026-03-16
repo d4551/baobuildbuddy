@@ -1,6 +1,9 @@
 name: desktop-release
 
 on:
+  push:
+    branches:
+      - "codex/**"
   workflow_dispatch:
 
 permissions:
