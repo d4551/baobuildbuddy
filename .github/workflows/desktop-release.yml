@@ -14,7 +14,7 @@ jobs:
     runs-on: macos-14
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -37,7 +37,7 @@ jobs:
         run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts
 
       - name: Upload macOS release artifact set
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: desktop-release-macos
           path: .desktop-release-artifacts/macos
@@ -47,7 +47,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -67,12 +67,23 @@ jobs:
         shell: pwsh
         run: bun install --frozen-lockfile
 
+      - name: Download WebView2 bootstrapper
+        shell: pwsh
+        run: |
+          $bootstrapperDir = Join-Path $env:LOCALAPPDATA 'tauri'
+          $bootstrapperPath = Join-Path $bootstrapperDir 'MicrosoftEdgeWebview2Setup.exe'
+          New-Item -ItemType Directory -Force -Path $bootstrapperDir | Out-Null
+          Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $bootstrapperPath
+          if (!(Test-Path $bootstrapperPath)) {
+            throw "WebView2 bootstrapper download did not produce $bootstrapperPath"
+          }
+
       - name: Build native Windows release artifacts
         shell: pwsh
         run: bun run release:desktop:windows -- --output-root .desktop-release-artifacts
 
       - name: Upload Windows release artifact set
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: desktop-release-windows
           path: .desktop-release-artifacts/windows
@@ -82,7 +93,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build native Linux ARM64 release artifacts
         uses: pguyot/arm-runner-action@v2.6.5
@@ -117,7 +128,7 @@ jobs:
             bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
 
       - name: Upload Linux ARM64 release artifact set
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: desktop-release-linux
           path: .desktop-release-artifacts/linux
@@ -131,7 +142,7 @@ jobs:
     runs-on: macos-14
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -142,19 +153,19 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Download macOS release artifact set
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: desktop-release-macos
           path: .desktop-release-input/macos
 
       - name: Download Windows release artifact set
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: desktop-release-windows
           path: .desktop-release-input/windows
 
       - name: Download Linux release artifact set
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: desktop-release-linux
           path: .desktop-release-input/linux
@@ -163,7 +174,7 @@ jobs:
         run: bun run release:refresh:all-os -- --source-root .desktop-release-input
 
       - name: Upload assembled desktop releases
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: desktop-releases
           path: packages/desktop/releases
