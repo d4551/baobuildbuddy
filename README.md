@@ -225,55 +225,55 @@ Windows builds are 64-bit only. See `packages/desktop/releases/README.md` for th
 
 ```mermaid
 flowchart TD
-  Browser["Browser"] --> Client["packages/client (Nuxt SSR)"]
-  Client --> Pages["pages + layouts + components"]
-  Client --> Composables["typed composables + api-normalizers.ts"]
-  Client --> EdenClient["plugins/eden.ts"]
-  Client --> FlowEngine["flow-engine.ts + ui-layout.ts"]
+  Browser["Browser"] --> Client["packages/client · Nuxt SSR"]
+  Client --> Pages["pages · layouts · components"]
+  Client --> Composables["typed composables · api-normalizers"]
+  Client --> EdenClient["plugins/eden"]
+  Client --> FlowEngine["flow-engine · ui-layout"]
 
   ServerTypes["packages/server/dist-types"]
   Shared["packages/shared contracts"]
-  EdenClient -->|typed HTTP calls| ApiPrefix["/api"]
-  EdenClient -->|type import| ServerTypes
-  ApiPrefix --> App["packages/server/src/app.ts"]
-  App --> Middleware["cors + swagger + rate-limit + logger + errorHandler + authGuard"]
-  App --> Routes["17 route modules from route-modules.ts"]
-  App --> WebSockets["/api/ws/chat + /api/ws/interview + /api/ws/automation"]
+  EdenClient -->|"typed HTTP calls"| ApiPrefix["/api"]
+  EdenClient -->|"type import"| ServerTypes
+  ApiPrefix --> App["packages/server/src/app"]
+  App --> Middleware["cors · swagger · rate-limit · logger · errorHandler · authGuard"]
+  App --> Routes["17 route modules from route-modules"]
+  App --> WebSockets["ws: chat · interview · automation"]
   App --> Shared
   App --> ServerTypes
 
-  Routes --> AuthRoutes["auth + user + settings"]
-  Routes --> CareerRoutes["jobs + resume + cover-letter + portfolio + interview + studios"]
-  Routes --> AutomationRoutes["automation + scraper + automation-screenshots"]
-  Routes --> PlatformRoutes["ai + gamification + skill-mapping + search + stats"]
+  Routes --> AuthRoutes["auth · user · settings"]
+  Routes --> CareerRoutes["jobs · resume · cover-letter · portfolio · interview · studios"]
+  Routes --> AutomationRoutes["automation · scraper · automation-screenshots"]
+  Routes --> PlatformRoutes["ai · gamification · skill-mapping · search · stats"]
 
   CareerRoutes --> JobsSvc["jobs service"]
-  JobsSvc --> JobAggregator["job-aggregator.ts"]
-  JobAggregator --> ProviderRegistry["provider-registry.ts"]
-  ProviderRegistry --> ATSProviders["greenhouse.ts + lever.ts + company-board.ts"]
-  ProviderRegistry --> GamingProviders["gaming-providers.ts"]
-  JobsSvc --> MatchingSvc["matching-service.ts"]
-  JobsSvc --> DedupSvc["deduplication.ts"]
+  JobsSvc --> JobAggregator["job-aggregator"]
+  JobAggregator --> ProviderRegistry["provider-registry"]
+  ProviderRegistry --> ATSProviders["greenhouse · lever · company-board"]
+  ProviderRegistry --> GamingProviders["gaming-providers"]
+  JobsSvc --> MatchingSvc["matching-service"]
+  JobsSvc --> DedupSvc["deduplication"]
 
-  CareerRoutes --> DomainServices["resume + cover-letter + portfolio + interview + studio services"]
-  PlatformRoutes --> PlatformServices["ai + gamification + skill-mapping + search + statistics"]
-  PlatformServices --> SkillExtractor["skill-extractor.ts"]
-  PlatformServices --> AiProviders["local + openai + gemini + claude + huggingface"]
-  AiProviders --> ExternalAI["provider APIs / local model endpoint"]
+  CareerRoutes --> DomainServices["resume · cover-letter · portfolio · interview · studio services"]
+  PlatformRoutes --> PlatformServices["ai · gamification · skill-mapping · search · statistics"]
+  PlatformServices --> SkillExtractor["skill-extractor"]
+  PlatformServices --> AiProviders["local · openai · gemini · claude · huggingface"]
+  AiProviders --> ExternalAI["provider APIs and local model endpoint"]
 
-  AutomationRoutes --> AutomationSvc["application-automation-service.ts"]
-  AutomationRoutes --> ScraperSvc["scraper-service.ts"]
-  AutomationSvc --> Runner["automation/rpa-runner.ts"]
+  AutomationRoutes --> AutomationSvc["application-automation-service"]
+  AutomationRoutes --> ScraperSvc["scraper-service"]
+  AutomationSvc --> Runner["automation/rpa-runner"]
   ScraperSvc --> Runner
   Runner --> ScraperPkg["packages/scraper"]
-  ScraperPkg --> Scripts["src/scripts/*.ts"]
-  Scripts --> Runtime["Playwright runtime + ATS adapters + provider extractors"]
+  ScraperPkg --> Scripts["src/scripts"]
+  Scripts --> Runtime["Playwright runtime · ATS adapters · provider extractors"]
 
-  JobsSvc --> DB[(SQLite via bun:sqlite + Drizzle)]
+  JobsSvc --> DB[("SQLite via Bun SQLite and Drizzle")]
   DomainServices --> DB
   PlatformServices --> DB
   AutomationSvc --> AutomationRuns["automation_runs"]
-  ScraperSvc --> JobsStudios["jobs + studios ingestion"]
+  ScraperSvc --> JobsStudios["jobs · studios ingestion"]
   AutomationRuns --> DB
   JobsStudios --> DB
 ```
