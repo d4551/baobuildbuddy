@@ -35,6 +35,9 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+packages/server/:memory:
+packages/server/:memory:-shm
+packages/server/:memory:-wal
 .venv/
 __pycache__/
 *.pyc

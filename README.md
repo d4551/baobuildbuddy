@@ -61,7 +61,7 @@ For the full beginner walkthrough, use [docs/LOCAL_AI_SETUP.md](docs/LOCAL_AI_SE
 
 ## Release Validation Workflow
 
-Use this sequence for a full local quality gate and rebuild pass:
+Use this sequence for a full local quality gate and host-local desktop verification pass:
 
 ```bash
 bun run lint
@@ -69,15 +69,29 @@ bun run typecheck
 bun run test
 bun run build
 bun run build:desktop
+```
+
+To assemble a canonical multi-platform release set after matching-host jobs have produced native artifacts under `.desktop-release-artifacts`, run:
+
+```bash
 bun run release:refresh:all-os
 ```
 
-After the full quality pass, use `bun run release:refresh:all-os:fast` for a deterministic rebuild-only packaging pass. It is equivalent to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates` and skips rerunning lint/typecheck/test/build.
+Per-platform native release staging commands:
 
-`release:refresh:all-os` now uses `cargo tauri build` as the canonical desktop build path. On macOS it still includes a deterministic headless DMG fallback that rebuilds the image from the emitted `.app` bundle when the standard DMG step is missing or unreliable.
+```bash
+bun run release:desktop:macos -- --output-root .desktop-release-artifacts
+bun run release:desktop:windows -- --output-root .desktop-release-artifacts
+bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
+```
 
-`bun run release:refresh:all-os` must run on a macOS host with Docker available and outbound network access for Ubuntu package mirrors plus Bun/Rust/AppImage downloads used by cross-target packaging.
-The script automatically uses containerized NSIS fallback for Windows setup packaging and runs the ARM AppImage stage separately after the Linux `deb`/`rpm` build completes.
+These commands follow the Tauri 2 matching-host release contract:
+
+- `bun run build:desktop` builds only the current host target.
+- `bun run release:desktop:macos` runs the macOS-native split flow: `bun tauri build --no-bundle` then `bun tauri bundle --bundles app,dmg`.
+- `bun run release:desktop:windows` runs native Windows `bun tauri build` and stages the NSIS installer plus portable zip.
+- `bun run release:desktop:linux-arm64` runs native Linux ARM64 `bun tauri build --bundles deb,rpm` and stages the deb and rpm bundles.
+- `bun run release:refresh:all-os` no longer cross-builds from one machine. It assembles previously built matching-host artifacts, regenerates checksums, and verifies staged provenance.
 
 Script/runtime verification commands:
 
@@ -116,9 +130,9 @@ Expected validation outcomes:
 - `bun run typecheck`: no TypeScript diagnostics.
 - `bun run test`: all workspace test suites pass.
 - `bun run build`: all packages build successfully.
-- `CI=true bun run build:desktop`: desktop packaging build succeeds.
-- `bun run release:refresh:all-os`: all desktop target artifacts are rebuilt and checksummed.
-- `bun run release:refresh:all-os:fast`: desktop artifacts are rebuilt and checksummed without rerunning lint/typecheck/test/build.
+- `CI=true bun run build:desktop`: current-host desktop packaging build succeeds.
+- `bun run release:desktop:<target>`: the matching-host native desktop artifacts for that target are produced under `.desktop-release-artifacts/<target>`.
+- `bun run release:refresh:all-os`: previously staged matching-host desktop artifacts are assembled under `packages/desktop/releases`, checksummed, and provenance-verified.
 - `bun run audit:official-llms`: official Bun/Nuxt/Elysia `llms.txt` sources are reachable and include required guidance markers.
 - `bun run ci:alignment`: frozen-lockfile install plus the Bun/daisyUI alignment gate passes.
 - `bun run validate:alignment`: combined baseline + stack + UI contracts pass for Bun and daisyUI alignment.
@@ -172,7 +186,7 @@ Use the packaged desktop installers in `packages/desktop/releases` when you want
 |------------------|--------------|
 | macOS (Apple Silicon) | `<PRODUCT_NAME>_<VERSION>_aarch64.dmg` |
 | Windows (x64) | `<PRODUCT_NAME>_<VERSION>_x64-setup.exe` or `<PRODUCT_NAME>_<VERSION>_x64-portable.zip` |
-| Linux (ARM64) | `<PRODUCT_NAME>_<VERSION>_aarch64.AppImage` or `<PRODUCT_NAME>_<VERSION>_arm64.deb` |
+| Linux (ARM64) | `<PRODUCT_NAME>_<VERSION>_arm64.deb` or `<PRODUCT_NAME>-<VERSION>-1.aarch64.rpm` |
 
 If you are on a different CPU architecture, use the matching artifact for that architecture when available in releases.
 Windows desktop releases are 64-bit only. We do not ship 32-bit (`x86` / `i686`) Windows builds.
@@ -801,21 +815,23 @@ This command:
 
 #### 8.9.3 Build desktop installers
 
-Canonical cross-target release refresh:
+Canonical matching-host release commands:
+
+```bash
+bun run release:desktop:macos -- --output-root .desktop-release-artifacts
+bun run release:desktop:windows -- --output-root .desktop-release-artifacts
+bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
+```
+
+Each command must run on the matching host for its target. The staged native artifacts are written under `.desktop-release-artifacts/<target>`.
+
+Canonical release assembly:
 
 ```bash
 bun run release:refresh:all-os
 ```
 
-This command runs quality gates, rebuilds desktop artifacts for macOS/Linux/Windows, stages artifacts under `packages/desktop/releases/{macos,linux,windows}`, and regenerates `packages/desktop/releases/sha256.txt`.
-
-Repeatable rebuild-only refresh:
-
-```bash
-bun run release:refresh:all-os:fast
-```
-
-This command skips quality gates and performs only the packaging/release artifact refresh (`--skip-quality-gates`) from the same canonical workflow.
+This command assembles previously produced matching-host artifacts into `packages/desktop/releases/{macos,linux,windows}`, writes `packages/desktop/releases/provenance.json`, regenerates `packages/desktop/releases/sha256.txt`, and runs `bun run verify:desktop-releases`.
 
 Single-target local desktop build (current host target only):
 
@@ -823,11 +839,7 @@ Single-target local desktop build (current host target only):
 bun run build:desktop
 ```
 
-The canonical desktop build entrypoint is Tauri's Cargo CLI. `bun run build:desktop` delegates to `cargo tauri build`, so install `tauri-cli` first:
-
-```bash
-cargo install tauri-cli --version 2.10.1 --locked
-```
+`bun run build:desktop` uses the repo-local `@tauri-apps/cli` package through Bun, so it does not require a separately installed global `cargo tauri` command for normal host builds. It no longer falls back to non-standard cross-target recovery logic. On macOS it follows the Tauri 2 split build flow: `bun tauri build --no-bundle`, then `bun tauri bundle --bundles app,dmg`.
 
 For deterministic macOS DMG packaging in shells with non-UTF8 locale defaults:
 
@@ -835,13 +847,13 @@ For deterministic macOS DMG packaging in shells with non-UTF8 locale defaults:
 LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
 ```
 
-Build outputs are generated under `packages/desktop/src-tauri/target/release/bundle` and then organized into the canonical release directory:
+Native build outputs are generated under `packages/desktop/src-tauri/target/release/bundle`. Canonical assembled release artifacts live under:
 
 - `packages/desktop/releases/macos`
 - `packages/desktop/releases/linux`
 - `packages/desktop/releases/windows`
 
-Current verified artifacts are cataloged in `packages/desktop/releases/README.md` and checksummed in `packages/desktop/releases/sha256.txt`.
+Matching-host jobs should then be assembled with `bun run release:refresh:all-os`. Current verified artifacts are cataloged in `packages/desktop/releases/README.md` and checksummed in `packages/desktop/releases/sha256.txt`.
 
 Release checksums are generated in `packages/desktop/releases/sha256.txt`.
 
@@ -850,7 +862,7 @@ Run `bun run verify:desktop-releases` to re-check desktop version alignment, req
 Install locally after building:
 
 - macOS: open the generated `.dmg` and drag the `.app` into `Applications`
-- Linux: `chmod +x` for `.AppImage` and run directly, or install `.deb`/`.rpm` with your package manager
+- Linux: install `.deb` or `.rpm` with your package manager
 - Windows: run the generated `-setup.exe` installer, or extract `-portable.zip` and keep the bundled `gen` directory next to the executable
 
 Windows desktop artifacts are `x64` only. 32-bit Windows is not supported by the packaged runtime. The portable archive includes the packaged `gen/runtime` tree plus the bundled WebView2 bootstrapper so first launch can recover a missing WebView2 runtime instead of failing silently.
@@ -861,10 +873,11 @@ If desktop build fails with `failed to run 'cargo metadata'`, install Rust using
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Cross-target requirements from Tauri build contracts:
-1. **Tauri CLI**: `cargo install tauri-cli --version 2.10.1 --locked`
-2. **Windows** (`x86_64-pc-windows-msvc`): `cargo-xwin` (`cargo install cargo-xwin`), Docker for NSIS setup fallback when local `makensis` fails.
-3. **Linux** (`aarch64-unknown-linux-gnu`): Docker with Ubuntu 24.04 for containerized GTK/WebKit packaging. The release pipeline builds `deb`/`rpm` through `cargo tauri build --bundles deb,rpm`, then creates the ARM AppImage in a separate ARM-native/emulated step.
+Matching-host requirements from Tauri build contracts:
+1. **Tauri CLI**: host and release builds use the repo-local `@tauri-apps/cli` package through Bun (`bun tauri build` / `bun tauri bundle`), so a separate global `cargo tauri` install is not required for the normal release workflow.
+2. **macOS** (`aarch64-apple-darwin`): run the native split bundle flow on macOS.
+3. **Windows** (`x86_64-pc-windows-msvc`): run the native Windows bundle flow on Windows for the NSIS installer and portable archive.
+4. **Linux** (`aarch64-unknown-linux-gnu`): run the native Linux ARM64 bundle flow on a Linux ARM64 host or ARM-emulated CI runner for deb and rpm artifacts.
 
 #### 8.9.4 Environment overrides for desktop
 
@@ -1028,10 +1041,13 @@ bun run dev:client
 | Build (macOS) | `bun run build:macos` | macOS entrypoint for CI/local build |
 | Build (Linux) | `bun run build:linux` | Linux entrypoint for CI/local build |
 | Build (Windows) | `bun run build:windows` | Windows entrypoint for CI/local build |
-| Build desktop | `bun run build:desktop` | Build Tauri installer artifacts |
+| Build desktop | `bun run build:desktop` | Build Tauri installer artifacts for the current host only |
 | Build desktop (debug) | `bun run build:desktop:debug` | Build Tauri debug installer artifacts |
-| Refresh desktop releases (all OS) | `bun run release:refresh:all-os` | Run quality gates, rebuild cross-target artifacts, stage release files, and regenerate checksums |
-| Refresh desktop releases (all OS, fast) | `bun run release:refresh:all-os:fast` | Rebuild and restage cross-target artifacts without rerunning quality gates |
+| Release desktop (macOS) | `bun run release:desktop:macos` | Produce native macOS release artifacts under `.desktop-release-artifacts/macos` |
+| Release desktop (Windows) | `bun run release:desktop:windows` | Produce native Windows release artifacts under `.desktop-release-artifacts/windows` |
+| Release desktop (Linux ARM64) | `bun run release:desktop:linux-arm64` | Produce native Linux ARM64 release artifacts under `.desktop-release-artifacts/linux` |
+| Refresh desktop releases (all OS) | `bun run release:refresh:all-os` | Assemble matching-host artifacts into `packages/desktop/releases`, regenerate checksums, and verify provenance |
+| Refresh desktop releases (all OS, fast) | `bun run release:refresh:all-os:fast` | Alias of the canonical release assembly command |
 | Verify SSR pages | `bun run verify:pages` | Validate localized routes return SSR HTML with `<title>`, `<h1>`, and `<main>` |
 | Server API type contract | `bun run --filter '@bao/server' build:types` | Generate `packages/server/dist-types` declarations used by client typecheck |
 | Format | `bun run format` | Apply Biome formatter |

@@ -427,21 +427,23 @@ If your org requires Electron-specific tooling, Electron remains viable but is i
 
 ### 12.3 Build desktop installer
 
-Canonical all-target desktop release refresh:
+Canonical matching-host desktop release commands:
+
+```bash
+bun run release:desktop:macos -- --output-root .desktop-release-artifacts
+bun run release:desktop:windows -- --output-root .desktop-release-artifacts
+bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
+```
+
+Run each command on the matching host for its target. Each native build stages its artifacts under `.desktop-release-artifacts/<target>`.
+
+Canonical assembled release refresh:
 
 ```bash
 bun run release:refresh:all-os
 ```
 
-This command refreshes macOS/Linux/Windows desktop artifacts and rewrites `packages/desktop/releases/sha256.txt`.
-
-Repeatable cross-target rebuild:
-
-```bash
-bun run release:refresh:all-os:fast
-```
-
-Use this command for local rebuild cycles once the quality gates have already passed.
+This command assembles previously built matching-host artifacts into `packages/desktop/releases`, regenerates `packages/desktop/releases/sha256.txt`, and verifies staged provenance.
 
 Single-target desktop build for the current host:
 
@@ -454,14 +456,6 @@ For deterministic macOS DMG packaging in terminals using non-UTF8 locale default
 ```bash
 LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
 ```
-
-If the direct build exits with `failed to run bundle_dmg.sh` but reports a completed first bundling pass, run the release refresher fallback path so DMG creation is retried headless:
-
-```bash
-bash scripts/refresh-desktop-releases.sh --skip-quality-gates --skip-linux --skip-windows
-```
-
-That command runs macOS packaging only and applies the `bundle_dmg.sh --skip-jenkins` fallback before staging.
 
 Raw output is generated under:
 
@@ -481,9 +475,10 @@ If `bun run build:desktop` fails with `failed to run 'cargo metadata'`, install 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Cross-target requirements from Tauri:
-1. **Windows** (`x86_64-pc-windows-msvc`): `cargo-xwin`, Docker for NSIS setup fallback.
-2. **Linux** (`aarch64-unknown-linux-gnu`): Docker with Ubuntu 24.04 for containerized bundling.
+Matching-host requirements from Tauri:
+1. **macOS** (`aarch64-apple-darwin`): run the native split bundle flow on macOS.
+2. **Windows** (`x86_64-pc-windows-msvc`): run the native Windows bundle flow on Windows.
+3. **Linux** (`aarch64-unknown-linux-gnu`): run the native Linux ARM64 bundle flow on a Linux ARM64 host or ARM-emulated CI runner.
 
 ### 12.4 Tauri-specific environment knobs
 

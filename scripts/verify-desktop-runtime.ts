@@ -5,9 +5,14 @@ import {
   DESKTOP_RUNTIME_HOST,
   DESKTOP_RUNTIME_MANIFEST_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
+  DESKTOP_RUNTIME_SCRAPER_DIR,
   DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
+import {
+  collectRuntimeDependencySourceRoots,
+  SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
+} from "./utils/desktop-runtime-scraper";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { toErrorMessage, withCleanup } from "./utils/async-control";
 import { cp, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
@@ -18,6 +23,7 @@ import { pathToFileURL } from "node:url";
 type DesktopRuntimeManifest = {
   serverExecutable: string;
   scriptRunnerExecutable: string;
+  scriptRunnerEntrypoint: string | null;
   scraperDir: string;
   serverHost: string;
   serverPort: number;
@@ -117,6 +123,7 @@ const readManifest = async (): Promise<DesktopRuntimeManifest> => {
   const {
     serverExecutable,
     scriptRunnerExecutable,
+    scriptRunnerEntrypoint,
     scraperDir,
     serverHost,
     serverPort,
@@ -126,6 +133,11 @@ const readManifest = async (): Promise<DesktopRuntimeManifest> => {
   if (
     typeof serverExecutable !== "string" ||
     typeof scriptRunnerExecutable !== "string" ||
+    !(
+      scriptRunnerEntrypoint === null ||
+      typeof scriptRunnerEntrypoint === "string" ||
+      typeof scriptRunnerEntrypoint === "undefined"
+    ) ||
     typeof scraperDir !== "string" ||
     typeof serverHost !== "string" ||
     typeof serverPort !== "number" ||
@@ -146,6 +158,8 @@ const readManifest = async (): Promise<DesktopRuntimeManifest> => {
   return {
     serverExecutable,
     scriptRunnerExecutable,
+    scriptRunnerEntrypoint:
+      typeof scriptRunnerEntrypoint === "string" ? scriptRunnerEntrypoint : null,
     scraperDir,
     serverHost,
     serverPort,
@@ -190,6 +204,37 @@ const fileExists = async (filePath: string): Promise<boolean> =>
     () => true,
     () => false,
   );
+
+const assertScraperRuntimeContract = async (manifest: DesktopRuntimeManifest): Promise<void> => {
+  if (manifest.scraperDir !== DESKTOP_RUNTIME_SCRAPER_DIR) {
+    throw new Error(`Unexpected desktop runtime scraper dir: ${manifest.scraperDir}`);
+  }
+
+  const scraperRuntimeRoot = join(RUNTIME_ROOT, manifest.scraperDir);
+  for (const relativePath of SCRAPER_RUNTIME_STAGE_SOURCE_PATHS) {
+    const stagedPath = join(scraperRuntimeRoot, relativePath);
+    if (!(await fileExists(stagedPath))) {
+      throw new Error(`Packaged scraper runtime is missing ${stagedPath}`);
+    }
+  }
+
+  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
+    join(REPO_ROOT, "packages", "scraper"),
+  );
+  for (const packageName of runtimeDependencyRoots.keys()) {
+    const stagedPackageManifestPath = join(
+      scraperRuntimeRoot,
+      "node_modules",
+      packageName,
+      "package.json",
+    );
+    if (!(await fileExists(stagedPackageManifestPath))) {
+      throw new Error(
+        `Packaged scraper runtime is missing dependency manifest ${stagedPackageManifestPath}`,
+      );
+    }
+  }
+};
 
 const isTextFile = (filePath: string): boolean => {
   const extension = extname(filePath).toLowerCase();
@@ -412,7 +457,19 @@ const startPackagedServer = async (
 ): Promise<ReturnType<typeof Bun.spawn>> => {
   const serverExecutablePath = join(RUNTIME_ROOT, manifest.serverExecutable);
   const scriptRunnerPath = join(RUNTIME_ROOT, manifest.scriptRunnerExecutable);
+  const scriptRunnerEntrypointPath = manifest.scriptRunnerEntrypoint
+    ? join(RUNTIME_ROOT, manifest.scriptRunnerEntrypoint)
+    : null;
   const scraperDirPath = join(RUNTIME_ROOT, manifest.scraperDir);
+
+  if (!(await fileExists(scriptRunnerPath))) {
+    throw new Error(`Packaged desktop script runner is missing ${scriptRunnerPath}`);
+  }
+  if (scriptRunnerEntrypointPath && !(await fileExists(scriptRunnerEntrypointPath))) {
+    throw new Error(
+      `Packaged desktop script runner entrypoint is missing ${scriptRunnerEntrypointPath}`,
+    );
+  }
 
   const overrideCorsOrigins = Array.from(
     new Set([...manifest.corsOrigins, VERIFY_FRONTEND_ORIGIN]),
@@ -425,6 +482,7 @@ const startPackagedServer = async (
       BAO_DISABLE_AUTH: "true",
       BAO_SCRAPER_DIR: scraperDirPath,
       BAO_SCRIPT_RUNNER_PATH: scriptRunnerPath,
+      BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH: scriptRunnerEntrypointPath ?? undefined,
       CORS_ORIGINS: overrideCorsOrigins,
       HOST: manifest.serverHost,
       NODE_ENV: "production",
@@ -459,6 +517,8 @@ const assertGeneratedFrontendIsReady = async (): Promise<void> => {
   if (!manifest.corsOrigins.includes(DESKTOP_RUNTIME_CORS_ORIGINS[0])) {
     throw new Error("Desktop runtime manifest is missing the primary packaged CORS origin.");
   }
+
+  await assertScraperRuntimeContract(manifest);
 };
 
 const prepareVerificationFrontendRoot = async (): Promise<string> => {

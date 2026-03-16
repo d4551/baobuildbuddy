@@ -6,16 +6,7 @@ Canonical installer output manifest for this repository baseline
 
 For the full validation sequence and script verification commands, see [README.md § Release Validation Workflow](../../../README.md#release-validation-workflow). Packaging docs in this file assume those quality gates succeed without masked diagnostics.
 
-`release:refresh:all-os` uses a headless fallback for macOS DMG creation:
-
-- First attempt uses `cargo tauri build --bundles dmg`.
-- If the expected `.dmg` is missing or that step exits non-zero, the script rebuilds the `.app` bundle if needed and then creates the DMG from the emitted app bundle with a deterministic headless `hdiutil` flow.
-
-If a direct `bun run build:desktop` run does not emit the expected DMG, use the refresh fallback directly:
-
-```bash
-bash scripts/refresh-desktop-releases.sh --skip-quality-gates --skip-linux --skip-windows
-```
+This repository now treats native matching-host Tauri bundles as the only canonical desktop release source. A single machine does not cross-build the full release set.
 
 Optional SSR/page validation before packaging (when validating UI render contracts):
 
@@ -24,87 +15,90 @@ PORT=4105 bun run --filter '@bao/client' preview
 VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 
-## Packaging workflow (macOS host)
+## Packaging workflow
 
 ```mermaid
 flowchart TD
-  Refresh["scripts/refresh-desktop-releases.sh"] --> QualityMode{"skip quality gates?"}
-
-  subgraph QualityGates["Quality gates (release:refresh:all-os)"]
+  subgraph QualityGates["Quality gates"]
     Lint["bun run lint"]
     Typecheck["bun run typecheck"]
     Test["bun run test"]
     Build["bun run build"]
   end
 
-  subgraph Targets["Cross-target builds"]
-    MacOS["macOS DMG (aarch64-apple-darwin)"]
-    Windows["Windows x64 (cargo-xwin + NSIS)"]
-    Linux["Linux ARM64 (Docker + AppImage/deb/rpm)"]
+  subgraph NativeBuilds["Matching-host native builds"]
+    MacOS["macOS: bun run release:desktop:macos"]
+    Windows["Windows: bun run release:desktop:windows"]
+    Linux["Linux ARM64: bun run release:desktop:linux-arm64"]
   end
 
-  subgraph Staging["Release staging"]
-    Stage["packages/desktop/releases/{macos,linux,windows}"]
+  subgraph Staging["Release assembly"]
+    Stage["bun run release:refresh:all-os"]
+    Releases["packages/desktop/releases/{macos,linux,windows}"]
+    Provenance["packages/desktop/releases/provenance.json"]
     Checksum["sha256.txt regeneration"]
   end
 
-  QualityMode -->|No| QualityGates
-  QualityMode -->|Yes| Targets
-  QualityGates --> Targets
+  QualityGates --> NativeBuilds
   MacOS --> Stage
   Windows --> Stage
   Linux --> Stage
-  Stage --> Checksum
+  Stage --> Releases
+  Stage --> Provenance
+  Releases --> Checksum
 ```
 
-Use the canonical all-target refresh command:
+Run matching-host native staging on each platform:
+
+```bash
+bun run release:desktop:macos -- --output-root .desktop-release-artifacts
+bun run release:desktop:windows -- --output-root .desktop-release-artifacts
+bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
+```
+
+Then assemble the canonical release directory:
 
 ```bash
 bun run release:refresh:all-os
 ```
 
-For fast local rebuilds after quality gates:
-
-```bash
-bun run release:refresh:all-os:fast
-```
-
-`bun run release:refresh:all-os:fast` is equivalent to `bash scripts/refresh-desktop-releases.sh --skip-quality-gates` and performs packaging + checksum regeneration only.
-
 Host/runtime requirements:
 
-- macOS host (required for DMG generation)
-- Docker daemon running (required for Windows NSIS fallback and Linux cross-target packaging)
-- `tauri-cli` (`cargo install tauri-cli --version 2.10.1 --locked`)
-- `cargo-xwin` for Windows x64 cross-compilation (`cargo install cargo-xwin`)
-- Outbound network access for Ubuntu package mirrors and Bun/Rust/AppImage downloads
+- repo-local `@tauri-apps/cli` invoked through Bun (`bun tauri build` / `bun tauri bundle`)
+- macOS host for the macOS bundle flow
+- Windows host for the Windows bundle flow
+- Linux ARM64 host or ARM-emulated CI runner for the Linux ARM64 bundle flow
 
-This command performs:
+The canonical release flow performs:
 
 - release quality gates (`lint`, `typecheck`, `test`, `build`)
-- macOS DMG build (`aarch64-apple-darwin`)
-- Windows x64 setup build (`x86_64-pc-windows-msvc`)
-- Linux ARM64 `deb`/`rpm` build through `cargo tauri build --bundles deb,rpm` (`aarch64-unknown-linux-gnu`)
-- Linux ARM64 AppImage build in a separate ARM-native/emulated step after `deb`/`rpm`
-- staging into `packages/desktop/releases/{macos,linux,windows}`
+- macOS-native split bundle flow: `bun tauri build --no-bundle`, then `bun tauri bundle --bundles app,dmg`
+- Windows-native `bun tauri build` for the NSIS installer and portable zip
+- Linux ARM64-native `bun tauri build --bundles deb,rpm` for deb and rpm bundles
+- staging native artifacts under `.desktop-release-artifacts/{macos,windows,linux}`
+- assembly into `packages/desktop/releases/{macos,linux,windows}`
+- provenance staging under `packages/desktop/releases/metadata/<target>` and `packages/desktop/releases/provenance.json`
 - checksum regeneration in `packages/desktop/releases/sha256.txt`
 - Bun-native post-staging verification via `bun run verify:desktop-releases`
-- containerized Windows NSIS fallback when local `makensis` is unavailable/fails
-- Linux AppImage creation via `appimagetool` from the staged ARM AppDir
 
 Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact. The canonical release set ships both the NSIS setup installer and a portable `.zip` that keeps the executable, bundled `gen/runtime` tree, and WebView2 bootstrapper together.
 
-Advanced target selection examples:
+The `release:refresh:all-os:fast` alias points to the same assembly command. It does not perform hidden cross-target rebuilds.
+
+Matching-host examples:
 
 ```bash
-# Skip quality gates when only rebuilding artifacts
-bash scripts/refresh-desktop-releases.sh --skip-quality-gates
+# macOS native bundle staging
+bun run release:desktop:macos -- --output-root .desktop-release-artifacts
 
-# Rebuild only Linux + Windows artifacts
-bash scripts/refresh-desktop-releases.sh --skip-macos
+# Windows native bundle staging
+bun run release:desktop:windows -- --output-root .desktop-release-artifacts
 
-# Rebuild only macOS artifacts
-bash scripts/refresh-desktop-releases.sh --skip-linux --skip-windows
+# Linux ARM64 native bundle staging
+bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
+
+# Assemble the canonical release directory after all matching-host jobs complete
+bun run release:refresh:all-os
 ```
 
 ## Canonical release directories
@@ -113,7 +107,7 @@ bash scripts/refresh-desktop-releases.sh --skip-linux --skip-windows
 - `linux/`
 - `windows/`
 
-Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/release/bundle` and then copied into these canonical release directories.
+Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/release/bundle`, staged per target under `.desktop-release-artifacts/<target>`, and then copied into these canonical release directories.
 
 ## Artifacts
 
@@ -123,7 +117,6 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 
 ### Linux
 
-- `linux/${APP_PRODUCT_NAME}_<VERSION>_aarch64.AppImage`
 - `linux/${APP_PRODUCT_NAME}_<VERSION>_arm64.deb`
 - `linux/${APP_PRODUCT_NAME}-<VERSION>-1.aarch64.rpm`
 
@@ -135,4 +128,5 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 ## Integrity
 
 - SHA-256 checksums are recorded in `sha256.txt`.
-- Run `bun run verify:desktop-releases` to validate version alignment, required Tauri icons, staged artifact names, bundle signatures, DMG integrity, and checksum matches.
+- Matching-host provenance is recorded in `provenance.json` and `metadata/<target>/provenance.json`.
+- Run `bun run verify:desktop-releases` to validate version alignment, required Tauri icons, staged artifact names, bundle signatures, DMG integrity, matching-host provenance, and checksum matches.

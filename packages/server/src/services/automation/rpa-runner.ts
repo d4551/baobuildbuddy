@@ -229,8 +229,11 @@ const resolveAutomationScriptPath = (options: RunAutomationScriptOptions): strin
 
 const resolveAutomationCommand = (scriptPath: string): string[] => {
   const scriptRunnerPath = process.env.BAO_SCRIPT_RUNNER_PATH?.trim();
+  const scriptRunnerEntrypointPath = process.env.BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH?.trim();
   if (scriptRunnerPath && scriptRunnerPath.length > 0) {
-    return [scriptRunnerPath, SCRAPER_DIR, scriptPath];
+    return scriptRunnerEntrypointPath && scriptRunnerEntrypointPath.length > 0
+      ? [scriptRunnerPath, scriptRunnerEntrypointPath, SCRAPER_DIR, scriptPath]
+      : [scriptRunnerPath, SCRAPER_DIR, scriptPath];
   }
 
   return [process.execPath, scriptPath];

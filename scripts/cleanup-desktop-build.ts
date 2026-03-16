@@ -1,22 +1,17 @@
-import { cp, mkdir, mkdtemp, rm, stat } from "node:fs/promises";
-import { basename, dirname, join, resolve } from "node:path";
-import { tmpdir } from "node:os";
-import { DISK_IMAGE_TIMEOUT_MS } from "../packages/shared/src/constants/scripts";
+import { rm, stat } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type MountedDesktopImage = {
-  imagePath: string;
-  mountPaths: string[];
+  readonly imagePath: string;
+  readonly mountPaths: readonly string[];
 };
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_TAURI_ROOT = join(REPO_ROOT, "packages", "desktop", "src-tauri");
-const DESKTOP_BUNDLE_GLOB = new Bun.Glob("target/**/bundle");
 const DESKTOP_TEMP_DMG_GLOB = new Bun.Glob("target/**/bundle/**/rw.*.dmg");
-const MOUNT_LINE_SPLIT_PATTERN = /\t+/;
 const DESKTOP_MOUNTED_IMAGE_PATTERN = /\/bundle\/(?:dmg|macos)\/rw\..+\.dmg$/;
-const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
-const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
+const MOUNT_LINE_SPLIT_PATTERN = /\t+/;
 
 const runCommand = async (
   command: readonly string[],
@@ -25,45 +20,20 @@ const runCommand = async (
 ): Promise<number> => {
   const proc = Bun.spawn(command, {
     cwd,
+    env,
     stdout: "inherit",
     stderr: "inherit",
-    env,
   });
 
   return proc.exited;
 };
 
-const runCommandWithTimeout = async (
-  command: readonly string[],
-  timeoutMs: number,
-  cwd: string = REPO_ROOT,
-  env: Record<string, string | undefined> = process.env,
-): Promise<number> => {
-  const proc = Bun.spawn(command, {
-    cwd,
-    stdout: "inherit",
-    stderr: "inherit",
-    env,
-  });
-
-  let timedOut = false;
-  const timeout = setTimeout(() => {
-    timedOut = true;
-    proc.kill();
-  }, timeoutMs);
-
-  const exitCode = await proc.exited.finally(() => {
-    clearTimeout(timeout);
-  });
-  return timedOut ? 124 : exitCode;
-};
-
 const readCommand = async (command: readonly string[]): Promise<string> => {
   const proc = Bun.spawn(command, {
     cwd: REPO_ROOT,
+    env: process.env,
     stdout: "pipe",
     stderr: "inherit",
-    env: process.env,
   });
   const exitCode = await proc.exited;
   if (exitCode !== 0 || !(proc.stdout instanceof ReadableStream)) {
@@ -80,20 +50,7 @@ const pathExists = async (candidatePath: string): Promise<boolean> =>
     () => false,
   );
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const readJsonObject = async (absolutePath: string): Promise<Record<string, unknown>> => {
-  const parsed: unknown = JSON.parse(await Bun.file(absolutePath).text());
-  if (isRecord(parsed)) {
-    return parsed;
-  }
-
-  await writeError(`Expected JSON object at ${absolutePath}.`);
-  process.exit(1);
-};
-
-const parseMountedDesktopImages = (infoText: string): MountedDesktopImage[] =>
+const parseMountedDesktopImages = (infoText: string): readonly MountedDesktopImage[] =>
   infoText.split("================================================").flatMap((sectionText) => {
     const lines = sectionText
       .split("\n")
@@ -120,39 +77,7 @@ const parseMountedDesktopImages = (infoText: string): MountedDesktopImage[] =>
     return [{ imagePath, mountPaths }];
   });
 
-const detachMountedImagesAtIndex = async (
-  mountedImages: readonly MountedDesktopImage[],
-  index: number,
-): Promise<void> => {
-  const mountedImage = mountedImages[index];
-  if (!mountedImage) {
-    return;
-  }
-
-  const detachMountPathAtIndex = async (
-    mountPaths: readonly string[],
-    mountIndex: number,
-  ): Promise<void> => {
-    const mountPath = mountPaths[mountIndex];
-    if (!mountPath) {
-      return;
-    }
-
-    await writeOutput(`Detaching stale desktop image mount ${mountPath}`);
-    const exitCode = await runCommand(["hdiutil", "detach", mountPath]);
-    if (exitCode !== 0) {
-      await writeError(`Failed to detach stale desktop image mount ${mountPath}.`);
-      process.exit(exitCode);
-    }
-
-    return detachMountPathAtIndex(mountPaths, mountIndex + 1);
-  };
-
-  await detachMountPathAtIndex(mountedImage.mountPaths, 0);
-  return detachMountedImagesAtIndex(mountedImages, index + 1);
-};
-
-const collectTemporaryDiskImages = async (): Promise<string[]> => {
+const collectTemporaryDiskImages = async (): Promise<readonly string[]> => {
   const imagePaths: string[] = [];
   for await (const relativePath of DESKTOP_TEMP_DMG_GLOB.scan({
     cwd: DESKTOP_TAURI_ROOT,
@@ -163,331 +88,47 @@ const collectTemporaryDiskImages = async (): Promise<string[]> => {
   return imagePaths;
 };
 
-const collectBundleDirectories = async (): Promise<string[]> => {
-  const directoryPaths: string[] = [];
-  for await (const relativePath of DESKTOP_BUNDLE_GLOB.scan({
-    cwd: DESKTOP_TAURI_ROOT,
-  })) {
-    directoryPaths.push(join(DESKTOP_TAURI_ROOT, relativePath));
-  }
-
-  return directoryPaths;
-};
-
-const resolveTargetArg = (tauriArgs: readonly string[]): string | null => {
-  const targetIndex = tauriArgs.findIndex(
-    (argument) => argument === "--target" || argument === "-t",
-  );
-  if (targetIndex === -1) {
-    return null;
-  }
-
-  const target = tauriArgs[targetIndex + 1];
-  return typeof target === "string" && target.trim().length > 0 ? target.trim() : null;
-};
-
-const resolveBundlesArgIndex = (tauriArgs: readonly string[]): number =>
-  tauriArgs.findIndex((argument) => argument === "--bundles" || argument === "-b");
-
-const resolveBundlesArgValue = (tauriArgs: readonly string[]): string | null => {
-  const bundlesIndex = resolveBundlesArgIndex(tauriArgs);
-  if (bundlesIndex === -1) {
-    return null;
-  }
-
-  const bundlesValue = tauriArgs[bundlesIndex + 1];
-  return typeof bundlesValue === "string" && bundlesValue.trim().length > 0
-    ? bundlesValue.trim()
-    : null;
-};
-
-const isMacosBuildTarget = (target: string | null): boolean =>
-  target === null || target.endsWith("apple-darwin") || target === "universal-apple-darwin";
-
-const shouldBuildHeadlessMacosDmg = (tauriArgs: readonly string[]): boolean => {
-  if (process.platform !== "darwin") {
-    return false;
-  }
-
-  if (!isMacosBuildTarget(resolveTargetArg(tauriArgs))) {
-    return false;
-  }
-
-  const bundlesValue = resolveBundlesArgValue(tauriArgs);
-  if (bundlesValue === null) {
-    return false;
-  }
-
-  return bundlesValue
-    .split(",")
-    .map((bundle) => bundle.trim())
-    .some((bundle) => bundle === "dmg");
-};
-
-const resolveMacosArchLabel = (tauriArgs: readonly string[]): string => {
-  const target = resolveTargetArg(tauriArgs);
-  if (target?.startsWith("aarch64-")) {
-    return "aarch64";
-  }
-  if (target?.startsWith("x86_64-")) {
-    return "x64";
-  }
-  if (target === "universal-apple-darwin") {
-    return "universal";
-  }
-  if (process.arch === "arm64") {
-    return "aarch64";
-  }
-  if (process.arch === "x64") {
-    return "x64";
-  }
-  return process.arch;
-};
-
-const buildCandidateBundleRoots = (tauriArgs: readonly string[]): string[] => {
-  const target = resolveTargetArg(tauriArgs);
-  const targetedBundleRoot = target
-    ? join(DESKTOP_TAURI_ROOT, "target", target, "release", "bundle")
-    : null;
-  const hostBundleRoot = join(DESKTOP_TAURI_ROOT, "target", "release", "bundle");
-
-  return targetedBundleRoot ? [targetedBundleRoot, hostBundleRoot] : [hostBundleRoot];
-};
-
-const readDesktopBundleMetadata = async (): Promise<{
-  productName: string;
-  version: string;
-  binaryName: string;
-}> => {
-  const tauriConfigPath = join(DESKTOP_TAURI_ROOT, "tauri.conf.json");
-  const tauriConfig = await readJsonObject(tauriConfigPath);
-  const cargoToml = await Bun.file(join(DESKTOP_TAURI_ROOT, "Cargo.toml")).text();
-  const packageJsonPathValue = tauriConfig.version;
-  const versionMatch = cargoToml.match(CARGO_VERSION_PATTERN);
-  const configuredVersion =
-    typeof packageJsonPathValue === "string" && packageJsonPathValue.endsWith(".json")
-      ? (await readJsonObject(join(DESKTOP_TAURI_ROOT, packageJsonPathValue))).version
-      : packageJsonPathValue;
-  const resolvedVersion =
-    typeof configuredVersion === "string" && configuredVersion.trim().length > 0
-      ? configuredVersion.trim()
-      : versionMatch?.[1] ?? "0.1.0";
-  const binaryName =
-    cargoToml.match(CARGO_PACKAGE_NAME_PATTERN)?.[1]?.trim() || "bao-build-buddy-desktop";
-
-  return {
-    productName:
-      typeof tauriConfig.productName === "string" && tauriConfig.productName.trim().length > 0
-        ? tauriConfig.productName.trim()
-        : "BaoBuildBuddy",
-    version: resolvedVersion,
-    binaryName,
-  };
-};
-
-const resolveBundleRootWithApp = async (
-  bundleRoots: readonly string[],
-  productName: string,
-): Promise<string | null> =>
-  (
-    await Promise.all(
-      bundleRoots.map(async (bundleRoot) => ({
-        bundleRoot,
-        exists: await pathExists(join(bundleRoot, "macos", `${productName}.app`)),
-      })),
-    )
-  ).find((bundleRootResult) => bundleRootResult.exists)?.bundleRoot ?? null;
-
-const buildHeadlessMacosDmg = async (
-  appBundlePath: string,
-  dmgOutputPath: string,
-  volumeName: string,
-): Promise<boolean> => {
-  const scratchRoot = await mkdtemp(join(tmpdir(), "baobuildbuddy-dmg-"));
-  const stagingRoot = join(scratchRoot, "payload");
-  const stagedAppBundlePath = join(stagingRoot, basename(appBundlePath));
-  const hybridImageBasePath = join(scratchRoot, "headless-dmg");
-  const hybridImagePath = `${hybridImageBasePath}.dmg`;
-
-  return Promise.resolve()
-    .then(async () => {
-      await mkdir(dirname(dmgOutputPath), { recursive: true });
-      await mkdir(stagingRoot, { recursive: true });
-      await cp(appBundlePath, stagedAppBundlePath, {
-        force: true,
-        recursive: true,
-      });
-
-      const hybridExitCode = await runCommandWithTimeout(
-        [
-          "hdiutil",
-          "makehybrid",
-          "-default-volume-name",
-          volumeName,
-          "-hfs",
-          "-o",
-          hybridImageBasePath,
-          stagingRoot,
-        ],
-        DISK_IMAGE_TIMEOUT_MS,
-      );
-      if (hybridExitCode !== 0) {
-        return false;
+const detachMountedImages = async (mountedImages: readonly MountedDesktopImage[]): Promise<void> => {
+  for (const mountedImage of mountedImages) {
+    for (const mountPath of mountedImage.mountPaths) {
+      await writeOutput(`Detaching stale desktop image mount ${mountPath}`);
+      const exitCode = await runCommand(["hdiutil", "detach", mountPath]);
+      if (exitCode !== 0) {
+        await writeError(`Failed to detach stale desktop image mount ${mountPath}.`);
+        process.exit(exitCode);
       }
-
-      const convertExitCode = await runCommandWithTimeout(
-        ["hdiutil", "convert", "-format", "UDZO", "-ov", "-o", dmgOutputPath, hybridImagePath],
-        DISK_IMAGE_TIMEOUT_MS,
-      );
-
-      return convertExitCode === 0;
-    })
-    .finally(async () => {
-      await rm(scratchRoot, {
-        force: true,
-        recursive: true,
-      });
-    });
+    }
+  }
 };
 
-const recoverMacosDmgBuild = async (tauriArgs: readonly string[]): Promise<boolean> => {
-  if (!shouldBuildHeadlessMacosDmg(tauriArgs)) {
-    return true;
-  }
-
-  const { productName, version } = await readDesktopBundleMetadata();
-  const bundleRoots = buildCandidateBundleRoots(tauriArgs);
-  const bundleRoot = await resolveBundleRootWithApp(bundleRoots, productName);
-  if (!bundleRoot) {
-    return false;
-  }
-
-  const appBundlePath = join(bundleRoot, "macos", `${productName}.app`);
-  const dmgOutputPath = join(
-    bundleRoot,
-    "dmg",
-    `${productName}_${version}_${resolveMacosArchLabel(tauriArgs)}.dmg`,
-  );
-  const volumeName = `${productName}_${version}_${resolveMacosArchLabel(tauriArgs)}`;
-
-  await writeOutput(`Building macOS DMG with deterministic headless fallback at ${dmgOutputPath}`);
-  await rm(dmgOutputPath, { force: true });
-  const fallbackSucceeded = await buildHeadlessMacosDmg(appBundlePath, dmgOutputPath, volumeName);
-  if (!fallbackSucceeded) {
-    return false;
-  }
-
-  if (!(await Bun.file(dmgOutputPath).exists())) {
-    return false;
-  }
-
-  await writeOutput(`Headless macOS DMG fallback created ${dmgOutputPath}`);
-  return true;
-};
-
-const removeTemporaryDiskImagesAtIndex = async (
+const removeTemporaryDiskImages = async (
   imagePaths: readonly string[],
-  index: number,
 ): Promise<void> => {
-  const imagePath = imagePaths[index];
-  if (!imagePath) {
-    return;
-  }
+  for (const imagePath of imagePaths) {
+    if (!(await pathExists(imagePath))) {
+      continue;
+    }
 
-  await rm(imagePath, { force: true });
-  await writeOutput(`Removed stale desktop disk image ${imagePath}`);
-  return removeTemporaryDiskImagesAtIndex(imagePaths, index + 1);
+    await rm(imagePath, { force: true });
+    await writeOutput(`Removed stale desktop disk image ${imagePath}`);
+  }
 };
 
-const removeBundleDirectoriesAtIndex = async (
-  directoryPaths: readonly string[],
-  index: number,
-): Promise<void> => {
-  const directoryPath = directoryPaths[index];
-  if (!directoryPath) {
-    return;
-  }
-
-  await rm(directoryPath, {
-    recursive: true,
-    force: true,
-  });
-  await writeOutput(`Removed stale desktop bundle directory ${directoryPath}`);
-  return removeBundleDirectoriesAtIndex(directoryPaths, index + 1);
-};
-
-const cleanupDesktopBuildArtifacts = async (): Promise<void> => {
+const runPrebuildCleanup = async (): Promise<void> => {
   if (process.platform !== "darwin") {
+    await writeOutput("Skipping desktop disk image cleanup outside macOS.");
     return;
   }
 
-  const hdiutilInfo = await readCommand(["hdiutil", "info"]);
-  const mountedImages = parseMountedDesktopImages(hdiutilInfo);
-  await detachMountedImagesAtIndex(mountedImages, 0);
-
-  const bundleDirectories = await collectBundleDirectories();
-  await removeBundleDirectoriesAtIndex(bundleDirectories, 0);
-
-  const temporaryDiskImages = await collectTemporaryDiskImages();
-  await removeTemporaryDiskImagesAtIndex(temporaryDiskImages, 0);
-
-  if (
-    mountedImages.length === 0 &&
-    bundleDirectories.length === 0 &&
-    temporaryDiskImages.length === 0
-  ) {
-    await writeOutput("No stale desktop DMG state detected.");
-  }
+  const mountedImages = parseMountedDesktopImages(await readCommand(["hdiutil", "info"]));
+  await detachMountedImages(mountedImages);
+  await removeTemporaryDiskImages(await collectTemporaryDiskImages());
 };
 
-const cleanupMacosTransientDiskImages = async (): Promise<void> => {
-  if (process.platform !== "darwin") {
-    return;
-  }
-
-  const hdiutilInfo = await readCommand(["hdiutil", "info"]);
-  const mountedImages = parseMountedDesktopImages(hdiutilInfo);
-  await detachMountedImagesAtIndex(mountedImages, 0);
-
-  const temporaryDiskImages = await collectTemporaryDiskImages();
-  await removeTemporaryDiskImagesAtIndex(temporaryDiskImages, 0);
-};
-
-const runPrebuild = async (): Promise<void> => {
-  await cleanupDesktopBuildArtifacts();
-};
-
-const runPostbuild = async (tauriArgs: readonly string[]): Promise<void> => {
-  await cleanupMacosTransientDiskImages();
-  const recovered = await recoverMacosDmgBuild(tauriArgs);
-  if (!recovered) {
-    await writeError("Headless macOS DMG creation failed after app build.");
-    process.exit(1);
-  }
-};
-
-const main = async (): Promise<void> => {
-  const [command, ...tauriArgs] = process.argv.slice(2);
-
-  switch (command) {
-    case "prebuild":
-      await runPrebuild();
-      return;
-    case "postbuild":
-      await runPostbuild(tauriArgs);
-      return;
-    default:
-      await writeError(
-        "Usage: bun scripts/cleanup-desktop-build.ts <prebuild|postbuild> [tauri build args...]",
-      );
-      process.exit(1);
-  }
-};
-
-await main().catch(async (error: unknown) => {
-  const message = error instanceof Error && error.message.trim().length > 0
-    ? error.message
-    : "Unexpected desktop build hook failure.";
-  await writeError(message);
+const command = process.argv[2];
+if (command !== "prebuild") {
+  await writeError("Usage: bun scripts/cleanup-desktop-build.ts prebuild");
   process.exit(1);
-});
+}
+
+await runPrebuildCleanup();
