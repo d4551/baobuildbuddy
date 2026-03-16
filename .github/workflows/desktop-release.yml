@@ -111,6 +111,7 @@ jobs:
             apt-get install -y --no-install-recommends --no-install-suggests \
               curl \
               file \
+              unzip \
               build-essential \
               libwebkit2gtk-4.1-dev \
               libgtk-3-dev \

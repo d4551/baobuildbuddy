@@ -11,6 +11,7 @@ import {
   DESKTOP_RELEASE_STAGING_ROOT,
   DESKTOP_RELEASE_TARGETS,
   DESKTOP_RELEASE_WINDOWS_ARCH,
+  DESKTOP_RUNTIME_RESOURCE_DIR,
   DESKTOP_RELEASE_WINDOWS_TARGET,
   DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
   DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
@@ -409,6 +410,7 @@ const stageWindowsArtifacts = async (
     "target",
     "release",
   );
+  const bundledRuntimeRoot = join(targetReleaseRoot, DESKTOP_RUNTIME_RESOURCE_DIR);
   const setupPath = join(
     targetReleaseRoot,
     "bundle",
@@ -418,7 +420,7 @@ const stageWindowsArtifacts = async (
   const executablePath = join(targetReleaseRoot, `${metadata.binaryName}.exe`);
   const runtimeRoot = join(targetReleaseRoot, "gen");
   const bootstrapperPath = join(
-    runtimeRoot,
+    bundledRuntimeRoot,
     `${DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`,
   );
   const nsisScriptPath = join(targetReleaseRoot, "nsis", "x64", "installer.nsi");
