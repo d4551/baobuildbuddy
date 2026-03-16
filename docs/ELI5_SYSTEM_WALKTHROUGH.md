@@ -1,23 +1,25 @@
-# BaoBuildBuddy Explained Like You're 5
+# BaoBuildBuddy -- Explained Like You're 5
 
-This is the smallest mental model of the system.
+This is the picture book version of the system. If the main [README](../README.md) feels like the full game manual, this is the one with diagrams.
 
-If the main [README](../README.md) feels like the full game manual, this file is the picture book version.
+If what you really want is "show me how to make local AI work," jump to [Local AI Setup](./LOCAL_AI_SETUP.md).
 
-If what you really want is "show me how to make local AI work," jump to [LOCAL_AI_SETUP.md](./LOCAL_AI_SETUP.md).
+---
 
 ## The tiny version
 
-BaoBuildBuddy is a helper for game-job hunting.
+BaoBuildBuddy is a helper for game-industry job hunting.
 
-- The `client` is the screen you click on.
-- The `server` is the manager that decides what should happen.
-- The `database` is the notebook that remembers things.
-- The `scraper` is the robot that visits job boards and forms.
-- The `desktop` app is a wrapped version of the same system for local installs.
-- The `shared` package is the rulebook that keeps every part speaking the same language.
+- The **client** is the screen you click on.
+- The **server** is the manager that decides what should happen.
+- The **database** is the notebook that remembers things.
+- The **scraper** is the robot that visits job boards and fills out forms.
+- The **desktop** app wraps the same system for local installs.
+- The **shared** package is the rulebook that keeps every part speaking the same language.
 
-## One-picture system map
+---
+
+## System map
 
 ```mermaid
 flowchart LR
@@ -32,13 +34,13 @@ flowchart LR
   Shared --> Scraper
 ```
 
+---
+
 ## What happens when you click around
 
-### 1. You open the app
+### Opening the app
 
-- The Nuxt client renders the page.
-- The client asks the server for saved data.
-- The server reads from SQLite and sends back typed results.
+The Nuxt client renders the page, asks the server for saved data, and the server reads from SQLite.
 
 ```mermaid
 sequenceDiagram
@@ -55,12 +57,9 @@ sequenceDiagram
   C-->>U: Render page
 ```
 
-### 2. You ask the AI chat for help
+### Asking the AI for help
 
-- The client sends your message and page context.
-- The server adds business rules and useful history.
-- The AI writes a reply.
-- The reply comes back to the chat bubble with context chips.
+Your message goes to the server with page context. The server adds business rules, the AI writes a reply, and it comes back as a chat bubble.
 
 ```mermaid
 sequenceDiagram
@@ -77,12 +76,9 @@ sequenceDiagram
   C-->>U: Bubble + context chips
 ```
 
-### 3. You refresh jobs
+### Refreshing jobs
 
-- The server starts the scraper robot.
-- The robot visits job sources.
-- It normalizes the jobs into one shared format.
-- The server saves them so the UI can show one clean list.
+The server launches the scraper robot, which visits job sources, normalizes everything into one format, and saves it for a clean list in the UI.
 
 ```mermaid
 sequenceDiagram
@@ -100,13 +96,9 @@ sequenceDiagram
   S-->>C: Run status + results
 ```
 
-### 4. You tell it to apply for a job
+### Applying for a job
 
-- The server collects your resume, job info, and saved settings.
-- The AI helps map fields and generate missing answers.
-- The scraper robot opens the real job form.
-- The robot fills fields, uploads the resume, captures screenshots, and submits when allowed.
-- The run record and screenshots are saved for review.
+The server gathers your resume, job info, and settings. The AI helps map fields. The scraper robot opens the real form, fills it in, captures screenshots, and submits.
 
 ```mermaid
 flowchart TD
@@ -119,12 +111,9 @@ flowchart TD
   Save --> Review["Show status in automation runs UI"]
 ```
 
-### 5. You generate and send an email reply
+### Sending an email reply
 
-- The AI writes the message draft.
-- If delivery is enabled, the server loads SMTP settings.
-- The Bun SMTP service sends the message.
-- The run stores the draft, delivery status, timestamp, and message ID.
+The AI drafts the message. If delivery is enabled, the server sends it through SMTP.
 
 ```mermaid
 sequenceDiagram
@@ -143,13 +132,9 @@ sequenceDiagram
   S-->>C: Draft + delivery result
 ```
 
-### 6. You schedule a robot task for later
+### Scheduling a task for later
 
-- The page tells the server what to run later and what time to use.
-- The server writes a `pending` run into the database first.
-- The server also sets a local timer.
-- If the app restarts, it reads the pending runs back out and restores the timers.
-- When the time arrives, the server looks at the run type and launches the right robot flow.
+The server saves a `pending` run in the database and sets a timer. If the app restarts, it reloads pending runs and restores timers.
 
 ```mermaid
 flowchart LR
@@ -163,9 +148,11 @@ flowchart LR
   Dispatch --> Scrape["Scraper"]
 ```
 
+---
+
 ## Where screenshots come from
 
-Screenshots are created by the browser robot during automation runs.
+The browser robot creates screenshots during automation runs. They're stored in run records and served through the screenshot route.
 
 ```mermaid
 flowchart LR
@@ -175,23 +162,25 @@ flowchart LR
   Route --> UI["Run detail page"]
 ```
 
-- The robot saves the image files.
-- The server stores their metadata in the run record.
-- The UI loads them through the screenshot route.
+---
 
 ## Why there are so many packages
 
 Each package owns one job:
 
-- `packages/client`: user interface
-- `packages/server`: API, orchestration, persistence
-- `packages/shared`: types, schemas, constants, validation
-- `packages/scraper`: job scraping and RPA browser execution
-- `packages/desktop`: desktop wrapper and installers
+| Package              | Responsibility                                |
+|----------------------|-----------------------------------------------|
+| `packages/client`    | User interface                                |
+| `packages/server`    | API, orchestration, persistence               |
+| `packages/shared`    | Types, schemas, constants, validation         |
+| `packages/scraper`   | Job scraping and RPA browser execution        |
+| `packages/desktop`   | Desktop wrapper and installers                |
 
 This split keeps one package from trying to do everything.
 
-## The normal happy path
+---
+
+## The happy path
 
 1. Open the app.
 2. Configure settings and AI providers.
@@ -201,17 +190,25 @@ This split keeps one package from trying to do everything.
 6. Review screenshots and run history.
 7. Generate and optionally deliver follow-up emails.
 
-## If something breaks, where to look
+---
 
-- UI looks wrong: `packages/client`
-- Route or API issue: `packages/server/src/routes`
-- Data shape mismatch: `packages/shared`
-- Browser automation issue: `packages/scraper`
-- Installer or app shell issue: `packages/desktop`
+## Something broke -- where to look
 
-## Read next
+| Symptom                           | Check here                         |
+|-----------------------------------|------------------------------------|
+| UI looks wrong                    | `packages/client`                  |
+| Route or API issue                | `packages/server/src/routes`       |
+| Data shape mismatch               | `packages/shared`                  |
+| Browser automation issue          | `packages/scraper`                 |
+| Installer or app shell issue      | `packages/desktop`                 |
 
-- Full runbook: [README.md](../README.md)
-- Local AI setup: [LOCAL_AI_SETUP.md](./LOCAL_AI_SETUP.md)
-- First-time setup: [STARTER_GUIDE.md](./STARTER_GUIDE.md)
-- Automation details: [AUTOMATION.md](./AUTOMATION.md)
+---
+
+## What to read next
+
+| Topic                              | Guide                                            |
+|------------------------------------|--------------------------------------------------|
+| Full technical reference           | [README.md](../README.md)                        |
+| Local AI setup                     | [Local AI Setup](./LOCAL_AI_SETUP.md)             |
+| First-time setup                   | [Starter Guide](./STARTER_GUIDE.md)              |
+| Automation details                 | [Automation Guide](./AUTOMATION.md)               |

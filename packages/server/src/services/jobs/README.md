@@ -1,47 +1,43 @@
 # Job Board Service Layer
 
-A comprehensive job aggregation service for the video game industry, built with Bun, Elysia, and Drizzle ORM.
+Job aggregation for the video game industry, built with Bun, Elysia, and Drizzle ORM.
 
-## Validation and Rebuild Workflow
+For the full validation sequence, see [README.md > Validation & Quality Gates](../../../../../README.md#validation--quality-gates).
 
-For the full validation sequence and quality gates, see [README.md § Release Validation Workflow](../../../../../README.md#release-validation-workflow).
+---
 
 ## Architecture
 
-The service is organized into several key modules:
-
 ### Providers (`providers/`)
 
-Job providers fetch listings from various Applicant Tracking Systems (ATS) used by gaming studios.
+Providers fetch job listings from Applicant Tracking Systems and job boards.
 
-**Available Providers:**
+**ATS-native:**
+- Greenhouse
+- Lever
 
-- **ATS-native providers**:
-  - **Greenhouse**
-  - **Lever**
-- **Gaming job boards**:
-  - **Hitmarker** (API-native)
-  - **Hitmarker** (RPA-backed)
-  - **GrackleHQ** (RPA-backed)
-  - **Work With Indies** (RPA-backed)
-  - **RemoteGameJobs** (RPA-backed)
-  - **GamesJobsDirect** (RPA-backed)
-  - **PocketGamer.biz** (RPA-backed)
-- **Company board adapters** via `settings.automationSettings.jobProviders.companyBoards`:
-  - **SmartRecruiters** (e.g. CD Projekt Red)
-  - **Workday** (e.g. Cloud Imperium Games, Activision/King, Netflix Games, Lightspeed Studios)
-  - **Ashby** (e.g. Second Dinner, Sierra Studio)
+**Gaming job boards:**
+- Hitmarker (API-native + RPA-backed)
+- GrackleHQ (RPA)
+- Work With Indies (RPA)
+- RemoteGameJobs (RPA)
+- GamesJobsDirect (RPA)
+- PocketGamer.biz (RPA)
 
-**Provider Registry Behavior (`provider-registry.ts`):**
+**Company board adapters** (via `settings.automationSettings.jobProviders.companyBoards`):
+- SmartRecruiters (e.g. CD Projekt Red)
+- Workday (e.g. Cloud Imperium Games, Activision/King, Netflix Games, Lightspeed Studios)
+- Ashby (e.g. Second Dinner, Sierra Studio)
 
-- Registers and unregisters providers at runtime.
-- Filters disabled providers from execution.
-- Applies a per-provider request limiter before fetch.
-- Executes provider fetches concurrently with `Promise.allSettled`.
-- Returns partial success when some providers fail.
-- Deduplicates by `contentHash` (fallback: normalized `title::company`).
+**Provider registry (`provider-registry.ts`):**
+- Registers/unregisters providers at runtime
+- Filters disabled providers
+- Applies per-provider rate limiting
+- Runs fetches concurrently with `Promise.allSettled`
+- Returns partial results when some providers fail
+- Deduplicates by `contentHash` (fallback: normalized `title::company`)
 
-**Provider Interface:**
+**Provider interface:**
 ```typescript
 interface JobProvider {
   name: string
@@ -53,34 +49,31 @@ interface JobProvider {
 
 ### Deduplication (`deduplication.ts`)
 
-Handles duplicate detection across multiple job sources using content-based hashing.
+Content-based duplicate detection using SHA-256 hashing (via `new Bun.CryptoHasher("sha256")`).
 
-**Key Functions:**
-- `generateContentHash(job)` - Creates SHA-256 hash from title + company + location
-- `deduplicateJobs(jobs)` - Removes duplicates, keeping first occurrence
-- `findDuplicates(jobs)` - Identifies all duplicate sets
-- `mergeJobs(jobs)` - Combines duplicate postings with metadata
+| Function              | Purpose                                     |
+|-----------------------|---------------------------------------------|
+| `generateContentHash` | SHA-256 hash from title + company + location |
+| `deduplicateJobs`     | Remove duplicates, keep first occurrence     |
+| `findDuplicates`      | Identify all duplicate sets                  |
+| `mergeJobs`           | Combine duplicate postings with metadata     |
 
-Uses Bun's native crypto: `new Bun.CryptoHasher("sha256")`
+### Matching (`matching-service.ts`)
 
-### Matching Service (`matching-service.ts`)
+Calculates compatibility scores between user profiles and job listings.
 
-Algorithmic job matching that calculates compatibility scores between user profiles and job postings.
+**Score breakdown (0-100):**
 
-**Match Score Breakdown:**
-- Skills (25%) - Overlap between user skills and job requirements
-- Experience (20%) - Experience level alignment
-- Location (15%) - Location/remote preferences
-- Salary (15%) - Salary expectation overlap
-- Technology (15%) - Technology stack match
-- Culture (10%) - Studio type, genre, platform preferences
+| Factor      | Weight | What it measures                          |
+|-------------|--------|-------------------------------------------|
+| Skills      | 25%    | Overlap between user skills and job reqs  |
+| Experience  | 20%    | Experience level alignment                |
+| Location    | 15%    | Location/remote preferences               |
+| Salary      | 15%    | Salary expectation overlap                |
+| Technology  | 15%    | Tech stack match                          |
+| Culture     | 10%    | Studio type, genre, platform preferences  |
 
-**Key Functions:**
-- `calculateMatchScore(userProfile, job)` - Returns 0-100 score with detailed breakdown
-- `calculateMatchScores(userProfile, jobs[])` - Batch scoring
-- `sortByMatchScore(jobs)` - Sort jobs by match score
-
-**Match Score Output:**
+**Output shape:**
 ```typescript
 interface MatchScore {
   overall: number              // 0-100
@@ -92,311 +85,172 @@ interface MatchScore {
     culture: number
     technology: number
   }
-  strengths: string[]          // What matches well
-  improvements: string[]       // Areas to develop
-  missingSkills: string[]      // Required skills user lacks
+  strengths: string[]
+  improvements: string[]
+  missingSkills: string[]
 }
 ```
 
-### Job Aggregator (`job-aggregator.ts`)
+### Aggregator (`job-aggregator.ts`)
 
-Main orchestration service that ties everything together.
-
-**Key Features:**
-- Fetches from all providers in parallel
-- Deduplicates across sources
-- Enriches job data with gaming-specific metadata
-- Caches to SQLite via Drizzle ORM
-- Full-text search with advanced filtering
-- Saved jobs and application tracking
-
-**Core Methods:**
+Main orchestration: fetches from all providers, deduplicates, enriches with gaming-specific metadata, caches to SQLite, and supports full-text search with advanced filtering.
 
 ```typescript
 class JobAggregator {
-  // Refresh jobs from all providers
   refreshJobs(): Promise<{ total: number; new: number; updated: number }>
-
-  // Search with comprehensive filters
   searchJobs(filters: JobFilters): Promise<JobSearchResult>
-
-  // Get single job
   getJobById(id: string): Promise<Job | null>
-
-  // Save/unsave jobs
   saveJob(jobId: string): Promise<void>
   unsaveJob(jobId: string): Promise<void>
   getSavedJobs(): Promise<Job[]>
-
-  // Application tracking
   applyToJob(jobId: string, notes?: string): Promise<string>
   getApplications(): Promise<Array<Application & { job: Job }>>
   updateApplicationStatus(id: string, status: string, note?: string): Promise<void>
-
-  // Cache management
   needsRefresh(): Promise<boolean>
   getStats(): Promise<Statistics>
 }
 ```
 
-## Job Filters
+---
 
-Comprehensive filtering system:
+## Filtering
 
 ```typescript
 interface JobFilters {
   query?: string                      // Full-text search
-  company?: string                    // Filter by company
-  location?: string                   // Filter by location
-  remote?: boolean                    // Remote only
-  hybrid?: boolean                    // Hybrid only
-  salaryMin?: number                  // Minimum salary
-  salaryMax?: number                  // Maximum salary
+  company?: string
+  location?: string
+  remote?: boolean
+  hybrid?: boolean
+  salaryMin?: number
+  salaryMax?: number
   experienceLevel?: JobExperienceLevel // entry, junior, mid, senior, principal, director
   jobType?: JobType                   // full-time, part-time, contract, internship, freelance
-  technologies?: string[]             // Required technologies
+  technologies?: string[]
   studioTypes?: StudioType[]          // AAA, Indie, Mobile, VR/AR, Platform, Esports
-  gameGenres?: GameGenre[]            // Action, RPG, Strategy, etc.
-  platforms?: Platform[]              // PC, Console, Mobile, VR, etc.
+  gameGenres?: GameGenre[]
+  platforms?: Platform[]
   postedWithin?: number               // Days since posted
-  featured?: boolean                  // Featured jobs only
-  minMatchScore?: number              // Minimum match score (0-100)
-  limit?: number                      // Results per page
-  page?: number                       // Page number
+  featured?: boolean
+  minMatchScore?: number              // 0-100
+  limit?: number
+  page?: number
 }
 ```
 
-## Data Enrichment
+---
+
+## Data enrichment
 
 The aggregator automatically enriches raw job data with:
 
-- **Remote/Hybrid Detection** - Analyzes location strings
-- **Experience Level** - Extracts from title (Entry, Junior, Mid, Senior, Principal, Director)
-- **Job Type** - Detects Full-time, Contract, Internship, Freelance
-- **Studio Type** - Categorizes companies (AAA, Indie, Mobile, VR/AR, Platform)
-- **Technologies** - Extracts tech stack from description (Unity, Unreal, C++, etc.)
-- **Requirements** - Parses required skills from description
-- **Genres** - Detects game genres (RPG, FPS, MOBA, etc.)
-- **Platforms** - Identifies target platforms (PC, Console, Mobile, VR, etc.)
-- **Tags** - Generates searchable tags
+- **Remote/hybrid detection** from location strings
+- **Experience level** from title (Entry, Junior, Mid, Senior, Principal, Director)
+- **Job type** detection (Full-time, Contract, Internship, Freelance)
+- **Studio type** categorization (AAA, Indie, Mobile, VR/AR, Platform)
+- **Technologies** extracted from descriptions (Unity, Unreal, C++, etc.)
+- **Requirements** parsed from descriptions
+- **Genres** detected (RPG, FPS, MOBA, etc.)
+- **Platforms** identified (PC, Console, Mobile, VR, etc.)
+- **Tags** generated for search
 
-## Usage Examples
+---
 
-### Basic Job Refresh
+## Usage examples
 
+### Refresh jobs
 ```typescript
-import { jobAggregator } from "./services/jobs"
-
-// Refresh all jobs from providers
 const result = await jobAggregator.refreshJobs()
 appLogger.info("jobs-import-summary", { added: result.new, updated: result.updated })
 ```
 
-### Search Jobs
-
+### Search jobs
 ```typescript
-// Search for remote Unity developer positions
 const results = await jobAggregator.searchJobs({
   query: "Unity Developer",
   remote: true,
   experienceLevel: "mid",
   technologies: ["Unity", "C#"],
-  platforms: ["PC", "Console"],
   limit: 20,
   page: 1
 })
-
-appLogger.info("jobs-search-count", { total: results.total })
-results.jobs.forEach(job => {
-  appLogger.info("jobs-search-item", { title: job.title, company: job.company })
-})
 ```
 
-### Calculate Match Scores
-
+### Calculate match scores
 ```typescript
-import { calculateMatchScore } from "./services/jobs"
-
-const userProfile = {
-  skills: ["Game Programming", "C++", "Unity", "Level Design"],
-  technologies: ["Unity", "C#", "Unreal Engine"],
-  experienceLevel: "mid",
-  preferredLocations: ["San Francisco", "Remote"],
-  remotePreference: true,
-  salaryExpectation: { min: 80000, max: 120000 }
-}
-
-const job = await jobAggregator.getJobById("job-id")
 const matchScore = calculateMatchScore(userProfile, job)
-
 appLogger.info("jobs-match-overall", { score: matchScore.overall })
-appLogger.info("jobs-match-strengths", { strengths: matchScore.strengths })
-appLogger.info("jobs-match-missing-skills", { missingSkills: matchScore.missingSkills })
 ```
 
-### Application Tracking
-
+### Track applications
 ```typescript
-// Apply to a job
-const applicationId = await jobAggregator.applyToJob(
-  "job-id",
-  "Applied via company website"
-)
-
-// Update status
-await jobAggregator.updateApplicationStatus(
-  applicationId,
-  "interviewing",
-  "Phone screen scheduled for next week"
-)
-
-// Get all applications
-const applications = await jobAggregator.getApplications()
-applications.forEach(app => {
-  appLogger.info("jobs-application-status", { title: app.job.title, status: app.status })
-})
+const applicationId = await jobAggregator.applyToJob("job-id", "Applied via company website")
+await jobAggregator.updateApplicationStatus(applicationId, "interviewing", "Phone screen scheduled")
 ```
 
-### Cache Management
+---
 
-```typescript
-// Check if cache needs refresh
-if (await jobAggregator.needsRefresh()) {
-  await jobAggregator.refreshJobs()
-}
+## Database
 
-// Get statistics
-const stats = await jobAggregator.getStats()
-appLogger.info("jobs-stats-total", { total: stats.total })
-appLogger.info("jobs-stats-remote", { remoteCount: stats.remoteCount })
-appLogger.info("jobs-stats-by-source", { bySource: stats.bySource })
-appLogger.info("jobs-stats-last-updated", { lastUpdated: stats.lastUpdated })
-```
+Jobs are cached in SQLite using Drizzle ORM.
 
-## Database Schema
+**Tables:** `jobs`, `savedJobs`, `applications`
 
-Jobs are cached in SQLite using Drizzle ORM:
+**Indexes:** content hash (unique, for dedup), source, posted date, job ID references.
 
-**Tables:**
-- `jobs` - Job listings with full metadata
-- `savedJobs` - User-saved jobs
-- `applications` - Job applications with status tracking
-
-**Indexes:**
-- Content hash (unique) - For deduplication
-- Source - For provider-based queries
-- Posted date - For time-based filtering
-- Job ID references - For foreign keys
+---
 
 ## Configuration
 
-### Cache Expiry
+**Cache expiry:** `JOB_AGGREGATOR_CACHE_EXPIRY_MS` from `@bao/shared`.
 
-Jobs are cached using `JOB_AGGREGATOR_CACHE_EXPIRY_MS` from `@bao/shared` (single source of truth).
+**Provider settings:** Loaded from `settings.automationSettings.jobProviders` via `providers/provider-settings.ts`. If missing or invalid, initialization fails with a configuration error. Update via `PUT /api/settings`.
 
-### Provider runtime source of truth
-
-Provider runtime settings are loaded from `settings.automationSettings.jobProviders` through `providers/provider-settings.ts`.
-If this object is missing or invalid, provider initialization fails with a deterministic configuration error.
-Use `PUT /api/settings` to update provider runtime configuration without code changes.
-
-### Adding Custom Providers
+### Adding a custom provider
 
 ```typescript
 class CustomProvider implements JobProvider {
   name = "Custom"
-
   async fetchJobs(query?: string): Promise<RawJob[]> {
-    // Implement custom fetching logic
     return []
   }
 }
-
-// Add to aggregator
 this.providers.push(new CustomProvider())
 ```
 
-### Configuring Provider Lists
+---
 
-```typescript
-// Custom Greenhouse boards
-const greenhouse = new GreenhouseProvider([
-  "mycompany",
-  "otherstudio"
-])
+## Gaming industry specifics
 
-// Custom Lever companies
-const lever = new LeverProvider([
-  "mystudio",
-  "anothergame"
-])
-```
+### Studio types
+AAA (EA, Activision, Ubisoft), Indie, Mobile (Supercell, King), VR/AR, Platform (Unity, Valve), Esports
 
-## Gaming Industry Specifics
-
-The service is optimized for video game industry jobs:
-
-### Studio Types
-- **AAA** - Major publishers (EA, Activision, Ubisoft)
-- **Indie** - Independent studios
-- **Mobile** - Mobile-first studios (Supercell, King)
-- **VR/AR** - Virtual/Augmented reality
-- **Platform** - Engine and platform companies (Unity, Valve)
-- **Esports** - Competitive gaming organizations
-
-### Technology Focus
-Common gaming technologies automatically detected:
-- Engines: Unity, Unreal Engine, Godot, CryEngine
-- Languages: C++, C#, Python, Lua
-- Graphics: DirectX, OpenGL, Vulkan, Metal
-- Tools: Blender, Maya, Substance Painter, ZBrush
-- Version Control: Git, Perforce
+### Technologies detected
+Engines: Unity, Unreal, Godot, CryEngine | Languages: C++, C#, Python, Lua | Graphics: DirectX, OpenGL, Vulkan, Metal | Tools: Blender, Maya, Substance Painter, ZBrush | VCS: Git, Perforce
 
 ### Genres
-RPG, FPS, MMORPG, MOBA, Battle Royale, Strategy, Simulation, Sports, Racing, Horror, Platformer, Puzzle, and more.
+RPG, FPS, MMORPG, MOBA, Battle Royale, Strategy, Simulation, Sports, Racing, Horror, Platformer, Puzzle, and more
 
 ### Platforms
 PC, Console (PlayStation, Xbox, Switch), Mobile, VR, AR, Web, Steam
 
-## Best Practices
-
-1. **Refresh Frequency** - Run `refreshJobs()` on a schedule (e.g., every 6 hours) via cron or job queue
-2. **Error Handling** - Providers fail gracefully; partial results returned if some providers fail
-3. **Rate Limiting** - Use registry/provider limits and request budgets to avoid source blocking
-4. **Deduplication** - Always run deduplication when combining multiple sources
-5. **Matching** - Calculate match scores in batches for better performance
-6. **Caching** - Rely on database cache; avoid excessive API calls
+---
 
 ## Performance
 
-- **Parallel Fetching** - All providers fetch simultaneously using `Promise.allSettled`
-- **Pagination** - Limited to 5 pages per provider to avoid excessive requests
-- **Database Indexes** - Optimized queries with proper indexes
-- **Content Hashing** - Fast SHA-256 hashing using Bun native crypto
-- **Batch Operations** - Support for batch match scoring
+- **Parallel fetching** with `Promise.allSettled`
+- **Pagination** limited to 5 pages per provider
+- **Database indexes** for optimized queries
+- **SHA-256 hashing** using Bun native crypto
+- **Batch scoring** for match calculations
 
-## Error Handling
+---
 
-All provider failures are caught and logged. The aggregator continues with successful providers:
+## Best practices
 
-```typescript
-const results = await Promise.allSettled(
-  this.providers.map(provider => provider.fetchJobs())
-)
-// Partial results returned even if some providers fail
-```
-
-## Future Enhancements
-
-Potential additions:
-- Additional ATS adapters (iCIMS, BambooHR)
-- Additional gaming boards and regional sources
-- AI-powered job description analysis
-- Salary data integration
-- Company culture scores
-- Interview preparation resources
-- Application deadline tracking
-
-## License
-
-Part of the BaoBuildBuddy project.
+1. Run `refreshJobs()` on a schedule (e.g. every 6 hours)
+2. Providers fail gracefully -- partial results are returned
+3. Use per-provider rate limits and request budgets
+4. Always deduplicate when combining sources
+5. Score matches in batches for performance
+6. Rely on database cache to reduce API calls

@@ -1,4 +1,4 @@
-# BaoBuildBuddy First-Time Setup Guide
+# First-Time Setup Guide
 
 ```text ascii-box
 +--------------------------+
@@ -7,210 +7,122 @@
 +--------------------------+
 ```
 
-Before this guide, you can read the picture-book version here:
+This guide walks you through getting BaoBuildBuddy running locally for the first time. Think of it as the tutorial level -- follow each checkpoint in order.
 
-- [Explain Like I'm 5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)
+## Pick your path
 
-If your main goal is "I just want local AI working on my computer," use this first:
+| I want to...                                   | Go here                                                  |
+|------------------------------------------------|----------------------------------------------------------|
+| Understand the app in simple terms             | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)  |
+| Set up local AI with Ollama                    | [Local AI Setup Guide](./LOCAL_AI_SETUP.md)               |
+| Do the full first-time local setup             | Keep reading below                                        |
+| Read the full technical reference              | [README.md](../README.md)                                 |
 
-- [Local AI Setup Guide](./LOCAL_AI_SETUP.md)
+---
 
-If you need deeper architecture and runbook details, see the full runbook: [README.md](../README.md).
-
-Use this guide if this is your first time running BaoBuildBuddy locally.
-Think of it as the tutorial level: follow each checkpoint in order before unlocking the rest of the project.
-
-## Choose your path
-
-| If you want to... | Read this |
-|---|---|
-| understand what the app does in simple terms | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md) |
-| set up local AI with Ollama | [Local AI Setup Guide](./LOCAL_AI_SETUP.md) |
-| do the full first-time local setup | keep reading this guide |
-| read the full technical runbook | [README.md](../README.md) |
-
-## Release Validation and Rebuild
-
-For the full production validation sequence, script verification commands, and expected outcomes, see [README.md § Release Validation Workflow](../README.md#release-validation-workflow).
-
-UI runtime contracts:
-
-- Core pages use tokenized layout primitives (`PageScaffold`, `PageHeaderBlock`, `SectionGrid`) backed by `packages/client/constants/ui-layout.ts`.
-- Modal flows use `AppModalFrame` with required dialog semantics (`aria-modal` + `aria-labelledby`).
-- Cross-page CTA and next-step decisions come from one source: `packages/client/constants/flow-engine.ts` and `packages/client/composables/useFlowEngine.ts`.
-- Automation pages (`/automation`, `/automation/job-apply`, `/automation/email`, `/automation/runs`, `/automation/runs/:id`, `/automation/scraper`) follow the same tokenized layout contract and are enforced by `validate:ui-layout-tokens`.
-- AI provider display copy/icons are locale-driven (`aiProviderCatalog.*`) with a shared icon component (`AIProviderIcon`) to avoid hardcoded provider UI metadata.
-- Interview role recommendations are derived from profile role, readiness role rankings, pathway match scoring, and live job titles; static role slug lists are removed.
-- Skills-readiness UI copy is locale-driven from typed server IDs (`feedbackId`, `improvementSuggestions`, `nextSteps`) instead of service hardcoded prose.
-
-Documentation map:
-
-- [Explain Like I'm 5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)
-- [Local AI Setup Guide](./LOCAL_AI_SETUP.md)
-- [Automation and RPA Guide](./AUTOMATION.md)
-- [Full local runbook](../README.md)
-
-## 1) Understand what is being started
+## What you're setting up
 
 BaoBuildBuddy is a monorepo with two runtime services:
 
-1. API server in `packages/server`
-2. Nuxt SSR app in `packages/client`
+1. **API server** in `packages/server` (Bun + Elysia, port 3000)
+2. **Frontend app** in `packages/client` (Nuxt SSR, port 3001)
 
-The standard one-command workflow starts both at once with:
+One command starts both:
 
 ```bash
 bun run dev
 ```
-`bun run dev` executes `scripts/dev-stack.ts` to orchestrate server/client startup.
 
-This is the recommended path for first-time setup.
+This runs `scripts/dev-stack.ts` to orchestrate startup. It's the recommended path.
 
-## 2) Install required tools
+---
 
-Install these before running setup:
+## Step 1: Install required tools
 
-Required:
+### Required
 
-- Bun runtime pinned to `bun@1.3.10` via `packageManager` in root `package.json`
-- Git
-- Rust + Cargo (for desktop builds)
+| Tool                     | macOS (Homebrew)                               | Ubuntu / Debian                                      | Windows (winget)                    |
+|--------------------------|------------------------------------------------|------------------------------------------------------|-------------------------------------|
+| Bun (`bun@1.3.10`)       | `brew install oven-sh/bun/bun`                 | `curl -fsSL https://bun.sh/install \| bash`          | `winget install --id Oven-sh.Bun -e`|
+| Git                      | `brew install git`                             | `sudo apt-get update && sudo apt-get install -y git`  | `winget install --id Git.Git -e`    |
+| Rust (for desktop builds)| `brew install rustup-init && rustup-init`      | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
 
-Optional but recommended:
+Playwright bundles its own Chromium -- no separate Chrome install needed.
 
-- curl
-- jq
-- At least one AI provider API key (HuggingFace token, OpenAI, Gemini, or Claude)
-- Ollama for local AI: [Download](https://ollama.com/download/) and [Quickstart](https://docs.ollama.com/quickstart)
+### Optional but recommended
 
-### 2.1 Installables (quick install commands)
+- `curl` and `jq` for diagnostics
+- At least one AI provider API key (HuggingFace, OpenAI, Gemini, or Claude)
+- Ollama for local AI: [Download](https://ollama.com/download/) | [Quickstart](https://docs.ollama.com/quickstart)
 
-| Tool | macOS (Homebrew) | Ubuntu / Debian | Windows (winget) |
-|------|-------------------|------------------|------------------|
-| Bun (from `packageManager` = `bun@1.3.10`) | `brew install oven-sh/bun/bun` | `curl -fsSL https://bun.sh/install \| bash` | `winget install --id Oven-sh.Bun -e` |
-| Git | `brew install git` | `sudo apt-get update && sudo apt-get install -y git` | `winget install --id Git.Git -e` |
-| Rust | `brew install rustup-init && rustup-init` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
+HuggingFace free tier now requires an API token. Create one at https://huggingface.co/settings/tokens.
 
-Playwright bundles its own Chromium — no separate Chrome or PHP install needed.
-
-HuggingFace free tier now requires an API token. Create one at https://huggingface.co/settings/tokens and set `HUGGINGFACE_TOKEN` in `.env` or via the Settings UI.
-
-Read Bun baseline from the workspace manifest when selecting an installer:
-
-```bash
-bun pm pkg get packageManager
-# -> "bun@1.3.10"
-```
-
-```powershell
-bun pm pkg get packageManager
-# -> "bun@1.3.10"
-```
-
-Verify each tool is on `PATH`:
+### Verify everything is on PATH
 
 ```bash
 bun --version
 git --version
-rustc --version
+rustc --version   # only needed for desktop builds
 ```
 
-On Windows you can verify Rust with:
-
-```powershell
-rustc --version
-cargo --version
-```
-
-Expected pre-flight state before running setup:
-
-- ✅ Bun runtime matches manifest baseline (`packageManager` in root `package.json`)
-- ✅ Git available
-- ✅ Rust toolchain available when desktop builds are needed
-- ✅ Playwright Chromium is installed by `bun run automation:browsers:install`
-
-## 2.6 Version drift check (recommended before first build)
-
-Run the repository stack audit command to confirm local package registry alignment:
+Check the Bun version matches the workspace manifest:
 
 ```bash
-bun run audit:stack-versions
-```
-
-Run these alignment gates and keep local setup aligned to their outputs:
-
-- `bun run ci:alignment` (for CI or any frozen-lockfile validation run)
-- `bun run audit:stack-versions`
-- `bun run verify:bun-baseline`
-- `bun run validate:alignment`
-- `bun pm pkg get packageManager`
-- `bun pm pkg get dependencies.nuxt dependencies.elysia dependencies.daisyui dependencies.tailwindcss`
-
-Expected pass patterns:
-
-```text
-bun run audit:stack-versions
-# prints package names and latest npm versions
-
-bun run ci:alignment
-# runs bun ci, then validate:alignment
-
-bun run verify:bun-baseline
-# prints "✅ Bun baseline and 1.3.9 guard checks passed"
-
-bun run validate:alignment
-# prints "daisyUI component contract validation passed." and layout-token validation pass output
-
 bun pm pkg get packageManager
 # -> "bun@1.3.10"
 ```
 
-daisyUI contract coverage in this gate:
+---
 
-- Shell layout: `packages/client/layouts/default.vue` and `packages/client/components/layout/AppNavbar.vue` must preserve drawer/navbar blueprint semantics.
-- Core surfaces: jobs, automation, and skills flows are checked for `card`, `btn`, `table`, `list`, `progress`, and `radial-progress` usage.
-- Accessibility rule: radial progress indicators must expose `role="progressbar"` and `aria-valuenow`.
-
-## 3) Get the code
+## Step 2: Get the code
 
 ```bash
 git clone https://github.com/d4551/baobuildbuddy.git
 cd baobuildbuddy
 ```
 
-If you already have the repository:
+Already have it? Just pull the latest:
 
 ```bash
 git pull --ff-only
 ```
 
-## 4) First-run bootstrap (recommended)
+---
 
-### 4.1 One command for macOS / Linux
+## Step 3: Run setup
 
+### Option A: Automated setup (recommended)
+
+**macOS / Linux:**
 ```bash
 bash scripts/setup.sh
 ```
 
-### 4.2 One command for Windows (PowerShell)
-
+**Windows (PowerShell):**
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
 
-The setup script:
+The setup script handles:
+1. Checking required tools
+2. Validating Bun version against the workspace manifest
+3. Installing workspace dependencies
+4. Installing Playwright Chromium (unless skipped)
+5. Creating `.env` from `.env.example`
+6. Generating and pushing DB schema
+7. Running `typecheck`, `lint`, and `test` (unless skipped)
 
-1. Checks required tools.
-2. Validates Bun major/minor against `packageManager` in root `package.json`.
-2. Installs workspace dependencies.
-3. Installs Playwright Chromium for the Bun automation runtime unless skipped.
-4. Creates `.env` from `.env.example`.
-5. Generates and pushes DB schema.
-6. Runs `typecheck`, `lint`, and `test` unless skipped.
-7. Optionally runs `bun run build` when `--include-build` / `-IncludeBuild` is provided.
-8. Optionally runs `bun run build:desktop` when `--include-desktop-build` / `-IncludeDesktopBuild` is provided.
+**Setup flags:**
 
-After a successful run, you should be able to confirm:
+| Flag                          | Bash                       | PowerShell             | Effect                              |
+|-------------------------------|----------------------------|------------------------|-------------------------------------|
+| Skip checks                  | `--skip-checks`            | `-SkipChecks`          | Skip validation after setup         |
+| Skip browser install          | `--skip-browser-install`   | `-SkipBrowserInstall`  | Skip Playwright Chromium            |
+| Include build                 | `--include-build`          | `-IncludeBuild`        | Run `bun run build` after setup     |
+| Include desktop build         | `--include-desktop-build`  | `-IncludeDesktopBuild` | Run Tauri desktop build             |
+| Help                          | `--help`                   | `-Help`                | Print usage                         |
+
+After a successful run, you should see:
 
 ```text
 ✅ Bun workspace install complete
@@ -219,58 +131,21 @@ After a successful run, you should be able to confirm:
 ✅ Initial validation checks pass
 ```
 
-### 4.3 Script flags
-
-| Command | Meaning |
-|---------|---------|
-| `--skip-checks` (Bash) / `-SkipChecks` (PowerShell) | Skip validation checks after setup |
-| `--skip-browser-install` (Bash) / `-SkipBrowserInstall` (PowerShell) | Skip Playwright Chromium installation |
-| `--include-build` (Bash) / `-IncludeBuild` (PowerShell) | Run `bun run build` after setup checks |
-| `--include-desktop-build` (Bash) / `-IncludeDesktopBuild` (PowerShell) | Run `bun run build:desktop` (setup script applies UTF-8 locale env for macOS DMG bundling) |
-| `--help` (Bash) / `-Help` (PowerShell) | Show script usage |
-
-### 4.4 If setup stops with a warning or error
-
-1. Read the first `[FAIL]` block in the script output.
-2. Re-run the same setup command.
-3. Run the failing command directly for details.
-
-Common fixes:
-
-- Update Bun to satisfy manifest baseline (`packageManager` in root `package.json`) and rerun setup.
-- Run `bun run automation:browsers:install` if Playwright Chromium is missing.
-- Install Chrome from the official package for your OS.
-
-### 4.5 Keep bootstrap deterministic
-
-To prevent environment drift:
-
-1. Start from `./.env.example` each time.
-2. Keep local overrides in your shell or editor profiles, not source files.
-3. Re-run bootstrap checks after changing system tool versions.
-
-## 5) Manual setup path (full control)
-
-Use this when you need to inspect each command.
+### Option B: Manual setup
 
 ```bash
 bun install
 bun run automation:browsers:install
-```
-
-Create the environment file and install the database schema:
-
-```bash
-cp .env.example .env # Windows: copy .env.example .env
+cp .env.example .env          # Windows: copy .env.example .env
 bun run db:generate
 bun run db:push
 ```
 
-## 6) Configure your first environment values
+---
 
-`PORT`, `DB_PATH`, provider keys, and locale settings are read from `.env`.
+## Step 4: Configure your environment
 
-Start with the minimum:
+Edit `.env` with these minimum values:
 
 ```text
 PORT=3000
@@ -282,51 +157,44 @@ NUXT_PUBLIC_I18N_FALLBACK_LOCALE=en-US
 NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY=bao-locale
 ```
 
-> **Important:** Do NOT set `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` in `.env`. Nuxt runtime config env override replaces the parsed array with a raw string, breaking the i18n plugin. The default is handled in `nuxt.config.ts`.
+> **Important:** Do NOT set `NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` in `.env`. Nuxt replaces the parsed array with a raw string, breaking the i18n plugin. The default is handled in `nuxt.config.ts`.
 
-Locale resolution order is deterministic: locale cookie -> `Accept-Language` header (q-weighted) -> browser locale -> configured default locale.
+When you're ready, add:
 
-Then add these when you are ready:
+- `BAO_DISABLE_AUTH=true` to skip auth gating in local dev
+- `LOCAL_MODEL_ENDPOINT=http://localhost:11434/v1` for local AI (leave `LOCAL_MODEL_NAME` blank for auto-detect)
+- `OPENAI_API_KEY`, `GEMINI_API_KEY`, `CLAUDE_API_KEY`, `HUGGINGFACE_TOKEN` as needed
+- `AUTOMATION_STDIO_BUFFER_LIMIT=2000` for large scraper outputs
 
-- `BAO_DISABLE_AUTH=true` for local dev if you want to skip API key gating.
-- `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` for local model.
-  For the easiest path, set `LOCAL_MODEL_ENDPOINT=http://localhost:11434/v1` and leave `LOCAL_MODEL_NAME` blank so BaoBuildBuddy can auto-detect the model.
-- `OPENAI_API_KEY`, `GEMINI_API_KEY`, `CLAUDE_API_KEY`, `HUGGINGFACE_TOKEN` as needed.
+AI provider keys can also be set in the UI via **Settings > AI Providers**.
 
-For RPA/automation support, add:
+---
 
-```text
-AUTOMATION_STDIO_BUFFER_LIMIT=2000
-```
+## Step 5: Start the stack
 
-AI provider keys can also be set via the **Settings > AI Providers** section in the UI, where each provider has a configuration panel with test and save buttons.
-
-Treat `.env.example` as the canonical base.
-
-## 7) Start the stack
-
-### 7.1 Recommended local mode (single command)
+### Recommended (single command)
 
 ```bash
 bun run dev
 ```
-bun run dev executes `scripts/dev-stack.ts` to orchestrate server/client startup.
 
-### 7.2 Split terminal mode
+### Split terminals
 
 Terminal 1:
-
 ```bash
 bun run dev:server
 ```
 
 Terminal 2:
-
 ```bash
 bun run dev:client
 ```
 
-## 8) Verify first run from terminal
+---
+
+## Step 6: Verify it's working
+
+From a terminal:
 
 ```bash
 curl -fsS http://localhost:3000/api/health
@@ -336,159 +204,98 @@ curl -fsS http://localhost:3000/api/jobs?limit=1
 
 Then open `http://localhost:3001` in your browser and confirm:
 
-1. Home loads without runtime errors.
+1. Home page loads without errors.
 2. Settings page is reachable.
-3. A basic API-backed feature returns data (jobs or resumes).
-4. Dashboard quick actions reflect your current pipeline status (incomplete steps are prioritized automatically).
-4. Browser dev tools show no hard errors on initial page load.
+3. An API-backed feature returns data (jobs or resumes).
+4. Dashboard quick actions reflect your pipeline status.
+5. Browser dev tools show no hard errors.
 
-## 9) Complete first-user configuration in UI
+---
+
+## Step 7: First-user configuration in the UI
 
 1. Open **Settings**.
-2. Configure your preferred AI mode:
-   - local model endpoint (recommended first, see [Local AI Setup Guide](./LOCAL_AI_SETUP.md)) or
-   - provider API key.
+2. Configure AI: local model endpoint (see [Local AI Setup](./LOCAL_AI_SETUP.md)) or a provider API key.
 3. Save settings.
-4. Open **Resume** and create your first resume record.
-5. Open **Jobs** and run a search to confirm ingestion path.
-6. Open **AI Chat** and send one message.
-7. Open **Automation → Job Apply** and test a non-sensitive sample flow.
+4. Open **Resume** and create your first resume.
+5. Open **Jobs** and run a search to confirm the ingestion pipeline.
+6. Open **AI Chat** and send a test message.
+7. Open **Automation > Job Apply** and test a non-sensitive sample flow.
 
-## 10) Validate contract and docs
+---
 
-For the full validation sequence and script verification commands, see [README.md § Release Validation Workflow](../README.md#release-validation-workflow).
+## Step 8: Run validation (optional but recommended)
 
-For `verify:pages`, target your BaoBuildBuddy preview instance explicitly if port `3001` is already used by another app:
+```bash
+bun run typecheck
+bun run lint
+bun run test
+bun run build
+```
+
+For the full validation sequence, see [README.md > Validation & Quality Gates](../README.md#validation--quality-gates).
+
+If port `3001` is already in use, run page verification against an alternate port:
 
 ```bash
 PORT=4105 bun run --filter '@bao/client' preview
 VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 
-## 11) Troubleshooting quick path
+---
 
-- Server starts but UI cannot connect:
-  - Check `NUXT_PUBLIC_API_BASE`/`NUXT_PUBLIC_WS_BASE` for your profile.
-  - `bun run dev` writes these automatically when launching `scripts/dev-stack.ts`.
-  - If `NUXT_PUBLIC_API_PROXY` is unset, Nuxt dev now proxies `/api` to `http://localhost:${PORT}` by default.
-  - Recheck `NUXT_PUBLIC_WS_BASE`.
-- Port conflict:
-  - Change `PORT` in `.env`.
-- Playwright browser missing:
-  - Run `bun run automation:browsers:install` or rerun setup without `--skip-browser-install`.
-- `curl` health checks fail:
-  - Confirm server terminal shows `Listening on ...` and no startup errors.
-- RPA automation unavailable:
-  - Ensure Playwright Chromium is installed and rerun `bun run automation:browsers:install`.
-- Locales missing or duplicated:
-  - Verify `.env` locales match keys under `packages/client/locales`.
+## Desktop app (optional)
 
-## 12) Optional Desktop installer path (Tauri)
+If you want a desktop window instead of a browser tab, see [README.md > Desktop Packaging](../README.md#desktop-packaging-tauri).
 
-If you need a desktop shell instead of a browser tab, use Tauri.
-
-### 12.1 Add desktop prerequisites
-
-- Rust toolchain (`rustup`) and `cargo` must be available.
-- macOS/Linux: system C/C++ build tools for Rust crates.
-- Windows: Visual C++ Build Tools installed with your `MSVC` workload.
-
-Verify toolchain in your shell before packaging:
-
-```bash
-rustc --version
-cargo --version
-```
-
-### 12.2 Start the desktop wrapper
-
-From repo root:
+Quick start:
 
 ```bash
 bun run dev:desktop
 ```
 
-This does three things:
-
-1. Runs the full stack bootstrap logic in `packages/desktop/src-tauri/src/main.rs`.
-2. Checks whether `PORT=3000` and `CLIENT_PORT=3001` (or configured overrides) are already responding.
-3. Starts `bun run dev`/`scripts/dev-stack.ts` if required and opens the app window at `http://localhost:3001` by default.
-
-Why Tauri is preferred for this repo:
-
-1. Bun-native startup can stay the same for web and desktop.
-2. Native runtime is thin; less install size than Electron.
-3. No extra JavaScript runtime layer in the desktop wrapper.
-
-If your org requires Electron-specific tooling, Electron remains viable but is intentionally non-default:
-
-- Electron gives you Node process access inside the desktop shell, at the cost of a larger bundle and extra runtime maintenance.
-- Tauri is the faster path for this repo because it reuses the same Bun runtime setup already defined by the web stack.
-
-### 12.3 Build desktop installer
-
-Canonical matching-host desktop release commands:
-
-```bash
-bun run release:desktop:macos -- --output-root .desktop-release-artifacts
-bun run release:desktop:windows -- --output-root .desktop-release-artifacts
-bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
-```
-
-Run each command on the matching host for its target. Each native build stages its artifacts under `.desktop-release-artifacts/<target>`.
-
-Canonical assembled release refresh:
-
-```bash
-bun run release:refresh:all-os
-```
-
-This command assembles previously built matching-host artifacts into `packages/desktop/releases`, regenerates `packages/desktop/releases/sha256.txt`, and verifies staged provenance.
-
-Single-target desktop build for the current host:
+Build an installer:
 
 ```bash
 bun run build:desktop
 ```
 
-For deterministic macOS DMG packaging in terminals using non-UTF8 locale defaults:
+Requires Rust toolchain (`rustc` + `cargo`).
 
-```bash
-LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
-```
+---
 
-Raw output is generated under:
+## Troubleshooting
 
-- `packages/desktop/src-tauri/target/release/bundle`
+| Problem                              | Fix                                                              |
+|--------------------------------------|------------------------------------------------------------------|
+| Server starts but UI can't connect   | Check `NUXT_PUBLIC_API_BASE` / `NUXT_PUBLIC_WS_BASE`            |
+| Port conflict                        | Change `PORT` in `.env`                                          |
+| Playwright browser missing           | Run `bun run automation:browsers:install`                        |
+| `curl` health checks fail            | Confirm server shows `Listening on ...` and no startup errors    |
+| RPA automation unavailable           | Install Playwright Chromium and retry                            |
+| Locales missing or duplicated        | Verify `.env` locale keys match `packages/client/locales`        |
 
-Canonical release artifacts are organized under:
+For more, see [README.md > Troubleshooting](../README.md#troubleshooting).
 
-- `packages/desktop/releases/macos`
-- `packages/desktop/releases/linux`
-- `packages/desktop/releases/windows`
+---
 
-Current installables are documented in `packages/desktop/releases/README.md`; `packages/desktop/releases/sha256.txt` contains matching checksums.
+## What's next
 
-If `bun run build:desktop` fails with `failed to run 'cargo metadata'`, install Rust and reopen your shell:
+| Topic                                | Guide                                                    |
+|--------------------------------------|----------------------------------------------------------|
+| Understand the system architecture   | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)  |
+| Set up local AI with Ollama          | [Local AI Setup Guide](./LOCAL_AI_SETUP.md)               |
+| Learn the automation flows           | [Automation Guide](./AUTOMATION.md)                       |
+| Deep architecture reference          | [README.md](../README.md)                                 |
 
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
+---
 
-Matching-host requirements from Tauri:
-1. **macOS** (`aarch64-apple-darwin`): run the native split bundle flow on macOS.
-2. **Windows** (`x86_64-pc-windows-msvc`): run the native Windows bundle flow on Windows.
-3. **Linux** (`aarch64-unknown-linux-gnu`): run the native Linux ARM64 bundle flow on a Linux ARM64 host or ARM-emulated CI runner.
+## UI runtime contracts (reference)
 
-### 12.4 Tauri-specific environment knobs
-
-- `BAO_STACK_HOST` (default `127.0.0.1`) to change health-check host.
-- `BAO_STACK_BOOTSTRAP_COMMAND` (default `bun`) to replace the stack command.
-- `CLIENT_PORT` (default `3001`) for readiness checks.
-- `BAO_DISABLE_AUTH` passed through to the same process launch.
-- `PORT` (default `3000`) used by the Bun backend start command.
-- `HOST` inherited from `BAO_STACK_HOST` and used for local readiness probes.
-
-## 13) Next step
-
-Use `README.md` section 9 onward for deep architecture, schema, API routes, and endpoint-level troubleshooting.
+- Core pages use tokenized layout primitives (`PageScaffold`, `PageHeaderBlock`, `SectionGrid`) from `packages/client/constants/ui-layout.ts`.
+- Modal flows use `AppModalFrame` with `aria-modal` + `aria-labelledby`.
+- Cross-page CTAs come from `packages/client/constants/flow-engine.ts` via `useFlowEngine.ts`.
+- Automation pages follow the same tokenized layout and are enforced by `validate:ui-layout-tokens`.
+- AI provider display is locale-driven (`aiProviderCatalog.*`) with `AIProviderIcon`.
+- Interview role recommendations are derived from profile, readiness rankings, pathway scores, and live job signals.
+- Skills readiness copy is locale-driven from typed server IDs (`feedbackId`, `improvementSuggestions`, `nextSteps`).
