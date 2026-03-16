@@ -234,10 +234,10 @@ Integration and release audits:
   - `bun run verify:pages`
 - `bun run release:verify`
   - macOS host preflight
-  - Docker / Rust / Xcode checks
-  - network reachability checks
+  - Rust / Xcode checks
   - `CI=true bun run build:desktop`
-  - `bun run release:refresh:all-os:fast`
+  - `bun run verify:desktop-runtime`
+  - `bun run verify:desktop-releases` when assembled matching-host release metadata is present
 - `bun run audit:full`
 
 `verify:pages` now starts Nuxt preview automatically unless `VERIFY_BASE_URL` is supplied explicitly.
