@@ -14,6 +14,10 @@ import {
   DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
+import {
+  collectRuntimeDependencySourceRoots,
+  SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
+} from "./utils/desktop-runtime-scraper";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
@@ -579,11 +583,32 @@ const compileRuntimeBinary = async (
 const stageScraperRuntime = async (): Promise<void> => {
   const destinationPath = join(RUNTIME_ROOT, DESKTOP_RUNTIME_SCRAPER_DIR);
   await writeOutput("desktop-runtime: staging scraper runtime resources");
-  await cp(SCRAPER_ROOT, destinationPath, {
-    recursive: true,
-    dereference: true,
-    force: true,
-  });
+  await mkdir(destinationPath, { recursive: true });
+
+  for (const relativePath of SCRAPER_RUNTIME_STAGE_SOURCE_PATHS) {
+    await cp(join(SCRAPER_ROOT, relativePath), join(destinationPath, relativePath), {
+      recursive: true,
+      force: true,
+    });
+  }
+
+  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(SCRAPER_ROOT);
+  for (const [packageName, sourceRoot] of runtimeDependencyRoots) {
+    const packageDestinationPath = join(destinationPath, "node_modules", packageName);
+    await mkdir(dirname(packageDestinationPath), { recursive: true });
+    await cp(sourceRoot, packageDestinationPath, {
+      recursive: true,
+      force: true,
+    });
+    await rm(join(packageDestinationPath, "node_modules"), {
+      recursive: true,
+      force: true,
+    });
+  }
+
+  await writeOutput(
+    `desktop-runtime: staged scraper runtime package plus ${runtimeDependencyRoots.size} runtime dependencies`,
+  );
 };
 
 const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<string | null> => {

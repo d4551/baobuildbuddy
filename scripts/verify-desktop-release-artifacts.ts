@@ -18,8 +18,9 @@ import {
   DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
   DISK_IMAGE_TIMEOUT_MS,
 } from "../packages/shared/src/constants/scripts";
-import { writeError, writeOutput } from "./utils/cli-output";
+import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
 import { captureResult, toErrorMessage } from "./utils/async-control";
+import { writeError, writeOutput } from "./utils/cli-output";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -951,6 +952,9 @@ const verifyWindowsPortablePayload = async (
   metadata: DesktopBundleMetadata,
 ): Promise<readonly VerificationResult[]> => {
   const portableRoot = `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable`;
+  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
+    join(REPO_ROOT, "packages", "scraper"),
+  );
   const requiredEntries = [
     `${portableRoot}/README.txt`,
     `${portableRoot}/${metadata.binaryName}.exe`,
@@ -959,6 +963,9 @@ const verifyWindowsPortablePayload = async (
     `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH}.exe`,
     `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH}.exe`,
     `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRAPER_DIR}/package.json`,
+    ...Array.from(runtimeDependencyRoots.keys(), (packageName) =>
+      `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRAPER_DIR}/node_modules/${packageName}/package.json`,
+    ),
   ] as const;
 
   const zipEntriesResult = await captureResult(() => listZipEntries(artifact.absolutePath));

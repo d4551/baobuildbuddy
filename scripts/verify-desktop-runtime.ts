@@ -5,9 +5,14 @@ import {
   DESKTOP_RUNTIME_HOST,
   DESKTOP_RUNTIME_MANIFEST_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
+  DESKTOP_RUNTIME_SCRAPER_DIR,
   DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
+import {
+  collectRuntimeDependencySourceRoots,
+  SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
+} from "./utils/desktop-runtime-scraper";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { toErrorMessage, withCleanup } from "./utils/async-control";
 import { cp, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
@@ -190,6 +195,37 @@ const fileExists = async (filePath: string): Promise<boolean> =>
     () => true,
     () => false,
   );
+
+const assertScraperRuntimeContract = async (manifest: DesktopRuntimeManifest): Promise<void> => {
+  if (manifest.scraperDir !== DESKTOP_RUNTIME_SCRAPER_DIR) {
+    throw new Error(`Unexpected desktop runtime scraper dir: ${manifest.scraperDir}`);
+  }
+
+  const scraperRuntimeRoot = join(RUNTIME_ROOT, manifest.scraperDir);
+  for (const relativePath of SCRAPER_RUNTIME_STAGE_SOURCE_PATHS) {
+    const stagedPath = join(scraperRuntimeRoot, relativePath);
+    if (!(await fileExists(stagedPath))) {
+      throw new Error(`Packaged scraper runtime is missing ${stagedPath}`);
+    }
+  }
+
+  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
+    join(REPO_ROOT, "packages", "scraper"),
+  );
+  for (const packageName of runtimeDependencyRoots.keys()) {
+    const stagedPackageManifestPath = join(
+      scraperRuntimeRoot,
+      "node_modules",
+      packageName,
+      "package.json",
+    );
+    if (!(await fileExists(stagedPackageManifestPath))) {
+      throw new Error(
+        `Packaged scraper runtime is missing dependency manifest ${stagedPackageManifestPath}`,
+      );
+    }
+  }
+};
 
 const isTextFile = (filePath: string): boolean => {
   const extension = extname(filePath).toLowerCase();
@@ -459,6 +495,8 @@ const assertGeneratedFrontendIsReady = async (): Promise<void> => {
   if (!manifest.corsOrigins.includes(DESKTOP_RUNTIME_CORS_ORIGINS[0])) {
     throw new Error("Desktop runtime manifest is missing the primary packaged CORS origin.");
   }
+
+  await assertScraperRuntimeContract(manifest);
 };
 
 const prepareVerificationFrontendRoot = async (): Promise<string> => {
