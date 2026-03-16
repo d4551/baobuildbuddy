@@ -149,10 +149,11 @@ fn main() {
         }
     };
 
-    app.run(|app_handle, event| {
-        if let RunEvent::ExitRequested { .. } = event {
+    app.run(|app_handle, event| match event {
+        RunEvent::ExitRequested { .. } | RunEvent::Exit => {
             app_handle.state::<ProcessManager>().shutdown();
         }
+        _ => {}
     });
 }
 

@@ -46,6 +46,7 @@ const READY_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 250;
 const LOG_LINE_LIMIT = 60;
 const COMPILE_RETRY_LIMIT = 2;
+const BUN_COMPILE_TARGET_REGISTRY_URL = "https://registry.npmjs.org" as const;
 const TEXT_FILE_EXTENSIONS = new Set([
   ".css",
   ".html",
@@ -59,6 +60,9 @@ const TEXT_FILE_EXTENSIONS = new Set([
 ]);
 const BUN_COMPILE_EXTRACTION_FAILURE_PATTERN =
   /Failed to extract executable for '.+?'\. The download may be incomplete\./u;
+
+let compileTargetScratchRoot: string | null = null;
+const prewarmedCompileTargetDirectories = new Map<string, Promise<string>>();
 
 const toExecutablePath = (relativePath: string, tauriTarget: string | null): string =>
   tauriTarget?.includes("windows") ? `${relativePath}.exe` : relativePath;
@@ -205,6 +209,93 @@ const resolveBunCompileTarget = (tauriTarget: string | null): string => {
       return "bun-windows-arm64";
     default:
       throw new Error(`Unsupported desktop target for Bun compile: ${tauriTarget}`);
+  }
+};
+
+const resolveCompileTargetScratchRoot = (): string => {
+  if (!compileTargetScratchRoot) {
+    throw new Error("Compile target scratch root is not initialized.");
+  }
+
+  return compileTargetScratchRoot;
+};
+
+const shouldPrewarmCompileTarget = (compileTarget: string): boolean =>
+  process.platform === "win32" && compileTarget.startsWith("bun-windows-");
+
+const buildCompileTargetExecutableName = (compileTarget: string): string =>
+  `${compileTarget}-v${Bun.version}`;
+
+const buildCompileTargetTarballUrl = (compileTarget: string): string => {
+  if (!compileTarget.startsWith("bun-")) {
+    throw new Error(`Unsupported Bun compile target package name: ${compileTarget}`);
+  }
+
+  const packageSuffix = compileTarget.slice("bun-".length);
+  return [
+    BUN_COMPILE_TARGET_REGISTRY_URL,
+    "@oven",
+    `bun-${packageSuffix}`,
+    "-",
+    `bun-${packageSuffix}-${Bun.version}.tgz`,
+  ].join("/");
+};
+
+const ensurePrewarmedCompileTargetDirectory = async (compileTarget: string): Promise<string> => {
+  const existingDirectory = prewarmedCompileTargetDirectories.get(compileTarget);
+  if (existingDirectory) {
+    return await existingDirectory;
+  }
+
+  const preparation = (async (): Promise<string> => {
+    const scratchRoot = resolveCompileTargetScratchRoot();
+    const workingDirectory = join(scratchRoot, "compile-targets", compileTarget);
+    const tarballPath = join(workingDirectory, "target.tgz");
+    const extractedDirectory = join(workingDirectory, "package");
+    const extractedExecutablePath = join(extractedDirectory, "bin", "bun.exe");
+    const prewarmedExecutablePath = join(
+      workingDirectory,
+      buildCompileTargetExecutableName(compileTarget),
+    );
+
+    if (await Bun.file(prewarmedExecutablePath).exists()) {
+      return workingDirectory;
+    }
+
+    await mkdir(workingDirectory, { recursive: true });
+    await writeOutput(
+      `desktop-runtime: prewarming official Bun compile target ${compileTarget} for ${Bun.version}`,
+    );
+
+    const tarballUrl = buildCompileTargetTarballUrl(compileTarget);
+    const tarballResponse = await fetch(tarballUrl, {
+      signal: AbortSignal.timeout(READY_TIMEOUT_MS),
+    });
+    if (!tarballResponse.ok) {
+      throw new Error(
+        `Unable to download ${compileTarget} tarball from ${tarballUrl}: ${tarballResponse.status} ${tarballResponse.statusText}`,
+      );
+    }
+
+    await writeFile(tarballPath, Buffer.from(await tarballResponse.arrayBuffer()));
+    await runCommand(["tar", "-xzf", tarballPath, "-C", workingDirectory]);
+
+    if (!(await Bun.file(extractedExecutablePath).exists())) {
+      throw new Error(
+        `Prewarmed Bun compile target executable is missing after extraction: ${extractedExecutablePath}`,
+      );
+    }
+
+    await cp(extractedExecutablePath, prewarmedExecutablePath, { force: true });
+    return workingDirectory;
+  })();
+
+  prewarmedCompileTargetDirectories.set(compileTarget, preparation);
+  try {
+    return await preparation;
+  } catch (error) {
+    prewarmedCompileTargetDirectories.delete(compileTarget);
+    throw error;
   }
 };
 
@@ -446,6 +537,9 @@ const compileRuntimeBinary = async (
   outputPath: string,
 ): Promise<void> => {
   await mkdir(dirname(outputPath), { recursive: true });
+  const commandCwd = shouldPrewarmCompileTarget(compileTarget)
+    ? await ensurePrewarmedCompileTargetDirectory(compileTarget)
+    : REPO_ROOT;
   const command = [
     process.execPath,
     "build",
@@ -458,7 +552,7 @@ const compileRuntimeBinary = async (
   ];
 
   for (let attempt = 1; attempt <= COMPILE_RETRY_LIMIT; attempt += 1) {
-    const result = await runCommandCaptured(command);
+    const result = await runCommandCaptured(command, { cwd: commandCwd });
     if (result.exitCode === 0) {
       return;
     }
@@ -559,6 +653,8 @@ const main = async (): Promise<void> => {
   const tauriTarget = parseTargetArg(process.argv.slice(2)) ?? resolveTargetFromEnvironment();
   const tempRoot = await mkdtemp(join(tmpdir(), "bao-desktop-runtime-"));
   const tempDbPath = join(tempRoot, "desktop-build.db");
+  compileTargetScratchRoot = tempRoot;
+  prewarmedCompileTargetDirectories.clear();
 
   await withCleanup(
     async () => {
@@ -579,7 +675,11 @@ const main = async (): Promise<void> => {
 
       await writeOutput("desktop-runtime: preparation complete");
     },
-    () => rm(tempRoot, { recursive: true, force: true }),
+    async () => {
+      compileTargetScratchRoot = null;
+      prewarmedCompileTargetDirectories.clear();
+      await rm(tempRoot, { recursive: true, force: true });
+    },
   );
 };
 
