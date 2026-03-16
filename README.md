@@ -1,3 +1,7 @@
+# Don't code? No problem! The easy install guide is available at [bao.builders](https://bao.builders/)
+
+
+
 ```text ascii-box
     ____              ____        _ _     _ ____            _     _
    | __ )  __ _  ___ | __ ) _   _(_) | __| | __ ) _   _  __| | __| |_   _
