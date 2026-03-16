@@ -1,10 +1,14 @@
+# Don't code? No problem! The easy install guide is available at [bao.builders](https://bao.builders/)
+
+
+
 ```text ascii-box
     ____              ____        _ _     _ ____            _     _
    | __ )  __ _  ___ | __ ) _   _(_) | __| | __ ) _   _  __| | __| |_   _
    |  _ \ / _` |/ _ \|  _ \| | | | | |/ _` |  _ \| | | |/ _` |/ _` | | | |
    | |_) | (_| | (_) | |_) | |_| | | | (_| | |_) | |_| | (_| | (_| | |_| |
    |____/ \__,_|\___/|____/ \__,_|_|_|\__,_|____/ \__,_|\__,_|\__,_|\__, |
-                                                                      |___/
+                                                                    |___/
                         Local Operations Manual
 ```
 
@@ -1042,16 +1046,17 @@ bun run release:refresh:all-os
 
 ## Desktop Packaging (Tauri)
 
+
 ```text
      ______________________
-    /|                     |\     Desktop packaging uses a native shell and
-   / |        TAURI        | \    no separate Electron runtime.
-  /__|_____________________|\    It launches the existing Bun stack and opens
-  |  |                     |  it in a desktop window.
-  |__|  .-.\           .-. |  This keeps one codebase for web + desktop.
-  |  |  |o|           |o| |
-  |  |  '-'           '-' |
-  |  |_____________________|
+    /|                     |\    Desktop packaging uses a native shell and
+   / |        TAURI        | \   no separate Electron runtime.
+  /__|_____________________|  \  It launches the existing Bun stack and opens
+  |  |                        |  it in a desktop window.
+  |__|  .-.\          /.-.    |  This keeps one codebase for web + desktop.
+  |  |  |o|           |o|     |
+  |  |  '-'           '-'     |
+  |  |_____________________   |
   |___________________________|
 ```
 
@@ -1236,26 +1241,25 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 - [ ] `/api/ws/automation` WebSocket handshake succeeds
 - [ ] AI provider responds (local or cloud)
 - [ ] `bun run scripts/validate-ascii-geometry.ts README.md` passes
-
 ```text
   +============================================================+
   |                                                            |
   |    __  __ ___ ____ ____ ___ ___  _   _                     |
-  |   |  \/  |_ _/ ___/ ___|_ _/ _ \| \ | |                   |
-  |   | |\/| || |\___ \___ \| | | | |  \| |                   |
-  |   | |  | || | ___) |__) | | |_| | |\  |                   |
-  |   |_|  |_|___|____/____/___\___/|_| \_|                   |
+  |   |  \/  |_ _/ ___/ ___|_ _/ _ \| \ | |                    |
+  |   | |\/| || |\___ \___ \| | | | |  \| |                    |
+  |   | |  | || | ___) |__) | | |_| | |\  |                    |
+  |   |_|  |_|___|____/____/___\___/|_| \_|                    |
   |                                                            |
   |     ____ ___  __  __ ____  _     _____ _____ _____         |
-  |    / ___/ _ \|  \/  |  _ \| |   | ____|_   _| ____|       |
-  |   | |  | | | | |\/| | |_) | |   |  _|   | | |  _|         |
-  |   | |__| |_| | |  | |  __/| |___| |___  | | | |___        |
-  |    \____\___/|_|  |_|_|   |_____|_____| |_| |_____|       |
+  |    / ___/ _ \|  \/  |  _ \| |   | ____|_   _| ____|        |
+  |   | |  | | | | |\/| | |_) | |   |  _|   | | |  _|          |
+  |   | |__| |_| | |  | |  __/| |___| |___  | | | |___         |
+  |    \____\___/|_|  |_|_|   |_____|_____| |_| |_____|        |
   |                                                            |
-  |                  BaoBuildBuddy is ready.                 |
+  |                  BaoBuildBuddy is ready.                   |
   |                                                            |
   |               "Thank you Mario!                            |
-  |                But our princess is in                       |
+  |                But our princess is in                      |
   |                another castle."                            |
   |                                                            |
   |               Just kidding. You're done.                   |
