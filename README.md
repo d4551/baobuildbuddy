@@ -183,9 +183,9 @@ Use the packaged desktop installers in `packages/desktop/releases` when you want
 
 | Operating System      | Artifact Pattern                                                                         |
 |-----------------------|------------------------------------------------------------------------------------------|
-| macOS (Apple Silicon)  | `<PRODUCT_NAME>_<VERSION>_aarch64.dmg`                                                  |
-| Windows (x64)          | `<PRODUCT_NAME>_<VERSION>_x64-setup.exe` or `<PRODUCT_NAME>_<VERSION>_x64-portable.zip` |
-| Linux (ARM64)          | `<PRODUCT_NAME>_<VERSION>_arm64.deb` or `<PRODUCT_NAME>-<VERSION>-1.aarch64.rpm`        |
+| macOS (Apple Silicon) | `<PRODUCT_NAME>_<VERSION>_aarch64.dmg`                                                   |
+| Windows (x64)         | `<PRODUCT_NAME>_<VERSION>_x64-setup.exe` or `<PRODUCT_NAME>_<VERSION>_x64-portable.zip`  |
+| Linux (ARM64)         | `<PRODUCT_NAME>_<VERSION>_arm64.deb` or `<PRODUCT_NAME>-<VERSION>-1.aarch64.rpm`         |
 
 Windows builds are 64-bit only. See `packages/desktop/releases/README.md` for the current artifact catalog.
 
@@ -409,8 +409,8 @@ bun run dev:client
 
 ### Default endpoints
 
-| Endpoint             | Default URL                              | Config key              |
-|----------------------|------------------------------------------|-------------------------|
+| Endpoint             | Default URL                              | Config key               |
+|----------------------|------------------------------------------|--------------------------|
 | API server           | `http://localhost:3000`                   | `PORT`                  |
 | Client UI            | `http://localhost:3001`                   | client `nuxt dev`       |
 | Chat WebSocket       | `ws://localhost:3000/api/ws/chat`         | `NUXT_PUBLIC_WS_BASE`   |
@@ -419,38 +419,38 @@ bun run dev:client
 
 ### All available scripts
 
-| Script                      | Command                             | Purpose                                           |
-|-----------------------------|-------------------------------------|----------------------------------------------------|
-| Dev (full)                  | `bun run dev`                       | Start server + client via `scripts/dev-stack.ts`    |
-| Dev (stack)                 | `bun run dev:stack`                 | Alias to `scripts/dev-stack.ts`                     |
-| Dev server                  | `bun run dev:server`                | Start API server only                               |
-| Dev client                  | `bun run dev:client`                | Start Nuxt client only                              |
-| Dev desktop                 | `bun run dev:desktop`               | Start Tauri desktop wrapper                         |
-| Build                       | `bun run build`                     | Build server and client                             |
-| Build desktop               | `bun run build:desktop`             | Build Tauri installer for current host              |
-| Typecheck                   | `bun run typecheck`                 | TypeScript checking across all packages             |
-| Test                        | `bun run test`                      | Run all test suites                                 |
-| Lint                        | `bun run lint`                      | All validators + Biome + ESLint + typecheck         |
-| Lint fix                    | `bun run lint:fix`                  | Autofix with guardrails preserved                   |
-| Format                      | `bun run format`                    | Apply Biome formatter                               |
-| Format check                | `bun run format:check`              | Verify formatter output                             |
-| DB generate                 | `bun run db:generate`               | Generate Drizzle migration files                    |
-| DB push                     | `bun run db:push`                   | Push schema changes to SQLite                       |
-| DB studio                   | `bun run db:studio`                 | Open Drizzle Studio GUI                             |
-| Release desktop (macOS)     | `bun run release:desktop:macos`     | Native macOS release artifacts                      |
-| Release desktop (Windows)   | `bun run release:desktop:windows`   | Native Windows release artifacts                    |
-| Release desktop (Linux ARM) | `bun run release:desktop:linux-arm64`| Native Linux ARM64 release artifacts               |
-| Release refresh (all OS)    | `bun run release:refresh:all-os`    | Assemble multi-platform release + checksums         |
-| Verify pages                | `bun run verify:pages`              | Validate SSR routes return proper HTML              |
-| Server type contract        | `bun run --filter '@bao/server' build:types` | Generate dist-types for client typecheck  |
-| Validate ARIA               | `bun run validate:aria`             | Interactive labeling + dialog semantics             |
-| Validate layout tokens      | `bun run validate:ui-layout-tokens` | Block hardcoded width/grid literals                 |
-| Validate UI                 | `bun run validate:ui`               | WCAG contrast + hardcoded color checks              |
-| Validate page SEO           | `bun run validate:page-seo`         | Require SSR `useServerSeoMeta` on core pages        |
-| Validate i18n               | `bun run validate:i18n-ui`          | Reject static template copy / missing `t()` keys   |
-| Validate no try/catch       | `bun run validate:no-try-catch`     | Enforce no-`try/catch` policy                       |
-| ASCII validation             | `bun run scripts/validate-ascii-geometry.ts README.md` | Verify ASCII-art geometry     |
-| Audit official LLM docs     | `bun run audit:official-llms`       | Check Bun/Nuxt/Elysia `llms.txt` reachability      |
+| Script                      | Command                                                | Purpose                                             |
+|-----------------------------|--------------------------------------------------------|-----------------------------------------------------|
+| Dev (full)                  | `bun run dev`                                          | Start server + client via `scripts/dev-stack.ts`    |
+| Dev (stack)                 | `bun run dev:stack`                                    | Alias to `scripts/dev-stack.ts`                     |
+| Dev server                  | `bun run dev:server`                                   | Start API server only                               |
+| Dev client                  | `bun run dev:client`                                   | Start Nuxt client only                              |
+| Dev desktop                 | `bun run dev:desktop`                                  | Start Tauri desktop wrapper                         |
+| Build                       | `bun run build`                                        | Build server and client                             |
+| Build desktop               | `bun run build:desktop`                                | Build Tauri installer for current host              |
+| Typecheck                   | `bun run typecheck`                                    | TypeScript checking across all packages             |
+| Test                        | `bun run test`                                         | Run all test suites                                 |
+| Lint                        | `bun run lint`                                         | All validators + Biome + ESLint + typecheck         |
+| Lint fix                    | `bun run lint:fix`                                     | Autofix with guardrails preserved                   |
+| Format                      | `bun run format`                                       | Apply Biome formatter                               |
+| Format check                | `bun run format:check`                                 | Verify formatter output                             |
+| DB generate                 | `bun run db:generate`                                  | Generate Drizzle migration files                    |
+| DB push                     | `bun run db:push`                                      | Push schema changes to SQLite                       |
+| DB studio                   | `bun run db:studio`                                    | Open Drizzle Studio GUI                             |
+| Release desktop (macOS)     | `bun run release:desktop:macos`                        | Native macOS release artifacts                      |
+| Release desktop (Windows)   | `bun run release:desktop:windows`                      | Native Windows release artifacts                    |
+| Release desktop (Linux ARM) | `bun run release:desktop:linux-arm64`                  | Native Linux ARM64 release artifacts                |
+| Release refresh (all OS)    | `bun run release:refresh:all-os`                       | Assemble multi-platform release + checksums         |
+| Verify pages                | `bun run verify:pages`                                 | Validate SSR routes return proper HTML              |
+| Server type contract        | `bun run --filter '@bao/server' build:types`           | Generate dist-types for client typecheck            |
+| Validate ARIA               | `bun run validate:aria`                                | Interactive labeling + dialog semantics             |
+| Validate layout tokens      | `bun run validate:ui-layout-tokens`                    | Block hardcoded width/grid literals                 |
+| Validate UI                 | `bun run validate:ui`                                  | WCAG contrast + hardcoded color checks              |
+| Validate page SEO           | `bun run validate:page-seo`                            | Require SSR `useServerSeoMeta` on core pages        |
+| Validate i18n               | `bun run validate:i18n-ui`                             | Reject static template copy / missing `t()` keys    |
+| Validate no try/catch       | `bun run validate:no-try-catch`                        | Enforce no-`try/catch` policy                       |
+| ASCII validation            | `bun run scripts/validate-ascii-geometry.ts README.md` | Verify ASCII-art geometry                           |
+| Audit official LLM docs     | `bun run audit:official-llms`                          | Check Bun/Nuxt/Elysia `llms.txt` reachability       |
 
 ---
 
@@ -484,16 +484,16 @@ Automation execution flows from `automationRoutes` through `application-automati
 
 ### Script registry
 
-| Script ID                | File                                              | Purpose                        |
-|--------------------------|---------------------------------------------------|--------------------------------|
-| `job-apply`              | `packages/scraper/src/scripts/job-apply.ts`       | Job application form automation |
-| `scraper-hitmarker`      | `packages/scraper/src/scripts/scraper-hitmarker.ts`| Scrape Hitmarker jobs          |
-| `scraper-grackle`        | `packages/scraper/src/scripts/scraper-grackle.ts`  | Scrape GrackleHQ jobs          |
-| `scraper-workwithindies` | `packages/scraper/src/scripts/scraper-workwithindies.ts` | Scrape Work With Indies  |
-| `scraper-remotegamejobs` | `packages/scraper/src/scripts/scraper-remotegamejobs.ts` | Scrape RemoteGameJobs    |
-| `scraper-gamesjobsdirect`| `packages/scraper/src/scripts/scraper-gamesjobsdirect.ts`| Scrape GamesJobsDirect   |
-| `scraper-pocketgamer`    | `packages/scraper/src/scripts/scraper-pocketgamer.ts`   | Scrape PocketGamer.biz   |
-| `studio-scraper`         | `packages/scraper/src/scripts/studio-scraper.ts`  | Curated studio directory        |
+| Script ID                | File                                                     | Purpose                         |
+|--------------------------|----------------------------------------------------------|---------------------------------|
+| `job-apply`              | `packages/scraper/src/scripts/job-apply.ts`              | Job application form automation |
+| `scraper-hitmarker`      | `packages/scraper/src/scripts/scraper-hitmarker.ts`      | Scrape Hitmarker jobs           |
+| `scraper-grackle`        | `packages/scraper/src/scripts/scraper-grackle.ts`        | Scrape GrackleHQ jobs           |
+| `scraper-workwithindies` | `packages/scraper/src/scripts/scraper-workwithindies.ts` | Scrape Work With Indies         |
+| `scraper-remotegamejobs` | `packages/scraper/src/scripts/scraper-remotegamejobs.ts` | Scrape RemoteGameJobs           |
+| `scraper-gamesjobsdirect`| `packages/scraper/src/scripts/scraper-gamesjobsdirect.ts`| Scrape GamesJobsDirect          |
+| `scraper-pocketgamer`    | `packages/scraper/src/scripts/scraper-pocketgamer.ts`    | Scrape PocketGamer.biz          |
+| `studio-scraper`         | `packages/scraper/src/scripts/studio-scraper.ts`         | Curated studio directory        |
 
 ### Script contract
 
@@ -588,14 +588,14 @@ Each writes a `pending` row to `automation_runs` with the requested time at `inp
      |  | Lever     | |      so the aggregator doesn't have to
      |  | Company   | |      care which ATS you're scraping.
      |  +-----------+ |
-      \             /
-       '-----------'
+      \              /
+       '------------'
 ```
 
 The job system lives in `packages/server/src/services/jobs/`:
 
-| File                                | What it does                                          |
-|-------------------------------------|-------------------------------------------------------|
+| File                                | What it does                                           |
+|-------------------------------------|--------------------------------------------------------|
 | `job-aggregator.ts`                 | Orchestrates fetching across all providers             |
 | `matching-service.ts`               | Scores jobs against user profile and skills            |
 | `deduplication.ts`                  | Deduplicates listings from multiple boards             |
@@ -631,17 +631,17 @@ The aggregator calls each provider, deduplicates results, scores them against yo
 
 The AI subsystem is in `packages/server/src/services/ai/`:
 
-| File                    | What it does                                    |
-|-------------------------|-------------------------------------------------|
-| `ai-service.ts`         | Routes requests to the active provider           |
-| `provider-interface.ts` | Common interface for all providers               |
-| `local-provider.ts`     | Connects to Ollama, LM Studio, etc.              |
-| `openai-provider.ts`    | OpenAI API adapter                               |
-| `gemini-provider.ts`    | Google Gemini API adapter                        |
-| `claude-provider.ts`    | Anthropic Claude API adapter                     |
-| `huggingface-provider.ts`| HuggingFace Inference API adapter               |
-| `context-manager.ts`    | Manages conversation history and context windows |
-| `prompts.ts`            | Prompt templates for resume review, interviews, cover letters |
+| File                     | What it does                                                  |
+|--------------------------|---------------------------------------------------------------|
+| `ai-service.ts`          | Routes requests to the active provider                        |
+| `provider-interface.ts`  | Common interface for all providers                            |
+| `local-provider.ts`      | Connects to Ollama, LM Studio, etc.                           |
+| `openai-provider.ts`     | OpenAI API adapter                                            |
+| `gemini-provider.ts`     | Google Gemini API adapter                                     |
+| `claude-provider.ts`     | Anthropic Claude API adapter                                  |
+| `huggingface-provider.ts`| HuggingFace Inference API adapter                             |
+| `context-manager.ts`     | Manages conversation history and context windows              |
+| `prompts.ts`             | Prompt templates for resume review, interviews, cover letters |
 
 ### Provider selection
 
@@ -667,13 +667,13 @@ All AI calls are server-owned. The client communicates through API routes and We
     |____________________________|
 ```
 
-| Service           | File                          | Purpose                                          |
-|-------------------|-------------------------------|--------------------------------------------------|
-| CV Questionnaire  | `cv-questionnaire-service.ts` | Guided questionnaire flow for building resume data |
-| Data Service      | `data-service.ts`             | Shared data access patterns                       |
+| Service           | File                          | Purpose                                               |
+|-------------------|-------------------------------|-------------------------------------------------------|
+| CV Questionnaire  | `cv-questionnaire-service.ts` | Guided questionnaire flow for building resume data    |
+| Data Service      | `data-service.ts`             | Shared data access patterns                           |
 | Export Service    | `export-service.ts`           | Export resumes, portfolios, cover letters to PDF/JSON |
-| Skill Extractor   | `skill-extractor.ts`          | Extract and normalize skills from listings/resumes |
-| Skill Mapping     | `skill-mapping-service.ts`    | Map user skills to job requirements for scoring    |
+| Skill Extractor   | `skill-extractor.ts`          | Extract and normalize skills from listings/resumes    |
+| Skill Mapping     | `skill-mapping-service.ts`    | Map user skills to job requirements for scoring       |
 
 ---
 
@@ -1109,11 +1109,11 @@ This assembles previously built artifacts into `packages/desktop/releases/`, reg
 
 ### Platform notes
 
-| Platform                      | Build target                        | Notes                                                       |
-|-------------------------------|-------------------------------------|-------------------------------------------------------------|
-| macOS (`aarch64-apple-darwin`)| `release:desktop:macos`             | Split flow: `bun tauri build --no-bundle` then `bun tauri bundle --bundles app,dmg` |
-| Windows (`x86_64-pc-windows-msvc`) | `release:desktop:windows`    | NSIS installer + portable zip. 64-bit only.                 |
-| Linux (`aarch64-unknown-linux-gnu`) | `release:desktop:linux-arm64`| Deb + RPM bundles. Requires ARM64 host or emulated runner.  |
+| Platform                            | Build target                        | Notes                                                                               |
+|-------------------------------------|-------------------------------------|-------------------------------------------------------------------------------------|
+| macOS (`aarch64-apple-darwin`)      | `release:desktop:macos`             | Split flow: `bun tauri build --no-bundle` then `bun tauri bundle --bundles app,dmg` |
+| Windows (`x86_64-pc-windows-msvc`)  | `release:desktop:windows`    | NSIS installer + portable zip. 64-bit only.                                                |
+| Linux (`aarch64-unknown-linux-gnu`) | `release:desktop:linux-arm64`| Deb + RPM bundles. Requires ARM64 host or emulated runner.                                 |
 
 For macOS DMG packaging with non-UTF8 locale defaults:
 ```bash
@@ -1159,29 +1159,29 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ### Client cannot reach API
 
-| Check                   | Fix                                                    |
-|-------------------------|--------------------------------------------------------|
-| API base configured?    | Verify `NUXT_PUBLIC_API_BASE` in `.env`                |
+| Check                   | Fix                                                                    |
+|-------------------------|------------------------------------------------------------------------|
+| API base configured?    | Verify `NUXT_PUBLIC_API_BASE` in `.env`                                |
 | Proxy configured?       | Set `NUXT_PUBLIC_API_PROXY` or ensure `localhost:${PORT}` is reachable |
-| CORS issue?             | Add client origin to `CORS_ORIGINS`                    |
-| Server running?         | `curl http://localhost:3000/api/health`                 |
+| CORS issue?             | Add client origin to `CORS_ORIGINS`                                    |
+| Server running?         | `curl http://localhost:3000/api/health`                                |
 
 ### WebSocket handshake fails
 
-| Check                   | Fix                                                    |
-|-------------------------|--------------------------------------------------------|
-| WS base correct?        | Verify `NUXT_PUBLIC_WS_BASE`                           |
-| Routes registered?      | Server logs should show `/api/ws/chat`, `/api/ws/interview`, `/api/ws/automation` |
-| Firewall blocking?      | `wscat -c ws://localhost:3000/api/ws/chat`              |
+| Check                   | Fix                                                                                |
+|-------------------------|------------------------------------------------------------------------------------|
+| WS base correct?        | Verify `NUXT_PUBLIC_WS_BASE`                                                       |
+| Routes registered?      | Server logs should show `/api/ws/chat`, `/api/ws/interview`, `/api/ws/automation`  |
+| Firewall blocking?      | `wscat -c ws://localhost:3000/api/ws/chat`                                         |
 
 ### RPA automation fails
 
 | Check                       | Fix                                                |
 |-----------------------------|----------------------------------------------------|
 | Playwright browser installed?| `bun run automation:browsers:install`             |
-| Chrome available?           | `which google-chrome` or `which chromium`           |
-| Script output?              | Check server logs for stdout/stderr                 |
-| Run record?                 | Query `/api/automation/runs` for the run ID         |
+| Chrome available?           | `which google-chrome` or `which chromium`          |
+| Script output?              | Check server logs for stdout/stderr                |
+| Run record?                 | Query `/api/automation/runs` for the run ID        |
 
 ### AI providers not responding
 
@@ -1271,13 +1271,13 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ## Documentation Index
 
-| Document                                                          | Purpose                                   |
-|-------------------------------------------------------------------|-------------------------------------------|
-| [ELI5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md)        | Plain-English system overview              |
-| [First-Time Setup Guide](docs/STARTER_GUIDE.md)                  | Step-by-step first install                 |
-| [Local AI Setup Guide](docs/LOCAL_AI_SETUP.md)                    | Ollama setup for local AI                  |
-| [Automation Guide](docs/AUTOMATION.md)                            | RPA contracts and runtime behavior         |
-| [Railway Deployment Guide](docs/RAILWAY.md)                       | Deploy to Railway                          |
-| [Feature Trace Matrix](docs/feature-trace-matrix.md)              | Route-to-service-to-UI traceability        |
-| [Job Board Service Layer](packages/server/src/services/jobs/README.md) | Job aggregation API reference         |
-| [Server routes](packages/server/src/routes)                       | API route modules                          |
+| Document                                                               | Purpose                                   |
+|------------------------------------------------------------------------|-------------------------------------------|
+| [ELI5 System Walkthrough](docs/ELI5_SYSTEM_WALKTHROUGH.md)             | Plain-English system overview             |
+| [First-Time Setup Guide](docs/STARTER_GUIDE.md)                        | Step-by-step first install                |
+| [Local AI Setup Guide](docs/LOCAL_AI_SETUP.md)                         | Ollama setup for local AI                 |
+| [Automation Guide](docs/AUTOMATION.md)                                 | RPA contracts and runtime behavior        |
+| [Railway Deployment Guide](docs/RAILWAY.md)                            | Deploy to Railway                         |
+| [Feature Trace Matrix](docs/feature-trace-matrix.md)                   | Route-to-service-to-UI traceability       |
+| [Job Board Service Layer](packages/server/src/services/jobs/README.md) | Job aggregation API reference             |
+| [Server routes](packages/server/src/routes)                            | API route modules                         |
