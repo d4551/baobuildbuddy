@@ -20,7 +20,7 @@ import {
 } from "./utils/desktop-runtime-scraper";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
-import { cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, extname, join, resolve } from "node:path";
 
@@ -44,6 +44,8 @@ const SCRAPER_ROOT = join(REPO_ROOT, "packages", "scraper");
 const SERVER_ENTRYPOINT = join(REPO_ROOT, "packages", "server", "src", "index.ts");
 const SERVER_DIST_ENTRYPOINT = join(REPO_ROOT, "packages", "server", "dist", "index.js");
 const SCRIPT_RUNNER_ENTRYPOINT = join(REPO_ROOT, "scripts", "desktop-bun-entrypoint-runner.ts");
+const LINUX_SCRIPT_RUNNER_BUN_BASENAME = "bao-bun";
+const LINUX_SCRIPT_RUNNER_ENTRYPOINT_BASENAME = "bao-bun-entrypoint-runner.mjs";
 const BUILD_SERVER_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`;
 const BUILD_SERVER_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`;
 const READY_TIMEOUT_MS = 60_000;
@@ -70,6 +72,9 @@ const prewarmedCompileTargetDirectories = new Map<string, Promise<string>>();
 
 const toExecutablePath = (relativePath: string, tauriTarget: string | null): string =>
   tauriTarget?.includes("windows") ? `${relativePath}.exe` : relativePath;
+
+const isLinuxTarget = (tauriTarget: string | null): boolean =>
+  tauriTarget?.includes("linux") ?? process.platform === "linux";
 
 const resolveTauriCacheDir = (): string => {
   const envOverride = process.env.TAURI_CACHE_DIR?.trim();
@@ -634,6 +639,30 @@ const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<str
   return destinationRelativePath;
 };
 
+const stageLinuxScriptRunner = async (tauriTarget: string | null): Promise<void> => {
+  const scriptRunnerPath = join(
+    RUNTIME_ROOT,
+    toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
+  );
+  const scriptRunnerDirectory = dirname(scriptRunnerPath);
+  const bunBinaryPath = join(scriptRunnerDirectory, LINUX_SCRIPT_RUNNER_BUN_BASENAME);
+  const entrypointPath = join(scriptRunnerDirectory, LINUX_SCRIPT_RUNNER_ENTRYPOINT_BASENAME);
+  const wrapperScript = [
+    "#!/bin/sh",
+    "set -eu",
+    'SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)',
+    `exec "$SCRIPT_DIR/${LINUX_SCRIPT_RUNNER_BUN_BASENAME}" "$SCRIPT_DIR/${LINUX_SCRIPT_RUNNER_ENTRYPOINT_BASENAME}" "$@"`,
+    "",
+  ].join("\n");
+
+  await mkdir(scriptRunnerDirectory, { recursive: true });
+  await cp(process.execPath, bunBinaryPath, { force: true });
+  await cp(SCRIPT_RUNNER_ENTRYPOINT, entrypointPath, { force: true });
+  await writeFile(scriptRunnerPath, wrapperScript, "utf8");
+  await chmod(bunBinaryPath, 0o755);
+  await chmod(scriptRunnerPath, 0o755);
+};
+
 const writeRuntimeManifest = async (
   tauriTarget: string | null,
   webviewBootstrapperExecutable: string | null,
@@ -666,8 +695,15 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
   await writeOutput(`desktop-runtime: compiling bundled desktop server (${compileTarget})`);
   await compileRuntimeBinary(compileTarget, SERVER_ENTRYPOINT, serverExecutablePath);
 
-  await writeOutput(`desktop-runtime: compiling bundled Bun script runner (${compileTarget})`);
-  await compileRuntimeBinary(compileTarget, SCRIPT_RUNNER_ENTRYPOINT, scriptRunnerPath);
+  if (isLinuxTarget(tauriTarget)) {
+    await writeOutput(
+      `desktop-runtime: staging bundled Bun runtime and shell wrapper for Linux script execution (${compileTarget})`,
+    );
+    await stageLinuxScriptRunner(tauriTarget);
+  } else {
+    await writeOutput(`desktop-runtime: compiling bundled Bun script runner (${compileTarget})`);
+    await compileRuntimeBinary(compileTarget, SCRIPT_RUNNER_ENTRYPOINT, scriptRunnerPath);
+  }
 
   await stageScraperRuntime();
   const webviewBootstrapperExecutable = await stageWebviewBootstrapper(tauriTarget);
