@@ -1053,7 +1053,7 @@ bun run release:refresh:all-os
    / |        TAURI        | \   no separate Electron runtime.
   /__|_____________________|  \  It launches the existing Bun stack and opens
   |  |                        |  it in a desktop window.
-  |__|  .-.\          /.-.    |  This keeps one codebase for web + desktop.
+  |__|  .-.\         /.-.     |  This keeps one codebase for web + desktop.
   |  |  |o|           |o|     |
   |  |  '-'           '-'     |
   |  |_____________________   |
