@@ -942,6 +942,8 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
   ] as const;
 };
 
+const MACOS_ONLY_PACKAGES = new Set(["fsevents"]);
+
 const verifyWindowsPortablePayload = async (
   artifact: ReleaseArtifact,
   metadata: DesktopBundleMetadata,
@@ -958,9 +960,11 @@ const verifyWindowsPortablePayload = async (
     `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH}.exe`,
     `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH}.exe`,
     `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRAPER_DIR}/package.json`,
-    ...Array.from(runtimeDependencyRoots.keys(), (packageName) =>
-      `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRAPER_DIR}/node_modules/${packageName}/package.json`,
-    ),
+    ...Array.from(runtimeDependencyRoots.keys())
+      .filter((packageName) => !MACOS_ONLY_PACKAGES.has(packageName))
+      .map((packageName) =>
+        `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRAPER_DIR}/node_modules/${packageName}/package.json`,
+      ),
   ] as const;
 
   const zipEntriesResult = await captureResult(() => listZipEntries(artifact.absolutePath));
