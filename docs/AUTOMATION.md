@@ -1,27 +1,12 @@
-# Automation & RPA
+# Automation & RPA Guide
 
-BaoBuildBuddy now runs browser automation through the Bun/TypeScript workspace package at `packages/scraper`. The server keeps process isolation with `Bun.spawn`, but the executable surface is no longer Python-based.
+BaoBuildBuddy runs browser automation through the Bun/TypeScript workspace package at `packages/scraper`. The server keeps process isolation with `Bun.spawn`.
 
-If you want the short mental model first, read [Explain Like I'm 5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md).
+For a plain-English overview, see [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md).
 
-## Runtime model
+---
 
-- `packages/server/src/services/automation/rpa-runner.ts` resolves typed script IDs and spawns Bun entrypoints from `packages/scraper/src/scripts`.
-- Job-apply automation keeps the NDJSON protocol contract defined in `@bao/shared` (`RPA_PROTOCOL_VERSION = "1.0"`).
-- Scraper scripts keep plain JSON stdout payloads for row ingestion.
-- Scheduled job-apply, email, and scraper runs are persisted in `automation_runs` with `status = "pending"` and `input.schedule.runAt`, then restored in-process on boot by `application-automation-service.ts`.
-- Shared script IDs, input schemas, and normalized row schemas live in `packages/shared/src/schemas/automation-scripts.schema.ts`.
-
-Current script registry:
-
-- `job-apply` → `packages/scraper/src/scripts/job-apply.ts`
-- `studio-scraper` → `packages/scraper/src/scripts/studio-scraper.ts`
-- `scraper-hitmarker` → `packages/scraper/src/scripts/scraper-hitmarker.ts`
-- `scraper-grackle` → `packages/scraper/src/scripts/scraper-grackle.ts`
-- `scraper-workwithindies` → `packages/scraper/src/scripts/scraper-workwithindies.ts`
-- `scraper-remotegamejobs` → `packages/scraper/src/scripts/scraper-remotegamejobs.ts`
-- `scraper-gamesjobsdirect` → `packages/scraper/src/scripts/scraper-gamesjobsdirect.ts`
-- `scraper-pocketgamer` → `packages/scraper/src/scripts/scraper-pocketgamer.ts`
+## How it works
 
 ```mermaid
 flowchart LR
@@ -43,15 +28,35 @@ flowchart LR
   Runs --> AutomationWs
 ```
 
-## Persisted scheduler
+**Key files:**
+- `packages/server/src/services/automation/rpa-runner.ts` -- resolves script IDs and spawns Bun entrypoints
+- `packages/scraper/src/scripts` -- individual automation scripts
+- `@bao/shared` -- script IDs, input schemas, and normalized row schemas
 
-All automation scheduling now uses one persisted model:
+---
+
+## Script registry
+
+| Script ID                | File                                              | Purpose                        |
+|--------------------------|---------------------------------------------------|--------------------------------|
+| `job-apply`              | `src/scripts/job-apply.ts`                        | Job application form automation |
+| `studio-scraper`         | `src/scripts/studio-scraper.ts`                   | Curated studio directory        |
+| `scraper-hitmarker`      | `src/scripts/scraper-hitmarker.ts`                | Scrape Hitmarker jobs           |
+| `scraper-grackle`        | `src/scripts/scraper-grackle.ts`                  | Scrape GrackleHQ jobs           |
+| `scraper-workwithindies` | `src/scripts/scraper-workwithindies.ts`           | Scrape Work With Indies         |
+| `scraper-remotegamejobs` | `src/scripts/scraper-remotegamejobs.ts`           | Scrape RemoteGameJobs           |
+| `scraper-gamesjobsdirect`| `src/scripts/scraper-gamesjobsdirect.ts`          | Scrape GamesJobsDirect          |
+| `scraper-pocketgamer`    | `src/scripts/scraper-pocketgamer.ts`              | Scrape PocketGamer.biz          |
+
+---
+
+## Scheduling
+
+All automation types use one persisted scheduling model:
 
 - `POST /api/automation/job-apply/schedule`
 - `POST /api/automation/email-response/schedule`
 - `POST /api/automation/scrape/schedule`
-
-Each route writes a `pending` row to `automation_runs`, stores the requested ISO timestamp at `input.schedule.runAt`, and queues an in-memory timer. On process restart, the service reloads pending rows and re-queues them. There is no separate cron table or shadow scheduler.
 
 ```mermaid
 flowchart LR
@@ -65,6 +70,10 @@ flowchart LR
   Dispatch --> Scrape["scrape executor"]
   Dispatch --> Runs
 ```
+
+Each route writes a `pending` row to `automation_runs` with the timestamp at `input.schedule.runAt`, then queues an in-memory timer. On restart, pending rows are reloaded and timers restored. No separate cron table.
+
+---
 
 ## Job-apply contract
 
@@ -88,39 +97,27 @@ Input is validated through `jobApplyScriptEnvelopeSchema` in `@bao/shared`:
       "phone": "+1 555 0100"
     }
   },
-  "coverLetter": {
-    "content": {}
-  },
-  "customAnswers": {
-    "workAuthorization": "Yes"
-  },
-  "selectorMap": {
-    "submit": ["button[type='submit']"]
-  }
+  "coverLetter": { "content": {} },
+  "customAnswers": { "workAuthorization": "Yes" },
+  "selectorMap": { "submit": ["button[type='submit']"] }
 }
 ```
 
-Output stays on the NDJSON event protocol:
+**Output:** NDJSON event protocol -- progress events on `stderr`, one terminal `result` or `error` event on `stdout`.
 
-- progress events on `stderr`
-- one terminal `result` or `error` event on `stdout`
+**Error codes:**
+- `AUTOMATION_RUNTIME_ERROR`, `AUTOMATION_TIMEOUT`, `AUTOMATION_CANCELLED`
+- `SCRIPT_PROTOCOL_ERROR`, `SCRIPT_OUTPUT_INVALID`
+- `OUTPUT_PERSISTENCE_ERROR`, `OUTPUT_VALIDATION_ERROR`
 
-Runtime-neutral error codes now use:
-
-- `AUTOMATION_RUNTIME_ERROR`
-- `AUTOMATION_TIMEOUT`
-- `AUTOMATION_CANCELLED`
-- `SCRIPT_PROTOCOL_ERROR`
-- `SCRIPT_OUTPUT_INVALID`
-- `OUTPUT_PERSISTENCE_ERROR`
-- `OUTPUT_VALIDATION_ERROR`
+---
 
 ## Email response and SMTP delivery
 
-The automation email flow now has two stages, whether it is started immediately or scheduled:
+The email automation has two stages (immediate or scheduled):
 
-1. Generate the reply draft with the configured AI provider.
-2. Optionally deliver the reply through the configured SMTP transport.
+1. **Draft:** Generate a reply with the configured AI provider.
+2. **Deliver:** Optionally send through SMTP.
 
 ```mermaid
 flowchart LR
@@ -134,29 +131,15 @@ flowchart LR
   Runs --> UI
 ```
 
-When delivery is enabled, the server loads these settings from the global settings row:
+**SMTP settings** (loaded from the global settings row): host, port, transport security, username, from name, from email, auth method, password secret, connection timeout.
 
-- SMTP host
-- SMTP port
-- transport security (`tls`, `starttls`, or `plain`)
-- username
-- from name
-- from email
-- auth method
-- stored password secret
-- connection timeout
+**Run output stores:** generated reply text, delivery status, recipient email, delivery timestamp, SMTP message ID.
 
-The completed run now stores:
-
-- generated reply text
-- whether the message was delivered
-- recipient email
-- delivery timestamp
-- SMTP message ID
+---
 
 ## Scraper contract
 
-Portal scrapers consume the shared `scraperScriptEnvelopeSchema`:
+Portal scrapers use `scraperScriptEnvelopeSchema`:
 
 ```json
 {
@@ -166,36 +149,13 @@ Portal scrapers consume the shared `scraperScriptEnvelopeSchema`:
 }
 ```
 
-`sourceUrl` is required. The server resolves it from `settings.automationSettings.jobProviders.gamingPortals[].fallbackUrl` before spawning the script, so scraper executables do not hardcode site defaults.
+`sourceUrl` is required. The server resolves it from `settings.automationSettings.jobProviders.gamingPortals[].fallbackUrl` before spawning the script.
 
-Normalized row output is validated with shared schemas:
+Normalized output is validated with `scrapedJobSchema` and `scrapedStudioSchema`.
 
-- `scrapedJobSchema`
-- `scrapedStudioSchema`
-
-Scheduled scraping now also flows through `automation_runs`:
-
-- `target = "studios"` runs the studio scraper and persists the summary in the run output.
-- `target = "jobs_hitmarker"` runs the Hitmarker scraper and persists the summary in the run output.
-
-## UI contract checks
-
-Automation-related pages still use the same SSR-first layout/token model:
-
-- `validate:ui-layout-tokens` remains the sole owner of widths, grid tracks, modal sizing, and page scaffold tokens.
-- `validate:daisyui-contracts` now scans layouts, pages, and components across the app for the blueprint-backed semantic classes:
-  - `btn`
-  - `card`, `card-body`, `card-title`, `card-actions`
-  - `drawer`, `drawer-toggle`, `drawer-content`, `drawer-side`, `drawer-overlay`
-  - `navbar`, `navbar-start`, `navbar-center`, `navbar-end`
-  - `table`
-  - `list`, `list-row`
-  - `progress`
-  - `radial-progress` with `role="progressbar"` and `aria-valuenow`
+---
 
 ## Setup
-
-Install workspace dependencies and Playwright Chromium:
 
 ```bash
 bun install
@@ -204,49 +164,69 @@ bun run automation:browsers:install
 
 No Python venv or `PYTHON_BINARY` configuration is required.
 
-Relevant environment variables:
+### Environment variables
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `AUTOMATION_STDIO_BUFFER_LIMIT` | Max stdout/stderr line capture for spawned scripts | `200` |
-| `AUTOMATION_SCRIPT_TIMEOUT_MS` | Max execution time per automation run | `30000` |
-| `AUTOMATION_NAVIGATION_TIMEOUT_MS` | Optional override for Playwright navigation timeout | derived from shared automation defaults |
-| `AUTOMATION_PAGE_SETTLE_DELAY_MS` | Optional post-navigation settle delay | `2000` |
-| `AUTOMATION_SECONDARY_NAVIGATION_DELAY_MS` | Optional apply-link redirect settle delay | `2000` |
-| `AUTOMATION_POST_SUBMIT_DELAY_MS` | Optional post-submit verification delay | `3000` |
+| Variable                                | Purpose                                    | Default   |
+|-----------------------------------------|--------------------------------------------|-----------|
+| `AUTOMATION_STDIO_BUFFER_LIMIT`         | Max stdout/stderr lines per script         | `200`     |
+| `AUTOMATION_SCRIPT_TIMEOUT_MS`          | Max execution time per run                 | `30000`   |
+| `AUTOMATION_NAVIGATION_TIMEOUT_MS`      | Playwright navigation timeout override     | derived   |
+| `AUTOMATION_PAGE_SETTLE_DELAY_MS`       | Post-navigation settle delay               | `2000`    |
+| `AUTOMATION_SECONDARY_NAVIGATION_DELAY_MS` | Apply-link redirect settle delay        | `2000`    |
+| `AUTOMATION_POST_SUBMIT_DELAY_MS`       | Post-submit verification delay             | `3000`    |
 
-## Verification model
+---
 
-Deterministic local quality gates:
+## Verification
 
-- `bun ci`
-- `bun run format:check`
-- `bun run lint`
-- `bun run typecheck`
-- `bun run test`
-- `bun run build`
-- `bun run ci:alignment`
+### Local quality gates
 
-Integration and release audits:
+```bash
+bun ci
+bun run format:check
+bun run lint
+bun run typecheck
+bun run test
+bun run build
+bun run ci:alignment
+```
 
-- `bun run audit:integration`
-  - `bun run audit:official-llms`
-  - `bun run verify:pages`
-- `bun run release:verify`
-  - macOS host preflight
-  - Rust / Xcode checks
-  - `CI=true bun run build:desktop`
-  - `bun run verify:desktop-runtime`
-  - `bun run verify:desktop-releases` when assembled matching-host release metadata is present
-- `bun run audit:full`
+### Integration and release audits
 
-`verify:pages` now starts Nuxt preview automatically unless `VERIFY_BASE_URL` is supplied explicitly.
+```bash
+bun run audit:integration       # audit:official-llms + verify:pages
+bun run release:verify           # preflight, build, verify:desktop-runtime, verify:desktop-releases
+bun run audit:full               # everything
+```
+
+`verify:pages` starts Nuxt preview automatically unless `VERIFY_BASE_URL` is supplied.
+
+---
+
+## UI contract checks
+
+Automation pages use the same SSR-first layout/token model as the rest of the app:
+
+- `validate:ui-layout-tokens` owns widths, grid tracks, modal sizing, and page scaffold tokens.
+- `validate:daisyui-contracts` scans for blueprint-backed semantic classes: `btn`, `card`, `drawer`, `navbar`, `table`, `list`, `progress`, and `radial-progress` (with `role="progressbar"` and `aria-valuenow`).
+
+---
 
 ## Tests
 
-Current test coverage for the Bun runtime includes:
+| Test                                   | Location                                                |
+|----------------------------------------|---------------------------------------------------------|
+| NDJSON runner contract tests           | `packages/server/src/services/automation/rpa-runner.test.ts` |
+| Scraper service integration tests      | `packages/server/src/services/scraper-service.test.ts`  |
+| Playwright extractor tests (fixtures)  | `packages/scraper/src/providers/provider-extractors.test.ts` |
+| ATS adapter selection tests            | `packages/scraper/src/job-apply/adapters.test.ts`       |
 
-- server-side NDJSON runner contract tests in `packages/server/src/services/automation/rpa-runner.test.ts`
-- server-side scraper-service integration tests in `packages/server/src/services/scraper-service.test.ts`
-- fixture-based Playwright extractor tests in `packages/scraper/src/providers/provider-extractors.test.ts`
-- ATS adapter selection tests in `packages/scraper/src/job-apply/adapters.test.ts`
+---
+
+## What to read next
+
+| Topic                              | Guide                                            |
+|------------------------------------|--------------------------------------------------|
+| Plain-English system overview      | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md) |
+| Local AI setup                     | [Local AI Setup](./LOCAL_AI_SETUP.md)             |
+| Full technical reference           | [README.md](../README.md)                        |
