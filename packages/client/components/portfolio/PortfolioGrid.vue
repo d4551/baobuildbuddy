@@ -66,25 +66,22 @@ function handleToggleFeatured(project: PortfolioProject) {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" role="list">
     <div
       v-for="(project, index) in localProjects"
       :key="project.id"
-      role="button"
-      tabindex="0"
-      draggable="true"
-      @dragstart="handleDragStart($event, index)"
-      @dragover="handleDragOver"
-      @drop="handleDrop($event, index)"
-      @keydown.enter.prevent
-      @keydown.space.prevent
-      class="cursor-move"
+      role="listitem"
     >
       <ProjectCard
         :project="project"
+        draggable="true"
+        class="cursor-move"
         @edit="handleEdit(project)"
         @delete="handleDelete(project)"
         @toggle-featured="handleToggleFeatured(project)"
+        @dragstart="handleDragStart($event, index)"
+        @dragover="handleDragOver"
+        @drop="handleDrop($event, index)"
       />
     </div>
   </div>

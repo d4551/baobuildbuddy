@@ -309,6 +309,27 @@ const jaJPOverrides = {
     seoDescription:
       "スタジオプロフィールを検索し、運用属性で絞り込み、文脈付きの面接練習を開始できます。",
     title: "スタジオディレクトリ",
+    options: {
+      type: {
+        indie: "インディー",
+        mobile: "モバイル",
+        platform: "プラットフォーム",
+        esports: "eスポーツ",
+        general: "汎用",
+        publisher: "パブリッシャー",
+        services: "サービス",
+        aiTech: "AI/テック",
+        midSize: "中規模",
+        unknown: "不明",
+      },
+      size: {
+        range50To199: "50〜199名",
+        range200To999: "200〜999名",
+        range500Plus: "500名以上",
+        range1000Plus: "1000名以上",
+        notAvailable: "該当なし",
+      },
+    },
   },
   aiProviderCatalog: {
     local: {

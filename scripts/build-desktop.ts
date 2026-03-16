@@ -97,8 +97,12 @@ const buildDesktopTarget = async (
     }
 
     await writeOutput(
-      "desktop-build: macOS DMG bundling runs through Tauri's bundle_dmg.sh and can stay quiet while hdiutil create/convert completes.",
+      "desktop-build: macOS DMG bundling runs through Tauri's bundle_dmg.sh in noninteractive mode and can stay quiet while hdiutil create/convert completes.",
     );
+    const bundleEnv = {
+      ...commandEnv,
+      CI: "true",
+    };
     const bundleExitCode = await runCommand(
       [
         ...sharedCommandPrefix,
@@ -109,7 +113,7 @@ const buildDesktopTarget = async (
       ],
       {
         cwd: DESKTOP_PACKAGE_ROOT,
-        env: commandEnv,
+        env: bundleEnv,
       },
     );
     if (bundleExitCode !== 0) {

@@ -145,7 +145,7 @@
               <div class="col-span-full flex justify-center py-12" aria-label="Loading Windows files"><span class="loading loading-spinner loading-lg text-primary"></span></div>
             </div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/windows" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">Browse Windows release folder →</a>
+               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/windows" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">View source on GitHub →</a>
             </div>
           </div>
 
@@ -162,7 +162,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="assets-macos" aria-live="polite"></div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/macos" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">Browse macOS release folder →</a>
+               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/macos" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">View source on GitHub →</a>
             </div>
           </div>
 
@@ -179,7 +179,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="assets-linux" aria-live="polite"></div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/linux" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">Browse Linux release folder →</a>
+               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/linux" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">View source on GitHub →</a>
             </div>
           </div>
         </div>
@@ -394,9 +394,6 @@
     <!-- Essential Scripts -->
     <script>
       // Focus management for keyboard users
-      const platformNames = ["windows", "macos", "linux"];
-      const githubReleaseRoot = "https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases";
-
       document.body.addEventListener('mousedown', () => {
         document.body.classList.remove('using-keyboard');
       });
@@ -430,7 +427,7 @@
           btn.classList.add("btn-success");
           btn.classList.remove("btn-ghost");
           btn.setAttribute("aria-live", "polite");
-          
+
           setTimeout(() => {
             btn.innerText = originalText;
             btn.classList.add("btn-ghost");
@@ -452,85 +449,55 @@
         });
       };
 
-      const getPlatformFolderUrl = (os) => `${githubReleaseRoot}/${os}`;
-      const buildAssetCard = (os, file) => {
-        const ext = file.name.split('.').pop() || 'file';
-        const folderUrl = `${getPlatformFolderUrl(os)}/${file.name}`;
+      // Direct download asset cards — served from bao.builders
+      const releaseRoot = "https://bao.builders/releases";
+      const releaseAssets = {
+        windows: [
+          { name: "BaoBuildBuddy_0.1.0_x64-setup.exe", size: "61 MB", primary: true },
+          { name: "BaoBuildBuddy_0.1.0_x64-portable.zip", size: "98 MB", primary: false }
+        ],
+        macos: [
+          { name: "BaoBuildBuddy_0.1.0_aarch64.dmg", size: "59 MB", primary: true }
+        ],
+        linux: [
+          { name: "BaoBuildBuddy_0.1.0_arm64.deb", size: "93 MB", primary: true },
+          { name: "BaoBuildBuddy-0.1.0-1.aarch64.rpm", size: "93 MB", primary: false }
+        ]
+      };
 
-        return `
-          <div class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow">
-            <div class="card-body p-6">
-              <div class="flex items-start justify-between">
-                <div class="w-full">
-                  <h4 class="card-title text-base font-mono break-all text-base-content leading-tight">${file.name}</h4>
-                  <div class="mt-3">
-                     <span class="badge ${ext === 'exe' || ext === 'dmg' || ext === 'AppImage' ? 'badge-primary' : 'badge-neutral'} badge-sm uppercase font-bold">${ext}</span>
+      function renderAssets() {
+        for (const [os, files] of Object.entries(releaseAssets)) {
+          const container = document.getElementById(`assets-${os}`);
+          if (!container) continue;
+          container.innerHTML = files.map((file) => {
+            const ext = file.name.split('.').pop() || 'file';
+            const downloadUrl = `${releaseRoot}/${os}/${file.name}`;
+            return `
+              <div class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow">
+                <div class="card-body p-6">
+                  <div class="flex items-start justify-between">
+                    <div class="w-full">
+                      <h4 class="card-title text-base font-mono break-all text-base-content leading-tight">${file.name}</h4>
+                      <div class="mt-3 flex items-center gap-2">
+                        <span class="badge ${file.primary ? 'badge-primary' : 'badge-neutral'} badge-sm uppercase font-bold">${ext}</span>
+                        <span class="text-xs text-base-content/50">${file.size}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-actions justify-end mt-4">
+                    <a href="${downloadUrl}" download class="btn ${file.primary ? 'btn-primary' : 'btn-outline'} btn-sm w-full font-medium" aria-label="Download ${file.name}">
+                      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                      Download
+                    </a>
                   </div>
                 </div>
               </div>
-              <div class="card-actions justify-end mt-4">
-                <a href="${folderUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm w-full font-medium" aria-label="View ${file.name} on GitHub">
-                   View Source File
-                 </a>
-              </div>
-            </div>
-          </div>
-        `;
-      };
-
-      // Safe GitHub fetch (folders only per user request)
-      async function fetchPlatformAssets() {
-        const apiUrl = "https://api.github.com/repos/d4551/baobuildbuddy/contents/packages/desktop/releases";
-        
-        try {
-          const res = await fetch(apiUrl);
-          if (!res.ok) throw new Error("API Limit reached");
-          const platforms = await res.json();
-
-          await Promise.all(platformNames.map(async (os) => {
-            const container = document.getElementById(`assets-${os}`);
-            if (!container) return;
-            
-            const p = platforms.find(dir => dir.name === os);
-            if (!p || p.type !== "dir") {
-               container.innerHTML = `<div class="col-span-full alert alert-info text-sm" role="alert">No folders found for ${os}.</div>`;
-               return;
-            }
-            
-            const osRes = await fetch(p.url);
-            const files = await osRes.json();
-            
-            const visibleFiles = files.filter((file) =>
-              file.type === "file" &&
-              !file.name.includes("sha256") &&
-              !file.name.includes(".DS_Store"),
-            );
-            container.innerHTML = visibleFiles.map((file) => buildAssetCard(os, file)).join("");
-            
-            if (visibleFiles.length === 0) {
-               container.innerHTML = `
-                 <div class="col-span-full alert border border-base-300 bg-base-100 text-sm" role="alert">
-                   No specific builder files found in ${os} directory.
-                 </div>
-               `;
-            }
-          }));
-        } catch {
-          for (const os of platformNames) {
-            const el = document.getElementById(`assets-${os}`);
-            if (el) {
-              const folderUrl = getPlatformFolderUrl(os);
-              el.innerHTML = `
-                <div class="col-span-full flex flex-col items-center gap-4 text-center py-8">
-                  <a href="${folderUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-outline" aria-label="Open ${os} release folder manually">Browse GitHub Directory</a>
-                </div>
-              `;
-            }
-          }
+            `;
+          }).join("");
         }
       }
 
-      document.addEventListener('DOMContentLoaded', fetchPlatformAssets);
+      document.addEventListener('DOMContentLoaded', renderAssets);
     </script>
   </body>
 </html>

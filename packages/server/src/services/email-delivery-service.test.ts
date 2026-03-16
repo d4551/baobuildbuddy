@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import type { EmailTransportSecurityOption } from "@bao/shared";
 import { emailDeliveryService } from "./email-delivery-service";
 
 const SMTP_LINE_BREAK = "\r\n";
@@ -31,6 +32,7 @@ type SmtpLineHandler = (
 ) => boolean;
 
 let activeListener: Bun.TCPSocketListener<undefined> | null = null;
+let closeOnCommand: string | null = null;
 
 const encodeBase64Utf8 = (value: string): string => Buffer.from(value, "utf8").toString("base64");
 
@@ -111,13 +113,32 @@ const handleAwaitingLoginPassword: SmtpLineHandler = (socket, session) => {
   return true;
 };
 
-const handleEhloLine: SmtpLineHandler = (socket, _session, line) => {
+const defaultEhloCapabilities = ["smtp.test", "STARTTLS", "AUTH PLAIN LOGIN"] as const;
+type EhloCapability = string;
+
+const buildEhloResponder = (capabilities: readonly EhloCapability[]): SmtpLineHandler => (
+  socket,
+  _session,
+  line,
+) => {
   if (!line.startsWith("EHLO ")) {
     return false;
   }
 
-  socket.write(`250-smtp.test${SMTP_LINE_BREAK}250 AUTH PLAIN LOGIN${SMTP_LINE_BREAK}`);
+  for (let index = 0; index < capabilities.length; index += 1) {
+    const capability = capabilities[index];
+    const isLastLine = index === capabilities.length - 1;
+    socket.write(`250${isLastLine ? " " : "-"}${capability}${SMTP_LINE_BREAK}`);
+  }
+
   return true;
+};
+
+let ehloResponder: SmtpLineHandler = buildEhloResponder(defaultEhloCapabilities);
+const handleEhloLine: SmtpLineHandler = (socket, session, line) => ehloResponder(socket, session, line);
+
+const setEhloResponder = (responder: SmtpLineHandler): void => {
+  ehloResponder = responder;
 };
 
 const handleAuthPlainLine: SmtpLineHandler = (socket, session, line) => {
@@ -198,6 +219,10 @@ const handleCommandLine = (
   line: string,
 ): void => {
   session.exchange.commands.push(line);
+  if (closeOnCommand !== null && line === closeOnCommand) {
+    socket.end();
+    return;
+  }
   for (const handler of SMTP_COMMAND_HANDLERS) {
     if (handler(socket, session, line)) {
       return;
@@ -240,12 +265,21 @@ const createSmtpSocketHandlers = (
   },
 });
 
-const createSmtpHarness = (): { exchange: CapturedSmtpExchange; port: number } => {
+type SmtpHarnessOptions = {
+  capabilityLines?: readonly EhloCapability[];
+  closeOnCommand?: string;
+};
+
+const createSmtpHarness = (
+  options: SmtpHarnessOptions = {},
+): { exchange: CapturedSmtpExchange; port: number } => {
   const exchange: CapturedSmtpExchange = {
     commands: [],
     message: "",
   };
   const sessions = new WeakMap<Bun.Socket<undefined>, SmtpSessionState>();
+  setEhloResponder(buildEhloResponder(options.capabilityLines ?? defaultEhloCapabilities));
+  closeOnCommand = options.closeOnCommand ?? null;
   activeListener = Bun.listen({
     hostname: "127.0.0.1",
     port: SMTP_PORT_EPHEMERAL,
@@ -258,10 +292,14 @@ const createSmtpHarness = (): { exchange: CapturedSmtpExchange; port: number } =
   };
 };
 
-const createTransportConfig = (port: number, authMethod: "plain" | "login") => ({
+const createTransportConfig = (
+  port: number,
+  authMethod: "plain" | "login",
+  security: EmailTransportSecurityOption = "plain",
+) => ({
   host: "127.0.0.1",
   port,
-  security: "plain" as const,
+  security,
   username: SMTP_USERNAME,
   fromEmail: SMTP_USERNAME,
   fromName: SMTP_FROM_NAME,
@@ -277,6 +315,7 @@ const encodeMessageBody = (body: string) =>
   encodeBase64Utf8(body.replaceAll("\n", SMTP_LINE_BREAK));
 
 afterEach(() => {
+  closeOnCommand = null;
   if (!activeListener) {
     return;
   }
@@ -285,7 +324,18 @@ afterEach(() => {
   activeListener = null;
 });
 
-describe("email delivery service", () => {
+const expectRejectedDelivery = async (
+  deliveryPromise: Promise<unknown>,
+): Promise<Error> => {
+  const result = await deliveryPromise.then(
+    () => null,
+    (error: unknown) => error,
+  );
+  expect(result).toBeInstanceOf(Error);
+  return result as Error;
+};
+
+const registerAuthPlainTest = (): void => {
   test("sends a message using AUTH PLAIN", async () => {
     const harness = createSmtpHarness();
     const body = "Thanks for the interview.\nLooking forward to next steps.";
@@ -303,7 +353,9 @@ describe("email delivery service", () => {
     expect(harness.exchange.message).toContain("Content-Transfer-Encoding: base64");
     expect(harness.exchange.message).toContain(encodeMessageBody(body));
   });
+};
 
+const registerAuthLoginTest = (): void => {
   test("sends a message using AUTH LOGIN", async () => {
     const harness = createSmtpHarness();
     const result = await emailDeliveryService.send(createTransportConfig(harness.port, "login"), {
@@ -318,4 +370,61 @@ describe("email delivery service", () => {
     expect(harness.exchange.username).toBe(SMTP_USERNAME);
     expect(harness.exchange.message).toContain("To: <producer@example.test>");
   });
+};
+
+const registerStartTlsFailureTest = (): void => {
+  test("fails when STARTTLS is required but missing", async () => {
+    const harness = createSmtpHarness({
+      capabilityLines: ["smtp.test", "AUTH PLAIN LOGIN"],
+    });
+    const error = await expectRejectedDelivery(
+      emailDeliveryService.send(createTransportConfig(harness.port, "plain", "starttls"), {
+        recipientEmail: "starttls@example.test",
+        subject: "TLS required",
+        body: "Secure message.",
+      }),
+    );
+    expect(error.message).toContain("SMTP server does not support STARTTLS");
+  });
+};
+
+const registerAuthMismatchFailureTest = (): void => {
+  test("fails when requested auth method is not advertised", async () => {
+    const harness = createSmtpHarness({
+      capabilityLines: ["smtp.test", "STARTTLS", "AUTH PLAIN"],
+    });
+    const error = await expectRejectedDelivery(
+      emailDeliveryService.send(createTransportConfig(harness.port, "login", "plain"), {
+        recipientEmail: "login@example.test",
+        subject: "Auth mismatch",
+        body: "Testing login fallback.",
+      }),
+    );
+    expect(error.message).toContain("SMTP server does not advertise AUTH LOGIN");
+  });
+};
+
+const registerDisconnectFailureTest = (): void => {
+  test("fails when the SMTP connection closes before message delivery completes", async () => {
+    const harness = createSmtpHarness({
+      closeOnCommand: "MAIL FROM:<mailer@example.test>",
+    });
+    const error = await expectRejectedDelivery(
+      emailDeliveryService.send(createTransportConfig(harness.port, "plain", "plain"), {
+        recipientEmail: "disconnect@example.test",
+        subject: "Connection closed",
+        body: "Testing unexpected disconnect.",
+      }),
+    );
+    expect(error.message).toContain("SMTP connection closed");
+    expect(harness.exchange.commands).toContain("MAIL FROM:<mailer@example.test>");
+  });
+};
+
+describe("email delivery service", () => {
+  registerAuthPlainTest();
+  registerAuthLoginTest();
+  registerStartTlsFailureTest();
+  registerAuthMismatchFailureTest();
+  registerDisconnectFailureTest();
 });

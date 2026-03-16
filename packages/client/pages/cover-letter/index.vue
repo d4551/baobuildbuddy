@@ -439,15 +439,14 @@ function resolveTemplate(value: string): CoverLetterTemplate {
       <article
         v-for="letter in coverLetterPagination.items.value"
         :key="letter.id"
-        class="card card-border cursor-pointer bg-base-100 transition-colors hover:bg-base-200"
-        role="button"
-        tabindex="0"
-        :aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
-        @click="editLetter(letter.id)"
-        @keydown.enter="editLetter(letter.id)"
-        @keydown.space.prevent="editLetter(letter.id)"
+        class="card card-border relative overflow-hidden bg-base-100 transition-colors hover:bg-base-200"
       >
-        <div class="card-body">
+        <NuxtLink
+          :to="APP_ROUTE_BUILDERS.coverLetterDetail(letter.id)"
+          class="absolute inset-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+          :aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
+        />
+        <div class="card-body relative z-10">
           <div class="flex items-start justify-between gap-2">
             <div>
               <h2 class="card-title text-lg">{{ letter.position }}</h2>
@@ -469,14 +468,14 @@ function resolveTemplate(value: string): CoverLetterTemplate {
 
           <div class="card-actions justify-end">
             <button
-              class="btn btn-sm btn-outline"
+              class="btn btn-sm btn-outline relative z-20"
               :aria-label="t('coverLetterPage.cards.editAria', { company: letter.company, position: letter.position })"
               @click.stop="editLetter(letter.id)"
             >
               {{ t("coverLetterPage.cards.editButton") }}
             </button>
             <button
-              class="btn btn-sm btn-error btn-outline"
+              class="btn btn-sm btn-error btn-outline relative z-20"
               :aria-label="t('coverLetterPage.cards.deleteAria', { company: letter.company, position: letter.position })"
               @click.stop="requestDeleteCoverLetter(letter.id)"
             >

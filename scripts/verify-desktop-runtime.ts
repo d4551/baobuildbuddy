@@ -69,6 +69,7 @@ const VERIFY_FRONTEND_URL = `${VERIFY_FRONTEND_ORIGIN}/`;
 const DESKTOP_RUNTIME_VERIFY_SERVER_PORT = DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT + 1;
 const VERIFY_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_VERIFY_SERVER_PORT}`;
 const VERIFY_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_VERIFY_SERVER_PORT}`;
+const VERIFY_API_ROUTE_BASE = `${VERIFY_API_BASE}/api`;
 const READY_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 250;
 const BUILD_API_LEAK_MARKERS = [
@@ -205,34 +206,54 @@ const fileExists = async (filePath: string): Promise<boolean> =>
     () => false,
   );
 
+const findFirstMissingPath = async (
+  candidatePaths: readonly string[],
+): Promise<string | null> => {
+  const existenceChecks = await Promise.all(candidatePaths.map((candidatePath) => fileExists(candidatePath)));
+  const missingIndex = existenceChecks.findIndex((exists) => !exists);
+  return missingIndex === -1 ? null : candidatePaths[missingIndex] ?? null;
+};
+
+const hasAutomationCapabilities = (
+  payload: unknown,
+): payload is {
+  capabilities: unknown[];
+} =>
+  isRecord(payload) &&
+  "capabilities" in payload &&
+  Array.isArray(payload.capabilities) &&
+  payload.capabilities.length > 0;
+
 const assertScraperRuntimeContract = async (manifest: DesktopRuntimeManifest): Promise<void> => {
   if (manifest.scraperDir !== DESKTOP_RUNTIME_SCRAPER_DIR) {
     throw new Error(`Unexpected desktop runtime scraper dir: ${manifest.scraperDir}`);
   }
 
   const scraperRuntimeRoot = join(RUNTIME_ROOT, manifest.scraperDir);
-  for (const relativePath of SCRAPER_RUNTIME_STAGE_SOURCE_PATHS) {
-    const stagedPath = join(scraperRuntimeRoot, relativePath);
-    if (!(await fileExists(stagedPath))) {
-      throw new Error(`Packaged scraper runtime is missing ${stagedPath}`);
-    }
+  const stagedContractPaths = SCRAPER_RUNTIME_STAGE_SOURCE_PATHS.map((relativePath) =>
+    join(scraperRuntimeRoot, relativePath),
+  );
+  const missingContractPath = await findFirstMissingPath(stagedContractPaths);
+  if (missingContractPath) {
+    throw new Error(`Packaged scraper runtime is missing ${missingContractPath}`);
   }
 
   const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
     join(REPO_ROOT, "packages", "scraper"),
   );
-  for (const packageName of runtimeDependencyRoots.keys()) {
-    const stagedPackageManifestPath = join(
+  const stagedDependencyManifestPaths = Array.from(runtimeDependencyRoots.keys(), (packageName) =>
+    join(
       scraperRuntimeRoot,
       "node_modules",
       packageName,
       "package.json",
+    ),
+  );
+  const missingDependencyManifestPath = await findFirstMissingPath(stagedDependencyManifestPaths);
+  if (missingDependencyManifestPath) {
+    throw new Error(
+      `Packaged scraper runtime is missing dependency manifest ${missingDependencyManifestPath}`,
     );
-    if (!(await fileExists(stagedPackageManifestPath))) {
-      throw new Error(
-        `Packaged scraper runtime is missing dependency manifest ${stagedPackageManifestPath}`,
-      );
-    }
   }
 };
 
@@ -452,6 +473,24 @@ const runBrowserChecks = async (
   );
 };
 
+const assertAutomationEndpoints = async (apiBase: string): Promise<void> => {
+  const capabilitiesResponse = await fetch(`${apiBase}/automation/capabilities`);
+  if (!capabilitiesResponse.ok) {
+    throw new Error(
+      `Automation capabilities endpoint failed: ${capabilitiesResponse.status} ${capabilitiesResponse.statusText}`,
+    );
+  }
+  const capabilitiesPayload: unknown = await capabilitiesResponse.json();
+  if (!hasAutomationCapabilities(capabilitiesPayload)) {
+    throw new Error("Automation capabilities payload missing required entries.");
+  }
+
+  const runsResponse = await fetch(`${apiBase}/automation/runs?limit=1`);
+  if (!runsResponse.ok) {
+    throw new Error(`Automation runs endpoint failed: ${runsResponse.status}`);
+  }
+};
+
 const startPackagedServer = async (
   manifest: DesktopRuntimeManifest,
 ): Promise<ReturnType<typeof Bun.spawn>> => {
@@ -566,6 +605,7 @@ const verifyPackagedRuntime = async (
 
       await verifyCorsContract(VERIFY_API_BASE, manifest, DESKTOP_RUNTIME_CORS_ORIGINS[0]);
       await verifyCorsContract(VERIFY_API_BASE, manifest, VERIFY_FRONTEND_ORIGIN);
+      await assertAutomationEndpoints(VERIFY_API_ROUTE_BASE);
       const browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
       assertBrowserChecksPassed(browserResult);
 

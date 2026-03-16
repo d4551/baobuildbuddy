@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { studioTypeLabel as formatStudioTypeLabel } from "~/utils/labels";
 
 interface Studio {
   id: string;
@@ -70,9 +71,11 @@ function studioTypeBadgeClass(type: string): string {
   return normalizedType.length > 0 ? "badge-outline" : "badge-ghost";
 }
 
-function studioTypeLabel(type: string): string {
+function resolvedStudioTypeLabel(type: string): string {
   const normalized = type.trim();
-  return normalized.length > 0 ? normalized : t("studioSelector.unknownType");
+  return normalized.length > 0
+    ? formatStudioTypeLabel(t, normalized)
+    : t("studioSelector.unknownType");
 }
 
 function studioLocationLabel(location: string): string {
@@ -96,7 +99,7 @@ function studioLocationLabel(location: string): string {
       <span v-if="selectedStudio" class="flex items-center gap-2 truncate">
         <span class="truncate">{{ selectedStudio.name }}</span>
         <span class="badge badge-sm" :class="studioTypeBadgeClass(selectedStudio.type)">
-          {{ studioTypeLabel(selectedStudio.type) }}
+          {{ resolvedStudioTypeLabel(selectedStudio.type) }}
         </span>
       </span>
       <span v-else class="text-base-content/50">{{ t("studioSelector.selectPlaceholder") }}</span>
@@ -107,8 +110,7 @@ function studioLocationLabel(location: string): string {
 
     <div
       v-if="isOpen"
-      tabindex="0"
-      class="dropdown-content z-10 menu p-2 shadow-lg bg-base-100 rounded-box w-full mt-2 max-h-96 overflow-auto flex-nowrap"
+      class="dropdown-content z-10 mt-2 max-h-96 w-full overflow-auto rounded-box bg-base-100 p-2 shadow-lg"
     >
       <div class="p-2 sticky top-0 bg-base-100 z-10">
         <input
@@ -126,7 +128,7 @@ function studioLocationLabel(location: string): string {
         :id="menuId"
         role="menu"
         tabindex="-1"
-        class="space-y-1"
+        class="menu w-full space-y-1"
         :aria-label="t('studioSelector.menuAria')"
         @keydown.esc.stop.prevent="onEscape"
       >
@@ -143,7 +145,7 @@ function studioLocationLabel(location: string): string {
             <div class="flex items-center gap-2 w-full">
               <span class="font-medium truncate">{{ studio.name }}</span>
               <span class="badge badge-sm" :class="studioTypeBadgeClass(studio.type)">
-                {{ studioTypeLabel(studio.type) }}
+                {{ resolvedStudioTypeLabel(studio.type) }}
               </span>
             </div>
             <span class="text-xs text-base-content/60">{{ studioLocationLabel(studio.location) }}</span>

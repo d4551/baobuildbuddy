@@ -15,6 +15,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
+import { jobExperienceLabel, studioTypeLabel } from "~/utils/labels";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
 
@@ -200,23 +201,12 @@ function formatDate(date: string) {
 
 function experienceOptionLabel(value: FilterSelection<JobExperienceLevel>): string {
   if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.all");
-  if (value === "entry") return t("jobsPage.options.experience.entry");
-  if (value === "junior") return t("jobsPage.options.experience.junior");
-  if (value === "mid") return t("jobsPage.options.experience.mid");
-  if (value === "senior") return t("jobsPage.options.experience.senior");
-  if (value === "principal") return t("jobsPage.options.experience.principal");
-  return t("jobsPage.options.experience.director");
+  return jobExperienceLabel(t, value);
 }
 
 function studioTypeOptionLabel(value: FilterSelection<StudioType>): string {
   if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.allTypes");
-  if (value === "AAA") return t("jobsPage.options.studioType.aaa");
-  if (value === "Indie") return t("jobsPage.options.studioType.indie");
-  if (value === "Mobile") return t("jobsPage.options.studioType.mobile");
-  if (value === "VR/AR") return t("jobsPage.options.studioType.vrAr");
-  if (value === "Platform") return t("jobsPage.options.studioType.platform");
-  if (value === "Esports") return t("jobsPage.options.studioType.esports");
-  return t("jobsPage.options.studioType.unknown");
+  return studioTypeLabel(t, value);
 }
 
 function platformOptionLabel(value: FilterSelection<Platform>): string {
@@ -435,18 +425,17 @@ async function maybeAwardSearchXp(): Promise<void> {
 
         <div v-else>
           <SectionGrid grid-token="twoColumn" extra-class="mb-6">
-            <div
+            <article
               v-for="job in paginatedJobs"
               :key="job.id"
-              class="card card-border cursor-pointer bg-base-100 transition-colors hover:bg-base-200"
-              role="button"
-              :aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
-              tabindex="0"
-              @click="viewJob(job.id)"
-              @keydown.enter="viewJob(job.id)"
-              @keydown.space.prevent="viewJob(job.id)"
+              class="card card-border relative overflow-hidden bg-base-100 transition-colors hover:bg-base-200"
             >
-              <div class="card-body">
+              <NuxtLink
+                :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
+                class="absolute inset-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                :aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
+              />
+              <div class="card-body relative z-10">
                 <div class="flex items-start justify-between gap-2">
                   <h3 class="card-title text-lg">{{ job.title }}</h3>
                   <div
@@ -494,14 +483,14 @@ async function maybeAwardSearchXp(): Promise<void> {
                   </span>
                   <div class="flex gap-2">
                     <button
-                      class="btn btn-outline btn-sm"
+                      class="btn btn-outline btn-sm relative z-20"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="interviewJob(job.id)"
                     >
                       {{ t("jobsPage.interviewButton") }}
                     </button>
                     <button
-                      class="btn btn-primary btn-sm"
+                      class="btn btn-primary btn-sm relative z-20"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
                       @click.stop="viewJob(job.id)"
                     >
@@ -510,7 +499,7 @@ async function maybeAwardSearchXp(): Promise<void> {
                   </div>
                 </div>
               </div>
-            </div>
+            </article>
           </SectionGrid>
 
           <div v-if="totalPages > 1" class="flex justify-center">

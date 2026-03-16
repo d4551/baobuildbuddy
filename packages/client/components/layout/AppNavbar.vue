@@ -15,9 +15,15 @@ const { t, locale, availableLocales } = useI18n();
 const localeMenuRef = useTemplateRef<HTMLDetailsElement>("localeMenu");
 const isLocaleMenuOpen = ref(false);
 const isDarkTheme = computed(() => theme.value === THEME_NAMES.dark);
+const localeMenuId = `app-navbar-locale-menu-${useId()}`;
+
+const isAppLanguageCode = (localeCode: string): localeCode is AppLanguageCode =>
+  Object.hasOwn(APP_LANGUAGE_LABELS, localeCode);
 
 const getLocaleLabel = (localeCode: string): string => {
-  const directLabel = APP_LANGUAGE_LABELS[localeCode as AppLanguageCode];
+  const directLabel = isAppLanguageCode(localeCode)
+    ? APP_LANGUAGE_LABELS[localeCode]
+    : undefined;
   return directLabel || localeCode;
 };
 
@@ -77,6 +83,7 @@ function syncLocaleMenuState(): void {
           class="btn btn-ghost btn-circle"
           :aria-label="t('a11y.localeSwitcher')"
           aria-haspopup="menu"
+          :aria-controls="localeMenuId"
           :aria-expanded="isLocaleMenuOpen"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -84,6 +91,7 @@ function syncLocaleMenuState(): void {
           </svg>
         </summary>
         <ul
+          :id="localeMenuId"
           class="menu dropdown-content rounded-box z-50 mt-2 w-40 bg-base-200 p-2 shadow-lg"
           role="menu"
           :aria-label="t('a11y.localeSwitcher')"

@@ -44,32 +44,26 @@ const relativeTime = computed(() =>
     keyPrefix: "jobCard.relativeTime",
   }),
 );
+const jobDetailRoute = computed(() => APP_ROUTE_BUILDERS.jobDetail(props.job.id));
 
 function toggleSave() {
   isSaved.value = !isSaved.value;
   emit(isSaved.value ? "save" : "unsave");
 }
-
-async function navigateToJob() {
-  await navigateTo(APP_ROUTE_BUILDERS.jobDetail(props.job.id));
-}
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-    <div
-      class="card-body"
-      role="button"
-      tabindex="0"
+  <div class="card relative overflow-hidden bg-base-100 shadow-md transition-shadow hover:shadow-lg">
+    <NuxtLink
+      class="absolute inset-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+      :to="jobDetailRoute"
       :aria-label="t('jobCard.viewAria', { title: job.title, company: job.company })"
-      @click="navigateToJob"
-      @keydown.enter="navigateToJob"
-      @keydown.space.prevent="navigateToJob"
-    >
+    />
+    <div class="card-body relative z-10">
       <div class="flex justify-between items-start">
         <h2 class="card-title text-lg">{{ job.title }}</h2>
         <button
-          class="btn btn-ghost btn-sm btn-circle"
+          class="btn btn-ghost btn-sm btn-circle relative z-20"
           :aria-label="isSaved ? t('jobCard.unsaveAria') : t('jobCard.saveAria')"
           :aria-pressed="isSaved"
           @click.stop="toggleSave"

@@ -5,6 +5,7 @@ import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
+import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
 const route = useRoute();
@@ -154,7 +155,7 @@ async function startJobInterview() {
                   </span>
 
                   <span v-if="job.experienceLevel" class="badge badge-outline">
-                    {{ job.experienceLevel }}
+                    {{ jobExperienceLabel(t, job.experienceLevel) }}
                   </span>
 
                   <span v-if="job.salary" class="badge badge-primary">
@@ -295,7 +296,7 @@ async function startJobInterview() {
 
               <div v-if="job.studioType">
                 <p class="text-xs text-base-content/60">{{ t("jobDetail.studioTypeLabel") }}</p>
-                <p class="font-medium">{{ job.studioType }}</p>
+                <p class="font-medium">{{ studioTypeLabel(t, job.studioType) }}</p>
               </div>
 
               <div v-if="job.website">
@@ -338,7 +339,7 @@ async function startJobInterview() {
                 :key="platform"
                 class="badge"
               >
-                {{ platform }}
+                {{ platformLabel(t, platform) }}
               </span>
             </div>
           </div>
@@ -354,7 +355,7 @@ async function startJobInterview() {
                 :key="genre"
                 class="badge"
               >
-                {{ genre }}
+                {{ gameGenreLabel(t, genre) }}
               </span>
             </div>
           </div>

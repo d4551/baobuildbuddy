@@ -163,6 +163,33 @@ const collectClientSourceFiles = async (): Promise<string[]> => {
   return files;
 };
 
+const localizedDomainOutputPatterns: Array<{ pattern: RegExp; label: string }> = [
+  { pattern: /\{\{\s*job\.experienceLevel\s*\}\}/gu, label: "job.experienceLevel" },
+  { pattern: /\{\{\s*studio\.type\s*\}\}/gu, label: "studio.type" },
+  { pattern: /\{\{\s*studio\.size\s*\}\}/gu, label: "studio.size" },
+  { pattern: /<option\b[^>]*>\s*\{\{\s*type\s*\}\}\s*<\/option>/gu, label: "studio type option" },
+  { pattern: /<option\b[^>]*>\s*\{\{\s*size\s*\}\}\s*<\/option>/gu, label: "studio size option" },
+];
+
+const collectLocalizedDomainOutputViolations = (
+  filePath: string,
+  fileContent: string,
+): Violation[] => {
+  const violations: Violation[] = [];
+
+  for (const { pattern, label } of localizedDomainOutputPatterns) {
+    for (const match of fileContent.matchAll(pattern)) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(fileContent, match.index ?? 0),
+        message: `${label} must be localized with a shared label resolver instead of raw output.`,
+      });
+    }
+  }
+
+  return violations;
+};
+
 const extractTemplateBlocks = (fileContent: string): TemplateBlock[] => {
   const blocks: TemplateBlock[] = [];
   const openTagPattern = /<template\b[^>]*>/giu;
@@ -515,6 +542,7 @@ const collectViolations = async (): Promise<Violation[]> => {
       );
       if (filePath.endsWith(".vue")) {
         fileViolations.push(...collectStaticTemplateViolations(filePath, fileContent));
+        fileViolations.push(...collectLocalizedDomainOutputViolations(filePath, fileContent));
       }
       return fileViolations;
     }),

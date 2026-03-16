@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
+import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 const { $toast } = useNuxtApp();
 const route = useRoute();
@@ -87,8 +88,8 @@ function remoteWorkLabel(remoteWork: boolean | undefined): string {
   return remoteWork ? t("studioDetail.remoteLabels.yes") : t("studioDetail.remoteLabels.no");
 }
 
-function studioField(value: string | undefined): string {
-  return value?.trim() || t("studioDetail.unknownValue");
+function studioDetailLocation(location: string | undefined): string {
+  return location?.trim() || t("studioDetail.unknownLocation");
 }
 </script>
 
@@ -124,8 +125,8 @@ function studioField(value: string | undefined): string {
                 <h1 class="text-3xl font-bold mb-2">{{ studio.name }}</h1>
                 <p class="text-base-content/70 mb-3">{{ studio.description || t("studioDetail.noDescription") }}</p>
                 <div class="flex flex-wrap gap-2">
-                  <span class="badge badge-primary">{{ studioField(studio.type) }}</span>
-                  <span class="badge">{{ studioField(studio.size) }}</span>
+                  <span class="badge badge-primary">{{ studioTypeLabel(t, studio.type) }}</span>
+                  <span class="badge">{{ studioSizeLabel(t, studio.size) }}</span>
                   <span v-if="studio.remoteWork" class="badge badge-success">
                     {{ t("studioDetail.remoteFriendlyBadge") }}
                   </span>
@@ -225,17 +226,17 @@ function studioField(value: string | undefined): string {
             <div class="space-y-3">
               <div>
                 <p class="text-xs text-base-content/60">{{ t("studioDetail.info.locationLabel") }}</p>
-                <p class="font-medium">{{ studioField(studio.location) }}</p>
+                <p class="font-medium">{{ studioDetailLocation(studio.location) }}</p>
               </div>
 
               <div>
                 <p class="text-xs text-base-content/60">{{ t("studioDetail.info.studioTypeLabel") }}</p>
-                <p class="font-medium">{{ studioField(studio.type) }}</p>
+                <p class="font-medium">{{ studioTypeLabel(t, studio.type) }}</p>
               </div>
 
               <div>
                 <p class="text-xs text-base-content/60">{{ t("studioDetail.info.companySizeLabel") }}</p>
-                <p class="font-medium">{{ studioField(studio.size) }}</p>
+                <p class="font-medium">{{ studioSizeLabel(t, studio.size) }}</p>
               </div>
 
               <div>

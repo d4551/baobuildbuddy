@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
 import { useDebouncedValue } from "~/composables/useDebouncedValue";
@@ -136,14 +137,6 @@ function studioDescription(description: string | undefined): string {
 
 function studioLocation(location: string): string {
   return location.trim() || t("studiosIndex.card.unknownLocation");
-}
-
-function studioType(type: string): string {
-  return type.trim() || t("studiosIndex.card.unknownType");
-}
-
-function studioSize(size: string): string {
-  return size.trim() || t("studiosIndex.card.unknownSize");
 }
 
 function clearFilters() {
@@ -310,7 +303,9 @@ watch(
               :aria-label="t('studiosIndex.filters.typeAria')"
             >
               <option value="">{{ t("studiosIndex.filters.allTypesOption") }}</option>
-              <option v-for="type in studioTypeOptions" :key="type" :value="type">{{ type }}</option>
+              <option v-for="type in studioTypeOptions" :key="type" :value="type">
+                {{ studioTypeLabel(t, type) }}
+              </option>
             </select>
           </fieldset>
 
@@ -322,7 +317,9 @@ watch(
               :aria-label="t('studiosIndex.filters.sizeAria')"
             >
               <option value="">{{ t("studiosIndex.filters.allSizesOption") }}</option>
-              <option v-for="size in studioSizeOptions" :key="size" :value="size">{{ size }}</option>
+              <option v-for="size in studioSizeOptions" :key="size" :value="size">
+                {{ studioSizeLabel(t, size) }}
+              </option>
             </select>
           </fieldset>
         </SectionGrid>
@@ -378,8 +375,8 @@ watch(
           </p>
 
           <div class="flex flex-wrap gap-2">
-            <span class="badge badge-primary badge-sm">{{ studioType(studio.type) }}</span>
-            <span class="badge badge-outline badge-sm">{{ studioSize(studio.size) }}</span>
+            <span class="badge badge-primary badge-sm">{{ studioTypeLabel(t, studio.type) }}</span>
+            <span class="badge badge-outline badge-sm">{{ studioSizeLabel(t, studio.size) }}</span>
             <span v-if="studio.remoteWork" class="badge badge-success badge-sm">
               {{ t("studiosIndex.card.remoteBadge") }}
             </span>
@@ -445,8 +442,8 @@ watch(
         </p>
 
         <div class="mt-4 flex flex-wrap gap-2">
-          <span class="badge badge-primary">{{ studioType(previewStudio.type) }}</span>
-          <span class="badge badge-outline">{{ studioSize(previewStudio.size) }}</span>
+          <span class="badge badge-primary">{{ studioTypeLabel(t, previewStudio.type) }}</span>
+          <span class="badge badge-outline">{{ studioSizeLabel(t, previewStudio.size) }}</span>
           <span class="badge badge-ghost">{{ studioLocation(previewStudio.location) }}</span>
           <span v-if="previewStudio.remoteWork" class="badge badge-success">
             {{ t("studiosIndex.card.remoteBadge") }}

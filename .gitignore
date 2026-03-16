@@ -46,3 +46,6 @@ __pycache__/
 .railway/
 packages/desktop/src-tauri/target/
 packages/desktop/src-tauri/target-linux/
+
+# Agentiflow
+agentiflow/

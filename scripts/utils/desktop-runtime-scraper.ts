@@ -1,6 +1,7 @@
 import { realpath } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
+import { captureResult, toErrorMessage } from "./async-control";
 
 type PackageDependencyMap = Record<string, string>;
 
@@ -29,21 +30,33 @@ const readPackageManifest = async (packageRoot: string): Promise<PackageManifest
   };
 };
 
+const isErrorWithCode = (value: unknown): value is { code: string } =>
+  typeof value === "object" &&
+  value !== null &&
+  "code" in value &&
+  typeof value.code === "string";
+
+const isModuleNotFoundError = (value: unknown): boolean =>
+  isErrorWithCode(value) && value.code === "MODULE_NOT_FOUND";
+
 const resolvePackageManifestPath = async (
   packageName: string,
   fromPackageRoot: string,
 ): Promise<string> => {
   const packageResolver = createRequire(join(fromPackageRoot, "package.json"));
-  try {
-    return await realpath(packageResolver.resolve(`${packageName}/package.json`));
-  } catch (error) {
-    throw new Error(
-      `Unable to resolve packaged scraper dependency "${packageName}" from ${fromPackageRoot}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-      { cause: error },
-    );
+  const manifestPathResult = await captureResult(() =>
+    realpath(packageResolver.resolve(`${packageName}/package.json`)),
+  );
+  if (manifestPathResult.ok) {
+    return manifestPathResult.value;
   }
+
+  throw new Error(
+    `Unable to resolve packaged scraper dependency "${packageName}" from ${fromPackageRoot}: ${toErrorMessage(
+      manifestPathResult.error,
+    )}`,
+    { cause: manifestPathResult.error },
+  );
 };
 
 const sortDependencyNames = (dependencyMap: PackageDependencyMap): string[] =>
@@ -55,12 +68,19 @@ const visitOptionalDependencies = async (
   visitedPackages: Map<string, string>,
 ): Promise<void> => {
   for (const dependencyName of sortDependencyNames(optionalDependencies)) {
-    const sourceRoot = await resolvePackageSourceRoot(dependencyName, packageRoot).catch(
-      () => null,
+    const sourceRootResult = await captureResult(() =>
+      resolvePackageSourceRoot(dependencyName, packageRoot),
     );
-    if (sourceRoot !== null) {
-      await visitRuntimeDependencyTree(dependencyName, sourceRoot, visitedPackages);
+    if (sourceRootResult.ok) {
+      await visitRuntimeDependencyTree(dependencyName, sourceRootResult.value, visitedPackages);
+      continue;
     }
+
+    if (isModuleNotFoundError(sourceRootResult.error)) {
+      continue;
+    }
+
+    throw sourceRootResult.error;
   }
 };
 

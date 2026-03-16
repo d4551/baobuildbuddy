@@ -300,13 +300,18 @@ const ensurePrewarmedCompileTargetDirectory = async (compileTarget: string): Pro
     return workingDirectory;
   })();
 
-  prewarmedCompileTargetDirectories.set(compileTarget, preparation);
-  try {
-    return await preparation;
-  } catch (error) {
-    prewarmedCompileTargetDirectories.delete(compileTarget);
-    throw error;
-  }
+  const trackedPreparation = preparation.then(
+    (workingDirectory) => workingDirectory,
+    (error: unknown) => {
+      prewarmedCompileTargetDirectories.delete(compileTarget);
+      return Promise.reject(
+        error instanceof Error ? error : new Error(toErrorMessage(error)),
+      );
+    },
+  );
+
+  prewarmedCompileTargetDirectories.set(compileTarget, trackedPreparation);
+  return trackedPreparation;
 };
 
 const runCommand = async (

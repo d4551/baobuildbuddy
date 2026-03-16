@@ -649,19 +649,20 @@ async function resolvePipelineReward(
           <div
             v-for="resume in resumePagination.items.value"
             :key="resume.id"
-            class="cursor-pointer transition-colors"
+            class="relative overflow-hidden transition-colors"
             :class="
               (resume.experience?.length ?? 0) > 0
                 ? 'card card-border bg-base-100 hover:bg-base-200'
                 : 'card card-dash bg-base-100 hover:bg-base-200'
             "
-            role="button"
-            tabindex="0"
-            @click="selectedResumeId = resume.id"
-            @keydown.enter="selectedResumeId = resume.id"
-            @keydown.space.prevent="selectedResumeId = resume.id"
           >
-            <div class="card-body">
+            <button
+              type="button"
+              class="absolute inset-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
+              @click="selectedResumeId = resume.id"
+            />
+            <div class="card-body relative z-10">
               <h3 class="card-title">{{ resume.name }}</h3>
               <div class="flex gap-2 mt-2">
                 <span class="badge badge-sm">{{ resumeTemplateLabel(resume.template) }}</span>
@@ -669,14 +670,14 @@ async function resolvePipelineReward(
               </div>
               <div class="card-actions justify-end mt-4">
                 <button
-                  class="btn btn-sm btn-outline"
+                  class="btn btn-sm btn-outline relative z-20"
                   :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
                   @click.stop="selectedResumeId = resume.id"
                 >
                   {{ t("resumePage.editButton") }}
                 </button>
                 <button
-                  class="btn btn-sm btn-error btn-outline"
+                  class="btn btn-sm btn-error btn-outline relative z-20"
                   :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                   @click.stop="requestDeleteResume(resume.id)"
                 >
