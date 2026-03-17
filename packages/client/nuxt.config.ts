@@ -171,12 +171,27 @@ const resolvedApiBase =
 const configuredWsBase = process.env.NUXT_PUBLIC_WS_BASE;
 const resolvedWsBase =
   configuredWsBase && configuredWsBase !== "/" ? configuredWsBase : resolvedApiBase;
+const shouldPrerenderApplicationRoutes =
+  Boolean(absoluteApiProxyBase) ||
+  Boolean(configuredApiBase && HTTPS_URL_PATTERN.test(configuredApiBase));
 
 export default defineNuxtConfig({
   modules: ["@nuxt/image", "@nuxt/test-utils/module"],
   compatibilityDate: NUXT_COMPATIBILITY_DATE,
   buildDir: ".nuxt",
   devtools: { enabled: true },
+  experimental: {
+    componentIslands: false,
+  },
+  hooks: {
+    "prerender:routes": ({ routes }) => {
+      if (shouldPrerenderApplicationRoutes) {
+        return;
+      }
+
+      routes.clear();
+    },
+  },
 
   devServer: {
     port: Number(resolvedDevServerPort),

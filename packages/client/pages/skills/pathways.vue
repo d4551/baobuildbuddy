@@ -224,7 +224,7 @@ function getReadinessDialStyle(score: number): Record<string, string> {
       <span>{{ getErrorMessage(error, t("skillsPathwaysPage.errors.loadFailed")) }}</span>
       <button
         type="button"
-        class="btn btn-sm"
+        class="btn btn-sm btn-ghost"
         :aria-label="t('skillsPathwaysPage.retryAria')"
         @click="retryLoad"
       >

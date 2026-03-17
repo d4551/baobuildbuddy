@@ -12,15 +12,64 @@ if [[ "$CURRENT" != "\"$BASELINE\"" ]]; then
   exit 1
 fi
 
-if command -v rg > /dev/null 2>&1; then
-  STALE_LINES="$(rg --files-with-matches \
+read_stale_bun_refs_with_rg() {
+  local output
+  local status
+
+  set +e
+  output="$(rg --files-with-matches \
     -g '!*node_modules/**' \
     -g '!**/.git/**' \
     -g '!**/.bun/**' \
     -g '!scripts/verify-bun-baseline.sh' \
-    -e 'bun@1\\.3\\.9|\"1\\.3\\.9\"' . || true)"
+    -e 'bun@1\\.3\\.9|\"1\\.3\\.9\"' .)"
+  status=$?
+  set -e
+
+  if [[ $status -eq 0 ]]; then
+    printf '%s' "$output"
+    return 0
+  fi
+
+  if [[ $status -eq 1 ]]; then
+    return 0
+  fi
+
+  echo "❌ Failed to scan for stale Bun references with ripgrep"
+  exit "$status"
+}
+
+read_stale_bun_refs_with_grep() {
+  local output
+  local status
+
+  set +e
+  output="$(grep -RIn \
+    --exclude-dir=node_modules \
+    --exclude-dir=.git \
+    --exclude-dir=.bun \
+    --exclude=scripts/verify-bun-baseline.sh \
+    -E 'bun@1\\.3\\.9|\"1\\.3\\.9\"' .)"
+  status=$?
+  set -e
+
+  if [[ $status -eq 0 ]]; then
+    printf '%s\n' "$output" | cut -d: -f1 | sort -u
+    return 0
+  fi
+
+  if [[ $status -eq 1 ]]; then
+    return 0
+  fi
+
+  echo "❌ Failed to scan for stale Bun references with grep"
+  exit "$status"
+}
+
+if command -v rg > /dev/null 2>&1; then
+  STALE_LINES="$(read_stale_bun_refs_with_rg)"
 else
-  STALE_LINES="$(grep -RIn --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.bun --exclude=scripts/verify-bun-baseline.sh -E 'bun@1\\.3\\.9|\"1\\.3\\.9\"' . | cut -d: -f1 | sort -u || true)"
+  STALE_LINES="$(read_stale_bun_refs_with_grep)"
 fi
 if [[ -n "$STALE_LINES" ]]; then
   echo "❌ Found stale Bun 1.3.9 references:"

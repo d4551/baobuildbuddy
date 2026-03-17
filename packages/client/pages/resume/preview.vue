@@ -201,8 +201,8 @@ function handlePrint() {
         </div>
         <div v-if="resume.gamingExperience?.shippedTitles">
           <p class="font-semibold text-sm">{{ t("resumePage.gaming.achievementsLegend") }}:</p>
-          <ul class="list-disc list-inside text-sm">
-            <li v-for="(achievement, idx) in resume.gamingExperience.shippedTitles.split(';')" :key="idx">
+          <ul class="list list-disc list-inside text-sm">
+            <li class="list-row" v-for="(achievement, idx) in resume.gamingExperience.shippedTitles.split(';')" :key="idx">
               {{ achievement.trim() }}
             </li>
           </ul>

@@ -1,4 +1,10 @@
-import { generateId, settle, type GamingPortalConfig, type GamingPortalId } from "@bao/shared";
+import {
+  generateId,
+  safeParseJson,
+  settle,
+  type GamingPortalConfig,
+  type GamingPortalId,
+} from "@bao/shared";
 import { type ScrapedJob, scraperService } from "../../scraper-service";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
@@ -94,7 +100,12 @@ export class HitmarkerProvider implements JobProvider {
       return [];
     }
 
-    const payload = (await response.json()) as HitmarkerResponse;
+    const rawText = await response.text();
+    const parsed = safeParseJson(rawText);
+    if (parsed === null) {
+      return [];
+    }
+    const payload = parsed as HitmarkerResponse;
     const jobs = resolveHitmarkerJobs(payload);
     const hitmarkerOrigin = new URL(providerSettings.hitmarkerApiBaseUrl).origin;
 

@@ -18,8 +18,7 @@ INCLUDE_DESKTOP_BUILD=false
 ERRORS=0
 WARNINGS=0
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REQUIRED_BUN_SEMVER="$(awk -F '"' '/"packageManager":/ { if ($4 ~ /^bun@/) print $4; exit }' "$REPO_ROOT/package.json")"
-REQUIRED_BUN_VERSION="${REQUIRED_BUN_SEMVER#bun@}"
+REQUIRED_BUN_VERSION="$(cd "$REPO_ROOT" && node -p "require('./package.json').packageManager?.replace(/^bun@/,'') || '1.3.10'" 2>/dev/null)" || REQUIRED_BUN_VERSION="1.3.10"
 REQUIRED_BUN_MAJOR="${REQUIRED_BUN_VERSION%%.*}"
 REQUIRED_BUN_REST="${REQUIRED_BUN_VERSION#*.}"
 REQUIRED_BUN_MINOR="${REQUIRED_BUN_REST%%.*}"
@@ -212,7 +211,9 @@ else
     cp .env.example .env
     ok "Created .env from .env.example"
     # Remove NUXT_PUBLIC_I18N_SUPPORTED_LOCALES (runtime override breaks i18n plugin)
-    sed -i '/^NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=/d' .env 2>/dev/null || true
+    temp_env="$(mktemp)"
+    grep -v '^NUXT_PUBLIC_I18N_SUPPORTED_LOCALES=' .env > "$temp_env"
+    mv "$temp_env" .env
     echo "AUTOMATION_STDIO_BUFFER_LIMIT=2000" >> .env
     warn "Edit .env with your environment-specific values before running"
   else

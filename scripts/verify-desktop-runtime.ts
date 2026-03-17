@@ -115,9 +115,6 @@ const DESKTOP_RUNTIME_VERIFY_SERVER_PORT = DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT 
 const VERIFY_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_VERIFY_SERVER_PORT}`;
 const VERIFY_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_VERIFY_SERVER_PORT}`;
 const VERIFY_API_ROUTE_BASE = `${VERIFY_API_BASE}/api`;
-const SKIP_BROWSER_VERIFY =
-  process.env.DESKTOP_RUNTIME_SKIP_BROWSER_VERIFY === "true" ||
-  process.env.DESKTOP_RUNTIME_SKIP_BROWSER_VERIFY === "1";
 const READY_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 250;
 const RUN_COMPLETION_TIMEOUT_MS = 45_000;
@@ -985,13 +982,8 @@ const runPackagedRuntimeChecks = async (
       await verifyCorsContract(VERIFY_API_BASE, manifest, DESKTOP_RUNTIME_CORS_ORIGINS[0]);
       await verifyCorsContract(VERIFY_API_BASE, manifest, VERIFY_FRONTEND_ORIGIN);
       await assertAutomationEndpoints(VERIFY_API_ROUTE_BASE);
-      let browserResult: BrowserCheckResult | null = null;
-      if (!SKIP_BROWSER_VERIFY) {
-        browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
-        assertBrowserChecksPassed(browserResult);
-      } else {
-        await writeOutput("desktop-runtime: skipping browser verification (DESKTOP_RUNTIME_SKIP_BROWSER_VERIFY)");
-      }
+      const browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
+      assertBrowserChecksPassed(browserResult);
       await configureVerificationSettings();
       await writeOutput(
         "desktop-runtime: configured deterministic automation verification settings",
@@ -1008,9 +1000,7 @@ const runPackagedRuntimeChecks = async (
       await verifyScheduledRunRecovery(resumeId, fixtureBaseUrl, restartServer);
 
       await writeOutput(
-        browserResult
-          ? `desktop-runtime: verified frontend "${browserResult.pageTitle}" against ${VERIFY_API_BASE}`
-          : `desktop-runtime: verified API and automation against ${VERIFY_API_BASE} (browser checks skipped)`,
+        `desktop-runtime: verified frontend "${browserResult.pageTitle}" against ${VERIFY_API_BASE}`,
       );
       await writeOutput("desktop-runtime: verification passed");
     },

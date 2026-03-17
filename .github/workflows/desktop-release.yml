@@ -18,10 +18,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Get Bun version from package.json
+        id: bun-version
+        run: echo "version=$(node -p "require('./package.json').packageManager?.replace('bun@','') || '1.3.10'")" >> $GITHUB_OUTPUT
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.10
+          bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Install workspace dependencies
         run: bun ci
@@ -49,10 +53,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Get Bun version from package.json
+        id: bun-version
+        run: echo "version=$(node -p "require('./package.json').packageManager?.replace('bun@','') || '1.3.10'")" >> $GITHUB_OUTPUT
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.10
+          bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -93,10 +101,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Get Bun version from package.json
+        id: bun-version
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').packageManager?.replace('bun@','') || '1.3.10'")" >> $GITHUB_OUTPUT
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.10
+          bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -132,10 +145,6 @@ jobs:
 
       - name: Verify packaged desktop runtime
         shell: pwsh
-        env:
-          # Playwright Chromium launch often times out on Windows GitHub runners (Bun + pipe handling).
-          # Skip browser-based frontend checks; API and automation verification still runs.
-          DESKTOP_RUNTIME_SKIP_BROWSER_VERIFY: "true"
         run: bun run verify:desktop-runtime -- --target x86_64-pc-windows-msvc
 
       - name: Verify Windows release artifacts
@@ -157,10 +166,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Get Bun version from package.json
+        id: bun-version
+        run: echo "version=$(node -p "require('./package.json').packageManager?.replace('bun@','') || '1.3.10'")" >> $GITHUB_OUTPUT
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.10
+          bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -218,10 +231,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Get Bun version from package.json
+        id: bun-version
+        run: echo "version=$(node -p "require('./package.json').packageManager?.replace('bun@','') || '1.3.10'")" >> $GITHUB_OUTPUT
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.10
+          bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -283,10 +300,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Get Bun version from package.json
+        id: bun-version
+        run: echo "version=$(node -p "require('./package.json').packageManager?.replace('bun@','') || '1.3.10'")" >> $GITHUB_OUTPUT
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.10
+          bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Install workspace dependencies
         run: bun ci

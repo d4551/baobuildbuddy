@@ -79,8 +79,8 @@ defineProps<{
           </div>
           <p class="text-lg font-medium text-base-content/80 mb-2">{{ exp.company }}</p>
           <p class="text-base mb-2">{{ exp.description }}</p>
-          <ul v-if="exp.highlights.length > 0" class="list-disc list-inside space-y-1">
-            <li v-for="(highlight, index) in exp.highlights" :key="index" class="text-sm">
+          <ul v-if="exp.highlights.length > 0" class="list list-disc list-inside space-y-1">
+            <li class="list-row text-sm" v-for="(highlight, index) in exp.highlights" :key="index">
               {{ highlight }}
             </li>
           </ul>

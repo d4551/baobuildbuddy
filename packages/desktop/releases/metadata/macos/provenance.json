@@ -8,7 +8,7 @@
   "tauriTarget": "aarch64-apple-darwin",
   "artifactNames": ["BaoBuildBuddy_0.1.0_aarch64.dmg"],
   "buildCommands": ["stage-only existing bundled artifacts for aarch64-apple-darwin"],
-  "builtAt": "2026-03-17T06:33:39.070Z",
+  "builtAt": "2026-03-17T07:00:12.083Z",
   "ci": {
     "workflow": null,
     "runId": null,

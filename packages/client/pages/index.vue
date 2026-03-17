@@ -466,7 +466,7 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
       <span>{{ getErrorMessage(error, t(DASHBOARD_COPY_KEYS.loadErrorFallback)) }}</span>
       <button
         type="button"
-        class="btn btn-sm"
+        class="btn btn-sm btn-ghost"
         :aria-label="t(DASHBOARD_COPY_KEYS.retryAria)"
         @click="retryDashboardLoad"
       >

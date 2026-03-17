@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, unique, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const jobs = sqliteTable(
   "jobs",
@@ -45,7 +45,10 @@ export const savedJobs = sqliteTable(
       .references(() => jobs.id, { onDelete: "cascade" }),
     savedAt: text("saved_at").notNull(),
   },
-  (table) => [index("saved_jobs_job_id_idx").on(table.jobId)],
+  (table) => [
+    index("saved_jobs_job_id_idx").on(table.jobId),
+    unique("saved_jobs_job_id_unique").on(table.jobId),
+  ],
 );
 
 export const applications = sqliteTable(
@@ -62,5 +65,8 @@ export const applications = sqliteTable(
     createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
     updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
   },
-  (table) => [index("applications_job_id_idx").on(table.jobId)],
+  (table) => [
+    index("applications_job_id_idx").on(table.jobId),
+    unique("applications_job_id_unique").on(table.jobId),
+  ],
 );
