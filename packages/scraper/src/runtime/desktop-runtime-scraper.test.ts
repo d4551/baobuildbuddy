@@ -3,7 +3,6 @@ import { mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import type * as NodeModuleNamespace from "node:module";
-import type * as DesktopRuntimeScraperModuleNamespace from "../../../../scripts/utils/desktop-runtime-scraper";
 
 type PackageManifest = {
   readonly name: string;
@@ -11,6 +10,17 @@ type PackageManifest = {
   readonly dependencies?: Record<string, string>;
   readonly optionalDependencies?: Record<string, string>;
 };
+
+type DesktopRuntimeScraperModule = {
+  readonly collectRuntimeDependencySourceRoots: (
+    packageRoot: string,
+  ) => Promise<ReadonlyMap<string, string>>;
+};
+
+const isDesktopRuntimeScraperModule = (value: unknown): value is DesktopRuntimeScraperModule =>
+  typeof value === "object" &&
+  value !== null &&
+  typeof Reflect.get(value, "collectRuntimeDependencySourceRoots") === "function";
 
 const writeJsonFile = async (filePath: string, value: PackageManifest): Promise<void> => {
   await mkdir(dirname(filePath), { recursive: true });
@@ -64,10 +74,11 @@ const desktopRuntimeScraperModuleUrl = new URL(
   "../../../../scripts/utils/desktop-runtime-scraper.ts",
   import.meta.url,
 );
-type DesktopRuntimeScraperModule = typeof DesktopRuntimeScraperModuleNamespace;
-const desktopRuntimeScraperModule = (await import(
-  desktopRuntimeScraperModuleUrl.href
-)) as DesktopRuntimeScraperModule;
+const desktopRuntimeScraperModuleValue: unknown = await import(desktopRuntimeScraperModuleUrl.href);
+if (!isDesktopRuntimeScraperModule(desktopRuntimeScraperModuleValue)) {
+  throw new Error("desktop-runtime-scraper module did not expose collectRuntimeDependencySourceRoots");
+}
+const desktopRuntimeScraperModule = desktopRuntimeScraperModuleValue;
 const { collectRuntimeDependencySourceRoots } = desktopRuntimeScraperModule;
 
 describe("collectRuntimeDependencySourceRoots", () => {
