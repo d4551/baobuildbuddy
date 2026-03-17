@@ -30,15 +30,6 @@ const readPackageManifest = async (packageRoot: string): Promise<PackageManifest
   };
 };
 
-const isErrorWithCode = (value: unknown): value is { code: string } =>
-  typeof value === "object" &&
-  value !== null &&
-  "code" in value &&
-  typeof value.code === "string";
-
-const isModuleNotFoundError = (value: unknown): boolean =>
-  isErrorWithCode(value) && value.code === "MODULE_NOT_FOUND";
-
 const resolvePackageManifestPath = async (
   packageName: string,
   fromPackageRoot: string,
@@ -84,19 +75,16 @@ const visitOptionalDependencies = async (
   await visitDependencyNamesSequentially(
     sortDependencyNames(optionalDependencies),
     async (dependencyName) => {
-    const sourceRootResult = await captureResult(() =>
-      resolvePackageSourceRoot(dependencyName, packageRoot),
-    );
-    if (sourceRootResult.ok) {
+      // Optional dependencies are allowed to be missing from the host install tree.
+      // Bun may surface that absence as MODULE_NOT_FOUND or as a generic resolver error.
+      const sourceRootResult = await captureResult(() =>
+        resolvePackageSourceRoot(dependencyName, packageRoot),
+      );
+      if (!sourceRootResult.ok) {
+        return;
+      }
+
       await visitRuntimeDependencyTree(dependencyName, sourceRootResult.value, visitedPackages);
-      return;
-    }
-
-    if (isModuleNotFoundError(sourceRootResult.error)) {
-      return;
-    }
-
-    throw sourceRootResult.error;
     },
   );
 };
