@@ -28,10 +28,52 @@ flowchart LR
   Server --> Database["SQLite database<br/>memory notebook"]
   Server --> AI["AI providers<br/>thinking helper"]
   Server --> Scraper["Playwright scraper/RPA<br/>robot browser"]
+  Server --> Email["Email delivery<br/>SMTP"]
   Desktop["Tauri desktop app"] --> Client
   Shared["Shared schemas and types<br/>rulebook"] --> Client
   Shared --> Server
   Shared --> Scraper
+```
+
+### Request flow
+
+```mermaid
+flowchart TD
+  subgraph User["User actions"]
+    Click["Click / type"]
+  end
+
+  subgraph ClientLayer["Client (Nuxt)"]
+    Pages["Pages · layouts"]
+    Composables["Composables"]
+    Eden["Eden HTTP client"]
+    WS["WebSocket clients"]
+  end
+
+  subgraph ServerLayer["Server (Elysia)"]
+    Routes["17 route modules"]
+    Services["Services"]
+    WSHandlers["WebSocket handlers"]
+  end
+
+  subgraph Backends["Backends"]
+    DB[("SQLite")]
+    AIProv["AI providers"]
+    JobProv["Job providers"]
+    ScraperPkg["Scraper package"]
+  end
+
+  Click --> Pages
+  Pages --> Composables
+  Composables --> Eden
+  Composables --> WS
+  Eden --> Routes
+  WS --> WSHandlers
+  Routes --> Services
+  Services --> DB
+  Services --> AIProv
+  Services --> JobProv
+  Services --> ScraperPkg
 ```
 
 ---

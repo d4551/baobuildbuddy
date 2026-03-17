@@ -211,6 +211,41 @@ Windows builds are 64-bit only. See `packages/desktop/releases/README.md` for th
                           (ATS + gaming boards + company boards)
 ```
 
+### System overview
+
+```mermaid
+flowchart LR
+  subgraph Client["@bao/client"]
+    UI["Nuxt pages · components"]
+    Eden["Eden treaty client"]
+    WS["WebSocket clients"]
+  end
+
+  subgraph Server["@bao/server"]
+    API["17 route modules"]
+    WSHandlers["ws/chat · interview · automation"]
+    Svcs["Services layer"]
+  end
+
+  subgraph Data["Data & external"]
+    DB[("SQLite")]
+    AI["AI providers"]
+    Jobs["Job providers"]
+    RPA["Scraper/RPA"]
+  end
+
+  UI --> Eden
+  UI --> WS
+  Eden -->|HTTP /api/*| API
+  WS --> WSHandlers
+  API --> Svcs
+  Svcs --> DB
+  Svcs --> AI
+  Svcs --> Jobs
+  Svcs --> RPA
+  RPA -->|Bun.spawn| Scraper["@bao/scraper"]
+```
+
 ### Packages
 
 | Package        | Path               | What it does                                              |
