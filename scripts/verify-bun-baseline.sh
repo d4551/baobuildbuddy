@@ -35,7 +35,7 @@ read_stale_bun_refs_with_rg() {
     return 0
   fi
 
-  echo "❌ Failed to scan for stale Bun references with ripgrep"
+  echo "❌ Failed to scan for stale Bun references with ripgrep" >&2
   exit "$status"
 }
 
@@ -46,7 +46,7 @@ read_stale_bun_refs_with_grep() {
   set +e
   output="$(
     find . \
-      \( -path './node_modules' -o -path './.git' -o -path './.bun' \) -prune \
+      \( -name 'node_modules' -o -name '.git' -o -name '.bun' \) -prune \
       -o -type f ! -path './scripts/verify-bun-baseline.sh' -print0 \
       | xargs -0 -r grep -InE 'bun@1\\.3\\.9|\"1\\.3\\.9\"'
   )"
@@ -58,11 +58,14 @@ read_stale_bun_refs_with_grep() {
     return 0
   fi
 
-  if [[ $status -eq 1 ]]; then
+  # Exit code 1 from grep means no matches; xargs returns 123 when
+  # the invoked command exits with status 1-125.  Both indicate that
+  # no stale references were found.
+  if [[ $status -eq 1 || $status -eq 123 ]]; then
     return 0
   fi
 
-  echo "❌ Failed to scan for stale Bun references with grep"
+  echo "❌ Failed to scan for stale Bun references with grep" >&2
   exit "$status"
 }
 

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readdir } from "node:fs/promises";
 import { cp, mkdir, rm, stat, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { join, posix, resolve } from "node:path";
 import {
   DESKTOP_RELEASE_METADATA_DIR,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
@@ -174,7 +174,7 @@ const writeChecksumManifest = async (): Promise<void> => {
         const fileNames = entries.filter((entry) => entry.isFile()).map((entry) => entry.name);
         return Promise.all(
           fileNames.map(async (fileName) => {
-            const relativePath = join(target, fileName);
+            const relativePath = posix.join(target, fileName);
             return `${await computeSha256(join(DESKTOP_RELEASE_ROOT, relativePath))}  ${relativePath}`;
           }),
         );
