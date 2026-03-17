@@ -698,6 +698,25 @@ const buildLaunchOptions = (executablePath: string): PlaywrightLaunchOptions => 
 const BROWSER_LAUNCH_MAX_ATTEMPTS = process.platform === "win32" ? 3 : 1;
 const BROWSER_LAUNCH_RETRY_DELAY_MS = 3_000;
 
+const attemptBrowserLaunch = async (
+  chromium: PlaywrightChromium,
+  executablePath: string,
+  attempt: number,
+): Promise<BrowserInstance> => {
+  const result = await captureResult(() => chromium.launch(buildLaunchOptions(executablePath)));
+  if (result.ok) {
+    return result.value;
+  }
+  if (attempt >= BROWSER_LAUNCH_MAX_ATTEMPTS) {
+    throw result.error;
+  }
+  await writeOutput(
+    `desktop-runtime: browser launch attempt ${attempt}/${BROWSER_LAUNCH_MAX_ATTEMPTS} failed, retrying in ${BROWSER_LAUNCH_RETRY_DELAY_MS}ms...`,
+  );
+  await new Promise((resolve) => setTimeout(resolve, BROWSER_LAUNCH_RETRY_DELAY_MS));
+  return attemptBrowserLaunch(chromium, executablePath, attempt + 1);
+};
+
 const launchVerificationBrowser = async (playwrightModule: {
   chromium: PlaywrightChromium;
 }): Promise<BrowserInstance> => {
@@ -723,23 +742,7 @@ const launchVerificationBrowser = async (playwrightModule: {
     `desktop-runtime: launching verification browser from ${browserExecutablePath}`,
   );
 
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= BROWSER_LAUNCH_MAX_ATTEMPTS; attempt++) {
-    const result = await captureResult(() =>
-      playwrightModule.chromium.launch(buildLaunchOptions(browserExecutablePath)),
-    );
-    if (result.ok) {
-      return result.value;
-    }
-    lastError = result.error;
-    if (attempt < BROWSER_LAUNCH_MAX_ATTEMPTS) {
-      await writeOutput(
-        `desktop-runtime: browser launch attempt ${attempt}/${BROWSER_LAUNCH_MAX_ATTEMPTS} failed, retrying in ${BROWSER_LAUNCH_RETRY_DELAY_MS}ms...`,
-      );
-      await new Promise((resolve) => setTimeout(resolve, BROWSER_LAUNCH_RETRY_DELAY_MS));
-    }
-  }
-  throw lastError;
+  return attemptBrowserLaunch(playwrightModule.chromium, browserExecutablePath, 1);
 };
 
 const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<BrowserCheckResult> => {
