@@ -1,5 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { resolveDesktopRuntimeTargetInfoFromHost } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 
@@ -14,7 +15,9 @@ const DESKTOP_TAURI_TARGET_ROOTS = [
 const CARGO_BUILD_PROFILES = ["debug", "release"] as const;
 
 type HostDesktopTarget = {
-  readonly name: "linux" | "macos" | "windows";
+  readonly bundleArgs: readonly string[];
+  readonly logLabel: "linux" | "macos" | "windows";
+  readonly releaseTarget: "linux-arm64" | "linux-x64" | "macos" | "windows";
 };
 
 const runCommand = async (
@@ -52,25 +55,28 @@ const runMacosPrebuildCleanup = async (): Promise<void> => {
 };
 
 const resolveHostDesktopTarget = (): HostDesktopTarget => {
-  if (process.platform === "darwin") {
+  const targetInfo = resolveDesktopRuntimeTargetInfoFromHost(process.platform, process.arch);
+  if (targetInfo.target === "macos") {
     return {
-      name: "macos",
+      bundleArgs: ["--bundles", "app,dmg"],
+      logLabel: "macos",
+      releaseTarget: targetInfo.target,
     };
   }
 
-  if (process.platform === "win32") {
+  if (targetInfo.target === "windows") {
     return {
-      name: "windows",
+      bundleArgs: ["--bundles", "nsis"],
+      logLabel: "windows",
+      releaseTarget: targetInfo.target,
     };
   }
 
-  if (process.platform === "linux") {
-    return {
-      name: "linux",
-    };
-  }
-
-  throw new Error(`Unsupported desktop host platform: ${process.platform}`);
+  return {
+    bundleArgs: ["--bundles", "deb,rpm"],
+    logLabel: "linux",
+    releaseTarget: targetInfo.target,
+  };
 };
 
 const isDebugDesktopBuild = (tauriArgs: readonly string[]): boolean =>
@@ -98,7 +104,7 @@ const buildDesktopTarget = async (
     APPIMAGE_EXTRACT_AND_RUN: process.env.APPIMAGE_EXTRACT_AND_RUN ?? "1",
   };
 
-  if (hostTarget.name === "macos") {
+  if (hostTarget.releaseTarget === "macos") {
     const buildExitCode = await runCommand(
       [...sharedCommandPrefix, "build", "--no-bundle", ...tauriArgs],
       {
@@ -118,7 +124,7 @@ const buildDesktopTarget = async (
       CI: "true",
     };
     const bundleExitCode = await runCommand(
-      [...sharedCommandPrefix, "bundle", "--bundles", "app,dmg", ...tauriArgs],
+      [...sharedCommandPrefix, "bundle", ...hostTarget.bundleArgs, ...tauriArgs],
       {
         cwd: DESKTOP_PACKAGE_ROOT,
         env: bundleEnv,
@@ -131,10 +137,13 @@ const buildDesktopTarget = async (
     return;
   }
 
-  const buildExitCode = await runCommand([...sharedCommandPrefix, "build", ...tauriArgs], {
-    cwd: DESKTOP_PACKAGE_ROOT,
-    env: commandEnv,
-  });
+  const buildExitCode = await runCommand(
+    [...sharedCommandPrefix, "build", ...hostTarget.bundleArgs, ...tauriArgs],
+    {
+      cwd: DESKTOP_PACKAGE_ROOT,
+      env: commandEnv,
+    },
+  );
   if (buildExitCode !== 0) {
     process.exit(buildExitCode);
   }
@@ -145,11 +154,13 @@ const main = async (): Promise<void> => {
   const hostTarget = resolveHostDesktopTarget();
   await runMacosPrebuildCleanup();
   await ensureDesktopTargetDirectories();
-  await writeOutput(`desktop-build: running standard host-local Tauri flow for ${hostTarget.name}`);
+  await writeOutput(
+    `desktop-build: running standard host-local Tauri flow for ${hostTarget.logLabel}`,
+  );
   await buildDesktopTarget(hostTarget, tauriArgs);
   if (!isDebugDesktopBuild(tauriArgs)) {
     await writeOutput(
-      `desktop-build: syncing latest ${hostTarget.name} release artifacts into packages/desktop/releases`,
+      `desktop-build: syncing latest ${hostTarget.releaseTarget} release artifacts into packages/desktop/releases`,
     );
     const syncExitCode = await runCommand(
       [
@@ -157,7 +168,7 @@ const main = async (): Promise<void> => {
         "run",
         "scripts/build-desktop-release.ts",
         "--target",
-        hostTarget.name,
+        hostTarget.releaseTarget,
         "--skip-build",
       ],
       {

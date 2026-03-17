@@ -1,3 +1,3 @@
 26ec178ddbc6a6de24ebd7cb2304bfa63d3b0bae09b3a41f2a204b9d13b414cd  windows/BaoBuildBuddy_0.1.0_x64-setup.exe
-49e81077c9d1c11dd2745328f4bb9f06e9c8577d727c2906c20ddf08e26ddee3  macos/BaoBuildBuddy_0.1.0_aarch64.dmg
 7f6bc1b9dbd4fff99b7a8b0e0b899f758472053456596e57a2a2760be3338544  windows/BaoBuildBuddy_0.1.0_x64-portable.zip
+8a1a543fd7b2ba531f83831d029eba4c3509e6047d249a2ca7b078a245dfde70  macos/BaoBuildBuddy_0.1.0_aarch64.dmg

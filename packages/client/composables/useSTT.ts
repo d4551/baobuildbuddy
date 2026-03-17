@@ -1,4 +1,6 @@
 import type { VoiceSettings } from "@bao/shared";
+import { computed, onMounted, readonly, ref } from "#imports";
+import type { Ref } from "vue";
 import { resolveSpeechLocale, resolveSpeechRecognitionConstructor } from "~/utils/speech";
 
 interface RecognitionUpdate {

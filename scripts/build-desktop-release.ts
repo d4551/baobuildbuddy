@@ -287,8 +287,17 @@ const runMacosTauriBuildFlow = async (
   return [buildCommand.join(" "), bundleCommand.join(" ")];
 };
 
-const buildLinuxBundleArgs = (hostTarget: HostReleaseTarget): readonly string[] =>
-  hostTarget.artifactLabel.startsWith("linux") ? ["--bundles", "deb,rpm"] : [];
+const buildStandardBundleArgs = (hostTarget: HostReleaseTarget): readonly string[] => {
+  if (hostTarget.artifactLabel.startsWith("linux")) {
+    return ["--bundles", "deb,rpm"] as const;
+  }
+
+  if (hostTarget.artifactLabel === "windows") {
+    return ["--bundles", "nsis"] as const;
+  }
+
+  return [] as const;
+};
 
 const runStandardTauriBuildFlow = async (
   hostTarget: HostReleaseTarget,
@@ -299,7 +308,7 @@ const runStandardTauriBuildFlow = async (
     process.execPath,
     "tauri",
     "build",
-    ...buildLinuxBundleArgs(hostTarget),
+    ...buildStandardBundleArgs(hostTarget),
     ...tauriArgs,
   ] as const;
   await runCommandOrExit(buildCommand, { cwd: DESKTOP_ROOT, env });

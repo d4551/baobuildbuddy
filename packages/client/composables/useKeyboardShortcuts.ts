@@ -1,4 +1,5 @@
 import { APP_ROUTES } from "@bao/shared";
+import { onMounted, onUnmounted, ref, useRoute, useRouter } from "#imports";
 import type { NavigationItem } from "~/constants/navigation";
 import { createClientLogger } from "~/utils/client-logger";
 
