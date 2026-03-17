@@ -1,9 +1,12 @@
 import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import {
-  DESKTOP_RELEASE_LINUX_ARCH,
-  DESKTOP_RELEASE_LINUX_DEB_ARCH,
-  DESKTOP_RELEASE_LINUX_TARGET,
+  DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH,
+  DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH,
+  DESKTOP_RELEASE_LINUX_ARM64_TARGET,
+  DESKTOP_RELEASE_LINUX_X64_DEB_ARCH,
+  DESKTOP_RELEASE_LINUX_X64_RPM_ARCH,
+  DESKTOP_RELEASE_LINUX_X64_TARGET,
   DESKTOP_RELEASE_MACOS_ARCH,
   DESKTOP_RELEASE_MACOS_TARGET,
   DESKTOP_RELEASE_METADATA_DIR,
@@ -120,21 +123,31 @@ const runCommand = async (
   return proc.exited;
 };
 
+const runCommandOrExit = async (
+  command: readonly string[],
+  options: {
+    readonly cwd?: string;
+    readonly env?: Record<string, string | undefined>;
+  } = {},
+): Promise<void> => {
+  const exitCode = await runCommand(command, options);
+  if (exitCode !== 0) {
+    process.exit(exitCode);
+  }
+};
+
 const runMacosPrebuildCleanup = async (): Promise<void> => {
   if (process.platform !== "darwin") {
     return;
   }
 
-  const cleanupExitCode = await runCommand(
+  await runCommandOrExit(
     [process.execPath, DESKTOP_CLEANUP_SCRIPT_PATH, "prebuild"],
     {
       cwd: REPO_ROOT,
       env: process.env,
     },
   );
-  if (cleanupExitCode !== 0) {
-    process.exit(cleanupExitCode);
-  }
 };
 
 const pathExists = async (absolutePath: string): Promise<boolean> =>
@@ -171,7 +184,7 @@ const resolveRequestedTarget = (argv: readonly string[]): DesktopReleaseTarget =
     return "windows";
   }
   if (process.platform === "linux") {
-    return "linux";
+    return process.arch === "arm64" ? "linux-arm64" : "linux-x64";
   }
 
   throw new Error(
@@ -202,10 +215,18 @@ const buildHostReleaseTarget = (target: DesktopReleaseTarget): HostReleaseTarget
     };
   }
 
+  if (target === "linux-x64") {
+    return {
+      artifactLabel: "linux-x64",
+      expectedPlatform: "linux",
+      tauriTarget: DESKTOP_RELEASE_LINUX_X64_TARGET,
+    };
+  }
+
   return {
-    artifactLabel: "linux",
+    artifactLabel: "linux-arm64",
     expectedPlatform: "linux",
-    tauriTarget: DESKTOP_RELEASE_LINUX_TARGET,
+    tauriTarget: DESKTOP_RELEASE_LINUX_ARM64_TARGET,
   };
 };
 
@@ -224,7 +245,7 @@ const syncReleaseDirectory = async (
   outputRoot: string,
   target: DesktopReleaseTarget,
 ): Promise<void> => {
-  const refreshExitCode = await runCommand(
+  await runCommandOrExit(
     [
       process.execPath,
       "run",
@@ -239,9 +260,47 @@ const syncReleaseDirectory = async (
       env: process.env,
     },
   );
-  if (refreshExitCode !== 0) {
-    process.exit(refreshExitCode);
-  }
+};
+
+const runMacosTauriBuildFlow = async (
+  tauriArgs: readonly string[],
+  env: Record<string, string | undefined>,
+): Promise<readonly string[]> => {
+  const buildCommand = [process.execPath, "tauri", "build", "--no-bundle", ...tauriArgs] as const;
+  const bundleCommand = [
+    process.execPath,
+    "tauri",
+    "bundle",
+    "--bundles",
+    "app,dmg",
+    ...tauriArgs,
+  ] as const;
+
+  await runCommandOrExit(buildCommand, { cwd: DESKTOP_ROOT, env });
+  await writeOutput(
+    "desktop-release: macOS DMG bundling runs through Tauri's bundle_dmg.sh and can stay quiet while hdiutil create/convert completes.",
+  );
+  await runCommandOrExit(bundleCommand, { cwd: DESKTOP_ROOT, env });
+  return [buildCommand.join(" "), bundleCommand.join(" ")];
+};
+
+const buildLinuxBundleArgs = (hostTarget: HostReleaseTarget): readonly string[] =>
+  hostTarget.artifactLabel.startsWith("linux") ? ["--bundles", "deb,rpm"] : [];
+
+const runStandardTauriBuildFlow = async (
+  hostTarget: HostReleaseTarget,
+  tauriArgs: readonly string[],
+  env: Record<string, string | undefined>,
+): Promise<readonly string[]> => {
+  const buildCommand = [
+    process.execPath,
+    "tauri",
+    "build",
+    ...buildLinuxBundleArgs(hostTarget),
+    ...tauriArgs,
+  ] as const;
+  await runCommandOrExit(buildCommand, { cwd: DESKTOP_ROOT, env });
+  return [buildCommand.join(" ")];
 };
 
 const runTauriBuildFlow = async (
@@ -254,66 +313,39 @@ const runTauriBuildFlow = async (
   };
 
   if (hostTarget.artifactLabel === "macos") {
-    const buildCommand = [
-      process.execPath,
-      "tauri",
-      "build",
-      "--no-bundle",
-      ...tauriArgs,
-    ] as const;
-    const bundleCommand = [
-      process.execPath,
-      "tauri",
-      "bundle",
-      "--bundles",
-      "app,dmg",
-      ...tauriArgs,
-    ] as const;
-
-    const buildExitCode = await runCommand(buildCommand, {
-      cwd: DESKTOP_ROOT,
-      env,
-    });
-    if (buildExitCode !== 0) {
-      process.exit(buildExitCode);
-    }
-
-    await writeOutput(
-      "desktop-release: macOS DMG bundling runs through Tauri's bundle_dmg.sh and can stay quiet while hdiutil create/convert completes.",
-    );
-    const bundleExitCode = await runCommand(bundleCommand, {
-      cwd: DESKTOP_ROOT,
-      env,
-    });
-    if (bundleExitCode !== 0) {
-      process.exit(bundleExitCode);
-    }
-
-    return [buildCommand.join(" "), bundleCommand.join(" ")];
+    return runMacosTauriBuildFlow(tauriArgs, env);
   }
 
   // On Linux aarch64, linuxdeploy-plugin-gtk crashes with std::runtime_error
   // during AppImage bundling (linuxdeploy 1-alpha is unstable on ARM64).
   // Restrict to deb and rpm which build reliably.
-  const linuxBundleArgs =
-    hostTarget.artifactLabel === "linux" ? ["--bundles", "deb,rpm"] : [];
+  return runStandardTauriBuildFlow(hostTarget, tauriArgs, env);
+};
 
-  const buildCommand = [
-    process.execPath,
-    "tauri",
-    "build",
-    ...linuxBundleArgs,
-    ...tauriArgs,
-  ] as const;
-  const buildExitCode = await runCommand(buildCommand, {
-    cwd: DESKTOP_ROOT,
-    env,
-  });
-  if (buildExitCode !== 0) {
-    process.exit(buildExitCode);
+const tryCreateZipArchive = async (
+  commandCandidates: readonly (readonly string[])[],
+  parentDir: string,
+  index: number = 0,
+): Promise<boolean> => {
+  const command = commandCandidates[index];
+  if (!command) {
+    return false;
   }
 
-  return [buildCommand.join(" ")];
+  const executable = command[0];
+  if (!Bun.which(executable)) {
+    return tryCreateZipArchive(commandCandidates, parentDir, index + 1);
+  }
+
+  const exitCode = await runCommand(command, {
+    cwd: executable === "zip" ? parentDir : REPO_ROOT,
+    env: process.env,
+  });
+  if (exitCode === 0) {
+    return true;
+  }
+
+  return tryCreateZipArchive(commandCandidates, parentDir, index + 1);
 };
 
 const createZipArchive = async (sourceDir: string, outputPath: string): Promise<void> => {
@@ -326,20 +358,8 @@ const createZipArchive = async (sourceDir: string, outputPath: string): Promise<
     ["zip", "-qr", "-9", outputPath, baseName],
   ] as const;
 
-  for (const command of zipCommandCandidates) {
-    const executable = command[0];
-    const executablePath = Bun.which(executable);
-    if (!executablePath) {
-      continue;
-    }
-
-    const exitCode = await runCommand(command, {
-      cwd: executable === "zip" ? parentDir : REPO_ROOT,
-      env: process.env,
-    });
-    if (exitCode === 0) {
-      return;
-    }
+  if (await tryCreateZipArchive(zipCommandCandidates, parentDir)) {
+    return;
   }
 
   throw new Error(`Unable to create zip archive at ${outputPath}.`);
@@ -370,24 +390,29 @@ const stageMacosArtifacts = async (
 const stageLinuxArtifacts = async (
   metadata: DesktopBundleMetadata,
   outputRoot: string,
+  target: Extract<DesktopReleaseTarget, "linux-x64" | "linux-arm64">,
 ): Promise<readonly string[]> => {
-  const targetRoot = join(outputRoot, "linux");
+  const targetRoot = join(outputRoot, target);
   const bundleRoot = join(
     DESKTOP_TAURI_ROOT,
     "target",
     "release",
     "bundle",
   );
+  const debArch =
+    target === "linux-x64" ? DESKTOP_RELEASE_LINUX_X64_DEB_ARCH : DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH;
+  const rpmArch =
+    target === "linux-x64" ? DESKTOP_RELEASE_LINUX_X64_RPM_ARCH : DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH;
   const artifactPaths = [
     join(
       bundleRoot,
       "deb",
-      `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_LINUX_DEB_ARCH}.deb`,
+      `${metadata.productName}_${metadata.version}_${debArch}.deb`,
     ),
     join(
       bundleRoot,
       "rpm",
-      `${metadata.productName}-${metadata.version}-1.${DESKTOP_RELEASE_LINUX_ARCH}.rpm`,
+      `${metadata.productName}-${metadata.version}-1.${rpmArch}.rpm`,
     ),
   ] as const;
 
@@ -400,6 +425,44 @@ const stageLinuxArtifacts = async (
   );
 
   return artifactPaths.map((artifactPath) => basename(artifactPath));
+};
+
+const buildWindowsPortableReadme = (metadata: DesktopBundleMetadata): string =>
+  [
+    "BaoBuildBuddy Windows portable package",
+    "",
+    "Run:",
+    `  ${metadata.binaryName}.exe`,
+    "",
+    "Keep the gen directory next to the executable.",
+    "If Microsoft Edge WebView2 is not installed yet, BaoBuildBuddy will prompt to run:",
+    `  ${DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`,
+    "",
+    `The packaged runtime includes ${DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH}.exe and ${DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH}.exe.`,
+  ].join("\n");
+
+const stageWindowsInstallerArtifacts = async (
+  targetRoot: string,
+  setupPath: string,
+  nsisScriptPath: string,
+): Promise<void> => {
+  await cp(setupPath, join(targetRoot, basename(setupPath)));
+  await cp(
+    nsisScriptPath,
+    join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, basename(nsisScriptPath)),
+  );
+};
+
+const stageWindowsPortableArtifacts = async (
+  metadata: DesktopBundleMetadata,
+  portableStageRoot: string,
+  executablePath: string,
+  runtimeRoot: string,
+): Promise<void> => {
+  await mkdir(portableStageRoot, { recursive: true });
+  await cp(executablePath, join(portableStageRoot, `${metadata.binaryName}.exe`));
+  await cp(runtimeRoot, join(portableStageRoot, "gen"), { recursive: true });
+  await writeFile(join(portableStageRoot, "README.txt"), buildWindowsPortableReadme(metadata));
 };
 
 const stageWindowsArtifacts = async (
@@ -443,27 +506,8 @@ const stageWindowsArtifacts = async (
 
   await rm(targetRoot, { force: true, recursive: true });
   await mkdir(join(targetRoot, DESKTOP_RELEASE_METADATA_DIR), { recursive: true });
-  await cp(setupPath, join(targetRoot, basename(setupPath)));
-  await cp(nsisScriptPath, join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, basename(nsisScriptPath)));
-
-  await mkdir(portableStageRoot, { recursive: true });
-  await cp(executablePath, join(portableStageRoot, `${metadata.binaryName}.exe`));
-  await cp(runtimeRoot, join(portableStageRoot, "gen"), { recursive: true });
-  await writeFile(
-    join(portableStageRoot, "README.txt"),
-    [
-      "BaoBuildBuddy Windows portable package",
-      "",
-      "Run:",
-      `  ${metadata.binaryName}.exe`,
-      "",
-      "Keep the gen directory next to the executable.",
-      "If Microsoft Edge WebView2 is not installed yet, BaoBuildBuddy will prompt to run:",
-      `  ${DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`,
-      "",
-      `The packaged runtime includes ${DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH}.exe and ${DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH}.exe.`,
-    ].join("\n"),
-  );
+  await stageWindowsInstallerArtifacts(targetRoot, setupPath, nsisScriptPath);
+  await stageWindowsPortableArtifacts(metadata, portableStageRoot, executablePath, runtimeRoot);
   await createZipArchive(portableStageRoot, portableArchivePath);
   await rm(portableStageRoot, { force: true, recursive: true });
 
@@ -535,7 +579,7 @@ const main = async (): Promise<void> => {
       ? await stageMacosArtifacts(metadata, outputRoot)
       : requestedTarget === "windows"
         ? await stageWindowsArtifacts(metadata, outputRoot)
-        : await stageLinuxArtifacts(metadata, outputRoot);
+        : await stageLinuxArtifacts(metadata, outputRoot, requestedTarget);
   await writeProvenance(hostTarget, outputRoot, artifactNames, buildCommands);
   await writeOutput(
     `desktop-release:${requestedTarget} staged ${artifactNames.join(", ")} in ${join(outputRoot, requestedTarget)}`,

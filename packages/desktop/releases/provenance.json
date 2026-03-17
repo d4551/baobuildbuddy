@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "assembledAt": "2026-03-16T22:10:00.069Z",
+  "assembledAt": "2026-03-17T00:15:23.101Z",
   "sourceRoot": "/Users/brandondonnelly/Downloads/baobuildbuddy/.desktop-release-artifacts",
   "targets": {
     "macos": {
@@ -17,7 +17,7 @@
       "buildCommands": [
         "stage-only existing bundled artifacts for aarch64-apple-darwin"
       ],
-      "builtAt": "2026-03-16T22:10:00.052Z",
+      "builtAt": "2026-03-17T00:15:23.076Z",
       "ci": {
         "workflow": null,
         "runId": null,

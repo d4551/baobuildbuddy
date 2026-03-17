@@ -53,7 +53,17 @@ const selectedResumeId = ref<string | null>(null);
 const showDeleteResumeDialog = ref(false);
 const pendingDeleteResumeId = ref<string | null>(null);
 type ResumeTabId = "personal" | "experience" | "education" | "skills" | "projects" | "gaming";
+const RESUME_TABS = [
+  "personal",
+  "experience",
+  "education",
+  "skills",
+  "projects",
+  "gaming",
+] as const satisfies readonly ResumeTabId[];
 const activeTab = ref<ResumeTabId>("personal");
+const resumeTabListId = `resume-tabs-${useId()}`;
+const resumeTabRefs = ref<(HTMLButtonElement | null)[]>([]);
 const creating = ref(false);
 const enhancing = ref(false);
 const scoring = ref(false);
@@ -149,12 +159,12 @@ const resumeSectionCompletion = computed<
     hasNonEmptyGamingValue(formData.gaming.achievements);
 
   return [
-    { id: "personal", completed: personalComplete },
-    { id: "experience", completed: experienceComplete },
-    { id: "education", completed: educationComplete },
-    { id: "skills", completed: skillsComplete },
-    { id: "projects", completed: projectsComplete },
-    { id: "gaming", completed: gamingComplete },
+    { id: RESUME_TABS[0], completed: personalComplete },
+    { id: RESUME_TABS[1], completed: experienceComplete },
+    { id: RESUME_TABS[2], completed: educationComplete },
+    { id: RESUME_TABS[3], completed: skillsComplete },
+    { id: RESUME_TABS[4], completed: projectsComplete },
+    { id: RESUME_TABS[5], completed: gamingComplete },
   ];
 });
 
@@ -245,6 +255,58 @@ function resumeTabLabel(tab: ResumeTabId): string {
 
 function resumeTabAriaLabel(tab: ResumeTabId): string {
   return t("resumePage.tabs.selectAria", { tab: resumeTabLabel(tab) });
+}
+
+function resumeTabButtonId(tab: ResumeTabId): string {
+  return `${resumeTabListId}-tab-${tab}`;
+}
+
+function resumeTabPanelId(tab: ResumeTabId): string {
+  return `${resumeTabListId}-panel-${tab}`;
+}
+
+function setResumeTabRef(index: number, element: Element | null): void {
+  resumeTabRefs.value[index] = element instanceof HTMLButtonElement ? element : null;
+}
+
+function focusResumeTab(index: number): void {
+  resumeTabRefs.value[index]?.focus();
+}
+
+function selectResumeTab(tab: ResumeTabId): void {
+  activeTab.value = tab;
+}
+
+function handleResumeTabKeydown(event: KeyboardEvent, index: number): void {
+  const lastTabIndex = RESUME_TABS.length - 1;
+  if (event.key === "ArrowRight") {
+    event.preventDefault();
+    const nextIndex = index === lastTabIndex ? 0 : index + 1;
+    selectResumeTab(RESUME_TABS[nextIndex]);
+    focusResumeTab(nextIndex);
+    return;
+  }
+
+  if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    const nextIndex = index === 0 ? lastTabIndex : index - 1;
+    selectResumeTab(RESUME_TABS[nextIndex]);
+    focusResumeTab(nextIndex);
+    return;
+  }
+
+  if (event.key === "Home") {
+    event.preventDefault();
+    selectResumeTab(RESUME_TABS[0]);
+    focusResumeTab(0);
+    return;
+  }
+
+  if (event.key === "End") {
+    event.preventDefault();
+    selectResumeTab(RESUME_TABS[lastTabIndex]);
+    focusResumeTab(lastTabIndex);
+  }
 }
 
 function resumeTemplateLabel(template?: string): string {
@@ -817,75 +879,34 @@ async function resolvePipelineReward(
 
       <div class="tabs tabs-lift" role="tablist" :aria-label="t('resumePage.tabs.tablistAria')">
         <button
+          v-for="(tab, index) in RESUME_TABS"
+          :id="resumeTabButtonId(tab)"
+          :key="tab"
           type="button"
           class="tab"
           role="tab"
-          :class="{ 'tab-active': activeTab === 'personal' }"
-          :aria-selected="activeTab === 'personal'"
-          :aria-label="resumeTabAriaLabel('personal')"
-          @click="activeTab = 'personal'"
+          :class="{ 'tab-active': activeTab === tab }"
+          :aria-selected="activeTab === tab"
+          :aria-controls="resumeTabPanelId(tab)"
+          :aria-label="resumeTabAriaLabel(tab)"
+          :tabindex="activeTab === tab ? 0 : -1"
+          :ref="(element) => setResumeTabRef(index, element)"
+          @click="selectResumeTab(tab)"
+          @keydown="handleResumeTabKeydown($event, index)"
         >
-          {{ t("resumePage.tabs.personal") }}
-        </button>
-        <button
-          type="button"
-          class="tab"
-          role="tab"
-          :class="{ 'tab-active': activeTab === 'experience' }"
-          :aria-selected="activeTab === 'experience'"
-          :aria-label="resumeTabAriaLabel('experience')"
-          @click="activeTab = 'experience'"
-        >
-          {{ t("resumePage.tabs.experience") }}
-        </button>
-        <button
-          type="button"
-          class="tab"
-          role="tab"
-          :class="{ 'tab-active': activeTab === 'education' }"
-          :aria-selected="activeTab === 'education'"
-          :aria-label="resumeTabAriaLabel('education')"
-          @click="activeTab = 'education'"
-        >
-          {{ t("resumePage.tabs.education") }}
-        </button>
-        <button
-          type="button"
-          class="tab"
-          role="tab"
-          :class="{ 'tab-active': activeTab === 'skills' }"
-          :aria-selected="activeTab === 'skills'"
-          :aria-label="resumeTabAriaLabel('skills')"
-          @click="activeTab = 'skills'"
-        >
-          {{ t("resumePage.tabs.skills") }}
-        </button>
-        <button
-          type="button"
-          class="tab"
-          role="tab"
-          :class="{ 'tab-active': activeTab === 'projects' }"
-          :aria-selected="activeTab === 'projects'"
-          :aria-label="resumeTabAriaLabel('projects')"
-          @click="activeTab = 'projects'"
-        >
-          {{ t("resumePage.tabs.projects") }}
-        </button>
-        <button
-          type="button"
-          class="tab"
-          role="tab"
-          :class="{ 'tab-active': activeTab === 'gaming' }"
-          :aria-selected="activeTab === 'gaming'"
-          :aria-label="resumeTabAriaLabel('gaming')"
-          @click="activeTab = 'gaming'"
-        >
-          {{ t("resumePage.tabs.gaming") }}
+          {{ resumeTabLabel(tab) }}
         </button>
       </div>
 
       <!-- Personal Info Tab -->
-      <div v-if="activeTab === 'personal'" class="card bg-base-200">
+      <div
+        v-show="activeTab === 'personal'"
+        :id="resumeTabPanelId('personal')"
+        class="card bg-base-200"
+        role="tabpanel"
+        :aria-labelledby="resumeTabButtonId('personal')"
+        :aria-hidden="activeTab !== 'personal'"
+      >
         <div class="card-body">
           <h2 class="card-title">{{ t("resumePage.personal.title") }}</h2>
           <SectionGrid grid-token="twoColumn">
@@ -952,7 +973,14 @@ async function resolvePipelineReward(
       </div>
 
       <!-- Experience Tab -->
-      <div v-if="activeTab === 'experience'" class="card bg-base-200">
+      <div
+        v-show="activeTab === 'experience'"
+        :id="resumeTabPanelId('experience')"
+        class="card bg-base-200"
+        role="tabpanel"
+        :aria-labelledby="resumeTabButtonId('experience')"
+        :aria-hidden="activeTab !== 'experience'"
+      >
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <h2 class="card-title">{{ t("resumePage.experience.title") }}</h2>
@@ -1034,7 +1062,14 @@ async function resolvePipelineReward(
       </div>
 
       <!-- Education Tab -->
-      <div v-if="activeTab === 'education'" class="card bg-base-200">
+      <div
+        v-show="activeTab === 'education'"
+        :id="resumeTabPanelId('education')"
+        class="card bg-base-200"
+        role="tabpanel"
+        :aria-labelledby="resumeTabButtonId('education')"
+        :aria-hidden="activeTab !== 'education'"
+      >
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <h2 class="card-title">{{ t("resumePage.education.title") }}</h2>
@@ -1096,7 +1131,14 @@ async function resolvePipelineReward(
       </div>
 
       <!-- Skills Tab -->
-      <div v-if="activeTab === 'skills'" class="card bg-base-200">
+      <div
+        v-show="activeTab === 'skills'"
+        :id="resumeTabPanelId('skills')"
+        class="card bg-base-200"
+        role="tabpanel"
+        :aria-labelledby="resumeTabButtonId('skills')"
+        :aria-hidden="activeTab !== 'skills'"
+      >
         <div class="card-body">
           <h2 class="card-title mb-4">{{ t("resumePage.skills.title") }}</h2>
           <div class="flex gap-2 mb-4">
@@ -1133,7 +1175,14 @@ async function resolvePipelineReward(
       </div>
 
       <!-- Projects Tab -->
-      <div v-if="activeTab === 'projects'" class="card bg-base-200">
+      <div
+        v-show="activeTab === 'projects'"
+        :id="resumeTabPanelId('projects')"
+        class="card bg-base-200"
+        role="tabpanel"
+        :aria-labelledby="resumeTabButtonId('projects')"
+        :aria-hidden="activeTab !== 'projects'"
+      >
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <h2 class="card-title">{{ t("resumePage.projects.title") }}</h2>
@@ -1187,7 +1236,14 @@ async function resolvePipelineReward(
       </div>
 
       <!-- Gaming Experience Tab -->
-      <div v-if="activeTab === 'gaming'" class="card bg-base-200">
+      <div
+        v-show="activeTab === 'gaming'"
+        :id="resumeTabPanelId('gaming')"
+        class="card bg-base-200"
+        role="tabpanel"
+        :aria-labelledby="resumeTabButtonId('gaming')"
+        :aria-hidden="activeTab !== 'gaming'"
+      >
         <div class="card-body">
           <h2 class="card-title mb-4">{{ t("resumePage.gaming.title") }}</h2>
           <p class="text-sm text-base-content/70 mb-4">

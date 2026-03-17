@@ -4,8 +4,10 @@ import { readdir, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import {
   DESKTOP_RELEASE_METADATA_DIR,
-  DESKTOP_RELEASE_LINUX_ARCH,
-  DESKTOP_RELEASE_LINUX_DEB_ARCH,
+  DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH,
+  DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH,
+  DESKTOP_RELEASE_LINUX_X64_DEB_ARCH,
+  DESKTOP_RELEASE_LINUX_X64_RPM_ARCH,
   DESKTOP_RELEASE_MACOS_ARCH,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
   DESKTOP_RELEASE_TARGETS,
@@ -307,19 +309,26 @@ const buildMacosArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseA
   return [createReleaseArtifact("macos", relativePath, "dmg")] as const;
 };
 
-const buildLinuxArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseArtifact[] => {
+const buildLinuxArtifacts = (
+  metadata: DesktopBundleMetadata,
+  target: Extract<DesktopReleaseTarget, "linux-x64" | "linux-arm64">,
+): readonly ReleaseArtifact[] => {
+  const debArch =
+    target === "linux-x64" ? DESKTOP_RELEASE_LINUX_X64_DEB_ARCH : DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH;
+  const rpmArch =
+    target === "linux-x64" ? DESKTOP_RELEASE_LINUX_X64_RPM_ARCH : DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH;
   const debPath = join(
-    "linux",
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_LINUX_DEB_ARCH}.deb`,
+    target,
+    `${metadata.productName}_${metadata.version}_${debArch}.deb`,
   );
   const rpmPath = join(
-    "linux",
-    `${metadata.productName}-${metadata.version}-1.${DESKTOP_RELEASE_LINUX_ARCH}.rpm`,
+    target,
+    `${metadata.productName}-${metadata.version}-1.${rpmArch}.rpm`,
   );
 
   return [
-    createReleaseArtifact("linux", debPath, "deb"),
-    createReleaseArtifact("linux", rpmPath, "rpm"),
+    createReleaseArtifact(target, debPath, "deb"),
+    createReleaseArtifact(target, rpmPath, "rpm"),
   ] as const;
 };
 
@@ -347,8 +356,8 @@ const buildArtifactsForTarget = (
     return buildMacosArtifacts(metadata);
   }
 
-  if (target === "linux") {
-    return buildLinuxArtifacts(metadata);
+  if (target === "linux-x64" || target === "linux-arm64") {
+    return buildLinuxArtifacts(metadata, target);
   }
 
   return buildWindowsArtifacts(metadata);
@@ -513,7 +522,7 @@ const verifyBundleConfig = (
         )),
   };
 
-  const gtkResult: VerificationResult | null = targets.includes("linux")
+  const gtkResult: VerificationResult | null = targets.some((target) => target.startsWith("linux"))
     ? {
         details: metadata.enableGtkAppId ? "enabled" : "disabled",
         label: "config:gtk-app-id",

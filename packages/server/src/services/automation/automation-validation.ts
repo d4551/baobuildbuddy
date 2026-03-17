@@ -18,6 +18,7 @@ import {
   AUTOMATION_MAX_JOB_URL_LENGTH,
 } from "@bao/shared";
 import { DEFAULT_HOST, LOOPBACK_HOST_IPV4 } from "@bao/shared";
+import { config } from "../../config/env";
 
 /** Re-export shared limits for consumers that import from this module. */
 export const MAX_JOB_URL_LENGTH = AUTOMATION_MAX_JOB_URL_LENGTH;
@@ -52,6 +53,10 @@ const DISALLOWED_HOST_PATTERNS = [
 ];
 
 const DISALLOWED_IPV6_PREFIX_PATTERN = /^(fc|fd|fe80)/i;
+
+const allowAutomationPrivateHosts = (): boolean => {
+  return config.allowAutomationPrivateHosts || config.enableAutomationVerification;
+};
 
 /**
  * Validate and normalize an automation URL while blocking unsafe host targets.
@@ -148,6 +153,10 @@ export function sanitizeCustomAnswers(
 function isDisallowedAutomationHost(hostname: string): boolean {
   if (!hostname) {
     return true;
+  }
+
+  if (allowAutomationPrivateHosts()) {
+    return false;
   }
 
   if (hostname === LOOPBACK_HOST_IPV4 || hostname === DEFAULT_HOST) {

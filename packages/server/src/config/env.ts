@@ -1,11 +1,12 @@
 import {
   API_ERROR_INVALID_PORT,
+  DECIMAL_RADIX,
+  DEFAULT_CLIENT_DEV_PORT,
   DEFAULT_CORS_ORIGINS,
+  DEFAULT_DB_PATH_TILDE,
   DEFAULT_HOST,
-  LOOPBACK_HOST,
-  LOOPBACK_HOST_IPV4,
-  LOOPBACK_HOST_IPV6,
   DEFAULT_LOG_LEVEL,
+  DEFAULT_SERVER_PORT,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_DEFAULT,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_MAX,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_MIN,
@@ -25,12 +26,11 @@ import {
   ENV_SMART_FIELD_MAPPER_RETRY_DELAY_MS_MAX,
   ENV_SMART_FIELD_MAPPER_RETRY_DELAY_MS_MIN,
   ENV_SMART_FIELD_MAPPER_USER_AGENT_DEFAULT,
+  LOOPBACK_HOST,
+  LOOPBACK_HOST_IPV4,
+  LOOPBACK_HOST_IPV6,
   MAX_PORT,
   MIN_PORT,
-  DEFAULT_SERVER_PORT,
-  DEFAULT_CLIENT_DEV_PORT,
-  DEFAULT_DB_PATH_TILDE,
-  DECIMAL_RADIX,
 } from "@bao/shared";
 
 const configuredServerPort = [Bun.env.SERVER_PORT, Bun.env.PORT].find(
@@ -61,6 +61,11 @@ function parseNonEmptyString(value: string | undefined, fallback: string): strin
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : fallback;
+}
+
+function parseBooleanFlag(primary: string | undefined, secondary?: string): boolean {
+  const value = primary ?? secondary;
+  return value === "true" || value === "1";
 }
 
 function parseCorsOrigins(value?: string): string[] {
@@ -111,6 +116,22 @@ export const config = {
   corsOrigins: resolvedCorsOrigins,
   /** When true, skip API key auth (local dev only) */
   disableAuth: disableAuthEnv === "true" || disableAuthEnv === "1" || isLocalhostOnly,
+  /** When true, expose deterministic automation verification helpers for packaged-runtime checks. */
+  get enableAutomationVerification(): boolean {
+    return parseBooleanFlag(
+      Bun.env.BAO_ENABLE_AUTOMATION_VERIFY,
+      process.env.BAO_ENABLE_AUTOMATION_VERIFY,
+    );
+  },
+  /** When true, allow localhost/private automation URLs for deterministic local verification flows. */
+  get allowAutomationPrivateHosts(): boolean {
+    return (
+      parseBooleanFlag(
+        Bun.env.BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS,
+        process.env.BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS,
+      ) || this.enableAutomationVerification
+    );
+  },
   automationScriptTimeoutMs: parseBoundedInt(
     Bun.env.AUTOMATION_SCRIPT_TIMEOUT_MS,
     ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_DEFAULT,

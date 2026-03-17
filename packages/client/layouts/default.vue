@@ -7,13 +7,14 @@ import {
   LAYOUT_CONTENT_MAX_WIDTH_REM,
   LAYOUT_DESKTOP_MEDIA_QUERY,
 } from "~/constants/layout";
+import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { initTheme, theme, setTheme } = useTheme();
 const { settings } = useSettings();
 const { brandCssVars } = useBrand();
 const { t } = useI18n();
 const route = useRoute();
-const isDrawerOpen = ref(false);
+const isDrawerOpen = useState<boolean>(APP_DRAWER_ID, () => false);
 const isDesktopViewport = ref(false);
 let desktopMediaQueryList: MediaQueryList | null = null;
 let removeMediaQueryListener: (() => void) | null = null;
@@ -82,7 +83,8 @@ onUnmounted(() => {
       type="checkbox"
       class="drawer-toggle"
       v-model="isDrawerOpen"
-      :aria-label="t('a11y.toggleSidebarNavigation')"
+      aria-hidden="true"
+      tabindex="-1"
     />
     <div class="drawer-content flex min-h-screen flex-col">
       <a :href="`#${APP_MAIN_CONTENT_ID}`" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn btn-primary btn-sm" :aria-label="t('a11y.skipToContent')">{{ t("a11y.skipToContent") }}</a>
@@ -96,7 +98,13 @@ onUnmounted(() => {
       <ToastContainer />
     </div>
     <aside class="drawer-side is-drawer-close:overflow-visible z-40" :aria-label="t('a11y.sidebarNavigation')">
-      <label :for="APP_DRAWER_ID" :aria-label="t('a11y.closeSidebar')" class="drawer-overlay"></label>
+      <button
+        type="button"
+        class="drawer-overlay"
+        :aria-label="t('a11y.closeSidebar')"
+        :aria-controls="APP_DRAWER_ID"
+        @click="setDrawerToggleState(false)"
+      ></button>
       <div class="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64 transition-all duration-200">
         <AppSidebar />
       </div>

@@ -2444,9 +2444,15 @@ export class ApplicationAutomationService {
         return;
       }
 
-      this.runBackgroundTask(this.persistProgress(event));
-      broadcastAutomationEvent(event);
-      onProgress?.(event);
+      const normalizedEvent = {
+        ...event,
+        sequence: this.nextRunEventSequence(event.runId),
+        timestamp: new Date().toISOString(),
+      } satisfies RpaRunEvent;
+
+      this.runBackgroundTask(this.persistProgress(normalizedEvent));
+      broadcastAutomationEvent(normalizedEvent);
+      onProgress?.(normalizedEvent);
     };
   }
 

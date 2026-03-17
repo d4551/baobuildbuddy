@@ -1,4 +1,17 @@
 import {
+  chmod,
+  cp,
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
+import { dirname, extname, join, resolve } from "node:path";
+import {
   DESKTOP_RUNTIME_API_BASE,
   DESKTOP_RUNTIME_BUILD_SERVER_PORT,
   DESKTOP_RUNTIME_CORS_ORIGINS,
@@ -10,21 +23,18 @@ import {
   DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH,
   DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
   DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
-  DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
   DESKTOP_RUNTIME_SERVER_PORT,
   DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
   DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
+  DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
+import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
+import { writeError, writeOutput } from "./utils/cli-output";
 import {
   collectRuntimeDependencySourceRoots,
   SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
 } from "./utils/desktop-runtime-scraper";
-import { writeError, writeOutput } from "./utils/cli-output";
-import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
-import { chmod, cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
-import { homedir, tmpdir } from "node:os";
-import { dirname, extname, join, resolve } from "node:path";
 
 type DesktopRuntimeManifest = {
   serverExecutable: string;
@@ -89,11 +99,17 @@ const resolveTauriCacheDir = (): string => {
 
   if (process.platform === "win32") {
     const localAppData = process.env.LOCALAPPDATA?.trim();
-    return join(localAppData && localAppData.length > 0 ? localAppData : join(homedir(), "AppData", "Local"), "tauri");
+    return join(
+      localAppData && localAppData.length > 0 ? localAppData : join(homedir(), "AppData", "Local"),
+      "tauri",
+    );
   }
 
   const xdgCacheHome = process.env.XDG_CACHE_HOME?.trim();
-  return join(xdgCacheHome && xdgCacheHome.length > 0 ? xdgCacheHome : join(homedir(), ".cache"), "tauri");
+  return join(
+    xdgCacheHome && xdgCacheHome.length > 0 ? xdgCacheHome : join(homedir(), ".cache"),
+    "tauri",
+  );
 };
 
 const resolveWebviewBootstrapperSourcePath = (): string => {
@@ -251,62 +267,88 @@ const buildCompileTargetTarballUrl = (compileTarget: string): string => {
   ].join("/");
 };
 
+type PrewarmedCompileTargetPaths = {
+  readonly workingDirectory: string;
+  readonly tarballPath: string;
+  readonly extractedExecutablePath: string;
+  readonly prewarmedExecutablePath: string;
+};
+
+const buildPrewarmedCompileTargetPaths = (compileTarget: string): PrewarmedCompileTargetPaths => {
+  const scratchRoot = resolveCompileTargetScratchRoot();
+  const workingDirectory = join(scratchRoot, "compile-targets", compileTarget);
+  const extractedDirectory = join(workingDirectory, "package");
+
+  return {
+    workingDirectory,
+    tarballPath: join(workingDirectory, "target.tgz"),
+    extractedExecutablePath: join(extractedDirectory, "bin", "bun.exe"),
+    prewarmedExecutablePath: join(
+      workingDirectory,
+      buildCompileTargetExecutableName(compileTarget),
+    ),
+  };
+};
+
+const downloadCompileTargetTarball = async (
+  compileTarget: string,
+  tarballPath: string,
+): Promise<void> => {
+  const tarballUrl = buildCompileTargetTarballUrl(compileTarget);
+  const tarballResponse = await fetch(tarballUrl, {
+    signal: AbortSignal.timeout(READY_TIMEOUT_MS),
+  });
+  if (!tarballResponse.ok) {
+    throw new Error(
+      `Unable to download ${compileTarget} tarball from ${tarballUrl}: ${tarballResponse.status} ${tarballResponse.statusText}`,
+    );
+  }
+
+  await writeFile(tarballPath, Buffer.from(await tarballResponse.arrayBuffer()));
+};
+
+const extractCompileTargetExecutable = async (
+  paths: PrewarmedCompileTargetPaths,
+): Promise<void> => {
+  await runCommand(["tar", "-xzf", paths.tarballPath, "-C", paths.workingDirectory]);
+
+  if (!(await Bun.file(paths.extractedExecutablePath).exists())) {
+    throw new Error(
+      `Prewarmed Bun compile target executable is missing after extraction: ${paths.extractedExecutablePath}`,
+    );
+  }
+
+  await cp(paths.extractedExecutablePath, paths.prewarmedExecutablePath, { force: true });
+};
+
+const prepareCompileTargetDirectory = async (compileTarget: string): Promise<string> => {
+  const paths = buildPrewarmedCompileTargetPaths(compileTarget);
+  if (await Bun.file(paths.prewarmedExecutablePath).exists()) {
+    return paths.workingDirectory;
+  }
+
+  await mkdir(paths.workingDirectory, { recursive: true });
+  await writeOutput(
+    `desktop-runtime: prewarming official Bun compile target ${compileTarget} for ${Bun.version}`,
+  );
+  await downloadCompileTargetTarball(compileTarget, paths.tarballPath);
+  await extractCompileTargetExecutable(paths);
+  return paths.workingDirectory;
+};
+
 const ensurePrewarmedCompileTargetDirectory = async (compileTarget: string): Promise<string> => {
   const existingDirectory = prewarmedCompileTargetDirectories.get(compileTarget);
   if (existingDirectory) {
     return await existingDirectory;
   }
 
-  const preparation = (async (): Promise<string> => {
-    const scratchRoot = resolveCompileTargetScratchRoot();
-    const workingDirectory = join(scratchRoot, "compile-targets", compileTarget);
-    const tarballPath = join(workingDirectory, "target.tgz");
-    const extractedDirectory = join(workingDirectory, "package");
-    const extractedExecutablePath = join(extractedDirectory, "bin", "bun.exe");
-    const prewarmedExecutablePath = join(
-      workingDirectory,
-      buildCompileTargetExecutableName(compileTarget),
-    );
-
-    if (await Bun.file(prewarmedExecutablePath).exists()) {
-      return workingDirectory;
-    }
-
-    await mkdir(workingDirectory, { recursive: true });
-    await writeOutput(
-      `desktop-runtime: prewarming official Bun compile target ${compileTarget} for ${Bun.version}`,
-    );
-
-    const tarballUrl = buildCompileTargetTarballUrl(compileTarget);
-    const tarballResponse = await fetch(tarballUrl, {
-      signal: AbortSignal.timeout(READY_TIMEOUT_MS),
-    });
-    if (!tarballResponse.ok) {
-      throw new Error(
-        `Unable to download ${compileTarget} tarball from ${tarballUrl}: ${tarballResponse.status} ${tarballResponse.statusText}`,
-      );
-    }
-
-    await writeFile(tarballPath, Buffer.from(await tarballResponse.arrayBuffer()));
-    await runCommand(["tar", "-xzf", tarballPath, "-C", workingDirectory]);
-
-    if (!(await Bun.file(extractedExecutablePath).exists())) {
-      throw new Error(
-        `Prewarmed Bun compile target executable is missing after extraction: ${extractedExecutablePath}`,
-      );
-    }
-
-    await cp(extractedExecutablePath, prewarmedExecutablePath, { force: true });
-    return workingDirectory;
-  })();
+  const preparation = prepareCompileTargetDirectory(compileTarget);
 
   const trackedPreparation = preparation.then(
     (workingDirectory) => workingDirectory,
     (error: unknown) => {
       prewarmedCompileTargetDirectories.delete(compileTarget);
-      return Promise.reject(
-        error instanceof Error ? error : new Error(toErrorMessage(error)),
-      );
+      return Promise.reject(error instanceof Error ? error : new Error(toErrorMessage(error)));
     },
   );
 
@@ -333,7 +375,9 @@ const runCommand = async (
   }
 };
 
-const readStreamText = async (stream: number | ReadableStream<Uint8Array> | undefined): Promise<string> => {
+const readStreamText = async (
+  stream: number | ReadableStream<Uint8Array> | undefined,
+): Promise<string> => {
   if (!(stream instanceof ReadableStream)) {
     return "";
   }
@@ -546,6 +590,51 @@ const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
   await assertNoBuildRuntimeLeak(CLIENT_PUBLIC_ROOT);
 };
 
+type CompileRetryContext = {
+  readonly command: readonly string[];
+  readonly commandCwd: string;
+  readonly compileTarget: string;
+  readonly outputPath: string;
+  readonly attempt?: number;
+};
+
+const runCompileCommandWithRetries = async ({
+  command,
+  commandCwd,
+  compileTarget,
+  outputPath,
+  attempt = 1,
+}: CompileRetryContext): Promise<void> => {
+  const result = await runCommandCaptured(command, { cwd: commandCwd });
+  if (result.exitCode === 0) {
+    return;
+  }
+
+  const combinedOutput = `${result.stdout}\n${result.stderr}`;
+  const canRetryExtractionFailure =
+    process.platform === "win32" &&
+    compileTarget.startsWith("bun-windows-") &&
+    attempt < COMPILE_RETRY_LIMIT &&
+    BUN_COMPILE_EXTRACTION_FAILURE_PATTERN.test(combinedOutput);
+
+  if (!canRetryExtractionFailure) {
+    throw new Error(`${command.join(" ")} exited with code ${result.exitCode}`);
+  }
+
+  await writeOutput(
+    `desktop-runtime: Bun compile target download for ${compileTarget} was incomplete; clearing Bun package cache and retrying`,
+  );
+  await runCommand([process.execPath, "pm", "cache", "rm"]);
+  await rm(outputPath, { force: true });
+  await runCompileCommandWithRetries({
+    command,
+    commandCwd,
+    compileTarget,
+    outputPath,
+    attempt: attempt + 1,
+  });
+};
+
 const compileRuntimeBinary = async (
   compileTarget: string,
   entrypointPath: string,
@@ -565,30 +654,12 @@ const compileRuntimeBinary = async (
     "--outfile",
     outputPath,
   ];
-
-  for (let attempt = 1; attempt <= COMPILE_RETRY_LIMIT; attempt += 1) {
-    const result = await runCommandCaptured(command, { cwd: commandCwd });
-    if (result.exitCode === 0) {
-      return;
-    }
-
-    const combinedOutput = `${result.stdout}\n${result.stderr}`;
-    const canRetryExtractionFailure = process.platform === "win32" &&
-      compileTarget.startsWith("bun-windows-") &&
-      attempt < COMPILE_RETRY_LIMIT &&
-      BUN_COMPILE_EXTRACTION_FAILURE_PATTERN.test(combinedOutput);
-
-    if (canRetryExtractionFailure) {
-      await writeOutput(
-        `desktop-runtime: Bun compile target download for ${compileTarget} was incomplete; clearing Bun package cache and retrying`,
-      );
-      await runCommand([process.execPath, "pm", "cache", "rm"]);
-      await rm(outputPath, { force: true });
-      continue;
-    }
-
-    throw new Error(`${command.join(" ")} exited with code ${result.exitCode}`);
-  }
+  await runCompileCommandWithRetries({
+    command,
+    commandCwd,
+    compileTarget,
+    outputPath,
+  });
 };
 
 const stageScraperRuntime = async (): Promise<void> => {
@@ -596,26 +667,30 @@ const stageScraperRuntime = async (): Promise<void> => {
   await writeOutput("desktop-runtime: staging scraper runtime resources");
   await mkdir(destinationPath, { recursive: true });
 
-  for (const relativePath of SCRAPER_RUNTIME_STAGE_SOURCE_PATHS) {
-    await cp(join(SCRAPER_ROOT, relativePath), join(destinationPath, relativePath), {
-      recursive: true,
-      force: true,
-    });
-  }
+  await Promise.all(
+    SCRAPER_RUNTIME_STAGE_SOURCE_PATHS.map((relativePath) =>
+      cp(join(SCRAPER_ROOT, relativePath), join(destinationPath, relativePath), {
+        recursive: true,
+        force: true,
+      }),
+    ),
+  );
 
   const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(SCRAPER_ROOT);
-  for (const [packageName, sourceRoot] of runtimeDependencyRoots) {
-    const packageDestinationPath = join(destinationPath, "node_modules", packageName);
-    await mkdir(dirname(packageDestinationPath), { recursive: true });
-    await cp(sourceRoot, packageDestinationPath, {
-      recursive: true,
-      force: true,
-    });
-    await rm(join(packageDestinationPath, "node_modules"), {
-      recursive: true,
-      force: true,
-    });
-  }
+  await Promise.all(
+    Array.from(runtimeDependencyRoots, async ([packageName, sourceRoot]) => {
+      const packageDestinationPath = join(destinationPath, "node_modules", packageName);
+      await mkdir(dirname(packageDestinationPath), { recursive: true });
+      await cp(sourceRoot, packageDestinationPath, {
+        recursive: true,
+        force: true,
+      });
+      await rm(join(packageDestinationPath, "node_modules"), {
+        recursive: true,
+        force: true,
+      });
+    }),
+  );
 
   await writeOutput(
     `desktop-runtime: staged scraper runtime package plus ${runtimeDependencyRoots.size} runtime dependencies`,
@@ -623,7 +698,7 @@ const stageScraperRuntime = async (): Promise<void> => {
 };
 
 const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<string | null> => {
-  if (!(tauriTarget?.includes("windows"))) {
+  if (!tauriTarget?.includes("windows")) {
     return null;
   }
 
@@ -645,8 +720,13 @@ const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<str
   return destinationRelativePath;
 };
 
-const stageLinuxScriptRunnerRuntime = async (): Promise<void> => {
-  const bunBinaryPath = join(RUNTIME_ROOT, DESKTOP_RUNTIME_LINUX_BUN_PATH);
+const stageBundledScriptRunnerRuntime = async (tauriTarget: string | null): Promise<void> => {
+  const bunBinaryPath = join(
+    RUNTIME_ROOT,
+    isLinuxTarget(tauriTarget)
+      ? DESKTOP_RUNTIME_LINUX_BUN_PATH
+      : toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
+  );
   const entrypointPath = join(RUNTIME_ROOT, DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH);
 
   await mkdir(dirname(bunBinaryPath), { recursive: true });
@@ -665,9 +745,7 @@ const writeRuntimeManifest = async (
     scriptRunnerExecutable: isLinuxRuntimeTarget
       ? DESKTOP_RUNTIME_LINUX_BUN_PATH
       : toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
-    scriptRunnerEntrypoint: isLinuxRuntimeTarget
-      ? DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH
-      : null,
+    scriptRunnerEntrypoint: DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH,
     webviewBootstrapperExecutable,
     scraperDir: DESKTOP_RUNTIME_SCRAPER_DIR,
     serverHost: DESKTOP_RUNTIME_HOST,
@@ -685,23 +763,14 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
     RUNTIME_ROOT,
     toExecutablePath(DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH, tauriTarget),
   );
-  const scriptRunnerPath = join(
-    RUNTIME_ROOT,
-    toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
-  );
 
   await writeOutput(`desktop-runtime: compiling bundled desktop server (${compileTarget})`);
   await compileRuntimeBinary(compileTarget, SERVER_ENTRYPOINT, serverExecutablePath);
 
-  if (isLinuxTarget(tauriTarget)) {
-    await writeOutput(
-      `desktop-runtime: staging bundled Bun runtime and entrypoint helper for Linux script execution (${compileTarget})`,
-    );
-    await stageLinuxScriptRunnerRuntime();
-  } else {
-    await writeOutput(`desktop-runtime: compiling bundled Bun script runner (${compileTarget})`);
-    await compileRuntimeBinary(compileTarget, SCRIPT_RUNNER_ENTRYPOINT, scriptRunnerPath);
-  }
+  await writeOutput(
+    `desktop-runtime: staging bundled Bun runtime and entrypoint helper for script execution (${compileTarget})`,
+  );
+  await stageBundledScriptRunnerRuntime(tauriTarget);
 
   await stageScraperRuntime();
   const webviewBootstrapperExecutable = await stageWebviewBootstrapper(tauriTarget);

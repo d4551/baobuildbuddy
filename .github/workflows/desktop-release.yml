@@ -3,6 +3,7 @@ name: desktop-release
 on:
   push:
     branches:
+      - main
       - "codex/**"
   workflow_dispatch:
 
@@ -10,8 +11,40 @@ permissions:
   contents: read
 
 jobs:
+  quality-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install workspace dependencies
+        run: bun ci
+
+      - name: Install Playwright Chromium
+        run: bun run automation:browsers:install
+
+      - name: Run lint
+        run: bun run lint
+
+      - name: Run typecheck
+        run: bun run typecheck
+
+      - name: Run tests
+        run: bun run test
+
+      - name: Run SSR build
+        run: bun run build
+
   build-macos:
+    needs: quality-gates
     runs-on: macos-14
+    timeout-minutes: 60
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -31,10 +64,19 @@ jobs:
           cache-on-failure: true
 
       - name: Install workspace dependencies
-        run: bun install --frozen-lockfile
+        run: bun ci
+
+      - name: Install Playwright Chromium
+        run: bun run automation:browsers:install
 
       - name: Build native macOS release artifacts
         run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts
+
+      - name: Verify packaged desktop runtime
+        run: bun run verify:desktop-runtime -- --target aarch64-apple-darwin
+
+      - name: Verify macOS release artifacts
+        run: bun run verify:desktop-releases -- --targets macos
 
       - name: Upload macOS release artifact set
         uses: actions/upload-artifact@v7
@@ -44,7 +86,9 @@ jobs:
           if-no-files-found: error
 
   build-windows:
+    needs: quality-gates
     runs-on: windows-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -65,7 +109,11 @@ jobs:
 
       - name: Install workspace dependencies
         shell: pwsh
-        run: bun install --frozen-lockfile
+        run: bun ci
+
+      - name: Install Playwright Chromium
+        shell: pwsh
+        run: bun run automation:browsers:install
 
       - name: Download WebView2 bootstrapper
         shell: pwsh
@@ -82,6 +130,14 @@ jobs:
         shell: pwsh
         run: bun run release:desktop:windows -- --output-root .desktop-release-artifacts
 
+      - name: Verify packaged desktop runtime
+        shell: pwsh
+        run: bun run verify:desktop-runtime -- --target x86_64-pc-windows-msvc
+
+      - name: Verify Windows release artifacts
+        shell: pwsh
+        run: bun run verify:desktop-releases -- --targets windows
+
       - name: Upload Windows release artifact set
         uses: actions/upload-artifact@v7
         with:
@@ -89,9 +145,10 @@ jobs:
           path: .desktop-release-artifacts/windows
           if-no-files-found: error
 
-  build-linux-arm64:
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 45
+  build-linux-x64:
+    needs: quality-gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -126,24 +183,94 @@ jobs:
             patchelf
 
       - name: Install workspace dependencies
-        run: bun install --frozen-lockfile
+        run: bun ci
+
+      - name: Install Playwright Chromium
+        run: bun run automation:browsers:install
+
+      - name: Build native Linux x64 release artifacts
+        run: bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --verbose
+
+      - name: Verify packaged desktop runtime
+        run: bun run verify:desktop-runtime -- --target x86_64-unknown-linux-gnu
+
+      - name: Verify Linux x64 release artifacts
+        run: bun run verify:desktop-releases -- --targets linux-x64
+
+      - name: Upload Linux x64 release artifact set
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-release-linux-x64
+          path: .desktop-release-artifacts/linux-x64
+          if-no-files-found: error
+
+  build-linux-arm64:
+    needs: quality-gates
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/desktop/src-tauri
+          cache-on-failure: true
+
+      - name: Install Linux bundle dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install workspace dependencies
+        run: bun ci
+
+      - name: Install Playwright Chromium
+        run: bun run automation:browsers:install
 
       - name: Build native Linux ARM64 release artifacts
         run: bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --verbose
 
+      - name: Verify packaged desktop runtime
+        run: bun run verify:desktop-runtime -- --target aarch64-unknown-linux-gnu
+
+      - name: Verify Linux ARM64 release artifacts
+        run: bun run verify:desktop-releases -- --targets linux-arm64
+
       - name: Upload Linux ARM64 release artifact set
         uses: actions/upload-artifact@v7
         with:
-          name: desktop-release-linux
-          path: .desktop-release-artifacts/linux
+          name: desktop-release-linux-arm64
+          path: .desktop-release-artifacts/linux-arm64
           if-no-files-found: error
 
   assemble-release:
     needs:
       - build-macos
       - build-windows
+      - build-linux-x64
       - build-linux-arm64
     runs-on: macos-14
+    timeout-minutes: 45
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -154,7 +281,7 @@ jobs:
           bun-version: 1.3.10
 
       - name: Install workspace dependencies
-        run: bun install --frozen-lockfile
+        run: bun ci
 
       - name: Download macOS release artifact set
         uses: actions/download-artifact@v8
@@ -168,14 +295,23 @@ jobs:
           name: desktop-release-windows
           path: .desktop-release-input/windows
 
-      - name: Download Linux release artifact set
+      - name: Download Linux x64 release artifact set
         uses: actions/download-artifact@v8
         with:
-          name: desktop-release-linux
-          path: .desktop-release-input/linux
+          name: desktop-release-linux-x64
+          path: .desktop-release-input/linux-x64
+
+      - name: Download Linux ARM64 release artifact set
+        uses: actions/download-artifact@v8
+        with:
+          name: desktop-release-linux-arm64
+          path: .desktop-release-input/linux-arm64
 
       - name: Assemble canonical desktop release directory
-        run: bun run release:refresh:all-os -- --source-root .desktop-release-input
+        run: bun run release:refresh:all-os -- --source-root .desktop-release-input --targets macos,windows,linux-x64,linux-arm64
+
+      - name: Verify assembled desktop releases
+        run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64
 
       - name: Upload assembled desktop releases
         uses: actions/upload-artifact@v7

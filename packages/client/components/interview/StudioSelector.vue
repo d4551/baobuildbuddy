@@ -23,7 +23,9 @@ const searchQuery = ref("");
 const isOpen = ref(false);
 const searchInputRef = useTemplateRef<HTMLInputElement>("studioSelectorSearchInput");
 const selectorId = useId();
-const menuId = `studio-selector-menu-${selectorId}`;
+const comboboxId = `studio-selector-combobox-${selectorId}`;
+const listboxId = `studio-selector-listbox-${selectorId}`;
+const activeOptionIndex = ref(-1);
 
 const selectedStudio = computed(() =>
   props.studios.find((studio) => studio.id === props.modelValue),
@@ -42,28 +44,134 @@ const filteredStudios = computed(() => {
 });
 
 watch(isOpen, (open) => {
-  if (!open) return;
-  requestAnimationFrame(() => {
-    searchInputRef.value?.focus();
-  });
+  if (open) {
+    activeOptionIndex.value = getSelectedOrFirstOptionIndex();
+    requestAnimationFrame(() => {
+      searchInputRef.value?.focus();
+    });
+    return;
+  }
+
+  searchQuery.value = "";
+  activeOptionIndex.value = -1;
 });
 
-function selectStudio(studioId: string) {
-  emit("update:modelValue", studioId);
-  isOpen.value = false;
-  searchQuery.value = "";
+watch(filteredStudios, (studios) => {
+  if (studios.length === 0) {
+    activeOptionIndex.value = -1;
+    return;
+  }
+
+  if (activeOptionIndex.value < 0 || activeOptionIndex.value >= studios.length) {
+    activeOptionIndex.value = getSelectedOrFirstOptionIndex();
+  }
+});
+
+function getSelectedOrFirstOptionIndex(): number {
+  const selectedIndex = filteredStudios.value.findIndex((studio) => studio.id === props.modelValue);
+  if (selectedIndex >= 0) {
+    return selectedIndex;
+  }
+
+  return filteredStudios.value.length > 0 ? 0 : -1;
 }
 
-function toggleDropdown() {
+function optionId(studioId: string): string {
+  return `${listboxId}-option-${studioId}`;
+}
+
+const activeOptionId = computed(() => {
+  const activeStudio = filteredStudios.value[activeOptionIndex.value];
+  return activeStudio ? optionId(activeStudio.id) : undefined;
+});
+
+function selectStudio(studioId: string): void {
+  emit("update:modelValue", studioId);
+  closeDropdown();
+}
+
+function toggleDropdown(): void {
   isOpen.value = !isOpen.value;
 }
 
-function closeDropdown() {
+function closeDropdown(): void {
   isOpen.value = false;
 }
 
-function onEscape() {
+function onEscape(): void {
   closeDropdown();
+}
+
+function focusActiveOption(): void {
+  const activeStudio = filteredStudios.value[activeOptionIndex.value];
+  if (!activeStudio) {
+    return;
+  }
+
+  document.getElementById(optionId(activeStudio.id))?.scrollIntoView({
+    block: "nearest",
+  });
+}
+
+function moveActiveOption(step: 1 | -1): void {
+  const optionCount = filteredStudios.value.length;
+  if (optionCount === 0) {
+    activeOptionIndex.value = -1;
+    return;
+  }
+
+  if (activeOptionIndex.value === -1) {
+    activeOptionIndex.value = step === 1 ? 0 : optionCount - 1;
+  } else {
+    activeOptionIndex.value =
+      (activeOptionIndex.value + step + optionCount) % optionCount;
+  }
+
+  focusActiveOption();
+}
+
+function selectActiveOption(): void {
+  const activeStudio = filteredStudios.value[activeOptionIndex.value];
+  if (activeStudio) {
+    selectStudio(activeStudio.id);
+  }
+}
+
+function handleComboboxKeydown(event: KeyboardEvent): void {
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    if (!isOpen.value) {
+      isOpen.value = true;
+      return;
+    }
+    moveActiveOption(1);
+    return;
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (!isOpen.value) {
+      isOpen.value = true;
+      return;
+    }
+    moveActiveOption(-1);
+    return;
+  }
+
+  if (event.key === "Enter") {
+    if (!isOpen.value) {
+      isOpen.value = true;
+      return;
+    }
+    event.preventDefault();
+    selectActiveOption();
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeDropdown();
+  }
 }
 
 function studioTypeBadgeClass(type: string): string {
@@ -91,8 +199,8 @@ function studioLocationLabel(location: string): string {
       class="btn btn-outline w-full justify-between"
       :aria-label="t('studioSelector.toggleAria')"
       :aria-expanded="isOpen"
-      :aria-controls="menuId"
-      aria-haspopup="menu"
+      :aria-controls="listboxId"
+      aria-haspopup="listbox"
       @click="toggleDropdown"
       @keydown.esc.stop.prevent="onEscape"
     >
@@ -116,33 +224,45 @@ function studioLocationLabel(location: string): string {
         <input
           ref="studioSelectorSearchInput"
           v-model="searchQuery"
+          :id="comboboxId"
           type="search"
           class="input input-bordered input-sm w-full"
+          role="combobox"
+          aria-autocomplete="list"
+          :aria-controls="listboxId"
+          :aria-expanded="isOpen"
+          :aria-activedescendant="activeOptionId"
           :placeholder="t('studioSelector.searchPlaceholder')"
           :aria-label="t('studioSelector.searchAria')"
+          @focus="isOpen = true"
+          @keydown="handleComboboxKeydown"
           @click.stop
         />
       </div>
 
       <ul
-        :id="menuId"
-        role="menu"
-        tabindex="-1"
+        :id="listboxId"
+        role="listbox"
         class="menu w-full space-y-1"
         :aria-label="t('studioSelector.menuAria')"
-        @keydown.esc.stop.prevent="onEscape"
       >
-        <li v-for="studio in filteredStudios" :key="studio.id">
+        <li v-for="(studio, index) in filteredStudios" :key="studio.id">
           <button
+            :id="optionId(studio.id)"
             type="button"
-            role="menuitemradio"
-            class="flex flex-col items-start gap-1"
-            :aria-checked="studio.id === modelValue"
+            role="option"
+            class="flex w-full cursor-pointer flex-col items-start gap-1 rounded-box px-3 py-2 text-left"
             :aria-label="t('studioSelector.optionAria', { studio: studio.name })"
-            :class="{ active: studio.id === modelValue }"
+            :aria-selected="studio.id === modelValue"
+            :class="{
+              'bg-base-200': index === activeOptionIndex,
+              'ring-1 ring-primary': studio.id === modelValue,
+            }"
+            @mouseenter="activeOptionIndex = index"
+            @focus="activeOptionIndex = index"
             @click="selectStudio(studio.id)"
           >
-            <div class="flex items-center gap-2 w-full">
+            <div class="flex w-full items-center gap-2">
               <span class="font-medium truncate">{{ studio.name }}</span>
               <span class="badge badge-sm" :class="studioTypeBadgeClass(studio.type)">
                 {{ resolvedStudioTypeLabel(studio.type) }}

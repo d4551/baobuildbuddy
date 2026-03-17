@@ -1,10 +1,12 @@
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  DESKTOP_RELEASE_LINUX_TARGET,
+  DESKTOP_RELEASE_LINUX_ARM64_TARGET,
+  DESKTOP_RELEASE_LINUX_X64_TARGET,
   DESKTOP_RELEASE_MACOS_TARGET,
   DESKTOP_RELEASE_METADATA_DIR,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
+  type DESKTOP_RELEASE_TARGETS,
   DESKTOP_RELEASE_WINDOWS_TARGET,
 } from "../packages/shared/src/constants/scripts";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -19,6 +21,8 @@ type NetworkTarget = {
   label: string;
   url: string;
 };
+
+type DesktopReleaseBucket = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
 const NETWORK_TIMEOUT_MS = 8_000;
 const DESKTOP_TAURI_ROOT = join(process.cwd(), "packages", "desktop", "src-tauri");
@@ -155,8 +159,26 @@ const resolveHostDesktopTarget = (): string | null => {
     return DESKTOP_RELEASE_WINDOWS_TARGET;
   }
 
-  if (process.platform === "linux" && process.arch === "arm64") {
-    return DESKTOP_RELEASE_LINUX_TARGET;
+  if (process.platform === "linux") {
+    return process.arch === "arm64"
+      ? DESKTOP_RELEASE_LINUX_ARM64_TARGET
+      : DESKTOP_RELEASE_LINUX_X64_TARGET;
+  }
+
+  return null;
+};
+
+const resolveHostReleaseBucket = (): DesktopReleaseBucket | null => {
+  if (process.platform === "darwin" && process.arch === "arm64") {
+    return "macos";
+  }
+
+  if (process.platform === "win32" && process.arch === "x64") {
+    return "windows";
+  }
+
+  if (process.platform === "linux") {
+    return process.arch === "arm64" ? "linux-arm64" : "linux-x64";
   }
 
   return null;
@@ -233,10 +255,13 @@ const main = async (): Promise<void> => {
   }
 
   if (await assembledDesktopReleasesExist()) {
+    const hostReleaseBucket = resolveHostReleaseBucket();
+    const releaseVerificationTargets = hostReleaseBucket ? ["--targets", hostReleaseBucket] : [];
     const releasesVerifyExitCode = await runCommand([
       process.execPath,
       "run",
       "verify:desktop-releases",
+      ...releaseVerificationTargets,
     ]);
     if (releasesVerifyExitCode !== 0) {
       await writeError("bun run verify:desktop-releases failed.");
