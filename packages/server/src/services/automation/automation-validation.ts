@@ -55,7 +55,7 @@ const DISALLOWED_HOST_PATTERNS = [
 const DISALLOWED_IPV6_PREFIX_PATTERN = /^(fc|fd|fe80)/i;
 
 const allowAutomationPrivateHosts = (): boolean => {
-  return config.allowAutomationPrivateHosts || config.enableAutomationVerification;
+  return config.allowAutomationPrivateHosts;
 };
 
 /**
