@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type {
-  AppSettings,
   AutomationSettings,
   BrandSettings,
+  BrandSettingsPatch,
   EmailTransportSettings,
   UserProfile,
 } from "@bao/shared";
@@ -12,6 +12,7 @@ import {
   APP_LANGUAGE_OPTIONS,
   APP_LANGUAGE_LABELS,
   brandContentSettingsSchema,
+  brandSettingsSchema,
   brandThemePaletteSchema,
   DEFAULT_BRAND_SETTINGS,
   type AppLanguageCode,
@@ -28,21 +29,11 @@ import {
   LOCAL_AI_DEFAULT_MODEL,
   OLLAMA_WEBSITE_URL,
   parseJson,
-  resolveBrandSettings,
   THEME_NAMES,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
-
-type SettingsWithFlags = AppSettings & {
-  hasGeminiKey?: boolean;
-  hasOpenaiKey?: boolean;
-  hasClaudeKey?: boolean;
-  hasEmailTransportPassword?: boolean;
-  hasHuggingfaceToken?: boolean;
-  hasLocalKey?: boolean;
-};
 
 type SaveState = "idle" | "saving" | "success" | "error";
 type BrandEditorPanel = "identity" | "typography" | "themes" | "content";
@@ -160,6 +151,17 @@ const brandEditorPanel = ref<BrandEditorPanel>("identity");
 
 const brandFieldsetClass =
   "fieldset rounded-box border border-base-300/70 bg-base-200/40 p-4 shadow-sm";
+const BRAND_DEFAULTS: BrandSettings = brandSettingsSchema.parse(
+  DEFAULT_BRAND_SETTINGS,
+);
+const BRAND_HINT_IDS = {
+  logoPath: "settings-brand-logo-path-hint",
+  faviconPath: "settings-brand-favicon-path-hint",
+  fontStylesheet: "settings-brand-font-stylesheet-hint",
+  lightTheme: "settings-brand-light-theme-hint",
+  darkTheme: "settings-brand-dark-theme-hint",
+  contentOverrides: "settings-brand-content-overrides-hint",
+} as const;
 
 const notificationForm = reactive({ ...DEFAULT_NOTIFICATION_PREFERENCES });
 const automationForm = reactive<AutomationSettings>({
@@ -170,22 +172,22 @@ const emailTransportForm = reactive<EmailTransportSettings>({
 });
 const emailTransportPasswordDraft = ref("");
 const brandForm = reactive({
-  name: DEFAULT_BRAND_SETTINGS.name,
-  assistantName: DEFAULT_BRAND_SETTINGS.assistantName,
-  apiName: DEFAULT_BRAND_SETTINGS.apiName,
-  logoPath: DEFAULT_BRAND_SETTINGS.logoPath,
-  faviconPath: DEFAULT_BRAND_SETTINGS.faviconPath,
-  fontStylesheetUrl: DEFAULT_BRAND_SETTINGS.typography.fontStylesheetUrl,
-  displayFontFamily: DEFAULT_BRAND_SETTINGS.typography.displayFontFamily,
-  bodyFontFamily: DEFAULT_BRAND_SETTINGS.typography.bodyFontFamily,
-  monoFontFamily: DEFAULT_BRAND_SETTINGS.typography.monoFontFamily,
-  tagline: DEFAULT_BRAND_SETTINGS.content.tagline,
-  defaultTitle: DEFAULT_BRAND_SETTINGS.content.defaultTitle,
-  defaultDescription: DEFAULT_BRAND_SETTINGS.content.defaultDescription,
-  lightThemeJson: JSON.stringify(DEFAULT_BRAND_SETTINGS.lightTheme, null, 2),
-  darkThemeJson: JSON.stringify(DEFAULT_BRAND_SETTINGS.darkTheme, null, 2),
+  name: BRAND_DEFAULTS.name,
+  assistantName: BRAND_DEFAULTS.assistantName,
+  apiName: BRAND_DEFAULTS.apiName,
+  logoPath: BRAND_DEFAULTS.logoPath,
+  faviconPath: BRAND_DEFAULTS.faviconPath,
+  fontStylesheetUrl: BRAND_DEFAULTS.typography.fontStylesheetUrl,
+  displayFontFamily: BRAND_DEFAULTS.typography.displayFontFamily,
+  bodyFontFamily: BRAND_DEFAULTS.typography.bodyFontFamily,
+  monoFontFamily: BRAND_DEFAULTS.typography.monoFontFamily,
+  tagline: BRAND_DEFAULTS.content.tagline,
+  defaultTitle: BRAND_DEFAULTS.content.defaultTitle,
+  defaultDescription: BRAND_DEFAULTS.content.defaultDescription,
+  lightThemeJson: JSON.stringify(BRAND_DEFAULTS.lightTheme, null, 2),
+  darkThemeJson: JSON.stringify(BRAND_DEFAULTS.darkTheme, null, 2),
   contentOverridesJson: JSON.stringify(
-    DEFAULT_BRAND_SETTINGS.content.contentOverrides,
+    BRAND_DEFAULTS.content.contentOverrides,
     null,
     2,
   ),
@@ -249,7 +251,7 @@ watch(
       ...currentSettings.emailTransportSettings,
     });
 
-    const nextBrand = currentSettings.brandSettings ?? DEFAULT_BRAND_SETTINGS;
+    const nextBrand = currentSettings.brandSettings ?? BRAND_DEFAULTS;
     brandForm.name = nextBrand.name;
     brandForm.assistantName = nextBrand.assistantName;
     brandForm.apiName = nextBrand.apiName;
@@ -293,52 +295,49 @@ function parseBrandContentOverrides(): Record<string, string> {
   );
 }
 
-const brandDraft = computed(() =>
-  resolveBrandSettings({
-    name: brandForm.name.trim() || DEFAULT_BRAND_SETTINGS.name,
+const brandDraft = computed<BrandSettings>(() => ({
+    name: brandForm.name.trim() || BRAND_DEFAULTS.name,
     assistantName:
-      brandForm.assistantName.trim() || DEFAULT_BRAND_SETTINGS.assistantName,
-    apiName: brandForm.apiName.trim() || DEFAULT_BRAND_SETTINGS.apiName,
-    logoPath: brandForm.logoPath.trim() || DEFAULT_BRAND_SETTINGS.logoPath,
+      brandForm.assistantName.trim() || BRAND_DEFAULTS.assistantName,
+    apiName: brandForm.apiName.trim() || BRAND_DEFAULTS.apiName,
+    logoPath: brandForm.logoPath.trim() || BRAND_DEFAULTS.logoPath,
     faviconPath:
-      brandForm.faviconPath.trim() || DEFAULT_BRAND_SETTINGS.faviconPath,
+      brandForm.faviconPath.trim() || BRAND_DEFAULTS.faviconPath,
     typography: {
       fontStylesheetUrl: brandForm.fontStylesheetUrl.trim(),
       displayFontFamily:
         brandForm.displayFontFamily.trim() ||
-        DEFAULT_BRAND_SETTINGS.typography.displayFontFamily,
+        BRAND_DEFAULTS.typography.displayFontFamily,
       bodyFontFamily:
         brandForm.bodyFontFamily.trim() ||
-        DEFAULT_BRAND_SETTINGS.typography.bodyFontFamily,
+        BRAND_DEFAULTS.typography.bodyFontFamily,
       monoFontFamily:
         brandForm.monoFontFamily.trim() ||
-        DEFAULT_BRAND_SETTINGS.typography.monoFontFamily,
+        BRAND_DEFAULTS.typography.monoFontFamily,
     },
     lightTheme:
       parseJson(brandForm.lightThemeJson, brandThemePaletteSchema) ??
-      DEFAULT_BRAND_SETTINGS.lightTheme,
+      BRAND_DEFAULTS.lightTheme,
     darkTheme:
       parseJson(brandForm.darkThemeJson, brandThemePaletteSchema) ??
-      DEFAULT_BRAND_SETTINGS.darkTheme,
+      BRAND_DEFAULTS.darkTheme,
     content: {
-      tagline:
-        brandForm.tagline.trim() || DEFAULT_BRAND_SETTINGS.content.tagline,
+      tagline: brandForm.tagline.trim() || BRAND_DEFAULTS.content.tagline,
       defaultTitle:
         brandForm.defaultTitle.trim() ||
-        DEFAULT_BRAND_SETTINGS.content.defaultTitle,
+        BRAND_DEFAULTS.content.defaultTitle,
       defaultDescription:
         brandForm.defaultDescription.trim() ||
-        DEFAULT_BRAND_SETTINGS.content.defaultDescription,
+        BRAND_DEFAULTS.content.defaultDescription,
       contentOverrides: parseBrandContentOverrides(),
     },
-  }),
-);
+  }));
 
 const brandPreviewInitial = computed(() => {
   const value = brandDraft.value.name.trim().charAt(0).toUpperCase();
   return value.length > 0
     ? value
-    : DEFAULT_BRAND_SETTINGS.name.trim().charAt(0).toUpperCase();
+    : BRAND_DEFAULTS.name.trim().charAt(0).toUpperCase();
 });
 
 const brandPreviewShellStyle = computed<Record<string, string>>(() => ({
@@ -411,9 +410,6 @@ watch(
   },
   { immediate: true },
 );
-
-const getComputedSettings = (): SettingsWithFlags | null =>
-  settings.value as SettingsWithFlags | null;
 
 function parseDelimitedList(raw: string): string[] {
   return raw
@@ -537,7 +533,7 @@ function emailTransportAuthModeLabel(
 }
 
 function isProviderConfigured(providerId: AIProviderType): boolean {
-  const current = getComputedSettings();
+  const current = settings.value;
   if (!current) return false;
 
   if (providerId === "local") {
@@ -745,7 +741,7 @@ async function handleSaveProfile() {
   $toast.success(t("settings.toasts.profileSaved"));
 }
 
-function buildBrandPayload(): Partial<BrandSettings> | null {
+function buildBrandPayload(): BrandSettingsPatch | null {
   const lightTheme = parseJson(
     brandForm.lightThemeJson,
     brandThemePaletteSchema,
@@ -764,13 +760,13 @@ function buildBrandPayload(): Partial<BrandSettings> | null {
   const contentCandidate = parseJson(
     JSON.stringify({
       tagline:
-        brandForm.tagline.trim() || DEFAULT_BRAND_SETTINGS.content.tagline,
+        brandForm.tagline.trim() || BRAND_DEFAULTS.content.tagline,
       defaultTitle:
         brandForm.defaultTitle.trim() ||
-        DEFAULT_BRAND_SETTINGS.content.defaultTitle,
+        BRAND_DEFAULTS.content.defaultTitle,
       defaultDescription:
         brandForm.defaultDescription.trim() ||
-        DEFAULT_BRAND_SETTINGS.content.defaultDescription,
+        BRAND_DEFAULTS.content.defaultDescription,
       contentOverrides: parseBrandContentOverrides(),
     }),
     brandContentSettingsSchema,
@@ -781,24 +777,24 @@ function buildBrandPayload(): Partial<BrandSettings> | null {
   }
 
   return {
-    name: brandForm.name.trim() || DEFAULT_BRAND_SETTINGS.name,
+    name: brandForm.name.trim() || BRAND_DEFAULTS.name,
     assistantName:
-      brandForm.assistantName.trim() || DEFAULT_BRAND_SETTINGS.assistantName,
-    apiName: brandForm.apiName.trim() || DEFAULT_BRAND_SETTINGS.apiName,
-    logoPath: brandForm.logoPath.trim() || DEFAULT_BRAND_SETTINGS.logoPath,
+      brandForm.assistantName.trim() || BRAND_DEFAULTS.assistantName,
+    apiName: brandForm.apiName.trim() || BRAND_DEFAULTS.apiName,
+    logoPath: brandForm.logoPath.trim() || BRAND_DEFAULTS.logoPath,
     faviconPath:
-      brandForm.faviconPath.trim() || DEFAULT_BRAND_SETTINGS.faviconPath,
+      brandForm.faviconPath.trim() || BRAND_DEFAULTS.faviconPath,
     typography: {
       fontStylesheetUrl: brandForm.fontStylesheetUrl.trim(),
       displayFontFamily:
         brandForm.displayFontFamily.trim() ||
-        DEFAULT_BRAND_SETTINGS.typography.displayFontFamily,
+        BRAND_DEFAULTS.typography.displayFontFamily,
       bodyFontFamily:
         brandForm.bodyFontFamily.trim() ||
-        DEFAULT_BRAND_SETTINGS.typography.bodyFontFamily,
+        BRAND_DEFAULTS.typography.bodyFontFamily,
       monoFontFamily:
         brandForm.monoFontFamily.trim() ||
-        DEFAULT_BRAND_SETTINGS.typography.monoFontFamily,
+        BRAND_DEFAULTS.typography.monoFontFamily,
     },
     lightTheme,
     darkTheme,
@@ -1422,9 +1418,12 @@ async function handleClearEmailDeliveryPassword() {
                       v-model="brandForm.logoPath"
                       class="input w-full"
                       :placeholder="t('settings.brand.assetPathPlaceholder')"
+                      :aria-describedby="BRAND_HINT_IDS.logoPath"
                       :aria-label="t('settings.brand.logoPathAria')"
                     />
-                    <p class="label">{{ t("settings.brand.assetPathHint") }}</p>
+                    <p :id="BRAND_HINT_IDS.logoPath" class="label">
+                      {{ t("settings.brand.assetPathHint") }}
+                    </p>
                   </fieldset>
 
                   <fieldset :class="brandFieldsetClass">
@@ -1435,9 +1434,12 @@ async function handleClearEmailDeliveryPassword() {
                       v-model="brandForm.faviconPath"
                       class="input w-full"
                       :placeholder="t('settings.brand.assetPathPlaceholder')"
+                      :aria-describedby="BRAND_HINT_IDS.faviconPath"
                       :aria-label="t('settings.brand.faviconPathAria')"
                     />
-                    <p class="label">{{ t("settings.brand.assetPathHint") }}</p>
+                    <p :id="BRAND_HINT_IDS.faviconPath" class="label">
+                      {{ t("settings.brand.assetPathHint") }}
+                    </p>
                   </fieldset>
                 </SectionGrid>
               </div>
@@ -1461,12 +1463,13 @@ async function handleClearEmailDeliveryPassword() {
                     <input
                       v-model="brandForm.fontStylesheetUrl"
                       class="input w-full"
+                      :aria-describedby="BRAND_HINT_IDS.fontStylesheet"
                       :placeholder="
                         t('settings.brand.fontStylesheetPlaceholder')
                       "
                       :aria-label="t('settings.brand.fontStylesheetAria')"
                     />
-                    <p class="label">
+                    <p :id="BRAND_HINT_IDS.fontStylesheet" class="label">
                       {{ t("settings.brand.fontStylesheetHint") }}
                     </p>
                   </fieldset>
@@ -1526,9 +1529,12 @@ async function handleClearEmailDeliveryPassword() {
                       v-model="brandForm.lightThemeJson"
                       class="textarea font-mono w-full"
                       rows="12"
+                      :aria-describedby="BRAND_HINT_IDS.lightTheme"
                       :aria-label="t('settings.brand.lightThemeAria')"
                     ></textarea>
-                    <p class="label">{{ t("settings.brand.themeJsonHint") }}</p>
+                    <p :id="BRAND_HINT_IDS.lightTheme" class="label">
+                      {{ t("settings.brand.themeJsonHint") }}
+                    </p>
                   </fieldset>
 
                   <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
@@ -1539,9 +1545,12 @@ async function handleClearEmailDeliveryPassword() {
                       v-model="brandForm.darkThemeJson"
                       class="textarea font-mono w-full"
                       rows="12"
+                      :aria-describedby="BRAND_HINT_IDS.darkTheme"
                       :aria-label="t('settings.brand.darkThemeAria')"
                     ></textarea>
-                    <p class="label">{{ t("settings.brand.themeJsonHint") }}</p>
+                    <p :id="BRAND_HINT_IDS.darkTheme" class="label">
+                      {{ t("settings.brand.themeJsonHint") }}
+                    </p>
                   </fieldset>
                 </SectionGrid>
               </div>
@@ -1589,9 +1598,10 @@ async function handleClearEmailDeliveryPassword() {
                       v-model="brandForm.contentOverridesJson"
                       class="textarea font-mono w-full"
                       rows="10"
+                      :aria-describedby="BRAND_HINT_IDS.contentOverrides"
                       :aria-label="t('settings.brand.contentOverridesAria')"
                     ></textarea>
-                    <p class="label">
+                    <p :id="BRAND_HINT_IDS.contentOverrides" class="label">
                       {{ t("settings.brand.contentOverridesHint") }}
                     </p>
                   </fieldset>

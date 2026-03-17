@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { readdir, stat } from "node:fs/promises";
+import { mkdtemp, readdir, rm, stat } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import {
   DESKTOP_RELEASE_METADATA_DIR,
@@ -14,7 +15,9 @@ import {
   DESKTOP_RELEASE_WINDOWS_ARCH,
   DESKTOP_REQUIRED_NATIVE_ICON_FILES,
   DESKTOP_REQUIRED_PNG_ICON_SPECS,
+  DESKTOP_RUNTIME_RESOURCE_DIR,
   DESKTOP_RUNTIME_SCRAPER_DIR,
+  DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH,
   DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
   DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
   DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
@@ -149,6 +152,9 @@ const IDENTIFIER_PATTERN = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u;
 const SHA256_ENTRY_PATTERN = /^([a-f0-9]{64}) {2}(.+)$/u;
 const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
 const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
+const LEADING_DOT_SLASH_PATTERN = /^\.\/+/u;
+const LEADING_SLASH_PATTERN = /^\/+/u;
+const WHITESPACE_PATTERN = /\s+/u;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -551,6 +557,98 @@ const verifyBundleConfig = (
 const expectedHostPlatformForTarget = (target: DesktopReleaseTarget): NodeJS.Platform =>
   target === "macos" ? "darwin" : target === "windows" ? "win32" : "linux";
 
+const expectedHostArchForTarget = (target: DesktopReleaseTarget): string =>
+  target === "macos" || target === "linux-arm64" ? "arm64" : "x64";
+
+const expectedTauriTargetForTarget = (target: DesktopReleaseTarget): string => {
+  if (target === "macos") {
+    return "aarch64-apple-darwin";
+  }
+  if (target === "windows") {
+    return "x86_64-pc-windows-msvc";
+  }
+  return target === "linux-arm64"
+    ? "aarch64-unknown-linux-gnu"
+    : "x86_64-unknown-linux-gnu";
+};
+
+const normalizeArchiveEntry = (entry: string): string =>
+  entry.trim().replace(LEADING_DOT_SLASH_PATTERN, "").replace(LEADING_SLASH_PATTERN, "");
+
+const joinArchiveEntry = (...segments: readonly string[]): string =>
+  normalizeArchiveEntry(segments.filter((segment) => segment.length > 0).join("/"));
+
+const buildRuntimePackageEntries = (
+  target: DesktopReleaseTarget,
+  metadata: DesktopBundleMetadata,
+  dependencyPackageNames: readonly string[],
+): readonly string[] => {
+  if (target === "macos") {
+    const appRoot = joinArchiveEntry(`${metadata.productName}.app`, "Contents");
+    const runtimeRoot = joinArchiveEntry(appRoot, "Resources", DESKTOP_RUNTIME_RESOURCE_DIR);
+    return [
+      joinArchiveEntry(appRoot, "MacOS", metadata.binaryName),
+      joinArchiveEntry(runtimeRoot, "manifest.json"),
+      joinArchiveEntry(runtimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH),
+      joinArchiveEntry(runtimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH),
+      joinArchiveEntry(runtimeRoot, DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH),
+      joinArchiveEntry(runtimeRoot, DESKTOP_RUNTIME_SCRAPER_DIR, "package.json"),
+      ...dependencyPackageNames.map((packageName) =>
+        joinArchiveEntry(
+          runtimeRoot,
+          DESKTOP_RUNTIME_SCRAPER_DIR,
+          "node_modules",
+          packageName,
+          "package.json",
+        ),
+      ),
+    ] as const;
+  }
+
+  const linuxRoot = joinArchiveEntry("usr", "lib", metadata.productName);
+  const linuxRuntimeRoot = joinArchiveEntry(linuxRoot, DESKTOP_RUNTIME_RESOURCE_DIR);
+  const linuxDependencyPackageNames = dependencyPackageNames.filter(
+    (packageName) => !MACOS_ONLY_PACKAGES.has(packageName),
+  );
+
+  return [
+    joinArchiveEntry("usr", "bin", metadata.binaryName),
+    joinArchiveEntry(linuxRuntimeRoot, "manifest.json"),
+    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH),
+    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH),
+    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH),
+    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SCRAPER_DIR, "package.json"),
+    ...linuxDependencyPackageNames.map((packageName) =>
+      joinArchiveEntry(
+        linuxRuntimeRoot,
+        DESKTOP_RUNTIME_SCRAPER_DIR,
+        "node_modules",
+        packageName,
+        "package.json",
+      ),
+    ),
+  ] as const;
+};
+
+const collectRelativeEntries = async (
+  rootPath: string,
+  entryPrefix = "",
+): Promise<readonly string[]> => {
+  const directoryEntries = await readdir(rootPath, { withFileTypes: true });
+  const nestedEntries = await Promise.all(
+    directoryEntries.map(async (directoryEntry) => {
+      const absolutePath = join(rootPath, directoryEntry.name);
+      const relativePath = joinArchiveEntry(entryPrefix, directoryEntry.name);
+      if (directoryEntry.isDirectory()) {
+        return collectRelativeEntries(absolutePath, relativePath);
+      }
+      return [relativePath] as const;
+    }),
+  );
+
+  return nestedEntries.flat();
+};
+
 const verifyReleaseProvenance = async (
   metadata: DesktopBundleMetadata,
   targets: readonly DesktopReleaseTarget[],
@@ -589,6 +687,8 @@ const verifyReleaseProvenance = async (
       `strategy=${toText(provenance.strategy) ?? "missing"}`,
       `tauriCli=${toText(provenance.tauriCli) ?? "missing"}`,
       `hostPlatform=${toText(provenance.hostPlatform) ?? "missing"}`,
+      `hostArch=${toText(provenance.hostArch) ?? "missing"}`,
+      `tauriTarget=${toText(provenance.tauriTarget) ?? "missing"}`,
       `artifacts=${actualArtifactNames.join(",") || "missing"}`,
     ].join(" ");
 
@@ -599,6 +699,8 @@ const verifyReleaseProvenance = async (
         provenance.strategy === "matching-host-native" &&
         provenance.tauriCli === "repo-local-bun" &&
         provenance.hostPlatform === expectedHostPlatformForTarget(target) &&
+        provenance.hostArch === expectedHostArchForTarget(target) &&
+        provenance.tauriTarget === expectedTauriTargetForTarget(target) &&
         actualArtifactNames.length === expectedArtifactNames.length &&
         actualArtifactNames.every((artifactName, index) => artifactName === expectedArtifactNames[index]),
     };
@@ -1008,6 +1110,196 @@ const verifyWindowsPortablePayload = async (
   ] as const;
 };
 
+type MountedDmgResult =
+  | { readonly ok: true; readonly mountRoot: string }
+  | { readonly ok: false; readonly failure: VerificationResult };
+
+const attachDmgArtifact = async (artifact: ReleaseArtifact): Promise<MountedDmgResult> => {
+  const mountRoot = await mkdtemp(join(tmpdir(), "bao-desktop-dmg-"));
+  const attachResult = await captureCommand(
+    [
+      "hdiutil",
+      "attach",
+      "-readonly",
+      "-nobrowse",
+      "-mountpoint",
+      mountRoot,
+      artifact.absolutePath,
+    ],
+    DISK_IMAGE_TIMEOUT_MS,
+  );
+  if (attachResult.exitCode === 0) {
+    return { mountRoot, ok: true };
+  }
+
+  await rm(mountRoot, { force: true, recursive: true });
+  return {
+    failure: {
+      details:
+        attachResult.timedOut
+          ? "hdiutil attach timed out"
+          : attachResult.stderr || attachResult.stdout || `exitCode=${attachResult.exitCode}`,
+      label: "macos:dmg-mount",
+      ok: false,
+    },
+    ok: false,
+  };
+};
+
+const detachDmgArtifact = async (mountRoot: string): Promise<VerificationResult> => {
+  const detachResult = await captureCommand(
+    ["hdiutil", "detach", mountRoot, "-force"],
+    DISK_IMAGE_TIMEOUT_MS,
+  );
+  await rm(mountRoot, { force: true, recursive: true });
+
+  return {
+    details:
+      detachResult.exitCode === 0
+        ? mountRoot
+        : detachResult.stderr || detachResult.stdout || `exitCode=${detachResult.exitCode}`,
+    label: "macos:dmg-detach",
+    ok: detachResult.exitCode === 0,
+  };
+};
+
+const verifyMountedDmgPayload = async (
+  mountRoot: string,
+  metadata: DesktopBundleMetadata,
+): Promise<VerificationResult> => {
+  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
+    join(REPO_ROOT, "packages", "scraper"),
+  );
+  const requiredEntries = buildRuntimePackageEntries(
+    "macos",
+    metadata,
+    Array.from(runtimeDependencyRoots.keys()),
+  );
+  const mountedEntriesResult = await captureResult(() => collectRelativeEntries(mountRoot));
+  if (!mountedEntriesResult.ok) {
+    return {
+      details: toErrorMessage(mountedEntriesResult.error),
+      label: "macos:dmg-payload",
+      ok: false,
+    };
+  }
+
+  const mountedEntries = new Set(mountedEntriesResult.value.map(normalizeArchiveEntry));
+  const missingEntries = requiredEntries.filter((entry) => !mountedEntries.has(entry));
+
+  return {
+    details:
+      missingEntries.length === 0
+        ? "dmg bundles desktop binary, runtime manifest, runner, server, scraper, and dependencies"
+        : `missing ${missingEntries.join(", ")}`,
+    label: "macos:dmg-payload",
+    ok: missingEntries.length === 0,
+  };
+};
+
+const verifyMacosDmgPayload = async (
+  artifact: ReleaseArtifact,
+  metadata: DesktopBundleMetadata,
+): Promise<readonly VerificationResult[]> => {
+  const mountResult = await attachDmgArtifact(artifact);
+  if (!mountResult.ok) {
+    return [mountResult.failure] as const;
+  }
+
+  const payloadResult = await verifyMountedDmgPayload(mountResult.mountRoot, metadata);
+  const detachResult = await detachDmgArtifact(mountResult.mountRoot);
+
+  return [
+    {
+      details: artifact.relativePath,
+      label: "macos:dmg-mount",
+      ok: true,
+    },
+    payloadResult,
+    detachResult,
+  ] as const;
+};
+
+const listDebEntries = async (absolutePath: string): Promise<readonly string[]> => {
+  const commandResult = await captureCommand(["dpkg-deb", "-c", absolutePath], ZIP_LIST_TIMEOUT_MS);
+  if (commandResult.exitCode !== 0) {
+    throw new Error(commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`);
+  }
+
+  return commandResult.stdout
+    .split(/\r?\n/gu)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => normalizeArchiveEntry(line.split(WHITESPACE_PATTERN).at(-1) ?? ""))
+    .filter((entry) => entry.length > 0);
+};
+
+const listRpmEntries = async (absolutePath: string): Promise<readonly string[]> => {
+  const commandResult = await captureCommand(
+    ["rpm", "--query", "--list", "--package", absolutePath],
+    ZIP_LIST_TIMEOUT_MS,
+  );
+  if (commandResult.exitCode !== 0) {
+    throw new Error(commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`);
+  }
+
+  return commandResult.stdout
+    .split(/\r?\n/gu)
+    .map((entry) => normalizeArchiveEntry(entry))
+    .filter((entry) => entry.length > 0);
+};
+
+const verifyLinuxPackagePayload = async (
+  artifact: ReleaseArtifact,
+  metadata: DesktopBundleMetadata,
+): Promise<readonly VerificationResult[]> => {
+  if (!(artifact.target === "linux-x64" || artifact.target === "linux-arm64")) {
+    return [] as const;
+  }
+
+  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
+    join(REPO_ROOT, "packages", "scraper"),
+  );
+  const requiredEntries = buildRuntimePackageEntries(
+    artifact.target,
+    metadata,
+    Array.from(runtimeDependencyRoots.keys()),
+  );
+  const entriesResult = await captureResult(() =>
+    artifact.kind === "deb"
+      ? listDebEntries(artifact.absolutePath)
+      : listRpmEntries(artifact.absolutePath),
+  );
+  if (!entriesResult.ok) {
+    return [
+      {
+        details: toErrorMessage(entriesResult.error),
+        label: `linux:${artifact.kind}-archive:${artifact.target}`,
+        ok: false,
+      },
+    ] as const;
+  }
+
+  const archiveEntries = new Set(entriesResult.value.map(normalizeArchiveEntry));
+  const missingEntries = requiredEntries.filter((entry) => !archiveEntries.has(entry));
+
+  return [
+    {
+      details: artifact.relativePath,
+      label: `linux:${artifact.kind}-archive:${artifact.target}`,
+      ok: true,
+    },
+    {
+      details:
+        missingEntries.length === 0
+          ? `${artifact.kind} bundles desktop binary, runtime manifest, runner, server, scraper, and dependencies`
+          : `missing ${missingEntries.join(", ")}`,
+      label: `linux:${artifact.kind}-payload:${artifact.target}`,
+      ok: missingEntries.length === 0,
+    },
+  ] as const;
+};
+
 const writeResults = async (results: readonly VerificationResult[]): Promise<void> => {
   await writeOutput(
     results
@@ -1048,6 +1340,19 @@ const main = async (): Promise<void> => {
     ...(windowsPortableArtifact
       ? await verifyWindowsPortablePayload(windowsPortableArtifact, metadata)
       : []),
+    ...(
+      await Promise.all(
+        artifacts.map(async (artifact) => {
+          if (artifact.kind === "dmg") {
+            return verifyMacosDmgPayload(artifact, metadata);
+          }
+          if (artifact.kind === "deb" || artifact.kind === "rpm") {
+            return verifyLinuxPackagePayload(artifact, metadata);
+          }
+          return [] as const;
+        }),
+      )
+    ).flat(),
     ...(await Promise.all(
       artifacts.flatMap((artifact) => [
         verifyArtifactPresence(artifact),
