@@ -88,30 +88,43 @@ const collectTemporaryDiskImages = async (): Promise<readonly string[]> => {
   return imagePaths;
 };
 
-const detachMountedImages = async (mountedImages: readonly MountedDesktopImage[]): Promise<void> => {
-  for (const mountedImage of mountedImages) {
-    for (const mountPath of mountedImage.mountPaths) {
-      await writeOutput(`Detaching stale desktop image mount ${mountPath}`);
-      const exitCode = await runCommand(["hdiutil", "detach", mountPath]);
-      if (exitCode !== 0) {
-        await writeError(`Failed to detach stale desktop image mount ${mountPath}.`);
-        process.exit(exitCode);
-      }
-    }
+const detachMountPathsSequentially = async (
+  mountPaths: readonly string[],
+  index: number = 0,
+): Promise<void> => {
+  const mountPath = mountPaths[index];
+  if (!mountPath) {
+    return;
   }
+
+  await writeOutput(`Detaching stale desktop image mount ${mountPath}`);
+  const exitCode = await runCommand(["hdiutil", "detach", mountPath]);
+  if (exitCode !== 0) {
+    await writeError(`Failed to detach stale desktop image mount ${mountPath}.`);
+    process.exit(exitCode);
+  }
+
+  await detachMountPathsSequentially(mountPaths, index + 1);
+};
+
+const detachMountedImages = async (mountedImages: readonly MountedDesktopImage[]): Promise<void> => {
+  const mountPaths = mountedImages.flatMap((mountedImage) => mountedImage.mountPaths);
+  await detachMountPathsSequentially(mountPaths);
 };
 
 const removeTemporaryDiskImages = async (
   imagePaths: readonly string[],
 ): Promise<void> => {
-  for (const imagePath of imagePaths) {
-    if (!(await pathExists(imagePath))) {
-      continue;
-    }
+  await Promise.all(
+    imagePaths.map(async (imagePath) => {
+      if (!(await pathExists(imagePath))) {
+        return;
+      }
 
-    await rm(imagePath, { force: true });
-    await writeOutput(`Removed stale desktop disk image ${imagePath}`);
-  }
+      await rm(imagePath, { force: true });
+      await writeOutput(`Removed stale desktop disk image ${imagePath}`);
+    }),
+  );
 };
 
 const runPrebuildCleanup = async (): Promise<void> => {

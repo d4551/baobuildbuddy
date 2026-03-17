@@ -62,26 +62,43 @@ const resolvePackageManifestPath = async (
 const sortDependencyNames = (dependencyMap: PackageDependencyMap): string[] =>
   Object.keys(dependencyMap).sort((left, right) => left.localeCompare(right));
 
+const visitDependencyNamesSequentially = async (
+  dependencyNames: readonly string[],
+  visitor: (dependencyName: string) => Promise<void>,
+  index: number = 0,
+): Promise<void> => {
+  const dependencyName = dependencyNames[index];
+  if (!dependencyName) {
+    return;
+  }
+
+  await visitor(dependencyName);
+  await visitDependencyNamesSequentially(dependencyNames, visitor, index + 1);
+};
+
 const visitOptionalDependencies = async (
   packageRoot: string,
   optionalDependencies: PackageDependencyMap,
   visitedPackages: Map<string, string>,
 ): Promise<void> => {
-  for (const dependencyName of sortDependencyNames(optionalDependencies)) {
+  await visitDependencyNamesSequentially(
+    sortDependencyNames(optionalDependencies),
+    async (dependencyName) => {
     const sourceRootResult = await captureResult(() =>
       resolvePackageSourceRoot(dependencyName, packageRoot),
     );
     if (sourceRootResult.ok) {
       await visitRuntimeDependencyTree(dependencyName, sourceRootResult.value, visitedPackages);
-      continue;
+      return;
     }
 
     if (isModuleNotFoundError(sourceRootResult.error)) {
-      continue;
+      return;
     }
 
     throw sourceRootResult.error;
-  }
+    },
+  );
 };
 
 const visitRuntimeDependencyTree = async (
@@ -102,10 +119,13 @@ const visitRuntimeDependencyTree = async (
   visitedPackages.set(packageName, packageRoot);
   const manifest = await readPackageManifest(packageRoot);
 
-  for (const dependencyName of sortDependencyNames(manifest.dependencies)) {
+  await visitDependencyNamesSequentially(
+    sortDependencyNames(manifest.dependencies),
+    async (dependencyName) => {
     const dependencyRoot = await resolvePackageSourceRoot(dependencyName, packageRoot);
     await visitRuntimeDependencyTree(dependencyName, dependencyRoot, visitedPackages);
-  }
+    },
+  );
 
   await visitOptionalDependencies(packageRoot, manifest.optionalDependencies, visitedPackages);
 };
@@ -132,10 +152,13 @@ export const collectRuntimeDependencySourceRoots = async (
   const visitedPackages = new Map<string, string>();
   const manifest = await readPackageManifest(packageRoot);
 
-  for (const dependencyName of sortDependencyNames(manifest.dependencies)) {
+  await visitDependencyNamesSequentially(
+    sortDependencyNames(manifest.dependencies),
+    async (dependencyName) => {
     const dependencyRoot = await resolvePackageSourceRoot(dependencyName, packageRoot);
     await visitRuntimeDependencyTree(dependencyName, dependencyRoot, visitedPackages);
-  }
+    },
+  );
 
   await visitOptionalDependencies(packageRoot, manifest.optionalDependencies, visitedPackages);
   return visitedPackages;

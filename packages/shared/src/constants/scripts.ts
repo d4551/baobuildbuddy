@@ -24,7 +24,12 @@ export const PREVIEW_SEPARATOR_LENGTH = 72 as const;
 export const DISK_IMAGE_TIMEOUT_MS = 60_000 as const;
 
 /** Supported desktop release staging targets. */
-export const DESKTOP_RELEASE_TARGETS = ["macos", "linux", "windows"] as const;
+export const DESKTOP_RELEASE_TARGETS = [
+  "macos",
+  "linux-x64",
+  "linux-arm64",
+  "windows",
+] as const;
 
 /** Default root used to stage native per-platform desktop release outputs before assembly. */
 export const DESKTOP_RELEASE_STAGING_ROOT = ".desktop-release-artifacts" as const;
@@ -41,14 +46,23 @@ export const DESKTOP_RELEASE_MACOS_ARCH = "aarch64" as const;
 /** Canonical macOS desktop release target triple. */
 export const DESKTOP_RELEASE_MACOS_TARGET = "aarch64-apple-darwin" as const;
 
-/** Canonical Linux desktop release architecture label. */
-export const DESKTOP_RELEASE_LINUX_ARCH = "aarch64" as const;
+/** Canonical Linux x64 release architecture label used by RPM bundles. */
+export const DESKTOP_RELEASE_LINUX_X64_RPM_ARCH = "x86_64" as const;
 
-/** Canonical Linux desktop release target triple. */
-export const DESKTOP_RELEASE_LINUX_TARGET = "aarch64-unknown-linux-gnu" as const;
+/** Canonical Linux x64 release target triple. */
+export const DESKTOP_RELEASE_LINUX_X64_TARGET = "x86_64-unknown-linux-gnu" as const;
 
-/** Canonical Debian package architecture label used by desktop releases. */
-export const DESKTOP_RELEASE_LINUX_DEB_ARCH = "arm64" as const;
+/** Canonical Debian package architecture label used by Linux x64 desktop releases. */
+export const DESKTOP_RELEASE_LINUX_X64_DEB_ARCH = "amd64" as const;
+
+/** Canonical Linux ARM64 release architecture label used by RPM bundles. */
+export const DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH = "aarch64" as const;
+
+/** Canonical Linux ARM64 release target triple. */
+export const DESKTOP_RELEASE_LINUX_ARM64_TARGET = "aarch64-unknown-linux-gnu" as const;
+
+/** Canonical Debian package architecture label used by Linux ARM64 desktop releases. */
+export const DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH = "arm64" as const;
 
 /** Canonical Windows desktop release architecture label. */
 export const DESKTOP_RELEASE_WINDOWS_ARCH = "x64" as const;

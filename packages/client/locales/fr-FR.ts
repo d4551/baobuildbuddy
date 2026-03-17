@@ -75,6 +75,43 @@ const frFROverrides = {
     seoDescription:
       "Recherchez et filtrez les postes jeu vidéo par plateforme, type de studio, genre et niveau d'expérience.",
     title: "Offres d'emploi",
+    pagination: {
+      navigationAria: "Pagination des offres",
+      previousAria: "Page précédente des offres",
+      nextAria: "Page suivante des offres",
+      pageAria: "Aller à la page d'offres {page}",
+      summary: "Affichage de {start} à {end} sur {total} offres",
+    },
+    options: {
+      all: "Tous",
+      allTypes: "Tous les types",
+      allPlatforms: "Toutes les plateformes",
+      allGenres: "Tous les genres",
+      experience: {
+        entry: "Débutant",
+        mid: "Intermédiaire",
+        director: "Directeur",
+      },
+      studioType: {
+        indie: "Indépendant",
+        platform: "Plateforme",
+        esports: "Esport",
+        unknown: "Inconnu",
+      },
+      platform: {},
+      genre: {
+        strategy: "Stratégie",
+        sports: "Sport",
+        racing: "Course",
+        platformer: "Jeu de plateforme",
+        horror: "Horreur",
+        adventure: "Aventure",
+        fighting: "Combat",
+        survival: "Survie",
+        cardGame: "Jeu de cartes",
+        indie: "Indépendant",
+      },
+    },
   },
   skillsPage: {
     seoTitle: "Cartographie des compétences",
@@ -327,6 +364,7 @@ const frFROverrides = {
     title: "Répertoire des studios",
     options: {
       type: {
+        indie: "Indépendant",
         platform: "Plateforme",
         esports: "Esport",
         general: "Généraliste",

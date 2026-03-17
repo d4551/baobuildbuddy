@@ -1,4 +1,4 @@
-import type { JobExperienceLevel } from "@bao/shared";
+import type { GameGenre, JobExperienceLevel, Platform } from "@bao/shared";
 
 type Translate = (key: string, params?: Record<string, unknown>) => string;
 
@@ -45,7 +45,31 @@ const PLATFORM_LABEL_KEYS = [
   ["PlayStation", "jobsPage.options.platform.playStation"],
   ["Xbox", "jobsPage.options.platform.xbox"],
   ["Steam", "jobsPage.options.platform.steam"],
-] as const;
+] as const satisfies ReadonlyArray<readonly [Platform, string]>;
+
+const GAME_GENRE_LABEL_KEYS = [
+  ["Action", "jobsPage.options.genre.action"],
+  ["RPG", "jobsPage.options.genre.rpg"],
+  ["Strategy", "jobsPage.options.genre.strategy"],
+  ["Puzzle", "jobsPage.options.genre.puzzle"],
+  ["Simulation", "jobsPage.options.genre.simulation"],
+  ["Sports", "jobsPage.options.genre.sports"],
+  ["Racing", "jobsPage.options.genre.racing"],
+  ["Shooter", "jobsPage.options.genre.shooter"],
+  ["Platformer", "jobsPage.options.genre.platformer"],
+  ["Horror", "jobsPage.options.genre.horror"],
+  ["MMORPG", "jobsPage.options.genre.mmorpg"],
+  ["MOBA", "jobsPage.options.genre.moba"],
+  ["Battle Royale", "jobsPage.options.genre.battleRoyale"],
+  ["Roguelike", "jobsPage.options.genre.roguelike"],
+  ["Sandbox", "jobsPage.options.genre.sandbox"],
+  ["Adventure", "jobsPage.options.genre.adventure"],
+  ["Fighting", "jobsPage.options.genre.fighting"],
+  ["Survival", "jobsPage.options.genre.survival"],
+  ["Card Game", "jobsPage.options.genre.cardGame"],
+  ["Casual", "jobsPage.options.genre.casual"],
+  ["Indie", "jobsPage.options.genre.indie"],
+] as const satisfies ReadonlyArray<readonly [GameGenre, string]>;
 
 const findLabelKey = (
   entries: ReadonlyArray<readonly [string, string]>,
@@ -149,5 +173,11 @@ export const gameGenreLabel = (
   if (normalizedValue.length === 0) {
     return "";
   }
-  return t("jobsPage.options.genre", { value: normalizedValue });
+
+  const key = findLabelKey(GAME_GENRE_LABEL_KEYS, normalizedValue);
+  if (key !== null) {
+    return t(key);
+  }
+
+  return normalizedValue;
 };

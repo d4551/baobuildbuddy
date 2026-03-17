@@ -3317,6 +3317,40 @@ export declare const app: Elysia<"/api", {
         automation: {};
     } & {
         automation: {
+            verify: {
+                context: {
+                    get: {
+                        body: unknown;
+                        params: {};
+                        query: unknown;
+                        headers: unknown;
+                        response: {
+                            200: {
+                                resumeId: string;
+                            };
+                            404: {
+                                error: {
+                                    details?: {} | undefined;
+                                    message: string;
+                                    code: string;
+                                };
+                            };
+                            422: {
+                                type: "validation";
+                                on: string;
+                                summary?: string;
+                                message?: string;
+                                found?: unknown;
+                                property?: string;
+                                expected?: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    } & {
+        automation: {
             "job-apply": {
                 post: {
                     body: {

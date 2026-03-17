@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
   aiChat: `${API_ENDPOINT_PREFIX}/ai/chat`,
   scraperStudios: `${API_ENDPOINT_PREFIX}/scraper/studios`,
   scraperJobsHitmarker: `${API_ENDPOINT_PREFIX}/scraper/jobs/hitmarker`,
+  settings: `${API_ENDPOINT_PREFIX}/settings`,
   resumes: `${API_ENDPOINT_PREFIX}/resumes`,
   resumesFromQuestionsGenerate: `${API_ENDPOINT_PREFIX}/resumes/from-questions/generate`,
   resumesFromQuestionsSynthesize: `${API_ENDPOINT_PREFIX}/resumes/from-questions/synthesize`,

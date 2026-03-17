@@ -30,8 +30,10 @@ import {
 import { and, desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 
+import { config } from "../config/env";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
+import { resumes } from "../db/schema/resumes";
 import { applicationAutomationService } from "../services/automation/application-automation-service";
 import { mapAutomationRouteError, toRouteError } from "../utils/automation-route-error";
 import { createServerLogger } from "../utils/logger";
@@ -58,6 +60,7 @@ const [
 ] = AUTOMATION_SCRAPE_TARGETS;
 
 const automationRoutesLogger = createServerLogger("automation-routes");
+const AUTOMATION_VERIFY_RESUME_ID = "automation-verify-resume";
 
 const AUTOMATION_TYPE_SCHEMA = t.Union([
   t.Literal(AUTOMATION_TYPE_SCRAPE),
@@ -273,6 +276,56 @@ const readAutomationRunById = async (runId: string): Promise<RpaRunExecutionEnve
   return normalizeAutomationRun(rows[0]);
 };
 
+const ensureAutomationVerifyContext = async (): Promise<{ resumeId: string }> => {
+  const timestamp = new Date().toISOString();
+  await db
+    .insert(resumes)
+    .values({
+      id: AUTOMATION_VERIFY_RESUME_ID,
+      name: "Automation Verify Resume",
+      personalInfo: {
+        name: "Automation Verify Candidate",
+        email: "verify@example.test",
+        location: "Remote",
+        portfolio: "https://example.test/portfolio",
+      },
+      summary:
+        "Deterministic packaged-runtime verification resume used for end-to-end automation validation.",
+      experience: [
+        {
+          title: "Gameplay Engineer",
+          company: "Bao Verify Studio",
+          location: "Remote",
+          startDate: "2024-01",
+          endDate: "",
+          current: true,
+          description:
+            "Built deterministic automation flows, packaging checks, and UI verification systems.",
+        },
+      ],
+      education: [],
+      skills: {
+        technical: ["TypeScript", "Bun", "Playwright"],
+      },
+      projects: [],
+      gamingExperience: {
+        roles: ["Raid Leader"],
+      },
+      updatedAt: timestamp,
+    })
+    .onConflictDoUpdate({
+      target: resumes.id,
+      set: {
+        name: "Automation Verify Resume",
+        updatedAt: timestamp,
+      },
+    });
+
+  return {
+    resumeId: AUTOMATION_VERIFY_RESUME_ID,
+  };
+};
+
 const runJobApplyInBackground = (runId: string, payload: JobApplyRequestBody): void => {
   applicationAutomationService.runJobApply(runId, payload).then(
     () => undefined,
@@ -290,6 +343,26 @@ const runJobApplyInBackground = (runId: string, payload: JobApplyRequestBody): v
  */
 export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Automation"] })
   .use(automationRateLimit)
+  .get(
+    "/verify/context",
+    async ({ set }) => {
+      if (!config.enableAutomationVerification) {
+        set.status = HTTP_STATUS_NOT_FOUND;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND);
+      }
+
+      set.status = HTTP_STATUS_OK;
+      return ensureAutomationVerifyContext();
+    },
+    {
+      response: {
+        [HTTP_STATUS_OK]: t.Object({
+          resumeId: t.String({ minLength: 1 }),
+        }),
+        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+      },
+    },
+  )
   .post(
     "/job-apply",
     async ({ body, set }) => {

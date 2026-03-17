@@ -109,7 +109,7 @@ const readExistingAssembledTargets = async (): Promise<Record<string, unknown>> 
   }
 
   const parsed: unknown = JSON.parse(await Bun.file(provenancePath).text());
-  if (!isRecord(parsed) || !isRecord(parsed.targets)) {
+  if (!(isRecord(parsed) && isRecord(parsed.targets))) {
     return {};
   }
 
@@ -158,22 +158,25 @@ const stageTargetArtifacts = async (
 };
 
 const writeChecksumManifest = async (): Promise<void> => {
-  const checksumEntries: string[] = [];
+  const checksumEntries = (
+    await Promise.all(
+      DESKTOP_RELEASE_TARGETS.map(async (target) => {
+        const targetRoot = join(DESKTOP_RELEASE_ROOT, target);
+        if (!(await pathExists(targetRoot))) {
+          return [];
+        }
 
-  for (const target of DESKTOP_RELEASE_TARGETS) {
-    const targetRoot = join(DESKTOP_RELEASE_ROOT, target);
-    if (!(await pathExists(targetRoot))) {
-      continue;
-    }
-    const entries = await readdir(targetRoot, { withFileTypes: true });
-    const fileNames = entries.filter((entry) => entry.isFile()).map((entry) => entry.name);
-    for (const fileName of fileNames) {
-      const relativePath = join(target, fileName);
-      checksumEntries.push(
-        `${await computeSha256(join(DESKTOP_RELEASE_ROOT, relativePath))}  ${relativePath}`,
-      );
-    }
-  }
+        const entries = await readdir(targetRoot, { withFileTypes: true });
+        const fileNames = entries.filter((entry) => entry.isFile()).map((entry) => entry.name);
+        return Promise.all(
+          fileNames.map(async (fileName) => {
+            const relativePath = join(target, fileName);
+            return `${await computeSha256(join(DESKTOP_RELEASE_ROOT, relativePath))}  ${relativePath}`;
+          }),
+        );
+      }),
+    )
+  ).flat();
 
   const sortedEntries = checksumEntries.sort((left, right) => left.localeCompare(right));
   await writeFile(DESKTOP_RELEASE_CHECKSUM_PATH, `${sortedEntries.join("\n")}\n`);

@@ -29,12 +29,13 @@ flowchart TD
   subgraph NativeBuilds["Matching-host native builds"]
     MacOS["macOS: bun run release:desktop:macos"]
     Windows["Windows: bun run release:desktop:windows"]
-    Linux["Linux ARM64: bun run release:desktop:linux-arm64"]
+    LinuxX64["Linux x64: bun run release:desktop:linux-x64"]
+    LinuxArm64["Linux ARM64: bun run release:desktop:linux-arm64"]
   end
 
   subgraph Staging["Release assembly"]
     Stage["bun run release:refresh:all-os"]
-    Releases["packages/desktop/releases/{macos,linux,windows}"]
+    Releases["packages/desktop/releases/{macos,windows,linux-x64,linux-arm64}"]
     Provenance["packages/desktop/releases/provenance.json"]
     Checksum["sha256.txt regeneration"]
   end
@@ -42,7 +43,8 @@ flowchart TD
   QualityGates --> NativeBuilds
   MacOS --> Stage
   Windows --> Stage
-  Linux --> Stage
+  LinuxX64 --> Stage
+  LinuxArm64 --> Stage
   Stage --> Releases
   Stage --> Provenance
   Releases --> Checksum
@@ -53,6 +55,7 @@ Run matching-host native staging on each platform:
 ```bash
 bun run release:desktop:macos -- --output-root .desktop-release-artifacts
 bun run release:desktop:windows -- --output-root .desktop-release-artifacts
+bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts
 bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
 ```
 
@@ -67,6 +70,7 @@ Host/runtime requirements:
 - repo-local `@tauri-apps/cli` invoked through Bun (`bun tauri build` / `bun tauri bundle`)
 - macOS host for the macOS bundle flow
 - Windows host for the Windows bundle flow
+- Linux x64 host for the Linux x64 bundle flow
 - Linux ARM64 host or ARM-emulated CI runner for the Linux ARM64 bundle flow
 
 The canonical release flow performs:
@@ -74,12 +78,14 @@ The canonical release flow performs:
 - release quality gates (`lint`, `typecheck`, `test`, `build`)
 - macOS-native split bundle flow: `bun tauri build --no-bundle`, then `bun tauri bundle --bundles app,dmg`
 - Windows-native `bun tauri build` for the NSIS installer and portable zip
+- Linux x64-native `bun tauri build --bundles deb,rpm` for deb and rpm bundles
 - Linux ARM64-native `bun tauri build --bundles deb,rpm` for deb and rpm bundles
-- staging native artifacts under `.desktop-release-artifacts/{macos,windows,linux}`
-- assembly into `packages/desktop/releases/{macos,linux,windows}`
+- staging native artifacts under `.desktop-release-artifacts/{macos,windows,linux-x64,linux-arm64}`
+- assembly into `packages/desktop/releases/{macos,windows,linux-x64,linux-arm64}`
 - provenance staging under `packages/desktop/releases/metadata/<target>` and `packages/desktop/releases/provenance.json`
 - checksum regeneration in `packages/desktop/releases/sha256.txt`
 - Bun-native post-staging verification via `bun run verify:desktop-releases`
+- CI quality gates via `.github/workflows/desktop-release.yml` before any native packaging job runs
 
 Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact. The canonical release set ships both the NSIS setup installer and a portable `.zip` that keeps the executable, bundled `gen/runtime` tree, and WebView2 bootstrapper together.
 
@@ -94,6 +100,9 @@ bun run release:desktop:macos -- --output-root .desktop-release-artifacts
 # Windows native bundle staging
 bun run release:desktop:windows -- --output-root .desktop-release-artifacts
 
+# Linux x64 native bundle staging
+bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts
+
 # Linux ARM64 native bundle staging
 bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
 
@@ -104,8 +113,9 @@ bun run release:refresh:all-os
 ## Canonical release directories
 
 - `macos/`
-- `linux/`
 - `windows/`
+- `linux-x64/`
+- `linux-arm64/`
 
 Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/release/bundle`, staged per target under `.desktop-release-artifacts/<target>`, and then copied into these canonical release directories.
 
@@ -115,10 +125,15 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 
 - `macos/${APP_PRODUCT_NAME}_<VERSION>_aarch64.dmg`
 
-### Linux
+### Linux x64
 
-- `linux/${APP_PRODUCT_NAME}_<VERSION>_arm64.deb`
-- `linux/${APP_PRODUCT_NAME}-<VERSION>-1.aarch64.rpm`
+- `linux-x64/${APP_PRODUCT_NAME}_<VERSION>_amd64.deb`
+- `linux-x64/${APP_PRODUCT_NAME}-<VERSION>-1.x86_64.rpm`
+
+### Linux ARM64
+
+- `linux-arm64/${APP_PRODUCT_NAME}_<VERSION>_arm64.deb`
+- `linux-arm64/${APP_PRODUCT_NAME}-<VERSION>-1.aarch64.rpm`
 
 ### Windows
 

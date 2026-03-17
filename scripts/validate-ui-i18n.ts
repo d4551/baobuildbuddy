@@ -41,7 +41,7 @@ type TemplateCharacterWindow = {
 };
 
 const projectRoot = process.cwd();
-const clientRoot = "packages/client";
+const sourceRoots = ["packages/client", "packages/shared/src"] as const;
 const sourceExtensions = new Set([".vue", ".ts", ".tsx", ".js", ".mjs", ".cjs"]);
 const ignoredDirectoryNames = new Set([
   "node_modules",
@@ -148,23 +148,31 @@ const getLineFromOffset = (text: string, offset: number): number => {
   return line;
 };
 
-const collectClientSourceFiles = async (): Promise<string[]> => {
-  const files: string[] = [];
-  const glob = new Bun.Glob(`${clientRoot}/**/*`);
+const scanSourceRoot = async (sourceRoot: (typeof sourceRoots)[number]): Promise<string[]> => {
+  const glob = new Bun.Glob(`${sourceRoot}/**/*`);
+  const relativeFilePaths = await Array.fromAsync(glob.scan({ cwd: projectRoot, onlyFiles: true }));
 
-  for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
+  return relativeFilePaths.flatMap((relativeFilePath) => {
     const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
     if (shouldIgnorePath(normalizedPath) || !hasSourceExtension(normalizedPath)) {
-      continue;
+      return [];
     }
-    files.push(normalizedPath);
-  }
+    return [normalizedPath];
+  });
+};
 
-  return files;
+const collectSourceFiles = async (): Promise<string[]> => {
+  const perRootFiles = await Promise.all(
+    sourceRoots.map((sourceRoot) => scanSourceRoot(sourceRoot)),
+  );
+  return perRootFiles.flat();
 };
 
 const localizedDomainOutputPatterns: Array<{ pattern: RegExp; label: string }> = [
   { pattern: /\{\{\s*job\.experienceLevel\s*\}\}/gu, label: "job.experienceLevel" },
+  { pattern: /\{\{\s*job\.studioType\s*\}\}/gu, label: "job.studioType" },
+  { pattern: /\{\{\s*job\.platforms?\s*\}\}/gu, label: "job.platforms" },
+  { pattern: /\{\{\s*job\.gameGenres?\s*\}\}/gu, label: "job.gameGenres" },
   { pattern: /\{\{\s*studio\.type\s*\}\}/gu, label: "studio.type" },
   { pattern: /\{\{\s*studio\.size\s*\}\}/gu, label: "studio.size" },
   { pattern: /<option\b[^>]*>\s*\{\{\s*type\s*\}\}\s*<\/option>/gu, label: "studio type option" },
@@ -531,7 +539,7 @@ const collectStaticTemplateViolations = (filePath: string, fileContent: string):
 
 const collectViolations = async (): Promise<Violation[]> => {
   const localeKeys = collectLocalePaths(enUS);
-  const files = await collectClientSourceFiles();
+  const files = await collectSourceFiles();
   const violationGroups = await Promise.all(
     files.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();

@@ -439,6 +439,7 @@ bun run dev:client
 | DB studio                   | `bun run db:studio`                                    | Open Drizzle Studio GUI                             |
 | Release desktop (macOS)     | `bun run release:desktop:macos`                        | Native macOS release artifacts                      |
 | Release desktop (Windows)   | `bun run release:desktop:windows`                      | Native Windows release artifacts                    |
+| Release desktop (Linux x64) | `bun run release:desktop:linux-x64`                    | Native Linux x64 release artifacts                  |
 | Release desktop (Linux ARM) | `bun run release:desktop:linux-arm64`                  | Native Linux ARM64 release artifacts                |
 | Release refresh (all OS)    | `bun run release:refresh:all-os`                       | Assemble multi-platform release + checksums         |
 | Verify pages                | `bun run verify:pages`                                 | Validate SSR routes return proper HTML              |
@@ -982,6 +983,7 @@ bun run validate:alignment
 Full local quality gate and desktop verification:
 
 ```bash
+bun ci
 bun run lint
 bun run typecheck
 bun run test
@@ -994,6 +996,7 @@ Per-platform native release staging:
 ```bash
 bun run release:desktop:macos -- --output-root .desktop-release-artifacts
 bun run release:desktop:windows -- --output-root .desktop-release-artifacts
+bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts
 bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
 ```
 
@@ -1012,6 +1015,7 @@ bun run release:refresh:all-os
 | `bun run test`                  | All test suites pass                                 |
 | `bun run build`                 | All packages build successfully                      |
 | `bun run build:desktop`         | Current-host desktop packaging succeeds              |
+| `bun run verify:desktop-runtime`| Packaged runtime executes deterministic automation proof |
 | `bun run verify:pages`          | All SSR routes and content checks pass               |
 | `bun run ci:alignment`          | Frozen-lockfile install + alignment gate passes      |
 | `bun run validate:alignment`    | Bun + daisyUI alignment passes                       |
@@ -1092,6 +1096,7 @@ bun run build:desktop
 ```bash
 bun run release:desktop:macos -- --output-root .desktop-release-artifacts
 bun run release:desktop:windows -- --output-root .desktop-release-artifacts
+bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts
 bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
 ```
 
@@ -1100,11 +1105,11 @@ bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
 bun run release:refresh:all-os
 ```
 
-This assembles previously built artifacts into `packages/desktop/releases/`, regenerates checksums, and verifies provenance.
+This assembles previously built artifacts into `packages/desktop/releases/`, regenerates checksums, and verifies provenance. The GitHub Actions desktop workflow now gates every native packaging job behind `bun ci`, `bun run lint`, `bun run typecheck`, `bun run test`, and `bun run build`, then runs `bun run verify:desktop-runtime` and `bun run verify:desktop-releases` on each native host before artifact upload.
 
 **Output locations:**
 - Raw build output: `packages/desktop/src-tauri/target/release/bundle`
-- Release artifacts: `packages/desktop/releases/{macos,linux,windows}`
+- Release artifacts: `packages/desktop/releases/{macos,windows,linux-x64,linux-arm64}`
 - Checksums: `packages/desktop/releases/sha256.txt`
 
 ### Platform notes
@@ -1112,8 +1117,9 @@ This assembles previously built artifacts into `packages/desktop/releases/`, reg
 | Platform                            | Build target                        | Notes                                                                               |
 |-------------------------------------|-------------------------------------|-------------------------------------------------------------------------------------|
 | macOS (`aarch64-apple-darwin`)      | `release:desktop:macos`             | Split flow: `bun tauri build --no-bundle` then `bun tauri bundle --bundles app,dmg` |
-| Windows (`x86_64-pc-windows-msvc`)  | `release:desktop:windows`    | NSIS installer + portable zip. 64-bit only.                                                |
-| Linux (`aarch64-unknown-linux-gnu`) | `release:desktop:linux-arm64`| Deb + RPM bundles. Requires ARM64 host or emulated runner.                                 |
+| Windows (`x86_64-pc-windows-msvc`)  | `release:desktop:windows`           | NSIS installer + portable zip. 64-bit only.                                          |
+| Linux x64 (`x86_64-unknown-linux-gnu`) | `release:desktop:linux-x64`      | Deb + RPM bundles on a native Linux x64 host.                                        |
+| Linux ARM64 (`aarch64-unknown-linux-gnu`) | `release:desktop:linux-arm64` | Deb + RPM bundles. Requires ARM64 host or emulated runner.                           |
 
 For macOS DMG packaging with non-UTF8 locale defaults:
 ```bash

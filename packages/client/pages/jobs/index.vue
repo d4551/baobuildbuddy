@@ -15,7 +15,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
-import { jobExperienceLabel, studioTypeLabel } from "~/utils/labels";
+import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
 
@@ -120,6 +120,13 @@ const totalPages = computed(() => Math.ceil(filteredJobs.value.length / pageSize
 const pageNumbers = computed(() =>
   Array.from({ length: totalPages.value }, (_, index) => index + 1),
 );
+const jobsPaginationSummary = computed(() =>
+  t("jobsPage.pagination.summary", {
+    start: filteredJobs.value.length === 0 ? 0 : (currentPage.value - 1) * pageSize + 1,
+    end: Math.min(currentPage.value * pageSize, filteredJobs.value.length),
+    total: filteredJobs.value.length,
+  }),
+);
 
 watch(
   () => ({
@@ -211,21 +218,12 @@ function studioTypeOptionLabel(value: FilterSelection<StudioType>): string {
 
 function platformOptionLabel(value: FilterSelection<Platform>): string {
   if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.allPlatforms");
-  if (value === "PC") return t("jobsPage.options.platform.pc");
-  if (value === "Console") return t("jobsPage.options.platform.console");
-  if (value === "Mobile") return t("jobsPage.options.platform.mobile");
-  if (value === "VR") return t("jobsPage.options.platform.vr");
-  if (value === "AR") return t("jobsPage.options.platform.ar");
-  if (value === "Web") return t("jobsPage.options.platform.web");
-  if (value === "Switch") return t("jobsPage.options.platform.switch");
-  if (value === "PlayStation") return t("jobsPage.options.platform.playStation");
-  if (value === "Xbox") return t("jobsPage.options.platform.xbox");
-  return t("jobsPage.options.platform.steam");
+  return platformLabel(t, value);
 }
 
 function genreOptionLabel(value: FilterSelection<GameGenre>): string {
   if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.allGenres");
-  return t("jobsPage.options.genre", { value });
+  return gameGenreLabel(t, value);
 }
 
 function hasSearchCriteria(): boolean {
@@ -502,36 +500,17 @@ async function maybeAwardSearchXp(): Promise<void> {
             </article>
           </SectionGrid>
 
-          <div v-if="totalPages > 1" class="flex justify-center">
-            <div class="join">
-              <button
-                class="join-item btn btn-sm"
-                :aria-label="t('jobsPage.previousPageAria')"
-                :disabled="currentPage === 1"
-                @click="currentPage--"
-              >
-                «
-              </button>
-              <button
-                v-for="page in pageNumbers"
-                :key="page"
-                class="join-item btn btn-sm"
-                :class="{ 'btn-active': page === currentPage }"
-                :aria-label="t('jobsPage.pageAria', { page })"
-                @click="currentPage = page"
-              >
-                {{ page }}
-              </button>
-              <button
-                class="join-item btn btn-sm"
-                :aria-label="t('jobsPage.nextPageAria')"
-                :disabled="currentPage === totalPages"
-                @click="currentPage++"
-              >
-                »
-              </button>
-            </div>
-          </div>
+          <AppPagination
+            v-if="totalPages > 1"
+            v-model:current-page="currentPage"
+            :total-pages="totalPages"
+            :page-numbers="pageNumbers"
+            :summary="jobsPaginationSummary"
+            :navigation-aria="t('jobsPage.pagination.navigationAria')"
+            :previous-aria="t('jobsPage.pagination.previousAria')"
+            :next-aria="t('jobsPage.pagination.nextAria')"
+            :page-aria="(page: number) => t('jobsPage.pagination.pageAria', { page })"
+          />
         </div>
       </div>
     </SectionGrid>
