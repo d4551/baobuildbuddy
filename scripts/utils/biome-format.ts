@@ -1,13 +1,21 @@
+import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 const REPO_ROOT = resolve(import.meta.dir, "../..");
-const BIOME_EXECUTABLE_PATH = join(
-  REPO_ROOT,
-  "node_modules",
-  ".bin",
-  process.platform === "win32" ? "biome.cmd" : "biome",
-);
+
+const resolveBiomeExecutable = (): string => {
+  const binDir = join(REPO_ROOT, "node_modules", ".bin");
+  if (process.platform === "win32") {
+    const exe = join(binDir, "biome.exe");
+    if (existsSync(exe)) return exe;
+    const cmd = join(binDir, "biome.cmd");
+    if (existsSync(cmd)) return cmd;
+  }
+  return join(binDir, "biome");
+};
+
+const BIOME_EXECUTABLE_PATH = resolveBiomeExecutable();
 const TEXT_ENCODER = new TextEncoder();
 
 const readStreamText = async (
