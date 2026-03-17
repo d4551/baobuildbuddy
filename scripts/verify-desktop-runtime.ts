@@ -695,6 +695,9 @@ const buildLaunchOptions = (executablePath: string): PlaywrightLaunchOptions => 
   return launchOptions;
 };
 
+const BROWSER_LAUNCH_MAX_ATTEMPTS = process.platform === "win32" ? 3 : 1;
+const BROWSER_LAUNCH_RETRY_DELAY_MS = 3_000;
+
 const launchVerificationBrowser = async (playwrightModule: {
   chromium: PlaywrightChromium;
 }): Promise<BrowserInstance> => {
@@ -719,7 +722,24 @@ const launchVerificationBrowser = async (playwrightModule: {
   await writeOutput(
     `desktop-runtime: launching verification browser from ${browserExecutablePath}`,
   );
-  return playwrightModule.chromium.launch(buildLaunchOptions(browserExecutablePath));
+
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= BROWSER_LAUNCH_MAX_ATTEMPTS; attempt++) {
+    const result = await captureResult(() =>
+      playwrightModule.chromium.launch(buildLaunchOptions(browserExecutablePath)),
+    );
+    if (result.ok) {
+      return result.value;
+    }
+    lastError = result.error;
+    if (attempt < BROWSER_LAUNCH_MAX_ATTEMPTS) {
+      await writeOutput(
+        `desktop-runtime: browser launch attempt ${attempt}/${BROWSER_LAUNCH_MAX_ATTEMPTS} failed, retrying in ${BROWSER_LAUNCH_RETRY_DELAY_MS}ms...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, BROWSER_LAUNCH_RETRY_DELAY_MS));
+    }
+  }
+  throw lastError;
 };
 
 const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<BrowserCheckResult> => {

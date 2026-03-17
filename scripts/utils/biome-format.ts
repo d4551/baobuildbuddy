@@ -1,27 +1,15 @@
-import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 
 const REPO_ROOT = resolve(import.meta.dir, "../..");
 
-const resolveBiomeExecutable = (): string => {
-  const binDir = join(REPO_ROOT, "node_modules", ".bin");
-  if (process.platform === "win32") {
-    const exe = join(binDir, "biome.exe");
-    if (existsSync(exe)) return exe;
-    const cmd = join(binDir, "biome.cmd");
-    if (existsSync(cmd)) return cmd;
-  }
-  const fallback = join(binDir, "biome");
-  if (!existsSync(fallback)) {
-    throw new Error(
-      `Biome executable not found in ${binDir}. Run bun install to install dependencies.`,
-    );
-  }
-  return fallback;
-};
-
-const BIOME_EXECUTABLE_PATH = resolveBiomeExecutable();
+/**
+ * Build the command prefix used to invoke Biome. Uses `bunx` (i.e. `bun x`)
+ * so that Bun resolves the locally-installed @biomejs/biome binary itself,
+ * which works consistently across Windows, macOS and Linux regardless of
+ * the extension or shim format that `bun install` wrote into node_modules/.bin/.
+ */
+const BIOME_COMMAND_PREFIX = [process.execPath, "x", "biome"];
 const TEXT_ENCODER = new TextEncoder();
 
 const readStreamText = async (
@@ -38,7 +26,7 @@ const formatTextWithBiomeFromStdin = async (
   filePathHint: string,
   text: string,
 ): Promise<string> => {
-  const proc = Bun.spawn([BIOME_EXECUTABLE_PATH, "format", `--stdin-file-path=${filePathHint}`], {
+  const proc = Bun.spawn([...BIOME_COMMAND_PREFIX, "format", `--stdin-file-path=${filePathHint}`], {
     cwd: REPO_ROOT,
     env: process.env,
     stdin: TEXT_ENCODER.encode(text),
@@ -73,7 +61,7 @@ export const formatFilesWithBiome = async (filePaths: readonly string[]): Promis
     return;
   }
 
-  const proc = Bun.spawn([BIOME_EXECUTABLE_PATH, "format", ...filePaths, "--write"], {
+  const proc = Bun.spawn([...BIOME_COMMAND_PREFIX, "format", ...filePaths, "--write"], {
     cwd: REPO_ROOT,
     env: process.env,
     stdout: "pipe",
