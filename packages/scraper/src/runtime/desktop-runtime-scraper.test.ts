@@ -43,7 +43,7 @@ await writeJsonFile(requiredPackageManifestPath, {
 const requiredPackageRoot = await realpath(join(fixtureRoot, "node_modules", "required-dependency"));
 
 const nodeModule: typeof NodeModuleNamespace = await import("node:module");
-void mock.module("node:module", () => ({
+await mock.module("node:module", () => ({
   ...nodeModule,
   createRequire: () => ({
     resolve(specifier: string): string {
