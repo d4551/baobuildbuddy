@@ -175,6 +175,7 @@ const resolvedWsBase =
 export default defineNuxtConfig({
   modules: ["@nuxt/image", "@nuxt/test-utils/module"],
   compatibilityDate: NUXT_COMPATIBILITY_DATE,
+  buildDir: ".nuxt",
   devtools: { enabled: true },
 
   devServer: {

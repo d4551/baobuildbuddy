@@ -598,6 +598,10 @@ const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
   await withCleanup(
     async () => {
       await writeOutput("desktop-runtime: generating static Nuxt desktop frontend");
+      const clientNuxtDir = join(CLIENT_ROOT, ".nuxt");
+      const clientOutputDir = join(CLIENT_ROOT, ".output");
+      await rm(clientNuxtDir, { recursive: true, force: true });
+      await rm(clientOutputDir, { recursive: true, force: true });
       await runCommand([process.execPath, "run", "--filter", "@bao/client", "generate"], {
         env: {
           ...process.env,

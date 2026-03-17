@@ -1,10 +1,17 @@
+import { mkdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { captureResult, toErrorMessage } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_PACKAGE_ROOT = join(REPO_ROOT, "packages", "desktop");
+const DESKTOP_TAURI_ROOT = join(DESKTOP_PACKAGE_ROOT, "src-tauri");
 const DESKTOP_CLEANUP_SCRIPT_PATH = join(REPO_ROOT, "scripts", "cleanup-desktop-build.ts");
+const DESKTOP_TAURI_TARGET_ROOTS = [
+  join(DESKTOP_TAURI_ROOT, "target"),
+  join(DESKTOP_TAURI_ROOT, "target-linux"),
+] as const;
+const CARGO_BUILD_PROFILES = ["debug", "release"] as const;
 
 type HostDesktopTarget = {
   readonly name: "linux" | "macos" | "windows";
@@ -69,6 +76,18 @@ const resolveHostDesktopTarget = (): HostDesktopTarget => {
 const isDebugDesktopBuild = (tauriArgs: readonly string[]): boolean =>
   tauriArgs.includes("--debug");
 
+const ensureDesktopTargetDirectories = async (): Promise<void> => {
+  await Promise.all(
+    DESKTOP_TAURI_TARGET_ROOTS.flatMap((targetRoot) =>
+      CARGO_BUILD_PROFILES.map((profile) =>
+        mkdir(join(targetRoot, profile, "deps"), {
+          recursive: true,
+        }),
+      ),
+    ),
+  );
+};
+
 const buildDesktopTarget = async (
   hostTarget: HostDesktopTarget,
   tauriArgs: readonly string[],
@@ -125,6 +144,7 @@ const main = async (): Promise<void> => {
   const tauriArgs = process.argv.slice(2);
   const hostTarget = resolveHostDesktopTarget();
   await runMacosPrebuildCleanup();
+  await ensureDesktopTargetDirectories();
   await writeOutput(`desktop-build: running standard host-local Tauri flow for ${hostTarget.name}`);
   await buildDesktopTarget(hostTarget, tauriArgs);
   if (!isDebugDesktopBuild(tauriArgs)) {
