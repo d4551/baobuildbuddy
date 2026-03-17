@@ -3,6 +3,7 @@ import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 let createdId: string;
+let generatedId: string;
 
 beforeAll(async () => {
   const dbModule = await import("../db/client");
@@ -85,10 +86,66 @@ function registerUpdateAndDeleteTests(): void {
   });
 }
 
+function registerDynamicGenerationTests(): void {
+  test("POST /api/cover-letters/generate returns unsaved dynamic content", async () => {
+    const res = await requestJson<{
+      message: string;
+      content: { introduction: string; body: string; conclusion: string };
+    }>(app, "POST", "/api/cover-letters/generate", {
+      company: "Studio Nova",
+      position: "Narrative Designer",
+      jobInfo: {
+        location: "Remote",
+        focus: "Co-op action RPG",
+      },
+      save: false,
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.content.introduction.length).toBeGreaterThan(0);
+    expect(res.body.content.body.length).toBeGreaterThan(0);
+    expect(res.body.content.conclusion.length).toBeGreaterThan(0);
+  });
+
+  test("POST /api/cover-letters/generate persists a saved cover letter", async () => {
+    const res = await requestJson<{
+      message: string;
+      coverLetter: { id: string; company: string; content: Record<string, unknown> };
+    }>(app, "POST", "/api/cover-letters/generate", {
+      company: "Studio Nova",
+      position: "Systems Designer",
+      save: true,
+    });
+    expect(res.status).toBe(201);
+    expect(res.body.coverLetter.id).toBeDefined();
+    expect(res.body.coverLetter.company).toBe("Studio Nova");
+    generatedId = res.body.coverLetter.id;
+  });
+
+  test("POST /api/cover-letters/:id/export returns a PDF attachment", async () => {
+    const response = await app.handle(
+      new Request(`http://localhost/api/cover-letters/${generatedId}/export`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ format: "pdf" }),
+      }),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("application/pdf");
+    expect(response.headers.get("content-disposition")).toContain(
+      `cover-letter-${generatedId}.pdf`,
+    );
+    expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
+  });
+}
+
 describe("cover-letter routes create/read", () => {
   registerCreateAndReadTests();
 });
 
 describe("cover-letter routes update/delete", () => {
   registerUpdateAndDeleteTests();
+});
+
+describe("cover-letter routes generation/export", () => {
+  registerDynamicGenerationTests();
 });

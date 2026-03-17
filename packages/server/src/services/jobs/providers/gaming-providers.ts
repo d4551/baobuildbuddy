@@ -105,6 +105,9 @@ export class HitmarkerProvider implements JobProvider {
       });
     }
     const providerSettings = providerSettingsResult.value;
+    if (!providerSettings.hitmarkerEnabled) {
+      return logProviderSkip(this.name, "provider_disabled");
+    }
     const query = filters?.query || providerSettings.hitmarkerDefaultQuery;
     const requestUrl = new URL(providerSettings.hitmarkerApiBaseUrl);
     requestUrl.searchParams.set("search", query);

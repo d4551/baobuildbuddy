@@ -55,6 +55,7 @@ const createJobProviderSettings = (overrides?: {
     gamingBoardResultLimit: 20,
     unknownLocationLabel: "Unknown location",
     unknownCompanyLabel: "Unknown company",
+    hitmarkerEnabled: true,
     hitmarkerApiBaseUrl: "https://example.com/hitmarker",
     hitmarkerDefaultQuery: "designer",
     hitmarkerDefaultLocation: "Remote",

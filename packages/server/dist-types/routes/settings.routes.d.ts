@@ -113,6 +113,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         gamingBoardResultLimit: number;
                         unknownLocationLabel: string;
                         unknownCompanyLabel: string;
+                        hitmarkerEnabled: boolean;
                         hitmarkerApiBaseUrl: string;
                         hitmarkerDefaultQuery: string;
                         hitmarkerDefaultLocation: string;

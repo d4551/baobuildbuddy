@@ -306,6 +306,7 @@ const jobProviderSettingsBodySchema = t.Object({
   gamingBoardResultLimit: t.Number({ minimum: 1, maximum: SCHEMA_MAX_BOARD_RESULT_LIMIT }),
   unknownLocationLabel: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
   unknownCompanyLabel: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  hitmarkerEnabled: t.Boolean(),
   hitmarkerApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
   hitmarkerDefaultQuery: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
   hitmarkerDefaultLocation: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),

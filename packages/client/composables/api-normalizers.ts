@@ -160,6 +160,162 @@ const SPEECH_AUDIO_FORMATS: readonly AutomationSettings["speech"]["tts"]["format
   "wav",
 ];
 
+const COMPANY_BOARD_ATS_TYPES: readonly AutomationSettings["jobProviders"]["companyBoards"][number]["type"][] =
+  [
+    "greenhouse",
+    "lever",
+    "recruitee",
+    "workable",
+    "ashby",
+    "smartrecruiters",
+    "teamtailor",
+    "workday",
+  ];
+
+const GAMING_PORTAL_IDS: readonly AutomationSettings["jobProviders"]["gamingPortals"][number]["id"][] = [
+  "hitmarker",
+  "grackle",
+  "workwithindies",
+  "remotegamejobs",
+  "gamesjobsdirect",
+  "pocketgamer",
+];
+
+const normalizeGreenhouseBoards = (
+  value: unknown,
+): AutomationSettings["jobProviders"]["greenhouseBoards"] =>
+  Array.isArray(value)
+    ? value.filter(isRecord).map((board) => ({
+        board: asString(board.board) ?? "",
+        company: asString(board.company) ?? "",
+        enabled: asBoolean(board.enabled) ?? false,
+      }))
+    : DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseBoards;
+
+const normalizeLeverCompanies = (value: unknown): AutomationSettings["jobProviders"]["leverCompanies"] =>
+  Array.isArray(value)
+    ? value.filter(isRecord).map((company) => ({
+        slug: asString(company.slug) ?? "",
+        company: asString(company.company) ?? "",
+        enabled: asBoolean(company.enabled) ?? false,
+      }))
+    : DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverCompanies;
+
+const normalizeCompanyBoardTemplates = (
+  value: unknown,
+): AutomationSettings["jobProviders"]["companyBoardApiTemplates"] => {
+  if (!isRecord(value)) {
+    return DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates;
+  }
+
+  return {
+    greenhouse:
+      asString(value.greenhouse) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.greenhouse,
+    lever:
+      asString(value.lever) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.lever,
+    recruitee:
+      asString(value.recruitee) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.recruitee,
+    workable:
+      asString(value.workable) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.workable,
+    ashby:
+      asString(value.ashby) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.ashby,
+    smartrecruiters:
+      asString(value.smartrecruiters) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.smartrecruiters,
+    teamtailor:
+      asString(value.teamtailor) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.teamtailor,
+    workday:
+      asString(value.workday) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.workday,
+  };
+};
+
+const normalizeCompanyBoards = (value: unknown): AutomationSettings["jobProviders"]["companyBoards"] =>
+  Array.isArray(value)
+    ? value.filter(isRecord).map((board) => ({
+        name: asString(board.name) ?? "",
+        token: asString(board.token) ?? "",
+        type: asEnum(board.type, COMPANY_BOARD_ATS_TYPES) ?? "greenhouse",
+        enabled: asBoolean(board.enabled) ?? false,
+        priority: asNumber(board.priority) ?? 0,
+      }))
+    : DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoards;
+
+const normalizeGamingPortals = (value: unknown): AutomationSettings["jobProviders"]["gamingPortals"] => {
+  if (!Array.isArray(value)) {
+    return DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals;
+  }
+
+  const configuredPortals = value.filter(isRecord);
+  return DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals.map((defaultPortal, index) => {
+    const matchedPortal =
+      configuredPortals.find(
+        (portal) => asEnum(portal.id, GAMING_PORTAL_IDS) === defaultPortal.id,
+      ) ?? configuredPortals[index];
+
+    return {
+      id: defaultPortal.id,
+      name: asString(matchedPortal?.name) ?? defaultPortal.name,
+      source: asString(matchedPortal?.source) ?? defaultPortal.source,
+      fallbackUrl: asString(matchedPortal?.fallbackUrl) ?? defaultPortal.fallbackUrl,
+      enabled: asBoolean(matchedPortal?.enabled) ?? defaultPortal.enabled,
+    };
+  });
+};
+
+const normalizeJobProviderSettings = (value: unknown): AutomationSettings["jobProviders"] => {
+  if (!isRecord(value)) {
+    return DEFAULT_AUTOMATION_SETTINGS.jobProviders;
+  }
+
+  return {
+    ...DEFAULT_AUTOMATION_SETTINGS.jobProviders,
+    providerTimeoutMs:
+      asNumber(value.providerTimeoutMs) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.providerTimeoutMs,
+    companyBoardResultLimit:
+      asNumber(value.companyBoardResultLimit) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardResultLimit,
+    gamingBoardResultLimit:
+      asNumber(value.gamingBoardResultLimit) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingBoardResultLimit,
+    unknownLocationLabel:
+      asString(value.unknownLocationLabel) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownLocationLabel,
+    unknownCompanyLabel:
+      asString(value.unknownCompanyLabel) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownCompanyLabel,
+    hitmarkerEnabled:
+      asBoolean(value.hitmarkerEnabled) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerEnabled,
+    hitmarkerApiBaseUrl:
+      asString(value.hitmarkerApiBaseUrl) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerApiBaseUrl,
+    hitmarkerDefaultQuery:
+      asString(value.hitmarkerDefaultQuery) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultQuery,
+    hitmarkerDefaultLocation:
+      asString(value.hitmarkerDefaultLocation) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultLocation,
+    greenhouseApiBaseUrl:
+      asString(value.greenhouseApiBaseUrl) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseApiBaseUrl,
+    greenhouseMaxPages:
+      asNumber(value.greenhouseMaxPages) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseMaxPages,
+    greenhouseBoards: normalizeGreenhouseBoards(value.greenhouseBoards),
+    leverApiBaseUrl:
+      asString(value.leverApiBaseUrl) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverApiBaseUrl,
+    leverMaxPages:
+      asNumber(value.leverMaxPages) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverMaxPages,
+    leverCompanies: normalizeLeverCompanies(value.leverCompanies),
+    companyBoardApiTemplates: normalizeCompanyBoardTemplates(value.companyBoardApiTemplates),
+    companyBoards: normalizeCompanyBoards(value.companyBoards),
+    gamingPortals: normalizeGamingPortals(value.gamingPortals),
+  };
+};
+
 const normalizeSpeechSettings = (value: unknown): AutomationSettings["speech"] => {
   if (!isRecord(value)) {
     return {
@@ -222,6 +378,7 @@ const normalizeAutomationSettings = (value: unknown): AutomationSettings | undef
     autoSaveScreenshots:
       asBoolean(value.autoSaveScreenshots) ?? DEFAULT_AUTOMATION_SETTINGS.autoSaveScreenshots,
     speech: normalizeSpeechSettings(value.speech),
+    jobProviders: normalizeJobProviderSettings(value.jobProviders),
   };
 };
 

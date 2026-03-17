@@ -42,13 +42,17 @@ async function getAIService(): Promise<AIService> {
 }
 
 function extractJson(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    return trimmed;
+  }
   const codeFence = text.match(JSON_CODE_FENCE_PATTERN);
   if (codeFence?.[1]) return codeFence[1].trim();
-  const arrayMatch = text.match(JSON_ARRAY_PATTERN);
-  if (arrayMatch) return arrayMatch[0];
   const objectMatch = text.match(JSON_OBJECT_PATTERN);
   if (objectMatch) return objectMatch[0];
-  return text.trim();
+  const arrayMatch = text.match(JSON_ARRAY_PATTERN);
+  if (arrayMatch) return arrayMatch[0];
+  return trimmed;
 }
 
 export class CvQuestionnaireService {

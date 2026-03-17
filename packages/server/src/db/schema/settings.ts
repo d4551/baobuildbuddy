@@ -3,6 +3,9 @@ import {
   AI_PROVIDER_DEFAULT_ORDER,
   DEFAULT_SETTINGS_ID,
   DEFAULT_BRAND_SETTINGS,
+  DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  DEFAULT_NOTIFICATION_PREFERENCES,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
   THEME_NAMES,
@@ -27,16 +30,16 @@ export const settings = sqliteTable("settings", {
     .default(sql.raw(`'${JSON.stringify(DEFAULT_BRAND_SETTINGS).replaceAll("'", "''")}'`)),
   notifications: text("notifications", { mode: "json" })
     .$type<Record<string, boolean>>()
-    .default(sql`'{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}'`),
+    .default(
+      sql.raw(`'${JSON.stringify(DEFAULT_NOTIFICATION_PREFERENCES).replaceAll("'", "''")}'`),
+    ),
   automationSettings: text("automation_settings", { mode: "json" })
     .$type<AutomationSettings>()
-    .default(
-      sql`'{"headless":true,"defaultTimeout":30,"screenshotRetention":7,"maxConcurrentRuns":1,"defaultBrowser":"chrome","enableSmartSelectors":true,"autoSaveScreenshots":true}'`,
-    ),
+    .default(sql.raw(`'${JSON.stringify(DEFAULT_AUTOMATION_SETTINGS).replaceAll("'", "''")}'`)),
   emailTransportSettings: text("email_transport_settings", { mode: "json" })
     .$type<EmailTransportSettings>()
     .default(
-      sql`'{"host":"","port":587,"security":"starttls","username":"","fromEmail":"","fromName":"","authMethod":"plain","connectionTimeoutSeconds":15}'`,
+      sql.raw(`'${JSON.stringify(DEFAULT_EMAIL_TRANSPORT_SETTINGS).replaceAll("'", "''")}'`),
     ),
   emailTransportPassword: text("email_transport_password"),
   createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),

@@ -26,6 +26,7 @@ const TEST_JOB_PROVIDER_SETTINGS: JobProviderSettings = {
   gamingBoardResultLimit: 25,
   unknownLocationLabel: "Unknown location",
   unknownCompanyLabel: "Unknown company",
+  hitmarkerEnabled: true,
   hitmarkerApiBaseUrl: "https://api.hitmarker.test/jobs",
   hitmarkerDefaultQuery: "engineer",
   hitmarkerDefaultLocation: "Remote",

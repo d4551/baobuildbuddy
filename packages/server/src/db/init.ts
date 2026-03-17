@@ -1,16 +1,32 @@
 import type { Database } from "bun:sqlite";
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
+  DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_BRAND_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  DEFAULT_PROFILE_ID,
+  DEFAULT_SETTINGS_ID,
   RESUME_DEFAULT_NAME,
   RESUME_DEFAULT_THEME,
   RESUME_TEMPLATE_DEFAULT,
 } from "@bao/shared";
 
 const escapeSqlString = (value: string): string => value.replaceAll("'", "''");
+const DEFAULT_BRAND_SETTINGS_SQL = escapeSqlString(JSON.stringify(DEFAULT_BRAND_SETTINGS));
+const DEFAULT_NOTIFICATION_PREFERENCES_SQL = escapeSqlString(
+  JSON.stringify(DEFAULT_NOTIFICATION_PREFERENCES),
+);
+const DEFAULT_AUTOMATION_SETTINGS_SQL = escapeSqlString(
+  JSON.stringify(DEFAULT_AUTOMATION_SETTINGS),
+);
+const DEFAULT_EMAIL_TRANSPORT_SETTINGS_SQL = escapeSqlString(
+  JSON.stringify(DEFAULT_EMAIL_TRANSPORT_SETTINGS),
+);
 
 const TABLE_DEFINITIONS = [
   `CREATE TABLE IF NOT EXISTS user_profile (
-      id TEXT PRIMARY KEY DEFAULT 'default',
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
       name TEXT NOT NULL DEFAULT '',
       email TEXT,
       phone TEXT,
@@ -30,7 +46,7 @@ const TABLE_DEFINITIONS = [
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
   `CREATE TABLE IF NOT EXISTS settings (
-      id TEXT PRIMARY KEY DEFAULT 'default',
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_SETTINGS_ID}',
       gemini_api_key TEXT,
       openai_api_key TEXT,
       claude_api_key TEXT,
@@ -42,16 +58,16 @@ const TABLE_DEFINITIONS = [
       preferred_models TEXT,
       theme TEXT DEFAULT 'bao-light',
       language TEXT DEFAULT 'en-US',
-      brand_settings TEXT DEFAULT '{"name":"BaoBuildBuddy","assistantName":"Bao","apiName":"BaoBuildBuddy API","logoPath":"/favicon.svg","faviconPath":"/favicon.svg","typography":{"fontStylesheetUrl":"","displayFontFamily":"\\"Space Grotesk\\", \\"Avenir Next\\", \\"Segoe UI\\", sans-serif","bodyFontFamily":"\\"DM Sans\\", \\"Inter\\", \\"Segoe UI\\", sans-serif","monoFontFamily":"\\"JetBrains Mono\\", \\"SFMono-Regular\\", \\"SF Mono\\", Consolas, \\"Liberation Mono\\", monospace"},"lightTheme":{"base100":"oklch(99% 0.005 255)","base200":"oklch(96% 0.008 255)","base300":"oklch(92% 0.012 255)","baseContent":"oklch(22% 0.025 255)","primary":"oklch(42% 0.17 260)","primaryContent":"oklch(98% 0.01 260)","secondary":"oklch(40% 0.11 210)","secondaryContent":"oklch(98% 0.01 210)","accent":"oklch(45% 0.13 150)","accentContent":"oklch(98% 0.01 150)","neutral":"oklch(30% 0.02 260)","neutralContent":"oklch(95% 0.01 260)","info":"oklch(44% 0.13 240)","infoContent":"oklch(98% 0.01 240)","success":"oklch(44% 0.12 155)","successContent":"oklch(98% 0.01 155)","warning":"oklch(78% 0.15 90)","warningContent":"oklch(18% 0.035 90)","error":"oklch(45% 0.16 30)","errorContent":"oklch(98% 0.01 30)","radiusSelector":"0.5rem","radiusField":"0.5rem","radiusBox":"1rem","sizeSelector":"0.25rem","sizeField":"0.25rem","border":"1px","depth":"1","noise":"0"},"darkTheme":{"base100":"oklch(14% 0.02 260)","base200":"oklch(11% 0.024 260)","base300":"oklch(8% 0.028 260)","baseContent":"oklch(95% 0.015 260)","primary":"oklch(72% 0.16 260)","primaryContent":"oklch(16% 0.02 260)","secondary":"oklch(70% 0.11 210)","secondaryContent":"oklch(16% 0.02 210)","accent":"oklch(74% 0.13 150)","accentContent":"oklch(16% 0.02 150)","neutral":"oklch(26% 0.02 260)","neutralContent":"oklch(92% 0.01 260)","info":"oklch(72% 0.12 240)","infoContent":"oklch(15% 0.02 240)","success":"oklch(74% 0.12 155)","successContent":"oklch(15% 0.02 155)","warning":"oklch(82% 0.14 90)","warningContent":"oklch(15% 0.03 90)","error":"oklch(72% 0.15 30)","errorContent":"oklch(15% 0.03 30)","radiusSelector":"0.5rem","radiusField":"0.5rem","radiusBox":"1rem","sizeSelector":"0.25rem","sizeField":"0.25rem","border":"1px","depth":"1","noise":"1"},"content":{"tagline":"Career OS for Game Industry Hiring","defaultTitle":"Career OS for Game Industry Hiring","defaultDescription":"Plan applications, tailor resumes, prep interviews, and run job-search automation from one workspace built for game industry hiring.","contentOverrides":{}}}',
-      notifications TEXT DEFAULT '{"achievements":true,"dailyChallenges":true,"levelUp":true,"jobAlerts":true}',
-      automation_settings TEXT DEFAULT '{"headless":true,"defaultTimeout":30,"screenshotRetention":7,"maxConcurrentRuns":1,"defaultBrowser":"chrome","enableSmartSelectors":true,"autoSaveScreenshots":true}',
-      email_transport_settings TEXT DEFAULT '{"host":"","port":587,"security":"starttls","username":"","fromEmail":"","fromName":"","authMethod":"plain","connectionTimeoutSeconds":15}',
+      brand_settings TEXT DEFAULT '${DEFAULT_BRAND_SETTINGS_SQL}',
+      notifications TEXT DEFAULT '${DEFAULT_NOTIFICATION_PREFERENCES_SQL}',
+      automation_settings TEXT DEFAULT '${DEFAULT_AUTOMATION_SETTINGS_SQL}',
+      email_transport_settings TEXT DEFAULT '${DEFAULT_EMAIL_TRANSPORT_SETTINGS_SQL}',
       email_transport_password TEXT,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
   `CREATE TABLE IF NOT EXISTS auth (
-      id TEXT PRIMARY KEY DEFAULT 'default',
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
       api_key TEXT
     )`,
   `CREATE TABLE IF NOT EXISTS jobs (
@@ -176,7 +192,7 @@ const TABLE_DEFINITIONS = [
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
   `CREATE TABLE IF NOT EXISTS gamification (
-      id TEXT PRIMARY KEY DEFAULT 'default',
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
       xp INTEGER DEFAULT 0,
       level INTEGER DEFAULT 1,
       achievements TEXT DEFAULT '[]',
@@ -256,9 +272,16 @@ const AUTOMATION_RUNS_REQUIRED_COLUMNS = {
 } as const;
 
 const SETTINGS_REQUIRED_COLUMNS = {
-  email_transport_settings: `TEXT DEFAULT '{"host":"","port":587,"security":"starttls","username":"","fromEmail":"","fromName":"","authMethod":"plain","connectionTimeoutSeconds":15}'`,
+  email_transport_settings: `TEXT DEFAULT '${DEFAULT_EMAIL_TRANSPORT_SETTINGS_SQL}'`,
   email_transport_password: "TEXT",
 } as const;
+
+const ensureSingletonRows = (sqlite: Database): void => {
+  sqlite.exec(`INSERT OR IGNORE INTO settings (id) VALUES ('${DEFAULT_SETTINGS_ID}')`);
+  sqlite.exec(`INSERT OR IGNORE INTO auth (id) VALUES ('${DEFAULT_PROFILE_ID}')`);
+  sqlite.exec(`INSERT OR IGNORE INTO gamification (id) VALUES ('${DEFAULT_PROFILE_ID}')`);
+  sqlite.exec(`INSERT OR IGNORE INTO user_profile (id) VALUES ('${DEFAULT_PROFILE_ID}')`);
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -318,4 +341,6 @@ export function initializeDatabase(sqlite: Database): void {
   for (const indexSql of INDEXES) {
     sqlite.exec(indexSql);
   }
+
+  ensureSingletonRows(sqlite);
 }

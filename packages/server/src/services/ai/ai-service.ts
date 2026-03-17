@@ -130,8 +130,115 @@ function buildDeterministicFinalAnalysis(): string {
   });
 }
 
+function buildDeterministicCvQuestionnaire(): string {
+  return JSON.stringify([
+    {
+      id: "personal-name",
+      question: "What name and preferred contact details should appear on your resume?",
+      category: "personal",
+    },
+    {
+      id: "summary-impact",
+      question: "What kind of gameplay impact or player-facing outcomes are you most proud of?",
+      category: "summary",
+    },
+    {
+      id: "experience-role",
+      question:
+        "Which game-industry roles, teams, or shipped features best represent your experience?",
+      category: "experience",
+    },
+    {
+      id: "skills-stack",
+      question: "Which tools, engines, or programming languages do you rely on most often?",
+      category: "skills",
+    },
+  ]);
+}
+
+function buildDeterministicSynthesizedResume(): string {
+  return JSON.stringify({
+    personalInfo: {
+      name: "Test Candidate",
+      email: "candidate@example.test",
+      phone: "",
+      location: "Remote",
+      linkedIn: "",
+      portfolio: "https://portfolio.example.test",
+    },
+    summary:
+      "Gameplay-focused developer with a track record of shipping player-facing systems and collaborating with cross-functional teams.",
+    experience: [
+      {
+        title: "Gameplay Programmer",
+        company: "Test Studio",
+        startDate: "2023",
+        endDate: "Present",
+        location: "Remote",
+        description: "Built and tuned combat and progression systems for a live game.",
+        achievements: [
+          "Shipped feature updates with designers and QA",
+          "Improved iteration speed with tooling automation",
+        ],
+      },
+    ],
+    education: [
+      {
+        degree: "BSc",
+        field: "Computer Science",
+        school: "Test University",
+        year: "2022",
+        gpa: "",
+      },
+    ],
+    skills: {
+      technical: ["TypeScript", "Bun", "Gameplay Systems"],
+      soft: ["Collaboration", "Communication"],
+      gaming: ["Combat Design", "Live Ops"],
+    },
+    projects: [
+      {
+        title: "Combat Sandbox",
+        description: "Prototype focused on encounter pacing and enemy readability.",
+        technologies: ["Bun", "TypeScript"],
+        link: "https://portfolio.example.test/projects/combat-sandbox",
+      },
+    ],
+    gamingExperience: {
+      gameEngines: "Unreal Engine, Unity",
+      platforms: "PC, Console",
+      genres: "Action RPG, Co-op Shooter",
+      shippedTitles: "1 released title",
+    },
+  });
+}
+
+function buildDeterministicCoverLetterContent(): string {
+  return JSON.stringify({
+    introduction:
+      "I am excited to apply for this role because it aligns with the kind of systems-driven game development work I enjoy most.",
+    body: "My recent work has focused on building player-facing gameplay systems, collaborating closely with designers, and turning feedback into polished features that ship reliably.",
+    conclusion:
+      "I would welcome the chance to contribute that same product-minded approach to your team.",
+  });
+}
+
 function buildDeterministicContent(prompt: string): string {
   const normalizedPrompt = prompt.toLowerCase();
+
+  if (
+    normalizedPrompt.includes("generate 8-12 interview-style questions") &&
+    normalizedPrompt.includes("return a json array")
+  ) {
+    return buildDeterministicCvQuestionnaire();
+  }
+
+  if (
+    normalizedPrompt.includes("structured resume (resumedata) json object") ||
+    normalizedPrompt.includes("return only valid json matching this structure")
+  ) {
+    return buildDeterministicSynthesizedResume();
+  }
 
   if (
     normalizedPrompt.includes('"overallscore": 0-100') &&
@@ -153,6 +260,13 @@ function buildDeterministicContent(prompt: string): string {
     normalizedPrompt.includes("interview")
   ) {
     return buildDeterministicQuestionSet(prompt);
+  }
+
+  if (
+    normalizedPrompt.includes("write a compelling cover letter") &&
+    normalizedPrompt.includes("respond with a json object containing three fields")
+  ) {
+    return buildDeterministicCoverLetterContent();
   }
 
   return "Deterministic test response.";

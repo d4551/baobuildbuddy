@@ -23,6 +23,7 @@ import type { AIProviderType } from "../types/ai";
 import {
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  DEFAULT_JOB_PROVIDER_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "../types/settings";
 import { DEFAULT_BRAND_SETTINGS } from "../constants/branding";
@@ -105,6 +106,7 @@ export const jobProviderSettingsSchema = z.object({
   gamingBoardResultLimit: z.number().int().min(1).max(200),
   unknownLocationLabel: z.string().trim().min(1).max(100),
   unknownCompanyLabel: z.string().trim().min(1).max(100),
+  hitmarkerEnabled: z.boolean().default(DEFAULT_JOB_PROVIDER_SETTINGS.hitmarkerEnabled),
   hitmarkerApiBaseUrl: z.string().url(),
   hitmarkerDefaultQuery: z.string().trim().min(1).max(100),
   hitmarkerDefaultLocation: z.string().trim().min(1).max(100),
@@ -298,7 +300,7 @@ export const automationSettingsSchema = z
     enableSmartSelectors: z.boolean().default(true),
     autoSaveScreenshots: z.boolean().default(true),
     speech: speechSettingsSchema.default(DEFAULT_AUTOMATION_SETTINGS.speech),
-    jobProviders: jobProviderSettingsSchema.optional(),
+    jobProviders: jobProviderSettingsSchema.default(DEFAULT_JOB_PROVIDER_SETTINGS),
   })
   .default(DEFAULT_AUTOMATION_SETTINGS);
 

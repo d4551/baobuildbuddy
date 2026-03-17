@@ -355,6 +355,7 @@ export declare const app: Elysia<"/api", {
                             gamingBoardResultLimit: number;
                             unknownLocationLabel: string;
                             unknownCompanyLabel: string;
+                            hitmarkerEnabled: boolean;
                             hitmarkerApiBaseUrl: string;
                             hitmarkerDefaultQuery: string;
                             hitmarkerDefaultLocation: string;

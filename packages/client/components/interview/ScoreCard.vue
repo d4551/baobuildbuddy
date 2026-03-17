@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 interface ScoreAnalysis {
