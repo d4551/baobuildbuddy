@@ -149,21 +149,14 @@ const collectWorkspacePackageSummaries = async (): Promise<WorkspacePackageSumma
 
 const collectAutomationClientPages = async (): Promise<string[]> => {
   const pageGlob = new Bun.Glob("packages/client/pages/automation/**/*.vue");
-  const nestedPaths = await Array.fromAsync(
+  const paths = await Array.fromAsync(
     pageGlob.scan({
       cwd: REPO_ROOT,
       onlyFiles: true,
     }),
   );
-  const rootPageGlob = new Bun.Glob("packages/client/pages/automation/*.vue");
-  const rootPaths = await Array.fromAsync(
-    rootPageGlob.scan({
-      cwd: REPO_ROOT,
-      onlyFiles: true,
-    }),
-  );
 
-  return [...nestedPaths, ...rootPaths].sort((left, right) => left.localeCompare(right));
+  return paths.sort((left, right) => left.localeCompare(right));
 };
 
 const collectProtocolFiles = async (): Promise<string[]> => {
