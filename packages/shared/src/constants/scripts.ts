@@ -36,10 +36,22 @@ export const DESKTOP_RELEASE_METADATA_DIR = "metadata" as const;
 export const DESKTOP_RELEASE_PROVENANCE_FILENAME = "provenance.json" as const;
 
 /** Canonical macOS desktop release architecture label. */
-export const DESKTOP_RELEASE_MACOS_ARCH = "aarch64" as const;
+export const DESKTOP_RELEASE_MACOS_AARCH64_ARCH = "aarch64" as const;
+
+/** Canonical macOS Apple Silicon archive label used by dmg filenames. */
+export const DESKTOP_RELEASE_MACOS_X64_ARCH = "x86_64" as const;
+
+/** Canonical macOS Universal archive label used by dmg filenames. */
+export const DESKTOP_RELEASE_MACOS_UNIVERSAL_ARCH = "universal" as const;
 
 /** Canonical macOS desktop release target triple. */
-export const DESKTOP_RELEASE_MACOS_TARGET = "aarch64-apple-darwin" as const;
+export const DESKTOP_RELEASE_MACOS_AARCH64_TARGET = "aarch64-apple-darwin" as const;
+
+/** Canonical macOS x86_64 release target triple. */
+export const DESKTOP_RELEASE_MACOS_X64_TARGET = "x86_64-apple-darwin" as const;
+
+/** Canonical macOS universal release target triple. */
+export const DESKTOP_RELEASE_MACOS_UNIVERSAL_TARGET = "universal-apple-darwin" as const;
 
 /** Canonical Linux x64 release architecture label used by RPM bundles. */
 export const DESKTOP_RELEASE_LINUX_X64_RPM_ARCH = "x86_64" as const;
@@ -64,6 +76,9 @@ export const DESKTOP_RELEASE_WINDOWS_ARCH = "x64" as const;
 
 /** Canonical Windows desktop release target triple. */
 export const DESKTOP_RELEASE_WINDOWS_TARGET = "x86_64-pc-windows-msvc" as const;
+
+/** Canonical Windows MSI language tag used by Tauri bundle naming. */
+export const DESKTOP_RELEASE_WINDOWS_MSI_LANGUAGE = "en-US" as const;
 
 /** Relative resource directory bundled into the packaged desktop application. */
 export const DESKTOP_RUNTIME_RESOURCE_DIR = "gen/runtime" as const;

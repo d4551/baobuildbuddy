@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "target": "linux-arm64",
+  "strategy": "matching-host-native",
+  "tauriCli": "repo-local-bun",
+  "hostPlatform": "linux",
+  "hostArch": "arm64",
+  "tauriTarget": "aarch64-unknown-linux-gnu",
+  "artifactNames": [
+    "BaoBuildBuddy_0.1.0_arm64.deb",
+    "BaoBuildBuddy-0.1.0-1.aarch64.rpm"
+  ],
+  "buildCommands": [
+    "stage-only existing bundled artifacts for aarch64-unknown-linux-gnu"
+  ],
+  "builtAt": "2026-03-18T00:00:00.000Z",
+  "ci": {
+    "workflow": null,
+    "runId": null,
+    "runAttempt": null
+  }
+}

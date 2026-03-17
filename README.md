@@ -479,7 +479,7 @@ bun run dev:client
 | Release desktop (Windows)   | `bun run release:desktop:windows`                      | Native Windows release artifacts                    |
 | Release desktop (Linux x64) | `bun run release:desktop:linux-x64`                    | Native Linux x64 release artifacts                  |
 | Release desktop (Linux ARM) | `bun run release:desktop:linux-arm64`                  | Native Linux ARM64 release artifacts                |
-| Release refresh (all OS)    | `bun run release:refresh:all-os`                       | Assemble multi-platform release + checksums         |
+| Release refresh (all staged OSes) | `bun run release:refresh:all-os`                | Assemble staged release artifacts + checksums       |
 | Verify pages                | `bun run verify:pages`                                 | Validate SSR routes return proper HTML              |
 | Server type contract        | `bun run --filter '@bao/server' build:types`           | Generate dist-types for client typecheck            |
 | Validate ARIA               | `bun run validate:aria`                                | Interactive labeling + dialog semantics             |
@@ -1031,10 +1031,10 @@ bun run build:desktop
 Per-platform native release staging:
 
 ```bash
-bun run release:desktop:macos -- --output-root .desktop-release-artifacts
-bun run release:desktop:windows -- --output-root .desktop-release-artifacts
-bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts
-bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
+bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
+bun run release:desktop:windows -- --output-root .desktop-release-artifacts --release
+bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --release
+bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --release
 ```
 
 Assemble multi-platform release set:
@@ -1131,10 +1131,17 @@ bun run build:desktop
 
 **Matching-host release builds (run each on its target platform):**
 ```bash
-bun run release:desktop:macos -- --output-root .desktop-release-artifacts
-bun run release:desktop:windows -- --output-root .desktop-release-artifacts
-bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts
-bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
+bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
+bun run release:desktop:windows -- --output-root .desktop-release-artifacts --release
+bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --release
+bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --release
+```
+
+**Optional installable variants:**
+```bash
+DESKTOP_RELEASE_MACOS_ARCHITECTURES=aarch64,x86_64,universal bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
+DESKTOP_RELEASE_WINDOWS_MSI=true bun run release:desktop:windows -- --output-root .desktop-release-artifacts --release
+DESKTOP_RELEASE_LINUX_APPIMAGE=true DESKTOP_RELEASE_LINUX_SIGNATURES=true bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --release
 ```
 
 **Assemble all platforms:**
@@ -1142,7 +1149,7 @@ bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts
 bun run release:refresh:all-os
 ```
 
-This assembles previously built artifacts into `packages/desktop/releases/`, regenerates checksums, and verifies provenance. The GitHub Actions desktop workflow now gates every native packaging job behind `bun ci`, `bun run lint`, `bun run typecheck`, `bun run test`, and `bun run build`, then runs `bun run verify:desktop-runtime` and `bun run verify:desktop-releases` on each native host before artifact upload.
+This assembles previously built artifacts into `packages/desktop/releases/`, regenerates checksums, and verifies provenance. The GitHub Actions desktop workflow now gates every native packaging job behind `bun ci`, `bun run lint`, `bun run typecheck`, `bun run test`, and `bun run build`, then runs `bun run verify:desktop-runtime` and `bun run verify:desktop-releases -- --release` on each native host before artifact upload. Optional MSI, AppImage, Linux `.sig`, and extra macOS architectures are controlled through workflow-dispatch inputs or the corresponding `DESKTOP_RELEASE_*` repository variables.
 
 **Output locations:**
 - Raw build output: `packages/desktop/src-tauri/target/release/bundle`
@@ -1153,10 +1160,10 @@ This assembles previously built artifacts into `packages/desktop/releases/`, reg
 
 | Platform                            | Build target                        | Notes                                                                               |
 |-------------------------------------|-------------------------------------|-------------------------------------------------------------------------------------|
-| macOS (`aarch64-apple-darwin`)      | `release:desktop:macos`             | Split flow: `bun tauri build --no-bundle` then `bun tauri bundle --bundles app,dmg` |
-| Windows (`x86_64-pc-windows-msvc`)  | `release:desktop:windows`           | NSIS installer + portable zip. 64-bit only.                                          |
-| Linux x64 (`x86_64-unknown-linux-gnu`) | `release:desktop:linux-x64`      | Deb + RPM bundles on a native Linux x64 host.                                        |
-| Linux ARM64 (`aarch64-unknown-linux-gnu`) | `release:desktop:linux-arm64` | Deb + RPM bundles. Requires ARM64 host or emulated runner.                           |
+| macOS (`aarch64-apple-darwin`)      | `release:desktop:macos`             | Split flow: `bun tauri build --no-bundle` then `bun tauri bundle --bundles app,dmg`; optional `x86_64` and `universal` channels via `DESKTOP_RELEASE_MACOS_ARCHITECTURES`. |
+| Windows (`x86_64-pc-windows-msvc`)  | `release:desktop:windows`           | NSIS installer + portable zip by default. Optional MSI via `DESKTOP_RELEASE_WINDOWS_MSI=true`. |
+| Linux x64 (`x86_64-unknown-linux-gnu`) | `release:desktop:linux-x64`      | Deb + RPM bundles by default. Optional AppImage and detached `.sig` files via `DESKTOP_RELEASE_LINUX_APPIMAGE=true` and `DESKTOP_RELEASE_LINUX_SIGNATURES=true`. |
+| Linux ARM64 (`aarch64-unknown-linux-gnu`) | `release:desktop:linux-arm64` | Deb + RPM bundles. Optional detached `.sig` files. Requires ARM64 host or emulated runner. |
 
 For macOS DMG packaging with non-UTF8 locale defaults:
 ```bash
@@ -1173,6 +1180,16 @@ LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
 | `CLIENT_PORT`                  | `3001`        | Client readiness check port    |
 | `BAO_DISABLE_AUTH`             | -             | Pass through to stack startup  |
 | `BAO_AUTH_SETUP_TOKEN`         | -             | One-time setup token for first API key bootstrap |
+| `DESKTOP_RELEASE_MACOS_ARCHITECTURES` | `aarch64` | Optional macOS release channels: `aarch64`, `x86_64`, `universal` |
+| `DESKTOP_RELEASE_WINDOWS_MSI`  | `false`       | Include the MSI installable in Windows release builds |
+| `DESKTOP_RELEASE_LINUX_APPIMAGE` | `false`     | Include the AppImage installable on Linux x64 |
+| `DESKTOP_RELEASE_LINUX_SIGNATURES` | `false`   | Generate detached GPG signatures for Linux release artifacts |
+| `APPLE_SIGNING_IDENTITY`       | -             | macOS code-sign identity used only for `--release` desktop builds |
+| `WINDOWS_CERTIFICATE_THUMBPRINT` | -           | Windows certificate thumbprint used only for `--release` desktop builds |
+| `WINDOWS_DIGEST_ALGORITHM`     | `SHA256`      | Windows signing digest algorithm for `--release` desktop builds |
+| `WINDOWS_TIMESTAMP_URL`        | -             | Windows timestamp server URL for `--release` desktop builds |
+| `DESKTOP_RELEASE_GPG_KEY_ID`   | -             | GPG identity for Linux detached signatures |
+| `DESKTOP_RELEASE_GPG_PASSPHRASE` | -           | Optional passphrase for Linux detached signatures |
 
 If desktop build fails with `failed to run 'cargo metadata'`:
 ```bash

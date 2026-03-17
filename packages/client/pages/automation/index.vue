@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { useAsyncData, useServerSeoMeta } from "#imports";
 import type {
   DashboardStats,
   RpaCapabilityAuditEntry,
@@ -6,6 +8,8 @@ import type {
 } from "@bao/shared";
 import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { useAutomation } from "~/composables/useAutomation";
+import { useFlowEngine } from "~/composables/useFlowEngine";
 import {
   type DashboardPipelineStepViewModel,
   resolveDashboardPipelineSteps,
@@ -347,7 +351,10 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
             </div>
 
             <div class="overflow-x-auto">
-              <table class="table table-zebra" :aria-label="t('automation.hub.audit.tableAria')">
+              <table
+                class="table table-zebra table-sm md:table-md"
+                :aria-label="t('automation.hub.audit.tableAria')"
+              >
                 <thead>
                   <tr>
                     <th>{{ t("automation.hub.audit.columns.name") }}</th>
@@ -361,41 +368,72 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="capability in capabilityEntries" :key="capability.id">
-                    <td class="font-medium">{{ capability.name }}</td>
-                    <td>
-                      <span class="badge badge-outline">
+                  <tr
+                    v-for="capability in capabilityEntries"
+                    :key="capability.id"
+                    class="align-top"
+                  >
+                    <td class="min-w-40 whitespace-normal font-medium">
+                      {{ capability.name }}
+                    </td>
+                    <td class="min-w-32">
+                      <span
+                        class="badge badge-outline h-auto whitespace-normal px-3 py-2 text-center leading-tight"
+                      >
                         {{ t(`automation.hub.audit.category.${capability.category}`) }}
                       </span>
                     </td>
                     <td>
                       <span
-                        :class="capabilityStatusClass(capability.configured, capability.issues.length)"
+                        :class="[
+                          capabilityStatusClass(capability.configured, capability.issues.length),
+                          'whitespace-nowrap',
+                        ]"
                       >
                         {{ capabilityStatusLabel(capability.configured, capability.issues.length) }}
                       </span>
                     </td>
                     <td>
-                      <span :class="capabilityStatusClass(capability.manualRunAvailable)">
+                      <span
+                        :class="[
+                          capabilityStatusClass(capability.manualRunAvailable),
+                          'whitespace-nowrap',
+                        ]"
+                      >
                         {{ capabilityStatusLabel(capability.manualRunAvailable) }}
                       </span>
                     </td>
                     <td>
-                      <span :class="capabilityStatusClass(capability.scheduledRunAvailable)">
+                      <span
+                        :class="[
+                          capabilityStatusClass(capability.scheduledRunAvailable),
+                          'whitespace-nowrap',
+                        ]"
+                      >
                         {{ capabilityStatusLabel(capability.scheduledRunAvailable) }}
                       </span>
                     </td>
                     <td>
-                      <span :class="capabilityStatusClass(capability.runHistoryAvailable)">
+                      <span
+                        :class="[
+                          capabilityStatusClass(capability.runHistoryAvailable),
+                          'whitespace-nowrap',
+                        ]"
+                      >
                         {{ capabilityStatusLabel(capability.runHistoryAvailable) }}
                       </span>
                     </td>
                     <td>
-                      <span :class="capabilityStatusClass(capability.liveUpdatesAvailable)">
+                      <span
+                        :class="[
+                          capabilityStatusClass(capability.liveUpdatesAvailable),
+                          'whitespace-nowrap',
+                        ]"
+                      >
                         {{ capabilityStatusLabel(capability.liveUpdatesAvailable) }}
                       </span>
                     </td>
-                    <td class="max-w-xs text-sm text-base-content/70">
+                    <td class="max-w-xs whitespace-normal break-words text-sm text-base-content/70">
                       {{ capability.issues[0] || t("automation.hub.audit.noIssues") }}
                     </td>
                   </tr>

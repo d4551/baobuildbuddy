@@ -195,7 +195,7 @@ bun run ci:alignment
 
 ```bash
 bun run audit:integration       # audit:official-llms + verify:pages
-bun run release:verify           # preflight, build, verify:desktop-runtime, verify:desktop-releases
+bun run release:verify           # preflight, build, verify:desktop-runtime, verify:desktop-releases -- --release
 bun run audit:full               # everything
 ```
 

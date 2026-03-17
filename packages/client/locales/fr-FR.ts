@@ -392,6 +392,10 @@ const frFROverrides = {
       apiKeyRequiredError: "Collez la clé API existante pour terminer la configuration.",
     },
     successStatusAria: "État d'achèvement de la configuration",
+    ollamaCommandCopyAria: "Copier la commande Ollama",
+    ollamaCommandCopyTitle: "Copier la commande Ollama",
+    ollamaCommandCopied: "Commande Ollama copiée",
+    ollamaCommandCopyFailed: "Échec de la copie de la commande Ollama",
   },
   apiDocs: {
     seoTitle: "Documentation API",

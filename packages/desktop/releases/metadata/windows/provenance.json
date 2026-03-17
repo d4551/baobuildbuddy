@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "target": "windows",
+  "strategy": "matching-host-native",
+  "tauriCli": "repo-local-bun",
+  "hostPlatform": "win32",
+  "hostArch": "x64",
+  "tauriTarget": "x86_64-pc-windows-msvc",
+  "artifactNames": [
+    "BaoBuildBuddy_0.1.0_x64-portable.zip",
+    "BaoBuildBuddy_0.1.0_x64-setup.exe"
+  ],
+  "buildCommands": [
+    "stage-only repaired existing bundled artifacts for x86_64-pc-windows-msvc"
+  ],
+  "builtAt": "2026-03-18T00:00:00.000Z",
+  "ci": {
+    "workflow": null,
+    "runId": null,
+    "runAttempt": null
+  }
+}

@@ -399,6 +399,10 @@ const jaJPOverrides = {
       apiKeyRequiredError: "セットアップを完了するには既存の API キーを貼り付けてください。",
     },
     successStatusAria: "セットアップ完了ステータス",
+    ollamaCommandCopyAria: "Ollama コマンドをコピー",
+    ollamaCommandCopyTitle: "Ollama コマンドをコピー",
+    ollamaCommandCopied: "Ollama コマンドをコピーしました",
+    ollamaCommandCopyFailed: "Ollama コマンドをコピーできませんでした",
   },
   apiDocs: {
     seoTitle: "APIドキュメント",

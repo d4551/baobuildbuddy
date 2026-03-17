@@ -1,4 +1,6 @@
 import { STATE_KEYS, THEME_NAMES } from "@bao/shared";
+import { useState } from "#imports";
+import { readonly } from "vue";
 
 /**
  * Theme toggle composable for bao-light / bao-dark.

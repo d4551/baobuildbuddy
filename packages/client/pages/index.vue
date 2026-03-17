@@ -593,29 +593,36 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
         </div>
       </section>
 
-      <section>
-        <div class="stats stats-vertical lg:stats-horizontal w-full bg-base-100 shadow">
-          <NuxtLink
-            v-for="statCard in DASHBOARD_STAT_CARDS"
-            :key="statCard.id"
-            :to="statCard.to"
-            class="stat transition-colors hover:bg-base-200"
-            :aria-label="t(DASHBOARD_A11Y_KEYS.statCardAria, { title: t(statCard.titleKey), value: getMetricValue(statCard.statKey), cta: t(statCard.ctaLabelKey) })"
-          >
-            <div class="stat-figure" :class="statCard.accentClass">
-              <svg class="h-8 w-8 opacity-85" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="statCard.iconPath" />
-              </svg>
+      <SectionGrid grid-token="fourColumn">
+        <NuxtLink
+          v-for="statCard in DASHBOARD_STAT_CARDS"
+          :key="statCard.id"
+          :to="statCard.to"
+          class="card bg-base-100 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md h-full"
+          :aria-label="t(DASHBOARD_A11Y_KEYS.statCardAria, { title: t(statCard.titleKey), value: getMetricValue(statCard.statKey), cta: t(statCard.ctaLabelKey) })"
+        >
+          <div class="card-body p-5 md:p-6 flex flex-col justify-between">
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <div class="text-sm font-medium text-base-content/60 mb-1">{{ t(statCard.titleKey) }}</div>
+                <div class="text-3xl font-bold">{{ getMetricValue(statCard.statKey) }}</div>
+              </div>
+              <div class="p-3 rounded-2xl bg-base-200/50" :class="statCard.accentClass">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="statCard.iconPath" />
+                </svg>
+              </div>
             </div>
-            <div class="stat-title">{{ t(statCard.titleKey) }}</div>
-            <div class="stat-value text-3xl">{{ getMetricValue(statCard.statKey) }}</div>
-            <div class="stat-desc" :class="statCard.accentClass">{{ t(statCard.ctaLabelKey) }}</div>
-          </NuxtLink>
-        </div>
-      </section>
+            <div class="mt-auto flex items-center gap-1 text-xs font-semibold" :class="statCard.accentClass">
+              <span>{{ t(statCard.ctaLabelKey) }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+          </div>
+        </NuxtLink>
+      </SectionGrid>
 
       <SectionGrid grid-token="twoColumnWide">
-        <div v-if="dashboard?.dailyChallenge" class="card bg-base-200">
+        <div v-if="dashboard?.dailyChallenge" class="card bg-base-200 h-full">
           <div class="card-body">
             <h2 class="card-title text-lg mb-3">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
             <div class="card bg-base-100">
@@ -646,7 +653,7 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
           </div>
         </div>
 
-        <div class="card bg-base-200">
+        <div class="card bg-base-200 h-full">
           <div class="card-body">
             <h2 class="card-title text-lg mb-3">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
             <ul class="list rounded-box bg-base-100">

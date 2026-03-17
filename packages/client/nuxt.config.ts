@@ -24,7 +24,6 @@ import {
 
 const DEFAULT_CLIENT_PORT = String(DEFAULT_CLIENT_DEV_PORT);
 const DEFAULT_API_SERVER_PORT = String(DEFAULT_SERVER_PORT);
-const isProductionBuild = process.env.NODE_ENV === "production";
 const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
 const configuredApiProxy = process.env.NUXT_PUBLIC_API_PROXY;
 const configuredServerPort = process.env.SERVER_PORT || process.env.PORT;
@@ -37,11 +36,11 @@ const resolvedDevServerPort =
   configuredClientPort && configuredClientPort.length > 0
     ? configuredClientPort
     : DEFAULT_CLIENT_PORT;
-const defaultDevApiProxy = `http://localhost:${resolvedApiServerPort}`;
+const defaultLocalApiProxy = `http://localhost:${resolvedApiServerPort}`;
 const apiBaseProxy =
   configuredApiProxy ||
   (configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : undefined) ||
-  (!isProductionBuild ? defaultDevApiProxy : undefined);
+  defaultLocalApiProxy;
 const HTTPS_URL_PATTERN = /^https?:\/\//u;
 const absoluteApiProxyBase =
   apiBaseProxy && HTTPS_URL_PATTERN.test(apiBaseProxy) ? apiBaseProxy : undefined;
@@ -166,8 +165,7 @@ const resolveManualChunkName = (moduleId: string): string | undefined => {
   return LOCALE_CHUNK_NAME_BY_FILE[fileName];
 };
 
-const resolvedApiBase =
-  configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : apiBaseProxy || "/";
+const resolvedApiBase = configuredApiBase && configuredApiBase.length > 0 ? configuredApiBase : "/";
 const configuredWsBase = process.env.NUXT_PUBLIC_WS_BASE;
 const resolvedWsBase =
   configuredWsBase && configuredWsBase !== "/" ? configuredWsBase : resolvedApiBase;
@@ -250,6 +248,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    preset: "bun",
     ...(apiBaseProxy
       ? {
           devProxy: {

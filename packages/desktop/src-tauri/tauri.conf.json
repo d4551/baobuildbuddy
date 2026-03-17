@@ -31,6 +31,10 @@
     "active": true,
     "targets": "all",
     "category": "DeveloperTools",
+    "linux": {
+      "appimage": {}
+    },
+    "macOS": {},
     "windows": {
       "webviewInstallMode": {
         "type": "embedBootstrapper"

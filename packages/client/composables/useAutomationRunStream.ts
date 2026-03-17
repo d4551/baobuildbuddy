@@ -239,7 +239,7 @@ async function fetchInitialRun(
   runId: string,
 ): Promise<{ ok: true; value: RpaRunExecutionEnvelope } | { ok: false; error: StreamError }> {
   return getRun(runId).then(
-    (value) => ({ ok: true as const, value }),
+    (value: RpaRunExecutionEnvelope) => ({ ok: true as const, value }),
     (error: unknown) => ({ ok: false as const, error: toStreamError(error) }),
   );
 }

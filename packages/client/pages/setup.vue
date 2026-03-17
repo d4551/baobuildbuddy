@@ -170,6 +170,10 @@ const needsStoredApiKey = computed(
     authStatus.value.bootstrapRequired === false &&
     getStoredApiKey() === null,
 );
+const ollamaCommand = computed(() => {
+  const modelName = localModelName.value.trim() || LOCAL_AI_DEFAULT_MODEL;
+  return `ollama run ${modelName}`;
+});
 
 async function handleTestProvider(provider: SetupProvider): Promise<void> {
   const key = getProviderTestKey(provider);
@@ -307,6 +311,23 @@ async function handleComplete(): Promise<void> {
   $toast.success(t("setup.completeToast"));
   await router.push(postSetupFlowTarget.value);
 }
+
+async function copyOllamaCommand(): Promise<void> {
+  if (!import.meta.client) {
+    return;
+  }
+
+  const clipboardWriteResult = await settlePromise(
+    navigator.clipboard.writeText(ollamaCommand.value),
+    t("setup.ollamaCommandCopyFailed"),
+  );
+  if (!clipboardWriteResult.ok) {
+    $toast.error(getErrorMessage(clipboardWriteResult.error, t("setup.ollamaCommandCopyFailed")));
+    return;
+  }
+
+  $toast.success(t("setup.ollamaCommandCopied"));
+}
 </script>
 
 <template>
@@ -387,11 +408,11 @@ async function handleComplete(): Promise<void> {
 
           <div
             role="alert"
-            class="alert alert-info alert-soft alert-vertical sm:alert-horizontal"
+            class="alert alert-info alert-soft alert-vertical sm:alert-horizontal items-start"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6 shrink-0 stroke-current"
+              class="h-6 w-6 mt-1 shrink-0 stroke-current text-info"
               fill="none"
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -403,21 +424,37 @@ async function handleComplete(): Promise<void> {
                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <div>
-              <h3 class="font-semibold">
+            <div class="flex-1 w-full overflow-hidden">
+              <h3 class="font-semibold mb-1">
                 {{ t("settings.aiProviders.ollamaTipTitle") }}
               </h3>
-              <p class="text-sm">
+              <p class="text-sm mb-3">
                 {{ t("settings.aiProviders.ollamaTipDescription") }}
                 <NuxtLink
                   :to="OLLAMA_WEBSITE_URL"
                   target="_blank"
-                  class="link link-primary"
+                  class="link link-primary inline-flex items-center gap-1"
                   :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
                 >
                   {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </NuxtLink>
               </p>
+
+              <div class="relative w-full mt-2 group rounded-box bg-base-300 text-base-content overflow-hidden border border-base-200">
+                <div class="overflow-x-auto p-3 pr-14 text-sm font-mono whitespace-nowrap">
+                  <span class="text-base-content/50 mr-2">$</span>{{ ollamaCommand }}
+                </div>
+                <button
+                  class="btn btn-sm btn-square btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-base-300/80 backdrop-blur-sm"
+                  type="button"
+                  :aria-label="t('setup.ollamaCommandCopyAria')"
+                  :title="t('setup.ollamaCommandCopyTitle')"
+                  @click="copyOllamaCommand"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
             </div>
           </div>
 

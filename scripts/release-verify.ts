@@ -3,7 +3,7 @@ import { join } from "node:path";
 import {
   DESKTOP_RELEASE_LINUX_ARM64_TARGET,
   DESKTOP_RELEASE_LINUX_X64_TARGET,
-  DESKTOP_RELEASE_MACOS_TARGET,
+  DESKTOP_RELEASE_MACOS_AARCH64_TARGET,
   DESKTOP_RELEASE_METADATA_DIR,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
   type DESKTOP_RELEASE_TARGETS,
@@ -152,7 +152,7 @@ const collectPreflightChecks = async (): Promise<PreflightCheck[]> => {
 
 const resolveHostDesktopTarget = (): string | null => {
   if (process.platform === "darwin" && process.arch === "arm64") {
-    return DESKTOP_RELEASE_MACOS_TARGET;
+    return DESKTOP_RELEASE_MACOS_AARCH64_TARGET;
   }
 
   if (process.platform === "win32" && process.arch === "x64") {

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BaoBuildBuddy</title>
-    <meta name="description" content="BaoBuildBuddy is a Bun-first workspace for game-industry hiring. Scout jobs, tailor resumes, and run RPA flows." />
+    <title>BaoBuildBuddy | AI Help For Videogame Job Seekers</title>
+    <meta name="description" content="BaoBuildBuddy helps videogame job seekers find roles, tailor applications, set up Ollama, and move through repetitive application steps faster." />
     <!-- Preconnect block -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,6 +19,7 @@
         --font-display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
         --font-body: "DM Sans", "Inter", "Segoe UI", sans-serif;
         --font-mono: "JetBrains Mono", monospace;
+        --section-max-width: 80rem;
       }
       body {
         font-family: var(--font-body);
@@ -45,13 +46,141 @@
         background-size: 40px 40px;
         background-position: 0 0, 20px 20px;
       }
+
+      .page-shell {
+        width: min(100%, var(--section-max-width));
+        margin-inline: auto;
+      }
+
+      .section-shell {
+        width: min(100%, var(--section-max-width));
+        margin-inline: auto;
+      }
+
+      .section-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 999px;
+        border: 1px solid oklch(var(--color-base-content) / 0.12);
+        background: oklch(var(--color-base-100) / 0.72);
+        padding: 0.4rem 0.8rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .section-heading {
+        max-width: 44rem;
+      }
+
+      .surface-panel {
+        border: 1px solid oklch(var(--color-base-content) / 0.1);
+        background:
+          linear-gradient(180deg, oklch(var(--color-base-100) / 0.96), oklch(var(--color-base-100) / 0.88));
+        box-shadow:
+          0 20px 60px -32px oklch(0% 0 0 / 0.55),
+          inset 0 1px 0 oklch(var(--color-base-100) / 0.72);
+      }
+
+      .surface-card {
+        border: 1px solid oklch(var(--color-base-content) / 0.08);
+        background:
+          linear-gradient(180deg, oklch(var(--color-base-100) / 0.98), oklch(var(--color-base-200) / 0.82));
+        box-shadow: 0 16px 38px -30px oklch(0% 0 0 / 0.65);
+      }
+
+      .hero-orb {
+        position: absolute;
+        inset: auto;
+        border-radius: 999px;
+        filter: blur(70px);
+        opacity: 0.45;
+        pointer-events: none;
+      }
+
+      .hero-orb-primary {
+        width: 18rem;
+        height: 18rem;
+        top: 10%;
+        right: max(6%, 1rem);
+        background: radial-gradient(circle, oklch(var(--color-primary) / 0.4), transparent 65%);
+      }
+
+      .hero-orb-accent {
+        width: 14rem;
+        height: 14rem;
+        bottom: 10%;
+        left: max(4%, 1rem);
+        background: radial-gradient(circle, oklch(var(--color-info) / 0.24), transparent 68%);
+      }
+
+      .downloads-tablist {
+        grid-template-columns: repeat(3, minmax(10rem, 1fr));
+      }
+
+      .downloads-tab {
+        min-height: 3.5rem;
+      }
+
+      .release-grid {
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      }
+
+      .docs-grid {
+        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+      }
+
+      .doc-icon {
+        display: inline-flex;
+        height: 3rem;
+        width: 3rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1rem;
+        border: 1px solid oklch(var(--color-base-content) / 0.1);
+        background: oklch(var(--color-base-200) / 0.65);
+        font-size: 1.5rem;
+      }
+
+      .using-keyboard :focus-visible {
+        outline: 2px solid oklch(var(--color-primary));
+        outline-offset: 2px;
+      }
+
+      @media (max-width: 767px) {
+        .downloads-tab-scroller {
+          overflow-x: auto;
+          padding-bottom: 0.25rem;
+        }
+
+        .downloads-tablist {
+          width: max-content;
+          min-width: 100%;
+        }
+      }
     </style>
   </head>
-  <body class="bg-base-100 text-base-content min-h-screen flex flex-col pt-16 sm:pt-20">
+  <body class="bg-base-100 text-base-content min-h-screen flex flex-col pt-16 sm:pt-20 pb-20 sm:pb-0">
     
     <!-- Accessible Navbar -->
-    <header class="navbar bg-base-100/90 backdrop-blur fixed top-0 w-full z-50 border-b border-base-300 px-4 sm:px-8">
+    <header class="fixed inset-x-0 top-0 z-50 border-b border-base-300 bg-base-100/88 backdrop-blur">
+      <div class="navbar page-shell min-h-16 px-4 sm:min-h-20 sm:px-6 lg:px-8">
       <div class="navbar-start">
+        <div class="dropdown lg:hidden">
+          <button tabindex="0" type="button" class="btn btn-ghost btn-circle btn-sm mr-2" aria-label="Open navigation menu">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-20 mt-3 w-56 p-2 shadow-lg border border-base-300">
+            <li><a href="#downloads">Downloads</a></li>
+            <li><a href="#ollama">Set Up Ollama</a></li>
+            <li><a href="#how-it-helps">How It Helps</a></li>
+          </ul>
+        </div>
         <a href="#" class="btn btn-ghost text-xl font-display gap-2 h-auto py-1" aria-label="BaoBuildBuddy Home">
           <svg viewBox="0 0 64 64" class="w-8 h-8" aria-hidden="true" role="presentation">
             <circle cx="32" cy="32" r="30" fill="#2d3570" />
@@ -67,9 +196,9 @@
       </div>
       <div class="navbar-center hidden lg:flex" aria-label="Main Navigation">
         <ul class="menu menu-horizontal px-1 gap-2 font-medium">
-          <li><a href="#downloads" aria-label="Go to Downloads section" class="h-10 flex items-center">Downloads</a></li>
-          <li><a href="#ollama" aria-label="Go to AI Setup section" class="h-10 flex items-center">AI Setup</a></li>
-          <li><a href="#docs" aria-label="Go to Documentation section" class="h-10 flex items-center">Docs</a></li>
+          <li><a href="#downloads" data-nav-target="downloads" aria-label="Go to Downloads section" class="h-10 flex items-center">Downloads</a></li>
+          <li><a href="#ollama" data-nav-target="ollama" aria-label="Go to Ollama setup section" class="h-10 flex items-center">Set Up Ollama</a></li>
+          <li><a href="#how-it-helps" data-nav-target="how-it-helps" aria-label="Go to how BaoBuildBuddy helps section" class="h-10 flex items-center">How It Helps</a></li>
         </ul>
       </div>
       <div class="navbar-end gap-3">
@@ -79,10 +208,11 @@
           <svg aria-hidden="true" class="swap-off fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
           <svg aria-hidden="true" class="swap-on fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
         </label>
-        <a href="https://github.com/d4551/baobuildbuddy" target="_blank" aria-label="Visit GitHub repository" class="btn btn-neutral btn-sm h-10 px-4 hidden sm:flex items-center gap-2 m-0">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-          <span class="sr-only sm:not-sr-only">GitHub</span>
+        <a href="#downloads" aria-label="Go to downloads section" class="btn btn-neutral btn-sm h-10 px-4 hidden sm:flex items-center gap-2 m-0">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          <span class="sr-only sm:not-sr-only">Download</span>
         </a>
+      </div>
       </div>
     </header>
 
@@ -90,45 +220,72 @@
     <main class="flex-grow flex flex-col items-center">
       
       <!-- Clean Accessible Hero -->
-      <section class="hero min-h-[65vh] bg-grid-pattern w-full text-center px-4">
-        <div class="hero-content max-w-4xl flex-col py-16">
-          <div class="flex flex-wrap items-center justify-center gap-2 mb-6" aria-label="Features">
-            <span class="badge badge-primary font-mono font-medium">PRESS START</span>
-            <span class="badge badge-neutral font-mono font-medium">SSR-FIRST</span>
-            <span class="badge badge-info font-mono font-medium">LOCAL AI</span>
+      <section class="relative isolate w-full overflow-hidden border-b border-base-300 bg-grid-pattern px-4 py-10 sm:px-6 sm:py-14 lg:px-8" aria-labelledby="hero-heading">
+        <div class="hero-orb hero-orb-primary"></div>
+        <div class="hero-orb hero-orb-accent"></div>
+        <div class="section-shell grid items-center gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,24rem)]">
+          <div class="text-center lg:text-left">
+          <div class="flex flex-wrap items-center justify-center gap-2 mb-6 lg:justify-start" aria-label="Features">
+            <span class="badge badge-soft badge-primary font-medium">Find jobs</span>
+            <span class="badge badge-soft badge-neutral font-medium">Apply faster</span>
+            <span class="badge badge-soft badge-info font-medium">Practice interviews</span>
           </div>
           
-          <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold font-display tracking-tight text-balance leading-tight text-base-content">
-            Career OS for game industry hiring
+          <h1 id="hero-heading" class="text-4xl md:text-6xl lg:text-7xl font-bold font-display tracking-tight text-balance leading-tight text-base-content">
+            Use AI to move faster in videogame job hunting
           </h1>
           
-          <p class="py-6 text-lg md:text-xl text-base-content/80 text-balance max-w-2xl font-medium">
-            BaoBuildBuddy is a Bun-first workspace. Scout jobs, tailor resumes, prep interviews, and run RPA automation flows without turning setup into a boss battle.
+          <p class="py-6 text-lg md:text-xl text-base-content/80 text-balance max-w-2xl font-medium mx-auto lg:mx-0">
+            Download the app for your OS, connect Ollama in a few minutes, and get help pulling together game jobs from different sites, writing stronger applications, and handling some of the repetitive applying steps.
           </p>
           
-          <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mt-6">
+          <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mt-6 lg:justify-start">
             <a href="#downloads" class="btn btn-primary btn-lg" aria-label="Jump to desktop app downloads">
               <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-              Desktop App
+              Download BaoBuildBuddy
             </a>
-            <a href="#docs" class="btn btn-neutral btn-outline btn-lg" aria-label="Jump to documentation">
-              Read Docs
+            <a href="#how-it-helps" class="btn btn-neutral btn-outline btn-lg" aria-label="Jump to how BaoBuildBuddy helps">
+              See How It Helps
             </a>
           </div>
+          </div>
+
+          <aside class="surface-panel rounded-[2rem] p-5 sm:p-6 text-left">
+            <p class="section-kicker">Quick Start</p>
+            <h2 class="mt-4 text-2xl font-display font-bold">Pick your download, connect Ollama, start job hunting with help</h2>
+            <div class="mt-6 grid gap-3">
+              <div class="surface-card rounded-2xl p-4">
+                <p class="font-mono text-xs uppercase tracking-[0.2em] text-base-content/60">Step 1</p>
+                <p class="mt-2 text-lg font-semibold">Install BaoBuildBuddy on Windows, macOS, or Linux</p>
+              </div>
+              <div class="surface-card rounded-2xl p-4">
+                <p class="font-mono text-xs uppercase tracking-[0.2em] text-base-content/60">Step 2</p>
+                <p class="mt-2 text-lg font-semibold">Turn on private local AI with Ollama</p>
+              </div>
+              <div class="surface-card rounded-2xl p-4">
+                <p class="font-mono text-xs uppercase tracking-[0.2em] text-base-content/60">Step 3</p>
+                <p class="mt-2 text-lg font-semibold">Pull together jobs from different sites, get writing help, and let Bao handle repetitive applying steps</p>
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
 
       <!-- Downloads Section with Logos -->
-      <section id="downloads" class="w-full max-w-6xl px-4 py-20 bg-base-100" aria-labelledby="downloads-heading">
-        <div class="text-center mb-12">
-          <h2 id="downloads-heading" class="text-3xl font-display font-bold mb-4 text-base-content">Choose your installer</h2>
-          <p class="text-lg text-base-content/70">Pre-built desktop apps updated straight from the repository.</p>
+      <section id="downloads" class="w-full bg-base-100 px-4 py-20 sm:px-6 lg:px-8" aria-labelledby="downloads-heading">
+        <div class="section-shell">
+        <div class="section-heading text-center mx-auto mb-12">
+          <p class="section-kicker justify-center">Download</p>
+          <h2 id="downloads-heading" class="text-3xl font-display font-bold mb-4 text-base-content">Choose your download</h2>
+          <p class="text-lg text-base-content/70">Pick your operating system, then choose the file that matches your computer.</p>
         </div>
 
-        <div role="tablist" class="tabs tabs-box tabs-lg grid grid-cols-3 max-w-3xl mx-auto shadow-sm border border-base-content/10 p-1 bg-base-200" aria-label="Operating System Installers">
+        <div class="surface-panel rounded-[2rem] p-4 sm:p-6 lg:p-8">
+        <div class="downloads-tab-scroller">
+        <div role="tablist" class="downloads-tablist tabs tabs-box tabs-lg grid gap-2 max-w-4xl mx-auto border border-base-content/10 p-1.5 bg-base-200/80" aria-label="Choose your computer type">
           
           <!-- Windows Tab -->
-          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Windows Downloads">
+          <label class="downloads-tab tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Windows Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-windows" checked="checked" />
             <svg aria-hidden="true" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M96 96H247V247H96" fill="#f24f23"></path><path d="M265 96V247H416V96" fill="#7eba03"></path><path d="M96 265H247V416H96" fill="#3ca4ef"></path><path d="M265 265H416V416H265" fill="#f9ba00"></path></svg>
             Windows
@@ -136,18 +293,19 @@
           <div role="tabpanel" id="panel-windows" class="tab-content pt-10 col-span-3">
             <div class="text-center mb-6">
               <svg aria-hidden="true" class="mx-auto w-12 h-12 mb-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M96 96H247V247H96" fill="#f24f23"></path><path d="M265 96V247H416V96" fill="#7eba03"></path><path d="M96 265H247V416H96" fill="#3ca4ef"></path><path d="M265 265H416V416H265" fill="#f9ba00"></path></svg>
-              <h3 class="text-xl font-bold">Windows x64</h3>
+              <h3 class="text-xl font-bold">Windows downloads</h3>
+              <p class="text-sm text-base-content/70 mt-2">Most Windows people can start with the setup file.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="assets-windows" aria-live="polite">
+            <div class="release-grid grid gap-6" id="assets-windows" aria-live="polite">
               <div class="col-span-full flex justify-center py-12" aria-label="Loading Windows files"><span class="loading loading-spinner loading-lg text-primary"></span></div>
             </div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/windows" target="_blank" class="link link-hover text-base-content/70 text-sm font-medium">Browse Windows release folder →</a>
+               <p class="text-base-content/70 text-sm font-medium">Choose the setup file for the normal install, or the portable ZIP if you want a self-contained folder.</p>
             </div>
           </div>
 
           <!-- macOS Tab -->
-          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="macOS Downloads">
+          <label class="downloads-tab tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="macOS Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-macos" />
             <svg aria-hidden="true" class="w-5 h-5 text-base-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1195 1195"><path fill="currentColor" d="M1006.933 812.8c-32 153.6-115.2 211.2-147.2 249.6-32 25.6-121.6 25.6-153.6 6.4-38.4-25.6-134.4-25.6-166.4 0-44.8 32-115.2 19.2-128 12.8-256-179.2-352-716.8 12.8-774.4 64-12.8 134.4 32 134.4 32 51.2 25.6 70.4 12.8 115.2-6.4 96-44.8 243.2-44.8 313.6 76.8-147.2 96-153.6 294.4 19.2 403.2zM802.133 64c12.8 70.4-64 224-204.8 230.4-12.8-38.4 32-217.6 204.8-230.4z"></path></svg>
             macOS
@@ -155,87 +313,93 @@
           <div role="tabpanel" id="panel-macos" class="tab-content pt-10 col-span-3">
             <div class="text-center mb-6">
               <svg aria-hidden="true" class="mx-auto w-12 h-12 text-base-content mb-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1195 1195"><path fill="currentColor" d="M1006.933 812.8c-32 153.6-115.2 211.2-147.2 249.6-32 25.6-121.6 25.6-153.6 6.4-38.4-25.6-134.4-25.6-166.4 0-44.8 32-115.2 19.2-128 12.8-256-179.2-352-716.8 12.8-774.4 64-12.8 134.4 32 134.4 32 51.2 25.6 70.4 12.8 115.2-6.4 96-44.8 243.2-44.8 313.6 76.8-147.2 96-153.6 294.4 19.2 403.2zM802.133 64c12.8 70.4-64 224-204.8 230.4-12.8-38.4 32-217.6 204.8-230.4z"></path></svg>
-              <h3 class="text-xl font-bold">macOS Silicon/Intel</h3>
+              <h3 class="text-xl font-bold">Mac downloads</h3>
+              <p class="text-sm text-base-content/70 mt-2">Open the Mac file that matches your Mac. If only one shows up, use that one.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="assets-macos" aria-live="polite"></div>
+            <div class="release-grid grid gap-6" id="assets-macos" aria-live="polite"></div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/macos" target="_blank" class="link link-hover text-base-content/70 text-sm font-medium">Browse macOS release folder →</a>
+               <p class="text-base-content/70 text-sm font-medium">The Mac installer below opens the standard drag-and-install flow.</p>
             </div>
           </div>
 
           <!-- Linux Tab -->
-          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Linux Downloads">
+          <label class="downloads-tab tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Linux Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-linux" />
-            <img src="assets/tux.svg" class="w-5 h-5 object-contain" alt="Linux Tux Logo" aria-hidden="true" />
+            <img src="assets/tux.svg" class="w-5 h-5 object-contain" alt="" aria-hidden="true" />
             Linux
           </label>
           <div role="tabpanel" id="panel-linux" class="tab-content pt-10 col-span-3">
              <div class="text-center mb-6">
-              <img src="assets/tux.svg" class="mx-auto w-12 h-12 mb-2 object-contain" alt="Linux Tux Logo" aria-hidden="true" />
-              <h3 class="text-xl font-bold">Linux AppImage/DEB</h3>
+              <img src="assets/tux.svg" class="mx-auto w-12 h-12 mb-2 object-contain" alt="" aria-hidden="true" />
+              <h3 class="text-xl font-bold">Linux downloads</h3>
+              <p class="text-sm text-base-content/70 mt-2">Linux files can show up in separate x64 and ARM64 versions. Pick the one that matches your machine.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="assets-linux" aria-live="polite"></div>
+            <div class="release-grid grid gap-6" id="assets-linux" aria-live="polite"></div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/linux" target="_blank" class="link link-hover text-base-content/70 text-sm font-medium">Browse Linux release folder →</a>
+               <p class="text-base-content/70 text-sm font-medium">Pick the Linux package that matches your machine and package manager.</p>
             </div>
           </div>
+        </div>
+        </div>
+        </div>
         </div>
       </section>
 
       <!-- Ollama Setup Section -->
-      <section id="ollama" class="w-full bg-base-200/50 py-20 px-4" aria-labelledby="ollama-heading">
-        <div class="max-w-5xl mx-auto">
+      <section id="ollama" class="w-full bg-base-200/50 px-4 py-20 sm:px-6 lg:px-8" aria-labelledby="ollama-heading">
+        <div class="section-shell">
           <div class="flex flex-col md:flex-row md:items-start justify-between mb-12 gap-8">
             <div class="max-w-2xl text-left">
+              <p class="section-kicker">Set Up Ollama</p>
               <h2 id="ollama-heading" class="text-3xl font-display font-bold mb-4 flex items-center gap-4 text-base-content">
                 <!-- Ollama custom simple SVG text or representation -->
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="text-base-content" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-11.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5zm4 0c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5zm-2 6.5c1.66 0 3.14-.69 4.22-1.78l-1.41-1.41C14.03 14.53 13.06 15 12 15s-2.03-.47-2.81-1.19l-1.41 1.41C8.86 16.31 10.34 17 12 17z" fill="currentColor"/></svg>
-                Local AI Setup
+                Set up private AI help on your own computer
               </h2>
               <p class="text-lg text-base-content/70">
-                BaoBuildBuddy runs completely local by default using Ollama. No API keys required, no data leaves your machine. Fast, secure inference.
+                BaoBuildBuddy works with Ollama so the app can help with resumes, cover letters, and interview practice right on your computer. Your work stays with you.
               </p>
             </div>
             <div class="flex-none pt-2">
-              <a href="https://ollama.com/download" target="_blank" class="btn btn-neutral btn-lg" aria-label="Download Ollama runtime">Get Ollama</a>
+              <a href="https://ollama.com/download" target="_blank" class="btn btn-neutral btn-lg" aria-label="Download Ollama">Download Ollama</a>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full font-display">
             <!-- Step 1 -->
-            <div class="card bg-base-100 shadow-sm border border-base-content/10 text-left hover:border-primary/50 hover:shadow-md transition-all group">
+            <div class="card surface-card text-left hover:border-primary/50 hover:-translate-y-1 transition-all group">
               <div class="card-body flex flex-col items-start h-full">
                 <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold font-mono text-lg mb-2 shadow-sm group-hover:-translate-y-1 transition-transform">1</div>
-                <h3 class="card-title text-xl">Install Runtime</h3>
-                <p class="text-sm font-body text-base-content/70 w-full flex-grow">Download and install the Ollama background daemon for your OS.</p>
+                <h3 class="card-title text-xl">Install Ollama</h3>
+                <p class="text-sm font-body text-base-content/70 w-full flex-grow">Download Ollama for your computer and finish the basic install.</p>
               </div>
             </div>
             
             <!-- Step 2 -->
-            <div class="card bg-base-100 shadow-sm border border-base-content/10 text-left hover:border-primary/50 hover:shadow-md transition-all group">
+            <div class="card surface-card text-left hover:border-primary/50 hover:-translate-y-1 transition-all group">
               <div class="card-body flex flex-col items-start h-full">
                 <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold font-mono text-lg mb-2 shadow-sm group-hover:-translate-y-1 transition-transform">2</div>
-                <h3 class="card-title text-xl">Pull a Fast Model</h3>
-                <p class="text-sm font-body text-base-content/70 w-full mb-4">Open terminal and download the recommended sub-billion parameter model.</p>
+                <h3 class="card-title text-xl">Download a starter model</h3>
+                <p class="text-sm font-body text-base-content/70 w-full mb-4">Paste this one line into Terminal to download the AI model the app can use.</p>
                 <div class="w-full mt-auto">
                   <div class="mockup-code bg-neutral text-neutral-content text-[11px] sm:text-xs rounded-box w-full p-2 py-4 pl-4 before:hidden relative border border-base-content/10 flex items-center">
-                     <button type="button" class="btn btn-ghost min-h-0 h-8 absolute top-1.5 right-1.5 px-3 z-10 text-neutral-content hover:bg-neutral-content/20" data-copy-text="ollama run qwen2.5:0.5b" aria-label="Copy to clipboard">Copy</button>
-                     <pre data-prefix="$" class="pr-20 m-0 overflow-x-auto whitespace-pre"><code>ollama run qwen2.5:0.5b</code></pre>
+                     <button type="button" class="btn btn-ghost min-h-0 h-8 absolute top-1.5 right-1.5 px-3 z-10 text-neutral-content hover:bg-neutral-content/20" data-copy-text="ollama pull llama3.2" aria-label="Copy to clipboard">Copy</button>
+                     <pre data-prefix="$" class="pr-20 m-0 overflow-x-auto whitespace-pre"><code>ollama pull llama3.2</code></pre>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Step 3 -->
-            <div class="card bg-base-100 shadow-sm border border-base-content/10 text-left hover:border-primary/50 hover:shadow-md transition-all group">
+            <div class="card surface-card text-left hover:border-primary/50 hover:-translate-y-1 transition-all group">
               <div class="card-body flex flex-col items-start h-full">
                 <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold font-mono text-lg mb-2 shadow-sm group-hover:-translate-y-1 transition-transform">3</div>
-                <h3 class="card-title text-xl">Auto-Detect</h3>
-                <p class="text-sm font-body text-base-content/70 w-full mb-4">Launch BaoBuildBuddy. It automatically connects to the default endpoint.</p>
+                <h3 class="card-title text-xl">Open BaoBuildBuddy</h3>
+                <p class="text-sm font-body text-base-content/70 w-full mb-4">Open the app and it will try to find Ollama for you so you can start using AI right away.</p>
                 <div class="w-full mt-auto">
-                  <div class="bg-base-200 px-3 py-4 rounded-box border border-base-content/10 flex items-center gap-2 font-mono text-[11px] sm:text-xs shadow-inner overflow-x-auto whitespace-nowrap">
-                    <span class="text-success inline-block drop-shadow-[0_0_2px_currentColor]">●</span> 
-                    <span>http://localhost:11434/v1</span>
+                  <div class="bg-base-200 px-3 py-4 rounded-box border border-base-content/10 flex items-center gap-2 text-sm shadow-inner">
+                    <span class="text-success inline-block drop-shadow-[0_0_2px_currentColor]">●</span>
+                    <span>It looks for Ollama automatically.</span>
                   </div>
                 </div>
               </div>
@@ -244,70 +408,94 @@
         </div>
       </section>
 
-      <!-- Documentation Directory -->
-      <section id="docs" class="w-full max-w-6xl px-4 py-20" aria-labelledby="documentation-heading">
-        <div class="text-center mb-12">
-          <h2 id="documentation-heading" class="text-3xl font-display font-bold mb-4 text-base-content">Documentation & Guides</h2>
-          <p class="text-lg text-base-content/70">Master the Bao stack with in-repo playbooks.</p>
+      <!-- How It Helps -->
+      <section id="how-it-helps" class="w-full px-4 py-20 sm:px-6 lg:px-8" aria-labelledby="how-it-helps-heading">
+        <div class="section-shell">
+        <div class="section-heading text-center mx-auto mb-12">
+          <p class="section-kicker justify-center">For Job Seekers</p>
+          <h2 id="how-it-helps-heading" class="text-3xl font-display font-bold mb-4 text-base-content">How BaoBuildBuddy helps you get hired</h2>
+          <p class="text-lg text-base-content/70">Built for videogame job seekers who want better applications without losing their own voice.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          <!-- Card Template -->
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/STARTER_GUIDE.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Starter Guide">
+        <div class="docs-grid grid gap-6">
+          <article class="card surface-card">
             <div class="card-body">
-              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">🚀</div>
-              <h3 class="card-title font-display text-lg text-base-content">Starter Guide</h3>
-              <p class="text-sm text-base-content/70">Full setup instructions, prerequisites, and architecture overview.</p>
+              <div class="doc-icon mb-2" aria-hidden="true">🎯</div>
+              <h3 class="card-title font-display text-lg text-base-content">Pull together game jobs faster</h3>
+              <p class="text-sm text-base-content/70">BaoBuildBuddy can gather job listings from different game job sites so you spend less time bouncing between tabs looking for openings.</p>
+              <div class="card-actions justify-start mt-4">
+                <span class="badge badge-soft badge-primary">Job Search</span>
+              </div>
             </div>
-          </a>
+          </article>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/AUTOMATION.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read RPA Automation Guide">
+          <article class="card surface-card">
             <div class="card-body">
-              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">🤖</div>
-              <h3 class="card-title font-display text-lg text-base-content">RPA Automation</h3>
-              <p class="text-sm text-base-content/70">How to write and run Playwright scrapers for the job board pipeline.</p>
+              <div class="doc-icon mb-2" aria-hidden="true">✍️</div>
+              <h3 class="card-title font-display text-lg text-base-content">Tailor every application faster</h3>
+              <p class="text-sm text-base-content/70">Shape resumes and cover letters around each studio and role while keeping your background, tone, and wins intact.</p>
+              <div class="card-actions justify-start mt-4">
+                <span class="badge badge-soft badge-info">Applications</span>
+              </div>
             </div>
-          </a>
+          </article>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/LOCAL_AI_SETUP.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Local AI Setup Guide">
+          <article class="card surface-card">
             <div class="card-body">
-              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">🧠</div>
-              <h3 class="card-title font-display text-lg text-base-content">Local AI Details</h3>
-              <p class="text-sm text-base-content/70">Deep dive into Ollama, model selection, and context limits.</p>
+              <div class="doc-icon mb-2" aria-hidden="true">🧠</div>
+              <h3 class="card-title font-display text-lg text-base-content">Keep your materials private</h3>
+              <p class="text-sm text-base-content/70">Run AI locally with Ollama so your resume, cover letters, and interview answers stay on your own machine.</p>
+              <div class="card-actions justify-start mt-4">
+                <span class="badge badge-soft badge-success">Privacy</span>
+              </div>
             </div>
-          </a>
+          </article>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/RAILWAY.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Railway Deployment Guide">
+          <article class="card surface-card">
             <div class="card-body">
-              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">🚂</div>
-              <h3 class="card-title font-display text-lg text-base-content">Railway Deploy</h3>
-              <p class="text-sm text-base-content/70">Hosting the server backend and Nuxt 4 frontend in the cloud.</p>
+              <div class="doc-icon mb-2" aria-hidden="true">🎮</div>
+              <h3 class="card-title font-display text-lg text-base-content">Practice before the interview</h3>
+              <p class="text-sm text-base-content/70">Rehearse answers, sharpen stories, and walk into game studio interviews with clearer examples and less panic.</p>
+              <div class="card-actions justify-start mt-4">
+                <span class="badge badge-soft badge-warning">Interviews</span>
+              </div>
             </div>
-          </a>
+          </article>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/ELI5_SYSTEM_WALKTHROUGH.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read ELI5 System Walkthrough">
+          <article class="card surface-card">
             <div class="card-body">
-              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">👶</div>
-              <h3 class="card-title font-display text-lg text-base-content">ELI5 Walkthrough</h3>
-              <p class="text-sm text-base-content/70">A non-technical explanation of how all the pieces fit together.</p>
+              <div class="doc-icon mb-2" aria-hidden="true">🤖</div>
+              <h3 class="card-title font-display text-lg text-base-content">Let the app handle repetitive applying steps</h3>
+              <p class="text-sm text-base-content/70">For supported flows, BaoBuildBuddy can take over some of the repetitive click-by-click application steps so you spend less time copy-pasting the same details.</p>
+              <div class="card-actions justify-start mt-4">
+                <span class="badge badge-soft badge-secondary">Focus</span>
+              </div>
             </div>
-          </a>
+          </article>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/feature-trace-matrix.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Feature Trace Matrix">
+          <article class="card surface-card">
             <div class="card-body">
-              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">📊</div>
-              <h3 class="card-title font-display text-lg text-base-content">Feature Matrix</h3>
-              <p class="text-sm text-base-content/70">Current status of all planned modules and integrations.</p>
+              <div class="doc-icon mb-2" aria-hidden="true">🏆</div>
+              <h3 class="card-title font-display text-lg text-base-content">Show your best work more clearly</h3>
+              <p class="text-sm text-base-content/70">BaoBuildBuddy is designed to help videogame job seekers present their strengths more clearly and apply with more confidence.</p>
+              <div class="card-actions justify-start mt-4">
+                <span class="badge badge-soft badge-accent">Confidence</span>
+              </div>
             </div>
-          </a>
+          </article>
 
+        </div>
+        <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <a href="#downloads" class="btn btn-primary btn-lg">Choose Your Download</a>
+          <a href="#ollama" class="btn btn-neutral btn-outline btn-lg">Set Up Ollama</a>
+        </div>
         </div>
       </section>
     </main>
 
     <!-- Accessible Footer -->
-    <footer class="footer bg-base-200 text-base-content p-10 border-t border-base-300 mt-auto">
+    <footer class="border-t border-base-300 bg-base-200 text-base-content mt-auto">
+      <div class="footer section-shell gap-10 p-8 sm:p-10">
       <aside>
         <svg viewBox="0 0 64 64" class="w-12 h-12 grayscale opacity-50" aria-hidden="true">
           <circle cx="32" cy="32" r="30" fill="#2d3570" />
@@ -320,39 +508,44 @@
         </svg>
         <p>
           <span class="font-display font-bold text-lg text-base-content block mb-1">BaoBuildBuddy</span>
-          <span class="text-base-content/70">Open source career orchestration.</span>
+          <span class="text-base-content/70">AI support for videogame job seekers.</span>
         </p>
       </aside>
       <nav>
-        <h6 class="footer-title">Project Links</h6>
-        <a href="https://github.com/d4551/baobuildbuddy" class="link link-hover flex items-center gap-2 font-medium" aria-label="GitHub Repository">
-           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-           GitHub Repository
+        <h6 class="footer-title">Start Here</h6>
+        <a href="#downloads" class="link link-hover flex items-center gap-2 font-medium" aria-label="Go to downloads section">
+           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+           Choose your download
         </a>
-        <a href="https://github.com/d4551/baobuildbuddy/issues" class="link link-hover flex items-center gap-2 font-medium" aria-label="Report an Issue on GitHub">
-           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-           Report Issue
+        <a href="#ollama" class="link link-hover flex items-center gap-2 font-medium" aria-label="Go to Ollama setup section">
+           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/><path d="M2 12h20"/></svg>
+           Set up Ollama
+        </a>
+        <a href="#how-it-helps" class="link link-hover flex items-center gap-2 font-medium" aria-label="Go to how BaoBuildBuddy helps section">
+           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+           See how it helps
         </a>
       </nav>
+      </div>
     </footer>
 
     <!-- Mobile Dock Navigation -->
     <nav class="dock sm:hidden border-t border-base-300 bg-base-100/95 backdrop-blur z-50 fixed bottom-0 w-full" aria-label="Mobile Navigation">
-      <a href="#" class="dock-item" aria-label="Go to Home">
+      <a href="#" class="dock-item dock-active" data-dock-target="top" aria-label="Go to Home">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span class="dock-label">Home</span>
       </a>
-      <a href="#downloads" class="dock-item" aria-label="Go to Downloads">
+      <a href="#downloads" class="dock-item" data-dock-target="downloads" aria-label="Go to Downloads">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-        <span class="dock-label">Apps</span>
+        <span class="dock-label">Download</span>
       </a>
-      <a href="#ollama" class="dock-item" aria-label="Go to AI Setup">
+      <a href="#ollama" class="dock-item" data-dock-target="ollama" aria-label="Go to Ollama setup">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/><path d="M2 12h20"/><path d="m5 7 3-5 3 5"/><path d="m5 17 3 5 3-5"/></svg>
-        <span class="dock-label">Setup</span>
+        <span class="dock-label">Ollama</span>
       </a>
-      <a href="#docs" class="dock-item" aria-label="Go to Documentation">
+      <a href="#how-it-helps" class="dock-item" data-dock-target="how-it-helps" aria-label="Go to how BaoBuildBuddy helps">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        <span class="dock-label">Docs</span>
+        <span class="dock-label">Why</span>
       </a>
     </nav>
 
@@ -383,32 +576,83 @@
         localStorage.setItem(tKey, newTheme);
       });
 
-      const PLATFORM_NAMES = ["windows", "macos", "linux"];
+      const SECTION_IDS = ["downloads", "ollama", "how-it-helps"];
       const COPY_BUTTON_RESET_DELAY_MS = 2000;
-      const RELEASE_DIRECTORY_TREE_BASE_URL =
-        "https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases";
-      const RELEASE_DIRECTORY_API_URL =
-        "https://api.github.com/repos/d4551/baobuildbuddy/contents/packages/desktop/releases";
+      const RELEASE_DOWNLOAD_ROOT = "releases";
       const PRIMARY_RELEASE_EXTENSIONS = new Set(["AppImage", "dmg", "exe"]);
+      const DOWNLOAD_PLATFORMS = [
+        {
+          id: "windows",
+          label: "Windows",
+          directories: [{ id: "windows", label: "Windows files" }],
+        },
+        {
+          id: "macos",
+          label: "Mac",
+          directories: [{ id: "macos", label: "Mac files" }],
+        },
+        {
+          id: "linux",
+          label: "Linux",
+          directories: [
+            { id: "linux-x64", label: "Linux x64 files" },
+            { id: "linux-arm64", label: "Linux ARM64 files" },
+          ],
+        },
+      ];
+      const RELEASE_ASSETS = {
+        windows: [
+          {
+            directoryId: "windows",
+            name: "BaoBuildBuddy_0.1.0_x64-setup.exe",
+            size: 63878526,
+          },
+          {
+            directoryId: "windows",
+            name: "BaoBuildBuddy_0.1.0_x64-portable.zip",
+            size: 102713235,
+          },
+        ],
+        macos: [
+          {
+            directoryId: "macos",
+            name: "BaoBuildBuddy_0.1.0_aarch64.dmg",
+            size: 71980655,
+          },
+        ],
+        linux: [
+          {
+            directoryId: "linux",
+            name: "BaoBuildBuddy_0.1.0_arm64.deb",
+            size: 44586740,
+          },
+          {
+            directoryId: "linux",
+            name: "BaoBuildBuddy-0.1.0-1.aarch64.rpm",
+            size: 69396109,
+          },
+        ],
+      };
 
-      function isRecord(value) {
-        return typeof value === "object" && value !== null;
+      function getReleaseFileHref(directoryId, file) {
+        return `${RELEASE_DOWNLOAD_ROOT}/${directoryId}/${encodeURIComponent(file.name)}`;
       }
 
-      function isGitHubContentEntry(value) {
-        if (!isRecord(value)) {
-          return false;
-        }
-
-        return (
-          typeof value.name === "string" &&
-          typeof value.type === "string" &&
-          typeof value.url === "string"
-        );
+      function escapeHtml(value) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
       }
 
-      function isGitHubReleaseFile(value) {
-        return isGitHubContentEntry(value) && typeof value.size === "number";
+      function formatFileSize(bytes) {
+        return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+      }
+
+      function getReleaseExtension(fileName) {
+        return fileName.split(".").pop() || "file";
       }
 
       function setCopyButtonState(targetButton, state) {
@@ -466,127 +710,268 @@
         }
       }
 
-      function createPlatformFolderLink(os) {
-        return `${RELEASE_DIRECTORY_TREE_BASE_URL}/${os}`;
-      }
-
-      function createEmptyPlatformMarkup(os) {
+      function createEmptyPlatformMarkup(platform) {
         return `
-          <div class="col-span-full alert border border-base-content/10 bg-base-100 text-sm" role="alert">
-            No specific builder files found in ${os} directory.
-          </div>
-        `;
-      }
-
-      function createMissingPlatformMarkup(os) {
-        return `
-          <div class="col-span-full alert alert-info text-sm" role="alert">
-            No folders found for ${os}.
-          </div>
-        `;
-      }
-
-      function createReleaseCardMarkup(os, file) {
-        const ext = file.name.split('.').pop() || 'file';
-        const fileUrl = `${RELEASE_DIRECTORY_TREE_BASE_URL}/${os}/${file.name}`;
-        const badgeClass = PRIMARY_RELEASE_EXTENSIONS.has(ext) ? 'badge-primary' : 'badge-neutral';
-
-        return `
-          <div class="card bg-base-100 shadow-sm border border-base-content/10 hover:shadow-md transition-shadow">
-            <div class="card-body p-6">
-              <div class="flex items-start justify-between">
-                <div class="w-full">
-                  <h4 class="card-title text-base font-mono break-all text-base-content leading-tight">${file.name}</h4>
-                  <div class="mt-3 flex gap-2">
-                     <span class="badge ${badgeClass} badge-sm uppercase font-bold">${ext}</span>
-                     <span class="text-xs text-base-content/70 self-center font-medium">${(file.size / 1024 / 1024).toFixed(1)} MB</span>
-                  </div>
-                </div>
-              </div>
-              <div class="card-actions justify-end mt-4">
-                <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm w-full font-medium" aria-label="View ${file.name} on GitHub">
-                   View Source File
-                 </a>
-              </div>
+          <div class="col-span-full">
+            <div class="alert border border-base-content/10 bg-base-100 text-sm" role="alert">
+              No ${platform.label.toLowerCase()} files are listed yet.
             </div>
           </div>
         `;
       }
 
-      function createBrowseDirectoryMarkup(os) {
+      function createMissingPlatformMarkup(platform) {
         return `
-          <div class="col-span-full flex flex-col items-center gap-4 text-center py-8">
-            <a href="${createPlatformFolderLink(os)}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-outline" aria-label="Open ${os} release folder manually">Browse GitHub Directory</a>
+          <div class="col-span-full">
+            <div class="alert alert-info text-sm" role="alert">
+              No ${platform.label.toLowerCase()} release folders are available yet.
+            </div>
           </div>
         `;
       }
 
-      function isReleaseArtifact(file) {
-        return (
-          isGitHubReleaseFile(file) &&
-          !file.name.includes("sha256") &&
-          !file.name.includes(".DS_Store")
-        );
+      function getReleaseKind(fileName) {
+        const lowerFileName = fileName.toLowerCase();
+        const ext = getReleaseExtension(fileName).toLowerCase();
+
+        if (ext === "exe") {
+          return "Setup file";
+        }
+
+        if (ext === "zip") {
+          return "Portable file";
+        }
+
+        if (ext === "dmg") {
+          return "Mac installer";
+        }
+
+        if (ext === "deb") {
+          return "Debian package";
+        }
+
+        if (ext === "rpm") {
+          return "RPM package";
+        }
+
+        if (ext === "appimage") {
+          return "Portable Linux app";
+        }
+
+        if (lowerFileName.endsWith(".sig")) {
+          return "Signature file";
+        }
+
+        return "Download file";
       }
 
-      async function fetchGitHubDirectoryEntries(url) {
-        const [responseResult] = await Promise.allSettled([fetch(url)]);
-        if (responseResult.status === "rejected" || !responseResult.value.ok) {
-          return null;
+      function getReleaseArchitecture(fileName, directoryId) {
+        const value = `${directoryId} ${fileName}`.toLowerCase();
+
+        if (value.includes("universal")) {
+          return "Universal";
         }
 
-        const [payloadResult] = await Promise.allSettled([responseResult.value.json()]);
-        if (payloadResult.status === "rejected" || !Array.isArray(payloadResult.value)) {
-          return null;
+        if (value.includes("arm64") || value.includes("aarch64")) {
+          return "ARM64";
         }
 
-        return payloadResult.value.filter((entry) => isGitHubContentEntry(entry));
+        if (value.includes("x64") || value.includes("x86_64") || value.includes("amd64")) {
+          return "x64";
+        }
+
+        return "";
       }
 
-      async function buildPlatformMarkup(os, platforms) {
-        const platformDirectory = platforms.find((dir) => dir.name === os && dir.type === "dir");
-        if (!platformDirectory) {
-          return createMissingPlatformMarkup(os);
+      function getReleaseDescription(platform, fileName) {
+        const ext = getReleaseExtension(fileName).toLowerCase();
+
+        if (platform.id === "windows" && ext === "exe") {
+          return "Best for most Windows people. This runs the usual setup.";
         }
 
-        const files = await fetchGitHubDirectoryEntries(platformDirectory.url);
-        if (!files) {
-          return createBrowseDirectoryMarkup(os);
+        if (platform.id === "windows" && ext === "zip") {
+          return "Use this if you want a portable folder instead of a full install.";
         }
 
-        const releaseFiles = files.filter((file) => isReleaseArtifact(file));
-        if (releaseFiles.length === 0) {
-          return createEmptyPlatformMarkup(os);
+        if (platform.id === "macos" && ext === "dmg") {
+          return "Open this on your Mac to start the normal install flow.";
         }
 
-        return releaseFiles.map((file) => createReleaseCardMarkup(os, file)).join("");
+        if (platform.id === "linux" && ext === "deb") {
+          return "Use this if your Linux system installs .deb packages.";
+        }
+
+        if (platform.id === "linux" && ext === "rpm") {
+          return "Use this if your Linux system installs .rpm packages.";
+        }
+
+        if (platform.id === "linux" && ext === "appimage") {
+          return "Use this if you want a portable Linux app file.";
+        }
+
+        return `Open this file if it matches your ${platform.label.toLowerCase()} computer.`;
       }
 
-      async function fetchPlatformAssets() {
-        const platforms = await fetchGitHubDirectoryEntries(RELEASE_DIRECTORY_API_URL);
-        const platformMarkup = platforms
-          ? await Promise.all(
-              PLATFORM_NAMES.map(async (os) => ({
-                os,
-                markup: await buildPlatformMarkup(os, platforms),
-              })),
-            )
-          : PLATFORM_NAMES.map((os) => ({
-              os,
-              markup: createBrowseDirectoryMarkup(os),
-            }));
+      function createReleaseCardMarkup(platform, directoryId, file) {
+        const ext = getReleaseExtension(file.name);
+        const fileUrl = getReleaseFileHref(directoryId, file);
+        const badgeClass = PRIMARY_RELEASE_EXTENSIONS.has(ext) ? "badge-primary" : "badge-neutral";
+        const architecture = getReleaseArchitecture(file.name, directoryId);
+        const releaseKind = getReleaseKind(file.name);
+        const releaseDescription = getReleaseDescription(platform, file.name);
+        const safeFileName = escapeHtml(file.name);
+        const safeReleaseKind = escapeHtml(releaseKind);
+        const safeReleaseDescription = escapeHtml(releaseDescription);
+        const safeArchitecture = escapeHtml(architecture);
 
-        for (const { os, markup } of platformMarkup) {
-          const container = document.getElementById(`assets-${os}`);
-          if (container) {
-            container.innerHTML = markup;
+        return `
+          <article class="card surface-card h-full transition-all hover:-translate-y-1 hover:border-primary/50">
+            <div class="card-body p-6">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="badge ${badgeClass} badge-soft badge-sm uppercase font-bold">${ext}</span>
+                  ${architecture ? `<span class="badge badge-ghost badge-sm font-medium">${safeArchitecture}</span>` : ""}
+                </div>
+                <span class="text-xs text-base-content/60 font-medium">${formatFileSize(file.size)}</span>
+              </div>
+              <div class="space-y-3">
+                <h4 class="card-title text-base text-base-content leading-tight">${safeReleaseKind}</h4>
+                <p class="text-sm text-base-content/70">${safeReleaseDescription}</p>
+                <p class="text-xs font-mono break-all text-base-content/60">${safeFileName}</p>
+              </div>
+              <div class="card-actions justify-start mt-auto pt-2">
+                <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm w-full font-medium" aria-label="Download ${safeFileName}">
+                  Download
+                </a>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function sortPlatformReleaseFiles(platform, releaseFiles) {
+        return releaseFiles.sort((leftEntry, rightEntry) => {
+          const leftExt = getReleaseExtension(leftEntry.file.name);
+          const rightExt = getReleaseExtension(rightEntry.file.name);
+          const leftPriority = PRIMARY_RELEASE_EXTENSIONS.has(leftExt) ? 0 : 1;
+          const rightPriority = PRIMARY_RELEASE_EXTENSIONS.has(rightExt) ? 0 : 1;
+
+          if (leftPriority !== rightPriority) {
+            return leftPriority - rightPriority;
           }
+
+          if (leftEntry.directoryId !== rightEntry.directoryId) {
+            const leftDirectoryIndex = platform.directories.findIndex(
+              (directory) => directory.id === leftEntry.directoryId,
+            );
+            const rightDirectoryIndex = platform.directories.findIndex(
+              (directory) => directory.id === rightEntry.directoryId,
+            );
+
+            return leftDirectoryIndex - rightDirectoryIndex;
+          }
+
+          return leftEntry.file.name.localeCompare(rightEntry.file.name);
+        });
+      }
+
+      function buildPlatformMarkup(platform) {
+        const releaseFiles = RELEASE_ASSETS[platform.id];
+
+        if (!Array.isArray(releaseFiles)) {
+          return createMissingPlatformMarkup(platform);
+        }
+
+        const sortedReleaseFiles = sortPlatformReleaseFiles(
+          platform,
+          releaseFiles.map((file) => ({ directoryId: file.directoryId, file })),
+        );
+        if (sortedReleaseFiles.length === 0) {
+          return createEmptyPlatformMarkup(platform);
+        }
+
+        return sortedReleaseFiles
+          .map(({ directoryId, file }) => createReleaseCardMarkup(platform, directoryId, file))
+          .join("");
+      }
+
+      function renderPlatformAssets() {
+        for (const platform of DOWNLOAD_PLATFORMS) {
+          const container = document.getElementById(`assets-${platform.id}`);
+          if (container) {
+            container.innerHTML = buildPlatformMarkup(platform);
+          }
+        }
+      }
+
+      function setActiveSection(sectionId) {
+        const navLinks = document.querySelectorAll("[data-nav-target]");
+        for (const link of navLinks) {
+          const isActive = link.getAttribute("data-nav-target") === sectionId;
+          link.classList.toggle("menu-active", isActive);
+        }
+
+        const dockLinks = document.querySelectorAll("[data-dock-target]");
+        for (const link of dockLinks) {
+          const isActive =
+            (sectionId === "top" && link.getAttribute("data-dock-target") === "top") ||
+            link.getAttribute("data-dock-target") === sectionId;
+          link.classList.toggle("dock-active", isActive);
+        }
+      }
+
+      function bindScrollNavigation() {
+        const sectionElements = SECTION_IDS
+          .map((sectionId) => document.getElementById(sectionId))
+          .filter((section) => section instanceof HTMLElement);
+
+        if (sectionElements.length === 0) {
+          return;
+        }
+
+        const sectionObserver = new IntersectionObserver(
+          (entries) => {
+            const visibleEntry = entries
+              .filter((entry) => entry.isIntersecting)
+              .sort((leftEntry, rightEntry) => rightEntry.intersectionRatio - leftEntry.intersectionRatio)[0];
+
+            if (visibleEntry?.target instanceof HTMLElement) {
+              setActiveSection(visibleEntry.target.id);
+            }
+          },
+          {
+            rootMargin: "-35% 0px -45% 0px",
+            threshold: [0.2, 0.45, 0.7],
+          },
+        );
+
+        for (const sectionElement of sectionElements) {
+          sectionObserver.observe(sectionElement);
+        }
+
+        const heroSection = document.getElementById("hero-heading")?.closest("section");
+        if (heroSection instanceof HTMLElement) {
+          const heroObserver = new IntersectionObserver(
+            (entries) => {
+              const [entry] = entries;
+              if (entry?.isIntersecting) {
+                setActiveSection("top");
+              }
+            },
+            {
+              threshold: 0.55,
+            },
+          );
+
+          heroObserver.observe(heroSection);
         }
       }
 
       document.addEventListener('DOMContentLoaded', () => {
         bindCopyButtons();
-        fetchPlatformAssets();
+        renderPlatformAssets();
+        bindScrollNavigation();
       });
     </script>
   </body>

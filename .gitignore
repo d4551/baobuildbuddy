@@ -49,3 +49,6 @@ packages/desktop/src-tauri/target-linux/
 
 # Agentiflow
 agentiflow/
+
+# Generated desktop packaging scratch space
+.tmp-*/

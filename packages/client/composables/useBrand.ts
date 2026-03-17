@@ -1,5 +1,7 @@
+import { computed, readonly } from "vue";
 import type { BrandSettings } from "@bao/shared";
 import { resolveBrandSettings } from "@bao/shared";
+import { useSettings } from "./useSettings";
 
 function toFontCssVars(brand: BrandSettings): Record<string, string> {
   return {

@@ -7,8 +7,12 @@
   "hostArch": "arm64",
   "tauriTarget": "aarch64-apple-darwin",
   "artifactNames": ["BaoBuildBuddy_0.1.0_aarch64.dmg"],
-  "buildCommands": ["stage-only existing bundled artifacts for aarch64-apple-darwin"],
-  "builtAt": "2026-03-17T08:34:10.001Z",
+  "buildCommands": [
+    "/Users/brandondonnelly/.bun/bin/bun tauri build --no-bundle --target aarch64-apple-darwin",
+    "/Users/brandondonnelly/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin",
+    "hdiutil create -srcfolder /Users/brandondonnelly/Downloads/baobuildbuddy/packages/desktop/src-tauri/target/release/bundle/macos/BaoBuildBuddy.app /Users/brandondonnelly/Downloads/baobuildbuddy/packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"
+  ],
+  "builtAt": "2026-03-17T18:02:00.903Z",
   "ci": {
     "workflow": null,
     "runId": null,

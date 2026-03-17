@@ -7,6 +7,26 @@ on:
       - "codex/**"
       - "copilot/**"
   workflow_dispatch:
+    inputs:
+      macos_architectures:
+        description: "Optional comma-separated macOS architectures (aarch64,x86_64,universal)"
+        required: false
+        type: string
+      include_windows_msi:
+        description: "Include Windows MSI in addition to NSIS and portable"
+        required: false
+        default: false
+        type: boolean
+      include_linux_appimage:
+        description: "Include Linux AppImage on x64 builds"
+        required: false
+        default: false
+        type: boolean
+      include_linux_signatures:
+        description: "Generate detached GPG signatures for Linux artifacts"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: desktop-release-${{ github.workflow }}-${{ github.ref }}
@@ -14,6 +34,13 @@ concurrency:
 
 permissions:
   contents: read
+
+env:
+  DESKTOP_RELEASE_RELEASE_MODE: "true"
+  DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event.inputs.include_linux_appimage || vars.DESKTOP_RELEASE_LINUX_APPIMAGE }}
+  DESKTOP_RELEASE_LINUX_SIGNATURES: ${{ github.event.inputs.include_linux_signatures || vars.DESKTOP_RELEASE_LINUX_SIGNATURES }}
+  DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event.inputs.include_windows_msi || vars.DESKTOP_RELEASE_WINDOWS_MSI }}
+  DESKTOP_RELEASE_MACOS_ARCHITECTURES: ${{ github.event.inputs.macos_architectures || vars.DESKTOP_RELEASE_MACOS_ARCHITECTURES }}
 
 jobs:
   quality-gates:
@@ -55,6 +82,10 @@ jobs:
     needs: quality-gates
     runs-on: macos-14
     timeout-minutes: 60
+    env:
+      APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+      APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -84,14 +115,46 @@ jobs:
       - name: Install Playwright Chromium
         run: bun run automation:browsers:install
 
+      - name: Import Apple developer certificate
+        if: ${{ secrets.APPLE_CERTIFICATE != '' && secrets.APPLE_CERTIFICATE_PASSWORD != '' && secrets.KEYCHAIN_PASSWORD != '' }}
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          security find-identity -v -p codesigning build.keychain
+
+      - name: Prepare App Store Connect API key
+        if: ${{ secrets.APPLE_API_KEY_CONTENT != '' }}
+        env:
+          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+        run: |
+          APPLE_API_KEY_PATH="$RUNNER_TEMP/AuthKey_${APPLE_API_KEY}.p8"
+          printf "%s" "$APPLE_API_KEY_CONTENT" > "$APPLE_API_KEY_PATH"
+          chmod 600 "$APPLE_API_KEY_PATH"
+          echo "APPLE_API_KEY_PATH=$APPLE_API_KEY_PATH" >> "$GITHUB_ENV"
+
       - name: Build native macOS release artifacts
-        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target aarch64-apple-darwin
 
+      - name: Validate notarized macOS artifacts
+        run: |
+          find .desktop-release-artifacts/macos -name '*.dmg' -print0 | while IFS= read -r -d '' artifact; do
+            xcrun stapler validate -v "$artifact"
+          done
+
       - name: Verify macOS release artifacts
-        run: bun run verify:desktop-releases -- --targets macos
+        run: bun run verify:desktop-releases -- --targets macos --release
 
       - name: Upload macOS release artifact set
         uses: actions/upload-artifact@v7
@@ -104,6 +167,10 @@ jobs:
     needs: quality-gates
     runs-on: windows-latest
     timeout-minutes: 60
+    env:
+      WINDOWS_CERTIFICATE_THUMBPRINT: ${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
+      WINDOWS_DIGEST_ALGORITHM: ${{ secrets.WINDOWS_DIGEST_ALGORITHM }}
+      WINDOWS_TIMESTAMP_URL: ${{ secrets.WINDOWS_TIMESTAMP_URL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -146,9 +213,20 @@ jobs:
             throw "WebView2 bootstrapper download did not produce $bootstrapperPath"
           }
 
+      - name: Import Windows code-signing certificate
+        if: ${{ secrets.WINDOWS_CERTIFICATE != '' && secrets.WINDOWS_CERTIFICATE_PASSWORD != '' }}
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          $certificatePath = Join-Path $env:RUNNER_TEMP 'desktop-signing-cert.pfx'
+          [System.IO.File]::WriteAllBytes($certificatePath, [System.Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
+          Import-PfxCertificate -FilePath $certificatePath -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force) | Out-Null
+
       - name: Build native Windows release artifacts
         shell: pwsh
-        run: bun run release:desktop:windows -- --output-root .desktop-release-artifacts
+        run: bun run release:desktop:windows -- --output-root .desktop-release-artifacts --release
 
       - name: Verify packaged desktop runtime
         shell: pwsh
@@ -156,7 +234,7 @@ jobs:
 
       - name: Verify Windows release artifacts
         shell: pwsh
-        run: bun run verify:desktop-releases -- --targets windows
+        run: bun run verify:desktop-releases -- --targets windows --release
 
       - name: Upload Windows release artifact set
         uses: actions/upload-artifact@v7
@@ -169,6 +247,9 @@ jobs:
     needs: quality-gates
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      DESKTOP_RELEASE_GPG_KEY_ID: ${{ secrets.DESKTOP_RELEASE_GPG_KEY_ID }}
+      DESKTOP_RELEASE_GPG_PASSPHRASE: ${{ secrets.DESKTOP_RELEASE_GPG_PASSPHRASE }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -215,14 +296,21 @@ jobs:
       - name: Install Playwright Chromium
         run: bun run automation:browsers:install
 
+      - name: Import Linux release signing key
+        if: ${{ env.DESKTOP_RELEASE_LINUX_SIGNATURES == 'true' && secrets.DESKTOP_GPG_PRIVATE_KEY != '' }}
+        env:
+          DESKTOP_GPG_PRIVATE_KEY: ${{ secrets.DESKTOP_GPG_PRIVATE_KEY }}
+        run: |
+          echo "$DESKTOP_GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
+
       - name: Build native Linux x64 release artifacts
-        run: bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --verbose
+        run: bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --verbose --release
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target x86_64-unknown-linux-gnu
 
       - name: Verify Linux x64 release artifacts
-        run: bun run verify:desktop-releases -- --targets linux-x64
+        run: bun run verify:desktop-releases -- --targets linux-x64 --release
 
       - name: Upload Linux x64 release artifact set
         uses: actions/upload-artifact@v7
@@ -235,6 +323,9 @@ jobs:
     needs: quality-gates
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 60
+    env:
+      DESKTOP_RELEASE_GPG_KEY_ID: ${{ secrets.DESKTOP_RELEASE_GPG_KEY_ID }}
+      DESKTOP_RELEASE_GPG_PASSPHRASE: ${{ secrets.DESKTOP_RELEASE_GPG_PASSPHRASE }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -281,14 +372,21 @@ jobs:
       - name: Install Playwright Chromium
         run: bun run automation:browsers:install
 
+      - name: Import Linux release signing key
+        if: ${{ env.DESKTOP_RELEASE_LINUX_SIGNATURES == 'true' && secrets.DESKTOP_GPG_PRIVATE_KEY != '' }}
+        env:
+          DESKTOP_GPG_PRIVATE_KEY: ${{ secrets.DESKTOP_GPG_PRIVATE_KEY }}
+        run: |
+          echo "$DESKTOP_GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
+
       - name: Build native Linux ARM64 release artifacts
-        run: bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --verbose
+        run: bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --verbose --release
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target aarch64-unknown-linux-gnu
 
       - name: Verify Linux ARM64 release artifacts
-        run: bun run verify:desktop-releases -- --targets linux-arm64
+        run: bun run verify:desktop-releases -- --targets linux-arm64 --release
 
       - name: Upload Linux ARM64 release artifact set
         uses: actions/upload-artifact@v7
@@ -353,7 +451,7 @@ jobs:
         run: bun run release:refresh:all-os -- --source-root .desktop-release-input --targets macos,windows,linux-x64,linux-arm64
 
       - name: Verify assembled desktop releases
-        run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64
+        run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64 --release
 
       - name: Upload assembled desktop releases
         uses: actions/upload-artifact@v7

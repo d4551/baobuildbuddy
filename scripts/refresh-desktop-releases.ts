@@ -11,6 +11,11 @@ import {
 import { captureResult, toErrorMessage } from "./utils/async-control";
 import { writeFormattedJsonFile } from "./utils/biome-format";
 import { writeError, writeOutput } from "./utils/cli-output";
+import {
+  discoverStagedDesktopReleaseTargets,
+  isDesktopReleaseProvenance,
+  parseDesktopReleaseRefreshTargets,
+} from "./utils/desktop-release-refresh";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -36,30 +41,18 @@ const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_RELEASE_ROOT = join(REPO_ROOT, "packages", "desktop", "releases");
 const DESKTOP_RELEASE_METADATA_ROOT = join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_METADATA_DIR);
 const DESKTOP_RELEASE_CHECKSUM_PATH = join(DESKTOP_RELEASE_ROOT, "sha256.txt");
+const DESKTOP_RELEASE_ROOT_ALLOWED_FILES = new Set([
+  "README.md",
+  "provenance.json",
+  "sha256.txt",
+]);
+const DESKTOP_RELEASE_ROOT_ALLOWED_DIRECTORIES = new Set([
+  DESKTOP_RELEASE_METADATA_DIR,
+  ...DESKTOP_RELEASE_TARGETS,
+]);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-
-const parseTargets = (argv: readonly string[]): readonly DesktopReleaseTarget[] => {
-  const targetsIndex = argv.indexOf("--targets");
-  if (targetsIndex === -1) {
-    return DESKTOP_RELEASE_TARGETS;
-  }
-
-  const rawTargets = argv[targetsIndex + 1] ?? "";
-  const selectedTargets = rawTargets
-    .split(",")
-    .map((target) => target.trim())
-    .filter((target): target is DesktopReleaseTarget =>
-      DESKTOP_RELEASE_TARGETS.includes(target as DesktopReleaseTarget),
-    );
-
-  if (selectedTargets.length === 0) {
-    throw new Error(`No supported desktop targets were supplied via --targets (${rawTargets}).`);
-  }
-
-  return selectedTargets;
-};
 
 const resolveSourceRoot = (argv: readonly string[]): string => {
   const rootIndex = argv.indexOf("--source-root");
@@ -102,21 +95,13 @@ const readProvenance = async (
     throw new Error(`Invalid provenance manifest for ${target}.`);
   }
 
+  if (!isDesktopReleaseProvenance(parsed)) {
+    throw new Error(
+      `Canonical release refresh requires valid release provenance for ${target}: ${provenancePath}`,
+    );
+  }
+
   return parsed as ReleaseProvenance;
-};
-
-const readExistingAssembledTargets = async (): Promise<Record<string, unknown>> => {
-  const provenancePath = join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_PROVENANCE_FILENAME);
-  if (!(await pathExists(provenancePath))) {
-    return {};
-  }
-
-  const parsed: unknown = JSON.parse(await Bun.file(provenancePath).text());
-  if (!(isRecord(parsed) && isRecord(parsed.targets))) {
-    return {};
-  }
-
-  return parsed.targets;
 };
 
 const collectTargetArtifacts = async (
@@ -159,6 +144,72 @@ const stageTargetArtifacts = async (
   if (await pathExists(sourceMetadataRoot)) {
     await cp(sourceMetadataRoot, releaseMetadataRoot, { recursive: true });
   }
+};
+
+const pruneLegacyReleaseEntries = async (): Promise<void> => {
+  if (!(await pathExists(DESKTOP_RELEASE_ROOT))) {
+    return;
+  }
+
+  const releaseEntries = await readdir(DESKTOP_RELEASE_ROOT, { withFileTypes: true });
+  await Promise.all(
+    releaseEntries.map(async (entry) => {
+      const entryPath = join(DESKTOP_RELEASE_ROOT, entry.name);
+      if (entry.isDirectory()) {
+        if (DESKTOP_RELEASE_ROOT_ALLOWED_DIRECTORIES.has(entry.name)) {
+          return;
+        }
+
+        await rm(entryPath, { recursive: true, force: true });
+        return;
+      }
+
+      if (DESKTOP_RELEASE_ROOT_ALLOWED_FILES.has(entry.name)) {
+        return;
+      }
+
+      await rm(entryPath, { force: true });
+    }),
+  );
+
+  if (!(await pathExists(DESKTOP_RELEASE_METADATA_ROOT))) {
+    return;
+  }
+
+  const metadataEntries = await readdir(DESKTOP_RELEASE_METADATA_ROOT, { withFileTypes: true });
+  await Promise.all(
+    metadataEntries.map(async (entry) => {
+      if (
+        entry.isDirectory() &&
+        DESKTOP_RELEASE_TARGETS.includes(entry.name as DesktopReleaseTarget)
+      ) {
+        return;
+      }
+
+      await rm(join(DESKTOP_RELEASE_METADATA_ROOT, entry.name), {
+        recursive: true,
+        force: true,
+      });
+    }),
+  );
+};
+
+const pruneUnselectedReleaseTargets = async (
+  selectedTargets: readonly DesktopReleaseTarget[],
+): Promise<void> => {
+  const selectedTargetSet = new Set(selectedTargets);
+
+  await Promise.all(
+    DESKTOP_RELEASE_TARGETS.filter((target) => !selectedTargetSet.has(target)).map(
+      async (target) => {
+        await rm(join(DESKTOP_RELEASE_ROOT, target), { recursive: true, force: true });
+        await rm(join(DESKTOP_RELEASE_METADATA_ROOT, target), {
+          recursive: true,
+          force: true,
+        });
+      },
+    ),
+  );
 };
 
 const writeChecksumManifest = async (): Promise<void> => {
@@ -210,8 +261,14 @@ const runVerifier = async (targets: readonly DesktopReleaseTarget[]): Promise<vo
 
 const main = async (): Promise<void> => {
   const argv = process.argv.slice(2);
-  const targets = parseTargets(argv);
   const sourceRoot = resolveSourceRoot(argv);
+  const explicitTargets = parseDesktopReleaseRefreshTargets(argv);
+  const targets = explicitTargets ?? (await discoverStagedDesktopReleaseTargets(sourceRoot, pathExists));
+  if (targets.length === 0) {
+    throw new Error(`No staged desktop release targets were found in ${sourceRoot}.`);
+  }
+  await pruneLegacyReleaseEntries();
+  await pruneUnselectedReleaseTargets(targets);
   const provenanceEntries = await Promise.all(
     targets.map(async (target) => {
       const provenance = await readProvenance(sourceRoot, target);
@@ -231,16 +288,11 @@ const main = async (): Promise<void> => {
   );
 
   await mkdir(DESKTOP_RELEASE_METADATA_ROOT, { recursive: true });
-  const existingTargets = await readExistingAssembledTargets();
-  const nextTargets = {
-    ...existingTargets,
-    ...Object.fromEntries(provenanceEntries),
-  };
   await writeFormattedJsonFile(join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_PROVENANCE_FILENAME), {
     schemaVersion: 1,
     assembledAt: new Date().toISOString(),
     sourceRoot,
-    targets: nextTargets,
+    targets: Object.fromEntries(provenanceEntries),
   });
   await writeChecksumManifest();
   await writeOutput(

@@ -13,21 +13,28 @@ import {
   DISK_IMAGE_TIMEOUT_MS,
 } from "../packages/shared/src/constants/scripts";
 import {
+  buildDesktopReleaseArtifactFileNames,
+  buildDesktopReleaseArtifactSpecs,
+  DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE,
+  type DesktopReleaseArtifactKind,
+  type DesktopReleaseArtifactProfile,
+  type DesktopReleaseMacosArchitecture,
+} from "../packages/shared/src/utils/desktop-release-contract";
+import {
   buildDesktopRuntimeManifest,
+  type DesktopRuntimeManifest,
   getDesktopRuntimeManifestMismatches,
   listDesktopRuntimeContractPaths,
   parseDesktopRuntimeManifest,
   resolveDesktopRuntimeTargetInfo,
-  type DesktopRuntimeManifest,
 } from "../packages/shared/src/utils/desktop-runtime-contract";
-import {
-  buildDesktopReleaseArtifactSpecs,
-  buildDesktopReleaseArtifactFileNames,
-  type DesktopReleaseArtifactKind,
-} from "../packages/shared/src/utils/desktop-release-contract";
-import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
+import {
+  hasNativeDesktopReleaseProvenance,
+  isDesktopReleaseProvenance,
+} from "./utils/desktop-release-refresh";
+import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -144,6 +151,19 @@ const WINDOWS_NSIS_SCRAPER_INSTALL_MARKER = [
   "runtime",
   WINDOWS_RUNTIME_MANIFEST.scraperDir,
 ].join("\\");
+const LINUX_APPIMAGE_ENV = "DESKTOP_RELEASE_LINUX_APPIMAGE";
+const LINUX_SIGNING_ENV = "DESKTOP_RELEASE_LINUX_SIGNATURES";
+const WINDOWS_MSI_ENV = "DESKTOP_RELEASE_WINDOWS_MSI";
+const MACOS_ARCH_ENV = "DESKTOP_RELEASE_MACOS_ARCHITECTURES";
+const RELEASE_BUILD_ENV = "DESKTOP_RELEASE_RELEASE_MODE";
+const LINUX_APPIMAGE_FLAG = "--include-linux-appimage";
+const LINUX_SIGNING_FLAG = "--include-linux-signatures";
+const WINDOWS_MSI_FLAG = "--include-windows-msi";
+const MACOS_ARCH_FLAG = "--macos-architectures";
+const RELEASE_FLAG = "--release";
+const GPG_SIG_PREFIX = "-----BEGIN PGP SIGNATURE";
+const WINDOWS_SIGNING_TOOL = "signtool";
+const SIGCHECK_MIN_SIZE_BYTES = 128;
 
 const PNG_SIGNATURE = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const ICO_SIGNATURE = Uint8Array.from([0, 0, 1, 0]);
@@ -222,6 +242,61 @@ const parseCommandTargets = (argv: readonly string[]): readonly DesktopReleaseTa
 
   return parsedTargets;
 };
+
+const parseBooleanValue = (value: string | undefined): boolean =>
+  value?.trim().toLowerCase() === "1" ||
+  value?.trim().toLowerCase() === "true" ||
+  value?.trim().toLowerCase() === "yes" ||
+  value?.trim().toLowerCase() === "on";
+
+const parseMacosArchitecture = (rawArchitecture: string): DesktopReleaseMacosArchitecture => {
+  if (
+    rawArchitecture === "aarch64" ||
+    rawArchitecture === "x86_64" ||
+    rawArchitecture === "universal"
+  ) {
+    return rawArchitecture;
+  }
+
+  throw new Error(`Unsupported macOS architecture token: ${rawArchitecture}`);
+};
+
+const parseMacosArchitecturesFromInput = (
+  rawValue: string,
+): readonly DesktopReleaseMacosArchitecture[] => {
+  const values = rawValue
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+  if (values.length === 0) {
+    return DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.macosArchitectures;
+  }
+
+  return values.map((value) => parseMacosArchitecture(value));
+};
+
+const parseReleaseProfile = (argv: readonly string[]): DesktopReleaseArtifactProfile => {
+  const macosArchitecturesArgIndex = argv.indexOf(MACOS_ARCH_FLAG);
+  const macosArchitecturesValue =
+    macosArchitecturesArgIndex === -1
+      ? process.env[MACOS_ARCH_ENV]
+      : argv[macosArchitecturesArgIndex + 1];
+  return {
+    includeLinuxAppImage:
+      argv.includes(LINUX_APPIMAGE_FLAG) || parseBooleanValue(process.env[LINUX_APPIMAGE_ENV]),
+    includeLinuxSignatures:
+      argv.includes(LINUX_SIGNING_FLAG) || parseBooleanValue(process.env[LINUX_SIGNING_ENV]),
+    includeWindowsMsi:
+      argv.includes(WINDOWS_MSI_FLAG) || parseBooleanValue(process.env[WINDOWS_MSI_ENV]),
+    macosArchitectures:
+      macosArchitecturesValue === undefined
+        ? DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.macosArchitectures
+        : parseMacosArchitecturesFromInput(macosArchitecturesValue),
+  };
+};
+
+const isReleaseMode = (argv: readonly string[]): boolean =>
+  argv.includes(RELEASE_FLAG) || parseBooleanValue(process.env[RELEASE_BUILD_ENV]);
 
 const readCargoMetadata = async (): Promise<CargoPackageMetadata> => {
   const cargoToml = await Bun.file(DESKTOP_CARGO_TOML_PATH).text();
@@ -335,8 +410,9 @@ const createReleaseArtifact = (
 const buildArtifactsForTarget = (
   metadata: DesktopBundleMetadata,
   target: DesktopReleaseTarget,
+  profile: DesktopReleaseArtifactProfile,
 ): readonly ReleaseArtifact[] => {
-  return buildDesktopReleaseArtifactSpecs(metadata, target).map((artifact) =>
+  return buildDesktopReleaseArtifactSpecs(metadata, target, profile).map((artifact) =>
     createReleaseArtifact(target, artifact.relativePath, artifact.kind),
   );
 };
@@ -344,8 +420,9 @@ const buildArtifactsForTarget = (
 const collectExpectedArtifacts = (
   metadata: DesktopBundleMetadata,
   targets: readonly DesktopReleaseTarget[],
+  profile: DesktopReleaseArtifactProfile,
 ): readonly ReleaseArtifact[] =>
-  targets.flatMap((target) => buildArtifactsForTarget(metadata, target));
+  targets.flatMap((target) => buildArtifactsForTarget(metadata, target, profile));
 
 const readFilePrefix = async (absolutePath: string, length: number): Promise<Uint8Array> => {
   const file = Bun.file(absolutePath);
@@ -639,6 +716,7 @@ const verifyCollectedEntries = async (
 const verifyReleaseProvenance = async (
   metadata: DesktopBundleMetadata,
   targets: readonly DesktopReleaseTarget[],
+  profile: DesktopReleaseArtifactProfile,
 ): Promise<readonly VerificationResult[]> => {
   const provenanceEntriesResult = await captureResult(() => readReleaseProvenance());
   if (!provenanceEntriesResult.ok) {
@@ -667,7 +745,7 @@ const verifyReleaseProvenance = async (
           (artifactName): artifactName is string => typeof artifactName === "string",
         )
       : [];
-    const expectedArtifactNames = buildArtifactsForTarget(metadata, target)
+    const expectedArtifactNames = buildArtifactsForTarget(metadata, target, profile)
       .map((artifact) => basename(artifact.relativePath))
       .sort((left, right) => left.localeCompare(right));
     const actualArtifactNames = [...artifactNames].sort((left, right) => left.localeCompare(right));
@@ -678,13 +756,14 @@ const verifyReleaseProvenance = async (
       `hostArch=${toText(provenance.hostArch) ?? "missing"}`,
       `tauriTarget=${toText(provenance.tauriTarget) ?? "missing"}`,
       `artifacts=${actualArtifactNames.join(",") || "missing"}`,
+      `buildMode=${hasNativeDesktopReleaseProvenance(provenance) ? "native" : "stage-only"}`,
     ].join(" ");
 
     return {
       details,
       label: `provenance:${target}`,
       ok:
-        provenance.strategy === "matching-host-native" &&
+        isDesktopReleaseProvenance(provenance) &&
         provenance.tauriCli === "repo-local-bun" &&
         provenance.hostPlatform === expectedHostPlatformForTarget(target) &&
         provenance.hostArch === expectedHostArchForTarget(target) &&
@@ -899,7 +978,174 @@ const verifyArtifactType = async (artifact: ReleaseArtifact): Promise<Verificati
     return verifyMagicArtifact(artifact, ZIP_SIGNATURE);
   }
 
+  if (artifact.kind === "sig") {
+    const prefix = await readFilePrefix(artifact.absolutePath, SIGCHECK_MIN_SIZE_BYTES);
+    const signatureText = new TextDecoder().decode(prefix);
+    return {
+      details: signatureText.includes(GPG_SIG_PREFIX)
+        ? "gpg signature header detected"
+        : "gpg signature header missing",
+      label: `artifact:${artifact.relativePath}`,
+      ok: signatureText.includes(GPG_SIG_PREFIX),
+    };
+  }
+
   return verifyMagicArtifact(artifact, WINDOWS_EXE_SIGNATURE);
+};
+
+const verifyWindowsAuthenticode = async (
+  artifact: ReleaseArtifact,
+  metadata: DesktopBundleMetadata,
+  checkPortablePayload: boolean,
+): Promise<readonly VerificationResult[]> => {
+  if (artifact.kind !== "portable" && artifact.kind !== "setup" && artifact.kind !== "msi") {
+    return [] as const;
+  }
+
+  if (!Bun.which(WINDOWS_SIGNING_TOOL)) {
+    return [
+      {
+        details: `${WINDOWS_SIGNING_TOOL} is required on PATH for windows release verification`,
+        label: `artifact:${artifact.relativePath}:signing`,
+        ok: false,
+      },
+    ];
+  }
+
+  if (artifact.kind === "setup") {
+    return [
+      {
+        ...(await verifyWindowsExecutableSignature(artifact)),
+        label: `artifact:${artifact.relativePath}:authenticode`,
+      },
+    ];
+  }
+
+  if (artifact.kind === "msi") {
+    return [await verifyWindowsExecutableSignature(artifact)];
+  }
+
+  if (!checkPortablePayload) {
+    return [
+      {
+        details: "portable signature check skipped in non-release mode",
+        label: `artifact:${artifact.relativePath}:authenticode`,
+        ok: true,
+      },
+    ];
+  }
+
+  return verifyPortableExecutableSignatureInZip(artifact, metadata);
+};
+
+const verifyWindowsExecutableSignature = async (
+  artifact: ReleaseArtifact,
+): Promise<VerificationResult> => {
+  const commandResult = await captureCommand(
+    [WINDOWS_SIGNING_TOOL, "verify", "/pa", "/v", artifact.absolutePath],
+    DISK_IMAGE_TIMEOUT_MS,
+  );
+  return {
+    details:
+      commandResult.exitCode === 0
+        ? `authenticode verify passed (${artifact.kind})`
+        : commandResult.timedOut
+          ? "signtool verify timed out"
+          : commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`,
+    label: `artifact:${artifact.relativePath}:authenticode`,
+    ok: commandResult.exitCode === 0,
+  };
+};
+
+const verifyPortableExecutableSignatureInZip = async (
+  artifact: ReleaseArtifact,
+  metadata: DesktopBundleMetadata,
+): Promise<readonly VerificationResult[]> => {
+  const zipRoot = await mkdtemp(join(tmpdir(), "bao-desktop-portable-verify-"));
+  return withCleanup(
+    async () => {
+      const extractResult = await captureResult(() =>
+        extractZipArchive(artifact.absolutePath, zipRoot),
+      );
+      if (!extractResult.ok) {
+        return [
+          {
+            details: toErrorMessage(extractResult.error),
+            label: `artifact:${artifact.relativePath}:portable-signature`,
+            ok: false,
+          },
+        ];
+      }
+
+      const portableRootName = artifact.relativePath.endsWith(ZIP_EXTENSION_PATTERN)
+        ? artifact.relativePath.slice(0, -".zip".length)
+        : basename(artifact.relativePath).replace(".zip", "");
+      const portableExecutable = join(zipRoot, portableRootName, `${metadata.binaryName}.exe`);
+      if (!(await pathExists(portableExecutable))) {
+        return [
+          {
+            details: `missing extracted portable exe for ${artifact.relativePath}`,
+            label: `artifact:${artifact.relativePath}:portable-signature`,
+            ok: false,
+          },
+        ];
+      }
+
+      const commandResult = await captureCommand(
+        [WINDOWS_SIGNING_TOOL, "verify", "/pa", "/v", portableExecutable],
+        DISK_IMAGE_TIMEOUT_MS,
+      );
+      return [
+        {
+          details:
+            commandResult.exitCode === 0
+              ? "portable executable is Authenticode-signed"
+              : commandResult.timedOut
+                ? "portable executable authenticode verification timed out"
+                : commandResult.stderr ||
+                  commandResult.stdout ||
+                  `exitCode=${commandResult.exitCode}`,
+          label: `artifact:${artifact.relativePath}:portable-signature`,
+          ok: commandResult.exitCode === 0,
+        },
+      ];
+    },
+    () => rm(zipRoot, { force: true, recursive: true }),
+  );
+};
+
+const verifyMacosNotaryTicket = async (artifact: ReleaseArtifact): Promise<VerificationResult> => {
+  if (!(await pathExists(artifact.absolutePath))) {
+    return {
+      details: "artifact is missing",
+      label: `artifact:${artifact.relativePath}:notarization`,
+      ok: false,
+    };
+  }
+
+  const missingTool = requireCommand("macOS notarization verification", "xcrun");
+  if (missingTool) {
+    return {
+      ...missingTool,
+      label: `artifact:${artifact.relativePath}:notarization`,
+      details: `${missingTool.details} (notarization verification unavailable)`,
+    };
+  }
+
+  const validateResult = await captureCommand(
+    ["xcrun", "stapler", "validate", "-v", artifact.absolutePath],
+    DISK_IMAGE_TIMEOUT_MS,
+  );
+  return {
+    details:
+      validateResult.exitCode === 0
+        ? "stapler validate passed"
+        : validateResult.timedOut
+          ? "stapler validate timed out"
+          : validateResult.stderr || validateResult.stdout || `exitCode=${validateResult.exitCode}`,
+    label: `artifact:${artifact.relativePath}:notarization`,
+    ok: validateResult.exitCode === 0,
+  };
 };
 
 const verifyArtifactPresence = async (artifact: ReleaseArtifact): Promise<VerificationResult> => {
@@ -922,6 +1168,7 @@ const verifyArtifactPresence = async (artifact: ReleaseArtifact): Promise<Verifi
 const verifyStagedDirectory = async (
   metadata: DesktopBundleMetadata,
   target: DesktopReleaseTarget,
+  profile: DesktopReleaseArtifactProfile,
 ): Promise<VerificationResult> => {
   const directoryPath = join(DESKTOP_RELEASE_ROOT, target);
   if (!(await pathExists(directoryPath))) {
@@ -933,7 +1180,7 @@ const verifyStagedDirectory = async (
   }
 
   const directoryEntries = await readdir(directoryPath, { withFileTypes: true });
-  const expectedArtifacts = buildArtifactsForTarget(metadata, target).map((artifact) =>
+  const expectedArtifacts = buildArtifactsForTarget(metadata, target, profile).map((artifact) =>
     basename(artifact.relativePath),
   );
   const actualArtifacts = directoryEntries
@@ -1436,49 +1683,121 @@ const toVerificationResult = (
   ok: expectedHash === actualHash,
 });
 
-const main = async (): Promise<void> => {
-  const targets = parseCommandTargets(process.argv.slice(2));
-  const metadata = await readDesktopMetadata();
-  const artifacts = collectExpectedArtifacts(metadata, targets);
-  const windowsPortableArtifact = targets.includes("windows")
-    ? artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "portable")
-    : undefined;
+type VerificationRunContext = {
+  readonly artifacts: readonly ReleaseArtifact[];
+  readonly metadata: DesktopBundleMetadata;
+  readonly releaseMode: boolean;
+  readonly releaseProfile: DesktopReleaseArtifactProfile;
+  readonly targets: readonly DesktopReleaseTarget[];
+};
 
-  const results = [
-    verifySemver(metadata),
-    ...verifyBundleConfig(metadata, targets),
-    ...(await verifyReleaseProvenance(metadata, targets)),
-    ...(await verifyIconAssets()),
-    ...(await Promise.all(targets.map((target) => verifyStagedDirectory(metadata, target)))),
-    ...(targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
-    ...(windowsPortableArtifact
-      ? await verifyWindowsPortablePayload(windowsPortableArtifact, metadata)
-      : []),
-    ...(
-      await Promise.all(
-        artifacts.map(async (artifact) => {
-          if (artifact.kind === "dmg") {
-            return verifyMacosDmgPayload(artifact, metadata);
-          }
-          if (artifact.kind === "deb" || artifact.kind === "rpm") {
-            return verifyLinuxPackagePayload(artifact, metadata);
-          }
-          return [] as const;
-        }),
+const collectWindowsVerificationResults = async (
+  context: VerificationRunContext,
+): Promise<readonly VerificationResult[]> => {
+  const windowsPortableArtifact = context.targets.includes("windows")
+    ? context.artifacts.find(
+        (artifact) => artifact.target === "windows" && artifact.kind === "portable",
       )
-    ).flat(),
-    ...(await Promise.all(
-      artifacts.flatMap((artifact) => [
-        verifyArtifactPresence(artifact),
-        verifyArtifactType(artifact),
-      ]),
-    )),
-    await verifyChecksumManifest(artifacts, targets),
-    ...(await verifyChecksumEntries(artifacts)),
-  ];
+    : undefined;
+  const windowsInstallerArtifact = context.targets.includes("windows")
+    ? context.artifacts.find(
+        (artifact) => artifact.target === "windows" && artifact.kind === "setup",
+      )
+    : undefined;
+  const windowsMsiArtifact = context.targets.includes("windows")
+    ? context.artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "msi")
+    : undefined;
+  const releaseWindowsSignatures =
+    context.targets.includes("windows") && context.releaseMode && process.platform === "win32";
 
+  return [
+    ...(context.targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
+    ...(windowsPortableArtifact
+      ? await verifyWindowsPortablePayload(windowsPortableArtifact, context.metadata)
+      : []),
+    ...(windowsInstallerArtifact && releaseWindowsSignatures
+      ? await verifyWindowsAuthenticode(windowsInstallerArtifact, context.metadata, true)
+      : []),
+    ...(windowsMsiArtifact && releaseWindowsSignatures
+      ? await verifyWindowsAuthenticode(windowsMsiArtifact, context.metadata, false)
+      : []),
+    ...(windowsPortableArtifact && releaseWindowsSignatures
+      ? await verifyWindowsAuthenticode(windowsPortableArtifact, context.metadata, true)
+      : []),
+  ];
+};
+
+const collectArtifactPayloadVerificationResults = async (
+  context: VerificationRunContext,
+): Promise<readonly VerificationResult[]> => {
+  const verifyMacosNotary =
+    context.targets.includes("macos") && context.releaseMode && process.platform === "darwin";
+  const nestedResults = await Promise.all(
+    context.artifacts.map(async (artifact) => {
+      if (artifact.kind === "dmg") {
+        const payloadResults = await verifyMacosDmgPayload(artifact, context.metadata);
+        return verifyMacosNotary
+          ? [...payloadResults, await verifyMacosNotaryTicket(artifact)]
+          : payloadResults;
+      }
+      if (artifact.kind === "deb" || artifact.kind === "rpm") {
+        return verifyLinuxPackagePayload(artifact, context.metadata);
+      }
+      return [] as const;
+    }),
+  );
+  return nestedResults.flat();
+};
+
+const collectArtifactPresenceVerificationResults = async (
+  artifacts: readonly ReleaseArtifact[],
+): Promise<readonly VerificationResult[]> =>
+  Promise.all(
+    artifacts.flatMap((artifact) => [
+      verifyArtifactPresence(artifact),
+      verifyArtifactType(artifact),
+    ]),
+  );
+
+const collectVerificationResults = async (
+  context: VerificationRunContext,
+): Promise<readonly VerificationResult[]> => [
+  verifySemver(context.metadata),
+  ...verifyBundleConfig(context.metadata, context.targets),
+  ...(await verifyReleaseProvenance(context.metadata, context.targets, context.releaseProfile)),
+  ...(await verifyIconAssets()),
+  ...(await Promise.all(
+    context.targets.map((target) =>
+      verifyStagedDirectory(context.metadata, target, context.releaseProfile),
+    ),
+  )),
+  ...(await collectWindowsVerificationResults(context)),
+  ...(await collectArtifactPayloadVerificationResults(context)),
+  ...(await collectArtifactPresenceVerificationResults(context.artifacts)),
+  await verifyChecksumManifest(context.artifacts, context.targets),
+  ...(await verifyChecksumEntries(context.artifacts)),
+];
+
+const buildVerificationRunContext = async (
+  argv: readonly string[],
+): Promise<VerificationRunContext> => {
+  const targets = parseCommandTargets(argv);
+  const releaseProfile = parseReleaseProfile(argv);
+  const metadata = await readDesktopMetadata();
+  return {
+    artifacts: collectExpectedArtifacts(metadata, targets, releaseProfile),
+    metadata,
+    releaseMode: isReleaseMode(argv),
+    releaseProfile,
+    targets,
+  };
+};
+
+const main = async (): Promise<void> => {
+  const context = await buildVerificationRunContext(process.argv.slice(2));
+  const results = await collectVerificationResults(context);
   await writeOutput(
-    `desktop-release:verify targets=${targets.join(",")} product=${metadata.productName} version=${metadata.version} binary=${metadata.binaryName}`,
+    `desktop-release:verify targets=${context.targets.join(",")} product=${context.metadata.productName} version=${context.metadata.version} binary=${context.metadata.binaryName}`,
   );
   await writeResults(results);
 

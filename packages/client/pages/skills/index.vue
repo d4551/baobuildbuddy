@@ -188,17 +188,11 @@ async function fetchMappings(): Promise<void> {
 }
 
 async function initializeSkillsPage(): Promise<void> {
-  await fetchMappings();
+  await Promise.all([fetchMappings(), syncGamificationProgress()]);
+}
 
-  const progressResult = await settlePromise(
-    fetchProgress(),
-    t("skillsPage.errors.gamificationLoadFailed"),
-  );
-  if (!progressResult.ok) {
-    $toast.warning(
-      getErrorMessage(progressResult.error, t("skillsPage.errors.gamificationLoadFailed")),
-    );
-  }
+async function syncGamificationProgress(): Promise<void> {
+  await settlePromise(fetchProgress(), t("skillsPage.errors.gamificationLoadFailed"));
 }
 
 async function tryAwardSkillXp(amount: number, reason: SkillsGamificationReason): Promise<boolean> {

@@ -130,6 +130,22 @@ const BUILD_WS_LEAK_MARKERS = [
   `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`,
   `ws:\\/\\/${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`,
 ];
+
+const ensureStaticFrontendEntrypoint = async (directoryPath: string): Promise<void> => {
+  const indexPath = join(directoryPath, "index.html");
+  if (await Bun.file(indexPath).exists()) {
+    return;
+  }
+
+  const spaFallbackPath = join(directoryPath, "200.html");
+  if (!(await Bun.file(spaFallbackPath).exists())) {
+    throw new Error(
+      "Generated desktop frontend is missing packages/client/.output/public/index.html and 200.html",
+    );
+  }
+
+  await cp(spaFallbackPath, indexPath, { force: true });
+};
 const LEADING_PATHNAME_SLASH_PATTERN = /^\/+/u;
 const TRAILING_PATHNAME_SLASH_PATTERN = /\/+$/u;
 
@@ -940,12 +956,7 @@ const stopProcess = async (proc: ReturnType<typeof Bun.spawn>): Promise<void> =>
 };
 
 const assertGeneratedFrontendIsReady = async (manifest: DesktopRuntimeManifest): Promise<void> => {
-  const indexFile = Bun.file(join(CLIENT_PUBLIC_ROOT, "index.html"));
-  if (!(await indexFile.exists())) {
-    throw new Error(
-      "Generated desktop frontend is missing packages/client/.output/public/index.html",
-    );
-  }
+  await ensureStaticFrontendEntrypoint(CLIENT_PUBLIC_ROOT);
 
   const leakedBuildFile = await findLeakedBuildEndpoint(CLIENT_PUBLIC_ROOT);
   if (leakedBuildFile) {

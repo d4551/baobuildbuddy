@@ -1,3 +1,4 @@
+import type { AsyncData } from "nuxt/app";
 import {
   API_ENDPOINTS,
   type AutomationScrapeTarget,
@@ -13,6 +14,8 @@ import {
   safeParseJson,
   WS_ENDPOINTS,
 } from "@bao/shared";
+import { useFetch, useRequestURL, useRuntimeConfig } from "#imports";
+import { $fetch, type FetchError } from "ofetch";
 import type { MaybeRef } from "vue";
 import { resolveApiEndpoint, resolveWebSocketEndpoint } from "~/utils/endpoints";
 
@@ -52,6 +55,13 @@ interface AutomationRuntime {
   requestUrl: URL;
 }
 
+type RunListAsyncData = AsyncData<RpaRunExecutionEnvelope[] | undefined, FetchError | undefined>;
+type RunAsyncData = AsyncData<RpaRunExecutionEnvelope | undefined, FetchError | undefined>;
+type CapabilityAuditAsyncData = AsyncData<
+  RpaCapabilityAuditReport | undefined,
+  FetchError | undefined
+>;
+
 function resolveAutomationRuntime(
   config: ReturnType<typeof useRuntimeConfig>,
   requestUrl: URL,
@@ -64,7 +74,7 @@ function resolveAutomationRuntime(
 }
 
 function createPostMutation(runtime: AutomationRuntime) {
-  return <TResponse>(endpoint: string, body: object) =>
+  return <TResponse>(endpoint: string, body: object): Promise<TResponse> =>
     $fetch<TResponse>(resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, endpoint), {
       method: "POST",
       body,
@@ -109,32 +119,32 @@ function createRunQueries(runtime: AutomationRuntime) {
     API_ENDPOINTS.automationRuns,
   );
 
-  const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}) =>
+  const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}): RunListAsyncData =>
     useFetch<RpaRunExecutionEnvelope[]>(runsEndpoint, {
       query: params,
     });
 
-  const fetchRun = (id: string) =>
+  const fetchRun = (id: string): RunAsyncData =>
     useFetch<RpaRunExecutionEnvelope>(
       resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, buildAutomationRunEndpoint(id)),
     );
 
-  const getRun = (id: string) =>
+  const getRun = (id: string): Promise<RpaRunExecutionEnvelope> =>
     $fetch<RpaRunExecutionEnvelope>(
       resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, buildAutomationRunEndpoint(id)),
     );
 
-  const getRuns = (params: FetchRunsParams = {}) =>
+  const getRuns = (params: FetchRunsParams = {}): Promise<RpaRunExecutionEnvelope[]> =>
     $fetch<RpaRunExecutionEnvelope[]>(runsEndpoint, {
       query: params,
     });
 
-  const fetchRpaCapabilities = () =>
+  const fetchRpaCapabilities = (): CapabilityAuditAsyncData =>
     useFetch<RpaCapabilityAuditReport>(
       resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationCapabilities),
     );
 
-  const getRpaCapabilities = () =>
+  const getRpaCapabilities = (): Promise<RpaCapabilityAuditReport> =>
     $fetch<RpaCapabilityAuditReport>(
       resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationCapabilities),
     );

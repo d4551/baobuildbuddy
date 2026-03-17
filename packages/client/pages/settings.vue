@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed, reactive, ref, watch } from "vue";
+import { useAsyncData, useNuxtApp, useServerSeoMeta } from "#imports";
 import type {
   AutomationSettings,
   BrandSettings,
@@ -34,6 +36,10 @@ import {
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { useBrand } from "~/composables/useBrand";
+import { useSettings } from "~/composables/useSettings";
+import { useTheme } from "~/composables/useTheme";
+import { useUser } from "~/composables/useUser";
 import { getErrorMessage } from "~/utils/errors";
 
 type SaveState = "idle" | "saving" | "success" | "error";
@@ -143,7 +149,7 @@ const brandSaveState = ref<SaveState>("idle");
 const brandEditorPanel = ref<BrandEditorPanel>("identity");
 
 const brandFieldsetClass =
-  "fieldset rounded-box border border-base-300/70 bg-base-200/40 p-4 shadow-sm";
+  "fieldset min-w-0 gap-2 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm";
 const BRAND_DEFAULTS: BrandSettings = brandSettingsSchema.parse(DEFAULT_BRAND_SETTINGS);
 const BRAND_HINT_IDS = {
   logoPath: "settings-brand-logo-path-hint",
@@ -1224,7 +1230,7 @@ async function handleClearEmailDeliveryPassword() {
             <div class="space-y-4">
               <div
                 role="tablist"
-                class="tabs tabs-lift tabs-sm overflow-x-auto md:tabs-md"
+                class="tabs tabs-border tabs-sm gap-2 overflow-x-auto whitespace-nowrap md:tabs-md"
                 :aria-label="t('settings.brand.editorTabsAria')"
               >
                 <button
@@ -1252,88 +1258,90 @@ async function handleClearEmailDeliveryPassword() {
                 role="tabpanel"
                 aria-labelledby="brand-tab-identity"
                 :aria-hidden="brandEditorPanel !== 'identity'"
-                class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
+                class="card card-border bg-base-100 shadow-sm"
               >
-                <p class="mb-4 text-sm text-base-content/70">
-                  {{ t("settings.brand.tabs.identityDescription") }}
-                </p>
-                <SectionGrid grid-token="twoColumn" extra-class="gap-4">
-                  <fieldset :class="brandFieldsetClass">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.nameLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.name"
-                      class="input w-full"
-                      :aria-label="t('settings.brand.nameAria')"
-                    />
-                  </fieldset>
+                <div class="card-body gap-4 p-4 md:p-6">
+                  <p class="text-sm text-base-content/70">
+                    {{ t("settings.brand.tabs.identityDescription") }}
+                  </p>
+                  <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+                    <fieldset :class="brandFieldsetClass">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.nameLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.name"
+                        class="input min-w-0 w-full"
+                        :aria-label="t('settings.brand.nameAria')"
+                      />
+                    </fieldset>
 
-                  <fieldset :class="brandFieldsetClass">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.assistantNameLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.assistantName"
-                      class="input w-full"
-                      :aria-label="t('settings.brand.assistantNameAria')"
-                    />
-                  </fieldset>
+                    <fieldset :class="brandFieldsetClass">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.assistantNameLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.assistantName"
+                        class="input min-w-0 w-full"
+                        :aria-label="t('settings.brand.assistantNameAria')"
+                      />
+                    </fieldset>
 
-                  <fieldset :class="brandFieldsetClass">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.apiNameLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.apiName"
-                      class="input w-full"
-                      :aria-label="t('settings.brand.apiNameAria')"
-                    />
-                  </fieldset>
+                    <fieldset :class="brandFieldsetClass">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.apiNameLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.apiName"
+                        class="input min-w-0 w-full"
+                        :aria-label="t('settings.brand.apiNameAria')"
+                      />
+                    </fieldset>
 
-                  <fieldset :class="brandFieldsetClass">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.taglineLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.tagline"
-                      class="input w-full"
-                      :aria-label="t('settings.brand.taglineAria')"
-                    />
-                  </fieldset>
+                    <fieldset :class="brandFieldsetClass">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.taglineLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.tagline"
+                        class="input min-w-0 w-full"
+                        :aria-label="t('settings.brand.taglineAria')"
+                      />
+                    </fieldset>
 
-                  <fieldset :class="brandFieldsetClass">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.logoPathLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.logoPath"
-                      class="input w-full"
-                      :placeholder="t('settings.brand.assetPathPlaceholder')"
-                      :aria-describedby="BRAND_HINT_IDS.logoPath"
-                      :aria-label="t('settings.brand.logoPathAria')"
-                    />
-                    <p :id="BRAND_HINT_IDS.logoPath" class="label">
-                      {{ t("settings.brand.assetPathHint") }}
-                    </p>
-                  </fieldset>
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.logoPathLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.logoPath"
+                        class="input min-w-0 w-full"
+                        :placeholder="t('settings.brand.assetPathPlaceholder')"
+                        :aria-describedby="BRAND_HINT_IDS.logoPath"
+                        :aria-label="t('settings.brand.logoPathAria')"
+                      />
+                      <p :id="BRAND_HINT_IDS.logoPath" class="label whitespace-normal">
+                        {{ t("settings.brand.assetPathHint") }}
+                      </p>
+                    </fieldset>
 
-                  <fieldset :class="brandFieldsetClass">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.faviconPathLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.faviconPath"
-                      class="input w-full"
-                      :placeholder="t('settings.brand.assetPathPlaceholder')"
-                      :aria-describedby="BRAND_HINT_IDS.faviconPath"
-                      :aria-label="t('settings.brand.faviconPathAria')"
-                    />
-                    <p :id="BRAND_HINT_IDS.faviconPath" class="label">
-                      {{ t("settings.brand.assetPathHint") }}
-                    </p>
-                  </fieldset>
-                </SectionGrid>
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.faviconPathLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.faviconPath"
+                        class="input min-w-0 w-full"
+                        :placeholder="t('settings.brand.assetPathPlaceholder')"
+                        :aria-describedby="BRAND_HINT_IDS.faviconPath"
+                        :aria-label="t('settings.brand.faviconPathAria')"
+                      />
+                      <p :id="BRAND_HINT_IDS.faviconPath" class="label whitespace-normal">
+                        {{ t("settings.brand.assetPathHint") }}
+                      </p>
+                    </fieldset>
+                  </SectionGrid>
+                </div>
               </div>
 
               <div
@@ -1342,63 +1350,65 @@ async function handleClearEmailDeliveryPassword() {
                 role="tabpanel"
                 aria-labelledby="brand-tab-typography"
                 :aria-hidden="brandEditorPanel !== 'typography'"
-                class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
+                class="card card-border bg-base-100 shadow-sm"
               >
-                <p class="mb-4 text-sm text-base-content/70">
-                  {{ t("settings.brand.tabs.typographyDescription") }}
-                </p>
-                <SectionGrid grid-token="twoColumn" extra-class="gap-4">
-                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.fontStylesheetLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.fontStylesheetUrl"
-                      class="input w-full"
-                      :aria-describedby="BRAND_HINT_IDS.fontStylesheet"
-                      :placeholder="
-                        t('settings.brand.fontStylesheetPlaceholder')
-                      "
-                      :aria-label="t('settings.brand.fontStylesheetAria')"
-                    />
-                    <p :id="BRAND_HINT_IDS.fontStylesheet" class="label">
-                      {{ t("settings.brand.fontStylesheetHint") }}
-                    </p>
-                  </fieldset>
+                <div class="card-body gap-4 p-4 md:p-6">
+                  <p class="text-sm text-base-content/70">
+                    {{ t("settings.brand.tabs.typographyDescription") }}
+                  </p>
+                  <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.fontStylesheetLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.fontStylesheetUrl"
+                        class="input min-w-0 w-full"
+                        :aria-describedby="BRAND_HINT_IDS.fontStylesheet"
+                        :placeholder="
+                          t('settings.brand.fontStylesheetPlaceholder')
+                        "
+                        :aria-label="t('settings.brand.fontStylesheetAria')"
+                      />
+                      <p :id="BRAND_HINT_IDS.fontStylesheet" class="label whitespace-normal">
+                        {{ t("settings.brand.fontStylesheetHint") }}
+                      </p>
+                    </fieldset>
 
-                  <fieldset :class="brandFieldsetClass">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.displayFontLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.displayFontFamily"
-                      class="input w-full"
-                      :aria-label="t('settings.brand.displayFontAria')"
-                    />
-                  </fieldset>
+                    <fieldset :class="brandFieldsetClass">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.displayFontLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.displayFontFamily"
+                        class="input min-w-0 w-full"
+                        :aria-label="t('settings.brand.displayFontAria')"
+                      />
+                    </fieldset>
 
-                  <fieldset :class="brandFieldsetClass">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.bodyFontLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.bodyFontFamily"
-                      class="input w-full"
-                      :aria-label="t('settings.brand.bodyFontAria')"
-                    />
-                  </fieldset>
+                    <fieldset :class="brandFieldsetClass">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.bodyFontLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.bodyFontFamily"
+                        class="input min-w-0 w-full"
+                        :aria-label="t('settings.brand.bodyFontAria')"
+                      />
+                    </fieldset>
 
-                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.monoFontLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.monoFontFamily"
-                      class="input w-full"
-                      :aria-label="t('settings.brand.monoFontAria')"
-                    />
-                  </fieldset>
-                </SectionGrid>
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.monoFontLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.monoFontFamily"
+                        class="input min-w-0 w-full"
+                        :aria-label="t('settings.brand.monoFontAria')"
+                      />
+                    </fieldset>
+                  </SectionGrid>
+                </div>
               </div>
 
               <div
@@ -1407,44 +1417,46 @@ async function handleClearEmailDeliveryPassword() {
                 role="tabpanel"
                 aria-labelledby="brand-tab-themes"
                 :aria-hidden="brandEditorPanel !== 'themes'"
-                class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
+                class="card card-border bg-base-100 shadow-sm"
               >
-                <p class="mb-4 text-sm text-base-content/70">
-                  {{ t("settings.brand.tabs.themesDescription") }}
-                </p>
-                <SectionGrid grid-token="twoColumn" extra-class="gap-4">
-                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.lightThemeLegend") }}
-                    </legend>
-                    <textarea
-                      v-model="brandForm.lightThemeJson"
-                      class="textarea font-mono w-full"
-                      rows="12"
-                      :aria-describedby="BRAND_HINT_IDS.lightTheme"
-                      :aria-label="t('settings.brand.lightThemeAria')"
-                    ></textarea>
-                    <p :id="BRAND_HINT_IDS.lightTheme" class="label">
-                      {{ t("settings.brand.themeJsonHint") }}
-                    </p>
-                  </fieldset>
+                <div class="card-body gap-4 p-4 md:p-6">
+                  <p class="text-sm text-base-content/70">
+                    {{ t("settings.brand.tabs.themesDescription") }}
+                  </p>
+                  <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.lightThemeLegend") }}
+                      </legend>
+                      <textarea
+                        v-model="brandForm.lightThemeJson"
+                        class="textarea font-mono min-w-0 w-full"
+                        rows="12"
+                        :aria-describedby="BRAND_HINT_IDS.lightTheme"
+                        :aria-label="t('settings.brand.lightThemeAria')"
+                      ></textarea>
+                      <p :id="BRAND_HINT_IDS.lightTheme" class="label whitespace-normal">
+                        {{ t("settings.brand.themeJsonHint") }}
+                      </p>
+                    </fieldset>
 
-                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.darkThemeLegend") }}
-                    </legend>
-                    <textarea
-                      v-model="brandForm.darkThemeJson"
-                      class="textarea font-mono w-full"
-                      rows="12"
-                      :aria-describedby="BRAND_HINT_IDS.darkTheme"
-                      :aria-label="t('settings.brand.darkThemeAria')"
-                    ></textarea>
-                    <p :id="BRAND_HINT_IDS.darkTheme" class="label">
-                      {{ t("settings.brand.themeJsonHint") }}
-                    </p>
-                  </fieldset>
-                </SectionGrid>
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.darkThemeLegend") }}
+                      </legend>
+                      <textarea
+                        v-model="brandForm.darkThemeJson"
+                        class="textarea font-mono min-w-0 w-full"
+                        rows="12"
+                        :aria-describedby="BRAND_HINT_IDS.darkTheme"
+                        :aria-label="t('settings.brand.darkThemeAria')"
+                      ></textarea>
+                      <p :id="BRAND_HINT_IDS.darkTheme" class="label whitespace-normal">
+                        {{ t("settings.brand.themeJsonHint") }}
+                      </p>
+                    </fieldset>
+                  </SectionGrid>
+                </div>
               </div>
 
               <div
@@ -1453,51 +1465,53 @@ async function handleClearEmailDeliveryPassword() {
                 role="tabpanel"
                 aria-labelledby="brand-tab-content"
                 :aria-hidden="brandEditorPanel !== 'content'"
-                class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm md:p-6"
+                class="card card-border bg-base-100 shadow-sm"
               >
-                <p class="mb-4 text-sm text-base-content/70">
-                  {{ t("settings.brand.tabs.contentDescription") }}
-                </p>
-                <SectionGrid grid-token="twoColumn" extra-class="gap-4">
-                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.defaultTitleLegend") }}
-                    </legend>
-                    <input
-                      v-model="brandForm.defaultTitle"
-                      class="input w-full"
-                      :aria-label="t('settings.brand.defaultTitleAria')"
-                    />
-                  </fieldset>
+                <div class="card-body gap-4 p-4 md:p-6">
+                  <p class="text-sm text-base-content/70">
+                    {{ t("settings.brand.tabs.contentDescription") }}
+                  </p>
+                  <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.defaultTitleLegend") }}
+                      </legend>
+                      <input
+                        v-model="brandForm.defaultTitle"
+                        class="input min-w-0 w-full"
+                        :aria-label="t('settings.brand.defaultTitleAria')"
+                      />
+                    </fieldset>
 
-                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.defaultDescriptionLegend") }}
-                    </legend>
-                    <textarea
-                      v-model="brandForm.defaultDescription"
-                      class="textarea w-full"
-                      rows="4"
-                      :aria-label="t('settings.brand.defaultDescriptionAria')"
-                    ></textarea>
-                  </fieldset>
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.defaultDescriptionLegend") }}
+                      </legend>
+                      <textarea
+                        v-model="brandForm.defaultDescription"
+                        class="textarea min-w-0 w-full"
+                        rows="4"
+                        :aria-label="t('settings.brand.defaultDescriptionAria')"
+                      ></textarea>
+                    </fieldset>
 
-                  <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-                    <legend class="fieldset-legend">
-                      {{ t("settings.brand.contentOverridesLegend") }}
-                    </legend>
-                    <textarea
-                      v-model="brandForm.contentOverridesJson"
-                      class="textarea font-mono w-full"
-                      rows="10"
-                      :aria-describedby="BRAND_HINT_IDS.contentOverrides"
-                      :aria-label="t('settings.brand.contentOverridesAria')"
-                    ></textarea>
-                    <p :id="BRAND_HINT_IDS.contentOverrides" class="label">
-                      {{ t("settings.brand.contentOverridesHint") }}
-                    </p>
-                  </fieldset>
-                </SectionGrid>
+                    <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
+                      <legend class="fieldset-legend text-sm font-semibold">
+                        {{ t("settings.brand.contentOverridesLegend") }}
+                      </legend>
+                      <textarea
+                        v-model="brandForm.contentOverridesJson"
+                        class="textarea font-mono min-w-0 w-full"
+                        rows="10"
+                        :aria-describedby="BRAND_HINT_IDS.contentOverrides"
+                        :aria-label="t('settings.brand.contentOverridesAria')"
+                      ></textarea>
+                      <p :id="BRAND_HINT_IDS.contentOverrides" class="label whitespace-normal">
+                        {{ t("settings.brand.contentOverridesHint") }}
+                      </p>
+                    </fieldset>
+                  </SectionGrid>
+                </div>
               </div>
 
               <div class="card-actions justify-end pt-2">

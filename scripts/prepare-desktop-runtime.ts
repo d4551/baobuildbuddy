@@ -585,6 +585,22 @@ const assertNoBuildRuntimeLeak = async (directoryPath: string): Promise<void> =>
   });
 };
 
+const ensureStaticFrontendEntrypoint = async (directoryPath: string): Promise<void> => {
+  const indexPath = join(directoryPath, "index.html");
+  if (await Bun.file(indexPath).exists()) {
+    return;
+  }
+
+  const spaFallbackPath = join(directoryPath, "200.html");
+  if (!(await Bun.file(spaFallbackPath).exists())) {
+    throw new Error(
+      "Static desktop frontend is missing packages/client/.output/public/index.html and 200.html",
+    );
+  }
+
+  await cp(spaFallbackPath, indexPath, { force: true });
+};
+
 const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
   await writeOutput("desktop-runtime: building server bundle for desktop prerender");
   await runCommand([process.execPath, "run", "--filter", "@bao/server", "build"]);
@@ -615,6 +631,7 @@ const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
   );
 
   await rewriteGeneratedRuntimeBase(CLIENT_PUBLIC_ROOT);
+  await ensureStaticFrontendEntrypoint(CLIENT_PUBLIC_ROOT);
   await assertNoBuildRuntimeLeak(CLIENT_PUBLIC_ROOT);
 };
 
@@ -807,11 +824,7 @@ const main = async (): Promise<void> => {
       await buildDesktopClient(tempDbPath);
       await prepareRuntimeResources(tauriTarget);
 
-      if (!(await Bun.file(join(CLIENT_PUBLIC_ROOT, "index.html")).exists())) {
-        throw new Error(
-          "Static desktop frontend is missing packages/client/.output/public/index.html",
-        );
-      }
+      await ensureStaticFrontendEntrypoint(CLIENT_PUBLIC_ROOT);
 
       await writeOutput("desktop-runtime: preparation complete");
     },
