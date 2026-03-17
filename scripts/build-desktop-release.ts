@@ -1,4 +1,4 @@
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import {
   DESKTOP_RELEASE_METADATA_DIR,
@@ -150,7 +150,10 @@ const runMacosPrebuildCleanup = async (): Promise<void> => {
 };
 
 const pathExists = async (absolutePath: string): Promise<boolean> =>
-  Bun.file(absolutePath).exists();
+  stat(absolutePath).then(
+    () => true,
+    () => false,
+  );
 
 const resolveExistingPath = async (
   label: string,
