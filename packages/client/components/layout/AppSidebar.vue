@@ -5,7 +5,7 @@ import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
 import { APP_DRAWER_ID } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
-import { toggleDrawerToggleState } from "~/utils/drawer-controls";
+import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const route = useRoute();
 const sidebarItems = getSidebarNavigationItems();
@@ -93,19 +93,22 @@ onMounted(() => {
         </NuxtLink>
       </li>
       <li class="mt-auto pt-4">
-        <button
-          type="button"
+        <label
+          :for="APP_DRAWER_ID"
+          role="button"
+          tabindex="0"
           class="btn btn-ghost btn-sm w-full justify-start is-drawer-close:btn-square"
           :aria-label="t('a11y.toggleSidebarNavigation')"
           :aria-controls="APP_DRAWER_ID"
           :aria-expanded="isDrawerOpen"
-          @click="toggleDrawerToggleState"
+          @keydown.enter.prevent="setDrawerToggleState(!isDrawerOpen)"
+          @keydown.space.prevent="setDrawerToggleState(!isDrawerOpen)"
         >
           <svg class="h-5 w-5 transition-transform duration-200 is-drawer-open:rotate-y-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
           <span class="is-drawer-close:hidden">{{ t("a11y.toggleSidebarNavigation") }}</span>
-        </button>
+        </label>
       </li>
     </ul>
   </nav>

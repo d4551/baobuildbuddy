@@ -7,7 +7,6 @@ import {
   LAYOUT_CONTENT_MAX_WIDTH_REM,
   LAYOUT_DESKTOP_MEDIA_QUERY,
 } from "~/constants/layout";
-import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { initTheme, theme, setTheme } = useTheme();
 const { settings } = useSettings();
@@ -98,13 +97,12 @@ onUnmounted(() => {
       <ToastContainer />
     </div>
     <aside class="drawer-side is-drawer-close:overflow-visible z-40" :aria-label="t('a11y.sidebarNavigation')">
-      <button
-        type="button"
+      <label
+        :for="APP_DRAWER_ID"
         class="drawer-overlay"
         :aria-label="t('a11y.closeSidebar')"
         :aria-controls="APP_DRAWER_ID"
-        @click="setDrawerToggleState(false)"
-      ></button>
+      ></label>
       <div class="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64 transition-all duration-200">
         <AppSidebar />
       </div>

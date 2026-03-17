@@ -8,7 +8,7 @@ import {
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { APP_DRAWER_ID } from "~/constants/layout";
-import { toggleDrawerToggleState } from "~/utils/drawer-controls";
+import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { theme, toggleTheme } = useTheme();
 const { resolvedBrand } = useBrand();
@@ -45,18 +45,21 @@ function syncLocaleMenuState(): void {
 <template>
   <div class="navbar sticky top-0 z-30 border-b border-base-300 bg-base-200/95 backdrop-blur supports-[backdrop-filter]:bg-base-200/80">
     <div class="navbar-start">
-      <button
-        type="button"
+      <label
+        :for="APP_DRAWER_ID"
+        role="button"
+        tabindex="0"
         class="btn btn-ghost btn-circle drawer-button lg:hidden"
         :aria-label="t('a11y.toggleSidebar')"
         :aria-controls="APP_DRAWER_ID"
         :aria-expanded="isDrawerOpen"
-        @click="toggleDrawerToggleState"
+        @keydown.enter.prevent="setDrawerToggleState(!isDrawerOpen)"
+        @keydown.space.prevent="setDrawerToggleState(!isDrawerOpen)"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
-      </button>
+      </label>
       <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-ghost gap-2 text-xl font-bold text-primary lg:hidden">
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
         <span>{{ resolvedBrand.name }}</span>

@@ -41,6 +41,7 @@ const tabPanelTagPattern = /<[^>]+role\s*=\s*["']tabpanel["'][^>]*>/gu;
 const boundIdAttributePattern = /(?:\s|:|v-bind:)id\s*=/u;
 const boundAriaLabelledByPattern = /(?:\s|:|v-bind:)aria-labelledby\s*=/u;
 const buttonLikeLabelPattern = /(?:drawer-overlay|drawer-button|\bbtn\b)/u;
+const labelForAttributePattern = /(?:\s|:|v-bind:)for\s*=/u;
 const tabindexAttributePattern = /tabindex\s*=/u;
 const conditionalTabPanelPattern = /v-if\s*=|v-else-if\s*=/u;
 const ariaCurrentPattern = /aria-current\s*=/u;
@@ -71,6 +72,11 @@ const isAllowedInteractiveRoleTag = (tagName: string, roleName: string): boolean
 
   return ["a", "button", "nuxtlink"].includes(tagName);
 };
+
+const isDrawerToggleLabel = (tagMarkup: string): boolean =>
+  extractTagName(tagMarkup) === "label" &&
+  buttonLikeLabelPattern.test(tagMarkup) &&
+  labelForAttributePattern.test(tagMarkup);
 
 const stripMarkupToText = (content: string): string =>
   content
@@ -163,6 +169,9 @@ const collectInteractiveRoleViolations = (filePath: string, fileContent: string)
     const tagName = extractTagName(tagMarkup);
     const roleMatch = roleAttributePattern.exec(tagMarkup);
     const roleName = roleMatch?.[1] ?? "";
+    if (roleName === "button" && isDrawerToggleLabel(tagMarkup)) {
+      continue;
+    }
     if (isAllowedInteractiveRoleTag(tagName, roleName)) {
       continue;
     }
@@ -191,6 +200,9 @@ const collectFocusableViolations = (filePath: string, fileContent: string): Viol
     }
 
     const tagName = extractTagName(tagMarkup);
+    if (tagName === "label" && isDrawerToggleLabel(tagMarkup)) {
+      continue;
+    }
     if (isNativeFocusableTag(tagName)) {
       continue;
     }
@@ -253,6 +265,9 @@ const collectLabelControlViolations = (filePath: string, fileContent: string): V
   for (const match of fileContent.matchAll(labelControlPattern)) {
     const tagMarkup = match[0];
     if (!buttonLikeLabelPattern.test(tagMarkup)) {
+      continue;
+    }
+    if (isDrawerToggleLabel(tagMarkup)) {
       continue;
     }
 
