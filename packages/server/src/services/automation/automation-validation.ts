@@ -54,8 +54,9 @@ const DISALLOWED_HOST_PATTERNS = [
 
 const DISALLOWED_IPV6_PREFIX_PATTERN = /^(fc|fd|fe80)/i;
 
-const allowAutomationPrivateHosts = (): boolean => {
-  return config.allowAutomationPrivateHosts;
+/** Bypass SSRF guards only for explicit verification runs that opt into private hosts. */
+const allowAutomationPrivateHostsInVerificationContext = (): boolean => {
+  return config.enableAutomationVerification && config.allowAutomationPrivateHosts;
 };
 
 /**
@@ -155,7 +156,7 @@ function isDisallowedAutomationHost(hostname: string): boolean {
     return true;
   }
 
-  if (allowAutomationPrivateHosts()) {
+  if (allowAutomationPrivateHostsInVerificationContext()) {
     return false;
   }
 

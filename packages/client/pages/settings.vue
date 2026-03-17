@@ -29,6 +29,7 @@ import {
   LOCAL_AI_DEFAULT_MODEL,
   OLLAMA_WEBSITE_URL,
   parseJson,
+  resolveBrandSettings,
   THEME_NAMES,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
@@ -295,7 +296,8 @@ function parseBrandContentOverrides(): Record<string, string> {
   );
 }
 
-const brandDraft = computed<BrandSettings>(() => ({
+const brandDraft = computed<BrandSettings>(() =>
+  resolveBrandSettings({
     name: brandForm.name.trim() || BRAND_DEFAULTS.name,
     assistantName:
       brandForm.assistantName.trim() || BRAND_DEFAULTS.assistantName,
@@ -331,7 +333,8 @@ const brandDraft = computed<BrandSettings>(() => ({
         BRAND_DEFAULTS.content.defaultDescription,
       contentOverrides: parseBrandContentOverrides(),
     },
-  }));
+  }),
+);
 
 const brandPreviewInitial = computed(() => {
   const value = brandDraft.value.name.trim().charAt(0).toUpperCase();
