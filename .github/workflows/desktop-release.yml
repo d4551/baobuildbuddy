@@ -176,6 +176,7 @@ jobs:
             curl \
             wget \
             file \
+            rpm \
             libxdo-dev \
             libssl-dev \
             libayatana-appindicator3-dev \
@@ -235,6 +236,7 @@ jobs:
             curl \
             wget \
             file \
+            rpm \
             libxdo-dev \
             libssl-dev \
             libayatana-appindicator3-dev \

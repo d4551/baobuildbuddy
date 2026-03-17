@@ -176,7 +176,25 @@ const bytesStartWith = (bytes: Uint8Array, signature: Uint8Array, offset = 0): b
   signature.every((byte, index) => bytes[offset + index] === byte);
 
 const pathExists = async (absolutePath: string): Promise<boolean> =>
-  Bun.file(absolutePath).exists();
+  stat(absolutePath).then(
+    () => true,
+    () => false,
+  );
+
+const requireCommand = (
+  label: string,
+  command: string,
+): VerificationResult | null => {
+  if (Bun.which(command)) {
+    return null;
+  }
+
+  return {
+    details: `${command} is required on PATH for ${label}`,
+    label: `tool:${command}`,
+    ok: false,
+  };
+};
 
 const parseCommandTargets = (argv: readonly string[]): readonly DesktopReleaseTarget[] => {
   const targetsIndex = argv.indexOf("--targets");
@@ -913,6 +931,14 @@ const verifyStagedDirectory = async (
   target: DesktopReleaseTarget,
 ): Promise<VerificationResult> => {
   const directoryPath = join(DESKTOP_RELEASE_ROOT, target);
+  if (!(await pathExists(directoryPath))) {
+    return {
+      details: `missing ${directoryPath}`,
+      label: `staging:${target}`,
+      ok: false,
+    };
+  }
+
   const directoryEntries = await readdir(directoryPath, { withFileTypes: true });
   const expectedArtifacts = buildArtifactsForTarget(metadata, target).map((artifact) =>
     basename(artifact.relativePath),
@@ -992,6 +1018,13 @@ const verifyChecksumEntries = async (
   const checksumEntries = await readChecksumEntries();
   return Promise.all(
     artifacts.map(async (artifact) => {
+      if (!(await pathExists(artifact.absolutePath))) {
+        return toVerificationResult(
+          artifact.relativePath,
+          checksumEntries.get(artifact.relativePath),
+          "missing",
+        );
+      }
       const expectedHash = checksumEntries.get(artifact.relativePath);
       const actualHash = await computeSha256(artifact.absolutePath);
       return toVerificationResult(artifact.relativePath, expectedHash, actualHash);
@@ -1255,6 +1288,14 @@ const verifyLinuxPackagePayload = async (
 ): Promise<readonly VerificationResult[]> => {
   if (!(artifact.target === "linux-x64" || artifact.target === "linux-arm64")) {
     return [] as const;
+  }
+
+  const missingToolResult =
+    artifact.kind === "deb"
+      ? requireCommand(`linux ${artifact.kind} verification`, "dpkg-deb")
+      : requireCommand(`linux ${artifact.kind} verification`, "rpm");
+  if (missingToolResult) {
+    return [missingToolResult] as const;
   }
 
   const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
