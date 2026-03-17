@@ -3,23 +3,20 @@ import { basename, join, resolve } from "node:path";
 import {
   DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH,
   DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH,
-  DESKTOP_RELEASE_LINUX_ARM64_TARGET,
   DESKTOP_RELEASE_LINUX_X64_DEB_ARCH,
   DESKTOP_RELEASE_LINUX_X64_RPM_ARCH,
-  DESKTOP_RELEASE_LINUX_X64_TARGET,
   DESKTOP_RELEASE_MACOS_ARCH,
-  DESKTOP_RELEASE_MACOS_TARGET,
   DESKTOP_RELEASE_METADATA_DIR,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
   DESKTOP_RELEASE_STAGING_ROOT,
   DESKTOP_RELEASE_TARGETS,
   DESKTOP_RELEASE_WINDOWS_ARCH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
-  DESKTOP_RELEASE_WINDOWS_TARGET,
   DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
   DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
   DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
 } from "../packages/shared/src/constants/scripts";
+import { resolveDesktopRuntimeTargetInfo } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 
@@ -199,34 +196,11 @@ const shouldSyncReleaseDirectory = (argv: readonly string[]): boolean =>
   !argv.includes("--no-sync-release-dir");
 
 const buildHostReleaseTarget = (target: DesktopReleaseTarget): HostReleaseTarget => {
-  if (target === "macos") {
-    return {
-      artifactLabel: "macos",
-      expectedPlatform: "darwin",
-      tauriTarget: DESKTOP_RELEASE_MACOS_TARGET,
-    };
-  }
-
-  if (target === "windows") {
-    return {
-      artifactLabel: "windows",
-      expectedPlatform: "win32",
-      tauriTarget: DESKTOP_RELEASE_WINDOWS_TARGET,
-    };
-  }
-
-  if (target === "linux-x64") {
-    return {
-      artifactLabel: "linux-x64",
-      expectedPlatform: "linux",
-      tauriTarget: DESKTOP_RELEASE_LINUX_X64_TARGET,
-    };
-  }
-
+  const runtimeTargetInfo = resolveDesktopRuntimeTargetInfo(target);
   return {
-    artifactLabel: "linux-arm64",
-    expectedPlatform: "linux",
-    tauriTarget: DESKTOP_RELEASE_LINUX_ARM64_TARGET,
+    artifactLabel: target,
+    expectedPlatform: runtimeTargetInfo.hostPlatform,
+    tauriTarget: runtimeTargetInfo.tauriTarget,
   };
 };
 

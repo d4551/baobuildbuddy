@@ -22,7 +22,8 @@
     "./utils/*": "./src/utils/*.ts"
   },
   "scripts": {
-    "typecheck": "bunx --bun tsc --noEmit"
+    "typecheck": "bunx --bun tsc --noEmit",
+    "test": "bun test"
   },
   "devDependencies": {
     "@types/bun": "1.3.10",

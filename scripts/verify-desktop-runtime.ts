@@ -15,7 +15,6 @@ import {
   DESKTOP_RUNTIME_HOST,
   DESKTOP_RUNTIME_MANIFEST_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
-  DESKTOP_RUNTIME_SCRAPER_DIR,
   DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
@@ -24,22 +23,21 @@ import {
   type RpaRunExecutionEnvelope,
   rpaRunEventSchema,
 } from "../packages/shared/src/schemas/rpa-events.schema";
+import {
+  buildDesktopRuntimeManifest,
+  getDesktopRuntimeManifestMismatches,
+  listDesktopRuntimeContractPaths,
+  parseDesktopRuntimeManifest,
+  resolveDesktopRuntimeTargetInfoFromHost,
+  resolveDesktopRuntimeTargetInfoFromTauriTarget,
+  type DesktopRuntimeManifest,
+} from "../packages/shared/src/utils/desktop-runtime-contract";
 import { toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import {
   collectRuntimeDependencySourceRoots,
   SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
 } from "./utils/desktop-runtime-scraper";
-
-type DesktopRuntimeManifest = {
-  serverExecutable: string;
-  scriptRunnerExecutable: string;
-  scriptRunnerEntrypoint: string | null;
-  scraperDir: string;
-  serverHost: string;
-  serverPort: number;
-  corsOrigins: string[];
-};
 
 type BrowserCheckResult = {
   pageTitle: string;
@@ -123,6 +121,13 @@ const parseTargetArg = (argv: readonly string[]): string | null => {
     : null;
 };
 
+const resolveExpectedRuntimeManifest = (tauriTarget: string | null): DesktopRuntimeManifest => {
+  const targetInfo = tauriTarget
+    ? resolveDesktopRuntimeTargetInfoFromTauriTarget(tauriTarget)
+    : resolveDesktopRuntimeTargetInfoFromHost(process.platform, process.arch);
+  return buildDesktopRuntimeManifest(targetInfo.target);
+};
+
 const runCommand = async (
   command: readonly string[],
   cwd: string = REPO_ROOT,
@@ -142,57 +147,7 @@ const runCommand = async (
 
 const readManifest = async (): Promise<DesktopRuntimeManifest> => {
   const rawManifest: unknown = JSON.parse(await Bun.file(MANIFEST_PATH).text());
-  if (!isRecord(rawManifest)) {
-    throw new Error(`Expected desktop runtime manifest object at ${MANIFEST_PATH}`);
-  }
-
-  const {
-    serverExecutable,
-    scriptRunnerExecutable,
-    scriptRunnerEntrypoint,
-    scraperDir,
-    serverHost,
-    serverPort,
-    corsOrigins,
-  } = rawManifest;
-
-  if (
-    typeof serverExecutable !== "string" ||
-    typeof scriptRunnerExecutable !== "string" ||
-    !(
-      scriptRunnerEntrypoint === null ||
-      typeof scriptRunnerEntrypoint === "string" ||
-      typeof scriptRunnerEntrypoint === "undefined"
-    ) ||
-    typeof scraperDir !== "string" ||
-    typeof serverHost !== "string" ||
-    typeof serverPort !== "number" ||
-    !Array.isArray(corsOrigins) ||
-    corsOrigins.some((origin) => typeof origin !== "string")
-  ) {
-    throw new Error(`Desktop runtime manifest is missing required fields at ${MANIFEST_PATH}`);
-  }
-
-  const normalizedCorsOrigins: string[] = [];
-  for (const origin of corsOrigins) {
-    if (typeof origin !== "string") {
-      throw new Error(
-        `Desktop runtime manifest contains a non-string CORS origin at ${MANIFEST_PATH}`,
-      );
-    }
-    normalizedCorsOrigins.push(origin);
-  }
-
-  return {
-    serverExecutable,
-    scriptRunnerExecutable,
-    scriptRunnerEntrypoint:
-      typeof scriptRunnerEntrypoint === "string" ? scriptRunnerEntrypoint : null,
-    scraperDir,
-    serverHost,
-    serverPort,
-    corsOrigins: normalizedCorsOrigins,
-  };
+  return parseDesktopRuntimeManifest(rawManifest, MANIFEST_PATH);
 };
 
 const isServiceReady = async (url: string): Promise<boolean> =>
@@ -491,10 +446,6 @@ const createJobApplyRun = async (params: {
 };
 
 const assertScraperRuntimeContract = async (manifest: DesktopRuntimeManifest): Promise<void> => {
-  if (manifest.scraperDir !== DESKTOP_RUNTIME_SCRAPER_DIR) {
-    throw new Error(`Unexpected desktop runtime scraper dir: ${manifest.scraperDir}`);
-  }
-
   const scraperRuntimeRoot = join(RUNTIME_ROOT, manifest.scraperDir);
   const stagedContractPaths = SCRAPER_RUNTIME_STAGE_SOURCE_PATHS.map((relativePath) =>
     join(scraperRuntimeRoot, relativePath),
@@ -515,6 +466,29 @@ const assertScraperRuntimeContract = async (manifest: DesktopRuntimeManifest): P
     throw new Error(
       `Packaged scraper runtime is missing dependency manifest ${missingDependencyManifestPath}`,
     );
+  }
+};
+
+const assertManifestContract = async (
+  manifest: DesktopRuntimeManifest,
+  tauriTarget: string | null,
+): Promise<void> => {
+  const expectedManifest = resolveExpectedRuntimeManifest(tauriTarget);
+  const manifestMismatches = getDesktopRuntimeManifestMismatches(manifest, expectedManifest);
+  if (manifestMismatches.length > 0) {
+    throw new Error(`Desktop runtime manifest drift detected: ${manifestMismatches.join("; ")}`);
+  }
+
+  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
+    join(REPO_ROOT, "packages", "scraper"),
+  );
+  const requiredRuntimePaths = listDesktopRuntimeContractPaths(
+    manifest,
+    Array.from(runtimeDependencyRoots.keys()),
+  ).map((relativePath) => join(RUNTIME_ROOT, relativePath));
+  const missingRuntimePath = await findFirstMissingPath(requiredRuntimePaths);
+  if (missingRuntimePath) {
+    throw new Error(`Packaged desktop runtime contract is missing ${missingRuntimePath}`);
   }
 };
 
@@ -867,8 +841,7 @@ const stopProcess = async (proc: ReturnType<typeof Bun.spawn>): Promise<void> =>
   await proc.exited.catch(() => undefined);
 };
 
-const assertGeneratedFrontendIsReady = async (): Promise<void> => {
-  const manifest = await readManifest();
+const assertGeneratedFrontendIsReady = async (manifest: DesktopRuntimeManifest): Promise<void> => {
   const indexFile = Bun.file(join(CLIENT_PUBLIC_ROOT, "index.html"));
   if (!(await indexFile.exists())) {
     throw new Error(
@@ -888,8 +861,10 @@ const assertGeneratedFrontendIsReady = async (): Promise<void> => {
   await assertScraperRuntimeContract(manifest);
 };
 
-const prepareVerificationFrontendRoot = async (): Promise<string> => {
-  await assertGeneratedFrontendIsReady();
+const prepareVerificationFrontendRoot = async (
+  manifest: DesktopRuntimeManifest,
+): Promise<string> => {
+  await assertGeneratedFrontendIsReady(manifest);
   const verificationFrontendRoot = await createVerificationFrontendRoot();
   const leakedProductionRuntimeFile = await findFirstMarkerMatch(verificationFrontendRoot, [
     DESKTOP_RUNTIME_API_BASE,
@@ -1013,7 +988,8 @@ const main = async (): Promise<void> => {
   );
 
   const manifest = await readManifest();
-  const verificationFrontendRoot = await prepareVerificationFrontendRoot();
+  await assertManifestContract(manifest, tauriTarget);
+  const verificationFrontendRoot = await prepareVerificationFrontendRoot(manifest);
   await verifyPackagedRuntime(manifest, verificationFrontendRoot);
 };
 

@@ -15,17 +15,19 @@ import {
   DESKTOP_RELEASE_WINDOWS_ARCH,
   DESKTOP_REQUIRED_NATIVE_ICON_FILES,
   DESKTOP_REQUIRED_PNG_ICON_SPECS,
-  DESKTOP_RUNTIME_LINUX_BUN_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
-  DESKTOP_RUNTIME_SCRAPER_DIR,
-  DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH,
-  DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
-  DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
-  DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
   DISK_IMAGE_TIMEOUT_MS,
 } from "../packages/shared/src/constants/scripts";
+import {
+  buildDesktopRuntimeManifest,
+  getDesktopRuntimeManifestMismatches,
+  listDesktopRuntimeContractPaths,
+  parseDesktopRuntimeManifest,
+  resolveDesktopRuntimeTargetInfo,
+  type DesktopRuntimeManifest,
+} from "../packages/shared/src/utils/desktop-runtime-contract";
 import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
-import { captureResult, toErrorMessage } from "./utils/async-control";
+import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
@@ -77,6 +79,11 @@ type ReleaseArtifact = {
   readonly relativePath: string;
   readonly absolutePath: string;
   readonly target: DesktopReleaseTarget;
+};
+
+type LinuxReleaseArtifact = ReleaseArtifact & {
+  readonly kind: "deb" | "rpm";
+  readonly target: "linux-x64" | "linux-arm64";
 };
 
 type VerificationResult = {
@@ -131,7 +138,13 @@ const DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
   "windows",
   "installer.nsi",
 );
-const WINDOWS_NSIS_SCRAPER_INSTALL_MARKER = ["$INSTDIR", "gen", "runtime", "scraper"].join("\\");
+const WINDOWS_RUNTIME_MANIFEST = buildDesktopRuntimeManifest("windows");
+const WINDOWS_NSIS_SCRAPER_INSTALL_MARKER = [
+  "$INSTDIR",
+  "gen",
+  "runtime",
+  WINDOWS_RUNTIME_MANIFEST.scraperDir,
+].join("\\");
 
 const PNG_SIGNATURE = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const ICO_SIGNATURE = Uint8Array.from([0, 0, 1, 0]);
@@ -142,11 +155,6 @@ const RPM_SIGNATURE = Uint8Array.from([237, 171, 238, 219]);
 const ZIP_SIGNATURE = Uint8Array.from([80, 75, 3, 4]);
 const WINDOWS_EXE_SIGNATURE = Uint8Array.from([77, 90]);
 const ZIP_LIST_TIMEOUT_MS = 30_000;
-const WINDOWS_NSIS_WEBVIEW_BOOTSTRAPPER_MARKER = [
-  '"/oname=gen\\runtime\\bin\\',
-  DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
-  '"',
-].join("");
 const REQUIRED_ICO_LAYER_SIZES = [16, 24, 32, 48, 64, 256] as const;
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u;
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u;
@@ -155,7 +163,6 @@ const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
 const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
 const LEADING_DOT_SLASH_PATTERN = /^\.\/+/u;
 const LEADING_SLASH_PATTERN = /^\/+/u;
-const WHITESPACE_PATTERN = /\s+/u;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -574,22 +581,13 @@ const verifyBundleConfig = (
 };
 
 const expectedHostPlatformForTarget = (target: DesktopReleaseTarget): NodeJS.Platform =>
-  target === "macos" ? "darwin" : target === "windows" ? "win32" : "linux";
+  resolveDesktopRuntimeTargetInfo(target).hostPlatform;
 
 const expectedHostArchForTarget = (target: DesktopReleaseTarget): string =>
-  target === "macos" || target === "linux-arm64" ? "arm64" : "x64";
+  resolveDesktopRuntimeTargetInfo(target).hostArch;
 
-const expectedTauriTargetForTarget = (target: DesktopReleaseTarget): string => {
-  if (target === "macos") {
-    return "aarch64-apple-darwin";
-  }
-  if (target === "windows") {
-    return "x86_64-pc-windows-msvc";
-  }
-  return target === "linux-arm64"
-    ? "aarch64-unknown-linux-gnu"
-    : "x86_64-unknown-linux-gnu";
-};
+const expectedTauriTargetForTarget = (target: DesktopReleaseTarget): string =>
+  resolveDesktopRuntimeTargetInfo(target).tauriTarget;
 
 const normalizeArchiveEntry = (entry: string): string =>
   entry.trim().replace(LEADING_DOT_SLASH_PATTERN, "").replace(LEADING_SLASH_PATTERN, "");
@@ -597,56 +595,57 @@ const normalizeArchiveEntry = (entry: string): string =>
 const joinArchiveEntry = (...segments: readonly string[]): string =>
   normalizeArchiveEntry(segments.filter((segment) => segment.length > 0).join("/"));
 
-const buildRuntimePackageEntries = (
-  target: DesktopReleaseTarget,
-  metadata: DesktopBundleMetadata,
+const buildRuntimeContractEntries = (
+  runtimeRoot: string,
+  manifest: DesktopRuntimeManifest,
   dependencyPackageNames: readonly string[],
-): readonly string[] => {
-  if (target === "macos") {
-    const appRoot = joinArchiveEntry(`${metadata.productName}.app`, "Contents");
-    const runtimeRoot = joinArchiveEntry(appRoot, "Resources", DESKTOP_RUNTIME_RESOURCE_DIR);
-    return [
-      joinArchiveEntry(appRoot, "MacOS", metadata.binaryName),
-      joinArchiveEntry(runtimeRoot, "manifest.json"),
-      joinArchiveEntry(runtimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH),
-      joinArchiveEntry(runtimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH),
-      joinArchiveEntry(runtimeRoot, DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH),
-      joinArchiveEntry(runtimeRoot, DESKTOP_RUNTIME_SCRAPER_DIR, "package.json"),
-      ...dependencyPackageNames.map((packageName) =>
-        joinArchiveEntry(
-          runtimeRoot,
-          DESKTOP_RUNTIME_SCRAPER_DIR,
-          "node_modules",
-          packageName,
-          "package.json",
-        ),
-      ),
-    ] as const;
-  }
-
-  const linuxRoot = joinArchiveEntry("usr", "lib", metadata.productName);
-  const linuxRuntimeRoot = joinArchiveEntry(linuxRoot, DESKTOP_RUNTIME_RESOURCE_DIR);
-  const linuxDependencyPackageNames = dependencyPackageNames.filter(
-    (packageName) => !MACOS_ONLY_PACKAGES.has(packageName),
+): readonly string[] =>
+  listDesktopRuntimeContractPaths(manifest, dependencyPackageNames).map((relativePath) =>
+    joinArchiveEntry(runtimeRoot, relativePath),
   );
 
-  return [
-    joinArchiveEntry("usr", "bin", metadata.binaryName),
-    joinArchiveEntry(linuxRuntimeRoot, "manifest.json"),
-    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_LINUX_BUN_PATH),
-    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH),
-    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH),
-    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SCRAPER_DIR, "package.json"),
-    ...linuxDependencyPackageNames.map((packageName) =>
-      joinArchiveEntry(
-        linuxRuntimeRoot,
-        DESKTOP_RUNTIME_SCRAPER_DIR,
-        "node_modules",
-        packageName,
-        "package.json",
-      ),
-    ),
-  ] as const;
+const MACOS_ONLY_PACKAGES = new Set(["fsevents"]);
+
+const quoteShellArgument = (value: string): string => `'${value.replaceAll("'", "'\\''")}'`;
+
+const filterRuntimeDependencyPackageNames = (
+  target: DesktopReleaseTarget,
+  dependencyPackageNames: readonly string[],
+): readonly string[] =>
+  target === "macos"
+    ? dependencyPackageNames
+    : dependencyPackageNames.filter((packageName) => !MACOS_ONLY_PACKAGES.has(packageName));
+
+const collectRuntimeDependencyPackageNames = async (
+  target: DesktopReleaseTarget,
+): Promise<readonly string[]> => {
+  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
+    join(REPO_ROOT, "packages", "scraper"),
+  );
+  return filterRuntimeDependencyPackageNames(target, Array.from(runtimeDependencyRoots.keys()));
+};
+
+const readDesktopRuntimeManifestFile = async (
+  absolutePath: string,
+): Promise<DesktopRuntimeManifest> =>
+  parseDesktopRuntimeManifest(JSON.parse(await Bun.file(absolutePath).text()), absolutePath);
+
+const verifyDesktopRuntimeManifest = (
+  target: DesktopReleaseTarget,
+  manifest: DesktopRuntimeManifest,
+  label: string,
+): VerificationResult => {
+  const expectedManifest = buildDesktopRuntimeManifest(target);
+  const manifestMismatches = getDesktopRuntimeManifestMismatches(manifest, expectedManifest);
+
+  return {
+    details:
+      manifestMismatches.length === 0
+        ? "manifest matches canonical runtime contract"
+        : manifestMismatches.join("; "),
+    label,
+    ok: manifestMismatches.length === 0,
+  };
 };
 
 const collectRelativeEntries = async (
@@ -666,6 +665,31 @@ const collectRelativeEntries = async (
   );
 
   return nestedEntries.flat();
+};
+
+const verifyCollectedEntries = async (
+  rootPath: string,
+  requiredEntries: readonly string[],
+  label: string,
+  successDetails: string,
+): Promise<VerificationResult> => {
+  const collectedEntriesResult = await captureResult(() => collectRelativeEntries(rootPath));
+  if (!collectedEntriesResult.ok) {
+    return {
+      details: toErrorMessage(collectedEntriesResult.error),
+      label,
+      ok: false,
+    };
+  }
+
+  const collectedEntries = new Set(collectedEntriesResult.value.map(normalizeArchiveEntry));
+  const missingEntries = requiredEntries.filter((entry) => !collectedEntries.has(entry));
+
+  return {
+    details: missingEntries.length === 0 ? successDetails : `missing ${missingEntries.join(", ")}`,
+    label,
+    ok: missingEntries.length === 0,
+  };
 };
 
 const verifyReleaseProvenance = async (
@@ -789,53 +813,79 @@ const captureCommand = (command: readonly string[], timeoutMs: number): Promise<
     });
   });
 
-const listZipEntriesWithCommandIndex = async (
-  commandCandidates: readonly (readonly string[])[],
-  index: number,
-): Promise<readonly string[]> => {
-  const command = commandCandidates[index];
-  if (!command) {
-    throw new Error("No zip listing command succeeded.");
-  }
+const quotePowershellLiteral = (value: string): string => value.replaceAll("'", "''");
 
-  const commandResult = await captureCommand(command, ZIP_LIST_TIMEOUT_MS);
-  if (commandResult.exitCode === 0) {
-    const entries = commandResult.stdout
-      .split(/\r?\n/gu)
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-    if (entries.length > 0) {
-      return entries;
-    }
-  }
-
-  return listZipEntriesWithCommandIndex(commandCandidates, index + 1);
-};
-
-const listZipEntries = async (absolutePath: string): Promise<readonly string[]> => {
+const extractZipArchive = async (
+  absolutePath: string,
+  destinationRoot: string,
+): Promise<void> => {
   const commandCandidates = [
-    ["unzip", "-Z1", absolutePath],
-    ["zipinfo", "-1", absolutePath],
-    ...(process.platform === "win32"
-      ? [
-          [
-            "powershell",
-            "-NoProfile",
-            "-Command",
-            [
-              "Add-Type -AssemblyName System.IO.Compression.FileSystem;",
-              `$archive = [System.IO.Compression.ZipFile]::OpenRead('${absolutePath.replaceAll("'", "''")}');`,
-              "$archive.Entries | ForEach-Object { $_.FullName };",
-              "$archive.Dispose();",
-            ].join(" "),
-          ] as const,
-        ]
-      : []),
+    ["unzip", "-qq", absolutePath, "-d", destinationRoot],
+    [
+      "powershell",
+      "-NoProfile",
+      "-Command",
+      `Expand-Archive -LiteralPath '${quotePowershellLiteral(absolutePath)}' -DestinationPath '${quotePowershellLiteral(destinationRoot)}' -Force`,
+    ],
+    [
+      "pwsh",
+      "-NoProfile",
+      "-Command",
+      `Expand-Archive -LiteralPath '${quotePowershellLiteral(absolutePath)}' -DestinationPath '${quotePowershellLiteral(destinationRoot)}' -Force`,
+    ],
   ] as const;
 
-  return listZipEntriesWithCommandIndex(commandCandidates, 0).catch(() => {
-    throw new Error(`Unable to list zip entries for ${absolutePath}.`);
-  });
+  const commandResult = await commandCandidates.reduce<Promise<CommandCapture | null>>(
+    async (pendingResult, command) => {
+      const settledResult = await pendingResult;
+      if (settledResult?.exitCode === 0) {
+        return settledResult;
+      }
+      if (!Bun.which(command[0])) {
+        return settledResult;
+      }
+      return captureCommand(command, ZIP_LIST_TIMEOUT_MS);
+    },
+    Promise.resolve(null),
+  );
+
+  if (!commandResult || commandResult.exitCode !== 0) {
+    throw new Error(`Unable to extract zip archive ${absolutePath}.`);
+  }
+};
+
+const extractDebPackage = async (
+  absolutePath: string,
+  destinationRoot: string,
+): Promise<void> => {
+  const commandResult = await captureCommand(
+    ["dpkg-deb", "-x", absolutePath, destinationRoot],
+    ZIP_LIST_TIMEOUT_MS,
+  );
+  if (commandResult.exitCode !== 0) {
+    throw new Error(
+      commandResult.stderr || commandResult.stdout || `Unable to extract deb package ${absolutePath}.`,
+    );
+  }
+};
+
+const extractRpmPackage = async (
+  absolutePath: string,
+  destinationRoot: string,
+): Promise<void> => {
+  const commandResult = await captureCommand(
+    [
+      "sh",
+      "-lc",
+      `cd ${quoteShellArgument(destinationRoot)} && rpm2cpio ${quoteShellArgument(absolutePath)} | cpio -idm --quiet`,
+    ],
+    ZIP_LIST_TIMEOUT_MS,
+  );
+  if (commandResult.exitCode !== 0) {
+    throw new Error(
+      commandResult.stderr || commandResult.stdout || `Unable to extract rpm package ${absolutePath}.`,
+    );
+  }
 };
 
 const verifyDmgArtifact = async (artifact: ReleaseArtifact): Promise<VerificationResult> => {
@@ -1061,11 +1111,16 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
   }
 
   const installerScript = await Bun.file(DESKTOP_WINDOWS_NSIS_SCRIPT_PATH).text();
+  const requiredManifestMarkers = listDesktopRuntimeContractPaths(WINDOWS_RUNTIME_MANIFEST, [])
+    .filter(
+      (relativePath) =>
+        relativePath !== "manifest.json" &&
+        relativePath !== `${WINDOWS_RUNTIME_MANIFEST.scraperDir}/package.json`,
+    )
+    .map((relativePath) => `"/oname=gen\\runtime\\${relativePath.replaceAll("/", "\\")}"`);
   const requiredMarkers = [
     '"/oname=gen\\runtime\\manifest.json"',
-    '"/oname=gen\\runtime\\bin\\bao-bun-runner.exe"',
-    WINDOWS_NSIS_WEBVIEW_BOOTSTRAPPER_MARKER,
-    '"/oname=gen\\runtime\\server\\bao-desktop-server.exe"',
+    ...requiredManifestMarkers,
     WINDOWS_NSIS_SCRAPER_INSTALL_MARKER,
   ] as const;
   const missingMarkers = requiredMarkers.filter((marker) => !installerScript.includes(marker));
@@ -1087,61 +1142,114 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
   ] as const;
 };
 
-const MACOS_ONLY_PACKAGES = new Set(["fsevents"]);
+type ManifestVerificationResult =
+  | { readonly ok: true; readonly manifest: DesktopRuntimeManifest }
+  | { readonly ok: false; readonly failure: VerificationResult };
+
+const hasVerifiedManifest = (
+  manifestResult: ManifestVerificationResult,
+): manifestResult is { readonly ok: true; readonly manifest: DesktopRuntimeManifest } =>
+  manifestResult.ok;
+
+const isLinuxPackageArtifact = (artifact: ReleaseArtifact): artifact is LinuxReleaseArtifact =>
+  (artifact.target === "linux-x64" || artifact.target === "linux-arm64") &&
+  (artifact.kind === "deb" || artifact.kind === "rpm");
+
+const readRuntimeManifestForVerification = async (
+  manifestPath: string,
+  label: string,
+): Promise<ManifestVerificationResult> => {
+  const manifestResult = await captureResult(() => readDesktopRuntimeManifestFile(manifestPath));
+  if (!manifestResult.ok) {
+    return {
+      failure: {
+        details: toErrorMessage(manifestResult.error),
+        label,
+        ok: false,
+      },
+      ok: false,
+    };
+  }
+
+  return {
+    manifest: manifestResult.value,
+    ok: true,
+  };
+};
+
+const verifyExtractedWindowsPortablePayload = async (
+  extractionRoot: string,
+  portableRoot: string,
+  metadata: DesktopBundleMetadata,
+): Promise<readonly VerificationResult[]> => {
+  const runtimeRoot = join(extractionRoot, portableRoot, "gen", "runtime");
+  const manifestResult = await readRuntimeManifestForVerification(
+    join(runtimeRoot, "manifest.json"),
+    "windows:portable-manifest",
+  );
+  if (!hasVerifiedManifest(manifestResult)) {
+    return [manifestResult.failure] as const;
+  }
+
+  const dependencyPackageNames = await collectRuntimeDependencyPackageNames("windows");
+  const requiredEntries = [
+    `${portableRoot}/README.txt`,
+    `${portableRoot}/${metadata.binaryName}.exe`,
+    ...buildRuntimeContractEntries(
+      `${portableRoot}/gen/runtime`,
+      manifestResult.manifest,
+      dependencyPackageNames,
+    ),
+  ] as const;
+
+  return [
+    verifyDesktopRuntimeManifest(
+      "windows",
+      manifestResult.manifest,
+      "windows:portable-manifest",
+    ),
+    await verifyCollectedEntries(
+      extractionRoot,
+      requiredEntries,
+      "windows:portable-payload",
+      "portable archive bundles executable, runtime manifest, bootstrapper, and scraper payload",
+    ),
+  ] as const;
+};
 
 const verifyWindowsPortablePayload = async (
   artifact: ReleaseArtifact,
   metadata: DesktopBundleMetadata,
 ): Promise<readonly VerificationResult[]> => {
   const portableRoot = `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable`;
-  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
-    join(REPO_ROOT, "packages", "scraper"),
-  );
-  const requiredEntries = [
-    `${portableRoot}/README.txt`,
-    `${portableRoot}/${metadata.binaryName}.exe`,
-    `${portableRoot}/gen/runtime/manifest.json`,
-    `${portableRoot}/gen/runtime/bin/${DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME}`,
-    `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH}.exe`,
-    `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH}.exe`,
-    `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRAPER_DIR}/package.json`,
-    ...Array.from(runtimeDependencyRoots.keys())
-      .filter((packageName) => !MACOS_ONLY_PACKAGES.has(packageName))
-      .map((packageName) =>
-        `${portableRoot}/gen/runtime/${DESKTOP_RUNTIME_SCRAPER_DIR}/node_modules/${packageName}/package.json`,
-      ),
-  ] as const;
+  const extractionRoot = await mkdtemp(join(tmpdir(), "bao-desktop-portable-"));
 
-  const zipEntriesResult = await captureResult(() => listZipEntries(artifact.absolutePath));
-  if (!zipEntriesResult.ok) {
-    return [
-      {
-        details: toErrorMessage(zipEntriesResult.error),
-        label: "windows:portable-archive",
-        ok: false,
-      },
-    ] as const;
-  }
+  return withCleanup(
+    async () => {
+      const extractResult = await captureResult(() =>
+        extractZipArchive(artifact.absolutePath, extractionRoot),
+      );
+      if (!extractResult.ok) {
+        return [
+          {
+            details: toErrorMessage(extractResult.error),
+            label: "windows:portable-archive",
+            ok: false,
+          },
+        ] as const;
+      }
 
-  const missingEntries = requiredEntries.filter(
-    (entry) => !zipEntriesResult.value.includes(entry),
-  );
-
-  return [
-    {
-      details: artifact.relativePath,
-      label: "windows:portable-archive",
-      ok: true,
+      return [
+        {
+          details: artifact.relativePath,
+          label: "windows:portable-archive",
+          ok: true,
+        },
+        ...(await verifyExtractedWindowsPortablePayload(extractionRoot, portableRoot, metadata)),
+      ] as const;
     },
-    {
-      details:
-        missingEntries.length === 0
-          ? "portable archive bundles executable, runtime, bootstrapper, and scraper payload"
-          : `missing ${missingEntries.join(", ")}`,
-      label: "windows:portable-payload",
-      ok: missingEntries.length === 0,
-    },
-  ] as const;
+    () => rm(extractionRoot, { force: true, recursive: true }),
+  );
 };
 
 type MountedDmgResult =
@@ -1200,35 +1308,40 @@ const detachDmgArtifact = async (mountRoot: string): Promise<VerificationResult>
 const verifyMountedDmgPayload = async (
   mountRoot: string,
   metadata: DesktopBundleMetadata,
-): Promise<VerificationResult> => {
-  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
-    join(REPO_ROOT, "packages", "scraper"),
+): Promise<readonly VerificationResult[]> => {
+  const appRoot = joinArchiveEntry(`${metadata.productName}.app`, "Contents");
+  const runtimeRoot = joinArchiveEntry(appRoot, "Resources", DESKTOP_RUNTIME_RESOURCE_DIR);
+  const runtimeManifestPath = join(
+    mountRoot,
+    `${metadata.productName}.app`,
+    "Contents",
+    "Resources",
+    DESKTOP_RUNTIME_RESOURCE_DIR,
+    "manifest.json",
   );
-  const requiredEntries = buildRuntimePackageEntries(
-    "macos",
-    metadata,
-    Array.from(runtimeDependencyRoots.keys()),
+  const manifestResult = await readRuntimeManifestForVerification(
+    runtimeManifestPath,
+    "macos:dmg-manifest",
   );
-  const mountedEntriesResult = await captureResult(() => collectRelativeEntries(mountRoot));
-  if (!mountedEntriesResult.ok) {
-    return {
-      details: toErrorMessage(mountedEntriesResult.error),
-      label: "macos:dmg-payload",
-      ok: false,
-    };
+  if (!hasVerifiedManifest(manifestResult)) {
+    return [manifestResult.failure] as const;
   }
 
-  const mountedEntries = new Set(mountedEntriesResult.value.map(normalizeArchiveEntry));
-  const missingEntries = requiredEntries.filter((entry) => !mountedEntries.has(entry));
+  const dependencyPackageNames = await collectRuntimeDependencyPackageNames("macos");
+  const requiredEntries = [
+    joinArchiveEntry(appRoot, "MacOS", metadata.binaryName),
+    ...buildRuntimeContractEntries(runtimeRoot, manifestResult.manifest, dependencyPackageNames),
+  ] as const;
 
-  return {
-    details:
-      missingEntries.length === 0
-        ? "dmg bundles desktop binary, runtime manifest, runner, server, scraper, and dependencies"
-        : `missing ${missingEntries.join(", ")}`,
-    label: "macos:dmg-payload",
-    ok: missingEntries.length === 0,
-  };
+  return [
+    verifyDesktopRuntimeManifest("macos", manifestResult.manifest, "macos:dmg-manifest"),
+    await verifyCollectedEntries(
+      mountRoot,
+      requiredEntries,
+      "macos:dmg-payload",
+      "dmg bundles desktop binary, runtime manifest, runner, server, scraper, and dependencies",
+    ),
+  ] as const;
 };
 
 const verifyMacosDmgPayload = async (
@@ -1240,7 +1353,7 @@ const verifyMacosDmgPayload = async (
     return [mountResult.failure] as const;
   }
 
-  const payloadResult = await verifyMountedDmgPayload(mountResult.mountRoot, metadata);
+  const payloadResults = await verifyMountedDmgPayload(mountResult.mountRoot, metadata);
   const detachResult = await detachDmgArtifact(mountResult.mountRoot);
 
   return [
@@ -1249,97 +1362,106 @@ const verifyMacosDmgPayload = async (
       label: "macos:dmg-mount",
       ok: true,
     },
-    payloadResult,
+    ...payloadResults,
     detachResult,
   ] as const;
 };
 
-const listDebEntries = async (absolutePath: string): Promise<readonly string[]> => {
-  const commandResult = await captureCommand(["dpkg-deb", "-c", absolutePath], ZIP_LIST_TIMEOUT_MS);
-  if (commandResult.exitCode !== 0) {
-    throw new Error(commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`);
-  }
-
-  return commandResult.stdout
-    .split(/\r?\n/gu)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .map((line) => normalizeArchiveEntry(line.split(WHITESPACE_PATTERN).at(-1) ?? ""))
-    .filter((entry) => entry.length > 0);
+const extractLinuxPackagePayload = async (
+  artifact: LinuxReleaseArtifact,
+  extractionRoot: string,
+): Promise<void> => {
+  await (artifact.kind === "deb"
+    ? extractDebPackage(artifact.absolutePath, extractionRoot)
+    : extractRpmPackage(artifact.absolutePath, extractionRoot));
 };
 
-const listRpmEntries = async (absolutePath: string): Promise<readonly string[]> => {
-  const commandResult = await captureCommand(
-    ["rpm", "--query", "--list", "--package", absolutePath],
-    ZIP_LIST_TIMEOUT_MS,
+const verifyExtractedLinuxPackagePayload = async (
+  artifact: LinuxReleaseArtifact,
+  metadata: DesktopBundleMetadata,
+  extractionRoot: string,
+): Promise<readonly VerificationResult[]> => {
+  const runtimeRoot = joinArchiveEntry("usr", "lib", metadata.productName, DESKTOP_RUNTIME_RESOURCE_DIR);
+  const manifestResult = await readRuntimeManifestForVerification(
+    join(
+      extractionRoot,
+      "usr",
+      "lib",
+      metadata.productName,
+      DESKTOP_RUNTIME_RESOURCE_DIR,
+      "manifest.json",
+    ),
+    `linux:${artifact.kind}-manifest:${artifact.target}`,
   );
-  if (commandResult.exitCode !== 0) {
-    throw new Error(commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`);
+  if (!hasVerifiedManifest(manifestResult)) {
+    return [manifestResult.failure] as const;
   }
 
-  return commandResult.stdout
-    .split(/\r?\n/gu)
-    .map((entry) => normalizeArchiveEntry(entry))
-    .filter((entry) => entry.length > 0);
+  const dependencyPackageNames = await collectRuntimeDependencyPackageNames(artifact.target);
+  const requiredEntries = [
+    joinArchiveEntry("usr", "bin", metadata.binaryName),
+    ...buildRuntimeContractEntries(runtimeRoot, manifestResult.manifest, dependencyPackageNames),
+  ] as const;
+
+  return [
+    verifyDesktopRuntimeManifest(
+      artifact.target,
+      manifestResult.manifest,
+      `linux:${artifact.kind}-manifest:${artifact.target}`,
+    ),
+    await verifyCollectedEntries(
+      extractionRoot,
+      requiredEntries,
+      `linux:${artifact.kind}-payload:${artifact.target}`,
+      `${artifact.kind} bundles desktop binary, runtime manifest, runner, server, scraper, and dependencies`,
+    ),
+  ] as const;
 };
 
 const verifyLinuxPackagePayload = async (
   artifact: ReleaseArtifact,
   metadata: DesktopBundleMetadata,
 ): Promise<readonly VerificationResult[]> => {
-  if (!(artifact.target === "linux-x64" || artifact.target === "linux-arm64")) {
+  if (!isLinuxPackageArtifact(artifact)) {
     return [] as const;
   }
 
-  const missingToolResult =
-    artifact.kind === "deb"
-      ? requireCommand(`linux ${artifact.kind} verification`, "dpkg-deb")
-      : requireCommand(`linux ${artifact.kind} verification`, "rpm");
+  const requiredCommands =
+    artifact.kind === "deb" ? ["dpkg-deb"] : ["rpm2cpio", "cpio"];
+  const missingToolResult = requiredCommands
+    .map((command) => requireCommand(`linux ${artifact.kind} verification`, command))
+    .find((result): result is VerificationResult => result !== null);
   if (missingToolResult) {
     return [missingToolResult] as const;
   }
 
-  const runtimeDependencyRoots = await collectRuntimeDependencySourceRoots(
-    join(REPO_ROOT, "packages", "scraper"),
-  );
-  const requiredEntries = buildRuntimePackageEntries(
-    artifact.target,
-    metadata,
-    Array.from(runtimeDependencyRoots.keys()),
-  );
-  const entriesResult = await captureResult(() =>
-    artifact.kind === "deb"
-      ? listDebEntries(artifact.absolutePath)
-      : listRpmEntries(artifact.absolutePath),
-  );
-  if (!entriesResult.ok) {
-    return [
-      {
-        details: toErrorMessage(entriesResult.error),
-        label: `linux:${artifact.kind}-archive:${artifact.target}`,
-        ok: false,
-      },
-    ] as const;
-  }
+  const extractionRoot = await mkdtemp(join(tmpdir(), `bao-desktop-${artifact.kind}-`));
+  return withCleanup(
+    async () => {
+      const extractResult = await captureResult(() =>
+        extractLinuxPackagePayload(artifact, extractionRoot),
+      );
+      if (!extractResult.ok) {
+        return [
+          {
+            details: toErrorMessage(extractResult.error),
+            label: `linux:${artifact.kind}-archive:${artifact.target}`,
+            ok: false,
+          },
+        ] as const;
+      }
 
-  const archiveEntries = new Set(entriesResult.value.map(normalizeArchiveEntry));
-  const missingEntries = requiredEntries.filter((entry) => !archiveEntries.has(entry));
-
-  return [
-    {
-      details: artifact.relativePath,
-      label: `linux:${artifact.kind}-archive:${artifact.target}`,
-      ok: true,
+      return [
+        {
+          details: artifact.relativePath,
+          label: `linux:${artifact.kind}-archive:${artifact.target}`,
+          ok: true,
+        },
+        ...(await verifyExtractedLinuxPackagePayload(artifact, metadata, extractionRoot)),
+      ] as const;
     },
-    {
-      details:
-        missingEntries.length === 0
-          ? `${artifact.kind} bundles desktop binary, runtime manifest, runner, server, scraper, and dependencies`
-          : `missing ${missingEntries.join(", ")}`,
-      label: `linux:${artifact.kind}-payload:${artifact.target}`,
-      ok: missingEntries.length === 0,
-    },
-  ] as const;
+    () => rm(extractionRoot, { force: true, recursive: true }),
+  );
 };
 
 const writeResults = async (results: readonly VerificationResult[]): Promise<void> => {

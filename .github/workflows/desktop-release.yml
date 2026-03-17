@@ -176,6 +176,7 @@ jobs:
             curl \
             wget \
             file \
+            cpio \
             rpm \
             libxdo-dev \
             libssl-dev \
@@ -236,6 +237,7 @@ jobs:
             curl \
             wget \
             file \
+            cpio \
             rpm \
             libxdo-dev \
             libssl-dev \
@@ -284,6 +286,9 @@ jobs:
 
       - name: Install workspace dependencies
         run: bun ci
+
+      - name: Install desktop package inspection tools
+        run: brew install dpkg rpm
 
       - name: Download macOS release artifact set
         uses: actions/download-artifact@v8

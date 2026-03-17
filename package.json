@@ -44,7 +44,7 @@
     "db:generate": "bun --env-file=.env run drizzle-kit generate",
     "db:push": "bun --env-file=.env run drizzle-kit push",
     "db:studio": "bun --env-file=.env run drizzle-kit studio",
-    "test": "bun run --filter '@bao/server' test && bun run --filter '@bao/scraper' test && bun run --filter '@bao/client' test",
+    "test": "bun run --filter '@bao/shared' test && bun run --filter '@bao/server' test && bun run --filter '@bao/scraper' test && bun run --filter '@bao/client' test",
     "format": "bun --bun run biome format . --write",
     "format:check": "bun --bun run biome format .",
     "validate:ui": "bun run scripts/validate-ui-accessibility.ts",

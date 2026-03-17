@@ -16,36 +16,26 @@ import {
   DESKTOP_RUNTIME_BUILD_SERVER_PORT,
   DESKTOP_RUNTIME_CORS_ORIGINS,
   DESKTOP_RUNTIME_HOST,
-  DESKTOP_RUNTIME_LINUX_BUN_PATH,
   DESKTOP_RUNTIME_MANIFEST_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
   DESKTOP_RUNTIME_SCRAPER_DIR,
-  DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH,
-  DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
-  DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
-  DESKTOP_RUNTIME_SERVER_PORT,
   DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
-  DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
   DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
+import {
+  buildDesktopRuntimeManifest,
+  resolveDesktopRuntimeTargetInfoFromHost,
+  resolveDesktopRuntimeTargetInfoFromTauriTarget,
+  type DesktopRuntimeManifest,
+  type DesktopRuntimeTargetInfo,
+} from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import {
   collectRuntimeDependencySourceRoots,
   SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
 } from "./utils/desktop-runtime-scraper";
-
-type DesktopRuntimeManifest = {
-  serverExecutable: string;
-  scriptRunnerExecutable: string;
-  scriptRunnerEntrypoint: string | null;
-  webviewBootstrapperExecutable: string | null;
-  scraperDir: string;
-  serverHost: string;
-  serverPort: number;
-  corsOrigins: string[];
-};
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const CLIENT_ROOT = join(REPO_ROOT, "packages", "client");
@@ -81,12 +71,6 @@ const BUN_COMPILE_EXTRACTION_FAILURE_PATTERN =
 let compileTargetScratchRoot: string | null = null;
 const prewarmedCompileTargetDirectories = new Map<string, Promise<string>>();
 
-const toExecutablePath = (relativePath: string, tauriTarget: string | null): string =>
-  tauriTarget?.includes("windows") ? `${relativePath}.exe` : relativePath;
-
-const isLinuxTarget = (tauriTarget: string | null): boolean =>
-  tauriTarget?.includes("linux") ?? process.platform === "linux";
-
 const resolveTauriCacheDir = (): string => {
   const envOverride = process.env.TAURI_CACHE_DIR?.trim();
   if (envOverride) {
@@ -120,6 +104,11 @@ const resolveWebviewBootstrapperSourcePath = (): string => {
 
   return join(resolveTauriCacheDir(), DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME);
 };
+
+const resolveRuntimeTargetInfo = (tauriTarget: string | null): DesktopRuntimeTargetInfo =>
+  tauriTarget
+    ? resolveDesktopRuntimeTargetInfoFromTauriTarget(tauriTarget)
+    : resolveDesktopRuntimeTargetInfoFromHost(process.platform, process.arch);
 
 const captureStreamLines = async (
   stream: number | ReadableStream<Uint8Array> | undefined,
@@ -697,8 +686,10 @@ const stageScraperRuntime = async (): Promise<void> => {
   );
 };
 
-const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<string | null> => {
-  if (!tauriTarget?.includes("windows")) {
+const stageWebviewBootstrapper = async (
+  runtimeTargetInfo: DesktopRuntimeTargetInfo,
+): Promise<string | null> => {
+  if (!runtimeTargetInfo.defaultWebviewBootstrapperExecutable) {
     return null;
   }
 
@@ -709,10 +700,7 @@ const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<str
     );
   }
 
-  const destinationRelativePath = toExecutablePath(
-    DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
-    tauriTarget,
-  );
+  const destinationRelativePath = runtimeTargetInfo.defaultWebviewBootstrapperExecutable;
   const destinationPath = join(RUNTIME_ROOT, destinationRelativePath);
   await mkdir(dirname(destinationPath), { recursive: true });
   await cp(sourcePath, destinationPath, { force: true });
@@ -720,14 +708,11 @@ const stageWebviewBootstrapper = async (tauriTarget: string | null): Promise<str
   return destinationRelativePath;
 };
 
-const stageBundledScriptRunnerRuntime = async (tauriTarget: string | null): Promise<void> => {
-  const bunBinaryPath = join(
-    RUNTIME_ROOT,
-    isLinuxTarget(tauriTarget)
-      ? DESKTOP_RUNTIME_LINUX_BUN_PATH
-      : toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
-  );
-  const entrypointPath = join(RUNTIME_ROOT, DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH);
+const stageBundledScriptRunnerRuntime = async (
+  runtimeTargetInfo: DesktopRuntimeTargetInfo,
+): Promise<void> => {
+  const bunBinaryPath = join(RUNTIME_ROOT, runtimeTargetInfo.scriptRunnerExecutable);
+  const entrypointPath = join(RUNTIME_ROOT, runtimeTargetInfo.scriptRunnerEntrypoint);
 
   await mkdir(dirname(bunBinaryPath), { recursive: true });
   await cp(process.execPath, bunBinaryPath, { force: true });
@@ -736,22 +721,12 @@ const stageBundledScriptRunnerRuntime = async (tauriTarget: string | null): Prom
 };
 
 const writeRuntimeManifest = async (
-  tauriTarget: string | null,
+  runtimeTargetInfo: DesktopRuntimeTargetInfo,
   webviewBootstrapperExecutable: string | null,
 ): Promise<void> => {
-  const isLinuxRuntimeTarget = isLinuxTarget(tauriTarget);
-  const manifest: DesktopRuntimeManifest = {
-    serverExecutable: toExecutablePath(DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH, tauriTarget),
-    scriptRunnerExecutable: isLinuxRuntimeTarget
-      ? DESKTOP_RUNTIME_LINUX_BUN_PATH
-      : toExecutablePath(DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH, tauriTarget),
-    scriptRunnerEntrypoint: DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH,
+  const manifest: DesktopRuntimeManifest = buildDesktopRuntimeManifest(runtimeTargetInfo.target, {
     webviewBootstrapperExecutable,
-    scraperDir: DESKTOP_RUNTIME_SCRAPER_DIR,
-    serverHost: DESKTOP_RUNTIME_HOST,
-    serverPort: DESKTOP_RUNTIME_SERVER_PORT,
-    corsOrigins: [...DESKTOP_RUNTIME_CORS_ORIGINS],
-  };
+  });
 
   await mkdir(resolve(RUNTIME_MANIFEST_PATH, ".."), { recursive: true });
   await writeFile(RUNTIME_MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
@@ -759,9 +734,10 @@ const writeRuntimeManifest = async (
 
 const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void> => {
   const compileTarget = resolveBunCompileTarget(tauriTarget);
+  const runtimeTargetInfo = resolveRuntimeTargetInfo(tauriTarget);
   const serverExecutablePath = join(
     RUNTIME_ROOT,
-    toExecutablePath(DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH, tauriTarget),
+    runtimeTargetInfo.serverExecutable,
   );
 
   await writeOutput(`desktop-runtime: compiling bundled desktop server (${compileTarget})`);
@@ -770,11 +746,11 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
   await writeOutput(
     `desktop-runtime: staging bundled Bun runtime and entrypoint helper for script execution (${compileTarget})`,
   );
-  await stageBundledScriptRunnerRuntime(tauriTarget);
+  await stageBundledScriptRunnerRuntime(runtimeTargetInfo);
 
   await stageScraperRuntime();
-  const webviewBootstrapperExecutable = await stageWebviewBootstrapper(tauriTarget);
-  await writeRuntimeManifest(tauriTarget, webviewBootstrapperExecutable);
+  const webviewBootstrapperExecutable = await stageWebviewBootstrapper(runtimeTargetInfo);
+  await writeRuntimeManifest(runtimeTargetInfo, webviewBootstrapperExecutable);
 };
 
 const main = async (): Promise<void> => {
