@@ -131,7 +131,7 @@ export const DESKTOP_RUNTIME_BUILD_SERVER_PORT = 3399 as const;
 export const DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT = 4106 as const;
 
 /** Launch timeout for the browser used by desktop runtime verification checks. */
-export const DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS = 30_000 as const;
+export const DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS = 120_000 as const;
 
 /** Required desktop PNG icon outputs recommended by Tauri for cross-platform bundling. */
 export const DESKTOP_REQUIRED_PNG_ICON_SPECS = [

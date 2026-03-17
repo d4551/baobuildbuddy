@@ -1,5 +1,5 @@
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
-import { basename, join, resolve } from "node:path";
+import { cp, mkdir, rm, stat, writeFile } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
 import {
   DESKTOP_RELEASE_METADATA_DIR,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
@@ -55,6 +55,10 @@ type ReleaseProvenance = {
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_ROOT = join(REPO_ROOT, "packages", "desktop");
 const DESKTOP_TAURI_ROOT = join(DESKTOP_ROOT, "src-tauri");
+const DESKTOP_PORTABLE_RUNTIME_ROOT = join(
+  DESKTOP_TAURI_ROOT,
+  dirname(DESKTOP_RUNTIME_RESOURCE_DIR),
+);
 const DESKTOP_CLEANUP_SCRIPT_PATH = join(REPO_ROOT, "scripts", "cleanup-desktop-build.ts");
 const DESKTOP_PACKAGE_JSON_PATH = join(DESKTOP_ROOT, "package.json");
 const DESKTOP_TAURI_CONFIG_PATH = join(DESKTOP_TAURI_ROOT, "tauri.conf.json");
@@ -146,7 +150,10 @@ const runMacosPrebuildCleanup = async (): Promise<void> => {
 };
 
 const pathExists = async (absolutePath: string): Promise<boolean> =>
-  Bun.file(absolutePath).exists();
+  stat(absolutePath).then(
+    () => true,
+    () => false,
+  );
 
 const resolveExistingPath = async (
   label: string,
@@ -494,18 +501,16 @@ const stageWindowsArtifacts = async (
     "Windows desktop executable",
     buildReleasePathCandidates("windows", `${metadata.binaryName}.exe`),
   );
-  const runtimeRoot = await resolveExistingPath(
-    "Windows portable runtime directory",
-    buildReleasePathCandidates("windows", "gen"),
-  );
-  await resolveExistingPath(
-    "Windows WebView2 bootstrapper",
-    buildReleasePathCandidates(
-      "windows",
+  const runtimeRoot = await resolveExistingPath("Windows portable runtime directory", [
+    DESKTOP_PORTABLE_RUNTIME_ROOT,
+  ]);
+  await resolveExistingPath("Windows WebView2 bootstrapper", [
+    join(
+      DESKTOP_TAURI_ROOT,
       DESKTOP_RUNTIME_RESOURCE_DIR,
       `${DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`,
     ),
-  );
+  ]);
   const nsisScriptPath = await resolveExistingPath(
     "Windows NSIS script",
     buildReleasePathCandidates("windows", "nsis", "x64", "installer.nsi"),

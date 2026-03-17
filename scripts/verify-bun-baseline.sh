@@ -44,12 +44,13 @@ read_stale_bun_refs_with_grep() {
   local status
 
   set +e
-  output="$(grep -RIn \
-    --exclude-dir=node_modules \
-    --exclude-dir=.git \
-    --exclude-dir=.bun \
-    --exclude=scripts/verify-bun-baseline.sh \
-    -E 'bun@1\\.3\\.9|\"1\\.3\\.9\"' .)"
+  output="$(
+    find . \
+      \( -path './node_modules' -o -path './.git' -o -path './.bun' \) -prune \
+      -o -type f \
+      ! -path './scripts/verify-bun-baseline.sh' \
+      -exec grep -InE 'bun@1\\.3\\.9|\"1\\.3\\.9\"' {} +
+  )"
   status=$?
   set -e
 
