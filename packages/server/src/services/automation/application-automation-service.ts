@@ -2440,8 +2440,7 @@ export class ApplicationAutomationService {
       aiService,
     );
     const isEmpty =
-      Object.keys(result.selectorMap).length === 0 &&
-      Object.keys(result.fieldAnswers).length === 0;
+      Object.keys(result.selectorMap).length === 0 && Object.keys(result.fieldAnswers).length === 0;
     if (isEmpty) {
       automationServiceLogger.debug("Smart field mapping returned empty result", {
         jobUrl: options.jobUrl,

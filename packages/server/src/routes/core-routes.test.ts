@@ -213,7 +213,6 @@ describe("auth routes", () => {
     expect(typeof res.body.bootstrapRequired).toBe("boolean");
     expect(typeof res.body.setupTokenConfigured).toBe("boolean");
   });
-
 });
 
 describe("auth init routes", () => {

@@ -22,6 +22,12 @@ const loggerEntries: {
 };
 
 const noopLogger = (): void => {};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+const isProviderModule = (value: unknown): value is ProviderModule =>
+  isRecord(value) &&
+  typeof value.HitmarkerProvider === "function" &&
+  typeof value.GamingPortalProvider === "function";
 
 const logger = {
   debug: noopLogger,
@@ -69,16 +75,15 @@ const createJobProviderSettings = (overrides?: {
       workday: "workday",
     },
     companyBoards: [],
-    gamingPortals:
-      overrides?.gamingPortals ?? [
-        {
-          id: "grackle",
-          name: "Grackle",
-          source: "grackle",
-          fallbackUrl: "https://example.com/grackle",
-          enabled: true,
-        },
-      ],
+    gamingPortals: overrides?.gamingPortals ?? [
+      {
+        id: "grackle",
+        name: "Grackle",
+        source: "grackle",
+        fallbackUrl: "https://example.com/grackle",
+        enabled: true,
+      },
+    ],
   });
 
 let loadJobProviderSettingsImpl: () => Promise<ProviderSettings> = () =>
@@ -117,7 +122,13 @@ function mockedFetch(input: URL | RequestInfo, init?: RequestInit | BunFetchRequ
 mockedFetch.preconnect = globalThis.fetch.preconnect;
 globalThis.fetch = mockedFetch;
 
-const loadProviders = (): Promise<ProviderModule> => import("./gaming-providers");
+const loadProviders = (): Promise<ProviderModule> =>
+  import(`./gaming-providers.ts?test=${crypto.randomUUID()}`).then((moduleValue: unknown) => {
+    if (!isProviderModule(moduleValue)) {
+      throw new Error("Failed to load gaming provider module");
+    }
+    return moduleValue;
+  });
 
 const fetchHitmarkerJobs = async (): Promise<RawJob[]> => {
   const { HitmarkerProvider } = await loadProviders();
@@ -162,9 +173,9 @@ describe("Hitmarker gaming provider", () => {
     const jobs = await fetchHitmarkerJobs();
 
     expect(jobs).toEqual([]);
-    expect(loggerEntries.error.some((entry) => JSON.stringify(entry).includes("invalid_json"))).toBe(
-      true,
-    );
+    expect(
+      loggerEntries.error.some((entry) => JSON.stringify(entry).includes("invalid_json")),
+    ).toBe(true);
   });
 
   test("treats empty successful responses as empty results without failure logging", async () => {
@@ -197,9 +208,9 @@ describe("portal-backed gaming providers", () => {
     const jobs = await fetchPortalJobs("grackle");
 
     expect(jobs).toEqual([]);
-    expect(loggerEntries.info.some((entry) => JSON.stringify(entry).includes("portal_disabled"))).toBe(
-      true,
-    );
+    expect(
+      loggerEntries.info.some((entry) => JSON.stringify(entry).includes("portal_disabled")),
+    ).toBe(true);
   });
 
   test("logs scrape failures for portal-backed providers", async () => {
@@ -208,8 +219,8 @@ describe("portal-backed gaming providers", () => {
     const jobs = await fetchPortalJobs("grackle");
 
     expect(jobs).toEqual([]);
-    expect(loggerEntries.error.some((entry) => JSON.stringify(entry).includes("scrape_failed"))).toBe(
-      true,
-    );
+    expect(
+      loggerEntries.error.some((entry) => JSON.stringify(entry).includes("scrape_failed")),
+    ).toBe(true);
   });
 });

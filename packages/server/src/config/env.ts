@@ -105,12 +105,7 @@ const resolveClientPort = (): number => {
   const configuredClientPort = [Bun.env.CLIENT_PORT, Bun.env.NUXT_CLIENT_PORT].find(
     (value) => value?.trim().length,
   );
-  return parseBoundedInt(
-    configuredClientPort,
-    DEFAULT_CLIENT_DEV_PORT,
-    MIN_PORT,
-    MAX_PORT,
-  );
+  return parseBoundedInt(configuredClientPort, DEFAULT_CLIENT_DEV_PORT, MIN_PORT, MAX_PORT);
 };
 
 const resolveAuthConfig = () => {
@@ -122,10 +117,7 @@ const resolveAuthConfig = () => {
 };
 
 const resolveEnableAutomationVerification = (): boolean =>
-  parseBooleanFlag(
-    Bun.env.BAO_ENABLE_AUTOMATION_VERIFY,
-    process.env.BAO_ENABLE_AUTOMATION_VERIFY,
-  );
+  parseBooleanFlag(Bun.env.BAO_ENABLE_AUTOMATION_VERIFY, process.env.BAO_ENABLE_AUTOMATION_VERIFY);
 
 const resolveAllowAutomationPrivateHosts = (): boolean =>
   parseBooleanFlag(

@@ -19,9 +19,9 @@ describe("collectDaisyUiContractViolationsForContent", () => {
       `<template><button class="btn btn-sm">Click</button></template>`,
     );
 
-    expect(violations.some((v) => v.message.includes("btn") && v.message.includes("modifier"))).toBe(
-      true,
-    );
+    expect(
+      violations.some((v) => v.message.includes("btn") && v.message.includes("modifier")),
+    ).toBe(true);
   });
 
   test("passes btn with semantic modifier", () => {
@@ -30,8 +30,8 @@ describe("collectDaisyUiContractViolationsForContent", () => {
       `<template><button class="btn btn-sm btn-ghost">Click</button></template>`,
     );
 
-    expect(violations.some((v) => v.message.includes("btn") && v.message.includes("modifier"))).toBe(
-      false,
-    );
+    expect(
+      violations.some((v) => v.message.includes("btn") && v.message.includes("modifier")),
+    ).toBe(false);
   });
 });

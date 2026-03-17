@@ -29,7 +29,7 @@
     "build": "bun build src/index.ts --outdir dist --target bun",
     "build:types": "bunx --bun tsc --emitDeclarationOnly --declarationMap false --outDir dist-types",
     "typecheck": "bunx --bun tsc --noEmit",
-    "test": "bun test",
+    "test": "bun test src",
     "db:generate": "bun --bun run drizzle-kit generate",
     "db:push": "bun --bun run drizzle-kit push",
     "db:studio": "bun --bun run drizzle-kit studio"

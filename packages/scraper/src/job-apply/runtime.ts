@@ -100,7 +100,12 @@ const isRetryablePlaywrightError = (reason: unknown): boolean => {
 const waitMs = (ms: number): Promise<void> =>
   new Promise((resolve) => {
     const t = setTimeout(resolve, ms);
-    if (typeof t === "object" && t !== null && "unref" in t && typeof (t as { unref: () => void }).unref === "function") {
+    if (
+      typeof t === "object" &&
+      t !== null &&
+      "unref" in t &&
+      typeof (t as { unref: () => void }).unref === "function"
+    ) {
       (t as { unref: () => void }).unref();
     }
   });

@@ -228,7 +228,10 @@ async function handleComplete(): Promise<void> {
         return;
       }
 
-      const authInitResult = await settlePromise(initAuth(setupToken), t("apiErrors.auth.initFailed"));
+      const authInitResult = await settlePromise(
+        initAuth(setupToken),
+        t("apiErrors.auth.initFailed"),
+      );
       if (!authInitResult.ok) {
         saving.value = false;
         $toast.error(getErrorMessage(authInitResult.error, t("apiErrors.auth.initFailed")));
