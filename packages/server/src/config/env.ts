@@ -125,11 +125,9 @@ export const config = {
   },
   /** When true, allow localhost/private automation URLs for deterministic local verification flows. */
   get allowAutomationPrivateHosts(): boolean {
-    return (
-      parseBooleanFlag(
-        Bun.env.BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS,
-        process.env.BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS,
-      ) || this.enableAutomationVerification
+    return parseBooleanFlag(
+      Bun.env.BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS,
+      process.env.BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS,
     );
   },
   automationScriptTimeoutMs: parseBoundedInt(
