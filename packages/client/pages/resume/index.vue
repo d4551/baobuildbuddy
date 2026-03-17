@@ -2,7 +2,6 @@
 import {
   APP_ROUTE_QUERY_KEYS,
   APP_ROUTES,
-  type DashboardStats,
   formDataToResumeData,
   RESUME_LIST_PAGE_SIZE,
   RESUME_TEMPLATE_DEFAULT,
@@ -32,11 +31,12 @@ const {
   aiEnhance,
   aiScore,
 } = useResume();
-const api = useApi();
+type ResumeScoreResult = Awaited<ReturnType<ReturnType<typeof useResume>["aiScore"]>>;
 const route = useRoute();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
 const { awardForAction } = usePipelineGamification();
+const { dashboard: dashboardStats, fetchDashboard } = useStatistics();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -67,9 +67,8 @@ const resumeTabRefs = ref<(HTMLButtonElement | null)[]>([]);
 const creating = ref(false);
 const enhancing = ref(false);
 const scoring = ref(false);
-const scoreResult = ref<Record<string, unknown> | null>(null);
+const scoreResult = ref<ResumeScoreResult | null>(null);
 const resumeSearchQuery = ref("");
-const dashboardStats = ref<DashboardStats | null>(null);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const templateLabelMap = computed<Record<ResumeTemplate, string>>(() => {
   const templates = t("resumePage.createModal.templates") as Record<string, string>;
@@ -326,10 +325,7 @@ function resumePageAria(page: number): string {
 
 await useAsyncData("resume-page-bootstrap", async () => {
   await fetchResumes();
-  const statsResponse = await api.stats.dashboard.get();
-  if (!statsResponse.error) {
-    dashboardStats.value = statsResponse.data;
-  }
+  await fetchDashboard();
 
   const id = route.query[APP_ROUTE_QUERY_KEYS.id];
   if (typeof id === "string" && id.trim()) {

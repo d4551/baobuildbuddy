@@ -11,6 +11,10 @@ type ResumeRoute = ReturnType<ApiClient["resumes"]>;
 type UpdateResumeInput = NonNullable<Parameters<ResumeRoute["put"]>[0]>;
 type ExportResumeInput = NonNullable<Parameters<ResumeRoute["export"]["post"]>[0]>;
 type ScoreResumeInput = NonNullable<Parameters<ResumeRoute["ai-score"]["post"]>[0]>;
+type ScoreResumeResult = Awaited<ReturnType<ResumeRoute["ai-score"]["post"]>>;
+type ScoreResumeData = NonNullable<ScoreResumeResult["data"]>;
+type ScoreResumeError = Extract<ScoreResumeData, { error: string }>;
+type ScoreResumeSuccess = Exclude<ScoreResumeData, ScoreResumeError>;
 
 type ResumeSynthesisSuccess = Partial<ResumeData> & {
   id: string;
@@ -44,6 +48,9 @@ const isResumeSynthesisSuccess = (
   value: ResumeSynthesisSuccess | ResumeSynthesisError,
 ): value is ResumeSynthesisSuccess =>
   isRecord(value) && "id" in value && typeof value.id === "string";
+
+const isResumeScoreError = (value: ScoreResumeData): value is ScoreResumeError =>
+  "error" in value && typeof value.error === "string";
 
 function toResumeList(value: unknown): ResumeData[] {
   return Array.isArray(value)
@@ -165,12 +172,18 @@ async function aiEnhance(context: ResumeContext, id: string): Promise<ResumeData
   });
 }
 
-async function aiScore(context: ResumeContext, id: string, jobId: string): Promise<unknown> {
+async function aiScore(context: ResumeContext, id: string, jobId: string): Promise<ScoreResumeSuccess> {
   return withLoadingState(context.loading, async () => {
     const payload: ScoreResumeInput = { jobId };
     const { data, error } = await context.api.resumes({ id })["ai-score"].post(payload);
     assertApiResponse(error, context.t("apiErrors.resumes.scoreFailed"));
-    return data;
+    const normalized = requireValue(data, context.t("apiErrors.resumes.invalidPayload"));
+    if (isResumeScoreError(normalized)) {
+      throw new Error(
+        String(normalized.details ?? normalized.error ?? context.t("apiErrors.resumes.scoreFailed")),
+      );
+    }
+    return normalized;
   });
 }
 
