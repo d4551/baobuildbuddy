@@ -15,6 +15,7 @@ import {
   DESKTOP_RELEASE_WINDOWS_ARCH,
   DESKTOP_REQUIRED_NATIVE_ICON_FILES,
   DESKTOP_REQUIRED_PNG_ICON_SPECS,
+  DESKTOP_RUNTIME_LINUX_BUN_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
   DESKTOP_RUNTIME_SCRAPER_DIR,
   DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH,
@@ -632,7 +633,7 @@ const buildRuntimePackageEntries = (
   return [
     joinArchiveEntry("usr", "bin", metadata.binaryName),
     joinArchiveEntry(linuxRuntimeRoot, "manifest.json"),
-    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH),
+    joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_LINUX_BUN_PATH),
     joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SCRIPT_RUNNER_ENTRYPOINT_PATH),
     joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH),
     joinArchiveEntry(linuxRuntimeRoot, DESKTOP_RUNTIME_SCRAPER_DIR, "package.json"),
