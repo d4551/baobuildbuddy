@@ -103,7 +103,13 @@ type DashboardStatsResponse = {
   skills: { mappedCount: number };
   ai: { chatMessages: number; chatSessions: number };
   gamification: { level: number; xp: number; achievements: number; streak: number };
-  automation: { totalRuns: number; successfulRuns: number; successRate: number; todayRuns: number; recentRuns: unknown[] };
+  automation: {
+    totalRuns: number;
+    successfulRuns: number;
+    successRate: number;
+    todayRuns: number;
+    recentRuns: unknown[];
+  };
 };
 
 const SEARCH_QUERY_SHORT = "a";
@@ -167,7 +173,11 @@ describe("search routes", () => {
     const shortAutocompleteUrl = `/api/search/autocomplete?${new URLSearchParams({
       prefix: AUTOCOMPLETE_SHORT_PREFIX,
     })}`;
-    const res = await requestJson<Array<{ text: string; type: string }>>(app, "GET", shortAutocompleteUrl);
+    const res = await requestJson<Array<{ text: string; type: string }>>(
+      app,
+      "GET",
+      shortAutocompleteUrl,
+    );
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
   });
@@ -176,7 +186,11 @@ describe("search routes", () => {
     const roleAutocompleteUrl = `/api/search/autocomplete?${new URLSearchParams({
       prefix: AUTOCOMPLETE_ROLE_PREFIX,
     })}`;
-    const res = await requestJson<Array<{ text: string; type: string }>>(app, "GET", roleAutocompleteUrl);
+    const res = await requestJson<Array<{ text: string; type: string }>>(
+      app,
+      "GET",
+      roleAutocompleteUrl,
+    );
     expect(res.status).toBe(200);
     expect(res.body.length).toBeGreaterThan(0);
     expect(res.body.some((entry) => entry.type === "role")).toBe(true);
@@ -214,7 +228,11 @@ describe("auth routes", () => {
   });
 
   test("GET /api/auth/configured reflects key configuration state", async () => {
-    const configured = await requestJson<{ configured: boolean }>(app, "GET", "/api/auth/configured");
+    const configured = await requestJson<{ configured: boolean }>(
+      app,
+      "GET",
+      "/api/auth/configured",
+    );
     expect(configured.status).toBe(200);
     expect(typeof configured.body.configured).toBe("boolean");
   });
@@ -248,7 +266,11 @@ describe("user routes", () => {
 
 describe("gamification routes", () => {
   test("GET /api/gamification/progress returns base progress", async () => {
-    const res = await requestJson<GamificationProgressResponse>(app, "GET", "/api/gamification/progress");
+    const res = await requestJson<GamificationProgressResponse>(
+      app,
+      "GET",
+      "/api/gamification/progress",
+    );
     expect(res.status).toBe(200);
     expect(res.body.xp).toBeGreaterThanOrEqual(0);
     expect(res.body.level).toBeGreaterThan(0);
@@ -277,7 +299,11 @@ describe("gamification routes", () => {
   });
 
   test("GET /api/gamification/challenges returns today's challenge list", async () => {
-    const res = await requestJson<GamificationChallengesResponse>(app, "GET", "/api/gamification/challenges");
+    const res = await requestJson<GamificationChallengesResponse>(
+      app,
+      "GET",
+      "/api/gamification/challenges",
+    );
     expect(res.status).toBe(200);
     expect(res.body.challenges.length).toBeGreaterThan(0);
     expect(res.body.totalCount).toBe(res.body.challenges.length);

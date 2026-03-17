@@ -386,8 +386,7 @@ function registerScheduledScrapeRunTest(): void {
       "runAt" in input.schedule
         ? input.schedule.runAt
         : null;
-    const target =
-      input && typeof input === "object" && "target" in input ? input.target : null;
+    const target = input && typeof input === "object" && "target" in input ? input.target : null;
     expect(scheduledRunAt).toBe(runAt);
     expect(target).toBe("jobs_grackle");
     createdRunIds.push(res.body.id);

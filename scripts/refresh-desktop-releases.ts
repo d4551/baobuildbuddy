@@ -9,6 +9,7 @@ import {
   DESKTOP_RELEASE_TARGETS,
 } from "../packages/shared/src/constants/scripts";
 import { captureResult, toErrorMessage } from "./utils/async-control";
+import { writeFormattedJsonFile } from "./utils/biome-format";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
@@ -63,7 +64,9 @@ const parseTargets = (argv: readonly string[]): readonly DesktopReleaseTarget[] 
 const resolveSourceRoot = (argv: readonly string[]): string => {
   const rootIndex = argv.indexOf("--source-root");
   const sourceRoot =
-    rootIndex === -1 ? DESKTOP_RELEASE_STAGING_ROOT : argv[rootIndex + 1] ?? DESKTOP_RELEASE_STAGING_ROOT;
+    rootIndex === -1
+      ? DESKTOP_RELEASE_STAGING_ROOT
+      : (argv[rootIndex + 1] ?? DESKTOP_RELEASE_STAGING_ROOT);
   return resolve(REPO_ROOT, sourceRoot);
 };
 
@@ -149,7 +152,8 @@ const stageTargetArtifacts = async (
 
   await Promise.all(
     artifactNames.map((artifactName) =>
-      cp(join(sourceTargetRoot, artifactName), join(releaseTargetRoot, artifactName))),
+      cp(join(sourceTargetRoot, artifactName), join(releaseTargetRoot, artifactName)),
+    ),
   );
 
   if (await pathExists(sourceMetadataRoot)) {
@@ -232,19 +236,12 @@ const main = async (): Promise<void> => {
     ...existingTargets,
     ...Object.fromEntries(provenanceEntries),
   };
-  await writeFile(
-    join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_PROVENANCE_FILENAME),
-    `${JSON.stringify(
-      {
-        schemaVersion: 1,
-        assembledAt: new Date().toISOString(),
-        sourceRoot,
-        targets: nextTargets,
-      },
-      null,
-      2,
-    )}\n`,
-  );
+  await writeFormattedJsonFile(join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_PROVENANCE_FILENAME), {
+    schemaVersion: 1,
+    assembledAt: new Date().toISOString(),
+    sourceRoot,
+    targets: nextTargets,
+  });
   await writeChecksumManifest();
   await writeOutput(
     `desktop-release:refreshed ${targets.join(", ")} from ${sourceRoot} into ${DESKTOP_RELEASE_ROOT}`,

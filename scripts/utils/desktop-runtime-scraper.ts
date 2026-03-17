@@ -110,8 +110,8 @@ const visitRuntimeDependencyTree = async (
   await visitDependencyNamesSequentially(
     sortDependencyNames(manifest.dependencies),
     async (dependencyName) => {
-    const dependencyRoot = await resolvePackageSourceRoot(dependencyName, packageRoot);
-    await visitRuntimeDependencyTree(dependencyName, dependencyRoot, visitedPackages);
+      const dependencyRoot = await resolvePackageSourceRoot(dependencyName, packageRoot);
+      await visitRuntimeDependencyTree(dependencyName, dependencyRoot, visitedPackages);
     },
   );
 
@@ -143,8 +143,8 @@ export const collectRuntimeDependencySourceRoots = async (
   await visitDependencyNamesSequentially(
     sortDependencyNames(manifest.dependencies),
     async (dependencyName) => {
-    const dependencyRoot = await resolvePackageSourceRoot(dependencyName, packageRoot);
-    await visitRuntimeDependencyTree(dependencyName, dependencyRoot, visitedPackages);
+      const dependencyRoot = await resolvePackageSourceRoot(dependencyName, packageRoot);
+      await visitRuntimeDependencyTree(dependencyName, dependencyRoot, visitedPackages);
     },
   );
 

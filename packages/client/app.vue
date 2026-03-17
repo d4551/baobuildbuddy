@@ -52,7 +52,8 @@ useHeadSafe(() => ({
 
 useSeoMeta(() => ({
   title:
-    resolvedBrand.value.content.defaultTitle || t("meta.title", { brand: resolvedBrand.value.name }),
+    resolvedBrand.value.content.defaultTitle ||
+    t("meta.title", { brand: resolvedBrand.value.name }),
   description: resolvedBrand.value.content.defaultDescription,
   ogTitle: t("meta.title", { brand: resolvedBrand.value.name }),
   ogDescription: t("meta.description"),

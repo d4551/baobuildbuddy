@@ -18,7 +18,8 @@ const successfulScraperResult: ScraperOperationResult = {
 const successfulScrapeJobsForPortal = (): Promise<ScraperOperationResult> =>
   Promise.resolve(successfulScraperResult);
 
-const failedScrapeStudios = (): Promise<ScraperOperationResult> => Promise.reject(new Error("studio scrape script failed"));
+const failedScrapeStudios = (): Promise<ScraperOperationResult> =>
+  Promise.reject(new Error("studio scrape script failed"));
 
 const failedScrapeJobs = (): Promise<ScraperOperationResult> =>
   Promise.reject(new Error("portal scrape script failed"));
@@ -83,7 +84,11 @@ function registerJobScraperRouteTests(): void {
   test("POST /api/scraper/jobs/hitmarker returns scrape result contract on success", async () => {
     scraperService.scrapeJobsForPortal = successfulScrapeJobsForPortal;
 
-    const result = await requestJson<ScraperOperationResult>(app, "POST", "/api/scraper/jobs/hitmarker");
+    const result = await requestJson<ScraperOperationResult>(
+      app,
+      "POST",
+      "/api/scraper/jobs/hitmarker",
+    );
 
     expect(result.status).toBe(200);
     expect(result.body.scraped).toBe(2);

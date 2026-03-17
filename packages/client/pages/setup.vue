@@ -30,12 +30,7 @@ type CloudProvider = Exclude<SetupProvider, "local">;
 type TestResult = { valid: boolean; provider: string };
 type SetupStep = 1 | 2 | 3;
 
-const CLOUD_PROVIDER_IDS: readonly CloudProvider[] = [
-  "gemini",
-  "openai",
-  "claude",
-  "huggingface",
-];
+const CLOUD_PROVIDER_IDS: readonly CloudProvider[] = ["gemini", "openai", "claude", "huggingface"];
 const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
   gemini: "geminiApiKey",
   openai: "openaiApiKey",
@@ -45,8 +40,7 @@ const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
 
 const { updateProfile } = useUser();
 const { settings, fetchSettings, updateApiKeys, testApiKey } = useSettings();
-const { checkAuthStatus, initAuth, getStoredApiKey, setStoredApiKey } =
-  useAuth();
+const { checkAuthStatus, initAuth, getStoredApiKey, setStoredApiKey } = useAuth();
 const router = useRouter();
 const api = useApi();
 const { $toast } = useNuxtApp();
@@ -152,12 +146,8 @@ const setupCompletionFlowInput = computed(() =>
     isSetupComplete: true,
   }),
 );
-const { primaryAction: setupCompletionPrimaryAction } = useFlowEngine(
-  setupCompletionFlowInput,
-);
-const postSetupFlowTarget = computed(
-  () => setupCompletionPrimaryAction.value.to,
-);
+const { primaryAction: setupCompletionPrimaryAction } = useFlowEngine(setupCompletionFlowInput);
+const postSetupFlowTarget = computed(() => setupCompletionPrimaryAction.value.to);
 
 async function handleTestProvider(provider: SetupProvider): Promise<void> {
   const key = getProviderTestKey(provider);
@@ -178,12 +168,7 @@ async function handleTestProvider(provider: SetupProvider): Promise<void> {
   }
 
   if (!providerTestResult.ok) {
-    $toast.error(
-      getErrorMessage(
-        providerTestResult.error,
-        t("setup.providerTestErrorFallback"),
-      ),
-    );
+    $toast.error(getErrorMessage(providerTestResult.error, t("setup.providerTestErrorFallback")));
     testResults.value[provider] = { valid: false, provider };
     return;
   }
@@ -191,13 +176,9 @@ async function handleTestProvider(provider: SetupProvider): Promise<void> {
   const result = providerTestResult.value;
   testResults.value[provider] = result;
   if (result?.valid) {
-    $toast.success(
-      t("setup.providerReachable", { provider: getProviderLabel(provider) }),
-    );
+    $toast.success(t("setup.providerReachable", { provider: getProviderLabel(provider) }));
   } else {
-    $toast.error(
-      t("setup.providerTestFailed", { provider: getProviderLabel(provider) }),
-    );
+    $toast.error(t("setup.providerTestFailed", { provider: getProviderLabel(provider) }));
   }
 }
 
@@ -207,16 +188,11 @@ async function handleComplete(): Promise<void> {
   const trimmedRole = currentRole.value.trim();
 
   const authStatus = await checkAuthStatus();
-  const authInitResult = await settlePromise(
-    initAuth(),
-    t("apiErrors.auth.initFailed"),
-  );
+  const authInitResult = await settlePromise(initAuth(), t("apiErrors.auth.initFailed"));
   if (!authInitResult.ok) {
     if (authStatus.authRequired) {
       saving.value = false;
-      $toast.error(
-        getErrorMessage(authInitResult.error, t("apiErrors.auth.initFailed")),
-      );
+      $toast.error(getErrorMessage(authInitResult.error, t("apiErrors.auth.initFailed")));
       return;
     }
   } else {
@@ -242,19 +218,13 @@ async function handleComplete(): Promise<void> {
     );
     if (!profileUpdateResult.ok) {
       saving.value = false;
-      $toast.error(
-        getErrorMessage(
-          profileUpdateResult.error,
-          t("setup.completeErrorFallback"),
-        ),
-      );
+      $toast.error(getErrorMessage(profileUpdateResult.error, t("setup.completeErrorFallback")));
       return;
     }
   }
 
   const update: Record<string, string> = {
-    localModelEndpoint:
-      localModelEndpoint.value.trim() || LOCAL_AI_DEFAULT_ENDPOINT,
+    localModelEndpoint: localModelEndpoint.value.trim() || LOCAL_AI_DEFAULT_ENDPOINT,
     localModelName: localModelName.value.trim() || LOCAL_AI_DEFAULT_MODEL,
   };
 
@@ -271,12 +241,7 @@ async function handleComplete(): Promise<void> {
   );
   saving.value = false;
   if (!apiKeyUpdateResult.ok) {
-    $toast.error(
-      getErrorMessage(
-        apiKeyUpdateResult.error,
-        t("setup.completeErrorFallback"),
-      ),
-    );
+    $toast.error(getErrorMessage(apiKeyUpdateResult.error, t("setup.completeErrorFallback")));
     return;
   }
 

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BaoBuildBuddy</title>
     <meta name="description" content="BaoBuildBuddy is a Bun-first workspace for game-industry hiring. Scout jobs, tailor resumes, and run RPA flows." />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <!-- Preconnect block -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -76,13 +75,11 @@
       <div class="navbar-end gap-3">
         <!-- Theme Toggle -->
         <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm h-10 w-10" aria-label="Toggle dark and light mode">
-          <input type="checkbox" id="theme-toggle" class="theme-controller" value="light" aria-label="Toggle theme" />
-          <!-- moon icon: swap-off = shown when unchecked (dark mode) -->
-          <svg aria-hidden="true" class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
-          <!-- sun icon: swap-on = shown when checked (light mode) -->
-          <svg aria-hidden="true" class="swap-on fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
+          <input type="checkbox" id="theme-toggle" aria-label="Toggle theme" />
+          <svg aria-hidden="true" class="swap-off fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
+          <svg aria-hidden="true" class="swap-on fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
         </label>
-        <a href="https://github.com/d4551/baobuildbuddy" target="_blank" rel="noopener noreferrer" aria-label="Visit GitHub repository" class="btn btn-ghost btn-sm h-10 px-4 hidden sm:flex items-center gap-2 m-0">
+        <a href="https://github.com/d4551/baobuildbuddy" target="_blank" aria-label="Visit GitHub repository" class="btn btn-neutral btn-sm h-10 px-4 hidden sm:flex items-center gap-2 m-0">
           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
           <span class="sr-only sm:not-sr-only">GitHub</span>
         </a>
@@ -114,7 +111,7 @@
               <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
               Desktop App
             </a>
-            <a href="#docs" class="btn btn-outline btn-lg border-base-content/30 text-base-content hover:bg-base-content hover:text-base-100" aria-label="Jump to documentation">
+            <a href="#docs" class="btn btn-neutral btn-outline btn-lg" aria-label="Jump to documentation">
               Read Docs
             </a>
           </div>
@@ -128,10 +125,10 @@
           <p class="text-lg text-base-content/70">Pre-built desktop apps updated straight from the repository.</p>
         </div>
 
-        <div role="tablist" class="tabs tabs-box tabs-lg grid grid-cols-3 max-w-3xl mx-auto shadow-sm border border-base-300 p-1 bg-base-200" aria-label="Operating System Installers">
+        <div role="tablist" class="tabs tabs-box tabs-lg grid grid-cols-3 max-w-3xl mx-auto shadow-sm border border-base-content/10 p-1 bg-base-200" aria-label="Operating System Installers">
           
           <!-- Windows Tab -->
-          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-300 transition-colors" aria-label="Windows Downloads">
+          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Windows Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-windows" checked="checked" />
             <svg aria-hidden="true" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M96 96H247V247H96" fill="#f24f23"></path><path d="M265 96V247H416V96" fill="#7eba03"></path><path d="M96 265H247V416H96" fill="#3ca4ef"></path><path d="M265 265H416V416H265" fill="#f9ba00"></path></svg>
             Windows
@@ -145,12 +142,12 @@
               <div class="col-span-full flex justify-center py-12" aria-label="Loading Windows files"><span class="loading loading-spinner loading-lg text-primary"></span></div>
             </div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/windows" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">View source on GitHub →</a>
+               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/windows" target="_blank" class="link link-hover text-base-content/70 text-sm font-medium">Browse Windows release folder →</a>
             </div>
           </div>
 
           <!-- macOS Tab -->
-          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-300 transition-colors" aria-label="macOS Downloads">
+          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="macOS Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-macos" />
             <svg aria-hidden="true" class="w-5 h-5 text-base-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1195 1195"><path fill="currentColor" d="M1006.933 812.8c-32 153.6-115.2 211.2-147.2 249.6-32 25.6-121.6 25.6-153.6 6.4-38.4-25.6-134.4-25.6-166.4 0-44.8 32-115.2 19.2-128 12.8-256-179.2-352-716.8 12.8-774.4 64-12.8 134.4 32 134.4 32 51.2 25.6 70.4 12.8 115.2-6.4 96-44.8 243.2-44.8 313.6 76.8-147.2 96-153.6 294.4 19.2 403.2zM802.133 64c12.8 70.4-64 224-204.8 230.4-12.8-38.4 32-217.6 204.8-230.4z"></path></svg>
             macOS
@@ -162,12 +159,12 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="assets-macos" aria-live="polite"></div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/macos" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">View source on GitHub →</a>
+               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/macos" target="_blank" class="link link-hover text-base-content/70 text-sm font-medium">Browse macOS release folder →</a>
             </div>
           </div>
 
           <!-- Linux Tab -->
-          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-300 transition-colors" aria-label="Linux Downloads">
+          <label class="tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Linux Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-linux" />
             <img src="assets/tux.svg" class="w-5 h-5 object-contain" alt="Linux Tux Logo" aria-hidden="true" />
             Linux
@@ -179,7 +176,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="assets-linux" aria-live="polite"></div>
             <div class="mt-8 text-center">
-               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/linux" target="_blank" rel="noopener noreferrer" class="link link-hover text-base-content/70 text-sm font-medium">View source on GitHub →</a>
+               <a href="https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases/linux" target="_blank" class="link link-hover text-base-content/70 text-sm font-medium">Browse Linux release folder →</a>
             </div>
           </div>
         </div>
@@ -200,13 +197,13 @@
               </p>
             </div>
             <div class="flex-none pt-2">
-              <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg" aria-label="Download Ollama runtime">Get Ollama</a>
+              <a href="https://ollama.com/download" target="_blank" class="btn btn-neutral btn-lg" aria-label="Download Ollama runtime">Get Ollama</a>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full font-display">
             <!-- Step 1 -->
-            <div class="card bg-base-100 shadow-sm border border-base-300 text-left hover:border-primary/50 hover:shadow-md transition-all group">
+            <div class="card bg-base-100 shadow-sm border border-base-content/10 text-left hover:border-primary/50 hover:shadow-md transition-all group">
               <div class="card-body flex flex-col items-start h-full">
                 <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold font-mono text-lg mb-2 shadow-sm group-hover:-translate-y-1 transition-transform">1</div>
                 <h3 class="card-title text-xl">Install Runtime</h3>
@@ -215,14 +212,14 @@
             </div>
             
             <!-- Step 2 -->
-            <div class="card bg-base-100 shadow-sm border border-base-300 text-left hover:border-primary/50 hover:shadow-md transition-all group">
+            <div class="card bg-base-100 shadow-sm border border-base-content/10 text-left hover:border-primary/50 hover:shadow-md transition-all group">
               <div class="card-body flex flex-col items-start h-full">
                 <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold font-mono text-lg mb-2 shadow-sm group-hover:-translate-y-1 transition-transform">2</div>
                 <h3 class="card-title text-xl">Pull a Fast Model</h3>
                 <p class="text-sm font-body text-base-content/70 w-full mb-4">Open terminal and download the recommended sub-billion parameter model.</p>
                 <div class="w-full mt-auto">
-                  <div class="mockup-code bg-neutral text-neutral-content text-[11px] sm:text-xs rounded-box w-full p-2 py-4 pl-4 before:hidden relative border border-base-300 flex items-center">
-                     <button type="button" class="btn btn-ghost min-h-0 h-8 absolute top-1.5 right-1.5 px-3 z-10 text-neutral-content hover:bg-neutral-content/20" onclick="copyCode(this, 'ollama run qwen2.5:0.5b')" aria-label="Copy to clipboard">Copy</button>
+                  <div class="mockup-code bg-neutral text-neutral-content text-[11px] sm:text-xs rounded-box w-full p-2 py-4 pl-4 before:hidden relative border border-base-content/10 flex items-center">
+                     <button type="button" class="btn btn-ghost min-h-0 h-8 absolute top-1.5 right-1.5 px-3 z-10 text-neutral-content hover:bg-neutral-content/20" data-copy-text="ollama run qwen2.5:0.5b" aria-label="Copy to clipboard">Copy</button>
                      <pre data-prefix="$" class="pr-20 m-0 overflow-x-auto whitespace-pre"><code>ollama run qwen2.5:0.5b</code></pre>
                   </div>
                 </div>
@@ -230,13 +227,13 @@
             </div>
 
             <!-- Step 3 -->
-            <div class="card bg-base-100 shadow-sm border border-base-300 text-left hover:border-primary/50 hover:shadow-md transition-all group">
+            <div class="card bg-base-100 shadow-sm border border-base-content/10 text-left hover:border-primary/50 hover:shadow-md transition-all group">
               <div class="card-body flex flex-col items-start h-full">
                 <div class="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold font-mono text-lg mb-2 shadow-sm group-hover:-translate-y-1 transition-transform">3</div>
                 <h3 class="card-title text-xl">Auto-Detect</h3>
                 <p class="text-sm font-body text-base-content/70 w-full mb-4">Launch BaoBuildBuddy. It automatically connects to the default endpoint.</p>
                 <div class="w-full mt-auto">
-                  <div class="bg-base-200 px-3 py-4 rounded-box border border-base-300 flex items-center gap-2 font-mono text-[11px] sm:text-xs shadow-inner overflow-x-auto whitespace-nowrap">
+                  <div class="bg-base-200 px-3 py-4 rounded-box border border-base-content/10 flex items-center gap-2 font-mono text-[11px] sm:text-xs shadow-inner overflow-x-auto whitespace-nowrap">
                     <span class="text-success inline-block drop-shadow-[0_0_2px_currentColor]">●</span> 
                     <span>http://localhost:11434/v1</span>
                   </div>
@@ -257,61 +254,49 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
           <!-- Card Template -->
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/STARTER_GUIDE.md" target="_blank" rel="noopener noreferrer" class="card bg-base-100 border border-base-300 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Starter Guide">
+          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/STARTER_GUIDE.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Starter Guide">
             <div class="card-body">
-              <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">
-                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
-              </div>
+              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">🚀</div>
               <h3 class="card-title font-display text-lg text-base-content">Starter Guide</h3>
               <p class="text-sm text-base-content/70">Full setup instructions, prerequisites, and architecture overview.</p>
             </div>
           </a>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener noreferrer" class="card bg-base-100 border border-base-300 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read RPA Automation Guide">
+          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/AUTOMATION.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read RPA Automation Guide">
             <div class="card-body">
-              <div class="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">
-                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M18 11V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v5"/><path d="M15 2v2"/><path d="M9 2v2"/></svg>
-              </div>
+              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">🤖</div>
               <h3 class="card-title font-display text-lg text-base-content">RPA Automation</h3>
               <p class="text-sm text-base-content/70">How to write and run Playwright scrapers for the job board pipeline.</p>
             </div>
           </a>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/LOCAL_AI_SETUP.md" target="_blank" rel="noopener noreferrer" class="card bg-base-100 border border-base-300 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Local AI Setup Guide">
+          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/LOCAL_AI_SETUP.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Local AI Setup Guide">
             <div class="card-body">
-              <div class="w-10 h-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">
-                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3 4 4.5 4.5 0 0 1-3-4"/><path d="M12 18v-5"/><circle cx="12" cy="12" r="1"/></svg>
-              </div>
+              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">🧠</div>
               <h3 class="card-title font-display text-lg text-base-content">Local AI Details</h3>
               <p class="text-sm text-base-content/70">Deep dive into Ollama, model selection, and context limits.</p>
             </div>
           </a>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/RAILWAY.md" target="_blank" rel="noopener noreferrer" class="card bg-base-100 border border-base-300 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Railway Deployment Guide">
+          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/RAILWAY.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Railway Deployment Guide">
             <div class="card-body">
-              <div class="w-10 h-10 rounded-lg bg-info/10 text-info flex items-center justify-center mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">
-                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
-              </div>
+              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">🚂</div>
               <h3 class="card-title font-display text-lg text-base-content">Railway Deploy</h3>
               <p class="text-sm text-base-content/70">Hosting the server backend and Nuxt 4 frontend in the cloud.</p>
             </div>
           </a>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/ELI5_SYSTEM_WALKTHROUGH.md" target="_blank" rel="noopener noreferrer" class="card bg-base-100 border border-base-300 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read ELI5 System Walkthrough">
+          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/ELI5_SYSTEM_WALKTHROUGH.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read ELI5 System Walkthrough">
             <div class="card-body">
-              <div class="w-10 h-10 rounded-lg bg-warning/10 text-warning flex items-center justify-center mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">
-                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-              </div>
+              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">👶</div>
               <h3 class="card-title font-display text-lg text-base-content">ELI5 Walkthrough</h3>
               <p class="text-sm text-base-content/70">A non-technical explanation of how all the pieces fit together.</p>
             </div>
           </a>
 
-          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/feature-trace-matrix.md" target="_blank" rel="noopener noreferrer" class="card bg-base-100 border border-base-300 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Feature Trace Matrix">
+          <a href="https://github.com/d4551/baobuildbuddy/blob/main/docs/feature-trace-matrix.md" target="_blank" class="card bg-base-100 border border-base-content/10 hover:border-primary/50 hover:shadow-lg transition-all group" aria-label="Read Feature Trace Matrix">
             <div class="card-body">
-              <div class="w-10 h-10 rounded-lg bg-success/10 text-success flex items-center justify-center mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">
-                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-              </div>
+              <div class="text-3xl mb-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true">📊</div>
               <h3 class="card-title font-display text-lg text-base-content">Feature Matrix</h3>
               <p class="text-sm text-base-content/70">Current status of all planned modules and integrations.</p>
             </div>
@@ -322,9 +307,9 @@
     </main>
 
     <!-- Accessible Footer -->
-    <footer class="footer sm:footer-horizontal bg-base-200 text-base-content items-center p-10 border-t border-base-300 mt-auto">
-      <aside class="grid-flow-col items-center">
-        <svg viewBox="0 0 64 64" class="w-10 h-10" aria-hidden="true">
+    <footer class="footer bg-base-200 text-base-content p-10 border-t border-base-300 mt-auto">
+      <aside>
+        <svg viewBox="0 0 64 64" class="w-12 h-12 grayscale opacity-50" aria-hidden="true">
           <circle cx="32" cy="32" r="30" fill="#2d3570" />
           <path d="M15 36c0-8.8 7.7-15.8 17-15.8S49 27.2 49 36c0 8.2-7.8 13.8-17 13.8S15 44.2 15 36Z" fill="#ffefcc" stroke="#e0a84f" stroke-linejoin="round" stroke-width="2.2" />
           <path d="M23 27.8c2 2.3 2.9 4.5 3.1 6.9" fill="none" stroke="#e0a84f" stroke-linecap="round" stroke-width="1.8" />
@@ -334,39 +319,19 @@
           <path d="M49.5 13.5v10M44.5 18.5h10" stroke="#f6fffa" stroke-linecap="round" stroke-width="1.8" />
         </svg>
         <p>
-          <span class="font-display font-bold text-lg">BaoBuildBuddy</span>
-          <br />
+          <span class="font-display font-bold text-lg text-base-content block mb-1">BaoBuildBuddy</span>
           <span class="text-base-content/70">Open source career orchestration.</span>
         </p>
       </aside>
-      <aside class="grid-flow-col items-center gap-2 text-sm text-base-content/60 md:place-self-center md:justify-self-center">
-        <span>Made with</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-error" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        <span>by</span>
-        <a href="https://vault.voyage/" target="_blank" class="link link-hover inline-flex items-center gap-1.5 font-display font-bold text-base-content/80 hover:text-base-content" aria-label="Visit Vault Voyage">
-          <svg viewBox="0 0 1024 1024" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-              <linearGradient id="vvFooterGrad" x1="160" y1="220" x2="864" y2="820" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#00FFD1"/>
-                <stop offset="33%" stop-color="#22A8FF"/>
-                <stop offset="66%" stop-color="#A043FF"/>
-                <stop offset="100%" stop-color="#FF2AD9"/>
-              </linearGradient>
-            </defs>
-            <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="160,220 512,820 864,220" stroke="url(#vvFooterGrad)" stroke-width="118"/>
-              <polyline points="320,760 512,320 704,760" stroke="url(#vvFooterGrad)" stroke-width="72"/>
-            </g>
-          </svg>
-          Vault Voyage
+      <nav>
+        <h6 class="footer-title">Project Links</h6>
+        <a href="https://github.com/d4551/baobuildbuddy" class="link link-hover flex items-center gap-2 font-medium" aria-label="GitHub Repository">
+           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+           GitHub Repository
         </a>
-      </aside>
-      <nav class="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
-        <a href="https://github.com/d4551/baobuildbuddy" target="_blank" rel="noopener noreferrer" class="link link-hover" aria-label="GitHub Repository">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-        </a>
-        <a href="https://github.com/d4551/baobuildbuddy/issues" target="_blank" rel="noopener noreferrer" class="link link-hover" aria-label="Report an Issue on GitHub">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <a href="https://github.com/d4551/baobuildbuddy/issues" class="link link-hover flex items-center gap-2 font-medium" aria-label="Report an Issue on GitHub">
+           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+           Report Issue
         </a>
       </nav>
     </footer>
@@ -403,101 +368,226 @@
         }
       });
 
-      // Theme persistence — value="light" means checked=light, unchecked=dark (default)
+      // Validating Theme Logic
       const themeToggle = document.getElementById("theme-toggle");
+      const htmlEl = document.documentElement;
       const tKey = "bao.builders.theme";
 
-      const savedTheme = localStorage.getItem(tKey);
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const isLight = savedTheme ? savedTheme === "light" : !prefersDark;
-
-      // checked = light theme, unchecked = dark theme (html data-theme default)
-      themeToggle.checked = isLight;
-      themeToggle.dispatchEvent(new Event("change", { bubbles: true }));
+      const currentTheme = localStorage.getItem(tKey) || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      htmlEl.setAttribute("data-theme", currentTheme);
+      themeToggle.checked = currentTheme === "dark";
 
       themeToggle.addEventListener("change", (e) => {
-        localStorage.setItem(tKey, e.target.checked ? "light" : "dark");
+        const newTheme = e.target.checked ? "dark" : "light";
+        htmlEl.setAttribute("data-theme", newTheme);
+        localStorage.setItem(tKey, newTheme);
       });
 
-      // Accessible Copy to Clipboard
-      window.copyCode = (btn, text) => {
-        navigator.clipboard.writeText(text).then(() => {
-          const originalText = btn.innerText;
-          btn.innerText = "Copied!";
-          btn.classList.add("btn-success");
-          btn.classList.remove("btn-ghost");
-          btn.setAttribute("aria-live", "polite");
+      const PLATFORM_NAMES = ["windows", "macos", "linux"];
+      const COPY_BUTTON_RESET_DELAY_MS = 2000;
+      const RELEASE_DIRECTORY_TREE_BASE_URL =
+        "https://github.com/d4551/baobuildbuddy/tree/main/packages/desktop/releases";
+      const RELEASE_DIRECTORY_API_URL =
+        "https://api.github.com/repos/d4551/baobuildbuddy/contents/packages/desktop/releases";
+      const PRIMARY_RELEASE_EXTENSIONS = new Set(["AppImage", "dmg", "exe"]);
 
-          setTimeout(() => {
-            btn.innerText = originalText;
-            btn.classList.add("btn-ghost");
-            btn.classList.remove("btn-success");
-            btn.removeAttribute("aria-live");
-          }, 2000);
-        }).catch(() => {
-          btn.innerText = "Copy failed";
-          btn.classList.add("btn-error");
-          btn.classList.remove("btn-ghost");
-          btn.setAttribute("aria-live", "polite");
+      function isRecord(value) {
+        return typeof value === "object" && value !== null;
+      }
 
-          setTimeout(() => {
-            btn.innerText = "Copy";
-            btn.classList.add("btn-ghost");
-            btn.classList.remove("btn-error");
-            btn.removeAttribute("aria-live");
-          }, 2000);
-        });
-      };
+      function isGitHubContentEntry(value) {
+        if (!isRecord(value)) {
+          return false;
+        }
 
-      // Direct download asset cards — served from bao.builders
-      const releaseRoot = "https://bao.builders/releases";
-      const releaseAssets = {
-        windows: [
-          { name: "BaoBuildBuddy_0.1.0_x64-setup.exe", size: "61 MB", primary: true },
-          { name: "BaoBuildBuddy_0.1.0_x64-portable.zip", size: "98 MB", primary: false }
-        ],
-        macos: [
-          { name: "BaoBuildBuddy_0.1.0_aarch64.dmg", size: "59 MB", primary: true }
-        ],
-        linux: [
-          { name: "BaoBuildBuddy_0.1.0_arm64.deb", size: "93 MB", primary: true },
-          { name: "BaoBuildBuddy-0.1.0-1.aarch64.rpm", size: "93 MB", primary: false }
-        ]
-      };
+        return (
+          typeof value.name === "string" &&
+          typeof value.type === "string" &&
+          typeof value.url === "string"
+        );
+      }
 
-      function renderAssets() {
-        for (const [os, files] of Object.entries(releaseAssets)) {
-          const container = document.getElementById(`assets-${os}`);
-          if (!container) continue;
-          container.innerHTML = files.map((file) => {
-            const ext = file.name.split('.').pop() || 'file';
-            const downloadUrl = `${releaseRoot}/${os}/${file.name}`;
-            return `
-              <div class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow">
-                <div class="card-body p-6">
-                  <div class="flex items-start justify-between">
-                    <div class="w-full">
-                      <h4 class="card-title text-base font-mono break-all text-base-content leading-tight">${file.name}</h4>
-                      <div class="mt-3 flex items-center gap-2">
-                        <span class="badge ${file.primary ? 'badge-primary' : 'badge-neutral'} badge-sm uppercase font-bold">${ext}</span>
-                        <span class="text-xs text-base-content/50">${file.size}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-actions justify-end mt-4">
-                    <a href="${downloadUrl}" download class="btn ${file.primary ? 'btn-primary' : 'btn-outline'} btn-sm w-full font-medium" aria-label="Download ${file.name}">
-                      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                      Download
-                    </a>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join("");
+      function isGitHubReleaseFile(value) {
+        return isGitHubContentEntry(value) && typeof value.size === "number";
+      }
+
+      function setCopyButtonState(targetButton, state) {
+        targetButton.innerText = state.text;
+        targetButton.classList.add(state.addClassName);
+        targetButton.classList.remove(state.removeClassName);
+        targetButton.setAttribute("aria-live", state.politeness);
+      }
+
+      function resetCopyButtonState(targetButton, originalText) {
+        window.setTimeout(() => {
+          targetButton.innerText = originalText;
+          targetButton.classList.add("btn-ghost");
+          targetButton.classList.remove("btn-success", "btn-error");
+          targetButton.removeAttribute("aria-live");
+        }, COPY_BUTTON_RESET_DELAY_MS);
+      }
+
+      function bindCopyButtons() {
+        const copyButtons = document.querySelectorAll("[data-copy-text]");
+        for (const button of copyButtons) {
+          button.addEventListener("click", (event) => {
+            const targetButton = event.currentTarget;
+            if (!(targetButton instanceof HTMLButtonElement)) {
+              return;
+            }
+
+            const text = targetButton.dataset.copyText;
+            if (typeof text !== "string" || text.length === 0) {
+              return;
+            }
+
+            const originalText = targetButton.innerText;
+            navigator.clipboard.writeText(text).then(
+              () => {
+                setCopyButtonState(targetButton, {
+                  text: "Copied!",
+                  addClassName: "btn-success",
+                  removeClassName: "btn-ghost",
+                  politeness: "polite",
+                });
+                resetCopyButtonState(targetButton, originalText);
+              },
+              () => {
+                setCopyButtonState(targetButton, {
+                  text: "Copy failed",
+                  addClassName: "btn-error",
+                  removeClassName: "btn-ghost",
+                  politeness: "assertive",
+                });
+                resetCopyButtonState(targetButton, originalText);
+              },
+            );
+          });
         }
       }
 
-      document.addEventListener('DOMContentLoaded', renderAssets);
+      function createPlatformFolderLink(os) {
+        return `${RELEASE_DIRECTORY_TREE_BASE_URL}/${os}`;
+      }
+
+      function createEmptyPlatformMarkup(os) {
+        return `
+          <div class="col-span-full alert border border-base-content/10 bg-base-100 text-sm" role="alert">
+            No specific builder files found in ${os} directory.
+          </div>
+        `;
+      }
+
+      function createMissingPlatformMarkup(os) {
+        return `
+          <div class="col-span-full alert alert-info text-sm" role="alert">
+            No folders found for ${os}.
+          </div>
+        `;
+      }
+
+      function createReleaseCardMarkup(os, file) {
+        const ext = file.name.split('.').pop() || 'file';
+        const fileUrl = `${RELEASE_DIRECTORY_TREE_BASE_URL}/${os}/${file.name}`;
+        const badgeClass = PRIMARY_RELEASE_EXTENSIONS.has(ext) ? 'badge-primary' : 'badge-neutral';
+
+        return `
+          <div class="card bg-base-100 shadow-sm border border-base-content/10 hover:shadow-md transition-shadow">
+            <div class="card-body p-6">
+              <div class="flex items-start justify-between">
+                <div class="w-full">
+                  <h4 class="card-title text-base font-mono break-all text-base-content leading-tight">${file.name}</h4>
+                  <div class="mt-3 flex gap-2">
+                     <span class="badge ${badgeClass} badge-sm uppercase font-bold">${ext}</span>
+                     <span class="text-xs text-base-content/70 self-center font-medium">${(file.size / 1024 / 1024).toFixed(1)} MB</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-actions justify-end mt-4">
+                <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm w-full font-medium" aria-label="View ${file.name} on GitHub">
+                   View Source File
+                 </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function createBrowseDirectoryMarkup(os) {
+        return `
+          <div class="col-span-full flex flex-col items-center gap-4 text-center py-8">
+            <a href="${createPlatformFolderLink(os)}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-outline" aria-label="Open ${os} release folder manually">Browse GitHub Directory</a>
+          </div>
+        `;
+      }
+
+      function isReleaseArtifact(file) {
+        return (
+          isGitHubReleaseFile(file) &&
+          !file.name.includes("sha256") &&
+          !file.name.includes(".DS_Store")
+        );
+      }
+
+      async function fetchGitHubDirectoryEntries(url) {
+        const [responseResult] = await Promise.allSettled([fetch(url)]);
+        if (responseResult.status === "rejected" || !responseResult.value.ok) {
+          return null;
+        }
+
+        const [payloadResult] = await Promise.allSettled([responseResult.value.json()]);
+        if (payloadResult.status === "rejected" || !Array.isArray(payloadResult.value)) {
+          return null;
+        }
+
+        return payloadResult.value.filter((entry) => isGitHubContentEntry(entry));
+      }
+
+      async function buildPlatformMarkup(os, platforms) {
+        const platformDirectory = platforms.find((dir) => dir.name === os && dir.type === "dir");
+        if (!platformDirectory) {
+          return createMissingPlatformMarkup(os);
+        }
+
+        const files = await fetchGitHubDirectoryEntries(platformDirectory.url);
+        if (!files) {
+          return createBrowseDirectoryMarkup(os);
+        }
+
+        const releaseFiles = files.filter((file) => isReleaseArtifact(file));
+        if (releaseFiles.length === 0) {
+          return createEmptyPlatformMarkup(os);
+        }
+
+        return releaseFiles.map((file) => createReleaseCardMarkup(os, file)).join("");
+      }
+
+      async function fetchPlatformAssets() {
+        const platforms = await fetchGitHubDirectoryEntries(RELEASE_DIRECTORY_API_URL);
+        const platformMarkup = platforms
+          ? await Promise.all(
+              PLATFORM_NAMES.map(async (os) => ({
+                os,
+                markup: await buildPlatformMarkup(os, platforms),
+              })),
+            )
+          : PLATFORM_NAMES.map((os) => ({
+              os,
+              markup: createBrowseDirectoryMarkup(os),
+            }));
+
+        for (const { os, markup } of platformMarkup) {
+          const container = document.getElementById(`assets-${os}`);
+          if (container) {
+            container.innerHTML = markup;
+          }
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        bindCopyButtons();
+        fetchPlatformAssets();
+      });
     </script>
   </body>
 </html>

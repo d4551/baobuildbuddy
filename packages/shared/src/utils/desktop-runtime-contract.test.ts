@@ -42,13 +42,12 @@ describe("desktop runtime contract: target resolution", () => {
       "test-manifest",
     );
 
-    expect(windowsManifest.webviewBootstrapperExecutable).toBe("bin/MicrosoftEdgeWebview2Setup.exe");
+    expect(windowsManifest.webviewBootstrapperExecutable).toBe(
+      "bin/MicrosoftEdgeWebview2Setup.exe",
+    );
     expect(normalizedManifest.webviewBootstrapperExecutable).toBeNull();
     expect(
-      getDesktopRuntimeManifestMismatches(
-        windowsManifest,
-        buildDesktopRuntimeManifest("windows"),
-      ),
+      getDesktopRuntimeManifestMismatches(windowsManifest, buildDesktopRuntimeManifest("windows")),
     ).toHaveLength(0);
   });
 

@@ -113,10 +113,7 @@ const DESKTOP_RUNTIME_TARGET_INFO = {
     serverExecutable: DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
     tauriTarget: DESKTOP_RELEASE_LINUX_ARM64_TARGET,
   },
-} as const satisfies Record<
-  DesktopRuntimeReleaseTarget,
-  Omit<DesktopRuntimeTargetInfo, "target">
->;
+} as const satisfies Record<DesktopRuntimeReleaseTarget, Omit<DesktopRuntimeTargetInfo, "target">>;
 
 /**
  * Resolves the canonical runtime layout for a release target.
@@ -235,7 +232,9 @@ export const getDesktopRuntimeManifestMismatches = (
       `scriptRunnerEntrypoint expected=${expectedManifest.scriptRunnerEntrypoint ?? "null"} actual=${actualManifest.scriptRunnerEntrypoint ?? "null"}`,
     );
   }
-  if (actualManifest.webviewBootstrapperExecutable !== expectedManifest.webviewBootstrapperExecutable) {
+  if (
+    actualManifest.webviewBootstrapperExecutable !== expectedManifest.webviewBootstrapperExecutable
+  ) {
     mismatches.push(
       `webviewBootstrapperExecutable expected=${expectedManifest.webviewBootstrapperExecutable ?? "null"} actual=${actualManifest.webviewBootstrapperExecutable ?? "null"}`,
     );
@@ -257,7 +256,9 @@ export const getDesktopRuntimeManifestMismatches = (
   }
   if (
     actualManifest.corsOrigins.length !== expectedManifest.corsOrigins.length ||
-    actualManifest.corsOrigins.some((origin, index) => origin !== expectedManifest.corsOrigins[index])
+    actualManifest.corsOrigins.some(
+      (origin, index) => origin !== expectedManifest.corsOrigins[index],
+    )
   ) {
     mismatches.push(
       `corsOrigins expected=${expectedManifest.corsOrigins.join(",")} actual=${actualManifest.corsOrigins.join(",")}`,
@@ -286,5 +287,7 @@ export const listDesktopRuntimeContractPaths = (
     ),
   ];
 
-  return manifestReferencedPaths.filter((path): path is string => typeof path === "string" && path.length > 0);
+  return manifestReferencedPaths.filter(
+    (path): path is string => typeof path === "string" && path.length > 0,
+  );
 };

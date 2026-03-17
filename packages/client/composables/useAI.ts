@@ -482,11 +482,7 @@ export function useAI() {
   const { $toast } = useNuxtApp();
   const { t } = useI18n();
   const { resolvedBrand } = useBrand();
-  const state = initializeAIState(
-    t,
-    resolvedBrand.value.name,
-    resolvedBrand.value.assistantName,
-  );
+  const state = initializeAIState(t, resolvedBrand.value.name, resolvedBrand.value.assistantName);
 
   const buildCurrentContext = createContextBuilder({
     route,

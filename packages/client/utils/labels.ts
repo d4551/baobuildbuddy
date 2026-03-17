@@ -87,10 +87,7 @@ const findLabelKey = (
 /**
  * Translate a job experience level value using the shared job labels.
  */
-export const jobExperienceLabel = (
-  t: Translate,
-  value: string | undefined | null,
-): string => {
+export const jobExperienceLabel = (t: Translate, value: string | undefined | null): string => {
   const normalizedValue = value?.trim() ?? "";
   if (normalizedValue.length === 0) {
     return "";
@@ -107,10 +104,7 @@ export const jobExperienceLabel = (
 /**
  * Translate a studio type value using the shared job label map for types.
  */
-export const studioTypeLabel = (
-  t: Translate,
-  value: string | undefined | null,
-): string => {
+export const studioTypeLabel = (t: Translate, value: string | undefined | null): string => {
   const normalizedValue = value?.trim() ?? "";
   if (normalizedValue.length === 0) {
     return t("studiosIndex.card.unknownType");
@@ -127,10 +121,7 @@ export const studioTypeLabel = (
 /**
  * Provide a localized fallback for studio size labels.
  */
-export const studioSizeLabel = (
-  t: Translate,
-  value: string | undefined | null,
-): string => {
+export const studioSizeLabel = (t: Translate, value: string | undefined | null): string => {
   const normalizedValue = value?.trim() ?? "";
   if (normalizedValue.length === 0) {
     return t("studiosIndex.card.unknownSize");
@@ -147,10 +138,7 @@ export const studioSizeLabel = (
 /**
  * Translate a platform value using the shared job platform labels.
  */
-export const platformLabel = (
-  t: Translate,
-  value: string | undefined | null,
-): string => {
+export const platformLabel = (t: Translate, value: string | undefined | null): string => {
   const normalizedValue = value?.trim() ?? "";
   if (normalizedValue.length === 0) {
     return "";
@@ -165,10 +153,7 @@ export const platformLabel = (
 /**
  * Provide a localized label for game genre domain values.
  */
-export const gameGenreLabel = (
-  t: Translate,
-  value: string | undefined | null,
-): string => {
+export const gameGenreLabel = (t: Translate, value: string | undefined | null): string => {
   const normalizedValue = value?.trim() ?? "";
   if (normalizedValue.length === 0) {
     return "";

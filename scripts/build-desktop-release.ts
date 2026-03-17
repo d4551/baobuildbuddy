@@ -1,23 +1,19 @@
 import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import {
-  DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH,
-  DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH,
-  DESKTOP_RELEASE_LINUX_X64_DEB_ARCH,
-  DESKTOP_RELEASE_LINUX_X64_RPM_ARCH,
-  DESKTOP_RELEASE_MACOS_ARCH,
   DESKTOP_RELEASE_METADATA_DIR,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
   DESKTOP_RELEASE_STAGING_ROOT,
   DESKTOP_RELEASE_TARGETS,
-  DESKTOP_RELEASE_WINDOWS_ARCH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
   DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH,
   DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
   DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
 } from "../packages/shared/src/constants/scripts";
+import { buildDesktopReleaseArtifactFileNames } from "../packages/shared/src/utils/desktop-release-contract";
 import { resolveDesktopRuntimeTargetInfo } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage } from "./utils/async-control";
+import { writeFormattedJsonFile } from "./utils/biome-format";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
@@ -61,6 +57,7 @@ const DESKTOP_TAURI_CONFIG_PATH = join(DESKTOP_TAURI_ROOT, "tauri.conf.json");
 const DESKTOP_CARGO_TOML_PATH = join(DESKTOP_TAURI_ROOT, "Cargo.toml");
 const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
 const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
+const ZIP_EXTENSION_PATTERN = /\.zip$/u;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -138,13 +135,10 @@ const runMacosPrebuildCleanup = async (): Promise<void> => {
     return;
   }
 
-  await runCommandOrExit(
-    [process.execPath, DESKTOP_CLEANUP_SCRIPT_PATH, "prebuild"],
-    {
-      cwd: REPO_ROOT,
-      env: process.env,
-    },
-  );
+  await runCommandOrExit([process.execPath, DESKTOP_CLEANUP_SCRIPT_PATH, "prebuild"], {
+    cwd: REPO_ROOT,
+    env: process.env,
+  });
 };
 
 const pathExists = async (absolutePath: string): Promise<boolean> =>
@@ -159,13 +153,15 @@ const requireFile = async (absolutePath: string): Promise<void> => {
 const resolveOutputRoot = (argv: readonly string[]): string => {
   const rootIndex = argv.indexOf("--output-root");
   const outputRoot =
-    rootIndex === -1 ? DESKTOP_RELEASE_STAGING_ROOT : argv[rootIndex + 1] ?? DESKTOP_RELEASE_STAGING_ROOT;
+    rootIndex === -1
+      ? DESKTOP_RELEASE_STAGING_ROOT
+      : (argv[rootIndex + 1] ?? DESKTOP_RELEASE_STAGING_ROOT);
   return resolve(REPO_ROOT, outputRoot);
 };
 
 const resolveRequestedTarget = (argv: readonly string[]): DesktopReleaseTarget => {
   const targetIndex = argv.indexOf("--target");
-  const requestedTarget = targetIndex === -1 ? null : argv[targetIndex + 1] ?? null;
+  const requestedTarget = targetIndex === -1 ? null : (argv[targetIndex + 1] ?? null);
   if (requestedTarget !== null) {
     if (DESKTOP_RELEASE_TARGETS.includes(requestedTarget as DesktopReleaseTarget)) {
       return requestedTarget as DesktopReleaseTarget;
@@ -189,8 +185,7 @@ const resolveRequestedTarget = (argv: readonly string[]): DesktopReleaseTarget =
   );
 };
 
-const shouldSkipBuild = (argv: readonly string[]): boolean =>
-  argv.includes("--skip-build");
+const shouldSkipBuild = (argv: readonly string[]): boolean => argv.includes("--skip-build");
 
 const shouldSyncReleaseDirectory = (argv: readonly string[]): boolean =>
   !argv.includes("--no-sync-release-dir");
@@ -207,12 +202,14 @@ const buildHostReleaseTarget = (target: DesktopReleaseTarget): HostReleaseTarget
 const filterForwardedArgs = (argv: readonly string[]): string[] =>
   argv.filter((argument, index) => {
     const previous = argv[index - 1];
-    return argument !== "--target" &&
+    return (
+      argument !== "--target" &&
       argument !== "--output-root" &&
       argument !== "--skip-build" &&
       argument !== "--no-sync-release-dir" &&
       previous !== "--target" &&
-      previous !== "--output-root";
+      previous !== "--output-root"
+    );
   });
 
 const syncReleaseDirectory = async (
@@ -327,8 +324,18 @@ const createZipArchive = async (sourceDir: string, outputPath: string): Promise<
   const parentDir = resolve(sourceDir, "..");
   const baseName = basename(sourceDir);
   const zipCommandCandidates = [
-    ["powershell", "-NoProfile", "-Command", `Compress-Archive -Path '${sourceDir}' -DestinationPath '${outputPath}' -Force`],
-    ["pwsh", "-NoProfile", "-Command", `Compress-Archive -Path '${sourceDir}' -DestinationPath '${outputPath}' -Force`],
+    [
+      "powershell",
+      "-NoProfile",
+      "-Command",
+      `Compress-Archive -Path '${sourceDir}' -DestinationPath '${outputPath}' -Force`,
+    ],
+    [
+      "pwsh",
+      "-NoProfile",
+      "-Command",
+      `Compress-Archive -Path '${sourceDir}' -DestinationPath '${outputPath}' -Force`,
+    ],
     ["zip", "-qr", "-9", outputPath, baseName],
   ] as const;
 
@@ -344,14 +351,11 @@ const stageMacosArtifacts = async (
   outputRoot: string,
 ): Promise<readonly string[]> => {
   const targetRoot = join(outputRoot, "macos");
-  const dmgPath = join(
-    DESKTOP_TAURI_ROOT,
-    "target",
-    "release",
-    "bundle",
-    "dmg",
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_MACOS_ARCH}.dmg`,
-  );
+  const [dmgFileName] = buildDesktopReleaseArtifactFileNames(metadata, "macos");
+  if (!dmgFileName) {
+    throw new Error("Canonical macOS release artifact name could not be resolved.");
+  }
+  const dmgPath = join(DESKTOP_TAURI_ROOT, "target", "release", "bundle", "dmg", dmgFileName);
 
   await requireFile(dmgPath);
   await rm(targetRoot, { force: true, recursive: true });
@@ -367,35 +371,21 @@ const stageLinuxArtifacts = async (
   target: Extract<DesktopReleaseTarget, "linux-x64" | "linux-arm64">,
 ): Promise<readonly string[]> => {
   const targetRoot = join(outputRoot, target);
-  const bundleRoot = join(
-    DESKTOP_TAURI_ROOT,
-    "target",
-    "release",
-    "bundle",
-  );
-  const debArch =
-    target === "linux-x64" ? DESKTOP_RELEASE_LINUX_X64_DEB_ARCH : DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH;
-  const rpmArch =
-    target === "linux-x64" ? DESKTOP_RELEASE_LINUX_X64_RPM_ARCH : DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH;
+  const bundleRoot = join(DESKTOP_TAURI_ROOT, "target", "release", "bundle");
+  const [debFileName, rpmFileName] = buildDesktopReleaseArtifactFileNames(metadata, target);
+  if (!(debFileName && rpmFileName)) {
+    throw new Error(`Canonical Linux release artifact names could not be resolved for ${target}.`);
+  }
   const artifactPaths = [
-    join(
-      bundleRoot,
-      "deb",
-      `${metadata.productName}_${metadata.version}_${debArch}.deb`,
-    ),
-    join(
-      bundleRoot,
-      "rpm",
-      `${metadata.productName}-${metadata.version}-1.${rpmArch}.rpm`,
-    ),
+    join(bundleRoot, "deb", debFileName),
+    join(bundleRoot, "rpm", rpmFileName),
   ] as const;
 
   await Promise.all(artifactPaths.map((artifactPath) => requireFile(artifactPath)));
   await rm(targetRoot, { force: true, recursive: true });
   await mkdir(join(targetRoot, DESKTOP_RELEASE_METADATA_DIR), { recursive: true });
   await Promise.all(
-    artifactPaths.map((artifactPath) =>
-      cp(artifactPath, join(targetRoot, basename(artifactPath)))),
+    artifactPaths.map((artifactPath) => cp(artifactPath, join(targetRoot, basename(artifactPath)))),
   );
 
   return artifactPaths.map((artifactPath) => basename(artifactPath));
@@ -444,18 +434,16 @@ const stageWindowsArtifacts = async (
   outputRoot: string,
 ): Promise<readonly string[]> => {
   const targetRoot = join(outputRoot, "windows");
-  const targetReleaseRoot = join(
-    DESKTOP_TAURI_ROOT,
-    "target",
-    "release",
-  );
+  const targetReleaseRoot = join(DESKTOP_TAURI_ROOT, "target", "release");
   const bundledRuntimeRoot = join(targetReleaseRoot, DESKTOP_RUNTIME_RESOURCE_DIR);
-  const setupPath = join(
-    targetReleaseRoot,
-    "bundle",
-    "nsis",
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-setup.exe`,
+  const [setupFileName, portableFileName] = buildDesktopReleaseArtifactFileNames(
+    metadata,
+    "windows",
   );
+  if (!(setupFileName && portableFileName)) {
+    throw new Error("Canonical Windows release artifact names could not be resolved.");
+  }
+  const setupPath = join(targetReleaseRoot, "bundle", "nsis", setupFileName);
   const executablePath = join(targetReleaseRoot, `${metadata.binaryName}.exe`);
   const runtimeRoot = join(targetReleaseRoot, "gen");
   const bootstrapperPath = join(
@@ -463,13 +451,9 @@ const stageWindowsArtifacts = async (
     `${DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`,
   );
   const nsisScriptPath = join(targetReleaseRoot, "nsis", "x64", "installer.nsi");
-  const portableRootName =
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable`;
+  const portableRootName = portableFileName.replace(ZIP_EXTENSION_PATTERN, "");
   const portableStageRoot = join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, portableRootName);
-  const portableArchivePath = join(
-    targetRoot,
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable.zip`,
-  );
+  const portableArchivePath = join(targetRoot, portableFileName);
 
   await Promise.all([
     requireFile(setupPath),
@@ -517,7 +501,7 @@ const writeProvenance = async (
     DESKTOP_RELEASE_METADATA_DIR,
     DESKTOP_RELEASE_PROVENANCE_FILENAME,
   );
-  await writeFile(provenancePath, `${JSON.stringify(provenance, null, 2)}\n`);
+  await writeFormattedJsonFile(provenancePath, provenance);
 };
 
 const main = async (): Promise<void> => {

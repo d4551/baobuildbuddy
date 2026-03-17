@@ -50,7 +50,9 @@ await writeJsonFile(requiredPackageManifestPath, {
   name: "required-dependency",
   version: "1.0.0",
 });
-const requiredPackageRoot = await realpath(join(fixtureRoot, "node_modules", "required-dependency"));
+const requiredPackageRoot = await realpath(
+  join(fixtureRoot, "node_modules", "required-dependency"),
+);
 
 const nodeModule: typeof NodeModuleNamespace = await import("node:module");
 await mock.module("node:module", () => ({
@@ -76,7 +78,9 @@ const desktopRuntimeScraperModuleUrl = new URL(
 );
 const desktopRuntimeScraperModuleValue: unknown = await import(desktopRuntimeScraperModuleUrl.href);
 if (!isDesktopRuntimeScraperModule(desktopRuntimeScraperModuleValue)) {
-  throw new Error("desktop-runtime-scraper module did not expose collectRuntimeDependencySourceRoots");
+  throw new Error(
+    "desktop-runtime-scraper module did not expose collectRuntimeDependencySourceRoots",
+  );
 }
 const desktopRuntimeScraperModule = desktopRuntimeScraperModuleValue;
 const { collectRuntimeDependencySourceRoots } = desktopRuntimeScraperModule;

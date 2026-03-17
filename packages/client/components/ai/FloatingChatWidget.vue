@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  AI_CHAT_PAGE_PATH,
-} from "@bao/shared";
+import { AI_CHAT_PAGE_PATH } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";

@@ -107,7 +107,10 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
     config: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
   async open(ws) {
-    const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+    const settingsRows = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.id, DEFAULT_SETTINGS_ID));
     const runtimeBrand = resolveBrandSettings(settingsRows[0]?.brandSettings);
     ws.send(
       JSON.stringify({

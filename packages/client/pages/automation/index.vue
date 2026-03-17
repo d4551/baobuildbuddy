@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import type { DashboardStats, RpaCapabilityAuditEntry, RpaCapabilityAuditReport } from "@bao/shared";
+import type {
+  DashboardStats,
+  RpaCapabilityAuditEntry,
+  RpaCapabilityAuditReport,
+} from "@bao/shared";
 import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {

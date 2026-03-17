@@ -172,7 +172,11 @@ async function aiEnhance(context: ResumeContext, id: string): Promise<ResumeData
   });
 }
 
-async function aiScore(context: ResumeContext, id: string, jobId: string): Promise<ScoreResumeSuccess> {
+async function aiScore(
+  context: ResumeContext,
+  id: string,
+  jobId: string,
+): Promise<ScoreResumeSuccess> {
   return withLoadingState(context.loading, async () => {
     const payload: ScoreResumeInput = { jobId };
     const { data, error } = await context.api.resumes({ id })["ai-score"].post(payload);
@@ -180,7 +184,9 @@ async function aiScore(context: ResumeContext, id: string, jobId: string): Promi
     const normalized = requireValue(data, context.t("apiErrors.resumes.invalidPayload"));
     if (isResumeScoreError(normalized)) {
       throw new Error(
-        String(normalized.details ?? normalized.error ?? context.t("apiErrors.resumes.scoreFailed")),
+        String(
+          normalized.details ?? normalized.error ?? context.t("apiErrors.resumes.scoreFailed"),
+        ),
       );
     }
     return normalized;

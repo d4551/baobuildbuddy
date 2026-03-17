@@ -59,7 +59,8 @@ const createTargetRecord = <TValue>(factory: () => TValue): TargetRecord<TValue>
 
 const isScrapeCapabilityCard = (
   capability: RpaCapabilityAuditEntry,
-): capability is ScrapeCapabilityCard => capability.category === "scrape" && capability.target !== null;
+): capability is ScrapeCapabilityCard =>
+  capability.category === "scrape" && capability.target !== null;
 
 const runStates = reactive(createTargetRecord<RunState>(() => "idle"));
 const runMessages = reactive(createTargetRecord<string>(() => ""));
@@ -110,7 +111,9 @@ const availableManualRunCount = computed(
   () => scrapeCapabilities.value.filter((capability) => capability.manualRunAvailable).length,
 );
 const overallJobState = computed<RunState>(() => {
-  const jobTargets = scrapeCapabilities.value.filter((capability) => capability.target !== "studios");
+  const jobTargets = scrapeCapabilities.value.filter(
+    (capability) => capability.target !== "studios",
+  );
   if (jobTargets.some((capability) => runStates[capability.target] === "running")) {
     return "running";
   }
@@ -307,7 +310,9 @@ async function runScrapeTarget(target: AutomationScrapeTarget): Promise<void> {
   lastRunAt[target] = runResult.value.completedAt ?? runResult.value.updatedAt;
   latestRuns[target] = runResult.value;
 
-  const reward = await resolvePipelineReward(target === "studios" ? "scraperStudios" : "scraperJobs");
+  const reward = await resolvePipelineReward(
+    target === "studios" ? "scraperStudios" : "scraperJobs",
+  );
   runMessages[target] = reward
     ? target === "studios"
       ? t("automation.scraper.messages.studioCompletedWithXp", { xp: reward })

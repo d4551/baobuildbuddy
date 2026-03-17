@@ -52,6 +52,7 @@ const resolveScraperDir = (): string => {
 
   const cwd = process.cwd();
   const candidates = [
+    resolve(cwd, "scraper"),
     resolve(cwd, "packages", "scraper"),
     resolve(cwd, "..", "packages", "scraper"),
     resolve(cwd, "..", "..", "packages", "scraper"),

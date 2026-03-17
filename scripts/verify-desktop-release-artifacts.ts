@@ -5,14 +5,8 @@ import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import {
   DESKTOP_RELEASE_METADATA_DIR,
-  DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH,
-  DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH,
-  DESKTOP_RELEASE_LINUX_X64_DEB_ARCH,
-  DESKTOP_RELEASE_LINUX_X64_RPM_ARCH,
-  DESKTOP_RELEASE_MACOS_ARCH,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
   DESKTOP_RELEASE_TARGETS,
-  DESKTOP_RELEASE_WINDOWS_ARCH,
   DESKTOP_REQUIRED_NATIVE_ICON_FILES,
   DESKTOP_REQUIRED_PNG_ICON_SPECS,
   DESKTOP_RUNTIME_RESOURCE_DIR,
@@ -26,6 +20,11 @@ import {
   resolveDesktopRuntimeTargetInfo,
   type DesktopRuntimeManifest,
 } from "../packages/shared/src/utils/desktop-runtime-contract";
+import {
+  buildDesktopReleaseArtifactSpecs,
+  buildDesktopReleaseArtifactFileNames,
+  type DesktopReleaseArtifactKind,
+} from "../packages/shared/src/utils/desktop-release-contract";
 import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -72,7 +71,7 @@ type DesktopBundleMetadata = {
   readonly cargoVersion: string;
 };
 
-type ReleaseArtifactKind = "appimage" | "deb" | "dmg" | "portable" | "rpm" | "setup";
+type ReleaseArtifactKind = DesktopReleaseArtifactKind | "appimage";
 
 type ReleaseArtifact = {
   readonly kind: ReleaseArtifactKind;
@@ -163,6 +162,7 @@ const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
 const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
 const LEADING_DOT_SLASH_PATTERN = /^\.\/+/u;
 const LEADING_SLASH_PATTERN = /^\/+/u;
+const ZIP_EXTENSION_PATTERN = /\.zip$/u;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -189,10 +189,7 @@ const pathExists = async (absolutePath: string): Promise<boolean> =>
     () => false,
   );
 
-const requireCommand = (
-  label: string,
-  command: string,
-): VerificationResult | null => {
+const requireCommand = (label: string, command: string): VerificationResult | null => {
   if (Bun.which(command)) {
     return null;
   }
@@ -301,7 +298,9 @@ const readDesktopMetadata = async (): Promise<DesktopBundleMetadata> => {
   };
 };
 
-const readReleaseProvenance = async (): Promise<ReadonlyMap<DesktopReleaseTarget, ReleaseProvenance>> => {
+const readReleaseProvenance = async (): Promise<
+  ReadonlyMap<DesktopReleaseTarget, ReleaseProvenance>
+> => {
   if (!(await pathExists(DESKTOP_RELEASE_PROVENANCE_PATH))) {
     throw new Error(`Missing release provenance manifest: ${DESKTOP_RELEASE_PROVENANCE_PATH}`);
   }
@@ -333,66 +332,13 @@ const createReleaseArtifact = (
   target,
 });
 
-const buildMacosArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseArtifact[] => {
-  const relativePath = join(
-    "macos",
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_MACOS_ARCH}.dmg`,
-  );
-  return [createReleaseArtifact("macos", relativePath, "dmg")] as const;
-};
-
-const buildLinuxArtifacts = (
-  metadata: DesktopBundleMetadata,
-  target: Extract<DesktopReleaseTarget, "linux-x64" | "linux-arm64">,
-): readonly ReleaseArtifact[] => {
-  const debArch =
-    target === "linux-x64" ? DESKTOP_RELEASE_LINUX_X64_DEB_ARCH : DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH;
-  const rpmArch =
-    target === "linux-x64" ? DESKTOP_RELEASE_LINUX_X64_RPM_ARCH : DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH;
-  const debPath = join(
-    target,
-    `${metadata.productName}_${metadata.version}_${debArch}.deb`,
-  );
-  const rpmPath = join(
-    target,
-    `${metadata.productName}-${metadata.version}-1.${rpmArch}.rpm`,
-  );
-
-  return [
-    createReleaseArtifact(target, debPath, "deb"),
-    createReleaseArtifact(target, rpmPath, "rpm"),
-  ] as const;
-};
-
-const buildWindowsArtifacts = (metadata: DesktopBundleMetadata): readonly ReleaseArtifact[] => {
-  const setupPath = join(
-    "windows",
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-setup.exe`,
-  );
-  const portablePath = join(
-    "windows",
-    `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable.zip`,
-  );
-
-  return [
-    createReleaseArtifact("windows", setupPath, "setup"),
-    createReleaseArtifact("windows", portablePath, "portable"),
-  ] as const;
-};
-
 const buildArtifactsForTarget = (
   metadata: DesktopBundleMetadata,
   target: DesktopReleaseTarget,
 ): readonly ReleaseArtifact[] => {
-  if (target === "macos") {
-    return buildMacosArtifacts(metadata);
-  }
-
-  if (target === "linux-x64" || target === "linux-arm64") {
-    return buildLinuxArtifacts(metadata, target);
-  }
-
-  return buildWindowsArtifacts(metadata);
+  return buildDesktopReleaseArtifactSpecs(metadata, target).map((artifact) =>
+    createReleaseArtifact(target, artifact.relativePath, artifact.kind),
+  );
 };
 
 const collectExpectedArtifacts = (
@@ -549,9 +495,7 @@ const verifyBundleConfig = (
     ok:
       metadata.tauriTargets === "all" ||
       (Array.isArray(metadata.tauriTargets) &&
-        ["deb", "dmg", "nsis", "rpm"].every((target) =>
-          metadata.tauriTargets.includes(target),
-        )),
+        ["deb", "dmg", "nsis", "rpm"].every((target) => metadata.tauriTargets.includes(target))),
   };
 
   const gtkResult: VerificationResult | null = targets.some((target) => target.startsWith("linux"))
@@ -719,8 +663,9 @@ const verifyReleaseProvenance = async (
     }
 
     const artifactNames = Array.isArray(provenance.artifactNames)
-      ? provenance.artifactNames.filter((artifactName): artifactName is string =>
-        typeof artifactName === "string")
+      ? provenance.artifactNames.filter(
+          (artifactName): artifactName is string => typeof artifactName === "string",
+        )
       : [];
     const expectedArtifactNames = buildArtifactsForTarget(metadata, target)
       .map((artifact) => basename(artifact.relativePath))
@@ -745,7 +690,9 @@ const verifyReleaseProvenance = async (
         provenance.hostArch === expectedHostArchForTarget(target) &&
         provenance.tauriTarget === expectedTauriTargetForTarget(target) &&
         actualArtifactNames.length === expectedArtifactNames.length &&
-        actualArtifactNames.every((artifactName, index) => artifactName === expectedArtifactNames[index]),
+        actualArtifactNames.every(
+          (artifactName, index) => artifactName === expectedArtifactNames[index],
+        ),
     };
   });
 };
@@ -815,10 +762,7 @@ const captureCommand = (command: readonly string[], timeoutMs: number): Promise<
 
 const quotePowershellLiteral = (value: string): string => value.replaceAll("'", "''");
 
-const extractZipArchive = async (
-  absolutePath: string,
-  destinationRoot: string,
-): Promise<void> => {
+const extractZipArchive = async (absolutePath: string, destinationRoot: string): Promise<void> => {
   const commandCandidates = [
     ["unzip", "-qq", absolutePath, "-d", destinationRoot],
     [
@@ -854,25 +798,21 @@ const extractZipArchive = async (
   }
 };
 
-const extractDebPackage = async (
-  absolutePath: string,
-  destinationRoot: string,
-): Promise<void> => {
+const extractDebPackage = async (absolutePath: string, destinationRoot: string): Promise<void> => {
   const commandResult = await captureCommand(
     ["dpkg-deb", "-x", absolutePath, destinationRoot],
     ZIP_LIST_TIMEOUT_MS,
   );
   if (commandResult.exitCode !== 0) {
     throw new Error(
-      commandResult.stderr || commandResult.stdout || `Unable to extract deb package ${absolutePath}.`,
+      commandResult.stderr ||
+        commandResult.stdout ||
+        `Unable to extract deb package ${absolutePath}.`,
     );
   }
 };
 
-const extractRpmPackage = async (
-  absolutePath: string,
-  destinationRoot: string,
-): Promise<void> => {
+const extractRpmPackage = async (absolutePath: string, destinationRoot: string): Promise<void> => {
   const commandResult = await captureCommand(
     [
       "sh",
@@ -883,7 +823,9 @@ const extractRpmPackage = async (
   );
   if (commandResult.exitCode !== 0) {
     throw new Error(
-      commandResult.stderr || commandResult.stdout || `Unable to extract rpm package ${absolutePath}.`,
+      commandResult.stderr ||
+        commandResult.stdout ||
+        `Unable to extract rpm package ${absolutePath}.`,
     );
   }
 };
@@ -1203,11 +1145,7 @@ const verifyExtractedWindowsPortablePayload = async (
   ] as const;
 
   return [
-    verifyDesktopRuntimeManifest(
-      "windows",
-      manifestResult.manifest,
-      "windows:portable-manifest",
-    ),
+    verifyDesktopRuntimeManifest("windows", manifestResult.manifest, "windows:portable-manifest"),
     await verifyCollectedEntries(
       extractionRoot,
       requiredEntries,
@@ -1221,7 +1159,17 @@ const verifyWindowsPortablePayload = async (
   artifact: ReleaseArtifact,
   metadata: DesktopBundleMetadata,
 ): Promise<readonly VerificationResult[]> => {
-  const portableRoot = `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-portable`;
+  const [, portableFileName] = buildDesktopReleaseArtifactFileNames(metadata, "windows");
+  if (!portableFileName) {
+    return [
+      {
+        details: "canonical Windows portable artifact name could not be resolved",
+        label: "windows:portable-archive",
+        ok: false,
+      },
+    ] as const;
+  }
+  const portableRoot = portableFileName.replace(ZIP_EXTENSION_PATTERN, "");
   const extractionRoot = await mkdtemp(join(tmpdir(), "bao-desktop-portable-"));
 
   return withCleanup(
@@ -1277,10 +1225,9 @@ const attachDmgArtifact = async (artifact: ReleaseArtifact): Promise<MountedDmgR
   await rm(mountRoot, { force: true, recursive: true });
   return {
     failure: {
-      details:
-        attachResult.timedOut
-          ? "hdiutil attach timed out"
-          : attachResult.stderr || attachResult.stdout || `exitCode=${attachResult.exitCode}`,
+      details: attachResult.timedOut
+        ? "hdiutil attach timed out"
+        : attachResult.stderr || attachResult.stdout || `exitCode=${attachResult.exitCode}`,
       label: "macos:dmg-mount",
       ok: false,
     },
@@ -1381,7 +1328,12 @@ const verifyExtractedLinuxPackagePayload = async (
   metadata: DesktopBundleMetadata,
   extractionRoot: string,
 ): Promise<readonly VerificationResult[]> => {
-  const runtimeRoot = joinArchiveEntry("usr", "lib", metadata.productName, DESKTOP_RUNTIME_RESOURCE_DIR);
+  const runtimeRoot = joinArchiveEntry(
+    "usr",
+    "lib",
+    metadata.productName,
+    DESKTOP_RUNTIME_RESOURCE_DIR,
+  );
   const manifestResult = await readRuntimeManifestForVerification(
     join(
       extractionRoot,
@@ -1426,8 +1378,7 @@ const verifyLinuxPackagePayload = async (
     return [] as const;
   }
 
-  const requiredCommands =
-    artifact.kind === "deb" ? ["dpkg-deb"] : ["rpm2cpio", "cpio"];
+  const requiredCommands = artifact.kind === "deb" ? ["dpkg-deb"] : ["rpm2cpio", "cpio"];
   const missingToolResult = requiredCommands
     .map((command) => requireCommand(`linux ${artifact.kind} verification`, command))
     .find((result): result is VerificationResult => result !== null);
@@ -1489,10 +1440,9 @@ const main = async (): Promise<void> => {
   const targets = parseCommandTargets(process.argv.slice(2));
   const metadata = await readDesktopMetadata();
   const artifacts = collectExpectedArtifacts(metadata, targets);
-  const windowsPortableArtifact =
-    targets.includes("windows")
-      ? artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "portable")
-      : undefined;
+  const windowsPortableArtifact = targets.includes("windows")
+    ? artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "portable")
+    : undefined;
 
   const results = [
     verifySemver(metadata),

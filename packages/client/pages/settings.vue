@@ -75,12 +75,7 @@ const {
   testApiKey,
   loading: settingsLoading,
 } = useSettings();
-const {
-  profile,
-  fetchProfile,
-  updateProfile,
-  loading: profileLoading,
-} = useUser();
+const { profile, fetchProfile, updateProfile, loading: profileLoading } = useUser();
 const { resolvedBrand } = useBrand();
 const { theme, toggleTheme } = useTheme();
 const { $toast } = useNuxtApp();
@@ -110,8 +105,7 @@ const providerInputs = computed<ProviderInputConfig[]>(() =>
   })),
 );
 
-const buildLanguageLabel = (value: AppLanguageCode): string =>
-  APP_LANGUAGE_LABELS[value] || value;
+const buildLanguageLabel = (value: AppLanguageCode): string => APP_LANGUAGE_LABELS[value] || value;
 
 const languageOptions = computed(() =>
   APP_LANGUAGE_OPTIONS.map((option) => ({
@@ -132,15 +126,13 @@ const apiKeys = reactive<Record<ProviderField, string>>({
   localModelName: LOCAL_AI_DEFAULT_MODEL,
 });
 
-const testResults = reactive<Record<AIProviderType, { valid: boolean } | null>>(
-  {
-    local: null,
-    gemini: null,
-    openai: null,
-    claude: null,
-    huggingface: null,
-  },
-);
+const testResults = reactive<Record<AIProviderType, { valid: boolean } | null>>({
+  local: null,
+  gemini: null,
+  openai: null,
+  claude: null,
+  huggingface: null,
+});
 
 const testingProvider = ref<AIProviderType | null>(null);
 const preferencesLanguage = ref(DEFAULT_APP_LANGUAGE);
@@ -152,9 +144,7 @@ const brandEditorPanel = ref<BrandEditorPanel>("identity");
 
 const brandFieldsetClass =
   "fieldset rounded-box border border-base-300/70 bg-base-200/40 p-4 shadow-sm";
-const BRAND_DEFAULTS: BrandSettings = brandSettingsSchema.parse(
-  DEFAULT_BRAND_SETTINGS,
-);
+const BRAND_DEFAULTS: BrandSettings = brandSettingsSchema.parse(DEFAULT_BRAND_SETTINGS);
 const BRAND_HINT_IDS = {
   logoPath: "settings-brand-logo-path-hint",
   faviconPath: "settings-brand-favicon-path-hint",
@@ -187,11 +177,7 @@ const brandForm = reactive({
   defaultDescription: BRAND_DEFAULTS.content.defaultDescription,
   lightThemeJson: JSON.stringify(BRAND_DEFAULTS.lightTheme, null, 2),
   darkThemeJson: JSON.stringify(BRAND_DEFAULTS.darkTheme, null, 2),
-  contentOverridesJson: JSON.stringify(
-    BRAND_DEFAULTS.content.contentOverrides,
-    null,
-    2,
-  ),
+  contentOverridesJson: JSON.stringify(BRAND_DEFAULTS.content.contentOverrides, null, 2),
 });
 
 const profileForm = reactive({
@@ -220,25 +206,18 @@ watch(
   (currentSettings) => {
     if (!currentSettings) return;
 
-    apiKeys.localModelEndpoint =
-      currentSettings.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT;
-    apiKeys.localModelName =
-      currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
+    apiKeys.localModelEndpoint = currentSettings.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT;
+    apiKeys.localModelName = currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
 
-    preferencesLanguage.value =
-      currentSettings.language || DEFAULT_APP_LANGUAGE;
-    const isKnownProvider = (v: string): v is AIProviderType =>
-      v in providerFieldById;
+    preferencesLanguage.value = currentSettings.language || DEFAULT_APP_LANGUAGE;
+    const isKnownProvider = (v: string): v is AIProviderType => v in providerFieldById;
     const saved = currentSettings.preferredProvider ?? "";
     preferredProviderSelection.value = isKnownProvider(saved) ? saved : "local";
 
-    notificationForm.achievements =
-      currentSettings.notifications?.achievements ?? true;
-    notificationForm.dailyChallenges =
-      currentSettings.notifications?.dailyChallenges ?? true;
+    notificationForm.achievements = currentSettings.notifications?.achievements ?? true;
+    notificationForm.dailyChallenges = currentSettings.notifications?.dailyChallenges ?? true;
     notificationForm.levelUp = currentSettings.notifications?.levelUp ?? true;
-    notificationForm.jobAlerts =
-      currentSettings.notifications?.jobAlerts ?? true;
+    notificationForm.jobAlerts = currentSettings.notifications?.jobAlerts ?? true;
 
     if (currentSettings.automationSettings) {
       Object.assign(automationForm, {
@@ -267,11 +246,7 @@ watch(
     brandForm.defaultDescription = nextBrand.content.defaultDescription;
     brandForm.lightThemeJson = JSON.stringify(nextBrand.lightTheme, null, 2);
     brandForm.darkThemeJson = JSON.stringify(nextBrand.darkTheme, null, 2);
-    brandForm.contentOverridesJson = JSON.stringify(
-      nextBrand.content.contentOverrides,
-      null,
-      2,
-    );
+    brandForm.contentOverridesJson = JSON.stringify(nextBrand.content.contentOverrides, null, 2);
   },
   { immediate: true },
 );
@@ -283,54 +258,38 @@ const emailDeliveryConfigured = computed(() =>
   ),
 );
 
-const showOllamaHotTip = computed(
-  () => preferredProviderSelection.value === "local",
-);
+const showOllamaHotTip = computed(() => preferredProviderSelection.value === "local");
 
 function parseBrandContentOverrides(): Record<string, string> {
   return (
-    parseJson(
-      brandForm.contentOverridesJson,
-      brandContentSettingsSchema.shape.contentOverrides,
-    ) ?? {}
+    parseJson(brandForm.contentOverridesJson, brandContentSettingsSchema.shape.contentOverrides) ??
+    {}
   );
 }
 
 const brandDraft = computed<BrandSettings>(() =>
   resolveBrandSettings({
     name: brandForm.name.trim() || BRAND_DEFAULTS.name,
-    assistantName:
-      brandForm.assistantName.trim() || BRAND_DEFAULTS.assistantName,
+    assistantName: brandForm.assistantName.trim() || BRAND_DEFAULTS.assistantName,
     apiName: brandForm.apiName.trim() || BRAND_DEFAULTS.apiName,
     logoPath: brandForm.logoPath.trim() || BRAND_DEFAULTS.logoPath,
-    faviconPath:
-      brandForm.faviconPath.trim() || BRAND_DEFAULTS.faviconPath,
+    faviconPath: brandForm.faviconPath.trim() || BRAND_DEFAULTS.faviconPath,
     typography: {
       fontStylesheetUrl: brandForm.fontStylesheetUrl.trim(),
       displayFontFamily:
-        brandForm.displayFontFamily.trim() ||
-        BRAND_DEFAULTS.typography.displayFontFamily,
-      bodyFontFamily:
-        brandForm.bodyFontFamily.trim() ||
-        BRAND_DEFAULTS.typography.bodyFontFamily,
-      monoFontFamily:
-        brandForm.monoFontFamily.trim() ||
-        BRAND_DEFAULTS.typography.monoFontFamily,
+        brandForm.displayFontFamily.trim() || BRAND_DEFAULTS.typography.displayFontFamily,
+      bodyFontFamily: brandForm.bodyFontFamily.trim() || BRAND_DEFAULTS.typography.bodyFontFamily,
+      monoFontFamily: brandForm.monoFontFamily.trim() || BRAND_DEFAULTS.typography.monoFontFamily,
     },
     lightTheme:
-      parseJson(brandForm.lightThemeJson, brandThemePaletteSchema) ??
-      BRAND_DEFAULTS.lightTheme,
+      parseJson(brandForm.lightThemeJson, brandThemePaletteSchema) ?? BRAND_DEFAULTS.lightTheme,
     darkTheme:
-      parseJson(brandForm.darkThemeJson, brandThemePaletteSchema) ??
-      BRAND_DEFAULTS.darkTheme,
+      parseJson(brandForm.darkThemeJson, brandThemePaletteSchema) ?? BRAND_DEFAULTS.darkTheme,
     content: {
       tagline: brandForm.tagline.trim() || BRAND_DEFAULTS.content.tagline,
-      defaultTitle:
-        brandForm.defaultTitle.trim() ||
-        BRAND_DEFAULTS.content.defaultTitle,
+      defaultTitle: brandForm.defaultTitle.trim() || BRAND_DEFAULTS.content.defaultTitle,
       defaultDescription:
-        brandForm.defaultDescription.trim() ||
-        BRAND_DEFAULTS.content.defaultDescription,
+        brandForm.defaultDescription.trim() || BRAND_DEFAULTS.content.defaultDescription,
       contentOverrides: parseBrandContentOverrides(),
     },
   }),
@@ -338,9 +297,7 @@ const brandDraft = computed<BrandSettings>(() =>
 
 const brandPreviewInitial = computed(() => {
   const value = brandDraft.value.name.trim().charAt(0).toUpperCase();
-  return value.length > 0
-    ? value
-    : BRAND_DEFAULTS.name.trim().charAt(0).toUpperCase();
+  return value.length > 0 ? value : BRAND_DEFAULTS.name.trim().charAt(0).toUpperCase();
 });
 
 const brandPreviewShellStyle = computed<Record<string, string>>(() => ({
@@ -359,26 +316,22 @@ const brandPreviewPrimaryBadgeStyle = computed<Record<string, string>>(() => ({
   color: brandDraft.value.lightTheme.primaryContent,
 }));
 
-const brandPreviewSecondaryBadgeStyle = computed<Record<string, string>>(
-  () => ({
-    backgroundColor: brandDraft.value.lightTheme.base100,
-    borderColor: brandDraft.value.lightTheme.base300,
-    color: brandDraft.value.lightTheme.baseContent,
-  }),
-);
+const brandPreviewSecondaryBadgeStyle = computed<Record<string, string>>(() => ({
+  backgroundColor: brandDraft.value.lightTheme.base100,
+  borderColor: brandDraft.value.lightTheme.base300,
+  color: brandDraft.value.lightTheme.baseContent,
+}));
 
 const brandPreviewPrimaryActionStyle = computed<Record<string, string>>(() => ({
   backgroundColor: brandDraft.value.lightTheme.accent,
   color: brandDraft.value.lightTheme.accentContent,
 }));
 
-const brandPreviewSecondaryActionStyle = computed<Record<string, string>>(
-  () => ({
-    backgroundColor: brandDraft.value.lightTheme.base100,
-    borderColor: brandDraft.value.lightTheme.base300,
-    color: brandDraft.value.lightTheme.baseContent,
-  }),
-);
+const brandPreviewSecondaryActionStyle = computed<Record<string, string>>(() => ({
+  backgroundColor: brandDraft.value.lightTheme.base100,
+  borderColor: brandDraft.value.lightTheme.base300,
+  color: brandDraft.value.lightTheme.baseContent,
+}));
 
 const brandLightSwatchStyle = computed<Record<string, string>>(() => ({
   background: `linear-gradient(135deg, ${brandDraft.value.lightTheme.base100}, ${brandDraft.value.lightTheme.primary})`,
@@ -432,10 +385,7 @@ function providerKeyLabel(providerId: AIProviderType): string {
   return t("settings.aiProviders.credentialLabel");
 }
 
-function providerPlaceholder(
-  providerId: AIProviderType,
-  providerLabel: string,
-): string {
+function providerPlaceholder(providerId: AIProviderType, providerLabel: string): string {
   if (providerId === "local") {
     return LOCAL_AI_DEFAULT_ENDPOINT;
   }
@@ -462,35 +412,24 @@ function focusBrandEditorTab(panel: BrandEditorPanel): void {
   });
 }
 
-function setBrandEditorPanel(
-  panel: BrandEditorPanel,
-  options?: { focusTab?: boolean },
-): void {
+function setBrandEditorPanel(panel: BrandEditorPanel, options?: { focusTab?: boolean }): void {
   brandEditorPanel.value = panel;
   if (options?.focusTab) {
     focusBrandEditorTab(panel);
   }
 }
 
-function handleBrandTabKeydown(
-  event: KeyboardEvent,
-  panel: BrandEditorPanel,
-): void {
-  const currentIndex = BRAND_EDITOR_PANELS.findIndex(
-    (entry) => entry.id === panel,
-  );
+function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): void {
+  const currentIndex = BRAND_EDITOR_PANELS.findIndex((entry) => entry.id === panel);
   if (currentIndex === -1) return;
 
   let nextPanel: BrandEditorPanel | null = null;
   if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-    nextPanel =
-      BRAND_EDITOR_PANELS[(currentIndex + 1) % BRAND_EDITOR_PANELS.length]
-        ?.id ?? null;
+    nextPanel = BRAND_EDITOR_PANELS[(currentIndex + 1) % BRAND_EDITOR_PANELS.length]?.id ?? null;
   } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
     nextPanel =
       BRAND_EDITOR_PANELS[
-        (currentIndex - 1 + BRAND_EDITOR_PANELS.length) %
-          BRAND_EDITOR_PANELS.length
+        (currentIndex - 1 + BRAND_EDITOR_PANELS.length) % BRAND_EDITOR_PANELS.length
       ]?.id ?? null;
   } else if (event.key === "Home") {
     nextPanel = BRAND_EDITOR_PANELS[0]?.id ?? null;
@@ -504,13 +443,9 @@ function handleBrandTabKeydown(
   setBrandEditorPanel(nextPanel, { focusTab: true });
 }
 
-function browserOptionLabel(
-  browser: (typeof AUTOMATION_BROWSER_OPTIONS)[number],
-): string {
-  if (browser === "chrome")
-    return t("settings.automation.browserOptions.chrome");
-  if (browser === "chromium")
-    return t("settings.automation.browserOptions.chromium");
+function browserOptionLabel(browser: (typeof AUTOMATION_BROWSER_OPTIONS)[number]): string {
+  if (browser === "chrome") return t("settings.automation.browserOptions.chrome");
+  if (browser === "chromium") return t("settings.automation.browserOptions.chromium");
   return t("settings.automation.browserOptions.edge");
 }
 
@@ -566,10 +501,7 @@ async function handleTest(providerId: AIProviderType) {
   testingProvider.value = null;
 
   if (!providerTestResult.ok) {
-    showToastError(
-      providerTestResult.error,
-      t("settings.errors.failedToTestProvider"),
-    );
+    showToastError(providerTestResult.error, t("settings.errors.failedToTestProvider"));
     testResults[providerId] = { valid: false };
     return;
   }
@@ -589,10 +521,7 @@ async function handleSavePreferredProvider() {
     t("settings.errors.failedToSavePreferences"),
   );
   if (!providerSaveResult.ok) {
-    showToastError(
-      providerSaveResult.error,
-      t("settings.errors.failedToSavePreferences"),
-    );
+    showToastError(providerSaveResult.error, t("settings.errors.failedToSavePreferences"));
     return;
   }
   $toast.success(t("settings.aiProviders.preferredProviderSaved"));
@@ -604,32 +533,24 @@ async function handleSaveKeys() {
     localModelName: apiKeys.localModelName || LOCAL_AI_DEFAULT_MODEL,
   };
 
-  if (apiKeys.geminiApiKey.trim())
-    payload.geminiApiKey = apiKeys.geminiApiKey.trim();
-  if (apiKeys.openaiApiKey.trim())
-    payload.openaiApiKey = apiKeys.openaiApiKey.trim();
-  if (apiKeys.claudeApiKey.trim())
-    payload.claudeApiKey = apiKeys.claudeApiKey.trim();
-  if (apiKeys.huggingfaceToken.trim())
-    payload.huggingfaceToken = apiKeys.huggingfaceToken.trim();
+  if (apiKeys.geminiApiKey.trim()) payload.geminiApiKey = apiKeys.geminiApiKey.trim();
+  if (apiKeys.openaiApiKey.trim()) payload.openaiApiKey = apiKeys.openaiApiKey.trim();
+  if (apiKeys.claudeApiKey.trim()) payload.claudeApiKey = apiKeys.claudeApiKey.trim();
+  if (apiKeys.huggingfaceToken.trim()) payload.huggingfaceToken = apiKeys.huggingfaceToken.trim();
 
   const saveKeysResult = await settlePromise(
     updateApiKeys(payload),
     t("settings.errors.failedToSaveApiKeys"),
   );
   if (!saveKeysResult.ok) {
-    showToastError(
-      saveKeysResult.error,
-      t("settings.errors.failedToSaveApiKeys"),
-    );
+    showToastError(saveKeysResult.error, t("settings.errors.failedToSaveApiKeys"));
     return;
   }
   $toast.success(t("settings.toasts.apiKeysSaved"));
 }
 
 async function handleToggleTheme() {
-  const nextTheme =
-    theme.value === THEME_NAMES.light ? THEME_NAMES.dark : THEME_NAMES.light;
+  const nextTheme = theme.value === THEME_NAMES.light ? THEME_NAMES.dark : THEME_NAMES.light;
   toggleTheme();
 
   const themeSaveResult = await settlePromise(
@@ -637,10 +558,7 @@ async function handleToggleTheme() {
     t("settings.errors.failedToSaveTheme"),
   );
   if (!themeSaveResult.ok) {
-    showToastError(
-      themeSaveResult.error,
-      t("settings.errors.failedToSaveTheme"),
-    );
+    showToastError(themeSaveResult.error, t("settings.errors.failedToSaveTheme"));
     return;
   }
   $toast.success(t("settings.toasts.themeSaved"));
@@ -664,10 +582,7 @@ async function handleSavePreferences() {
 
   if (!preferenceSaveResult.ok) {
     preferencesSaveState.value = "error";
-    showToastError(
-      preferenceSaveResult.error,
-      t("settings.errors.failedToSavePreferences"),
-    );
+    showToastError(preferenceSaveResult.error, t("settings.errors.failedToSavePreferences"));
     return;
   }
 
@@ -733,10 +648,7 @@ async function handleSaveProfile() {
   );
   if (!profileSaveResult.ok) {
     profileSaveState.value = "error";
-    showToastError(
-      profileSaveResult.error,
-      t("settings.errors.failedToSaveProfile"),
-    );
+    showToastError(profileSaveResult.error, t("settings.errors.failedToSaveProfile"));
     return;
   }
 
@@ -745,10 +657,7 @@ async function handleSaveProfile() {
 }
 
 function buildBrandPayload(): BrandSettingsPatch | null {
-  const lightTheme = parseJson(
-    brandForm.lightThemeJson,
-    brandThemePaletteSchema,
-  );
+  const lightTheme = parseJson(brandForm.lightThemeJson, brandThemePaletteSchema);
   if (!lightTheme) {
     $toast.error(t("settings.brand.errors.invalidLightTheme"));
     return null;
@@ -762,14 +671,10 @@ function buildBrandPayload(): BrandSettingsPatch | null {
 
   const contentCandidate = parseJson(
     JSON.stringify({
-      tagline:
-        brandForm.tagline.trim() || BRAND_DEFAULTS.content.tagline,
-      defaultTitle:
-        brandForm.defaultTitle.trim() ||
-        BRAND_DEFAULTS.content.defaultTitle,
+      tagline: brandForm.tagline.trim() || BRAND_DEFAULTS.content.tagline,
+      defaultTitle: brandForm.defaultTitle.trim() || BRAND_DEFAULTS.content.defaultTitle,
       defaultDescription:
-        brandForm.defaultDescription.trim() ||
-        BRAND_DEFAULTS.content.defaultDescription,
+        brandForm.defaultDescription.trim() || BRAND_DEFAULTS.content.defaultDescription,
       contentOverrides: parseBrandContentOverrides(),
     }),
     brandContentSettingsSchema,
@@ -781,23 +686,16 @@ function buildBrandPayload(): BrandSettingsPatch | null {
 
   return {
     name: brandForm.name.trim() || BRAND_DEFAULTS.name,
-    assistantName:
-      brandForm.assistantName.trim() || BRAND_DEFAULTS.assistantName,
+    assistantName: brandForm.assistantName.trim() || BRAND_DEFAULTS.assistantName,
     apiName: brandForm.apiName.trim() || BRAND_DEFAULTS.apiName,
     logoPath: brandForm.logoPath.trim() || BRAND_DEFAULTS.logoPath,
-    faviconPath:
-      brandForm.faviconPath.trim() || BRAND_DEFAULTS.faviconPath,
+    faviconPath: brandForm.faviconPath.trim() || BRAND_DEFAULTS.faviconPath,
     typography: {
       fontStylesheetUrl: brandForm.fontStylesheetUrl.trim(),
       displayFontFamily:
-        brandForm.displayFontFamily.trim() ||
-        BRAND_DEFAULTS.typography.displayFontFamily,
-      bodyFontFamily:
-        brandForm.bodyFontFamily.trim() ||
-        BRAND_DEFAULTS.typography.bodyFontFamily,
-      monoFontFamily:
-        brandForm.monoFontFamily.trim() ||
-        BRAND_DEFAULTS.typography.monoFontFamily,
+        brandForm.displayFontFamily.trim() || BRAND_DEFAULTS.typography.displayFontFamily,
+      bodyFontFamily: brandForm.bodyFontFamily.trim() || BRAND_DEFAULTS.typography.bodyFontFamily,
+      monoFontFamily: brandForm.monoFontFamily.trim() || BRAND_DEFAULTS.typography.monoFontFamily,
     },
     lightTheme,
     darkTheme,
@@ -820,10 +718,7 @@ async function handleSaveBrand() {
 
   if (!brandSaveResult.ok) {
     brandSaveState.value = "error";
-    showToastError(
-      brandSaveResult.error,
-      t("settings.brand.errors.failedToSave"),
-    );
+    showToastError(brandSaveResult.error, t("settings.brand.errors.failedToSave"));
     return;
   }
 
@@ -837,10 +732,7 @@ async function handleSaveAutomation() {
     t("settings.errors.failedToSaveAutomation"),
   );
   if (!automationSaveResult.ok) {
-    showToastError(
-      automationSaveResult.error,
-      t("settings.errors.failedToSaveAutomation"),
-    );
+    showToastError(automationSaveResult.error, t("settings.errors.failedToSaveAutomation"));
     return;
   }
   $toast.success(t("settings.toasts.automationSaved"));
@@ -866,10 +758,7 @@ async function handleSaveEmailDeliverySettings() {
     t("settings.errors.failedToSaveEmailDelivery"),
   );
   if (!emailDeliverySaveResult.ok) {
-    showToastError(
-      emailDeliverySaveResult.error,
-      t("settings.errors.failedToSaveEmailDelivery"),
-    );
+    showToastError(emailDeliverySaveResult.error, t("settings.errors.failedToSaveEmailDelivery"));
     return;
   }
 

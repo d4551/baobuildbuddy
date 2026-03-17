@@ -63,8 +63,7 @@ const parseMountedDesktopImages = (infoText: string): readonly MountedDesktopIma
 
     const imagePath = imagePathLine.split(":").slice(1).join(":").trim();
     if (
-      !(imagePath.startsWith(DESKTOP_TAURI_ROOT) &&
-        DESKTOP_MOUNTED_IMAGE_PATTERN.test(imagePath))
+      !(imagePath.startsWith(DESKTOP_TAURI_ROOT) && DESKTOP_MOUNTED_IMAGE_PATTERN.test(imagePath))
     ) {
       return [];
     }
@@ -107,14 +106,14 @@ const detachMountPathsSequentially = async (
   await detachMountPathsSequentially(mountPaths, index + 1);
 };
 
-const detachMountedImages = async (mountedImages: readonly MountedDesktopImage[]): Promise<void> => {
+const detachMountedImages = async (
+  mountedImages: readonly MountedDesktopImage[],
+): Promise<void> => {
   const mountPaths = mountedImages.flatMap((mountedImage) => mountedImage.mountPaths);
   await detachMountPathsSequentially(mountPaths);
 };
 
-const removeTemporaryDiskImages = async (
-  imagePaths: readonly string[],
-): Promise<void> => {
+const removeTemporaryDiskImages = async (imagePaths: readonly string[]): Promise<void> => {
   await Promise.all(
     imagePaths.map(async (imagePath) => {
       if (!(await pathExists(imagePath))) {

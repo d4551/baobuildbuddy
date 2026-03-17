@@ -81,12 +81,7 @@ const buildDesktopTarget = async (
 
   if (hostTarget.name === "macos") {
     const buildExitCode = await runCommand(
-      [
-        ...sharedCommandPrefix,
-        "build",
-        "--no-bundle",
-        ...tauriArgs,
-      ],
+      [...sharedCommandPrefix, "build", "--no-bundle", ...tauriArgs],
       {
         cwd: DESKTOP_PACKAGE_ROOT,
         env: commandEnv,
@@ -104,13 +99,7 @@ const buildDesktopTarget = async (
       CI: "true",
     };
     const bundleExitCode = await runCommand(
-      [
-        ...sharedCommandPrefix,
-        "bundle",
-        "--bundles",
-        "app,dmg",
-        ...tauriArgs,
-      ],
+      [...sharedCommandPrefix, "bundle", "--bundles", "app,dmg", ...tauriArgs],
       {
         cwd: DESKTOP_PACKAGE_ROOT,
         env: bundleEnv,
@@ -123,13 +112,10 @@ const buildDesktopTarget = async (
     return;
   }
 
-  const buildExitCode = await runCommand(
-    [...sharedCommandPrefix, "build", ...tauriArgs],
-    {
-      cwd: DESKTOP_PACKAGE_ROOT,
-      env: commandEnv,
-    },
-  );
+  const buildExitCode = await runCommand([...sharedCommandPrefix, "build", ...tauriArgs], {
+    cwd: DESKTOP_PACKAGE_ROOT,
+    env: commandEnv,
+  });
   if (buildExitCode !== 0) {
     process.exit(buildExitCode);
   }
@@ -139,9 +125,7 @@ const main = async (): Promise<void> => {
   const tauriArgs = process.argv.slice(2);
   const hostTarget = resolveHostDesktopTarget();
   await runMacosPrebuildCleanup();
-  await writeOutput(
-    `desktop-build: running standard host-local Tauri flow for ${hostTarget.name}`,
-  );
+  await writeOutput(`desktop-build: running standard host-local Tauri flow for ${hostTarget.name}`);
   await buildDesktopTarget(hostTarget, tauriArgs);
   if (!isDebugDesktopBuild(tauriArgs)) {
     await writeOutput(

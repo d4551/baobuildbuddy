@@ -167,9 +167,7 @@ const resolveManualChunkName = (moduleId: string): string | undefined => {
 };
 
 const resolvedApiBase =
-  configuredApiBase && configuredApiBase !== "/"
-    ? configuredApiBase
-    : apiBaseProxy || "/";
+  configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : apiBaseProxy || "/";
 const configuredWsBase = process.env.NUXT_PUBLIC_WS_BASE;
 const resolvedWsBase =
   configuredWsBase && configuredWsBase !== "/" ? configuredWsBase : resolvedApiBase;
@@ -253,7 +251,7 @@ export default defineNuxtConfig({
                 },
               }
             : {}),
-      }
+        }
       : {}),
   },
 
@@ -272,7 +270,7 @@ export default defineNuxtConfig({
         DECIMAL_RADIX,
       ),
       queryRefetchOnFocus:
-      process.env.NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS !== QUERY_REFETCH_ON_FOCUS_DISABLED,
+        process.env.NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS !== QUERY_REFETCH_ON_FOCUS_DISABLED,
       i18n: {
         defaultLocale: process.env.NUXT_PUBLIC_I18N_DEFAULT_LOCALE || DEFAULT_I18N_LOCALE,
         fallbackLocale: process.env.NUXT_PUBLIC_I18N_FALLBACK_LOCALE || DEFAULT_I18N_LOCALE,

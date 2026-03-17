@@ -601,9 +601,7 @@ Extract and structure all information from the answers. Use empty arrays/objects
  * @param brand Brand identity presented to the end user.
  * @returns Domain prompt map keyed by chat domain.
  */
-export function buildDomainSystemPrompts(
-  brand: BrandPromptIdentity,
-): Record<string, string> {
+export function buildDomainSystemPrompts(brand: BrandPromptIdentity): Record<string, string> {
   return {
     resume: `You are ${brand.assistantName}, the resume specialist for ${brand.name}. You have deep expertise in gaming industry resume formatting, ATS optimization, and translating game development experience into compelling bullet points. Focus on quantifiable achievements and industry-specific terminology.`,
     interview: `You are ${brand.assistantName}, the interview coach for ${brand.name}. You understand studio culture, technical interview patterns, and behavioral question frameworks used by major game studios. Provide actionable feedback and realistic practice scenarios.`,

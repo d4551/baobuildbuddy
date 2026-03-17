@@ -3,8 +3,5 @@
   "identifier": "default",
   "description": "Default capability set for the BaoBuildBuddy desktop window",
   "windows": ["main"],
-  "permissions": [
-    "core:default",
-    "dialog:default"
-  ]
+  "permissions": ["core:default", "dialog:default"]
 }

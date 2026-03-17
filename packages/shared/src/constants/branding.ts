@@ -108,10 +108,10 @@ export const DEFAULT_BRAND_SETTINGS: BrandSettings = {
   faviconPath: APP_BRAND.logoPath,
   typography: {
     fontStylesheetUrl: "",
-    displayFontFamily: "\"Space Grotesk\", \"Avenir Next\", \"Segoe UI\", sans-serif",
-    bodyFontFamily: "\"DM Sans\", \"Inter\", \"Segoe UI\", sans-serif",
+    displayFontFamily: '"Space Grotesk", "Avenir Next", "Segoe UI", sans-serif',
+    bodyFontFamily: '"DM Sans", "Inter", "Segoe UI", sans-serif',
     monoFontFamily:
-      "\"JetBrains Mono\", \"SFMono-Regular\", \"SF Mono\", Consolas, \"Liberation Mono\", monospace",
+      '"JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace',
   },
   lightTheme: DEFAULT_BRAND_LIGHT_THEME,
   darkTheme: DEFAULT_BRAND_DARK_THEME,

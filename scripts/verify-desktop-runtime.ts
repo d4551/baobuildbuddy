@@ -10,6 +10,7 @@ import {
 } from "../packages/shared/src/constants/endpoints";
 import {
   DESKTOP_RUNTIME_API_BASE,
+  DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS,
   DESKTOP_RUNTIME_BUILD_SERVER_PORT,
   DESKTOP_RUNTIME_CORS_ORIGINS,
   DESKTOP_RUNTIME_HOST,
@@ -32,7 +33,7 @@ import {
   resolveDesktopRuntimeTargetInfoFromTauriTarget,
   type DesktopRuntimeManifest,
 } from "../packages/shared/src/utils/desktop-runtime-contract";
-import { toErrorMessage, withCleanup } from "./utils/async-control";
+import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import {
   collectRuntimeDependencySourceRoots,
@@ -43,6 +44,32 @@ type BrowserCheckResult = {
   pageTitle: string;
   healthStatus: string;
   websocketOpened: boolean;
+};
+
+type BrowserPage = {
+  goto(url: string, options?: { waitUntil?: string }): Promise<void>;
+  title(): Promise<string>;
+  waitForLoadState(state: "domcontentloaded" | "load" | "networkidle"): Promise<void>;
+  waitForTimeout(timeoutMs: number): Promise<void>;
+  evaluate<T, TArg>(pageFunction: (arg: TArg) => Promise<T> | T, arg: TArg): Promise<T>;
+  close(): Promise<void>;
+};
+
+type BrowserInstance = {
+  newPage(): Promise<BrowserPage>;
+  close(): Promise<void>;
+};
+
+type PlaywrightLaunchOptions = {
+  headless: boolean;
+  executablePath?: string;
+  timeout?: number;
+  args?: string[];
+};
+
+type PlaywrightChromium = {
+  launch(options: PlaywrightLaunchOptions): Promise<BrowserInstance>;
+  executablePath(): string;
 };
 
 type StaticServerHandle = {
@@ -88,6 +115,9 @@ const DESKTOP_RUNTIME_VERIFY_SERVER_PORT = DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT 
 const VERIFY_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_VERIFY_SERVER_PORT}`;
 const VERIFY_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_VERIFY_SERVER_PORT}`;
 const VERIFY_API_ROUTE_BASE = `${VERIFY_API_BASE}/api`;
+const SKIP_BROWSER_VERIFY =
+  process.env.DESKTOP_RUNTIME_SKIP_BROWSER_VERIFY === "true" ||
+  process.env.DESKTOP_RUNTIME_SKIP_BROWSER_VERIFY === "1";
 const READY_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 250;
 const RUN_COMPLETION_TIMEOUT_MS = 45_000;
@@ -640,24 +670,67 @@ const verifyCorsContract = async (
   }
 };
 
+/** Chromium args that improve headless launch reliability on Windows CI (GitHub Actions). */
+const WINDOWS_CI_CHROMIUM_ARGS: string[] = [
+  "--disable-gpu",
+  "--disable-software-rasterizer",
+  "--disable-dev-shm-usage",
+  "--no-sandbox",
+  "--disable-setuid-sandbox",
+  "--disable-background-networking",
+  "--disable-default-apps",
+  "--disable-sync",
+  "--disable-translate",
+  "--metrics-recording-only",
+  "--mute-audio",
+  "--no-first-run",
+];
+
+const buildLaunchOptions = (executablePath: string): PlaywrightLaunchOptions => {
+  const launchOptions: PlaywrightLaunchOptions = {
+    executablePath,
+    headless: true,
+    timeout: DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS,
+  };
+  if (process.platform === "win32") {
+    launchOptions.args = WINDOWS_CI_CHROMIUM_ARGS;
+  }
+  return launchOptions;
+};
+
+const launchVerificationBrowser = async (playwrightModule: {
+  chromium: PlaywrightChromium;
+}): Promise<BrowserInstance> => {
+  const browserExecutablePath = playwrightModule.chromium.executablePath().trim();
+  if (browserExecutablePath.length === 0) {
+    throw new Error("Playwright did not provide a bundled Chromium executable path.");
+  }
+
+  const executableStatResult = await captureResult(() => stat(browserExecutablePath));
+  if (!executableStatResult.ok) {
+    throw new Error(
+      `Playwright bundled Chromium executable is missing at ${browserExecutablePath}. Run bun run automation:browsers:install before verifying the packaged desktop runtime.`,
+      { cause: executableStatResult.error },
+    );
+  }
+  if (!executableStatResult.value.isFile()) {
+    throw new Error(
+      `Playwright bundled Chromium executable path is not a file: ${browserExecutablePath}`,
+    );
+  }
+
+  await writeOutput(
+    `desktop-runtime: launching verification browser from ${browserExecutablePath}`,
+  );
+  return playwrightModule.chromium.launch(buildLaunchOptions(browserExecutablePath));
+};
+
 const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<BrowserCheckResult> => {
   const playwrightModule = (await import(pathToFileURL(PLAYWRIGHT_ENTRYPOINT).href)) as {
-    chromium: {
-      launch(options: { headless: boolean }): Promise<{
-        newPage(): Promise<{
-          goto(url: string, options?: { waitUntil?: string }): Promise<void>;
-          title(): Promise<string>;
-          waitForLoadState(state: "domcontentloaded" | "load" | "networkidle"): Promise<void>;
-          waitForTimeout(timeoutMs: number): Promise<void>;
-          evaluate<T, TArg>(pageFunction: (arg: TArg) => Promise<T> | T, arg: TArg): Promise<T>;
-          close(): Promise<void>;
-        }>;
-        close(): Promise<void>;
-      }>;
-    };
+    chromium: PlaywrightChromium;
   };
 
-  const browser = await playwrightModule.chromium.launch({ headless: true });
+  const browser = await launchVerificationBrowser(playwrightModule);
   return withCleanup(
     async () => {
       const page = await browser.newPage();
@@ -838,7 +911,12 @@ const startPackagedServer = async (
 
 const stopProcess = async (proc: ReturnType<typeof Bun.spawn>): Promise<void> => {
   proc.kill();
-  await proc.exited.catch(() => undefined);
+  const [result] = await Promise.allSettled([proc.exited]);
+  if (result.status === "rejected") {
+    throw new Error("Failed waiting for the desktop runtime server to exit cleanly.", {
+      cause: result.reason,
+    });
+  }
 };
 
 const assertGeneratedFrontendIsReady = async (manifest: DesktopRuntimeManifest): Promise<void> => {
@@ -907,8 +985,13 @@ const runPackagedRuntimeChecks = async (
       await verifyCorsContract(VERIFY_API_BASE, manifest, DESKTOP_RUNTIME_CORS_ORIGINS[0]);
       await verifyCorsContract(VERIFY_API_BASE, manifest, VERIFY_FRONTEND_ORIGIN);
       await assertAutomationEndpoints(VERIFY_API_ROUTE_BASE);
-      const browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
-      assertBrowserChecksPassed(browserResult);
+      let browserResult: BrowserCheckResult | null = null;
+      if (!SKIP_BROWSER_VERIFY) {
+        browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
+        assertBrowserChecksPassed(browserResult);
+      } else {
+        await writeOutput("desktop-runtime: skipping browser verification (DESKTOP_RUNTIME_SKIP_BROWSER_VERIFY)");
+      }
       await configureVerificationSettings();
       await writeOutput(
         "desktop-runtime: configured deterministic automation verification settings",
@@ -925,7 +1008,9 @@ const runPackagedRuntimeChecks = async (
       await verifyScheduledRunRecovery(resumeId, fixtureBaseUrl, restartServer);
 
       await writeOutput(
-        `desktop-runtime: verified frontend "${browserResult.pageTitle}" against ${VERIFY_API_BASE}`,
+        browserResult
+          ? `desktop-runtime: verified frontend "${browserResult.pageTitle}" against ${VERIFY_API_BASE}`
+          : `desktop-runtime: verified API and automation against ${VERIFY_API_BASE} (browser checks skipped)`,
       );
       await writeOutput("desktop-runtime: verification passed");
     },

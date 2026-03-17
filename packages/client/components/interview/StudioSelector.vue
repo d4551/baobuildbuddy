@@ -123,8 +123,7 @@ function moveActiveOption(step: 1 | -1): void {
   if (activeOptionIndex.value === -1) {
     activeOptionIndex.value = step === 1 ? 0 : optionCount - 1;
   } else {
-    activeOptionIndex.value =
-      (activeOptionIndex.value + step + optionCount) % optionCount;
+    activeOptionIndex.value = (activeOptionIndex.value + step + optionCount) % optionCount;
   }
 
   focusActiveOption();

@@ -24,12 +24,7 @@ export const PREVIEW_SEPARATOR_LENGTH = 72 as const;
 export const DISK_IMAGE_TIMEOUT_MS = 60_000 as const;
 
 /** Supported desktop release staging targets. */
-export const DESKTOP_RELEASE_TARGETS = [
-  "macos",
-  "linux-x64",
-  "linux-arm64",
-  "windows",
-] as const;
+export const DESKTOP_RELEASE_TARGETS = ["macos", "linux-x64", "linux-arm64", "windows"] as const;
 
 /** Default root used to stage native per-platform desktop release outputs before assembly. */
 export const DESKTOP_RELEASE_STAGING_ROOT = ".desktop-release-artifacts" as const;
@@ -74,7 +69,8 @@ export const DESKTOP_RELEASE_WINDOWS_TARGET = "x86_64-pc-windows-msvc" as const;
 export const DESKTOP_RUNTIME_RESOURCE_DIR = "gen/runtime" as const;
 
 /** Relative runtime manifest path bundled into the packaged desktop application. */
-export const DESKTOP_RUNTIME_MANIFEST_PATH = `${DESKTOP_RUNTIME_RESOURCE_DIR}/manifest.json` as const;
+export const DESKTOP_RUNTIME_MANIFEST_PATH =
+  `${DESKTOP_RUNTIME_RESOURCE_DIR}/manifest.json` as const;
 
 /** Default loopback host used by the packaged desktop server runtime. */
 export const DESKTOP_RUNTIME_HOST = "127.0.0.1" as const;
@@ -83,10 +79,12 @@ export const DESKTOP_RUNTIME_HOST = "127.0.0.1" as const;
 export const DESKTOP_RUNTIME_SERVER_PORT = 3000 as const;
 
 /** Absolute HTTP base used by the packaged desktop client to reach the local server. */
-export const DESKTOP_RUNTIME_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_SERVER_PORT}` as const;
+export const DESKTOP_RUNTIME_API_BASE =
+  `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_SERVER_PORT}` as const;
 
 /** Absolute WebSocket base used by the packaged desktop client to reach the local server. */
-export const DESKTOP_RUNTIME_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_SERVER_PORT}` as const;
+export const DESKTOP_RUNTIME_WS_BASE =
+  `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_SERVER_PORT}` as const;
 
 /** Packaged desktop webview origins that are allowed to access the local desktop server. */
 export const DESKTOP_RUNTIME_CORS_ORIGINS = [
@@ -115,8 +113,7 @@ export const DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_BASENAME = [
 ].join("");
 
 /** Windows WebView2 bootstrapper filename bundled into portable desktop runtime assets. */
-export const DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME =
-  `${DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_BASENAME}.exe`;
+export const DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_FILENAME = `${DESKTOP_RUNTIME_WINDOWS_WEBVIEW_BOOTSTRAPPER_BASENAME}.exe`;
 
 /** Relative output path for the bundled WebView2 bootstrapper used by portable Windows builds. */
 export const DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH = [
@@ -132,6 +129,9 @@ export const DESKTOP_RUNTIME_BUILD_SERVER_PORT = 3399 as const;
 
 /** Loopback port used by desktop runtime smoke tests for serving generated static assets. */
 export const DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT = 4106 as const;
+
+/** Launch timeout for the browser used by desktop runtime verification checks. */
+export const DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS = 30_000 as const;
 
 /** Required desktop PNG icon outputs recommended by Tauri for cross-platform bundling. */
 export const DESKTOP_REQUIRED_PNG_ICON_SPECS = [

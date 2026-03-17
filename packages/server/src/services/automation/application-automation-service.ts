@@ -70,10 +70,7 @@ import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { AIService } from "../ai/ai-service";
 import { emailResponsePrompt } from "../ai/prompts";
-import {
-  emailDeliveryService,
-  type EmailTransportRuntimeConfig,
-} from "../email-delivery-service";
+import { emailDeliveryService, type EmailTransportRuntimeConfig } from "../email-delivery-service";
 import { exportService } from "../export-service";
 import { gamificationService } from "../gamification-service";
 import { resumeService } from "../resume-service";
@@ -181,8 +178,7 @@ const summarizeRpaCapabilities = (
     (accumulator, capability) => ({
       total: accumulator.total + 1,
       configured: accumulator.configured + (capability.configured ? 1 : 0),
-      manualRunAvailable:
-        accumulator.manualRunAvailable + (capability.manualRunAvailable ? 1 : 0),
+      manualRunAvailable: accumulator.manualRunAvailable + (capability.manualRunAvailable ? 1 : 0),
       scheduledRunAvailable:
         accumulator.scheduledRunAvailable + (capability.scheduledRunAvailable ? 1 : 0),
       runHistoryAvailable:
@@ -594,9 +590,7 @@ export class ApplicationAutomationService {
   /**
    * Maps optional tone input to a supported automation email tone.
    */
-  private normalizeEmailResponseTone(
-    toneValue: EmailResponseRequest["tone"],
-  ): EmailResponseTone {
+  private normalizeEmailResponseTone(toneValue: EmailResponseRequest["tone"]): EmailResponseTone {
     const normalizedTone = toneValue?.trim();
     if (normalizedTone && isEmailResponseTone(normalizedTone)) {
       return normalizedTone;
@@ -989,9 +983,7 @@ export class ApplicationAutomationService {
     }
 
     const toneCandidate = typeof input.tone === "string" ? input.tone.trim() : "";
-    const tone = isEmailResponseTone(toneCandidate)
-      ? toneCandidate
-      : DEFAULT_EMAIL_RESPONSE_TONE;
+    const tone = isEmailResponseTone(toneCandidate) ? toneCandidate : DEFAULT_EMAIL_RESPONSE_TONE;
 
     return {
       subject,
@@ -1079,7 +1071,11 @@ export class ApplicationAutomationService {
    * Load a single automation run row.
    */
   private async readRunRow(runId: string): Promise<AutomationRunRow | null> {
-    const rows = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
+    const rows = await db
+      .select()
+      .from(automationRuns)
+      .where(eq(automationRuns.id, runId))
+      .limit(1);
     return rows[0] ?? null;
   }
 
@@ -1862,7 +1858,9 @@ export class ApplicationAutomationService {
       ...(deliveryResult.value.recipientEmail
         ? { recipientEmail: deliveryResult.value.recipientEmail }
         : {}),
-      ...(deliveryResult.value.deliveredAt ? { deliveredAt: deliveryResult.value.deliveredAt } : {}),
+      ...(deliveryResult.value.deliveredAt
+        ? { deliveredAt: deliveryResult.value.deliveredAt }
+        : {}),
       ...(deliveryResult.value.messageId ? { messageId: deliveryResult.value.messageId } : {}),
     };
   }
@@ -1880,10 +1878,7 @@ export class ApplicationAutomationService {
   /**
    * Mark a scrape run as running.
    */
-  private async markScrapeRunStarted(
-    runId: string,
-    target: AutomationScrapeTarget,
-  ): Promise<void> {
+  private async markScrapeRunStarted(runId: string, target: AutomationScrapeTarget): Promise<void> {
     const now = new Date().toISOString();
     await db
       .update(automationRuns)
@@ -1998,10 +1993,7 @@ export class ApplicationAutomationService {
   /**
    * Execute a scrape target and persist the run result.
    */
-  private async executeScrapeRun(
-    runId: string,
-    target: AutomationScrapeTarget,
-  ): Promise<void> {
+  private async executeScrapeRun(runId: string, target: AutomationScrapeTarget): Promise<void> {
     const startedAt = Date.now();
     await this.markScrapeRunStarted(runId, target);
     const scrapeResult = await settle(this.executeScrapeTarget(target));

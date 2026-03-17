@@ -256,8 +256,7 @@ const AUTOMATION_RUNS_REQUIRED_COLUMNS = {
 } as const;
 
 const SETTINGS_REQUIRED_COLUMNS = {
-  email_transport_settings:
-    `TEXT DEFAULT '{"host":"","port":587,"security":"starttls","username":"","fromEmail":"","fromName":"","authMethod":"plain","connectionTimeoutSeconds":15}'`,
+  email_transport_settings: `TEXT DEFAULT '{"host":"","port":587,"security":"starttls","username":"","fromEmail":"","fromName":"","authMethod":"plain","connectionTimeoutSeconds":15}'`,
   email_transport_password: "TEXT",
 } as const;
 

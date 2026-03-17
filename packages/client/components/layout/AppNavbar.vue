@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  APP_LANGUAGE_LABELS,
-  APP_ROUTES,
-  THEME_NAMES,
-  type AppLanguageCode,
-} from "@bao/shared";
+import { APP_LANGUAGE_LABELS, APP_ROUTES, THEME_NAMES, type AppLanguageCode } from "@bao/shared";
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { APP_DRAWER_ID } from "~/constants/layout";
@@ -23,9 +18,7 @@ const isAppLanguageCode = (localeCode: string): localeCode is AppLanguageCode =>
   Object.hasOwn(APP_LANGUAGE_LABELS, localeCode);
 
 const getLocaleLabel = (localeCode: string): string => {
-  const directLabel = isAppLanguageCode(localeCode)
-    ? APP_LANGUAGE_LABELS[localeCode]
-    : undefined;
+  const directLabel = isAppLanguageCode(localeCode) ? APP_LANGUAGE_LABELS[localeCode] : undefined;
   return directLabel || localeCode;
 };
 

@@ -456,7 +456,11 @@ class SmtpConnection {
       return;
     }
 
-    throw new SmtpProtocolError(response.code, response.lines, `Unexpected response for ${context}`);
+    throw new SmtpProtocolError(
+      response.code,
+      response.lines,
+      `Unexpected response for ${context}`,
+    );
   }
 
   /**
@@ -506,7 +510,9 @@ export class EmailDeliveryService {
       throw connectResult.reason;
     }
 
-    const deliveryResult = await settle(this.performDelivery(connection, config, request, metadata));
+    const deliveryResult = await settle(
+      this.performDelivery(connection, config, request, metadata),
+    );
     const quitResult = await settle(connection.quit());
     if (quitResult.status === "rejected") {
       this.logger.warn("smtp quit failed", quitResult.reason);
@@ -559,10 +565,7 @@ export class EmailDeliveryService {
   /**
    * Validates SMTP settings before opening a network connection.
    */
-  private validateTransport(
-    config: EmailTransportRuntimeConfig,
-    recipientEmail: string,
-  ): void {
+  private validateTransport(config: EmailTransportRuntimeConfig, recipientEmail: string): void {
     if (config.host.trim().length === 0) {
       throw new Error("Email delivery host is not configured");
     }
@@ -695,7 +698,9 @@ const buildRfc822Message = (
   deliveredAt: string,
   messageId: string,
 ): string => {
-  const encodedBody = splitBase64Lines(encodeBase64Utf8(request.body.replace(/\r?\n/g, SMTP_LINE_BREAK)));
+  const encodedBody = splitBase64Lines(
+    encodeBase64Utf8(request.body.replace(/\r?\n/g, SMTP_LINE_BREAK)),
+  );
   const fromAddress = formatAddress(config.fromEmail, config.fromName);
   const toAddress = formatAddress(request.recipientEmail, "");
 

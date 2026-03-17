@@ -58,9 +58,11 @@
     "validate:i18n-ui": "bun run scripts/validate-ui-i18n.ts",
     "audit:official-llms": "bun run scripts/audit-official-llms.ts",
     "audit:integration": "bun run audit:official-llms && bun run verify:pages",
+    "capability:matrix": "bun run scripts/generate-agentiflow-capability-matrix.ts",
+    "capability:matrix:check": "bun run scripts/check-agentiflow-capability-matrix.ts",
     "verify:bun-baseline": "bash scripts/verify-bun-baseline.sh",
     "audit:stack-versions": "for pkg in bun nuxt tailwindcss daisyui elysia @elysiajs/eden drizzle-orm drizzle-kit @tauri-apps/cli @tauri-apps/api; do printf \"%s\\t\" \"$pkg\"; bunx npm view \"$pkg\" version; done",
-    "validate:stack-alignment": "bun run verify:bun-baseline && bun run audit:stack-versions",
+    "validate:stack-alignment": "bun run verify:bun-baseline && bun run audit:stack-versions && bun run capability:matrix:check",
     "validate:daisyui-contracts": "bun run scripts/validate-daisyui-contracts.ts",
     "validate:alignment": "bun run validate:stack-alignment && bun run validate:ui-layout-tokens && bun run validate:daisyui-contracts",
     "ci:alignment": "bun ci && bun run validate:alignment",
@@ -81,7 +83,7 @@
     "drizzle-kit": "^0.31.9",
     "eslint": "^10.0.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0",
+    "typescript-eslint": "^8.57.1",
     "vue-router": "^5.0.3"
   }
 }

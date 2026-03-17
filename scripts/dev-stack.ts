@@ -147,16 +147,24 @@ const trackProcess = async (name: ProcessName, proc: ChildProcess): Promise<void
 
 const TRAILING_SLASH_REGEX = /\/$/;
 
+const settlePromise = async <T>(promise: Promise<T>): Promise<PromiseSettledResult<T>> => {
+  const [result] = await Promise.allSettled([promise]);
+  return result;
+};
+
 const isPinchTabReachable = async (baseUrl: string): Promise<boolean> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), PINCHTAB_REQUEST_TIMEOUT_MS);
-  const result = await fetch(`${baseUrl.replace(TRAILING_SLASH_REGEX, "")}/`, {
-    signal: controller.signal,
-  })
-    .then((res) => res.ok)
-    .catch(() => false);
+  const result = await settlePromise(
+    fetch(`${baseUrl.replace(TRAILING_SLASH_REGEX, "")}/`, {
+      signal: controller.signal,
+    }),
+  );
   clearTimeout(timeout);
-  return result;
+  if (result.status === "rejected") {
+    return false;
+  }
+  return result.value.ok;
 };
 
 const describeAsyncError = (value: unknown): string =>

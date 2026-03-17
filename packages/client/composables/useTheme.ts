@@ -6,10 +6,7 @@ import { STATE_KEYS, THEME_NAMES } from "@bao/shared";
 export function useTheme() {
   const theme = useState<"bao-light" | "bao-dark">(STATE_KEYS.APP_THEME, () => THEME_NAMES.light);
 
-  function setTheme(
-    newTheme: "bao-light" | "bao-dark",
-    options: { persistLocal?: boolean } = {},
-  ) {
+  function setTheme(newTheme: "bao-light" | "bao-dark", options: { persistLocal?: boolean } = {}) {
     theme.value = newTheme;
     if (import.meta.client) {
       document.documentElement.setAttribute("data-theme", newTheme);

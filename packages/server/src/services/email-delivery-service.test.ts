@@ -39,9 +39,7 @@ afterEach(() => {
   }
 });
 
-const expectRejectedDelivery = async (
-  deliveryPromise: Promise<unknown>,
-): Promise<Error> => {
+const expectRejectedDelivery = async (deliveryPromise: Promise<unknown>): Promise<Error> => {
   const result = await deliveryPromise.then(
     () => null,
     (error: unknown) => error,

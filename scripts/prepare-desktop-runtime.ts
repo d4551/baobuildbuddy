@@ -71,6 +71,17 @@ const BUN_COMPILE_EXTRACTION_FAILURE_PATTERN =
 let compileTargetScratchRoot: string | null = null;
 const prewarmedCompileTargetDirectories = new Map<string, Promise<string>>();
 
+const pushBoundedLogLine = (target: string[], value: string): void => {
+  const normalized = value.trim();
+  if (normalized.length === 0) {
+    return;
+  }
+  target.push(normalized);
+  if (target.length > LOG_LINE_LIMIT) {
+    target.shift();
+  }
+};
+
 const resolveTauriCacheDir = (): string => {
   const envOverride = process.env.TAURI_CACHE_DIR?.trim();
   if (envOverride) {
@@ -122,23 +133,12 @@ const captureStreamLines = async (
   const decoder = new TextDecoder();
   let pending = "";
 
-  const pushLine = (value: string): void => {
-    const normalized = value.trim();
-    if (normalized.length === 0) {
-      return;
-    }
-    target.push(normalized);
-    if (target.length > LOG_LINE_LIMIT) {
-      target.shift();
-    }
-  };
-
   const readChunk = async (): Promise<void> => {
     const result = await reader.read();
     if (result.done) {
       const trailing = `${pending}${decoder.decode()}`.trim();
       if (trailing.length > 0) {
-        pushLine(trailing);
+        pushBoundedLogLine(target, trailing);
       }
       return;
     }
@@ -147,13 +147,48 @@ const captureStreamLines = async (
     const lines = decoded.split(/\r?\n/gu);
     pending = lines.pop() ?? "";
     for (const line of lines) {
-      pushLine(line);
+      pushBoundedLogLine(target, line);
     }
 
     await readChunk();
   };
 
   await readChunk();
+};
+
+const recordStreamCapture = (
+  stream: number | ReadableStream<Uint8Array> | undefined,
+  target: string[],
+  label: string,
+): void => {
+  Promise.allSettled([captureStreamLines(stream, target)]).then(
+    ([result]) => {
+      if (result.status === "rejected") {
+        pushBoundedLogLine(
+          target,
+          `[${label}] ${toErrorMessage(result.reason, `Failed to capture ${label}.`)}`,
+        );
+      }
+    },
+    (error) => {
+      pushBoundedLogLine(
+        target,
+        `[${label}] ${toErrorMessage(error, `Failed to observe ${label}.`)}`,
+      );
+    },
+  );
+};
+
+const waitForProcessExit = async (
+  proc: ReturnType<typeof Bun.spawn>,
+  processLabel: string,
+): Promise<void> => {
+  const [result] = await Promise.allSettled([proc.exited]);
+  if (result.status === "rejected") {
+    throw new Error(`Failed waiting for ${processLabel} to exit cleanly.`, {
+      cause: result.reason,
+    });
+  }
 };
 
 const parseTargetArg = (argv: readonly string[]): string | null => {
@@ -478,15 +513,15 @@ const startBuildServer = async (
     stderr: "pipe",
   });
 
-  captureStreamLines(proc.stdout, stdoutLines).catch(() => undefined);
-  captureStreamLines(proc.stderr, stderrLines).catch(() => undefined);
+  recordStreamCapture(proc.stdout, stdoutLines, "desktop-runtime-build-stdout");
+  recordStreamCapture(proc.stderr, stderrLines, "desktop-runtime-build-stderr");
 
   const waitResult = await captureResult(() =>
     waitForService(`${BUILD_SERVER_API_BASE}/api/health`),
   );
   if (!waitResult.ok) {
     proc.kill();
-    await proc.exited.catch(() => undefined);
+    await waitForProcessExit(proc, "desktop runtime build server");
     const logDump = [...stdoutLines, ...stderrLines].join("\n");
     const message = toErrorMessage(
       waitResult.error,
@@ -504,7 +539,7 @@ const startBuildServer = async (
 
 const stopProcess = async (proc: ReturnType<typeof Bun.spawn>): Promise<void> => {
   proc.kill();
-  await proc.exited.catch(() => undefined);
+  await waitForProcessExit(proc, "desktop runtime build server");
 };
 
 const isTextFile = (filePath: string): boolean => {
@@ -735,10 +770,7 @@ const writeRuntimeManifest = async (
 const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void> => {
   const compileTarget = resolveBunCompileTarget(tauriTarget);
   const runtimeTargetInfo = resolveRuntimeTargetInfo(tauriTarget);
-  const serverExecutablePath = join(
-    RUNTIME_ROOT,
-    runtimeTargetInfo.serverExecutable,
-  );
+  const serverExecutablePath = join(RUNTIME_ROOT, runtimeTargetInfo.serverExecutable);
 
   await writeOutput(`desktop-runtime: compiling bundled desktop server (${compileTarget})`);
   await compileRuntimeBinary(compileTarget, SERVER_ENTRYPOINT, serverExecutablePath);

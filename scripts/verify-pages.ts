@@ -212,7 +212,7 @@ const verifyRoute = async (
   const response = await fetch(`${VERIFY_BASE_URL}${route}`, {
     headers: {
       "accept-language": locale,
-        cookie: `${DEFAULT_I18N_LOCALE_COOKIE_KEY}=${locale}`,
+      cookie: `${DEFAULT_I18N_LOCALE_COOKIE_KEY}=${locale}`,
     },
   });
 

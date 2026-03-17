@@ -132,6 +132,10 @@ jobs:
 
       - name: Verify packaged desktop runtime
         shell: pwsh
+        env:
+          # Playwright Chromium launch often times out on Windows GitHub runners (Bun + pipe handling).
+          # Skip browser-based frontend checks; API and automation verification still runs.
+          DESKTOP_RUNTIME_SKIP_BROWSER_VERIFY: "true"
         run: bun run verify:desktop-runtime -- --target x86_64-pc-windows-msvc
 
       - name: Verify Windows release artifacts

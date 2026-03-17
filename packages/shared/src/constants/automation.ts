@@ -28,9 +28,7 @@ export type AutomationScrapePortalId = (typeof AUTOMATION_SCRAPE_PORTAL_IDS)[num
  * @param portalId Portal id under evaluation.
  * @returns `true` when the portal id maps to a supported scraper integration.
  */
-export function isAutomationScrapePortalId(
-  portalId: string,
-): portalId is AutomationScrapePortalId {
+export function isAutomationScrapePortalId(portalId: string): portalId is AutomationScrapePortalId {
   return AUTOMATION_SCRAPE_PORTAL_IDS.some((candidatePortalId) => candidatePortalId === portalId);
 }
 
@@ -49,10 +47,7 @@ export const AUTOMATION_SCRAPE_JOB_TARGETS = [
 /**
  * Supported scheduled scrape targets across API and client surfaces.
  */
-export const AUTOMATION_SCRAPE_TARGETS = [
-  "studios",
-  ...AUTOMATION_SCRAPE_JOB_TARGETS,
-] as const;
+export const AUTOMATION_SCRAPE_TARGETS = ["studios", ...AUTOMATION_SCRAPE_JOB_TARGETS] as const;
 
 /**
  * Union type for a job-board scrape target.

@@ -139,10 +139,8 @@ const jaJPOverrides = {
     readiness: {
       feedback: {
         empty: "{category} の準備データはまだありません。",
-        early:
-          "{category} は初期段階です。マッピングと証拠をさらに追加してください。",
-        developing:
-          "{category} は発展途上です。具体的な事例と証拠を継続して追加しましょう。",
+        early: "{category} は初期段階です。マッピングと証拠をさらに追加してください。",
+        developing: "{category} は発展途上です。具体的な事例と証拠を継続して追加しましょう。",
         good: "{category} は良好です。さらに深掘りして強化しましょう。",
         excellent: "{category} は非常に良好です。この領域の準備は十分です。",
       },
@@ -150,50 +148,35 @@ const jaJPOverrides = {
         imp_tech_map:
           "ゲーム由来の技術スキルを、業務で使える技術スキルへさらにマッピングしましょう。",
         imp_conf_up: "既存の技術スキルマッピングの信頼度を引き上げましょう。",
-        imp_lead_comm:
-          "リーダーシップとコミュニケーション経験のマッピングを増やしましょう。",
+        imp_lead_comm: "リーダーシップとコミュニケーション経験のマッピングを増やしましょう。",
         imp_team_examples: "チーム協業の具体例を追加しましょう。",
-        imp_industry_research:
-          "マッピング済みスキルの業界適用先をさらに調査しましょう。",
-        imp_role_link:
-          "マッピング済みスキルを具体的なターゲット職種に結びつけましょう。",
-        imp_evidence_add:
-          "クリップ、スクリーンショット、文書でスキルの証拠を追加しましょう。",
-        imp_portfolio_build:
-          "実践スキルを示すポートフォリオプロジェクトを構築しましょう。",
-        imp_achievements_doc:
-          "主要なスキルマッピングに対して測定可能な成果を記録しましょう。",
+        imp_industry_research: "マッピング済みスキルの業界適用先をさらに調査しましょう。",
+        imp_role_link: "マッピング済みスキルを具体的なターゲット職種に結びつけましょう。",
+        imp_evidence_add: "クリップ、スクリーンショット、文書でスキルの証拠を追加しましょう。",
+        imp_portfolio_build: "実践スキルを示すポートフォリオプロジェクトを構築しましょう。",
+        imp_achievements_doc: "主要なスキルマッピングに対して測定可能な成果を記録しましょう。",
         imp_transfer_strengthen:
           "ゲームメカニクスを工学概念に対応させ、技術転用力を強化しましょう。",
         imp_leadership_highlight:
           "ゲーム文脈でのリーダーシップとコミュニケーション経験を強調しましょう。",
-        imp_coverage_broaden:
-          "10〜15の多様なスキルをマッピングしてカバレッジを広げましょう。",
-        imp_examples_refine:
-          "現在のマッピングをより具体的な事例で改善しましょう。",
+        imp_coverage_broaden: "10〜15の多様なスキルをマッピングしてカバレッジを広げましょう。",
+        imp_examples_refine: "現在のマッピングをより具体的な事例で改善しましょう。",
         imp_certs_pursue: "技術力を裏付ける認定資格の取得を検討しましょう。",
-        imp_network_pro:
-          "ターゲット業界のプロフェッショナルとのネットワークを拡大しましょう。",
+        imp_network_pro: "ターゲット業界のプロフェッショナルとのネットワークを拡大しましょう。",
       },
       nextStepItems: {
         step_apply_roles: "ターゲット職種への応募を開始しましょう。",
-        step_network_industry:
-          "業界のプロフェッショナルとネットワークを構築しましょう。",
+        step_network_industry: "業界のプロフェッショナルとネットワークを構築しましょう。",
         step_prepare_interviews: "技術面接の準備を進めましょう。",
         step_polish_linkedin: "LinkedInプロフィールを磨きましょう。",
-        step_complete_portfolio:
-          "3〜5件の強いポートフォリオプロジェクトを完成させましょう。",
-        step_map_skills_15:
-          "追加で5スキルをマッピングして15件以上を目指しましょう。",
+        step_complete_portfolio: "3〜5件の強いポートフォリオプロジェクトを完成させましょう。",
+        step_map_skills_15: "追加で5スキルをマッピングして15件以上を目指しましょう。",
         step_evidence_top: "上位10スキルに証拠を追加しましょう。",
         step_research_targets: "ターゲット企業と職種を調査しましょう。",
-        step_map_skills_10:
-          "ゲームスキルを10件以上キャリアスキルへマッピングしましょう。",
-        step_start_portfolio:
-          "ポートフォリオプロジェクトの構築を開始しましょう。",
+        step_map_skills_10: "ゲームスキルを10件以上キャリアスキルへマッピングしましょう。",
+        step_start_portfolio: "ポートフォリオプロジェクトの構築を開始しましょう。",
         step_evidence_abilities: "能力を示すための証拠を追加しましょう。",
-        step_explore_pathways:
-          "自身のスキルに合うキャリアパスを探索しましょう。",
+        step_explore_pathways: "自身のスキルに合うキャリアパスを探索しましょう。",
         step_map_skills_5: "最初の5つのゲームスキルをマッピングしましょう。",
         step_explore_categories: "さまざまなスキルカテゴリを探索しましょう。",
         step_learn_careers: "ゲーム業界のキャリア選択肢を学びましょう。",
@@ -226,17 +209,14 @@ const jaJPOverrides = {
     title: "面接準備ハブ",
     errors: {
       bootstrapLoadFailed: "面接ハブのデータ読み込みに失敗しました",
-      roleRecommendationsFailed:
-        "最適化されたロール提案の読み込みに失敗しました",
+      roleRecommendationsFailed: "最適化されたロール提案の読み込みに失敗しました",
     },
   },
   settings: {
     seoTitle: "設定とプロフィール",
-    seoDescription:
-      "プロフィール、AIプロバイダー、通知設定、自動化の既定値を一元的に管理します。",
+    seoDescription: "プロフィール、AIプロバイダー、通知設定、自動化の既定値を一元的に管理します。",
     title: "設定とプロフィール",
-    subtitle:
-      "アイデンティティ、アシスタントの動作、自動化のデフォルト設定を一元管理します。",
+    subtitle: "アイデンティティ、アシスタントの動作、自動化のデフォルト設定を一元管理します。",
     profile: {
       title: "ユーザープロフィール",
       nameLegend: "名前",
@@ -269,8 +249,7 @@ const jaJPOverrides = {
       smartSelectorsTitle: "スマートセレクター",
       smartSelectorsDescription: "AIでフォームフィールドを検出します。",
       autoScreenshotsTitle: "自動スクリーンショット",
-      autoScreenshotsDescription:
-        "各ステップでスクリーンショットを保存します。",
+      autoScreenshotsDescription: "各ステップでスクリーンショットを保存します。",
       timeoutLegend: "タイムアウト（秒）",
       retentionLegend: "スクリーンショット保持（日数）",
       concurrentRunsLegend: "最大同時実行数",
@@ -335,17 +314,13 @@ const jaJPOverrides = {
       },
       stats: {
         product: "製品",
-        productDescription:
-          "顧客向けに表示される主要なアプリケーション名です。",
+        productDescription: "顧客向けに表示される主要なアプリケーション名です。",
         assistant: "アシスタント",
-        assistantDescription:
-          "チャット画面全体で既定表示されるアシスタントの人格です。",
+        assistantDescription: "チャット画面全体で既定表示されるアシスタントの人格です。",
         locales: "言語",
-        localesDescription:
-          "設定画面で公開されている対応インターフェース言語数です。",
+        localesDescription: "設定画面で公開されている対応インターフェース言語数です。",
         overrides: "オーバーライド",
-        overridesDescription:
-          "アクティブなロケールカタログへ統合されるカスタムコピーキー数です。",
+        overridesDescription: "アクティブなロケールカタログへ統合されるカスタムコピーキー数です。",
       },
     },
     toasts: {
@@ -386,12 +361,10 @@ const jaJPOverrides = {
   aiProviderCatalog: {
     local: {
       name: "ローカルモデル",
-      description:
-        "RamaLama または Ollama を使ったプライベートなローカル優先実行。",
+      description: "RamaLama または Ollama を使ったプライベートなローカル優先実行。",
     },
     gemini: {
-      description:
-        "一般的なQAとコンテンツ生成に適した主要クラウドプロバイダー。",
+      description: "一般的なQAとコンテンツ生成に適した主要クラウドプロバイダー。",
     },
     claude: {
       description: "長文脈推論が必要な分析系ワークフロー向けプロバイダー。",
@@ -415,8 +388,7 @@ const jaJPOverrides = {
     seoDescription:
       "利用可能なエンドポイントを確認し、アプリから直接エンドポイントのリクエストをテストできます。",
     title: "APIリファレンス",
-    intro:
-      "APIの公開範囲を確認し、統合テスターでエンドポイントチェックを実行します。",
+    intro: "APIの公開範囲を確認し、統合テスターでエンドポイントチェックを実行します。",
     endpointNavigator: "エンドポイント一覧",
     groups: {
       untagged: "未分類",
@@ -451,8 +423,7 @@ const jaJPOverrides = {
       requestBodyIntro: "リクエストボディ",
       requestBodyAria: "JSON リクエストボディ",
       bodyPlaceholder: '{\n  "サンプル": "値"\n}',
-      noRequestBodyTemplate:
-        "OpenAPI仕様にリクエストボディテンプレートがありません。",
+      noRequestBodyTemplate: "OpenAPI仕様にリクエストボディテンプレートがありません。",
       parameterLabel: "パラメータ {name}",
       send: "リクエストを送信",
       sending: "送信中",
@@ -500,8 +471,7 @@ const jaJPOverrides = {
           "どのブラウザ自動化ワークフローが実装済みで、設定され、観測可能かを確認します。",
         aria: "RPA機能監査",
         openScraperButton: "スクレイパーハブを開く",
-        openScraperAria:
-          "拡張されたRPAターゲットを備えたスクレイパーハブを開く",
+        openScraperAria: "拡張されたRPAターゲットを備えたスクレイパーハブを開く",
         loadErrorFallback: "RPA機能監査を読み込めませんでした。",
         available: "利用可能",
         needsConfig: "要設定",
@@ -560,8 +530,7 @@ const jaJPOverrides = {
         cancelButton: "ストリーム停止",
         cancelAria: "ストリーム購読を停止",
         errorTitle: "ストリームエラー",
-        startErrorFallback:
-          "この実行のライブストリームを開始できませんでした。",
+        startErrorFallback: "この実行のライブストリームを開始できませんでした。",
         states: {
           idle: "待機中",
           loading: "ストリームへ接続中",
@@ -610,8 +579,7 @@ const jaJPOverrides = {
     },
     runDetail: {
       screenshotLinkLabel: "スクリーンショット {index} を開く",
-      screenshotLoadError:
-        "スクリーンショット {index} をプレビューできませんでした。",
+      screenshotLoadError: "スクリーンショット {index} をプレビューできませんでした。",
       retryButton: "再試行",
       retryAria: "実行詳細の読み込みを再試行",
       progressSummary: "{percent}% 完了",
@@ -655,8 +623,7 @@ const jaJPOverrides = {
   resumePreview: {
     printButton: "印刷",
     printAria: "履歴書プレビューを印刷",
-    notFound:
-      "履歴書が見つかりません。プレビューする履歴書を選択してください。",
+    notFound: "履歴書が見つかりません。プレビューする履歴書を選択してください。",
     websiteLinkAria: "個人ウェブサイトを開く",
     linkedinLinkAria: "LinkedInプロフィールを開く",
     githubLinkAria: "GitHubプロフィールを開く",
@@ -679,8 +646,7 @@ const jaJPOverrides = {
       viewButton: "表示",
       emptyState:
         "表示するプロジェクトがありません。ポートフォリオビルダーでプロジェクトを追加してください。",
-      notFound:
-        "ポートフォリオが見つかりません。先にポートフォリオを作成してください。",
+      notFound: "ポートフォリオが見つかりません。先にポートフォリオを作成してください。",
     },
   },
   interviewScoreCard: {

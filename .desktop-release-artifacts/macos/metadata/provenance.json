@@ -6,13 +6,9 @@
   "hostPlatform": "darwin",
   "hostArch": "arm64",
   "tauriTarget": "aarch64-apple-darwin",
-  "artifactNames": [
-    "BaoBuildBuddy_0.1.0_aarch64.dmg"
-  ],
-  "buildCommands": [
-    "stage-only existing bundled artifacts for aarch64-apple-darwin"
-  ],
-  "builtAt": "2026-03-17T01:05:41.083Z",
+  "artifactNames": ["BaoBuildBuddy_0.1.0_aarch64.dmg"],
+  "buildCommands": ["stage-only existing bundled artifacts for aarch64-apple-darwin"],
+  "builtAt": "2026-03-17T06:12:18.074Z",
   "ci": {
     "workflow": null,
     "runId": null,
