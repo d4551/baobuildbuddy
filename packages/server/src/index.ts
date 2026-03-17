@@ -34,8 +34,8 @@ runBackgroundTask(
   })(),
 );
 
-// Job refresh: run every 6 hours (Bun-native, no cron deps)
-setInterval(() => {
+// Job refresh: initial run on startup, then every 6 hours (Bun-native, no cron deps)
+const runJobRefresh = (): void => {
   const aggregator = new JobAggregator();
   runBackgroundTask(
     (async () => {
@@ -55,7 +55,9 @@ setInterval(() => {
       );
     })(),
   );
-}, JOB_AGGREGATOR_CACHE_EXPIRY_MS);
+};
+runJobRefresh();
+setInterval(runJobRefresh, JOB_AGGREGATOR_CACHE_EXPIRY_MS);
 
 // Start server
 const server = app.listen(config.port);

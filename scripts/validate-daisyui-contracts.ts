@@ -13,6 +13,12 @@ type FileContract = {
   description: string;
 };
 
+type SameAttributeDisallowedRequirement = {
+  baseClass: string;
+  disallowedClasses: readonly string[];
+  message: string;
+};
+
 const REQUIRED_FILE_CONTRACTS: readonly FileContract[] = [
   {
     filePath: "packages/client/layouts/default.vue",
@@ -66,6 +72,33 @@ const FILE_LEVEL_PART_REQUIREMENTS = [
     baseClass: "list",
     partClasses: ["list-row"],
   },
+] as const;
+
+const SAME_ATTRIBUTE_DISALLOWED_REQUIREMENTS: readonly SameAttributeDisallowedRequirement[] = [
+  {
+    baseClass: "list",
+    disallowedClasses: ["list-disc", "list-inside"],
+    message:
+      "daisyUI `list` already defines the list primitive; do not combine it with Tailwind bullet-list classes.",
+  },
+] as const;
+
+const BTN_SEMANTIC_MODIFIERS = [
+  "btn-primary",
+  "btn-secondary",
+  "btn-accent",
+  "btn-neutral",
+  "btn-info",
+  "btn-success",
+  "btn-warning",
+  "btn-error",
+  "btn-outline",
+  "btn-ghost",
+  "btn-soft",
+  "btn-dash",
+  "btn-link",
+  "btn-active",
+  "btn-disabled",
 ] as const;
 
 const extractClassTokens = (value: string): string[] =>
@@ -233,19 +266,79 @@ const collectRadialProgressViolations = (filePath: string, fileContent: string):
   return violations;
 };
 
+const collectIncompatibleClassViolations = (filePath: string, fileContent: string): Violation[] => {
+  const violations: Violation[] = [];
+  for (const classMatch of fileContent.matchAll(STATIC_CLASS_ATTRIBUTE_PATTERN)) {
+    const tokens = extractClassTokens(classMatch[1]);
+    for (const requirement of SAME_ATTRIBUTE_DISALLOWED_REQUIREMENTS) {
+      if (!tokens.includes(requirement.baseClass)) {
+        continue;
+      }
+
+      const foundDisallowedClass = requirement.disallowedClasses.find((className) =>
+        tokens.includes(className),
+      );
+      if (!foundDisallowedClass) {
+        continue;
+      }
+
+      violations.push({
+        filePath,
+        line: getLineFromOffset(fileContent, classMatch.index ?? 0),
+        message: `${requirement.message} Remove \`${foundDisallowedClass}\`.`,
+      });
+    }
+  }
+  return violations;
+};
+
+const collectBtnModifierViolations = (filePath: string, fileContent: string): Violation[] => {
+  const violations: Violation[] = [];
+  for (const classMatch of fileContent.matchAll(STATIC_CLASS_ATTRIBUTE_PATTERN)) {
+    const tokens = extractClassTokens(classMatch[1]);
+    if (!tokens.includes("btn")) {
+      continue;
+    }
+    const hasModifier = BTN_SEMANTIC_MODIFIERS.some((mod) => tokens.includes(mod));
+    if (!hasModifier) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(fileContent, classMatch.index ?? 0),
+        message:
+          "daisyUI `btn` requires a semantic modifier (e.g. btn-primary, btn-ghost, btn-outline).",
+      });
+    }
+  }
+  return violations;
+};
+
+/**
+ * Collect daisyUI contract violations for a single Vue file payload.
+ *
+ * This is exported so package tests can lock validator behavior without spawning the full script.
+ */
+export function collectDaisyUiContractViolationsForContent(
+  filePath: string,
+  fileContent: string,
+): Violation[] {
+  return [
+    ...collectRequiredClassViolations(filePath, fileContent),
+    ...collectSemanticModifierViolations(filePath, fileContent),
+    ...collectBtnModifierViolations(filePath, fileContent),
+    ...collectFileLevelPartViolations(filePath, fileContent),
+    ...collectIncompatibleClassViolations(filePath, fileContent),
+    ...collectTableMarkupViolations(filePath, fileContent),
+    ...collectProgressMarkupViolations(filePath, fileContent),
+    ...collectRadialProgressViolations(filePath, fileContent),
+  ];
+}
+
 const collectScopeViolations = async (): Promise<Violation[]> => {
   const files = await collectVueFiles();
   const fileViolationGroups = await Promise.all(
     files.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();
-      return [
-        ...collectRequiredClassViolations(filePath, fileContent),
-        ...collectSemanticModifierViolations(filePath, fileContent),
-        ...collectFileLevelPartViolations(filePath, fileContent),
-        ...collectTableMarkupViolations(filePath, fileContent),
-        ...collectProgressMarkupViolations(filePath, fileContent),
-        ...collectRadialProgressViolations(filePath, fileContent),
-      ];
+      return collectDaisyUiContractViolationsForContent(filePath, fileContent);
     }),
   );
   return fileViolationGroups.flat();
@@ -267,4 +360,6 @@ const main = async (): Promise<void> => {
   process.exit(1);
 };
 
-await main();
+if (import.meta.main) {
+  await main();
+}

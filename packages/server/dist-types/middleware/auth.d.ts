@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 /**
  * Elysia plugin that validates Bearer API key for protected routes.
- * Skipped when config.disableAuth is true (local dev).
+ * Skipped only when config.disableAuth is explicitly enabled.
  */
 export declare const authGuard: Elysia<"", {
     decorator: {};

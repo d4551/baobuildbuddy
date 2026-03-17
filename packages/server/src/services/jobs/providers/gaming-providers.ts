@@ -2,10 +2,12 @@ import {
   generateId,
   safeParseJson,
   settle,
+  toErrorMessage,
   type GamingPortalConfig,
   type GamingPortalId,
 } from "@bao/shared";
 import { type ScrapedJob, scraperService } from "../../scraper-service";
+import { createServerLogger } from "../../../utils/logger";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
@@ -35,6 +37,25 @@ const PORTAL_SCRAPE_METHOD_BY_ID: Record<GamingPortalId, PortalScrapeMethod> = {
   remotegamejobs: () => scraperService.scrapeRemoteGameJobsRaw(),
   gamesjobsdirect: () => scraperService.scrapeGamesJobsDirectRaw(),
   pocketgamer: () => scraperService.scrapePocketGamerJobsRaw(),
+};
+const gamingProviderLogger = createServerLogger("gaming-providers");
+
+const logProviderFailure = (providerName: string, reason: string, details?: unknown): RawJob[] => {
+  gamingProviderLogger.error("Job provider fetch failed", {
+    providerName,
+    reason,
+    details,
+  });
+  return [];
+};
+
+const logProviderSkip = (providerName: string, reason: string, details?: unknown): RawJob[] => {
+  gamingProviderLogger.info("Job provider fetch skipped", {
+    providerName,
+    reason,
+    details,
+  });
+  return [];
 };
 
 const resolveHitmarkerJobs = (payload: HitmarkerResponse): HitmarkerJob[] =>
@@ -79,7 +100,9 @@ export class HitmarkerProvider implements JobProvider {
   async fetchJobs(filters?: JobFilters): Promise<RawJob[]> {
     const providerSettingsResult = await settle(loadJobProviderSettings());
     if (providerSettingsResult.status === "rejected") {
-      return [];
+      return logProviderFailure(this.name, "settings_unavailable", {
+        error: toErrorMessage(providerSettingsResult.reason),
+      });
     }
     const providerSettings = providerSettingsResult.value;
     const query = filters?.query || providerSettings.hitmarkerDefaultQuery;
@@ -93,17 +116,25 @@ export class HitmarkerProvider implements JobProvider {
       }),
     );
     if (responseResult.status === "rejected") {
-      return [];
+      return logProviderFailure(this.name, "request_failed", {
+        error: toErrorMessage(responseResult.reason),
+        requestUrl: requestUrl.toString(),
+      });
     }
     const response = responseResult.value;
     if (!response.ok) {
-      return [];
+      return logProviderFailure(this.name, "response_not_ok", {
+        requestUrl: requestUrl.toString(),
+        status: response.status,
+      });
     }
 
     const rawText = await response.text();
     const parsed = safeParseJson(rawText);
     if (parsed === null) {
-      return [];
+      return logProviderFailure(this.name, "invalid_json", {
+        requestUrl: requestUrl.toString(),
+      });
     }
     const payload = parsed as HitmarkerResponse;
     const jobs = resolveHitmarkerJobs(payload);
@@ -145,12 +176,16 @@ export class GamingPortalProvider implements JobProvider {
   async fetchJobs(): Promise<RawJob[]> {
     const providerSettingsResult = await settle(loadJobProviderSettings());
     if (providerSettingsResult.status === "rejected") {
-      return [];
+      return logProviderFailure(this.name, "settings_unavailable", {
+        error: toErrorMessage(providerSettingsResult.reason),
+      });
     }
     const providerSettings = providerSettingsResult.value;
     const portalConfig = resolvePortalConfig(providerSettings.gamingPortals, this.portalId);
     if (!portalConfig?.enabled) {
-      return [];
+      return logProviderSkip(this.portalId, "portal_disabled", {
+        portalId: this.portalId,
+      });
     }
 
     this.name = portalConfig.name;
@@ -158,7 +193,10 @@ export class GamingPortalProvider implements JobProvider {
     const scrapeMethod = PORTAL_SCRAPE_METHOD_BY_ID[this.portalId];
     const scrapeResult = await settle(scrapeMethod(portalConfig.fallbackUrl));
     if (scrapeResult.status === "rejected") {
-      return [];
+      return logProviderFailure(this.name, "scrape_failed", {
+        error: toErrorMessage(scrapeResult.reason),
+        portalId: this.portalId,
+      });
     }
     const scraped = scrapeResult.value;
     return scraped.slice(0, providerSettings.gamingBoardResultLimit).map((job) => ({

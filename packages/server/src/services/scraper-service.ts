@@ -1,5 +1,6 @@
 import {
   API_ERROR_INVALID_SCRAPER_JSON,
+  API_ERROR_INVALID_SCRIPT_ID,
   automationScrapeTargetToPortalId,
   automationScriptIdSchema,
   generateId,
@@ -120,10 +121,16 @@ const parseJsonRows = (raw: unknown): unknown[] => {
 
 const resolveScriptReference = (
   scriptReference: AutomationScriptId | ScriptReferenceOverride,
-): AutomationScriptReference =>
-  typeof scriptReference === "string"
-    ? { scriptId: automationScriptIdSchema.parse(scriptReference) }
-    : { scriptPath: scriptReference.scriptPath };
+): AutomationScriptReference => {
+  if (typeof scriptReference !== "string") {
+    return { scriptPath: scriptReference.scriptPath };
+  }
+  const parsed = automationScriptIdSchema.safeParse(scriptReference);
+  if (!parsed.success) {
+    throw new Error(API_ERROR_INVALID_SCRIPT_ID);
+  }
+  return { scriptId: parsed.data };
+};
 
 const normalizeHashInput = (value: string | undefined): string =>
   typeof value === "string" ? value.trim().toLowerCase() : "";

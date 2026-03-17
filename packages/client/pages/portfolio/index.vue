@@ -608,7 +608,7 @@ function projectPageAria(page: number): string {
                 <div class="card-actions mt-4 justify-between">
                   <div class="join">
                     <button
-                      class="btn join-item btn-xs"
+                      class="btn join-item btn-xs btn-ghost"
                       :disabled="!canMove(project.id, 'up') || reorderingProjectId === project.id"
                       :aria-label="t('portfolioPage.projects.moveUpAria', { title: project.title })"
                       @click="moveProject(project.id, 'up')"
@@ -616,7 +616,7 @@ function projectPageAria(page: number): string {
                       {{ t("portfolioPage.projects.moveUpButton") }}
                     </button>
                     <button
-                      class="btn join-item btn-xs"
+                      class="btn join-item btn-xs btn-ghost"
                       :disabled="!canMove(project.id, 'down') || reorderingProjectId === project.id"
                       :aria-label="t('portfolioPage.projects.moveDownAria', { title: project.title })"
                       @click="moveProject(project.id, 'down')"

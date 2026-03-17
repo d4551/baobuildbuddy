@@ -8,6 +8,8 @@ export const API_MESSAGE_JOB_REFRESH_COMPLETE = "Job refresh completed successfu
 export const API_MESSAGE_AUTH_DISABLED = "Auth disabled";
 export const API_MESSAGE_API_KEY_ALREADY_CONFIGURED = "API key already configured";
 export const API_MESSAGE_SAVE_API_KEY_ONCE = "Save this API key — it will not be shown again";
+export const API_MESSAGE_AUTH_SETUP_TOKEN_REQUIRED =
+  "Provide the setup token to initialize the first API key";
 export const API_MESSAGE_INTERVIEW_SESSION_CREATED = "Interview session created";
 export const API_MESSAGE_RESPONSE_RECORDED = "Response recorded";
 export const API_MESSAGE_INTERVIEW_COMPLETED = "Interview completed";

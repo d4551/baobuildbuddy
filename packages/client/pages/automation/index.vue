@@ -264,7 +264,7 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
       <span>{{ getErrorMessage(error, t("automation.hub.loadErrorFallback")) }}</span>
       <button
         type="button"
-        class="btn btn-sm"
+        class="btn btn-sm btn-ghost"
         :aria-label="t('automation.hub.retryAria')"
         @click="retryLoad"
       >
@@ -424,8 +424,8 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
             <div class="card-actions justify-end mt-4">
               <NuxtLink
                 :to="card.to"
-                class="btn"
-                :class="primaryCardId === card.id ? 'btn-primary' : 'btn-outline'"
+                class="btn btn-outline"
+                :class="{ 'btn-primary': primaryCardId === card.id }"
                 :aria-label="t(card.buttonKey)"
               >
                 {{ t(card.buttonKey) }}

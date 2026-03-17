@@ -54,11 +54,18 @@ describe("useAuth", () => {
     const result = await checkAuthStatus();
     expect(result.authRequired).toBe(false);
     expect(result.configured).toBe(false);
+    expect(result.bootstrapRequired).toBe(false);
+    expect(result.setupTokenConfigured).toBe(false);
   });
 
   it("checkAuthStatus returns data when api succeeds", async () => {
     mockApi.auth.status.get.mockResolvedValueOnce({
-      data: { authRequired: true, configured: true },
+      data: {
+        authRequired: true,
+        configured: true,
+        bootstrapRequired: false,
+        setupTokenConfigured: true,
+      },
       error: null,
     });
 
@@ -66,6 +73,21 @@ describe("useAuth", () => {
     const result = await checkAuthStatus();
     expect(result.authRequired).toBe(true);
     expect(result.configured).toBe(true);
+    expect(result.bootstrapRequired).toBe(false);
+    expect(result.setupTokenConfigured).toBe(true);
+  });
+
+  it("passes setupToken to auth init requests", async () => {
+    mockApi.auth.init.post.mockResolvedValueOnce({
+      data: { configured: true, apiKey: "bao_test", message: "ok" },
+      error: null,
+    });
+
+    const { initAuth } = useAuth();
+    const result = await initAuth("setup-token");
+
+    expect(mockApi.auth.init.post).toHaveBeenCalledWith({ setupToken: "setup-token" });
+    expect(result.apiKey).toBe("bao_test");
   });
 
   it("stores and retrieves the API key through Nuxt app injection", () => {

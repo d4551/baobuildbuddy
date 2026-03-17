@@ -371,8 +371,19 @@ export class ApplicationAutomationService {
       ...(typeof params.totalSteps === "number" ? { totalSteps: params.totalSteps } : {}),
     } as const;
 
-    const validated = rpaProgressEventSchema.parse(event);
-    return validated;
+    const parsed = rpaProgressEventSchema.safeParse(event);
+    if (!parsed.success) {
+      automationServiceLogger.warn("Invalid progress event shape", {
+        params,
+        error: parsed.error.flatten(),
+      });
+      return {
+        ...event,
+        action: "validation_error",
+        status: "error" as const,
+      } as RpaRunEvent;
+    }
+    return parsed.data;
   }
 
   /**
@@ -2412,20 +2423,31 @@ export class ApplicationAutomationService {
     options: AutofillAnalysisOptions,
   ): Promise<SmartFieldAnalysisResult> {
     if (!options.automationSettings.enableSmartSelectors) {
+      automationServiceLogger.debug("Smart field mapping skipped: enableSmartSelectors is off");
       return this.createEmptyAutofillAnalysis();
     }
 
     const aiService = await this.tryLoadAIService();
     if (!aiService) {
+      automationServiceLogger.debug("Smart field mapping skipped: AI service unavailable");
       return this.createEmptyAutofillAnalysis();
     }
 
-    return smartFieldMapper.analyze(
+    const result = await smartFieldMapper.analyze(
       options.jobUrl,
       [...SMART_FIELD_CORE_KEYS],
       this.buildSmartFieldAnalysisContext(options),
       aiService,
     );
+    const isEmpty =
+      Object.keys(result.selectorMap).length === 0 &&
+      Object.keys(result.fieldAnswers).length === 0;
+    if (isEmpty) {
+      automationServiceLogger.debug("Smart field mapping returned empty result", {
+        jobUrl: options.jobUrl,
+      });
+    }
+    return result;
   }
 
   private createProgressHandler(

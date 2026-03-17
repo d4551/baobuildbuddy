@@ -13,7 +13,7 @@ import { auth } from "../db/schema/auth";
 
 /**
  * Elysia plugin that validates Bearer API key for protected routes.
- * Skipped when config.disableAuth is true (local dev).
+ * Skipped only when config.disableAuth is explicitly enabled.
  */
 export const authGuard = new Elysia({ name: "auth-guard" }).onBeforeHandle(
   async ({ request, status }) => {

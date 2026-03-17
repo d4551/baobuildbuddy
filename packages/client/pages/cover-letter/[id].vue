@@ -384,7 +384,7 @@ function handleExport() {
               {{ t("coverLetterDetailPage.editor.characterCount", { count: contentCharacterCount }) }}
             </span>
             <div class="flex gap-2">
-              <button class="btn btn-sm" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="clearContent">
+              <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="clearContent">
                 {{ t("coverLetterDetailPage.editor.clearButton") }}
               </button>
               <button class="btn btn-sm btn-primary" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="handleSave">

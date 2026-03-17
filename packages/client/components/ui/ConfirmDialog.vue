@@ -134,7 +134,7 @@ function handleClose(): void {
       <button
         ref="cancelButton"
         type="button"
-        class="btn"
+        class="btn btn-ghost"
         :aria-label="resolvedCancelText"
         @click="handleCancel"
       >

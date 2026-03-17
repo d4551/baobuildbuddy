@@ -1,5 +1,6 @@
 import {
   generateId,
+  safeParseJson,
   settle,
   type CompanyBoardATSType,
   type CompanyBoardConfig,
@@ -147,7 +148,12 @@ export class CompanyBoardProvider implements JobProvider {
       return [];
     }
 
-    const data = (await response.json()) as ATSResponse;
+    const rawText = await response.text();
+    const parsed = safeParseJson(rawText);
+    if (parsed === null) {
+      return [];
+    }
+    const data = parsed as ATSResponse;
     return this.parseJobs(data, providerSettings);
   }
 

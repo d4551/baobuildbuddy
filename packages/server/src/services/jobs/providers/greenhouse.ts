@@ -2,6 +2,7 @@
  * Greenhouse ATS provider.
  */
 
+import { safeParseJson } from "@bao/shared";
 import { JOB_AGGREGATOR_USER_AGENT, type JobProvider, type RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
@@ -26,6 +27,25 @@ interface GreenhouseJob {
 interface GreenhouseResponse {
   jobs: GreenhouseJob[];
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isGreenhouseJob = (value: unknown): value is GreenhouseJob => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.id === "number" &&
+    typeof value.title === "string" &&
+    typeof value.absolute_url === "string" &&
+    typeof value.updated_at === "string"
+  );
+};
+
+const isGreenhouseResponse = (value: unknown): value is GreenhouseResponse =>
+  isRecord(value) && Array.isArray(value.jobs) && value.jobs.every(isGreenhouseJob);
 
 type GreenhouseFetchStatus =
   | {
@@ -127,8 +147,12 @@ export class GreenhouseProvider implements JobProvider {
     if (!response.ok) {
       return { ok: false };
     }
-    const data = (await response.json()) as GreenhouseResponse;
-    return { ok: true, jobs: data.jobs || [] };
+    const rawText = await response.text();
+    const parsed = safeParseJson(rawText);
+    if (parsed === null || !isGreenhouseResponse(parsed)) {
+      return { ok: false };
+    }
+    return { ok: true, jobs: parsed.jobs };
   }
 
   private filterMappedJobs(

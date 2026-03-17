@@ -497,7 +497,7 @@ function removeApplication(index: number): void {
             v-model="categoryFilter"
             type="radio"
             name="skills-category"
-            class="btn btn-sm"
+            class="btn btn-sm btn-ghost"
             :value="SKILLS_FILTER_ALL_VALUE"
             :aria-label="t('skillsPage.filters.allAria')"
           />
@@ -507,7 +507,7 @@ function removeApplication(index: number): void {
             v-model="categoryFilter"
             type="radio"
             name="skills-category"
-            class="btn btn-sm"
+            class="btn btn-sm btn-ghost"
             :value="categoryOption.value"
             :aria-label="t('skillsPage.filters.categoryAria', { category: categoryOption.label })"
           />

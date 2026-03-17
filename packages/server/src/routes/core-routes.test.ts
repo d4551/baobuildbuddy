@@ -1,9 +1,13 @@
 import {
+  API_ERROR_AUTH_SETUP_TOKEN_INVALID,
+  API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
   API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
   API_MESSAGE_AUTH_DISABLED,
   API_MESSAGE_SAVE_API_KEY_ONCE,
-  DEFAULT_PROFILE_ID,
   AUTH_API_KEY_PREFIX_PATTERN,
+  DEFAULT_PROFILE_ID,
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_FORBIDDEN,
 } from "@bao/shared";
 import { beforeAll, describe, expect, test } from "bun:test";
 import { tmpdir } from "node:os";
@@ -36,6 +40,8 @@ type SearchResponse = {
 type AuthStatusResponse = {
   authRequired: boolean;
   configured: boolean;
+  bootstrapRequired: boolean;
+  setupTokenConfigured: boolean;
 };
 
 type AuthInitResponse = {
@@ -119,6 +125,7 @@ const AUTOCOMPLETE_SHORT_PREFIX = "a";
 const AUTOCOMPLETE_ROLE_PREFIX = "de";
 
 Bun.env.DB_PATH = join(tmpdir(), "bao-core-route-tests", `${crypto.randomUUID()}.db`);
+Bun.env.BAO_AUTH_SETUP_TOKEN = "core-route-setup-token";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 
@@ -203,30 +210,56 @@ describe("auth routes", () => {
     expect(res.status).toBe(200);
     expect(typeof res.body.authRequired).toBe("boolean");
     expect(typeof res.body.configured).toBe("boolean");
+    expect(typeof res.body.bootstrapRequired).toBe("boolean");
+    expect(typeof res.body.setupTokenConfigured).toBe("boolean");
   });
 
-  test("POST /api/auth/init initializes API key only when auth is enabled", async () => {
+});
+
+describe("auth init routes", () => {
+  test("POST /api/auth/init requires a valid setup token before initializing API key", async () => {
     const status = await requestJson<AuthStatusResponse>(app, "GET", "/api/auth/status");
-    const res = await requestJson<AuthInitResponse>(app, "POST", "/api/auth/init");
-    expect(res.status).toBe(200);
 
     if (status.body.authRequired) {
+      expect(status.body.bootstrapRequired).toBe(true);
+      expect(status.body.setupTokenConfigured).toBe(true);
+
+      const missingToken = await requestJson<{ error: string }>(app, "POST", "/api/auth/init");
+      expect(missingToken.status).toBe(HTTP_STATUS_BAD_REQUEST);
+      expect(missingToken.body.error).toBe(API_ERROR_AUTH_SETUP_TOKEN_REQUIRED);
+
+      const invalidToken = await requestJson<{ error: string }>(app, "POST", "/api/auth/init", {
+        setupToken: "wrong-token",
+      });
+      expect(invalidToken.status).toBe(HTTP_STATUS_FORBIDDEN);
+      expect(invalidToken.body.error).toBe(API_ERROR_AUTH_SETUP_TOKEN_INVALID);
+
+      const res = await requestJson<AuthInitResponse>(app, "POST", "/api/auth/init", {
+        setupToken: Bun.env.BAO_AUTH_SETUP_TOKEN,
+      });
+      expect(res.status).toBe(200);
       expect(res.body.configured).toBe(true);
       expect(res.body.apiKey).toMatch(AUTH_API_KEY_PREFIX_PATTERN);
       expect(res.body.message).toBe(API_MESSAGE_SAVE_API_KEY_ONCE);
 
-      const second = await requestJson<AuthInitResponse>(app, "POST", "/api/auth/init");
+      const second = await requestJson<AuthInitResponse>(app, "POST", "/api/auth/init", {
+        setupToken: Bun.env.BAO_AUTH_SETUP_TOKEN,
+      });
       expect(second.status).toBe(200);
       expect(second.body.configured).toBe(true);
       expect(second.body.message).toBe(API_MESSAGE_API_KEY_ALREADY_CONFIGURED);
-      expect(second.body.apiKey).toBe(res.body.apiKey);
+      expect(second.body.apiKey).toBeUndefined();
     } else {
+      const res = await requestJson<AuthInitResponse>(app, "POST", "/api/auth/init", {});
+      expect(res.status).toBe(200);
       expect(res.body.apiKey).toBeUndefined();
       expect(res.body.message).toBe(API_MESSAGE_AUTH_DISABLED);
       expect(res.body.configured).toBe(false);
     }
   });
+});
 
+describe("auth configured routes", () => {
   test("GET /api/auth/configured reflects key configuration state", async () => {
     const configured = await requestJson<{ configured: boolean }>(
       app,

@@ -2244,6 +2244,22 @@ const enUS = {
     doneTitle: "You're all set",
     doneDescription:
       "{assistant} is ready to help you plan, tailor, and execute your next move in game industry hiring.",
+    auth: {
+      setupTokenTitle: "Secure first-run auth",
+      setupTokenDescription:
+        "Enter the operator setup token to mint the first API key for this workspace.",
+      setupTokenLegend: "Setup token",
+      setupTokenPlaceholder: "Enter setup token",
+      setupTokenAria: "Setup token for first-run API key bootstrap",
+      setupTokenRequiredError: "Enter the setup token to initialize the first API key.",
+      bootstrapUnavailableTitle: "Setup token not configured",
+      bootstrapUnavailableDescription:
+        "An operator must set BAO_AUTH_SETUP_TOKEN before auth bootstrap can run on this installation.",
+      apiKeyLegend: "Existing API key",
+      apiKeyPlaceholder: "Paste your existing API key",
+      apiKeyAria: "Existing API key for this workspace",
+      apiKeyRequiredError: "Paste the existing API key to finish setup.",
+    },
     successStatusAria: "Setup completion status",
     backToAiConfigAria: "Back to AI configuration step",
     launchAria: "Finish setup and open workspace",

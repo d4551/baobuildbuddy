@@ -161,7 +161,7 @@ watch(
           v-for="(page, index) in normalizedPageNumbers"
           :key="page"
           type="button"
-          class="join-item btn btn-sm"
+          class="join-item btn btn-sm btn-ghost"
           :class="{ 'btn-active': page === currentPage }"
           :aria-label="pageAria(page)"
           :aria-current="page === currentPage ? 'page' : undefined"

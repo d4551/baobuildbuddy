@@ -246,7 +246,7 @@ function getTimelineLineClass(score: number): string {
               <div class="flex items-center gap-2">
                 <div class="join">
                   <button
-                    class="join-item btn btn-sm"
+                    class="join-item btn btn-sm btn-ghost"
                     :class="{ 'btn-active': historyView === 'table' }"
                     :aria-label="t('interviewHistory.tableAriaLabel')"
                     @click="historyView = 'table'"
@@ -254,7 +254,7 @@ function getTimelineLineClass(score: number): string {
                     {{ t("interviewHistory.viewModes.table") }}
                   </button>
                   <button
-                    class="join-item btn btn-sm"
+                    class="join-item btn btn-sm btn-ghost"
                     :class="{ 'btn-active': historyView === 'timeline' }"
                     :aria-label="t('interviewHistory.timelineAriaLabel')"
                     @click="historyView = 'timeline'"

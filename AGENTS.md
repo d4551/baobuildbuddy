@@ -45,7 +45,7 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
 
 5. **`packages/server/src/db/schema/schema-modules.ts`** is the schema source; `drizzle.config.ts` points to it directly.
 
-6. **Auth is disabled in local dev** by setting `BAO_DISABLE_AUTH=true` in `.env`.
+6. **Auth is disabled only when explicitly requested.** Set `BAO_DISABLE_AUTH=true` in `.env` for local dev, or keep auth enabled and provide `BAO_AUTH_SETUP_TOKEN` for first-run onboarding.
 
 7. **No external database needed.** SQLite is embedded via `bun:sqlite`; the DB file is at `~/.bao/bao.db`.
 

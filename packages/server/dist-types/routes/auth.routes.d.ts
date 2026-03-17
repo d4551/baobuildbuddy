@@ -7,6 +7,9 @@ export declare const authRoutes: Elysia<"/auth", {
 }, {
     typebox: {};
     error: {};
+} & {
+    error: {};
+    typebox: import("@sinclair/typebox").TModule<{}, {}>;
 }, {
     schema: {};
     standaloneSchema: {};
@@ -14,6 +17,11 @@ export declare const authRoutes: Elysia<"/auth", {
     macroFn: {};
     parser: {};
     response: {};
+} & {
+    schema: {};
+    macro: {};
+    macroFn: {};
+    parser: {};
 }, {
     auth: {
         status: {
@@ -26,6 +34,8 @@ export declare const authRoutes: Elysia<"/auth", {
                     200: {
                         configured: boolean;
                         authRequired: boolean;
+                        bootstrapRequired: boolean;
+                        setupTokenConfigured: boolean;
                     };
                 };
             };
@@ -51,7 +61,9 @@ export declare const authRoutes: Elysia<"/auth", {
     auth: {
         init: {
             post: {
-                body: unknown;
+                body: {
+                    setupToken?: string | undefined;
+                };
                 params: {};
                 query: unknown;
                 headers: unknown;
@@ -64,6 +76,23 @@ export declare const authRoutes: Elysia<"/auth", {
                         configured: boolean;
                         apiKey: string;
                         message: string;
+                    };
+                    400: {
+                        readonly error: "Setup token is required";
+                    };
+                    403: {
+                        readonly error: "Setup token bootstrap is unavailable";
+                    } | {
+                        readonly error: "Setup token is invalid";
+                    };
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };
@@ -81,4 +110,14 @@ export declare const authRoutes: Elysia<"/auth", {
     schema: {};
     standaloneSchema: {};
     response: {};
+} & {
+    derive: {};
+    resolve: {};
+    schema: {};
+    standaloneSchema: {};
+    response: {};
+} & {
+    derive: {};
+    resolve: {};
+    schema: {};
 }>;

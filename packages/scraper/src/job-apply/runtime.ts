@@ -88,6 +88,23 @@ type UploadResumeArtifactOptions = {
 const BOOLEAN_TRUE_ANSWERS = new Set(["1", "checked", "on", "true", "yes"]);
 const BOOLEAN_FALSE_ANSWERS = new Set(["0", "false", "no", "off", "unchecked"]);
 
+const PLAYWRIGHT_ACTION_TIMEOUT_MS = 5_000;
+const PLAYWRIGHT_RETRY_MAX_ATTEMPTS = 3;
+const PLAYWRIGHT_RETRY_INITIAL_DELAY_MS = 500;
+
+const isRetryablePlaywrightError = (reason: unknown): boolean => {
+  const msg = String(reason).toLowerCase();
+  return msg.includes("timeout") || msg.includes("target closed") || msg.includes("network");
+};
+
+const waitMs = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    const t = setTimeout(resolve, ms);
+    if (typeof t === "object" && t !== null && "unref" in t && typeof (t as { unref: () => void }).unref === "function") {
+      (t as { unref: () => void }).unref();
+    }
+  });
+
 const anchorSelectorByText = (text: string): string => `a:has-text('${text}')`;
 
 const anchorSelectorByHrefFragment = (fragment: string): string => `a[href*='${fragment}']`;
@@ -251,6 +268,28 @@ const runOnFirstMatchingLocator = async <T>(
   return runOnFirstMatchingLocator(page, remainingSelectors, action);
 };
 
+const withRetry = async <T>(
+  fn: () => Promise<T>,
+  options: { maxAttempts?: number; delayMs?: number } = {},
+): Promise<T | null> => {
+  const runAttempt = async (attempt: number, delayMs: number): Promise<T | null> => {
+    const result = await settle(fn());
+    if (result.status === "fulfilled") {
+      return result.value;
+    }
+    if (attempt >= (options.maxAttempts ?? PLAYWRIGHT_RETRY_MAX_ATTEMPTS)) {
+      return null;
+    }
+    if (!isRetryablePlaywrightError(result.reason)) {
+      return null;
+    }
+    await waitMs(delayMs);
+    return runAttempt(attempt + 1, delayMs * 2);
+  };
+
+  return runAttempt(1, options.delayMs ?? PLAYWRIGHT_RETRY_INITIAL_DELAY_MS);
+};
+
 const fillFirstMatchingField = async (
   page: Page,
   selectors: readonly string[],
@@ -261,8 +300,10 @@ const fillFirstMatchingField = async (
   }
 
   const fillResult = await runOnFirstMatchingLocator(page, selectors, async (locator) => {
-    const matchingResult = await settle(locator.fill(value, { timeout: 5_000 }));
-    return matchingResult.status === "fulfilled" ? true : null;
+    const result = await withRetry(() =>
+      locator.fill(value, { timeout: PLAYWRIGHT_ACTION_TIMEOUT_MS }).then(() => true),
+    );
+    return result ?? null;
   });
   return fillResult ?? false;
 };
@@ -272,8 +313,10 @@ const clickFirstMatchingField = async (
   selectors: readonly string[],
 ): Promise<boolean> => {
   const clickResult = await runOnFirstMatchingLocator(page, selectors, async (locator) => {
-    const matchingResult = await settle(locator.click({ timeout: 5_000 }));
-    return matchingResult.status === "fulfilled" ? true : null;
+    const result = await withRetry(() =>
+      locator.click({ timeout: PLAYWRIGHT_ACTION_TIMEOUT_MS }).then(() => true),
+    );
+    return result ?? null;
   });
   return clickResult ?? false;
 };
@@ -676,16 +719,19 @@ const initializeApplicationPage = async (state: JobApplyExecutionState): Promise
   );
   addStep(state.steps, "init", "ok", `headless=${String(state.payload.settings.headless)}`);
 
-  const navigateResult = await settle(
-    state.session.page.goto(state.payload.jobUrl, {
-      waitUntil: "domcontentloaded",
-      timeout: Math.max(
-        state.payload.settings.defaultTimeout * 1_000,
-        automationRuntimeConfig.navigationTimeoutMs,
-      ),
-    }),
+  const timeoutMs = Math.max(
+    state.payload.settings.defaultTimeout * 1_000,
+    automationRuntimeConfig.navigationTimeoutMs,
   );
-  if (navigateResult.status === "rejected") {
+  const navigateResult = await withRetry(
+    () =>
+      state.session.page.goto(state.payload.jobUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: timeoutMs,
+      }),
+    { maxAttempts: PLAYWRIGHT_RETRY_MAX_ATTEMPTS, delayMs: PLAYWRIGHT_RETRY_INITIAL_DELAY_MS },
+  );
+  if (navigateResult === null) {
     return closeWithRuntimeFailure(
       state,
       "Unable to load job URL.",

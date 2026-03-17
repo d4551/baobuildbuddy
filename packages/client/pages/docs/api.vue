@@ -775,11 +775,8 @@ onBeforeUnmount(() => {
                   <li v-for="endpoint in group.endpoints" :key="endpoint.id">
                     <button
                       type="button"
-                      class="btn btn-sm h-auto w-full justify-start whitespace-normal py-2 text-left"
-                      :class="{
-                        'btn-primary': activeEndpointId === endpoint.id,
-                        'btn-ghost': activeEndpointId !== endpoint.id,
-                      }"
+                      class="btn btn-sm btn-ghost h-auto w-full justify-start whitespace-normal py-2 text-left"
+                      :class="{ 'btn-primary': activeEndpointId === endpoint.id }"
                       :aria-label="
                         t('apiDocs.endpoint.navigateAria', {
                           method: methodLabel(endpoint.method),

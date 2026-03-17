@@ -1,9 +1,12 @@
+import { toErrorMessage } from "@bao/shared";
 import { useNuxtRuntimeApp } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 
 interface AuthStatus {
   authRequired: boolean;
   configured: boolean;
+  bootstrapRequired: boolean;
+  setupTokenConfigured: boolean;
 }
 
 interface AuthInitResult {
@@ -17,7 +20,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 interface UseAuthState {
   checkAuthStatus: () => Promise<AuthStatus>;
-  initAuth: () => Promise<AuthInitResult>;
+  initAuth: (setupToken?: string) => Promise<AuthInitResult>;
   getStoredApiKey: () => string | null;
   setStoredApiKey: (key: string | null) => void;
 }
@@ -32,7 +35,12 @@ const AUTH_INIT_FAILED_ERROR_KEY = "apiErrors.auth.initFailed";
 export function useAuth(): UseAuthState {
   const api = useApi();
   const nuxtApp = useNuxtRuntimeApp();
-  const authNotConfigured: AuthStatus = { authRequired: false, configured: false };
+  const authNotConfigured: AuthStatus = {
+    authRequired: false,
+    configured: false,
+    bootstrapRequired: false,
+    setupTokenConfigured: false,
+  };
 
   async function checkAuthStatus(): Promise<AuthStatus> {
     const { data, error } = await api.auth.status.get();
@@ -40,12 +48,20 @@ export function useAuth(): UseAuthState {
     return {
       authRequired: data?.authRequired ?? true,
       configured: data?.configured ?? false,
+      bootstrapRequired: data?.bootstrapRequired ?? false,
+      setupTokenConfigured: data?.setupTokenConfigured ?? false,
     };
   }
 
-  async function initAuth() {
-    const { data, error } = await api.auth.init.post();
-    if (error) throw new Error(AUTH_INIT_FAILED_ERROR_KEY);
+  async function initAuth(setupToken?: string) {
+    const requestBody =
+      typeof setupToken === "string" && setupToken.trim().length > 0
+        ? { setupToken: setupToken.trim() }
+        : undefined;
+    const { data, error } = await api.auth.init.post(requestBody);
+    if (error) {
+      throw new Error(toErrorMessage(error, AUTH_INIT_FAILED_ERROR_KEY));
+    }
     const payload = data ?? {};
     if (!isRecord(payload)) {
       return { configured: false };

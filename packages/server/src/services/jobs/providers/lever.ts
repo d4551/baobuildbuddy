@@ -2,6 +2,7 @@
  * Lever ATS provider.
  */
 
+import { safeParseJson } from "@bao/shared";
 import { JOB_AGGREGATOR_USER_AGENT, type JobProvider, type RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
@@ -21,6 +22,48 @@ interface LeverJob {
   createdAt: number;
   workplaceType?: string;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isLeverCategories = (value: unknown): value is LeverJob["categories"] =>
+  isRecord(value) &&
+  (value.commitment === undefined || typeof value.commitment === "string") &&
+  (value.department === undefined || typeof value.department === "string") &&
+  (value.team === undefined || typeof value.team === "string") &&
+  (value.location === undefined || typeof value.location === "string");
+
+const isLeverJob = (value: unknown): value is LeverJob => {
+  if (!(isRecord(value) && isLeverCategories(value.categories))) {
+    return false;
+  }
+
+  return (
+    typeof value.id === "string" &&
+    typeof value.text === "string" &&
+    typeof value.description === "string" &&
+    typeof value.descriptionPlain === "string" &&
+    typeof value.hostedUrl === "string" &&
+    typeof value.applyUrl === "string" &&
+    typeof value.createdAt === "number" &&
+    (value.workplaceType === undefined || typeof value.workplaceType === "string")
+  );
+};
+
+const parseLeverJobs = (value: unknown): LeverJob[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const jobs: LeverJob[] = [];
+  for (const item of value) {
+    if (!isLeverJob(item)) {
+      return [];
+    }
+    jobs.push(item);
+  }
+  return jobs;
+};
 
 type JobProviderSettings = Awaited<ReturnType<typeof loadJobProviderSettings>>;
 
@@ -144,8 +187,12 @@ export class LeverProvider implements JobProvider {
       return null;
     }
 
-    const data = (await response.json()) as LeverJob[];
-    return Array.isArray(data) ? data : [];
+    const rawText = await response.text();
+    const parsed = safeParseJson(rawText);
+    if (parsed === null) {
+      return [];
+    }
+    return parseLeverJobs(parsed);
   }
 
   private mapJob(job: LeverJob, companySlug: string, companyName: string): RawJob {

@@ -196,7 +196,7 @@ async function requestData<T>(
       <span>{{ getErrorMessage(error, t("gamificationPage.loadErrorFallback")) }}</span>
       <button
         type="button"
-        class="btn btn-sm"
+        class="btn btn-sm btn-ghost"
         :aria-label="t('gamificationPage.retryAria')"
         @click="retryPageLoad"
       >

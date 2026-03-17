@@ -1,20 +1,29 @@
-export declare const config: {
-    port: number;
-    host: string;
-    dbPath: string;
-    logLevel: string;
-    corsOrigins: string[];
-    /** When true, skip API key auth (local dev only) */
-    disableAuth: boolean;
-    /** When true, expose deterministic automation verification helpers for packaged-runtime checks. */
-    readonly enableAutomationVerification: boolean;
-    /** When true, allow localhost/private automation URLs for deterministic local verification flows. */
-    readonly allowAutomationPrivateHosts: boolean;
-    automationScriptTimeoutMs: number;
-    automationStdioBufferLimit: number;
+/**
+ * Resolves the current server runtime configuration from environment variables.
+ */
+export declare function readConfig(): {
     smartFieldMapperRetries: number;
     smartFieldMapperRetryDelayMs: number;
     smartFieldMapperFetchTimeoutMs: number;
     smartFieldMapperMaxFormHtmlChars: number;
     smartFieldMapperUserAgent: string;
+    automationScriptTimeoutMs: number;
+    automationStdioBufferLimit: number;
+    enableAutomationVerification: boolean;
+    allowAutomationPrivateHosts: boolean;
+    disableAuth: boolean;
+    authSetupToken: string | null;
+    port: number;
+    host: string;
+    dbPath: string;
+    logLevel: string;
+    corsOrigins: string[];
 };
+/**
+ * Stable server runtime configuration for the current process.
+ */
+export type ServerConfig = ReturnType<typeof readConfig>;
+/**
+ * Cached runtime configuration for the active process.
+ */
+export declare const config: ServerConfig;

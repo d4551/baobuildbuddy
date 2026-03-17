@@ -99,6 +99,8 @@ export declare const app: Elysia<"/api", {
                         200: {
                             configured: boolean;
                             authRequired: boolean;
+                            bootstrapRequired: boolean;
+                            setupTokenConfigured: boolean;
                         };
                     };
                 };
@@ -124,7 +126,9 @@ export declare const app: Elysia<"/api", {
         auth: {
             init: {
                 post: {
-                    body: unknown;
+                    body: {
+                        setupToken?: string | undefined;
+                    };
                     params: {};
                     query: unknown;
                     headers: unknown;
@@ -137,6 +141,23 @@ export declare const app: Elysia<"/api", {
                             configured: boolean;
                             apiKey: string;
                             message: string;
+                        };
+                        400: {
+                            readonly error: "Setup token is required";
+                        };
+                        403: {
+                            readonly error: "Setup token bootstrap is unavailable";
+                        } | {
+                            readonly error: "Setup token is invalid";
+                        };
+                        422: {
+                            type: "validation";
+                            on: string;
+                            summary?: string;
+                            message?: string;
+                            found?: unknown;
+                            property?: string;
+                            expected?: string;
                         };
                     };
                 };

@@ -2257,6 +2257,23 @@ const esES: AppTranslationOverrides = {
     doneTitle: "Todo listo",
     doneDescription:
       "{assistant} está listo para ayudarte con tu carrera en la industria del juego.",
+    auth: {
+      setupTokenTitle: "Autenticación segura de primer uso",
+      setupTokenDescription:
+        "Introduce el token de configuración del operador para emitir la primera clave API de este espacio.",
+      setupTokenLegend: "Token de configuración",
+      setupTokenPlaceholder: "Introduce el token de configuración",
+      setupTokenAria: "Token de configuración para crear la primera clave API",
+      setupTokenRequiredError:
+        "Introduce el token de configuración para inicializar la primera clave API.",
+      bootstrapUnavailableTitle: "Token de configuración no disponible",
+      bootstrapUnavailableDescription:
+        "Un operador debe definir BAO_AUTH_SETUP_TOKEN antes de poder inicializar la autenticación en esta instalación.",
+      apiKeyLegend: "Clave API existente",
+      apiKeyPlaceholder: "Pega tu clave API existente",
+      apiKeyAria: "Clave API existente para este espacio",
+      apiKeyRequiredError: "Pega la clave API existente para completar la configuración.",
+    },
     successStatusAria: "Estado de finalización de la configuración",
     backToAiConfigAria: "Volver al paso de configuración de IA",
     launchAria: "Finalizar configuración y lanzar aplicación",

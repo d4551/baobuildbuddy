@@ -18,6 +18,11 @@ const LLM_SOURCES = [
     url: "https://bun.sh/llms.txt",
     requiredMarkers: ["# Bun", "Welcome to Bun", "bun install"],
   },
+  {
+    name: "daisyUI",
+    url: "https://daisyui.com/llms.txt",
+    requiredMarkers: ["daisyUI 5", "btn", "card", "drawer"],
+  },
 ] as const;
 
 type LlmSource = (typeof LLM_SOURCES)[number];

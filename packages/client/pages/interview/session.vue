@@ -540,8 +540,8 @@ async function handleCompleteInterview() {
             </span>
             <button
               type="button"
-              class="btn btn-sm"
-              :class="stt.isListening.value ? 'btn-error' : 'btn-primary'"
+              class="btn btn-sm btn-primary"
+              :class="{ 'btn-error': stt.isListening.value }"
               :disabled="completionState !== 'ready' || !canUseVoice"
               :title="
                 stt.isListening.value ? t('interviewSession.voice.stopTitle') : t('interviewSession.voice.startTitle')

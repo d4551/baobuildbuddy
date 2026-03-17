@@ -1,5 +1,3 @@
-import { type ChildProcess, spawn, spawnSync, type SpawnSyncReturns } from "node:child_process";
-
 import {
   DEFAULT_CLIENT_DEV_PORT,
   DEFAULT_PINCHTAB_PORT,
@@ -20,6 +18,7 @@ import {
 } from "../packages/shared/src/constants/scripts";
 
 type ProcessName = "server" | "client";
+type ManagedProcess = ReturnType<typeof Bun.spawn>;
 
 const validatePort = (value: string | undefined, fallback: number): number => {
   const parsed = value ? Number.parseInt(value, DECIMAL_RADIX) : fallback;
@@ -42,14 +41,6 @@ const normalizeEnv = (environment: Record<string, string | undefined>): Record<s
 const toStringPort = (value: number): string => `${value}`;
 const write = (value: string): void => {
   process.stdout.write(value);
-};
-
-const resolveErrorCode = (value: unknown): string | undefined => {
-  if (!(value && typeof value === "object" && "code" in value)) {
-    return;
-  }
-  const code = value.code;
-  return typeof code === "string" ? code : undefined;
 };
 
 const serverPort = validatePort(process.env.SERVER_PORT, DEFAULT_SERVER_PORT);
@@ -78,30 +69,26 @@ clientEnv.CORS_ORIGINS = corsOrigins;
 clientEnv.NUXT_PUBLIC_API_BASE = apiBase;
 clientEnv.NUXT_PUBLIC_WS_BASE = apiBase;
 
-const trackedProcesses: ChildProcess[] = [];
+const trackedProcesses: ManagedProcess[] = [];
 let shuttingDown = false;
 
-const waitForExit = (childProcess: ChildProcess): Promise<number> => {
-  return new Promise((resolve) => {
-    childProcess.once("exit", (exitCode) => {
-      resolve(exitCode ?? 0);
-    });
-  });
-};
+const waitForExit = async (childProcess: ManagedProcess): Promise<number> => childProcess.exited;
 
-const spawnProcess = (args: string[], env: Record<string, string>): ChildProcess => {
-  return spawn("bun", args, {
+const spawnProcess = (args: string[], env: Record<string, string>): ManagedProcess => {
+  return Bun.spawn(["bun", ...args], {
     cwd: process.cwd(),
     env,
-    stdio: "inherit",
+    stdin: "inherit",
+    stdout: "inherit",
+    stderr: "inherit",
   });
 };
 
-const spawnServer = (): ChildProcess => {
+const spawnServer = (): ManagedProcess => {
   return spawnProcess(["--env-file=.env", "run", "--filter", "@bao/server", "dev"], serverEnv);
 };
 
-const spawnClient = (): ChildProcess => {
+const spawnClient = (): ManagedProcess => {
   return spawnProcess(
     [
       "--env-file=.env",
@@ -127,7 +114,7 @@ const shutdown = async (reason: string): Promise<void> => {
   write(`\n[bao/dev-stack] shutdown: ${reason}\n`);
 
   for (const item of trackedProcesses) {
-    item.kill();
+    item.kill("SIGTERM");
   }
 
   await Promise.allSettled(trackedProcesses.map(waitForExit));
@@ -136,7 +123,7 @@ const shutdown = async (reason: string): Promise<void> => {
   process.exit(0);
 };
 
-const trackProcess = async (name: ProcessName, proc: ChildProcess): Promise<void> => {
+const trackProcess = async (name: ProcessName, proc: ManagedProcess): Promise<void> => {
   trackedProcesses.push(proc);
   const exitCode = await waitForExit(proc);
   write(`[bao/dev-stack] ${name} exited with code ${exitCode}\n`);
@@ -178,12 +165,7 @@ const ensurePinchTabRunning = async (): Promise<string> => {
   }
 
   const pinchtabPath = process.env.PINCHTAB_BIN ?? "pinchtab";
-  const check: SpawnSyncReturns<string> = spawnSync(pinchtabPath, ["--version"], {
-    encoding: "utf8",
-    stdio: "pipe",
-  });
-  const errCode = resolveErrorCode(check.error);
-  if (errCode === "ENOENT") {
+  if (!Bun.which(pinchtabPath)) {
     write(
       `[bao/dev-stack] PinchTab not found (${pinchtabPath}); agents will use puppeteer fallback\n`,
     );
@@ -193,11 +175,13 @@ const ensurePinchTabRunning = async (): Promise<string> => {
   write(`[bao/dev-stack] starting PinchTab server at ${baseUrl}\n`);
   const url = new URL(baseUrl);
   const port = url.port || String(DEFAULT_PINCHTAB_PORT);
-  const pinchtab = spawn(pinchtabPath, [], {
+  const pinchtab = Bun.spawn([pinchtabPath], {
     cwd: process.cwd(),
     env: { ...process.env, PINCHTAB_PORT: port },
-    stdio: "ignore",
-    detached: true,
+    stdin: "ignore",
+    stdout: "ignore",
+    stderr: "ignore",
+    windowsHide: true,
   });
   pinchtab.unref();
 

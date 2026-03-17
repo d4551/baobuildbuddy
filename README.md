@@ -264,6 +264,8 @@ flowchart TD
   AutomationRoutes --> AutomationSvc["application-automation-service"]
   AutomationRoutes --> ScraperSvc["scraper-service"]
   AutomationSvc --> Runner["automation/rpa-runner"]
+  AutomationSvc --> SmartFieldMapper["smart-field-mapper"]
+  AutomationSvc --> EmailDelivery["email-delivery-service"]
   ScraperSvc --> Runner
   Runner --> ScraperPkg["packages/scraper"]
   ScraperPkg --> Scripts["src/scripts"]
@@ -314,7 +316,8 @@ Key conventions:
 | `DB_PATH`          | SQLite database file location   | Parent directory must be writable |
 | `LOG_LEVEL`        | Logging verbosity               | `info`, `debug`, `warn`, `error` |
 | `CORS_ORIGINS`     | Comma-separated allowed origins | Defaults include localhost        |
-| `BAO_DISABLE_AUTH` | Disable auth for local dev      | Set `true` or `1`                |
+| `BAO_DISABLE_AUTH` | Disable auth explicitly         | Set `true` or `1` for local-only dev |
+| `BAO_AUTH_SETUP_TOKEN` | First-run API key bootstrap token | Required only when auth stays enabled during setup |
 
 ### Client environment (`.env`)
 
@@ -451,7 +454,7 @@ bun run dev:client
 | Validate i18n               | `bun run validate:i18n-ui`                             | Reject static template copy / missing `t()` keys    |
 | Validate no try/catch       | `bun run validate:no-try-catch`                        | Enforce no-`try/catch` policy                       |
 | ASCII validation            | `bun run scripts/validate-ascii-geometry.ts README.md` | Verify ASCII-art geometry                           |
-| Audit official LLM docs     | `bun run audit:official-llms`                          | Check Bun/Nuxt/Elysia `llms.txt` reachability       |
+| Audit official LLM docs     | `bun run audit:official-llms`                          | Check Elysia/Nuxt/Bun/daisyUI `llms.txt` reachability |
 
 ---
 
@@ -668,13 +671,15 @@ All AI calls are server-owned. The client communicates through API routes and We
     |____________________________|
 ```
 
-| Service           | File                          | Purpose                                               |
-|-------------------|-------------------------------|-------------------------------------------------------|
-| CV Questionnaire  | `cv-questionnaire-service.ts` | Guided questionnaire flow for building resume data    |
-| Data Service      | `data-service.ts`             | Shared data access patterns                           |
-| Export Service    | `export-service.ts`           | Export resumes, portfolios, cover letters to PDF/JSON |
-| Skill Extractor   | `skill-extractor.ts`          | Extract and normalize skills from listings/resumes    |
-| Skill Mapping     | `skill-mapping-service.ts`    | Map user skills to job requirements for scoring       |
+| Service             | File                              | Purpose                                               |
+|---------------------|-----------------------------------|-------------------------------------------------------|
+| CV Questionnaire    | `cv-questionnaire-service.ts`     | Guided questionnaire flow for building resume data    |
+| Data Service        | `data-service.ts`                 | Shared data access patterns                           |
+| Export Service      | `export-service.ts`               | Export resumes, portfolios, cover letters to PDF/JSON |
+| Email Delivery      | `email-delivery-service.ts`       | SMTP delivery for automation email responses         |
+| Skill Extractor     | `skill-extractor.ts`              | Extract and normalize skills from listings/resumes    |
+| Skill Mapping       | `skill-mapping-service.ts`        | Map user skills to job requirements for scoring      |
+| Smart Field Mapper  | `automation/smart-field-mapper.ts`| AI-assisted form field mapping for job-apply RPA      |
 
 ---
 
@@ -706,7 +711,7 @@ BaoBuildBuddy ships these locale packs:
 ```text
       .-----------.
      /             \       "A man chooses. A slave obeys."
-    |   13 TABLES   |       But a schema migrates.
+    |   16 TABLES   |       But a schema migrates.
     |   IN SQLite   |
      \             /       All tables are defined in
       '-----------'        packages/server/src/db/schema/
@@ -714,16 +719,16 @@ BaoBuildBuddy ships these locale packs:
 
 | Schema File            | Tables                               | Purpose                                |
 |------------------------|--------------------------------------|----------------------------------------|
-| `user.ts`              | users                                | User accounts and profiles             |
-| `auth.ts`              | auth tokens                          | Authentication sessions and tokens     |
+| `user.ts`              | user_profile                         | User accounts and profiles             |
+| `auth.ts`              | auth                                 | Authentication sessions and tokens     |
 | `resumes.ts`           | resumes                              | Resume data with structured sections   |
 | `cover-letters.ts`     | cover_letters                        | Generated and custom cover letters     |
 | `portfolios.ts`        | portfolios, portfolio_projects       | Portfolio collections and projects     |
-| `interviews.ts`        | interviews, interview_messages       | Mock interview sessions and transcripts |
+| `interviews.ts`        | interview_sessions                   | Mock interview sessions and transcripts |
 | `studios.ts`           | studios                              | Game studio directory                  |
-| `jobs.ts`              | jobs                                 | Aggregated job listings                |
+| `jobs.ts`              | jobs, saved_jobs, applications       | Aggregated job listings, saves, applications |
 | `skill-mappings.ts`    | skill_mappings                       | User skill profiles and gap analysis   |
-| `gamification.ts`      | achievements, xp_events              | XP tracking and achievements           |
+| `gamification.ts`      | gamification                         | XP, level, achievements, streaks       |
 | `settings.ts`          | settings                             | User preferences and app configuration |
 | `automation-runs.ts`   | automation_runs                      | RPA execution audit trail              |
 | `chat-history.ts`      | chat_messages                        | AI conversation history                |
@@ -799,7 +804,7 @@ Migrations live in `packages/server/src/db/migrations/`. Seed data in `packages/
     |   |   |   +-- ai/             AIChatBubble, AIStreamingResponse, BaoFairy
     |   |   |   +-- resume/         ResumePreview, ExperienceList, PersonalInfoForm,
     |   |   |   |                   SkillsEditor, EducationList
-    |   |   |   +-- jobs/           JobCard, JobMatchScore, JobSearchBar, JobFilters
+    |   |   |   +-- jobs/           JobCard, JobMatchScore, JobSearchBar
     |   |   |   +-- interview/      InterviewChat, ScoreCard, StudioSelector
     |   |   |   +-- gamification/   DailyChallenge, XPBar, AchievementBadge
     |   |   |   +-- portfolio/      PortfolioGrid, ProjectCard
@@ -880,7 +885,7 @@ Migrations live in `packages/server/src/db/migrations/`. Seed data in `packages/
 | **AI Chat**                 | `ai/dashboard`, `ai/chat`                                                           | `useAI`, `useChatVoice`, `useSpeech`   |
 | **Studios**                 | `studios/index`, `studios/[id]`, `studios/analytics`                                | `useStudio`                            |
 | **Jobs**                    | `jobs/index`, `jobs/[id]`                                                           | `useJobs`, `useSearch`                 |
-| **Automation**              | `automation/index`, `job-apply`, `email`, `scraper`, `runs`, `runs/[id]`            | `useAutomation`                        |
+| **Automation**              | `automation/index`, `automation/job-apply`, `automation/email`, `automation/scraper`, `automation/runs`, `automation/runs/[id]` | `useAutomation`                        |
 | **Skills & XP**             | `skills/index`, `skills/pathways`, `gamification`                                   | `useSkillMapping`, `useGamification`   |
 
 ### UI standards
@@ -964,10 +969,7 @@ flowchart LR
 
 ### Stack version contract
 
-Context7 verification references:
-- Nuxt 4 docs (`/websites/nuxt_4_x`) confirm `nuxt` latest tag is v4.
-- Drizzle ORM docs (`/drizzle/team/drizzle`) confirm runtime data layer guidance.
-- Bun docs (`/oven-sh/bun`) confirm Bun runtime/toolchain guidance.
+Context7 verification: `bun run audit:official-llms` fetches and validates `llms.txt` from official sources (Elysia, Nuxt, Bun, daisyUI). Each source is checked for required markers to ensure AI assistants receive up-to-date docs.
 
 Verify stack alignment:
 
@@ -1135,6 +1137,7 @@ LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bun run build:desktop
 | `PORT`                         | `3000`        | API port                       |
 | `CLIENT_PORT`                  | `3001`        | Client readiness check port    |
 | `BAO_DISABLE_AUTH`             | -             | Pass through to stack startup  |
+| `BAO_AUTH_SETUP_TOKEN`         | -             | One-time setup token for first API key bootstrap |
 
 If desktop build fails with `failed to run 'cargo metadata'`:
 ```bash

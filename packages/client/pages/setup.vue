@@ -29,6 +29,12 @@ type SetupProvider = "local" | "gemini" | "openai" | "claude" | "huggingface";
 type CloudProvider = Exclude<SetupProvider, "local">;
 type TestResult = { valid: boolean; provider: string };
 type SetupStep = 1 | 2 | 3;
+type SetupAuthStatus = {
+  authRequired: boolean;
+  configured: boolean;
+  bootstrapRequired: boolean;
+  setupTokenConfigured: boolean;
+};
 
 const CLOUD_PROVIDER_IDS: readonly CloudProvider[] = ["gemini", "openai", "claude", "huggingface"];
 const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
@@ -49,6 +55,9 @@ const dashboardStats = ref<DashboardStats | null>(null);
 const step = ref<SetupStep>(1);
 const name = ref("");
 const currentRole = ref("");
+const authStatus = ref<SetupAuthStatus | null>(null);
+const authSetupToken = ref("");
+const existingApiKey = ref("");
 
 const localModelEndpoint = ref(LOCAL_AI_DEFAULT_ENDPOINT);
 const localModelName = ref(LOCAL_AI_DEFAULT_MODEL);
@@ -130,6 +139,9 @@ await useAsyncData(
       dashboardStats.value = null;
     }
 
+    const authStatusResult = await settlePromise(checkAuthStatus(), t("apiErrors.auth.initFailed"));
+    authStatus.value = authStatusResult.ok ? authStatusResult.value : null;
+
     return {
       initialized: true,
     };
@@ -148,6 +160,16 @@ const setupCompletionFlowInput = computed(() =>
 );
 const { primaryAction: setupCompletionPrimaryAction } = useFlowEngine(setupCompletionFlowInput);
 const postSetupFlowTarget = computed(() => setupCompletionPrimaryAction.value.to);
+const authBootstrapRequired = computed(
+  () => authStatus.value?.authRequired === true && authStatus.value.bootstrapRequired,
+);
+const authSetupTokenConfigured = computed(() => authStatus.value?.setupTokenConfigured === true);
+const needsStoredApiKey = computed(
+  () =>
+    authStatus.value?.authRequired === true &&
+    authStatus.value.bootstrapRequired === false &&
+    getStoredApiKey() === null,
+);
 
 async function handleTestProvider(provider: SetupProvider): Promise<void> {
   const key = getProviderTestKey(provider);
@@ -186,26 +208,57 @@ async function handleComplete(): Promise<void> {
   saving.value = true;
   const trimmedName = name.value.trim();
   const trimmedRole = currentRole.value.trim();
+  const setupToken = authSetupToken.value.trim();
+  const providedApiKey = existingApiKey.value.trim();
+  const storedApiKey = getStoredApiKey();
 
-  const authStatus = await checkAuthStatus();
-  const authInitResult = await settlePromise(initAuth(), t("apiErrors.auth.initFailed"));
-  if (!authInitResult.ok) {
-    if (authStatus.authRequired) {
-      saving.value = false;
-      $toast.error(getErrorMessage(authInitResult.error, t("apiErrors.auth.initFailed")));
-      return;
-    }
-  } else {
-    const issuedApiKey = authInitResult.value.apiKey;
-    if (typeof issuedApiKey === "string" && issuedApiKey.length > 0) {
+  const nextAuthStatus = authStatus.value ?? (await checkAuthStatus());
+  authStatus.value = nextAuthStatus;
+  if (nextAuthStatus.authRequired && !storedApiKey) {
+    if (nextAuthStatus.bootstrapRequired) {
+      if (!nextAuthStatus.setupTokenConfigured) {
+        saving.value = false;
+        $toast.error(t("setup.auth.bootstrapUnavailableDescription"));
+        return;
+      }
+
+      if (!setupToken) {
+        saving.value = false;
+        $toast.error(t("setup.auth.setupTokenRequiredError"));
+        return;
+      }
+
+      const authInitResult = await settlePromise(initAuth(setupToken), t("apiErrors.auth.initFailed"));
+      if (!authInitResult.ok) {
+        saving.value = false;
+        $toast.error(getErrorMessage(authInitResult.error, t("apiErrors.auth.initFailed")));
+        return;
+      }
+
+      const issuedApiKey = authInitResult.value.apiKey;
+      if (typeof issuedApiKey !== "string" || issuedApiKey.length === 0) {
+        saving.value = false;
+        $toast.error(t("apiErrors.auth.initFailed"));
+        return;
+      }
+
       setStoredApiKey(issuedApiKey);
-    }
+    } else {
+      if (!providedApiKey) {
+        saving.value = false;
+        $toast.error(t("setup.auth.apiKeyRequiredError"));
+        return;
+      }
 
-    if (authStatus.authRequired && !getStoredApiKey()) {
-      saving.value = false;
-      $toast.error(t("apiErrors.auth.initFailed"));
-      return;
+      setStoredApiKey(providedApiKey);
     }
+  }
+
+  const activeApiKey = getStoredApiKey();
+  if (nextAuthStatus.authRequired && !activeApiKey) {
+    saving.value = false;
+    $toast.error(t("apiErrors.auth.initFailed"));
+    return;
   }
 
   if (trimmedName) {
@@ -217,6 +270,9 @@ async function handleComplete(): Promise<void> {
       t("setup.completeErrorFallback"),
     );
     if (!profileUpdateResult.ok) {
+      if (!storedApiKey && providedApiKey.length > 0) {
+        setStoredApiKey(null);
+      }
       saving.value = false;
       $toast.error(getErrorMessage(profileUpdateResult.error, t("setup.completeErrorFallback")));
       return;
@@ -490,6 +546,50 @@ async function handleComplete(): Promise<void> {
               })
             }}
           </p>
+
+          <div
+            v-if="authBootstrapRequired && authSetupTokenConfigured"
+            role="alert"
+            class="alert alert-info alert-vertical text-left sm:alert-horizontal"
+          >
+            <div>
+              <h3 class="font-bold">{{ t("setup.auth.setupTokenTitle") }}</h3>
+              <div class="text-sm">{{ t("setup.auth.setupTokenDescription") }}</div>
+            </div>
+          </div>
+
+          <div
+            v-else-if="authBootstrapRequired"
+            role="alert"
+            class="alert alert-warning alert-vertical text-left sm:alert-horizontal"
+          >
+            <div>
+              <h3 class="font-bold">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
+              <div class="text-sm">{{ t("setup.auth.bootstrapUnavailableDescription") }}</div>
+            </div>
+          </div>
+
+          <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label w-full text-left">
+            <span>{{ t("setup.auth.setupTokenLegend") }}</span>
+            <input
+              v-model="authSetupToken"
+              type="password"
+              :placeholder="t('setup.auth.setupTokenPlaceholder')"
+              class="input w-full"
+              :aria-label="t('setup.auth.setupTokenAria')"
+            />
+          </label>
+
+          <label v-if="needsStoredApiKey" class="floating-label w-full text-left">
+            <span>{{ t("setup.auth.apiKeyLegend") }}</span>
+            <input
+              v-model="existingApiKey"
+              type="password"
+              :placeholder="t('setup.auth.apiKeyPlaceholder')"
+              class="input w-full"
+              :aria-label="t('setup.auth.apiKeyAria')"
+            />
+          </label>
 
           <div class="flex justify-center gap-2">
             <button

@@ -634,7 +634,7 @@ async function viewSession(id: string) {
                 <div class="text-xs">{{ t("interviewHub.cards.selectedJobValue", { title: selectedJob.title, company: selectedJob.company }) }}</div>
               </div>
               <button
-                class="btn btn-sm"
+                class="btn btn-sm btn-ghost"
                 :aria-label="t('interviewHub.cards.changeJobAria')"
                 @click="openConfig('job')"
               >
@@ -769,8 +769,8 @@ async function viewSession(id: string) {
       <div class="join mt-4">
         <button
           type="button"
-          class="btn join-item"
-          :class="selectedMode === 'job' ? 'btn-primary' : 'btn-outline'"
+          class="btn join-item btn-outline"
+          :class="{ 'btn-primary': selectedMode === 'job' }"
           :aria-label="t('interviewHub.config.switchToJobAria')"
           @click="selectedMode = 'job'"
         >
@@ -778,8 +778,8 @@ async function viewSession(id: string) {
         </button>
         <button
           type="button"
-          class="btn join-item"
-          :class="selectedMode === 'studio' ? 'btn-primary' : 'btn-outline'"
+          class="btn join-item btn-outline"
+          :class="{ 'btn-primary': selectedMode === 'studio' }"
           :aria-label="t('interviewHub.config.switchToStudioAria')"
           @click="selectedMode = 'studio'"
         >
@@ -821,8 +821,8 @@ async function viewSession(id: string) {
                     <td class="text-right">
                       <button
                         type="button"
-                        class="btn btn-xs"
-                        :class="job.id === selectedJobId ? 'btn-primary' : 'btn-ghost'"
+                        class="btn btn-xs btn-ghost"
+                        :class="{ 'btn-primary': job.id === selectedJobId }"
                         :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
                         @click="selectJobById(job.id)"
                       >

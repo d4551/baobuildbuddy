@@ -162,6 +162,7 @@ NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY=bao-locale
 When you're ready, add:
 
 - `BAO_DISABLE_AUTH=true` to skip auth gating in local dev
+- or `BAO_AUTH_SETUP_TOKEN=your-operator-token` if you want auth enabled during first-run setup
 - `LOCAL_MODEL_ENDPOINT=http://localhost:11434/v1` for local AI (leave `LOCAL_MODEL_NAME` blank for auto-detect)
 - `OPENAI_API_KEY`, `GEMINI_API_KEY`, `CLAUDE_API_KEY`, `HUGGINGFACE_TOKEN` as needed
 - `AUTOMATION_STDIO_BUFFER_LIMIT=2000` for large scraper outputs

@@ -202,7 +202,7 @@ onUnmounted(() => {
           :key="action.id"
           :to="action.to"
           :id="`quick-action-${index}`"
-          class="btn btn-lg justify-between min-w-52 transition-colors duration-150"
+          class="btn btn-lg btn-primary justify-between min-w-52 transition-colors duration-150"
           role="menuitem"
           :tabindex="index === activeActionIndex ? 0 : -1"
           :aria-label="t(action.labelKey)"

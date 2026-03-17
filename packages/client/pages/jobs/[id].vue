@@ -232,8 +232,8 @@ async function startJobInterview() {
         <div v-if="job.requirements?.length" class="card bg-base-200">
           <div class="card-body">
             <h2 class="card-title">{{ t("jobDetail.requirementsTitle") }}</h2>
-            <ul class="list list-disc list-inside space-y-2">
-              <li class="list-row" v-for="(req, idx) in job.requirements" :key="idx">
+            <ul class="list">
+              <li class="list-row px-0 py-2" v-for="(req, idx) in job.requirements" :key="idx">
                 {{ req }}
               </li>
             </ul>
