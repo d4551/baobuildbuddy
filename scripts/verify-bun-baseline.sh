@@ -47,7 +47,7 @@ read_stale_bun_refs_with_grep() {
   output="$(
     find . \
       \( -path './node_modules' -o -path './.git' -o -path './.bun' \) -prune \
-      -o -type f ! -type l \
+      -o -type f \
       ! -path './scripts/verify-bun-baseline.sh' \
       -exec grep -InE 'bun@1\\.3\\.9|\"1\\.3\\.9\"' {} +
   )"

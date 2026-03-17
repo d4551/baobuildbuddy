@@ -12,7 +12,13 @@ const resolveBiomeExecutable = (): string => {
     const cmd = join(binDir, "biome.cmd");
     if (existsSync(cmd)) return cmd;
   }
-  return join(binDir, "biome");
+  const fallback = join(binDir, "biome");
+  if (!existsSync(fallback)) {
+    throw new Error(
+      `Biome executable not found in ${binDir}. Run bun install to install dependencies.`,
+    );
+  }
+  return fallback;
 };
 
 const BIOME_EXECUTABLE_PATH = resolveBiomeExecutable();
