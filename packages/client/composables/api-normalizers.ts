@@ -172,14 +172,8 @@ const COMPANY_BOARD_ATS_TYPES: readonly AutomationSettings["jobProviders"]["comp
     "workday",
   ];
 
-const GAMING_PORTAL_IDS: readonly AutomationSettings["jobProviders"]["gamingPortals"][number]["id"][] = [
-  "hitmarker",
-  "grackle",
-  "workwithindies",
-  "remotegamejobs",
-  "gamesjobsdirect",
-  "pocketgamer",
-];
+const GAMING_PORTAL_IDS: readonly AutomationSettings["jobProviders"]["gamingPortals"][number]["id"][] =
+  ["hitmarker", "grackle", "workwithindies", "remotegamejobs", "gamesjobsdirect", "pocketgamer"];
 
 const normalizeGreenhouseBoards = (
   value: unknown,
@@ -192,7 +186,9 @@ const normalizeGreenhouseBoards = (
       }))
     : DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseBoards;
 
-const normalizeLeverCompanies = (value: unknown): AutomationSettings["jobProviders"]["leverCompanies"] =>
+const normalizeLeverCompanies = (
+  value: unknown,
+): AutomationSettings["jobProviders"]["leverCompanies"] =>
   Array.isArray(value)
     ? value.filter(isRecord).map((company) => ({
         slug: asString(company.slug) ?? "",
@@ -213,7 +209,8 @@ const normalizeCompanyBoardTemplates = (
       asString(value.greenhouse) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.greenhouse,
     lever:
-      asString(value.lever) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.lever,
+      asString(value.lever) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.lever,
     recruitee:
       asString(value.recruitee) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.recruitee,
@@ -221,7 +218,8 @@ const normalizeCompanyBoardTemplates = (
       asString(value.workable) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.workable,
     ashby:
-      asString(value.ashby) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.ashby,
+      asString(value.ashby) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.ashby,
     smartrecruiters:
       asString(value.smartrecruiters) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates.smartrecruiters,
@@ -234,7 +232,9 @@ const normalizeCompanyBoardTemplates = (
   };
 };
 
-const normalizeCompanyBoards = (value: unknown): AutomationSettings["jobProviders"]["companyBoards"] =>
+const normalizeCompanyBoards = (
+  value: unknown,
+): AutomationSettings["jobProviders"]["companyBoards"] =>
   Array.isArray(value)
     ? value.filter(isRecord).map((board) => ({
         name: asString(board.name) ?? "",
@@ -245,7 +245,9 @@ const normalizeCompanyBoards = (value: unknown): AutomationSettings["jobProvider
       }))
     : DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoards;
 
-const normalizeGamingPortals = (value: unknown): AutomationSettings["jobProviders"]["gamingPortals"] => {
+const normalizeGamingPortals = (
+  value: unknown,
+): AutomationSettings["jobProviders"]["gamingPortals"] => {
   if (!Array.isArray(value)) {
     return DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals;
   }
@@ -275,7 +277,8 @@ const normalizeJobProviderSettings = (value: unknown): AutomationSettings["jobPr
   return {
     ...DEFAULT_AUTOMATION_SETTINGS.jobProviders,
     providerTimeoutMs:
-      asNumber(value.providerTimeoutMs) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.providerTimeoutMs,
+      asNumber(value.providerTimeoutMs) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.providerTimeoutMs,
     companyBoardResultLimit:
       asNumber(value.companyBoardResultLimit) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardResultLimit,
@@ -289,7 +292,8 @@ const normalizeJobProviderSettings = (value: unknown): AutomationSettings["jobPr
       asString(value.unknownCompanyLabel) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownCompanyLabel,
     hitmarkerEnabled:
-      asBoolean(value.hitmarkerEnabled) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerEnabled,
+      asBoolean(value.hitmarkerEnabled) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerEnabled,
     hitmarkerApiBaseUrl:
       asString(value.hitmarkerApiBaseUrl) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerApiBaseUrl,
@@ -303,7 +307,8 @@ const normalizeJobProviderSettings = (value: unknown): AutomationSettings["jobPr
       asString(value.greenhouseApiBaseUrl) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseApiBaseUrl,
     greenhouseMaxPages:
-      asNumber(value.greenhouseMaxPages) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseMaxPages,
+      asNumber(value.greenhouseMaxPages) ??
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseMaxPages,
     greenhouseBoards: normalizeGreenhouseBoards(value.greenhouseBoards),
     leverApiBaseUrl:
       asString(value.leverApiBaseUrl) ?? DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverApiBaseUrl,

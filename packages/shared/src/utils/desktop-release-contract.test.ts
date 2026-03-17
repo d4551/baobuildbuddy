@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
+  buildDesktopBundleDirectoryCandidates,
   buildDesktopReleaseArtifactFileNames,
+  buildDesktopReleaseDirectoryCandidates,
   buildDesktopReleaseArtifactSpecs,
 } from "./desktop-release-contract";
 
@@ -51,6 +53,24 @@ describe("desktop release contract", () => {
         relativePath: "windows/BaoBuildBuddy_0.1.0_x64-portable.zip",
         target: "windows",
       },
+    ]);
+  });
+
+  test("builds Cargo release directory candidates for target-aware staging", () => {
+    expect(buildDesktopReleaseDirectoryCandidates("windows")).toEqual([
+      "target/release",
+      "target/x86_64-pc-windows-msvc/release",
+    ]);
+    expect(buildDesktopReleaseDirectoryCandidates("linux-arm64")).toEqual([
+      "target/release",
+      "target/aarch64-unknown-linux-gnu/release",
+    ]);
+  });
+
+  test("builds bundle directory candidates for target-aware staging", () => {
+    expect(buildDesktopBundleDirectoryCandidates("macos")).toEqual([
+      "target/release/bundle",
+      "target/aarch64-apple-darwin/release/bundle",
     ]);
   });
 });

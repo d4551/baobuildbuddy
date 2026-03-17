@@ -10,7 +10,11 @@ import {
   DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH,
   DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH,
 } from "../packages/shared/src/constants/scripts";
-import { buildDesktopReleaseArtifactFileNames } from "../packages/shared/src/utils/desktop-release-contract";
+import {
+  buildDesktopBundleDirectoryCandidates,
+  buildDesktopReleaseArtifactFileNames,
+  buildDesktopReleaseDirectoryCandidates,
+} from "../packages/shared/src/utils/desktop-release-contract";
 import { resolveDesktopRuntimeTargetInfo } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage } from "./utils/async-control";
 import { writeFormattedJsonFile } from "./utils/biome-format";
@@ -144,11 +148,39 @@ const runMacosPrebuildCleanup = async (): Promise<void> => {
 const pathExists = async (absolutePath: string): Promise<boolean> =>
   Bun.file(absolutePath).exists();
 
-const requireFile = async (absolutePath: string): Promise<void> => {
-  if (!(await pathExists(absolutePath))) {
-    throw new Error(`Required file is missing: ${absolutePath}`);
+const resolveExistingPath = async (
+  label: string,
+  candidatePaths: readonly string[],
+): Promise<string> => {
+  const candidateResults = await Promise.all(
+    candidatePaths.map(async (candidatePath) => ({
+      candidatePath,
+      exists: await pathExists(candidatePath),
+    })),
+  );
+  const existingCandidate = candidateResults.find((candidate) => candidate.exists);
+  if (existingCandidate) {
+    return existingCandidate.candidatePath;
   }
+
+  throw new Error(`Required ${label} is missing. Checked: ${candidatePaths.join(", ")}`);
 };
+
+const buildReleasePathCandidates = (
+  target: DesktopReleaseTarget,
+  ...relativeSegments: readonly string[]
+): readonly string[] =>
+  buildDesktopReleaseDirectoryCandidates(target).map((releaseRoot) =>
+    join(DESKTOP_TAURI_ROOT, releaseRoot, ...relativeSegments),
+  );
+
+const buildBundlePathCandidates = (
+  target: DesktopReleaseTarget,
+  ...relativeSegments: readonly string[]
+): readonly string[] =>
+  buildDesktopBundleDirectoryCandidates(target).map((bundleRoot) =>
+    join(DESKTOP_TAURI_ROOT, bundleRoot, ...relativeSegments),
+  );
 
 const resolveOutputRoot = (argv: readonly string[]): string => {
   const rootIndex = argv.indexOf("--output-root");
@@ -355,9 +387,10 @@ const stageMacosArtifacts = async (
   if (!dmgFileName) {
     throw new Error("Canonical macOS release artifact name could not be resolved.");
   }
-  const dmgPath = join(DESKTOP_TAURI_ROOT, "target", "release", "bundle", "dmg", dmgFileName);
-
-  await requireFile(dmgPath);
+  const dmgPath = await resolveExistingPath(
+    "macOS dmg bundle",
+    buildBundlePathCandidates("macos", "dmg", dmgFileName),
+  );
   await rm(targetRoot, { force: true, recursive: true });
   await mkdir(join(targetRoot, DESKTOP_RELEASE_METADATA_DIR), { recursive: true });
   const destinationPath = join(targetRoot, basename(dmgPath));
@@ -371,17 +404,20 @@ const stageLinuxArtifacts = async (
   target: Extract<DesktopReleaseTarget, "linux-x64" | "linux-arm64">,
 ): Promise<readonly string[]> => {
   const targetRoot = join(outputRoot, target);
-  const bundleRoot = join(DESKTOP_TAURI_ROOT, "target", "release", "bundle");
   const [debFileName, rpmFileName] = buildDesktopReleaseArtifactFileNames(metadata, target);
   if (!(debFileName && rpmFileName)) {
     throw new Error(`Canonical Linux release artifact names could not be resolved for ${target}.`);
   }
-  const artifactPaths = [
-    join(bundleRoot, "deb", debFileName),
-    join(bundleRoot, "rpm", rpmFileName),
-  ] as const;
-
-  await Promise.all(artifactPaths.map((artifactPath) => requireFile(artifactPath)));
+  const artifactPaths = await Promise.all([
+    resolveExistingPath(
+      `${target} deb bundle`,
+      buildBundlePathCandidates(target, "deb", debFileName),
+    ),
+    resolveExistingPath(
+      `${target} rpm bundle`,
+      buildBundlePathCandidates(target, "rpm", rpmFileName),
+    ),
+  ] as const);
   await rm(targetRoot, { force: true, recursive: true });
   await mkdir(join(targetRoot, DESKTOP_RELEASE_METADATA_DIR), { recursive: true });
   await Promise.all(
@@ -434,8 +470,6 @@ const stageWindowsArtifacts = async (
   outputRoot: string,
 ): Promise<readonly string[]> => {
   const targetRoot = join(outputRoot, "windows");
-  const targetReleaseRoot = join(DESKTOP_TAURI_ROOT, "target", "release");
-  const bundledRuntimeRoot = join(targetReleaseRoot, DESKTOP_RUNTIME_RESOURCE_DIR);
   const [setupFileName, portableFileName] = buildDesktopReleaseArtifactFileNames(
     metadata,
     "windows",
@@ -443,24 +477,33 @@ const stageWindowsArtifacts = async (
   if (!(setupFileName && portableFileName)) {
     throw new Error("Canonical Windows release artifact names could not be resolved.");
   }
-  const setupPath = join(targetReleaseRoot, "bundle", "nsis", setupFileName);
-  const executablePath = join(targetReleaseRoot, `${metadata.binaryName}.exe`);
-  const runtimeRoot = join(targetReleaseRoot, "gen");
-  const bootstrapperPath = join(
-    bundledRuntimeRoot,
-    `${DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`,
+  const setupPath = await resolveExistingPath(
+    "Windows NSIS installer",
+    buildBundlePathCandidates("windows", "nsis", setupFileName),
   );
-  const nsisScriptPath = join(targetReleaseRoot, "nsis", "x64", "installer.nsi");
+  const executablePath = await resolveExistingPath(
+    "Windows desktop executable",
+    buildReleasePathCandidates("windows", `${metadata.binaryName}.exe`),
+  );
+  const runtimeRoot = await resolveExistingPath(
+    "Windows portable runtime directory",
+    buildReleasePathCandidates("windows", "gen"),
+  );
+  await resolveExistingPath(
+    "Windows WebView2 bootstrapper",
+    buildReleasePathCandidates(
+      "windows",
+      DESKTOP_RUNTIME_RESOURCE_DIR,
+      `${DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`,
+    ),
+  );
+  const nsisScriptPath = await resolveExistingPath(
+    "Windows NSIS script",
+    buildReleasePathCandidates("windows", "nsis", "x64", "installer.nsi"),
+  );
   const portableRootName = portableFileName.replace(ZIP_EXTENSION_PATTERN, "");
   const portableStageRoot = join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, portableRootName);
   const portableArchivePath = join(targetRoot, portableFileName);
-
-  await Promise.all([
-    requireFile(setupPath),
-    requireFile(executablePath),
-    requireFile(bootstrapperPath),
-    requireFile(nsisScriptPath),
-  ]);
 
   await rm(targetRoot, { force: true, recursive: true });
   await mkdir(join(targetRoot, DESKTOP_RELEASE_METADATA_DIR), { recursive: true });

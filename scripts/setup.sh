@@ -18,7 +18,7 @@ INCLUDE_DESKTOP_BUILD=false
 ERRORS=0
 WARNINGS=0
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REQUIRED_BUN_VERSION="$(cd "$REPO_ROOT" && node -p "require('./package.json').packageManager?.replace(/^bun@/,'') || '1.3.10'" 2>/dev/null)" || REQUIRED_BUN_VERSION="1.3.10"
+REQUIRED_BUN_VERSION="$(bash "$REPO_ROOT/scripts/read-bun-version.sh")" || REQUIRED_BUN_VERSION="1.3.10"
 REQUIRED_BUN_MAJOR="${REQUIRED_BUN_VERSION%%.*}"
 REQUIRED_BUN_REST="${REQUIRED_BUN_VERSION#*.}"
 REQUIRED_BUN_MINOR="${REQUIRED_BUN_REST%%.*}"

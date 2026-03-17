@@ -77,4 +77,4 @@ if [[ -n "$STALE_LINES" ]]; then
   exit 1
 fi
 
-echo "✅ Bun baseline and 1.3.9 guard checks passed"
+echo "✅ Bun baseline and stale 1.3.9 reference checks passed"

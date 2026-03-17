@@ -7,6 +7,7 @@ import {
   DESKTOP_RELEASE_MACOS_ARCH,
   DESKTOP_RELEASE_WINDOWS_ARCH,
 } from "../constants/scripts";
+import { resolveDesktopRuntimeTargetInfo } from "./desktop-runtime-contract";
 
 /**
  * Canonical desktop release staging targets.
@@ -116,3 +117,23 @@ export const buildDesktopReleaseArtifactFileNames = (
   target: DesktopReleaseTarget,
 ): readonly string[] =>
   buildDesktopReleaseArtifactSpecs(metadata, target).map((artifact) => artifact.fileName);
+
+/**
+ * Builds the candidate Cargo release directories used by native Tauri builds for a target.
+ */
+export const buildDesktopReleaseDirectoryCandidates = (
+  target: DesktopReleaseTarget,
+): readonly string[] => {
+  const targetInfo = resolveDesktopRuntimeTargetInfo(target);
+  return ["target/release", `target/${targetInfo.tauriTarget}/release`] as const;
+};
+
+/**
+ * Builds the candidate Tauri bundle directories used by native Tauri builds for a target.
+ */
+export const buildDesktopBundleDirectoryCandidates = (
+  target: DesktopReleaseTarget,
+): readonly string[] =>
+  buildDesktopReleaseDirectoryCandidates(target).map(
+    (releaseDirectory) => `${releaseDirectory}/bundle`,
+  );
