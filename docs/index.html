@@ -150,6 +150,75 @@
         outline-offset: 2px;
       }
 
+      /* ── WCAG 2.1 AA contrast fixes for light theme ── */
+      /* badge-soft text colors darkened to meet 4.5:1 on their tinted backgrounds */
+      [data-theme="light"] .badge-soft.badge-warning {
+        color: oklch(0.42 0.16 75);
+      }
+      [data-theme="light"] .badge-soft.badge-success {
+        color: oklch(0.40 0.15 155);
+      }
+      [data-theme="light"] .badge-soft.badge-info {
+        color: oklch(0.40 0.14 245);
+      }
+      [data-theme="light"] .badge-soft.badge-accent {
+        color: oklch(0.42 0.15 165);
+      }
+      [data-theme="light"] .badge-soft.badge-secondary {
+        color: oklch(0.42 0.17 330);
+      }
+      /* badge-ghost: add visible border for 3:1 non-text contrast in both modes */
+      .badge-ghost {
+        border: 1px solid oklch(var(--color-base-content) / 0.22);
+      }
+      [data-theme="light"] .badge-ghost {
+        color: oklch(var(--color-base-content) / 0.72);
+      }
+      /* btn-ghost: ensure 3:1 interactive-boundary contrast in light mode */
+      [data-theme="light"] .btn-ghost {
+        color: oklch(var(--color-base-content) / 0.78);
+      }
+      [data-theme="light"] .btn-ghost:hover,
+      [data-theme="light"] .btn-ghost:focus-visible {
+        background-color: oklch(var(--color-base-content) / 0.1);
+      }
+      /* btn-neutral btn-outline: enforce dark border on light backgrounds */
+      [data-theme="light"] .btn-outline.btn-neutral {
+        border-color: oklch(var(--color-neutral) / 0.6);
+        color: oklch(0.28 0.02 270);
+      }
+
+      /* ── WCAG 2.1 AA contrast fixes for dark theme ── */
+      /* btn-neutral: add visible border so button boundary meets 3:1 on dark bg */
+      [data-theme="dark"] .btn-neutral {
+        border: 1px solid oklch(var(--color-base-content) / 0.18);
+      }
+      [data-theme="dark"] .btn-neutral:hover,
+      [data-theme="dark"] .btn-neutral:focus-visible {
+        border-color: oklch(var(--color-base-content) / 0.30);
+        background-color: oklch(var(--color-neutral) / 0.85);
+      }
+      /* btn-neutral btn-outline: boost border + text visibility in dark mode */
+      [data-theme="dark"] .btn-outline.btn-neutral {
+        border-color: oklch(var(--color-base-content) / 0.35);
+        color: oklch(var(--color-base-content) / 0.85);
+      }
+      [data-theme="dark"] .btn-outline.btn-neutral:hover,
+      [data-theme="dark"] .btn-outline.btn-neutral:focus-visible {
+        border-color: oklch(var(--color-base-content) / 0.5);
+        background-color: oklch(var(--color-base-content) / 0.08);
+      }
+      /* badge-soft badge-neutral: lighten bg + text so it's visible on dark bg */
+      [data-theme="dark"] .badge-soft.badge-neutral {
+        background-color: oklch(var(--color-base-content) / 0.12);
+        color: oklch(var(--color-base-content) / 0.82);
+      }
+      /* badge-outline: boost border for 3:1 non-text contrast in dark mode */
+      [data-theme="dark"] .badge-outline {
+        border-color: oklch(var(--color-base-content) / 0.30);
+        color: oklch(var(--color-base-content) / 0.82);
+      }
+
       @media (max-width: 767px) {
         .downloads-tab-scroller {
           overflow-x: auto;
@@ -907,7 +976,7 @@
               <div class="flex items-start justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="badge ${badgeClass} badge-soft badge-sm uppercase font-bold">${ext}</span>
-                  ${architecture ? `<span class="badge badge-ghost badge-sm font-medium">${safeArchitecture}</span>` : ""}
+                  ${architecture ? `<span class="badge badge-outline badge-neutral badge-sm font-medium">${safeArchitecture}</span>` : ""}
                 </div>
                 <span class="text-xs text-base-content/60 font-medium">${formatFileSize(file.size)}</span>
               </div>
