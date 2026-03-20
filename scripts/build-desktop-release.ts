@@ -1187,7 +1187,7 @@ const stageWindowsArtifacts = async (
   );
   const executablePath = await resolveExistingPath(
     "Windows desktop executable",
-    buildReleasePathCandidates("windows", `${metadata.binaryName}.exe`),
+    buildReleasePathCandidates("windows", undefined, `${metadata.binaryName}.exe`),
   );
   const runtimeRoot = await resolveExistingPath("Windows portable runtime directory", [
     DESKTOP_PORTABLE_RUNTIME_ROOT,
