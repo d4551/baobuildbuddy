@@ -1060,12 +1060,12 @@ async function resolvePipelineReward(
                     </fieldset>
                   </div>
                 </SectionGrid>
-                <div class="form-control">
+                <fieldset class="fieldset">
                   <label class="label cursor-pointer justify-start gap-2">
                     <input v-model="exp.current" type="checkbox" class="checkbox checkbox-sm" :aria-label="t('resumePage.experience.currentAria')"/>
-                    <span class="label-text">{{ t("resumePage.experience.currentLabel") }}</span>
+                    <span class="label">{{ t("resumePage.experience.currentLabel") }}</span>
                   </label>
-                </div>
+                </fieldset>
                 <fieldset class="fieldset">
                   <legend class="fieldset-legend">{{ t("resumePage.experience.descriptionLegend") }}</legend>
                   <textarea

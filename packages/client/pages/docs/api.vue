@@ -928,15 +928,15 @@ onBeforeUnmount(() => {
             <label
               v-for="parameterName in selectedEndpoint.pathParameters"
               :key="`path-${parameterName}`"
-              class="form-control"
+              class="fieldset"
             >
-              <span class="label-text">
+              <span class="label">
                 {{ t("apiDocs.tester.parameterLabel", { name: parameterName }) }}
               </span>
               <input
                 v-model="pathParameterValues[parameterName]"
                 type="text"
-                class="input input-bordered"
+                class="input"
                 :aria-label="t('apiDocs.tester.parameterLabel', { name: parameterName })"
               />
             </label>
@@ -953,15 +953,15 @@ onBeforeUnmount(() => {
             <label
               v-for="parameter in selectedEndpoint.queryParameters"
               :key="`query-${parameter.name}`"
-              class="form-control"
+              class="fieldset"
             >
-              <span class="label-text">
+              <span class="label">
                 {{ t("apiDocs.tester.parameterLabel", { name: parameter.name }) }}
               </span>
               <input
                 v-model="queryParameterValues[parameter.name]"
                 type="text"
-                class="input input-bordered"
+                class="input"
                 :aria-label="t('apiDocs.tester.parameterLabel', { name: parameter.name })"
               />
             </label>
@@ -976,7 +976,7 @@ onBeforeUnmount(() => {
           <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
           <textarea
             v-model="requestBodyValue"
-            class="textarea textarea-bordered min-h-40 w-full font-mono text-sm"
+            class="textarea min-h-40 w-full font-mono text-sm"
             :placeholder="t('apiDocs.tester.bodyPlaceholder')"
             :aria-label="t('apiDocs.tester.requestBodyAria')"
           />

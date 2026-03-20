@@ -175,19 +175,19 @@ watch(renderedMessages, async () => {
 
     <!-- Response Input -->
     <div v-if="currentQuestion" class="p-4 bg-base-100 rounded-b-lg border-t border-base-300">
-      <form class="form-control gap-2" @submit.prevent="submitResponse">
+      <form class="fieldset gap-2" @submit.prevent="submitResponse">
         <div class="label">
-          <label :for="responseTextareaId" class="label-text font-medium">
+          <label :for="responseTextareaId" class="font-medium">
             {{ t(props.responseLabelKey) }}
           </label>
-          <span class="label-text font-medium">
+          <span class="font-medium">
             {{ currentQuestionProgressLabel }}
           </span>
         </div>
         <textarea
           :id="responseTextareaId"
           v-model="currentResponse"
-          class="textarea textarea-bordered h-24"
+          class="textarea h-24"
           :placeholder="t(props.responsePlaceholderKey)"
           :aria-label="t(props.responseAriaKey)"
           :aria-describedby="responseHintId"
@@ -198,7 +198,7 @@ watch(renderedMessages, async () => {
           @keyup.ctrl.enter.prevent="submitResponse"
           @keyup.meta.enter.prevent="submitResponse"
         ></textarea>
-        <span :id="responseHintId" class="label-text-alt">
+        <span :id="responseHintId" class="label text-sm">
           {{ responseHintText }}
         </span>
         <button

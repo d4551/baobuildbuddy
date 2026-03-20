@@ -523,7 +523,7 @@ function cardRunButtonLabel(target: AutomationScrapeTarget): string {
                 <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
                 <input
                   v-model="scheduledRunAt[capability.target]"
-                  class="input input-bordered w-full"
+                  class="input w-full"
                   type="datetime-local"
                   :aria-label="t('automation.scraper.schedule.aria')"
                 />

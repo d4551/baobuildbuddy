@@ -332,7 +332,7 @@ watch(
               class="toggle toggle-primary toggle-sm"
               :aria-label="t('studiosIndex.filters.remoteAria')"
             />
-            <span class="label-text">{{ t("studiosIndex.filters.remoteLabel") }}</span>
+            <span class="label">{{ t("studiosIndex.filters.remoteLabel") }}</span>
           </label>
 
           <button class="btn btn-ghost btn-sm" :aria-label="t('studiosIndex.filters.clearAria')" @click="clearFilters">

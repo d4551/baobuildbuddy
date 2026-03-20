@@ -347,337 +347,337 @@ async function copyOllamaCommand(): Promise<void> {
 
 <template>
   <PageScaffold tag="main" width-token="shell" spacing-token="compact" labelled-by="setup-title" extra-class="w-full">
-        <h1 id="setup-title" class="mb-4 text-2xl font-bold text-primary">
-          {{ t("setup.title", { brand: resolvedBrand.name }) }}
-        </h1>
+    <h1 id="setup-title" class="mb-4 text-2xl font-bold text-primary">
+      {{ t("setup.title", { brand: resolvedBrand.name }) }}
+    </h1>
 
-        <LoadingSkeleton v-if="setupBootstrapPending" :lines="8" />
+    <LoadingSkeleton v-if="setupBootstrapPending" :lines="8" />
 
-        <BootstrapErrorAlert
-          v-else-if="setupBootstrapError"
-          :message="getErrorMessage(setupBootstrapError, t('setup.bootstrapError'))"
-          :retry-label="t('setup.bootstrapRetry')"
-          :retry-aria-label="t('setup.bootstrapRetryAria')"
-          @retry="() => refreshSetupBootstrap()"
-        />
+    <BootstrapErrorAlert
+      v-else-if="setupBootstrapError"
+      :message="getErrorMessage(setupBootstrapError, t('setup.bootstrapError'))"
+      :retry-label="t('setup.bootstrapRetry')"
+      :retry-aria-label="t('setup.bootstrapRetryAria')"
+      @retry="() => refreshSetupBootstrap()"
+    />
 
-        <template v-else>
-          <ul
-            class="steps steps-horizontal w-full mb-8"
-            :aria-label="t('setup.stepsAriaLabel')"
+    <template v-else>
+      <ul
+        class="steps steps-horizontal w-full mb-8"
+        :aria-label="t('setup.stepsAriaLabel')"
+      >
+        <li
+          class="step"
+          :class="{ 'step-primary': step >= 1 }"
+          :data-content="step > 1 ? '✓' : '1'"
+        >
+          {{ t("setup.steps.profile") }}
+        </li>
+        <li
+          class="step"
+          :class="{ 'step-primary': step >= 2 }"
+          :data-content="step > 2 ? '✓' : '2'"
+        >
+          {{ t("setup.steps.localAi") }}
+        </li>
+        <li
+          class="step"
+          :class="{ 'step-primary': step >= 3 }"
+          :data-content="step >= 3 ? '✓' : '3'"
+        >
+          {{ t("setup.steps.done") }}
+        </li>
+      </ul>
+
+      <div v-if="step === 1" class="space-y-4">
+        <h2 class="text-lg font-semibold">{{ t("setup.profileTitle") }}</h2>
+        <label class="floating-label w-full">
+          <span>{{ t("setup.nameLegend") }}</span>
+          <input
+            v-model="name"
+            type="text"
+            :placeholder="t('setup.namePlaceholder')"
+            class="input w-full"
+            :aria-label="t('setup.nameAria')"
+          />
+        </label>
+        <label class="floating-label w-full">
+          <span>{{ t("setup.currentRoleLegend") }}</span>
+          <input
+            v-model="currentRole"
+            type="text"
+            :placeholder="t('setup.currentRolePlaceholder')"
+            class="input w-full"
+            :aria-label="t('setup.currentRoleAria')"
+          />
+        </label>
+
+        <div class="flex justify-end">
+          <button
+            class="btn btn-primary"
+            :aria-label="t('setup.nextToLocalAiAria')"
+            @click="step = 2"
           >
-            <li
-              class="step"
-              :class="{ 'step-primary': step >= 1 }"
-              :data-content="step > 1 ? '✓' : '1'"
-            >
-              {{ t("setup.steps.profile") }}
-            </li>
-            <li
-              class="step"
-              :class="{ 'step-primary': step >= 2 }"
-              :data-content="step > 2 ? '✓' : '2'"
-            >
-              {{ t("setup.steps.localAi") }}
-            </li>
-            <li
-              class="step"
-              :class="{ 'step-primary': step >= 3 }"
-              :data-content="step >= 3 ? '✓' : '3'"
-            >
-              {{ t("setup.steps.done") }}
-            </li>
-          </ul>
+            {{ t("setup.nextButton") }}
+          </button>
+        </div>
+      </div>
 
-          <div v-if="step === 1" class="space-y-4">
-            <h2 class="text-lg font-semibold">{{ t("setup.profileTitle") }}</h2>
-            <label class="floating-label w-full">
-              <span>{{ t("setup.nameLegend") }}</span>
-              <input
-                v-model="name"
-                type="text"
-                :placeholder="t('setup.namePlaceholder')"
-                class="input w-full"
-                :aria-label="t('setup.nameAria')"
-              />
-            </label>
-            <label class="floating-label w-full">
-              <span>{{ t("setup.currentRoleLegend") }}</span>
-              <input
-                v-model="currentRole"
-                type="text"
-                :placeholder="t('setup.currentRolePlaceholder')"
-                class="input w-full"
-                :aria-label="t('setup.currentRoleAria')"
-              />
-            </label>
+      <div v-if="step === 2" class="space-y-5">
+        <h2 class="text-lg font-semibold">{{ t("setup.aiConfigTitle") }}</h2>
+        <div role="alert" class="alert alert-info alert-soft">
+          <span>{{
+            t("setup.localFirstInfo", { brand: resolvedBrand.name })
+          }}</span>
+        </div>
 
-            <div class="flex justify-end">
-              <button
-                class="btn btn-primary"
-                :aria-label="t('setup.nextToLocalAiAria')"
-                @click="step = 2"
+        <div
+          role="alert"
+          class="alert alert-info alert-soft alert-vertical sm:alert-horizontal items-start"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 mt-1 shrink-0 stroke-current text-info"
+            fill="none"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <div class="flex-1 w-full overflow-hidden">
+            <h3 class="font-semibold mb-1">
+              {{ t("settings.aiProviders.ollamaTipTitle") }}
+            </h3>
+            <p class="text-sm mb-3">
+              {{ t("settings.aiProviders.ollamaTipDescription") }}
+              <NuxtLink
+                :to="OLLAMA_WEBSITE_URL"
+                target="_blank"
+                class="link link-primary inline-flex items-center gap-1"
+                :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
               >
-                {{ t("setup.nextButton") }}
-              </button>
-            </div>
-          </div>
-
-          <div v-if="step === 2" class="space-y-5">
-            <h2 class="text-lg font-semibold">{{ t("setup.aiConfigTitle") }}</h2>
-            <div role="alert" class="alert alert-info alert-soft">
-              <span>{{
-                t("setup.localFirstInfo", { brand: resolvedBrand.name })
-              }}</span>
-            </div>
-
-            <div
-              role="alert"
-              class="alert alert-info alert-soft alert-vertical sm:alert-horizontal items-start"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 mt-1 shrink-0 stroke-current text-info"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <div class="flex-1 w-full overflow-hidden">
-                <h3 class="font-semibold mb-1">
-                  {{ t("settings.aiProviders.ollamaTipTitle") }}
-                </h3>
-                <p class="text-sm mb-3">
-                  {{ t("settings.aiProviders.ollamaTipDescription") }}
-                  <NuxtLink
-                    :to="OLLAMA_WEBSITE_URL"
-                    target="_blank"
-                    class="link link-primary inline-flex items-center gap-1"
-                    :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
-                  >
-                    {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                  </NuxtLink>
-                </p>
-
-                <div class="relative w-full mt-2 group rounded-box bg-base-300 text-base-content overflow-hidden border border-base-200">
-                  <div class="overflow-x-auto p-3 pr-14 text-sm font-mono whitespace-nowrap">
-                    <span class="text-base-content/50 mr-2">$</span>{{ ollamaCommand }}
-                  </div>
-                  <button
-                    class="btn btn-sm btn-square btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-base-300/80 backdrop-blur-sm"
-                    type="button"
-                    :aria-label="t('setup.ollamaCommandCopyAria')"
-                    :title="t('setup.ollamaCommandCopyTitle')"
-                    @click="copyOllamaCommand"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <label class="floating-label w-full">
-              <span>{{ t("setup.localEndpointLegend") }}</span>
-              <input
-                v-model="localModelEndpoint"
-                type="text"
-                class="input w-full"
-                :aria-label="t('setup.localEndpointAria')"
-              />
-            </label>
-            <div class="label">{{ t("setup.localEndpointExamples") }}</div>
-
-            <label class="floating-label w-full">
-              <span>{{ t("setup.localModelLegend") }}</span>
-              <input
-                v-model="localModelName"
-                type="text"
-                class="input w-full"
-                :aria-label="t('setup.localModelAria')"
-              />
-            </label>
-
-            <button
-              class="btn btn-outline btn-sm"
-              :disabled="testing && testingProvider === 'local'"
-              :aria-label="t('setup.testLocalAria')"
-              @click="handleTestProvider('local')"
-            >
-              <span
-                v-if="testing && testingProvider === 'local'"
-                class="loading loading-spinner loading-xs"
-              ></span>
-              {{ t("setup.testLocalButton") }}
-            </button>
-
-            <details class="collapse collapse-arrow bg-base-200">
-              <summary class="collapse-title font-medium">
-                {{ t("setup.cloudOptionalTitle") }}
-              </summary>
-              <div class="collapse-content space-y-4">
-                <fieldset
-                  v-for="provider in CLOUD_PROVIDER_IDS"
-                  :key="provider"
-                  class="fieldset"
-                >
-                  <legend class="fieldset-legend">
-                    {{
-                      t("setup.cloudProviderLegend", {
-                        provider: getProviderLabel(provider),
-                      })
-                    }}
-                  </legend>
-                  <div class="join w-full">
-                    <input
-                      v-model="providerCredentials[provider]"
-                      type="password"
-                      :placeholder="
-                        t('setup.cloudProviderPlaceholder', {
-                          provider: getProviderLabel(provider),
-                        })
-                      "
-                      class="input join-item w-full"
-                      :aria-label="
-                        t('setup.cloudProviderAria', {
-                          provider: getProviderLabel(provider),
-                        })
-                      "
-                    />
-                    <button
-                      class="btn btn-outline join-item"
-                      :disabled="testing || !providerCredentials[provider].trim()"
-                      :aria-label="
-                        t('setup.testProviderAria', {
-                          provider: getProviderLabel(provider),
-                        })
-                      "
-                      @click="handleTestProvider(provider)"
-                    >
-                      {{ t("setup.testButton") }}
-                    </button>
-                  </div>
-                </fieldset>
-              </div>
-            </details>
-
-            <div class="flex justify-between">
-              <button
-                class="btn btn-ghost"
-                :aria-label="t('setup.backToProfileAria')"
-                @click="step = 1"
-              >
-                {{ t("setup.backButton") }}
-              </button>
-              <button
-                class="btn btn-primary"
-                :aria-label="t('setup.nextToDoneAria')"
-                @click="step = 3"
-              >
-                {{ t("setup.nextButton") }}
-              </button>
-            </div>
-          </div>
-
-          <div v-if="step === 3" class="space-y-4 text-center">
-            <div class="flex justify-center mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                class="h-14 w-14 text-success"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="9" />
-                <path d="m8.5 12.5 2.5 2.5 4.5-5" />
-              </svg>
-              <span class="sr-only">{{ t("setup.successStatusAria") }}</span>
-            </div>
-            <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
-            <p class="text-base-content/70">
-              {{
-                t("setup.doneDescription", {
-                  assistant: resolvedBrand.assistantName,
-                })
-              }}
+                {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              </NuxtLink>
             </p>
 
-            <div
-              v-if="authBootstrapRequired && authSetupTokenConfigured"
-              role="alert"
-              class="alert alert-info alert-vertical text-left sm:alert-horizontal"
-            >
-              <div>
-                <h3 class="font-bold">{{ t("setup.auth.setupTokenTitle") }}</h3>
-                <div class="text-sm">{{ t("setup.auth.setupTokenDescription") }}</div>
+            <div class="relative w-full mt-2 group rounded-box bg-base-300 text-base-content overflow-hidden border border-base-200">
+              <div class="overflow-x-auto p-3 pr-14 text-sm font-mono whitespace-nowrap">
+                <span class="text-base-content/50 mr-2">$</span>{{ ollamaCommand }}
               </div>
-            </div>
-
-            <div
-              v-else-if="authBootstrapRequired"
-              role="alert"
-              class="alert alert-warning alert-vertical text-left sm:alert-horizontal"
-            >
-              <div>
-                <h3 class="font-bold">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
-                <div class="text-sm">{{ t("setup.auth.bootstrapUnavailableDescription") }}</div>
-              </div>
-            </div>
-
-            <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label w-full text-left">
-              <span>{{ t("setup.auth.setupTokenLegend") }}</span>
-              <input
-                v-model="authSetupToken"
-                type="password"
-                :placeholder="t('setup.auth.setupTokenPlaceholder')"
-                class="input w-full"
-                :aria-label="t('setup.auth.setupTokenAria')"
-              />
-            </label>
-
-            <label v-if="needsStoredApiKey" class="floating-label w-full text-left">
-              <span>{{ t("setup.auth.apiKeyLegend") }}</span>
-              <input
-                v-model="existingApiKey"
-                type="password"
-                :placeholder="t('setup.auth.apiKeyPlaceholder')"
-                class="input w-full"
-                :aria-label="t('setup.auth.apiKeyAria')"
-              />
-            </label>
-
-            <div class="flex justify-center gap-2">
               <button
-                class="btn btn-ghost"
-                :aria-label="t('setup.backToAiConfigAria')"
-                @click="step = 2"
+                class="btn btn-sm btn-square btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-base-300/80 backdrop-blur-sm"
+                type="button"
+                :aria-label="t('setup.ollamaCommandCopyAria')"
+                :title="t('setup.ollamaCommandCopyTitle')"
+                @click="copyOllamaCommand"
               >
-                {{ t("setup.backButton") }}
-              </button>
-              <button
-                class="btn btn-primary"
-                :disabled="saving"
-                :aria-label="t('setup.launchAria')"
-                @click="handleComplete"
-              >
-                <span
-                  v-if="saving"
-                  class="loading loading-spinner loading-xs"
-                ></span>
-                {{ t("setup.launchButton", { brand: resolvedBrand.name }) }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               </button>
             </div>
           </div>
-        </template>
+        </div>
+
+        <label class="floating-label w-full">
+          <span>{{ t("setup.localEndpointLegend") }}</span>
+          <input
+            v-model="localModelEndpoint"
+            type="text"
+            class="input w-full"
+            :aria-label="t('setup.localEndpointAria')"
+          />
+        </label>
+        <div class="label">{{ t("setup.localEndpointExamples") }}</div>
+
+        <label class="floating-label w-full">
+          <span>{{ t("setup.localModelLegend") }}</span>
+          <input
+            v-model="localModelName"
+            type="text"
+            class="input w-full"
+            :aria-label="t('setup.localModelAria')"
+          />
+        </label>
+
+        <button
+          class="btn btn-outline btn-sm"
+          :disabled="testing && testingProvider === 'local'"
+          :aria-label="t('setup.testLocalAria')"
+          @click="handleTestProvider('local')"
+        >
+          <span
+            v-if="testing && testingProvider === 'local'"
+            class="loading loading-spinner loading-xs"
+          ></span>
+          {{ t("setup.testLocalButton") }}
+        </button>
+
+        <details class="collapse collapse-arrow bg-base-200">
+          <summary class="collapse-title font-medium">
+            {{ t("setup.cloudOptionalTitle") }}
+          </summary>
+          <div class="collapse-content space-y-4">
+            <fieldset
+              v-for="provider in CLOUD_PROVIDER_IDS"
+              :key="provider"
+              class="fieldset"
+            >
+              <legend class="fieldset-legend">
+                {{
+                  t("setup.cloudProviderLegend", {
+                    provider: getProviderLabel(provider),
+                  })
+                }}
+              </legend>
+              <div class="join w-full">
+                <input
+                  v-model="providerCredentials[provider]"
+                  type="password"
+                  :placeholder="
+                    t('setup.cloudProviderPlaceholder', {
+                      provider: getProviderLabel(provider),
+                    })
+                  "
+                  class="input join-item w-full"
+                  :aria-label="
+                    t('setup.cloudProviderAria', {
+                      provider: getProviderLabel(provider),
+                    })
+                  "
+                />
+                <button
+                  class="btn btn-outline join-item"
+                  :disabled="testing || !providerCredentials[provider].trim()"
+                  :aria-label="
+                    t('setup.testProviderAria', {
+                      provider: getProviderLabel(provider),
+                    })
+                  "
+                  @click="handleTestProvider(provider)"
+                >
+                  {{ t("setup.testButton") }}
+                </button>
+              </div>
+            </fieldset>
+          </div>
+        </details>
+
+        <div class="flex justify-between">
+          <button
+            class="btn btn-ghost"
+            :aria-label="t('setup.backToProfileAria')"
+            @click="step = 1"
+          >
+            {{ t("setup.backButton") }}
+          </button>
+          <button
+            class="btn btn-primary"
+            :aria-label="t('setup.nextToDoneAria')"
+            @click="step = 3"
+          >
+            {{ t("setup.nextButton") }}
+          </button>
+        </div>
+      </div>
+
+      <div v-if="step === 3" class="space-y-4 text-center">
+        <div class="flex justify-center mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            class="h-14 w-14 text-success"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+          </svg>
+          <span class="sr-only">{{ t("setup.successStatusAria") }}</span>
+        </div>
+        <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
+        <p class="text-base-content/70">
+          {{
+            t("setup.doneDescription", {
+              assistant: resolvedBrand.assistantName,
+            })
+          }}
+        </p>
+
+        <div
+          v-if="authBootstrapRequired && authSetupTokenConfigured"
+          role="alert"
+          class="alert alert-info alert-vertical text-left sm:alert-horizontal"
+        >
+          <div>
+            <h3 class="font-bold">{{ t("setup.auth.setupTokenTitle") }}</h3>
+            <div class="text-sm">{{ t("setup.auth.setupTokenDescription") }}</div>
+          </div>
+        </div>
+
+        <div
+          v-else-if="authBootstrapRequired"
+          role="alert"
+          class="alert alert-warning alert-vertical text-left sm:alert-horizontal"
+        >
+          <div>
+            <h3 class="font-bold">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
+            <div class="text-sm">{{ t("setup.auth.bootstrapUnavailableDescription") }}</div>
+          </div>
+        </div>
+
+        <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label w-full text-left">
+          <span>{{ t("setup.auth.setupTokenLegend") }}</span>
+          <input
+            v-model="authSetupToken"
+            type="password"
+            :placeholder="t('setup.auth.setupTokenPlaceholder')"
+            class="input w-full"
+            :aria-label="t('setup.auth.setupTokenAria')"
+          />
+        </label>
+
+        <label v-if="needsStoredApiKey" class="floating-label w-full text-left">
+          <span>{{ t("setup.auth.apiKeyLegend") }}</span>
+          <input
+            v-model="existingApiKey"
+            type="password"
+            :placeholder="t('setup.auth.apiKeyPlaceholder')"
+            class="input w-full"
+            :aria-label="t('setup.auth.apiKeyAria')"
+          />
+        </label>
+
+        <div class="flex justify-center gap-2">
+          <button
+            class="btn btn-ghost"
+            :aria-label="t('setup.backToAiConfigAria')"
+            @click="step = 2"
+          >
+            {{ t("setup.backButton") }}
+          </button>
+          <button
+            class="btn btn-primary"
+            :disabled="saving"
+            :aria-label="t('setup.launchAria')"
+            @click="handleComplete"
+          >
+            <span
+              v-if="saving"
+              class="loading loading-spinner loading-xs"
+            ></span>
+            {{ t("setup.launchButton", { brand: resolvedBrand.name }) }}
+          </button>
+        </div>
+      </div>
+    </template>
   </PageScaffold>
 </template>

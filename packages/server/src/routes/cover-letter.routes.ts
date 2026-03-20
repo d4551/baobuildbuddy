@@ -23,6 +23,7 @@ import {
   ROUTE_GAMIFICATION_XP,
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_MICRO,
   SCHEMA_MAX_LENGTH_SHORT,
   safeParseJson,
   settle,
@@ -38,7 +39,11 @@ import { gamificationService } from "../services/gamification-service";
 import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts";
 import { exportService } from "../services/export-service";
-import { createPdfAttachmentResponse } from "../utils/http-response";
+import { docxExportService } from "../services/docx-export-service";
+import {
+  createDocxAttachmentResponse,
+  createPdfAttachmentResponse,
+} from "../utils/http-response";
 
 const coverLetterTemplateBodySchema = t.String({
   enum: COVER_LETTER_TEMPLATE_OPTIONS,
@@ -321,7 +326,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
   })
   .post(
     "/:id/export",
-    async ({ params, set }) => {
+    async ({ params, body, set }) => {
       const rows = await db.select().from(coverLetters).where(eq(coverLetters.id, params.id));
       if (rows.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -354,15 +359,32 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
         sender.location = profile.location;
       }
 
+      const letterPayload = {
+        company: letter.company,
+        position: letter.position,
+        content: toJsonRecord(letter.content),
+      };
+
+      if (body.format === "docx") {
+        const docxResult = await settle(
+          docxExportService.exportCoverLetterDocx(letterPayload, sender),
+        );
+        if (docxResult.status === "rejected") {
+          set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+          return {
+            error: API_ERROR_EXPORT_COVER_LETTER,
+            details:
+              docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
+          };
+        }
+        return createDocxAttachmentResponse(
+          docxResult.value,
+          `cover-letter-${params.id}.docx`,
+        );
+      }
+
       const exportResult = await settle(
-        exportService.exportCoverLetterPDF(
-          {
-            company: letter.company,
-            position: letter.position,
-            content: toJsonRecord(letter.content),
-          },
-          sender,
-        ),
+        exportService.exportCoverLetterPDF(letterPayload, sender),
       );
       if (exportResult.status === "rejected") {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -381,6 +403,9 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
     {
       params: t.Object({
         id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+      }),
+      body: t.Object({
+        format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
       }),
     },
   );

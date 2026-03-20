@@ -265,11 +265,11 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
     </PageHeaderBlock>
 
     <SectionGrid grid-token="twoColumn">
-      <label class="form-control">
-        <span class="mb-1 text-sm">{{ t("automation.runs.typeLabel") }}</span>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("automation.runs.typeLabel") }}</legend>
         <select
           v-model="typeFilter"
-          class="select select-bordered"
+          class="select"
           :aria-label="t('automation.runs.typeFilterAria')"
         >
           <option value="">{{ t("automation.runs.allTypes") }}</option>
@@ -277,13 +277,13 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
             {{ option.label }}
           </option>
         </select>
-      </label>
+      </fieldset>
 
-      <label class="form-control">
-        <span class="mb-1 text-sm">{{ t("automation.runs.statusLabel") }}</span>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("automation.runs.statusLabel") }}</legend>
         <select
           v-model="statusFilter"
-          class="select select-bordered"
+          class="select"
           :aria-label="t('automation.runs.statusFilterAria')"
         >
           <option value="">{{ t("automation.runs.allStatuses") }}</option>
@@ -291,7 +291,7 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
             {{ option.label }}
           </option>
         </select>
-      </label>
+      </fieldset>
     </SectionGrid>
 
     <div class="card card-border bg-base-100">

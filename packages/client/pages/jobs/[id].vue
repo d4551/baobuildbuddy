@@ -294,28 +294,6 @@ async function startJobInterview() {
             </div>
           </div>
         </div>
-
-        <!-- Match Score Breakdown -->
-        <div v-if="job.matchBreakdown" class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title">{{ t("jobDetail.matchBreakdownTitle") }}</h2>
-            <div class="space-y-3">
-              <div v-for="(item, key) in job.matchBreakdown" :key="key">
-                <div class="flex justify-between mb-1">
-                  <span class="text-sm font-medium">{{ key }}</span>
-                  <span class="text-sm">{{ item.score }}%</span>
-                </div>
-                <progress
-                  class="progress progress-primary w-full"
-                  :value="item.score"
-                  max="100"
-                  :aria-label="t('jobDetail.scoreProgressAria')"
-                ></progress>
-                <p class="text-xs text-base-content/60 mt-1">{{ item.reason }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Sidebar -->
@@ -336,35 +314,22 @@ async function startJobInterview() {
                 <p class="font-medium">{{ studioTypeLabel(t, job.studioType) }}</p>
               </div>
 
-              <div v-if="job.website">
+              <div v-if="job.url">
                 <p class="text-xs text-base-content/60">{{ t("jobDetail.websiteLabel") }}</p>
-                <a :href="job.website" target="_blank" rel="noopener noreferrer" class="link link-primary" :aria-label="t('jobDetail.visitWebsiteAria', { company: job.company })">
+                <a :href="job.url" target="_blank" rel="noopener noreferrer" class="link link-primary" :aria-label="t('jobDetail.visitWebsiteAria', { company: job.company })">
                   {{ t("jobDetail.visitWebsiteButton") }}
                 </a>
               </div>
 
-              <div v-if="job.postedAt">
+              <div v-if="job.postedDate">
                 <p class="text-xs text-base-content/60">{{ t("jobDetail.postedLabel") }}</p>
-                <p class="font-medium">{{ formatDate(job.postedAt) }}</p>
+                <p class="font-medium">{{ formatDate(job.postedDate) }}</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Games -->
-        <div v-if="job.games?.length" class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title text-lg">{{ t("jobDetail.notableGamesTitle") }}</h2>
-            <ul class="space-y-2">
-              <li v-for="game in job.games" :key="game" class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-                {{ game }}
-              </li>
-            </ul>
-          </div>
-        </div>
+
 
         <!-- Platforms -->
         <div v-if="job.platforms?.length" class="card bg-base-200">
@@ -383,12 +348,12 @@ async function startJobInterview() {
         </div>
 
         <!-- Genres -->
-        <div v-if="job.genres?.length" class="card bg-base-200">
+        <div v-if="job.gameGenres?.length" class="card bg-base-200">
           <div class="card-body">
             <h2 class="card-title text-lg">{{ t("jobDetail.genresTitle") }}</h2>
             <div class="flex flex-wrap gap-2">
               <span
-                v-for="genre in job.genres"
+                v-for="genre in job.gameGenres"
                 :key="genre"
                 class="badge"
               >
@@ -416,7 +381,7 @@ async function startJobInterview() {
         <legend class="fieldset-legend">{{ t("jobDetail.applicationNotesLegend") }}</legend>
         <textarea
           v-model="applicationNotes"
-          class="textarea textarea-bordered w-full"
+          class="textarea w-full"
           rows="5"
           :placeholder="t('jobDetail.applicationNotesPlaceholder')"
           :aria-label="t('jobDetail.applicationNotesAria')"

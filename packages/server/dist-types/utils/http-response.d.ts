@@ -15,6 +15,10 @@ export declare const HEADER_CACHE_CONTROL = "cache-control";
  */
 export declare const MIME_TYPE_PDF = "application/pdf";
 /**
+ * Canonical DOCX content-type value used by Word document export endpoints.
+ */
+export declare const MIME_TYPE_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+/**
  * Canonical generic binary content-type fallback value.
  */
 export declare const MIME_TYPE_OCTET_STREAM = "application/octet-stream";
@@ -38,6 +42,14 @@ export declare const createPdfAttachmentHeaders: (fileName: string) => Readonly<
  * Creates a binary PDF attachment response with canonical headers.
  */
 export declare const createPdfAttachmentResponse: (payload: BinaryPayload, fileName: string) => Response;
+/**
+ * Creates canonical headers for a DOCX attachment response.
+ */
+export declare const createDocxAttachmentHeaders: (fileName: string) => Readonly<Record<string, string>>;
+/**
+ * Creates a binary DOCX attachment response with canonical headers.
+ */
+export declare const createDocxAttachmentResponse: (payload: BinaryPayload, fileName: string) => Response;
 /**
  * Creates a binary response with optional cache-control metadata.
  */

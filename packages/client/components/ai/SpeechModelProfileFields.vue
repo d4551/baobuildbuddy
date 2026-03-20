@@ -74,7 +74,7 @@ function handleTtsModelChange(event: Event): void {
       </label>
       <select
         id="speech-profile-stt-provider"
-        class="select select-bordered select-sm w-full"
+        class="select select-sm w-full"
         :value="props.sttProvider"
         :disabled="props.saving"
         :aria-label="t('aiChatPage.voiceSettings.sttProviderAria')"
@@ -94,7 +94,7 @@ function handleTtsModelChange(event: Event): void {
       </label>
       <select
         id="speech-profile-tts-provider"
-        class="select select-bordered select-sm w-full"
+        class="select select-sm w-full"
         :value="props.ttsProvider"
         :disabled="props.saving"
         :aria-label="t('aiChatPage.voiceSettings.ttsProviderAria')"
@@ -114,7 +114,7 @@ function handleTtsModelChange(event: Event): void {
       </label>
       <input
         id="speech-profile-stt-model"
-        class="input input-bordered input-sm w-full"
+        class="input input-sm w-full"
         :value="props.sttModel"
         :disabled="props.saving"
         list="speech-profile-stt-model-options"
@@ -134,7 +134,7 @@ function handleTtsModelChange(event: Event): void {
       </label>
       <input
         id="speech-profile-tts-model"
-        class="input input-bordered input-sm w-full"
+        class="input input-sm w-full"
         :value="props.ttsModel"
         :disabled="props.saving"
         list="speech-profile-tts-model-options"

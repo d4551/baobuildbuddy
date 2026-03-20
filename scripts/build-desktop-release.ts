@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, rm, stat, symlink, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import {
@@ -19,6 +19,7 @@ import {
   DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE,
   type DesktopReleaseArtifactKind,
   type DesktopReleaseArtifactProfile,
+  type DesktopReleaseArtifactSpec,
   type DesktopReleaseMacosArchitecture,
   normalizeDesktopReleaseArtifactProfile,
   resolveMacosTargetFromProfileArchitecture,
@@ -79,6 +80,8 @@ const DESKTOP_CARGO_TOML_PATH = join(DESKTOP_TAURI_ROOT, "Cargo.toml");
 const CARGO_VERSION_PATTERN = /^version = "([^"]+)"/m;
 const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
 const ZIP_EXTENSION_PATTERN = /\.zip$/u;
+const LINUX_APPIMAGE_AMD64_SUFFIX_PATTERN = /_amd64\.AppImage$/u;
+const LINUX_APPIMAGE_X86_64_SUFFIX_PATTERN = /_x86_64\.AppImage$/u;
 const LINUX_SIGNING_ENV = "DESKTOP_RELEASE_LINUX_SIGNATURES";
 const LINUX_APPIMAGE_ENV = "DESKTOP_RELEASE_LINUX_APPIMAGE";
 const LINUX_APPIMAGE_FLAG = "--include-linux-appimage";
@@ -119,6 +122,15 @@ type TauriBundleSigningConfig = {
 };
 
 type LinuxSignableArtifactKind = Extract<DesktopReleaseArtifactKind, "appimage" | "deb" | "rpm">;
+
+type LinuxSignableArtifactSpec = DesktopReleaseArtifactSpec & {
+  readonly kind: LinuxSignableArtifactKind;
+};
+
+const isLinuxSignableArtifactSpec = (
+  artifact: DesktopReleaseArtifactSpec,
+): artifact is LinuxSignableArtifactSpec =>
+  artifact.kind === "appimage" || artifact.kind === "deb" || artifact.kind === "rpm";
 
 type TauriBuildFlowOptions = {
   readonly env: Record<string, string | undefined>;
@@ -330,7 +342,7 @@ const runCommand = async (
     readonly env?: Record<string, string | undefined>;
   } = {},
 ): Promise<number> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn([...command], {
     cwd: options.cwd ?? REPO_ROOT,
     env: options.env ?? process.env,
     stdout: "inherit",
@@ -623,9 +635,7 @@ const runMacosTauriBuildFlow = async ({
   const commandLog: string[] = [];
   await commandEntries.reduce<Promise<void>>(async (previous, entry) => {
     await previous;
-    commandLog.push(
-      ...(await runMacosTauriCommandEntry(entry, { env, metadata, releaseMode })),
-    );
+    commandLog.push(...(await runMacosTauriCommandEntry(entry, { env, metadata, releaseMode })));
   }, Promise.resolve());
 
   return commandLog;
@@ -677,9 +687,7 @@ const createMacosDmgFallback = async (
 const resolveWindowsBundles = (includeWindowsMsi: boolean): readonly string[] =>
   includeWindowsMsi ? (["nsis", "msi"] as const) : (["nsis"] as const);
 
-const requireHostReleaseTarget = (
-  hostTarget: HostReleaseTarget | undefined,
-): HostReleaseTarget => {
+const requireHostReleaseTarget = (hostTarget: HostReleaseTarget | undefined): HostReleaseTarget => {
   if (!hostTarget) {
     throw new Error("Desktop release build requires a resolved host target.");
   }
@@ -695,10 +703,7 @@ const resolveBundleArgs = (
 
   if (resolvedHostTarget.artifactLabel.startsWith("linux")) {
     const linuxBundles: string[] = ["deb", "rpm"];
-    if (
-      releaseProfile.includeLinuxAppImage &&
-      resolvedHostTarget.artifactLabel === "linux-x64"
-    ) {
+    if (releaseProfile.includeLinuxAppImage && resolvedHostTarget.artifactLabel === "linux-x64") {
       linuxBundles.push("appimage");
     }
     return ["--bundles", linuxBundles.join(",")] as const;
@@ -842,24 +847,20 @@ const signLinuxArtifacts = async (
 
   const passphrase = readEnvValue(process.env[LINUX_GPG_PASSPHRASE_ENV]);
   const artifactSpecs = buildDesktopReleaseArtifactSpecs(metadata, target, profile).filter(
-    (
-      artifact,
-    ): artifact is { readonly fileName: string; readonly kind: LinuxSignableArtifactKind } =>
-      artifact.kind === "appimage" || artifact.kind === "deb" || artifact.kind === "rpm",
+    isLinuxSignableArtifactSpec,
   );
 
   await Promise.all(
     artifactSpecs.map(async (artifact) => {
+      const fileNameVariants =
+        artifact.kind === "appimage"
+          ? expandLinuxAppImageCandidateFileNames(target, artifact.fileName)
+          : [artifact.fileName];
       const artifactPath = await resolveExistingPath(
         `Linux ${artifact.kind} artifact for detached signing`,
-        buildBundlePathCandidates(
-          target,
-          undefined,
-          resolveLinuxBundleDirectory(artifact.kind),
-          artifact.fileName,
-        ),
+        buildLinuxBundlePathCandidatesForFileNames(target, artifact.kind, fileNameVariants),
       );
-      const signaturePath = `${artifactPath}.sig`;
+      const signaturePath = join(dirname(artifactPath), `${artifact.fileName}.sig`);
       await runCommandOrExit(
         buildLinuxSigningCommand(signaturePath, artifactPath, keyId, passphrase),
         {
@@ -968,6 +969,63 @@ const resolveLinuxBundleDirectory = (
   artifactKind: "appimage" | "deb" | "rpm",
 ): "appimage" | "deb" | "rpm" => artifactKind;
 
+/** Tauri AppImage naming has used both Debian (`amd64`) and GNU triplet-style (`x86_64`) suffixes. */
+const expandLinuxAppImageCandidateFileNames = (
+  target: Extract<DesktopReleaseTarget, "linux-arm64" | "linux-x64">,
+  canonicalFileName: string,
+): readonly string[] => {
+  if (target !== "linux-x64" || !canonicalFileName.endsWith(".AppImage")) {
+    return [canonicalFileName];
+  }
+  const variants = new Set<string>([canonicalFileName]);
+  if (canonicalFileName.endsWith("_amd64.AppImage")) {
+    variants.add(
+      canonicalFileName.replace(LINUX_APPIMAGE_AMD64_SUFFIX_PATTERN, "_x86_64.AppImage"),
+    );
+  }
+  if (canonicalFileName.endsWith("_x86_64.AppImage")) {
+    variants.add(
+      canonicalFileName.replace(LINUX_APPIMAGE_X86_64_SUFFIX_PATTERN, "_amd64.AppImage"),
+    );
+  }
+  return [...variants];
+};
+
+const buildLinuxBundlePathCandidatesForFileNames = (
+  target: Extract<DesktopReleaseTarget, "linux-arm64" | "linux-x64">,
+  bundleKind: "appimage" | "deb" | "rpm",
+  fileNames: readonly string[],
+): readonly string[] =>
+  fileNames.flatMap((fileName) =>
+    buildBundlePathCandidates(target, undefined, resolveLinuxBundleDirectory(bundleKind), fileName),
+  );
+
+const resolveWindowsNsisScriptPath = async (): Promise<string> => {
+  const nsisDirectories = buildDesktopBundleDirectoryCandidates("windows", undefined).map(
+    (bundleRoot) => join(DESKTOP_TAURI_ROOT, bundleRoot, "nsis"),
+  );
+  const resolvedFromBundle = await Promise.all(
+    nsisDirectories.map(async (nsisDirectory) => {
+      if (!(await pathExists(nsisDirectory))) {
+        return;
+      }
+      const directoryEntries = await readdir(nsisDirectory).catch(() => [] as string[]);
+      const nsiFiles = directoryEntries.filter((entry) => entry.toLowerCase().endsWith(".nsi"));
+      const preferred = nsiFiles.find((entry) => entry === "installer.nsi") ?? nsiFiles[0];
+      return preferred ? join(nsisDirectory, preferred) : undefined;
+    }),
+  );
+  const firstResolved = resolvedFromBundle.find((candidatePath) => candidatePath !== undefined);
+  if (firstResolved) {
+    return firstResolved;
+  }
+
+  return resolveExistingPath("Windows NSIS script", [
+    ...buildBundlePathCandidates("windows", undefined, "nsis", "installer.nsi"),
+    ...buildReleasePathCandidates("windows", "nsis", "x64", "installer.nsi"),
+  ]);
+};
+
 const inferLinuxArtifactKind = (artifactName: string): "appimage" | "deb" | "rpm" => {
   if (artifactName.endsWith(".deb")) {
     return "deb";
@@ -1000,11 +1058,10 @@ const stageLinuxArtifacts = async (
         if (artifactName.endsWith(".sig")) {
           const unsignedArtifactName = artifactName.slice(0, -4);
           const unsignedKind = inferLinuxArtifactKind(unsignedArtifactName);
-          const signatureBundlePath = buildBundlePathCandidates(
+          const signatureBundlePath = buildLinuxBundlePathCandidatesForFileNames(
             target,
-            undefined,
             resolveLinuxBundleDirectory(unsignedKind),
-            artifactName,
+            [artifactName],
           );
           return [
             artifactName,
@@ -1013,11 +1070,14 @@ const stageLinuxArtifacts = async (
         }
 
         const artifactKind = inferLinuxArtifactKind(artifactName);
-        const sourcePaths = buildBundlePathCandidates(
+        const fileNameVariants =
+          artifactKind === "appimage"
+            ? expandLinuxAppImageCandidateFileNames(target, artifactName)
+            : [artifactName];
+        const sourcePaths = buildLinuxBundlePathCandidatesForFileNames(
           target,
-          undefined,
           resolveLinuxBundleDirectory(artifactKind),
-          artifactName,
+          fileNameVariants,
         );
         return [
           artifactName,
@@ -1128,10 +1188,7 @@ const stageWindowsArtifacts = async (
       `${DESKTOP_RUNTIME_WEBVIEW_BOOTSTRAPPER_PATH}.exe`,
     ),
   ]);
-  const nsisScriptPath = await resolveExistingPath(
-    "Windows NSIS script",
-    buildReleasePathCandidates("windows", "nsis", "x64", "installer.nsi"),
-  );
+  const nsisScriptPath = await resolveWindowsNsisScriptPath();
   const portableRootName = portableFileName.replace(ZIP_EXTENSION_PATTERN, "");
   const portableStageRoot = join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, portableRootName);
   const portableArchivePath = join(targetRoot, portableFileName);

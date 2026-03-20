@@ -772,7 +772,7 @@ function projectPageAria(page: number): string {
             class="checkbox checkbox-primary"
             :aria-label="t('portfolioPage.modal.featuredAria')"
           />
-          <span class="label-text">{{ t("portfolioPage.modal.featuredLabel") }}</span>
+          <span class="label">{{ t("portfolioPage.modal.featuredLabel") }}</span>
         </label>
       </div>
 

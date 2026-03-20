@@ -225,7 +225,7 @@ function studioLocationLabel(location: string): string {
           v-model="searchQuery"
           :id="comboboxId"
           type="search"
-          class="input input-bordered input-sm w-full"
+          class="input input-sm w-full"
           role="combobox"
           aria-autocomplete="list"
           :aria-controls="listboxId"

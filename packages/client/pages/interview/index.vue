@@ -967,7 +967,7 @@ async function viewSession(id: string) {
               class="toggle toggle-primary"
               :aria-label="t('interviewHub.config.enableVoiceAria')"
             />
-            <span class="label-text">{{ t("interviewHub.config.enableVoiceLabel") }}</span>
+            <span class="label">{{ t("interviewHub.config.enableVoiceLabel") }}</span>
           </label>
 
           <fieldset v-if="sessionConfig.enableVoiceMode" class="fieldset">

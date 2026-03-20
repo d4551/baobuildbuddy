@@ -1621,7 +1621,7 @@ async function handleClearEmailDeliveryPassword() {
                       t('settings.preferences.notifications.achievementsAria')
                     "
                   />
-                  <span class="label-text">{{
+                  <span class="label">{{
                     t("settings.preferences.notifications.achievements")
                   }}</span>
                 </label>
@@ -1636,7 +1636,7 @@ async function handleClearEmailDeliveryPassword() {
                       )
                     "
                   />
-                  <span class="label-text">{{
+                  <span class="label">{{
                     t("settings.preferences.notifications.dailyChallenges")
                   }}</span>
                 </label>
@@ -1649,7 +1649,7 @@ async function handleClearEmailDeliveryPassword() {
                       t('settings.preferences.notifications.levelUpAria')
                     "
                   />
-                  <span class="label-text">{{
+                  <span class="label">{{
                     t("settings.preferences.notifications.levelUp")
                   }}</span>
                 </label>
@@ -1662,7 +1662,7 @@ async function handleClearEmailDeliveryPassword() {
                       t('settings.preferences.notifications.jobAlertsAria')
                     "
                   />
-                  <span class="label-text">{{
+                  <span class="label">{{
                     t("settings.preferences.notifications.jobAlerts")
                   }}</span>
                 </label>

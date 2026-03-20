@@ -60,8 +60,15 @@ function toResumeList(value: unknown): ResumeData[] {
     : [];
 }
 
-function toExportPayload(template?: ResumeTemplate): ExportResumeInput {
-  return template ? { template } : {};
+function toExportPayload(template?: ResumeTemplate, format?: string): ExportResumeInput {
+  const payload: ExportResumeInput = {};
+  if (template) {
+    payload.template = template;
+  }
+  if (format) {
+    payload.format = format;
+  }
+  return payload;
 }
 
 async function fetchResumes(context: ResumeContext): Promise<void> {
@@ -134,11 +141,12 @@ async function exportResume(
   context: ResumeContext,
   id: string,
   template?: ResumeTemplate,
+  format?: string,
 ): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api
       .resumes({ id })
-      .export.post(toExportPayload(template));
+      .export.post(toExportPayload(template, format));
     assertApiResponse(error, context.t("apiErrors.resumes.exportFailed"));
     return data;
   });
@@ -148,11 +156,12 @@ async function exportResumeOnePage(
   context: ResumeContext,
   id: string,
   template?: ResumeTemplate,
+  format?: string,
 ): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api
       .resumes({ id })
-      .export.post(toExportPayload(template));
+      .export.post(toExportPayload(template, format));
     assertApiResponse(error, context.t("apiErrors.resumes.exportOnePageFailed"));
     return data;
   });
@@ -276,9 +285,10 @@ export function useResume() {
     createResume: (resumeData: CreateResumeInput) => createResume(context, resumeData),
     updateResume: (id: string, updates: UpdateResumeInput) => updateResume(context, id, updates),
     deleteResume: (id: string) => deleteResume(context, id),
-    exportResume: (id: string, template?: ResumeTemplate) => exportResume(context, id, template),
-    exportResumeOnePage: (id: string, template?: ResumeTemplate) =>
-      exportResumeOnePage(context, id, template),
+    exportResume: (id: string, template?: ResumeTemplate, format?: string) =>
+      exportResume(context, id, template, format),
+    exportResumeOnePage: (id: string, template?: ResumeTemplate, format?: string) =>
+      exportResumeOnePage(context, id, template, format),
     aiEnhance: (id: string) => aiEnhance(context, id),
     aiScore: (id: string, jobId: string) => aiScore(context, id, jobId),
     generateCvQuestions: (config: {

@@ -57,7 +57,7 @@ export interface PortfolioData {
   updatedAt?: string;
 }
 
-export type PortfolioExportFormat = "pdf" | "zip" | "html" | "json" | "website";
+export type PortfolioExportFormat = "pdf" | "docx" | "zip" | "html" | "json" | "website";
 
 export interface PortfolioExportOptions {
   template?: "modern" | "gaming" | "minimal" | "showcase";

@@ -144,9 +144,14 @@ async function generateCoverLetter(
   return data;
 }
 
-async function exportPdf(context: CoverLetterContext, id: string): Promise<unknown> {
+async function exportDocument(
+  context: CoverLetterContext,
+  id: string,
+  format?: string,
+): Promise<unknown> {
   context.loading.value = true;
-  const { data, error } = await context.api["cover-letters"]({ id }).export.post();
+  const payload = format ? { format } : {};
+  const { data, error } = await context.api["cover-letters"]({ id }).export.post(payload);
   context.loading.value = false;
 
   if (error) {
@@ -183,6 +188,6 @@ export function useCoverLetter() {
     deleteCoverLetter: (id: string) => deleteCoverLetter(context, id),
     generateCoverLetter: (generationData: GenerateCoverLetterInput) =>
       generateCoverLetter(context, generationData),
-    exportPdf: (id: string) => exportPdf(context, id),
+    exportPdf: (id: string, format?: string) => exportDocument(context, id, format),
   };
 }

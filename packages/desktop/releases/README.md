@@ -150,7 +150,7 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 
 - `linux-x64/${APP_PRODUCT_NAME}_<VERSION>_amd64.deb`
 - `linux-x64/${APP_PRODUCT_NAME}-<VERSION>-1.x86_64.rpm`
-- `linux-x64/${APP_PRODUCT_NAME}_<VERSION>_x86_64.AppImage` (omit with `DESKTOP_RELEASE_LINUX_APPIMAGE=false`)
+- `linux-x64/${APP_PRODUCT_NAME}_<VERSION>_amd64.AppImage` (omit with `DESKTOP_RELEASE_LINUX_APPIMAGE=false`)
 - detached `.sig` files for each Linux artifact when signatures are enabled and GPG env is configured (omit with `DESKTOP_RELEASE_LINUX_SIGNATURES=false`)
 
 ### Linux ARM64

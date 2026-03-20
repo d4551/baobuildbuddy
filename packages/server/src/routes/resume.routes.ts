@@ -50,9 +50,13 @@ import { AIService } from "../services/ai/ai-service";
 import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { exportService } from "../services/export-service";
+import { docxExportService } from "../services/docx-export-service";
 import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";
-import { createPdfAttachmentResponse } from "../utils/http-response";
+import {
+  createDocxAttachmentResponse,
+  createPdfAttachmentResponse,
+} from "../utils/http-response";
 
 const resumeTemplateBodySchema = t.String({
   enum: RESUME_TEMPLATE_OPTIONS,
@@ -483,6 +487,25 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
       }
 
       const templateName = body.template || resume.template || RESUME_TEMPLATE_DEFAULT;
+
+      if (body.format === "docx") {
+        const docxResult = await settle(
+          docxExportService.exportResumeDocx(resume, templateName),
+        );
+        if (docxResult.status === "rejected") {
+          set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+          return {
+            error: API_ERROR_EXPORT_RESUME,
+            details:
+              docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
+          };
+        }
+        return createDocxAttachmentResponse(
+          docxResult.value,
+          `resume-${params.id}.docx`,
+        );
+      }
+
       const exportResult = await settle(exportService.exportResumePDF(resume, templateName));
       if (exportResult.status === "rejected") {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;

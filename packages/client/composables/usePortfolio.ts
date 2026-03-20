@@ -91,9 +91,10 @@ async function reorderProjects(
   });
 }
 
-async function exportPortfolio(context: PortfolioContext): Promise<unknown> {
+async function exportPortfolio(context: PortfolioContext, format?: string): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.portfolio.export.post();
+    const payload = format ? { format } : {};
+    const { data, error } = await context.api.portfolio.export.post(payload);
     assertApiResponse(error, context.t("apiErrors.portfolio.exportFailed"));
     return data;
   });
@@ -122,6 +123,6 @@ export function usePortfolio() {
       updateProject(context, id, updates),
     deleteProject: (id: string) => deleteProject(context, id),
     reorderProjects: (orderedIds: string[]) => reorderProjects(context, orderedIds),
-    exportPortfolio: () => exportPortfolio(context),
+    exportPortfolio: (format?: string) => exportPortfolio(context, format),
   };
 }

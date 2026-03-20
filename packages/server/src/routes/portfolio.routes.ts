@@ -22,9 +22,13 @@ import {
 } from "@bao/shared";
 import { Elysia, t } from "elysia";
 import { exportService } from "../services/export-service";
+import { docxExportService } from "../services/docx-export-service";
 import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
-import { createPdfAttachmentResponse } from "../utils/http-response";
+import {
+  createDocxAttachmentResponse,
+  createPdfAttachmentResponse,
+} from "../utils/http-response";
 
 export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfolio"] })
   .get("/", async () => {
@@ -201,7 +205,7 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
   )
   .post(
     "/export",
-    async ({ set }) => {
+    async ({ body, set }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -209,6 +213,25 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
       }
 
       const metadata: PortfolioMetadata = portfolio.metadata ?? {};
+
+      if (body.format === "docx") {
+        const docxResult = await settle(
+          docxExportService.exportPortfolioDocx(metadata, portfolio.projects),
+        );
+        if (docxResult.status === "rejected") {
+          set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+          return {
+            error: API_ERROR_EXPORT_PORTFOLIO,
+            details:
+              docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
+          };
+        }
+        return createDocxAttachmentResponse(
+          docxResult.value,
+          `portfolio-${portfolio.id}.docx`,
+        );
+      }
+
       const exportResult = await settle(
         exportService.exportPortfolioPDF(metadata, portfolio.projects),
       );
