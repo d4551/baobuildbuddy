@@ -702,17 +702,20 @@ const removeStagedTestSourcesUnder = async (rootDir: string): Promise<void> => {
   );
 };
 
-/** Adjacent to `bao-desktop-server`; gzip blob so linuxdeploy skips ELF/ldd during AppImage bundling. */
 const LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME = "bao-desktop-server.payload.gz" as const;
+const LINUX_BUN_SCRIPT_RUNNER_PAYLOAD_BASENAME = "bao-bun.payload.gz" as const;
 
 /**
  * AppImage bundling runs linuxdeploy, which walks bundled ELFs under `usr/lib/<app>/` and runs `ldd`.
- * The Bun-compiled server can make that step abort; shipping a shell launcher plus a `.gz` payload avoids
- * registering a second ELF in the AppDir while keeping `serverExecutable` unchanged in the manifest.
+ * Bun-produced binaries can make that step abort; a shell launcher plus a `.gz` payload keeps the manifest
+ * paths stable while avoiding extra ELF registrations in the AppDir.
  */
-const packLinuxDesktopServerForAppImageBundling = async (serverExecutablePath: string): Promise<void> => {
-  const payloadPath = join(dirname(serverExecutablePath), LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME);
-  const raw = await Bun.file(serverExecutablePath).arrayBuffer();
+const packLinuxElfBinaryAsGzipLauncher = async (
+  executablePath: string,
+  payloadBasename: string,
+): Promise<void> => {
+  const payloadPath = join(dirname(executablePath), payloadBasename);
+  const raw = await Bun.file(executablePath).arrayBuffer();
   await Bun.write(payloadPath, gzipSync(Buffer.from(raw)));
   await chmod(payloadPath, 0o644);
   const launcher = [
@@ -720,17 +723,17 @@ const packLinuxDesktopServerForAppImageBundling = async (serverExecutablePath: s
     "set -eu",
     // biome-ignore lint/security/noSecrets: POSIX launcher path resolution (false positive from entropy heuristic)
     'here="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"',
-    `payload="$here/${LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME}"`,
+    `payload="$here/${payloadBasename}"`,
     // biome-ignore lint/suspicious/noTemplateCurlyInString: mktemp uses shell parameter expansion, not JS templates
-    'tmp="$(mktemp "${TMPDIR:-/tmp}/bao-desktop-server.XXXXXX")"',
+    'tmp="$(mktemp "${TMPDIR:-/tmp}/bao-rt.XXXXXX")"',
     'cleanup() { rm -f "$tmp"; }',
     "trap cleanup EXIT INT HUP TERM",
     'gzip -dc "$payload" > "$tmp"',
     'chmod 700 "$tmp"',
     'exec "$tmp" "$@"',
   ].join("\n");
-  await Bun.write(serverExecutablePath, `${launcher}\n`);
-  await chmod(serverExecutablePath, 0o755);
+  await Bun.write(executablePath, `${launcher}\n`);
+  await chmod(executablePath, 0o755);
 };
 
 const compileRuntimeBinary = async (
@@ -854,13 +857,25 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
     await writeOutput(
       "desktop-runtime: packing Linux server as gzip payload + POSIX launcher (AppImage / linuxdeploy compatibility)",
     );
-    await packLinuxDesktopServerForAppImageBundling(serverExecutablePath);
+    await packLinuxElfBinaryAsGzipLauncher(
+      serverExecutablePath,
+      LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME,
+    );
   }
 
   await writeOutput(
     `desktop-runtime: staging bundled Bun runtime and entrypoint helper for script execution (${compileTarget})`,
   );
   await stageBundledScriptRunnerRuntime(runtimeTargetInfo);
+  if (compileTarget.startsWith("bun-linux")) {
+    await writeOutput(
+      "desktop-runtime: packing Linux bundled Bun binary as gzip payload + POSIX launcher (AppImage / linuxdeploy compatibility)",
+    );
+    await packLinuxElfBinaryAsGzipLauncher(
+      join(RUNTIME_ROOT, runtimeTargetInfo.scriptRunnerExecutable),
+      LINUX_BUN_SCRIPT_RUNNER_PAYLOAD_BASENAME,
+    );
+  }
 
   await stageScraperRuntime();
   const webviewBootstrapperExecutable = await stageWebviewBootstrapper(runtimeTargetInfo);

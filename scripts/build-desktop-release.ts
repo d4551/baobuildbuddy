@@ -673,8 +673,9 @@ const createMacosDmgFallback = async (
   });
 };
 
+/** Portable `.zip` is assembled in `stageWindowsArtifacts`; Tauri CLI only accepts `nsis` / `msi` here. */
 const resolveWindowsBundles = (includeWindowsMsi: boolean): readonly string[] =>
-  includeWindowsMsi ? (["portable", "nsis", "msi"] as const) : (["portable", "nsis"] as const);
+  includeWindowsMsi ? (["nsis", "msi"] as const) : (["nsis"] as const);
 
 const requireHostReleaseTarget = (
   hostTarget: HostReleaseTarget | undefined,
