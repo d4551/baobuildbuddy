@@ -64,12 +64,16 @@ export type DesktopReleaseArtifactProfile = {
 
 /**
  * Default profile for canonical release outputs.
- * Set `include*` fields to false (or `DESKTOP_RELEASE_*=false` in build/verify scripts) to omit variants.
+ * Set `include*` fields to true (or `DESKTOP_RELEASE_*=true` in build/verify scripts) to opt in.
+ *
+ * Linux signatures require GPG signing infrastructure.
+ * Windows MSI requires the WiX toolchain.
+ * Enable these flags only when the build environment supports them.
  */
 export const DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE: DesktopReleaseArtifactProfile = {
-  includeLinuxAppImage: true,
-  includeLinuxSignatures: true,
-  includeWindowsMsi: true,
+  includeLinuxAppImage: false,
+  includeLinuxSignatures: false,
+  includeWindowsMsi: false,
   macosArchitectures: [DESKTOP_RELEASE_MACOS_AARCH64_ARCH],
 };
 
@@ -139,8 +143,8 @@ const buildLinuxAppImageSpecs = (
     target,
     `${metadata.productName}_${metadata.version}_${
       target === "linux-x64"
-        ? DESKTOP_RELEASE_LINUX_X64_RPM_ARCH
-        : DESKTOP_RELEASE_LINUX_ARM64_RPM_ARCH
+        ? DESKTOP_RELEASE_LINUX_X64_DEB_ARCH
+        : DESKTOP_RELEASE_LINUX_ARM64_DEB_ARCH
     }.AppImage`,
     "appimage",
   ),
