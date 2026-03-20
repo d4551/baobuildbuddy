@@ -47,8 +47,9 @@ __pycache__/
 packages/desktop/src-tauri/target/
 packages/desktop/src-tauri/target-linux/
 
-# Agentiflow
-agentiflow/
+# Agentiflow (ignore local scratch; keep generated matrix for CI drift checks)
+agentiflow/*
+!agentiflow/capability-matrix.generated.json
 
 # Generated desktop packaging scratch space
 .tmp-*/
