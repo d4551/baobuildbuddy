@@ -182,13 +182,13 @@ jobs:
 
       - name: Build native macOS release artifacts (notarized)
         if: ${{ steps.apple.outputs.full_notarize == 'true' }}
-        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
 
       - name: Build native macOS release artifacts (ad-hoc signed)
         if: ${{ steps.apple.outputs.full_notarize != 'true' }}
         env:
           DESKTOP_RELEASE_RELEASE_MODE: "false"
-        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target aarch64-apple-darwin
@@ -307,7 +307,7 @@ jobs:
 
       - name: Build native Windows release artifacts
         shell: pwsh
-        run: bun run release:desktop:windows -- --output-root .desktop-release-artifacts --release
+        run: bun run release:desktop:windows -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         shell: pwsh
@@ -394,7 +394,7 @@ jobs:
           echo "$DESKTOP_GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
 
       - name: Build native Linux x64 release artifacts
-        run: bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --verbose --release
+        run: bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --verbose --release --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target x86_64-unknown-linux-gnu
@@ -489,7 +489,7 @@ jobs:
           echo "$DESKTOP_GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
 
       - name: Build native Linux ARM64 release artifacts
-        run: bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --verbose --release
+        run: bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --verbose --release --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target aarch64-unknown-linux-gnu
