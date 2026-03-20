@@ -11,6 +11,7 @@ import {
 } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, extname, join, resolve } from "node:path";
+import { gzipSync } from "node:zlib";
 import {
   DESKTOP_RUNTIME_API_BASE,
   DESKTOP_RUNTIME_BUILD_SERVER_PORT,
@@ -701,6 +702,35 @@ const removeStagedTestSourcesUnder = async (rootDir: string): Promise<void> => {
   );
 };
 
+/** Adjacent to `bao-desktop-server`; gzip blob so linuxdeploy skips ELF/ldd during AppImage bundling. */
+const LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME = "bao-desktop-server.payload.gz" as const;
+
+/**
+ * AppImage bundling runs linuxdeploy, which walks bundled ELFs under `usr/lib/<app>/` and runs `ldd`.
+ * The Bun-compiled server can make that step abort; shipping a shell launcher plus a `.gz` payload avoids
+ * registering a second ELF in the AppDir while keeping `serverExecutable` unchanged in the manifest.
+ */
+const packLinuxDesktopServerForAppImageBundling = async (serverExecutablePath: string): Promise<void> => {
+  const payloadPath = join(dirname(serverExecutablePath), LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME);
+  const raw = await Bun.file(serverExecutablePath).arrayBuffer();
+  await Bun.write(payloadPath, gzipSync(Buffer.from(raw)));
+  await chmod(payloadPath, 0o644);
+  const launcher = [
+    "#!/usr/bin/env sh",
+    "set -eu",
+    'here="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"',
+    `payload="$here/${LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME}"`,
+    'tmp="$(mktemp "${TMPDIR:-/tmp}/bao-desktop-server.XXXXXX")"',
+    'cleanup() { rm -f "$tmp"; }',
+    "trap cleanup EXIT INT HUP TERM",
+    'gzip -dc "$payload" > "$tmp"',
+    'chmod 700 "$tmp"',
+    'exec "$tmp" "$@"',
+  ].join("\n");
+  await Bun.write(serverExecutablePath, `${launcher}\n`);
+  await chmod(serverExecutablePath, 0o755);
+};
+
 const compileRuntimeBinary = async (
   compileTarget: string,
   entrypointPath: string,
@@ -818,6 +848,12 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
 
   await writeOutput(`desktop-runtime: compiling bundled desktop server (${compileTarget})`);
   await compileRuntimeBinary(compileTarget, SERVER_ENTRYPOINT, serverExecutablePath);
+  if (compileTarget.startsWith("bun-linux")) {
+    await writeOutput(
+      "desktop-runtime: packing Linux server as gzip payload + POSIX launcher (AppImage / linuxdeploy compatibility)",
+    );
+    await packLinuxDesktopServerForAppImageBundling(serverExecutablePath);
+  }
 
   await writeOutput(
     `desktop-runtime: staging bundled Bun runtime and entrypoint helper for script execution (${compileTarget})`,
