@@ -159,6 +159,8 @@ const collectAutomationClientPages = async (): Promise<string[]> => {
   return paths.sort((left, right) => left.localeCompare(right));
 };
 
+const GENERATED_CAPABILITY_MATRIX_SEGMENT = "capability-matrix.generated.json" as const;
+
 const collectProtocolFiles = async (): Promise<string[]> => {
   const protocolGlob = new Bun.Glob("agentiflow/*");
   const protocolPaths = await Array.fromAsync(
@@ -168,7 +170,9 @@ const collectProtocolFiles = async (): Promise<string[]> => {
     }),
   );
 
-  return protocolPaths.sort((left, right) => left.localeCompare(right));
+  return protocolPaths
+    .filter((path) => !path.endsWith(GENERATED_CAPABILITY_MATRIX_SEGMENT))
+    .sort((left, right) => left.localeCompare(right));
 };
 
 const collectRootRuleCopies = async (): Promise<string[]> => {
@@ -208,6 +212,7 @@ const buildDesktopSection = (
   verificationScripts: [
     "scripts/verify-desktop-runtime.ts",
     "scripts/verify-desktop-release-artifacts.ts",
+    "scripts/verify-production-client-output.ts",
     "scripts/release-verify.ts",
   ],
   runtimeManifestPath: `packages/desktop/src-tauri/${DESKTOP_RUNTIME_MANIFEST_PATH}`,

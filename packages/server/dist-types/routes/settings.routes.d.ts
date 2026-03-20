@@ -1,4 +1,4 @@
-import type { AutomationSettings, BrandSettings, EmailTransportSettings } from "@bao/shared";
+import type { AppDataTheme, AutomationSettings, BrandSettings, EmailTransportSettings } from "@bao/shared";
 import { Elysia } from "elysia";
 export declare const settingsRoutes: Elysia<"/settings", {
     decorator: {};
@@ -36,6 +36,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 200: {
                     error: string;
                 } | {
+                    theme: AppDataTheme;
                     brandSettings: BrandSettings;
                     geminiApiKey: string | null;
                     openaiApiKey: string | null;
@@ -52,7 +53,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     localModelName: string | null;
                     preferredProvider: string | null;
                     preferredModel: string | null;
-                    theme: string | null;
                     language: string | null;
                     notifications: Record<string, boolean> | null;
                     automationSettings: AutomationSettings | null;
@@ -159,7 +159,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 } | undefined;
                 preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                 preferredModel?: string | undefined;
-                theme?: "bao-light" | "bao-dark" | undefined;
+                theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
                 language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
                 brandSettings?: {
                     name?: string | undefined;
@@ -167,6 +167,12 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     apiName?: string | undefined;
                     logoPath?: string | undefined;
                     faviconPath?: string | undefined;
+                    content?: {
+                        tagline?: string | undefined;
+                        defaultTitle?: string | undefined;
+                        defaultDescription?: string | undefined;
+                        contentOverrides?: {} | undefined;
+                    } | undefined;
                     typography?: {
                         fontStylesheetUrl?: string | undefined;
                         displayFontFamily?: string | undefined;
@@ -175,7 +181,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     } | undefined;
                     lightTheme?: {
                         success?: string | undefined;
-                        error?: string | undefined;
                         base100?: string | undefined;
                         base200?: string | undefined;
                         base300?: string | undefined;
@@ -193,6 +198,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         successContent?: string | undefined;
                         warning?: string | undefined;
                         warningContent?: string | undefined;
+                        error?: string | undefined;
                         errorContent?: string | undefined;
                         radiusSelector?: string | undefined;
                         radiusField?: string | undefined;
@@ -205,7 +211,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     } | undefined;
                     darkTheme?: {
                         success?: string | undefined;
-                        error?: string | undefined;
                         base100?: string | undefined;
                         base200?: string | undefined;
                         base300?: string | undefined;
@@ -223,6 +228,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         successContent?: string | undefined;
                         warning?: string | undefined;
                         warningContent?: string | undefined;
+                        error?: string | undefined;
                         errorContent?: string | undefined;
                         radiusSelector?: string | undefined;
                         radiusField?: string | undefined;
@@ -232,12 +238,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         border?: string | undefined;
                         depth?: string | undefined;
                         noise?: string | undefined;
-                    } | undefined;
-                    content?: {
-                        tagline?: string | undefined;
-                        defaultTitle?: string | undefined;
-                        defaultDescription?: string | undefined;
-                        contentOverrides?: {} | undefined;
                     } | undefined;
                 } | undefined;
             };

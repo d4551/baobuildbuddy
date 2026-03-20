@@ -21,13 +21,36 @@ export const APP_SEO = {
 } as const;
 
 /**
- * Canonical client theme identifiers.
+ * daisyUI theme names registered in `packages/client/assets/css/main.css`
+ * (`corporate` default light, `business` prefers-dark).
+ */
+export type AppDataTheme = "corporate" | "business";
+
+/**
+ * Canonical client theme identifiers (matches `data-theme` values).
  */
 export const THEME_NAMES = {
-  light: "bao-light",
-  dark: "bao-dark",
+  light: "corporate",
+  dark: "business",
   storageKey: "bao-theme",
 } as const;
+
+const LEGACY_DARK_THEMES = new Set<string>(["bao-dark", THEME_NAMES.dark]);
+const LEGACY_LIGHT_THEMES = new Set<string>(["bao-light", THEME_NAMES.light]);
+
+/**
+ * Maps persisted theme strings (including legacy `bao-*`) to daisyUI theme ids.
+ */
+export function normalizeAppDataTheme(value: string | null | undefined): AppDataTheme {
+  const trimmed = value?.trim();
+  if (trimmed && LEGACY_DARK_THEMES.has(trimmed)) {
+    return THEME_NAMES.dark;
+  }
+  if (trimmed && LEGACY_LIGHT_THEMES.has(trimmed)) {
+    return THEME_NAMES.light;
+  }
+  return THEME_NAMES.light;
+}
 
 /**
  * Default light brand palette used when no white-label override exists.

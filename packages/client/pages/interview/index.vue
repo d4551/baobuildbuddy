@@ -24,7 +24,7 @@ import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
-const { sessions, stats, loading, startSession, fetchSessions, fetchStats } = useInterview();
+const { sessions, stats, startSession, fetchSessions, fetchStats } = useInterview();
 const { studios, searchStudios } = useStudio();
 const { jobs, searchJobs, getJob } = useJobs();
 const { profile, fetchProfile } = useUser();
@@ -270,7 +270,16 @@ const isStartDisabled = computed(() => {
   return !sessionConfig.studioId;
 });
 
-await useAsyncData("interview-hub-bootstrap", async () => {
+// Critical bootstrap failures surface via useAsyncData error + inline alert. Pathways/readiness is non-blocking (warning + retry refreshes full bootstrap).
+const pathwaysRecommendationError = ref<string | null>(null);
+
+const {
+  status: interviewHubStatus,
+  error: interviewHubError,
+  refresh: refreshInterviewHub,
+} = await useAsyncData("interview-hub-bootstrap", async () => {
+  pathwaysRecommendationError.value = null;
+
   const bootstrapResult = await settlePromise(
     Promise.all([
       fetchSessions(),
@@ -285,7 +294,7 @@ await useAsyncData("interview-hub-bootstrap", async () => {
     t("interviewHub.errors.bootstrapLoadFailed"),
   );
   if (!bootstrapResult.ok) {
-    $toast.error(
+    throw new Error(
       getErrorMessage(bootstrapResult.error, t("interviewHub.errors.bootstrapLoadFailed")),
     );
   }
@@ -294,11 +303,9 @@ await useAsyncData("interview-hub-bootstrap", async () => {
     Promise.all([fetchPathways(), fetchReadiness()]),
     t("interviewHub.errors.roleRecommendationsFailed"),
   );
-  if (!pathwaysResult.ok) {
-    $toast.error(
-      getErrorMessage(pathwaysResult.error, t("interviewHub.errors.roleRecommendationsFailed")),
-    );
-  }
+  pathwaysRecommendationError.value = pathwaysResult.ok
+    ? null
+    : getErrorMessage(pathwaysResult.error, t("interviewHub.errors.roleRecommendationsFailed"));
 
   selectedMode.value = requestedMode.value;
 
@@ -312,6 +319,14 @@ await useAsyncData("interview-hub-bootstrap", async () => {
 
   return true;
 });
+
+const interviewHubPending = computed(
+  () => interviewHubStatus.value === "pending" || interviewHubStatus.value === "idle",
+);
+
+async function retryPathwaysFromWarning(): Promise<void> {
+  await refreshInterviewHub();
+}
 
 function prepStatusBadgeClass(ready: boolean): string {
   return ready ? "badge-success" : "badge-ghost";
@@ -546,9 +561,25 @@ async function viewSession(id: string) {
       </div>
     </section>
 
-    <LoadingSkeleton v-if="loading && !stats" :lines="6" />
+    <LoadingSkeleton v-if="interviewHubPending" :lines="6" />
+
+    <BootstrapErrorAlert
+      v-else-if="interviewHubStatus === 'error'"
+      :message="getErrorMessage(interviewHubError, t('interviewHub.errors.bootstrapLoadFailed'))"
+      :retry-label="t('interviewHub.bootstrapRetry')"
+      :retry-aria-label="t('interviewHub.bootstrapRetryAria')"
+      @retry="() => refreshInterviewHub()"
+    />
 
     <div v-else class="space-y-6">
+      <BootstrapErrorAlert
+        v-if="pathwaysRecommendationError"
+        severity="warning"
+        :message="pathwaysRecommendationError"
+        :retry-label="t('interviewHub.pathwaysRetry')"
+        :retry-aria-label="t('interviewHub.pathwaysRetryAria')"
+        @retry="retryPathwaysFromWarning"
+      />
       <div class="stats stats-vertical lg:stats-horizontal w-full border border-base-300 bg-base-100 shadow-sm">
         <div class="stat">
           <div class="stat-title">{{ t("interviewHub.stats.totalSessionsTitle") }}</div>
@@ -816,7 +847,7 @@ async function viewSession(id: string) {
                 </thead>
                 <tbody>
                   <tr v-for="job in jobSelectionPagination.items.value" :key="job.id" class="hover:bg-base-200">
-                    <td class="max-w-[16rem] truncate">{{ job.title }}</td>
+                    <td class="max-w-64 truncate">{{ job.title }}</td>
                     <td>{{ job.company }}</td>
                     <td class="text-right">
                       <button

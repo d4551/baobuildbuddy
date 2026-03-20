@@ -323,7 +323,11 @@ function resumePageAria(page: number): string {
   return t("resumePage.pagination.pageAria", { page });
 }
 
-await useAsyncData("resume-page-bootstrap", async () => {
+const {
+  error: resumeBootstrapError,
+  status: resumeBootstrapStatus,
+  refresh: refreshResumeBootstrap,
+} = await useAsyncData("resume-page-bootstrap", async () => {
   await fetchResumes();
   await fetchDashboard();
 
@@ -660,7 +664,30 @@ async function resolvePipelineReward(
       </PageHeaderBlock>
     </section>
 
-    <LoadingSkeleton v-if="loading && !resumes.length" variant="cards" :lines="6" />
+    <div
+      v-if="resumeBootstrapError"
+      class="alert alert-error sm:alert-horizontal"
+      role="alert"
+    >
+      <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ getErrorMessage(resumeBootstrapError, t("resumePage.bootstrapError")) }}</span>
+      <button
+        type="button"
+        class="btn btn-sm btn-ghost shrink-0"
+        :aria-label="t('resumePage.bootstrapRetryAria')"
+        @click="() => refreshResumeBootstrap()"
+      >
+        {{ t("resumePage.bootstrapRetry") }}
+      </button>
+    </div>
+
+    <LoadingSkeleton
+      v-else-if="resumeBootstrapStatus === 'pending' || (loading && !resumes.length)"
+      variant="cards"
+      :lines="6"
+    />
 
     <div v-else-if="!selectedResumeId" class="space-y-6">
       <section v-if="resumes.length > 0" class="card card-border bg-base-100">

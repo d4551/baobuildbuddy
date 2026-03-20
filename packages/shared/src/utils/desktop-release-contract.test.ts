@@ -24,6 +24,10 @@ describe("desktop release contract artifact names", () => {
     expect(buildDesktopReleaseArtifactFileNames(DESKTOP_RELEASE_METADATA, "linux-x64")).toEqual([
       "BaoBuildBuddy_0.1.0_amd64.deb",
       "BaoBuildBuddy-0.1.0-1.x86_64.rpm",
+      "BaoBuildBuddy_0.1.0_x86_64.AppImage",
+      "BaoBuildBuddy_0.1.0_amd64.deb.sig",
+      "BaoBuildBuddy-0.1.0-1.x86_64.rpm.sig",
+      "BaoBuildBuddy_0.1.0_x86_64.AppImage.sig",
     ]);
   });
 
@@ -31,6 +35,8 @@ describe("desktop release contract artifact names", () => {
     expect(buildDesktopReleaseArtifactFileNames(DESKTOP_RELEASE_METADATA, "linux-arm64")).toEqual([
       "BaoBuildBuddy_0.1.0_arm64.deb",
       "BaoBuildBuddy-0.1.0-1.aarch64.rpm",
+      "BaoBuildBuddy_0.1.0_arm64.deb.sig",
+      "BaoBuildBuddy-0.1.0-1.aarch64.rpm.sig",
     ]);
   });
 
@@ -51,6 +57,7 @@ describe("desktop release contract artifact names", () => {
     expect(buildDesktopReleaseArtifactFileNames(DESKTOP_RELEASE_METADATA, "windows")).toEqual([
       "BaoBuildBuddy_0.1.0_x64-setup.exe",
       "BaoBuildBuddy_0.1.0_x64-portable.zip",
+      "BaoBuildBuddy_0.1.0_x64-en-US.msi",
     ]);
   });
 });
@@ -68,6 +75,12 @@ describe("desktop release contract staging and matrix", () => {
         fileName: "BaoBuildBuddy_0.1.0_x64-portable.zip",
         kind: "portable",
         relativePath: "windows/BaoBuildBuddy_0.1.0_x64-portable.zip",
+        target: "windows",
+      },
+      {
+        fileName: "BaoBuildBuddy_0.1.0_x64-en-US.msi",
+        kind: "msi",
+        relativePath: "windows/BaoBuildBuddy_0.1.0_x64-en-US.msi",
         target: "windows",
       },
     ]);
@@ -109,33 +122,28 @@ describe("desktop release contract staging and matrix", () => {
 });
 
 describe("desktop release contract optional variants", () => {
-  test("includes optional Linux artifact variants when enabled", () => {
+  test("omits Linux AppImage and signatures when profile disables them", () => {
     expect(
       buildDesktopReleaseArtifactFileNames(DESKTOP_RELEASE_METADATA, "linux-x64", {
         ...DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE,
-        includeLinuxAppImage: true,
-        includeLinuxSignatures: true,
+        includeLinuxAppImage: false,
+        includeLinuxSignatures: false,
       }),
     ).toEqual([
       "BaoBuildBuddy_0.1.0_amd64.deb",
       "BaoBuildBuddy-0.1.0-1.x86_64.rpm",
-      "BaoBuildBuddy_0.1.0_x86_64.AppImage",
-      "BaoBuildBuddy_0.1.0_amd64.deb.sig",
-      "BaoBuildBuddy-0.1.0-1.x86_64.rpm.sig",
-      "BaoBuildBuddy_0.1.0_x86_64.AppImage.sig",
     ]);
   });
 
-  test("includes optional MSI artifact when enabled", () => {
+  test("omits MSI when profile disables it", () => {
     expect(
       buildDesktopReleaseArtifactFileNames(DESKTOP_RELEASE_METADATA, "windows", {
         ...DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE,
-        includeWindowsMsi: true,
+        includeWindowsMsi: false,
       }),
     ).toEqual([
       "BaoBuildBuddy_0.1.0_x64-setup.exe",
       "BaoBuildBuddy_0.1.0_x64-portable.zip",
-      "BaoBuildBuddy_0.1.0_x64-en-US.msi",
     ]);
   });
 });

@@ -31,6 +31,8 @@ const jaJPOverrides = {
     toggleSidebarNavigation: "サイドバーナビゲーションを切り替え",
     sidebarNavigation: "サイドバーナビゲーション",
     closeSidebar: "サイドバーを閉じる",
+    appHeader: "アプリケーションヘッダー",
+    userMenu: "アカウントメニュー",
     skipToContent: "コンテンツへスキップ",
     breadcrumbs: "パンくずリスト",
     notifications: "通知",
@@ -63,6 +65,7 @@ const jaJPOverrides = {
     gamification: "ゲーミフィケーション",
     settings: "設定",
     apiDocs: "APIドキュメント",
+    breadcrumbUnknown: "ページ",
   },
   dashboard: {
     pageTitle: "ダッシュボード",

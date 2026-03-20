@@ -16,6 +16,7 @@ import {
   buildDesktopReleaseArtifactFileNames,
   buildDesktopReleaseArtifactSpecs,
   DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE,
+  normalizeDesktopReleaseArtifactProfile,
   type DesktopReleaseArtifactKind,
   type DesktopReleaseArtifactProfile,
   type DesktopReleaseMacosArchitecture,
@@ -35,6 +36,7 @@ import {
   isDesktopReleaseProvenance,
 } from "./utils/desktop-release-refresh";
 import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
+import { orderTargetsPresentInProvenance } from "./utils/desktop-release-verify-targets";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -165,6 +167,8 @@ const GPG_SIG_PREFIX = "-----BEGIN PGP SIGNATURE";
 const WINDOWS_SIGNING_TOOL = "signtool";
 const SIGCHECK_MIN_SIZE_BYTES = 128;
 
+const GIT_LFS_POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1";
+
 const PNG_SIGNATURE = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const ICO_SIGNATURE = Uint8Array.from([0, 0, 1, 0]);
 const ICNS_SIGNATURE = Uint8Array.from([105, 99, 110, 115]);
@@ -221,10 +225,17 @@ const requireCommand = (label: string, command: string): VerificationResult | nu
   };
 };
 
-const parseCommandTargets = (argv: readonly string[]): readonly DesktopReleaseTarget[] => {
+const isGitLfsPointerFileContent = (bytes: Uint8Array): boolean => {
+  const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+  return text.trimStart().startsWith(GIT_LFS_POINTER_PREFIX);
+};
+
+const parseExplicitVerificationTargets = (
+  argv: readonly string[],
+): readonly DesktopReleaseTarget[] | null => {
   const targetsIndex = argv.indexOf("--targets");
   if (targetsIndex === -1) {
-    return DESKTOP_RELEASE_TARGETS;
+    return null;
   }
 
   const rawTargets = argv[targetsIndex + 1] ?? "";
@@ -243,11 +254,44 @@ const parseCommandTargets = (argv: readonly string[]): readonly DesktopReleaseTa
   return parsedTargets;
 };
 
+const resolveVerificationTargets = async (
+  argv: readonly string[],
+): Promise<readonly DesktopReleaseTarget[]> => {
+  const explicitTargets = parseExplicitVerificationTargets(argv);
+  if (explicitTargets !== null) {
+    return explicitTargets;
+  }
+
+  const provenanceTargetsResult = await captureResult(async () => {
+    const provenanceEntries = await readReleaseProvenance();
+    const selected = orderTargetsPresentInProvenance(new Set(provenanceEntries.keys()));
+    if (selected.length === 0) {
+      throw new Error("Assembled release provenance did not list any supported targets.");
+    }
+    return selected;
+  });
+
+  if (provenanceTargetsResult.ok) {
+    return provenanceTargetsResult.value;
+  }
+
+  return DESKTOP_RELEASE_TARGETS;
+};
+
 const parseBooleanValue = (value: string | undefined): boolean =>
   value?.trim().toLowerCase() === "1" ||
   value?.trim().toLowerCase() === "true" ||
   value?.trim().toLowerCase() === "yes" ||
   value?.trim().toLowerCase() === "on";
+
+/** When unset or empty, callers should apply `DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE` for that toggle. */
+const parseOptionalEnvBoolean = (environmentKey: string): boolean | undefined => {
+  const raw = process.env[environmentKey]?.trim();
+  if (raw === undefined || raw === "") {
+    return;
+  }
+  return parseBooleanValue(raw);
+};
 
 const parseMacosArchitecture = (rawArchitecture: string): DesktopReleaseMacosArchitecture => {
   if (
@@ -281,18 +325,24 @@ const parseReleaseProfile = (argv: readonly string[]): DesktopReleaseArtifactPro
     macosArchitecturesArgIndex === -1
       ? process.env[MACOS_ARCH_ENV]
       : argv[macosArchitecturesArgIndex + 1];
-  return {
+  return normalizeDesktopReleaseArtifactProfile({
     includeLinuxAppImage:
-      argv.includes(LINUX_APPIMAGE_FLAG) || parseBooleanValue(process.env[LINUX_APPIMAGE_ENV]),
+      argv.includes(LINUX_APPIMAGE_FLAG) ||
+      (parseOptionalEnvBoolean(LINUX_APPIMAGE_ENV) ??
+        DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeLinuxAppImage),
     includeLinuxSignatures:
-      argv.includes(LINUX_SIGNING_FLAG) || parseBooleanValue(process.env[LINUX_SIGNING_ENV]),
+      argv.includes(LINUX_SIGNING_FLAG) ||
+      (parseOptionalEnvBoolean(LINUX_SIGNING_ENV) ??
+        DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeLinuxSignatures),
     includeWindowsMsi:
-      argv.includes(WINDOWS_MSI_FLAG) || parseBooleanValue(process.env[WINDOWS_MSI_ENV]),
+      argv.includes(WINDOWS_MSI_FLAG) ||
+      (parseOptionalEnvBoolean(WINDOWS_MSI_ENV) ??
+        DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeWindowsMsi),
     macosArchitectures:
       macosArchitecturesValue === undefined
         ? DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.macosArchitectures
         : parseMacosArchitecturesFromInput(macosArchitecturesValue),
-  };
+  });
 };
 
 const isReleaseMode = (argv: readonly string[]): boolean =>
@@ -932,12 +982,29 @@ const verifyMagicArtifact = async (
   offset = 0,
 ): Promise<VerificationResult> => {
   const prefix = await readFilePrefix(artifact.absolutePath, offset + signature.length);
+  const signatureOk = bytesStartWith(prefix, signature, offset);
+  if (signatureOk) {
+    return {
+      details: `${artifact.kind} signature verified`,
+      label: `artifact:${artifact.relativePath}`,
+      ok: true,
+    };
+  }
+
+  const lfsProbe = await readFilePrefix(artifact.absolutePath, 256);
+  if (isGitLfsPointerFileContent(lfsProbe)) {
+    return {
+      details:
+        "Git LFS pointer file; run git lfs pull in the repo root to fetch release binaries",
+      label: `artifact:${artifact.relativePath}`,
+      ok: false,
+    };
+  }
+
   return {
-    details: bytesStartWith(prefix, signature, offset)
-      ? `${artifact.kind} signature verified`
-      : `${artifact.kind} signature mismatch`,
+    details: `${artifact.kind} signature mismatch`,
     label: `artifact:${artifact.relativePath}`,
-    ok: bytesStartWith(prefix, signature, offset),
+    ok: false,
   };
 };
 
@@ -1136,13 +1203,16 @@ const verifyMacosNotaryTicket = async (artifact: ReleaseArtifact): Promise<Verif
     ["xcrun", "stapler", "validate", "-v", artifact.absolutePath],
     DISK_IMAGE_TIMEOUT_MS,
   );
+  const staplerOutput = validateResult.timedOut
+    ? "stapler validate timed out"
+    : validateResult.stderr || validateResult.stdout || `exitCode=${validateResult.exitCode}`;
+  const notStapledHint =
+    "Not stapled: for repo/checkouts without a shipping DMG, run verify without --release; for release, notarize and staple the DMG (see packages/desktop/releases/README.md).";
   return {
     details:
       validateResult.exitCode === 0
         ? "stapler validate passed"
-        : validateResult.timedOut
-          ? "stapler validate timed out"
-          : validateResult.stderr || validateResult.stdout || `exitCode=${validateResult.exitCode}`,
+        : `${staplerOutput} | ${notStapledHint}`,
     label: `artifact:${artifact.relativePath}:notarization`,
     ok: validateResult.exitCode === 0,
   };
@@ -1625,6 +1695,29 @@ const verifyLinuxPackagePayload = async (
     return [] as const;
   }
 
+  // `rpm2cpio <missing> | cpio` can exit 0 on some hosts, so missing RPMs must fail here — not only via dpkg-deb.
+  if (!(await pathExists(artifact.absolutePath))) {
+    return [
+      {
+        details: `missing package file (${artifact.relativePath})`,
+        label: `linux:${artifact.kind}-archive:${artifact.target}`,
+        ok: false,
+      },
+    ] as const;
+  }
+
+  const pointerProbe = await readFilePrefix(artifact.absolutePath, 256);
+  if (isGitLfsPointerFileContent(pointerProbe)) {
+    return [
+      {
+        details:
+          "Git LFS pointer file; run git lfs pull in the repo root to fetch Linux package binaries",
+        label: `linux:${artifact.kind}-archive:${artifact.target}`,
+        ok: false,
+      },
+    ] as const;
+  }
+
   const requiredCommands = artifact.kind === "deb" ? ["dpkg-deb"] : ["rpm2cpio", "cpio"];
   const missingToolResult = requiredCommands
     .map((command) => requireCommand(`linux ${artifact.kind} verification`, command))
@@ -1781,7 +1874,7 @@ const collectVerificationResults = async (
 const buildVerificationRunContext = async (
   argv: readonly string[],
 ): Promise<VerificationRunContext> => {
-  const targets = parseCommandTargets(argv);
+  const targets = await resolveVerificationTargets(argv);
   const releaseProfile = parseReleaseProfile(argv);
   const metadata = await readDesktopMetadata();
   return {

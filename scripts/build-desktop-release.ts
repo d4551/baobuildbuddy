@@ -214,6 +214,15 @@ const parseBooleanValue = (value: string | undefined): boolean =>
   value?.trim().toLowerCase() === "yes" ||
   value?.trim().toLowerCase() === "on";
 
+/** When unset or empty, callers should apply `DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE` for that toggle. */
+const parseOptionalEnvBoolean = (environmentKey: string): boolean | undefined => {
+  const raw = process.env[environmentKey]?.trim();
+  if (raw === undefined || raw === "") {
+    return;
+  }
+  return parseBooleanValue(raw);
+};
+
 const parseMacosArchitecture = (rawArchitecture: string): DesktopReleaseMacosArchitecture => {
   if (
     rawArchitecture === "aarch64" ||
@@ -254,11 +263,17 @@ const parseReleaseProfile = (argv: readonly string[]): StageRequest => {
     releaseMode,
     profile: normalizeDesktopReleaseArtifactProfile({
       includeLinuxAppImage:
-        argv.includes(LINUX_APPIMAGE_FLAG) || parseBooleanValue(process.env[LINUX_APPIMAGE_ENV]),
+        argv.includes(LINUX_APPIMAGE_FLAG) ||
+        (parseOptionalEnvBoolean(LINUX_APPIMAGE_ENV) ??
+          DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeLinuxAppImage),
       includeLinuxSignatures:
-        argv.includes(LINUX_SIGNING_FLAG) || parseBooleanValue(process.env[LINUX_SIGNING_ENV]),
+        argv.includes(LINUX_SIGNING_FLAG) ||
+        (parseOptionalEnvBoolean(LINUX_SIGNING_ENV) ??
+          DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeLinuxSignatures),
       includeWindowsMsi:
-        argv.includes(WINDOWS_MSI_FLAG) || parseBooleanValue(process.env[WINDOWS_MSI_ENV]),
+        argv.includes(WINDOWS_MSI_FLAG) ||
+        (parseOptionalEnvBoolean(WINDOWS_MSI_ENV) ??
+          DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeWindowsMsi),
       macosArchitectures:
         macosArchitecturesValue === undefined
           ? DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.macosArchitectures
@@ -718,6 +733,15 @@ const runStandardTauriBuildFlow = async ({
   return [buildCommand.join(" ")];
 };
 
+/** Tauri CLI's `--ci` flag reads `CI`; values like `1` are invalid (only `true` / `false`). */
+const desktopReleaseEnvForTauri = (): NodeJS.ProcessEnv => {
+  const env = { ...process.env } as NodeJS.ProcessEnv;
+  if (env.CI === "1") {
+    env.CI = "true";
+  }
+  return env;
+};
+
 const runTauriBuildFlow = async ({
   metadata,
   hostTarget,
@@ -727,7 +751,7 @@ const runTauriBuildFlow = async ({
 }: TauriBuildRequest): Promise<readonly string[]> => {
   const resolvedHostTarget = requireHostReleaseTarget(hostTarget);
   const env = {
-    ...process.env,
+    ...desktopReleaseEnvForTauri(),
     APPIMAGE_EXTRACT_AND_RUN: process.env.APPIMAGE_EXTRACT_AND_RUN ?? "1",
   };
   const releaseEnv = releaseMode

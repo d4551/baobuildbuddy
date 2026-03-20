@@ -78,6 +78,12 @@ const isDrawerToggleLabel = (tagMarkup: string): boolean =>
   buttonLikeLabelPattern.test(tagMarkup) &&
   labelForAttributePattern.test(tagMarkup);
 
+/** daisyUI theme toggle: `label.swap` wraps a native `input.theme-controller` (navbar). */
+const isDaisyThemeSwapLabel = (tagMarkup: string): boolean =>
+  extractTagName(tagMarkup) === "label" &&
+  /\bswap\b/u.test(tagMarkup) &&
+  /\bswap-rotate\b/u.test(tagMarkup);
+
 const stripMarkupToText = (content: string): string =>
   content
     .replace(templateInterpolationPattern, " dynamic-text ")
@@ -268,6 +274,9 @@ const collectLabelControlViolations = (filePath: string, fileContent: string): V
       continue;
     }
     if (isDrawerToggleLabel(tagMarkup)) {
+      continue;
+    }
+    if (isDaisyThemeSwapLabel(tagMarkup)) {
       continue;
     }
 

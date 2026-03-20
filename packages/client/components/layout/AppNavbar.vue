@@ -5,14 +5,15 @@ import { useI18n } from "vue-i18n";
 import { APP_DRAWER_ID } from "~/constants/layout";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
 
-const { theme, toggleTheme } = useTheme();
+const { theme, setTheme } = useTheme();
 const { resolvedBrand } = useBrand();
+const { navbarBreadcrumbs } = useNavbarBreadcrumbs();
 const { t, locale, availableLocales } = useI18n();
 const isDrawerOpen = useState<boolean>(APP_DRAWER_ID, () => false);
-const localeMenuRef = useTemplateRef<HTMLDetailsElement>("localeMenu");
-const isLocaleMenuOpen = ref(false);
+const userMenuRef = useTemplateRef<HTMLDetailsElement>("userMenu");
+const isUserMenuOpen = ref(false);
 const isDarkTheme = computed(() => theme.value === THEME_NAMES.dark);
-const localeMenuId = `app-navbar-locale-menu-${useId()}`;
+const userMenuId = `app-navbar-user-menu-${useId()}`;
 
 const isAppLanguageCode = (localeCode: string): localeCode is AppLanguageCode =>
   Object.hasOwn(APP_LANGUAGE_LABELS, localeCode);
@@ -22,27 +23,36 @@ const getLocaleLabel = (localeCode: string): string => {
   return directLabel || localeCode;
 };
 
-function selectLocale(nextLocale: string): void {
-  locale.value = nextLocale;
-  if (localeMenuRef.value) {
-    localeMenuRef.value.open = false;
-    isLocaleMenuOpen.value = false;
+function closeUserMenu(): void {
+  if (userMenuRef.value) {
+    userMenuRef.value.open = false;
+    isUserMenuOpen.value = false;
   }
 }
 
-function syncLocaleMenuState(): void {
-  isLocaleMenuOpen.value = localeMenuRef.value?.open ?? false;
+function selectLocale(nextLocale: string): void {
+  locale.value = nextLocale;
+  closeUserMenu();
+}
+
+function syncUserMenuState(): void {
+  isUserMenuOpen.value = userMenuRef.value?.open ?? false;
+}
+
+function onThemeControllerChange(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  setTheme(input.checked ? THEME_NAMES.dark : THEME_NAMES.light);
 }
 </script>
 
 <template>
-  <div class="navbar sticky top-0 z-30 border-b border-base-300 bg-base-200/95 backdrop-blur supports-[backdrop-filter]:bg-base-200/80">
-    <div class="navbar-start">
+  <nav class="navbar sticky top-0 z-10 border-b border-base-300 bg-base-200" :aria-label="t('a11y.appHeader')">
+    <div class="navbar-start flex min-w-0 flex-1 items-center gap-2 lg:gap-4">
       <label
         :for="APP_DRAWER_ID"
         role="button"
         tabindex="0"
-        class="btn btn-ghost btn-circle drawer-button lg:hidden"
+        class="btn btn-ghost btn-circle drawer-button shrink-0 lg:hidden"
         :aria-label="t('a11y.toggleSidebar')"
         :aria-controls="APP_DRAWER_ID"
         :aria-expanded="isDrawerOpen"
@@ -53,45 +63,68 @@ function syncLocaleMenuState(): void {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </label>
-      <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-ghost gap-2 text-xl font-bold text-primary lg:hidden">
+      <NuxtLink
+        :to="APP_ROUTES.dashboard"
+        class="btn btn-ghost shrink-0 gap-2 text-xl font-bold text-primary lg:hidden"
+      >
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
         <span>{{ resolvedBrand.name }}</span>
       </NuxtLink>
+      <div class="hidden min-w-0 flex-1 lg:block">
+        <AppBreadcrumbs :crumbs="navbarBreadcrumbs" class="truncate" />
+      </div>
     </div>
     <div class="navbar-center hidden lg:flex">
       <span class="text-sm text-base-content/60">{{ resolvedBrand.content.tagline }}</span>
     </div>
     <div class="navbar-end gap-1">
-      <button
-        type="button"
-        class="btn btn-ghost btn-circle"
-        :aria-pressed="isDarkTheme"
-        :aria-label="t('a11y.toggleTheme')"
-        @click="toggleTheme()"
-      >
-        <svg v-if="!isDarkTheme" class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
-        </svg>
-        <svg v-else class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Z" />
-        </svg>
-      </button>
-      <details ref="localeMenu" class="dropdown dropdown-end" @toggle="syncLocaleMenuState">
+      <label class="swap swap-rotate btn btn-ghost btn-circle">
+        <input
+          type="checkbox"
+          class="theme-controller"
+          value="business"
+          :checked="isDarkTheme"
+          :aria-label="t('a11y.toggleTheme')"
+          :aria-pressed="isDarkTheme"
+          @change="onThemeControllerChange"
+        />
+        <span class="swap-off" aria-hidden="true">
+          <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+          </svg>
+        </span>
+        <span class="swap-on" aria-hidden="true">
+          <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Z" />
+          </svg>
+        </span>
+      </label>
+      <details ref="userMenu" class="dropdown dropdown-end" @toggle="syncUserMenuState">
         <summary
           class="btn btn-ghost btn-circle"
-          :aria-label="t('a11y.localeSwitcher')"
-          :aria-controls="localeMenuId"
-          :aria-expanded="isLocaleMenuOpen"
+          :aria-label="t('a11y.userMenu')"
+          :aria-controls="userMenuId"
+          :aria-expanded="isUserMenuOpen"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12 6a3 3 0 110-6 3 3 0 010 6z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </summary>
         <ul
-          :id="localeMenuId"
-          class="menu dropdown-content rounded-box z-50 mt-2 w-40 bg-base-200 p-2 shadow-lg"
-          :aria-label="t('a11y.localeSwitcher')"
+          :id="userMenuId"
+          class="menu dropdown-content rounded-box z-50 mt-2 w-56 bg-base-200 p-2 shadow-lg"
+          :aria-label="t('a11y.userMenu')"
         >
+          <li>
+            <NuxtLink :to="APP_ROUTES.settings" class="flex items-center gap-2" @click="closeUserMenu">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {{ t("nav.settings") }}
+            </NuxtLink>
+          </li>
+          <li class="menu-title">{{ t("a11y.localeSwitcher") }}</li>
           <li v-for="loc in availableLocales" :key="loc">
             <button
               type="button"
@@ -106,12 +139,6 @@ function syncLocaleMenuState(): void {
           </li>
         </ul>
       </details>
-      <NuxtLink :to="APP_ROUTES.settings" class="btn btn-ghost btn-circle" :aria-label="t('a11y.openSettings')">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </NuxtLink>
     </div>
-  </div>
+  </nav>
 </template>

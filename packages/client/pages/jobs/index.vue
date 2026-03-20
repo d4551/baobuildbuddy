@@ -14,6 +14,7 @@ import {
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -60,7 +61,11 @@ const studioTypeOptions = JOB_STUDIO_TYPES;
 const platformOptions = JOB_SUPPORTED_PLATFORMS;
 const genreOptions = JOB_GAME_GENRES;
 
-await useAsyncData("jobs-page-bootstrap", async () => {
+const {
+  error: jobsBootstrapError,
+  status: jobsBootstrapStatus,
+  refresh: refreshJobsBootstrap,
+} = await useAsyncData("jobs-page-bootstrap", async () => {
   await searchJobs();
   return true;
 });
@@ -411,8 +416,19 @@ async function maybeAwardSearchXp(): Promise<void> {
         </div>
       </div>
 
-      <div class="flex-1">
-        <LoadingSkeleton v-if="loading" variant="cards" />
+      <div class="min-w-0 flex-1">
+        <LoadingSkeleton
+          v-if="loading || jobsBootstrapStatus === 'pending'"
+          variant="cards"
+        />
+
+        <BootstrapErrorAlert
+          v-else-if="jobsBootstrapError"
+          :message="getErrorMessage(jobsBootstrapError, t('jobsPage.bootstrapError'))"
+          :retry-label="t('jobsPage.bootstrapRetry')"
+          :retry-aria-label="t('jobsPage.bootstrapRetryAria')"
+          @retry="() => refreshJobsBootstrap()"
+        />
 
         <div v-else-if="paginatedJobs.length === 0" class="alert alert-info alert-soft">
           <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -426,7 +442,7 @@ async function maybeAwardSearchXp(): Promise<void> {
             <article
               v-for="job in paginatedJobs"
               :key="job.id"
-              class="card card-border relative overflow-hidden bg-base-100 transition-colors hover:bg-base-200"
+              class="card card-border relative h-full overflow-hidden bg-base-100 transition-colors hover:bg-base-200"
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
@@ -438,7 +454,7 @@ async function maybeAwardSearchXp(): Promise<void> {
                   <h3 class="card-title text-lg">{{ job.title }}</h3>
                   <div
                     v-if="job.matchScore"
-                    class="radial-progress text-[0.65rem] font-bold"
+                    class="radial-progress text-xs font-bold"
                     :class="getMatchScoreColor(job.matchScore)"
                     :style="`--value:${job.matchScore}; --size:2.5rem; --thickness:0.22rem;`"
                     role="progressbar"

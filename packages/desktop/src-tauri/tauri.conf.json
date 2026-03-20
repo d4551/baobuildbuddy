@@ -29,12 +29,15 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["deb", "rpm", "nsis", "app", "dmg"],
     "category": "DeveloperTools",
     "linux": {
       "appimage": {}
     },
-    "macOS": {},
+    "macOS": {
+      "hardenedRuntime": true,
+      "minimumSystemVersion": "10.13"
+    },
     "windows": {
       "webviewInstallMode": {
         "type": "embedBootstrapper"

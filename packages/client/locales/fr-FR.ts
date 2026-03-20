@@ -31,11 +31,18 @@ const frFROverrides = {
     toggleSidebarNavigation: "Basculer la navigation latérale",
     sidebarNavigation: "Navigation latérale",
     closeSidebar: "Fermer la barre latérale",
+    appHeader: "En-tête de l’application",
+    userMenu: "Menu du compte",
     skipToContent: "Aller au contenu",
     breadcrumbs: "Fil d'Ariane",
     dismissNotification: "Fermer la notification",
     localeSwitcher: "Changer de langue",
     localeOptionAria: "Changer la langue en {locale}",
+  },
+  layout: {
+    shell: {
+      versionFooterAria: "Version de l’application",
+    },
   },
   confirmDialog: {
     confirmButton: "Confirmer",
@@ -62,6 +69,7 @@ const frFROverrides = {
     gamification: "Ludification",
     settings: "Paramètres",
     apiDocs: "Documentation API",
+    breadcrumbUnknown: "Rubrique",
   },
   dashboard: {
     pageTitle: "Tableau de bord",
@@ -112,6 +120,9 @@ const frFROverrides = {
         indie: "Indépendant",
       },
     },
+    bootstrapError: "Impossible de charger les offres.",
+    bootstrapRetry: "Réessayer",
+    bootstrapRetryAria: "Réessayer le chargement des offres",
   },
   skillsPage: {
     seoTitle: "Cartographie des compétences",
@@ -181,6 +192,9 @@ const frFROverrides = {
     seoDescription:
       "Créez des variantes de CV ciblées, suivez l'avancement et enchaînez vers lettre, portfolio et préparation d'entretien.",
     title: "Créateur de CV",
+    bootstrapError: "Impossible de charger les CV ou les données du tableau de bord.",
+    bootstrapRetry: "Réessayer",
+    bootstrapRetryAria: "Réessayer le chargement de l’espace CV",
   },
   resumeBuildPage: {
     title: "Créez votre CV avec l'IA",
@@ -211,6 +225,9 @@ const frFROverrides = {
     title: "Paramètres et profil",
     subtitle:
       "Centralisez votre identité, le comportement de l'assistant et les paramètres d'automatisation.",
+    bootstrapError: "Impossible de charger les paramètres ou le profil.",
+    bootstrapRetry: "Réessayer",
+    bootstrapRetryAria: "Réessayer le chargement des paramètres",
     profile: {
       title: "Profil utilisateur",
       nameLegend: "Nom",

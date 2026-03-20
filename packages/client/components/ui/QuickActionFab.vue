@@ -157,7 +157,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="fab z-[50] left-6 bottom-24 hidden lg:flex"
+    class="fab z-40 left-6 bottom-24 hidden lg:flex"
     role="region"
     :aria-label="t('quickFab.groupAria', { brand: resolvedBrand.name })"
   >

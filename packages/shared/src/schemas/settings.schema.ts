@@ -26,7 +26,7 @@ import {
   DEFAULT_JOB_PROVIDER_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "../types/settings";
-import { DEFAULT_BRAND_SETTINGS } from "../constants/branding";
+import { DEFAULT_BRAND_SETTINGS, THEME_NAMES, normalizeAppDataTheme } from "../constants/branding";
 
 export const apiKeyConfigSchema = z.object({
   provider: z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]),
@@ -314,7 +314,15 @@ export const settingsSchema = z.object({
   preferredProvider: aiProviderSchema.default(AI_PROVIDER_DEFAULT),
   preferredModel: z.string().optional(),
   preferredModels: preferredModelsSchema.optional(),
-  theme: z.enum(["bao-light", "bao-dark"]).default("bao-light"),
+  theme: z
+    .union([
+      z.literal("corporate"),
+      z.literal("business"),
+      z.literal("bao-light"),
+      z.literal("bao-dark"),
+    ])
+    .default(THEME_NAMES.light)
+    .transform((value) => normalizeAppDataTheme(value)),
   language: z.enum(APP_LANGUAGE_CODES).default(DEFAULT_APP_LANGUAGE),
   brandSettings: brandSettingsSchema.default(DEFAULT_BRAND_SETTINGS),
   notifications: notificationPreferencesSchema,

@@ -27,6 +27,7 @@ import {
   type Job,
   type JobExperienceLevel,
   type JobType,
+  normalizeAppDataTheme,
   type PortfolioData,
   type PortfolioMetadata,
   type PortfolioProject,
@@ -883,7 +884,7 @@ export const toAppSettings = (value: unknown): AppSettings | null => {
     localModelName: asString(value.localModelName),
     preferredModel: asString(value.preferredModel),
     preferredProvider: normalizeAIProvider(value.preferredProvider),
-    theme: value.theme === "bao-dark" ? "bao-dark" : "bao-light",
+    theme: normalizeAppDataTheme(asString(value.theme)),
     language: asEnum(value.language, APP_LANGUAGE_CODES) ?? DEFAULT_APP_LANGUAGE,
     brandSettings: resolveBrandSettings(isRecord(value.brandSettings) ? value.brandSettings : null),
     notifications: {

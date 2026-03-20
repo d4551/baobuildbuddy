@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import {
+  PAGE_HEADER_DESCRIPTION_CLASS,
+  PAGE_HEADER_OUTER_CLASS,
+  PAGE_HEADER_TITLE_CLASS,
+} from "~/constants/layout";
+
 type HeadingTag = "h1" | "h2";
 
 const props = withDefaults(
@@ -18,19 +24,19 @@ const props = withDefaults(
 
 const hasActions = computed(() => Boolean(useSlots().actions));
 const resolvedDescriptionClass = computed(() =>
-  props.descriptionClass.length > 0 ? props.descriptionClass : "text-sm text-base-content/70",
+  props.descriptionClass.length > 0 ? props.descriptionClass : PAGE_HEADER_DESCRIPTION_CLASS,
 );
 </script>
 
 <template>
-  <header class="flex flex-wrap items-start justify-between gap-4">
-    <div class="space-y-2">
-      <component :is="headingTag" :id="titleId" class="text-3xl font-bold md:text-4xl">
+  <header :class="PAGE_HEADER_OUTER_CLASS">
+    <div class="min-w-0">
+      <component :is="headingTag" :id="titleId" :class="PAGE_HEADER_TITLE_CLASS">
         {{ title }}
       </component>
       <p v-if="description" :class="resolvedDescriptionClass">{{ description }}</p>
     </div>
-    <div v-if="hasActions" class="flex flex-wrap gap-2">
+    <div v-if="hasActions" class="flex shrink-0 flex-wrap gap-2">
       <slot name="actions" />
     </div>
   </header>

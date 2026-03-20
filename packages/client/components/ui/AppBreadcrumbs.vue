@@ -24,7 +24,7 @@ const lastCrumbIndex = computed(() => crumbs.value.length - 1);
 </script>
 
 <template>
-  <nav class="breadcrumbs" :class="sizeClass" :aria-label="t('a11y.breadcrumbs')">
+  <div class="breadcrumbs" :class="sizeClass" role="navigation" :aria-label="t('a11y.breadcrumbs')">
     <ul>
       <li v-for="(crumb, index) in crumbs" :key="`${crumb.label}-${index}`">
         <NuxtLink v-if="crumb.to && index !== lastCrumbIndex" :to="crumb.to">
@@ -35,5 +35,5 @@ const lastCrumbIndex = computed(() => crumbs.value.length - 1);
         </span>
       </li>
     </ul>
-  </nav>
+  </div>
 </template>

@@ -42,6 +42,8 @@ export type UiGridToken =
   | "threeColumn"
   | "fourColumnLg"
   | "fourColumn"
+  /** Dashboard-style bento: uniform gap-6, up to four columns on xl */
+  | "bento"
   | "sidebar"
   | "split";
 
@@ -60,8 +62,10 @@ export const UI_GRID_CLASS_BY_TOKEN: Record<UiGridToken, string> = {
   threeColumn: "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3",
   fourColumnLg: "grid grid-cols-1 gap-3 lg:grid-cols-4",
   fourColumn: "grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4",
-  sidebar: "grid grid-cols-1 gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]",
-  split: "grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]",
+  bento: "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+  /** Sidebar + content: first column should use `lg:w-64 shrink-0`, second `min-w-0 flex-1`. */
+  sidebar: "flex flex-col gap-6 lg:flex-row lg:items-start",
+  split: "grid grid-cols-1 gap-6 lg:grid-cols-2",
 };
 
 /**

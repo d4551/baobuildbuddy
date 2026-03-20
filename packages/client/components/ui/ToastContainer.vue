@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
+import { TOAST_CONTAINER_DOM_ID } from "~/constants/layout";
 import type { ToastType } from "~/composables/useToast";
 
 const { toasts, removeToast } = useToast();
@@ -32,7 +33,8 @@ function resolveIconPath(type: ToastType): string {
 
 <template>
   <div
-    class="toast toast-top toast-center z-[1000] pointer-events-none"
+    :id="TOAST_CONTAINER_DOM_ID"
+    class="toast toast-end toast-top z-50 pointer-events-none"
     aria-live="polite"
     aria-atomic="false"
     :aria-label="t('a11y.notifications')"
@@ -41,7 +43,7 @@ function resolveIconPath(type: ToastType): string {
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="alert shadow-lg pointer-events-auto items-start"
+        class="alert shadow-lg pointer-events-auto items-start sm:alert-horizontal"
         :class="resolveAlertClass(toast.type)"
         :role="toast.type === 'error' ? 'alert' : 'status'"
         :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"

@@ -278,6 +278,7 @@ export declare const app: Elysia<"/api", {
                     200: {
                         error: string;
                     } | {
+                        theme: import("@bao/shared").AppDataTheme;
                         brandSettings: import("@bao/shared").BrandSettings;
                         geminiApiKey: string | null;
                         openaiApiKey: string | null;
@@ -294,7 +295,6 @@ export declare const app: Elysia<"/api", {
                         localModelName: string | null;
                         preferredProvider: string | null;
                         preferredModel: string | null;
-                        theme: string | null;
                         language: string | null;
                         notifications: Record<string, boolean> | null;
                         automationSettings: import("@bao/shared").AutomationSettings | null;
@@ -401,7 +401,7 @@ export declare const app: Elysia<"/api", {
                     } | undefined;
                     preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                     preferredModel?: string | undefined;
-                    theme?: "bao-light" | "bao-dark" | undefined;
+                    theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
                     language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
                     brandSettings?: {
                         name?: string | undefined;
@@ -409,6 +409,12 @@ export declare const app: Elysia<"/api", {
                         apiName?: string | undefined;
                         logoPath?: string | undefined;
                         faviconPath?: string | undefined;
+                        content?: {
+                            tagline?: string | undefined;
+                            defaultTitle?: string | undefined;
+                            defaultDescription?: string | undefined;
+                            contentOverrides?: {} | undefined;
+                        } | undefined;
                         typography?: {
                             fontStylesheetUrl?: string | undefined;
                             displayFontFamily?: string | undefined;
@@ -417,7 +423,6 @@ export declare const app: Elysia<"/api", {
                         } | undefined;
                         lightTheme?: {
                             success?: string | undefined;
-                            error?: string | undefined;
                             base100?: string | undefined;
                             base200?: string | undefined;
                             base300?: string | undefined;
@@ -435,6 +440,7 @@ export declare const app: Elysia<"/api", {
                             successContent?: string | undefined;
                             warning?: string | undefined;
                             warningContent?: string | undefined;
+                            error?: string | undefined;
                             errorContent?: string | undefined;
                             radiusSelector?: string | undefined;
                             radiusField?: string | undefined;
@@ -447,7 +453,6 @@ export declare const app: Elysia<"/api", {
                         } | undefined;
                         darkTheme?: {
                             success?: string | undefined;
-                            error?: string | undefined;
                             base100?: string | undefined;
                             base200?: string | undefined;
                             base300?: string | undefined;
@@ -465,6 +470,7 @@ export declare const app: Elysia<"/api", {
                             successContent?: string | undefined;
                             warning?: string | undefined;
                             warningContent?: string | undefined;
+                            error?: string | undefined;
                             errorContent?: string | undefined;
                             radiusSelector?: string | undefined;
                             radiusField?: string | undefined;
@@ -474,12 +480,6 @@ export declare const app: Elysia<"/api", {
                             border?: string | undefined;
                             depth?: string | undefined;
                             noise?: string | undefined;
-                        } | undefined;
-                        content?: {
-                            tagline?: string | undefined;
-                            defaultTitle?: string | undefined;
-                            defaultDescription?: string | undefined;
-                            contentOverrides?: {} | undefined;
                         } | undefined;
                     } | undefined;
                 };
@@ -3410,7 +3410,7 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "pending" | "running" | "error";
+                            status: "success" | "error" | "pending" | "running";
                             createdAt: string;
                             updatedAt: string;
                             screenshots: string[] | null;
@@ -3497,7 +3497,7 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
-                                status: "success" | "pending" | "running" | "error";
+                                status: "success" | "error" | "pending" | "running";
                                 createdAt: string;
                                 updatedAt: string;
                                 screenshots: string[] | null;
@@ -3652,7 +3652,7 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
-                                status: "success" | "pending" | "running" | "error";
+                                status: "success" | "error" | "pending" | "running";
                                 createdAt: string;
                                 updatedAt: string;
                                 screenshots: string[] | null;
@@ -3734,7 +3734,7 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "pending" | "running" | "error";
+                            status: "success" | "error" | "pending" | "running";
                             createdAt: string;
                             updatedAt: string;
                             screenshots: string[] | null;
@@ -3817,7 +3817,7 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
-                                status: "success" | "pending" | "running" | "error";
+                                status: "success" | "error" | "pending" | "running";
                                 createdAt: string;
                                 updatedAt: string;
                                 screenshots: string[] | null;
@@ -3926,7 +3926,7 @@ export declare const app: Elysia<"/api", {
                     params: {};
                     query: {
                         type?: "scrape" | "job_apply" | "email" | undefined;
-                        status?: "success" | "pending" | "running" | "error" | undefined;
+                        status?: "success" | "error" | "pending" | "running" | undefined;
                     };
                     headers: unknown;
                     response: {
@@ -3947,7 +3947,7 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "pending" | "running" | "error";
+                            status: "success" | "error" | "pending" | "running";
                             createdAt: string;
                             updatedAt: string;
                             screenshots: string[] | null;
@@ -4003,7 +4003,7 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
-                                status: "success" | "pending" | "running" | "error";
+                                status: "success" | "error" | "pending" | "running";
                                 createdAt: string;
                                 updatedAt: string;
                                 screenshots: string[] | null;

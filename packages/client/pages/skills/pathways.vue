@@ -80,12 +80,22 @@ const { data, status, error, refresh } = await useAsyncData(
   },
 );
 
-const { data: gamificationProgress } = await useAsyncData(
+const {
+  data: gamificationProgress,
+  status: gamificationStatus,
+  error: gamificationError,
+  refresh: refreshGamificationProgress,
+} = await useAsyncData(
   "skills-pathways-gamification-progress",
   async () => {
     const progressResponse = await api.gamification.progress.get();
     if (progressResponse.error) {
-      return null;
+      throw new Error(
+        getErrorMessage(
+          progressResponse.error,
+          t("skillsPathwaysPage.errors.gamificationLoadFailed"),
+        ),
+      );
     }
 
     return progressResponse.data;
@@ -95,6 +105,8 @@ const { data: gamificationProgress } = await useAsyncData(
     server: true,
   },
 );
+
+const gamificationReady = computed(() => gamificationStatus.value === "success");
 
 const uiState = computed(() => {
   if (status.value === "pending") return "loading";
@@ -108,8 +120,12 @@ const breadcrumbs = computed(() => [
   { label: t("skillsPathwaysPage.title") },
 ]);
 
-const gamificationLevel = computed(() => gamificationProgress.value?.level ?? 1);
-const gamificationXP = computed(() => gamificationProgress.value?.xp ?? 0);
+const gamificationLevel = computed(() =>
+  gamificationReady.value ? (gamificationProgress.value?.level ?? 1) : 0,
+);
+const gamificationXP = computed(() =>
+  gamificationReady.value ? (gamificationProgress.value?.xp ?? 0) : 0,
+);
 
 const readinessAssessment = computed<ReadinessAssessment | null>(
   () => data.value?.readiness ?? null,
@@ -199,6 +215,7 @@ function getReadinessDialStyle(score: number): Record<string, string> {
         <p class="text-sm text-base-content/70">{{ t("skillsPathwaysPage.subtitle") }}</p>
       </div>
       <NuxtLink
+        v-if="gamificationReady"
         :to="APP_ROUTES.gamification"
         class="btn btn-ghost btn-sm gap-2"
         :aria-label="t('skillsPathwaysPage.gamification.openProgressAria')"
@@ -208,7 +225,22 @@ function getReadinessDialStyle(score: number): Record<string, string> {
         </span>
         <span class="text-xs">{{ t("skillsPathwaysPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
       </NuxtLink>
+      <span
+        v-else-if="gamificationStatus === 'pending' || gamificationStatus === 'idle'"
+        class="badge badge-ghost badge-sm"
+      >
+        {{ t("skillsPathwaysPage.gamification.unavailableHint") }}
+      </span>
     </header>
+
+    <BootstrapErrorAlert
+      v-if="gamificationStatus === 'error'"
+      severity="warning"
+      :message="getErrorMessage(gamificationError, t('skillsPathwaysPage.errors.gamificationLoadFailed'))"
+      :retry-label="t('skillsPathwaysPage.gamification.retryButton')"
+      :retry-aria-label="t('skillsPathwaysPage.gamification.retryAria')"
+      @retry="() => refreshGamificationProgress()"
+    />
 
     <LoadingSkeleton v-if="uiState === 'loading'" variant="cards" :lines="8" />
 

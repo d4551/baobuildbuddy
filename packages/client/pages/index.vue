@@ -593,7 +593,7 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
         </div>
       </section>
 
-      <SectionGrid grid-token="fourColumn">
+      <SectionGrid grid-token="bento">
         <NuxtLink
           v-for="statCard in DASHBOARD_STAT_CARDS"
           :key="statCard.id"
@@ -687,7 +687,7 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
       <section class="card bg-base-200">
         <div class="card-body">
           <h2 class="card-title text-lg mb-4">{{ t(DASHBOARD_COPY_KEYS.quickActionsTitle) }}</h2>
-          <SectionGrid grid-token="fourColumn">
+          <SectionGrid grid-token="bento">
             <NuxtLink
               v-for="action in dashboardQuickActions"
               :key="action.id"

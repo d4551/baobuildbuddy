@@ -1,14 +1,16 @@
-import { STATE_KEYS, THEME_NAMES } from "@bao/shared";
+import type { AppDataTheme } from "@bao/shared";
+import { STATE_KEYS, THEME_NAMES, normalizeAppDataTheme } from "@bao/shared";
 import { useState } from "#imports";
 import { readonly } from "vue";
 
 /**
- * Theme toggle composable for bao-light / bao-dark.
+ * Theme toggle: daisyUI `corporate` (light) / `business` (dark), driven by `data-theme`.
+ * Persists to localStorage and stays aligned with settings on the server.
  */
 export function useTheme() {
-  const theme = useState<"bao-light" | "bao-dark">(STATE_KEYS.APP_THEME, () => THEME_NAMES.light);
+  const theme = useState<AppDataTheme>(STATE_KEYS.APP_THEME, () => THEME_NAMES.light);
 
-  function setTheme(newTheme: "bao-light" | "bao-dark", options: { persistLocal?: boolean } = {}) {
+  function setTheme(newTheme: AppDataTheme, options: { persistLocal?: boolean } = {}) {
     theme.value = newTheme;
     if (import.meta.client) {
       document.documentElement.setAttribute("data-theme", newTheme);
@@ -22,11 +24,12 @@ export function useTheme() {
     setTheme(theme.value === THEME_NAMES.light ? THEME_NAMES.dark : THEME_NAMES.light);
   }
 
-  function initTheme(preferredTheme?: "bao-light" | "bao-dark") {
+  function initTheme(preferredTheme?: AppDataTheme) {
     if (import.meta.client) {
-      const saved = localStorage.getItem(THEME_NAMES.storageKey) as "bao-light" | "bao-dark" | null;
-      if (saved) {
-        setTheme(saved, { persistLocal: false });
+      const savedRaw = localStorage.getItem(THEME_NAMES.storageKey);
+      if (savedRaw) {
+        const normalized = normalizeAppDataTheme(savedRaw);
+        setTheme(normalized, { persistLocal: normalized !== savedRaw });
       } else if (preferredTheme) {
         setTheme(preferredTheme, { persistLocal: false });
       } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {

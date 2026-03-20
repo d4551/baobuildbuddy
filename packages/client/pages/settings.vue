@@ -202,7 +202,11 @@ const profileForm = reactive({
   softSkillsText: "",
 });
 
-await useAsyncData("settings-bootstrap", async () => {
+const {
+  error: settingsBootstrapError,
+  status: settingsBootstrapStatus,
+  refresh: refreshSettingsBootstrap,
+} = await useAsyncData("settings-bootstrap", async () => {
   await Promise.all([fetchSettings(), fetchProfile()]);
   return true;
 });
@@ -823,8 +827,30 @@ async function handleClearEmailDeliveryPassword() {
       </div>
     </section>
 
+    <div
+      v-if="settingsBootstrapError"
+      class="alert alert-error sm:alert-horizontal"
+      role="alert"
+    >
+      <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ getErrorMessage(settingsBootstrapError, t("settings.bootstrapError")) }}</span>
+      <button
+        type="button"
+        class="btn btn-sm btn-ghost shrink-0"
+        :aria-label="t('settings.bootstrapRetryAria')"
+        @click="() => refreshSettingsBootstrap()"
+      >
+        {{ t("settings.bootstrapRetry") }}
+      </button>
+    </div>
+
     <LoadingSkeleton
-      v-if="settingsLoading && profileLoading && !settings && !profile"
+      v-else-if="
+        settingsBootstrapStatus === 'pending' ||
+          (settingsLoading && profileLoading && !settings && !profile)
+      "
       :lines="8"
     />
 
@@ -1108,7 +1134,7 @@ async function handleClearEmailDeliveryPassword() {
                       <p class="max-w-md text-sm opacity-80">
                         {{ brandDraft.content.tagline }}
                       </p>
-                      <p class="max-w-md text-xs opacity-65">
+                      <p class="max-w-md text-xs text-base-content/60">
                         {{ brandDraft.content.defaultDescription }}
                       </p>
                     </div>

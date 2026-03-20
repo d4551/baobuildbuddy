@@ -4,8 +4,8 @@ import { useI18n } from "vue-i18n";
 import {
   APP_DRAWER_ID,
   APP_MAIN_CONTENT_ID,
-  LAYOUT_CONTENT_MAX_WIDTH_REM,
   LAYOUT_DESKTOP_MEDIA_QUERY,
+  SHELL_MAIN_INNER_CLASS,
 } from "~/constants/layout";
 
 const { initTheme, theme, setTheme } = useTheme();
@@ -18,10 +18,7 @@ const isDesktopViewport = ref(false);
 let desktopMediaQueryList: MediaQueryList | null = null;
 let removeMediaQueryListener: (() => void) | null = null;
 
-const shellStyle = computed(() => ({
-  "--layout-content-max-width": `${LAYOUT_CONTENT_MAX_WIDTH_REM}rem`,
-  ...brandCssVars.value,
-}));
+const shellStyle = computed(() => brandCssVars.value);
 
 const showFloatingChatWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
 
@@ -88,25 +85,27 @@ onUnmounted(() => {
     <div class="drawer-content flex min-h-screen flex-col">
       <a :href="`#${APP_MAIN_CONTENT_ID}`" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn btn-primary btn-sm" :aria-label="t('a11y.skipToContent')">{{ t("a11y.skipToContent") }}</a>
       <AppNavbar />
-      <main
-        :id="APP_MAIN_CONTENT_ID"
-        class="mx-auto flex-1 w-full max-w-[var(--layout-content-max-width)] px-4 pb-24 pt-4 sm:px-6 lg:px-8 lg:pb-8"
-      >
-        <slot />
+      <main :id="APP_MAIN_CONTENT_ID" class="flex flex-1 flex-col">
+        <div :class="SHELL_MAIN_INNER_CLASS">
+          <slot />
+        </div>
       </main>
       <ToastContainer />
     </div>
-    <aside class="drawer-side is-drawer-close:overflow-visible z-40" :aria-label="t('a11y.sidebarNavigation')">
+    <div class="drawer-side is-drawer-close:overflow-visible z-20">
       <label
         :for="APP_DRAWER_ID"
         class="drawer-overlay"
         :aria-label="t('a11y.closeSidebar')"
         :aria-controls="APP_DRAWER_ID"
       ></label>
-      <div class="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64 transition-all duration-200">
+      <aside
+        class="flex min-h-full flex-col items-start bg-base-200 transition-all duration-200 is-drawer-close:w-14 is-drawer-open:w-64"
+        :aria-label="t('a11y.sidebarNavigation')"
+      >
         <AppSidebar />
-      </div>
-    </aside>
+      </aside>
+    </div>
     <ClientOnly>
       <AppDock />
       <LazyQuickActionFab />

@@ -178,6 +178,19 @@ export default defineNuxtConfig({
   compatibilityDate: NUXT_COMPATIBILITY_DATE,
   buildDir: ".nuxt",
   devtools: { enabled: true },
+  $development: {
+    sourcemap: {
+      client: false,
+      server: true,
+    },
+  },
+  $production: {
+    sourcemap: {
+      // Avoid shipping SSR .map files (path leakage, larger deploy); client maps stay off via vite.build.
+      client: false,
+      server: false,
+    },
+  },
   experimental: {
     componentIslands: false,
   },
@@ -207,11 +220,6 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
-
-  sourcemap: {
-    server: true,
-    client: false,
-  },
 
   vite: {
     css: {

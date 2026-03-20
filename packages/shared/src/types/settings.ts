@@ -2,6 +2,7 @@
  * App settings types for single-user local-first app.
  */
 
+import type { AppDataTheme } from "../constants/branding";
 import type {
   AppLanguageCode,
   AutomationBrowserOption,
@@ -455,7 +456,7 @@ export interface AppSettings {
   preferredModel?: string;
   preferredModels?: ProviderModelPreferences;
   preferredProvider: AIProviderType;
-  theme: "bao-light" | "bao-dark";
+  theme: AppDataTheme;
   language: AppLanguageCode;
   brandSettings?: BrandSettings;
   notifications: NotificationPreferences;

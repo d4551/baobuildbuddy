@@ -562,7 +562,7 @@ function removeApplication(index: number): void {
               </td>
               <td>
                 <div class="radial-progress text-primary" :style="confidenceProgressStyle(mapping.confidence)" role="progressbar" :aria-valuenow="mapping.confidence" :aria-valuemin="SKILLS_CONFIDENCE_MIN" :aria-valuemax="SKILLS_CONFIDENCE_MAX" :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })">
-                  <span class="text-[10px] font-semibold">{{ mapping.confidence }}%</span>
+                  <span class="text-xs font-semibold">{{ mapping.confidence }}%</span>
                 </div>
               </td>
               <td>
@@ -572,7 +572,7 @@ function removeApplication(index: number): void {
               </td>
               <td>
                 <button
-                  class="btn btn-ghost btn-xs btn-error"
+                  class="btn btn-ghost btn-sm btn-error"
                   :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
                   @click="requestDeleteMapping(mapping.id)"
                 >
@@ -598,7 +598,7 @@ function removeApplication(index: number): void {
                 <p class="text-sm text-base-content/70">{{ mapping.gameExpression }}</p>
               </div>
               <div class="radial-progress text-primary" :style="confidenceProgressStyle(mapping.confidence)" role="progressbar" :aria-valuenow="mapping.confidence" :aria-valuemin="SKILLS_CONFIDENCE_MIN" :aria-valuemax="SKILLS_CONFIDENCE_MAX" :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })">
-                <span class="text-[10px] font-semibold">{{ mapping.confidence }}%</span>
+                <span class="text-xs font-semibold">{{ mapping.confidence }}%</span>
               </div>
             </div>
 
@@ -615,7 +615,7 @@ function removeApplication(index: number): void {
 
             <div class="card-actions justify-end">
               <button
-                class="btn btn-ghost btn-xs btn-error"
+                class="btn btn-ghost btn-sm btn-error"
                 :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
                 @click="requestDeleteMapping(mapping.id)"
               >

@@ -227,3 +227,18 @@ export function isRouteActive(currentPath: string, targetPath: string): boolean 
 
   return true;
 }
+
+/**
+ * Resolves the most specific sidebar nav item for the current path (longest matching `to`).
+ */
+export function resolveLongestMatchingSidebarNavItem(path: string): NavigationItem | null {
+  const matches = NAVIGATION_ITEMS.filter(
+    (item) => item.includeInSidebar && isRouteActive(path, item.to),
+  );
+  if (matches.length === 0) {
+    return null;
+  }
+  return matches.reduce((best, item) =>
+    normalizeRoutePath(item.to).length > normalizeRoutePath(best.to).length ? item : best,
+  );
+}

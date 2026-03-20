@@ -722,7 +722,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-[120rem] space-y-6">
+  <div class="mx-auto max-w-7xl space-y-6">
     <header class="space-y-2">
       <h1 class="text-3xl font-bold">{{ t("apiDocs.title") }}</h1>
       <p class="text-base-content/70">{{ t("apiDocs.intro") }}</p>

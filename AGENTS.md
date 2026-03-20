@@ -2,7 +2,7 @@
 
 ### Codebase overview
 
-BaoBuildBuddy is a Bun-first monorepo (5 workspace packages) for game-industry career automation. See `README.md` for full architecture, scripts, and troubleshooting.
+BaoBuildBuddy is a Bun-first monorepo (5 workspace packages) for game-industry career automation. See `README.md` for full architecture, scripts, and troubleshooting. **Canonical stack vs generic prompts:** [`docs/STACK-CONTRACT.md`](docs/STACK-CONTRACT.md) (Drizzle + Nuxt/Vue, not Prisma/htmx).
 
 | Package       | Path               | Role                                         |
 |---------------|--------------------|--------------------------------------------- |
@@ -12,12 +12,16 @@ BaoBuildBuddy is a Bun-first monorepo (5 workspace packages) for game-industry c
 | `@bao/scraper`| `packages/scraper` | Bun + Playwright automation and scraper exes |
 | `@bao/desktop`| `packages/desktop` | Tauri desktop wrapper (optional)             |
 
+**Stack truth:** Client data fetching uses **Vue / Nuxt** (`NuxtLink`, `useAsyncData`, composables), not htmx. The ORM is **Drizzle**, not Prisma. Themes are defined once in `packages/client/assets/css/main.css` via daisyUI **`corporate` (light, default) and `business` (prefers-dark)**; `useTheme` + `data-theme` on the shell keep persistence/settings in sync, and the navbar uses daisyUI **`swap swap-rotate`** with **`input.theme-controller[value="business"]`**. See `docs/feature-trace-matrix.md` for route-to-page mapping.
+
+**Design tokens (single source):** Semantic colors/spacing use **daisyUI + Tailwind scale only** (no palette literals like `bg-slate-*`). Layout constants live in `packages/client/constants/layout.ts` (`SHELL_MAIN_INNER_CLASS`, `APP_DRAWER_ID`, `APP_MAIN_CONTENT_ID`, `AUTH_SHELL_OUTER_CLASS`, `AUTH_CARD_SHELL_CLASS` — must match the static `card` classes on `layouts/auth-shell.vue` for `validate:daisyui-contracts`, `PAGE_HEADER_*`, `EMPTY_STATE_STACK_CLASS`, `TOAST_CONTAINER_DOM_ID`). Grid width/spacing tokens = `constants/ui-layout.ts`. Authenticated chrome = `layouts/default.vue`; centered flows = `layouts/auth-shell.vue`. Navbar section crumbs = `useNavbarBreadcrumbs` + `resolveLongestMatchingSidebarNavItem`. **htmx / `hx-*` in the pasted playbook are not used**—mirror those patterns with Vue async state (loading / empty / error / success) where product requirements call for it.
+
 ### Key commands
 
 - **Dev:** `bun run dev` (starts server + client in parallel)
 - **Lint:** `bun run lint` (all validators + biome + eslint + typecheck)
 - **Test:** `bun run test` (server bun:test + scraper bun:test + client vitest)
-- **Build:** `bun run build`
+- **Build:** `bun run build` (optional stricter check: `bun run build:verify` runs the web build then `verify:production-client` to ensure Nitro SSR output ships without `.map` leakage)
 - **DB setup:** `bun run db:generate && bun run db:push`
 
 ### Local AI setup
@@ -72,3 +76,7 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
 14. **Gamification is wired into all routes.** XP awards: resume (30), cover letter (30), portfolio (35), interview (75), job save (10), job apply (40), skill mapping (15). Achievement checking triggers automatically.
 
 15. **Tauri desktop** requires Rust toolchain (`rustc` + `cargo`).
+
+16. **Desktop release verify:** `bun run verify:desktop-releases -- --release` on macOS enforces **`xcrun stapler validate`** (stapled/notarized DMG). Checkouts with an unstapled DMG under `packages/desktop/releases` should run **`bun run verify:desktop-releases`** without `--release` for full payload + checksum checks. CI keeps `--release` after a proper notarized build.
+
+17. **External “full-stack audit” prompts** often assume **Prisma + htmx**. This repo does **not** use those. Treat [`docs/STACK-CONTRACT.md`](docs/STACK-CONTRACT.md) as binding; map playbook items to **Drizzle + Nuxt/Vue** (see the htmx→Nuxt table there). Do not start a framework migration unless the product owner explicitly requests it.

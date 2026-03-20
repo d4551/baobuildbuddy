@@ -28,12 +28,20 @@ const enUS = {
     toggleSidebarNavigation: "Toggle sidebar navigation",
     sidebarNavigation: "Sidebar navigation",
     closeSidebar: "Close sidebar",
+    appHeader: "Application header",
+    userMenu: "Account menu",
     skipToContent: "Skip to content",
     breadcrumbs: "Breadcrumb",
     notifications: "Notifications",
     dismissNotification: "Dismiss notification",
     localeSwitcher: "Change language",
     localeOptionAria: "Switch language to {locale}",
+  },
+  layout: {
+    shell: {
+      appVersion: "Version {version}",
+      versionFooterAria: "Application version",
+    },
   },
   apiErrors: {
     jobs: {
@@ -167,6 +175,7 @@ const enUS = {
     gamification: "Gamification",
     settings: "Settings",
     apiDocs: "API Docs",
+    breadcrumbUnknown: "Page",
   },
   apiDocs: {
     seoTitle: "API Documentation",
@@ -458,6 +467,9 @@ const enUS = {
       },
     },
     emptyState: "No jobs found. Try adjusting your filters or search query.",
+    bootstrapError: "Could not load the job board.",
+    bootstrapRetry: "Retry",
+    bootstrapRetryAria: "Retry loading the job board",
     openJobAria: "Open job details for {title} at {company}",
     remoteBadge: "Remote",
     matchScoreAria: "Job match score",
@@ -674,11 +686,6 @@ const enUS = {
       "Track readiness and explore role pathways generated from your mapped skill evidence.",
     retryButtonLabel: "Retry",
     retryAria: "Retry loading career pathways",
-    gamification: {
-      levelLabel: "Lvl {level}",
-      xpLabel: "{xp} XP",
-      openProgressAria: "Open gamification progress",
-    },
     categories: {
       technical: "Technical",
       softSkills: "Soft Skills",
@@ -758,6 +765,15 @@ const enUS = {
       loadFailed: "Failed to load career pathways data",
       pathwaysLoadFailed: "Failed to load pathway recommendations",
       readinessLoadFailed: "Failed to load readiness assessment",
+      gamificationLoadFailed: "Failed to load gamification progress for this page",
+    },
+    gamification: {
+      openProgressAria: "Open gamification progress",
+      levelLabel: "Lvl {level}",
+      xpLabel: "{xp} XP",
+      retryAria: "Retry loading gamification progress",
+      retryButton: "Retry",
+      unavailableHint: "Progress unavailable",
     },
   },
   resumePage: {
@@ -772,6 +788,9 @@ const enUS = {
     guidedButton: "Guided Builder",
     guidedButtonAria: "Open guided resume builder",
     emptyState: "No resumes yet. Create your first resume to get started.",
+    bootstrapError: "Could not load resumes or dashboard data.",
+    bootstrapRetry: "Retry",
+    bootstrapRetryAria: "Retry loading the resume workspace",
     filteredEmptyState: "No resumes match your active search.",
     defaultBadge: "Default",
     editButton: "Edit",
@@ -1561,7 +1580,15 @@ const enUS = {
     errors: {
       saveFailed: "Failed to update saved job status",
       applyFailed: "Failed to submit application",
+      loadFailed: "Could not load this job",
     },
+    retryButton: "Retry",
+    retryAria: "Retry loading job details",
+    notFoundTitle: "Job not found",
+    notFoundBody: "This job may have been removed or the link is invalid.",
+    backToJobs: "Back to jobs",
+    backToJobsAria: "Return to jobs list",
+    invalidId: "No job selected.",
   },
   studioDetail: {
     breadcrumbs: {
@@ -1958,6 +1985,9 @@ const enUS = {
       title: "Email Response Automation",
       pageDescription:
         "Generate and track AI-assisted email responses through the automation pipeline.",
+      bootstrapError: "Could not load email automation settings",
+      bootstrapRetry: "Retry",
+      bootstrapRetryAria: "Retry loading email automation settings",
       openRunsButton: "View Runs",
       openRunsAria: "Open automation runs page",
       subjectLegend: "Subject",
@@ -2177,6 +2207,12 @@ const enUS = {
         jobFailed: "Job scraper failed",
         scheduleFailed: "Failed to schedule scraper run",
         rewardFailed: "Failed to award scraper progress",
+        capabilitiesLoadFailed: "Could not load scraper capability audit",
+        capabilitiesRetry: "Retry",
+        capabilitiesRetryAria: "Retry loading scraper capability audit",
+        jobsFeedLoadFailed: "Could not refresh the job feed for this page",
+        jobsFeedRetry: "Retry",
+        jobsFeedRetryAria: "Retry loading job feed for scraper hub",
       },
     },
   },
@@ -2207,6 +2243,9 @@ const enUS = {
     seoTitle: "{brand} Setup",
     seoDescription:
       "Configure profile context, local AI, and provider fallbacks so your hiring workspace is production-ready.",
+    bootstrapError: "Could not load setup data",
+    bootstrapRetry: "Retry",
+    bootstrapRetryAria: "Retry loading setup data",
     stepsAriaLabel: "Setup progress",
     steps: {
       profile: "Profile",
@@ -2399,6 +2438,10 @@ const enUS = {
     title: "Interview Prep Hub",
     subtitle:
       "Practice against either real scraped job listings or studio-focused interview tracks. Every session returns scored feedback and targeted improvement points.",
+    bootstrapRetry: "Retry",
+    bootstrapRetryAria: "Retry loading interview hub data",
+    pathwaysRetry: "Retry",
+    pathwaysRetryAria: "Retry loading role recommendations",
     hero: {
       openJobAria: "Configure a job-based interview",
       openJobButton: "Interview a Scraped Job",
@@ -2608,6 +2651,9 @@ const enUS = {
       "Manage profile identity, AI providers, notification preferences, and automation defaults from one control plane.",
     title: "Settings & Profile",
     subtitle: "Centralize your identity, assistant behavior, and automation defaults in one place.",
+    bootstrapError: "Could not load settings or profile.",
+    bootstrapRetry: "Retry",
+    bootstrapRetryAria: "Retry loading settings",
     saveState: {
       idle: "Idle",
       saving: "Saving",

@@ -46,7 +46,7 @@ beforeEach(() => {
 
 describe("useSettings", () => {
   it("fetchSettings sets loading and updates settings on success", async () => {
-    const mockSettings = { id: "default", theme: "bao-light" };
+    const mockSettings = { id: "default", theme: "corporate" };
     mockApi.settings.get.mockResolvedValueOnce({ data: mockSettings, error: null });
 
     const { fetchSettings, settings, loading } = useSettings();
@@ -55,7 +55,7 @@ describe("useSettings", () => {
     expect(loading.value).toBe(false);
     expect(settings.value).toMatchObject({
       id: "default",
-      theme: "bao-light",
+      theme: "corporate",
       language: "en-US",
       notifications: {
         achievements: true,

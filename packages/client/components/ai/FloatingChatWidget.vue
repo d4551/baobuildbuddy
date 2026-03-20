@@ -238,7 +238,7 @@ onUnmounted(() => {
   <Teleport to="body">
     <div
       v-if="showWidget"
-      class="fixed z-[60] bottom-24 right-4 lg:bottom-6 lg:right-6 flex flex-col items-end gap-3"
+      class="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-6 lg:right-6"
     >
       <div
         v-if="isOpen"

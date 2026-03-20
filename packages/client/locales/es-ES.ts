@@ -29,6 +29,8 @@ const esES: AppTranslationOverrides = {
     toggleSidebarNavigation: "Alternar navegación de barra lateral",
     sidebarNavigation: "Navegación de barra lateral",
     closeSidebar: "Cerrar barra lateral",
+    appHeader: "Encabezado de la aplicación",
+    userMenu: "Menú de cuenta",
     skipToContent: "Saltar al contenido",
     breadcrumbs: "Ruta de navegación",
     notifications: "Notificaciones",
@@ -168,6 +170,7 @@ const esES: AppTranslationOverrides = {
     gamification: "Gamificación",
     settings: "Configuración",
     apiDocs: "Documentación de API",
+    breadcrumbUnknown: "Página",
   },
   apiDocs: {
     seoTitle: "Documentación de API",
@@ -682,6 +685,9 @@ const esES: AppTranslationOverrides = {
       levelLabel: "Nvl {level}",
       xpLabel: "{xp} XP",
       openProgressAria: "Abrir progreso de gamificación",
+      retryAria: "Reintentar carga del progreso de gamificación",
+      retryButton: "Reintentar",
+      unavailableHint: "Progreso no disponible",
     },
     categories: {
       technical: "Técnico",
@@ -766,6 +772,7 @@ const esES: AppTranslationOverrides = {
       loadFailed: "Error al cargar datos de rutas de carrera",
       pathwaysLoadFailed: "Error al cargar recomendaciones de rutas",
       readinessLoadFailed: "Error al cargar evaluación de preparación",
+      gamificationLoadFailed: "Error al cargar el progreso de gamificación en esta página",
     },
   },
   resumePage: {
@@ -1572,7 +1579,15 @@ const esES: AppTranslationOverrides = {
     errors: {
       saveFailed: "Error al actualizar estado del empleo guardado",
       applyFailed: "Error al enviar la solicitud",
+      loadFailed: "No se pudo cargar este empleo",
     },
+    retryButton: "Reintentar",
+    retryAria: "Reintentar cargar el detalle del empleo",
+    notFoundTitle: "Empleo no encontrado",
+    notFoundBody: "Es posible que se haya eliminado o que el enlace no sea válido.",
+    backToJobs: "Volver a empleos",
+    backToJobsAria: "Volver a la lista de empleos",
+    invalidId: "No hay ningún empleo seleccionado.",
   },
   studioDetail: {
     breadcrumbs: {
@@ -1969,6 +1984,9 @@ const esES: AppTranslationOverrides = {
       title: "Automatización de Respuestas por Email",
       pageDescription:
         "Genera y sigue respuestas de email asistidas por IA a través del pipeline de automatización.",
+      bootstrapError: "No se pudieron cargar los ajustes de automatización de email",
+      bootstrapRetry: "Reintentar",
+      bootstrapRetryAria: "Reintentar carga de ajustes de automatización de email",
       openRunsButton: "Ver Ejecuciones",
       openRunsAria: "Abrir página de ejecuciones",
       subjectLegend: "Asunto",
@@ -2190,6 +2208,12 @@ const esES: AppTranslationOverrides = {
         jobFailed: "Error en extractor de empleos",
         scheduleFailed: "Error al programar la extracción",
         rewardFailed: "Error al acreditar progreso del extractor",
+        capabilitiesLoadFailed: "No se pudo cargar la auditoría de capacidades del extractor",
+        capabilitiesRetry: "Reintentar",
+        capabilitiesRetryAria: "Reintentar carga de la auditoría de capacidades del extractor",
+        jobsFeedLoadFailed: "No se pudo actualizar el listado de empleos para esta página",
+        jobsFeedRetry: "Reintentar",
+        jobsFeedRetryAria: "Reintentar carga del listado de empleos del centro de extracción",
       },
     },
   },
@@ -2220,6 +2244,9 @@ const esES: AppTranslationOverrides = {
     seoTitle: "Configuración de {brand}",
     seoDescription:
       "Completa tu perfil, configura proveedores de IA y lanza tu espacio de trabajo profesional.",
+    bootstrapError: "No se pudieron cargar los datos de configuración",
+    bootstrapRetry: "Reintentar",
+    bootstrapRetryAria: "Reintentar carga de datos de configuración",
     stepsAriaLabel: "Progreso de configuración",
     steps: {
       profile: "Perfil",
@@ -2413,6 +2440,10 @@ const esES: AppTranslationOverrides = {
     title: "Centro de Preparación de Entrevistas",
     subtitle:
       "Practica contra ofertas reales extraídas o pistas de entrevista centradas en estudios. Cada sesión devuelve feedback puntuado y puntos de mejora.",
+    bootstrapRetry: "Reintentar",
+    bootstrapRetryAria: "Reintentar carga de datos del hub de entrevistas",
+    pathwaysRetry: "Reintentar",
+    pathwaysRetryAria: "Reintentar carga de recomendaciones de rol",
     hero: {
       openJobAria: "Configurar entrevista basada en empleo",
       openJobButton: "Entrevista para Empleo Extraído",

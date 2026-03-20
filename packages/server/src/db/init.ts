@@ -56,7 +56,7 @@ const TABLE_DEFINITIONS = [
       preferred_provider TEXT DEFAULT 'local',
       preferred_model TEXT,
       preferred_models TEXT,
-      theme TEXT DEFAULT 'bao-light',
+      theme TEXT DEFAULT 'corporate',
       language TEXT DEFAULT 'en-US',
       brand_settings TEXT DEFAULT '${DEFAULT_BRAND_SETTINGS_SQL}',
       notifications TEXT DEFAULT '${DEFAULT_NOTIFICATION_PREFERENCES_SQL}',

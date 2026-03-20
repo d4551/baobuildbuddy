@@ -1,5 +1,5 @@
-import { writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 
 const REPO_ROOT = resolve(import.meta.dir, "../..");
 
@@ -90,7 +90,9 @@ export const formatFilesWithBiome = async (filePaths: readonly string[]): Promis
  * @param value JSON-compatible value to persist.
  */
 export const writeFormattedJsonFile = async (filePath: string, value: unknown): Promise<void> => {
-  await writeFile(filePath, await formatJsonWithBiome(filePath, value), "utf8");
+  const absolutePath = resolve(filePath);
+  await mkdir(dirname(absolutePath), { recursive: true });
+  await writeFile(absolutePath, await formatJsonWithBiome(filePath, value), "utf8");
 };
 
 /**

@@ -1,5 +1,6 @@
 import type {
   AIProviderType,
+  AppDataTheme,
   AutomationSettings,
   BrandSettings,
   BrandSettingsPatch,
@@ -47,6 +48,7 @@ import {
   settle,
   SPEECH_PROVIDER_OPTIONS,
   mergeBrandSettings,
+  normalizeAppDataTheme,
   resolveBrandSettings,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
@@ -472,7 +474,7 @@ const readOrCreateSettingsRow = async () => {
 interface SettingsUpdateInput {
   preferredProvider?: AIProviderType;
   preferredModel?: string;
-  theme?: "bao-light" | "bao-dark";
+  theme?: AppDataTheme | "bao-light" | "bao-dark";
   language?: (typeof APP_LANGUAGE_CODES)[number];
   brandSettings?: BrandSettingsPatch;
   notifications?: Partial<NotificationPreferences>;
@@ -488,7 +490,7 @@ const buildSettingsUpdate = (
 
   if (body.preferredProvider !== undefined) update.preferredProvider = body.preferredProvider;
   if (body.preferredModel !== undefined) update.preferredModel = body.preferredModel;
-  if (body.theme !== undefined) update.theme = body.theme;
+  if (body.theme !== undefined) update.theme = normalizeAppDataTheme(body.theme);
   if (body.language !== undefined) update.language = body.language;
   if (body.brandSettings !== undefined) {
     const mergedBrandSettings = mergePersistedBrandSettings(
@@ -559,6 +561,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
 
     return {
       ...publicRow,
+      theme: normalizeAppDataTheme(row.theme),
       brandSettings: resolveBrandSettings(row.brandSettings),
       geminiApiKey: row.geminiApiKey
         ? `***${row.geminiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
@@ -609,7 +612,14 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
       body: t.Object({
         preferredProvider: t.Optional(preferredProviderBodySchema),
         preferredModel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
-        theme: t.Optional(t.Union([t.Literal("bao-light"), t.Literal("bao-dark")])),
+        theme: t.Optional(
+          t.Union([
+            t.Literal("corporate"),
+            t.Literal("business"),
+            t.Literal("bao-light"),
+            t.Literal("bao-dark"),
+          ]),
+        ),
         language: t.Optional(languageBodySchema),
         brandSettings: t.Optional(brandSettingsPatchBodySchema),
         notifications: t.Optional(

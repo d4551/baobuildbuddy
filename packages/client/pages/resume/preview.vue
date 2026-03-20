@@ -226,22 +226,22 @@ function handlePrint() {
   }
 
   body {
-    background: var(--bao-light-base-100);
+    background: var(--color-base-100);
   }
 
   .resume-print-surface {
-    background: var(--bao-light-base-100) !important;
-    border-color: var(--bao-light-base-300) !important;
-    color: var(--bao-light-base-content) !important;
+    background: var(--color-base-100) !important;
+    border-color: var(--color-base-300) !important;
+    color: var(--color-base-content) !important;
   }
 
   .resume-print-divider {
-    border-color: var(--bao-light-base-300) !important;
+    border-color: var(--color-base-300) !important;
   }
 
   .resume-print-chip {
-    background: var(--bao-light-base-200) !important;
-    color: var(--bao-light-base-content) !important;
+    background: var(--color-base-200) !important;
+    color: var(--color-base-content) !important;
   }
 }
 </style>

@@ -1,7 +1,8 @@
+import type { BrandSettings, BrandThemePalette } from "@bao/shared";
+import { resolveBrandSettings, THEME_NAMES } from "@bao/shared";
 import { computed, readonly } from "vue";
-import type { BrandSettings } from "@bao/shared";
-import { resolveBrandSettings } from "@bao/shared";
 import { useSettings } from "./useSettings";
+import { useTheme } from "./useTheme";
 
 function toFontCssVars(brand: BrandSettings): Record<string, string> {
   return {
@@ -11,77 +12,39 @@ function toFontCssVars(brand: BrandSettings): Record<string, string> {
   };
 }
 
-function toLightThemeCssVars(brand: BrandSettings): Record<string, string> {
+/**
+ * Maps a brand palette to daisyUI v5 semantic color/size tokens for the active `data-theme`.
+ */
+function toDaisySemanticColorVars(palette: BrandThemePalette): Record<string, string> {
   return {
-    "--bao-light-base-100": brand.lightTheme.base100,
-    "--bao-light-base-200": brand.lightTheme.base200,
-    "--bao-light-base-300": brand.lightTheme.base300,
-    "--bao-light-base-content": brand.lightTheme.baseContent,
-    "--bao-light-primary": brand.lightTheme.primary,
-    "--bao-light-primary-content": brand.lightTheme.primaryContent,
-    "--bao-light-secondary": brand.lightTheme.secondary,
-    "--bao-light-secondary-content": brand.lightTheme.secondaryContent,
-    "--bao-light-accent": brand.lightTheme.accent,
-    "--bao-light-accent-content": brand.lightTheme.accentContent,
-    "--bao-light-neutral": brand.lightTheme.neutral,
-    "--bao-light-neutral-content": brand.lightTheme.neutralContent,
-    "--bao-light-info": brand.lightTheme.info,
-    "--bao-light-info-content": brand.lightTheme.infoContent,
-    "--bao-light-success": brand.lightTheme.success,
-    "--bao-light-success-content": brand.lightTheme.successContent,
-    "--bao-light-warning": brand.lightTheme.warning,
-    "--bao-light-warning-content": brand.lightTheme.warningContent,
-    "--bao-light-error": brand.lightTheme.error,
-    "--bao-light-error-content": brand.lightTheme.errorContent,
-    "--bao-light-radius-selector": brand.lightTheme.radiusSelector,
-    "--bao-light-radius-field": brand.lightTheme.radiusField,
-    "--bao-light-radius-box": brand.lightTheme.radiusBox,
-    "--bao-light-size-selector": brand.lightTheme.sizeSelector,
-    "--bao-light-size-field": brand.lightTheme.sizeField,
-    "--bao-light-border-size": brand.lightTheme.border,
-    "--bao-light-depth": brand.lightTheme.depth,
-    "--bao-light-noise": brand.lightTheme.noise,
-  };
-}
-
-function toDarkThemeCssVars(brand: BrandSettings): Record<string, string> {
-  return {
-    "--bao-dark-base-100": brand.darkTheme.base100,
-    "--bao-dark-base-200": brand.darkTheme.base200,
-    "--bao-dark-base-300": brand.darkTheme.base300,
-    "--bao-dark-base-content": brand.darkTheme.baseContent,
-    "--bao-dark-primary": brand.darkTheme.primary,
-    "--bao-dark-primary-content": brand.darkTheme.primaryContent,
-    "--bao-dark-secondary": brand.darkTheme.secondary,
-    "--bao-dark-secondary-content": brand.darkTheme.secondaryContent,
-    "--bao-dark-accent": brand.darkTheme.accent,
-    "--bao-dark-accent-content": brand.darkTheme.accentContent,
-    "--bao-dark-neutral": brand.darkTheme.neutral,
-    "--bao-dark-neutral-content": brand.darkTheme.neutralContent,
-    "--bao-dark-info": brand.darkTheme.info,
-    "--bao-dark-info-content": brand.darkTheme.infoContent,
-    "--bao-dark-success": brand.darkTheme.success,
-    "--bao-dark-success-content": brand.darkTheme.successContent,
-    "--bao-dark-warning": brand.darkTheme.warning,
-    "--bao-dark-warning-content": brand.darkTheme.warningContent,
-    "--bao-dark-error": brand.darkTheme.error,
-    "--bao-dark-error-content": brand.darkTheme.errorContent,
-    "--bao-dark-radius-selector": brand.darkTheme.radiusSelector,
-    "--bao-dark-radius-field": brand.darkTheme.radiusField,
-    "--bao-dark-radius-box": brand.darkTheme.radiusBox,
-    "--bao-dark-size-selector": brand.darkTheme.sizeSelector,
-    "--bao-dark-size-field": brand.darkTheme.sizeField,
-    "--bao-dark-border-size": brand.darkTheme.border,
-    "--bao-dark-depth": brand.darkTheme.depth,
-    "--bao-dark-noise": brand.darkTheme.noise,
-  };
-}
-
-function toBrandCssVars(brand: BrandSettings): Record<string, string> {
-  return {
-    ...toFontCssVars(brand),
-    ...toLightThemeCssVars(brand),
-    ...toDarkThemeCssVars(brand),
+    "--color-base-100": palette.base100,
+    "--color-base-200": palette.base200,
+    "--color-base-300": palette.base300,
+    "--color-base-content": palette.baseContent,
+    "--color-primary": palette.primary,
+    "--color-primary-content": palette.primaryContent,
+    "--color-secondary": palette.secondary,
+    "--color-secondary-content": palette.secondaryContent,
+    "--color-accent": palette.accent,
+    "--color-accent-content": palette.accentContent,
+    "--color-neutral": palette.neutral,
+    "--color-neutral-content": palette.neutralContent,
+    "--color-info": palette.info,
+    "--color-info-content": palette.infoContent,
+    "--color-success": palette.success,
+    "--color-success-content": palette.successContent,
+    "--color-warning": palette.warning,
+    "--color-warning-content": palette.warningContent,
+    "--color-error": palette.error,
+    "--color-error-content": palette.errorContent,
+    "--radius-selector": palette.radiusSelector,
+    "--radius-field": palette.radiusField,
+    "--radius-box": palette.radiusBox,
+    "--size-selector": palette.sizeSelector,
+    "--size-field": palette.sizeField,
+    "--border": palette.border,
+    "--depth": palette.depth,
+    "--noise": palette.noise,
   };
 }
 
@@ -92,9 +55,17 @@ function toBrandCssVars(brand: BrandSettings): Record<string, string> {
  */
 export function useBrand() {
   const { settings } = useSettings();
+  const { theme } = useTheme();
 
   const resolvedBrand = computed(() => resolveBrandSettings(settings.value?.brandSettings));
-  const brandCssVars = computed(() => toBrandCssVars(resolvedBrand.value));
+  const brandCssVars = computed(() => {
+    const brand = resolvedBrand.value;
+    const palette = theme.value === THEME_NAMES.dark ? brand.darkTheme : brand.lightTheme;
+    return {
+      ...toFontCssVars(brand),
+      ...toDaisySemanticColorVars(palette),
+    };
+  });
 
   return {
     resolvedBrand: readonly(resolvedBrand),

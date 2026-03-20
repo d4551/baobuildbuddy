@@ -100,7 +100,7 @@ export declare const automationRoutes: Elysia<"/automation", {
                             [x: string]: unknown;
                         } | null;
                         progress: number | null;
-                        status: "success" | "pending" | "running" | "error";
+                        status: "success" | "error" | "pending" | "running";
                         createdAt: string;
                         updatedAt: string;
                         screenshots: string[] | null;
@@ -187,7 +187,7 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "pending" | "running" | "error";
+                            status: "success" | "error" | "pending" | "running";
                             createdAt: string;
                             updatedAt: string;
                             screenshots: string[] | null;
@@ -342,7 +342,7 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "pending" | "running" | "error";
+                            status: "success" | "error" | "pending" | "running";
                             createdAt: string;
                             updatedAt: string;
                             screenshots: string[] | null;
@@ -424,7 +424,7 @@ export declare const automationRoutes: Elysia<"/automation", {
                             [x: string]: unknown;
                         } | null;
                         progress: number | null;
-                        status: "success" | "pending" | "running" | "error";
+                        status: "success" | "error" | "pending" | "running";
                         createdAt: string;
                         updatedAt: string;
                         screenshots: string[] | null;
@@ -507,7 +507,7 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "pending" | "running" | "error";
+                            status: "success" | "error" | "pending" | "running";
                             createdAt: string;
                             updatedAt: string;
                             screenshots: string[] | null;
@@ -616,7 +616,7 @@ export declare const automationRoutes: Elysia<"/automation", {
                 params: {};
                 query: {
                     type?: "scrape" | "job_apply" | "email" | undefined;
-                    status?: "success" | "pending" | "running" | "error" | undefined;
+                    status?: "success" | "error" | "pending" | "running" | undefined;
                 };
                 headers: unknown;
                 response: {
@@ -637,7 +637,7 @@ export declare const automationRoutes: Elysia<"/automation", {
                             [x: string]: unknown;
                         } | null;
                         progress: number | null;
-                        status: "success" | "pending" | "running" | "error";
+                        status: "success" | "error" | "pending" | "running";
                         createdAt: string;
                         updatedAt: string;
                         screenshots: string[] | null;
@@ -693,7 +693,7 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "pending" | "running" | "error";
+                            status: "success" | "error" | "pending" | "running";
                             createdAt: string;
                             updatedAt: string;
                             screenshots: string[] | null;

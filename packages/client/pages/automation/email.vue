@@ -58,12 +58,20 @@ const lastResult = ref<{
 } | null>(null);
 const scheduledRun = ref<RpaRunExecutionEnvelope | null>(null);
 
-await useAsyncData("automation-email-settings", async () => {
+const {
+  status: emailSettingsStatus,
+  error: emailSettingsError,
+  refresh: refreshEmailSettings,
+} = await useAsyncData("automation-email-settings", async () => {
   if (!settings.value) {
     await fetchSettings();
   }
   return true;
 });
+
+const emailSettingsPending = computed(
+  () => emailSettingsStatus.value === "pending" || emailSettingsStatus.value === "idle",
+);
 
 const emailDeliveryConfigured = computed(() =>
   isEmailTransportConfigured(
@@ -246,7 +254,17 @@ if (import.meta.server) {
       </template>
     </PageHeaderBlock>
 
-    <div class="card card-border bg-base-100 shadow-sm">
+    <LoadingSkeleton v-if="emailSettingsPending" :lines="6" />
+
+    <BootstrapErrorAlert
+      v-else-if="emailSettingsError"
+      :message="getErrorMessage(emailSettingsError, t('automation.email.bootstrapError'))"
+      :retry-label="t('automation.email.bootstrapRetry')"
+      :retry-aria-label="t('automation.email.bootstrapRetryAria')"
+      @retry="() => refreshEmailSettings()"
+    />
+
+    <div v-else class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">
         <div class="space-y-4">
           <fieldset class="fieldset">

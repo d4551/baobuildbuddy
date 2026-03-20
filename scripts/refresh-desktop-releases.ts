@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
-import { readdir } from "node:fs/promises";
-import { cp, mkdir, rm, stat, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { cp, mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { isAbsolute, join, resolve } from "node:path";
 import {
   DESKTOP_RELEASE_METADATA_DIR,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
@@ -37,16 +36,35 @@ type ReleaseProvenance = {
   };
 };
 
-const REPO_ROOT = resolve(import.meta.dir, "..");
-const DESKTOP_RELEASE_ROOT = join(REPO_ROOT, "packages", "desktop", "releases");
+/** Monorepo root (directory that contains `scripts/`). Used to spawn the verifier regardless of release layout root. */
+const MONOREPO_ROOT = resolve(import.meta.dir, "..");
+/**
+ * Root that contains `packages/desktop/releases`. Override for tests via `BAO_DESKTOP_RELEASE_WORKSPACE_ROOT` (absolute path).
+ */
+const RELEASE_WORKSPACE_ROOT = (() => {
+  const raw = process.env.BAO_DESKTOP_RELEASE_WORKSPACE_ROOT?.trim();
+  if (!raw) {
+    return MONOREPO_ROOT;
+  }
+  return isAbsolute(raw) ? resolve(raw) : resolve(process.cwd(), raw);
+})();
+
+const REPLACE_RELEASE_TREE_FLAG = "--replace-release-tree";
+const SKIP_VERIFY_FLAG = "--skip-verify";
+
+const DESKTOP_RELEASE_ROOT = join(RELEASE_WORKSPACE_ROOT, "packages", "desktop", "releases");
+const DESKTOP_RELEASE_ASSEMBLED_PROVENANCE_PATH = join(
+  DESKTOP_RELEASE_ROOT,
+  DESKTOP_RELEASE_PROVENANCE_FILENAME,
+);
 const DESKTOP_RELEASE_METADATA_ROOT = join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_METADATA_DIR);
 const DESKTOP_RELEASE_CHECKSUM_PATH = join(DESKTOP_RELEASE_ROOT, "sha256.txt");
-const DESKTOP_RELEASE_ROOT_ALLOWED_FILES = new Set([
+const DESKTOP_RELEASE_ROOT_ALLOWED_FILES = new Set<string>([
   "README.md",
   "provenance.json",
   "sha256.txt",
 ]);
-const DESKTOP_RELEASE_ROOT_ALLOWED_DIRECTORIES = new Set([
+const DESKTOP_RELEASE_ROOT_ALLOWED_DIRECTORIES = new Set<string>([
   DESKTOP_RELEASE_METADATA_DIR,
   ...DESKTOP_RELEASE_TARGETS,
 ]);
@@ -60,7 +78,7 @@ const resolveSourceRoot = (argv: readonly string[]): string => {
     rootIndex === -1
       ? DESKTOP_RELEASE_STAGING_ROOT
       : (argv[rootIndex + 1] ?? DESKTOP_RELEASE_STAGING_ROOT);
-  return resolve(REPO_ROOT, sourceRoot);
+  return resolve(RELEASE_WORKSPACE_ROOT, sourceRoot);
 };
 
 const pathExists = async (absolutePath: string): Promise<boolean> =>
@@ -74,6 +92,53 @@ const computeSha256 = async (absolutePath: string): Promise<string> => {
   const file = Bun.file(absolutePath);
   hasher.update(Buffer.from(await file.arrayBuffer()));
   return hasher.digest("hex");
+};
+
+const parseReplaceReleaseTreeFlag = (argv: readonly string[]): boolean =>
+  argv.includes(REPLACE_RELEASE_TREE_FLAG);
+
+const parseSkipVerifyFlag = (argv: readonly string[]): boolean => argv.includes(SKIP_VERIFY_FLAG);
+
+const readExistingAssembledTargets = async (): Promise<
+  Map<DesktopReleaseTarget, ReleaseProvenance>
+> => {
+  const result = new Map<DesktopReleaseTarget, ReleaseProvenance>();
+  if (!(await pathExists(DESKTOP_RELEASE_ASSEMBLED_PROVENANCE_PATH))) {
+    return result;
+  }
+
+  const parsed: unknown = JSON.parse(
+    await Bun.file(DESKTOP_RELEASE_ASSEMBLED_PROVENANCE_PATH).text(),
+  );
+  if (!(isRecord(parsed) && isRecord(parsed.targets))) {
+    return result;
+  }
+
+  for (const target of DESKTOP_RELEASE_TARGETS) {
+    const entry = parsed.targets[target];
+    if (!isRecord(entry)) {
+      continue;
+    }
+    if (!isDesktopReleaseProvenance(entry) || entry.target !== target) {
+      continue;
+    }
+    result.set(target, entry as ReleaseProvenance);
+  }
+
+  return result;
+};
+
+const buildOrderedAssembledTargets = (
+  targetMap: Map<DesktopReleaseTarget, ReleaseProvenance>,
+): Record<string, ReleaseProvenance> => {
+  const ordered: Record<string, ReleaseProvenance> = {};
+  for (const target of DESKTOP_RELEASE_TARGETS) {
+    const provenance = targetMap.get(target);
+    if (provenance) {
+      ordered[target] = provenance;
+    }
+  }
+  return ordered;
 };
 
 const readProvenance = async (
@@ -247,7 +312,7 @@ const runVerifier = async (targets: readonly DesktopReleaseTarget[]): Promise<vo
       targets.join(","),
     ],
     {
-      cwd: REPO_ROOT,
+      cwd: MONOREPO_ROOT,
       stdout: "inherit",
       stderr: "inherit",
       env: process.env,
@@ -261,14 +326,22 @@ const runVerifier = async (targets: readonly DesktopReleaseTarget[]): Promise<vo
 
 const main = async (): Promise<void> => {
   const argv = process.argv.slice(2);
+  const replaceReleaseTree = parseReplaceReleaseTreeFlag(argv);
+  const skipVerify = parseSkipVerifyFlag(argv);
+  /** When false (default), other canonical targets under `packages/desktop/releases` are kept and merged into assembled provenance. */
+  const preserveOtherTargets = !replaceReleaseTree;
   const sourceRoot = resolveSourceRoot(argv);
   const explicitTargets = parseDesktopReleaseRefreshTargets(argv);
-  const targets = explicitTargets ?? (await discoverStagedDesktopReleaseTargets(sourceRoot, pathExists));
+  const targets =
+    explicitTargets ?? (await discoverStagedDesktopReleaseTargets(sourceRoot, pathExists));
   if (targets.length === 0) {
     throw new Error(`No staged desktop release targets were found in ${sourceRoot}.`);
   }
+  const preMergeTargets = preserveOtherTargets ? await readExistingAssembledTargets() : new Map();
   await pruneLegacyReleaseEntries();
-  await pruneUnselectedReleaseTargets(targets);
+  if (replaceReleaseTree) {
+    await pruneUnselectedReleaseTargets(targets);
+  }
   const provenanceEntries = await Promise.all(
     targets.map(async (target) => {
       const provenance = await readProvenance(sourceRoot, target);
@@ -287,18 +360,27 @@ const main = async (): Promise<void> => {
     }),
   );
 
+  const mergedTargetMap = new Map<DesktopReleaseTarget, ReleaseProvenance>(preMergeTargets);
+  for (const [target, provenance] of provenanceEntries) {
+    mergedTargetMap.set(target, provenance);
+  }
+
   await mkdir(DESKTOP_RELEASE_METADATA_ROOT, { recursive: true });
-  await writeFormattedJsonFile(join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_PROVENANCE_FILENAME), {
+  await writeFormattedJsonFile(DESKTOP_RELEASE_ASSEMBLED_PROVENANCE_PATH, {
     schemaVersion: 1,
     assembledAt: new Date().toISOString(),
     sourceRoot,
-    targets: Object.fromEntries(provenanceEntries),
+    targets: buildOrderedAssembledTargets(mergedTargetMap),
   });
   await writeChecksumManifest();
   await writeOutput(
-    `desktop-release:refreshed ${targets.join(", ")} from ${sourceRoot} into ${DESKTOP_RELEASE_ROOT}`,
+    replaceReleaseTree
+      ? `desktop-release:refreshed ${targets.join(", ")} from ${sourceRoot} into ${DESKTOP_RELEASE_ROOT} (replace-release-tree: pruned unstaged canonical targets)`
+      : `desktop-release:refreshed ${targets.join(", ")} from ${sourceRoot} into ${DESKTOP_RELEASE_ROOT} (other canonical targets preserved; pass ${REPLACE_RELEASE_TREE_FLAG} to prune them)`,
   );
-  await runVerifier(targets);
+  if (!skipVerify) {
+    await runVerifier(targets);
+  }
   await writeOutput("desktop-release:refresh complete");
 };
 

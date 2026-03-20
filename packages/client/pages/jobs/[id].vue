@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Job } from "@bao/shared";
 import { APP_ROUTES, SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -10,7 +9,7 @@ import { formatDateWithLocale } from "~/utils/locale-format";
 
 const route = useRoute();
 const router = useRouter();
-const { getJob, saveJob, unsaveJob, applyToJob, savedJobs, loading } = useJobs();
+const { getJob, saveJob, unsaveJob, applyToJob, savedJobs } = useJobs();
 const { $toast } = useNuxtApp();
 const { t, locale, fallbackLocale } = useI18n();
 
@@ -21,7 +20,6 @@ if (import.meta.server) {
   });
 }
 
-const job = ref<Job | null>(null);
 const showApplyModal = ref(false);
 const applicationNotes = ref("");
 const applying = ref(false);
@@ -36,30 +34,40 @@ function routeParamToString(value: string | string[] | undefined): string {
 }
 
 const jobId = computed(() => routeParamToString(route.params.id));
+
+const isSaved = computed(() => {
+  return savedJobs.value.some((j) => j.id === jobId.value);
+});
+
+// Job detail loading/error: useAsyncData status (handler is side-effect free); useJobs().loading covers save/apply side effects only.
+const {
+  data: jobDetailData,
+  status: jobDetailStatus,
+  error: jobDetailError,
+  refresh: refreshJobDetail,
+} = await useAsyncData(
+  () => `job-detail-${jobId.value}`,
+  async () => {
+    if (!jobId.value) {
+      return null;
+    }
+    return getJob(jobId.value);
+  },
+  {
+    watch: [jobId],
+  },
+);
+
+const job = computed(() => jobDetailData.value ?? null);
+
 const breadcrumbs = computed(() => [
   { label: t("jobDetail.breadcrumbs.dashboard"), to: APP_ROUTES.dashboard },
   { label: t("jobDetail.breadcrumbs.jobs"), to: APP_ROUTES.jobs },
   { label: job.value?.title || t("jobDetail.breadcrumbs.detailFallback") },
 ]);
 
-const isSaved = computed(() => {
-  return savedJobs.value.some((j) => j.id === jobId.value);
-});
-
-await useAsyncData(
-  () => `job-detail-${jobId.value}`,
-  async () => {
-    if (!jobId.value) {
-      job.value = null;
-      return null;
-    }
-    const resolvedJob = await getJob(jobId.value);
-    job.value = resolvedJob;
-    return resolvedJob;
-  },
-  {
-    watch: [jobId],
-  },
+const jobDetailPending = computed(
+  () => jobDetailStatus.value === "pending" || jobDetailStatus.value === "idle",
 );
 
 async function handleSaveToggle() {
@@ -128,7 +136,36 @@ async function startJobInterview() {
   <PageScaffold width-token="content" spacing-token="comfortable">
     <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
 
-    <LoadingSkeleton v-if="loading" :lines="10" />
+    <LoadingSkeleton v-if="jobDetailPending" :lines="10" />
+
+    <BootstrapErrorAlert
+      v-else-if="jobDetailStatus === 'error'"
+      :message="getErrorMessage(jobDetailError, t('jobDetail.errors.loadFailed'))"
+      :retry-label="t('jobDetail.retryButton')"
+      :retry-aria-label="t('jobDetail.retryAria')"
+      @retry="() => refreshJobDetail()"
+    />
+
+    <div
+      v-else-if="jobDetailStatus === 'success' && !job && jobId"
+      class="alert alert-info alert-soft"
+      role="status"
+    >
+      <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div>
+        <p class="font-medium">{{ t("jobDetail.notFoundTitle") }}</p>
+        <p class="text-sm text-base-content/70">{{ t("jobDetail.notFoundBody") }}</p>
+      </div>
+      <NuxtLink :to="APP_ROUTES.jobs" class="btn btn-sm btn-ghost shrink-0" :aria-label="t('jobDetail.backToJobsAria')">
+        {{ t("jobDetail.backToJobs") }}
+      </NuxtLink>
+    </div>
+
+    <div v-else-if="jobDetailStatus === 'success' && !jobId" class="alert alert-warning alert-soft" role="status">
+      <span>{{ t("jobDetail.invalidId") }}</span>
+    </div>
 
     <SectionGrid v-else-if="job" grid-token="threeColumnLg">
       <!-- Main Content -->

@@ -25,10 +25,10 @@ import {
 } from "../packages/shared/src/constants/scripts";
 import {
   buildDesktopRuntimeManifest,
-  resolveDesktopRuntimeTargetInfoFromHost,
-  resolveDesktopRuntimeTargetInfoFromTauriTarget,
   type DesktopRuntimeManifest,
   type DesktopRuntimeTargetInfo,
+  resolveDesktopRuntimeTargetInfoFromHost,
+  resolveDesktopRuntimeTargetInfoFromTauriTarget,
 } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -680,6 +680,27 @@ const runCompileCommandWithRetries = async ({
   });
 };
 
+const STAGED_TEST_FILE_SUFFIXES = [".test.ts", ".test.tsx", ".spec.ts", ".spec.tsx"] as const;
+
+const removeStagedTestSourcesUnder = async (rootDir: string): Promise<void> => {
+  const entries = await readdir(rootDir, { withFileTypes: true });
+  await Promise.all(
+    entries.map(async (entry) => {
+      const fullPath = join(rootDir, entry.name);
+      if (entry.isDirectory()) {
+        await removeStagedTestSourcesUnder(fullPath);
+        return;
+      }
+      if (
+        entry.isFile() &&
+        STAGED_TEST_FILE_SUFFIXES.some((suffix) => entry.name.endsWith(suffix))
+      ) {
+        await rm(fullPath, { force: true });
+      }
+    }),
+  );
+};
+
 const compileRuntimeBinary = async (
   compileTarget: string,
   entrypointPath: string,
@@ -736,6 +757,8 @@ const stageScraperRuntime = async (): Promise<void> => {
       });
     }),
   );
+
+  await removeStagedTestSourcesUnder(destinationPath);
 
   await writeOutput(
     `desktop-runtime: staged scraper runtime package plus ${runtimeDependencyRoots.size} runtime dependencies`,

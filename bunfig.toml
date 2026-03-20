@@ -1,2 +1,15 @@
 [install]
 peer = false
+
+# Repo-root `bun test` discovers packages/server tests without packages/server/bunfig.toml; mirror the
+# server preload so auth/DB env matches `bun run --filter @bao/server test`. CI uses `bun run test`.
+# pathIgnorePatterns: Bun 1.4+ prunes Tauri target/ trees (optional when stale bundles exist locally).
+[test]
+preload = ["./packages/server/src/test-setup.ts"]
+smol = true
+# Serialize tests at repo root so server tests that patch globalThis.fetch are not interleaved with scraper.
+concurrent = 1
+pathIgnorePatterns = [
+  "**/packages/desktop/src-tauri/target/**",
+  "**/packages/server/dist/**",
+]

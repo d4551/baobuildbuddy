@@ -64,11 +64,12 @@ export type DesktopReleaseArtifactProfile = {
 
 /**
  * Default profile for canonical release outputs.
+ * Set `include*` fields to false (or `DESKTOP_RELEASE_*=false` in build/verify scripts) to omit variants.
  */
 export const DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE: DesktopReleaseArtifactProfile = {
-  includeLinuxAppImage: false,
-  includeLinuxSignatures: false,
-  includeWindowsMsi: false,
+  includeLinuxAppImage: true,
+  includeLinuxSignatures: true,
+  includeWindowsMsi: true,
   macosArchitectures: [DESKTOP_RELEASE_MACOS_AARCH64_ARCH],
 };
 
@@ -103,9 +104,13 @@ const dedupeMacosArchitectures = (
 export const normalizeDesktopReleaseArtifactProfile = (
   profile: Partial<DesktopReleaseArtifactProfile> = {},
 ): DesktopReleaseArtifactProfile => ({
-  includeLinuxAppImage: profile.includeLinuxAppImage ?? false,
-  includeLinuxSignatures: profile.includeLinuxSignatures ?? false,
-  includeWindowsMsi: profile.includeWindowsMsi ?? false,
+  includeLinuxAppImage:
+    profile.includeLinuxAppImage ?? DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeLinuxAppImage,
+  includeLinuxSignatures:
+    profile.includeLinuxSignatures ??
+    DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeLinuxSignatures,
+  includeWindowsMsi:
+    profile.includeWindowsMsi ?? DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.includeWindowsMsi,
   macosArchitectures:
     profile.macosArchitectures === undefined || profile.macosArchitectures.length === 0
       ? DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE.macosArchitectures

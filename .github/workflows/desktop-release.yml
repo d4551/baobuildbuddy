@@ -15,17 +15,17 @@ on:
       include_windows_msi:
         description: "Include Windows MSI in addition to NSIS and portable"
         required: false
-        default: false
+        default: true
         type: boolean
       include_linux_appimage:
         description: "Include Linux AppImage on x64 builds"
         required: false
-        default: false
+        default: true
         type: boolean
       include_linux_signatures:
         description: "Generate detached GPG signatures for Linux artifacts"
         required: false
-        default: false
+        default: true
         type: boolean
 
 concurrency:
@@ -37,9 +37,11 @@ permissions:
 
 env:
   DESKTOP_RELEASE_RELEASE_MODE: "true"
-  DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event.inputs.include_linux_appimage || vars.DESKTOP_RELEASE_LINUX_APPIMAGE }}
-  DESKTOP_RELEASE_LINUX_SIGNATURES: ${{ github.event.inputs.include_linux_signatures || vars.DESKTOP_RELEASE_LINUX_SIGNATURES }}
-  DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event.inputs.include_windows_msi || vars.DESKTOP_RELEASE_WINDOWS_MSI }}
+  # workflow_dispatch: must honor boolean `false` (do not use `input || vars` — false is falsy and would fall through to vars).
+  # push: use repository vars when set; otherwise leave empty so scripts apply defaults.
+  DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_APPIMAGE || github.event.inputs.include_linux_appimage }}
+  DESKTOP_RELEASE_LINUX_SIGNATURES: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_SIGNATURES || github.event.inputs.include_linux_signatures }}
+  DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_WINDOWS_MSI || github.event.inputs.include_windows_msi }}
   DESKTOP_RELEASE_MACOS_ARCHITECTURES: ${{ github.event.inputs.macos_architectures || vars.DESKTOP_RELEASE_MACOS_ARCHITECTURES }}
 
 jobs:
@@ -72,6 +74,8 @@ jobs:
       - name: Run typecheck
         run: bun run typecheck
 
+      # Uses package.json (workspace filters + scripts/*.test.ts). Do not replace with bare `bun test`
+      # at repo root without bunfig pathIgnorePatterns — Tauri target/ can contain copied tests.
       - name: Run tests
         run: bun run test
 
@@ -86,6 +90,11 @@ jobs:
       APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
       APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
       APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      # Expose signing material to steps via env (not secrets.*) so `if:` conditions validate on workflow_dispatch.
+      APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -116,11 +125,7 @@ jobs:
         run: bun run automation:browsers:install
 
       - name: Import Apple developer certificate
-        if: ${{ secrets.APPLE_CERTIFICATE != '' && secrets.APPLE_CERTIFICATE_PASSWORD != '' && secrets.KEYCHAIN_PASSWORD != '' }}
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        if: ${{ env.APPLE_CERTIFICATE != '' && env.APPLE_CERTIFICATE_PASSWORD != '' && env.KEYCHAIN_PASSWORD != '' }}
         run: |
           echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
@@ -132,9 +137,7 @@ jobs:
           security find-identity -v -p codesigning build.keychain
 
       - name: Prepare App Store Connect API key
-        if: ${{ secrets.APPLE_API_KEY_CONTENT != '' }}
-        env:
-          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+        if: ${{ env.APPLE_API_KEY_CONTENT != '' }}
         run: |
           APPLE_API_KEY_PATH="$RUNNER_TEMP/AuthKey_${APPLE_API_KEY}.p8"
           printf "%s" "$APPLE_API_KEY_CONTENT" > "$APPLE_API_KEY_PATH"
@@ -147,14 +150,27 @@ jobs:
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target aarch64-apple-darwin
 
+      # Stapler + verify --release require a stapled notarization ticket. Skip when Apple API / signing
+      # secrets are absent so forks and partial secret sets still produce signed or ad-hoc DMGs.
       - name: Validate notarized macOS artifacts
+        if: ${{ env.APPLE_API_KEY_CONTENT != '' && env.APPLE_API_ISSUER != '' && env.APPLE_API_KEY != '' && env.APPLE_SIGNING_IDENTITY != '' && env.APPLE_CERTIFICATE != '' && env.APPLE_CERTIFICATE_PASSWORD != '' && env.KEYCHAIN_PASSWORD != '' }}
         run: |
           find .desktop-release-artifacts/macos -name '*.dmg' -print0 | while IFS= read -r -d '' artifact; do
             xcrun stapler validate -v "$artifact"
           done
 
-      - name: Verify macOS release artifacts
+      - name: Verify macOS release artifacts (stapled shipping build)
+        if: ${{ env.APPLE_API_KEY_CONTENT != '' && env.APPLE_API_ISSUER != '' && env.APPLE_API_KEY != '' && env.APPLE_SIGNING_IDENTITY != '' && env.APPLE_CERTIFICATE != '' && env.APPLE_CERTIFICATE_PASSWORD != '' && env.KEYCHAIN_PASSWORD != '' }}
         run: bun run verify:desktop-releases -- --targets macos --release
+
+      - name: Verify macOS release artifacts (non-stapled CI)
+        if: ${{ env.APPLE_API_KEY_CONTENT == '' || env.APPLE_API_ISSUER == '' || env.APPLE_API_KEY == '' || env.APPLE_SIGNING_IDENTITY == '' || env.APPLE_CERTIFICATE == '' || env.APPLE_CERTIFICATE_PASSWORD == '' || env.KEYCHAIN_PASSWORD == '' }}
+        env:
+          DESKTOP_RELEASE_RELEASE_MODE: "false"
+        run: bun run verify:desktop-releases -- --targets macos
+
+      - name: List staged macOS release files
+        run: find .desktop-release-artifacts/macos -type f -print
 
       - name: Upload macOS release artifact set
         uses: actions/upload-artifact@v7
@@ -171,6 +187,8 @@ jobs:
       WINDOWS_CERTIFICATE_THUMBPRINT: ${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
       WINDOWS_DIGEST_ALGORITHM: ${{ secrets.WINDOWS_DIGEST_ALGORITHM }}
       WINDOWS_TIMESTAMP_URL: ${{ secrets.WINDOWS_TIMESTAMP_URL }}
+      WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+      WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -213,12 +231,32 @@ jobs:
             throw "WebView2 bootstrapper download did not produce $bootstrapperPath"
           }
 
-      - name: Import Windows code-signing certificate
-        if: ${{ secrets.WINDOWS_CERTIFICATE != '' && secrets.WINDOWS_CERTIFICATE_PASSWORD != '' }}
+      - name: Install WiX Toolset for MSI bundles
+        if: ${{ env.DESKTOP_RELEASE_WINDOWS_MSI != 'false' }}
         shell: pwsh
-        env:
-          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          choco install wixtoolset --no-progress -y
+          $wixRoots = @(
+            'C:\Program Files (x86)\WiX Toolset v3.14\bin',
+            'C:\Program Files (x86)\WiX Toolset v3.11\bin'
+          )
+          foreach ($root in $wixRoots) {
+            if (Test-Path $root) {
+              Add-Content -Path $env:GITHUB_PATH -Value $root
+              break
+            }
+          }
+
+      - name: Verify WiX tools on PATH
+        if: ${{ env.DESKTOP_RELEASE_WINDOWS_MSI != 'false' }}
+        shell: pwsh
+        run: |
+          if (-not (Get-Command candle -ErrorAction SilentlyContinue)) { throw 'WiX candle.exe not on PATH' }
+          if (-not (Get-Command light -ErrorAction SilentlyContinue)) { throw 'WiX light.exe not on PATH' }
+
+      - name: Import Windows code-signing certificate
+        if: ${{ env.WINDOWS_CERTIFICATE != '' && env.WINDOWS_CERTIFICATE_PASSWORD != '' }}
+        shell: pwsh
         run: |
           $certificatePath = Join-Path $env:RUNNER_TEMP 'desktop-signing-cert.pfx'
           [System.IO.File]::WriteAllBytes($certificatePath, [System.Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
@@ -236,6 +274,10 @@ jobs:
         shell: pwsh
         run: bun run verify:desktop-releases -- --targets windows --release
 
+      - name: List staged Windows release files
+        shell: pwsh
+        run: Get-ChildItem -Recurse .desktop-release-artifacts/windows | ForEach-Object { $_.FullName }
+
       - name: Upload Windows release artifact set
         uses: actions/upload-artifact@v7
         with:
@@ -250,9 +292,14 @@ jobs:
     env:
       DESKTOP_RELEASE_GPG_KEY_ID: ${{ secrets.DESKTOP_RELEASE_GPG_KEY_ID }}
       DESKTOP_RELEASE_GPG_PASSPHRASE: ${{ secrets.DESKTOP_RELEASE_GPG_PASSPHRASE }}
+      DESKTOP_GPG_PRIVATE_KEY: ${{ secrets.DESKTOP_GPG_PRIVATE_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Disable Linux detached signatures without GPG secrets
+        if: ${{ env.DESKTOP_GPG_PRIVATE_KEY == '' || env.DESKTOP_RELEASE_GPG_KEY_ID == '' }}
+        run: echo "DESKTOP_RELEASE_LINUX_SIGNATURES=false" >> "$GITHUB_ENV"
 
       - name: Get Bun version from package.json
         id: bun-version
@@ -288,7 +335,9 @@ jobs:
             libssl-dev \
             libayatana-appindicator3-dev \
             librsvg2-dev \
-            patchelf
+            patchelf \
+            squashfs-tools \
+            libfuse2
 
       - name: Install workspace dependencies
         run: bun ci
@@ -297,9 +346,7 @@ jobs:
         run: bun run automation:browsers:install
 
       - name: Import Linux release signing key
-        if: ${{ env.DESKTOP_RELEASE_LINUX_SIGNATURES == 'true' && secrets.DESKTOP_GPG_PRIVATE_KEY != '' }}
-        env:
-          DESKTOP_GPG_PRIVATE_KEY: ${{ secrets.DESKTOP_GPG_PRIVATE_KEY }}
+        if: ${{ env.DESKTOP_RELEASE_LINUX_SIGNATURES == 'true' && env.DESKTOP_GPG_PRIVATE_KEY != '' }}
         run: |
           echo "$DESKTOP_GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
 
@@ -311,6 +358,22 @@ jobs:
 
       - name: Verify Linux x64 release artifacts
         run: bun run verify:desktop-releases -- --targets linux-x64 --release
+
+      - name: Require AppImage when enabled
+        if: ${{ env.DESKTOP_RELEASE_LINUX_APPIMAGE != 'false' }}
+        run: |
+          set -euo pipefail
+          appimages="$(find .desktop-release-artifacts/linux-x64 -maxdepth 1 -type f -name '*.AppImage' 2>/dev/null || true)"
+          if [ -z "$appimages" ]; then
+            echo "::error::Expected at least one *.AppImage under .desktop-release-artifacts/linux-x64 (DESKTOP_RELEASE_LINUX_APPIMAGE is not false)."
+            find .desktop-release-artifacts/linux-x64 -type f -print || true
+            exit 1
+          fi
+          echo "AppImage outputs:"
+          echo "$appimages"
+
+      - name: List staged Linux x64 release files
+        run: find .desktop-release-artifacts/linux-x64 -type f -print
 
       - name: Upload Linux x64 release artifact set
         uses: actions/upload-artifact@v7
@@ -326,9 +389,14 @@ jobs:
     env:
       DESKTOP_RELEASE_GPG_KEY_ID: ${{ secrets.DESKTOP_RELEASE_GPG_KEY_ID }}
       DESKTOP_RELEASE_GPG_PASSPHRASE: ${{ secrets.DESKTOP_RELEASE_GPG_PASSPHRASE }}
+      DESKTOP_GPG_PRIVATE_KEY: ${{ secrets.DESKTOP_GPG_PRIVATE_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Disable Linux detached signatures without GPG secrets
+        if: ${{ env.DESKTOP_GPG_PRIVATE_KEY == '' || env.DESKTOP_RELEASE_GPG_KEY_ID == '' }}
+        run: echo "DESKTOP_RELEASE_LINUX_SIGNATURES=false" >> "$GITHUB_ENV"
 
       - name: Get Bun version from package.json
         id: bun-version
@@ -373,9 +441,7 @@ jobs:
         run: bun run automation:browsers:install
 
       - name: Import Linux release signing key
-        if: ${{ env.DESKTOP_RELEASE_LINUX_SIGNATURES == 'true' && secrets.DESKTOP_GPG_PRIVATE_KEY != '' }}
-        env:
-          DESKTOP_GPG_PRIVATE_KEY: ${{ secrets.DESKTOP_GPG_PRIVATE_KEY }}
+        if: ${{ env.DESKTOP_RELEASE_LINUX_SIGNATURES == 'true' && env.DESKTOP_GPG_PRIVATE_KEY != '' }}
         run: |
           echo "$DESKTOP_GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
 
@@ -387,6 +453,9 @@ jobs:
 
       - name: Verify Linux ARM64 release artifacts
         run: bun run verify:desktop-releases -- --targets linux-arm64 --release
+
+      - name: List staged Linux ARM64 release files
+        run: find .desktop-release-artifacts/linux-arm64 -type f -print
 
       - name: Upload Linux ARM64 release artifact set
         uses: actions/upload-artifact@v7
@@ -403,9 +472,23 @@ jobs:
       - build-linux-arm64
     runs-on: macos-14
     timeout-minutes: 45
+    env:
+      APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+      APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+      APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      DESKTOP_GPG_PRIVATE_KEY: ${{ secrets.DESKTOP_GPG_PRIVATE_KEY }}
+      DESKTOP_RELEASE_GPG_KEY_ID: ${{ secrets.DESKTOP_RELEASE_GPG_KEY_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Disable Linux detached signatures without GPG secrets
+        if: ${{ env.DESKTOP_GPG_PRIVATE_KEY == '' || env.DESKTOP_RELEASE_GPG_KEY_ID == '' }}
+        run: echo "DESKTOP_RELEASE_LINUX_SIGNATURES=false" >> "$GITHUB_ENV"
 
       - name: Get Bun version from package.json
         id: bun-version
@@ -450,8 +533,18 @@ jobs:
       - name: Assemble canonical desktop release directory
         run: bun run release:refresh:all-os -- --source-root .desktop-release-input --targets macos,windows,linux-x64,linux-arm64
 
-      - name: Verify assembled desktop releases
+      - name: Verify assembled desktop releases (expect stapled macOS DMG)
+        if: ${{ env.APPLE_API_KEY_CONTENT != '' && env.APPLE_API_ISSUER != '' && env.APPLE_API_KEY != '' && env.APPLE_SIGNING_IDENTITY != '' && env.APPLE_CERTIFICATE != '' && env.APPLE_CERTIFICATE_PASSWORD != '' && env.KEYCHAIN_PASSWORD != '' }}
         run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64 --release
+
+      - name: Verify assembled desktop releases (skip macOS stapler)
+        if: ${{ env.APPLE_API_KEY_CONTENT == '' || env.APPLE_API_ISSUER == '' || env.APPLE_API_KEY == '' || env.APPLE_SIGNING_IDENTITY == '' || env.APPLE_CERTIFICATE == '' || env.APPLE_CERTIFICATE_PASSWORD == '' || env.KEYCHAIN_PASSWORD == '' }}
+        env:
+          DESKTOP_RELEASE_RELEASE_MODE: "false"
+        run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64
+
+      - name: List assembled desktop release files
+        run: find packages/desktop/releases -type f ! -path '*/.git/*' -print
 
       - name: Upload assembled desktop releases
         uses: actions/upload-artifact@v7

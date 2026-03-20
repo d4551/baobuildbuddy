@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_SEMVER } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
@@ -57,59 +58,67 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav :aria-label="t('a11y.primaryNavigation')" class="w-full min-h-full">
-    <ul class="menu min-h-full w-full p-4 pt-6 gap-1">
-      <li class="menu-title px-2 pb-4">
-        <span class="flex items-center gap-2 text-lg font-bold text-primary is-drawer-close:hidden">
-          <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
-          <span>{{ resolvedBrand.name }}</span>
-        </span>
-      </li>
-      <li v-for="item in sidebarItems" :key="item.id">
-        <NuxtLink
-          :to="item.to"
-          :class="[
-            'flex items-center gap-2 rounded-box border-l-3 border-transparent pl-2 transition-all duration-200 is-drawer-close:tooltip is-drawer-close:tooltip-right',
-            { 'menu-active border-primary': isSidebarItemActive(item) },
-          ]"
-          :data-tip="resolveSidebarLabel(item)"
-          :aria-current="isSidebarItemActive(item) ? 'page' : undefined"
-          :aria-label="resolveSidebarLabel(item)"
-        >
-          <span class="indicator">
-            <span
-              v-if="item.id === 'settings' && isAiConfigurationIncomplete"
-              class="indicator-item badge badge-warning badge-xs"
-            ></span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
+  <div class="flex min-h-full w-full flex-col">
+    <div class="border-b border-base-300 p-4 is-drawer-close:hidden">
+      <span class="flex items-center gap-2 text-lg font-bold text-primary">
+        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
+        <span>{{ resolvedBrand.name }}</span>
+      </span>
+    </div>
+    <nav :aria-label="t('a11y.primaryNavigation')" class="flex min-h-0 min-w-0 flex-1 flex-col">
+      <ul class="menu menu-sm flex min-h-0 w-full flex-1 flex-col gap-1 p-4">
+        <li v-for="item in sidebarItems" :key="item.id">
+          <NuxtLink
+            :to="item.to"
+            :class="[
+              'flex items-center gap-2 rounded-box border-l-3 border-transparent pl-2 transition-all duration-200 is-drawer-close:tooltip is-drawer-close:tooltip-right',
+              { 'menu-active border-primary': isSidebarItemActive(item) },
+            ]"
+            :data-tip="resolveSidebarLabel(item)"
+            :aria-current="isSidebarItemActive(item) ? 'page' : undefined"
+            :aria-label="resolveSidebarLabel(item)"
+          >
+            <span class="indicator">
+              <span
+                v-if="item.id === 'settings' && isAiConfigurationIncomplete"
+                class="indicator-item badge badge-warning badge-xs"
+              ></span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
+              </svg>
+            </span>
+            <span class="is-drawer-close:hidden">{{ resolveSidebarLabel(item) }}</span>
+            <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ml-auto flex items-center gap-1 text-base-content/60">
+              <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.prefix.toUpperCase() }}</kbd>
+              <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.key.toUpperCase() }}</kbd>
+            </span>
+          </NuxtLink>
+        </li>
+        <li class="mt-auto pt-4">
+          <label
+            :for="APP_DRAWER_ID"
+            role="button"
+            tabindex="0"
+            class="btn btn-ghost btn-sm w-full justify-start is-drawer-close:btn-square"
+            :aria-label="t('a11y.toggleSidebarNavigation')"
+            :aria-controls="APP_DRAWER_ID"
+            :aria-expanded="isDrawerOpen"
+            @keydown.enter.prevent="setDrawerToggleState(!isDrawerOpen)"
+            @keydown.space.prevent="setDrawerToggleState(!isDrawerOpen)"
+          >
+            <svg class="h-5 w-5 transition-transform duration-200 is-drawer-open:rotate-y-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-          </span>
-          <span class="is-drawer-close:hidden">{{ resolveSidebarLabel(item) }}</span>
-          <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ml-auto flex items-center gap-1 opacity-65">
-            <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.prefix.toUpperCase() }}</kbd>
-            <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.key.toUpperCase() }}</kbd>
-          </span>
-        </NuxtLink>
-      </li>
-      <li class="mt-auto pt-4">
-        <label
-          :for="APP_DRAWER_ID"
-          role="button"
-          tabindex="0"
-          class="btn btn-ghost btn-sm w-full justify-start is-drawer-close:btn-square"
-          :aria-label="t('a11y.toggleSidebarNavigation')"
-          :aria-controls="APP_DRAWER_ID"
-          :aria-expanded="isDrawerOpen"
-          @keydown.enter.prevent="setDrawerToggleState(!isDrawerOpen)"
-          @keydown.space.prevent="setDrawerToggleState(!isDrawerOpen)"
-        >
-          <svg class="h-5 w-5 transition-transform duration-200 is-drawer-open:rotate-y-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          <span class="is-drawer-close:hidden">{{ t("a11y.toggleSidebarNavigation") }}</span>
-        </label>
-      </li>
-    </ul>
-  </nav>
+            <span class="is-drawer-close:hidden">{{ t("a11y.toggleSidebarNavigation") }}</span>
+          </label>
+        </li>
+      </ul>
+    </nav>
+    <footer
+      class="border-t border-base-300 p-4 text-xs text-base-content/40 is-drawer-close:hidden"
+      :aria-label="t('layout.shell.versionFooterAria')"
+    >
+      {{ t("layout.shell.appVersion", { version: APP_SEMVER }) }}
+    </footer>
+  </div>
 </template>

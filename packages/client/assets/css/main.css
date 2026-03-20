@@ -1,145 +1,16 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
+  themes: corporate --default, business --prefersdark;
   exclude: countdown;
 }
 
-/* Centralized palette tokens with WCAG-oriented contrast pairs. */
+/* Typography tokens (fonts may be overridden via brand CSS variables on the shell). */
 :root {
   --brand-font-display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
   --brand-font-body: "DM Sans", "Inter", "Segoe UI", sans-serif;
   --brand-font-mono:
     "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
-  --bao-light-base-100: oklch(99% 0.005 255);
-  --bao-light-base-200: oklch(96% 0.008 255);
-  --bao-light-base-300: oklch(92% 0.012 255);
-  --bao-light-base-content: oklch(22% 0.025 255);
-
-  --bao-light-primary: oklch(42% 0.17 260);
-  --bao-light-primary-content: oklch(98% 0.01 260);
-  --bao-light-secondary: oklch(40% 0.11 210);
-  --bao-light-secondary-content: oklch(98% 0.01 210);
-  --bao-light-accent: oklch(45% 0.13 150);
-  --bao-light-accent-content: oklch(98% 0.01 150);
-  --bao-light-neutral: oklch(30% 0.02 260);
-  --bao-light-neutral-content: oklch(95% 0.01 260);
-
-  --bao-light-info: oklch(44% 0.13 240);
-  --bao-light-info-content: oklch(98% 0.01 240);
-  --bao-light-success: oklch(44% 0.12 155);
-  --bao-light-success-content: oklch(98% 0.01 155);
-  --bao-light-warning: oklch(78% 0.15 90);
-  --bao-light-warning-content: oklch(18% 0.035 90);
-  --bao-light-error: oklch(45% 0.16 30);
-  --bao-light-error-content: oklch(98% 0.01 30);
-  --bao-light-radius-selector: 0.5rem;
-  --bao-light-radius-field: 0.5rem;
-  --bao-light-radius-box: 1rem;
-  --bao-light-size-selector: 0.25rem;
-  --bao-light-size-field: 0.25rem;
-  --bao-light-border-size: 1px;
-  --bao-light-depth: 1;
-  --bao-light-noise: 0;
-
-  --bao-dark-base-100: oklch(14% 0.02 260);
-  --bao-dark-base-200: oklch(11% 0.024 260);
-  --bao-dark-base-300: oklch(8% 0.028 260);
-  --bao-dark-base-content: oklch(95% 0.015 260);
-
-  --bao-dark-primary: oklch(72% 0.16 260);
-  --bao-dark-primary-content: oklch(16% 0.02 260);
-  --bao-dark-secondary: oklch(70% 0.11 210);
-  --bao-dark-secondary-content: oklch(16% 0.02 210);
-  --bao-dark-accent: oklch(74% 0.13 150);
-  --bao-dark-accent-content: oklch(16% 0.02 150);
-  --bao-dark-neutral: oklch(26% 0.02 260);
-  --bao-dark-neutral-content: oklch(92% 0.01 260);
-
-  --bao-dark-info: oklch(72% 0.12 240);
-  --bao-dark-info-content: oklch(15% 0.02 240);
-  --bao-dark-success: oklch(74% 0.12 155);
-  --bao-dark-success-content: oklch(15% 0.02 155);
-  --bao-dark-warning: oklch(82% 0.14 90);
-  --bao-dark-warning-content: oklch(15% 0.03 90);
-  --bao-dark-error: oklch(72% 0.15 30);
-  --bao-dark-error-content: oklch(15% 0.03 30);
-  --bao-dark-radius-selector: 0.5rem;
-  --bao-dark-radius-field: 0.5rem;
-  --bao-dark-radius-box: 1rem;
-  --bao-dark-size-selector: 0.25rem;
-  --bao-dark-size-field: 0.25rem;
-  --bao-dark-border-size: 1px;
-  --bao-dark-depth: 1;
-  --bao-dark-noise: 1;
-}
-
-@plugin "daisyui/theme" {
-  name: "bao-light";
-  default: true;
-  prefersdark: false;
-  color-scheme: light;
-  --color-base-100: var(--bao-light-base-100);
-  --color-base-200: var(--bao-light-base-200);
-  --color-base-300: var(--bao-light-base-300);
-  --color-base-content: var(--bao-light-base-content);
-  --color-primary: var(--bao-light-primary);
-  --color-primary-content: var(--bao-light-primary-content);
-  --color-secondary: var(--bao-light-secondary);
-  --color-secondary-content: var(--bao-light-secondary-content);
-  --color-accent: var(--bao-light-accent);
-  --color-accent-content: var(--bao-light-accent-content);
-  --color-neutral: var(--bao-light-neutral);
-  --color-neutral-content: var(--bao-light-neutral-content);
-  --color-info: var(--bao-light-info);
-  --color-info-content: var(--bao-light-info-content);
-  --color-success: var(--bao-light-success);
-  --color-success-content: var(--bao-light-success-content);
-  --color-warning: var(--bao-light-warning);
-  --color-warning-content: var(--bao-light-warning-content);
-  --color-error: var(--bao-light-error);
-  --color-error-content: var(--bao-light-error-content);
-  --radius-selector: var(--bao-light-radius-selector, 0.5rem);
-  --radius-field: var(--bao-light-radius-field, 0.5rem);
-  --radius-box: var(--bao-light-radius-box, 1rem);
-  --size-selector: var(--bao-light-size-selector, 0.25rem);
-  --size-field: var(--bao-light-size-field, 0.25rem);
-  --border: var(--bao-light-border-size, 1px);
-  --depth: var(--bao-light-depth, 1);
-  --noise: var(--bao-light-noise, 0);
-}
-
-@plugin "daisyui/theme" {
-  name: "bao-dark";
-  default: false;
-  prefersdark: true;
-  color-scheme: dark;
-  --color-base-100: var(--bao-dark-base-100);
-  --color-base-200: var(--bao-dark-base-200);
-  --color-base-300: var(--bao-dark-base-300);
-  --color-base-content: var(--bao-dark-base-content);
-  --color-primary: var(--bao-dark-primary);
-  --color-primary-content: var(--bao-dark-primary-content);
-  --color-secondary: var(--bao-dark-secondary);
-  --color-secondary-content: var(--bao-dark-secondary-content);
-  --color-accent: var(--bao-dark-accent);
-  --color-accent-content: var(--bao-dark-accent-content);
-  --color-neutral: var(--bao-dark-neutral);
-  --color-neutral-content: var(--bao-dark-neutral-content);
-  --color-info: var(--bao-dark-info);
-  --color-info-content: var(--bao-dark-info-content);
-  --color-success: var(--bao-dark-success);
-  --color-success-content: var(--bao-dark-success-content);
-  --color-warning: var(--bao-dark-warning);
-  --color-warning-content: var(--bao-dark-warning-content);
-  --color-error: var(--bao-dark-error);
-  --color-error-content: var(--bao-dark-error-content);
-  --radius-selector: var(--bao-dark-radius-selector, 0.5rem);
-  --radius-field: var(--bao-dark-radius-field, 0.5rem);
-  --radius-box: var(--bao-dark-radius-box, 1rem);
-  --size-selector: var(--bao-dark-size-selector, 0.25rem);
-  --size-field: var(--bao-dark-size-field, 0.25rem);
-  --border: var(--bao-dark-border-size, 1px);
-  --depth: var(--bao-dark-depth, 1);
-  --noise: var(--bao-dark-noise, 1);
 }
 
 body {
@@ -175,5 +46,26 @@ samp {
 .page-enter-from,
 .page-leave-to {
   opacity: 0;
-  transform: translateY(0.5rem);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter-from,
+  .page-leave-to {
+    transform: translateY(0.5rem);
+  }
+}
+
+/*
+ * WCAG 2.1 AA text contrast (4.5:1) on semantic pairs — daisyUI stock corporate/business
+ * miss a few pairs; overrides merge with node_modules/daisyui/themes.css in validate-ui-accessibility.ts.
+ */
+[data-theme="corporate"] {
+  --color-primary: oklch(46% 0.15 241.966);
+  --color-accent: oklch(48% 0.11 184.704);
+  --color-info: oklch(48% 0.12 221.723);
+  --color-success: oklch(50% 0.18 149.214);
+}
+
+[data-theme="business"] {
+  --color-error: oklch(46% 0.14 29.674);
 }

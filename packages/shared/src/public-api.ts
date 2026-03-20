@@ -218,8 +218,10 @@ import {
   DEFAULT_BRAND_SETTINGS,
   THEME_NAMES,
   mergeBrandSettings,
+  normalizeAppDataTheme,
   resolveBrandSettings,
 } from "./constants/branding";
+export type { AppDataTheme } from "./constants/branding";
 export {
   APP_BRAND,
   APP_SEO,
@@ -228,6 +230,7 @@ export {
   DEFAULT_BRAND_SETTINGS,
   THEME_NAMES,
   mergeBrandSettings,
+  normalizeAppDataTheme,
   resolveBrandSettings,
 };
 import { DEFAULT_UNSPECIFIED_LABEL } from "./constants/default-labels";
@@ -344,6 +347,8 @@ export {
 };
 import type { CoverLetterTemplate } from "./constants/cover-letter";
 export type { CoverLetterTemplate };
+import { APP_SEMVER } from "./constants/app-version";
+export { APP_SEMVER };
 import {
   API_ENDPOINT_PREFIX,
   API_ENDPOINTS,

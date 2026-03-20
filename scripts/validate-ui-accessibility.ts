@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type OklchColor = {
@@ -5,8 +6,6 @@ type OklchColor = {
   chroma: number;
   hueDegrees: number;
 };
-
-type ThemeMode = "light" | "dark";
 
 type Violation = {
   filePath: string;
@@ -17,6 +16,15 @@ type Violation = {
 const projectRoot = process.cwd();
 const clientRoot = "packages/client";
 const themeFilePath = `${clientRoot}/assets/css/main.css`;
+const daisyThemesPath = join(projectRoot, clientRoot, "node_modules", "daisyui", "themes.css");
+
+/**
+ * Must match `@plugin "daisyui" { themes: … }` in `main.css` (default light + prefers-dark).
+ */
+const CONFIGURED_DAISY_THEMES = [
+  { name: "corporate", role: "light default" as const },
+  { name: "business", role: "dark prefers-dark" as const },
+] as const;
 
 const textContrastMinimum = 4.5;
 const hardcodedColorLiteralPattern =
@@ -26,8 +34,9 @@ const hardcodedPaletteClassPattern =
 const hardcodedArbitraryColorClassPattern =
   /\b(?:bg|text|border|from|to|via|ring|fill|stroke)-\[(?:#|rgb|hsl|oklch|oklab|color)[^\]]+\]/gu;
 
-const tokenPattern =
-  /--bao-(light|dark)-([a-z0-9-]+):\s*oklch\(\s*([0-9.]+)%\s+([0-9.]+)\s+([0-9.]+)\s*\)\s*;/gu;
+/** daisyUI theme blocks use `--color-*: oklch(L% C H)` (optional space after `:`). */
+const daisyColorTokenPattern =
+  /--color-([a-z0-9-]+):\s*oklch\(\s*([0-9.]+)%\s+([0-9.]+)\s+([0-9.]+)\s*\)/gu;
 
 const allowedColorLiteralFiles = new Set([themeFilePath]);
 const scannedExtensions = new Set([".vue", ".ts", ".tsx", ".js", ".mjs", ".cjs", ".css"]);
@@ -137,31 +146,47 @@ const getContrastRatio = (firstColor: OklchColor, secondColor: OklchColor): numb
   return (lighter + 0.05) / (darker + 0.05);
 };
 
-const getThemeColors = (css: string): Record<ThemeMode, Map<string, OklchColor>> => {
-  const themes: Record<ThemeMode, Map<string, OklchColor>> = {
-    light: new Map<string, OklchColor>(),
-    dark: new Map<string, OklchColor>(),
-  };
+const buildDataThemeBlockPattern = (themeName: string): RegExp => {
+  if (!/^[a-z0-9-]+$/u.test(themeName)) {
+    return /$^/u;
+  }
+  return new RegExp(
+    `\\[data-theme=["']?${themeName}["']?\\][^{]*\\{([^}]+)\\}`,
+    "u",
+  );
+};
 
-  for (const match of css.matchAll(tokenPattern)) {
-    const mode = match[1];
-    const token = match[2];
-    const lightnessPercent = Number.parseFloat(match[3]);
-    const chroma = Number.parseFloat(match[4]);
-    const hueDegrees = Number.parseFloat(match[5]);
+const extractDaisyThemeDeclarations = (themesCss: string, themeName: string): string | null => {
+  const match = themesCss.match(buildDataThemeBlockPattern(themeName));
+  return match?.[1] ?? null;
+};
 
-    if ((mode !== "light" && mode !== "dark") || Number.isNaN(lightnessPercent)) {
+const parseDaisyThemeColorMap = (declarations: string): Map<string, OklchColor> => {
+  const map = new Map<string, OklchColor>();
+  daisyColorTokenPattern.lastIndex = 0;
+  for (const match of declarations.matchAll(daisyColorTokenPattern)) {
+    const token = match[1];
+    const lightnessPercent = Number.parseFloat(match[2]);
+    const chroma = Number.parseFloat(match[3]);
+    const hueDegrees = Number.parseFloat(match[4]);
+    if (Number.isNaN(lightnessPercent) || Number.isNaN(chroma) || Number.isNaN(hueDegrees)) {
       continue;
     }
-
-    themes[mode].set(token, {
-      lightnessPercent,
-      chroma,
-      hueDegrees,
-    });
+    map.set(token, { lightnessPercent, chroma, hueDegrees });
   }
+  return map;
+};
 
-  return themes;
+const assertMainCssMatchesConfiguredThemes = (mainCss: string): string | null => {
+  if (!mainCss.includes('@plugin "daisyui"')) {
+    return "packages/client/assets/css/main.css must use @plugin \"daisyui\" for theme contrast validation.";
+  }
+  for (const { name } of CONFIGURED_DAISY_THEMES) {
+    if (!mainCss.includes(name)) {
+      return `main.css is missing daisyUI theme name "${name}"; update CONFIGURED_DAISY_THEMES or main.css so they stay aligned.`;
+    }
+  }
+  return null;
 };
 
 const collectHardcodedColorViolations = async (): Promise<Violation[]> => {
@@ -209,18 +234,46 @@ const collectHardcodedColorViolations = async (): Promise<Violation[]> => {
   return violationGroups.flat();
 };
 
-const collectContrastViolations = (css: string): string[] => {
-  const themes = getThemeColors(css);
+const mergeColorMaps = (
+  base: Map<string, OklchColor>,
+  overrides: Map<string, OklchColor>,
+): Map<string, OklchColor> => {
+  const merged = new Map(base);
+  for (const [key, value] of overrides) {
+    merged.set(key, value);
+  }
+  return merged;
+};
+
+const extractMainThemeOverrides = (mainCss: string, themeName: string): Map<string, OklchColor> => {
+  const match = mainCss.match(buildDataThemeBlockPattern(themeName));
+  if (!match?.[1]) {
+    return new Map();
+  }
+  return parseDaisyThemeColorMap(match[1]);
+};
+
+const collectContrastViolations = (themesCss: string, mainCss: string): string[] => {
   const failures: string[] = [];
 
-  for (const mode of ["light", "dark"] as const) {
+  for (const { name, role } of CONFIGURED_DAISY_THEMES) {
+    const block = extractDaisyThemeDeclarations(themesCss, name);
+    if (!block) {
+      failures.push(`Missing daisyUI [data-theme=${name}] block in themes.css (${role}).`);
+      continue;
+    }
+
+    const colors = mergeColorMaps(
+      parseDaisyThemeColorMap(block),
+      extractMainThemeOverrides(mainCss, name),
+    );
     for (const [backgroundToken, contentToken] of contrastPairs) {
-      const background = themes[mode].get(backgroundToken);
-      const content = themes[mode].get(contentToken);
+      const background = colors.get(backgroundToken);
+      const content = colors.get(contentToken);
 
       if (!(background && content)) {
         failures.push(
-          `Missing token pair: bao-${mode}-${backgroundToken} / bao-${mode}-${contentToken}`,
+          `Missing token pair: theme=${name} --color-${backgroundToken} / --color-${contentToken}`,
         );
         continue;
       }
@@ -228,7 +281,7 @@ const collectContrastViolations = (css: string): string[] => {
       const ratio = getContrastRatio(background, content);
       if (ratio < textContrastMinimum) {
         failures.push(
-          `Contrast below ${textContrastMinimum.toFixed(1)}: bao-${mode}-${backgroundToken} vs bao-${mode}-${contentToken} = ${ratio.toFixed(2)}`,
+          `Contrast below ${textContrastMinimum.toFixed(1)}: theme=${name} ${backgroundToken} vs ${contentToken} = ${ratio.toFixed(2)}`,
         );
       }
     }
@@ -238,13 +291,28 @@ const collectContrastViolations = (css: string): string[] => {
 };
 
 const main = async (): Promise<void> => {
-  const themeCss = await Bun.file(themeFilePath).text();
+  const mainCssText = await Bun.file(themeFilePath).text();
+  const mainCssMismatch = assertMainCssMatchesConfiguredThemes(mainCssText);
+  if (mainCssMismatch) {
+    await writeError(mainCssMismatch);
+    process.exit(1);
+  }
+
+  const daisyThemesFile = Bun.file(daisyThemesPath);
+  if (!(await daisyThemesFile.exists())) {
+    await writeError(
+      `Missing daisyUI themes.css at ${daisyThemesPath}. Run bun install in packages/client.`,
+    );
+    process.exit(1);
+  }
+
+  const themesCss = await daisyThemesFile.text();
   const hardcodedColorViolations = await collectHardcodedColorViolations();
-  const contrastViolations = collectContrastViolations(themeCss);
+  const contrastViolations = collectContrastViolations(themesCss, mainCssText);
 
   if (hardcodedColorViolations.length === 0 && contrastViolations.length === 0) {
     await writeOutput(
-      "UI accessibility validation passed: WCAG contrast and tokenized colors are enforced.",
+      "UI accessibility validation passed: WCAG contrast (daisyUI corporate/business) and tokenized colors are enforced.",
     );
     return;
   }
