@@ -854,6 +854,7 @@ const signLinuxArtifacts = async (
         `Linux ${artifact.kind} artifact for detached signing`,
         buildBundlePathCandidates(
           target,
+          undefined,
           resolveLinuxBundleDirectory(artifact.kind),
           artifact.fileName,
         ),
@@ -1001,6 +1002,7 @@ const stageLinuxArtifacts = async (
           const unsignedKind = inferLinuxArtifactKind(unsignedArtifactName);
           const signatureBundlePath = buildBundlePathCandidates(
             target,
+            undefined,
             resolveLinuxBundleDirectory(unsignedKind),
             artifactName,
           );
@@ -1013,6 +1015,7 @@ const stageLinuxArtifacts = async (
         const artifactKind = inferLinuxArtifactKind(artifactName);
         const sourcePaths = buildBundlePathCandidates(
           target,
+          undefined,
           resolveLinuxBundleDirectory(artifactKind),
           artifactName,
         );
@@ -1086,7 +1089,7 @@ const resolveOptionalWindowsMsiPath = async (
 
   return resolveExistingPath(
     "Windows MSI installer",
-    buildBundlePathCandidates("windows", "msi", msiFileName),
+    buildBundlePathCandidates("windows", undefined, "msi", msiFileName),
   );
 };
 
@@ -1109,7 +1112,7 @@ const stageWindowsArtifacts = async (
 
   const setupPath = await resolveExistingPath(
     "Windows NSIS installer",
-    buildBundlePathCandidates("windows", "nsis", setupFileName),
+    buildBundlePathCandidates("windows", undefined, "nsis", setupFileName),
   );
   const executablePath = await resolveExistingPath(
     "Windows desktop executable",
