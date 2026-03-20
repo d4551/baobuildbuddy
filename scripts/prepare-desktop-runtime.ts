@@ -718,8 +718,10 @@ const packLinuxDesktopServerForAppImageBundling = async (serverExecutablePath: s
   const launcher = [
     "#!/usr/bin/env sh",
     "set -eu",
+    // biome-ignore lint/security/noSecrets: POSIX launcher path resolution (false positive from entropy heuristic)
     'here="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"',
     `payload="$here/${LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME}"`,
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: mktemp uses shell parameter expansion, not JS templates
     'tmp="$(mktemp "${TMPDIR:-/tmp}/bao-desktop-server.XXXXXX")"',
     'cleanup() { rm -f "$tmp"; }',
     "trap cleanup EXIT INT HUP TERM",
