@@ -1000,7 +1000,8 @@ const buildLinuxBundlePathCandidatesForFileNames = (
     buildBundlePathCandidates(target, undefined, resolveLinuxBundleDirectory(bundleKind), fileName),
   );
 
-const resolveWindowsNsisScriptPath = async (): Promise<string> => {
+/** Tauri v2 may discard the NSIS `.nsi` source after `makensis` completes; resolve best-effort. */
+const resolveWindowsNsisScriptPath = async (): Promise<string | null> => {
   const nsisDirectories = buildDesktopBundleDirectoryCandidates("windows", undefined).map(
     (bundleRoot) => join(DESKTOP_TAURI_ROOT, bundleRoot, "nsis"),
   );
@@ -1020,10 +1021,18 @@ const resolveWindowsNsisScriptPath = async (): Promise<string> => {
     return firstResolved;
   }
 
-  return resolveExistingPath("Windows NSIS script", [
+  const fallbackCandidates = [
     ...buildBundlePathCandidates("windows", undefined, "nsis", "installer.nsi"),
     ...buildReleasePathCandidates("windows", "nsis", "x64", "installer.nsi"),
-  ]);
+  ];
+  const existingFallback = await Promise.all(
+    fallbackCandidates.map(async (candidate) => ({
+      candidate,
+      exists: await pathExists(candidate),
+    })),
+  );
+  const resolved = existingFallback.find((entry) => entry.exists);
+  return resolved?.candidate ?? null;
 };
 
 const inferLinuxArtifactKind = (artifactName: string): "appimage" | "deb" | "rpm" => {
@@ -1119,13 +1128,15 @@ const buildWindowsPortableReadme = (metadata: DesktopBundleMetadata): string =>
 const stageWindowsInstallerArtifacts = async (
   targetRoot: string,
   setupPath: string,
-  nsisScriptPath: string,
+  nsisScriptPath: string | null,
 ): Promise<void> => {
   await cp(setupPath, join(targetRoot, basename(setupPath)));
-  await cp(
-    nsisScriptPath,
-    join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, basename(nsisScriptPath)),
-  );
+  if (nsisScriptPath) {
+    await cp(
+      nsisScriptPath,
+      join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, basename(nsisScriptPath)),
+    );
+  }
 };
 
 const stageWindowsPortableArtifacts = async (

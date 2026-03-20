@@ -41,7 +41,6 @@ env:
   # push: use repository vars when set; otherwise leave empty so scripts apply defaults.
   DESKTOP_RELEASE_LINUX_SIGNATURES: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_SIGNATURES || github.event.inputs.include_linux_signatures }}
   DESKTOP_RELEASE_MACOS_ARCHITECTURES: ${{ github.event.inputs.macos_architectures || vars.DESKTOP_RELEASE_MACOS_ARCHITECTURES }}
-  DESKTOP_RELEASE_RELEASE_MODE: "true"
   DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_WINDOWS_MSI || github.event.inputs.include_windows_msi }}
 
 jobs:
@@ -181,7 +180,14 @@ jobs:
           echo "APPLE_API_ISSUER=${APPLE_API_ISSUER}" >> "$GITHUB_ENV"
           echo "APPLE_API_KEY=${APPLE_API_KEY}" >> "$GITHUB_ENV"
 
-      - name: Build native macOS release artifacts
+      - name: Build native macOS release artifacts (notarized)
+        if: ${{ steps.apple.outputs.full_notarize == 'true' }}
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
+
+      - name: Build native macOS release artifacts (ad-hoc signed)
+        if: ${{ steps.apple.outputs.full_notarize != 'true' }}
+        env:
+          DESKTOP_RELEASE_RELEASE_MODE: "false"
         run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
 
       - name: Verify packaged desktop runtime
@@ -397,7 +403,7 @@ jobs:
         run: bun run verify:desktop-releases -- --targets linux-x64 --release
 
       - name: Require AppImage when enabled
-        if: ${{ env.DESKTOP_RELEASE_LINUX_APPIMAGE != 'false' }}
+        if: ${{ env.DESKTOP_RELEASE_LINUX_APPIMAGE == 'true' }}
         run: |
           set -euo pipefail
           appimages="$(find .desktop-release-artifacts/linux-x64 -maxdepth 1 -type f -name '*.AppImage' 2>/dev/null || true)"
