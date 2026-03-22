@@ -91,27 +91,15 @@ jobs:
 
       - name: Evaluate Apple signing and notarization gates
         id: apple
-        env:
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          has_codesign=false
-          if [ -n "${APPLE_CERTIFICATE}" ] && [ -n "${APPLE_CERTIFICATE_PASSWORD}" ] && \
-             [ -n "${KEYCHAIN_PASSWORD}" ] && [ -n "${APPLE_SIGNING_IDENTITY}" ]; then
-            has_codesign=true
-          fi
-          full_notarize=false
-          if [ "${has_codesign}" = true ] && [ -n "${APPLE_API_KEY_CONTENT}" ] && \
-             [ -n "${APPLE_API_ISSUER}" ] && [ -n "${APPLE_API_KEY}" ]; then
-            full_notarize=true
-          fi
-          echo "has_codesign=${has_codesign}" >> "${GITHUB_OUTPUT}"
-          echo "full_notarize=${full_notarize}" >> "${GITHUB_OUTPUT}"
+        uses: ./.github/actions/evaluate-apple-signing
+        with:
+          apple_certificate: ${{ secrets.APPLE_CERTIFICATE }}
+          apple_certificate_password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          keychain_password: ${{ secrets.KEYCHAIN_PASSWORD }}
+          apple_signing_identity: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          apple_api_key_content: ${{ secrets.APPLE_API_KEY_CONTENT }}
+          apple_api_issuer: ${{ secrets.APPLE_API_ISSUER }}
+          apple_api_key: ${{ secrets.APPLE_API_KEY }}
 
       - name: Get Bun version from package.json
         id: bun-version
@@ -524,27 +512,15 @@ jobs:
 
       - name: Evaluate Apple signing and notarization gates
         id: apple
-        env:
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          has_codesign=false
-          if [ -n "${APPLE_CERTIFICATE}" ] && [ -n "${APPLE_CERTIFICATE_PASSWORD}" ] && \
-             [ -n "${KEYCHAIN_PASSWORD}" ] && [ -n "${APPLE_SIGNING_IDENTITY}" ]; then
-            has_codesign=true
-          fi
-          full_notarize=false
-          if [ "${has_codesign}" = true ] && [ -n "${APPLE_API_KEY_CONTENT}" ] && \
-             [ -n "${APPLE_API_ISSUER}" ] && [ -n "${APPLE_API_KEY}" ]; then
-            full_notarize=true
-          fi
-          echo "has_codesign=${has_codesign}" >> "${GITHUB_OUTPUT}"
-          echo "full_notarize=${full_notarize}" >> "${GITHUB_OUTPUT}"
+        uses: ./.github/actions/evaluate-apple-signing
+        with:
+          apple_certificate: ${{ secrets.APPLE_CERTIFICATE }}
+          apple_certificate_password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          keychain_password: ${{ secrets.KEYCHAIN_PASSWORD }}
+          apple_signing_identity: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          apple_api_key_content: ${{ secrets.APPLE_API_KEY_CONTENT }}
+          apple_api_issuer: ${{ secrets.APPLE_API_ISSUER }}
+          apple_api_key: ${{ secrets.APPLE_API_KEY }}
 
       - name: Disable Linux detached signatures without GPG secrets
         if: ${{ env.DESKTOP_GPG_PRIVATE_KEY == '' || env.DESKTOP_RELEASE_GPG_KEY_ID == '' }}
