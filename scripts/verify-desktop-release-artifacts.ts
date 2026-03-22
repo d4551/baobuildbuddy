@@ -129,19 +129,45 @@ type CommandCapture = {
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_ROOT = join(REPO_ROOT, "packages", "desktop");
-const DESKTOP_RELEASE_ROOT = join(DESKTOP_ROOT, "releases");
+const DEFAULT_DESKTOP_RELEASE_ROOT = join(DESKTOP_ROOT, "releases");
 const DESKTOP_TAURI_ROOT = join(DESKTOP_ROOT, "src-tauri");
 const DESKTOP_ICON_ROOT = join(DESKTOP_TAURI_ROOT, "icons");
 const DESKTOP_PACKAGE_JSON_PATH = join(DESKTOP_ROOT, "package.json");
 const DESKTOP_TAURI_CONFIG_PATH = join(DESKTOP_TAURI_ROOT, "tauri.conf.json");
 const DESKTOP_CARGO_TOML_PATH = join(DESKTOP_TAURI_ROOT, "Cargo.toml");
-const DESKTOP_RELEASE_CHECKSUM_PATH = join(DESKTOP_RELEASE_ROOT, "sha256.txt");
-const DESKTOP_RELEASE_PROVENANCE_PATH = join(
+const RELEASE_ROOT_FLAG = "--release-root";
+
+/** Parsed once in `main()` via `parseReleaseRoot`. All path helpers reference this. */
+let DESKTOP_RELEASE_ROOT = DEFAULT_DESKTOP_RELEASE_ROOT;
+let DESKTOP_RELEASE_CHECKSUM_PATH = join(DESKTOP_RELEASE_ROOT, "sha256.txt");
+let DESKTOP_RELEASE_PROVENANCE_PATH = join(
   DESKTOP_RELEASE_ROOT,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
 );
-const DESKTOP_RELEASE_METADATA_ROOT = join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_METADATA_DIR);
-const DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
+let DESKTOP_RELEASE_METADATA_ROOT = join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_METADATA_DIR);
+
+/** Resolves `--release-root <path>` from argv, falling back to the canonical `packages/desktop/releases`. */
+const parseReleaseRoot = (argv: readonly string[]): string => {
+  const flagIndex = argv.indexOf(RELEASE_ROOT_FLAG);
+  if (flagIndex === -1 || !argv[flagIndex + 1]) {
+    return DEFAULT_DESKTOP_RELEASE_ROOT;
+  }
+  return resolve(REPO_ROOT, argv[flagIndex + 1]);
+};
+
+/** Call once before any verification to redirect all path helpers. */
+const applyReleaseRoot = (releaseRoot: string): void => {
+  DESKTOP_RELEASE_ROOT = releaseRoot;
+  DESKTOP_RELEASE_CHECKSUM_PATH = join(releaseRoot, "sha256.txt");
+  DESKTOP_RELEASE_PROVENANCE_PATH = join(releaseRoot, DESKTOP_RELEASE_PROVENANCE_FILENAME);
+  DESKTOP_RELEASE_METADATA_ROOT = join(releaseRoot, DESKTOP_RELEASE_METADATA_DIR);
+  DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
+    DESKTOP_RELEASE_METADATA_ROOT,
+    "windows",
+    "installer.nsi",
+  );
+};
+let DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
   DESKTOP_RELEASE_METADATA_ROOT,
   "windows",
   "installer.nsi",
@@ -1780,6 +1806,8 @@ type VerificationRunContext = {
   readonly metadata: DesktopBundleMetadata;
   readonly releaseMode: boolean;
   readonly releaseProfile: DesktopReleaseArtifactProfile;
+  /** When true, skip assembly-level checks (checksums, provenance) that require files only created by the `assemble-release` job. */
+  readonly skipAssemblyChecks: boolean;
   readonly targets: readonly DesktopReleaseTarget[];
 };
 
@@ -1856,7 +1884,9 @@ const collectVerificationResults = async (
 ): Promise<readonly VerificationResult[]> => [
   verifySemver(context.metadata),
   ...verifyBundleConfig(context.metadata, context.targets),
-  ...(await verifyReleaseProvenance(context.metadata, context.targets, context.releaseProfile)),
+  ...(context.skipAssemblyChecks
+    ? []
+    : await verifyReleaseProvenance(context.metadata, context.targets, context.releaseProfile)),
   ...(await verifyIconAssets()),
   ...(await Promise.all(
     context.targets.map((target) =>
@@ -1866,8 +1896,10 @@ const collectVerificationResults = async (
   ...(await collectWindowsVerificationResults(context)),
   ...(await collectArtifactPayloadVerificationResults(context)),
   ...(await collectArtifactPresenceVerificationResults(context.artifacts)),
-  await verifyChecksumManifest(context.artifacts, context.targets),
-  ...(await verifyChecksumEntries(context.artifacts)),
+  ...(context.skipAssemblyChecks
+    ? []
+    : [await verifyChecksumManifest(context.artifacts, context.targets)]),
+  ...(context.skipAssemblyChecks ? [] : await verifyChecksumEntries(context.artifacts)),
 ];
 
 const buildVerificationRunContext = async (
@@ -1876,17 +1908,21 @@ const buildVerificationRunContext = async (
   const targets = await resolveVerificationTargets(argv);
   const releaseProfile = parseReleaseProfile(argv);
   const metadata = await readDesktopMetadata();
+  const releaseRoot = parseReleaseRoot(argv);
   return {
     artifacts: collectExpectedArtifacts(metadata, targets, releaseProfile),
     metadata,
     releaseMode: isReleaseMode(argv),
     releaseProfile,
+    skipAssemblyChecks: releaseRoot !== DEFAULT_DESKTOP_RELEASE_ROOT,
     targets,
   };
 };
 
 const main = async (): Promise<void> => {
-  const context = await buildVerificationRunContext(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  applyReleaseRoot(parseReleaseRoot(argv));
+  const context = await buildVerificationRunContext(argv);
   const results = await collectVerificationResults(context);
   await writeOutput(
     `desktop-release:verify targets=${context.targets.join(",")} product=${context.metadata.productName} version=${context.metadata.version} binary=${context.metadata.binaryName}`,

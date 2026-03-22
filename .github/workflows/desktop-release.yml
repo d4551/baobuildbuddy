@@ -193,13 +193,13 @@ jobs:
 
       - name: Verify macOS release artifacts (stapled shipping build)
         if: ${{ steps.apple.outputs.full_notarize == 'true' }}
-        run: bun run verify:desktop-releases -- --targets macos --release
+        run: bun run verify:desktop-releases -- --targets macos --release --release-root .desktop-release-artifacts
 
       - name: Verify macOS release artifacts (non-stapled CI)
         if: ${{ steps.apple.outputs.full_notarize != 'true' }}
         env:
           DESKTOP_RELEASE_RELEASE_MODE: "false"
-        run: bun run verify:desktop-releases -- --targets macos
+        run: bun run verify:desktop-releases -- --targets macos --release-root .desktop-release-artifacts
 
       - name: List staged macOS release files
         run: find .desktop-release-artifacts/macos -type f -print
@@ -304,7 +304,7 @@ jobs:
 
       - name: Verify Windows release artifacts
         shell: pwsh
-        run: bun run verify:desktop-releases -- --targets windows --release
+        run: bun run verify:desktop-releases -- --targets windows --release --release-root .desktop-release-artifacts
 
       - name: List staged Windows release files
         shell: pwsh
@@ -389,7 +389,7 @@ jobs:
         run: bun run verify:desktop-runtime -- --target x86_64-unknown-linux-gnu
 
       - name: Verify Linux x64 release artifacts
-        run: bun run verify:desktop-releases -- --targets linux-x64 --release
+        run: bun run verify:desktop-releases -- --targets linux-x64 --release --release-root .desktop-release-artifacts
 
       - name: Require AppImage when enabled
         if: ${{ env.DESKTOP_RELEASE_LINUX_APPIMAGE == 'true' }}
@@ -484,7 +484,7 @@ jobs:
         run: bun run verify:desktop-runtime -- --target aarch64-unknown-linux-gnu
 
       - name: Verify Linux ARM64 release artifacts
-        run: bun run verify:desktop-releases -- --targets linux-arm64 --release
+        run: bun run verify:desktop-releases -- --targets linux-arm64 --release --release-root .desktop-release-artifacts
 
       - name: List staged Linux ARM64 release files
         run: find .desktop-release-artifacts/linux-arm64 -type f -print
