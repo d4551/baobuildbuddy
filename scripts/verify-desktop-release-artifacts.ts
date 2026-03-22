@@ -1829,10 +1829,15 @@ const collectWindowsVerificationResults = async (
     ? context.artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "msi")
     : undefined;
   const releaseWindowsSignatures =
-    context.targets.includes("windows") && context.releaseMode && process.platform === "win32";
+    context.targets.includes("windows") &&
+    context.releaseMode &&
+    process.platform === "win32" &&
+    !context.skipAssemblyChecks;
 
   return [
-    ...(context.targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
+    ...(context.targets.includes("windows") && !context.skipAssemblyChecks
+      ? await verifyWindowsNsisPayload()
+      : []),
     ...(windowsPortableArtifact
       ? await verifyWindowsPortablePayload(windowsPortableArtifact, context.metadata)
       : []),
