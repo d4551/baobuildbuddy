@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import {
-  APP_ROUTES,
-  buildAutomationScreenshotEndpoint,
-  type RpaRunResult,
-} from "@bao/shared";
+import { APP_ROUTES, buildAutomationScreenshotEndpoint, type RpaRunResult } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { resolveApiEndpoint } from "~/utils/endpoints";

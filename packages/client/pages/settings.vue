@@ -59,8 +59,6 @@ type ProviderInputConfig = {
   field: ProviderField;
 };
 
-
-
 const BRAND_EDITOR_PANELS = [
   { id: "identity", labelKey: "settings.brand.tabs.identity" },
   { id: "typography", labelKey: "settings.brand.tabs.typography" },
