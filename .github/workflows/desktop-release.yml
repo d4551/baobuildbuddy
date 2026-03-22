@@ -188,7 +188,7 @@ jobs:
         if: ${{ steps.apple.outputs.full_notarize != 'true' }}
         env:
           DESKTOP_RELEASE_RELEASE_MODE: "false"
-        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target aarch64-apple-darwin
