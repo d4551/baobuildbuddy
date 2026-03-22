@@ -137,19 +137,35 @@ async function deleteResume(context: ResumeContext, id: string): Promise<void> {
   });
 }
 
+async function performExportResume(
+  context: ResumeContext,
+  id: string,
+  template: ResumeTemplate | undefined,
+  format: string | undefined,
+  errorMessage: string,
+): Promise<unknown> {
+  return withLoadingState(context.loading, async () => {
+    const { data, error } = await context.api
+      .resumes({ id })
+      .export.post(toExportPayload(template, format));
+    assertApiResponse(error, errorMessage);
+    return data;
+  });
+}
+
 async function exportResume(
   context: ResumeContext,
   id: string,
   template?: ResumeTemplate,
   format?: string,
 ): Promise<unknown> {
-  return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api
-      .resumes({ id })
-      .export.post(toExportPayload(template, format));
-    assertApiResponse(error, context.t("apiErrors.resumes.exportFailed"));
-    return data;
-  });
+  return performExportResume(
+    context,
+    id,
+    template,
+    format,
+    context.t("apiErrors.resumes.exportFailed"),
+  );
 }
 
 async function exportResumeOnePage(
@@ -158,13 +174,13 @@ async function exportResumeOnePage(
   template?: ResumeTemplate,
   format?: string,
 ): Promise<unknown> {
-  return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api
-      .resumes({ id })
-      .export.post(toExportPayload(template, format));
-    assertApiResponse(error, context.t("apiErrors.resumes.exportOnePageFailed"));
-    return data;
-  });
+  return performExportResume(
+    context,
+    id,
+    template,
+    format,
+    context.t("apiErrors.resumes.exportOnePageFailed"),
+  );
 }
 
 async function aiEnhance(context: ResumeContext, id: string): Promise<ResumeData> {
