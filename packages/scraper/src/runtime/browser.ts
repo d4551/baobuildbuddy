@@ -1,5 +1,5 @@
-import { DEFAULT_AUTOMATION_SETTINGS, settle, type AutomationSettings } from "@bao/shared";
-import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+import { type AutomationSettings, DEFAULT_AUTOMATION_SETTINGS, settle } from "@bao/shared";
+import { type Browser, type BrowserContext, chromium, type Page } from "playwright";
 import { automationRuntimeConfig } from "./config";
 
 /**

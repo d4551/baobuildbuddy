@@ -12,6 +12,7 @@ import {
 /** AI-backed interview tests require additional headroom for cold-start provider calls. */
 const INTERVIEW_TEST_TIMEOUT_MS = 15_000;
 setDefaultTimeout(INTERVIEW_TEST_TIMEOUT_MS);
+
 import type { InterviewResponse, InterviewSession } from "@bao/shared";
 import type { AppRequestHandler } from "./test-utils";
 import { requestJson } from "./test-utils";

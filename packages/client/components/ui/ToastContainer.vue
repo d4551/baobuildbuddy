@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { TOAST_CONTAINER_DOM_ID } from "~/constants/layout";
 import type { ToastType } from "~/composables/useToast";
+import { TOAST_CONTAINER_DOM_ID } from "~/constants/layout";
 
 const { toasts, removeToast } = useToast();
 const { t } = useI18n();

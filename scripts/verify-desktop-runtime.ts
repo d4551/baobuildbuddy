@@ -10,12 +10,12 @@ import {
 } from "../packages/shared/src/constants/endpoints";
 import {
   DESKTOP_RUNTIME_API_BASE,
-  DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS,
   DESKTOP_RUNTIME_BUILD_SERVER_PORT,
   DESKTOP_RUNTIME_CORS_ORIGINS,
   DESKTOP_RUNTIME_HOST,
   DESKTOP_RUNTIME_MANIFEST_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
+  DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS,
   DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
@@ -26,12 +26,12 @@ import {
 } from "../packages/shared/src/schemas/rpa-events.schema";
 import {
   buildDesktopRuntimeManifest,
+  type DesktopRuntimeManifest,
   getDesktopRuntimeManifestMismatches,
   listDesktopRuntimeContractPaths,
   parseDesktopRuntimeManifest,
   resolveDesktopRuntimeTargetInfoFromHost,
   resolveDesktopRuntimeTargetInfoFromTauriTarget,
-  type DesktopRuntimeManifest,
 } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";

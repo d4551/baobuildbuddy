@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import {
   AI_PROVIDER_CATALOG,
+  type DashboardStats,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
   OLLAMA_WEBSITE_URL,
-  type DashboardStats,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";

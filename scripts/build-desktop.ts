@@ -27,7 +27,7 @@ const runCommand = async (
     readonly env?: Record<string, string | undefined>;
   } = {},
 ): Promise<number> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn(command as string[], {
     cwd: options.cwd ?? REPO_ROOT,
     env: options.env ?? process.env,
     stdout: "inherit",

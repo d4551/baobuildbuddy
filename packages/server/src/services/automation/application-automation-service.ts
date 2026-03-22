@@ -1,35 +1,49 @@
 import { mkdirSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
+import type {
+  AutomationScrapeTarget,
+  AutomationSettings,
+  EmailResponseRequest,
+  EmailResponseResult,
+  EmailResponseTone,
+  ErrorEnvelope,
+  ResumeData,
+  RpaCapabilityAuditEntry,
+  RpaCapabilityAuditReport,
+  RpaCapabilityAuditSummary,
+  RpaRunEvent,
+  RpaRunResult,
+} from "@bao/shared";
 import {
-  DECIMAL_RADIX,
   API_ERROR_EMAIL_DELIVERY_FAILED,
   API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING,
   API_ERROR_EMPTY_EMAIL_RESPONSE,
-  API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED,
-  API_MESSAGE_EMAIL_RESPONSE_DELIVERED,
-  API_MESSAGE_EMAIL_RESPONSE_GENERATED,
-  API_MESSAGE_JOB_APPLICATION_AUTOMATION_COMPLETED,
   API_ERROR_GENERATE_EMAIL_RESPONSE,
+  API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED,
   API_ERROR_NO_AI_PROVIDER_EMAIL,
   API_ERROR_RUN_ID_INVALID,
   API_ERROR_SCRAPE_JOBS_FAILED,
   API_ERROR_SCRAPE_STUDIOS_FAILED,
+  API_MESSAGE_EMAIL_RESPONSE_DELIVERED,
+  API_MESSAGE_EMAIL_RESPONSE_GENERATED,
+  API_MESSAGE_JOB_APPLICATION_AUTOMATION_COMPLETED,
   AUTOMATION_CLEANUP_LIMIT,
   AUTOMATION_FINISHED_PROGRESS,
   AUTOMATION_MAX_CONCURRENT_RUNS,
+  AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH,
   AUTOMATION_MAX_PROGRESS_STEPS,
+  AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS,
   AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
+  AUTOMATION_MAX_SCREENSHOT_RETENTION_DAYS,
+  AUTOMATION_MIN_ID_LENGTH,
+  AUTOMATION_SCHEDULE_RETRY_DELAY_MS,
   AUTOMATION_SCRAPE_JOB_TARGETS,
   AUTOMATION_SCRAPE_TARGETS,
-  AUTOMATION_MIN_ID_LENGTH,
-  AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH,
-  AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS,
-  AUTOMATION_MAX_SCREENSHOT_RETENTION_DAYS,
-  AUTOMATION_SCHEDULE_RETRY_DELAY_MS,
   automationScrapeTargetToAction,
   automationScrapeTargetToPortalId,
   automationSettingsSchema,
   buildRpaCapabilityIdFromScrapeTarget,
+  DECIMAL_RADIX,
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   emailTransportSettingsSchema,
@@ -46,37 +60,23 @@ import {
   settle,
   toErrorMessage,
 } from "@bao/shared";
-import type {
-  AutomationScrapeTarget,
-  AutomationSettings,
-  EmailResponseRequest,
-  EmailResponseResult,
-  EmailResponseTone,
-  ErrorEnvelope,
-  ResumeData,
-  RpaCapabilityAuditEntry,
-  RpaCapabilityAuditReport,
-  RpaCapabilityAuditSummary,
-  RpaRunEvent,
-  RpaRunResult,
-} from "@bao/shared";
 import { and, count, eq, inArray, ne, sql } from "drizzle-orm";
 import { config } from "../../config/env";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
 import { db } from "../../db/client";
-import { coverLetters, resumes } from "../../db/schema/schema-modules";
 import { automationRuns } from "../../db/schema/automation-runs";
+import { coverLetters, resumes } from "../../db/schema/schema-modules";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
+import { createServerLogger } from "../../utils/logger";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { AIService } from "../ai/ai-service";
 import { emailResponsePrompt } from "../ai/prompts";
-import { emailDeliveryService, type EmailTransportRuntimeConfig } from "../email-delivery-service";
+import { type EmailTransportRuntimeConfig, emailDeliveryService } from "../email-delivery-service";
 import { exportService } from "../export-service";
 import { gamificationService } from "../gamification-service";
+import { loadJobProviderSettings } from "../jobs/providers/provider-settings";
 import { resumeService } from "../resume-service";
 import { scraperService } from "../scraper-service";
-import { loadJobProviderSettings } from "../jobs/providers/provider-settings";
-import { createServerLogger } from "../../utils/logger";
 import {
   MAX_CUSTOM_ANSWER_KEY_LENGTH,
   MAX_CUSTOM_ANSWER_VALUE_LENGTH,
@@ -85,9 +85,9 @@ import {
 } from "./automation-validation";
 import { type RpaScriptExecutionResult, runRpaScript } from "./rpa-runner";
 import {
-  smartFieldMapper,
   type SmartFieldAnalysisContext,
   type SmartFieldAnalysisResult,
+  smartFieldMapper,
 } from "./smart-field-mapper";
 
 interface JobApplyPayload {

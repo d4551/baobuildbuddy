@@ -10,9 +10,11 @@ describe("orderTargetsPresentInProvenance", () => {
   });
 
   test("omits targets missing from the provenance key set", () => {
-    expect(
-      orderTargetsPresentInProvenance(new Set(["macos", "linux-arm64", "windows"])),
-    ).toEqual(["macos", "linux-arm64", "windows"]);
+    expect(orderTargetsPresentInProvenance(new Set(["macos", "linux-arm64", "windows"]))).toEqual([
+      "macos",
+      "linux-arm64",
+      "windows",
+    ]);
   });
 
   test("returns empty when no keys match", () => {

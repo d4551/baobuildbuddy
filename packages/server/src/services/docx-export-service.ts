@@ -211,7 +211,9 @@ export class DocxExportService {
     children.push(createDivider(config.primaryColor));
 
     if (resume.summary) {
-      children.push(createSectionHeading("Summary", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT));
+      children.push(
+        createSectionHeading("Summary", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
+      );
       children.push(
         new Paragraph({
           children: [
@@ -227,26 +229,34 @@ export class DocxExportService {
     }
 
     if (resume.experience && resume.experience.length > 0) {
-      children.push(createSectionHeading("Experience", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT));
+      children.push(
+        createSectionHeading("Experience", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
+      );
       for (const item of resume.experience) {
         children.push(...this.buildExperienceItem(item, config));
       }
     }
 
     if (resume.education && resume.education.length > 0) {
-      children.push(createSectionHeading("Education", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT));
+      children.push(
+        createSectionHeading("Education", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
+      );
       for (const item of resume.education) {
         children.push(...this.buildEducationItem(item, config));
       }
     }
 
     if (resume.skills) {
-      children.push(createSectionHeading("Skills", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT));
+      children.push(
+        createSectionHeading("Skills", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
+      );
       children.push(...this.buildSkillsSection(resume.skills, config));
     }
 
     if (resume.projects && resume.projects.length > 0) {
-      children.push(createSectionHeading("Projects", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT));
+      children.push(
+        createSectionHeading("Projects", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
+      );
       for (const project of resume.projects) {
         children.push(...this.buildProjectItem(project, config));
       }
@@ -586,8 +596,17 @@ export class DocxExportService {
       items.push(
         new Paragraph({
           children: [
-            new TextRun({ text: "GPA: ", bold: true, size: DOCX_RESUME_FONT_ACCENT_PT * 2, font: config.fontFamily }),
-            new TextRun({ text: item.gpa, size: DOCX_RESUME_FONT_ACCENT_PT * 2, font: config.fontFamily }),
+            new TextRun({
+              text: "GPA: ",
+              bold: true,
+              size: DOCX_RESUME_FONT_ACCENT_PT * 2,
+              font: config.fontFamily,
+            }),
+            new TextRun({
+              text: item.gpa,
+              size: DOCX_RESUME_FONT_ACCENT_PT * 2,
+              font: config.fontFamily,
+            }),
           ],
         }),
       );
@@ -603,7 +622,12 @@ export class DocxExportService {
       items.push(
         new Paragraph({
           children: [
-            new TextRun({ text: "Technical: ", bold: true, size: DOCX_RESUME_FONT_BODY_PT * 2, font: config.fontFamily }),
+            new TextRun({
+              text: "Technical: ",
+              bold: true,
+              size: DOCX_RESUME_FONT_BODY_PT * 2,
+              font: config.fontFamily,
+            }),
             new TextRun({
               text: skills.technical.join(", "),
               size: DOCX_RESUME_FONT_BODY_PT * 2,
@@ -619,7 +643,12 @@ export class DocxExportService {
       items.push(
         new Paragraph({
           children: [
-            new TextRun({ text: "Soft Skills: ", bold: true, size: DOCX_RESUME_FONT_BODY_PT * 2, font: config.fontFamily }),
+            new TextRun({
+              text: "Soft Skills: ",
+              bold: true,
+              size: DOCX_RESUME_FONT_BODY_PT * 2,
+              font: config.fontFamily,
+            }),
             new TextRun({
               text: skills.soft.join(", "),
               size: DOCX_RESUME_FONT_BODY_PT * 2,
@@ -635,7 +664,12 @@ export class DocxExportService {
       items.push(
         new Paragraph({
           children: [
-            new TextRun({ text: "Gaming: ", bold: true, size: DOCX_RESUME_FONT_BODY_PT * 2, font: config.fontFamily }),
+            new TextRun({
+              text: "Gaming: ",
+              bold: true,
+              size: DOCX_RESUME_FONT_BODY_PT * 2,
+              font: config.fontFamily,
+            }),
             new TextRun({
               text: skills.gaming.join(", "),
               size: DOCX_RESUME_FONT_BODY_PT * 2,

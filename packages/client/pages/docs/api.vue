@@ -227,7 +227,7 @@ const readOpenApiSpec = (value: unknown): OpenApiSpec | null => {
       description: typeof infoRaw?.description === "string" ? infoRaw.description : undefined,
       version: typeof infoRaw?.version === "string" ? infoRaw.version : undefined,
     },
-    paths: isRecord(value.paths) ? value.paths : {},
+    paths: isRecord(value.paths) ? (value.paths as Record<string, Record<string, unknown>>) : {},
   };
 };
 
@@ -468,7 +468,7 @@ const testerStateLabel = computed(() => {
   return t(`apiDocs.state.${testerState.value}`);
 });
 const activeEndpointId = computed(() => {
-  if (activeSectionId.value.length > 0) {
+  if (activeSectionId.value && activeSectionId.value.length > 0) {
     return activeSectionId.value;
   }
   const firstGroup = endpointGroups.value[0];
@@ -755,7 +755,7 @@ onBeforeUnmount(() => {
         type="button"
         class="btn btn-sm btn-outline"
         :aria-label="t('apiDocs.actions.retry')"
-        @click="refreshSpec"
+        @click="() => refreshSpec()"
       >
         {{ t("apiDocs.actions.retry") }}
       </button>
@@ -812,7 +812,7 @@ onBeforeUnmount(() => {
               v-for="endpoint in group.endpoints"
               :id="endpoint.id"
               :key="endpoint.id"
-              :ref="(element) => setSectionRef(endpoint.id, element)"
+              :ref="(element) => setSectionRef(endpoint.id, element as Element | null)"
               tabindex="-1"
               class="scroll-mt-24 space-y-4 rounded-lg border border-base-200 bg-base-100 p-4"
             >

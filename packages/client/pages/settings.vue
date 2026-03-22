@@ -1,26 +1,23 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
-import { useAsyncData, useNuxtApp, useServerSeoMeta } from "#imports";
 import type {
   AutomationSettings,
   BrandSettings,
   BrandSettingsPatch,
   EmailTransportSettings,
-  UserProfile,
 } from "@bao/shared";
 import {
   AI_PROVIDER_CATALOG,
   type AIProviderType,
-  APP_LANGUAGE_OPTIONS,
   APP_LANGUAGE_LABELS,
+  APP_LANGUAGE_OPTIONS,
+  type AppLanguageCode,
+  AUTOMATION_BROWSER_OPTIONS,
   brandContentSettingsSchema,
   brandSettingsSchema,
   brandThemePaletteSchema,
-  DEFAULT_BRAND_SETTINGS,
-  type AppLanguageCode,
-  AUTOMATION_BROWSER_OPTIONS,
   DEFAULT_APP_LANGUAGE,
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_BRAND_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
   EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
@@ -34,7 +31,9 @@ import {
   resolveBrandSettings,
   THEME_NAMES,
 } from "@bao/shared";
+import { computed, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { useAsyncData, useNuxtApp, useServerSeoMeta } from "#imports";
 import { settlePromise } from "~/composables/async-flow";
 import { useBrand } from "~/composables/useBrand";
 import { useSettings } from "~/composables/useSettings";
@@ -60,8 +59,7 @@ type ProviderInputConfig = {
   field: ProviderField;
 };
 
-type ProfileUpdatePayload = Partial<UserProfile> &
-  Pick<UserProfile, "name" | "technicalSkills" | "softSkills">;
+
 
 const BRAND_EDITOR_PANELS = [
   { id: "identity", labelKey: "settings.brand.tabs.identity" },
@@ -617,7 +615,7 @@ async function handleSaveProfile() {
 
   profileSaveState.value = "saving";
 
-  const profilePayload: ProfileUpdatePayload = {
+  const profilePayload: Parameters<typeof updateProfile>[0] = {
     name,
     technicalSkills: parseDelimitedList(profileForm.technicalSkillsText),
     softSkills: parseDelimitedList(profileForm.softSkillsText),

@@ -5,12 +5,13 @@ import {
   API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
   API_MESSAGE_AUTH_DISABLED,
   API_MESSAGE_SAVE_API_KEY_ONCE,
+  AUTH_KEY_PREFIX,
+  AUTH_KEY_RANDOM_BYTES,
   AUTH_SETUP_TOKEN_HEADER,
   DEFAULT_PROFILE_ID,
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
 } from "@bao/shared";
-import { AUTH_KEY_PREFIX, AUTH_KEY_RANDOM_BYTES } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";

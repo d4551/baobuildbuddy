@@ -41,7 +41,7 @@ const runCommand = async (
   command: readonly string[],
   env: Record<string, string | undefined> = process.env,
 ): Promise<number> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn(command as string[], {
     cwd: process.cwd(),
     stdout: "inherit",
     stderr: "inherit",
@@ -68,7 +68,7 @@ const readCommand = async (
   stdout: string;
   stderr: string;
 }> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn(command as string[], {
     cwd: process.cwd(),
     stdout: "pipe",
     stderr: "pipe",

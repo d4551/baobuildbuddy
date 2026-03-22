@@ -4,8 +4,8 @@ import { extractGamesJobsDirectJobs } from "./gamesjobsdirect";
 import { extractGrackleJobs } from "./grackle";
 import { extractHitmarkerJobs } from "./hitmarker";
 import { extractPocketGamerJobs } from "./pocketgamer";
-import { extractRemoteGameJobs } from "./remotegamejobs";
 import type { PageEvaluator } from "./provider-types";
+import { extractRemoteGameJobs } from "./remotegamejobs";
 import { extractWorkWithIndiesJobs } from "./workwithindies";
 
 const DOM_GLOBAL_KEYS = ["window", "document", "HTMLElement", "HTMLAnchorElement"] as const;

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
 import { useDebouncedValue } from "~/composables/useDebouncedValue";
@@ -12,6 +11,7 @@ import {
 } from "~/constants/studios";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
+import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 const { $toast } = useNuxtApp();
 const route = useRoute();
@@ -88,7 +88,9 @@ const previewStudio = computed(
   () => studios.value.find((studio) => studio.id === previewStudioId.value) ?? null,
 );
 const routeStudioId = computed(() =>
-  queryValueToString(route.query[APP_ROUTE_QUERY_KEYS.studioId]),
+  queryValueToString(
+    route.query[APP_ROUTE_QUERY_KEYS.studioId] as string | string[] | null | undefined,
+  ),
 );
 const searchableStudios = computed(() =>
   studios.value.map((studio) => ({

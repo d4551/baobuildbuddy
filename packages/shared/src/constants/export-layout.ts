@@ -37,17 +37,17 @@ export const EXPORT_DATE_LOCALE = "en-US";
 export const MIME_TYPE_DOCX =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-/** DOCX resume font sizes in half-points (1 pt = 2 half-points). */
+/** DOCX resume font sizes in points. */
 export const DOCX_RESUME_FONT_NAME_PT = 24;
 export const DOCX_RESUME_FONT_HEADER_PT = 14;
 export const DOCX_RESUME_FONT_BODY_PT = 11;
 export const DOCX_RESUME_FONT_ACCENT_PT = 9;
 
-/** DOCX cover-letter font sizes in half-points. */
+/** DOCX cover-letter font sizes in points. */
 export const DOCX_COVER_LETTER_FONT_BODY_PT = 11;
 export const DOCX_COVER_LETTER_FONT_HEADER_PT = 14;
 
-/** DOCX portfolio font sizes in half-points. */
+/** DOCX portfolio font sizes in points. */
 export const DOCX_PORTFOLIO_FONT_TITLE_PT = 36;
 export const DOCX_PORTFOLIO_FONT_HEADING_PT = 16;
 export const DOCX_PORTFOLIO_FONT_BODY_PT = 10;

@@ -69,7 +69,7 @@ const scheduledRun = ref<RpaRunExecutionEnvelope | null>(null);
 
 const streamRun = computed(() => runStream.run.value);
 const streamState = computed(() => runStream.state.value);
-const streamEvents = computed<readonly RpaRunEvent[]>(() => runStream.events.value);
+const streamEvents = computed(() => runStream.events.value);
 const streamError = computed(() => runStream.streamError.value);
 const activeRunId = computed<string>(() => streamRun.value?.id ?? startedRunId.value);
 const hasActiveRun = computed<boolean>(() => activeRunId.value.length > 0);
@@ -94,15 +94,15 @@ const streamTotalSteps = computed<number | null>(() => streamRun.value?.totalSte
 const streamStateLabelKey = computed<string>(
   () => `automation.jobApply.stream.states.${streamState.value}`,
 );
-const streamTimelineRows = computed<RpaRunEvent[]>(() =>
-  [...streamEvents.value].slice(-12).reverse(),
+const streamTimelineRows = computed<RpaRunEvent[]>(
+  () => [...streamEvents.value].slice(-12).reverse() as RpaRunEvent[],
 );
 
 const lifecycleStepClasses = computed<[string, string, string]>(() => {
   const runStatus = streamRun.value?.status ?? RUN_STATUS_PENDING;
   const queueStep = "step step-primary";
   const runningStep =
-    runStatus === RUN_STATUS_RUNNING || TERMINAL_RUN_STATUSES.has(runStatus)
+    runStatus === RUN_STATUS_RUNNING || TERMINAL_RUN_STATUSES.has(runStatus as "success" | "error")
       ? "step step-primary"
       : "step";
   const completionStep =

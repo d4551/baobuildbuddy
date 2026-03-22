@@ -1,6 +1,6 @@
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
 import { createI18n } from "vue-i18n";
-import { I18N_MESSAGE_CATALOG, type AvailableLocale } from "~/constants/i18n-catalog";
+import { type AvailableLocale, I18N_MESSAGE_CATALOG } from "~/constants/i18n-catalog";
 
 const DEFAULT_LOCALE: AvailableLocale = DEFAULT_APP_LANGUAGE;
 const ACCEPT_LANGUAGE_SEPARATOR = ",";

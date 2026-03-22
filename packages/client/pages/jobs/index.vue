@@ -206,9 +206,13 @@ function getMatchScoreColor(score: number) {
 }
 
 function formatDate(date: string) {
-  return formatRelativeTimeForDate(date, (key, params) => t(key, params), {
-    keyPrefix: "jobsPage.date",
-  });
+  return formatRelativeTimeForDate(
+    date,
+    (key, params) => t(key, params as Record<string, unknown>),
+    {
+      keyPrefix: "jobsPage.date",
+    },
+  );
 }
 
 function experienceOptionLabel(value: FilterSelection<JobExperienceLevel>): string {

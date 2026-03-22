@@ -3,12 +3,12 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { generateId } from "@bao/shared";
-import { runRpaScript } from "./rpa-runner";
 import {
   createJobApplyFixtureSelectorMap,
-  startJobApplyFixtureServer,
   type SubmittedJobApplyFixturePayload,
+  startJobApplyFixtureServer,
 } from "../../test-support/automation/job-apply-fixture";
+import { runRpaScript } from "./rpa-runner";
 
 const TEMP_DIRECTORY_PREFIX = "bao-job-apply-script-";
 const TEST_RESUME_FILE_NAME = "candidate-resume.pdf";

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   APP_ROUTE_QUERY_KEYS,
+  DECIMAL_RADIX,
   type InterviewSession,
   SCORE_PASS_THRESHOLD,
   SCORE_WARNING_THRESHOLD,
@@ -11,7 +12,6 @@ import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
-import { DECIMAL_RADIX } from "@bao/shared";
 
 const route = useRoute();
 const router = useRouter();
@@ -206,8 +206,9 @@ function scoreBadgeClass(value: number | undefined): string {
     return "badge-warning";
   }
 
-  if (value >= SCORE_PASS_THRESHOLD) return "badge-success";
-  if (value >= SCORE_WARNING_THRESHOLD) return "badge-warning";
+  const validScore = value ?? 0;
+  if (validScore >= SCORE_PASS_THRESHOLD) return "badge-success";
+  if (validScore >= SCORE_WARNING_THRESHOLD) return "badge-warning";
   return "badge-error";
 }
 
@@ -215,18 +216,22 @@ function questionScoreText(score: number | undefined): number {
   if (!Number.isFinite(score ?? NaN)) {
     return 0;
   }
-  return score;
+  return score ?? 0;
 }
 
-function getScoreColorClass(score: number): string {
-  if (score >= SCORE_PASS_THRESHOLD) return "text-success";
-  if (score >= SCORE_WARNING_THRESHOLD) return "text-warning";
+function getScoreColorClass(score: number | undefined): string {
+  if (!Number.isFinite(score ?? NaN)) return "text-warning";
+  const validScore = score ?? 0;
+  if (validScore >= SCORE_PASS_THRESHOLD) return "text-success";
+  if (validScore >= SCORE_WARNING_THRESHOLD) return "text-warning";
   return "text-error";
 }
 
-function getTimelineLineClass(score: number): string {
-  if (score >= SCORE_PASS_THRESHOLD) return "bg-success";
-  if (score >= SCORE_WARNING_THRESHOLD) return "bg-warning";
+function getTimelineLineClass(score: number | undefined): string {
+  if (!Number.isFinite(score ?? NaN)) return "bg-warning";
+  const validScore = score ?? 0;
+  if (validScore >= SCORE_PASS_THRESHOLD) return "bg-success";
+  if (validScore >= SCORE_WARNING_THRESHOLD) return "bg-warning";
   return "bg-error";
 }
 </script>
@@ -309,7 +314,7 @@ function getTimelineLineClass(score: number): string {
                         {{ formatScore(session.score) }}
                       </span>
                     </td>
-                    <td>{{ formatDuration(session.duration) }}</td>
+                    <td>{{ formatDuration(session.duration ?? 0) }}</td>
                     <td>
                       <button
                         class="btn btn-ghost btn-xs"
@@ -348,7 +353,7 @@ function getTimelineLineClass(score: number): string {
                   <div class="timeline-end timeline-box">
                     <p class="font-semibold">{{ session.studioName }}</p>
                     <p class="text-sm text-base-content/70">{{ session.role }}</p>
-                    <p class="text-xs text-base-content/60">{{ formatDuration(session.duration) }}</p>
+                    <p class="text-xs text-base-content/60">{{ formatDuration(session.duration ?? 0) }}</p>
                     <button
                       class="btn btn-ghost btn-xs mt-2"
                       :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"

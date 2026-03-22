@@ -12,6 +12,7 @@ import { swagger } from "@elysiajs/swagger";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "./config/env";
+import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 import { HEALTHCHECK_PROBE_SQL, sqlite } from "./db/client";
 import { authGuard } from "./middleware/auth";
 import { errorHandler } from "./middleware/error-handler";
@@ -38,7 +39,6 @@ import {
 import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
-import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 
 const getRequestOrigin = (request: Request): string | null =>
   request.headers.get("origin") ?? request.headers.get("Origin");

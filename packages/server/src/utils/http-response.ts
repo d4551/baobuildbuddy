@@ -21,8 +21,9 @@ export const MIME_TYPE_PDF = "application/pdf";
 /**
  * Canonical DOCX content-type value used by Word document export endpoints.
  */
-export const MIME_TYPE_DOCX =
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+import { MIME_TYPE_DOCX } from "@bao/shared";
+
+export { MIME_TYPE_DOCX };
 
 /**
  * Canonical generic binary content-type fallback value.
@@ -84,10 +85,7 @@ export const createDocxAttachmentHeaders = (
 /**
  * Creates a binary DOCX attachment response with canonical headers.
  */
-export const createDocxAttachmentResponse = (
-  payload: BinaryPayload,
-  fileName: string,
-): Response =>
+export const createDocxAttachmentResponse = (payload: BinaryPayload, fileName: string): Response =>
   new Response(new Blob([normalizeBinaryPayload(payload)]), {
     headers: createDocxAttachmentHeaders(fileName),
   });

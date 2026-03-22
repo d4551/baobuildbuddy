@@ -7,28 +7,25 @@ import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
+  type PortfolioMetadata,
+  ROUTE_GAMIFICATION_XP,
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_ITEMS_MEDIUM,
   SCHEMA_MAX_ITEMS_SMALL,
+  SCHEMA_MAX_LENGTH_DESCRIPTION,
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_LABEL,
   SCHEMA_MAX_LENGTH_MICRO,
   SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_URL,
-  ROUTE_GAMIFICATION_XP,
-  SCHEMA_MAX_LENGTH_DESCRIPTION,
-  type PortfolioMetadata,
   settle,
 } from "@bao/shared";
 import { Elysia, t } from "elysia";
-import { exportService } from "../services/export-service";
 import { docxExportService } from "../services/docx-export-service";
+import { exportService } from "../services/export-service";
 import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
-import {
-  createDocxAttachmentResponse,
-  createPdfAttachmentResponse,
-} from "../utils/http-response";
+import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
 
 export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfolio"] })
   .get("/", async () => {
@@ -226,10 +223,7 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
               docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
           };
         }
-        return createDocxAttachmentResponse(
-          docxResult.value,
-          `portfolio-${portfolio.id}.docx`,
-        );
+        return createDocxAttachmentResponse(docxResult.value, `portfolio-${portfolio.id}.docx`);
       }
 
       const exportResult = await settle(

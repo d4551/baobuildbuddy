@@ -275,10 +275,10 @@ if (import.meta.main) {
 }
 
 export {
+  advancedSearch,
+  calculateMatches,
+  maintainCache,
   refreshJobs,
   searchUnityJobs,
-  calculateMatches,
   trackApplications,
-  advancedSearch,
-  maintainCache,
 };

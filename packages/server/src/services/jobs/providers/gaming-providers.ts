@@ -1,13 +1,13 @@
 import {
+  type GamingPortalConfig,
+  type GamingPortalId,
   generateId,
   safeParseJson,
   settle,
   toErrorMessage,
-  type GamingPortalConfig,
-  type GamingPortalId,
 } from "@bao/shared";
-import { type ScrapedJob, scraperService } from "../../scraper-service";
 import { createServerLogger } from "../../../utils/logger";
+import { type ScrapedJob, scraperService } from "../../scraper-service";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 

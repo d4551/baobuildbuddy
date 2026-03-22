@@ -1,26 +1,26 @@
+import { join } from "node:path";
 import {
   API_ERROR_INVALID_RUN_ID,
   API_ERROR_INVALID_SCREENSHOT_INDEX,
+  API_ERROR_INVALID_SCREENSHOT_METADATA,
   API_ERROR_SCREENSHOT_FILE_MISSING,
   API_ERROR_SCREENSHOT_INDEX_OUT_OF_RANGE,
-  API_ERROR_INVALID_SCREENSHOT_METADATA,
   API_ERROR_SCREENSHOT_NOT_FOUND,
+  DECIMAL_RADIX,
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_NOT_FOUND,
   RUN_ID_MIN_LENGTH,
   RUN_ID_SAFE_PATTERN_SOURCE,
   settle,
-  DECIMAL_RADIX,
 } from "@bao/shared";
-import { join } from "node:path";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import {
-  CACHE_CONTROL_PRIVATE_NO_STORE,
   type BinaryPayload,
+  CACHE_CONTROL_PRIVATE_NO_STORE,
   createBinaryResponse,
   MIME_TYPE_OCTET_STREAM,
 } from "../utils/http-response";

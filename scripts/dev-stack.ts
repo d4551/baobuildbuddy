@@ -1,3 +1,4 @@
+import { DECIMAL_RADIX } from "../packages/shared/src/constants/client-config";
 import {
   DEFAULT_CLIENT_DEV_PORT,
   DEFAULT_PINCHTAB_PORT,
@@ -5,10 +6,9 @@ import {
   MAX_PORT,
   MIN_PORT,
 } from "../packages/shared/src/constants/ports";
-import { DECIMAL_RADIX } from "../packages/shared/src/constants/client-config";
 import {
-  LOOPBACK_HOST,
   DEFAULT_HOST,
+  LOOPBACK_HOST,
   LOOPBACK_HOST_IPV4,
 } from "../packages/shared/src/constants/runtime";
 import {

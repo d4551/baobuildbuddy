@@ -9,13 +9,11 @@ import type {
 } from "@bao/shared";
 import {
   AI_PROVIDER_ID_LIST,
+  AI_PROVIDER_TEST_STRATEGY_BY_ID,
   API_ERROR_INIT_SETTINGS_ROW,
   API_ERROR_INVALID_AUTOMATION_PAYLOAD,
   API_ERROR_LOAD_SETTINGS,
   API_ERROR_UNKNOWN_PROVIDER,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_UNPROCESSABLE_ENTITY,
-  AI_PROVIDER_TEST_STRATEGY_BY_ID,
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
   automationSettingsSchema,
@@ -27,41 +25,43 @@ import {
   EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
   EMAIL_TRANSPORT_SECURITY_OPTIONS,
   emailTransportSettingsSchema,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
   MAX_PORT,
   MIN_PORT,
+  mergeBrandSettings,
+  normalizeAppDataTheme,
+  resolveBrandSettings,
+  SCHEMA_MAX_BOARD_RESULT_LIMIT,
+  SCHEMA_MAX_ITEMS_BOARDS,
+  SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_LENGTH_API_KEY,
   SCHEMA_MAX_LENGTH_EMAIL,
+  SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_MICRO,
   SCHEMA_MAX_LENGTH_MODEL,
-  SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
   SCHEMA_MAX_LENGTH_SETTINGS_URL,
-  SCHEMA_MAX_LENGTH_MICRO,
-  SCHEMA_MAX_BOARD_RESULT_LIMIT,
+  SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_PAGES_MAX,
   SCHEMA_MAX_PAGES_MIN,
   SCHEMA_PROVIDER_TIMEOUT_MAX_MS,
   SCHEMA_PROVIDER_TIMEOUT_MIN_MS,
-  SCHEMA_MAX_ITEMS_BOARDS,
-  SCHEMA_MAX_ITEMS_LARGE,
-  SCHEMA_MAX_LENGTH_ID,
-  settle,
   SPEECH_PROVIDER_OPTIONS,
-  mergeBrandSettings,
-  normalizeAppDataTheme,
-  resolveBrandSettings,
+  settle,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
-import { db } from "../db/client";
-import { settings } from "../db/schema/settings";
-import { DATA_EXPORT_VERSION } from "../services/data-service";
-import { resolveRateLimitClientKey } from "../utils/request";
 import {
   RATE_LIMIT_SETTINGS_DURATION_MS,
   RATE_LIMIT_SETTINGS_MAX_REQUESTS,
 } from "../config/rate-limit";
+import { db } from "../db/client";
+import { settings } from "../db/schema/settings";
+import { DATA_EXPORT_VERSION } from "../services/data-service";
+import { resolveRateLimitClientKey } from "../utils/request";
 
 const VALID_PROVIDERS = AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]];
 const KEY_MASK_VISIBLE_CHARS = 4;

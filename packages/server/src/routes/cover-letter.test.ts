@@ -136,6 +136,24 @@ function registerDynamicGenerationTests(): void {
     );
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
+
+  test("POST /api/cover-letters/:id/export returns a DOCX attachment", async () => {
+    const response = await app.handle(
+      new Request(`http://localhost/api/cover-letters/${generatedId}/export`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ format: "docx" }),
+      }),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    expect(response.headers.get("content-disposition")).toContain(
+      `cover-letter-${generatedId}.docx`,
+    );
+    expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
+  });
 }
 
 describe("cover-letter routes create/read", () => {

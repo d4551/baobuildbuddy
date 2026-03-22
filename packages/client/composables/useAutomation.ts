@@ -1,9 +1,8 @@
-import type { AsyncData } from "nuxt/app";
 import {
   API_ENDPOINTS,
-  type AutomationScrapeTarget,
   type AutomationRunStatus,
   type AutomationRunType,
+  type AutomationScrapeTarget,
   buildAutomationRunEndpoint,
   type EmailResponseRequest,
   type EmailResponseResult,
@@ -14,9 +13,10 @@ import {
   safeParseJson,
   WS_ENDPOINTS,
 } from "@bao/shared";
-import { useFetch, useRequestURL, useRuntimeConfig } from "#imports";
+import type { AsyncData } from "nuxt/app";
 import { $fetch, type FetchError } from "ofetch";
 import type { MaybeRef } from "vue";
+import { useFetch, useRequestURL, useRuntimeConfig } from "#imports";
 import { resolveApiEndpoint, resolveWebSocketEndpoint } from "~/utils/endpoints";
 
 interface JobApplyBody {

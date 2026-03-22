@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_LANGUAGE_LABELS, APP_ROUTES, THEME_NAMES, type AppLanguageCode } from "@bao/shared";
+import { APP_LANGUAGE_LABELS, APP_ROUTES, type AppLanguageCode, THEME_NAMES } from "@bao/shared";
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { APP_DRAWER_ID } from "~/constants/layout";

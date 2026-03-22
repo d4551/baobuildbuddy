@@ -1,7 +1,7 @@
 import type { AutocompleteResult, SearchResult, SearchResults } from "@bao/shared";
 import { asNumber, asString, isRecord, STATE_KEYS } from "@bao/shared";
-import { computed, readonly, useState } from "#imports";
 import { useI18n } from "vue-i18n";
+import { computed, readonly, useState } from "#imports";
 import { assertApiResponse, settlePromise, withLoadingState } from "./async-flow";
 
 const SEARCH_RESULT_TYPE_MAP: Record<string, SearchResult["type"]> = {

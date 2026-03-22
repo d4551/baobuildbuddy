@@ -100,7 +100,7 @@ function handleNavigationKeydown(event: KeyboardEvent): void {
 
   if (event.key === "Home") {
     activePageIndex.value = 0;
-    selectPage(normalizedPageNumbers.value[0]);
+    selectPage(normalizedPageNumbers.value[0] ?? 1);
     getPageButtons()[0]?.focus();
     return;
   }
@@ -108,7 +108,7 @@ function handleNavigationKeydown(event: KeyboardEvent): void {
   if (event.key === "End") {
     const lastIndex = normalizedPageNumbers.value.length - 1;
     activePageIndex.value = lastIndex;
-    selectPage(normalizedPageNumbers.value[lastIndex]);
+    selectPage(normalizedPageNumbers.value[lastIndex] ?? 1);
     getPageButtons()[lastIndex]?.focus();
     return;
   }
@@ -116,7 +116,7 @@ function handleNavigationKeydown(event: KeyboardEvent): void {
   const direction = event.key === "ArrowRight" ? 1 : -1;
   const nextIndex = clampPageIndex(activePageIndex.value + direction);
   activePageIndex.value = nextIndex;
-  selectPage(normalizedPageNumbers.value[nextIndex]);
+  selectPage(normalizedPageNumbers.value[nextIndex] ?? 1);
   getPageButtons()[nextIndex]?.focus();
 }
 
@@ -166,7 +166,7 @@ watch(
           :aria-label="pageAria(page)"
           :aria-current="page === currentPage ? 'page' : undefined"
           :tabindex="page === currentPage ? 0 : -1"
-          :ref="(element) => setPageRef(index, element)"
+          :ref="(element) => setPageRef(index, element as Element | null)"
           @focus="setActivePageIndex(page)"
           @keydown="handleNavigationKeydown"
           @click="selectPage(page)"

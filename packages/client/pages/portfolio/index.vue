@@ -335,7 +335,8 @@ async function moveProject(projectId: string | undefined, direction: ProjectDire
   if (targetIndex < 0 || targetIndex >= projects.value.length) return;
 
   const reordered = [...displayProjects.value];
-  const [movedProject] = reordered.splice(index, 1);
+  const movedProject = reordered.splice(index, 1)[0];
+  if (!movedProject) return;
   reordered.splice(targetIndex, 0, movedProject);
 
   const orderedIds = reordered

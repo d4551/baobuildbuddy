@@ -40,7 +40,7 @@ const matchScoreColor = computed(() => {
 });
 
 const relativeTime = computed(() =>
-  formatRelativeTimeForDate(props.job.postedDate, (key, params) => t(key, params), {
+  formatRelativeTimeForDate(props.job.postedDate, (key, params) => t(key, params || {}), {
     keyPrefix: "jobCard.relativeTime",
   }),
 );
@@ -48,7 +48,11 @@ const jobDetailRoute = computed(() => APP_ROUTE_BUILDERS.jobDetail(props.job.id)
 
 function toggleSave() {
   isSaved.value = !isSaved.value;
-  emit(isSaved.value ? "save" : "unsave");
+  if (isSaved.value) {
+    emit("save");
+  } else {
+    emit("unsave");
+  }
 }
 </script>
 

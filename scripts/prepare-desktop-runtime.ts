@@ -388,7 +388,7 @@ const runCommand = async (
     env?: Record<string, string | undefined>;
   } = {},
 ): Promise<void> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn(command as string[], {
     cwd: options.cwd ?? REPO_ROOT,
     env: options.env ?? process.env,
     stdout: "inherit",
@@ -421,7 +421,7 @@ const runCommandCaptured = async (
   readonly stdout: string;
   readonly stderr: string;
 }> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn(command as string[], {
     cwd: options.cwd ?? REPO_ROOT,
     env: options.env ?? process.env,
     stdout: "pipe",
@@ -728,6 +728,7 @@ const packLinuxElfBinaryAsGzipLauncher = async (
     'tmp="$(mktemp "${TMPDIR:-/tmp}/bao-rt.XXXXXX")"',
     'cleanup() { rm -f "$tmp"; }',
     "trap cleanup EXIT INT HUP TERM",
+    'command -v gzip >/dev/null 2>&1 || { echo "error: gzip is not installed or not in PATH" >&2; exit 1; }',
     'gzip -dc "$payload" > "$tmp"',
     'chmod 700 "$tmp"',
     'exec "$tmp" "$@"',

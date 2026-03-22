@@ -1,7 +1,7 @@
+import { join } from "node:path";
 import { APP_BRAND } from "../packages/shared/src/constants/branding";
-import { APP_ROUTES } from "../packages/shared/src/constants/routes";
-import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
 import { DEFAULT_I18N_LOCALE_COOKIE_KEY } from "../packages/shared/src/constants/client-config";
+import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import {
   DEFAULT_VERIFY_HOST,
   DEFAULT_VERIFY_PORT,
@@ -10,8 +10,8 @@ import {
   PREVIEW_READY_TIMEOUT_MS,
   PREVIEW_SEPARATOR_LENGTH,
 } from "../packages/shared/src/constants/scripts";
+import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
 import { writeError, writeOutput } from "./utils/cli-output";
-import { join } from "node:path";
 
 type RouteVerificationResult = {
   locale: string;

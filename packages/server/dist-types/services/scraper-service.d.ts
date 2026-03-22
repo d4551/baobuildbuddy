@@ -1,4 +1,4 @@
-import { type AutomationScriptId, type AutomationJobScrapeTarget, type GamingPortalId, type ScrapedJob } from "@bao/shared";
+import { type AutomationJobScrapeTarget, type AutomationScriptId, type GamingPortalId, type ScrapedJob } from "@bao/shared";
 export type { ScrapedJob };
 type ScriptReferenceOverride = {
     scriptPath: string;

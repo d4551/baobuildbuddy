@@ -1,9 +1,9 @@
-import { captureResult, toErrorMessage } from "./utils/async-control";
 import {
   AGENTIFLOW_CAPABILITY_MATRIX_PATH,
   buildAgentiflowCapabilityMatrix,
   resolveAgentiflowCapabilityMatrixRelativePath,
 } from "./utils/agentiflow-capability-matrix";
+import { captureResult, toErrorMessage } from "./utils/async-control";
 import { writeFormattedJsonFile } from "./utils/biome-format";
 import { writeError, writeOutput } from "./utils/cli-output";
 

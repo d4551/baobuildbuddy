@@ -30,6 +30,8 @@ Thumbs.db
 # Editor directories and files
 .vscode/
 .idea/
+.cursor/
+.cursorrules
 
 # Database files
 *.db
@@ -50,6 +52,7 @@ packages/desktop/src-tauri/target-linux/
 # Agentiflow (ignore local scratch; keep generated matrix for CI drift checks)
 agentiflow/*
 !agentiflow/capability-matrix.generated.json
+.agentiflow/
 
 # Generated desktop packaging scratch space
 .tmp-*/

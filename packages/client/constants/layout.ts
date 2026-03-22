@@ -38,7 +38,8 @@ export const SHELL_MAIN_INNER_CLASS =
 /**
  * Centered auth / onboarding shell (semantic surfaces only).
  */
-export const AUTH_SHELL_OUTER_CLASS = "flex min-h-screen items-center justify-center bg-base-200 px-4";
+export const AUTH_SHELL_OUTER_CLASS =
+  "flex min-h-screen items-center justify-center bg-base-200 px-4";
 
 /**
  * Auth card surface — **must match** the static `class` on `layouts/auth-shell.vue`
@@ -63,4 +64,3 @@ export const PAGE_HEADER_DESCRIPTION_CLASS = "mt-1 text-base-content/60";
  */
 export const EMPTY_STATE_STACK_CLASS =
   "flex flex-col items-center justify-center py-12 text-center gap-4";
-

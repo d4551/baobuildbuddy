@@ -8,4 +8,4 @@ declare function calculateMatches(): Promise<void>;
 declare function trackApplications(): Promise<void>;
 declare function advancedSearch(): Promise<void>;
 declare function maintainCache(): Promise<void>;
-export { refreshJobs, searchUnityJobs, calculateMatches, trackApplications, advancedSearch, maintainCache, };
+export { advancedSearch, calculateMatches, maintainCache, refreshJobs, searchUnityJobs, trackApplications, };

@@ -130,6 +130,22 @@ function registerPortfolioExportTests(): void {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
 
+  test("POST /api/portfolio/export returns a DOCX attachment", async () => {
+    const response = await app.handle(
+      new Request("http://localhost/api/portfolio/export", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ format: "docx" }),
+      }),
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    expect(response.headers.get("content-disposition")).toContain("portfolio-");
+    expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
+  });
+
   test("DELETE /api/portfolio/projects/:id removes the second project", async () => {
     const res = await requestJson<{ success: boolean }>(
       app,

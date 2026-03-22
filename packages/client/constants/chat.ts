@@ -1,7 +1,8 @@
 /**
  * Shared width constraints for chat message headers and bubbles.
  */
-export const CHAT_MESSAGE_WIDTH_CLASS = "w-fit min-w-44 max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl";
+export const CHAT_MESSAGE_WIDTH_CLASS =
+  "w-fit min-w-44 max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl";
 
 /**
  * Shared typography/spacing scale for chat message bubbles.

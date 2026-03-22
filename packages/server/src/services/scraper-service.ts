@@ -1,19 +1,19 @@
 import {
   API_ERROR_INVALID_SCRAPER_JSON,
   API_ERROR_INVALID_SCRIPT_ID,
+  type AutomationJobScrapeTarget,
+  type AutomationScriptId,
   automationScrapeTargetToPortalId,
   automationScriptIdSchema,
-  generateId,
-  gamingPortalScraperScriptIdByPortalId,
-  type JobSearchResult,
-  scrapedJobSchema,
-  scrapedStudioSchema,
-  safeParseJson,
-  type AutomationScriptId,
-  type AutomationJobScrapeTarget,
   type GamingPortalId,
+  gamingPortalScraperScriptIdByPortalId,
+  generateId,
+  type JobSearchResult,
   type ScrapedJob,
   type ScrapedStudio,
+  safeParseJson,
+  scrapedJobSchema,
+  scrapedStudioSchema,
   toErrorMessage,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
@@ -53,6 +53,7 @@ const PORTAL_SCRIPT_ID_BY_ID = {
   gamesjobsdirect: GAMESJOBSDIRECT_SCRIPT_ID,
   pocketgamer: POCKETGAMER_SCRIPT_ID,
 } as const satisfies Record<GamingPortalId, AutomationScriptId>;
+
 export type { ScrapedJob };
 
 type ScriptRows<T> = {

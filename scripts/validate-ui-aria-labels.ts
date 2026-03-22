@@ -24,6 +24,8 @@ const markupPattern = /<[^>]+>/gu;
 const whitespacePattern = /\s+/gu;
 const tagNamePattern = /^<([a-zA-Z0-9:-]+)/;
 const roleAttributePattern = /role\s*=\s*["']([^"']+)["']/u;
+const daisySwapClassPattern = /\bswap\b/u;
+const daisySwapRotateClassPattern = /\bswap-rotate\b/u;
 
 const interactiveRolePattern = new RegExp(
   `<[^>]+role\\s*=\\s*["'](?:${interactiveRoleNames.join("|")})["'][^>]*>`,
@@ -78,11 +80,10 @@ const isDrawerToggleLabel = (tagMarkup: string): boolean =>
   buttonLikeLabelPattern.test(tagMarkup) &&
   labelForAttributePattern.test(tagMarkup);
 
-/** daisyUI theme toggle: `label.swap` wraps a native `input.theme-controller` (navbar). */
 const isDaisyThemeSwapLabel = (tagMarkup: string): boolean =>
   extractTagName(tagMarkup) === "label" &&
-  /\bswap\b/u.test(tagMarkup) &&
-  /\bswap-rotate\b/u.test(tagMarkup);
+  daisySwapClassPattern.test(tagMarkup) &&
+  daisySwapRotateClassPattern.test(tagMarkup);
 
 const stripMarkupToText = (content: string): string =>
   content

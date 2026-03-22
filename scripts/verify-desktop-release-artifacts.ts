@@ -16,10 +16,10 @@ import {
   buildDesktopReleaseArtifactFileNames,
   buildDesktopReleaseArtifactSpecs,
   DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE,
-  normalizeDesktopReleaseArtifactProfile,
   type DesktopReleaseArtifactKind,
   type DesktopReleaseArtifactProfile,
   type DesktopReleaseMacosArchitecture,
+  normalizeDesktopReleaseArtifactProfile,
 } from "../packages/shared/src/utils/desktop-release-contract";
 import {
   buildDesktopRuntimeManifest,
@@ -35,8 +35,8 @@ import {
   hasNativeDesktopReleaseProvenance,
   isDesktopReleaseProvenance,
 } from "./utils/desktop-release-refresh";
-import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
 import { orderTargetsPresentInProvenance } from "./utils/desktop-release-verify-targets";
+import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -841,7 +841,7 @@ const computeSha256 = (absolutePath: string): Promise<string> =>
 
 const captureCommand = (command: readonly string[], timeoutMs: number): Promise<CommandCapture> =>
   new Promise((resolveCommand) => {
-    const proc = Bun.spawn(command, {
+    const proc = Bun.spawn(command as string[], {
       cwd: REPO_ROOT,
       stdout: "pipe",
       stderr: "pipe",
@@ -994,8 +994,7 @@ const verifyMagicArtifact = async (
   const lfsProbe = await readFilePrefix(artifact.absolutePath, 256);
   if (isGitLfsPointerFileContent(lfsProbe)) {
     return {
-      details:
-        "Git LFS pointer file; run git lfs pull in the repo root to fetch release binaries",
+      details: "Git LFS pointer file; run git lfs pull in the repo root to fetch release binaries",
       label: `artifact:${artifact.relativePath}`,
       ok: false,
     };
@@ -1144,8 +1143,8 @@ const verifyPortableExecutableSignatureInZip = async (
         ];
       }
 
-      const portableRootName = artifact.relativePath.endsWith(ZIP_EXTENSION_PATTERN)
-        ? artifact.relativePath.slice(0, -".zip".length)
+      const portableRootName = ZIP_EXTENSION_PATTERN.test(artifact.relativePath)
+        ? artifact.relativePath.replace(ZIP_EXTENSION_PATTERN, "")
         : basename(artifact.relativePath).replace(".zip", "");
       const portableExecutable = join(zipRoot, portableRootName, `${metadata.binaryName}.exe`);
       if (!(await pathExists(portableExecutable))) {

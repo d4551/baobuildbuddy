@@ -5,12 +5,12 @@
 
 import type { Job, JobExperienceLevel, MatchScore } from "@bao/shared";
 import {
+  DECIMAL_RADIX,
   DEFAULT_SCORE_NEUTRAL,
   JOB_SALARY_PARSE_MULTIPLIER,
   MATCHING_IMPROVEMENT_THRESHOLD,
   MATCHING_STRENGTH_THRESHOLD,
   MATCHING_WEIGHTS,
-  DECIMAL_RADIX,
 } from "@bao/shared";
 
 export interface UserProfile {

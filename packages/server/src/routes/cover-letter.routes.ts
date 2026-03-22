@@ -1,19 +1,19 @@
 import {
   AI_DEFAULT_TEMPERATURE_CREATIVE,
-  API_ERROR_COVER_LETTER_NOT_FOUND,
   API_ERROR_AI_SETTINGS_NOT_CONFIGURED,
   API_ERROR_COVER_LETTER_GENERATION_FAILED,
-  COVER_LETTER_DEFAULT_CLOSING,
-  COVER_LETTER_DEFAULT_OPENING,
-  DEFAULT_UNSPECIFIED_LABEL,
-  API_MESSAGE_COVER_LETTER_GENERATED_ONLY,
-  API_MESSAGE_COVER_LETTER_GENERATED_SAVED,
-  DEFAULT_PROFILE_ID,
+  API_ERROR_COVER_LETTER_NOT_FOUND,
   API_ERROR_EXPORT_COVER_LETTER,
   API_ERROR_UNKNOWN,
+  API_MESSAGE_COVER_LETTER_GENERATED_ONLY,
+  API_MESSAGE_COVER_LETTER_GENERATED_SAVED,
+  COVER_LETTER_DEFAULT_CLOSING,
+  COVER_LETTER_DEFAULT_OPENING,
   COVER_LETTER_DEFAULT_TEMPLATE,
   COVER_LETTER_TEMPLATE_OPTIONS,
   type CoverLetterTemplate,
+  DEFAULT_PROFILE_ID,
+  DEFAULT_UNSPECIFIED_LABEL,
   generateId,
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -35,15 +35,12 @@ import { coverLetters } from "../db/schema/cover-letters";
 import { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
-import { gamificationService } from "../services/gamification-service";
 import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts";
-import { exportService } from "../services/export-service";
 import { docxExportService } from "../services/docx-export-service";
-import {
-  createDocxAttachmentResponse,
-  createPdfAttachmentResponse,
-} from "../utils/http-response";
+import { exportService } from "../services/export-service";
+import { gamificationService } from "../services/gamification-service";
+import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
 
 const coverLetterTemplateBodySchema = t.String({
   enum: COVER_LETTER_TEMPLATE_OPTIONS,
@@ -377,15 +374,10 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
               docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
           };
         }
-        return createDocxAttachmentResponse(
-          docxResult.value,
-          `cover-letter-${params.id}.docx`,
-        );
+        return createDocxAttachmentResponse(docxResult.value, `cover-letter-${params.id}.docx`);
       }
 
-      const exportResult = await settle(
-        exportService.exportCoverLetterPDF(letterPayload, sender),
-      );
+      const exportResult = await settle(exportService.exportCoverLetterPDF(letterPayload, sender));
       if (exportResult.status === "rejected") {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {

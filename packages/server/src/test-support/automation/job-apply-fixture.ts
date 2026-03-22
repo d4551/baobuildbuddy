@@ -1,4 +1,4 @@
-import { resumeDataSchema, type ResumeData } from "@bao/shared";
+import { type ResumeData, resumeDataSchema } from "@bao/shared";
 
 const FIXTURE_HOST = "127.0.0.1" as const;
 const FIXTURE_PAGE_CONTENT_TYPE = "text/html; charset=utf-8" as const;

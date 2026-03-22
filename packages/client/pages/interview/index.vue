@@ -20,6 +20,7 @@ import {
   type VoiceSettings,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import type { LocationQueryValue } from "vue-router";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
@@ -80,7 +81,9 @@ function resolvePreferredOption<T>(options: readonly T[], preferredIndex: number
   return fallback;
 }
 
-function queryValueToString(value: string | string[] | null | undefined): string {
+function queryValueToString(
+  value: LocationQueryValue | LocationQueryValue[] | readonly LocationQueryValue[] | undefined,
+): string {
   if (Array.isArray(value)) {
     const [firstValue] = value;
     return typeof firstValue === "string" ? firstValue : "";
@@ -213,7 +216,7 @@ const interviewRoleOptions = computed<readonly string[]>(() => {
 const availableJobs = computed(() => {
   const unique = new Map<string, Job>();
   for (const job of jobs.value) {
-    unique.set(job.id, job);
+    unique.set(job.id, job as Job);
   }
   return [...unique.values()];
 });
@@ -286,7 +289,7 @@ const {
       fetchStats(),
       fetchProfile(),
       searchStudios(),
-      searchJobs({ limit: INTERVIEW_HUB_JOB_QUERY_LIMIT }),
+      searchJobs({ limit: String(INTERVIEW_HUB_JOB_QUERY_LIMIT) }),
       fetchResumes(),
       fetchCoverLetters(),
       fetchPortfolio(),
@@ -978,7 +981,7 @@ async function viewSession(id: string) {
               :aria-label="t('interviewHub.config.ttsVoiceAria')"
             >
               <option value="">{{ t("interviewHub.config.ttsDefaultOption") }}</option>
-              <option v-for="voice in tts.voices" :key="voice.voiceURI" :value="voice.voiceURI">
+              <option v-for="voice in (Array.isArray(tts.voices) ? tts.voices : [])" :key="voice.voiceURI" :value="voice.voiceURI">
                 {{ voice.name }} ({{ voice.lang }})
               </option>
             </select>

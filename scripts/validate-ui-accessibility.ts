@@ -33,6 +33,8 @@ const hardcodedPaletteClassPattern =
   /\b(?:bg|text|border|from|to|via|ring|fill|stroke)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}\b/gu;
 const hardcodedArbitraryColorClassPattern =
   /\b(?:bg|text|border|from|to|via|ring|fill|stroke)-\[(?:#|rgb|hsl|oklch|oklab|color)[^\]]+\]/gu;
+const themeNamePattern = /^[a-z0-9-]+$/u;
+const neverMatchPattern = /$^/u;
 
 /** daisyUI theme blocks use `--color-*: oklch(L% C H)` (optional space after `:`). */
 const daisyColorTokenPattern =
@@ -147,13 +149,10 @@ const getContrastRatio = (firstColor: OklchColor, secondColor: OklchColor): numb
 };
 
 const buildDataThemeBlockPattern = (themeName: string): RegExp => {
-  if (!/^[a-z0-9-]+$/u.test(themeName)) {
-    return /$^/u;
+  if (!themeNamePattern.test(themeName)) {
+    return neverMatchPattern;
   }
-  return new RegExp(
-    `\\[data-theme=["']?${themeName}["']?\\][^{]*\\{([^}]+)\\}`,
-    "u",
-  );
+  return new RegExp(`\\[data-theme=["']?${themeName}["']?\\][^{]*\\{([^}]+)\\}`, "u");
 };
 
 const extractDaisyThemeDeclarations = (themesCss: string, themeName: string): string | null => {
@@ -179,7 +178,7 @@ const parseDaisyThemeColorMap = (declarations: string): Map<string, OklchColor> 
 
 const assertMainCssMatchesConfiguredThemes = (mainCss: string): string | null => {
   if (!mainCss.includes('@plugin "daisyui"')) {
-    return "packages/client/assets/css/main.css must use @plugin \"daisyui\" for theme contrast validation.";
+    return 'packages/client/assets/css/main.css must use @plugin "daisyui" for theme contrast validation.';
   }
   for (const { name } of CONFIGURED_DAISY_THEMES) {
     if (!mainCss.includes(name)) {

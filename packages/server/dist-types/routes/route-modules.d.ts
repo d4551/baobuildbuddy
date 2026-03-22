@@ -1,7 +1,7 @@
 import { aiRoutes } from "./ai.routes";
 import { authRoutes } from "./auth.routes";
-import { automationScreenshotRoutes } from "./automation-screenshots.routes";
 import { automationRoutes } from "./automation.routes";
+import { automationScreenshotRoutes } from "./automation-screenshots.routes";
 import { coverLetterRoutes } from "./cover-letter.routes";
 import { gamificationRoutes } from "./gamification.routes";
 import { interviewRoutes } from "./interview.routes";

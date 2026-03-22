@@ -4,7 +4,7 @@ import {
   AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS,
   AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY,
 } from "@bao/shared";
-import { computed, type ComputedRef } from "vue";
+import { type ComputedRef, computed } from "vue";
 
 type Translator = (key: string, params?: Record<string, unknown>) => string;
 

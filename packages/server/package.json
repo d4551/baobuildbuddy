@@ -46,7 +46,6 @@
     "drizzle-orm": "^0.45.1",
     "elysia": "^1.4.28",
     "elysia-rate-limit": "^4.5.1",
-    "ollama": "^0.6.3",
     "openai": "^6.32.0",
     "pdf-lib": "^1.17.1",
     "pino": "^10.3.1",

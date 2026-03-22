@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useDebouncedValue } from "~/composables/useDebouncedValue";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
+import { useDebouncedValue } from "~/composables/useDebouncedValue";
 
 const SEARCH_DEBOUNCE_MS = 300;
 

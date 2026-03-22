@@ -1,5 +1,5 @@
-import { generateId, isValidEmail, settle } from "@bao/shared";
 import type { EmailTransportSettings } from "@bao/shared";
+import { generateId, isValidEmail, settle } from "@bao/shared";
 import { createServerLogger } from "../utils/logger";
 
 const SMTP_LINE_BREAK = "\r\n";
