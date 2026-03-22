@@ -62,6 +62,7 @@ type BrowserInstance = {
 
 type PlaywrightLaunchOptions = {
   headless: boolean;
+  channel?: string;
   executablePath?: string;
   timeout?: number;
   args?: string[];
@@ -699,14 +700,19 @@ const WINDOWS_CI_CHROMIUM_ARGS: string[] = [
   "--no-first-run",
 ];
 
-const buildLaunchOptions = (executablePath: string): PlaywrightLaunchOptions => {
+/** Whether to use the pre-installed Microsoft Edge instead of bundled Chromium. */
+const USE_WINDOWS_EDGE_CHANNEL = process.platform === "win32";
+
+const buildLaunchOptions = (executablePath: string | null): PlaywrightLaunchOptions => {
   const launchOptions: PlaywrightLaunchOptions = {
-    executablePath,
     headless: true,
     timeout: DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS,
   };
-  if (process.platform === "win32") {
+  if (USE_WINDOWS_EDGE_CHANNEL) {
+    launchOptions.channel = "msedge";
     launchOptions.args = WINDOWS_CI_CHROMIUM_ARGS;
+  } else if (executablePath) {
+    launchOptions.executablePath = executablePath;
   }
   return launchOptions;
 };
@@ -716,7 +722,7 @@ const BROWSER_LAUNCH_RETRY_DELAY_MS = 3_000;
 
 const attemptBrowserLaunch = async (
   chromium: PlaywrightChromium,
-  executablePath: string,
+  executablePath: string | null,
   attempt: number,
 ): Promise<BrowserInstance> => {
   const result = await captureResult(() => chromium.launch(buildLaunchOptions(executablePath)));
@@ -736,6 +742,13 @@ const attemptBrowserLaunch = async (
 const launchVerificationBrowser = async (playwrightModule: {
   chromium: PlaywrightChromium;
 }): Promise<BrowserInstance> => {
+  if (USE_WINDOWS_EDGE_CHANNEL) {
+    await writeOutput(
+      "desktop-runtime: launching verification browser via pre-installed Microsoft Edge (msedge channel)",
+    );
+    return attemptBrowserLaunch(playwrightModule.chromium, null, 1);
+  }
+
   const browserExecutablePath = playwrightModule.chromium.executablePath().trim();
   if (browserExecutablePath.length === 0) {
     throw new Error("Playwright did not provide a bundled Chromium executable path.");
@@ -1016,20 +1029,8 @@ const runPackagedRuntimeChecks = async (
       await verifyCorsContract(VERIFY_API_BASE, manifest, DESKTOP_RUNTIME_CORS_ORIGINS[0]);
       await verifyCorsContract(VERIFY_API_BASE, manifest, VERIFY_FRONTEND_ORIGIN);
       await assertAutomationEndpoints(VERIFY_API_ROUTE_BASE);
-
-      const browserResult = await captureResult(() =>
-        runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE),
-      );
-      if (browserResult.ok) {
-        assertBrowserChecksPassed(browserResult.value);
-      } else if (process.platform === "win32" && process.env.CI) {
-        await writeOutput(
-          `desktop-runtime: WARNING — browser checks skipped on Windows CI (Chromium launch failed: ${toErrorMessage(browserResult.error)})`,
-        );
-      } else {
-        throw browserResult.error;
-      }
-
+      const browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
+      assertBrowserChecksPassed(browserResult);
       await configureVerificationSettings();
       await writeOutput(
         "desktop-runtime: configured deterministic automation verification settings",
@@ -1045,10 +1046,9 @@ const runPackagedRuntimeChecks = async (
       await writeOutput("desktop-runtime: verifying scheduled automation recovery across restart");
       await verifyScheduledRunRecovery(resumeId, fixtureBaseUrl, restartServer);
 
-      const titleSuffix = browserResult.ok
-        ? `verified frontend "${browserResult.value.pageTitle}" against ${VERIFY_API_BASE}`
-        : `verified API-only against ${VERIFY_API_BASE} (browser checks skipped)`;
-      await writeOutput(`desktop-runtime: ${titleSuffix}`);
+      await writeOutput(
+        `desktop-runtime: verified frontend "${browserResult.pageTitle}" against ${VERIFY_API_BASE}`,
+      );
       await writeOutput("desktop-runtime: verification passed");
     },
     () => staticServer.stop(true),
