@@ -394,8 +394,11 @@ const main = async (): Promise<void> => {
   );
 
   const mergedTargetMap = new Map<DesktopReleaseTarget, ReleaseProvenance>();
-  for (const [target, provenance] of preMergeTargets) {
-    mergedTargetMap.set(target, sanitizeProvenanceForCommit(provenance));
+  const existingEntries: ReadonlyArray<[DesktopReleaseTarget, ReleaseProvenance]> = Array.from(
+    preMergeTargets.entries(),
+  );
+  for (const [existingTarget, existingProvenance] of existingEntries) {
+    mergedTargetMap.set(existingTarget, sanitizeProvenanceForCommit(existingProvenance));
   }
   for (const [target, provenance] of provenanceEntries) {
     mergedTargetMap.set(target, provenance);

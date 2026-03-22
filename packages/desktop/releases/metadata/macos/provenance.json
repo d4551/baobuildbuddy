@@ -1,1 +1,17 @@
-{"schemaVersion":1,"target":"macos","strategy":"matching-host-native","tauriCli":"repo-local-bun","hostPlatform":"darwin","hostArch":"arm64","tauriTarget":"aarch64-apple-darwin","artifactNames":["BaoBuildBuddy_0.1.0_aarch64.dmg"],"buildCommands":["~/.bun/bin/bun tauri build --no-bundle --target aarch64-apple-darwin --verbose","~/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin --verbose","hdiutil create -srcfolder ./packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BaoBuildBuddy.app ./packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"],"builtAt":"2026-03-20T17:38:15.007Z","ci":{"workflow":null,"runId":null,"runAttempt":null}}
+{
+  "schemaVersion": 1,
+  "target": "macos",
+  "strategy": "matching-host-native",
+  "tauriCli": "repo-local-bun",
+  "hostPlatform": "darwin",
+  "hostArch": "arm64",
+  "tauriTarget": "aarch64-apple-darwin",
+  "artifactNames": ["BaoBuildBuddy_0.1.0_aarch64.dmg"],
+  "buildCommands": [
+    "~/.bun/bin/bun tauri build --no-bundle --target aarch64-apple-darwin --verbose",
+    "~/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin --verbose",
+    "hdiutil create -srcfolder ./packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BaoBuildBuddy.app ./packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"
+  ],
+  "builtAt": "2026-03-20T17:38:15.007Z",
+  "ci": { "workflow": null, "runId": null, "runAttempt": null }
+}
