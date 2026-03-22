@@ -784,7 +784,61 @@ const launchVerificationBrowser = async (playwrightModule: {
   return attemptBrowserLaunch(playwrightModule.chromium, browserExecutablePath, 1);
 };
 
+/**
+ * Verifies frontend and API health using native `fetch` + `WebSocket` instead
+ * of Playwright browser automation. Used on Windows where Bun's subprocess
+ * management is incompatible with Playwright's debugging protocol (both pipe
+ * and TCP-based connections time out despite the browser process starting).
+ */
+const runNativeBrowserChecks = async (
+  apiBase: string,
+  wsBase: string,
+  frontendUrl: string,
+): Promise<BrowserCheckResult> => {
+  await writeOutput("desktop-runtime: running native HTTP/WS browser checks (Playwright skipped)");
+
+  const htmlResponse = await fetch(frontendUrl);
+  if (!htmlResponse.ok) {
+    throw new Error(
+      `Frontend HTML fetch failed: ${htmlResponse.status} ${htmlResponse.statusText}`,
+    );
+  }
+  const html = await htmlResponse.text();
+  const titleMatch = /<title>([^<]*)<\/title>/i.exec(html);
+  const pageTitle = titleMatch?.[1]?.trim() ?? "untitled";
+
+  const healthResponse = await fetch(`${apiBase}/api/health`);
+  if (!healthResponse.ok) {
+    throw new Error(
+      `Health endpoint failed: ${healthResponse.status} ${healthResponse.statusText}`,
+    );
+  }
+  const healthPayload = (await healthResponse.json()) as { status?: string };
+  const healthStatus = typeof healthPayload.status === "string" ? healthPayload.status : "unknown";
+
+  const websocketUrl = `${wsBase}/api/ws/automation`;
+  const websocketOpened = await new Promise<boolean>((resolve) => {
+    const timeout = setTimeout(() => resolve(false), 5_000);
+    const socket = new WebSocket(websocketUrl);
+    socket.addEventListener("open", () => {
+      clearTimeout(timeout);
+      socket.close();
+      resolve(true);
+    });
+    socket.addEventListener("error", () => {
+      clearTimeout(timeout);
+      resolve(false);
+    });
+  });
+
+  return { pageTitle, healthStatus, websocketOpened };
+};
+
 const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<BrowserCheckResult> => {
+  if (USE_WINDOWS_EDGE_CHANNEL) {
+    return runNativeBrowserChecks(apiBase, wsBase, VERIFY_FRONTEND_URL);
+  }
+
   const playwrightModule = (await import(pathToFileURL(PLAYWRIGHT_ENTRYPOINT).href)) as {
     chromium: PlaywrightChromium;
   };
