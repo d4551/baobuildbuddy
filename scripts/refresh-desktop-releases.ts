@@ -81,6 +81,34 @@ const resolveSourceRoot = (argv: readonly string[]): string => {
   return resolve(RELEASE_WORKSPACE_ROOT, sourceRoot);
 };
 
+/** Returns a path safe for committing (no username or host-specific dirs). */
+const sanitizeSourceRootForProvenance = (sourceRoot: string): string => {
+  if (sourceRoot.startsWith(RELEASE_WORKSPACE_ROOT)) {
+    const suffix = sourceRoot.slice(RELEASE_WORKSPACE_ROOT.length).replace(/^\//, "");
+    return suffix ? suffix : ".desktop-release-artifacts";
+  }
+  return DESKTOP_RELEASE_STAGING_ROOT;
+};
+
+/** Sanitizes build command strings to remove PII before committing. */
+const sanitizeBuildCommandsForProvenance = (
+  commands: readonly string[],
+  repoRoot: string,
+): readonly string[] =>
+  commands.map((cmd) => {
+    let s = cmd;
+    s = s.split(repoRoot).join(".");
+    s = s.replace(/\/Users\/[^/]+\//g, "~/");
+    s = s.replace(/\/home\/[^/]+\//g, "~/");
+    s = s.replace(/C:\\Users\\[^\\]+\\/g, "<home>\\");
+    return s;
+  });
+
+const sanitizeProvenanceForCommit = (p: ReleaseProvenance): ReleaseProvenance => ({
+  ...p,
+  buildCommands: sanitizeBuildCommandsForProvenance(p.buildCommands, MONOREPO_ROOT),
+});
+
 const pathExists = async (absolutePath: string): Promise<boolean> =>
   stat(absolutePath).then(
     () => true,
@@ -355,12 +383,20 @@ const main = async (): Promise<void> => {
         );
       }
 
+      const sanitized = sanitizeProvenanceForCommit(provenance);
       await stageTargetArtifacts(sourceRoot, target, provenance.artifactNames);
-      return [target, provenance] as const;
+      await writeFormattedJsonFile(
+        join(DESKTOP_RELEASE_METADATA_ROOT, target, DESKTOP_RELEASE_PROVENANCE_FILENAME),
+        sanitized,
+      );
+      return [target, sanitized] as const;
     }),
   );
 
-  const mergedTargetMap = new Map<DesktopReleaseTarget, ReleaseProvenance>(preMergeTargets);
+  const mergedTargetMap = new Map<DesktopReleaseTarget, ReleaseProvenance>();
+  for (const [target, provenance] of preMergeTargets) {
+    mergedTargetMap.set(target, sanitizeProvenanceForCommit(provenance));
+  }
   for (const [target, provenance] of provenanceEntries) {
     mergedTargetMap.set(target, provenance);
   }
@@ -369,7 +405,7 @@ const main = async (): Promise<void> => {
   await writeFormattedJsonFile(DESKTOP_RELEASE_ASSEMBLED_PROVENANCE_PATH, {
     schemaVersion: 1,
     assembledAt: new Date().toISOString(),
-    sourceRoot,
+    sourceRoot: sanitizeSourceRootForProvenance(sourceRoot),
     targets: buildOrderedAssembledTargets(mergedTargetMap),
   });
   await writeChecksumManifest();

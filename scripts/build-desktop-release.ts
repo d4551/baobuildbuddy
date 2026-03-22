@@ -1219,12 +1219,27 @@ const stageWindowsArtifacts = async (
   return artifactNames;
 };
 
+/** Replaces absolute paths in build command strings to avoid committing PII (username, home dir). */
+const sanitizeBuildCommandsForProvenance = (
+  commands: readonly string[],
+  repoRoot: string,
+): readonly string[] =>
+  commands.map((cmd) => {
+    let s = cmd;
+    s = s.split(repoRoot).join(".");
+    s = s.replace(/\/Users\/[^/]+\//g, "~/");
+    s = s.replace(/\/home\/[^/]+\//g, "~/");
+    s = s.replace(/C:\\Users\\[^\\]+\\/g, "<home>\\");
+    return s;
+  });
+
 const writeProvenance = async (
   target: HostReleaseTarget,
   outputRoot: string,
   artifactNames: readonly string[],
   buildCommands: readonly string[],
 ): Promise<void> => {
+  const sanitizedBuildCommands = sanitizeBuildCommandsForProvenance(buildCommands, REPO_ROOT);
   const provenance: ReleaseProvenance = {
     schemaVersion: 1,
     target: target.artifactLabel,
@@ -1234,7 +1249,7 @@ const writeProvenance = async (
     hostArch: process.arch,
     tauriTarget: target.tauriTarget,
     artifactNames,
-    buildCommands,
+    buildCommands: sanitizedBuildCommands,
     builtAt: new Date().toISOString(),
     ci: {
       workflow: process.env.GITHUB_WORKFLOW ?? null,
