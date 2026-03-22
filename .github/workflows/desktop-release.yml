@@ -173,8 +173,12 @@ jobs:
         if: ${{ steps.apple.outputs.full_notarize == 'true' }}
         run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
 
+      - name: Build native macOS release artifacts (codesigned, not notarized)
+        if: ${{ steps.apple.outputs.has_codesign == 'true' && steps.apple.outputs.full_notarize != 'true' }}
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
+
       - name: Build native macOS release artifacts (ad-hoc signed)
-        if: ${{ steps.apple.outputs.full_notarize != 'true' }}
+        if: ${{ steps.apple.outputs.has_codesign != 'true' }}
         env:
           DESKTOP_RELEASE_RELEASE_MODE: "false"
         run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --no-sync-release-dir
