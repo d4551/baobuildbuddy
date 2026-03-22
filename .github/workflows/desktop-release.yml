@@ -36,6 +36,7 @@ permissions:
   contents: read
 
 env:
+  DESKTOP_RELEASE_RELEASE_MODE: "true"
   DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_APPIMAGE || github.event.inputs.include_linux_appimage }}
   # workflow_dispatch: must honor boolean `false` (do not use `input || vars` — false is falsy and would fall through to vars).
   # push: use repository vars when set; otherwise leave empty so scripts apply defaults.
