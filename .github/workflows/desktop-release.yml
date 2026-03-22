@@ -199,8 +199,14 @@ jobs:
         if: ${{ steps.apple.outputs.full_notarize == 'true' }}
         run: bun run verify:desktop-releases -- --targets macos --release --release-root .desktop-release-artifacts
 
-      - name: Verify macOS release artifacts (non-stapled CI)
-        if: ${{ steps.apple.outputs.full_notarize != 'true' }}
+      - name: Verify macOS release artifacts (codesigned, not stapled)
+        if: ${{ steps.apple.outputs.has_codesign == 'true' && steps.apple.outputs.full_notarize != 'true' }}
+        env:
+          DESKTOP_RELEASE_SKIP_MACOS_STAPLER: "true"
+        run: bun run verify:desktop-releases -- --targets macos --release --release-root .desktop-release-artifacts
+
+      - name: Verify macOS release artifacts (ad-hoc)
+        if: ${{ steps.apple.outputs.has_codesign != 'true' }}
         env:
           DESKTOP_RELEASE_RELEASE_MODE: "false"
         run: bun run verify:desktop-releases -- --targets macos --release-root .desktop-release-artifacts
@@ -578,8 +584,14 @@ jobs:
         if: ${{ steps.apple.outputs.full_notarize == 'true' }}
         run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64 --release
 
-      - name: Verify assembled desktop releases (skip macOS stapler)
-        if: ${{ steps.apple.outputs.full_notarize != 'true' }}
+      - name: Verify assembled desktop releases (codesigned macOS, skip stapler)
+        if: ${{ steps.apple.outputs.has_codesign == 'true' && steps.apple.outputs.full_notarize != 'true' }}
+        env:
+          DESKTOP_RELEASE_SKIP_MACOS_STAPLER: "true"
+        run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64 --release
+
+      - name: Verify assembled desktop releases (ad-hoc macOS)
+        if: ${{ steps.apple.outputs.has_codesign != 'true' }}
         env:
           DESKTOP_RELEASE_RELEASE_MODE: "false"
         run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64

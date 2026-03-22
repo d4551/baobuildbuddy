@@ -184,6 +184,7 @@ const LINUX_SIGNING_ENV = "DESKTOP_RELEASE_LINUX_SIGNATURES";
 const WINDOWS_MSI_ENV = "DESKTOP_RELEASE_WINDOWS_MSI";
 const MACOS_ARCH_ENV = "DESKTOP_RELEASE_MACOS_ARCHITECTURES";
 const RELEASE_BUILD_ENV = "DESKTOP_RELEASE_RELEASE_MODE";
+const SKIP_MACOS_STAPLER_ENV = "DESKTOP_RELEASE_SKIP_MACOS_STAPLER";
 const LINUX_APPIMAGE_FLAG = "--include-linux-appimage";
 const LINUX_SIGNING_FLAG = "--include-linux-signatures";
 const WINDOWS_MSI_FLAG = "--include-windows-msi";
@@ -1850,8 +1851,12 @@ const collectWindowsVerificationResults = async (
 const collectArtifactPayloadVerificationResults = async (
   context: VerificationRunContext,
 ): Promise<readonly VerificationResult[]> => {
+  const skipMacosStapler = parseBooleanValue(process.env[SKIP_MACOS_STAPLER_ENV]);
   const verifyMacosNotary =
-    context.targets.includes("macos") && context.releaseMode && process.platform === "darwin";
+    context.targets.includes("macos") &&
+    context.releaseMode &&
+    !skipMacosStapler &&
+    process.platform === "darwin";
   const nestedResults = await Promise.all(
     context.artifacts.map(async (artifact) => {
       if (artifact.kind === "dmg") {
