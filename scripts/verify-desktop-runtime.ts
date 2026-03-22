@@ -66,6 +66,7 @@ type PlaywrightLaunchOptions = {
   executablePath?: string;
   timeout?: number;
   args?: string[];
+  ignoreDefaultArgs?: string[];
 };
 
 type PlaywrightChromium = {
@@ -684,8 +685,16 @@ const verifyCorsContract = async (
   }
 };
 
-/** Chromium args that improve headless launch reliability on Windows CI (GitHub Actions). */
+/**
+ * Chromium args that improve headless launch reliability on Windows CI (GitHub Actions).
+ *
+ * Critically, `--remote-debugging-port=0` forces TCP-based debugging instead of
+ * Playwright's default `--remote-debugging-pipe`. The named-pipe protocol is
+ * incompatible with Bun's child process handling on Windows, causing a 120s
+ * timeout even though the browser PID starts successfully.
+ */
 const WINDOWS_CI_CHROMIUM_ARGS: string[] = [
+  "--remote-debugging-port=0",
   "--disable-gpu",
   "--disable-software-rasterizer",
   "--disable-dev-shm-usage",
@@ -711,6 +720,7 @@ const buildLaunchOptions = (executablePath: string | null): PlaywrightLaunchOpti
   if (USE_WINDOWS_EDGE_CHANNEL) {
     launchOptions.channel = "msedge";
     launchOptions.args = WINDOWS_CI_CHROMIUM_ARGS;
+    launchOptions.ignoreDefaultArgs = ["--remote-debugging-pipe"];
   } else if (executablePath) {
     launchOptions.executablePath = executablePath;
   }
