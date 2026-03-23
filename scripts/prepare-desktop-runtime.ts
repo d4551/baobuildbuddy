@@ -619,14 +619,31 @@ const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
       const clientOutputDir = join(CLIENT_ROOT, ".output");
       await rm(clientNuxtDir, { recursive: true, force: true });
       await rm(clientOutputDir, { recursive: true, force: true });
-      await runCommand([process.execPath, "run", "--filter", "@bao/client", "generate"], {
-        env: {
-          ...process.env,
-          BAO_DISABLE_AUTH: "true",
-          NUXT_PUBLIC_API_BASE: BUILD_SERVER_API_BASE,
-          NUXT_PUBLIC_WS_BASE: BUILD_SERVER_WS_BASE,
-        },
-      });
+
+      const generateEnv = {
+        ...process.env,
+        BAO_DISABLE_AUTH: "true",
+        NUXT_PUBLIC_API_BASE: BUILD_SERVER_API_BASE,
+        NUXT_PUBLIC_WS_BASE: BUILD_SERVER_WS_BASE,
+      };
+
+      if (process.platform === "win32") {
+        /**
+         * On Windows, `bun --bun run nuxt generate` (the package.json script)
+         * causes a segfault because Bun's Node compatibility layer cannot handle
+         * Nuxt's complex SSR/prerender pipeline. Invoke `nuxt generate` directly
+         * without the `--bun` override so Bun delegates heavy Node.js work to
+         * its standard compatibility path.
+         */
+        await runCommand([process.execPath, "run", "nuxt", "generate"], {
+          cwd: CLIENT_ROOT,
+          env: generateEnv,
+        });
+      } else {
+        await runCommand([process.execPath, "run", "--filter", "@bao/client", "generate"], {
+          env: generateEnv,
+        });
+      }
     },
     () => stopProcess(proc),
   );
