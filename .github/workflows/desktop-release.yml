@@ -578,7 +578,7 @@ jobs:
           path: .desktop-release-input/linux-arm64
 
       - name: Assemble canonical desktop release directory
-        run: bun run release:refresh:all-os -- --source-root .desktop-release-input --targets macos,windows,linux-x64,linux-arm64
+        run: bun run release:refresh:all-os -- --source-root .desktop-release-input --targets macos,windows,linux-x64,linux-arm64 --skip-verify
 
       - name: Verify assembled desktop releases (expect stapled macOS DMG)
         if: ${{ steps.apple.outputs.full_notarize == 'true' }}
