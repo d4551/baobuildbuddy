@@ -97,6 +97,9 @@ const WINDOWS_DIGEST_ALGORITHM_ENV = "WINDOWS_DIGEST_ALGORITHM";
 const WINDOWS_TIMESTAMP_URL_ENV = "WINDOWS_TIMESTAMP_URL";
 const LINUX_GPG_KEY_ID_ENV = "DESKTOP_RELEASE_GPG_KEY_ID";
 const LINUX_GPG_PASSPHRASE_ENV = "DESKTOP_RELEASE_GPG_PASSPHRASE";
+/** Stable directory for NSIS `.nsi` scripts captured during `cargo tauri build`. */
+const NSIS_CAPTURE_DIR = join(DESKTOP_TAURI_ROOT, ".nsis-capture");
+const NSIS_POLL_INTERVAL_MS = 500;
 
 const PROFILE_FLAG_SET = new Set([
   LINUX_APPIMAGE_FLAG,
@@ -719,6 +722,53 @@ const resolveBundleArgs = (
   return [] as const;
 };
 
+/**
+ * Polls NSIS bundle directories for `.nsi` files during `cargo tauri build`.
+ * Tauri v2 deletes the `.nsi` source after `makensis` completes, so this
+ * captures a copy the moment it appears.
+ */
+const startNsisCapturePoller = (captureDir: string): { stop: () => void } => {
+  let stopped = false;
+  const nsisDirectories = buildDesktopBundleDirectoryCandidates("windows", undefined).map(
+    (bundleRoot) => join(DESKTOP_TAURI_ROOT, bundleRoot, "nsis"),
+  );
+
+  const poll = async (): Promise<void> => {
+    for (const nsisDir of nsisDirectories) {
+      const dirExists = await pathExists(nsisDir);
+      if (!dirExists) {
+        continue;
+      }
+      const entries = await readdir(nsisDir).catch(() => [] as string[]);
+      const nsiFiles = entries.filter((entry) => entry.toLowerCase().endsWith(".nsi"));
+      for (const nsiFile of nsiFiles) {
+        const sourcePath = join(nsisDir, nsiFile);
+        const destPath = join(captureDir, nsiFile);
+        const alreadyCaptured = await pathExists(destPath);
+        if (!alreadyCaptured) {
+          await cp(sourcePath, destPath).catch(() => undefined);
+        }
+      }
+    }
+  };
+
+  const loop = async (): Promise<void> => {
+    while (!stopped) {
+      await poll();
+      await new Promise<void>((resolve) => setTimeout(resolve, NSIS_POLL_INTERVAL_MS));
+    }
+    /** Final poll to catch files written just before the build completed. */
+    await poll();
+  };
+
+  void loop();
+  return {
+    stop: () => {
+      stopped = true;
+    },
+  };
+};
+
 const runStandardTauriBuildFlow = async ({
   env,
   hostTarget,
@@ -727,6 +777,14 @@ const runStandardTauriBuildFlow = async ({
   tauriArgs,
 }: TauriBuildFlowOptions): Promise<readonly string[]> => {
   const resolvedHostTarget = requireHostReleaseTarget(hostTarget);
+  const isWindows = resolvedHostTarget.expectedPlatform === "win32";
+
+  if (isWindows) {
+    await rm(NSIS_CAPTURE_DIR, { force: true, recursive: true });
+    await mkdir(NSIS_CAPTURE_DIR, { recursive: true });
+  }
+  const capturePoller = isWindows ? startNsisCapturePoller(NSIS_CAPTURE_DIR) : undefined;
+
   const buildCommand = [
     process.execPath,
     "tauri",
@@ -736,6 +794,7 @@ const runStandardTauriBuildFlow = async ({
     ...buildSigningConfigArgs(resolvedHostTarget, releaseMode),
   ] as const;
   await runCommandOrExit(buildCommand, { cwd: DESKTOP_ROOT, env });
+  capturePoller?.stop();
   return [buildCommand.join(" ")];
 };
 
@@ -1021,6 +1080,17 @@ const resolveWindowsNsisScriptPath = async (): Promise<string> => {
     return firstResolved;
   }
 
+  /** Check the capture directory (populated by the background poller during build). */
+  if (await pathExists(NSIS_CAPTURE_DIR)) {
+    const capturedEntries = await readdir(NSIS_CAPTURE_DIR).catch(() => [] as string[]);
+    const capturedNsi = capturedEntries.filter((entry) => entry.toLowerCase().endsWith(".nsi"));
+    const capturedPreferred =
+      capturedNsi.find((entry) => entry === "installer.nsi") ?? capturedNsi[0];
+    if (capturedPreferred) {
+      return join(NSIS_CAPTURE_DIR, capturedPreferred);
+    }
+  }
+
   const fallbackCandidates = [
     ...buildBundlePathCandidates("windows", undefined, "nsis", "installer.nsi"),
     ...buildReleasePathCandidates("windows", "nsis", "x64", "installer.nsi"),
@@ -1036,7 +1106,7 @@ const resolveWindowsNsisScriptPath = async (): Promise<string> => {
     return resolved.candidate;
   }
 
-  const searchedPaths = [...nsisDirectories, ...fallbackCandidates].join("\n  ");
+  const searchedPaths = [...nsisDirectories, NSIS_CAPTURE_DIR, ...fallbackCandidates].join("\n  ");
   throw new Error(
     `NSIS installer script (.nsi) not found after Tauri build.\n` +
       `Searched:\n  ${searchedPaths}\n` +
