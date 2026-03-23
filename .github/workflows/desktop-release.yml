@@ -127,6 +127,14 @@ jobs:
       - name: Install Playwright Chromium
         run: bun run automation:browsers:install
 
+      - name: Disable Spotlight indexing to prevent hdiutil Resource busy
+        run: |
+          # Spotlight's mds_stores locks files during indexing, causing
+          # hdiutil: create failed - Resource busy on CI runners.
+          sudo mdutil -a -i off || true
+          sudo mdutil -i off "$GITHUB_WORKSPACE" || true
+          sudo mdutil -i off /Users/runner || true
+
       - name: Import Apple developer certificate
         if: ${{ steps.apple.outputs.has_codesign == 'true' }}
         env:
