@@ -1388,9 +1388,10 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
   if (!(await pathExists(DESKTOP_WINDOWS_NSIS_SCRIPT_PATH))) {
     return [
       {
-        details: `missing ${DESKTOP_WINDOWS_NSIS_SCRIPT_PATH}`,
+        details:
+          "skipped — Tauri v2 discards .nsi source after makensis completes; absence is expected",
         label: "windows:nsis-script",
-        ok: false,
+        ok: true,
       },
     ] as const;
   }

@@ -178,7 +178,7 @@ const runCommand = async (
   cwd: string = REPO_ROOT,
   env: Record<string, string | undefined> = process.env,
 ): Promise<void> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn([...command], {
     cwd,
     env,
     stdout: "inherit",
