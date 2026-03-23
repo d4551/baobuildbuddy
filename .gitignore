@@ -56,3 +56,6 @@ agentiflow/*
 
 # Generated desktop packaging scratch space
 .tmp-*/
+
+# Desktop release staging (CI produces artifacts; do not commit local builds)
+.desktop-release-artifacts/

@@ -188,6 +188,6 @@ export function useCoverLetter() {
     deleteCoverLetter: (id: string) => deleteCoverLetter(context, id),
     generateCoverLetter: (generationData: GenerateCoverLetterInput) =>
       generateCoverLetter(context, generationData),
-    exportPdf: (id: string, format?: string) => exportDocument(context, id, format),
+    exportDocument: (id: string, format?: string) => exportDocument(context, id, format),
   };
 }
