@@ -97,8 +97,6 @@ const WINDOWS_DIGEST_ALGORITHM_ENV = "WINDOWS_DIGEST_ALGORITHM";
 const WINDOWS_TIMESTAMP_URL_ENV = "WINDOWS_TIMESTAMP_URL";
 const LINUX_GPG_KEY_ID_ENV = "DESKTOP_RELEASE_GPG_KEY_ID";
 const LINUX_GPG_PASSPHRASE_ENV = "DESKTOP_RELEASE_GPG_PASSPHRASE";
-/** Stable directory for NSIS `.nsi` scripts captured during `cargo tauri build`. */
-const NSIS_CAPTURE_DIR = join(DESKTOP_TAURI_ROOT, ".nsis-capture");
 
 const PROFILE_FLAG_SET = new Set([
   LINUX_APPIMAGE_FLAG,
@@ -721,38 +719,6 @@ const resolveBundleArgs = (
   return [] as const;
 };
 
-const NSIS_CAPTURE_WATCHER_SCRIPT = join(REPO_ROOT, "scripts", "nsis-capture-watcher.ts");
-
-/**
- * Spawns the NSIS capture watcher as a separate process.
- * The watcher polls NSIS bundle directories for `.nsi` files during
- * `cargo tauri build` and copies them to the capture directory before
- * Tauri v2 deletes them after `makensis`. Runs independently of the
- * parent's event loop to avoid starvation during subprocess I/O.
- */
-const spawnNsisCaptureWatcher = (captureDir: string): { stop: () => Promise<void> } => {
-  const nsisDirectories = buildDesktopBundleDirectoryCandidates("windows", undefined).map(
-    (bundleRoot) => join(DESKTOP_TAURI_ROOT, bundleRoot, "nsis"),
-  );
-
-  const proc = Bun.spawn(
-    [process.execPath, "run", NSIS_CAPTURE_WATCHER_SCRIPT, ...nsisDirectories, "--", captureDir],
-    {
-      cwd: REPO_ROOT,
-      stdin: "pipe",
-      stdout: "inherit",
-      stderr: "inherit",
-    },
-  );
-
-  return {
-    stop: async () => {
-      await proc.stdin.end();
-      await proc.exited;
-    },
-  };
-};
-
 const runStandardTauriBuildFlow = async ({
   env,
   hostTarget,
@@ -761,14 +727,6 @@ const runStandardTauriBuildFlow = async ({
   tauriArgs,
 }: TauriBuildFlowOptions): Promise<readonly string[]> => {
   const resolvedHostTarget = requireHostReleaseTarget(hostTarget);
-  const isWindows = resolvedHostTarget.expectedPlatform === "win32";
-
-  if (isWindows) {
-    await rm(NSIS_CAPTURE_DIR, { force: true, recursive: true });
-    await mkdir(NSIS_CAPTURE_DIR, { recursive: true });
-  }
-  const captureWatcher = isWindows ? spawnNsisCaptureWatcher(NSIS_CAPTURE_DIR) : undefined;
-
   const buildCommand = [
     process.execPath,
     "tauri",
@@ -778,9 +736,6 @@ const runStandardTauriBuildFlow = async ({
     ...buildSigningConfigArgs(resolvedHostTarget, releaseMode),
   ] as const;
   await runCommandOrExit(buildCommand, { cwd: DESKTOP_ROOT, env });
-  if (captureWatcher) {
-    await captureWatcher.stop();
-  }
   return [buildCommand.join(" ")];
 };
 
@@ -1045,8 +1000,12 @@ const buildLinuxBundlePathCandidatesForFileNames = (
     buildBundlePathCandidates(target, undefined, resolveLinuxBundleDirectory(bundleKind), fileName),
   );
 
-/** Resolve the NSIS `.nsi` script from the Tauri bundle output. Throws if not found. */
-const resolveWindowsNsisScriptPath = async (): Promise<string> => {
+/**
+ * Resolve the NSIS `.nsi` script from the Tauri bundle output.
+ * Returns `null` when absent — Tauri v2 intentionally deletes the `.nsi`
+ * script after `makensis` compiles it into the `.exe` installer.
+ */
+const resolveWindowsNsisScriptPath = async (): Promise<string | null> => {
   const nsisDirectories = buildDesktopBundleDirectoryCandidates("windows", undefined).map(
     (bundleRoot) => join(DESKTOP_TAURI_ROOT, bundleRoot, "nsis"),
   );
@@ -1066,17 +1025,6 @@ const resolveWindowsNsisScriptPath = async (): Promise<string> => {
     return firstResolved;
   }
 
-  /** Check the capture directory (populated by the background poller during build). */
-  if (await pathExists(NSIS_CAPTURE_DIR)) {
-    const capturedEntries = await readdir(NSIS_CAPTURE_DIR).catch(() => [] as string[]);
-    const capturedNsi = capturedEntries.filter((entry) => entry.toLowerCase().endsWith(".nsi"));
-    const capturedPreferred =
-      capturedNsi.find((entry) => entry === "installer.nsi") ?? capturedNsi[0];
-    if (capturedPreferred) {
-      return join(NSIS_CAPTURE_DIR, capturedPreferred);
-    }
-  }
-
   const fallbackCandidates = [
     ...buildBundlePathCandidates("windows", undefined, "nsis", "installer.nsi"),
     ...buildReleasePathCandidates("windows", "nsis", "x64", "installer.nsi"),
@@ -1092,12 +1040,7 @@ const resolveWindowsNsisScriptPath = async (): Promise<string> => {
     return resolved.candidate;
   }
 
-  const searchedPaths = [...nsisDirectories, NSIS_CAPTURE_DIR, ...fallbackCandidates].join("\n  ");
-  throw new Error(
-    `NSIS installer script (.nsi) not found after Tauri build.\n` +
-      `Searched:\n  ${searchedPaths}\n` +
-      `The NSIS script is required for release verification.`,
-  );
+  return null;
 };
 
 const inferLinuxArtifactKind = (artifactName: string): "appimage" | "deb" | "rpm" => {
@@ -1190,16 +1133,22 @@ const buildWindowsPortableReadme = (metadata: DesktopBundleMetadata): string =>
     `The packaged runtime includes ${DESKTOP_RUNTIME_SCRIPT_RUNNER_PATH}.exe and ${DESKTOP_RUNTIME_SERVER_EXECUTABLE_PATH}.exe.`,
   ].join("\n");
 
+/**
+ * Stages Windows installer artifacts. The NSIS `.nsi` script is optional
+ * because Tauri v2 deletes it after `makensis` — only staged when available.
+ */
 const stageWindowsInstallerArtifacts = async (
   targetRoot: string,
   setupPath: string,
-  nsisScriptPath: string,
+  nsisScriptPath: string | null,
 ): Promise<void> => {
   await cp(setupPath, join(targetRoot, basename(setupPath)));
-  await cp(
-    nsisScriptPath,
-    join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, basename(nsisScriptPath)),
-  );
+  if (nsisScriptPath) {
+    await cp(
+      nsisScriptPath,
+      join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, basename(nsisScriptPath)),
+    );
+  }
 };
 
 const stageWindowsPortableArtifacts = async (

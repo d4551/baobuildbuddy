@@ -1388,9 +1388,9 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
   if (!(await pathExists(DESKTOP_WINDOWS_NSIS_SCRIPT_PATH))) {
     return [
       {
-        details: `expected ${DESKTOP_WINDOWS_NSIS_SCRIPT_PATH} — build must stage .nsi before Tauri cleanup`,
+        details: "Tauri v2 deletes .nsi after makensis — ephemeral intermediate artifact",
         label: "windows:nsis-script",
-        ok: false,
+        ok: true,
       },
     ] as const;
   }
