@@ -175,7 +175,7 @@ watch(renderedMessages, async () => {
 
     <!-- Response Input -->
     <div v-if="currentQuestion" class="p-4 bg-base-100 rounded-b-lg border-t border-base-300">
-      <form class="fieldset gap-2" @submit.prevent="submitResponse">
+      <form class="gap-2" @submit.prevent="submitResponse">
         <div class="label">
           <label :for="responseTextareaId" class="font-medium">
             {{ t(props.responseLabelKey) }}

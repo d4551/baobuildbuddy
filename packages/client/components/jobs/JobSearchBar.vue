@@ -47,7 +47,7 @@ watch(debouncedSearchValue, emitSearch, { immediate: false });
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="fieldset">
+  <form @submit.prevent="handleSubmit">
     <div class="join">
       <span class="join-item bg-base-200">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
