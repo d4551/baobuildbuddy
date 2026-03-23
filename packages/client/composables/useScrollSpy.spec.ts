@@ -7,6 +7,7 @@ class MockIntersectionObserver implements IntersectionObserver {
 
   readonly root: Element | Document | null = null;
   readonly rootMargin: string;
+  readonly scrollMargin: string = "0px";
   readonly thresholds: ReadonlyArray<number>;
   readonly takeRecords = vi.fn((): IntersectionObserverEntry[] => []);
   readonly disconnect = vi.fn((): void => undefined);
@@ -30,7 +31,7 @@ class MockIntersectionObserver implements IntersectionObserver {
   }
 
   trigger(entries: readonly IntersectionObserverEntry[]): void {
-    this.callback([...entries], this);
+    this.callback.call(undefined, [...entries], this);
   }
 }
 
@@ -50,7 +51,11 @@ const hasDomEnvironment = (): boolean =>
 beforeEach(() => {
   MockIntersectionObserver.latest = null;
   vi.restoreAllMocks();
-  globalThis.IntersectionObserver = MockIntersectionObserver;
+  Object.defineProperty(globalThis, "IntersectionObserver", {
+    configurable: true,
+    writable: true,
+    value: MockIntersectionObserver,
+  });
 });
 
 function createScopedScrollSpy() {
