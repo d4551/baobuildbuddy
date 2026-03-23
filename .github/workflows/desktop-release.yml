@@ -402,7 +402,7 @@ jobs:
         run: bun run verify:desktop-releases -- --targets linux-x64 --release --release-root .desktop-release-artifacts
 
       - name: Require AppImage when enabled
-        if: ${{ env.DESKTOP_RELEASE_LINUX_APPIMAGE == 'true' }}
+        if: ${{ env.DESKTOP_RELEASE_LINUX_APPIMAGE != 'false' }}
         run: |
           set -euo pipefail
           appimages="$(find .desktop-release-artifacts/linux-x64 -maxdepth 1 -type f -name '*.AppImage' 2>/dev/null || true)"
