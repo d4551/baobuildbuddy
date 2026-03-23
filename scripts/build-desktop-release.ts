@@ -1000,8 +1000,8 @@ const buildLinuxBundlePathCandidatesForFileNames = (
     buildBundlePathCandidates(target, undefined, resolveLinuxBundleDirectory(bundleKind), fileName),
   );
 
-/** Tauri v2 may discard the NSIS `.nsi` source after `makensis` completes; resolve best-effort. */
-const resolveWindowsNsisScriptPath = async (): Promise<string | null> => {
+/** Resolve the NSIS `.nsi` script from the Tauri bundle output. Throws if not found. */
+const resolveWindowsNsisScriptPath = async (): Promise<string> => {
   const nsisDirectories = buildDesktopBundleDirectoryCandidates("windows", undefined).map(
     (bundleRoot) => join(DESKTOP_TAURI_ROOT, bundleRoot, "nsis"),
   );
@@ -1032,7 +1032,16 @@ const resolveWindowsNsisScriptPath = async (): Promise<string | null> => {
     })),
   );
   const resolved = existingFallback.find((entry) => entry.exists);
-  return resolved?.candidate ?? null;
+  if (resolved) {
+    return resolved.candidate;
+  }
+
+  const searchedPaths = [...nsisDirectories, ...fallbackCandidates].join("\n  ");
+  throw new Error(
+    `NSIS installer script (.nsi) not found after Tauri build.\n` +
+      `Searched:\n  ${searchedPaths}\n` +
+      `The NSIS script is required for release verification.`,
+  );
 };
 
 const inferLinuxArtifactKind = (artifactName: string): "appimage" | "deb" | "rpm" => {
@@ -1128,15 +1137,13 @@ const buildWindowsPortableReadme = (metadata: DesktopBundleMetadata): string =>
 const stageWindowsInstallerArtifacts = async (
   targetRoot: string,
   setupPath: string,
-  nsisScriptPath: string | null,
+  nsisScriptPath: string,
 ): Promise<void> => {
   await cp(setupPath, join(targetRoot, basename(setupPath)));
-  if (nsisScriptPath) {
-    await cp(
-      nsisScriptPath,
-      join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, basename(nsisScriptPath)),
-    );
-  }
+  await cp(
+    nsisScriptPath,
+    join(targetRoot, DESKTOP_RELEASE_METADATA_DIR, basename(nsisScriptPath)),
+  );
 };
 
 const stageWindowsPortableArtifacts = async (

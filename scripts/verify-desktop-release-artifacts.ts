@@ -1388,10 +1388,9 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
   if (!(await pathExists(DESKTOP_WINDOWS_NSIS_SCRIPT_PATH))) {
     return [
       {
-        details:
-          "skipped — Tauri v2 discards .nsi source after makensis completes; absence is expected",
+        details: `expected ${DESKTOP_WINDOWS_NSIS_SCRIPT_PATH} — build must stage .nsi before Tauri cleanup`,
         label: "windows:nsis-script",
-        ok: true,
+        ok: false,
       },
     ] as const;
   }
@@ -1830,15 +1829,10 @@ const collectWindowsVerificationResults = async (
     ? context.artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "msi")
     : undefined;
   const releaseWindowsSignatures =
-    context.targets.includes("windows") &&
-    context.releaseMode &&
-    process.platform === "win32" &&
-    !context.skipAssemblyChecks;
+    context.targets.includes("windows") && context.releaseMode && process.platform === "win32";
 
   return [
-    ...(context.targets.includes("windows") && !context.skipAssemblyChecks
-      ? await verifyWindowsNsisPayload()
-      : []),
+    ...(context.targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
     ...(windowsPortableArtifact
       ? await verifyWindowsPortablePayload(windowsPortableArtifact, context.metadata)
       : []),

@@ -37,9 +37,9 @@ permissions:
 
 env:
   DESKTOP_RELEASE_RELEASE_MODE: "true"
-  DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_APPIMAGE || github.event.inputs.include_linux_appimage }}
-  # workflow_dispatch: must honor boolean `false` (do not use `input || vars` — false is falsy and would fall through to vars).
-  # push: use repository vars when set; otherwise leave empty so scripts apply defaults.
+  DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_linux_appimage || vars.DESKTOP_RELEASE_LINUX_APPIMAGE || 'true' }}
+  # workflow_dispatch: honour the boolean input directly (may be 'false').
+  # push: use repository var when set; otherwise default to 'true' (AppImage enabled).
   DESKTOP_RELEASE_LINUX_SIGNATURES: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_SIGNATURES || github.event.inputs.include_linux_signatures }}
   DESKTOP_RELEASE_MACOS_ARCHITECTURES: ${{ github.event.inputs.macos_architectures || vars.DESKTOP_RELEASE_MACOS_ARCHITECTURES }}
   DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_WINDOWS_MSI || github.event.inputs.include_windows_msi }}
@@ -578,7 +578,10 @@ jobs:
           path: .desktop-release-input/linux-arm64
 
       - name: Assemble canonical desktop release directory
-        run: bun run release:refresh:all-os -- --source-root .desktop-release-input --targets macos,windows,linux-x64,linux-arm64 --skip-verify
+        env:
+          DESKTOP_RELEASE_RELEASE_MODE: ${{ steps.apple.outputs.has_codesign == 'true' && 'true' || 'false' }}
+          DESKTOP_RELEASE_SKIP_MACOS_STAPLER: ${{ steps.apple.outputs.full_notarize != 'true' && steps.apple.outputs.has_codesign == 'true' && 'true' || 'false' }}
+        run: bun run release:refresh:all-os -- --source-root .desktop-release-input --targets macos,windows,linux-x64,linux-arm64
 
       - name: Verify assembled desktop releases (expect stapled macOS DMG)
         if: ${{ steps.apple.outputs.full_notarize == 'true' }}
