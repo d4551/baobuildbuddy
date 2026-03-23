@@ -312,6 +312,32 @@ jobs:
         shell: pwsh
         run: bun run verify:desktop-runtime -- --target x86_64-pc-windows-msvc
 
+      - name: Add signtool to PATH
+        shell: pwsh
+        run: |
+          $sdkRoots = @(
+            "${env:ProgramFiles(x86)}\Windows Kits\10\bin",
+            "${env:ProgramFiles}\Windows Kits\10\bin"
+          )
+          $found = $false
+          foreach ($sdkRoot in $sdkRoots) {
+            if (Test-Path $sdkRoot) {
+              $versions = Get-ChildItem $sdkRoot -Directory | Sort-Object Name -Descending
+              foreach ($ver in $versions) {
+                $signtoolPath = Join-Path $ver.FullName "x64\signtool.exe"
+                if (Test-Path $signtoolPath) {
+                  $binDir = Split-Path $signtoolPath
+                  Add-Content -Path $env:GITHUB_PATH -Value $binDir
+                  Write-Host "signtool found: $signtoolPath"
+                  $found = $true
+                  break
+                }
+              }
+              if ($found) { break }
+            }
+          }
+          if (-not $found) { throw 'signtool.exe not found in Windows SDK' }
+
       - name: Verify Windows release artifacts
         shell: pwsh
         run: bun run verify:desktop-releases -- --targets windows --release --release-root .desktop-release-artifacts

@@ -192,6 +192,7 @@ const MACOS_ARCH_FLAG = "--macos-architectures";
 const RELEASE_FLAG = "--release";
 const GPG_SIG_PREFIX = "-----BEGIN PGP SIGNATURE";
 const WINDOWS_SIGNING_TOOL = "signtool";
+const WINDOWS_CERTIFICATE_ENV = "WINDOWS_CERTIFICATE";
 const SIGCHECK_MIN_SIZE_BYTES = 128;
 
 const GIT_LFS_POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1";
@@ -1098,9 +1099,9 @@ const verifyWindowsAuthenticode = async (
   if (!Bun.which(WINDOWS_SIGNING_TOOL)) {
     return [
       {
-        details: `${WINDOWS_SIGNING_TOOL} not on PATH — authenticode verification skipped`,
+        details: `${WINDOWS_SIGNING_TOOL} is required on PATH for windows release verification`,
         label: `artifact:${artifact.relativePath}:signing`,
-        ok: true,
+        ok: false,
       },
     ];
   }
@@ -1828,8 +1829,12 @@ const collectWindowsVerificationResults = async (
   const windowsMsiArtifact = context.targets.includes("windows")
     ? context.artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "msi")
     : undefined;
+  const windowsSigningConfigured = Boolean(process.env[WINDOWS_CERTIFICATE_ENV]);
   const releaseWindowsSignatures =
-    context.targets.includes("windows") && context.releaseMode && process.platform === "win32";
+    context.targets.includes("windows") &&
+    context.releaseMode &&
+    process.platform === "win32" &&
+    windowsSigningConfigured;
 
   return [
     ...(context.targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
