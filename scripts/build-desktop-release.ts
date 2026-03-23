@@ -99,7 +99,6 @@ const LINUX_GPG_KEY_ID_ENV = "DESKTOP_RELEASE_GPG_KEY_ID";
 const LINUX_GPG_PASSPHRASE_ENV = "DESKTOP_RELEASE_GPG_PASSPHRASE";
 /** Stable directory for NSIS `.nsi` scripts captured during `cargo tauri build`. */
 const NSIS_CAPTURE_DIR = join(DESKTOP_TAURI_ROOT, ".nsis-capture");
-const NSIS_POLL_INTERVAL_MS = 500;
 
 const PROFILE_FLAG_SET = new Set([
   LINUX_APPIMAGE_FLAG,
@@ -722,49 +721,34 @@ const resolveBundleArgs = (
   return [] as const;
 };
 
+const NSIS_CAPTURE_WATCHER_SCRIPT = join(REPO_ROOT, "scripts", "nsis-capture-watcher.ts");
+
 /**
- * Polls NSIS bundle directories for `.nsi` files during `cargo tauri build`.
- * Tauri v2 deletes the `.nsi` source after `makensis` completes, so this
- * captures a copy the moment it appears.
+ * Spawns the NSIS capture watcher as a separate process.
+ * The watcher polls NSIS bundle directories for `.nsi` files during
+ * `cargo tauri build` and copies them to the capture directory before
+ * Tauri v2 deletes them after `makensis`. Runs independently of the
+ * parent's event loop to avoid starvation during subprocess I/O.
  */
-const startNsisCapturePoller = (captureDir: string): { stop: () => void } => {
-  let stopped = false;
+const spawnNsisCaptureWatcher = (captureDir: string): { stop: () => Promise<void> } => {
   const nsisDirectories = buildDesktopBundleDirectoryCandidates("windows", undefined).map(
     (bundleRoot) => join(DESKTOP_TAURI_ROOT, bundleRoot, "nsis"),
   );
 
-  const poll = async (): Promise<void> => {
-    for (const nsisDir of nsisDirectories) {
-      const dirExists = await pathExists(nsisDir);
-      if (!dirExists) {
-        continue;
-      }
-      const entries = await readdir(nsisDir).catch(() => [] as string[]);
-      const nsiFiles = entries.filter((entry) => entry.toLowerCase().endsWith(".nsi"));
-      for (const nsiFile of nsiFiles) {
-        const sourcePath = join(nsisDir, nsiFile);
-        const destPath = join(captureDir, nsiFile);
-        const alreadyCaptured = await pathExists(destPath);
-        if (!alreadyCaptured) {
-          await cp(sourcePath, destPath).catch(() => undefined);
-        }
-      }
-    }
-  };
+  const proc = Bun.spawn(
+    [process.execPath, "run", NSIS_CAPTURE_WATCHER_SCRIPT, ...nsisDirectories, "--", captureDir],
+    {
+      cwd: REPO_ROOT,
+      stdin: "pipe",
+      stdout: "inherit",
+      stderr: "inherit",
+    },
+  );
 
-  const loop = async (): Promise<void> => {
-    while (!stopped) {
-      await poll();
-      await new Promise<void>((resolve) => setTimeout(resolve, NSIS_POLL_INTERVAL_MS));
-    }
-    /** Final poll to catch files written just before the build completed. */
-    await poll();
-  };
-
-  void loop();
   return {
-    stop: () => {
-      stopped = true;
+    stop: async () => {
+      await proc.stdin.end();
+      await proc.exited;
     },
   };
 };
@@ -783,7 +767,7 @@ const runStandardTauriBuildFlow = async ({
     await rm(NSIS_CAPTURE_DIR, { force: true, recursive: true });
     await mkdir(NSIS_CAPTURE_DIR, { recursive: true });
   }
-  const capturePoller = isWindows ? startNsisCapturePoller(NSIS_CAPTURE_DIR) : undefined;
+  const captureWatcher = isWindows ? spawnNsisCaptureWatcher(NSIS_CAPTURE_DIR) : undefined;
 
   const buildCommand = [
     process.execPath,
@@ -794,7 +778,9 @@ const runStandardTauriBuildFlow = async ({
     ...buildSigningConfigArgs(resolvedHostTarget, releaseMode),
   ] as const;
   await runCommandOrExit(buildCommand, { cwd: DESKTOP_ROOT, env });
-  capturePoller?.stop();
+  if (captureWatcher) {
+    await captureWatcher.stop();
+  }
   return [buildCommand.join(" ")];
 };
 
