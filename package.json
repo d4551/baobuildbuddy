@@ -22,7 +22,7 @@
     "dev:client": "bun --env-file=.env run --filter '@bao/client' dev",
     "dev:stack": "bun run scripts/dev-stack.ts",
     "dev:desktop": "bun run --filter '@bao/desktop' dev",
-    "build": "bun run --filter '@bao/server' build && bun run --filter '@bao/client' build",
+    "build": "bun run --filter '@bao/server' build && bun run --filter '@bao/client' build && bun run build:docs-site",
     "start:railway": "(PORT=3000 bun run packages/server/dist/index.js &) && sleep 2 && bun packages/client/.output/server/index.mjs",
     "start:client": "bun packages/client/.output/server/index.mjs",
     "automation:browsers:install": "bun run --filter '@bao/scraper' install:browsers",
@@ -30,6 +30,7 @@
     "build:linux": "bun run build",
     "build:windows": "bun run build",
     "build:desktop": "bun run --filter '@bao/desktop' build",
+    "build:docs-site": "bun run scripts/build-docs-site-css.ts",
     "build:desktop:debug": "bun run --filter '@bao/desktop' build:debug",
     "prepare:desktop-runtime": "bun run scripts/prepare-desktop-runtime.ts",
     "release:desktop:macos": "bun run scripts/build-desktop-release.ts --target macos",
@@ -78,6 +79,7 @@
     "lint:fix": "bun run validate:alignment && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ascii && bun run lint:typed:fix && bun --bun run biome lint . --write --max-diagnostics=1200 && bun run --filter '@bao/client' lint --fix && bun run typecheck"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
     "@biomejs/biome": "^2.4.7",
     "@eslint/js": "^10.0.1",
     "better-sqlite3": "^12.8.0",

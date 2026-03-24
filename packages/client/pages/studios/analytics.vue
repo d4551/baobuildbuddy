@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
@@ -106,28 +107,43 @@ function getMaxCount(items: readonly AnalyticsTechnology[]) {
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-bold mb-6">{{ t("studioAnalytics.title") }}</h1>
-
-    <div
-      v-if="pageError"
-      class="alert alert-error mb-6"
-      role="alert"
-      :aria-label="t('studioAnalytics.errorBannerAria')"
+  <PageScaffold tag="section" width-token="content" labelled-by="studio-analytics-title">
+    <PageHeroHeader
+      title-id="studio-analytics-title"
+      :title="t('studioAnalytics.title')"
+      :description="t('studioAnalytics.description')"
     >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>{{ pageError }}</span>
-      <button class="btn btn-sm btn-ghost" :aria-label="t('studioAnalytics.retryAria')" @click="refreshAnalytics()">
-        {{ t("studioAnalytics.retryButton") }}
-      </button>
-    </div>
+      <template #actions>
+        <NuxtLink
+          :to="APP_ROUTES.studios"
+          class="btn btn-outline"
+          :aria-label="t('studioAnalytics.openDirectoryAria')"
+        >
+          {{ t("studiosIndex.title") }}
+        </NuxtLink>
+      </template>
+    </PageHeroHeader>
 
-    <LoadingSkeleton v-else-if="loading && !analytics" :lines="8" />
+    <LoadingSkeleton v-if="loading && !analytics" :lines="8" />
 
-    <div v-else-if="analytics" class="space-y-6">
-      <!-- Overview Stats -->
+    <BootstrapErrorAlert
+      v-else-if="pageError"
+      :title="t('studioAnalytics.title')"
+      :message="pageError"
+      :retry-label="t('studioAnalytics.retryButton')"
+      :retry-aria-label="t('studioAnalytics.retryAria')"
+      @retry="() => refreshAnalytics()"
+    />
+
+    <EmptyState
+      v-else-if="!analytics"
+      title-key="studioAnalytics.emptyTitle"
+      description-key="studioAnalytics.emptyDescription"
+      cta-label-key="studioAnalytics.retryButton"
+      :cta-to="APP_ROUTES.studios"
+    />
+
+    <div v-else class="space-y-6">
       <div class="stats stats-vertical lg:stats-horizontal w-full bg-base-200">
         <div class="stat">
           <div class="stat-title">{{ t("studioAnalytics.overview.totalStudiosTitle") }}</div>
@@ -137,30 +153,25 @@ function getMaxCount(items: readonly AnalyticsTechnology[]) {
 
         <div class="stat">
           <div class="stat-title">{{ t("studioAnalytics.overview.remoteFriendlyTitle") }}</div>
-          <div class="stat-value text-secondary">{{ remoteWorkPercentage }}%</div>
+          <div class="stat-value text-success">{{ remoteWorkPercentage }}%</div>
           <div class="stat-desc">{{ t("studioAnalytics.overview.remoteFriendlyDesc") }}</div>
         </div>
 
         <div class="stat">
           <div class="stat-title">{{ t("studioAnalytics.overview.indieStudiosTitle") }}</div>
-          <div class="stat-value text-accent">{{ indieStudiosCount }}</div>
+          <div class="stat-value text-warning">{{ indieStudiosCount }}</div>
           <div class="stat-desc">
             {{ t("studioAnalytics.overview.percentageOfTotal", { value: totalStudios > 0 ? Math.round((indieStudiosCount / totalStudios) * 100) : 0 }) }}
           </div>
         </div>
       </div>
 
-      <!-- By Type -->
-      <div class="card bg-base-200">
+      <div class="card card-border bg-base-100 shadow-sm">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.byTypeTitle") }}</h2>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div
-              v-for="[type, count] in byTypeEntries"
-              :key="type"
-              class="stat bg-base-100 rounded-lg"
-            >
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div v-for="[type, count] in byTypeEntries" :key="type" class="stat rounded-lg bg-base-200">
               <div class="stat-title text-xs">{{ type }}</div>
               <div class="stat-value text-2xl">{{ count }}</div>
               <div class="stat-desc">
@@ -171,8 +182,7 @@ function getMaxCount(items: readonly AnalyticsTechnology[]) {
         </div>
       </div>
 
-      <!-- By Size -->
-      <div class="card bg-base-200">
+      <div class="card card-border bg-base-100 shadow-sm">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.bySizeTitle") }}</h2>
 
@@ -196,11 +206,10 @@ function getMaxCount(items: readonly AnalyticsTechnology[]) {
         </div>
       </div>
 
-      <!-- Top Technologies -->
-      <div class="card bg-base-200">
+      <div class="card card-border bg-base-100 shadow-sm">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.topTechnologiesTitle") }}</h2>
-          <p class="text-sm text-base-content/70 mb-4">
+          <p class="mb-4 text-sm text-base-content/70">
             {{ t("studioAnalytics.sections.topTechnologiesDescription") }}
           </p>
 
@@ -225,35 +234,47 @@ function getMaxCount(items: readonly AnalyticsTechnology[]) {
         </div>
       </div>
 
-      <!-- Remote Work Distribution -->
-      <div class="card bg-base-200">
+      <div class="card card-border bg-base-100 shadow-sm">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 
-          <div class="flex items-center justify-center py-8">
-            <div
-              class="radial-progress text-primary"
-              :style="`--value:${remoteWorkPercentage}; --size:12rem;`"
-              role="progressbar"
-              :aria-label="t('studioAnalytics.remoteWorkProgressAria', { value: remoteWorkPercentage })"
-              :aria-valuenow="remoteWorkPercentage"
-              aria-valuemin="0"
-              aria-valuemax="100"
-            >
-              <div class="text-center">
-                <span class="text-4xl font-bold">{{ remoteWorkPercentage }}%</span>
-                <p class="text-sm mt-2">{{ t("studioAnalytics.sections.offerRemoteLabel") }}</p>
+          <div class="stats stats-vertical w-full bg-base-200 sm:stats-horizontal">
+            <div class="stat">
+              <div class="stat-title">
+                {{ t("studioAnalytics.sections.offerRemoteLabel") }}
+              </div>
+              <div class="stat-value text-success">{{ remoteWorkPercentage }}%</div>
+              <div class="stat-desc">
+                {{ t("studioAnalytics.remoteWorkProgressAria", { value: remoteWorkPercentage }) }}
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-title">
+                {{ t("studioAnalytics.sections.remoteFriendlyTitle") }}
+              </div>
+              <div class="stat-value text-success">{{ remoteWorkStudios }}</div>
+              <div class="stat-desc">
+                {{ t("studioAnalytics.overview.remoteFriendlyDesc") }}
               </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 mt-4">
-            <div class="stat bg-base-100 rounded-lg">
+          <div class="mt-4">
+            <progress
+              class="progress progress-primary w-full"
+              :value="remoteWorkStudios"
+              :max="Math.max(1, totalStudios)"
+              :aria-label="t('studioAnalytics.remoteWorkProgressAria', { value: remoteWorkPercentage })"
+            ></progress>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="stat rounded-lg bg-base-200">
               <div class="stat-title text-xs">{{ t("studioAnalytics.sections.remoteFriendlyTitle") }}</div>
               <div class="stat-value text-success text-2xl">{{ remoteWorkStudios }}</div>
             </div>
 
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat rounded-lg bg-base-200">
               <div class="stat-title text-xs">{{ t("studioAnalytics.sections.onSiteOnlyTitle") }}</div>
               <div class="stat-value text-warning text-2xl">{{ onSiteOnlyCount }}</div>
             </div>
@@ -261,5 +282,5 @@ function getMaxCount(items: readonly AnalyticsTechnology[]) {
         </div>
       </div>
     </div>
-  </div>
+  </PageScaffold>
 </template>

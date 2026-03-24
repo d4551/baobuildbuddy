@@ -264,7 +264,7 @@ async function submitScheduledJobApply(): Promise<void> {
 
 <template>
   <PageScaffold tag="section" width-token="content" labelled-by="automation-job-apply-title">
-    <PageHeaderBlock
+    <PageHeroHeader
       title-id="automation-job-apply-title"
       :title="t('automation.jobApply.title')"
       :description="t('automation.hub.cards.jobApply.description')"
@@ -362,10 +362,11 @@ async function submitScheduledJobApply(): Promise<void> {
       </div>
     </div>
 
-    <div v-if="submitError" role="alert" class="alert alert-error" aria-live="assertive">
-      <h3 class="font-semibold">{{ t("automation.jobApply.submitErrorTitle") }}</h3>
-      <p>{{ submitError }}</p>
-    </div>
+    <BootstrapErrorAlert
+      v-if="submitError"
+      :title="t('automation.jobApply.submitErrorTitle')"
+      :message="submitError"
+    />
 
     <div v-if="hasActiveRun" class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">
@@ -439,21 +440,26 @@ async function submitScheduledJobApply(): Promise<void> {
           </button>
         </div>
 
-        <div v-if="streamError" role="alert" class="alert alert-error mt-4" aria-live="assertive">
-          <h3 class="font-semibold">{{ t("automation.jobApply.stream.errorTitle") }}</h3>
-          <p>{{ streamError.message }}</p>
-        </div>
+        <BootstrapErrorAlert
+          v-if="streamError"
+          class="mt-4"
+          :title="t('automation.jobApply.stream.errorTitle')"
+          :message="streamError.message"
+          :retry-label="t('automation.jobApply.stream.retryButton')"
+          :retry-aria-label="t('automation.jobApply.stream.retryAria')"
+          @retry="() => runStream.retry()"
+        />
 
         <section class="mt-4" :aria-label="t('automation.jobApply.stream.eventsAria')">
           <h3 class="font-semibold">{{ t("automation.jobApply.stream.eventsTitle") }}</h3>
           <div class="overflow-x-auto mt-2">
-            <table class="table table-zebra table-sm">
+            <table class="table table-zebra table-sm" :aria-label="t('automation.jobApply.stream.eventsAria')">
               <thead>
                 <tr>
-                  <th>{{ t("automation.jobApply.stream.events.columns.timestamp") }}</th>
-                  <th>{{ t("automation.jobApply.stream.events.columns.stage") }}</th>
-                  <th>{{ t("automation.jobApply.stream.events.columns.status") }}</th>
-                  <th>{{ t("automation.jobApply.stream.events.columns.message") }}</th>
+                  <th scope="col">{{ t("automation.jobApply.stream.events.columns.timestamp") }}</th>
+                  <th scope="col">{{ t("automation.jobApply.stream.events.columns.stage") }}</th>
+                  <th scope="col">{{ t("automation.jobApply.stream.events.columns.status") }}</th>
+                  <th scope="col">{{ t("automation.jobApply.stream.events.columns.message") }}</th>
                 </tr>
               </thead>
               <tbody>

@@ -101,6 +101,25 @@ type GeneratedCoverLetterContent = {
   body: string;
   conclusion: string;
 };
+type CoverLetterRecord = typeof coverLetters.$inferSelect;
+type CoverLetterSender = {
+  name: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+};
+type CoverLetterExportPayload = {
+  company: string;
+  position: string;
+  content: Record<string, unknown>;
+};
+type CoverLetterExportRequest = {
+  id: string;
+  format: string | undefined;
+  payload: CoverLetterExportPayload;
+  sender: CoverLetterSender;
+  set: RouteSetState;
+};
 
 const resolveResumeContext = async (resumeId?: string): Promise<string> => {
   if (!resumeId) return "";
@@ -154,6 +173,72 @@ const saveGeneratedCoverLetter = async (
   return newCoverLetter;
 };
 
+const getCoverLetterById = async (
+  id: string,
+  set: RouteSetState,
+): Promise<CoverLetterRecord | null> => {
+  const rows = await db.select().from(coverLetters).where(eq(coverLetters.id, id));
+  const letter = rows[0] ?? null;
+  if (!letter) {
+    set.status = HTTP_STATUS_NOT_FOUND;
+  }
+  return letter;
+};
+
+const buildCoverLetterSender = async (): Promise<CoverLetterSender> => {
+  const profileRows = await db
+    .select()
+    .from(userProfile)
+    .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
+  const profile = profileRows[0];
+
+  return {
+    name: profile?.name || "",
+    ...(profile?.email ? { email: profile.email } : {}),
+    ...(profile?.phone ? { phone: profile.phone } : {}),
+    ...(profile?.location ? { location: profile.location } : {}),
+  };
+};
+
+const toCoverLetterExportPayload = (letter: CoverLetterRecord): CoverLetterExportPayload => ({
+  company: letter.company,
+  position: letter.position,
+  content: toJsonRecord(letter.content),
+});
+
+const createCoverLetterExportError = (reason: unknown) => ({
+  error: API_ERROR_EXPORT_COVER_LETTER,
+  details: reason instanceof Error ? reason.message : API_ERROR_UNKNOWN,
+});
+
+const exportCoverLetterAttachment = async (
+  request: CoverLetterExportRequest,
+) => {
+  if (request.format === "docx") {
+    const docxResult = await settle(
+      docxExportService.exportCoverLetterDocx(request.payload, request.sender),
+    );
+    if (docxResult.status === "rejected") {
+      request.set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+      return createCoverLetterExportError(docxResult.reason);
+    }
+    return createDocxAttachmentResponse(docxResult.value, `cover-letter-${request.id}.docx`);
+  }
+
+  const exportResult = await settle(
+    exportService.exportCoverLetterPDF(request.payload, request.sender),
+  );
+  if (exportResult.status === "rejected") {
+    request.set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return createCoverLetterExportError(exportResult.reason);
+  }
+
+  return createPdfAttachmentResponse(
+    Buffer.from(exportResult.value),
+    `cover-letter-${request.id}.pdf`,
+  );
+};
+
 const handleGenerateCoverLetter = async (body: GenerateCoverLetterBody, set: RouteSetState) => {
   const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
   if (settingsRows.length === 0) {
@@ -170,6 +255,7 @@ const handleGenerateCoverLetter = async (body: GenerateCoverLetterBody, set: Rou
     : "No additional job information provided";
   const aiResult = await settle(
     aiService.generate(coverLetterPrompt(body.company, body.position, jobInfoText, resumeContext), {
+      purpose: "coverLetter",
       temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
       maxTokens: SCHEMA_MAX_LENGTH_LONG,
     }),
@@ -324,73 +410,19 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
   .post(
     "/:id/export",
     async ({ params, body, set }) => {
-      const rows = await db.select().from(coverLetters).where(eq(coverLetters.id, params.id));
-      if (rows.length === 0) {
-        set.status = HTTP_STATUS_NOT_FOUND;
+      const letter = await getCoverLetterById(params.id, set);
+      if (!letter) {
         return { error: API_ERROR_COVER_LETTER_NOT_FOUND };
       }
 
-      const letter = rows[0];
-
-      // Load user profile for sender info
-      const profileRows = await db
-        .select()
-        .from(userProfile)
-        .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
-      const profile = profileRows[0];
-      const sender: {
-        name: string;
-        email?: string;
-        phone?: string;
-        location?: string;
-      } = {
-        name: profile?.name || "",
-      };
-      if (profile?.email) {
-        sender.email = profile.email;
-      }
-      if (profile?.phone) {
-        sender.phone = profile.phone;
-      }
-      if (profile?.location) {
-        sender.location = profile.location;
-      }
-
-      const letterPayload = {
-        company: letter.company,
-        position: letter.position,
-        content: toJsonRecord(letter.content),
-      };
-
-      if (body.format === "docx") {
-        const docxResult = await settle(
-          docxExportService.exportCoverLetterDocx(letterPayload, sender),
-        );
-        if (docxResult.status === "rejected") {
-          set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-          return {
-            error: API_ERROR_EXPORT_COVER_LETTER,
-            details:
-              docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
-          };
-        }
-        return createDocxAttachmentResponse(docxResult.value, `cover-letter-${params.id}.docx`);
-      }
-
-      const exportResult = await settle(exportService.exportCoverLetterPDF(letterPayload, sender));
-      if (exportResult.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return {
-          error: API_ERROR_EXPORT_COVER_LETTER,
-          details:
-            exportResult.reason instanceof Error ? exportResult.reason.message : API_ERROR_UNKNOWN,
-        };
-      }
-
-      return createPdfAttachmentResponse(
-        Buffer.from(exportResult.value),
-        `cover-letter-${params.id}.pdf`,
-      );
+      const sender = await buildCoverLetterSender();
+      return exportCoverLetterAttachment({
+        id: params.id,
+        format: body.format,
+        payload: toCoverLetterExportPayload(letter),
+        sender,
+        set,
+      });
     },
     {
       params: t.Object({

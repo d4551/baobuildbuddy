@@ -79,6 +79,7 @@ watch(query, () => {
 });
 
 const isLoading = computed(() => runFetchStatus.value === "pending");
+const hasRuns = computed(() => sortedRuns.value.length > 0);
 const errorMessage = computed(() =>
   error.value ? getErrorMessage(error.value, t("automation.runs.loadErrorFallback")) : "",
 );
@@ -252,7 +253,11 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
 
 <template>
   <PageScaffold tag="section" width-token="content" labelled-by="automation-runs-title">
-    <PageHeaderBlock title-id="automation-runs-title" :title="t('automation.runs.title')">
+    <PageHeroHeader
+      title-id="automation-runs-title"
+      :title="t('automation.runs.title')"
+      :description="t('automation.hub.cards.runHistory.description')"
+    >
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.automation"
@@ -262,7 +267,7 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
           {{ t("automation.runs.backButton") }}
         </NuxtLink>
       </template>
-    </PageHeaderBlock>
+    </PageHeroHeader>
 
     <SectionGrid grid-token="twoColumn">
       <fieldset class="fieldset">
@@ -294,19 +299,30 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
       </fieldset>
     </SectionGrid>
 
-    <div class="card card-border bg-base-100">
+    <LoadingSkeleton v-if="isLoading && !hasRuns" :lines="6" />
+
+    <BootstrapErrorAlert
+      v-else-if="error"
+      :title="t('automation.runs.loadErrorTitle')"
+      :message="errorMessage"
+      :retry-label="t('automation.hub.retryButtonLabel')"
+      :retry-aria-label="t('automation.hub.retryAria')"
+      @retry="() => refresh()"
+    />
+
+    <div v-else class="card card-border bg-base-100">
       <div class="card-body">
         <div class="overflow-x-auto">
           <table class="table table-zebra" :aria-label="t('automation.runs.tableAriaLabel')">
             <thead>
               <tr>
-                <th>{{ t("automation.runs.columns.id") }}</th>
-                <th>{{ t("automation.runs.columns.type") }}</th>
-                <th>{{ t("automation.runs.columns.status") }}</th>
-                <th>{{ t("automation.runs.columns.progress") }}</th>
-                <th>{{ t("automation.runs.columns.job") }}</th>
-                <th>{{ t("automation.runs.columns.updated") }}</th>
-                <th>{{ t("automation.runs.columns.actions") }}</th>
+                <th scope="col">{{ t("automation.runs.columns.id") }}</th>
+                <th scope="col">{{ t("automation.runs.columns.type") }}</th>
+                <th scope="col">{{ t("automation.runs.columns.status") }}</th>
+                <th scope="col" class="text-right">{{ t("automation.runs.columns.progress") }}</th>
+                <th scope="col">{{ t("automation.runs.columns.job") }}</th>
+                <th scope="col">{{ t("automation.runs.columns.updated") }}</th>
+                <th scope="col">{{ t("automation.runs.columns.actions") }}</th>
               </tr>
             </thead>
             <tbody>
@@ -325,7 +341,7 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
                     </span>
                   </div>
                 </td>
-                <td>{{ formatRunProgress(run) }}</td>
+                <td class="text-right">{{ formatRunProgress(run) }}</td>
                 <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
                 <td>{{ formatDate(run.updatedAt) }}</td>
                 <td>
@@ -343,14 +359,6 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
               </tr>
             </tbody>
           </table>
-        </div>
-
-        <p v-if="isLoading" class="text-sm opacity-70" role="status" aria-live="polite">
-          {{ t("automation.runs.loadingLabel") }}
-        </p>
-        <div v-else-if="error" role="alert" class="alert alert-error">
-          <h3 class="font-semibold">{{ t("automation.runs.loadErrorTitle") }}</h3>
-          <p>{{ errorMessage }}</p>
         </div>
       </div>
     </div>

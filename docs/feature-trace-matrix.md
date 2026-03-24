@@ -62,3 +62,9 @@ The server and tests use `node:fs`, `node:path`, and related modules where Bun p
 | `/api/settings` (`settings.routes.ts`) | settings + JSON export service hooks | `settings` | `packages/client/pages/settings.vue` | `packages/server/src/routes/settings.test.ts` |
 | `/api/stats` (`stats.routes.ts`) | `statisticsService` | aggregated reads across jobs, resumes, interviews, gamification | profile and dashboard surfaces that show aggregate progress | `packages/server/src/routes/core-routes.test.ts` |
 | `/api/search` + `/api/automation` + `/api/ai` composition points | cross-domain orchestration from shared route handlers | multiple tables used by composed services | validated by route-level translation in `packages/client/` surfaces above | core-route + dedicated route tests |
+
+## AI routing notes
+
+- `settings.aiRouting` is now the canonical server-side routing contract for AI provider/model selection.
+- High-value purpose mappings currently exercised in code paths: `chat`, `interviewQuestions`, `interviewFeedback`, `resume`, `coverLetter`, `emailResponse`, `jobMatch`, and `automationFieldMapping`.
+- Local provider readiness is surfaced through `providerDiagnostics` on the settings payload and `/api/ai/models` provider health metadata.

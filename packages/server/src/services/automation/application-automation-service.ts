@@ -13,6 +13,7 @@ import type {
   RpaCapabilityAuditSummary,
   RpaRunEvent,
   RpaRunResult,
+  ScraperOperationResult,
 } from "@bao/shared";
 import {
   API_ERROR_EMAIL_DELIVERY_FAILED,
@@ -1070,7 +1071,7 @@ export class ApplicationAutomationService {
    */
   private executeScrapeTarget(
     target: AutomationScrapeTarget,
-  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+  ): Promise<ScraperOperationResult> {
     if (!isAutomationJobScrapeTarget(target)) {
       return scraperService.scrapeStudios();
     }
@@ -1696,6 +1697,7 @@ export class ApplicationAutomationService {
           normalized.tone,
           normalized.sender,
         ),
+        { purpose: "emailResponse" },
       ),
     );
     if (aiResultOutcome.status === "rejected") {
@@ -1960,7 +1962,7 @@ export class ApplicationAutomationService {
   private async completeScrapeRun(
     runId: string,
     target: AutomationScrapeTarget,
-    result: { scraped: number; upserted: number; errors: string[] },
+    result: ScraperOperationResult,
     executionMs: number,
   ): Promise<void> {
     const completedAt = new Date().toISOString();
@@ -1969,6 +1971,7 @@ export class ApplicationAutomationService {
       scraped: result.scraped,
       upserted: result.upserted,
       errors: result.errors,
+      enrichment: result.enrichment,
     } satisfies Record<string, unknown>;
 
     await db
@@ -1994,7 +1997,11 @@ export class ApplicationAutomationService {
         runId,
         action: this.resolveScrapeAction(target),
         status: "success",
-        message: `${target} scrape completed (${result.scraped} scraped, ${result.upserted} upserted)`,
+        message:
+          `${target} scrape completed (` +
+          `${result.scraped} scraped, ` +
+          `${result.upserted} upserted, ` +
+          `${result.enrichment.enrichedRecords} enriched)`,
         step: 1,
         totalSteps: 1,
       }),

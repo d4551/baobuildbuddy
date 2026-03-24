@@ -1,5 +1,9 @@
 import z from "zod";
-import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
+import {
+  AI_PROVIDER_DEFAULT,
+  AI_PROVIDER_ID_LIST,
+  DEFAULT_AI_ROUTING,
+} from "../constants/ai";
 import { DEFAULT_BRAND_SETTINGS, normalizeAppDataTheme, THEME_NAMES } from "../constants/branding";
 import { MAX_PORT, MIN_PORT } from "../constants/ports";
 import {
@@ -36,6 +40,29 @@ export const apiKeyConfigSchema = z.object({
 const aiProviderSchema = z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]);
 
 export const preferredModelsSchema = z.partialRecord(aiProviderSchema, z.string().min(1));
+
+const AI_ROUTING_PURPOSE_SCHEMA_VALUES = [
+  "chat",
+  "interviewQuestions",
+  "interviewFeedback",
+  "resume",
+  "coverLetter",
+  "emailResponse",
+  "jobMatch",
+  "scrapeEnrichment",
+  "automationFieldMapping",
+] as const;
+
+const aiRoutingPurposeSchema = z.enum(AI_ROUTING_PURPOSE_SCHEMA_VALUES);
+
+export const aiRoutingTargetSchema = z.object({
+  provider: aiProviderSchema,
+  model: z.string().trim().min(1).optional(),
+});
+
+export const aiRoutingSchema = z
+  .record(aiRoutingPurposeSchema, aiRoutingTargetSchema)
+  .default(DEFAULT_AI_ROUTING);
 
 export const companyBoardTypeSchema = z.enum([
   "greenhouse",
@@ -311,6 +338,7 @@ export const settingsSchema = z.object({
   huggingfaceToken: z.string().optional(),
   localModelEndpoint: z.string().url().optional(),
   localModelName: z.string().optional(),
+  aiRouting: aiRoutingSchema,
   preferredProvider: aiProviderSchema.default(AI_PROVIDER_DEFAULT),
   preferredModel: z.string().optional(),
   preferredModels: preferredModelsSchema.optional(),

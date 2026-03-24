@@ -171,6 +171,7 @@ Want BaoBuildBuddy to use AI on your own computer without cloud API keys?
 3. Download a first model: `ollama pull llama3.2`
 4. Open BaoBuildBuddy and go to **Settings > AI Providers**.
 5. Set the local endpoint to `http://localhost:11434/v1` and leave the model blank for auto-detect.
+6. Use the built-in test button before saving. The settings and setup flows now surface concrete local diagnostics such as unreachable endpoint, timeout, empty model list, and invalid selected model.
 
 For the full beginner walkthrough, see [docs/LOCAL_AI_SETUP.md](docs/LOCAL_AI_SETUP.md).
 
@@ -689,11 +690,18 @@ The AI subsystem is in `packages/server/src/services/ai/`:
 
 ### Provider selection
 
-1. Local provider is used when `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` are set.
-2. Cloud adapters are selected based on which API keys are configured.
-3. The context manager handles conversation state and prompt construction.
+1. The settings row persists a canonical `aiRouting` map keyed by purpose: `chat`, `interviewQuestions`, `interviewFeedback`, `resume`, `coverLetter`, `emailResponse`, `jobMatch`, `scrapeEnrichment`, and `automationFieldMapping`.
+2. Each AI route/service call now passes an explicit purpose so provider and model selection happens server-side per workflow instead of through one global preference.
+3. Local inference is centered on `http://localhost:11434/v1` and supports blank-model auto-detect; diagnostics report unreachable endpoints, timeouts, empty `/models` responses, and invalid configured models.
+4. The context manager still owns conversation state and prompt construction for chat surfaces.
 
 All AI calls are server-owned. The client communicates through API routes and WebSocket endpoints, never directly to providers.
+
+### Source-of-truth policy
+
+- Edit hand-maintained source, docs, schemas, and config under `packages/*`, `docs/`, and `scripts/`.
+- Treat `.nuxt`, `.output`, `dist-types`, desktop release payloads, and other packaged/generated artifacts as derived outputs.
+- Regenerate derived outputs after source changes; do not hand-edit them.
 
 ---
 

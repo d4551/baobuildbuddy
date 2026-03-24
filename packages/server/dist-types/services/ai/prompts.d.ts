@@ -1,4 +1,4 @@
-import { type BrandSettings } from "@bao/shared";
+import { type BrandSettings, type ScrapedJob, type ScrapedStudio } from "@bao/shared";
 /**
  * AI prompt templates specialized for video game industry career guidance.
  */
@@ -51,6 +51,14 @@ export declare function interviewQuestionPrompt(studio: string, role: string, le
  * Interview response feedback prompt
  */
 export declare function interviewFeedbackPrompt(question: string, response: string): string;
+/**
+ * Scrape enrichment prompt for a normalized scraped job row.
+ */
+export declare function scrapeJobEnrichmentPrompt(job: ScrapedJob): string;
+/**
+ * Scrape enrichment prompt for a normalized scraped studio row.
+ */
+export declare function scrapeStudioEnrichmentPrompt(studio: ScrapedStudio): string;
 /**
  * Skills analysis and mapping prompt
  */

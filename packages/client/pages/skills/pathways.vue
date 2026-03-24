@@ -206,32 +206,34 @@ function getReadinessDialStyle(score: number): Record<string, string> {
 </script>
 
 <template>
-  <section class="space-y-6">
+  <PageScaffold tag="section" labelled-by="skills-pathways-title">
     <AppBreadcrumbs :crumbs="breadcrumbs" />
 
-    <header class="flex flex-wrap items-start justify-between gap-3">
-      <div class="space-y-1">
-        <h1 class="text-3xl font-bold">{{ t("skillsPathwaysPage.title") }}</h1>
-        <p class="text-sm text-base-content/70">{{ t("skillsPathwaysPage.subtitle") }}</p>
-      </div>
-      <NuxtLink
-        v-if="gamificationReady"
-        :to="APP_ROUTES.gamification"
-        class="btn btn-ghost btn-sm gap-2"
-        :aria-label="t('skillsPathwaysPage.gamification.openProgressAria')"
-      >
-        <span class="badge badge-primary badge-sm">
-          {{ t("skillsPathwaysPage.gamification.levelLabel", { level: gamificationLevel }) }}
+    <PageHeroHeader
+      title-id="skills-pathways-title"
+      :title="t('skillsPathwaysPage.title')"
+      :description="t('skillsPathwaysPage.subtitle')"
+    >
+      <template #actions>
+        <NuxtLink
+          v-if="gamificationReady"
+          :to="APP_ROUTES.gamification"
+          class="btn btn-ghost"
+          :aria-label="t('skillsPathwaysPage.gamification.openProgressAria')"
+        >
+          <span class="badge badge-primary badge-sm">
+            {{ t("skillsPathwaysPage.gamification.levelLabel", { level: gamificationLevel }) }}
+          </span>
+          <span class="text-xs">{{ t("skillsPathwaysPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
+        </NuxtLink>
+        <span
+          v-else-if="gamificationStatus === 'pending' || gamificationStatus === 'idle'"
+          class="badge badge-ghost badge-sm"
+        >
+          {{ t("skillsPathwaysPage.gamification.unavailableHint") }}
         </span>
-        <span class="text-xs">{{ t("skillsPathwaysPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
-      </NuxtLink>
-      <span
-        v-else-if="gamificationStatus === 'pending' || gamificationStatus === 'idle'"
-        class="badge badge-ghost badge-sm"
-      >
-        {{ t("skillsPathwaysPage.gamification.unavailableHint") }}
-      </span>
-    </header>
+      </template>
+    </PageHeroHeader>
 
     <BootstrapErrorAlert
       v-if="gamificationStatus === 'error'"
@@ -244,25 +246,13 @@ function getReadinessDialStyle(score: number): Record<string, string> {
 
     <LoadingSkeleton v-if="uiState === 'loading'" variant="cards" :lines="8" />
 
-    <div v-else-if="uiState === 'error'" class="alert alert-error" role="alert">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span>{{ getErrorMessage(error, t("skillsPathwaysPage.errors.loadFailed")) }}</span>
-      <button
-        type="button"
-        class="btn btn-sm btn-ghost"
-        :aria-label="t('skillsPathwaysPage.retryAria')"
-        @click="retryLoad"
-      >
-        {{ t("skillsPathwaysPage.retryButtonLabel") }}
-      </button>
-    </div>
+    <BootstrapErrorAlert
+      v-else-if="uiState === 'error'"
+      :message="getErrorMessage(error, t('skillsPathwaysPage.errors.loadFailed'))"
+      :retry-label="t('skillsPathwaysPage.retryButtonLabel')"
+      :retry-aria-label="t('skillsPathwaysPage.retryAria')"
+      @retry="retryLoad"
+    />
 
     <template v-else>
       <section
@@ -346,9 +336,11 @@ function getReadinessDialStyle(score: number): Record<string, string> {
         </div>
       </section>
 
-      <section v-else role="alert" class="alert alert-info alert-soft">
-        <span>{{ t("skillsPathwaysPage.readiness.emptyState") }}</span>
-      </section>
+      <EmptyState
+        v-else
+        title-key="skillsPathwaysPage.readiness.emptyStateTitle"
+        description-key="skillsPathwaysPage.readiness.emptyStateDescription"
+      />
 
       <section class="card bg-base-200">
         <div class="card-body gap-4">
@@ -415,11 +407,13 @@ function getReadinessDialStyle(score: number): Record<string, string> {
             </article>
           </div>
 
-          <div v-if="sortedPathways.length === 0" role="alert" class="alert alert-info alert-soft">
-            <span>{{ t("skillsPathwaysPage.pathways.emptyState") }}</span>
-          </div>
+          <EmptyState
+            v-if="sortedPathways.length === 0"
+            title-key="skillsPathwaysPage.pathways.emptyStateTitle"
+            description-key="skillsPathwaysPage.pathways.emptyStateDescription"
+          />
         </div>
       </section>
     </template>
-  </section>
+  </PageScaffold>
 </template>

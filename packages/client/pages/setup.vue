@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
-  AI_PROVIDER_CATALOG,
+  AI_PROVIDER_ID_LIST,
+  type AIProviderType,
   type DashboardStats,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
@@ -9,6 +10,8 @@ import {
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { createFlowEngineInput } from "~/constants/flow-engine";
+import type { ClientProviderTestResult } from "~/utils/ai-control-plane";
+import { resolveLocalProviderState, resolveProviderMetadata } from "~/utils/ai-control-plane";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -25,9 +28,11 @@ if (import.meta.server) {
   });
 }
 
-type SetupProvider = "local" | "gemini" | "openai" | "claude" | "huggingface";
+type SetupProvider = AIProviderType;
 type CloudProvider = Exclude<SetupProvider, "local">;
-type TestResult = { valid: boolean; provider: string };
+type TestResult = ClientProviderTestResult & {
+  provider: string;
+};
 type SetupStep = 1 | 2 | 3;
 type SetupAuthStatus = {
   authRequired: boolean;
@@ -36,7 +41,11 @@ type SetupAuthStatus = {
   setupTokenConfigured: boolean;
 };
 
-const CLOUD_PROVIDER_IDS: readonly CloudProvider[] = ["gemini", "openai", "claude", "huggingface"];
+function isCloudProvider(provider: AIProviderType): provider is CloudProvider {
+  return provider !== "local";
+}
+
+const CLOUD_PROVIDER_IDS = AI_PROVIDER_ID_LIST.filter(isCloudProvider);
 const API_KEY_FIELD_BY_PROVIDER: Record<CloudProvider, string> = {
   gemini: "geminiApiKey",
   openai: "openaiApiKey",
@@ -80,12 +89,8 @@ const testResults = ref<Record<SetupProvider, TestResult | null>>({
 });
 
 const providerNameById = computed<Record<SetupProvider, string>>(() => {
-  const catalogMap = new Map(
-    AI_PROVIDER_CATALOG.map((provider) => [provider.id, provider] as const),
-  );
-
   const resolveProviderName = (providerId: SetupProvider): string => {
-    const provider = catalogMap.get(providerId);
+    const provider = resolveProviderMetadata(providerId);
     if (!provider) {
       return providerId;
     }
@@ -185,9 +190,17 @@ const needsStoredApiKey = computed(
     authStatus.value.bootstrapRequired === false &&
     getStoredApiKey() === null,
 );
+const localProviderState = computed(() =>
+  resolveLocalProviderState({
+    settings: settings.value,
+    endpoint: localModelEndpoint.value,
+    model: localModelName.value,
+    testResult: testResults.value.local,
+  }),
+);
+const localResolvedModelName = computed(() => localProviderState.value.selectedModel);
 const ollamaCommand = computed(() => {
-  const modelName = localModelName.value.trim() || LOCAL_AI_DEFAULT_MODEL;
-  return `ollama run ${modelName}`;
+  return `ollama run ${localResolvedModelName.value}`;
 });
 
 async function handleTestProvider(provider: SetupProvider): Promise<void> {
@@ -200,7 +213,11 @@ async function handleTestProvider(provider: SetupProvider): Promise<void> {
   testingProvider.value = provider;
   testResults.value[provider] = null;
   const providerTestResult = await settlePromise(
-    testApiKey(provider, key),
+    testApiKey(
+      provider,
+      key,
+      provider === "local" ? localProviderState.value.configuredModel || undefined : undefined,
+    ),
     t("setup.providerTestErrorFallback"),
   );
   testing.value = false;
@@ -219,7 +236,9 @@ async function handleTestProvider(provider: SetupProvider): Promise<void> {
   if (result?.valid) {
     $toast.success(t("setup.providerReachable", { provider: getProviderLabel(provider) }));
   } else {
-    $toast.error(t("setup.providerTestFailed", { provider: getProviderLabel(provider) }));
+    $toast.error(
+      result?.message || t("setup.providerTestFailed", { provider: getProviderLabel(provider) }),
+    );
   }
 }
 
@@ -299,6 +318,37 @@ async function handleComplete(): Promise<void> {
       $toast.error(getErrorMessage(profileUpdateResult.error, t("setup.completeErrorFallback")));
       return;
     }
+  }
+
+  const hasCloudCredentials =
+    CLOUD_PROVIDER_IDS.some((provider) => providerCredentials[provider].trim().length > 0) ||
+    Boolean(settings.value?.hasGeminiKey) ||
+    Boolean(settings.value?.hasOpenaiKey) ||
+    Boolean(settings.value?.hasClaudeKey) ||
+    Boolean(settings.value?.hasHuggingfaceToken);
+
+  const localProviderCheck = await settlePromise(
+    testApiKey(
+      "local",
+      localProviderState.value.endpoint,
+      localProviderState.value.configuredModel || undefined,
+    ),
+    t("setup.providerTestErrorFallback"),
+  );
+  if (!localProviderCheck.ok) {
+    saving.value = false;
+    $toast.error(getErrorMessage(localProviderCheck.error, t("setup.providerTestErrorFallback")));
+    return;
+  }
+  testResults.value.local = localProviderCheck.value;
+
+  if (!hasCloudCredentials && !localProviderCheck.value.valid) {
+    saving.value = false;
+    $toast.error(
+      localProviderCheck.value.message ||
+        t("setup.providerTestFailed", { provider: getProviderLabel("local") }),
+    );
+    return;
   }
 
   const update: Record<string, string> = {
@@ -462,7 +512,21 @@ async function copyOllamaCommand(): Promise<void> {
                 :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
               >
                 {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-3 w-3 shrink-0"
+                  aria-hidden="true"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
               </NuxtLink>
             </p>
 
@@ -477,7 +541,20 @@ async function copyOllamaCommand(): Promise<void> {
                 :title="t('setup.ollamaCommandCopyTitle')"
                 @click="copyOllamaCommand"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-4 w-4 shrink-0 opacity-70"
+                  aria-hidden="true"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
               </button>
             </div>
           </div>

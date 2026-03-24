@@ -132,6 +132,7 @@ const BUILD_WS_LEAK_MARKERS = [
   `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`,
   `ws:\\/\\/${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_BUILD_SERVER_PORT}`,
 ];
+const HTML_TITLE_PATTERN = /<title>([^<]*)<\/title>/iu;
 
 const ensureStaticFrontendEntrypoint = async (directoryPath: string): Promise<void> => {
   const indexPath = join(directoryPath, "index.html");
@@ -804,7 +805,7 @@ const runNativeBrowserChecks = async (
     );
   }
   const html = await htmlResponse.text();
-  const titleMatch = /<title>([^<]*)<\/title>/i.exec(html);
+  const titleMatch = HTML_TITLE_PATTERN.exec(html);
   const pageTitle = titleMatch?.[1]?.trim() ?? "untitled";
 
   const healthResponse = await fetch(`${apiBase}/api/health`);

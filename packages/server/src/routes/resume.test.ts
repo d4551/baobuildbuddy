@@ -126,7 +126,9 @@ function registerResumeDynamicFlowTests(): void {
     expect(res.status).toBe(200);
     expect(res.body.name).toBe("Updated Resume");
   });
+}
 
+function registerResumeAiFlowTests(): void {
   test("POST /api/resumes/:id/ai-enhance returns structured suggestions", async () => {
     const res = await requestJson<{
       section: string;
@@ -156,7 +158,9 @@ function registerResumeDynamicFlowTests(): void {
     expect(Array.isArray(res.body.improvements)).toBe(true);
     expect(Array.isArray(res.body.keywords)).toBe(true);
   });
+}
 
+function registerResumeExportTests(): void {
   test("POST /api/resumes/:id/export returns a PDF attachment", async () => {
     const response = await app.handle(
       new Request(`http://localhost/api/resumes/${createdId}/export`, {
@@ -220,5 +224,7 @@ describe("resume routes", () => {
   registerQuestionnaireRouteTests();
   registerResumeCrudTests();
   registerResumeDynamicFlowTests();
+  registerResumeAiFlowTests();
+  registerResumeExportTests();
   registerResumeDeletionTests();
 });

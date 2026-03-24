@@ -1,4 +1,4 @@
-import type { AutomationSettings, EmailTransportSettings } from "@bao/shared";
+import type { AIRouting, AutomationSettings, EmailTransportSettings } from "@bao/shared";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared";
 export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "settings";
@@ -136,6 +136,25 @@ export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWith
             generated: undefined;
         }, {}, {
             length: number | undefined;
+        }>;
+        aiRouting: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+            name: "ai_routing";
+            tableName: "settings";
+            dataType: "json";
+            columnType: "SQLiteTextJson";
+            data: AIRouting;
+            driverParam: string;
+            notNull: false;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            $type: AIRouting;
         }>;
         preferredProvider: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "preferred_provider";

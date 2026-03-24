@@ -10,6 +10,7 @@ export declare class HuggingFaceProvider extends BaseAIProvider {
     model: string;
     private client;
     constructor(apiKey?: string, model?: string);
+    private resolveModel;
     generate(prompt: string, options?: GenerateOptions): Promise<AIResponse>;
     stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string>;
     isAvailable(): Promise<boolean>;

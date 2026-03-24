@@ -83,6 +83,9 @@ const frFROverrides = {
     seoDescription:
       "Recherchez et filtrez les postes jeu vidéo par plateforme, type de studio, genre et niveau d'expérience.",
     title: "Offres d'emploi",
+    emptyStateTitle: "Aucune offre ne correspond à vos filtres",
+    emptyStateDescription:
+      "Ajustez votre recherche ou vos filtres pour élargir la vue actuelle de découverte d'offres.",
     pagination: {
       navigationAria: "Pagination des offres",
       previousAria: "Page précédente des offres",
@@ -127,11 +130,16 @@ const frFROverrides = {
   skillsPage: {
     seoTitle: "Cartographie des compétences",
     title: "Cartographie des compétences",
+    retryButton: "Réessayer",
+    retryAria: "Réessayer le chargement des correspondances de compétences",
   },
   skillsPathwaysPage: {
     seoTitle: "Parcours de carrière",
     title: "Parcours de carrière",
     readiness: {
+      emptyStateTitle: "Les données de préparation ne sont pas encore disponibles",
+      emptyStateDescription:
+        "Ajoutez davantage de preuves de compétences cartographiées puis relancez l'analyse pour remplir cette section.",
       feedback: {
         empty: "Les données de préparation pour {category} ne sont pas encore disponibles.",
         early: "Niveau initial en {category}. Ajoutez davantage de correspondances et de preuves.",
@@ -186,6 +194,11 @@ const frFROverrides = {
         step_setup_profile: "Mettez en place votre profil professionnel.",
       },
     },
+    pathways: {
+      emptyStateTitle: "Aucun parcours disponible pour le moment",
+      emptyStateDescription:
+        "Élargissez vos compétences cartographiées pour débloquer de meilleures recommandations et une couverture plus large.",
+    },
   },
   resumePage: {
     seoTitle: "Créateur de CV",
@@ -205,6 +218,16 @@ const frFROverrides = {
   },
   interviewHistory: {
     title: "Historique des entretiens",
+    subtitle:
+      "Revoyez les sessions précédentes, comparez les scores dans le temps et rouvrez le retour complet de chaque entretien.",
+    emptyStateTitle: "Aucune session d'entretien trouvée",
+    emptyStateDescription:
+      "Démarrez un nouvel entretien depuis une offre récupérée ou un exercice studio pour alimenter l'historique.",
+    retryButtonLabel: "Réessayer",
+    retryAria: "Réessayer le chargement des détails de l'entretien",
+    selectPromptTitle: "Choisissez une session",
+    selectPromptDescription:
+      "Ouvrez n'importe quelle session de la liste pour revoir les scores, réponses et retours IA.",
     timelineScoreAria: "Score d'entretien : {score} pour cent",
     detailScoreAria: "Score d'entretien : {score} pour cent",
   },
@@ -213,6 +236,14 @@ const frFROverrides = {
     seoDescription:
       "Entraînez-vous avec des scénarios d'entretien orientés poste ou studio, puis révisez les retours notés.",
     title: "Centre de préparation aux entretiens",
+    config: {
+      conversationStyleLegend: "Style de conversation",
+      conversationStyleAria: "Style de conversation",
+      conversationStyleNatural: "Conversation naturelle",
+      conversationStyleStructured: "Rounds structurés",
+      conversationStyleHint:
+        "Le mode naturel génère une question contextualisée à la fois. Le mode structuré prépare l'ensemble de la session dès le départ.",
+    },
     errors: {
       bootstrapLoadFailed: "Impossible de charger les données du centre d'entretien",
       roleRecommendationsFailed: "Impossible de charger les recommandations de rôle personnalisées",
@@ -282,9 +313,71 @@ const frFROverrides = {
       connectionSuccessful: "Connexion réussie",
       connectionFailed: "Connexion échouée",
       preferredProviderLegend: "Fournisseur IA préféré",
+      preferredProviderAria: "Sélectionner le fournisseur IA préféré",
+      preferredProviderSaveButton: "Enregistrer le chat par défaut",
       preferredProviderHint:
-        "Le système IA essaiera ce fournisseur en premier, puis se rabattra sur les autres.",
+        "Ce contrôle rapide définit le fournisseur par défaut pour le chat et les conversations.",
       preferredProviderSaved: "Fournisseur préféré mis à jour",
+      routingTitle: "Routage par usage",
+      routingSubtitle:
+        "Attribuez un fournisseur et un modèle optionnel à chaque capacité IA afin que le chat, l'entretien, l'export et l'automatisation n'utilisent pas un unique défaut global.",
+      saveRoutingAria: "Enregistrer le routage IA par usage",
+      saveRoutingButton: "Enregistrer le routage",
+      routingSaved: "Routage IA enregistré",
+      purposeProviderLegend: "Fournisseur",
+      purposeProviderAria: "Sélectionner le fournisseur pour {purpose}",
+      purposeModelLegend: "Modèle spécifique",
+      purposeModelAria: "Définir le modèle spécifique pour {purpose}",
+      purposeModelPlaceholder:
+        "Laissez vide pour utiliser le modèle par défaut ou l'auto-détection",
+      purposeModelHint:
+        "N'indiquez un modèle précis que si ce flux en a réellement besoin. Sinon, le défaut du fournisseur reste actif.",
+      purposes: {
+        chat: {
+          label: "Conversation",
+          description: "Chat général, réponses de l'assistant et conversations interactives.",
+        },
+        interviewQuestions: {
+          label: "Questions d'entretien",
+          description:
+            "Génération des questions, relances et rythme conversationnel de l'entretien.",
+        },
+        interviewFeedback: {
+          label: "Retour d'entretien",
+          description:
+            "Notation des réponses, feedback par grille et synthèses finales d'entretien.",
+        },
+        resume: {
+          label: "CV",
+          description:
+            "Synthèse du CV, amélioration, scoring et sorties structurées du parcours.",
+        },
+        coverLetter: {
+          label: "Lettre de motivation",
+          description:
+            "Rédaction, révision et formulation prête à exporter de la lettre.",
+        },
+        emailResponse: {
+          label: "Réponse email",
+          description:
+            "Brouillons de réponse aux recruteurs et génération d'emails automatiques.",
+        },
+        jobMatch: {
+          label: "Compatibilité poste",
+          description:
+            "Score d'adéquation, analyse du poste et synthèses de recommandation.",
+        },
+        scrapeEnrichment: {
+          label: "Enrichissement de scraping",
+          description:
+            "Enrichissement des personas studio et analyse des signaux de recrutement après scraping.",
+        },
+        automationFieldMapping: {
+          label: "Mappage d'automatisation",
+          description:
+            "Mappage des champs, inférence des sélecteurs et automatisation structurée des formulaires.",
+        },
+      },
       ollamaTipTitle: "Astuce : Ollama s'installe en dehors de l'app",
       ollamaTipDescription:
         "Installez-le d'abord puis suivez la configuration officielle d'Ollama pour votre machine ou votre projet sur",
@@ -348,6 +441,15 @@ const frFROverrides = {
     seoDescription:
       "Parcourez les profils studio, filtrez les attributs opérationnels et lancez des entraînements d'entretien contextualisés.",
     title: "Répertoire des studios",
+    subtitle:
+      "Parcourez les profils studio, filtrez par attributs opérationnels et passez directement à l'entraînement d'entretien.",
+    errorTitle: "Répertoire des studios indisponible",
+    errorBannerAria: "Erreur du répertoire des studios",
+    retryAria: "Réessayer le chargement des studios",
+    retryButton: "Réessayer",
+    emptyTitle: "Aucun studio ne correspond à ces filtres",
+    emptyDescription:
+      "Ajustez la recherche actuelle ou la combinaison de filtres pour afficher un autre profil studio.",
     options: {
       type: {
         indie: "Indépendant",
@@ -367,6 +469,20 @@ const frFROverrides = {
         notAvailable: "Non disponible",
       },
     },
+  },
+  studioDetail: {
+    emptyTitle: "Studio indisponible",
+    emptyDescription:
+      "Ce profil studio n'est plus disponible. Revenez au répertoire pour choisir un autre contexte studio.",
+  },
+  studioAnalytics: {
+    title: "Analyse des studios",
+    description:
+      "Passez en revue la répartition des studios, la couverture du travail à distance et les tendances technologiques communes du jeu de données indexé.",
+    openDirectoryAria: "Ouvrir le répertoire des studios",
+    emptyTitle: "Aucune analyse studio disponible",
+    emptyDescription:
+      "Actualisez les données studio depuis le répertoire ou le hub de scraping pour alimenter cette vue analytique.",
   },
   aiProviderCatalog: {
     local: {
@@ -604,6 +720,14 @@ const frFROverrides = {
     },
     scraper: {
       title: "Centre des opérations de scraping",
+      stats: {
+        enrichedJobsTitle: "Postes enrichis par IA",
+        enrichedJobsDescription: "Lignes avec contexte studio et signaux de recrutement",
+      },
+      table: {
+        actionsLabel: "Opérations",
+        personaSummaryLabel: "Persona :",
+      },
       errors: {
         rewardFailed: "Impossible d'attribuer la progression du scraping.",
       },
@@ -652,9 +776,18 @@ const frFROverrides = {
     moreTechnologies: "+{count} de plus",
   },
   resumePreview: {
+    pageTitle: "Aperçu du CV",
+    description:
+      "Vérifiez la mise en page imprimable du CV avant de l'exporter ou de le partager.",
     printButton: "Imprimer",
     printAria: "Imprimer l'aperçu du CV",
+    retryButton: "Réessayer",
+    retryAria: "Réessayer le chargement de l'aperçu du CV",
+    loadError: "Impossible de charger l'aperçu du CV.",
     notFound: "CV introuvable. Veuillez sélectionner un CV à prévisualiser.",
+    notFoundTitle: "CV introuvable",
+    notFoundDescription:
+      "Sélectionnez un CV enregistré depuis l'espace CV pour ouvrir cet aperçu.",
     websiteLinkAria: "Ouvrir le site web personnel",
     linkedinLinkAria: "Ouvrir le profil LinkedIn",
     githubLinkAria: "Ouvrir le profil GitHub",
@@ -663,10 +796,15 @@ const frFROverrides = {
     title: "Créateur de portfolio",
     preview: {
       pageTitle: "Aperçu du portfolio",
+      description:
+        "Vérifiez la présentation publiée de votre portfolio avant de l'exporter ou de la partager.",
       backButton: "Retour à l'éditeur",
       backButtonAria: "Retour à l'éditeur de portfolio",
       exportPdfButton: "Exporter en PDF",
       exportPdfAria: "Exporter l'aperçu du portfolio en PDF",
+      retryButton: "Réessayer",
+      retryAria: "Réessayer le chargement de l'aperçu du portfolio",
+      loadError: "Impossible de charger l'aperçu du portfolio.",
       defaultTitle: "Mon Portfolio",
       contactButton: "Me contacter",
       contactAria: "Contacter le propriétaire du portfolio par e-mail",
@@ -675,8 +813,11 @@ const frFROverrides = {
       featuredProjectsTitle: "Projets mis en avant",
       moreProjectsTitle: "Plus de projets",
       viewButton: "Voir",
-      emptyState: "Aucun projet à afficher. Ajoutez des projets dans l'éditeur de portfolio.",
-      notFound: "Portfolio introuvable. Créez d'abord votre portfolio.",
+      emptyStateTitle: "Aucun projet à afficher",
+      emptyStateDescription:
+        "Ajoutez des projets dans l'éditeur de portfolio pour alimenter cet aperçu avec vos travaux.",
+      notFoundTitle: "Portfolio introuvable",
+      notFoundDescription: "Créez d'abord votre portfolio puis revenez sur cet aperçu.",
     },
   },
   interviewScoreCard: {

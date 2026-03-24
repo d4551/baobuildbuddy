@@ -59,14 +59,15 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                         contentHash: string | null;
                         postedDate: string | null;
                         technologies: string[] | null;
+                        updatedAt: string;
                         requirements: string[] | null;
+                        enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                         experienceLevel: string | null;
                         hybrid: boolean | null;
                         gameGenres: string[] | null;
                         platforms: string[] | null;
                         tags: string[] | null;
                         createdAt: string;
-                        updatedAt: string;
                         salary: Record<string, unknown> | null;
                         studioType: string | null;
                         companyLogo: string | null;
@@ -122,6 +123,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                         tags: string[] | null;
                         companyLogo: string | null;
                         applicationUrl: string | null;
+                        enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                         createdAt: string;
                         updatedAt: string;
                     } | {
@@ -247,6 +249,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                             tags: string[] | null;
                             companyLogo: string | null;
                             applicationUrl: string | null;
+                            enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                             createdAt: string;
                             updatedAt: string;
                         } | null;
@@ -391,6 +394,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                             tags: string[] | null;
                             companyLogo: string | null;
                             applicationUrl: string | null;
+                            enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                             createdAt: string;
                             updatedAt: string;
                         } | null;

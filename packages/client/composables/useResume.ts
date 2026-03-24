@@ -37,6 +37,13 @@ interface ResumeContext {
   requestUrl: URL;
 }
 
+interface ResumeExportRequest {
+  id: string;
+  template?: ResumeTemplate;
+  format?: string;
+  errorMessage: string;
+}
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -139,16 +146,13 @@ async function deleteResume(context: ResumeContext, id: string): Promise<void> {
 
 async function performExportResume(
   context: ResumeContext,
-  id: string,
-  template: ResumeTemplate | undefined,
-  format: string | undefined,
-  errorMessage: string,
+  request: ResumeExportRequest,
 ): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
     const { data, error } = await context.api
-      .resumes({ id })
-      .export.post(toExportPayload(template, format));
-    assertApiResponse(error, errorMessage);
+      .resumes({ id: request.id })
+      .export.post(toExportPayload(request.template, request.format));
+    assertApiResponse(error, request.errorMessage);
     return data;
   });
 }
@@ -159,13 +163,12 @@ async function exportResume(
   template?: ResumeTemplate,
   format?: string,
 ): Promise<unknown> {
-  return performExportResume(
-    context,
+  return performExportResume(context, {
     id,
     template,
     format,
-    context.t("apiErrors.resumes.exportFailed"),
-  );
+    errorMessage: context.t("apiErrors.resumes.exportFailed"),
+  });
 }
 
 async function exportResumeOnePage(
@@ -174,13 +177,12 @@ async function exportResumeOnePage(
   template?: ResumeTemplate,
   format?: string,
 ): Promise<unknown> {
-  return performExportResume(
-    context,
+  return performExportResume(context, {
     id,
     template,
     format,
-    context.t("apiErrors.resumes.exportOnePageFailed"),
-  );
+    errorMessage: context.t("apiErrors.resumes.exportOnePageFailed"),
+  });
 }
 
 async function aiEnhance(context: ResumeContext, id: string): Promise<ResumeData> {

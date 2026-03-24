@@ -3,18 +3,20 @@ import {
   A4_PAGE_SIZE,
   A4_PAGE_WIDTH,
   API_ERROR_UNSUPPORTED_RESUME_TEMPLATE,
+  COVER_LETTER_EXPORT_THEME,
   COVER_LETTER_DEFAULT_SIGNATURE,
   COVER_LETTER_LINE_HEIGHT,
   COVER_LETTER_MARGIN,
   COVER_LETTER_PARAGRAPH_GAP,
   COVER_LETTER_PARAGRAPH_SIZE,
-  EXPORT_DATE_LOCALE,
-  isRecord,
-  isResumeTemplate,
+  collectDefinedStringValues,
+  formatExportDate,
+  PORTFOLIO_EXPORT_THEME,
   PORTFOLIO_FOOTER_X_OFFSET,
   PORTFOLIO_FOOTER_Y,
   PORTFOLIO_MARGIN,
   PORTFOLIO_PROJECT_SPACE,
+  RESUME_EXPORT_THEME_CONFIGS,
   type PortfolioMetadata,
   type PortfolioProject,
   RESUME_BODY_LINE_GAP,
@@ -25,8 +27,10 @@ import {
   RESUME_SECTION_HEADER_SPACING,
   RESUME_SECTION_SPACE,
   RESUME_TEMPLATE_DEFAULT,
+  resolveResumeExportTemplate,
   type ResumeData,
   type ResumeTemplate,
+  toCoverLetterParagraphs,
 } from "@bao/shared";
 import { type Color, PDFDocument, type PDFFont, type PDFPage, rgb, StandardFonts } from "pdf-lib";
 
@@ -36,21 +40,7 @@ interface RGB {
   b: number;
 }
 
-interface ResumeTemplateDefinition {
-  name: string;
-  fonts: { name: number; header: number; body: number; accent: number };
-  colors: { primary: RGB; secondary: RGB; accent: RGB; text: RGB; bg: RGB };
-  spacing: {
-    sectionGap: number;
-    lineHeight: number;
-    margins: { top: number; right: number; bottom: number; left: number };
-  };
-  layout: {
-    headerStyle: "centered" | "left-aligned" | "banner";
-    dividerStyle: "line" | "none" | "accent-bar";
-    skillsLayout: "2-column" | "inline-tags" | "grouped";
-  };
-}
+type ResumeTemplateDefinition = (typeof RESUME_EXPORT_THEME_CONFIGS)[ResumeTemplate]["pdf"];
 
 type ResumeExperienceItem = NonNullable<ResumeData["experience"]>[number];
 type ResumeEducationItem = NonNullable<ResumeData["education"]>[number];
@@ -126,154 +116,34 @@ interface PortfolioRenderContext {
   boldFont: PDFFont;
 }
 
-const COVER_LETTER_DATE_FORMATTER = new Intl.DateTimeFormat(EXPORT_DATE_LOCALE, {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
+const toStaticPdfColor = (color: RGB): Color => rgb(color.r, color.g, color.b);
 
-const COVER_LETTER_COLORS = {
-  text: rgb(0.15, 0.15, 0.15),
-  muted: rgb(0.3, 0.3, 0.3),
-  subtle: rgb(0.4, 0.4, 0.4),
+const COVER_LETTER_PDF_COLORS = {
+  text: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.text),
+  muted: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.muted),
+  subtle: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.subtle),
 };
 
-const PORTFOLIO_COLORS = {
-  primary: rgb(0.2, 0.1, 0.5),
-  text: rgb(0.2, 0.2, 0.2),
-  accent: rgb(0.5, 0.2, 0.6),
-  muted: rgb(0.4, 0.4, 0.4),
-  featured: rgb(0.8, 0.6, 0),
-  line: rgb(0.8, 0.8, 0.8),
-  footer: rgb(0.5, 0.5, 0.5),
-};
-
-const RESUME_TEMPLATES: Partial<Record<ResumeTemplate, ResumeTemplateDefinition>> = {
-  modern: {
-    name: "Modern",
-    fonts: { name: 24, header: 14, body: 10.5, accent: 9 },
-    colors: {
-      primary: { r: 0.16, g: 0.38, b: 1.0 }, // #2962FF blue
-      secondary: { r: 0.39, g: 0.39, b: 0.39 }, // #646464 gray
-      accent: { r: 0, g: 0.59, b: 0.53 }, // #009688 teal
-      text: { r: 0.13, g: 0.13, b: 0.13 }, // #212121 dark
-      bg: { r: 1, g: 1, b: 1 }, // white
-    },
-    spacing: {
-      sectionGap: 16,
-      lineHeight: 1.4,
-      margins: { top: 50, right: 50, bottom: 50, left: 50 },
-    },
-    layout: { headerStyle: "left-aligned", dividerStyle: "line", skillsLayout: "2-column" },
-  },
-  "google-xyz": {
-    name: "Google XYZ",
-    fonts: { name: 18, header: 12, body: 10, accent: 8.5 },
-    colors: {
-      primary: { r: 0.26, g: 0.52, b: 0.96 }, // #4285F4 Google blue
-      secondary: { r: 0.37, g: 0.39, b: 0.41 }, // #5F6368
-      accent: { r: 0.2, g: 0.66, b: 0.33 }, // #34A853 Google green
-      text: { r: 0.13, g: 0.13, b: 0.14 }, // #202124
-      bg: { r: 1, g: 1, b: 1 },
-    },
-    spacing: {
-      sectionGap: 12,
-      lineHeight: 1.2,
-      margins: { top: 36, right: 36, bottom: 36, left: 36 },
-    },
-    layout: { headerStyle: "left-aligned", dividerStyle: "none", skillsLayout: "inline-tags" },
-  },
-  gaming: {
-    name: "Gaming",
-    fonts: { name: 28, header: 16, body: 10.5, accent: 9 },
-    colors: {
-      primary: { r: 0.54, g: 0.17, b: 0.89 }, // #8A2BE2 purple
-      secondary: { r: 0, g: 1.0, b: 0.53 }, // #00FF88 neon green
-      accent: { r: 1.0, g: 0, b: 0.39 }, // #FF0064 hot pink
-      text: { r: 0.94, g: 0.94, b: 0.94 }, // #F0F0F0 light
-      bg: { r: 0.1, g: 0.1, b: 0.14 }, // #191923 dark bg
-    },
-    spacing: {
-      sectionGap: 18,
-      lineHeight: 1.3,
-      margins: { top: 40, right: 40, bottom: 40, left: 40 },
-    },
-    layout: { headerStyle: "banner", dividerStyle: "accent-bar", skillsLayout: "grouped" },
-  },
-};
-
-const asStringParagraphs = (value: unknown): string[] => {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? [trimmed] : [];
-  }
-
-  if (Array.isArray(value)) {
-    return value
-      .filter((entry): entry is string => typeof entry === "string")
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-  }
-
-  return [];
-};
-
-const toCoverLetterParagraphs = (content: unknown): string[] => {
-  if (typeof content === "string") {
-    return content
-      .split("\n\n")
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-  }
-
-  if (!isRecord(content)) {
-    return [];
-  }
-
-  const contentRecord = content;
-  const canonicalParagraphs = [
-    ...asStringParagraphs(contentRecord.opening),
-    ...asStringParagraphs(contentRecord.body),
-    ...asStringParagraphs(contentRecord.closing),
-  ];
-
-  if (canonicalParagraphs.length > 0) {
-    return canonicalParagraphs;
-  }
-
-  return [
-    ...asStringParagraphs(contentRecord.introduction),
-    ...asStringParagraphs(contentRecord.main),
-    ...asStringParagraphs(contentRecord.conclusion),
-  ];
+const PORTFOLIO_PDF_COLORS = {
+  primary: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.primary),
+  text: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.text),
+  accent: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.accent),
+  muted: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.muted),
+  featured: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.featured),
+  line: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.line),
+  footer: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.footer),
 };
 
 /**
  * PDF export service for resumes, cover letters, and portfolios.
  */
 export class ExportService {
-  private resolveTemplate(templateName?: string, resumeTemplate?: string): ResumeTemplate {
-    if (isResumeTemplate(templateName)) {
-      return templateName;
-    }
-    if (isResumeTemplate(resumeTemplate)) {
-      return resumeTemplate;
-    }
-    return RESUME_TEMPLATE_DEFAULT;
-  }
-
   private addA4Page(pdfDoc: PDFDocument): PDFPage {
     return pdfDoc.addPage([...A4_PAGE_SIZE]);
   }
 
   private toPdfColor(color: RGB): Color {
     return rgb(color.r, color.g, color.b);
-  }
-
-  private collectDefinedValues(values: Array<string | undefined>): string[] {
-    return values.filter(
-      (value): value is string => typeof value === "string" && value.trim().length > 0,
-    );
   }
 
   private applyResumeBackground(context: ResumeRenderContext, page: PDFPage): void {
@@ -361,7 +231,7 @@ export class ExportService {
         line: this.toPdfColor(template.colors.secondary),
         accent: this.toPdfColor(template.colors.accent),
       },
-      background: template.colors.bg,
+      background: template.colors.background,
       font,
       boldFont,
     };
@@ -422,7 +292,7 @@ export class ExportService {
   }
 
   private renderResumeContact(context: ResumeRenderContext, info?: ResumePersonalInfo): void {
-    const contactItems = this.collectDefinedValues([info?.email, info?.phone, info?.location]);
+    const contactItems = collectDefinedStringValues([info?.email, info?.phone, info?.location]);
     if (contactItems.length === 0) {
       return;
     }
@@ -438,7 +308,7 @@ export class ExportService {
   }
 
   private renderResumeLinks(context: ResumeRenderContext, info?: ResumePersonalInfo): void {
-    const linkItems = this.collectDefinedValues([info?.website, info?.linkedIn, info?.github]);
+    const linkItems = collectDefinedStringValues([info?.website, info?.linkedIn, info?.github]);
     if (linkItems.length === 0) {
       return;
     }
@@ -848,7 +718,7 @@ export class ExportService {
       return;
     }
 
-    const gamingItems = this.collectDefinedValues([
+    const gamingItems = collectDefinedStringValues([
       resume.gamingExperience.gameEngines
         ? `Engines: ${resume.gamingExperience.gameEngines}`
         : undefined,
@@ -883,9 +753,10 @@ export class ExportService {
    * Export resume as PDF.
    */
   async exportResumePDF(resume: ResumeData, templateName?: string): Promise<Uint8Array> {
-    const resolvedTemplate = this.resolveTemplate(templateName, resume.template);
+    const resolvedTemplate = resolveResumeExportTemplate(templateName, resume.template);
     const template =
-      RESUME_TEMPLATES[resolvedTemplate] ?? RESUME_TEMPLATES[RESUME_TEMPLATE_DEFAULT];
+      RESUME_EXPORT_THEME_CONFIGS[resolvedTemplate]?.pdf ??
+      RESUME_EXPORT_THEME_CONFIGS[RESUME_TEMPLATE_DEFAULT]?.pdf;
     if (!template) {
       throw new Error(`${API_ERROR_UNSUPPORTED_RESUME_TEMPLATE}: ${resolvedTemplate}`);
     }
@@ -939,11 +810,11 @@ export class ExportService {
       y: context.yPosition,
       size: 14,
       font: context.boldFont,
-      color: COVER_LETTER_COLORS.text,
+      color: COVER_LETTER_PDF_COLORS.text,
     });
     context.yPosition -= 18;
 
-    const contactLine = this.collectDefinedValues([
+    const contactLine = collectDefinedStringValues([
       userProfile.email,
       userProfile.phone,
       userProfile.location,
@@ -957,18 +828,18 @@ export class ExportService {
       y: context.yPosition,
       size: 10,
       font: context.font,
-      color: COVER_LETTER_COLORS.subtle,
+      color: COVER_LETTER_PDF_COLORS.subtle,
     });
     context.yPosition -= 25;
   }
 
   private renderCoverLetterDate(context: CoverLetterRenderContext, date: Date): void {
-    context.page.drawText(COVER_LETTER_DATE_FORMATTER.format(date), {
+    context.page.drawText(formatExportDate(date), {
       x: context.margin,
       y: context.yPosition,
       size: 10,
       font: context.font,
-      color: COVER_LETTER_COLORS.muted,
+      color: COVER_LETTER_PDF_COLORS.muted,
     });
     context.yPosition -= 25;
   }
@@ -982,7 +853,7 @@ export class ExportService {
       y: context.yPosition,
       size: 11,
       font: context.boldFont,
-      color: COVER_LETTER_COLORS.text,
+      color: COVER_LETTER_PDF_COLORS.text,
     });
     context.yPosition -= 15;
 
@@ -991,7 +862,7 @@ export class ExportService {
       y: context.yPosition,
       size: 10,
       font: context.font,
-      color: COVER_LETTER_COLORS.muted,
+      color: COVER_LETTER_PDF_COLORS.muted,
     });
     context.yPosition -= 25;
   }
@@ -1003,7 +874,7 @@ export class ExportService {
       y: context.yPosition,
       size: COVER_LETTER_PARAGRAPH_SIZE,
       font: context.font,
-      color: COVER_LETTER_COLORS.text,
+      color: COVER_LETTER_PDF_COLORS.text,
     });
     context.yPosition -= COVER_LETTER_LINE_HEIGHT;
   }
@@ -1044,7 +915,7 @@ export class ExportService {
       y: context.yPosition,
       size: 11,
       font: context.font,
-      color: COVER_LETTER_COLORS.text,
+      color: COVER_LETTER_PDF_COLORS.text,
     });
     context.yPosition -= 25;
 
@@ -1053,7 +924,7 @@ export class ExportService {
       y: context.yPosition,
       size: 11,
       font: context.boldFont,
-      color: COVER_LETTER_COLORS.text,
+      color: COVER_LETTER_PDF_COLORS.text,
     });
   }
 
@@ -1209,7 +1080,7 @@ export class ExportService {
       y: context.yPosition,
       size: 9,
       font: context.font,
-      color: PORTFOLIO_COLORS.muted,
+      color: PORTFOLIO_PDF_COLORS.muted,
     });
   }
 
@@ -1224,7 +1095,7 @@ export class ExportService {
       y: context.yPosition,
       size: 36,
       font: context.boldFont,
-      color: PORTFOLIO_COLORS.primary,
+      color: PORTFOLIO_PDF_COLORS.primary,
     });
     context.yPosition -= 50;
 
@@ -1234,7 +1105,7 @@ export class ExportService {
         y: context.yPosition,
         size: 20,
         font: context.boldFont,
-        color: PORTFOLIO_COLORS.text,
+        color: PORTFOLIO_PDF_COLORS.text,
       });
       context.yPosition -= 30;
     }
@@ -1245,7 +1116,7 @@ export class ExportService {
         y: context.yPosition,
         size: 14,
         font: context.font,
-        color: PORTFOLIO_COLORS.text,
+        color: PORTFOLIO_PDF_COLORS.text,
       });
       context.yPosition -= 25;
     }
@@ -1255,7 +1126,7 @@ export class ExportService {
         text: metadata.description,
         x: context.margin,
         size: 11,
-        color: PORTFOLIO_COLORS.text,
+        color: PORTFOLIO_PDF_COLORS.text,
         font: context.font,
         maxWidth: context.width - context.margin * 2,
       });
@@ -1268,7 +1139,7 @@ export class ExportService {
         y: context.yPosition,
         size: 10,
         font: context.font,
-        color: PORTFOLIO_COLORS.accent,
+        color: PORTFOLIO_PDF_COLORS.accent,
       });
       context.yPosition -= 20;
     }
@@ -1285,7 +1156,7 @@ export class ExportService {
       y: context.yPosition,
       size: 24,
       font: context.boldFont,
-      color: PORTFOLIO_COLORS.primary,
+      color: PORTFOLIO_PDF_COLORS.primary,
     });
     context.yPosition -= 40;
   }
@@ -1300,7 +1171,7 @@ export class ExportService {
       y: context.yPosition,
       size: 16,
       font: context.boldFont,
-      color: PORTFOLIO_COLORS.accent,
+      color: PORTFOLIO_PDF_COLORS.accent,
     });
     context.yPosition -= 20;
 
@@ -1313,7 +1184,7 @@ export class ExportService {
       y: context.yPosition,
       size: 9,
       font: context.boldFont,
-      color: PORTFOLIO_COLORS.featured,
+      color: PORTFOLIO_PDF_COLORS.featured,
     });
     context.yPosition -= 15;
   }
@@ -1328,7 +1199,7 @@ export class ExportService {
       y: context.yPosition,
       size: 10,
       font: context.boldFont,
-      color: PORTFOLIO_COLORS.text,
+      color: PORTFOLIO_PDF_COLORS.text,
     });
     context.yPosition -= 15;
   }
@@ -1347,7 +1218,7 @@ export class ExportService {
       y: context.yPosition,
       size: 9,
       font: context.font,
-      color: PORTFOLIO_COLORS.muted,
+      color: PORTFOLIO_PDF_COLORS.muted,
     });
     context.yPosition -= 15;
   }
@@ -1356,7 +1227,7 @@ export class ExportService {
     context: PortfolioRenderContext,
     project: PortfolioProject,
   ): void {
-    const details = this.collectDefinedValues([
+    const details = collectDefinedStringValues([
       project.platforms && project.platforms.length > 0
         ? `Platforms: ${project.platforms.join(", ")}`
         : undefined,
@@ -1375,7 +1246,7 @@ export class ExportService {
       y: context.yPosition,
       size: 9,
       font: context.font,
-      color: PORTFOLIO_COLORS.muted,
+      color: PORTFOLIO_PDF_COLORS.muted,
     });
     context.yPosition -= 15;
   }
@@ -1384,7 +1255,7 @@ export class ExportService {
     context: PortfolioRenderContext,
     project: PortfolioProject,
   ): void {
-    const links = this.collectDefinedValues([
+    const links = collectDefinedStringValues([
       project.liveUrl ? `Live: ${project.liveUrl}` : undefined,
       project.githubUrl ? `GitHub: ${project.githubUrl}` : undefined,
     ]);
@@ -1399,7 +1270,7 @@ export class ExportService {
       y: context.yPosition,
       size: 9,
       font: context.font,
-      color: PORTFOLIO_COLORS.accent,
+      color: PORTFOLIO_PDF_COLORS.accent,
     });
     context.yPosition -= 15;
   }
@@ -1415,7 +1286,7 @@ export class ExportService {
       y: context.yPosition,
       size: 8,
       font: context.font,
-      color: PORTFOLIO_COLORS.footer,
+      color: PORTFOLIO_PDF_COLORS.footer,
     });
     context.yPosition -= 20;
   }
@@ -1433,7 +1304,7 @@ export class ExportService {
       start: { x: context.margin, y: context.yPosition },
       end: { x: context.width - context.margin, y: context.yPosition },
       thickness: 0.5,
-      color: PORTFOLIO_COLORS.line,
+      color: PORTFOLIO_PDF_COLORS.line,
     });
     context.yPosition -= 20;
   }
@@ -1452,7 +1323,7 @@ export class ExportService {
       text: project.description,
       x: context.margin,
       size: 10,
-      color: PORTFOLIO_COLORS.text,
+      color: PORTFOLIO_PDF_COLORS.text,
       font: context.font,
       maxWidth: context.width - context.margin * 2,
     });
@@ -1476,7 +1347,7 @@ export class ExportService {
         y: PORTFOLIO_FOOTER_Y,
         size: 8,
         font: context.font,
-        color: PORTFOLIO_COLORS.footer,
+        color: PORTFOLIO_PDF_COLORS.footer,
       });
     }
   }

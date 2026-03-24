@@ -24,8 +24,17 @@ export class GeminiProvider extends BaseAIProvider {
     this.generativeModel = this.client.getGenerativeModel({ model: this.model });
   }
 
+  private resolveModel(options?: GenerateOptions): string {
+    return typeof options?.model === "string" && options.model.trim().length > 0
+      ? options.model.trim()
+      : this.model;
+  }
+
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
+    const model = this.resolveModel(options);
+    const generativeModel =
+      model === this.model ? this.generativeModel : this.client.getGenerativeModel({ model });
     const generationConfig = {
       temperature: options?.temperature ?? 0.7,
       maxOutputTokens: options?.maxTokens ?? 2048,
@@ -40,7 +49,7 @@ export class GeminiProvider extends BaseAIProvider {
     }
 
     const resultResponse = await settle(
-      this.generativeModel.generateContent({
+      generativeModel.generateContent({
         contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
         generationConfig,
       }),
@@ -49,7 +58,7 @@ export class GeminiProvider extends BaseAIProvider {
       return {
         id: this.generateId(),
         provider: this.name,
-        model: this.model,
+        model,
         content: "",
         error: toErrorMessage(resultResponse.reason),
         timing: this.createTimingMetrics(startTime),
@@ -68,7 +77,7 @@ export class GeminiProvider extends BaseAIProvider {
     return {
       id: this.generateId(),
       provider: this.name,
-      model: this.model,
+      model,
       content: text,
       usage,
       timing: this.createTimingMetrics(startTime),
@@ -76,6 +85,9 @@ export class GeminiProvider extends BaseAIProvider {
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
+    const model = this.resolveModel(options);
+    const generativeModel =
+      model === this.model ? this.generativeModel : this.client.getGenerativeModel({ model });
     const generationConfig = {
       temperature: options?.temperature ?? 0.7,
       maxOutputTokens: options?.maxTokens ?? 2048,
@@ -90,7 +102,7 @@ export class GeminiProvider extends BaseAIProvider {
     }
 
     const streamResult = await settle(
-      this.generativeModel.generateContentStream({
+      generativeModel.generateContentStream({
         contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
         generationConfig,
       }),

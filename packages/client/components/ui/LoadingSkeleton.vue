@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { UI_GRID_CLASS_BY_TOKEN } from "~/constants/ui-layout";
+
 type LoadingSkeletonVariant = "text" | "cards" | "stats";
 
 withDefaults(
@@ -13,11 +15,13 @@ withDefaults(
     variant: "text",
   },
 );
+
+const cardsGridClass = UI_GRID_CLASS_BY_TOKEN.threeColumn;
 </script>
 
 <template>
-  <div v-if="variant === 'cards'" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-    <div v-for="index in 6" :key="index" class="card card-border bg-base-100">
+  <div v-if="variant === 'cards'" :class="cardsGridClass">
+    <div v-for="index in 6" :key="index" class="card card-border h-full bg-base-100">
       <div class="card-body gap-3">
         <div class="skeleton h-5 w-2/3"></div>
         <div class="skeleton h-4 w-1/2"></div>
@@ -31,7 +35,10 @@ withDefaults(
     </div>
   </div>
 
-  <div v-else-if="variant === 'stats'" class="stats stats-vertical w-full gap-4 bg-base-100 p-4 shadow md:stats-horizontal">
+  <div
+    v-else-if="variant === 'stats'"
+    class="stats stats-vertical w-full border border-base-300 bg-base-200 shadow-sm sm:stats-horizontal"
+  >
     <div v-for="index in 3" :key="index" class="stat">
       <div class="skeleton mb-2 h-4 w-20"></div>
       <div class="skeleton h-8 w-16"></div>

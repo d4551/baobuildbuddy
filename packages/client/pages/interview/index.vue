@@ -11,6 +11,7 @@ import {
   INTERVIEW_HUB_JOB_QUERY_LIMIT,
   INTERVIEW_HUB_QUESTION_COUNT_OPTIONS,
   INTERVIEW_HUB_RECENT_SESSION_LIMIT,
+  type InterviewConversationStyle,
   type InterviewMode,
   type InterviewTargetJob,
   JOB_PREVIEW_LIMIT,
@@ -104,6 +105,7 @@ const sessionConfig = reactive({
     1,
     INTERVIEW_DEFAULT_QUESTION_COUNT,
   ),
+  conversationStyle: "natural" as InterviewConversationStyle,
   enableVoiceMode: false,
   voiceSettings: {
     ...INTERVIEW_DEFAULT_VOICE_SETTINGS,
@@ -258,6 +260,15 @@ const selectedJob = computed(() => {
   if (selectedJobFallback.value?.id === selectedJobId.value) return selectedJobFallback.value;
   return null;
 });
+const selectedResumeId = computed(() => {
+  const defaultResume = resumes.value.find((resume) => resume.isDefault && resume.id);
+  if (defaultResume?.id) {
+    return defaultResume.id;
+  }
+  return resumes.value[0]?.id;
+});
+const selectedCoverLetterId = computed(() => coverLetters.value[0]?.id);
+const selectedPortfolioId = computed(() => portfolio.value?.id);
 
 const selectedStudioName = computed(() => {
   if (!sessionConfig.studioId) return "";
@@ -441,6 +452,7 @@ function toTargetJob(job: Job): InterviewTargetJob {
     source: job.source,
     postedDate: job.postedDate,
     url: job.url,
+    enrichment: job.enrichment,
   };
 }
 
@@ -489,12 +501,18 @@ async function handleStartInterview() {
         roleType: activeJob?.title || sessionConfig.role,
         experienceLevel: sessionConfig.experienceLevel,
         questionCount: sessionConfig.questionCount,
+        conversationStyle: sessionConfig.conversationStyle,
         includeTechnical: true,
         includeBehavioral: true,
         includeStudioSpecific: true,
         technologies: activeJob?.technologies || [],
         enableVoiceMode: sessionConfig.enableVoiceMode,
         interviewMode: selectedMode.value,
+        candidateContext: {
+          ...(selectedResumeId.value ? { resumeId: selectedResumeId.value } : {}),
+          ...(selectedCoverLetterId.value ? { coverLetterId: selectedCoverLetterId.value } : {}),
+          ...(selectedPortfolioId.value ? { portfolioId: selectedPortfolioId.value } : {}),
+        },
         ...(sessionConfig.enableVoiceMode ? { voiceSettings: sessionConfig.voiceSettings } : {}),
         ...(activeJob ? { targetJob: toTargetJob(activeJob) } : {}),
       } as const;
@@ -530,39 +548,37 @@ async function viewSession(id: string) {
 
 <template>
   <PageScaffold labelled-by="interview-hub-title">
-    <section class="hero rounded-box bg-base-200 border border-base-300">
-      <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <PageHeaderBlock
-          title-id="interview-hub-title"
-          :title="t('interviewHub.title')"
-          :description="t('interviewHub.subtitle')"
-          description-class="text-base-content/70"
+    <PageHeroHeader
+      title-id="interview-hub-title"
+      :title="t('interviewHub.title')"
+      :description="t('interviewHub.subtitle')"
+      description-class="text-base-content/70"
+      density="comfortable"
+    >
+      <template #actions>
+        <button
+          class="btn btn-primary"
+          :aria-label="t('interviewHub.hero.openJobAria')"
+          @click="openConfig('job')"
         >
-          <template #actions>
-            <button
-              class="btn btn-primary"
-              :aria-label="t('interviewHub.hero.openJobAria')"
-              @click="openConfig('job')"
-            >
-              {{ t("interviewHub.hero.openJobButton") }}
-            </button>
-            <button
-              class="btn btn-outline"
-              :aria-label="t('interviewHub.hero.openStudioAria')"
-              @click="openConfig('studio')"
-            >
-              {{ t("interviewHub.hero.openStudioButton") }}
-            </button>
-          </template>
-        </PageHeaderBlock>
-
-        <ul class="steps steps-vertical lg:steps-horizontal w-full" :aria-label="t('interviewHub.hero.stepsAria')">
+          {{ t("interviewHub.hero.openJobButton") }}
+        </button>
+        <button
+          class="btn btn-outline"
+          :aria-label="t('interviewHub.hero.openStudioAria')"
+          @click="openConfig('studio')"
+        >
+          {{ t("interviewHub.hero.openStudioButton") }}
+        </button>
+      </template>
+      <template #aside>
+        <ul class="steps steps-vertical w-full lg:steps-horizontal" :aria-label="t('interviewHub.hero.stepsAria')">
           <li class="step step-primary">{{ t("interviewHub.hero.steps.chooseContext") }}</li>
           <li class="step" :class="showConfigModal ? 'step-primary' : ''">{{ t("interviewHub.hero.steps.configureSession") }}</li>
           <li class="step">{{ t("interviewHub.hero.steps.practiceAndScore") }}</li>
         </ul>
-      </div>
-    </section>
+      </template>
+    </PageHeroHeader>
 
     <LoadingSkeleton v-if="interviewHubPending" :lines="6" />
 
@@ -961,6 +977,21 @@ async function viewSession(id: string) {
                 {{ questionCountLabel(option) }}
               </option>
             </select>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">{{ t("interviewHub.config.conversationStyleLegend") }}</legend>
+            <select
+              v-model="sessionConfig.conversationStyle"
+              class="select w-full"
+              :aria-label="t('interviewHub.config.conversationStyleAria')"
+            >
+              <option value="natural">{{ t("interviewHub.config.conversationStyleNatural") }}</option>
+              <option value="structured">{{ t("interviewHub.config.conversationStyleStructured") }}</option>
+            </select>
+            <p class="text-xs text-base-content/60 mt-2">
+              {{ t("interviewHub.config.conversationStyleHint") }}
+            </p>
           </fieldset>
 
           <label class="label cursor-pointer justify-start gap-3">

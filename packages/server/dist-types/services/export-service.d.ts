@@ -14,10 +14,8 @@ interface CoverLetterUserProfile {
  * PDF export service for resumes, cover letters, and portfolios.
  */
 export declare class ExportService {
-    private resolveTemplate;
     private addA4Page;
     private toPdfColor;
-    private collectDefinedValues;
     private applyResumeBackground;
     private ensureResumeSpace;
     private drawResumeWrappedLine;

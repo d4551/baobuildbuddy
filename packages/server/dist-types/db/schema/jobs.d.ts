@@ -1,3 +1,4 @@
+import type { ScrapePersonaEnrichment } from "@bao/shared";
 export declare const jobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "jobs";
     schema: undefined;
@@ -415,6 +416,25 @@ export declare const jobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColu
             generated: undefined;
         }, {}, {
             length: number | undefined;
+        }>;
+        enrichment: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+            name: "enrichment";
+            tableName: "jobs";
+            dataType: "json";
+            columnType: "SQLiteTextJson";
+            data: ScrapePersonaEnrichment;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            $type: ScrapePersonaEnrichment;
         }>;
         createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "created_at";

@@ -195,7 +195,7 @@ const isRetryableFetchFailure = (result: FetchPageResult): boolean => {
 export interface FieldMapperAIClient {
   generate: (
     prompt: string,
-    options?: { temperature?: number; maxTokens?: number },
+    options?: { purpose?: "automationFieldMapping"; temperature?: number; maxTokens?: number },
   ) => Promise<AIResponse>;
 }
 
@@ -337,6 +337,7 @@ export class SmartFieldMapper {
     );
     return params.aiService
       .generate(prompt, {
+        purpose: "automationFieldMapping",
         temperature: AI_DEFAULT_TEMPERATURE_STRUCTURED,
         maxTokens: AI_MAX_TOKENS_FIELD_MAPPER,
       })

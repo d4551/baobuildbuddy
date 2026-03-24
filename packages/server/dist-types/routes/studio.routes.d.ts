@@ -51,6 +51,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                     culture: Record<string, unknown> | null;
                     interviewStyle: string | null;
                     remoteWork: boolean | null;
+                    enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                     createdAt: string;
                     updatedAt: string;
                 }[];
@@ -91,6 +92,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                         culture: Record<string, unknown> | null;
                         interviewStyle: string | null;
                         remoteWork: boolean | null;
+                        enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                         createdAt: string;
                         updatedAt: string;
                     } | {
@@ -204,6 +206,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                         culture: Record<string, unknown> | null;
                         interviewStyle: string | null;
                         remoteWork: boolean | null;
+                        enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                         createdAt: string;
                         updatedAt: string;
                     } | {

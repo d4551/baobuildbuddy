@@ -56,12 +56,13 @@ const props = withDefaults(
 );
 
 const iconPaths = computed(() => AI_PROVIDER_ICON_PATHS[props.providerId]);
+const iconClass = computed(() => ["inline-block shrink-0 align-middle", props.class]);
 </script>
 
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    :class="props.class"
+    :class="iconClass"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"

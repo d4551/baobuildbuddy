@@ -648,29 +648,27 @@ async function resolvePipelineReward(
 
 <template>
   <PageScaffold>
-    <section class="rounded-box border border-base-300 bg-base-200 p-6">
-      <PageHeaderBlock
-        title-id="resume-page-title"
-        :title="t('resumePage.title')"
-        :description="t('resumePage.subtitle')"
-      >
-        <template #actions>
-          <button
-            class="btn btn-primary btn-sm"
-            :aria-label="t('resumePage.createButtonAria')"
-            @click="showCreateModal = true"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            {{ t("resumePage.createButton") }}
-          </button>
-          <NuxtLink :to="APP_ROUTES.resumeBuild" class="btn btn-outline btn-sm" :aria-label="t('resumePage.guidedButtonAria')">
-            {{ t("resumePage.guidedButton") }}
-          </NuxtLink>
-        </template>
-      </PageHeaderBlock>
-    </section>
+    <PageHeroHeader
+      title-id="resume-page-title"
+      :title="t('resumePage.title')"
+      :description="t('resumePage.subtitle')"
+    >
+      <template #actions>
+        <button
+          class="btn btn-primary btn-sm"
+          :aria-label="t('resumePage.createButtonAria')"
+          @click="showCreateModal = true"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          {{ t("resumePage.createButton") }}
+        </button>
+        <NuxtLink :to="APP_ROUTES.resumeBuild" class="btn btn-outline btn-sm" :aria-label="t('resumePage.guidedButtonAria')">
+          {{ t("resumePage.guidedButton") }}
+        </NuxtLink>
+      </template>
+    </PageHeroHeader>
 
     <div
       v-if="resumeBootstrapError"

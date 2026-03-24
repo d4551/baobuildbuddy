@@ -1,6 +1,7 @@
 import type { Database } from "bun:sqlite";
 import {
   afterAll,
+  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -8,18 +9,25 @@ import {
   setDefaultTimeout,
   test,
 } from "bun:test";
+import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
+import { eq } from "drizzle-orm";
+import type * as schema from "./db/schema/schema-modules";
 
 /** AI-backed interview tests require additional headroom for cold-start provider calls. */
 const INTERVIEW_TEST_TIMEOUT_MS = 15_000;
 setDefaultTimeout(INTERVIEW_TEST_TIMEOUT_MS);
 
 import type { InterviewResponse, InterviewSession } from "@bao/shared";
+import { coverLetters } from "./db/schema/cover-letters";
+import { portfolioProjects, portfolios } from "./db/schema/portfolios";
+import { resumes } from "./db/schema/resumes";
 import type { AppRequestHandler } from "./test-utils";
 import { requestJson } from "./test-utils";
 
 interface TestHarness {
   app: AppRequestHandler;
   sqlite: Database;
+  db: BunSQLiteDatabase<typeof schema>;
   interviewService: {
     startSession(studioId: string, rawConfig?: Record<string, unknown>): Promise<InterviewSession>;
     addResponse(sessionId: string, response: InterviewResponse): Promise<InterviewSession | null>;
@@ -42,6 +50,7 @@ async function createTestHarness(): Promise<TestHarness> {
 
   return {
     app,
+    db: dbModule.db,
     sqlite: dbModule.sqlite,
     interviewService: interviewServiceModule.interviewService,
   };
@@ -49,20 +58,110 @@ async function createTestHarness(): Promise<TestHarness> {
 
 let harness: TestHarness;
 
+function clearInterviewCandidateFixtures(): void {
+  harness.sqlite.exec("DELETE FROM portfolio_projects WHERE id LIKE 'portfolio-project-%'");
+  harness.sqlite.exec("DELETE FROM portfolios WHERE id LIKE 'portfolio-%'");
+  harness.sqlite.exec("DELETE FROM cover_letters WHERE id LIKE 'cover-letter-%'");
+  harness.sqlite.exec("DELETE FROM resumes WHERE id LIKE 'resume-%'");
+}
+
 beforeAll(async () => {
   harness = await createTestHarness();
 });
 
 beforeEach(() => {
   harness.sqlite.exec("DELETE FROM interview_sessions");
+  clearInterviewCandidateFixtures();
 });
 
 afterAll(() => {});
 
-describe("interview service", () => {
+afterEach(() => {
+  clearInterviewCandidateFixtures();
+});
+
+function createCandidateFixtureIds() {
+  const suffix = Date.now().toString();
+  return {
+    resumeId: `resume-${suffix}`,
+    coverLetterId: `cover-letter-${suffix}`,
+    portfolioId: `portfolio-${suffix}`,
+    portfolioProjectId: `portfolio-project-${suffix}`,
+  };
+}
+
+async function insertCandidateFixtures(
+  ids: ReturnType<typeof createCandidateFixtureIds>,
+): Promise<void> {
+  await harness.db.insert(resumes).values({
+    id: ids.resumeId,
+    name: "Interview Context Resume",
+    summary: "Candidate summary for interview-context testing.",
+    personalInfo: {
+      name: "Interview Candidate",
+      email: "candidate@example.test",
+      location: "Remote",
+    },
+    experience: [
+      {
+        title: "Gameplay Engineer",
+        company: "Test Studio",
+        achievements: ["Shipped live-ops features", "Improved tooling throughput"],
+      },
+    ],
+    projects: [
+      {
+        title: "Combat Sandbox",
+        description: "Built encounter systems and telemetry dashboards.",
+      },
+    ],
+    isDefault: true,
+  });
+
+  await harness.db.insert(coverLetters).values({
+    id: ids.coverLetterId,
+    company: "Riot Games",
+    position: "Gameplay Engineer",
+    jobInfo: {
+      tone: "collaborative",
+    },
+    content: {
+      body: "I connect player impact with measurable engineering outcomes.",
+    },
+  });
+
+  await harness.db.insert(portfolios).values({
+    id: ids.portfolioId,
+    metadata: {
+      tagline: "Systems-focused portfolio",
+    },
+  });
+
+  await harness.db.insert(portfolioProjects).values({
+    id: ids.portfolioProjectId,
+    portfolioId: ids.portfolioId,
+    title: "Live Service Tooling",
+    description: "Created internal dashboards and performance observability workflows.",
+    technologies: ["TypeScript", "Bun", "SQLite"],
+    featured: true,
+  });
+}
+
+async function seedCandidateAssets() {
+  const ids = createCandidateFixtureIds();
+  await insertCandidateFixtures(ids);
+  return {
+    resumeId: ids.resumeId,
+    coverLetterId: ids.coverLetterId,
+    portfolioId: ids.portfolioId,
+  };
+}
+
+function registerInterviewSessionDefaultsTest(): void {
   test("startSession applies config defaults and avoids technical questions when disabled", async () => {
     const created = await harness.interviewService.startSession("riot-games", {
       questionCount: 3,
+      conversationStyle: "structured",
       includeTechnical: false,
     });
 
@@ -76,7 +175,33 @@ describe("interview service", () => {
     expect(persisted).not.toBeNull();
     expect(persisted?.totalQuestions).toBe(3);
   });
+}
 
+function registerNaturalInterviewSessionTest(): void {
+  test("startSession keeps natural interviews asset-aware and starts with one contextual question", async () => {
+    const candidateAssets = await seedCandidateAssets();
+
+    const created = await harness.interviewService.startSession("riot-games", {
+      questionCount: 3,
+      conversationStyle: "natural",
+      roleType: "Gameplay Engineer",
+      candidateContext: candidateAssets,
+    });
+
+    expect(created.config.conversationStyle).toBe("natural");
+    expect(created.config.candidateContext).toEqual(candidateAssets);
+    expect(created.questions).toHaveLength(1);
+    expect(created.questions[0]?.question).toContain("Gameplay Engineer");
+    expect(created.questions[0]?.question).toContain("Riot Games");
+
+    const persisted = await harness.interviewService.getSession(created.id);
+    expect(persisted?.config.conversationStyle).toBe("natural");
+    expect(persisted?.config.candidateContext).toEqual(candidateAssets);
+    expect(persisted?.questions).toHaveLength(1);
+  });
+}
+
+function registerInterviewCompletionTests(): void {
   test("addResponse stores AI feedback, completes session, and writes final analysis", async () => {
     const created = await harness.interviewService.startSession("electronic-arts", {
       questionCount: 1,
@@ -112,6 +237,44 @@ describe("interview service", () => {
 
     expect(missing).toBeNull();
   });
+}
+
+function registerInterviewNaturalFollowUpTest(): void {
+  test("addResponse appends the next natural follow-up question until the configured count is reached", async () => {
+    const candidateAssets = await seedCandidateAssets();
+    const created = await harness.interviewService.startSession("riot-games", {
+      questionCount: 2,
+      conversationStyle: "natural",
+      roleType: "Gameplay Engineer",
+      candidateContext: candidateAssets,
+    });
+    const firstQuestion = created.questions[0];
+    expect(firstQuestion?.id).toBeDefined();
+
+    const updated = await harness.interviewService.addResponse(created.id, {
+      questionId: firstQuestion?.id ?? "",
+      transcript:
+        "I translate ambiguous design goals into observable engineering milestones and align partners on measurable player outcomes.",
+      duration: 420,
+      timestamp: Date.now(),
+      confidence: 0.85,
+    });
+
+    expect(updated).not.toBeNull();
+    expect(updated?.status).toBe("active");
+    expect(updated?.responses).toHaveLength(1);
+    expect(updated?.questions).toHaveLength(2);
+    expect(updated?.questions[1]?.id).not.toBe(firstQuestion?.id);
+    expect(updated?.questions[1]?.question).toContain("Gameplay Engineer");
+    expect(updated?.currentQuestionIndex).toBe(1);
+  });
+}
+
+describe("interview service", () => {
+  registerInterviewSessionDefaultsTest();
+  registerNaturalInterviewSessionTest();
+  registerInterviewCompletionTests();
+  registerInterviewNaturalFollowUpTest();
 });
 
 function registerRoleTypeCompatibilityTest(): void {
@@ -171,12 +334,18 @@ function registerCanonicalResponsePayloadTest(): void {
 
 function registerJobContextPersistenceTest(): void {
   test("POST /api/interview/sessions persists job interview context", async () => {
+    const candidateAssets = await seedCandidateAssets();
     const response = await requestJson<{
       id: string;
       role: string;
       studioName: string;
       config: {
         interviewMode: string;
+        candidateContext?: {
+          resumeId?: string;
+          coverLetterId?: string;
+          portfolioId?: string;
+        };
         targetJob?: {
           id: string;
           title: string;
@@ -184,10 +353,12 @@ function registerJobContextPersistenceTest(): void {
           location: string;
         };
       };
+      questions: Array<{ question: string }>;
     }>(harness.app, "POST", "/api/interview/sessions", {
       config: {
         interviewMode: "job",
         questionCount: 2,
+        candidateContext: candidateAssets,
         targetJob: {
           id: "job-123",
           title: "Senior Gameplay Engineer",
@@ -200,9 +371,48 @@ function registerJobContextPersistenceTest(): void {
 
     expect(response.status).toBe(201);
     expect(response.body.config.interviewMode).toBe("job");
+    expect(response.body.config.candidateContext).toEqual(candidateAssets);
     expect(response.body.config.targetJob?.id).toBe("job-123");
     expect(response.body.role).toBe("Senior Gameplay Engineer");
     expect(response.body.studioName).toBe("Supergiant Games");
+    expect(response.body.questions[0]?.question).toContain("Senior Gameplay Engineer");
+    expect(response.body.questions[0]?.question).toContain("Supergiant Games");
+  });
+}
+
+function registerConversationConfigPersistenceTest(): void {
+  test("POST /api/interview/sessions persists conversation style and candidate asset context", async () => {
+    const candidateAssets = await seedCandidateAssets();
+
+    const response = await requestJson<{
+      config: {
+        conversationStyle?: string;
+        candidateContext?: {
+          resumeId?: string;
+          coverLetterId?: string;
+          portfolioId?: string;
+        };
+      };
+      totalQuestions: number;
+    }>(harness.app, "POST", "/api/interview/sessions", {
+      studioId: "riot-games",
+      config: {
+        questionCount: 3,
+        conversationStyle: "natural",
+        candidateContext: candidateAssets,
+      },
+    });
+
+    expect(response.status).toBe(201);
+    expect(response.body.config.conversationStyle).toBe("natural");
+    expect(response.body.config.candidateContext).toEqual(candidateAssets);
+    expect(response.body.totalQuestions).toBe(1);
+
+    const persisted = await harness.db
+      .select()
+      .from(resumes)
+      .where(eq(resumes.id, candidateAssets.resumeId));
+    expect(persisted).toHaveLength(1);
   });
 }
 
@@ -216,4 +426,8 @@ describe("interview API response payload compatibility", () => {
 
 describe("interview API job context compatibility", () => {
   registerJobContextPersistenceTest();
+});
+
+describe("interview API conversation config compatibility", () => {
+  registerConversationConfigPersistenceTest();
 });

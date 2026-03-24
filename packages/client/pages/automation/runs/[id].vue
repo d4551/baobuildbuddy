@@ -72,6 +72,13 @@ const toLocalizedDateTime = (value: string): string => {
 const streamStateMessageKey = computed<string>(
   () => `automation.runDetail.states.${streamState.value}`,
 );
+const showLoadError = computed(
+  () =>
+    streamState.value === "unauthorized" ||
+    streamState.value === "errorRetryable" ||
+    streamState.value === "errorNonRetryable",
+);
+const canRetryLoad = computed(() => streamState.value === "errorRetryable");
 const statusText = computed(() => {
   if (!run.value) {
     return t("automation.runDetail.loadingStatus");
@@ -239,29 +246,30 @@ onBeforeUnmount(() => {
   <PageScaffold tag="section" width-token="content" labelled-by="automation-run-detail-title">
     <div class="space-y-3">
       <AppBreadcrumbs :crumbs="breadcrumbs" />
-      <PageHeaderBlock title-id="automation-run-detail-title" :title="t('automation.runDetail.title')" />
+      <PageHeroHeader title-id="automation-run-detail-title" :title="t('automation.runDetail.title')">
+        <template #actions>
+          <NuxtLink
+            :to="APP_ROUTES.automationRuns"
+            class="btn btn-outline"
+            :aria-label="t('automation.runDetail.backToRunsAria')"
+          >
+            {{ t("automation.runDetail.backButton") }}
+          </NuxtLink>
+        </template>
+      </PageHeroHeader>
     </div>
 
-    <div
-      v-if="streamState === 'unauthorized' || streamState === 'errorRetryable' || streamState === 'errorNonRetryable'"
-      role="alert"
-      class="alert alert-error mb-6"
-    >
-      <h3 class="font-semibold">{{ t("automation.runDetail.loadErrorTitle") }}</h3>
-      <p>{{ streamError?.message || t(streamStateMessageKey) }}</p>
-      <button
-        v-if="streamState === 'errorRetryable'"
-        type="button"
-        class="btn btn-sm btn-outline"
-        :aria-label="t('automation.runDetail.retryAria')"
-        @click="runStream.retry()"
-      >
-        {{ t("automation.runDetail.retryButton") }}
-      </button>
-    </div>
+    <BootstrapErrorAlert
+      v-if="showLoadError"
+      :title="t('automation.runDetail.loadErrorTitle')"
+      :message="streamError?.message || t(streamStateMessageKey)"
+      :retry-label="canRetryLoad ? t('automation.runDetail.retryButton') : ''"
+      :retry-aria-label="canRetryLoad ? t('automation.runDetail.retryAria') : ''"
+      @retry="() => runStream.retry()"
+    />
 
     <div v-if="run" class="space-y-6">
-      <div class="stats stats-vertical w-full bg-base-100 shadow-sm lg:stats-horizontal">
+      <div class="stats stats-vertical w-full bg-base-200 lg:stats-horizontal">
         <div class="stat">
           <div class="stat-title">{{ t("automation.runDetail.stats.inputTitle") }}</div>
           <div class="stat-value text-base">{{ inputSummary }}</div>
@@ -308,13 +316,13 @@ onBeforeUnmount(() => {
         <div class="card-body">
           <h2 class="card-title">{{ t("automation.runDetail.timeline.title") }}</h2>
           <div class="overflow-x-auto">
-            <table class="table table-zebra table-sm">
+            <table class="table table-zebra table-sm" :aria-label="t('automation.runDetail.timeline.aria')">
               <thead>
                 <tr>
-                  <th>{{ t("automation.runDetail.timeline.columns.time") }}</th>
-                  <th>{{ t("automation.runDetail.timeline.columns.stage") }}</th>
-                  <th>{{ t("automation.runDetail.timeline.columns.status") }}</th>
-                  <th>{{ t("automation.runDetail.timeline.columns.message") }}</th>
+                  <th scope="col">{{ t("automation.runDetail.timeline.columns.time") }}</th>
+                  <th scope="col">{{ t("automation.runDetail.timeline.columns.stage") }}</th>
+                  <th scope="col">{{ t("automation.runDetail.timeline.columns.status") }}</th>
+                  <th scope="col">{{ t("automation.runDetail.timeline.columns.message") }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -395,15 +403,6 @@ onBeforeUnmount(() => {
       </section>
     </div>
 
-    <div
-      v-else
-      class="mt-8 flex items-center gap-3"
-      role="status"
-      aria-live="polite"
-      :aria-label="t('automation.runDetail.loadingAria')"
-    >
-      <span class="loading loading-spinner loading-lg"></span>
-      <span>{{ t(streamStateMessageKey) }}</span>
-    </div>
+    <LoadingSkeleton v-else :lines="8" />
   </PageScaffold>
 </template>

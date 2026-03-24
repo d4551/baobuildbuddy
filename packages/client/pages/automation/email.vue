@@ -242,7 +242,11 @@ if (import.meta.server) {
 
 <template>
   <PageScaffold tag="section" width-token="content" labelled-by="automation-email-title">
-    <PageHeaderBlock title-id="automation-email-title" :title="t('automation.email.title')">
+    <PageHeroHeader
+      title-id="automation-email-title"
+      :title="t('automation.email.title')"
+      :description="t('automation.email.pageDescription')"
+    >
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.automationRuns"
@@ -252,7 +256,7 @@ if (import.meta.server) {
           {{ t("automation.email.openRunsButton") }}
         </NuxtLink>
       </template>
-    </PageHeaderBlock>
+    </PageHeroHeader>
 
     <LoadingSkeleton v-if="emailSettingsPending" :lines="6" />
 
@@ -406,10 +410,11 @@ if (import.meta.server) {
       </div>
     </div>
 
-    <div v-if="submitError" role="alert" class="alert alert-error">
-      <h3 class="font-semibold">{{ t("automation.email.submitErrorTitle") }}</h3>
-      <p>{{ submitError }}</p>
-    </div>
+    <BootstrapErrorAlert
+      v-if="submitError"
+      :title="t('automation.email.submitErrorTitle')"
+      :message="submitError"
+    />
 
     <div v-if="scheduledRun" class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">

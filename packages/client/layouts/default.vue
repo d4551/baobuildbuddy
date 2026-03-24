@@ -5,7 +5,12 @@ import {
   APP_DRAWER_ID,
   APP_MAIN_CONTENT_ID,
   LAYOUT_DESKTOP_MEDIA_QUERY,
+  SHELL_DRAWER_CLASS,
+  SHELL_DRAWER_CONTENT_CLASS,
+  SHELL_DRAWER_SIDE_CLASS,
   SHELL_MAIN_INNER_CLASS,
+  SHELL_SIDEBAR_ASIDE_CLASS,
+  SHELL_SKIP_LINK_CLASS,
 } from "~/constants/layout";
 
 const { initTheme, theme, setTheme } = useTheme();
@@ -73,7 +78,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="drawer lg:drawer-open min-h-screen" :data-theme="theme" :style="shellStyle">
+  <div class="drawer" :class="SHELL_DRAWER_CLASS" :data-theme="theme" :style="shellStyle">
     <input
       :id="APP_DRAWER_ID"
       type="checkbox"
@@ -82,8 +87,8 @@ onUnmounted(() => {
       aria-hidden="true"
       tabindex="-1"
     />
-    <div class="drawer-content flex min-h-screen flex-col">
-      <a :href="`#${APP_MAIN_CONTENT_ID}`" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn btn-primary btn-sm" :aria-label="t('a11y.skipToContent')">{{ t("a11y.skipToContent") }}</a>
+    <div class="drawer-content" :class="SHELL_DRAWER_CONTENT_CLASS">
+      <a :href="`#${APP_MAIN_CONTENT_ID}`" :class="SHELL_SKIP_LINK_CLASS" :aria-label="t('a11y.skipToContent')">{{ t("a11y.skipToContent") }}</a>
       <AppNavbar />
       <main :id="APP_MAIN_CONTENT_ID" class="flex flex-1 flex-col">
         <div :class="SHELL_MAIN_INNER_CLASS">
@@ -92,17 +97,14 @@ onUnmounted(() => {
       </main>
       <ToastContainer />
     </div>
-    <div class="drawer-side is-drawer-close:overflow-visible z-20">
+    <div class="drawer-side" :class="SHELL_DRAWER_SIDE_CLASS">
       <label
         :for="APP_DRAWER_ID"
         class="drawer-overlay"
         :aria-label="t('a11y.closeSidebar')"
         :aria-controls="APP_DRAWER_ID"
       ></label>
-      <aside
-        class="flex min-h-full flex-col items-start bg-base-200 transition-all duration-200 is-drawer-close:w-14 is-drawer-open:w-64"
-        :aria-label="t('a11y.sidebarNavigation')"
-      >
+      <aside :class="SHELL_SIDEBAR_ASIDE_CLASS" :aria-label="t('a11y.sidebarNavigation')">
         <AppSidebar />
       </aside>
     </div>

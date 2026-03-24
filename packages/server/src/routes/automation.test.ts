@@ -410,6 +410,13 @@ function registerImmediateScrapeRunTest(): void {
         scraped: 4,
         upserted: 3,
         errors: [],
+        enrichment: {
+          enabled: true,
+          enrichedRecords: 3,
+          warnings: [],
+          provider: "local",
+          model: "deterministic-test-model",
+        },
       });
 
     const res = await requestJson<{
@@ -428,6 +435,7 @@ function registerImmediateScrapeRunTest(): void {
     expect(res.status).toBe(200);
     expect(res.body.status).toBe("success");
     expect(res.body.output?.target).toBe("jobs_grackle");
+    expect(res.body.output?.enrichment).not.toBeNull();
     createdRunIds.push(res.body.id);
 
     const run = await db

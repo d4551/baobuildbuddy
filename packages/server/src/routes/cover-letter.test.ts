@@ -120,7 +120,9 @@ function registerDynamicGenerationTests(): void {
     expect(res.body.coverLetter.company).toBe("Studio Nova");
     generatedId = res.body.coverLetter.id;
   });
+}
 
+function registerCoverLetterExportTests(): void {
   test("POST /api/cover-letters/:id/export returns a PDF attachment", async () => {
     const response = await app.handle(
       new Request(`http://localhost/api/cover-letters/${generatedId}/export`, {
@@ -166,4 +168,5 @@ describe("cover-letter routes update/delete", () => {
 
 describe("cover-letter routes generation/export", () => {
   registerDynamicGenerationTests();
+  registerCoverLetterExportTests();
 });

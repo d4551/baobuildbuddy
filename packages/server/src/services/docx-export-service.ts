@@ -1,4 +1,5 @@
 import {
+  COVER_LETTER_EXPORT_THEME,
   COVER_LETTER_DEFAULT_SIGNATURE,
   DOCX_COVER_LETTER_FONT_BODY_PT,
   DOCX_COVER_LETTER_FONT_HEADER_PT,
@@ -9,14 +10,17 @@ import {
   DOCX_RESUME_FONT_BODY_PT,
   DOCX_RESUME_FONT_HEADER_PT,
   DOCX_RESUME_FONT_NAME_PT,
-  EXPORT_DATE_LOCALE,
-  isRecord,
-  isResumeTemplate,
+  collectDefinedStringValues,
+  formatExportDate,
+  PORTFOLIO_EXPORT_THEME,
   type PortfolioMetadata,
   type PortfolioProject,
+  RESUME_EXPORT_THEME_CONFIGS,
   RESUME_TEMPLATE_DEFAULT,
+  resolveResumeExportTemplate,
   type ResumeData,
   type ResumeTemplate,
+  toCoverLetterParagraphs,
 } from "@bao/shared";
 import {
   AlignmentType,
@@ -35,12 +39,7 @@ type ResumeEducationItem = NonNullable<ResumeData["education"]>[number];
 type ResumeProjectItem = NonNullable<ResumeData["projects"]>[number];
 type ResumeSkillsData = NonNullable<ResumeData["skills"]>;
 type ResumePersonalInfo = NonNullable<ResumeData["personalInfo"]>;
-
-interface DocxTemplateConfig {
-  primaryColor: string;
-  accentColor: string;
-  fontFamily: string;
-}
+type DocxTemplateConfig = (typeof RESUME_EXPORT_THEME_CONFIGS)[ResumeTemplate]["docx"];
 
 interface CoverLetterPayload {
   company: string;
@@ -55,96 +54,14 @@ interface CoverLetterUserProfile {
   location?: string;
 }
 
-const COVER_LETTER_DATE_FORMATTER = new Intl.DateTimeFormat(EXPORT_DATE_LOCALE, {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
-
-const DOCX_TEMPLATE_CONFIGS: Record<ResumeTemplate, DocxTemplateConfig> = {
-  modern: {
-    primaryColor: "2962FF",
-    accentColor: "009688",
-    fontFamily: "Calibri",
-  },
-  classic: {
-    primaryColor: "333333",
-    accentColor: "555555",
-    fontFamily: "Times New Roman",
-  },
-  creative: {
-    primaryColor: "E91E63",
-    accentColor: "FF9800",
-    fontFamily: "Georgia",
-  },
-  minimal: {
-    primaryColor: "424242",
-    accentColor: "757575",
-    fontFamily: "Calibri",
-  },
-  "google-xyz": {
-    primaryColor: "4285F4",
-    accentColor: "34A853",
-    fontFamily: "Calibri",
-  },
-  gaming: {
-    primaryColor: "8A2BE2",
-    accentColor: "FF0064",
-    fontFamily: "Consolas",
-  },
-  executive: {
-    primaryColor: "1A237E",
-    accentColor: "C9B037",
-    fontFamily: "Garamond",
-  },
-  technical: {
-    primaryColor: "00695C",
-    accentColor: "0277BD",
-    fontFamily: "Consolas",
-  },
-};
-
-const asStringParagraphs = (value: unknown): string[] => {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? [trimmed] : [];
-  }
-  if (Array.isArray(value)) {
-    return value
-      .filter((entry): entry is string => typeof entry === "string")
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-  }
-  return [];
-};
-
-const toCoverLetterParagraphs = (content: unknown): string[] => {
-  if (typeof content === "string") {
-    return content
-      .split("\n\n")
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-  }
-  if (!isRecord(content)) {
-    return [];
-  }
-  const canonical = [
-    ...asStringParagraphs(content.opening),
-    ...asStringParagraphs(content.body),
-    ...asStringParagraphs(content.closing),
-  ];
-  if (canonical.length > 0) {
-    return canonical;
-  }
-  return [
-    ...asStringParagraphs(content.introduction),
-    ...asStringParagraphs(content.main),
-    ...asStringParagraphs(content.conclusion),
-  ];
-};
-
-const collectDefinedValues = (values: Array<string | undefined>): string[] =>
-  values.filter((v): v is string => typeof v === "string" && v.trim().length > 0);
+const COVER_LETTER_DOCX_FONT_FAMILY = COVER_LETTER_EXPORT_THEME.docx.fontFamily;
+const PORTFOLIO_DOCX_FONT_FAMILY = PORTFOLIO_EXPORT_THEME.docx.fontFamily;
+const COVER_LETTER_DOCX_TEXT_COLOR = COVER_LETTER_EXPORT_THEME.docx.textColorHex;
+const COVER_LETTER_DOCX_MUTED_COLOR = COVER_LETTER_EXPORT_THEME.docx.mutedColorHex;
+const PORTFOLIO_DOCX_PRIMARY_COLOR = PORTFOLIO_EXPORT_THEME.docx.primaryColorHex;
+const PORTFOLIO_DOCX_MUTED_COLOR = PORTFOLIO_EXPORT_THEME.docx.mutedColorHex;
+const PORTFOLIO_DOCX_SUBTLE_COLOR = PORTFOLIO_EXPORT_THEME.docx.subtleColorHex;
+const PORTFOLIO_DOCX_FOOTER_COLOR = PORTFOLIO_EXPORT_THEME.docx.footerColorHex;
 
 /**
  * Horizontal separator paragraph for resume DOCX output.
@@ -160,7 +77,12 @@ const createDivider = (color: string): Paragraph =>
 /**
  * Section heading paragraph for resume DOCX output.
  */
-const createSectionHeading = (label: string, color: string, pt: number): Paragraph =>
+const createSectionHeading = (
+  label: string,
+  color: string,
+  pt: number,
+  fontFamily: string,
+): Paragraph =>
   new Paragraph({
     spacing: { before: 200, after: 80 },
     children: [
@@ -169,7 +91,7 @@ const createSectionHeading = (label: string, color: string, pt: number): Paragra
         bold: true,
         size: pt * 2,
         color,
-        font: "Calibri",
+        font: fontFamily,
       }),
     ],
   });
@@ -179,19 +101,6 @@ const createSectionHeading = (label: string, color: string, pt: number): Paragra
  */
 export class DocxExportService {
   /**
-   * Resolves the template name from user or resume-level values.
-   */
-  private resolveTemplate(templateName?: string, resumeTemplate?: string): ResumeTemplate {
-    if (isResumeTemplate(templateName)) {
-      return templateName;
-    }
-    if (isResumeTemplate(resumeTemplate)) {
-      return resumeTemplate;
-    }
-    return RESUME_TEMPLATE_DEFAULT;
-  }
-
-  /**
    * Generates a styled DOCX resume document.
    *
    * @param resume Resume data payload.
@@ -199,78 +108,12 @@ export class DocxExportService {
    * @returns DOCX binary buffer.
    */
   async exportResumeDocx(resume: ResumeData, templateName?: string): Promise<Uint8Array> {
-    const resolvedTemplate = this.resolveTemplate(templateName, resume.template);
-    const config = DOCX_TEMPLATE_CONFIGS[resolvedTemplate];
-    const children: Paragraph[] = [];
-
-    const personalInfo = resume.personalInfo;
-    if (personalInfo) {
-      children.push(...this.buildResumeHeader(personalInfo, config));
-    }
-
-    children.push(createDivider(config.primaryColor));
-
-    if (resume.summary) {
-      children.push(
-        createSectionHeading("Summary", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
-      );
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: resume.summary,
-              size: DOCX_RESUME_FONT_BODY_PT * 2,
-              font: config.fontFamily,
-            }),
-          ],
-          spacing: { after: 120 },
-        }),
-      );
-    }
-
-    if (resume.experience && resume.experience.length > 0) {
-      children.push(
-        createSectionHeading("Experience", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
-      );
-      for (const item of resume.experience) {
-        children.push(...this.buildExperienceItem(item, config));
-      }
-    }
-
-    if (resume.education && resume.education.length > 0) {
-      children.push(
-        createSectionHeading("Education", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
-      );
-      for (const item of resume.education) {
-        children.push(...this.buildEducationItem(item, config));
-      }
-    }
-
-    if (resume.skills) {
-      children.push(
-        createSectionHeading("Skills", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
-      );
-      children.push(...this.buildSkillsSection(resume.skills, config));
-    }
-
-    if (resume.projects && resume.projects.length > 0) {
-      children.push(
-        createSectionHeading("Projects", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
-      );
-      for (const project of resume.projects) {
-        children.push(...this.buildProjectItem(project, config));
-      }
-    }
-
-    if (resume.gamingExperience) {
-      children.push(
-        createSectionHeading("Gaming Experience", config.primaryColor, DOCX_RESUME_FONT_HEADER_PT),
-      );
-      children.push(...this.buildGamingExperienceSection(resume.gamingExperience, config));
-    }
-
+    const resolvedTemplate = resolveResumeExportTemplate(templateName, resume.template);
+    const config =
+      RESUME_EXPORT_THEME_CONFIGS[resolvedTemplate]?.docx ??
+      RESUME_EXPORT_THEME_CONFIGS[RESUME_TEMPLATE_DEFAULT].docx;
     const doc = new Document({
-      sections: [{ children }],
+      sections: [{ children: this.buildResumeSections(resume, config) }],
     });
     const buffer = await Packer.toBuffer(doc);
     return new Uint8Array(buffer);
@@ -287,125 +130,8 @@ export class DocxExportService {
     coverLetter: CoverLetterPayload,
     userProfile: CoverLetterUserProfile,
   ): Promise<Uint8Array> {
-    const children: Paragraph[] = [];
-
-    children.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: userProfile.name,
-            bold: true,
-            size: DOCX_COVER_LETTER_FONT_HEADER_PT * 2,
-            font: "Times New Roman",
-          }),
-        ],
-        spacing: { after: 40 },
-      }),
-    );
-
-    const contactParts = collectDefinedValues([
-      userProfile.email,
-      userProfile.phone,
-      userProfile.location,
-    ]);
-    if (contactParts.length > 0) {
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: contactParts.join(" | "),
-              size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-              color: "666666",
-              font: "Times New Roman",
-            }),
-          ],
-          spacing: { after: 200 },
-        }),
-      );
-    }
-
-    children.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: COVER_LETTER_DATE_FORMATTER.format(new Date()),
-            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-            font: "Times New Roman",
-          }),
-        ],
-        spacing: { after: 200 },
-      }),
-    );
-
-    children.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: coverLetter.company,
-            bold: true,
-            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-            font: "Times New Roman",
-          }),
-        ],
-      }),
-    );
-    children.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: `Re: ${coverLetter.position}`,
-            italics: true,
-            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-            font: "Times New Roman",
-          }),
-        ],
-        spacing: { after: 200 },
-      }),
-    );
-
-    const paragraphs = toCoverLetterParagraphs(coverLetter.content);
-    for (const paragraph of paragraphs) {
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: paragraph,
-              size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-              font: "Times New Roman",
-            }),
-          ],
-          spacing: { after: 160 },
-        }),
-      );
-    }
-
-    children.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: COVER_LETTER_DEFAULT_SIGNATURE,
-            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-            font: "Times New Roman",
-          }),
-        ],
-        spacing: { before: 200, after: 40 },
-      }),
-    );
-    children.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: userProfile.name,
-            bold: true,
-            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-            font: "Times New Roman",
-          }),
-        ],
-      }),
-    );
-
     const doc = new Document({
-      sections: [{ children }],
+      sections: [{ children: this.buildCoverLetterSections(coverLetter, userProfile) }],
     });
     const buffer = await Packer.toBuffer(doc);
     return new Uint8Array(buffer);
@@ -432,6 +158,256 @@ export class DocxExportService {
     return new Uint8Array(buffer);
   }
 
+  private buildResumeSections(resume: ResumeData, config: DocxTemplateConfig): Paragraph[] {
+    return [
+      ...this.buildResumeHeaderSection(resume.personalInfo, config),
+      ...this.buildResumeSummarySection(resume.summary, config),
+      ...this.buildResumeExperienceSection(resume.experience, config),
+      ...this.buildResumeEducationSection(resume.education, config),
+      ...this.buildResumeSkillsSection(resume.skills, config),
+      ...this.buildResumeProjectsSection(resume.projects, config),
+      ...this.buildResumeGamingSection(resume.gamingExperience, config),
+    ];
+  }
+
+  private buildResumeHeaderSection(
+    personalInfo: ResumeData["personalInfo"],
+    config: DocxTemplateConfig,
+  ): Paragraph[] {
+    const children = personalInfo ? this.buildResumeHeader(personalInfo, config) : [];
+    return [...children, createDivider(config.primaryColorHex)];
+  }
+
+  private buildResumeSummarySection(
+    summary: ResumeData["summary"],
+    config: DocxTemplateConfig,
+  ): Paragraph[] {
+    if (!summary) {
+      return [];
+    }
+
+    return [
+      createSectionHeading("Summary", config.primaryColorHex, DOCX_RESUME_FONT_HEADER_PT, config.fontFamily),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: summary,
+            size: DOCX_RESUME_FONT_BODY_PT * 2,
+            font: config.fontFamily,
+          }),
+        ],
+        spacing: { after: 120 },
+      }),
+    ];
+  }
+
+  private buildResumeExperienceSection(
+    experience: ResumeData["experience"],
+    config: DocxTemplateConfig,
+  ): Paragraph[] {
+    if (!(experience && experience.length > 0)) {
+      return [];
+    }
+
+    return [
+      createSectionHeading("Experience", config.primaryColorHex, DOCX_RESUME_FONT_HEADER_PT, config.fontFamily),
+      ...experience.flatMap((item) => this.buildExperienceItem(item, config)),
+    ];
+  }
+
+  private buildResumeEducationSection(
+    education: ResumeData["education"],
+    config: DocxTemplateConfig,
+  ): Paragraph[] {
+    if (!(education && education.length > 0)) {
+      return [];
+    }
+
+    return [
+      createSectionHeading("Education", config.primaryColorHex, DOCX_RESUME_FONT_HEADER_PT, config.fontFamily),
+      ...education.flatMap((item) => this.buildEducationItem(item, config)),
+    ];
+  }
+
+  private buildResumeSkillsSection(
+    skills: ResumeData["skills"],
+    config: DocxTemplateConfig,
+  ): Paragraph[] {
+    if (!skills) {
+      return [];
+    }
+
+    return [
+      createSectionHeading("Skills", config.primaryColorHex, DOCX_RESUME_FONT_HEADER_PT, config.fontFamily),
+      ...this.buildSkillsSection(skills, config),
+    ];
+  }
+
+  private buildResumeProjectsSection(
+    projects: ResumeData["projects"],
+    config: DocxTemplateConfig,
+  ): Paragraph[] {
+    if (!(projects && projects.length > 0)) {
+      return [];
+    }
+
+    return [
+      createSectionHeading("Projects", config.primaryColorHex, DOCX_RESUME_FONT_HEADER_PT, config.fontFamily),
+      ...projects.flatMap((project) => this.buildProjectItem(project, config)),
+    ];
+  }
+
+  private buildResumeGamingSection(
+    gamingExperience: ResumeData["gamingExperience"],
+    config: DocxTemplateConfig,
+  ): Paragraph[] {
+    if (!gamingExperience) {
+      return [];
+    }
+
+    return [
+      createSectionHeading("Gaming Experience", config.primaryColorHex, DOCX_RESUME_FONT_HEADER_PT, config.fontFamily),
+      ...this.buildGamingExperienceSection(gamingExperience, config),
+    ];
+  }
+
+  private buildCoverLetterSections(
+    coverLetter: CoverLetterPayload,
+    userProfile: CoverLetterUserProfile,
+  ): Paragraph[] {
+    return [
+      ...this.buildCoverLetterHeader(userProfile),
+      ...this.buildCoverLetterRecipientBlock(coverLetter),
+      ...this.buildCoverLetterBodyParagraphs(coverLetter.content),
+      ...this.buildCoverLetterSignature(userProfile),
+    ];
+  }
+
+  private buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[] {
+    const children = [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: userProfile.name,
+            bold: true,
+            size: DOCX_COVER_LETTER_FONT_HEADER_PT * 2,
+            font: COVER_LETTER_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { after: 40 },
+      }),
+    ];
+
+    const contactParts = collectDefinedStringValues([
+      userProfile.email,
+      userProfile.phone,
+      userProfile.location,
+    ]);
+    if (contactParts.length > 0) {
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: contactParts.join(" | "),
+              size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
+              color: COVER_LETTER_DOCX_MUTED_COLOR,
+              font: COVER_LETTER_DOCX_FONT_FAMILY,
+            }),
+          ],
+          spacing: { after: 200 },
+        }),
+      );
+    }
+
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: formatExportDate(new Date()),
+            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
+            color: COVER_LETTER_DOCX_TEXT_COLOR,
+            font: COVER_LETTER_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { after: 200 },
+      }),
+    );
+
+    return children;
+  }
+
+  private buildCoverLetterRecipientBlock(coverLetter: CoverLetterPayload): Paragraph[] {
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: coverLetter.company,
+            bold: true,
+            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
+            color: COVER_LETTER_DOCX_TEXT_COLOR,
+            font: COVER_LETTER_DOCX_FONT_FAMILY,
+          }),
+        ],
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Re: ${coverLetter.position}`,
+            italics: true,
+            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
+            color: COVER_LETTER_DOCX_MUTED_COLOR,
+            font: COVER_LETTER_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { after: 200 },
+      }),
+    ];
+  }
+
+  private buildCoverLetterBodyParagraphs(content: unknown): Paragraph[] {
+    return toCoverLetterParagraphs(content).map(
+      (paragraph) =>
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: paragraph,
+              size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
+              color: COVER_LETTER_DOCX_TEXT_COLOR,
+              font: COVER_LETTER_DOCX_FONT_FAMILY,
+            }),
+          ],
+          spacing: { after: 160 },
+        }),
+    );
+  }
+
+  private buildCoverLetterSignature(userProfile: CoverLetterUserProfile): Paragraph[] {
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: COVER_LETTER_DEFAULT_SIGNATURE,
+            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
+            color: COVER_LETTER_DOCX_TEXT_COLOR,
+            font: COVER_LETTER_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { before: 200, after: 40 },
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: userProfile.name,
+            bold: true,
+            size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
+            color: COVER_LETTER_DOCX_TEXT_COLOR,
+            font: COVER_LETTER_DOCX_FONT_FAMILY,
+          }),
+        ],
+      }),
+    ];
+  }
+
   private buildResumeHeader(info: ResumePersonalInfo, config: DocxTemplateConfig): Paragraph[] {
     const items: Paragraph[] = [];
 
@@ -443,7 +419,7 @@ export class DocxExportService {
             text: info.name ?? "",
             bold: true,
             size: DOCX_RESUME_FONT_NAME_PT * 2,
-            color: config.primaryColor,
+            color: config.primaryColorHex,
             font: config.fontFamily,
           }),
         ],
@@ -451,7 +427,7 @@ export class DocxExportService {
       }),
     );
 
-    const contactParts = collectDefinedValues([info.email, info.phone, info.location]);
+    const contactParts = collectDefinedStringValues([info.email, info.phone, info.location]);
     if (contactParts.length > 0) {
       items.push(
         new Paragraph({
@@ -460,7 +436,7 @@ export class DocxExportService {
             new TextRun({
               text: contactParts.join(" | "),
               size: DOCX_RESUME_FONT_ACCENT_PT * 2,
-              color: "666666",
+              color: config.secondaryColorHex,
               font: config.fontFamily,
             }),
           ],
@@ -469,7 +445,7 @@ export class DocxExportService {
       );
     }
 
-    const linkParts = collectDefinedValues([info.linkedIn, info.portfolio, info.github]);
+    const linkParts = collectDefinedStringValues([info.linkedIn, info.portfolio, info.github]);
     if (linkParts.length > 0) {
       items.push(
         new Paragraph({
@@ -478,7 +454,7 @@ export class DocxExportService {
             new TextRun({
               text: linkParts.join(" | "),
               size: DOCX_RESUME_FONT_ACCENT_PT * 2,
-              color: config.accentColor,
+              color: config.accentColorHex,
               font: config.fontFamily,
             }),
           ],
@@ -505,7 +481,7 @@ export class DocxExportService {
           new TextRun({
             text: item.company ? ` — ${item.company}` : "",
             size: DOCX_RESUME_FONT_BODY_PT * 2,
-            color: "666666",
+            color: config.secondaryColorHex,
             font: config.fontFamily,
           }),
         ],
@@ -513,7 +489,7 @@ export class DocxExportService {
       }),
     );
 
-    const dateParts = collectDefinedValues([item.startDate, item.endDate ?? "Present"]);
+    const dateParts = collectDefinedStringValues([item.startDate, item.endDate ?? "Present"]);
     if (dateParts.length > 0) {
       const locationLine = item.location ? ` | ${item.location}` : "";
       items.push(
@@ -523,7 +499,7 @@ export class DocxExportService {
               text: dateParts.join(" – ") + locationLine,
               italics: true,
               size: DOCX_RESUME_FONT_ACCENT_PT * 2,
-              color: "999999",
+              color: config.mutedColorHex,
               font: config.fontFamily,
             }),
           ],
@@ -567,7 +543,7 @@ export class DocxExportService {
           new TextRun({
             text: item.school ? ` — ${item.school}` : "",
             size: DOCX_RESUME_FONT_BODY_PT * 2,
-            color: "666666",
+            color: config.secondaryColorHex,
             font: config.fontFamily,
           }),
         ],
@@ -583,7 +559,7 @@ export class DocxExportService {
               text: item.year,
               italics: true,
               size: DOCX_RESUME_FONT_ACCENT_PT * 2,
-              color: "999999",
+              color: config.mutedColorHex,
               font: config.fontFamily,
             }),
           ],
@@ -616,72 +592,15 @@ export class DocxExportService {
   }
 
   private buildSkillsSection(skills: ResumeSkillsData, config: DocxTemplateConfig): Paragraph[] {
-    const items: Paragraph[] = [];
+    const skillSections = [
+      { label: "Technical", values: skills.technical },
+      { label: "Soft Skills", values: skills.soft },
+      { label: "Gaming", values: skills.gaming },
+    ];
 
-    if (skills.technical && skills.technical.length > 0) {
-      items.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: "Technical: ",
-              bold: true,
-              size: DOCX_RESUME_FONT_BODY_PT * 2,
-              font: config.fontFamily,
-            }),
-            new TextRun({
-              text: skills.technical.join(", "),
-              size: DOCX_RESUME_FONT_BODY_PT * 2,
-              font: config.fontFamily,
-            }),
-          ],
-          spacing: { after: 40 },
-        }),
-      );
-    }
-
-    if (skills.soft && skills.soft.length > 0) {
-      items.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: "Soft Skills: ",
-              bold: true,
-              size: DOCX_RESUME_FONT_BODY_PT * 2,
-              font: config.fontFamily,
-            }),
-            new TextRun({
-              text: skills.soft.join(", "),
-              size: DOCX_RESUME_FONT_BODY_PT * 2,
-              font: config.fontFamily,
-            }),
-          ],
-          spacing: { after: 40 },
-        }),
-      );
-    }
-
-    if (skills.gaming && skills.gaming.length > 0) {
-      items.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: "Gaming: ",
-              bold: true,
-              size: DOCX_RESUME_FONT_BODY_PT * 2,
-              font: config.fontFamily,
-            }),
-            new TextRun({
-              text: skills.gaming.join(", "),
-              size: DOCX_RESUME_FONT_BODY_PT * 2,
-              font: config.fontFamily,
-            }),
-          ],
-          spacing: { after: 40 },
-        }),
-      );
-    }
-
-    return items;
+    return skillSections.flatMap(({ label, values }) =>
+      values && values.length > 0 ? [this.buildSkillParagraph(label, values, config)] : [],
+    );
   }
 
   private buildProjectItem(project: ResumeProjectItem, config: DocxTemplateConfig): Paragraph[] {
@@ -724,7 +643,7 @@ export class DocxExportService {
               text: `Technologies: ${project.technologies.join(", ")}`,
               italics: true,
               size: DOCX_RESUME_FONT_ACCENT_PT * 2,
-              color: config.accentColor,
+              color: config.accentColorHex,
               font: config.fontFamily,
             }),
           ],
@@ -773,227 +692,289 @@ export class DocxExportService {
   }
 
   private buildPortfolioCoverPage(metadata: PortfolioMetadata): ISectionOptions {
-    const children: Paragraph[] = [];
-
-    children.push(
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 4000 },
-        children: [
-          new TextRun({
-            text: metadata.title ?? "Portfolio",
-            bold: true,
-            size: DOCX_PORTFOLIO_FONT_TITLE_PT * 2,
-            color: "333399",
-            font: "Calibri",
-          }),
-        ],
-      }),
-    );
-
-    if (metadata.author) {
-      children.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 400 },
-          children: [
-            new TextRun({
-              text: metadata.author,
-              size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
-              color: "666666",
-              font: "Calibri",
-            }),
-          ],
-        }),
-      );
-    }
-
-    if (metadata.description) {
-      children.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 400, after: 200 },
-          children: [
-            new TextRun({
-              text: metadata.description,
-              italics: true,
-              size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-              color: "999999",
-              font: "Calibri",
-            }),
-          ],
-        }),
-      );
-    }
-
-    const contactParts = collectDefinedValues([metadata.website, metadata.email]);
-    if (contactParts.length > 0) {
-      children.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 200 },
-          children: [
-            new TextRun({
-              text: contactParts.join(" | "),
-              size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-              color: "333399",
-              font: "Calibri",
-            }),
-          ],
-        }),
-      );
-    }
-
-    return { children };
+    return {
+      children: [
+        this.buildPortfolioTitleParagraph(metadata.title),
+        ...this.buildPortfolioAuthorParagraph(metadata.author),
+        ...this.buildPortfolioDescriptionParagraph(metadata.description),
+        ...this.buildPortfolioContactParagraph(metadata),
+      ],
+    };
   }
 
   private buildPortfolioProjectsSection(
     _metadata: PortfolioMetadata,
     projects: PortfolioProject[],
   ): ISectionOptions {
-    const children: Paragraph[] = [];
+    return {
+      children: [
+        this.buildPortfolioProjectsHeading(),
+        ...projects.flatMap((project, index) => this.buildPortfolioProjectParagraphs(project, index)),
+        this.buildPortfolioFooter(),
+      ],
+    };
+  }
 
-    children.push(
-      new Paragraph({
-        heading: HeadingLevel.HEADING_1,
-        children: [
-          new TextRun({
-            text: "Projects",
-            bold: true,
-            size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
-            color: "333399",
-            font: "Calibri",
-          }),
-        ],
-        spacing: { after: 200 },
-      }),
-    );
-
-    for (let idx = 0; idx < projects.length; idx++) {
-      const project = projects[idx];
-
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `${String(idx + 1)}. ${project.title}`,
-              bold: true,
-              size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
-              color: "333399",
-              font: "Calibri",
-            }),
-          ],
-          spacing: { before: 240 },
+  private buildSkillParagraph(
+    label: string,
+    values: string[],
+    config: DocxTemplateConfig,
+  ): Paragraph {
+    return new Paragraph({
+      children: [
+        new TextRun({
+          text: `${label}: `,
+          bold: true,
+          size: DOCX_RESUME_FONT_BODY_PT * 2,
+          font: config.fontFamily,
         }),
-      );
-
-      if (project.role) {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Role: ${project.role}`,
-                italics: true,
-                size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-                color: "666666",
-                font: "Calibri",
-              }),
-            ],
-          }),
-        );
-      }
-
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: project.description,
-              size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-              font: "Calibri",
-            }),
-          ],
-          spacing: { after: 80 },
+        new TextRun({
+          text: values.join(", "),
+          size: DOCX_RESUME_FONT_BODY_PT * 2,
+          font: config.fontFamily,
         }),
-      );
+      ],
+      spacing: { after: 40 },
+    });
+  }
 
-      if (project.technologies && project.technologies.length > 0) {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Technologies: ",
-                bold: true,
-                size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-                font: "Calibri",
-              }),
-              new TextRun({
-                text: project.technologies.join(", "),
-                size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-                font: "Calibri",
-              }),
-            ],
-            spacing: { after: 40 },
-          }),
-        );
-      }
+  private buildPortfolioTitleParagraph(title: string | undefined): Paragraph {
+    return new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 4000 },
+      children: [
+        new TextRun({
+          text: title ?? "Portfolio",
+          bold: true,
+          size: DOCX_PORTFOLIO_FONT_TITLE_PT * 2,
+          color: PORTFOLIO_DOCX_PRIMARY_COLOR,
+          font: PORTFOLIO_DOCX_FONT_FAMILY,
+        }),
+      ],
+    });
+  }
 
-      if (project.tags && project.tags.length > 0) {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Tags: ${project.tags.join(", ")}`,
-                italics: true,
-                size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-                color: "999999",
-                font: "Calibri",
-              }),
-            ],
-            spacing: { after: 40 },
-          }),
-        );
-      }
-
-      const urls = collectDefinedValues([project.liveUrl, project.githubUrl]);
-      if (urls.length > 0) {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: urls.join(" | "),
-                size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-                color: "333399",
-                font: "Calibri",
-              }),
-            ],
-            spacing: { after: 80 },
-          }),
-        );
-      }
+  private buildPortfolioAuthorParagraph(author: string | undefined): Paragraph[] {
+    if (!author) {
+      return [];
     }
 
-    children.push(
+    return [
       new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 400 },
         children: [
           new TextRun({
-            text: "Page ",
-            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-            color: "999999",
-            font: "Calibri",
-          }),
-          new TextRun({
-            children: [PageNumber.CURRENT],
-            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-            color: "999999",
-            font: "Calibri",
+            text: author,
+            size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
+            color: PORTFOLIO_DOCX_MUTED_COLOR,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
           }),
         ],
       }),
-    );
+    ];
+  }
 
-    return { children };
+  private buildPortfolioDescriptionParagraph(description: string | undefined): Paragraph[] {
+    if (!description) {
+      return [];
+    }
+
+    return [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 400, after: 200 },
+        children: [
+          new TextRun({
+            text: description,
+            italics: true,
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            color: PORTFOLIO_DOCX_SUBTLE_COLOR,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+      }),
+    ];
+  }
+
+  private buildPortfolioContactParagraph(metadata: PortfolioMetadata): Paragraph[] {
+    const contactParts = collectDefinedStringValues([metadata.website, metadata.email]);
+    if (contactParts.length === 0) {
+      return [];
+    }
+
+    return [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 200 },
+        children: [
+          new TextRun({
+            text: contactParts.join(" | "),
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            color: PORTFOLIO_DOCX_PRIMARY_COLOR,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+      }),
+    ];
+  }
+
+  private buildPortfolioProjectsHeading(): Paragraph {
+    return new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      children: [
+        new TextRun({
+          text: "Projects",
+          bold: true,
+          size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
+          color: PORTFOLIO_DOCX_PRIMARY_COLOR,
+          font: PORTFOLIO_DOCX_FONT_FAMILY,
+        }),
+      ],
+      spacing: { after: 200 },
+    });
+  }
+
+  private buildPortfolioProjectParagraphs(
+    project: PortfolioProject,
+    index: number,
+  ): Paragraph[] {
+    const urls = collectDefinedStringValues([project.liveUrl, project.githubUrl]);
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `${String(index + 1)}. ${project.title}`,
+            bold: true,
+            size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
+            color: PORTFOLIO_DOCX_PRIMARY_COLOR,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { before: 240 },
+      }),
+      ...this.buildPortfolioProjectRole(project.role),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: project.description,
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { after: 80 },
+      }),
+      ...this.buildPortfolioProjectTechnologies(project.technologies),
+      ...this.buildPortfolioProjectTags(project.tags),
+      ...this.buildPortfolioProjectUrls(urls),
+    ];
+  }
+
+  private buildPortfolioProjectRole(role: string | undefined): Paragraph[] {
+    if (!role) {
+      return [];
+    }
+
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Role: ${role}`,
+            italics: true,
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            color: PORTFOLIO_DOCX_MUTED_COLOR,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+      }),
+    ];
+  }
+
+  private buildPortfolioProjectTechnologies(technologies: string[] | undefined): Paragraph[] {
+    if (!(technologies && technologies.length > 0)) {
+      return [];
+    }
+
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "Technologies: ",
+            bold: true,
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+          new TextRun({
+            text: technologies.join(", "),
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { after: 40 },
+      }),
+    ];
+  }
+
+  private buildPortfolioProjectTags(tags: string[] | undefined): Paragraph[] {
+    if (!(tags && tags.length > 0)) {
+      return [];
+    }
+
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Tags: ${tags.join(", ")}`,
+            italics: true,
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            color: PORTFOLIO_DOCX_SUBTLE_COLOR,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { after: 40 },
+      }),
+    ];
+  }
+
+  private buildPortfolioProjectUrls(urls: string[]): Paragraph[] {
+    if (urls.length === 0) {
+      return [];
+    }
+
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: urls.join(" | "),
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            color: PORTFOLIO_DOCX_PRIMARY_COLOR,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+        spacing: { after: 80 },
+      }),
+    ];
+  }
+
+  private buildPortfolioFooter(): Paragraph {
+    return new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 400 },
+      children: [
+        new TextRun({
+          text: "Page ",
+          size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+          color: PORTFOLIO_DOCX_FOOTER_COLOR,
+          font: PORTFOLIO_DOCX_FONT_FAMILY,
+        }),
+        new TextRun({
+          children: [PageNumber.CURRENT],
+          size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+          color: PORTFOLIO_DOCX_FOOTER_COLOR,
+          font: PORTFOLIO_DOCX_FONT_FAMILY,
+        }),
+      ],
+    });
   }
 }
 

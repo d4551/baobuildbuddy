@@ -177,48 +177,39 @@ async function requestData<T>(
 </script>
 
 <template>
-  <section class="space-y-6" aria-labelledby="gamification-title">
-    <header class="space-y-1">
-      <h1 id="gamification-title" class="text-3xl font-bold">{{ t("gamificationPage.pageTitle") }}</h1>
-      <p class="text-sm text-base-content/60">{{ t("gamificationPage.metricsSummary", { brand: resolvedBrand.name }) }}</p>
-    </header>
+  <PageScaffold
+    tag="section"
+    width-token="content"
+    spacing-token="comfortable"
+    labelled-by="gamification-title"
+  >
+    <PageHeroHeader
+      title-id="gamification-title"
+      :title="t('gamificationPage.pageTitle')"
+      :description="t('gamificationPage.metricsSummary', { brand: resolvedBrand.name })"
+    />
 
     <LoadingSkeleton
       v-if="uiState === 'loading' || uiState === 'idle'"
       :lines="GAMIFICATION_LOADING_SKELETON_LINES"
     />
 
-    <div v-else-if="uiState === 'error'" class="alert alert-error" role="alert">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span>{{ getErrorMessage(error, t("gamificationPage.loadErrorFallback")) }}</span>
-      <button
-        type="button"
-        class="btn btn-sm btn-ghost"
-        :aria-label="t('gamificationPage.retryAria')"
-        @click="retryPageLoad"
-      >
-        {{ t("gamificationPage.retryButtonLabel") }}
-      </button>
-    </div>
+    <BootstrapErrorAlert
+      v-else-if="uiState === 'error'"
+      :title="t('gamificationPage.pageTitle')"
+      :message="getErrorMessage(error, t('gamificationPage.loadErrorFallback'))"
+      :retry-label="t('gamificationPage.retryButtonLabel')"
+      :retry-aria-label="t('gamificationPage.retryAria')"
+      @retry="retryPageLoad"
+    />
 
-    <div v-else-if="uiState === 'empty'" class="card bg-base-200 card-border">
-      <div class="card-body items-start gap-3">
-        <h2 class="card-title">{{ t("gamificationPage.emptyStateTitle") }}</h2>
-        <p class="text-sm text-base-content/70">{{ t("gamificationPage.emptyStateDescription") }}</p>
-        <div class="card-actions">
-          <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-primary">
-            {{ t("gamificationPage.emptyStateCta") }}
-          </NuxtLink>
-        </div>
-      </div>
-    </div>
+    <EmptyState
+      v-else-if="uiState === 'empty'"
+      title-key="gamificationPage.emptyStateTitle"
+      description-key="gamificationPage.emptyStateDescription"
+      cta-label-key="gamificationPage.emptyStateCta"
+      :cta-to="APP_ROUTES.dashboard"
+    />
 
     <div v-else-if="hubData" class="space-y-6">
       <section class="card bg-gradient-to-br from-primary to-secondary text-primary-content">
@@ -362,5 +353,5 @@ async function requestData<T>(
         </div>
       </section>
     </div>
-  </section>
+  </PageScaffold>
 </template>

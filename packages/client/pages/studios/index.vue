@@ -242,16 +242,13 @@ watch(
 
 <template>
   <PageScaffold labelled-by="studios-index-title">
-    <section class="hero rounded-box bg-base-200 border border-base-300">
-      <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <PageHeaderBlock
-          title-id="studios-index-title"
-          :title="t('studiosIndex.title')"
-          :description="t('studiosIndex.subtitle')"
-          description-class="text-base-content/70"
-        />
-      </div>
-    </section>
+    <PageHeroHeader
+      title-id="studios-index-title"
+      :title="t('studiosIndex.title')"
+      :description="t('studiosIndex.subtitle')"
+      description-class="text-base-content/70"
+      density="comfortable"
+    />
 
     <div class="stats stats-vertical lg:stats-horizontal w-full border border-base-300 bg-base-100 shadow-sm">
       <div class="stat">
@@ -273,15 +270,14 @@ watch(
       </div>
     </div>
 
-    <div v-if="pageError" class="alert alert-error" role="alert" :aria-label="t('studiosIndex.errorBannerAria')">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>{{ pageError }}</span>
-      <button class="btn btn-sm btn-ghost" :aria-label="t('studiosIndex.retryAria')" @click="refreshStudios()">
-        {{ t("studiosIndex.retryButton") }}
-      </button>
-    </div>
+    <BootstrapErrorAlert
+      v-if="pageError"
+      :title="t('studiosIndex.errorTitle')"
+      :message="pageError"
+      :retry-label="t('studiosIndex.retryButton')"
+      :retry-aria-label="t('studiosIndex.retryAria')"
+      @retry="refreshStudios()"
+    />
 
     <div class="card card-border bg-base-100">
       <div class="card-body gap-4">
@@ -346,12 +342,11 @@ watch(
 
     <LoadingSkeleton v-if="loading && studios.length === 0" :lines="6" />
 
-    <div v-else-if="filteredStudios.length === 0" class="alert alert-info alert-soft" role="status" aria-live="polite">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>{{ t("studiosIndex.emptyState") }}</span>
-    </div>
+    <EmptyState
+      v-else-if="filteredStudios.length === 0"
+      title-key="studiosIndex.emptyTitle"
+      description-key="studiosIndex.emptyDescription"
+    />
 
     <SectionGrid v-else grid-token="threeColumn">
       <article

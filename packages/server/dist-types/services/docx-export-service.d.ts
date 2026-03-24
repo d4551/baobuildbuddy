@@ -15,10 +15,6 @@ interface CoverLetterUserProfile {
  */
 export declare class DocxExportService {
     /**
-     * Resolves the template name from user or resume-level values.
-     */
-    private resolveTemplate;
-    /**
      * Generates a styled DOCX resume document.
      *
      * @param resume Resume data payload.
@@ -42,6 +38,19 @@ export declare class DocxExportService {
      * @returns DOCX binary buffer.
      */
     exportPortfolioDocx(metadata: PortfolioMetadata, projects: PortfolioProject[]): Promise<Uint8Array>;
+    private buildResumeSections;
+    private buildResumeHeaderSection;
+    private buildResumeSummarySection;
+    private buildResumeExperienceSection;
+    private buildResumeEducationSection;
+    private buildResumeSkillsSection;
+    private buildResumeProjectsSection;
+    private buildResumeGamingSection;
+    private buildCoverLetterSections;
+    private buildCoverLetterHeader;
+    private buildCoverLetterRecipientBlock;
+    private buildCoverLetterBodyParagraphs;
+    private buildCoverLetterSignature;
     private buildResumeHeader;
     private buildExperienceItem;
     private buildEducationItem;
@@ -50,6 +59,18 @@ export declare class DocxExportService {
     private buildGamingExperienceSection;
     private buildPortfolioCoverPage;
     private buildPortfolioProjectsSection;
+    private buildSkillParagraph;
+    private buildPortfolioTitleParagraph;
+    private buildPortfolioAuthorParagraph;
+    private buildPortfolioDescriptionParagraph;
+    private buildPortfolioContactParagraph;
+    private buildPortfolioProjectsHeading;
+    private buildPortfolioProjectParagraphs;
+    private buildPortfolioProjectRole;
+    private buildPortfolioProjectTechnologies;
+    private buildPortfolioProjectTags;
+    private buildPortfolioProjectUrls;
+    private buildPortfolioFooter;
 }
 /**
  * Singleton DOCX export service instance.

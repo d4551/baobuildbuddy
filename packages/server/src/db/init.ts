@@ -2,6 +2,7 @@ import type { Database } from "bun:sqlite";
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_AI_ROUTING,
   DEFAULT_BRAND_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
@@ -20,6 +21,7 @@ const DEFAULT_NOTIFICATION_PREFERENCES_SQL = escapeSqlString(
 const DEFAULT_AUTOMATION_SETTINGS_SQL = escapeSqlString(
   JSON.stringify(DEFAULT_AUTOMATION_SETTINGS),
 );
+const DEFAULT_AI_ROUTING_SQL = escapeSqlString(JSON.stringify(DEFAULT_AI_ROUTING));
 const DEFAULT_EMAIL_TRANSPORT_SETTINGS_SQL = escapeSqlString(
   JSON.stringify(DEFAULT_EMAIL_TRANSPORT_SETTINGS),
 );
@@ -53,6 +55,7 @@ const TABLE_DEFINITIONS = [
       huggingface_token TEXT,
       local_model_endpoint TEXT,
       local_model_name TEXT,
+      ai_routing TEXT DEFAULT '${DEFAULT_AI_ROUTING_SQL}',
       preferred_provider TEXT DEFAULT 'local',
       preferred_model TEXT,
       preferred_models TEXT,
@@ -93,6 +96,7 @@ const TABLE_DEFINITIONS = [
       tags TEXT,
       company_logo TEXT,
       application_url TEXT,
+      enrichment TEXT,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
@@ -188,6 +192,7 @@ const TABLE_DEFINITIONS = [
       culture TEXT,
       interview_style TEXT,
       remote_work INTEGER,
+      enrichment TEXT,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
@@ -263,6 +268,8 @@ const INDEXES = [
 
 const AUTOMATION_RUNS_TABLE_NAME = "automation_runs";
 const SETTINGS_TABLE_NAME = "settings";
+const JOBS_TABLE_NAME = "jobs";
+const STUDIOS_TABLE_NAME = "studios";
 
 const AUTOMATION_RUNS_REQUIRED_COLUMNS = {
   exit_code: "INTEGER",
@@ -272,8 +279,17 @@ const AUTOMATION_RUNS_REQUIRED_COLUMNS = {
 } as const;
 
 const SETTINGS_REQUIRED_COLUMNS = {
+  ai_routing: `TEXT DEFAULT '${DEFAULT_AI_ROUTING_SQL}'`,
   email_transport_settings: `TEXT DEFAULT '${DEFAULT_EMAIL_TRANSPORT_SETTINGS_SQL}'`,
   email_transport_password: "TEXT",
+} as const;
+
+const JOBS_REQUIRED_COLUMNS = {
+  enrichment: "TEXT",
+} as const;
+
+const STUDIOS_REQUIRED_COLUMNS = {
+  enrichment: "TEXT",
 } as const;
 
 const ensureSingletonRows = (sqlite: Database): void => {
@@ -327,6 +343,28 @@ const ensureSettingsColumns = (sqlite: Database): void => {
   }
 };
 
+const ensureJobsColumns = (sqlite: Database): void => {
+  const existingColumns = readTableColumnNames(sqlite, JOBS_TABLE_NAME);
+
+  for (const [columnName, columnDefinition] of Object.entries(JOBS_REQUIRED_COLUMNS)) {
+    if (existingColumns.has(columnName)) {
+      continue;
+    }
+    sqlite.exec(`ALTER TABLE ${JOBS_TABLE_NAME} ADD COLUMN ${columnName} ${columnDefinition}`);
+  }
+};
+
+const ensureStudiosColumns = (sqlite: Database): void => {
+  const existingColumns = readTableColumnNames(sqlite, STUDIOS_TABLE_NAME);
+
+  for (const [columnName, columnDefinition] of Object.entries(STUDIOS_REQUIRED_COLUMNS)) {
+    if (existingColumns.has(columnName)) {
+      continue;
+    }
+    sqlite.exec(`ALTER TABLE ${STUDIOS_TABLE_NAME} ADD COLUMN ${columnName} ${columnDefinition}`);
+  }
+};
+
 /**
  * Initialize SQLite schema for all supported tables.
  */
@@ -337,6 +375,8 @@ export function initializeDatabase(sqlite: Database): void {
 
   ensureAutomationRunColumns(sqlite);
   ensureSettingsColumns(sqlite);
+  ensureJobsColumns(sqlite);
+  ensureStudiosColumns(sqlite);
 
   for (const indexSql of INDEXES) {
     sqlite.exec(indexSql);

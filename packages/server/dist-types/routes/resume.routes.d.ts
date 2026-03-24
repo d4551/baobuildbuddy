@@ -110,6 +110,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 } | undefined;
                 name?: string | undefined;
                 theme?: "light" | "dark" | undefined;
+                summary?: string | undefined;
                 projects?: {
                     link?: string | undefined;
                     technologies?: string[] | undefined;
@@ -126,7 +127,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     linkedIn?: string | undefined;
                     github?: string | undefined;
                 } | undefined;
-                summary?: string | undefined;
                 experience?: {
                     description?: string | undefined;
                     achievements?: string[] | undefined;
@@ -139,10 +139,10 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 }[] | undefined;
                 education?: {
                     gpa?: string | undefined;
+                    year: string;
                     degree: string;
                     field: string;
                     school: string;
-                    year: string;
                 }[] | undefined;
                 gamingExperience?: {
                     platforms?: string | undefined;
@@ -209,6 +209,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     } | undefined;
                     name?: string | undefined;
                     theme?: "light" | "dark" | undefined;
+                    summary?: string | undefined;
                     projects?: {
                         link?: string | undefined;
                         technologies?: string[] | undefined;
@@ -225,7 +226,6 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         linkedIn?: string | undefined;
                         github?: string | undefined;
                     } | undefined;
-                    summary?: string | undefined;
                     experience?: {
                         description?: string | undefined;
                         achievements?: string[] | undefined;
@@ -238,10 +238,10 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     }[] | undefined;
                     education?: {
                         gpa?: string | undefined;
+                        year: string;
                         degree: string;
                         field: string;
                         school: string;
-                        year: string;
                     }[] | undefined;
                     gamingExperience?: {
                         platforms?: string | undefined;

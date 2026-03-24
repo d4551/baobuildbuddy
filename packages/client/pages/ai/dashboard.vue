@@ -1,13 +1,21 @@
 <script setup lang="ts">
 import {
-  AI_PROVIDER_CATALOG,
-  AI_PROVIDER_DEFAULT_ORDER,
-  AI_PROVIDER_ID_LIST,
+  AI_PROVIDER_DEFAULT,
+  AI_ROUTING_PURPOSE_IDS,
+  type AIRouting,
   type AIProviderType,
   APP_ROUTES,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import {
+  buildFallbackProviderRows,
+  isProviderConfigured as isConfiguredProviderFromSettings,
+  normalizeProviderRows,
+  resolveProviderMetadata,
+  resolveProviderModelOptions,
+  resolveProviderModelSelection,
+} from "~/utils/ai-control-plane";
 import { getErrorMessage } from "~/utils/errors";
 
 type ApiClient = ReturnType<typeof useApi>;
@@ -35,6 +43,13 @@ type ProviderConnectivityResult = {
   message: string;
 };
 
+type DashboardBootstrap = {
+  activeModel: string;
+  activeProvider: AIProviderType;
+  normalizedStats: DashboardStats;
+  resolvedProviders: ProviderConfig[];
+};
+
 const HEALTH_LABEL_KEY_BY_VALUE: Record<ProviderHealth, string> = {
   healthy: "aiDashboard.health.healthy",
   degraded: "aiDashboard.health.degraded",
@@ -49,14 +64,14 @@ const HEALTH_BADGE_CLASS_BY_VALUE: Record<ProviderHealth, string> = {
   unconfigured: "badge-ghost",
 };
 
-const providerCatalogById = new Map(
-  AI_PROVIDER_CATALOG.map((provider) => [provider.id, provider] as const),
-);
-const providerIdSet = new Set<string>(AI_PROVIDER_ID_LIST);
-const providerHealthSet = new Set<string>(["healthy", "degraded", "down", "unconfigured"]);
-
 const { t } = useI18n();
-const { settings, fetchSettings } = useSettings();
+const {
+  settings,
+  fetchSettings,
+  testApiKey,
+  chatRoutingPreference,
+  localProviderState,
+} = useSettings();
 const { $toast } = useNuxtApp();
 const api = useApi();
 
@@ -67,9 +82,6 @@ if (import.meta.server) {
   });
 }
 
-const providerStats = ref<DashboardStats | null>(null);
-const providers = ref<ProviderConfig[]>([]);
-const loading = ref(false);
 const testingProvider = ref<AIProviderType | null>(null);
 const testResults = reactive<Record<AIProviderType, ProviderConnectivityResult | null>>({
   local: null,
@@ -79,49 +91,24 @@ const testResults = reactive<Record<AIProviderType, ProviderConnectivityResult |
   huggingface: null,
 });
 
-const selectedProvider = ref<AIProviderType>(AI_PROVIDER_DEFAULT_ORDER[0] ?? "local");
+const selectedProvider = ref<AIProviderType>(AI_PROVIDER_DEFAULT);
 const selectedModel = ref("");
 const selectedProviderModels = computed(() => {
   const matchingProvider = providers.value.find(
     (provider) => provider.id === selectedProvider.value,
   );
-  return matchingProvider?.models ?? [];
+  return resolveProviderModelOptions(
+    selectedProvider.value,
+    settings.value,
+    matchingProvider?.models ?? [],
+  );
 });
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" ? value : undefined;
 
 const asNumber = (value: unknown): number | undefined =>
   typeof value === "number" && Number.isFinite(value) ? value : undefined;
 
-const asBoolean = (value: unknown): boolean | undefined =>
-  typeof value === "boolean" ? value : undefined;
-
-const asStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
-
-function isProviderId(value: string): value is AIProviderType {
-  return providerIdSet.has(value);
-}
-
-function isProviderHealth(value: string): value is ProviderHealth {
-  return providerHealthSet.has(value);
-}
-
 function isProviderConfigured(providerId: AIProviderType): boolean {
-  const currentSettings = settings.value;
-  if (!currentSettings) return false;
-
-  if (providerId === "local") {
-    return currentSettings.hasLocalKey ?? true;
-  }
-  if (providerId === "gemini") return Boolean(currentSettings.hasGeminiKey);
-  if (providerId === "openai") return Boolean(currentSettings.hasOpenaiKey);
-  if (providerId === "claude") return Boolean(currentSettings.hasClaudeKey);
-  return Boolean(currentSettings.hasHuggingfaceToken);
+  return isConfiguredProviderFromSettings(settings.value, providerId);
 }
 
 function providerAvailabilityLabel(available: boolean): string {
@@ -147,7 +134,7 @@ function providerSelectOptionLabel(provider: ProviderConfig): string {
 }
 
 function providerLabel(providerId: AIProviderType): string {
-  const catalogEntry = providerCatalogById.get(providerId);
+  const catalogEntry = resolveProviderMetadata(providerId);
   if (!catalogEntry) {
     return providerId;
   }
@@ -155,64 +142,11 @@ function providerLabel(providerId: AIProviderType): string {
 }
 
 function providerDescription(providerId: AIProviderType): string {
-  const catalogEntry = providerCatalogById.get(providerId);
+  const catalogEntry = resolveProviderMetadata(providerId);
   if (!catalogEntry) {
     return "";
   }
   return t(catalogEntry.descriptionKey);
-}
-
-function providerIconId(providerId: AIProviderType): AIProviderType {
-  const catalogEntry = providerCatalogById.get(providerId);
-  return catalogEntry?.iconId ?? providerId;
-}
-
-function normalizeProviderRow(value: unknown): ProviderConfig | null {
-  if (!isRecord(value)) return null;
-
-  const rawId = asString(value.id);
-  if (!rawId || !isProviderId(rawId)) return null;
-
-  const catalogEntry = providerCatalogById.get(rawId);
-  if (!catalogEntry) return null;
-
-  const rawHealth = asString(value.health);
-  const rawAvailable = asBoolean(value.available);
-  const available = rawAvailable ?? isProviderConfigured(rawId);
-  const health =
-    rawHealth && isProviderHealth(rawHealth) ? rawHealth : available ? "healthy" : "unconfigured";
-  const models = asStringArray(value.models);
-
-  return {
-    id: rawId,
-    iconId: providerIconId(rawId),
-    models: models.length > 0 ? models : [...catalogEntry.modelHints],
-    available,
-    health,
-  };
-}
-
-function buildFallbackProviders(): ProviderConfig[] {
-  return AI_PROVIDER_DEFAULT_ORDER.map((providerId) => {
-    const catalogEntry = providerCatalogById.get(providerId);
-    if (!catalogEntry) {
-      return {
-        id: providerId,
-        iconId: providerId,
-        models: [],
-        available: false,
-        health: "unconfigured",
-      };
-    }
-
-    return {
-      id: providerId,
-      iconId: providerIconId(providerId),
-      models: [...catalogEntry.modelHints],
-      available: isProviderConfigured(providerId),
-      health: isProviderConfigured(providerId) ? "degraded" : "unconfigured",
-    };
-  });
 }
 
 function resolveDefaultModel(providerId: AIProviderType): string {
@@ -221,7 +155,7 @@ function resolveDefaultModel(providerId: AIProviderType): string {
     return matchingProvider.models[0];
   }
 
-  const catalogEntry = providerCatalogById.get(providerId);
+  const catalogEntry = resolveProviderMetadata(providerId);
   return catalogEntry?.modelHints[0] ?? "";
 }
 
@@ -235,33 +169,11 @@ function resolveProviderCredential(providerId: TestApiKeyInput["provider"]): str
   return "";
 }
 
-function resolvePreferredProvider(value: unknown): AIProviderType {
-  if (!isRecord(value)) {
-    return AI_PROVIDER_DEFAULT_ORDER[0] ?? "local";
-  }
-
-  const preferred = asString(value.preferredProvider);
-  if (preferred && isProviderId(preferred)) {
-    return preferred;
-  }
-
-  return AI_PROVIDER_DEFAULT_ORDER[0] ?? "local";
-}
-
-function normalizeProviders(value: unknown): ProviderConfig[] {
-  if (!isRecord(value)) return [];
-
-  const rows = Array.isArray(value.providers) ? value.providers : [];
-  return rows
-    .map((row) => normalizeProviderRow(row))
-    .filter((provider): provider is ProviderConfig => provider !== null);
-}
-
 function normalizeDashboardStats(
   usagePayload: unknown,
   activeProvider: AIProviderType,
 ): DashboardStats {
-  if (!isRecord(usagePayload)) {
+  if (typeof usagePayload !== "object" || usagePayload === null) {
     return {
       totalRequests: 0,
       successRate: 0,
@@ -293,56 +205,81 @@ function normalizeDashboardStats(
 }
 
 async function fetchProviderStats() {
-  loading.value = true;
-  const statsResult = await settlePromise(
-    (async () => {
-      await fetchSettings();
-
-      const [usageResult, modelsResult] = await Promise.all([
-        api.ai.usage.get(),
-        api.ai.models.get(),
-      ]);
-
-      if (usageResult.error) {
-        throw new Error(t("aiDashboard.errors.usageLoadFailed"));
-      }
-      if (modelsResult.error) {
-        throw new Error(t("aiDashboard.errors.modelsLoadFailed"));
-      }
-
-      const normalizedProviders = normalizeProviders(modelsResult.data);
-      const resolvedProviders =
-        normalizedProviders.length > 0 ? normalizedProviders : buildFallbackProviders();
-      const preferredProvider = resolvePreferredProvider(modelsResult.data);
-      const activeProvider = resolvedProviders.some((provider) => provider.id === preferredProvider)
-        ? preferredProvider
-        : (resolvedProviders[0]?.id ?? "local");
-
-      return {
-        resolvedProviders,
-        activeProvider,
-        normalizedStats: normalizeDashboardStats(usageResult.data, activeProvider),
-      };
-    })(),
+  const refreshResult = await settlePromise(
+    refreshDashboardBootstrap(),
     t("aiDashboard.toasts.loadFailed"),
   );
-  loading.value = false;
+  if (!refreshResult.ok) {
+    $toast.error(getErrorMessage(refreshResult.error, t("aiDashboard.toasts.loadFailed")));
+  }
+}
 
-  if (!statsResult.ok) {
-    providers.value = buildFallbackProviders();
-    const fallbackProvider = providers.value[0]?.id ?? "local";
-    selectedProvider.value = fallbackProvider;
-    selectedModel.value = resolveDefaultModel(fallbackProvider);
-    providerStats.value = normalizeDashboardStats(null, fallbackProvider);
-    $toast.error(getErrorMessage(statsResult.error, t("aiDashboard.toasts.loadFailed")));
-    return;
+async function loadDashboardState(): Promise<DashboardBootstrap> {
+  await fetchSettings();
+
+  const [usageResult, modelsResult] = await Promise.all([
+    api.ai.usage.get(),
+    api.ai.models.get(),
+  ]);
+
+  if (usageResult.error) {
+    throw new Error(t("aiDashboard.errors.usageLoadFailed"));
+  }
+  if (modelsResult.error) {
+    throw new Error(t("aiDashboard.errors.modelsLoadFailed"));
   }
 
-  providers.value = statsResult.value.resolvedProviders;
-  selectedProvider.value = statsResult.value.activeProvider;
-  selectedModel.value = resolveDefaultModel(statsResult.value.activeProvider);
-  providerStats.value = statsResult.value.normalizedStats;
+  const normalizedProviders = normalizeProviderRows(modelsResult.data, settings.value);
+  const resolvedProviders =
+    normalizedProviders.length > 0
+      ? normalizedProviders
+      : buildFallbackProviderRows(settings.value);
+  const activeProvider = resolvedProviders.some(
+    (provider) => provider.id === chatRoutingPreference.value.provider,
+  )
+    ? chatRoutingPreference.value.provider
+    : (resolvedProviders[0]?.id ?? AI_PROVIDER_DEFAULT);
+  const activeProviderModels =
+    resolvedProviders.find((provider) => provider.id === activeProvider)?.models ?? [];
+
+  return {
+    resolvedProviders,
+    activeProvider,
+    activeModel:
+      resolveProviderModelSelection(activeProvider, settings.value, activeProviderModels) ||
+      resolveDefaultModel(activeProvider),
+    normalizedStats: normalizeDashboardStats(usageResult.data, activeProvider),
+  };
 }
+
+const {
+  data: dashboardBootstrap,
+  error: dashboardBootstrapError,
+  refresh: refreshDashboardBootstrap,
+  status: dashboardBootstrapStatus,
+} = await useAsyncData("ai-dashboard-bootstrap", loadDashboardState, {
+  server: true,
+  lazy: false,
+});
+
+const loading = computed(
+  () => dashboardBootstrapStatus.value === "pending" || dashboardBootstrapStatus.value === "idle",
+);
+const providers = computed(() => dashboardBootstrap.value?.resolvedProviders ?? []);
+const providerStats = computed(() => dashboardBootstrap.value?.normalizedStats ?? null);
+
+watch(
+  dashboardBootstrap,
+  (value) => {
+    if (!value) {
+      return;
+    }
+
+    selectedProvider.value = value.activeProvider;
+    selectedModel.value = value.activeModel;
+  },
+  { immediate: true },
+);
 
 async function handleTestProvider(providerId: AIProviderType) {
   testingProvider.value = providerId;
@@ -351,18 +288,18 @@ async function handleTestProvider(providerId: AIProviderType) {
   const providerTestResult = await settlePromise(
     (async (): Promise<ProviderConnectivityResult> => {
       if (providerId === "local") {
-        const { data, error } = await api.ai.models.get();
-        if (error) {
-          throw new Error(t("aiDashboard.errors.localConnectivityFailed"));
-        }
-
-        const localProvider = normalizeProviders(data).find((provider) => provider.id === "local");
-        const localAvailable = localProvider?.available ?? false;
+        const result = await testApiKey(
+          "local",
+          localProviderState.value.endpoint,
+          localProviderState.value.configuredModel || undefined,
+        );
         return {
-          valid: localAvailable,
-          message: localAvailable
-            ? t("aiDashboard.tests.localSuccess")
-            : t("aiDashboard.tests.localFailure"),
+          valid: result.valid,
+          message:
+            result.message ||
+            (result.valid
+              ? t("aiDashboard.tests.localSuccess")
+              : t("aiDashboard.tests.localFailure")),
         };
       }
 
@@ -374,21 +311,13 @@ async function handleTestProvider(providerId: AIProviderType) {
         };
       }
 
-      const { data, error } = await api.settings["test-api-key"].post({
-        provider: providerId,
-        key: providerCredential,
-      });
-
-      if (error) {
-        throw new Error(t("aiDashboard.errors.providerTestFailed"));
-      }
-
-      const valid = isRecord(data) && data.valid === true;
+      const result = await testApiKey(providerId, providerCredential);
+      const valid = result.valid;
       return {
         valid,
-        message: valid
-          ? t("aiDashboard.tests.connectionSuccess")
-          : t("aiDashboard.tests.connectionFailure"),
+        message:
+          result.message ||
+          (valid ? t("aiDashboard.tests.connectionSuccess") : t("aiDashboard.tests.connectionFailure")),
       };
     })(),
     t("aiDashboard.tests.connectionFailure"),
@@ -412,8 +341,18 @@ async function handleSetPreference() {
   const preferenceResult = await settlePromise(
     (async () => {
       const { error } = await api.settings.put({
+        aiRouting: {
+          ...(settings.value?.aiRouting ??
+            (Object.fromEntries(
+              AI_ROUTING_PURPOSE_IDS.map((purpose) => [purpose, { provider: selectedProvider.value }]),
+            ) as AIRouting)),
+          chat: {
+            provider: selectedProvider.value,
+            ...(selectedModel.value ? { model: selectedModel.value } : {}),
+          },
+        },
         preferredProvider: selectedProvider.value,
-        preferredModel: selectedModel.value,
+        preferredModel: selectedModel.value || undefined,
       });
       if (error) {
         throw new Error(t("aiDashboard.errors.preferenceSaveFailed"));
@@ -433,26 +372,27 @@ async function handleSetPreference() {
 }
 
 watch(selectedProvider, (providerId) => {
-  selectedModel.value = resolveDefaultModel(providerId);
+  selectedModel.value = resolveProviderModelSelection(
+    providerId,
+    settings.value,
+    selectedProviderModels.value,
+  );
 });
 
 const activeProviderLabel = computed(() =>
   providerStats.value ? providerLabel(providerStats.value.activeProvider) : "",
 );
-
-onMounted(() => {
-  void fetchProviderStats();
-});
 </script>
 
 <template>
-  <div class="space-y-6">
-    <section class="hero rounded-box border border-base-300 bg-base-200">
-      <div class="hero-content w-full flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div class="max-w-2xl space-y-2">
-          <h1 class="text-3xl font-bold md:text-4xl">{{ t("aiDashboard.title") }}</h1>
-          <p class="text-base-content/70">{{ t("aiDashboard.subtitle") }}</p>
-        </div>
+  <PageScaffold tag="section" labelled-by="ai-dashboard-title">
+    <PageHeroHeader
+      title-id="ai-dashboard-title"
+      :title="t('aiDashboard.title')"
+      :description="t('aiDashboard.subtitle')"
+      description-class="text-base-content/70"
+    >
+      <template #actions>
         <button
           class="btn btn-outline btn-sm"
           :disabled="loading"
@@ -462,10 +402,17 @@ onMounted(() => {
           <span v-if="loading" class="loading loading-spinner loading-xs"></span>
           <span>{{ t("aiDashboard.preference.refreshButton") }}</span>
         </button>
-      </div>
-    </section>
+      </template>
+    </PageHeroHeader>
 
     <LoadingSkeleton v-if="loading && !providerStats" :lines="8" />
+    <BootstrapErrorAlert
+      v-else-if="dashboardBootstrapError"
+      :message="getErrorMessage(dashboardBootstrapError, t('aiDashboard.toasts.loadFailed'))"
+      :retry-label="t('aiDashboard.preference.refreshButton')"
+      :retry-aria-label="t('aiDashboard.preference.refreshAria')"
+      @retry="fetchProviderStats"
+    />
 
     <div v-else class="space-y-6">
       <div
@@ -578,10 +525,13 @@ onMounted(() => {
           class="card card-border bg-base-100 shadow-sm"
         >
           <div class="card-body gap-4">
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex items-start gap-3">
-                <AIProviderIcon :provider-id="provider.iconId" class="h-8 w-8 text-primary" />
-                <div>
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <AIProviderIcon
+                  :provider-id="provider.iconId"
+                  class="h-8 w-8 shrink-0 text-primary"
+                />
+                <div class="min-w-0">
                   <h3 class="card-title text-lg">{{ providerLabel(provider.id) }}</h3>
                   <p class="text-xs text-base-content/70">{{ providerDescription(provider.id) }}</p>
                 </div>
@@ -651,5 +601,5 @@ onMounted(() => {
         </div>
       </div>
     </div>
-  </div>
+  </PageScaffold>
 </template>

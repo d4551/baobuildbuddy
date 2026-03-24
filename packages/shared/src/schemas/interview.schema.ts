@@ -1,4 +1,15 @@
 import z from "zod";
+import { AI_PROVIDER_IDS } from "../types/ai";
+
+export const scrapePersonaEnrichmentSchema = z.object({
+  summary: z.string().min(1),
+  hiringSignals: z.array(z.string()).default([]),
+  interviewFocusAreas: z.array(z.string()).default([]),
+  candidatePitchAngles: z.array(z.string()).default([]),
+  provider: z.enum(AI_PROVIDER_IDS).optional(),
+  model: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
 
 export const interviewTargetJobSchema = z.object({
   id: z.string().min(1),
@@ -11,6 +22,13 @@ export const interviewTargetJobSchema = z.object({
   source: z.string().optional(),
   postedDate: z.string().optional(),
   url: z.string().optional(),
+  enrichment: scrapePersonaEnrichmentSchema.optional(),
+});
+
+export const interviewCandidateContextSchema = z.object({
+  resumeId: z.string().optional(),
+  coverLetterId: z.string().optional(),
+  portfolioId: z.string().optional(),
 });
 
 export const interviewConfigSchema = z.object({
@@ -26,7 +44,9 @@ export const interviewConfigSchema = z.object({
   enableVoiceMode: z.boolean().optional(),
   technologies: z.array(z.string()).optional(),
   interviewMode: z.enum(["studio", "job"]).optional(),
+  conversationStyle: z.enum(["natural", "structured"]).optional(),
   targetJob: interviewTargetJobSchema.optional(),
+  candidateContext: interviewCandidateContextSchema.optional(),
 });
 
 export const interviewResponseSchema = z.object({

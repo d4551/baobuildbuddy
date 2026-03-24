@@ -240,7 +240,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
+                    200: import("../services/ai/control-plane").AIControlPlaneState | {
                         providers: {
                             id: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             nameKey: string;
@@ -251,21 +251,6 @@ export declare const aiRoutes: Elysia<"/ai", {
                             health: "unconfigured";
                         }[];
                         error: string;
-                        preferredProvider?: undefined;
-                        configuredProviders?: undefined;
-                    } | {
-                        providers: {
-                            id: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                            nameKey: string;
-                            descriptionKey: string;
-                            iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                            models: string[];
-                            available: boolean;
-                            health: "healthy" | "degraded" | "down" | "unconfigured";
-                        }[];
-                        preferredProvider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                        configuredProviders: ("gemini" | "claude" | "openai" | "huggingface" | "local")[];
-                        error?: undefined;
                     };
                 };
             };
@@ -300,8 +285,8 @@ export declare const aiRoutes: Elysia<"/ai", {
         "automation-action": {
             post: {
                 body: {
-                    jobId?: string | undefined;
                     coverLetterId?: string | undefined;
+                    jobId?: string | undefined;
                     resumeId: string;
                     jobUrl: string;
                     action: string;

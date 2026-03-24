@@ -325,13 +325,13 @@ function resolveTemplate(value: string): CoverLetterTemplate {
 
 <template>
   <PageScaffold width-token="wide" spacing-token="comfortable">
-    <section class="rounded-box border border-base-300 bg-base-200 p-6">
-      <div class="flex flex-wrap items-start justify-between gap-4">
-        <div class="space-y-2">
-          <h1 class="text-3xl font-bold">{{ t("coverLetterPage.title") }}</h1>
-          <p class="max-w-2xl text-sm text-base-content/70">{{ t("coverLetterPage.subtitle") }}</p>
-        </div>
-
+    <PageHeroHeader
+      title-id="cover-letter-page-title"
+      :title="t('coverLetterPage.title')"
+      :description="t('coverLetterPage.subtitle')"
+      description-class="max-w-2xl text-base-content/70"
+    >
+      <template #actions>
         <button
           class="btn btn-primary"
           :aria-label="t('coverLetterPage.generateButtonAria')"
@@ -342,26 +342,27 @@ function resolveTemplate(value: string): CoverLetterTemplate {
           </svg>
           {{ t("coverLetterPage.generateButton") }}
         </button>
-      </div>
-
-      <div class="stats stats-vertical mt-4 w-full border border-base-300 bg-base-100 shadow-sm sm:stats-horizontal">
-        <div class="stat">
-          <div class="stat-title">{{ t("coverLetterPage.stats.totalTitle") }}</div>
-          <div class="stat-value text-primary">{{ coverLetters.length }}</div>
-          <div class="stat-desc">{{ t("coverLetterPage.stats.totalDesc") }}</div>
+      </template>
+      <template #aside>
+        <div class="stats stats-vertical mt-4 w-full border border-base-300 bg-base-100 shadow-sm sm:stats-horizontal">
+          <div class="stat">
+            <div class="stat-title">{{ t("coverLetterPage.stats.totalTitle") }}</div>
+            <div class="stat-value text-primary">{{ coverLetters.length }}</div>
+            <div class="stat-desc">{{ t("coverLetterPage.stats.totalDesc") }}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">{{ t("coverLetterPage.stats.filteredTitle") }}</div>
+            <div class="stat-value text-secondary">{{ filteredCoverLetters.length }}</div>
+            <div class="stat-desc">{{ t("coverLetterPage.stats.filteredDesc") }}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">{{ t("coverLetterPage.stats.templatesTitle") }}</div>
+            <div class="stat-value">{{ templateUsageCount }}</div>
+            <div class="stat-desc">{{ t("coverLetterPage.stats.templatesDesc") }}</div>
+          </div>
         </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("coverLetterPage.stats.filteredTitle") }}</div>
-          <div class="stat-value text-secondary">{{ filteredCoverLetters.length }}</div>
-          <div class="stat-desc">{{ t("coverLetterPage.stats.filteredDesc") }}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("coverLetterPage.stats.templatesTitle") }}</div>
-          <div class="stat-value">{{ templateUsageCount }}</div>
-          <div class="stat-desc">{{ t("coverLetterPage.stats.templatesDesc") }}</div>
-        </div>
-      </div>
-    </section>
+      </template>
+    </PageHeroHeader>
 
     <section class="card card-border bg-base-100">
       <div class="card-body">

@@ -1,5 +1,4 @@
 import {
-  AI_DEFAULT_TEMPERATURE,
   API_ERROR_START_INTERVIEW,
   API_ERROR_STUDIO_ID_REQUIRED,
   DECIMAL_RADIX,
@@ -9,14 +8,10 @@ import {
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_MAX_QUESTION_COUNT,
   INTERVIEW_UNKNOWN_STUDIO_NAME,
-  isRecord,
   resolveBrandSettings,
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_LABEL,
   SCHEMA_MAX_LENGTH_MESSAGE,
-  SCORE_PASS_THRESHOLD,
-  SCORE_WARNING_THRESHOLD,
-  safeParseJson,
   settle,
   toApiScopedPath,
   WS_ENDPOINTS,
@@ -24,22 +19,10 @@ import {
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/client";
-import { interviewSessions } from "../db/schema/interviews";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
-import type { AIService } from "../services/ai/ai-service";
 import { interviewService } from "../services/interview-service";
 
-type AIServiceInstance = AIService;
 type InterviewSocket = { send: (data: string) => void };
-type JsonRecord = Record<string, unknown>;
-type InterviewSessionRow = typeof interviewSessions.$inferSelect;
-type InterviewSessionQuestion = { id: string; question: string; type: string };
-
-async function getAIService(): Promise<AIServiceInstance> {
-  const { AIService } = await import("../services/ai/ai-service");
-  const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
-  return AIService.fromSettings(settingsRows[0]);
-}
 
 type InterviewMessage = {
   type: string;
@@ -63,40 +46,61 @@ type InterviewFeedback = {
   summary: string;
 };
 
-type FeedbackSummary = {
-  score: number;
-  strengths: string[];
-  improvements: string[];
+type WsCandidateContext = {
+  resumeId?: string;
+  coverLetterId?: string;
+  portfolioId?: string;
 };
 
-const isQuestionRecord = (
-  value: unknown,
-): value is { id: string; question: string; type: string } =>
-  isRecord(value) &&
-  typeof value.id === "string" &&
-  typeof value.question === "string" &&
-  typeof value.type === "string";
-
-const getFeedbackSummary = (value: unknown): FeedbackSummary => {
-  if (!isRecord(value)) {
-    return { score: 0, strengths: [], improvements: [] };
+function toWsConfigRecord(value: unknown): Record<string, unknown> | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null;
   }
 
-  const rawScore = value.score;
-  const score = typeof rawScore === "number" && Number.isFinite(rawScore) ? rawScore : 0;
-  const strengths = Array.isArray(value.strengths)
-    ? value.strengths.filter((entry): entry is string => typeof entry === "string")
-    : [];
-  const improvements = Array.isArray(value.improvements)
-    ? value.improvements.filter((entry): entry is string => typeof entry === "string")
-    : [];
+  return Object.fromEntries(Object.entries(value));
+}
 
-  return {
-    score,
-    strengths,
-    improvements,
+function resolveWsConfigText(value: unknown, fallback: string): string {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function resolveWsQuestionCount(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(1, Math.min(Math.floor(value), INTERVIEW_MAX_QUESTION_COUNT));
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number.parseInt(value, DECIMAL_RADIX);
+    if (Number.isFinite(parsed)) {
+      return Math.max(1, Math.min(parsed, INTERVIEW_MAX_QUESTION_COUNT));
+    }
+  }
+
+  return INTERVIEW_DEFAULT_QUESTION_COUNT;
+}
+
+function resolveWsCandidateContext(value: unknown): WsCandidateContext | undefined {
+  const candidateContextValue = toWsConfigRecord(value);
+  if (!candidateContextValue) {
+    return;
+  }
+
+  const candidateContext: WsCandidateContext = {
+    ...(typeof candidateContextValue.resumeId === "string"
+      ? { resumeId: candidateContextValue.resumeId }
+      : {}),
+    ...(typeof candidateContextValue.coverLetterId === "string"
+      ? { coverLetterId: candidateContextValue.coverLetterId }
+      : {}),
+    ...(typeof candidateContextValue.portfolioId === "string"
+      ? { portfolioId: candidateContextValue.portfolioId }
+      : {}),
   };
-};
+
+  return candidateContext.resumeId || candidateContext.coverLetterId || candidateContext.portfolioId
+    ? candidateContext
+    : undefined;
+}
 
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
   body: t.Object({
@@ -148,41 +152,20 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
   },
 });
 
-function createInterviewFeedbackSummary(feedback: Partial<InterviewFeedback>): InterviewFeedback {
-  return {
-    score: typeof feedback.score === "number" ? feedback.score : 0,
-    strengths: Array.isArray(feedback.strengths) ? feedback.strengths : [],
-    improvements: Array.isArray(feedback.improvements) ? feedback.improvements : [],
-    summary: typeof feedback.summary === "string" ? feedback.summary : "Response recorded.",
-  };
-}
-
 function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<string, unknown> {
-  const role =
-    typeof config.role === "string" && config.role.trim()
-      ? config.role
-      : INTERVIEW_DEFAULT_ROLE_TYPE;
-  const level =
-    typeof config.level === "string" && config.level.trim()
-      ? config.level
-      : INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
-  let questionCount = INTERVIEW_DEFAULT_QUESTION_COUNT;
-  if (typeof config.questionCount === "number" && Number.isFinite(config.questionCount)) {
-    questionCount = Math.max(
-      1,
-      Math.min(Math.floor(config.questionCount), INTERVIEW_MAX_QUESTION_COUNT),
-    );
-  } else if (typeof config.questionCount === "string") {
-    const parsed = Number.parseInt(config.questionCount, DECIMAL_RADIX);
-    if (Number.isFinite(parsed))
-      questionCount = Math.max(1, Math.min(parsed, INTERVIEW_MAX_QUESTION_COUNT));
-  }
+  const role = resolveWsConfigText(config.role, INTERVIEW_DEFAULT_ROLE_TYPE);
+  const level = resolveWsConfigText(config.level, INTERVIEW_DEFAULT_EXPERIENCE_LEVEL);
+  const questionCount = resolveWsQuestionCount(config.questionCount);
+  const candidateContext = resolveWsCandidateContext(config.candidateContext);
+
   return {
     roleType: role,
     role,
     experienceLevel: level,
     level,
     questionCount,
+    conversationStyle: config.conversationStyle === "structured" ? "structured" : "natural",
+    ...(candidateContext ? { candidateContext } : {}),
     includeTechnical: true,
     includeBehavioral: true,
     includeStudioSpecific: true,
@@ -204,78 +187,8 @@ function toWsQuestions(
   }));
 }
 
-function parseFeedback(response: string): InterviewFeedback {
-  const parsed = safeParseJson(response);
-  if (parsed && isRecord(parsed)) {
-    return createInterviewFeedbackSummary({
-      score: typeof parsed.score === "number" ? parsed.score : undefined,
-      strengths: Array.isArray(parsed.strengths)
-        ? parsed.strengths.filter((entry): entry is string => typeof entry === "string")
-        : undefined,
-      improvements: Array.isArray(parsed.improvements)
-        ? parsed.improvements.filter((entry): entry is string => typeof entry === "string")
-        : undefined,
-      summary: typeof parsed.summary === "string" ? parsed.summary : undefined,
-    });
-  }
-
-  return {
-    score: 70,
-    strengths: ["Response provided"],
-    improvements: ["Add more detail"],
-    summary: "Response recorded, with a request for more detail.",
-  };
-}
-
 function sendInterviewError(socket: InterviewSocket, message: string): void {
   socket.send(JSON.stringify({ type: "error", message }));
-}
-
-async function getInterviewSessionById(sessionId: string): Promise<InterviewSessionRow | null> {
-  const sessionRows = await db
-    .select()
-    .from(interviewSessions)
-    .where(eq(interviewSessions.id, sessionId));
-  return sessionRows[0] ?? null;
-}
-
-function getSessionResponses(session: InterviewSessionRow): JsonRecord[] {
-  if (!Array.isArray(session.responses)) {
-    return [];
-  }
-  return session.responses.filter(isRecord);
-}
-
-function getSessionQuestions(session: InterviewSessionRow): InterviewSessionQuestion[] {
-  if (!Array.isArray(session.questions)) {
-    return [];
-  }
-  return session.questions.filter(isQuestionRecord);
-}
-
-function createFeedbackPrompt(
-  content: string,
-  currentQuestion: InterviewSessionQuestion | undefined,
-): string {
-  return `You are an interview coach. Evaluate this interview response.
-
-Question: ${currentQuestion?.question || "Unknown question"}
-Category: ${currentQuestion?.type || "general"}
-Candidate Response: ${content}
-
-Return a JSON object:
-{"score": 0-100, "strengths": ["..."], "improvements": ["..."], "summary": "one sentence feedback"}
-
-Only return the JSON object.`;
-}
-
-function getDefaultFeedback(): InterviewFeedback {
-  return {
-    score: 70,
-    strengths: ["Response provided"],
-    improvements: ["Configure AI for detailed feedback"],
-    summary: "Response recorded. Configure an AI provider for detailed feedback.",
-  };
 }
 
 function getAiFallbackFeedback(): InterviewFeedback {
@@ -284,89 +197,6 @@ function getAiFallbackFeedback(): InterviewFeedback {
     strengths: ["Attempted answer"],
     improvements: ["More detail needed"],
     summary: "Response recorded.",
-  };
-}
-
-async function evaluateInterviewResponse(
-  content: string,
-  currentQuestion: InterviewSessionQuestion | undefined,
-): Promise<InterviewFeedback> {
-  const aiServiceResult = await settle(getAIService());
-  if (aiServiceResult.status === "rejected") {
-    return getDefaultFeedback();
-  }
-
-  const prompt = createFeedbackPrompt(content, currentQuestion);
-  const feedbackResult = await settle(
-    aiServiceResult.value.generate(prompt, { temperature: AI_DEFAULT_TEMPERATURE }),
-  );
-  if (feedbackResult.status === "rejected") {
-    return getAiFallbackFeedback();
-  }
-
-  return parseFeedback(feedbackResult.value.content);
-}
-
-function buildSessionResponseRecord(
-  questionIndex: number,
-  currentQuestion: InterviewSessionQuestion | undefined,
-  content: string,
-  feedback: InterviewFeedback,
-): JsonRecord {
-  return {
-    questionIndex,
-    question: currentQuestion?.question,
-    answer: content,
-    feedback,
-    timestamp: new Date().toISOString(),
-    questionCategory: currentQuestion?.type,
-  };
-}
-
-function getRecommendations(avgScore: number): string[] {
-  if (avgScore >= SCORE_PASS_THRESHOLD) {
-    return ["Strong performance! Focus on refining edge cases."];
-  }
-  if (avgScore >= SCORE_WARNING_THRESHOLD) {
-    return [
-      "Good foundation. Practice more specific examples.",
-      "Review common follow-up questions.",
-    ];
-  }
-  return [
-    "Consider more structured practice.",
-    "Research the company more thoroughly.",
-    "Prepare concrete examples from your experience.",
-  ];
-}
-
-function buildFinalAnalysis(session: InterviewSessionRow, responses: JsonRecord[]) {
-  const totalScore = responses.reduce((sum, responseRecord) => {
-    const { score } = getFeedbackSummary(responseRecord.feedback);
-    return Number.isFinite(score) ? sum + score : sum;
-  }, 0);
-
-  const answeredQuestions = responses.length;
-  const avgScore = answeredQuestions > 0 ? Math.round(totalScore / answeredQuestions) : 0;
-  const responseStrengths = responses.flatMap((responseRecord) => {
-    const { strengths } = getFeedbackSummary(responseRecord.feedback);
-    return strengths;
-  });
-  const responseImprovements = responses.flatMap((responseRecord) => {
-    const { improvements } = getFeedbackSummary(responseRecord.feedback);
-    return improvements;
-  });
-  const totalQuestions = Array.isArray(session.questions) ? session.questions.length : 0;
-  const strengths = Array.from(new Set(responseStrengths)).slice(0, 5);
-  const weaknesses = Array.from(new Set(responseImprovements)).slice(0, 5);
-
-  return {
-    overallScore: avgScore,
-    totalQuestions,
-    answeredQuestions,
-    strengths,
-    weaknesses,
-    recommendations: getRecommendations(avgScore),
   };
 }
 
@@ -419,28 +249,30 @@ async function handleSubmitResponse(socket: InterviewSocket, data: InterviewMess
     return;
   }
 
-  const session = await getInterviewSessionById(sessionId);
-  if (!session) {
+  const updatedSession = await interviewService.addResponse(sessionId, {
+    questionId: "",
+    transcript: content,
+    duration: Math.max(1, content.length * 150),
+    timestamp: Date.now(),
+    confidence: 0.8,
+  });
+  if (!updatedSession) {
     sendInterviewError(socket, "Session not found");
     return;
   }
-
-  const responses = getSessionResponses(session);
-  const questions = getSessionQuestions(session);
-  const questionIndex = responses.length;
-  const currentQuestion = questions[questionIndex];
-  const feedback = await evaluateInterviewResponse(content, currentQuestion);
-  const newResponse = buildSessionResponseRecord(questionIndex, currentQuestion, content, feedback);
-
-  const nextQuestion = questions[questionIndex + 1] ?? null;
-  const responseIndex = questionIndex + 1;
-  const isComplete = responses.length + 1 >= questions.length;
-
-  responses.push(newResponse);
-  await db
-    .update(interviewSessions)
-    .set({ responses, updatedAt: new Date().toISOString() })
-    .where(eq(interviewSessions.id, sessionId));
+  const latestResponse = updatedSession.responses.at(-1);
+  const questionIndex = Math.max(0, updatedSession.responses.length - 1);
+  const feedback = latestResponse?.aiAnalysis
+    ? {
+        score: latestResponse.aiAnalysis.score,
+        strengths: latestResponse.aiAnalysis.strengths,
+        improvements: latestResponse.aiAnalysis.improvements,
+        summary: latestResponse.aiAnalysis.feedback,
+      }
+    : getAiFallbackFeedback();
+  const nextQuestion = updatedSession.questions[updatedSession.currentQuestionIndex] ?? null;
+  const responseIndex = updatedSession.responses.length;
+  const isComplete = updatedSession.status === "completed";
 
   socket.send(
     JSON.stringify({
@@ -462,24 +294,17 @@ async function handleEndSession(socket: InterviewSocket, data: InterviewMessage)
     return;
   }
 
-  const session = await getInterviewSessionById(sessionId);
+  const session = await interviewService.completeSession(sessionId);
   if (!session) {
     sendInterviewError(socket, "Session not found");
     return;
   }
-
-  const responses = getSessionResponses(session);
-  const finalAnalysis = buildFinalAnalysis(session, responses);
-
-  await db
-    .update(interviewSessions)
-    .set({
-      status: "completed",
-      endTime: Date.now(),
-      finalAnalysis,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(interviewSessions.id, sessionId));
+  const finalAnalysis = session.finalAnalysis ?? {
+    overallScore: 0,
+    strengths: [],
+    improvements: [],
+    recommendations: [],
+  };
 
   socket.send(
     JSON.stringify({

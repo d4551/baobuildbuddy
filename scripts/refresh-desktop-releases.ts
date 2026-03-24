@@ -68,6 +68,10 @@ const DESKTOP_RELEASE_ROOT_ALLOWED_DIRECTORIES = new Set<string>([
   DESKTOP_RELEASE_METADATA_DIR,
   ...DESKTOP_RELEASE_TARGETS,
 ]);
+const LEADING_PATH_SEPARATOR_PATTERN = /^\//u;
+const MACOS_HOME_DIRECTORY_PATTERN = /\/Users\/[^/]+\//g;
+const LINUX_HOME_DIRECTORY_PATTERN = /\/home\/[^/]+\//g;
+const WINDOWS_HOME_DIRECTORY_PATTERN = /C:\\Users\\[^\\]+\\/g;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -84,7 +88,9 @@ const resolveSourceRoot = (argv: readonly string[]): string => {
 /** Returns a path safe for committing (no username or host-specific dirs). */
 const sanitizeSourceRootForProvenance = (sourceRoot: string): string => {
   if (sourceRoot.startsWith(RELEASE_WORKSPACE_ROOT)) {
-    const suffix = sourceRoot.slice(RELEASE_WORKSPACE_ROOT.length).replace(/^\//, "");
+    const suffix = sourceRoot
+      .slice(RELEASE_WORKSPACE_ROOT.length)
+      .replace(LEADING_PATH_SEPARATOR_PATTERN, "");
     return suffix ? suffix : ".desktop-release-artifacts";
   }
   return DESKTOP_RELEASE_STAGING_ROOT;
@@ -98,9 +104,9 @@ const sanitizeBuildCommandsForProvenance = (
   commands.map((cmd) => {
     let s = cmd;
     s = s.split(repoRoot).join(".");
-    s = s.replace(/\/Users\/[^/]+\//g, "~/");
-    s = s.replace(/\/home\/[^/]+\//g, "~/");
-    s = s.replace(/C:\\Users\\[^\\]+\\/g, "<home>\\");
+    s = s.replace(MACOS_HOME_DIRECTORY_PATTERN, "~/");
+    s = s.replace(LINUX_HOME_DIRECTORY_PATTERN, "~/");
+    s = s.replace(WINDOWS_HOME_DIRECTORY_PATTERN, "<home>\\");
     return s;
   });
 
@@ -352,25 +358,45 @@ const runVerifier = async (targets: readonly DesktopReleaseTarget[]): Promise<vo
   }
 };
 
-const main = async (): Promise<void> => {
-  const argv = process.argv.slice(2);
+type RefreshDesktopReleaseConfig = {
+  argv: readonly string[];
+  replaceReleaseTree: boolean;
+  skipVerify: boolean;
+  preserveOtherTargets: boolean;
+  sourceRoot: string;
+};
+
+const createRefreshDesktopReleaseConfig = (
+  argv: readonly string[],
+): RefreshDesktopReleaseConfig => {
   const replaceReleaseTree = parseReplaceReleaseTreeFlag(argv);
-  const skipVerify = parseSkipVerifyFlag(argv);
-  /** When false (default), other canonical targets under `packages/desktop/releases` are kept and merged into assembled provenance. */
-  const preserveOtherTargets = !replaceReleaseTree;
-  const sourceRoot = resolveSourceRoot(argv);
+  return {
+    argv,
+    replaceReleaseTree,
+    skipVerify: parseSkipVerifyFlag(argv),
+    preserveOtherTargets: !replaceReleaseTree,
+    sourceRoot: resolveSourceRoot(argv),
+  };
+};
+
+const resolveRefreshTargets = async (
+  argv: readonly string[],
+  sourceRoot: string,
+): Promise<readonly DesktopReleaseTarget[]> => {
   const explicitTargets = parseDesktopReleaseRefreshTargets(argv);
   const targets =
     explicitTargets ?? (await discoverStagedDesktopReleaseTargets(sourceRoot, pathExists));
   if (targets.length === 0) {
     throw new Error(`No staged desktop release targets were found in ${sourceRoot}.`);
   }
-  const preMergeTargets = preserveOtherTargets ? await readExistingAssembledTargets() : new Map();
-  await pruneLegacyReleaseEntries();
-  if (replaceReleaseTree) {
-    await pruneUnselectedReleaseTargets(targets);
-  }
-  const provenanceEntries = await Promise.all(
+  return targets;
+};
+
+const stageReleaseProvenanceEntries = async (
+  sourceRoot: string,
+  targets: readonly DesktopReleaseTarget[],
+): Promise<readonly (readonly [DesktopReleaseTarget, ReleaseProvenance])[]> =>
+  Promise.all(
     targets.map(async (target) => {
       const provenance = await readProvenance(sourceRoot, target);
       const artifactNames = await collectTargetArtifacts(sourceRoot, target);
@@ -393,6 +419,10 @@ const main = async (): Promise<void> => {
     }),
   );
 
+const mergeAssembledTargetMap = (
+  preMergeTargets: Map<DesktopReleaseTarget, ReleaseProvenance>,
+  provenanceEntries: readonly (readonly [DesktopReleaseTarget, ReleaseProvenance])[],
+): Map<DesktopReleaseTarget, ReleaseProvenance> => {
   const mergedTargetMap = new Map<DesktopReleaseTarget, ReleaseProvenance>();
   const existingEntries: ReadonlyArray<[DesktopReleaseTarget, ReleaseProvenance]> = Array.from(
     preMergeTargets.entries(),
@@ -403,7 +433,13 @@ const main = async (): Promise<void> => {
   for (const [target, provenance] of provenanceEntries) {
     mergedTargetMap.set(target, provenance);
   }
+  return mergedTargetMap;
+};
 
+const writeAssembledReleaseManifests = async (
+  sourceRoot: string,
+  mergedTargetMap: Map<DesktopReleaseTarget, ReleaseProvenance>,
+): Promise<void> => {
   await mkdir(DESKTOP_RELEASE_METADATA_ROOT, { recursive: true });
   await writeFormattedJsonFile(DESKTOP_RELEASE_ASSEMBLED_PROVENANCE_PATH, {
     schemaVersion: 1,
@@ -412,12 +448,27 @@ const main = async (): Promise<void> => {
     targets: buildOrderedAssembledTargets(mergedTargetMap),
   });
   await writeChecksumManifest();
+};
+
+const main = async (): Promise<void> => {
+  const config = createRefreshDesktopReleaseConfig(process.argv.slice(2));
+  const targets = await resolveRefreshTargets(config.argv, config.sourceRoot);
+  const preMergeTargets = config.preserveOtherTargets
+    ? await readExistingAssembledTargets()
+    : new Map<DesktopReleaseTarget, ReleaseProvenance>();
+  await pruneLegacyReleaseEntries();
+  if (config.replaceReleaseTree) {
+    await pruneUnselectedReleaseTargets(targets);
+  }
+  const provenanceEntries = await stageReleaseProvenanceEntries(config.sourceRoot, targets);
+  const mergedTargetMap = mergeAssembledTargetMap(preMergeTargets, provenanceEntries);
+  await writeAssembledReleaseManifests(config.sourceRoot, mergedTargetMap);
   await writeOutput(
-    replaceReleaseTree
-      ? `desktop-release:refreshed ${targets.join(", ")} from ${sourceRoot} into ${DESKTOP_RELEASE_ROOT} (replace-release-tree: pruned unstaged canonical targets)`
-      : `desktop-release:refreshed ${targets.join(", ")} from ${sourceRoot} into ${DESKTOP_RELEASE_ROOT} (other canonical targets preserved; pass ${REPLACE_RELEASE_TREE_FLAG} to prune them)`,
+    config.replaceReleaseTree
+      ? `desktop-release:refreshed ${targets.join(", ")} from ${config.sourceRoot} into ${DESKTOP_RELEASE_ROOT} (replace-release-tree: pruned unstaged canonical targets)`
+      : `desktop-release:refreshed ${targets.join(", ")} from ${config.sourceRoot} into ${DESKTOP_RELEASE_ROOT} (other canonical targets preserved; pass ${REPLACE_RELEASE_TREE_FLAG} to prune them)`,
   );
-  if (!skipVerify) {
+  if (!config.skipVerify) {
     await runVerifier(targets);
   }
   await writeOutput("desktop-release:refresh complete");

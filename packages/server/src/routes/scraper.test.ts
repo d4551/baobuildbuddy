@@ -13,6 +13,13 @@ const successfulScraperResult: ScraperOperationResult = {
   scraped: 2,
   upserted: 2,
   errors: [],
+  enrichment: {
+    enabled: true,
+    enrichedRecords: 2,
+    warnings: [],
+    provider: "local",
+    model: "deterministic-test-model",
+  },
 };
 
 const successfulScrapeJobsForPortal = (): Promise<ScraperOperationResult> =>
@@ -63,6 +70,7 @@ function registerStudioScraperRouteTests(): void {
     expect(result.body.upserted).toBe(2);
     expect(Array.isArray(result.body.errors)).toBe(true);
     expect(result.body.errors).toEqual([]);
+    expect(result.body.enrichment.enrichedRecords).toBe(2);
   });
 
   test("POST /api/scraper/studios forwards service errors as API error payload", async () => {
@@ -94,6 +102,7 @@ function registerJobScraperRouteTests(): void {
     expect(result.body.scraped).toBe(2);
     expect(result.body.upserted).toBe(2);
     expect(result.body.errors).toEqual([]);
+    expect(result.body.enrichment.model).toBe("deterministic-test-model");
   });
 
   test("POST /api/scraper/jobs/grackle forwards service errors as API error payload", async () => {

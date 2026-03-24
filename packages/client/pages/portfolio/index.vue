@@ -390,54 +390,53 @@ function projectPageAria(page: number): string {
 
 <template>
   <PageScaffold width-token="wide" spacing-token="comfortable">
-    <section class="rounded-box border border-base-300 bg-base-200 p-6">
-      <div class="flex flex-wrap items-start justify-between gap-4">
-        <div class="space-y-2">
-          <h1 class="text-3xl font-bold">{{ t("portfolioPage.title") }}</h1>
-          <p class="max-w-2xl text-sm text-base-content/70">{{ t("portfolioPage.subtitle") }}</p>
-        </div>
+    <PageHeroHeader
+      title-id="portfolio-page-title"
+      :title="t('portfolioPage.title')"
+      :description="t('portfolioPage.subtitle')"
+      description-class="max-w-2xl text-base-content/70"
+    >
+      <template #actions>
+        <NuxtLink
+          :to="APP_ROUTES.portfolioPreview"
+          class="btn btn-outline"
+          :aria-label="t('portfolioPage.actions.previewAria')"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          {{ t("portfolioPage.actions.previewButton") }}
+        </NuxtLink>
 
-        <div class="flex flex-wrap gap-2">
-          <NuxtLink
-            :to="APP_ROUTES.portfolioPreview"
-            class="btn btn-outline"
-            :aria-label="t('portfolioPage.actions.previewAria')"
-          >
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            {{ t("portfolioPage.actions.previewButton") }}
-          </NuxtLink>
-
-          <button
-            class="btn btn-primary"
-            :aria-label="t('portfolioPage.actions.exportAria')"
-            @click="handleExport"
-          >
-            {{ t("portfolioPage.actions.exportButton") }}
-          </button>
+        <button
+          class="btn btn-primary"
+          :aria-label="t('portfolioPage.actions.exportAria')"
+          @click="handleExport"
+        >
+          {{ t("portfolioPage.actions.exportButton") }}
+        </button>
+      </template>
+      <template #aside>
+        <div class="stats stats-vertical mt-4 w-full border border-base-300 bg-base-100 shadow-sm sm:stats-horizontal">
+          <div class="stat">
+            <div class="stat-title">{{ t("portfolioPage.stats.projectsTitle") }}</div>
+            <div class="stat-value text-primary">{{ projects.length }}</div>
+            <div class="stat-desc">{{ t("portfolioPage.stats.projectsDesc") }}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">{{ t("portfolioPage.stats.featuredTitle") }}</div>
+            <div class="stat-value text-secondary">{{ featuredProjectCount }}</div>
+            <div class="stat-desc">{{ t("portfolioPage.stats.featuredDesc") }}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">{{ t("portfolioPage.stats.profileTitle") }}</div>
+            <div class="stat-value">{{ hasMetadata ? t("portfolioPage.stats.profileReady") : t("portfolioPage.stats.profileMissing") }}</div>
+            <div class="stat-desc">{{ t("portfolioPage.stats.profileDesc") }}</div>
+          </div>
         </div>
-      </div>
-
-      <div class="stats stats-vertical mt-4 w-full border border-base-300 bg-base-100 shadow-sm sm:stats-horizontal">
-        <div class="stat">
-          <div class="stat-title">{{ t("portfolioPage.stats.projectsTitle") }}</div>
-          <div class="stat-value text-primary">{{ projects.length }}</div>
-          <div class="stat-desc">{{ t("portfolioPage.stats.projectsDesc") }}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("portfolioPage.stats.featuredTitle") }}</div>
-          <div class="stat-value text-secondary">{{ featuredProjectCount }}</div>
-          <div class="stat-desc">{{ t("portfolioPage.stats.featuredDesc") }}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("portfolioPage.stats.profileTitle") }}</div>
-          <div class="stat-value">{{ hasMetadata ? t("portfolioPage.stats.profileReady") : t("portfolioPage.stats.profileMissing") }}</div>
-          <div class="stat-desc">{{ t("portfolioPage.stats.profileDesc") }}</div>
-        </div>
-      </div>
-    </section>
+      </template>
+    </PageHeroHeader>
 
     <section class="card card-border bg-base-100">
       <div class="card-body">

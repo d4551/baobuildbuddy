@@ -17,6 +17,8 @@ import {
   INTERVIEW_DEFAULT_ROLE_CATEGORY,
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_DEFAULT_VOICE_SETTINGS,
+  type InterviewCandidateContext,
+  type InterviewConversationStyle,
   INTERVIEW_FALLBACK_STUDIO_ID,
   INTERVIEW_SERVICE_MAX_QUESTION_COUNT,
   type InterviewAnalysis,
@@ -27,6 +29,8 @@ import {
   type InterviewResponse,
   type InterviewSession,
   type InterviewTargetJob,
+  normalizeScrapePersonaEnrichment,
+  type ScrapePersonaEnrichment,
   SCORE_PASS_THRESHOLD,
   SCORE_WARNING_THRESHOLD,
   safeParseJson,
@@ -36,9 +40,13 @@ import {
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
+import { coverLetters } from "../db/schema/cover-letters";
 import { interviewSessions } from "../db/schema/interviews";
+import { portfolioProjects, portfolios } from "../db/schema/portfolios";
+import { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { studios } from "../db/schema/studios";
+import { userProfile } from "../db/schema/user";
 import { createServerLogger } from "../utils/logger";
 import { AIService } from "./ai/ai-service";
 import {
@@ -62,6 +70,23 @@ interface StudioContext {
   location: string;
   type: string;
   remoteWork: boolean;
+  enrichment?: ScrapePersonaEnrichment;
+}
+
+interface CandidateInterviewContext {
+  conversationStyle: InterviewConversationStyle;
+  profileSummary: string;
+  resumeSummary: string;
+  coverLetterSummary: string;
+  portfolioSummary: string;
+}
+
+interface FinalAnalysisPromptContext {
+  studio: StudioContext;
+  config: InterviewConfig;
+  responses: InterviewResponse[];
+  persona: InterviewerPersona;
+  candidateContext: CandidateInterviewContext;
 }
 
 const toPersistedRecord = (value: object): Record<string, unknown> => {
@@ -75,10 +100,11 @@ const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null;
 
 const DEFAULT_INTERVIEW_MODE: InterviewMode = "studio";
-const PREFIX_FOR_PATTERN = /^\s*For\s*/u;
+const DEFAULT_INTERVIEW_CONVERSATION_STYLE: InterviewConversationStyle = "natural";
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
 const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;
 const JSON_OBJECT_PATTERN = /\{[\s\S]*\}/;
+const SUMMARY_HIGHLIGHT_SPLIT_PATTERN = /[;,]/u;
 const interviewServiceLogger = createServerLogger("interview-service");
 const FALLBACK_INTERVIEW_QUESTIONS: Array<Omit<InterviewQuestion, "id">> = [
   {
@@ -179,7 +205,158 @@ async function withAiOperationTimeout<T>(
     });
 }
 
-function buildFallbackQuestions(config: InterviewConfig, studioName: string): InterviewQuestion[] {
+function extractSummaryValue(summary: string, label: string): string {
+  const matcher = new RegExp(`^- ${label}:\\s*(.+)$`, "im");
+  return summary.match(matcher)?.[1]?.trim() ?? "";
+}
+
+function extractSummaryHighlights(summary: string, label: string, maxItems = 3): string[] {
+  return extractSummaryValue(summary, label)
+    .split(SUMMARY_HIGHLIGHT_SPLIT_PATTERN)
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0 && value !== DEFAULT_UNSPECIFIED_LABEL)
+    .slice(0, maxItems);
+}
+
+type FallbackInterviewContext = {
+  interviewEntity: string;
+  roleTarget: string;
+  primaryTechnology: string;
+  experienceHighlight: string;
+  projectHighlight: string;
+  focusArea: string;
+  hiringSignal: string;
+  pitchAngle: string;
+};
+
+function buildFallbackInterviewContext(
+  studio: StudioContext,
+  config: InterviewConfig,
+  candidateContext: CandidateInterviewContext,
+): FallbackInterviewContext {
+  const targetJob = config.targetJob;
+  const interviewEntity =
+    config.interviewMode === "job" && targetJob?.company ? targetJob.company : studio.name;
+  const roleTarget = targetJob?.title || config.roleType;
+  const technicalHighlights =
+    targetJob?.technologies?.filter((value) => value.trim().length > 0) ??
+    extractSummaryHighlights(candidateContext.resumeSummary, "Technical skills");
+
+  return {
+    interviewEntity,
+    roleTarget,
+    primaryTechnology:
+      technicalHighlights.find((value) => value.length > 0) ?? "your strongest technical stack",
+    experienceHighlight:
+      extractSummaryHighlights(candidateContext.resumeSummary, "Experience highlights", 1)[0] ??
+      extractSummaryHighlights(candidateContext.profileSummary, "Current role", 1)[0] ??
+      "recent game-industry delivery work",
+    projectHighlight:
+      extractSummaryHighlights(candidateContext.resumeSummary, "Project highlights", 1)[0] ??
+      extractSummaryHighlights(candidateContext.portfolioSummary, "Featured work", 1)[0] ??
+      "a player-facing system you shipped",
+    focusArea:
+      targetJob?.enrichment?.interviewFocusAreas?.[0] ??
+      studio.enrichment?.interviewFocusAreas?.[0] ??
+      "cross-functional delivery",
+    hiringSignal:
+      targetJob?.enrichment?.hiringSignals?.[0] ??
+      studio.enrichment?.hiringSignals?.[0] ??
+      "shipping velocity and collaborative execution",
+    pitchAngle:
+      targetJob?.enrichment?.candidatePitchAngles?.[0] ??
+      studio.enrichment?.candidatePitchAngles?.[0] ??
+      "measurable player impact and ownership",
+  };
+}
+
+function buildFallbackIntroQuestion(context: FallbackInterviewContext) {
+  return {
+    question: `Your background highlights ${context.experienceHighlight}. How does that prepare you for the ${context.roleTarget} role at ${context.interviewEntity}?`,
+    followUps: [
+      `Which result from ${context.projectHighlight} is most relevant to ${context.interviewEntity}?`,
+      "How did you validate the outcome with teammates, stakeholders, or players?",
+      "What tradeoff from that work would you handle differently now?",
+    ],
+    tags: ["candidate-context", "role-context"],
+  };
+}
+
+function buildFallbackBehavioralQuestion(context: FallbackInterviewContext) {
+  return {
+    question: `Tell me about a time you aligned design, QA, or production partners to deliver ${context.focusArea} work with a clear outcome.`,
+    followUps: [
+      "What disagreement or constraint made the collaboration difficult?",
+      "How did you keep the team aligned when priorities shifted?",
+      "What evidence told you the collaboration was successful?",
+    ],
+    tags: ["candidate-context", "collaboration"],
+  };
+}
+
+function buildFallbackStudioSpecificQuestion(context: FallbackInterviewContext) {
+  return {
+    question: `${context.interviewEntity} is signaling ${context.hiringSignal}. How would you ramp up in your first 30 days and show that ${context.pitchAngle}?`,
+    followUps: [
+      `Which stakeholder would you meet first to support ${context.focusArea}?`,
+      "What deliverable would you aim to own by the end of your first sprint?",
+      "How would you tailor your communication to this studio context?",
+    ],
+    tags: ["studio-context", "scrape-enrichment"],
+  };
+}
+
+function buildFallbackTechnicalQuestion(context: FallbackInterviewContext) {
+  return {
+    question: `Walk me through a system from ${context.projectHighlight} where you used ${context.primaryTechnology} in a way that would transfer directly to the ${context.roleTarget} scope at ${context.interviewEntity}.`,
+    followUps: [
+      `What constraints shaped your use of ${context.primaryTechnology}?`,
+      "What telemetry, QA checks, or player signals told you the solution was healthy?",
+      "How would you scale that approach for a larger team or live-service environment?",
+    ],
+    tags: ["candidate-context", "technical-context"],
+  };
+}
+
+function buildFallbackClosingQuestion(context: FallbackInterviewContext) {
+  return {
+    question: `What is the strongest evidence from your resume, cover letter, or portfolio that you are ready for ${context.roleTarget} at ${context.interviewEntity} right now?`,
+    followUps: [
+      "Which accomplishment best proves that claim?",
+      "How does that evidence connect to this studio's priorities?",
+      "What would you aim to deliver in your first 30 days?",
+    ],
+    tags: ["candidate-context", "closing"],
+  };
+}
+
+function buildFallbackQuestionText(
+  seed: Omit<InterviewQuestion, "id">,
+  studio: StudioContext,
+  config: InterviewConfig,
+  candidateContext: CandidateInterviewContext,
+): { question: string; followUps: string[]; tags: string[] } {
+  const context = buildFallbackInterviewContext(studio, config, candidateContext);
+
+  switch (seed.type) {
+    case "intro":
+      return { ...buildFallbackIntroQuestion(context), tags: [...seed.tags, "candidate-context", "role-context"] };
+    case "behavioral":
+      return { ...buildFallbackBehavioralQuestion(context), tags: [...seed.tags, "candidate-context", "collaboration"] };
+    case "studio-specific":
+      return { ...buildFallbackStudioSpecificQuestion(context), tags: [...seed.tags, "studio-context", "scrape-enrichment"] };
+    case "technical":
+      return { ...buildFallbackTechnicalQuestion(context), tags: [...seed.tags, "candidate-context", "technical-context"] };
+    case "closing":
+      return { ...buildFallbackClosingQuestion(context), tags: [...seed.tags, "candidate-context", "closing"] };
+  }
+}
+
+function buildFallbackQuestions(
+  config: InterviewConfig,
+  studio: StudioContext,
+  candidateContext: CandidateInterviewContext,
+): InterviewQuestion[] {
   const includeTechnical = Boolean(config.includeTechnical);
   const includeBehavioral = Boolean(config.includeBehavioral);
   const includeStudioSpecific = Boolean(config.includeStudioSpecific);
@@ -197,13 +374,13 @@ function buildFallbackQuestions(config: InterviewConfig, studioName: string): In
 
   while (questions.length < normalizedQuestionCount) {
     const seed = pool[questions.length % pool.length];
+    const contextualized = buildFallbackQuestionText(seed, studio, config, candidateContext);
     questions.push({
       ...seed,
       id: `fallback-${questions.length + 1}`,
-      question: `For ${studioName}, ${seed.question}`.replace(
-        PREFIX_FOR_PATTERN,
-        `For ${studioName}, `,
-      ),
+      question: contextualized.question,
+      followUps: contextualized.followUps,
+      tags: contextualized.tags,
     });
   }
 
@@ -271,6 +448,27 @@ function normalizeInterviewMode(value: unknown): InterviewMode {
   return value === "job" ? "job" : DEFAULT_INTERVIEW_MODE;
 }
 
+function normalizeConversationStyle(value: unknown): InterviewConversationStyle {
+  return value === "structured" ? "structured" : DEFAULT_INTERVIEW_CONVERSATION_STYLE;
+}
+
+function normalizeCandidateContext(value: unknown): InterviewCandidateContext | undefined {
+  if (!isRecord(value)) return;
+
+  const resumeId = parseString(value.resumeId, "");
+  const coverLetterId = parseString(value.coverLetterId, "");
+  const portfolioId = parseString(value.portfolioId, "");
+  if (!(resumeId || coverLetterId || portfolioId)) {
+    return;
+  }
+
+  return {
+    ...(resumeId ? { resumeId } : {}),
+    ...(coverLetterId ? { coverLetterId } : {}),
+    ...(portfolioId ? { portfolioId } : {}),
+  };
+}
+
 function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undefined {
   if (!isRecord(value)) return;
 
@@ -289,6 +487,7 @@ function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undef
   const source = parseString(value.source, "");
   const postedDate = parseString(value.postedDate, "");
   const url = parseString(value.url, "");
+  const enrichment = normalizeScrapePersonaEnrichment(value.enrichment);
 
   const targetJob: InterviewTargetJob = {
     id,
@@ -313,6 +512,9 @@ function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undef
   }
   if (url) {
     targetJob.url = url;
+  }
+  if (enrichment) {
+    targetJob.enrichment = enrichment;
   }
 
   return targetJob;
@@ -367,6 +569,8 @@ function normalizeConfig(raw: InterviewConfigInput): InterviewConfig {
   const technologies = parseStringArray(raw.technologies);
   const enableVoiceMode = parseBoolean(raw.enableVoiceMode, false);
   const voiceSettings = normalizeVoiceSettings(raw.voiceSettings);
+  const candidateContext = normalizeCandidateContext(raw.candidateContext);
+  const conversationStyle = normalizeConversationStyle(raw.conversationStyle);
 
   return {
     roleType,
@@ -382,7 +586,9 @@ function normalizeConfig(raw: InterviewConfigInput): InterviewConfig {
     technologies,
     voiceSettings,
     interviewMode,
+    conversationStyle,
     targetJob,
+    candidateContext,
   };
 }
 
@@ -650,6 +856,8 @@ function toStudioContext(studio: StudioRow, fallbackStudio?: StudioRow): StudioC
   const fallbackGames = parseStringArray(fallbackStudio?.games);
   const studioCulture = isRecord(studio.culture) ? studio.culture : null;
   const fallbackCulture = isRecord(fallbackStudio?.culture) ? fallbackStudio.culture : null;
+  const studioEnrichment = normalizeScrapePersonaEnrichment(studio.enrichment);
+  const fallbackEnrichment = normalizeScrapePersonaEnrichment(fallbackStudio?.enrichment);
 
   return {
     id: studio.id,
@@ -664,6 +872,7 @@ function toStudioContext(studio: StudioRow, fallbackStudio?: StudioRow): StudioC
     remoteWork:
       studio.remoteWork === true ||
       (studio.remoteWork !== false && fallbackStudio?.remoteWork === true),
+    enrichment: studioEnrichment ?? fallbackEnrichment,
   };
 }
 
@@ -694,6 +903,225 @@ async function createAIService(): Promise<AIService> {
   return AIService.fromSettings(settingsRows[0]);
 }
 
+function joinInterviewList(values: string[], maxItems = 6): string {
+  const trimmed = values.map((value) => value.trim()).filter((value) => value.length > 0);
+  if (trimmed.length === 0) {
+    return DEFAULT_UNSPECIFIED_LABEL;
+  }
+  return trimmed.slice(0, maxItems).join(", ");
+}
+
+function summarizeUserProfileContext(
+  row: typeof userProfile.$inferSelect | undefined,
+): string {
+  if (!row) {
+    return "Candidate profile: not provided.";
+  }
+
+  const gamingExperience = isRecord(row.gamingExperience) ? row.gamingExperience : null;
+  const specializations = parseStringArray(gamingExperience?.specializations);
+  const shippedTitles = Array.isArray(gamingExperience?.shippedTitles)
+    ? gamingExperience?.shippedTitles
+        .filter((entry): entry is JsonRecord => isRecord(entry))
+        .map((entry) => parseString(entry.name, ""))
+        .filter((value) => value.length > 0)
+    : [];
+
+  return `Candidate profile:
+- Name: ${parseString(row.name, DEFAULT_UNSPECIFIED_LABEL)}
+- Current role: ${parseString(row.currentRole, DEFAULT_UNSPECIFIED_LABEL)}
+- Current company: ${parseString(row.currentCompany, DEFAULT_UNSPECIFIED_LABEL)}
+- Location: ${parseString(row.location, DEFAULT_UNSPECIFIED_LABEL)}
+- Summary: ${parseString(row.summary, DEFAULT_UNSPECIFIED_LABEL)}
+- Technical skills: ${joinInterviewList(row.technicalSkills ?? [])}
+- Soft skills: ${joinInterviewList(row.softSkills ?? [])}
+- Gaming specializations: ${joinInterviewList(specializations)}
+- Shipped titles: ${joinInterviewList(shippedTitles, 4)}`;
+}
+
+function summarizeResumeContext(row: typeof resumes.$inferSelect | undefined): string {
+  if (!row) {
+    return "Resume context: not provided.";
+  }
+
+  const experience = Array.isArray(row.experience)
+    ? row.experience
+        .filter((entry): entry is JsonRecord => isRecord(entry))
+        .map((entry) =>
+          [parseString(entry.title, ""), parseString(entry.company, "")]
+            .filter((value) => value.length > 0)
+            .join(" @ "),
+        )
+        .filter((value) => value.length > 0)
+    : [];
+  const projects = Array.isArray(row.projects)
+    ? row.projects
+        .filter((entry): entry is JsonRecord => isRecord(entry))
+        .map((entry) => parseString(entry.title, ""))
+        .filter((value) => value.length > 0)
+    : [];
+  const skills = isRecord(row.skills) ? row.skills : null;
+  const technicalSkills = parseStringArray(skills?.technical);
+  const softSkills = parseStringArray(skills?.soft);
+
+  return `Resume context:
+- Resume name: ${parseString(row.name, DEFAULT_UNSPECIFIED_LABEL)}
+- Summary: ${parseString(row.summary, DEFAULT_UNSPECIFIED_LABEL)}
+- Experience highlights: ${joinInterviewList(experience, 4)}
+- Project highlights: ${joinInterviewList(projects, 4)}
+- Technical skills: ${joinInterviewList(technicalSkills)}
+- Soft skills: ${joinInterviewList(softSkills)}`;
+}
+
+function summarizeCoverLetterContext(
+  row: typeof coverLetters.$inferSelect | undefined,
+): string {
+  if (!row) {
+    return "Cover letter context: not provided.";
+  }
+
+  const content = isRecord(row.content) ? row.content : null;
+  const opening = parseString(content?.opening, "");
+  const body = parseString(content?.body, "");
+  const closing = parseString(content?.closing, "");
+  const combinedContent = [opening, body, closing].filter((value) => value.length > 0).join(" ");
+
+  return `Cover letter context:
+- Company: ${parseString(row.company, DEFAULT_UNSPECIFIED_LABEL)}
+- Position: ${parseString(row.position, DEFAULT_UNSPECIFIED_LABEL)}
+- Key narrative: ${combinedContent || DEFAULT_UNSPECIFIED_LABEL}`;
+}
+
+function summarizePortfolioContext(
+  portfolioRow: typeof portfolios.$inferSelect | undefined,
+  projectRows: Array<typeof portfolioProjects.$inferSelect>,
+): string {
+  if (!portfolioRow) {
+    return "Portfolio context: not provided.";
+  }
+
+  const metadata = isRecord(portfolioRow.metadata) ? portfolioRow.metadata : null;
+  const featuredProjects = projectRows
+    .slice()
+    .sort((left, right) => Number(right.featured) - Number(left.featured))
+    .map((project) => {
+      const technologies = Array.isArray(project.technologies) ? joinInterviewList(project.technologies, 3) : DEFAULT_UNSPECIFIED_LABEL;
+      return `${project.title} (${parseString(project.role, "Role not specified")}; tech: ${technologies})`;
+    });
+
+  return `Portfolio context:
+- Portfolio title: ${parseString(metadata?.title, DEFAULT_UNSPECIFIED_LABEL)}
+- Portfolio summary: ${parseString(metadata?.description, parseString(metadata?.bio, DEFAULT_UNSPECIFIED_LABEL))}
+- Featured work: ${joinInterviewList(featuredProjects, 3)}`;
+}
+
+async function resolvePreferredResume(
+  candidateContext?: InterviewCandidateContext,
+): Promise<typeof resumes.$inferSelect | undefined> {
+  if (candidateContext?.resumeId) {
+    const rows = await db.select().from(resumes).where(eq(resumes.id, candidateContext.resumeId));
+    if (rows[0]) {
+      return rows[0];
+    }
+  }
+
+  const defaultRows = await db.select().from(resumes).where(eq(resumes.isDefault, true));
+  if (defaultRows[0]) {
+    return defaultRows[0];
+  }
+
+  const rows = await db.select().from(resumes).limit(1);
+  return rows[0];
+}
+
+async function resolvePreferredCoverLetter(
+  candidateContext?: InterviewCandidateContext,
+): Promise<typeof coverLetters.$inferSelect | undefined> {
+  if (candidateContext?.coverLetterId) {
+    const rows = await db
+      .select()
+      .from(coverLetters)
+      .where(eq(coverLetters.id, candidateContext.coverLetterId));
+    if (rows[0]) {
+      return rows[0];
+    }
+  }
+
+  const rows = await db.select().from(coverLetters).orderBy(desc(coverLetters.updatedAt)).limit(1);
+  return rows[0];
+}
+
+async function resolvePreferredPortfolio(
+  candidateContext?: InterviewCandidateContext,
+): Promise<{
+  portfolioRow?: typeof portfolios.$inferSelect;
+  projectRows: Array<typeof portfolioProjects.$inferSelect>;
+}> {
+  const portfolioRows = candidateContext?.portfolioId
+    ? await db.select().from(portfolios).where(eq(portfolios.id, candidateContext.portfolioId))
+    : await db.select().from(portfolios).limit(1);
+  const portfolioRow = portfolioRows[0];
+
+  if (!portfolioRow) {
+    return { projectRows: [] };
+  }
+
+  const projectRows = await db
+    .select()
+    .from(portfolioProjects)
+    .where(eq(portfolioProjects.portfolioId, portfolioRow.id))
+    .orderBy(desc(portfolioProjects.featured), portfolioProjects.sortOrder);
+  return { portfolioRow, projectRows };
+}
+
+async function resolveCandidateInterviewContext(
+  config: InterviewConfig,
+): Promise<CandidateInterviewContext> {
+  const [profileRows, resumeRow, coverLetterRow, portfolioSnapshot] = await Promise.all([
+    db.select().from(userProfile).limit(1),
+    resolvePreferredResume(config.candidateContext),
+    resolvePreferredCoverLetter(config.candidateContext),
+    resolvePreferredPortfolio(config.candidateContext),
+  ]);
+
+  return {
+    conversationStyle: config.conversationStyle ?? DEFAULT_INTERVIEW_CONVERSATION_STYLE,
+    profileSummary: summarizeUserProfileContext(profileRows[0]),
+    resumeSummary: summarizeResumeContext(resumeRow),
+    coverLetterSummary: summarizeCoverLetterContext(coverLetterRow),
+    portfolioSummary: summarizePortfolioContext(
+      portfolioSnapshot.portfolioRow,
+      portfolioSnapshot.projectRows,
+    ),
+  };
+}
+
+function buildCandidatePromptContext(candidateContext: CandidateInterviewContext): string {
+  return `${candidateContext.profileSummary}
+
+${candidateContext.resumeSummary}
+
+${candidateContext.coverLetterSummary}
+
+${candidateContext.portfolioSummary}
+
+Conversation style: ${candidateContext.conversationStyle}`;
+}
+
+function buildStudioPromptContext(studio: StudioContext): string {
+  return `Studio context:
+- Name: ${studio.name}
+- Type: ${studio.type || DEFAULT_UNSPECIFIED_LABEL}
+- Interview style: ${studio.interviewStyle || DEFAULT_UNSPECIFIED_LABEL}
+- Technologies: ${studio.technologies.join(", ") || DEFAULT_UNSPECIFIED_LABEL}
+- Key titles: ${studio.games.slice(0, 4).join(", ") || DEFAULT_UNSPECIFIED_LABEL}
+- Remote: ${studio.remoteWork ? "supported" : "primarily on-site"}
+- Persona summary: ${studio.enrichment?.summary || DEFAULT_UNSPECIFIED_LABEL}
+- Hiring signals: ${studio.enrichment?.hiringSignals.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
+- Interview focus areas: ${studio.enrichment?.interviewFocusAreas.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
+- Candidate pitch angles: ${studio.enrichment?.candidatePitchAngles.join("; ") || DEFAULT_UNSPECIFIED_LABEL}`;
+}
+
 function buildJobPromptContext(config: InterviewConfig): string {
   const targetJob = config.targetJob;
   if (!targetJob || config.interviewMode !== "job") {
@@ -707,10 +1135,18 @@ function buildJobPromptContext(config: InterviewConfig): string {
 - Technologies: ${targetJob.technologies?.join(", ") || DEFAULT_UNSPECIFIED_LABEL}
 - Requirements: ${targetJob.requirements?.slice(0, 8).join("; ") || DEFAULT_UNSPECIFIED_LABEL}
 - Description: ${targetJob.description || "Not provided"}
-- Source: ${targetJob.source || "Unknown"}`;
+- Source: ${targetJob.source || "Unknown"}
+- Persona summary: ${targetJob.enrichment?.summary || DEFAULT_UNSPECIFIED_LABEL}
+- Hiring signals: ${targetJob.enrichment?.hiringSignals.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
+- Interview focus areas: ${targetJob.enrichment?.interviewFocusAreas.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
+- Candidate pitch angles: ${targetJob.enrichment?.candidatePitchAngles.join("; ") || DEFAULT_UNSPECIFIED_LABEL}`;
 }
 
-function buildQuestionGenerationPrompt(studio: StudioContext, config: InterviewConfig): string {
+function buildQuestionGenerationPrompt(
+  studio: StudioContext,
+  config: InterviewConfig,
+  candidateContext: CandidateInterviewContext,
+): string {
   const targetJob = config.targetJob;
   const interviewEntity =
     config.interviewMode === "job" && targetJob?.company ? targetJob.company : studio.name;
@@ -723,27 +1159,28 @@ function buildQuestionGenerationPrompt(studio: StudioContext, config: InterviewC
       ? config.experienceLevel
       : INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
   const base = interviewQuestionPrompt(interviewEntity, roleTarget, promptLevel);
+  const requestedQuestionCount =
+    candidateContext.conversationStyle === "natural" ? 1 : config.questionCount;
 
   return `${base}\n\nInterview mode: ${config.interviewMode || DEFAULT_INTERVIEW_MODE}
+Conversation style: ${candidateContext.conversationStyle}
 
-Studio context:
-- Name: ${studio.name}
-- Type: ${studio.type}
-- Interview style: ${studio.interviewStyle}
-- Technologies: ${studio.technologies.join(", ") || "TBD"}
-- Key titles: ${studio.games.slice(0, 4).join(", ") || "General game production context"}
-- Remote: ${studio.remoteWork ? "supported" : "primarily on-site"}
+${buildStudioPromptContext(studio)}
 
 ${buildJobPromptContext(config)}
 
+${buildCandidatePromptContext(candidateContext)}
+
 Constraints:
 1. Return strict JSON array only.
-2. Produce exactly ${config.questionCount} questions.
+2. Produce exactly ${requestedQuestionCount} question${requestedQuestionCount === 1 ? "" : "s"}.
 3. Use types only from: technical|behavioral|studio-specific|intro|closing.
 4. Apply include flags: technical=${config.includeTechnical}, behavioral=${config.includeBehavioral}, studio-specific=${config.includeStudioSpecific}.
 5. Keep followUps concise and practical.
 6. ExpectedDuration range 45-180.
 7. Each question must have: id (string), question (string), type, followUps (array), expectedDuration (number), difficulty, tags (array).
+8. Ground every question in the candidate context, not generic interview filler.
+9. If conversation style is natural, ask one opening or follow-up question that references the candidate's background and the target role directly.
 `;
 }
 
@@ -758,18 +1195,140 @@ function mapQuestionSetToConfig(raw: unknown): InterviewQuestion[] {
   return normalized;
 }
 
+function normalizeSingleQuestion(raw: unknown): InterviewQuestion | null {
+  return normalizeQuestions([raw])[0] ?? null;
+}
+
+function buildNaturalNextQuestionPrompt(input: {
+  studio: StudioContext;
+  config: InterviewConfig;
+  candidateContext: CandidateInterviewContext;
+  previousQuestion: InterviewQuestion;
+  latestResponse: InterviewResponse;
+  responses: InterviewResponse[];
+}): string {
+  const { studio, config, candidateContext, previousQuestion, latestResponse, responses } = input;
+
+  return `${interviewPersonaPrompt({
+    role: config.targetJob?.title || config.roleType,
+    company: config.targetJob?.company || studio.name,
+    personality: buildInterviewerPersona(studio, config).name,
+    interviewStyle: studio.interviewStyle,
+    focusAreas: config.focusAreas,
+  })}
+
+Interview mode: ${config.interviewMode || DEFAULT_INTERVIEW_MODE}
+Conversation style: ${candidateContext.conversationStyle}
+${buildStudioPromptContext(studio)}
+${buildJobPromptContext(config)}
+${buildCandidatePromptContext(candidateContext)}
+
+Previous question:
+${previousQuestion.question}
+
+Latest candidate response:
+${latestResponse.transcript}
+
+Interview transcript so far:
+${responses.map((response) => `- ${response.questionId}: ${response.transcript}`).join("\n")}
+
+Return strict JSON only for the single best next question:
+{
+  "id": "q-next",
+  "question": "string",
+  "type": "technical|behavioral|studio-specific|intro|closing",
+  "followUps": ["string"],
+  "expectedDuration": 45-180,
+  "difficulty": "easy|medium|hard",
+  "tags": ["string"]
+}
+
+Constraints:
+1. Ask exactly one follow-up question.
+2. The question must build on the candidate's previous answer and candidate artifacts.
+3. Avoid repeating previous questions.
+4. Keep it conversational, specific, and role-relevant.`;
+}
+
+function buildFallbackNaturalQuestion(
+  session: InterviewSession,
+  studio: StudioContext,
+  candidateContext: CandidateInterviewContext,
+): InterviewQuestion | null {
+  const nextFallback = buildFallbackQuestions(
+    {
+      ...session.config,
+      questionCount: session.config.questionCount,
+    },
+    studio,
+    candidateContext,
+  )[session.responses.length];
+  if (!nextFallback) {
+    return null;
+  }
+  return {
+    ...nextFallback,
+    id: `natural-fallback-${session.responses.length + 1}`,
+  };
+}
+
+async function generateNextNaturalQuestion(
+  session: InterviewSession,
+  studio: StudioContext,
+  latestResponse: InterviewResponse,
+  previousQuestion: InterviewQuestion,
+): Promise<InterviewQuestion | null> {
+  const candidateContext = await resolveCandidateInterviewContext(session.config);
+  const aiServiceResult = await settle(createAIService());
+  if (aiServiceResult.status === "rejected") {
+    return buildFallbackNaturalQuestion(session, studio, candidateContext);
+  }
+
+  const prompt = buildNaturalNextQuestionPrompt({
+    studio,
+    config: session.config,
+    candidateContext,
+    previousQuestion,
+    latestResponse,
+    responses: [...session.responses, latestResponse],
+  });
+
+  const response = (await withAiOperationTimeout(() =>
+    aiServiceResult.value.generate(prompt, {
+      purpose: "interviewQuestions",
+      temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
+      maxTokens: AI_MAX_TOKENS_QUESTION,
+    }),
+  )) ?? null;
+  if (!response || response.error) {
+    return buildFallbackNaturalQuestion(session, studio, candidateContext);
+  }
+
+  const parsed = normalizeSingleQuestion(safeParseJSON(response.content));
+  if (parsed) {
+    return {
+      ...parsed,
+      id: `natural-${session.responses.length + 2}`,
+    };
+  }
+
+  return buildFallbackNaturalQuestion(session, studio, candidateContext);
+}
+
 async function generateQuestions(
   config: InterviewConfig,
   studio: StudioContext,
 ): Promise<InterviewQuestion[]> {
   const aiService = await createAIService();
-  const fullPrompt = buildQuestionGenerationPrompt(studio, config);
+  const candidateContext = await resolveCandidateInterviewContext(config);
+  const fullPrompt = buildQuestionGenerationPrompt(studio, config, candidateContext);
   const role = config.targetJob?.title || config.roleType;
   const level = config.experienceLevel;
 
   const tryGenerate = async (prompt: string): Promise<InterviewQuestion[]> => {
     const response = (await withAiOperationTimeout(() =>
       aiService.generate(prompt, {
+        purpose: "interviewQuestions",
         temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW_QUESTIONS,
         maxTokens: AI_MAX_TOKENS_ANALYSIS,
       }),
@@ -791,7 +1350,10 @@ async function generateQuestions(
     });
 
     if (parsed.length === 0) throw new Error(API_ERROR_AI_NO_QUESTIONS);
-    return parsed.slice(0, config.questionCount);
+    return parsed.slice(
+      0,
+      candidateContext.conversationStyle === "natural" ? 1 : config.questionCount,
+    );
   };
 
   const primaryResult = await settle(tryGenerate(fullPrompt));
@@ -812,17 +1374,20 @@ async function generateQuestions(
     "AI question generation failed on fallback prompt, using deterministic local questions.",
     toErrorMessage(fallbackResult.reason),
   );
-  return buildFallbackQuestions(config, config.targetJob?.company || studio.name);
+  return buildFallbackQuestions(config, studio, candidateContext);
 }
 
 function buildResponseFeedbackPrompt(input: {
   studio: StudioContext;
   config: InterviewConfig;
+  candidateContext: CandidateInterviewContext;
   persona: InterviewerPersona;
   question: InterviewQuestion;
   responseText: string;
+  priorResponses: InterviewResponse[];
 }): string {
-  const { studio, config, persona, question, responseText } = input;
+  const { studio, config, candidateContext, persona, question, responseText, priorResponses } =
+    input;
   return `${interviewPersonaPrompt({
     role: config.targetJob?.title || config.roleType,
     company: config.targetJob?.company || studio.name,
@@ -832,7 +1397,13 @@ function buildResponseFeedbackPrompt(input: {
   })}
 
 Interview mode: ${config.interviewMode || DEFAULT_INTERVIEW_MODE}
+Conversation style: ${candidateContext.conversationStyle}
+${buildStudioPromptContext(studio)}
 ${buildJobPromptContext(config)}
+${buildCandidatePromptContext(candidateContext)}
+
+Prior answers:
+${priorResponses.length > 0 ? priorResponses.map((response) => `- ${response.questionId}: ${response.transcript}`).join("\n") : "- None yet"}
 
 Question asked:
 ${question.question}
@@ -888,12 +1459,15 @@ async function generateResponseFeedback(
   }
 
   const persona = buildInterviewerPersona(studio, session.config);
+  const candidateContext = await resolveCandidateInterviewContext(session.config);
   const prompt = buildResponseFeedbackPrompt({
     studio,
     config: session.config,
+    candidateContext,
     persona,
     question,
     responseText: transcript,
+    priorResponses: session.responses,
   });
   const aiServiceResult = await settle(createAIService());
   if (aiServiceResult.status === "rejected") {
@@ -902,6 +1476,7 @@ async function generateResponseFeedback(
 
   const response = (await withAiOperationTimeout(() =>
     aiServiceResult.value.generate(prompt, {
+      purpose: "interviewFeedback",
       temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
       maxTokens: AI_MAX_TOKENS_FEEDBACK,
     }),
@@ -976,14 +1551,15 @@ function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnal
   };
 }
 
-function buildFinalAnalysisPrompt(
-  studio: StudioContext,
-  config: InterviewConfig,
-  responses: InterviewResponse[],
-  persona: InterviewerPersona,
-): string {
+function buildFinalAnalysisPrompt({
+  studio,
+  config,
+  responses,
+  persona,
+  candidateContext,
+}: FinalAnalysisPromptContext): string {
   const responseLines = responses.map(
-    (response, index) => `Q${index + 1}: "${response.questionId}"`,
+    (response, index) => `Q${index + 1}: "${response.questionId}"\nA${index + 1}: ${response.transcript}`,
   );
 
   return `${interviewPersonaPrompt({
@@ -994,7 +1570,10 @@ function buildFinalAnalysisPrompt(
     focusAreas: config.focusAreas,
   })}
 Interview mode: ${config.interviewMode || DEFAULT_INTERVIEW_MODE}
+Conversation style: ${candidateContext.conversationStyle}
+${buildStudioPromptContext(studio)}
 ${buildJobPromptContext(config)}
+${buildCandidatePromptContext(candidateContext)}
 You are analyzing the following interview responses.
 
 Responses:
@@ -1041,7 +1620,14 @@ async function generateFinalAnalysis(
   studio: StudioContext,
 ): Promise<InterviewAnalysis> {
   const persona = buildInterviewerPersona(studio, session.config);
-  const prompt = buildFinalAnalysisPrompt(studio, session.config, session.responses, persona);
+  const candidateContext = await resolveCandidateInterviewContext(session.config);
+  const prompt = buildFinalAnalysisPrompt({
+    studio,
+    config: session.config,
+    responses: session.responses,
+    persona,
+    candidateContext,
+  });
   const aiServiceResult = await settle(createAIService());
   if (aiServiceResult.status === "rejected") {
     return calculateDefaultAnalysis(session.responses);
@@ -1050,6 +1636,7 @@ async function generateFinalAnalysis(
   const response =
     (await withAiOperationTimeout(() =>
       aiServiceResult.value.generate(prompt, {
+        purpose: "interviewFeedback",
         temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
         maxTokens: AI_MAX_TOKENS_QUESTION,
       }),
@@ -1196,16 +1783,17 @@ export class InterviewService {
   private async persistSessionResponses(options: {
     sessionId: string;
     responses: InterviewResponse[];
-    questionsLength: number;
+    questions: InterviewQuestion[];
     endTime: number | null;
     nowIso: string;
   }): Promise<InterviewSession["status"]> {
     const status: InterviewSession["status"] =
-      options.responses.length >= options.questionsLength ? "completed" : "active";
+      options.responses.length >= options.questions.length ? "completed" : "active";
     await db
       .update(interviewSessions)
       .set({
         responses: options.responses,
+        questions: options.questions,
         status,
         endTime: status === "completed" ? Date.now() : options.endTime,
         updatedAt: options.nowIso,
@@ -1258,10 +1846,20 @@ export class InterviewService {
     const nowIso = new Date().toISOString();
     const responseWithAnalysis = this.buildAnalyzedResponse(response, question.id, analysis);
     const responses = [...session.responses, responseWithAnalysis];
+    const shouldGenerateFollowUp =
+      session.config.conversationStyle === "natural" &&
+      responses.length < session.config.questionCount;
+    const followUpQuestion = shouldGenerateFollowUp
+      ? await generateNextNaturalQuestion(session, studioContext, responseWithAnalysis, question)
+      : null;
+    const questions =
+      followUpQuestion && !session.questions.some((entry) => entry.id === followUpQuestion.id)
+        ? [...session.questions, followUpQuestion]
+        : session.questions;
     const status = await this.persistSessionResponses({
       sessionId,
       responses,
-      questionsLength: session.questions.length,
+      questions,
       endTime: session.endTime ?? null,
       nowIso,
     });

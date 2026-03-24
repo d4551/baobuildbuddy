@@ -1,4 +1,5 @@
 import type {
+  AIRouting,
   AIProviderType,
   AppDataTheme,
   AutomationSettings,
@@ -30,6 +31,7 @@ import {
   MAX_PORT,
   MIN_PORT,
   mergeBrandSettings,
+  normalizeAIRouting,
   normalizeAppDataTheme,
   resolveBrandSettings,
   SCHEMA_MAX_BOARD_RESULT_LIMIT,
@@ -50,6 +52,7 @@ import {
   SCHEMA_PROVIDER_TIMEOUT_MIN_MS,
   SPEECH_PROVIDER_OPTIONS,
   settle,
+  toErrorMessage,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
@@ -61,6 +64,8 @@ import {
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { DATA_EXPORT_VERSION } from "../services/data-service";
+import { buildAIControlPlaneState } from "../services/ai/control-plane";
+import { LocalProvider } from "../services/ai/local-provider";
 import { resolveRateLimitClientKey } from "../utils/request";
 
 const VALID_PROVIDERS = AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]];
@@ -130,6 +135,9 @@ const [
 ] = EMAIL_TRANSPORT_SECURITY_IDS;
 const [EMAIL_TRANSPORT_AUTH_PLAIN, EMAIL_TRANSPORT_AUTH_LOGIN] = EMAIL_TRANSPORT_AUTH_MODE_IDS;
 
+const resolveKnownProvider = (value?: string | null): AIProviderType =>
+  VALID_PROVIDERS.find((provider) => provider === value) ?? PROVIDER_LOCAL;
+
 const speechProviderBodySchema = t.Union([
   t.Literal(SPEECH_PROVIDER_BROWSER),
   t.Literal(SPEECH_PROVIDER_OPENAI),
@@ -165,6 +173,23 @@ const preferredProviderBodySchema = t.Union([
   t.Literal(PROVIDER_HUGGINGFACE),
   t.Literal(PROVIDER_LOCAL),
 ]);
+
+const aiRoutingTargetBodySchema = t.Object({
+  provider: preferredProviderBodySchema,
+  model: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
+});
+
+const aiRoutingBodySchema = t.Object({
+  chat: aiRoutingTargetBodySchema,
+  interviewQuestions: aiRoutingTargetBodySchema,
+  interviewFeedback: aiRoutingTargetBodySchema,
+  resume: aiRoutingTargetBodySchema,
+  coverLetter: aiRoutingTargetBodySchema,
+  emailResponse: aiRoutingTargetBodySchema,
+  jobMatch: aiRoutingTargetBodySchema,
+  scrapeEnrichment: aiRoutingTargetBodySchema,
+  automationFieldMapping: aiRoutingTargetBodySchema,
+});
 
 const browserBodySchema = t.Union([
   t.Literal(AUTOMATION_BROWSER_CHROME),
@@ -472,6 +497,7 @@ const readOrCreateSettingsRow = async () => {
 };
 
 interface SettingsUpdateInput {
+  aiRouting?: AIRouting;
   preferredProvider?: AIProviderType;
   preferredModel?: string;
   theme?: AppDataTheme | "bao-light" | "bao-dark";
@@ -482,26 +508,122 @@ interface SettingsUpdateInput {
   emailTransportSettings?: Partial<EmailTransportSettings>;
 }
 
+const resolveRoutingUpdate = (
+  existingRow: typeof settings.$inferSelect,
+  body: SettingsUpdateInput,
+):
+  | {
+      aiRouting: AIRouting;
+      preferredProvider: AIProviderType;
+      preferredModel: string | null;
+    }
+  | undefined => {
+  const nextPreferredProvider =
+    body.preferredProvider ?? resolveKnownProvider(existingRow.preferredProvider);
+  const nextPreferredModel = body.preferredModel ?? existingRow.preferredModel ?? undefined;
+  const shouldUpdateRouting =
+    body.aiRouting !== undefined ||
+    body.preferredProvider !== undefined ||
+    body.preferredModel !== undefined;
+
+  if (!shouldUpdateRouting) {
+    return;
+  }
+
+  const aiRouting = normalizeAIRouting(
+    body.aiRouting ?? existingRow.aiRouting,
+    nextPreferredProvider,
+    nextPreferredModel,
+  );
+
+  return {
+    aiRouting,
+    preferredProvider: aiRouting.chat.provider,
+    preferredModel: aiRouting.chat.model ?? null,
+  };
+};
+
+const applyBrandSettingsUpdate = (
+  update: Partial<typeof settings.$inferInsert>,
+  existingRow: typeof settings.$inferSelect,
+  patch: BrandSettingsPatch | undefined,
+): boolean => {
+  if (patch === undefined) {
+    return true;
+  }
+
+  const mergedBrandSettings = mergePersistedBrandSettings(existingRow.brandSettings, patch);
+  if (!mergedBrandSettings) {
+    return false;
+  }
+
+  update.brandSettings = mergedBrandSettings;
+  return true;
+};
+
+const applyAutomationSettingsUpdate = (
+  update: Partial<typeof settings.$inferInsert>,
+  existingRow: typeof settings.$inferSelect,
+  patch: Partial<AutomationSettings> | undefined,
+): boolean => {
+  if (patch === undefined) {
+    return true;
+  }
+
+  const mergedAutomationSettings = mergeAutomationSettings(
+    existingRow.automationSettings,
+    patch,
+  );
+  if (!mergedAutomationSettings) {
+    return false;
+  }
+
+  update.automationSettings = mergedAutomationSettings;
+  return true;
+};
+
+const applyEmailTransportSettingsUpdate = (
+  update: Partial<typeof settings.$inferInsert>,
+  existingRow: typeof settings.$inferSelect,
+  patch: Partial<EmailTransportSettings> | undefined,
+): boolean => {
+  if (patch === undefined) {
+    return true;
+  }
+
+  const mergedEmailTransportSettings = mergeEmailTransportSettings(
+    existingRow.emailTransportSettings,
+    patch,
+  );
+  if (!mergedEmailTransportSettings) {
+    return false;
+  }
+
+  update.emailTransportSettings = mergedEmailTransportSettings;
+  return true;
+};
+
 const buildSettingsUpdate = (
   existingRow: typeof settings.$inferSelect,
   body: SettingsUpdateInput,
 ): Partial<typeof settings.$inferInsert> | null => {
   const update: Partial<typeof settings.$inferInsert> = {};
+  const routingUpdate = resolveRoutingUpdate(existingRow, body);
 
-  if (body.preferredProvider !== undefined) update.preferredProvider = body.preferredProvider;
-  if (body.preferredModel !== undefined) update.preferredModel = body.preferredModel;
-  if (body.theme !== undefined) update.theme = normalizeAppDataTheme(body.theme);
-  if (body.language !== undefined) update.language = body.language;
-  if (body.brandSettings !== undefined) {
-    const mergedBrandSettings = mergePersistedBrandSettings(
-      existingRow.brandSettings,
-      body.brandSettings,
-    );
-    if (!mergedBrandSettings) {
-      return null;
-    }
+  if (routingUpdate) {
+    update.aiRouting = routingUpdate.aiRouting;
+    update.preferredProvider = routingUpdate.preferredProvider;
+    update.preferredModel = routingUpdate.preferredModel;
+  }
 
-    update.brandSettings = mergedBrandSettings;
+  if (body.theme !== undefined) {
+    update.theme = normalizeAppDataTheme(body.theme);
+  }
+  if (body.language !== undefined) {
+    update.language = body.language;
+  }
+  if (!applyBrandSettingsUpdate(update, existingRow, body.brandSettings)) {
+    return null;
   }
 
   if (body.notifications !== undefined) {
@@ -509,31 +631,41 @@ const buildSettingsUpdate = (
     update.notifications = toNotificationRecord(mergedNotifications);
   }
 
-  if (body.automationSettings !== undefined) {
-    const mergedAutomationSettings = mergeAutomationSettings(
-      existingRow.automationSettings,
-      body.automationSettings,
-    );
-    if (!mergedAutomationSettings) {
-      return null;
-    }
-
-    update.automationSettings = mergedAutomationSettings;
+  if (!applyAutomationSettingsUpdate(update, existingRow, body.automationSettings)) {
+    return null;
   }
-
-  if (body.emailTransportSettings !== undefined) {
-    const mergedEmailTransportSettings = mergeEmailTransportSettings(
-      existingRow.emailTransportSettings,
-      body.emailTransportSettings,
-    );
-    if (!mergedEmailTransportSettings) {
-      return null;
-    }
-
-    update.emailTransportSettings = mergedEmailTransportSettings;
+  if (!applyEmailTransportSettingsUpdate(update, existingRow, body.emailTransportSettings)) {
+    return null;
   }
 
   return update;
+};
+
+const buildSettingsResponse = async (row: typeof settings.$inferSelect) => {
+  const { emailTransportPassword, ...publicRow } = row;
+  const controlPlane = await buildAIControlPlaneState(row);
+
+  return {
+    ...publicRow,
+    aiRouting: controlPlane.aiRouting,
+    providerDiagnostics: controlPlane.providerDiagnostics,
+    preferredProvider: controlPlane.preferredProvider,
+    preferredModel: controlPlane.preferredModel,
+    theme: normalizeAppDataTheme(row.theme),
+    brandSettings: resolveBrandSettings(row.brandSettings),
+    geminiApiKey: row.geminiApiKey ? `***${row.geminiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
+    openaiApiKey: row.openaiApiKey ? `***${row.openaiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
+    claudeApiKey: row.claudeApiKey ? `***${row.claudeApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
+    huggingfaceToken: row.huggingfaceToken
+      ? `***${row.huggingfaceToken.slice(-KEY_MASK_VISIBLE_CHARS)}`
+      : null,
+    hasGeminiKey: Boolean(row.geminiApiKey),
+    hasOpenaiKey: Boolean(row.openaiApiKey),
+    hasClaudeKey: Boolean(row.claudeApiKey),
+    hasHuggingfaceToken: Boolean(row.huggingfaceToken),
+    hasEmailTransportPassword: Boolean(emailTransportPassword),
+    hasLocalKey: Boolean(row.localModelEndpoint),
+  };
 };
 
 export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings"] })
@@ -546,42 +678,12 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
     }),
   )
   .get("/", async () => {
-    let rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
-    if (rows.length === 0) {
-      await db.insert(settings).values({ id: DEFAULT_SETTINGS_ID });
-      rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
-    }
-
-    const row = rows[0];
+    const row = await readOrCreateSettingsRow();
     if (!row) {
       return { error: API_ERROR_LOAD_SETTINGS };
     }
 
-    const { emailTransportPassword, ...publicRow } = row;
-
-    return {
-      ...publicRow,
-      theme: normalizeAppDataTheme(row.theme),
-      brandSettings: resolveBrandSettings(row.brandSettings),
-      geminiApiKey: row.geminiApiKey
-        ? `***${row.geminiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
-        : null,
-      openaiApiKey: row.openaiApiKey
-        ? `***${row.openaiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
-        : null,
-      claudeApiKey: row.claudeApiKey
-        ? `***${row.claudeApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}`
-        : null,
-      huggingfaceToken: row.huggingfaceToken
-        ? `***${row.huggingfaceToken.slice(-KEY_MASK_VISIBLE_CHARS)}`
-        : null,
-      hasGeminiKey: Boolean(row.geminiApiKey),
-      hasOpenaiKey: Boolean(row.openaiApiKey),
-      hasClaudeKey: Boolean(row.claudeApiKey),
-      hasHuggingfaceToken: Boolean(row.huggingfaceToken),
-      hasEmailTransportPassword: Boolean(emailTransportPassword),
-      hasLocalKey: Boolean(row.localModelEndpoint),
-    };
+    return buildSettingsResponse(row);
   })
   .put(
     "/",
@@ -610,6 +712,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
     },
     {
       body: t.Object({
+        aiRouting: t.Optional(aiRoutingBodySchema),
         preferredProvider: t.Optional(preferredProviderBodySchema),
         preferredModel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
         theme: t.Optional(
@@ -689,7 +792,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
         openaiApiKey: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
         claudeApiKey: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
         huggingfaceToken: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
-        localModelEndpoint: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
+        localModelEndpoint: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL })),
         localModelName: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
         emailTransportPassword: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
       }),
@@ -698,6 +801,18 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
   .post(
     "/test-api-key",
     async ({ body }) => {
+      if (body.provider === "local") {
+        const diagnostics = await LocalProvider.inspectEndpoint(body.key, body.model);
+        return {
+          valid: diagnostics.code === "healthy",
+          provider: body.provider,
+          diagnosticCode: diagnostics.code,
+          message: diagnostics.message,
+          availableModels: diagnostics.availableModels,
+          selectedModel: diagnostics.selectedModel,
+        };
+      }
+
       const strategy = (() => {
         switch (body.provider) {
           case "gemini":
@@ -706,8 +821,6 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
             return AI_PROVIDER_TEST_STRATEGY_BY_ID.openai;
           case "claude":
             return AI_PROVIDER_TEST_STRATEGY_BY_ID.claude;
-          case "local":
-            return AI_PROVIDER_TEST_STRATEGY_BY_ID.local;
           case "huggingface":
             return AI_PROVIDER_TEST_STRATEGY_BY_ID.huggingface;
           default:
@@ -723,21 +836,32 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
         };
       }
 
-      const endpointInput = body.provider === "local" ? body.key : "unused";
-      const requestUrl = strategy.buildUrl(body.key, endpointInput);
+      const requestUrl = strategy.buildUrl(body.key);
       const requestInit = strategy.buildInit(body.key);
 
       const responseResult = await settle(fetch(requestUrl, requestInit));
       if (responseResult.status === "rejected") {
-        return { valid: false, provider: body.provider };
+        return {
+          valid: false,
+          provider: body.provider,
+          diagnosticCode: "error",
+          message: toErrorMessage(responseResult.reason),
+        };
       }
 
-      return { valid: strategy.isSuccess(responseResult.value.status), provider: body.provider };
+      const valid = strategy.isSuccess(responseResult.value.status);
+      return {
+        valid,
+        provider: body.provider,
+        diagnosticCode: valid ? "healthy" : "error",
+        message: valid ? undefined : `HTTP ${responseResult.value.status}`,
+      };
     },
     {
       body: t.Object({
         provider: apiProviderBodySchema,
-        key: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_API_KEY }),
+        key: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+        model: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
       }),
     },
   )

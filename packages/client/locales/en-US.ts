@@ -383,6 +383,9 @@ const enUS = {
     seoDescription:
       "Search and filter game-industry roles by platform, studio type, genre, and experience level.",
     title: "Job Board",
+    emptyStateTitle: "No jobs match your filters",
+    emptyStateDescription:
+      "Adjust your search query or filters to widen the current job discovery view.",
     refreshButton: "Refresh Jobs",
     refreshAria: "Refresh job feed",
     searchPlaceholder: "Search jobs by title, company, or keywords...",
@@ -527,12 +530,19 @@ const enUS = {
     },
   },
   resumePreview: {
+    pageTitle: "Resume Preview",
+    description: "Review the printable resume layout before exporting or sharing it.",
     defaultName: "Your Name",
     present: "Present",
     gpaLabel: "GPA: {gpa}",
     printButton: "Print",
     printAria: "Print resume preview",
+    retryButton: "Retry",
+    retryAria: "Retry loading resume preview",
+    loadError: "Failed to load resume preview.",
     notFound: "Resume not found. Please select a resume to preview.",
+    notFoundTitle: "Resume not found",
+    notFoundDescription: "Select a saved resume from the resume workspace to open this preview.",
     website: "Website",
     websiteLinkAria: "Open personal website",
     linkedin: "LinkedIn",
@@ -552,6 +562,8 @@ const enUS = {
       "Translate gaming experience into career-ready competencies with confidence scoring, category mapping, and AI-assisted analysis.",
     title: "Skill Mapper",
     subtitle: "Convert gaming achievements into clear professional capability signals.",
+    retryButton: "Retry",
+    retryAria: "Retry loading skill mappings",
     description:
       "Map your gameplay achievements to transferable workplace skills, then reuse these mappings across resumes and interviews.",
     gamification: {
@@ -588,7 +600,9 @@ const enUS = {
       topMappingsDescription:
         "Highest-confidence transferable skills, ranked by mapping confidence score.",
       topMappingsAria: "Top skill mappings by confidence",
-      topMappingsEmpty: "No top mappings yet. Add or analyze mappings to populate this list.",
+      topMappingsEmptyTitle: "Top mappings are not available yet",
+      topMappingsEmptyDescription:
+        "Add or analyze mappings to populate the highest-confidence skills in this summary.",
     },
     filters: {
       searchPlaceholder: "Search by gaming experience, transferable skill, or application...",
@@ -599,7 +613,12 @@ const enUS = {
       clearButton: "Clear Filters",
       clearAria: "Clear active skill mapping filters",
     },
-    emptyState: "No skill mappings found. Add your first mapping to get started.",
+    emptyStateTitle: "No skill mappings yet",
+    emptyStateDescription:
+      "Add your first gaming-to-career mapping to start building reusable evidence for resumes and interviews.",
+    filteredEmptyTitle: "No mappings match these filters",
+    filteredEmptyDescription:
+      "Adjust your search or category filters to restore matching skill mappings.",
     categories: {
       leadership: "Leadership",
       community: "Community Management",
@@ -746,6 +765,9 @@ const enUS = {
         step_setup_profile: "Set up your professional profile.",
       },
       emptyState: "Readiness data is not available yet. Add skill mappings and run analysis first.",
+      emptyStateTitle: "Readiness data is not available yet",
+      emptyStateDescription:
+        "Add more mapped skill evidence and rerun readiness analysis to populate this section.",
     },
     pathways: {
       title: "Pathway Recommendations",
@@ -760,6 +782,9 @@ const enUS = {
         declining: "Declining",
       },
       emptyState: "No pathways available yet. Add more mapped skills to generate recommendations.",
+      emptyStateTitle: "No pathways available yet",
+      emptyStateDescription:
+        "Expand your mapped skills to unlock stronger role recommendations and pathway coverage.",
     },
     errors: {
       loadFailed: "Failed to load career pathways data",
@@ -1264,10 +1289,14 @@ const enUS = {
     },
     preview: {
       pageTitle: "Portfolio Preview",
+      description: "Review the published presentation of your portfolio before exporting or sharing it.",
       backButton: "Back to Builder",
       backButtonAria: "Back to portfolio builder",
       exportPdfButton: "Export PDF",
       exportPdfAria: "Export portfolio preview as PDF",
+      retryButton: "Retry",
+      retryAria: "Retry loading portfolio preview",
+      loadError: "Failed to load portfolio preview.",
       defaultTitle: "My Portfolio",
       contactButton: "Contact Me",
       contactAria: "Contact portfolio owner by email",
@@ -1276,8 +1305,11 @@ const enUS = {
       featuredProjectsTitle: "Featured Projects",
       moreProjectsTitle: "More Projects",
       viewButton: "View",
-      emptyState: "No projects to display. Add projects in the portfolio builder.",
-      notFound: "Portfolio not found. Please create your portfolio first.",
+      emptyStateTitle: "No projects to display",
+      emptyStateDescription:
+        "Add projects in the portfolio builder to populate this preview with featured and supporting work.",
+      notFoundTitle: "Portfolio not found",
+      notFoundDescription: "Create your portfolio first, then return to this preview.",
     },
     stats: {
       projectsTitle: "Projects",
@@ -1586,6 +1618,8 @@ const enUS = {
     retryAria: "Retry loading job details",
     notFoundTitle: "Job not found",
     notFoundBody: "This job may have been removed or the link is invalid.",
+    invalidIdTitle: "No job selected",
+    invalidIdBody: "Choose a job from the jobs list to review its details.",
     backToJobs: "Back to jobs",
     backToJobsAria: "Return to jobs list",
     invalidId: "No job selected.",
@@ -1631,6 +1665,9 @@ const enUS = {
       yes: "Yes",
       no: "No",
     },
+    emptyTitle: "Studio unavailable",
+    emptyDescription:
+      "This studio profile is no longer available. Return to the directory and choose another studio context.",
     errors: {
       invalidStudioId: "Invalid studio identifier.",
       notFound: "Studio not found.",
@@ -1644,10 +1681,14 @@ const enUS = {
     title: "Studio Directory",
     subtitle:
       "Browse studio profiles, filter by operational attributes, and move directly into interview practice.",
+    errorTitle: "Studio directory unavailable",
     errorBannerAria: "Studio directory error",
     retryAria: "Retry loading studios",
     retryButton: "Retry",
     emptyState: "No studios match your current search and filters.",
+    emptyTitle: "No studios match these filters",
+    emptyDescription:
+      "Adjust the current search or filter combination to surface another studio profile.",
     stats: {
       totalTitle: "Total Studios",
       totalDesc: "Profiles currently indexed",
@@ -1740,9 +1781,15 @@ const enUS = {
   },
   studioAnalytics: {
     title: "Studio Analytics",
+    description:
+      "Review studio distribution, remote-work coverage, and shared technology trends from the indexed studio dataset.",
     errorBannerAria: "Studio analytics error",
     retryAria: "Retry loading studio analytics",
     retryButton: "Retry",
+    openDirectoryAria: "Open the studio directory",
+    emptyTitle: "No studio analytics available",
+    emptyDescription:
+      "Refresh studio data from the directory or scraper hub to populate analytics for this workspace.",
     progressAria: "Progress for {label}",
     remoteWorkProgressAria: "Remote work availability: {value} percent",
     overview: {
@@ -2157,6 +2204,8 @@ const enUS = {
       stats: {
         availableJobsTitle: "Scraped Jobs Available",
         availableJobsDescription: "Current interview-ready inventory",
+        enrichedJobsTitle: "AI Enriched Jobs",
+        enrichedJobsDescription: "Rows with studio and hiring persona context",
         jobStatusTitle: "Job Scraper Status",
         jobStatusDescription: "Latest run health",
         interviewEntryTitle: "Interview Entry",
@@ -2170,6 +2219,8 @@ const enUS = {
         aria: "Scraped jobs available for interview",
         interviewButton: "Interview This Job",
         interviewAria: "Start interview for {title} at {company}",
+        actionsLabel: "Actions",
+        personaSummaryLabel: "Persona:",
         columns: {
           role: "Role",
           company: "Company",
@@ -2392,15 +2443,22 @@ const enUS = {
   },
   interviewHistory: {
     title: "Interview History",
+    subtitle:
+      "Review prior interview runs, compare scores over time, and reopen full feedback for each session.",
     allSessionsTitle: "All Sessions",
     studioFilterAria: "Filter sessions by studio",
     allStudiosOption: "All studios",
     emptyState: "No interview sessions found.",
+    emptyStateTitle: "No interview sessions found",
+    emptyStateDescription:
+      "Start a new interview from a scraped job or studio drill to populate your practice history.",
     tableAriaLabel: "Interview sessions",
     timelineAriaLabel: "Interview sessions timeline view",
     viewButton: "View",
     viewSessionAria: "View interview session {id}",
     loadingDetails: "Loading session details...",
+    retryButtonLabel: "Retry",
+    retryAria: "Retry loading interview session details",
     detailsTitle: "Session Details",
     closeDetailsAria: "Close session details panel",
     detailStudioLabel: "Studio",
@@ -2413,6 +2471,9 @@ const enUS = {
     questionHeader: "Q{index}: {score}%",
     overallFeedbackLabel: "Overall Feedback",
     selectPrompt: "Select a session to view details",
+    selectPromptTitle: "Choose a session",
+    selectPromptDescription:
+      "Open any interview run from the list to inspect scores, answers, and AI feedback.",
     fetchErrorFallback: "Failed to load interview sessions",
     sessionNotFound: "Session not found",
     detailLoadErrorFallback: "Failed to load session details",
@@ -2560,6 +2621,12 @@ const enUS = {
       experienceAria: "Experience level",
       questionCountLegend: "Question count",
       questionCountAria: "Question count",
+      conversationStyleLegend: "Conversation style",
+      conversationStyleAria: "Conversation style",
+      conversationStyleNatural: "Natural conversation",
+      conversationStyleStructured: "Structured rounds",
+      conversationStyleHint:
+        "Natural mode generates one context-aware question at a time. Structured mode prebuilds the full interview set.",
       enableVoiceAria: "Enable voice mode",
       enableVoiceLabel: "Enable voice mode",
       ttsVoiceLegend: "TTS voice",
@@ -2812,9 +2879,61 @@ const enUS = {
       connectionFailed: "Connection failed",
       preferredProviderLegend: "Preferred AI Provider",
       preferredProviderAria: "Select preferred AI provider",
+      preferredProviderSaveButton: "Save chat default",
       preferredProviderHint:
-        "The AI system will try this provider first, then fall back to others.",
+        "This quick control sets the default provider for chat and conversational surfaces.",
       preferredProviderSaved: "Preferred provider updated",
+      routingTitle: "Purpose-based routing",
+      routingSubtitle:
+        "Assign a provider and optional model to each AI capability so chat, interview, export, and automation flows do not share one global default.",
+      saveRoutingAria: "Save AI routing by purpose",
+      saveRoutingButton: "Save routing",
+      routingSaved: "AI routing saved",
+      purposeProviderLegend: "Provider",
+      purposeProviderAria: "Select provider for {purpose}",
+      purposeModelLegend: "Model override",
+      purposeModelAria: "Set model override for {purpose}",
+      purposeModelPlaceholder: "Leave blank to use the provider default or auto-detect",
+      purposeModelHint:
+        "Use a specific model only when this workflow needs one. Leaving it blank preserves provider defaults.",
+      purposes: {
+        chat: {
+          label: "Chat",
+          description: "General chat, assistant replies, and interactive conversations.",
+        },
+        interviewQuestions: {
+          label: "Interview Questions",
+          description: "Question generation, follow-ups, and conversational interview pacing.",
+        },
+        interviewFeedback: {
+          label: "Interview Feedback",
+          description: "Answer scoring, rubric feedback, and final interview summaries.",
+        },
+        resume: {
+          label: "Resume",
+          description: "Resume synthesis, enhancement, scoring, and structured CV outputs.",
+        },
+        coverLetter: {
+          label: "Cover Letter",
+          description: "Cover-letter drafting, refinement, and export-ready wording.",
+        },
+        emailResponse: {
+          label: "Email Response",
+          description: "Recruiter reply drafts and automation email generation.",
+        },
+        jobMatch: {
+          label: "Job Match",
+          description: "Job-fit scoring, role analysis, and recommendation summaries.",
+        },
+        scrapeEnrichment: {
+          label: "Scrape Enrichment",
+          description: "Studio persona enrichment and post-scrape hiring-signal analysis.",
+        },
+        automationFieldMapping: {
+          label: "Automation Mapping",
+          description: "Field mapping, selector inference, and structured form automation.",
+        },
+      },
       ollamaTipTitle: "Hot tip: Ollama runs outside this app",
       ollamaTipDescription:
         "Install it first and follow Ollama's setup for your own machine or project at",

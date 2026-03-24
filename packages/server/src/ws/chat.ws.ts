@@ -147,6 +147,7 @@ async function streamAssistantResponse({
   sendSocketPayload(socket, { type: "stream_start", sessionId });
 
   const generator = aiService.stream(input, {
+    purpose: "chat",
     systemPrompt: context.systemPrompt,
     messages: context.messages,
     temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,

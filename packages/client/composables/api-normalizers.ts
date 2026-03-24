@@ -4,6 +4,7 @@ import {
   APP_LANGUAGE_CODES,
   type AppSettings,
   type AutomationSettings,
+  DEFAULT_APP_AI_ROUTING,
   asBoolean,
   asNumber,
   asRecord,
@@ -28,6 +29,8 @@ import {
   type JobExperienceLevel,
   type JobType,
   normalizeAppDataTheme,
+  normalizeAIRouting,
+  normalizeScrapePersonaEnrichment,
   type PortfolioData,
   type PortfolioMetadata,
   type PortfolioProject,
@@ -141,6 +144,75 @@ const normalizeJobType = (value: unknown): JobType => asEnum(value, JOB_TYPES) ?
 
 const normalizeAIProvider = (value: unknown): AIProviderType =>
   asEnum(value, AI_PROVIDERS) ?? AI_PROVIDER_DEFAULT;
+
+const isProviderId = (value: string): value is AIProviderType => isOneOf(value, AI_PROVIDERS);
+
+const AI_PROVIDER_DIAGNOSTIC_CODES = [
+  "healthy",
+  "unconfigured",
+  "unreachable",
+  "empty-model-list",
+  "invalid-model",
+  "timeout",
+  "error",
+] as const;
+
+const normalizeProviderDiagnosticCode = (value: unknown) =>
+  asEnum(value, AI_PROVIDER_DIAGNOSTIC_CODES) ?? "error";
+
+const normalizeAIRoutingValue = (value: unknown, preferredProvider: AIProviderType) => {
+  if (!isRecord(value)) {
+    return normalizeAIRouting(DEFAULT_APP_AI_ROUTING, preferredProvider);
+  }
+
+  return normalizeAIRouting(
+    Object.fromEntries(
+      Object.entries(value).flatMap(([purpose, target]) => {
+        if (!isRecord(target)) {
+          return [];
+        }
+        return [
+          [
+            purpose,
+            {
+              provider: normalizeAIProvider(target.provider),
+              model: asString(target.model),
+            },
+          ],
+        ];
+      }),
+    ),
+    preferredProvider,
+  );
+};
+
+const normalizeProviderDiagnostics = (value: unknown) => {
+  if (!isRecord(value)) {
+    return;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([providerId, entry]) => {
+      if (!(isProviderId(providerId) && isRecord(entry))) {
+        return [];
+      }
+      return [
+        [
+          providerId,
+          {
+            provider: normalizeAIProvider(entry.provider ?? providerId),
+            code: normalizeProviderDiagnosticCode(entry.code),
+            checkedAt: asString(entry.checkedAt) ?? new Date(0).toISOString(),
+            endpoint: asString(entry.endpoint),
+            selectedModel: asString(entry.selectedModel),
+            availableModels: asStringArray(entry.availableModels),
+            message: asString(entry.message),
+          },
+        ],
+      ];
+    }),
+  );
+};
 
 const normalizeStudioCulture = (value: unknown): StudioCulture => {
   if (!isRecord(value)) {
@@ -477,6 +549,7 @@ export const toJob = (value: unknown): Job | null => {
     gameGenres: asEnumArray(value.gameGenres, JOB_GAME_GENRES),
     platforms: asEnumArray(value.platforms, JOB_SUPPORTED_PLATFORMS),
     gamingRelevance: asNumber(value.gamingRelevance),
+    enrichment: normalizeScrapePersonaEnrichment(value.enrichment),
   };
 };
 
@@ -770,6 +843,7 @@ export const toGameStudio = (value: unknown): GameStudio | null => {
     category: asEnum(value.category, STUDIO_CATEGORIES),
     region: asString(value.region),
     benefits: asStringArray(value.benefits),
+    enrichment: normalizeScrapePersonaEnrichment(value.enrichment),
   };
 };
 
@@ -874,6 +948,7 @@ export const toAppSettings = (value: unknown): AppSettings | null => {
   if (!id) return null;
 
   const notificationsRecord = asRecord(value.notifications) ?? {};
+  const preferredProvider = normalizeAIProvider(value.preferredProvider);
   return {
     id,
     geminiApiKey: asString(value.geminiApiKey),
@@ -882,8 +957,10 @@ export const toAppSettings = (value: unknown): AppSettings | null => {
     huggingfaceToken: asString(value.huggingfaceToken),
     localModelEndpoint: asString(value.localModelEndpoint),
     localModelName: asString(value.localModelName),
+    aiRouting: normalizeAIRoutingValue(value.aiRouting, preferredProvider),
+    providerDiagnostics: normalizeProviderDiagnostics(value.providerDiagnostics),
     preferredModel: asString(value.preferredModel),
-    preferredProvider: normalizeAIProvider(value.preferredProvider),
+    preferredProvider,
     theme: normalizeAppDataTheme(asString(value.theme)),
     language: asEnum(value.language, APP_LANGUAGE_CODES) ?? DEFAULT_APP_LANGUAGE,
     brandSettings: resolveBrandSettings(isRecord(value.brandSettings) ? value.brandSettings : null),

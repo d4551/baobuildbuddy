@@ -262,10 +262,9 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                     response: {
                         200: Response | {
                             error: string;
-                            details?: undefined;
+                            details: string;
                         } | {
                             error: string;
-                            details: string;
                         };
                         422: {
                             type: "validation";

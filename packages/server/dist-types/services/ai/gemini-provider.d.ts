@@ -9,6 +9,7 @@ export declare class GeminiProvider extends BaseAIProvider {
     private client;
     private generativeModel;
     constructor(apiKey: string, model?: string);
+    private resolveModel;
     generate(prompt: string, options?: GenerateOptions): Promise<AIResponse>;
     stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string>;
     isAvailable(): Promise<boolean>;

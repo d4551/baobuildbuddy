@@ -214,9 +214,9 @@ export declare const app: Elysia<"/api", {
                         email?: string | undefined;
                         location?: string | undefined;
                         website?: string | undefined;
+                        summary?: string | undefined;
                         phone?: string | undefined;
                         github?: string | undefined;
-                        summary?: string | undefined;
                         gamingExperience?: {} | undefined;
                         softSkills?: string[] | undefined;
                         linkedin?: string | undefined;
@@ -276,8 +276,10 @@ export declare const app: Elysia<"/api", {
                 headers: unknown;
                 response: {
                     200: {
-                        error: string;
-                    } | {
+                        aiRouting: import("@bao/shared").AIRouting;
+                        providerDiagnostics: Record<string, unknown> | undefined;
+                        preferredProvider: string | null;
+                        preferredModel: string | null;
                         theme: import("@bao/shared").AppDataTheme;
                         brandSettings: import("@bao/shared").BrandSettings;
                         geminiApiKey: string | null;
@@ -291,17 +293,16 @@ export declare const app: Elysia<"/api", {
                         hasEmailTransportPassword: boolean;
                         hasLocalKey: boolean;
                         id: string;
-                        localModelEndpoint: string | null;
-                        localModelName: string | null;
-                        preferredProvider: string | null;
-                        preferredModel: string | null;
-                        language: string | null;
                         notifications: Record<string, boolean> | null;
                         automationSettings: import("@bao/shared").AutomationSettings | null;
                         emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
-                        createdAt: string;
+                        localModelEndpoint: string | null;
+                        localModelName: string | null;
+                        language: string | null;
                         updatedAt: string;
-                        error?: undefined;
+                        createdAt: string;
+                    } | {
+                        error: string;
                     };
                 };
             };
@@ -310,6 +311,44 @@ export declare const app: Elysia<"/api", {
         settings: {
             put: {
                 body: {
+                    aiRouting?: {
+                        chat: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                        interviewQuestions: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                        interviewFeedback: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                        resume: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                        coverLetter: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                        emailResponse: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                        jobMatch: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                        scrapeEnrichment: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                        automationFieldMapping: {
+                            model?: string | undefined;
+                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        };
+                    } | undefined;
                     notifications?: {
                         achievements?: boolean | undefined;
                         dailyChallenges?: boolean | undefined;
@@ -332,9 +371,9 @@ export declare const app: Elysia<"/api", {
                                 endpoint: string;
                             };
                             tts: {
-                                format: "mp3" | "wav";
                                 provider: "openai" | "huggingface" | "local" | "browser" | "custom";
                                 model: string;
+                                format: "mp3" | "wav";
                                 endpoint: string;
                                 voice: string;
                             };
@@ -422,6 +461,7 @@ export declare const app: Elysia<"/api", {
                             monoFontFamily?: string | undefined;
                         } | undefined;
                         lightTheme?: {
+                            error?: string | undefined;
                             success?: string | undefined;
                             base100?: string | undefined;
                             base200?: string | undefined;
@@ -440,7 +480,6 @@ export declare const app: Elysia<"/api", {
                             successContent?: string | undefined;
                             warning?: string | undefined;
                             warningContent?: string | undefined;
-                            error?: string | undefined;
                             errorContent?: string | undefined;
                             radiusSelector?: string | undefined;
                             radiusField?: string | undefined;
@@ -452,6 +491,7 @@ export declare const app: Elysia<"/api", {
                             noise?: string | undefined;
                         } | undefined;
                         darkTheme?: {
+                            error?: string | undefined;
                             success?: string | undefined;
                             base100?: string | undefined;
                             base200?: string | undefined;
@@ -470,7 +510,6 @@ export declare const app: Elysia<"/api", {
                             successContent?: string | undefined;
                             warning?: string | undefined;
                             warningContent?: string | undefined;
-                            error?: string | undefined;
                             errorContent?: string | undefined;
                             radiusSelector?: string | undefined;
                             radiusField?: string | undefined;
@@ -544,8 +583,9 @@ export declare const app: Elysia<"/api", {
             "test-api-key": {
                 post: {
                     body: {
-                        key: string;
+                        model?: string | undefined;
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        key: string;
                     };
                     params: {};
                     query: unknown;
@@ -553,11 +593,27 @@ export declare const app: Elysia<"/api", {
                     response: {
                         200: {
                             valid: boolean;
-                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                            error: string;
+                            provider: "local";
+                            diagnosticCode: "healthy" | "unconfigured" | "unreachable" | "empty-model-list" | "invalid-model" | "timeout" | "error";
+                            message: string | undefined;
+                            availableModels: string[] | undefined;
+                            selectedModel: string | undefined;
+                            error?: undefined;
                         } | {
                             valid: boolean;
-                            provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                            provider: "gemini" | "claude" | "openai" | "huggingface";
+                            error: string;
+                            diagnosticCode?: undefined;
+                            message?: undefined;
+                            availableModels?: undefined;
+                            selectedModel?: undefined;
+                        } | {
+                            valid: boolean;
+                            provider: "gemini" | "claude" | "openai" | "huggingface";
+                            diagnosticCode: string;
+                            message: string | undefined;
+                            availableModels?: undefined;
+                            selectedModel?: undefined;
                             error?: undefined;
                         };
                         422: {
@@ -683,14 +739,15 @@ export declare const app: Elysia<"/api", {
                             contentHash: string | null;
                             postedDate: string | null;
                             technologies: string[] | null;
+                            updatedAt: string;
                             requirements: string[] | null;
+                            enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                             experienceLevel: string | null;
                             hybrid: boolean | null;
                             gameGenres: string[] | null;
                             platforms: string[] | null;
                             tags: string[] | null;
                             createdAt: string;
-                            updatedAt: string;
                             salary: Record<string, unknown> | null;
                             studioType: string | null;
                             companyLogo: string | null;
@@ -746,6 +803,7 @@ export declare const app: Elysia<"/api", {
                             tags: string[] | null;
                             companyLogo: string | null;
                             applicationUrl: string | null;
+                            enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                             createdAt: string;
                             updatedAt: string;
                         } | {
@@ -871,6 +929,7 @@ export declare const app: Elysia<"/api", {
                                 tags: string[] | null;
                                 companyLogo: string | null;
                                 applicationUrl: string | null;
+                                enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                                 createdAt: string;
                                 updatedAt: string;
                             } | null;
@@ -1015,6 +1074,7 @@ export declare const app: Elysia<"/api", {
                                 tags: string[] | null;
                                 companyLogo: string | null;
                                 applicationUrl: string | null;
+                                enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                                 createdAt: string;
                                 updatedAt: string;
                             } | null;
@@ -1046,14 +1106,15 @@ export declare const app: Elysia<"/api", {
                                 contentHash: string | null;
                                 postedDate: string | null;
                                 technologies: string[] | null;
+                                updatedAt: string;
                                 requirements: string[] | null;
+                                enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                                 experienceLevel: string | null;
                                 hybrid: boolean | null;
                                 gameGenres: string[] | null;
                                 platforms: string[] | null;
                                 tags: string[] | null;
                                 createdAt: string;
-                                updatedAt: string;
                                 salary: Record<string, unknown> | null;
                                 studioType: string | null;
                                 companyLogo: string | null;
@@ -1188,6 +1249,7 @@ export declare const app: Elysia<"/api", {
                     } | undefined;
                     name?: string | undefined;
                     theme?: "light" | "dark" | undefined;
+                    summary?: string | undefined;
                     projects?: {
                         link?: string | undefined;
                         technologies?: string[] | undefined;
@@ -1204,7 +1266,6 @@ export declare const app: Elysia<"/api", {
                         linkedIn?: string | undefined;
                         github?: string | undefined;
                     } | undefined;
-                    summary?: string | undefined;
                     experience?: {
                         description?: string | undefined;
                         achievements?: string[] | undefined;
@@ -1217,10 +1278,10 @@ export declare const app: Elysia<"/api", {
                     }[] | undefined;
                     education?: {
                         gpa?: string | undefined;
+                        year: string;
                         degree: string;
                         field: string;
                         school: string;
-                        year: string;
                     }[] | undefined;
                     gamingExperience?: {
                         platforms?: string | undefined;
@@ -1287,6 +1348,7 @@ export declare const app: Elysia<"/api", {
                         } | undefined;
                         name?: string | undefined;
                         theme?: "light" | "dark" | undefined;
+                        summary?: string | undefined;
                         projects?: {
                             link?: string | undefined;
                             technologies?: string[] | undefined;
@@ -1303,7 +1365,6 @@ export declare const app: Elysia<"/api", {
                             linkedIn?: string | undefined;
                             github?: string | undefined;
                         } | undefined;
-                        summary?: string | undefined;
                         experience?: {
                             description?: string | undefined;
                             achievements?: string[] | undefined;
@@ -1316,10 +1377,10 @@ export declare const app: Elysia<"/api", {
                         }[] | undefined;
                         education?: {
                             gpa?: string | undefined;
+                            year: string;
                             degree: string;
                             field: string;
                             school: string;
-                            year: string;
                         }[] | undefined;
                         gamingExperience?: {
                             platforms?: string | undefined;
@@ -1780,10 +1841,9 @@ export declare const app: Elysia<"/api", {
                         response: {
                             200: Response | {
                                 error: string;
-                                details?: undefined;
+                                details: string;
                             } | {
                                 error: string;
-                                details: string;
                             };
                             422: {
                                 type: "validation";
@@ -2034,6 +2094,7 @@ export declare const app: Elysia<"/api", {
                             includeStudioSpecific?: boolean | undefined;
                             enableVoiceMode?: boolean | undefined;
                             interviewMode?: "job" | "studio" | undefined;
+                            conversationStyle?: "natural" | "structured" | undefined;
                             targetJob?: {
                                 source?: string | undefined;
                                 description?: string | undefined;
@@ -2045,6 +2106,11 @@ export declare const app: Elysia<"/api", {
                                 title: string;
                                 company: string;
                                 location: string;
+                            } | undefined;
+                            candidateContext?: {
+                                resumeId?: string | undefined;
+                                coverLetterId?: string | undefined;
+                                portfolioId?: string | undefined;
                             } | undefined;
                             voiceSettings?: {
                                 language?: string | undefined;
@@ -2247,6 +2313,7 @@ export declare const app: Elysia<"/api", {
                         culture: Record<string, unknown> | null;
                         interviewStyle: string | null;
                         remoteWork: boolean | null;
+                        enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                         createdAt: string;
                         updatedAt: string;
                     }[];
@@ -2287,6 +2354,7 @@ export declare const app: Elysia<"/api", {
                             culture: Record<string, unknown> | null;
                             interviewStyle: string | null;
                             remoteWork: boolean | null;
+                            enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                             createdAt: string;
                             updatedAt: string;
                         } | {
@@ -2400,6 +2468,7 @@ export declare const app: Elysia<"/api", {
                             culture: Record<string, unknown> | null;
                             interviewStyle: string | null;
                             remoteWork: boolean | null;
+                            enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                             createdAt: string;
                             updatedAt: string;
                         } | {
@@ -2476,11 +2545,7 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            scraped: number;
-                            upserted: number;
-                            errors: string[];
-                        } | {
+                        200: import("@bao/shared").ScraperOperationResult | {
                             error: string;
                             details: string;
                         };
@@ -2500,11 +2565,7 @@ export declare const app: Elysia<"/api", {
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                scraped: number;
-                                upserted: number;
-                                errors: string[];
-                            } | {
+                            200: import("@bao/shared").ScraperOperationResult | {
                                 error: string;
                                 details: string;
                             };
@@ -2736,7 +2797,7 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
+                        200: import("./services/ai/control-plane").AIControlPlaneState | {
                             providers: {
                                 id: "gemini" | "claude" | "openai" | "huggingface" | "local";
                                 nameKey: string;
@@ -2747,21 +2808,6 @@ export declare const app: Elysia<"/api", {
                                 health: "unconfigured";
                             }[];
                             error: string;
-                            preferredProvider?: undefined;
-                            configuredProviders?: undefined;
-                        } | {
-                            providers: {
-                                id: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                                nameKey: string;
-                                descriptionKey: string;
-                                iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                                models: string[];
-                                available: boolean;
-                                health: "healthy" | "degraded" | "down" | "unconfigured";
-                            }[];
-                            preferredProvider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                            configuredProviders: ("gemini" | "claude" | "openai" | "huggingface" | "local")[];
-                            error?: undefined;
                         };
                     };
                 };
@@ -2796,8 +2842,8 @@ export declare const app: Elysia<"/api", {
             "automation-action": {
                 post: {
                     body: {
-                        jobId?: string | undefined;
                         coverLetterId?: string | undefined;
+                        jobId?: string | undefined;
                         resumeId: string;
                         jobUrl: string;
                         action: string;
@@ -3355,8 +3401,8 @@ export declare const app: Elysia<"/api", {
                             404: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             422: {
@@ -3379,8 +3425,8 @@ export declare const app: Elysia<"/api", {
                 post: {
                     body: {
                         customAnswers?: {} | undefined;
-                        jobId?: string | undefined;
                         coverLetterId?: string | undefined;
+                        jobId?: string | undefined;
                         resumeId: string;
                         jobUrl: string;
                     };
@@ -3391,16 +3437,16 @@ export declare const app: Elysia<"/api", {
                         500: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         200: {
                             error: string | {
                                 details?: {} | undefined;
+                                code: string;
                                 source: string;
                                 message: string;
-                                code: string;
                             } | null;
                             id: string;
                             aborted: boolean;
@@ -3412,9 +3458,9 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "error" | "pending" | "running";
-                            createdAt: string;
+                            status: "error" | "success" | "pending" | "running";
                             updatedAt: string;
+                            createdAt: string;
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -3429,29 +3475,29 @@ export declare const app: Elysia<"/api", {
                         400: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         404: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         409: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         422: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                     };
@@ -3465,8 +3511,8 @@ export declare const app: Elysia<"/api", {
                     post: {
                         body: {
                             customAnswers?: {} | undefined;
-                            jobId?: string | undefined;
                             coverLetterId?: string | undefined;
+                            jobId?: string | undefined;
                             resumeId: string;
                             jobUrl: string;
                             runAt: string;
@@ -3478,16 +3524,16 @@ export declare const app: Elysia<"/api", {
                             500: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             200: {
                                 error: string | {
                                     details?: {} | undefined;
+                                    code: string;
                                     source: string;
                                     message: string;
-                                    code: string;
                                 } | null;
                                 id: string;
                                 aborted: boolean;
@@ -3499,9 +3545,9 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
-                                status: "success" | "error" | "pending" | "running";
-                                createdAt: string;
+                                status: "error" | "success" | "pending" | "running";
                                 updatedAt: string;
+                                createdAt: string;
                                 screenshots: string[] | null;
                                 totalSteps: number | null;
                                 jobId: string | null;
@@ -3516,29 +3562,29 @@ export declare const app: Elysia<"/api", {
                             400: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             404: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             409: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             422: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                         };
@@ -3565,8 +3611,8 @@ export declare const app: Elysia<"/api", {
                         500: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         200: {
@@ -3583,29 +3629,29 @@ export declare const app: Elysia<"/api", {
                         400: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         404: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         409: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         422: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                     };
@@ -3633,16 +3679,16 @@ export declare const app: Elysia<"/api", {
                             500: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             200: {
                                 error: string | {
                                     details?: {} | undefined;
+                                    code: string;
                                     source: string;
                                     message: string;
-                                    code: string;
                                 } | null;
                                 id: string;
                                 aborted: boolean;
@@ -3654,9 +3700,9 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
-                                status: "success" | "error" | "pending" | "running";
-                                createdAt: string;
+                                status: "error" | "success" | "pending" | "running";
                                 updatedAt: string;
+                                createdAt: string;
                                 screenshots: string[] | null;
                                 totalSteps: number | null;
                                 jobId: string | null;
@@ -3671,29 +3717,29 @@ export declare const app: Elysia<"/api", {
                             400: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             404: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             409: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             422: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                         };
@@ -3715,16 +3761,16 @@ export declare const app: Elysia<"/api", {
                         500: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         200: {
                             error: string | {
                                 details?: {} | undefined;
+                                code: string;
                                 source: string;
                                 message: string;
-                                code: string;
                             } | null;
                             id: string;
                             aborted: boolean;
@@ -3736,9 +3782,9 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "error" | "pending" | "running";
-                            createdAt: string;
+                            status: "error" | "success" | "pending" | "running";
                             updatedAt: string;
+                            createdAt: string;
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -3753,29 +3799,29 @@ export declare const app: Elysia<"/api", {
                         400: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         404: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         409: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         422: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                     };
@@ -3798,16 +3844,16 @@ export declare const app: Elysia<"/api", {
                             500: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             200: {
                                 error: string | {
                                     details?: {} | undefined;
+                                    code: string;
                                     source: string;
                                     message: string;
-                                    code: string;
                                 } | null;
                                 id: string;
                                 aborted: boolean;
@@ -3819,9 +3865,9 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
-                                status: "success" | "error" | "pending" | "running";
-                                createdAt: string;
+                                status: "error" | "success" | "pending" | "running";
                                 updatedAt: string;
+                                createdAt: string;
                                 screenshots: string[] | null;
                                 totalSteps: number | null;
                                 jobId: string | null;
@@ -3836,29 +3882,29 @@ export declare const app: Elysia<"/api", {
                             400: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             404: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             409: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             422: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                         };
@@ -3878,8 +3924,8 @@ export declare const app: Elysia<"/api", {
                         500: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         200: {
@@ -3928,16 +3974,16 @@ export declare const app: Elysia<"/api", {
                     params: {};
                     query: {
                         type?: "scrape" | "job_apply" | "email" | undefined;
-                        status?: "success" | "error" | "pending" | "running" | undefined;
+                        status?: "error" | "success" | "pending" | "running" | undefined;
                     };
                     headers: unknown;
                     response: {
                         200: {
                             error: string | {
                                 details?: {} | undefined;
+                                code: string;
                                 source: string;
                                 message: string;
-                                code: string;
                             } | null;
                             id: string;
                             aborted: boolean;
@@ -3949,9 +3995,9 @@ export declare const app: Elysia<"/api", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "error" | "pending" | "running";
-                            createdAt: string;
+                            status: "error" | "success" | "pending" | "running";
                             updatedAt: string;
+                            createdAt: string;
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -3991,9 +4037,9 @@ export declare const app: Elysia<"/api", {
                             200: {
                                 error: string | {
                                     details?: {} | undefined;
+                                    code: string;
                                     source: string;
                                     message: string;
-                                    code: string;
                                 } | null;
                                 id: string;
                                 aborted: boolean;
@@ -4005,9 +4051,9 @@ export declare const app: Elysia<"/api", {
                                     [x: string]: unknown;
                                 } | null;
                                 progress: number | null;
-                                status: "success" | "error" | "pending" | "running";
-                                createdAt: string;
+                                status: "error" | "success" | "pending" | "running";
                                 updatedAt: string;
+                                createdAt: string;
                                 screenshots: string[] | null;
                                 totalSteps: number | null;
                                 jobId: string | null;
@@ -4022,15 +4068,15 @@ export declare const app: Elysia<"/api", {
                             400: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             404: {
                                 error: {
                                     details?: {} | undefined;
-                                    message: string;
                                     code: string;
+                                    message: string;
                                 };
                             };
                             422: {

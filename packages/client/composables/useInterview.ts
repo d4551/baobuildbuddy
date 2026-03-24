@@ -1,5 +1,7 @@
 import type {
+  InterviewCandidateContext,
   InterviewConfig,
+  InterviewConversationStyle,
   InterviewMode,
   InterviewSession,
   InterviewTargetJob,
@@ -11,6 +13,7 @@ import {
   asStringArray,
   INTERVIEW_FALLBACK_STUDIO_ID,
   isRecord,
+  normalizeScrapePersonaEnrichment,
   STATE_KEYS,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
@@ -69,6 +72,8 @@ const asQuestionDifficulty = (value: unknown): InterviewQuestionDifficulty =>
   isOneOf(INTERVIEW_QUESTION_DIFFICULTIES, value) ? value : "medium";
 
 const asInterviewMode = (value: unknown): InterviewMode => (value === "job" ? "job" : "studio");
+const asInterviewConversationStyle = (value: unknown): InterviewConversationStyle =>
+  value === "structured" ? "structured" : "natural";
 
 const asInterviewTargetJob = (value: unknown): InterviewTargetJob | undefined => {
   if (!isRecord(value)) {
@@ -94,6 +99,26 @@ const asInterviewTargetJob = (value: unknown): InterviewTargetJob | undefined =>
     source: asString(value.source),
     postedDate: asString(value.postedDate),
     url: asString(value.url),
+    enrichment: normalizeScrapePersonaEnrichment(value.enrichment),
+  };
+};
+
+const asInterviewCandidateContext = (value: unknown): InterviewCandidateContext | undefined => {
+  if (!isRecord(value)) {
+    return;
+  }
+
+  const resumeId = asString(value.resumeId);
+  const coverLetterId = asString(value.coverLetterId);
+  const portfolioId = asString(value.portfolioId);
+  if (!(resumeId || coverLetterId || portfolioId)) {
+    return;
+  }
+
+  return {
+    ...(resumeId ? { resumeId } : {}),
+    ...(coverLetterId ? { coverLetterId } : {}),
+    ...(portfolioId ? { portfolioId } : {}),
   };
 };
 
@@ -224,6 +249,7 @@ const toInterviewConfig = (value: unknown, questionCount: number): InterviewSess
     enableVoiceMode: asBoolean(configRecord.enableVoiceMode),
     technologies: asStringArray(configRecord.technologies),
     interviewMode: asInterviewMode(configRecord.interviewMode),
+    conversationStyle: asInterviewConversationStyle(configRecord.conversationStyle),
   };
 
   const voiceSettings = toVoiceSettings(configRecord.voiceSettings);
@@ -234,6 +260,10 @@ const toInterviewConfig = (value: unknown, questionCount: number): InterviewSess
   const targetJob = asInterviewTargetJob(configRecord.targetJob);
   if (targetJob) {
     config.targetJob = targetJob;
+  }
+  const candidateContext = asInterviewCandidateContext(configRecord.candidateContext);
+  if (candidateContext) {
+    config.candidateContext = candidateContext;
   }
 
   return config;

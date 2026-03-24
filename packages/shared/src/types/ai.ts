@@ -6,6 +6,59 @@ export const AI_PROVIDER_IDS = ["gemini", "claude", "openai", "huggingface", "lo
 
 export type AIProviderType = (typeof AI_PROVIDER_IDS)[number];
 
+/**
+ * Canonical AI routing purposes used to select provider/model pairs by capability.
+ */
+export const AI_ROUTING_PURPOSE_IDS = [
+  "chat",
+  "interviewQuestions",
+  "interviewFeedback",
+  "resume",
+  "coverLetter",
+  "emailResponse",
+  "jobMatch",
+  "scrapeEnrichment",
+  "automationFieldMapping",
+] as const;
+
+/**
+ * Explicit AI routing purpose identifier.
+ */
+export type AIRoutingPurpose = (typeof AI_ROUTING_PURPOSE_IDS)[number];
+
+/**
+ * Provider/model pair used for one AI routing purpose.
+ */
+export interface AIRoutingTarget {
+  provider: AIProviderType;
+  model?: string;
+}
+
+/**
+ * Complete AI routing table persisted in settings and consumed by the server.
+ */
+export type AIRouting = Record<AIRoutingPurpose, AIRoutingTarget>;
+
+/**
+ * Structured diagnostic state for one provider readiness check.
+ */
+export interface AIProviderDiagnostic {
+  provider: AIProviderType;
+  code:
+    | "healthy"
+    | "unconfigured"
+    | "unreachable"
+    | "empty-model-list"
+    | "invalid-model"
+    | "timeout"
+    | "error";
+  checkedAt: string;
+  endpoint?: string;
+  selectedModel?: string;
+  availableModels?: string[];
+  message?: string;
+}
+
 export interface AIProviderConfig {
   provider: AIProviderType;
   apiKey?: string;
@@ -37,6 +90,9 @@ export interface TimingMetrics {
 }
 
 export interface GenerateOptions {
+  purpose?: AIRoutingPurpose;
+  provider?: AIProviderType;
+  model?: string;
   temperature?: number;
   maxTokens?: number;
   topP?: number;
@@ -66,6 +122,10 @@ export interface AIProviderStatus {
   health: "healthy" | "degraded" | "down" | "unconfigured";
   lastCheck?: number;
   error?: string;
+  endpoint?: string;
+  selectedModel?: string;
+  availableModels?: string[];
+  diagnosticCode?: AIProviderDiagnostic["code"];
 }
 
 export interface AIModelInfo {

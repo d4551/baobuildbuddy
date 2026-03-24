@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type {
+  AIRouting,
+  AIRoutingPurpose,
   AutomationSettings,
   BrandSettings,
   BrandSettingsPatch,
@@ -7,6 +9,8 @@ import type {
 } from "@bao/shared";
 import {
   AI_PROVIDER_CATALOG,
+  AI_PROVIDER_DEFAULT,
+  AI_ROUTING_PURPOSE_IDS,
   type AIProviderType,
   APP_LANGUAGE_LABELS,
   APP_LANGUAGE_OPTIONS,
@@ -39,10 +43,12 @@ import { useBrand } from "~/composables/useBrand";
 import { useSettings } from "~/composables/useSettings";
 import { useTheme } from "~/composables/useTheme";
 import { useUser } from "~/composables/useUser";
+import { resolveAIRoutingPreference, resolveLocalProviderState, resolveProviderModelOptions } from "~/utils/ai-control-plane";
 import { getErrorMessage } from "~/utils/errors";
 
 type SaveState = "idle" | "saving" | "success" | "error";
 type BrandEditorPanel = "identity" | "typography" | "themes" | "content";
+type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
 
 type ProviderField =
   | "localModelEndpoint"
@@ -76,6 +82,7 @@ const {
   updateApiKeys,
   testApiKey,
   loading: settingsLoading,
+  providerDiagnostics,
 } = useSettings();
 const { profile, fetchProfile, updateProfile, loading: profileLoading } = useUser();
 const { resolvedBrand } = useBrand();
@@ -128,7 +135,7 @@ const apiKeys = reactive<Record<ProviderField, string>>({
   localModelName: LOCAL_AI_DEFAULT_MODEL,
 });
 
-const testResults = reactive<Record<AIProviderType, { valid: boolean } | null>>({
+const testResults = reactive<Record<AIProviderType, { valid: boolean; message?: string } | null>>({
   local: null,
   gemini: null,
   openai: null,
@@ -138,7 +145,7 @@ const testResults = reactive<Record<AIProviderType, { valid: boolean } | null>>(
 
 const testingProvider = ref<AIProviderType | null>(null);
 const preferencesLanguage = ref(DEFAULT_APP_LANGUAGE);
-const preferredProviderSelection = ref<AIProviderType>("local");
+const preferredProviderSelection = ref<AIProviderType>(AI_PROVIDER_DEFAULT);
 const preferencesSaveState = ref<SaveState>("idle");
 const profileSaveState = ref<SaveState>("idle");
 const brandSaveState = ref<SaveState>("idle");
@@ -156,6 +163,11 @@ const BRAND_HINT_IDS = {
   contentOverrides: "settings-brand-content-overrides-hint",
 } as const;
 
+const createDefaultAiRoutingDraft = (): AIRoutingDraft =>
+  Object.fromEntries(
+    AI_ROUTING_PURPOSE_IDS.map((purpose) => [purpose, { provider: AI_PROVIDER_DEFAULT, model: "" }]),
+  ) as AIRoutingDraft;
+
 const notificationForm = reactive({ ...DEFAULT_NOTIFICATION_PREFERENCES });
 const automationForm = reactive<AutomationSettings>({
   ...DEFAULT_AUTOMATION_SETTINGS,
@@ -164,6 +176,7 @@ const emailTransportForm = reactive<EmailTransportSettings>({
   ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,
 });
 const emailTransportPasswordDraft = ref("");
+const aiRoutingDraft = reactive<AIRoutingDraft>(createDefaultAiRoutingDraft());
 const brandForm = reactive({
   name: BRAND_DEFAULTS.name,
   assistantName: BRAND_DEFAULTS.assistantName,
@@ -216,9 +229,11 @@ watch(
     apiKeys.localModelName = currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
 
     preferencesLanguage.value = currentSettings.language || DEFAULT_APP_LANGUAGE;
-    const isKnownProvider = (v: string): v is AIProviderType => v in providerFieldById;
-    const saved = currentSettings.preferredProvider ?? "";
-    preferredProviderSelection.value = isKnownProvider(saved) ? saved : "local";
+    preferredProviderSelection.value = resolveAIRoutingPreference(currentSettings, "chat").provider;
+    for (const purpose of AI_ROUTING_PURPOSE_IDS) {
+      aiRoutingDraft[purpose].provider = currentSettings.aiRouting[purpose].provider;
+      aiRoutingDraft[purpose].model = currentSettings.aiRouting[purpose].model ?? "";
+    }
 
     notificationForm.achievements = currentSettings.notifications?.achievements ?? true;
     notificationForm.dailyChallenges = currentSettings.notifications?.dailyChallenges ?? true;
@@ -257,6 +272,21 @@ watch(
   { immediate: true },
 );
 
+watch(preferredProviderSelection, (provider) => {
+  if (aiRoutingDraft.chat.provider !== provider) {
+    aiRoutingDraft.chat.provider = provider;
+  }
+});
+
+watch(
+  () => aiRoutingDraft.chat.provider,
+  (provider) => {
+    if (preferredProviderSelection.value !== provider) {
+      preferredProviderSelection.value = provider;
+    }
+  },
+);
+
 const emailDeliveryConfigured = computed(() =>
   isEmailTransportConfigured(
     settings.value?.emailTransportSettings ?? emailTransportForm,
@@ -264,7 +294,21 @@ const emailDeliveryConfigured = computed(() =>
   ),
 );
 
-const showOllamaHotTip = computed(() => preferredProviderSelection.value === "local");
+const showOllamaHotTip = computed(() => aiRoutingDraft.chat.provider === "local");
+const localProviderDraftState = computed(() =>
+  resolveLocalProviderState({
+    settings: settings.value,
+    endpoint: apiKeys.localModelEndpoint,
+    model: apiKeys.localModelName,
+  }),
+);
+const aiRoutingSections = computed(() =>
+  AI_ROUTING_PURPOSE_IDS.map((purpose) => ({
+    id: purpose,
+    label: t(`settings.aiProviders.purposes.${purpose}.label`),
+    description: t(`settings.aiProviders.purposes.${purpose}.description`),
+  })),
+);
 
 function parseBrandContentOverrides(): Record<string, string> {
   return (
@@ -403,6 +447,29 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
   });
 }
 
+function buildAiRoutingPayload(): AIRouting {
+  return Object.fromEntries(
+    AI_ROUTING_PURPOSE_IDS.map((purpose) => {
+      const model = aiRoutingDraft[purpose].model.trim();
+      return [
+        purpose,
+        {
+          provider: aiRoutingDraft[purpose].provider,
+          ...(model ? { model } : {}),
+        },
+      ];
+    }),
+  ) as AIRouting;
+}
+
+function resolveRoutingModelOptions(providerId: AIProviderType): string[] {
+  return resolveProviderModelOptions(
+    providerId,
+    settings.value,
+    providerId === "local" ? [apiKeys.localModelName] : [],
+  );
+}
+
 function saveStateLabel(value: SaveState): string {
   if (value === "saving") return t("settings.saveState.saving");
   if (value === "success") return t("settings.saveState.success");
@@ -492,7 +559,7 @@ function isProviderConfigured(providerId: AIProviderType): boolean {
 async function handleTest(providerId: AIProviderType) {
   const testInput =
     providerId === "local"
-      ? apiKeys.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT
+      ? localProviderDraftState.value.endpoint
       : apiKeys[providerFieldById[providerId]]?.trim();
 
   if (!testInput && providerId !== "local") return;
@@ -501,7 +568,11 @@ async function handleTest(providerId: AIProviderType) {
   testResults[providerId] = null;
 
   const providerTestResult = await settlePromise(
-    testApiKey(providerId, testInput),
+    testApiKey(
+      providerId,
+      testInput,
+      providerId === "local" ? localProviderDraftState.value.configuredModel || undefined : undefined,
+    ),
     t("settings.errors.failedToTestProvider"),
   );
   testingProvider.value = null;
@@ -513,24 +584,35 @@ async function handleTest(providerId: AIProviderType) {
   }
 
   const result = providerTestResult.value;
-  testResults[providerId] = result;
+  testResults[providerId] = { valid: result.valid, message: result.message };
   if (result?.valid) {
     $toast.success(t("settings.aiProviders.connectionSuccessful"));
   } else {
-    $toast.error(t("settings.aiProviders.connectionFailed"));
+    $toast.error(result?.message || t("settings.aiProviders.connectionFailed"));
   }
 }
 
 async function handleSavePreferredProvider() {
-  const providerSaveResult = await settlePromise(
-    updateSettings({ preferredProvider: preferredProviderSelection.value }),
+  aiRoutingDraft.chat.provider = preferredProviderSelection.value;
+  await handleSaveRouting();
+}
+
+async function handleSaveRouting() {
+  const aiRouting = buildAiRoutingPayload();
+  const routingSaveResult = await settlePromise(
+    updateSettings({
+      aiRouting,
+      preferredProvider: aiRouting.chat.provider,
+      preferredModel: aiRouting.chat.model,
+    }),
     t("settings.errors.failedToSavePreferences"),
   );
-  if (!providerSaveResult.ok) {
-    showToastError(providerSaveResult.error, t("settings.errors.failedToSavePreferences"));
+  if (!routingSaveResult.ok) {
+    showToastError(routingSaveResult.error, t("settings.errors.failedToSavePreferences"));
     return;
   }
-  $toast.success(t("settings.aiProviders.preferredProviderSaved"));
+  preferredProviderSelection.value = aiRouting.chat.provider;
+  $toast.success(t("settings.aiProviders.routingSaved"));
 }
 
 async function handleSaveKeys() {
@@ -810,18 +892,12 @@ async function handleClearEmailDeliveryPassword() {
 
 <template>
   <PageScaffold labelled-by="settings-page-title">
-    <section class="hero rounded-box bg-base-200 border border-base-300">
-      <div
-        class="hero-content w-full flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between"
-      >
-        <PageHeaderBlock
-          title-id="settings-page-title"
-          :title="t('settings.title')"
-          :description="t('settings.subtitle')"
-          description-class="text-base-content/70 mt-2"
-        />
-      </div>
-    </section>
+    <PageHeroHeader
+      title-id="settings-page-title"
+      :title="t('settings.title')"
+      :description="t('settings.subtitle')"
+      description-class="text-base-content/70 mt-2"
+    />
 
     <div
       v-if="settingsBootstrapError"
@@ -2044,7 +2120,6 @@ async function handleClearEmailDeliveryPassword() {
               v-model="preferredProviderSelection"
               class="select w-full"
               :aria-label="t('settings.aiProviders.preferredProviderAria')"
-              @change="handleSavePreferredProvider"
             >
               <option
                 v-for="provider in providerInputs"
@@ -2057,7 +2132,98 @@ async function handleClearEmailDeliveryPassword() {
             <p class="text-xs text-base-content/50 mt-1">
               {{ t("settings.aiProviders.preferredProviderHint") }}
             </p>
+            <div class="mt-2 flex justify-end">
+              <button
+                class="btn btn-outline btn-sm"
+                :aria-label="t('settings.aiProviders.preferredProviderAria')"
+                @click="handleSavePreferredProvider"
+              >
+                {{ t("settings.aiProviders.preferredProviderSaveButton") }}
+              </button>
+            </div>
           </fieldset>
+
+          <div class="card card-border bg-base-200 mb-4">
+            <div class="card-body gap-4 p-4">
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div class="space-y-1">
+                  <h3 class="font-semibold">{{ t("settings.aiProviders.routingTitle") }}</h3>
+                  <p class="text-sm text-base-content/60">
+                    {{ t("settings.aiProviders.routingSubtitle") }}
+                  </p>
+                </div>
+                <button
+                  class="btn btn-primary btn-sm"
+                  :aria-label="t('settings.aiProviders.saveRoutingAria')"
+                  @click="handleSaveRouting"
+                >
+                  {{ t("settings.aiProviders.saveRoutingButton") }}
+                </button>
+              </div>
+
+              <SectionGrid grid-token="twoColumnXl">
+                <div
+                  v-for="section in aiRoutingSections"
+                  :key="section.id"
+                  class="rounded-box border border-base-300 bg-base-100 p-4 space-y-3"
+                >
+                  <div class="space-y-1">
+                    <h4 class="font-medium">{{ section.label }}</h4>
+                    <p class="text-sm text-base-content/60">{{ section.description }}</p>
+                  </div>
+
+                  <fieldset class="fieldset">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.aiProviders.purposeProviderLegend") }}
+                    </legend>
+                    <select
+                      v-model="aiRoutingDraft[section.id].provider"
+                      class="select w-full"
+                      :aria-label="
+                        t('settings.aiProviders.purposeProviderAria', { purpose: section.label })
+                      "
+                    >
+                      <option
+                        v-for="provider in providerInputs"
+                        :key="`${section.id}-${provider.id}`"
+                        :value="provider.id"
+                      >
+                        {{ provider.label }}
+                      </option>
+                    </select>
+                  </fieldset>
+
+                  <fieldset class="fieldset">
+                    <legend class="fieldset-legend">
+                      {{ t("settings.aiProviders.purposeModelLegend") }}
+                    </legend>
+                    <input
+                      v-model="aiRoutingDraft[section.id].model"
+                      :list="`routing-model-options-${section.id}`"
+                      type="text"
+                      class="input w-full"
+                      :placeholder="t('settings.aiProviders.purposeModelPlaceholder')"
+                      :aria-label="
+                        t('settings.aiProviders.purposeModelAria', { purpose: section.label })
+                      "
+                    />
+                    <datalist :id="`routing-model-options-${section.id}`">
+                      <option
+                        v-for="model in resolveRoutingModelOptions(aiRoutingDraft[section.id].provider)"
+                        :key="`${section.id}-${aiRoutingDraft[section.id].provider}-${model}`"
+                        :value="model"
+                      >
+                        {{ model }}
+                      </option>
+                    </datalist>
+                    <p class="text-xs text-base-content/50">
+                      {{ t("settings.aiProviders.purposeModelHint") }}
+                    </p>
+                  </fieldset>
+                </div>
+              </SectionGrid>
+            </div>
+          </div>
 
           <div
             v-if="showOllamaHotTip"
@@ -2187,6 +2353,18 @@ async function handleClearEmailDeliveryPassword() {
                       : t("settings.aiProviders.failedBadge")
                   }}
                 </span>
+                <p
+                  v-if="!testResults[provider.id] && providerDiagnostics[provider.id]?.message"
+                  class="text-sm text-base-content/60"
+                >
+                  {{ providerDiagnostics[provider.id]?.message }}
+                </p>
+                <p
+                  v-else-if="testResults[provider.id]?.message"
+                  class="text-sm text-base-content/60"
+                >
+                  {{ testResults[provider.id]?.message }}
+                </p>
               </div>
             </div>
           </div>

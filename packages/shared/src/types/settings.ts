@@ -3,6 +3,7 @@
  */
 
 import type { AppDataTheme } from "../constants/branding";
+import { DEFAULT_AI_ROUTING } from "../constants/ai";
 import type {
   AppLanguageCode,
   AutomationBrowserOption,
@@ -14,12 +15,17 @@ import {
   DEFAULT_EMAIL_TRANSPORT_CONNECTION_TIMEOUT_SECONDS,
   DEFAULT_SPEECH_SETTINGS,
 } from "../constants/settings";
-import type { AIProviderType } from "./ai";
+import type { AIProviderDiagnostic, AIProviderType, AIRouting } from "./ai";
 
 /**
  * Per-provider model preferences.
  */
 export type ProviderModelPreferences = Partial<Record<AIProviderType, string>>;
+
+/**
+ * Latest provider readiness results keyed by provider id.
+ */
+export type AIProviderDiagnostics = Partial<Record<AIProviderType, AIProviderDiagnostic>>;
 
 /**
  * Supported ATS types for company-board integrations.
@@ -453,6 +459,8 @@ export interface AppSettings {
   huggingfaceToken?: string;
   localModelEndpoint?: string;
   localModelName?: string;
+  aiRouting: AIRouting;
+  providerDiagnostics?: AIProviderDiagnostics;
   preferredModel?: string;
   preferredModels?: ProviderModelPreferences;
   preferredProvider: AIProviderType;
@@ -469,6 +477,11 @@ export interface AppSettings {
   hasEmailTransportPassword?: boolean;
   hasLocalKey?: boolean;
 }
+
+/**
+ * Canonical settings-level AI routing default.
+ */
+export const DEFAULT_APP_AI_ROUTING: AIRouting = DEFAULT_AI_ROUTING;
 
 /**
  * API key payload.

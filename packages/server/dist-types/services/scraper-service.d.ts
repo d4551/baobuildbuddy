@@ -1,4 +1,4 @@
-import { type AutomationJobScrapeTarget, type AutomationScriptId, type GamingPortalId, type ScrapedJob } from "@bao/shared";
+import { type AutomationJobScrapeTarget, type AutomationScriptId, type GamingPortalId, type ScraperOperationResult, type ScrapedJob } from "@bao/shared";
 export type { ScrapedJob };
 type ScriptReferenceOverride = {
     scriptPath: string;
@@ -7,13 +7,43 @@ type ScriptReferenceOverride = {
  * Scraper service for studio/job ingestion via Bun automation scripts.
  */
 export declare class ScraperService {
+    /**
+     * Load the singleton settings row used to construct purpose-aware AI services.
+     */
+    private loadSettingsRow;
+    /**
+     * Create the AI service used for scrape enrichment when settings are available.
+     */
+    private createScrapeEnrichmentService;
+    /**
+     * Generate studio persona enrichment for one scraped studio row.
+     */
+    private enrichStudioRow;
+    /**
+     * Generate job persona enrichment for one scraped job row.
+     */
+    private enrichJobRow;
     private resolvePortalSourceUrl;
     /**
      * Resolve the configured automation script id for a portal-backed scraper.
      */
     private resolvePortalScriptId;
+    /**
+     * Upsert a scraped studio row and persist the latest enrichment snapshot.
+     */
     private upsertStudioRow;
-    private insertScrapedJobIfMissing;
+    /**
+     * Upsert a scraped job row keyed by deterministic content hash and persist enrichment.
+     */
+    private upsertScrapedJob;
+    /**
+     * Upsert a scraped job row and update the enrichment summary in-memory.
+     */
+    private persistScrapedJobRow;
+    /**
+     * Upsert a scraped studio row and update the enrichment summary in-memory.
+     */
+    private persistScrapedStudioRow;
     /**
      * Scrape normalized rows for a configured gaming portal.
      */
@@ -37,11 +67,7 @@ export declare class ScraperService {
     /**
      * Scrapes and upserts studio data.
      */
-    scrapeStudios(): Promise<{
-        scraped: number;
-        upserted: number;
-        errors: string[];
-    }>;
+    scrapeStudios(): Promise<ScraperOperationResult>;
     /**
      * Scrapes jobs from Hitmarker and validates normalized output shape.
      */
@@ -69,26 +95,14 @@ export declare class ScraperService {
     /**
      * Scrapes and upserts Hitmarker jobs with row-level error reporting.
      */
-    scrapeHitmarkerJobs(scriptReference?: AutomationScriptId | ScriptReferenceOverride): Promise<{
-        scraped: number;
-        upserted: number;
-        errors: string[];
-    }>;
+    scrapeHitmarkerJobs(scriptReference?: AutomationScriptId | ScriptReferenceOverride): Promise<ScraperOperationResult>;
     /**
      * Scrapes and upserts jobs for a supported job-board scrape target.
      */
-    scrapeJobsForTarget(target: AutomationJobScrapeTarget): Promise<{
-        scraped: number;
-        upserted: number;
-        errors: string[];
-    }>;
+    scrapeJobsForTarget(target: AutomationJobScrapeTarget): Promise<ScraperOperationResult>;
     /**
      * Scrapes and upserts jobs for a supported gaming portal id.
      */
-    scrapeJobsForPortal(portalId: GamingPortalId): Promise<{
-        scraped: number;
-        upserted: number;
-        errors: string[];
-    }>;
+    scrapeJobsForPortal(portalId: GamingPortalId): Promise<ScraperOperationResult>;
 }
 export declare const scraperService: ScraperService;

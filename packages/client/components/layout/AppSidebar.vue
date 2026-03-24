@@ -3,7 +3,7 @@ import { APP_SEMVER } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
-import { APP_DRAWER_ID } from "~/constants/layout";
+import { APP_DRAWER_ID, SHELL_SIDEBAR_MENU_CLASS } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
@@ -45,6 +45,13 @@ function resolveSidebarLabel(item: NavigationItem): string {
   return localizedSidebarLabels.value.get(item.id) ?? "";
 }
 
+function sidebarLinkClass(item: NavigationItem): string[] {
+  return [
+    "flex min-h-10 items-center gap-2 rounded-box px-2 transition-colors duration-200 is-drawer-close:tooltip is-drawer-close:tooltip-right",
+    isSidebarItemActive(item) ? "menu-active font-medium" : "",
+  ];
+}
+
 async function hydrateSidebarSettings(): Promise<void> {
   if (settings.value) {
     return;
@@ -66,14 +73,11 @@ onMounted(() => {
       </span>
     </div>
     <nav :aria-label="t('a11y.primaryNavigation')" class="flex min-h-0 min-w-0 flex-1 flex-col">
-      <ul class="menu menu-sm flex min-h-0 w-full flex-1 flex-col gap-1 p-4">
+      <ul :class="SHELL_SIDEBAR_MENU_CLASS">
         <li v-for="item in sidebarItems" :key="item.id">
           <NuxtLink
             :to="item.to"
-            :class="[
-              'flex items-center gap-2 rounded-box border-l-3 border-transparent pl-2 transition-all duration-200 is-drawer-close:tooltip is-drawer-close:tooltip-right',
-              { 'menu-active border-primary': isSidebarItemActive(item) },
-            ]"
+            :class="sidebarLinkClass(item)"
             :data-tip="resolveSidebarLabel(item)"
             :aria-current="isSidebarItemActive(item) ? 'page' : undefined"
             :aria-label="resolveSidebarLabel(item)"

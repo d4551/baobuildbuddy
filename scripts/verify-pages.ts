@@ -127,7 +127,7 @@ const ensureClientBuildExists = async (): Promise<boolean> => {
 };
 
 const spawnPreviewProcess = (): PreviewProcess =>
-  Bun.spawn(["node", ".output/server/index.mjs"], {
+  Bun.spawn(["bun", ".output/server/index.mjs"], {
     cwd: CLIENT_PACKAGE_ROOT,
     stdout: "pipe",
     stderr: "pipe",

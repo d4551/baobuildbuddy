@@ -1,4 +1,6 @@
 import type {
+  AIRouting,
+  AIRoutingPurpose,
   AIProviderConfig,
   AIProviderStatus,
   AIProviderType,
@@ -7,10 +9,13 @@ import type {
 } from "@bao/shared";
 import {
   AI_CHAT_CONTEXT_MESSAGE_LIMIT,
+  AI_PROVIDER_DEFAULT,
   AI_PROVIDER_DEFAULT_ORDER,
   API_ERROR_ALL_PROVIDERS_STREAM_FAILED,
   DECIMAL_RADIX,
+  DEFAULT_AI_ROUTING,
   LOCAL_AI_AUTO_DETECT_MODEL,
+  normalizeAIRouting,
   toErrorMessage,
 } from "@bao/shared";
 import { createServerLogger } from "../../utils/logger";
@@ -26,6 +31,8 @@ const TEST_AI_MODEL_NAME = "deterministic-test-model";
 const TEST_AI_MAX_QUESTION_COUNT = 12;
 const EXACT_QUESTION_COUNT_PATTERN = /exactly\s+(\d+)\s+questions/i;
 const GENERATE_QUESTION_COUNT_PATTERN = /generate\s+(\d+)\s+interview questions/i;
+const SUMMARY_BULLET_PATTERN_TEMPLATE = String.raw`^-\s+%LABEL%:\s*(.+)$`;
+const PROMPT_HIGHLIGHT_SPLIT_PATTERN = /[;,]/u;
 const aiServiceLogger = createServerLogger("ai-service");
 const describeProviderError = (
   providerName: AIProviderType,
@@ -43,6 +50,24 @@ const describeProviderError = (
 type AvailabilityResult = { isAvailable: boolean; error: string | null };
 type GenerationAttempt = { response: AIResponse | null; error: string | null };
 type StreamAttempt = { result: IteratorResult<string> | null; error: string | null };
+type FallbackRequest = {
+  providerOrder: AIProviderType[];
+  index: number;
+  contextualPrompt: string;
+  providerOptions: Omit<GenerateOptions, "messages"> | undefined;
+  errors: ProviderFailure[];
+};
+type AIServiceSettings = {
+  geminiApiKey?: string | null;
+  claudeApiKey?: string | null;
+  openaiApiKey?: string | null;
+  huggingfaceToken?: string | null;
+  localModelEndpoint?: string | null;
+  localModelName?: string | null;
+  aiRouting?: AIRouting | null;
+  preferredProvider?: string | null;
+  preferredModel?: string | null;
+};
 
 function parseQuestionCount(prompt: string): number {
   const exactMatch = prompt.match(EXACT_QUESTION_COUNT_PATTERN);
@@ -63,13 +88,183 @@ function parseIncludeFlag(prompt: string, label: string, fallback: boolean): boo
   return fallback;
 }
 
+function escapePattern(value: string): string {
+  return value.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+}
+
+function extractPromptLineValue(prompt: string, label: string): string {
+  const matcher = new RegExp(`^${escapePattern(label)}:\\s*(.+)$`, "im");
+  return prompt.match(matcher)?.[1]?.trim() ?? "";
+}
+
+function extractPromptBulletValue(prompt: string, label: string): string {
+  const pattern = SUMMARY_BULLET_PATTERN_TEMPLATE.replace("%LABEL%", escapePattern(label));
+  return prompt.match(new RegExp(pattern, "im"))?.[1]?.trim() ?? "";
+}
+
+function extractPromptHighlights(value: string): string[] {
+  return value
+    .split(PROMPT_HIGHLIGHT_SPLIT_PATTERN)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0 && entry.toLowerCase() !== "not specified")
+    .slice(0, 3);
+}
+
+type DeterministicInterviewPromptContext = {
+  studio: string;
+  role: string;
+  company: string;
+  experienceHighlight: string;
+  projectHighlight: string;
+  technicalHighlight: string;
+  focusArea: string;
+  hiringSignal: string;
+  pitchAngle: string;
+};
+
+function buildDeterministicInterviewPromptContext(
+  prompt: string,
+): DeterministicInterviewPromptContext {
+  const studio = extractPromptLineValue(prompt, "Studio") || extractPromptBulletValue(prompt, "Name");
+  const role = extractPromptLineValue(prompt, "Role") || extractPromptBulletValue(prompt, "Job title");
+  const company = extractPromptBulletValue(prompt, "Company") || studio;
+  const experienceHighlights = extractPromptHighlights(
+    extractPromptBulletValue(prompt, "Experience highlights") ||
+      extractPromptBulletValue(prompt, "Current role"),
+  );
+  const projectHighlights = extractPromptHighlights(
+    extractPromptBulletValue(prompt, "Project highlights") ||
+      extractPromptBulletValue(prompt, "Featured work"),
+  );
+  const technicalHighlights = extractPromptHighlights(
+    extractPromptBulletValue(prompt, "Technical skills") ||
+      extractPromptBulletValue(prompt, "Technologies"),
+  );
+  const focusAreas = extractPromptHighlights(extractPromptBulletValue(prompt, "Interview focus areas"));
+  const hiringSignals = extractPromptHighlights(extractPromptBulletValue(prompt, "Hiring signals"));
+  const candidatePitchAngles = extractPromptHighlights(
+    extractPromptBulletValue(prompt, "Candidate pitch angles"),
+  );
+
+  return {
+    studio,
+    role,
+    company,
+    experienceHighlight: experienceHighlights[0] ?? "recent game-industry delivery work",
+    projectHighlight: projectHighlights[0] ?? "a player-facing system you shipped",
+    technicalHighlight: technicalHighlights[0] ?? "your strongest technical stack",
+    focusArea: focusAreas[0] ?? "cross-functional delivery",
+    hiringSignal: hiringSignals[0] ?? "shipping velocity and collaborative execution",
+    pitchAngle: candidatePitchAngles[0] ?? "player impact, ownership, and measurable outcomes",
+  };
+}
+
+function buildDeterministicQuestionText(
+  type: "intro" | "behavioral" | "technical" | "studio-specific" | "closing",
+  context: DeterministicInterviewPromptContext,
+): string {
+  switch (type) {
+    case "intro":
+      return `Your background highlights ${context.experienceHighlight}. How does that prepare you for the ${context.role} role at ${context.company}?`;
+    case "behavioral":
+      return `Tell me about a time you aligned design, production, or QA partners to deliver ${context.focusArea} work with clear player impact.`;
+    case "technical":
+      return `Walk me through a system from ${context.projectHighlight} where you used ${context.technicalHighlight} in a way that would transfer directly to the ${context.role} scope at ${context.company}.`;
+    case "studio-specific":
+      return `This opportunity signals ${context.hiringSignal}. How would you ramp up in your first 30 days and prove the ${context.pitchAngle} angle is real?`;
+    case "closing":
+      return `What is the strongest evidence from your resume, cover letter, or portfolio that you are ready for ${context.role} at ${context.company} right now?`;
+  }
+}
+
+function buildDeterministicFollowUps(
+  type: "intro" | "behavioral" | "technical" | "studio-specific" | "closing",
+  context: DeterministicInterviewPromptContext,
+): string[] {
+  switch (type) {
+    case "intro":
+      return [
+        `Which result from ${context.projectHighlight} is most relevant to ${context.company}?`,
+        "How did you validate the outcome with teammates or players?",
+      ];
+    case "behavioral":
+      return [
+        "What disagreement or tradeoff made the collaboration difficult?",
+        "How did you know the partnership was working?",
+      ];
+    case "technical":
+      return [
+        `What constraints shaped your use of ${context.technicalHighlight}?`,
+        "What telemetry or quality checks told you the solution was healthy?",
+      ];
+    case "studio-specific":
+      return [
+        `Which stakeholder would you meet first to support ${context.focusArea}?`,
+        "What deliverable would you aim to own by the end of the first sprint?",
+      ];
+    case "closing":
+      return [
+        "Which accomplishment best proves that claim?",
+        "Why does this studio context fit where you want to grow next?",
+      ];
+  }
+}
+
 type ProviderFailure = { provider: AIProviderType; error: string };
+
+function appendOptionalProviderConfig(
+  configs: AIProviderConfig[],
+  provider: Exclude<AIProviderType, "local" | "huggingface">,
+  apiKey?: string | null,
+): void {
+  if (!apiKey) {
+    return;
+  }
+
+  configs.push({
+    provider,
+    apiKey,
+    enabled: true,
+  });
+}
+
+function buildProviderConfigs(settings?: AIServiceSettings): AIProviderConfig[] {
+  const localModelEndpoint =
+    typeof settings?.localModelEndpoint === "string" && settings.localModelEndpoint.trim()
+      ? settings.localModelEndpoint.trim()
+      : null;
+  const localModelName =
+    typeof settings?.localModelName === "string" && settings.localModelName.trim()
+      ? settings.localModelName.trim()
+      : null;
+
+  const configs: AIProviderConfig[] = [
+    {
+      provider: "local",
+      enabled: true,
+      ...(localModelEndpoint ? { baseUrl: localModelEndpoint } : {}),
+      ...(localModelName ? { model: localModelName } : {}),
+    },
+  ];
+
+  appendOptionalProviderConfig(configs, "gemini", settings?.geminiApiKey);
+  appendOptionalProviderConfig(configs, "claude", settings?.claudeApiKey);
+  appendOptionalProviderConfig(configs, "openai", settings?.openaiApiKey);
+  configs.push({
+    provider: "huggingface",
+    enabled: true,
+    ...(settings?.huggingfaceToken ? { apiKey: settings.huggingfaceToken } : {}),
+  });
+
+  return configs;
+}
 
 function buildDeterministicQuestionSet(prompt: string): string {
   const questionCount = parseQuestionCount(prompt);
   const includeTechnical = parseIncludeFlag(prompt, "technical", true);
   const includeBehavioral = parseIncludeFlag(prompt, "behavioral", true);
   const includeStudioSpecific = parseIncludeFlag(prompt, "studio-specific", true);
+  const promptContext = buildDeterministicInterviewPromptContext(prompt);
   const candidateTypes: Array<
     "intro" | "behavioral" | "technical" | "studio-specific" | "closing"
   > = ["intro"];
@@ -99,9 +294,9 @@ function buildDeterministicQuestionSet(prompt: string): string {
     const type = candidateTypes[index % candidateTypes.length] ?? "behavioral";
     questions.push({
       id: `test-q${position}`,
-      question: `Deterministic interview question ${position} for reliable test execution.`,
+      question: buildDeterministicQuestionText(type, promptContext),
       type,
-      followUps: ["Can you describe your approach?", "What measurable result did you achieve?"],
+      followUps: buildDeterministicFollowUps(type, promptContext),
       expectedDuration: 90,
       difficulty: type === "technical" ? "hard" : "medium",
       tags: ["deterministic", "test"],
@@ -223,6 +418,26 @@ function buildDeterministicCoverLetterContent(): string {
   });
 }
 
+function buildDeterministicScrapeEnrichment(): string {
+  return JSON.stringify({
+    summary:
+      "The posting emphasizes hands-on delivery, cross-functional collaboration, and practical ownership in a live game environment.",
+    hiringSignals: [
+      "Team values shipping velocity and execution reliability",
+      "Role expects direct collaboration with adjacent disciplines",
+    ],
+    interviewFocusAreas: [
+      "Player-facing system ownership",
+      "Cross-functional delivery tradeoffs",
+      "Live-ops or iteration workflow",
+    ],
+    candidatePitchAngles: [
+      "Highlight shipped gameplay or production outcomes",
+      "Show how tooling or process improvements improved delivery",
+    ],
+  });
+}
+
 function buildDeterministicContent(prompt: string): string {
   const normalizedPrompt = prompt.toLowerCase();
 
@@ -269,6 +484,13 @@ function buildDeterministicContent(prompt: string): string {
     return buildDeterministicCoverLetterContent();
   }
 
+  if (
+    normalizedPrompt.includes("return strict json object only for scrape enrichment") &&
+    normalizedPrompt.includes('"candidatepitchangles"')
+  ) {
+    return buildDeterministicScrapeEnrichment();
+  }
+
   return "Deterministic test response.";
 }
 
@@ -312,10 +534,16 @@ class DeterministicTestProvider implements AIProvider {
 export class AIService {
   private providers: Map<AIProviderType, AIProvider> = new Map();
   private preferredProvider?: AIProviderType;
+  private routing: AIRouting = DEFAULT_AI_ROUTING;
   private fallbackOrder: AIProviderType[] = [];
 
-  constructor(configs: AIProviderConfig[], preferredProvider?: AIProviderType) {
+  constructor(
+    configs: AIProviderConfig[],
+    preferredProvider?: AIProviderType,
+    routing?: AIRouting,
+  ) {
     this.preferredProvider = preferredProvider;
+    this.routing = normalizeAIRouting(routing, preferredProvider ?? AI_PROVIDER_DEFAULT);
     this.initializeProviders(configs);
     this.rebuildFallbackOrder(configs);
   }
@@ -325,70 +553,21 @@ export class AIService {
    * Converts the flat settings config into AIProviderConfig[] format.
    * Used by WebSocket handlers, route handlers, and services.
    */
-  static fromSettings(settings?: {
-    geminiApiKey?: string | null;
-    claudeApiKey?: string | null;
-    openaiApiKey?: string | null;
-    huggingfaceToken?: string | null;
-    localModelEndpoint?: string | null;
-    localModelName?: string | null;
-    preferredProvider?: string | null;
-  }): AIService {
+  static fromSettings(settings?: AIServiceSettings): AIService {
     if (AIService.isTestRuntime()) {
       return AIService.createDeterministicTestService();
     }
 
-    const localModelEndpoint =
-      typeof settings?.localModelEndpoint === "string" && settings.localModelEndpoint.trim()
-        ? settings.localModelEndpoint.trim()
-        : null;
-    const localModelName =
-      typeof settings?.localModelName === "string" && settings.localModelName.trim()
-        ? settings.localModelName.trim()
-        : null;
-
-    const localProviderConfig: AIProviderConfig = {
-      provider: "local",
-      enabled: true,
-      ...(localModelEndpoint ? { baseUrl: localModelEndpoint } : {}),
-      ...(localModelName ? { model: localModelName } : {}),
-    };
-    const configs: AIProviderConfig[] = [localProviderConfig];
-
-    if (settings?.geminiApiKey) {
-      configs.push({
-        provider: "gemini",
-        apiKey: settings.geminiApiKey,
-        enabled: true,
-      });
-    }
-
-    if (settings?.claudeApiKey) {
-      configs.push({
-        provider: "claude",
-        apiKey: settings.claudeApiKey,
-        enabled: true,
-      });
-    }
-
-    if (settings?.openaiApiKey) {
-      configs.push({
-        provider: "openai",
-        apiKey: settings.openaiApiKey,
-        enabled: true,
-      });
-    }
-
-    // HuggingFace free tier — always available, token optional
-    const huggingFaceProviderConfig: AIProviderConfig = {
-      provider: "huggingface",
-      enabled: true,
-      ...(settings?.huggingfaceToken ? { apiKey: settings.huggingfaceToken } : {}),
-    };
-    configs.push(huggingFaceProviderConfig);
-
-    const preferredProvider = AIService.resolvePreferredProvider(settings?.preferredProvider);
-    return new AIService(configs, preferredProvider);
+    const configs = buildProviderConfigs(settings);
+    const preferredProvider = AIService.resolvePreferredProvider(
+      settings?.aiRouting?.chat?.provider ?? settings?.preferredProvider,
+    );
+    const routing = normalizeAIRouting(
+      settings?.aiRouting,
+      preferredProvider,
+      settings?.preferredModel,
+    );
+    return new AIService(configs, preferredProvider, routing);
   }
 
   private static isTestRuntime(): boolean {
@@ -396,11 +575,12 @@ export class AIService {
   }
 
   private static createDeterministicTestService(): AIService {
-    const service = new AIService([], TEST_AI_PROVIDER_NAME);
+    const service = new AIService([], TEST_AI_PROVIDER_NAME, DEFAULT_AI_ROUTING);
     service.providers.clear();
     service.providers.set(TEST_AI_PROVIDER_NAME, new DeterministicTestProvider());
     service.fallbackOrder = [TEST_AI_PROVIDER_NAME];
     service.preferredProvider = TEST_AI_PROVIDER_NAME;
+    service.routing = normalizeAIRouting(undefined, TEST_AI_PROVIDER_NAME, TEST_AI_MODEL_NAME);
     return service;
   }
 
@@ -518,6 +698,43 @@ export class AIService {
     return this.providers.values().next().value || null;
   }
 
+  private resolveRoutingTarget(options?: GenerateOptions): {
+    purpose: AIRoutingPurpose;
+    provider: AIProviderType;
+    model?: string;
+  } {
+    const purpose = options?.purpose ?? "chat";
+    const routedTarget = this.routing[purpose] ?? this.routing.chat;
+    const provider =
+      options?.provider ??
+      routedTarget?.provider ??
+      this.preferredProvider ??
+      AI_PROVIDER_DEFAULT_ORDER[0];
+    const model =
+      typeof options?.model === "string" && options.model.trim().length > 0
+        ? options.model.trim()
+        : routedTarget?.model;
+    return model ? { purpose, provider, model } : { purpose, provider };
+  }
+
+  private buildProviderOrder(options?: GenerateOptions): AIProviderType[] {
+    const preferredTarget = this.resolveRoutingTarget(options);
+    const ordered: AIProviderType[] = [];
+
+    ordered.push(preferredTarget.provider);
+    if (this.preferredProvider && !ordered.includes(this.preferredProvider)) {
+      ordered.push(this.preferredProvider);
+    }
+
+    for (const provider of this.fallbackOrder) {
+      if (!ordered.includes(provider)) {
+        ordered.push(provider);
+      }
+    }
+
+    return ordered;
+  }
+
   private static mergePromptWithContext(prompt: string, options?: GenerateOptions): string {
     const messageHistory = options?.messages;
     if (!messageHistory || messageHistory.length === 0) {
@@ -539,14 +756,27 @@ export class AIService {
   }
 
   private static toProviderOptions(
+    routingTarget: ReturnType<AIService["resolveRoutingTarget"]>,
     options?: GenerateOptions,
   ): Omit<GenerateOptions, "messages"> | undefined {
     if (!options) {
-      return;
+      return routingTarget.model
+        ? {
+            purpose: routingTarget.purpose,
+            provider: routingTarget.provider,
+            model: routingTarget.model,
+          }
+        : {
+            purpose: routingTarget.purpose,
+            provider: routingTarget.provider,
+          };
     }
 
     const { temperature, maxTokens, topP, topK, timeout, systemPrompt } = options;
     return {
+      purpose: routingTarget.purpose,
+      provider: routingTarget.provider,
+      model: routingTarget.model,
       temperature,
       maxTokens,
       topP,
@@ -628,35 +858,33 @@ export class AIService {
     return generationResult.response;
   }
 
-  private async generateWithFallback(
-    index: number,
-    contextualPrompt: string,
-    providerOptions: Omit<GenerateOptions, "messages"> | undefined,
-    errors: ProviderFailure[],
-  ): Promise<AIResponse | null> {
-    const providerName = this.fallbackOrder[index];
+  private async generateWithFallback(request: FallbackRequest): Promise<AIResponse | null> {
+    const providerName = request.providerOrder[request.index];
     if (!providerName) {
       return null;
     }
 
     const response = await this.generateFromProvider(
       providerName,
-      contextualPrompt,
-      providerOptions,
-      errors,
+      request.contextualPrompt,
+      request.providerOptions,
+      request.errors,
     );
     if (response) {
       return response;
     }
-    return this.generateWithFallback(index + 1, contextualPrompt, providerOptions, errors);
+    return this.generateWithFallback({ ...request, index: request.index + 1 });
   }
 
-  private buildGenerateFailureResponse(errors: ProviderFailure[]): AIResponse {
+  private buildGenerateFailureResponse(
+    errors: ProviderFailure[],
+    fallbackProvider: AIProviderType,
+  ): AIResponse {
     const now = Date.now();
     const errorMessage = AIService.buildFailureMessage(errors);
     return {
       id: `failed-${now}`,
-      provider: this.preferredProvider || AI_PROVIDER_DEFAULT_ORDER[0],
+      provider: fallbackProvider,
       model: "none",
       content: "",
       error: `All providers failed: ${errorMessage}`,
@@ -713,26 +941,23 @@ export class AIService {
   }
 
   private async *streamWithFallback(
-    index: number,
-    contextualPrompt: string,
-    providerOptions: Omit<GenerateOptions, "messages"> | undefined,
-    errors: ProviderFailure[],
+    request: FallbackRequest,
   ): AsyncGenerator<{ chunk: string; provider: AIProviderType }, boolean> {
-    const providerName = this.fallbackOrder[index];
+    const providerName = request.providerOrder[request.index];
     if (!providerName) {
       return false;
     }
 
     const streamResult = yield* this.streamProvider(
       providerName,
-      contextualPrompt,
-      providerOptions,
-      errors,
+      request.contextualPrompt,
+      request.providerOptions,
+      request.errors,
     );
     if (streamResult.hasYielded && !streamResult.failed) {
       return true;
     }
-    return yield* this.streamWithFallback(index + 1, contextualPrompt, providerOptions, errors);
+    return yield* this.streamWithFallback({ ...request, index: request.index + 1 });
   }
 
   /**
@@ -741,12 +966,20 @@ export class AIService {
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const errors: ProviderFailure[] = [];
     const contextualPrompt = AIService.mergePromptWithContext(prompt, options);
-    const providerOptions = AIService.toProviderOptions(options);
-    const response = await this.generateWithFallback(0, contextualPrompt, providerOptions, errors);
+    const routingTarget = this.resolveRoutingTarget(options);
+    const providerOrder = this.buildProviderOrder(options);
+    const providerOptions = AIService.toProviderOptions(routingTarget, options);
+    const response = await this.generateWithFallback({
+      providerOrder,
+      index: 0,
+      contextualPrompt,
+      providerOptions,
+      errors,
+    });
     if (response) {
       return response;
     }
-    return this.buildGenerateFailureResponse(errors);
+    return this.buildGenerateFailureResponse(errors, routingTarget.provider);
   }
 
   /**
@@ -758,8 +991,16 @@ export class AIService {
   ): AsyncGenerator<{ chunk: string; provider: AIProviderType }> {
     const errors: ProviderFailure[] = [];
     const contextualPrompt = AIService.mergePromptWithContext(prompt, options);
-    const providerOptions = AIService.toProviderOptions(options);
-    const streamed = yield* this.streamWithFallback(0, contextualPrompt, providerOptions, errors);
+    const routingTarget = this.resolveRoutingTarget(options);
+    const providerOrder = this.buildProviderOrder(options);
+    const providerOptions = AIService.toProviderOptions(routingTarget, options);
+    const streamed = yield* this.streamWithFallback({
+      providerOrder,
+      index: 0,
+      contextualPrompt,
+      providerOptions,
+      errors,
+    });
     if (streamed) {
       return;
     }
@@ -772,13 +1013,32 @@ export class AIService {
    * Get status of all providers
    */
   async getAvailableProviders(): Promise<AIProviderStatus[]> {
-    const checks = Array.from(this.providers.entries()).map(([providerName, provider]) =>
-      provider.isAvailable().then(
+    const checks = Array.from(this.providers.entries()).map(async ([providerName, provider]) => {
+      if (providerName === "local" && provider.baseUrl) {
+        const diagnostics = await LocalProvider.inspectEndpoint(
+          provider.baseUrl,
+          this.getActiveModel("local") ?? undefined,
+        );
+        return {
+          provider: providerName,
+          available: diagnostics.code === "healthy",
+          health: diagnostics.code === "healthy" ? "healthy" : "down",
+          lastCheck: Date.now(),
+          error: diagnostics.message,
+          endpoint: diagnostics.endpoint,
+          selectedModel: diagnostics.selectedModel,
+          availableModels: diagnostics.availableModels,
+          diagnosticCode: diagnostics.code,
+        } satisfies AIProviderStatus;
+      }
+
+      return provider.isAvailable().then(
         (available): AIProviderStatus => ({
           provider: providerName,
           available,
           health: available ? "healthy" : "down",
           lastCheck: Date.now(),
+          selectedModel: provider.model,
         }),
         (error: unknown): AIProviderStatus => ({
           provider: providerName,
@@ -786,9 +1046,11 @@ export class AIService {
           health: "down",
           lastCheck: Date.now(),
           error: toErrorMessage(error),
+          selectedModel: provider.model,
+          diagnosticCode: "error",
         }),
-      ),
-    );
+      );
+    });
     return Promise.all(checks);
   }
 
@@ -796,7 +1058,14 @@ export class AIService {
    * Detect local AI providers (RamaLama, Ollama)
    */
   async detectLocalProviders(): Promise<
-    Array<{ baseUrl: string; name: string; available: boolean }>
+    Array<{
+      baseUrl: string;
+      name: string;
+      available: boolean;
+      availableModels?: string[];
+      diagnosticCode?: AIProviderStatus["diagnosticCode"];
+      message?: string;
+    }>
   > {
     return await LocalProvider.detectLocalServers();
   }
@@ -861,6 +1130,13 @@ export class AIService {
    */
   getFallbackOrder(): AIProviderType[] {
     return [...this.fallbackOrder];
+  }
+
+  /**
+   * Get the current purpose-aware routing table.
+   */
+  getRouting(): AIRouting {
+    return normalizeAIRouting(this.routing, this.preferredProvider ?? AI_PROVIDER_DEFAULT);
   }
 
   /**

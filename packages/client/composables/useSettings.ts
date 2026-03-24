@@ -6,11 +6,24 @@ import { toAppSettings } from "./api-normalizers";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 import { useNuxtState } from "./nuxtRuntime";
 import { useApi } from "./useApi";
+import {
+  resolveAIRoutingPreference,
+  resolveLocalProviderState,
+  resolveProviderDiagnostics,
+} from "~/utils/ai-control-plane";
 
 type ApiClient = ReturnType<typeof useApi>;
 type UpdateSettingsInput = NonNullable<Parameters<ApiClient["settings"]["put"]>[0]>;
 type UpdateApiKeysInput = NonNullable<Parameters<ApiClient["settings"]["api-keys"]["put"]>[0]>;
 type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
+type ProviderTestResult = {
+  valid: boolean;
+  provider: TestApiKeyInput["provider"];
+  diagnosticCode?: string;
+  message?: string;
+  availableModels?: string[];
+  selectedModel?: string;
+};
 
 interface SettingsContext {
   api: ApiClient;
@@ -27,9 +40,13 @@ function createAiConfigurationIncompleteComputed(
       return false;
     }
 
-    const hasLocalConfig =
+    const localConfigured =
       settings.value.hasLocalKey ??
-      Boolean(settings.value.localModelEndpoint?.trim() && settings.value.localModelName?.trim());
+      Boolean(settings.value.localModelEndpoint?.trim());
+    const localDiagnosticCode = settings.value.providerDiagnostics?.local?.code;
+    const hasLocalConfig =
+      localConfigured &&
+      (localDiagnosticCode ? localDiagnosticCode === "healthy" : localConfigured);
     const hasCloudProvider =
       Boolean(settings.value.hasGeminiKey) ||
       Boolean(settings.value.hasOpenaiKey) ||
@@ -38,6 +55,24 @@ function createAiConfigurationIncompleteComputed(
 
     return !(hasLocalConfig || hasCloudProvider);
   });
+}
+
+function createChatRoutingPreferenceComputed(
+  settings: ReturnType<typeof useNuxtState<AppSettings | null>>,
+) {
+  return computed(() => resolveAIRoutingPreference(settings.value, "chat"));
+}
+
+function createProviderDiagnosticsComputed(
+  settings: ReturnType<typeof useNuxtState<AppSettings | null>>,
+) {
+  return computed(() => resolveProviderDiagnostics(settings.value));
+}
+
+function createLocalProviderStateComputed(
+  settings: ReturnType<typeof useNuxtState<AppSettings | null>>,
+) {
+  return computed(() => resolveLocalProviderState({ settings: settings.value }));
 }
 
 function createSettingsActions(context: SettingsContext) {
@@ -66,12 +101,25 @@ function createSettingsActions(context: SettingsContext) {
       await fetchSettings();
     });
 
-  const testApiKey = async (provider: TestApiKeyInput["provider"], key: string) => {
-    const { data, error } = await context.api.settings["test-api-key"].post({ provider, key });
+  const testApiKey = async (
+    provider: TestApiKeyInput["provider"],
+    key: string,
+    model?: string,
+  ): Promise<ProviderTestResult> => {
+    const { data, error } = await context.api.settings["test-api-key"].post({ provider, key, model });
     if (error || !data || typeof data.valid !== "boolean") {
-      return { valid: false, provider };
+      return { valid: false, provider, diagnosticCode: "error" };
     }
-    return { valid: data.valid, provider };
+    return {
+      valid: data.valid,
+      provider,
+      diagnosticCode: typeof data.diagnosticCode === "string" ? data.diagnosticCode : undefined,
+      message: typeof data.message === "string" ? data.message : undefined,
+      availableModels: Array.isArray(data.availableModels)
+        ? data.availableModels.filter((value): value is string => typeof value === "string")
+        : undefined,
+      selectedModel: typeof data.selectedModel === "string" ? data.selectedModel : undefined,
+    };
   };
 
   return {
@@ -96,12 +144,18 @@ export function useSettings() {
   };
 
   const isAiConfigurationIncomplete = createAiConfigurationIncompleteComputed(context.settings);
+  const chatRoutingPreference = createChatRoutingPreferenceComputed(context.settings);
+  const providerDiagnostics = createProviderDiagnosticsComputed(context.settings);
+  const localProviderState = createLocalProviderStateComputed(context.settings);
   const actions = createSettingsActions(context);
 
   return {
     settings: readonly(context.settings),
     loading: readonly(context.loading),
     isAiConfigurationIncomplete: readonly(isAiConfigurationIncomplete),
+    chatRoutingPreference: readonly(chatRoutingPreference),
+    providerDiagnostics: readonly(providerDiagnostics),
+    localProviderState: readonly(localProviderState),
     ...actions,
   };
 }

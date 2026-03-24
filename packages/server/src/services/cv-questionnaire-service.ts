@@ -65,6 +65,7 @@ export class CvQuestionnaireService {
     );
 
     const response = await ai.generate(prompt, {
+      purpose: "resume",
       temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
       maxTokens: AI_MAX_TOKENS_CV_QUESTION,
     });
@@ -98,6 +99,7 @@ export class CvQuestionnaireService {
     const prompt = cvQuestionnaireSynthesizePrompt(questionsAndAnswers);
 
     const response = await ai.generate(prompt, {
+      purpose: "resume",
       temperature: AI_DEFAULT_TEMPERATURE,
       maxTokens: AI_MAX_TOKENS_CV_ANALYSIS,
     });

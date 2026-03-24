@@ -43,8 +43,8 @@ export declare const automationRoutes: Elysia<"/automation", {
                         404: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         422: {
@@ -67,8 +67,8 @@ export declare const automationRoutes: Elysia<"/automation", {
             post: {
                 body: {
                     customAnswers?: {} | undefined;
-                    jobId?: string | undefined;
                     coverLetterId?: string | undefined;
+                    jobId?: string | undefined;
                     resumeId: string;
                     jobUrl: string;
                 };
@@ -79,16 +79,16 @@ export declare const automationRoutes: Elysia<"/automation", {
                     500: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     200: {
                         error: string | {
                             details?: {} | undefined;
+                            code: string;
                             source: string;
                             message: string;
-                            code: string;
                         } | null;
                         id: string;
                         aborted: boolean;
@@ -100,9 +100,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                             [x: string]: unknown;
                         } | null;
                         progress: number | null;
-                        status: "success" | "error" | "pending" | "running";
-                        createdAt: string;
+                        status: "error" | "success" | "pending" | "running";
                         updatedAt: string;
+                        createdAt: string;
                         screenshots: string[] | null;
                         totalSteps: number | null;
                         jobId: string | null;
@@ -117,29 +117,29 @@ export declare const automationRoutes: Elysia<"/automation", {
                     400: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     404: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     409: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     422: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                 };
@@ -153,8 +153,8 @@ export declare const automationRoutes: Elysia<"/automation", {
                 post: {
                     body: {
                         customAnswers?: {} | undefined;
-                        jobId?: string | undefined;
                         coverLetterId?: string | undefined;
+                        jobId?: string | undefined;
                         resumeId: string;
                         jobUrl: string;
                         runAt: string;
@@ -166,16 +166,16 @@ export declare const automationRoutes: Elysia<"/automation", {
                         500: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         200: {
                             error: string | {
                                 details?: {} | undefined;
+                                code: string;
                                 source: string;
                                 message: string;
-                                code: string;
                             } | null;
                             id: string;
                             aborted: boolean;
@@ -187,9 +187,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "error" | "pending" | "running";
-                            createdAt: string;
+                            status: "error" | "success" | "pending" | "running";
                             updatedAt: string;
+                            createdAt: string;
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -204,29 +204,29 @@ export declare const automationRoutes: Elysia<"/automation", {
                         400: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         404: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         409: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         422: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                     };
@@ -253,8 +253,8 @@ export declare const automationRoutes: Elysia<"/automation", {
                     500: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     200: {
@@ -271,29 +271,29 @@ export declare const automationRoutes: Elysia<"/automation", {
                     400: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     404: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     409: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     422: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                 };
@@ -321,16 +321,16 @@ export declare const automationRoutes: Elysia<"/automation", {
                         500: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         200: {
                             error: string | {
                                 details?: {} | undefined;
+                                code: string;
                                 source: string;
                                 message: string;
-                                code: string;
                             } | null;
                             id: string;
                             aborted: boolean;
@@ -342,9 +342,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "error" | "pending" | "running";
-                            createdAt: string;
+                            status: "error" | "success" | "pending" | "running";
                             updatedAt: string;
+                            createdAt: string;
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -359,29 +359,29 @@ export declare const automationRoutes: Elysia<"/automation", {
                         400: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         404: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         409: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         422: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                     };
@@ -403,16 +403,16 @@ export declare const automationRoutes: Elysia<"/automation", {
                     500: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     200: {
                         error: string | {
                             details?: {} | undefined;
+                            code: string;
                             source: string;
                             message: string;
-                            code: string;
                         } | null;
                         id: string;
                         aborted: boolean;
@@ -424,9 +424,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                             [x: string]: unknown;
                         } | null;
                         progress: number | null;
-                        status: "success" | "error" | "pending" | "running";
-                        createdAt: string;
+                        status: "error" | "success" | "pending" | "running";
                         updatedAt: string;
+                        createdAt: string;
                         screenshots: string[] | null;
                         totalSteps: number | null;
                         jobId: string | null;
@@ -441,29 +441,29 @@ export declare const automationRoutes: Elysia<"/automation", {
                     400: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     404: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     409: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     422: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                 };
@@ -486,16 +486,16 @@ export declare const automationRoutes: Elysia<"/automation", {
                         500: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         200: {
                             error: string | {
                                 details?: {} | undefined;
+                                code: string;
                                 source: string;
                                 message: string;
-                                code: string;
                             } | null;
                             id: string;
                             aborted: boolean;
@@ -507,9 +507,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "error" | "pending" | "running";
-                            createdAt: string;
+                            status: "error" | "success" | "pending" | "running";
                             updatedAt: string;
+                            createdAt: string;
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -524,29 +524,29 @@ export declare const automationRoutes: Elysia<"/automation", {
                         400: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         404: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         409: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         422: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                     };
@@ -566,8 +566,8 @@ export declare const automationRoutes: Elysia<"/automation", {
                     500: {
                         error: {
                             details?: {} | undefined;
-                            message: string;
                             code: string;
+                            message: string;
                         };
                     };
                     200: {
@@ -616,16 +616,16 @@ export declare const automationRoutes: Elysia<"/automation", {
                 params: {};
                 query: {
                     type?: "scrape" | "job_apply" | "email" | undefined;
-                    status?: "success" | "error" | "pending" | "running" | undefined;
+                    status?: "error" | "success" | "pending" | "running" | undefined;
                 };
                 headers: unknown;
                 response: {
                     200: {
                         error: string | {
                             details?: {} | undefined;
+                            code: string;
                             source: string;
                             message: string;
-                            code: string;
                         } | null;
                         id: string;
                         aborted: boolean;
@@ -637,9 +637,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                             [x: string]: unknown;
                         } | null;
                         progress: number | null;
-                        status: "success" | "error" | "pending" | "running";
-                        createdAt: string;
+                        status: "error" | "success" | "pending" | "running";
                         updatedAt: string;
+                        createdAt: string;
                         screenshots: string[] | null;
                         totalSteps: number | null;
                         jobId: string | null;
@@ -679,9 +679,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                         200: {
                             error: string | {
                                 details?: {} | undefined;
+                                code: string;
                                 source: string;
                                 message: string;
-                                code: string;
                             } | null;
                             id: string;
                             aborted: boolean;
@@ -693,9 +693,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                                 [x: string]: unknown;
                             } | null;
                             progress: number | null;
-                            status: "success" | "error" | "pending" | "running";
-                            createdAt: string;
+                            status: "error" | "success" | "pending" | "running";
                             updatedAt: string;
+                            createdAt: string;
                             screenshots: string[] | null;
                             totalSteps: number | null;
                             jobId: string | null;
@@ -710,15 +710,15 @@ export declare const automationRoutes: Elysia<"/automation", {
                         400: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         404: {
                             error: {
                                 details?: {} | undefined;
-                                message: string;
                                 code: string;
+                                message: string;
                             };
                         };
                         422: {

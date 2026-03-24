@@ -1696,6 +1696,25 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             }, {}, {
                 length: number | undefined;
             }>;
+            enrichment: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "enrichment";
+                tableName: "jobs";
+                dataType: "json";
+                columnType: "SQLiteTextJson";
+                data: import("@bao/shared").ScrapePersonaEnrichment;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: undefined;
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                $type: import("@bao/shared").ScrapePersonaEnrichment;
+            }>;
             createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "created_at";
                 tableName: "jobs";
@@ -2599,6 +2618,25 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             }, {}, {
                 length: number | undefined;
             }>;
+            aiRouting: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "ai_routing";
+                tableName: "settings";
+                dataType: "json";
+                columnType: "SQLiteTextJson";
+                data: import("@bao/shared").AIRouting;
+                driverParam: string;
+                notNull: false;
+                hasDefault: true;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: undefined;
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                $type: import("@bao/shared").AIRouting;
+            }>;
             preferredProvider: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "preferred_provider";
                 tableName: "settings";
@@ -3272,6 +3310,25 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {}>;
+            enrichment: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "enrichment";
+                tableName: "studios";
+                dataType: "json";
+                columnType: "SQLiteTextJson";
+                data: import("@bao/shared").ScrapePersonaEnrichment;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: undefined;
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                $type: import("@bao/shared").ScrapePersonaEnrichment;
+            }>;
             createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "created_at";
                 tableName: "studios";

@@ -1,4 +1,4 @@
-import type { AppDataTheme, AutomationSettings, BrandSettings, EmailTransportSettings } from "@bao/shared";
+import type { AIRouting, AppDataTheme, AutomationSettings, BrandSettings, EmailTransportSettings } from "@bao/shared";
 import { Elysia } from "elysia";
 export declare const settingsRoutes: Elysia<"/settings", {
     decorator: {};
@@ -34,8 +34,10 @@ export declare const settingsRoutes: Elysia<"/settings", {
             headers: unknown;
             response: {
                 200: {
-                    error: string;
-                } | {
+                    aiRouting: AIRouting;
+                    providerDiagnostics: Record<string, unknown> | undefined;
+                    preferredProvider: string | null;
+                    preferredModel: string | null;
                     theme: AppDataTheme;
                     brandSettings: BrandSettings;
                     geminiApiKey: string | null;
@@ -49,17 +51,16 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     hasEmailTransportPassword: boolean;
                     hasLocalKey: boolean;
                     id: string;
-                    localModelEndpoint: string | null;
-                    localModelName: string | null;
-                    preferredProvider: string | null;
-                    preferredModel: string | null;
-                    language: string | null;
                     notifications: Record<string, boolean> | null;
                     automationSettings: AutomationSettings | null;
                     emailTransportSettings: EmailTransportSettings | null;
-                    createdAt: string;
+                    localModelEndpoint: string | null;
+                    localModelName: string | null;
+                    language: string | null;
                     updatedAt: string;
-                    error?: undefined;
+                    createdAt: string;
+                } | {
+                    error: string;
                 };
             };
         };
@@ -68,6 +69,44 @@ export declare const settingsRoutes: Elysia<"/settings", {
     settings: {
         put: {
             body: {
+                aiRouting?: {
+                    chat: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                    interviewQuestions: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                    interviewFeedback: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                    resume: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                    coverLetter: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                    emailResponse: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                    jobMatch: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                    scrapeEnrichment: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                    automationFieldMapping: {
+                        model?: string | undefined;
+                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    };
+                } | undefined;
                 notifications?: {
                     achievements?: boolean | undefined;
                     dailyChallenges?: boolean | undefined;
@@ -90,9 +129,9 @@ export declare const settingsRoutes: Elysia<"/settings", {
                             endpoint: string;
                         };
                         tts: {
-                            format: "mp3" | "wav";
                             provider: "openai" | "huggingface" | "local" | "browser" | "custom";
                             model: string;
+                            format: "mp3" | "wav";
                             endpoint: string;
                             voice: string;
                         };
@@ -180,6 +219,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         monoFontFamily?: string | undefined;
                     } | undefined;
                     lightTheme?: {
+                        error?: string | undefined;
                         success?: string | undefined;
                         base100?: string | undefined;
                         base200?: string | undefined;
@@ -198,7 +238,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         successContent?: string | undefined;
                         warning?: string | undefined;
                         warningContent?: string | undefined;
-                        error?: string | undefined;
                         errorContent?: string | undefined;
                         radiusSelector?: string | undefined;
                         radiusField?: string | undefined;
@@ -210,6 +249,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         noise?: string | undefined;
                     } | undefined;
                     darkTheme?: {
+                        error?: string | undefined;
                         success?: string | undefined;
                         base100?: string | undefined;
                         base200?: string | undefined;
@@ -228,7 +268,6 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         successContent?: string | undefined;
                         warning?: string | undefined;
                         warningContent?: string | undefined;
-                        error?: string | undefined;
                         errorContent?: string | undefined;
                         radiusSelector?: string | undefined;
                         radiusField?: string | undefined;
@@ -302,8 +341,9 @@ export declare const settingsRoutes: Elysia<"/settings", {
         "test-api-key": {
             post: {
                 body: {
-                    key: string;
+                    model?: string | undefined;
                     provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    key: string;
                 };
                 params: {};
                 query: unknown;
@@ -311,11 +351,27 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 response: {
                     200: {
                         valid: boolean;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                        error: string;
+                        provider: "local";
+                        diagnosticCode: "healthy" | "unconfigured" | "unreachable" | "empty-model-list" | "invalid-model" | "timeout" | "error";
+                        message: string | undefined;
+                        availableModels: string[] | undefined;
+                        selectedModel: string | undefined;
+                        error?: undefined;
                     } | {
                         valid: boolean;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "gemini" | "claude" | "openai" | "huggingface";
+                        error: string;
+                        diagnosticCode?: undefined;
+                        message?: undefined;
+                        availableModels?: undefined;
+                        selectedModel?: undefined;
+                    } | {
+                        valid: boolean;
+                        provider: "gemini" | "claude" | "openai" | "huggingface";
+                        diagnosticCode: string;
+                        message: string | undefined;
+                        availableModels?: undefined;
+                        selectedModel?: undefined;
                         error?: undefined;
                     };
                     422: {

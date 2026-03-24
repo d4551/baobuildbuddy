@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
+import { AI_ROUTING_PURPOSE_IDS } from "@bao/shared";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -20,6 +21,9 @@ beforeAll(async () => {
 const getSettings = () =>
   requestJson<{
     id: string;
+    aiRouting?: Record<string, { provider: string; model?: string }>;
+    preferredProvider?: string;
+    preferredModel?: string | null;
     hasGeminiKey?: boolean;
     geminiApiKey?: string | null;
     hasEmailTransportPassword?: boolean;
@@ -56,6 +60,15 @@ describe("settings write routes", () => {
   test("PUT /api/settings updates", async () => {
     const res = await requestJson<{ success: boolean }>(app, "PUT", "/api/settings", {
       theme: "bao-dark",
+      aiRouting: Object.fromEntries(
+        AI_ROUTING_PURPOSE_IDS.map((purpose) => [
+          purpose,
+          {
+            provider: purpose === "chat" ? "openai" : "local",
+            ...(purpose === "chat" ? { model: "gpt-4o-mini" } : {}),
+          },
+        ]),
+      ),
       emailTransportSettings: {
         host: "smtp.example.test",
         port: 587,
@@ -69,6 +82,14 @@ describe("settings write routes", () => {
     });
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
+
+    const updated = await getSettings();
+    expect(updated.body.aiRouting?.chat).toEqual({
+      provider: "openai",
+      model: "gpt-4o-mini",
+    });
+    expect(updated.body.preferredProvider).toBe("openai");
+    expect(updated.body.preferredModel).toBe("gpt-4o-mini");
   });
 
   test("PUT /api/settings/api-keys updates keys", async () => {

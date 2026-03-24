@@ -1,48 +1,80 @@
 <script setup lang="ts">
 import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-const props = defineProps<{
+interface MatchBreakdown {
+  skills: number;
+  experience: number;
+  location: number;
+}
+
+const props = withDefaults(defineProps<{
   score: number;
-  breakdown?: {
-    skills: number;
-    experience: number;
-    location: number;
-  };
-}>();
+  breakdown?: MatchBreakdown;
+  compact?: boolean;
+}>(), {
+  breakdown: undefined,
+  compact: false,
+});
 const { t } = useI18n();
 
-const scoreColor = computed(() => {
+const scoreTextClass = computed(() => {
   if (props.score >= SCORE_PASS_THRESHOLD) return "text-success";
   if (props.score >= SCORE_WARNING_THRESHOLD) return "text-warning";
   return "text-error";
 });
 
-const scoreBorderColor = computed(() => {
-  if (props.score >= SCORE_PASS_THRESHOLD) return "border-success";
-  if (props.score >= SCORE_WARNING_THRESHOLD) return "border-warning";
-  return "border-error";
+const scoreProgressClass = computed(() => {
+  if (props.score >= SCORE_PASS_THRESHOLD) return "progress-success";
+  if (props.score >= SCORE_WARNING_THRESHOLD) return "progress-warning";
+  return "progress-error";
+});
+
+const scoreBadgeClass = computed(() => {
+  if (props.score >= SCORE_PASS_THRESHOLD) return "badge-success";
+  if (props.score >= SCORE_WARNING_THRESHOLD) return "badge-warning";
+  return "badge-error";
 });
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-4">
-    <div
-      class="radial-progress"
-      :class="[scoreColor, scoreBorderColor]"
-      :style="`--value:${score};`"
-      role="progressbar"
+  <div
+    v-if="compact"
+    class="w-20 shrink-0 space-y-2 text-right"
+  >
+    <p class="text-sm font-semibold" :class="scoreTextClass">
+      {{ score }}%
+    </p>
+    <progress
+      class="progress w-full"
+      :class="scoreProgressClass"
+      :value="score"
+      max="100"
       :aria-label="t('jobsPage.matchBreakdown.overallProgressAria', { score })"
-      :aria-valuenow="score"
-      aria-valuemin="0"
-      aria-valuemax="100"
-    >
-      <span class="text-2xl font-bold">{{ score }}%</span>
+    ></progress>
+  </div>
+
+  <div v-else class="flex flex-col items-center gap-4">
+    <div class="w-full max-w-xs space-y-3 text-center">
+      <div class="flex justify-center">
+        <span class="badge badge-lg" :class="scoreBadgeClass">
+          {{ score }}%
+        </span>
+      </div>
+      <p class="text-3xl font-bold" :class="scoreTextClass">{{ score }}%</p>
+      <progress
+        class="progress w-full"
+        :class="scoreProgressClass"
+        :value="score"
+        max="100"
+        :aria-label="t('jobsPage.matchBreakdown.overallProgressAria', { score })"
+      ></progress>
     </div>
 
     <div v-if="breakdown" class="w-full space-y-3">
       <div>
-        <div class="flex justify-between text-sm mb-1">
+        <div class="mb-1 flex justify-between text-sm">
           <span>{{ t("jobsPage.matchBreakdown.skillsMatchLabel") }}</span>
           <span class="font-medium">{{ breakdown.skills }}%</span>
         </div>
@@ -55,7 +87,7 @@ const scoreBorderColor = computed(() => {
       </div>
 
       <div>
-        <div class="flex justify-between text-sm mb-1">
+        <div class="mb-1 flex justify-between text-sm">
           <span>{{ t("jobsPage.matchBreakdown.experienceMatchLabel") }}</span>
           <span class="font-medium">{{ breakdown.experience }}%</span>
         </div>
@@ -68,7 +100,7 @@ const scoreBorderColor = computed(() => {
       </div>
 
       <div>
-        <div class="flex justify-between text-sm mb-1">
+        <div class="mb-1 flex justify-between text-sm">
           <span>{{ t("jobsPage.matchBreakdown.locationMatchLabel") }}</span>
           <span class="font-medium">{{ breakdown.location }}%</span>
         </div>

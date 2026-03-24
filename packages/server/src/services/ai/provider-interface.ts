@@ -6,6 +6,7 @@ import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
 export interface AIProvider {
   name: AIProviderType;
   model: string;
+  readonly baseUrl?: string;
 
   /**
    * Generate a single response from the AI

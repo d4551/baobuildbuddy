@@ -49,6 +49,7 @@ const { awardXP, progress, fetchProgress } = useGamification();
 const mappings = ref<SkillMapping[]>([]);
 const loading = ref(false);
 const analyzing = ref(false);
+const pageError = ref<string | null>(null);
 const showAddModal = ref(false);
 const SKILLS_ADD_MAPPING_DIALOG_TITLE_ID = "skills-page-add-mapping-dialog-title";
 const showDeleteMappingDialog = ref(false);
@@ -135,10 +136,15 @@ const topMappings = computed(() =>
 
 const gamificationLevel = computed(() => progress.value?.level ?? 1);
 const gamificationXP = computed(() => progress.value?.xp ?? 0);
+const hasMappings = computed(() => mappings.value.length > 0);
 
-onMounted(() => {
-  void initializeSkillsPage();
-});
+const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsyncData(
+  "skills-page-bootstrap",
+  async () => {
+    await initializeSkillsPage();
+    return true;
+  },
+);
 
 function resolveCategoryLabel(category: SkillCategory): string {
   return t(SKILLS_CATEGORY_LABEL_KEYS[category]);
@@ -149,12 +155,8 @@ function clearFilters(): void {
   searchFilter.value = "";
 }
 
-function confidenceProgressStyle(confidence: number): string {
-  const normalizedConfidence = Math.min(
-    SKILLS_CONFIDENCE_MAX,
-    Math.max(SKILLS_CONFIDENCE_MIN, confidence),
-  );
-  return `--value:${normalizedConfidence}; --size:2.8rem; --thickness:0.24rem;`;
+function normalizedConfidence(confidence: number): number {
+  return Math.min(SKILLS_CONFIDENCE_MAX, Math.max(SKILLS_CONFIDENCE_MIN, confidence));
 }
 
 function resetForm(): void {
@@ -167,6 +169,7 @@ function resetForm(): void {
 }
 
 async function fetchMappings(): Promise<void> {
+  pageError.value = null;
   loading.value = true;
   const mappingsResult = await settlePromise(
     api.skills.mappings.get(),
@@ -175,7 +178,8 @@ async function fetchMappings(): Promise<void> {
   loading.value = false;
 
   if (!mappingsResult.ok) {
-    $toast.error(getErrorMessage(mappingsResult.error, t("skillsPage.errors.fetchFailed")));
+    pageError.value = getErrorMessage(mappingsResult.error, t("skillsPage.errors.fetchFailed"));
+    $toast.error(pageError.value);
     return;
   }
 
@@ -325,16 +329,21 @@ function removeApplication(index: number): void {
 </script>
 
 <template>
-  <section class="space-y-6">
-    <header class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 class="text-3xl font-bold">{{ t("skillsPage.title") }}</h1>
-        <p class="text-sm text-base-content/70">{{ t("skillsPage.subtitle") }}</p>
-      </div>
-      <div class="flex gap-2">
+  <PageScaffold
+    tag="section"
+    width-token="content"
+    spacing-token="comfortable"
+    labelled-by="skills-page-title"
+  >
+    <PageHeroHeader
+      title-id="skills-page-title"
+      :title="t('skillsPage.title')"
+      :description="t('skillsPage.subtitle')"
+    >
+      <template #actions>
         <NuxtLink
           :to="APP_ROUTES.gamification"
-          class="btn btn-ghost btn-sm gap-2"
+          class="btn btn-ghost gap-2"
           :aria-label="t('skillsPage.gamification.openProgressAria')"
         >
           <span class="badge badge-primary badge-sm">
@@ -343,234 +352,311 @@ function removeApplication(index: number): void {
           <span class="text-xs">{{ t("skillsPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
         </NuxtLink>
         <button
-          class="btn btn-outline btn-sm"
+          class="btn btn-outline"
           :disabled="analyzing"
           :aria-label="t('skillsPage.actions.aiAnalyzeAria')"
           @click="handleAIAnalyze"
         >
           <span v-if="analyzing" class="loading loading-spinner loading-xs"></span>
-          <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           {{ t("skillsPage.actions.aiAnalyzeButton") }}
         </button>
         <button
-          class="btn btn-primary btn-sm"
+          class="btn btn-primary"
           :aria-label="t('skillsPage.actions.addMappingAria')"
           @click="showAddModal = true"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           {{ t("skillsPage.actions.addMappingButton") }}
         </button>
-      </div>
-    </header>
+      </template>
+    </PageHeroHeader>
 
-    <div class="stats stats-vertical lg:stats-horizontal w-full bg-base-100 shadow-sm">
-      <div class="stat">
-        <div class="stat-title">{{ t("skillsPage.stats.totalMappingsTitle") }}</div>
-        <div class="stat-value text-primary">{{ mappingMetrics.total }}</div>
-        <div class="stat-desc">{{ t("skillsPage.stats.totalMappingsDesc") }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-title">{{ t("skillsPage.stats.averageConfidenceTitle") }}</div>
-        <div class="stat-value text-secondary">{{ mappingMetrics.averageConfidence }}%</div>
-        <div class="stat-desc">{{ t("skillsPage.stats.averageConfidenceDesc") }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-title">{{ t("skillsPage.stats.aiGeneratedTitle") }}</div>
-        <div class="stat-value text-accent">{{ mappingMetrics.aiGeneratedCount }}</div>
-        <div class="stat-desc">{{ t("skillsPage.stats.aiGeneratedDesc") }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-title">{{ t("skillsPage.stats.categoriesUsedTitle") }}</div>
-        <div class="stat-value text-info">{{ mappingMetrics.categoriesUsed }}</div>
-        <div class="stat-desc">{{ t("skillsPage.stats.categoriesUsedDesc") }}</div>
-      </div>
-    </div>
+    <LoadingSkeleton v-if="bootstrapPending && !hasMappings" variant="cards" :lines="6" />
 
-    <section class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-      <article class="card card-border bg-base-100">
-        <div class="card-body gap-4">
-          <div class="space-y-1">
-            <h2 class="card-title text-lg">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
-            <p class="text-sm text-base-content/70">
-              {{ t("skillsPage.insights.pathwaysDescription") }}
-            </p>
+    <BootstrapErrorAlert
+      v-else-if="pageError && !hasMappings"
+      :title="t('skillsPage.title')"
+      :message="pageError"
+      :retry-label="t('skillsPage.retryButton')"
+      :retry-aria-label="t('skillsPage.retryAria')"
+      @retry="() => refreshSkillsPage()"
+    />
+
+    <div v-else class="space-y-6">
+      <div class="stats stats-vertical w-full bg-base-200 lg:stats-horizontal">
+        <div class="stat">
+          <div class="stat-title">{{ t("skillsPage.stats.totalMappingsTitle") }}</div>
+          <div class="stat-value text-primary">{{ mappingMetrics.total }}</div>
+          <div class="stat-desc">{{ t("skillsPage.stats.totalMappingsDesc") }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">{{ t("skillsPage.stats.averageConfidenceTitle") }}</div>
+          <div class="stat-value text-success">{{ mappingMetrics.averageConfidence }}%</div>
+          <div class="stat-desc">{{ t("skillsPage.stats.averageConfidenceDesc") }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">{{ t("skillsPage.stats.aiGeneratedTitle") }}</div>
+          <div class="stat-value text-info">{{ mappingMetrics.aiGeneratedCount }}</div>
+          <div class="stat-desc">{{ t("skillsPage.stats.aiGeneratedDesc") }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">{{ t("skillsPage.stats.categoriesUsedTitle") }}</div>
+          <div class="stat-value text-warning">{{ mappingMetrics.categoriesUsed }}</div>
+          <div class="stat-desc">{{ t("skillsPage.stats.categoriesUsedDesc") }}</div>
+        </div>
+      </div>
+
+      <div class="card card-border bg-base-100 shadow-sm">
+        <div class="card-body">
+          <p class="text-sm text-base-content/70">
+            {{ t("skillsPage.description") }}
+          </p>
+        </div>
+      </div>
+
+      <section class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <article class="card card-border bg-base-100 shadow-sm">
+          <div class="card-body gap-4">
+            <div class="space-y-1">
+              <h2 class="card-title text-lg">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
+              <p class="text-sm text-base-content/70">
+                {{ t("skillsPage.insights.pathwaysDescription") }}
+              </p>
+            </div>
+
+            <ul class="list rounded-box bg-base-200/60">
+              <li class="list-row">
+                <span class="font-medium">{{ t("skillsPage.insights.totalMappingsLabel") }}</span>
+                <span class="list-col-grow"></span>
+                <span class="badge badge-neutral">{{ mappingMetrics.total }}</span>
+              </li>
+              <li class="list-row">
+                <span class="font-medium">{{ t("skillsPage.insights.avgConfidenceLabel") }}</span>
+                <span class="list-col-grow"></span>
+                <span class="badge badge-primary">{{ mappingMetrics.averageConfidence }}%</span>
+              </li>
+              <li class="list-row">
+                <span class="font-medium">{{ t("skillsPage.insights.categoriesCoverageLabel") }}</span>
+                <span class="list-col-grow"></span>
+                <span class="badge badge-secondary">{{ mappingMetrics.categoriesUsed }}</span>
+              </li>
+            </ul>
+
+            <div class="card-actions justify-end">
+              <NuxtLink
+                :to="APP_ROUTES.skillsPathways"
+                class="btn btn-primary btn-sm"
+                :aria-label="t('skillsPage.insights.pathwaysButtonAria')"
+              >
+                {{ t("skillsPage.insights.pathwaysButton") }}
+              </NuxtLink>
+            </div>
           </div>
+        </article>
 
-          <ul class="list rounded-box bg-base-200/60">
-            <li class="list-row">
-              <span class="font-medium">{{ t("skillsPage.insights.totalMappingsLabel") }}</span>
-              <span class="list-col-grow"></span>
-              <span class="badge badge-neutral">{{ mappingMetrics.total }}</span>
-            </li>
-            <li class="list-row">
-              <span class="font-medium">{{ t("skillsPage.insights.avgConfidenceLabel") }}</span>
-              <span class="list-col-grow"></span>
-              <span class="badge badge-primary">{{ mappingMetrics.averageConfidence }}%</span>
-            </li>
-            <li class="list-row">
-              <span class="font-medium">{{ t("skillsPage.insights.categoriesCoverageLabel") }}</span>
-              <span class="list-col-grow"></span>
-              <span class="badge badge-secondary">{{ mappingMetrics.categoriesUsed }}</span>
-            </li>
-          </ul>
+        <article class="card card-border bg-base-100 shadow-sm">
+          <div class="card-body gap-4">
+            <div class="space-y-1">
+              <h2 class="card-title text-lg">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
+              <p class="text-sm text-base-content/70">
+                {{ t("skillsPage.insights.topMappingsDescription") }}
+              </p>
+            </div>
 
-          <div class="card-actions justify-end">
-            <NuxtLink
-              :to="APP_ROUTES.skillsPathways"
-              class="btn btn-primary btn-sm"
-              :aria-label="t('skillsPage.insights.pathwaysButtonAria')"
+            <ul
+              v-if="topMappings.length > 0"
+              class="list rounded-box bg-base-200/60"
+              :aria-label="t('skillsPage.insights.topMappingsAria')"
             >
-              {{ t("skillsPage.insights.pathwaysButton") }}
-            </NuxtLink>
-          </div>
-        </div>
-      </article>
+              <li
+                v-for="mapping in topMappings"
+                :key="mapping.id"
+                class="list-row items-center"
+              >
+                <div class="list-col-grow">
+                  <p class="font-medium">{{ mapping.transferableSkill }}</p>
+                  <p class="text-xs text-base-content/70">{{ mapping.gameExpression }}</p>
+                </div>
+                <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
+              </li>
+            </ul>
 
-      <article class="card card-border bg-base-100">
+            <EmptyState
+              v-else
+              title-key="skillsPage.insights.topMappingsEmptyTitle"
+              description-key="skillsPage.insights.topMappingsEmptyDescription"
+            />
+          </div>
+        </article>
+      </section>
+
+      <div class="card card-border bg-base-100 shadow-sm">
         <div class="card-body gap-4">
-          <div class="space-y-1">
-            <h2 class="card-title text-lg">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
-            <p class="text-sm text-base-content/70">
-              {{ t("skillsPage.insights.topMappingsDescription") }}
-            </p>
-          </div>
+          <label class="input input-sm flex w-full items-center gap-2">
+            <svg class="h-4 w-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              v-model="searchFilter"
+              class="grow"
+              type="text"
+              :placeholder="t('skillsPage.filters.searchPlaceholder')"
+              :aria-label="t('skillsPage.filters.searchAria')"
+            />
+          </label>
 
-          <ul
-            v-if="topMappings.length > 0"
-            class="list rounded-box bg-base-200/60"
-            :aria-label="t('skillsPage.insights.topMappingsAria')"
-          >
-            <li
-              v-for="mapping in topMappings"
-              :key="mapping.id"
-              class="list-row items-center"
+          <form class="filter gap-2 overflow-x-auto pb-1" :aria-label="t('skillsPage.filters.categoryGroupAria')">
+            <input
+              v-model="categoryFilter"
+              type="radio"
+              name="skills-category"
+              class="btn btn-sm btn-ghost"
+              :value="SKILLS_FILTER_ALL_VALUE"
+              :aria-label="t('skillsPage.filters.allAria')"
+            />
+            <input
+              v-for="categoryOption in categoryOptions"
+              :key="categoryOption.value"
+              v-model="categoryFilter"
+              type="radio"
+              name="skills-category"
+              class="btn btn-sm btn-ghost"
+              :value="categoryOption.value"
+              :aria-label="t('skillsPage.filters.categoryAria', { category: categoryOption.label })"
+            />
+          </form>
+
+          <div class="flex justify-end">
+            <button
+              class="btn btn-ghost btn-sm"
+              :disabled="!hasActiveFilters"
+              :aria-label="t('skillsPage.filters.clearAria')"
+              @click="clearFilters"
             >
-              <div class="list-col-grow">
-                <p class="font-medium">{{ mapping.transferableSkill }}</p>
-                <p class="text-xs text-base-content/70">{{ mapping.gameExpression }}</p>
-              </div>
-              <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
-            </li>
-          </ul>
-
-          <div v-else role="alert" class="alert alert-info alert-soft">
-            <span>{{ t("skillsPage.insights.topMappingsEmpty") }}</span>
+              {{ t("skillsPage.filters.clearButton") }}
+            </button>
           </div>
-        </div>
-      </article>
-    </section>
-
-    <div role="alert" class="alert alert-info alert-soft">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>{{ t("skillsPage.description") }}</span>
-    </div>
-
-    <div class="card bg-base-200">
-      <div class="card-body gap-4">
-        <label class="input flex items-center gap-2">
-          <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            v-model="searchFilter"
-            class="grow"
-            type="text"
-            :placeholder="t('skillsPage.filters.searchPlaceholder')"
-            :aria-label="t('skillsPage.filters.searchAria')"
-          />
-        </label>
-
-        <form class="filter gap-2 overflow-x-auto pb-1" :aria-label="t('skillsPage.filters.categoryGroupAria')">
-          <input
-            v-model="categoryFilter"
-            type="radio"
-            name="skills-category"
-            class="btn btn-sm btn-ghost"
-            :value="SKILLS_FILTER_ALL_VALUE"
-            :aria-label="t('skillsPage.filters.allAria')"
-          />
-          <input
-            v-for="categoryOption in categoryOptions"
-            :key="categoryOption.value"
-            v-model="categoryFilter"
-            type="radio"
-            name="skills-category"
-            class="btn btn-sm btn-ghost"
-            :value="categoryOption.value"
-            :aria-label="t('skillsPage.filters.categoryAria', { category: categoryOption.label })"
-          />
-        </form>
-
-        <div class="flex justify-end">
-          <button
-            class="btn btn-ghost btn-sm"
-            :disabled="!hasActiveFilters"
-            :aria-label="t('skillsPage.filters.clearAria')"
-            @click="clearFilters"
-          >
-            {{ t("skillsPage.filters.clearButton") }}
-          </button>
         </div>
       </div>
-    </div>
 
-    <LoadingSkeleton v-if="loading && mappings.length === 0" variant="cards" :lines="6" />
+      <EmptyState
+        v-if="!hasMappings"
+        title-key="skillsPage.emptyStateTitle"
+        description-key="skillsPage.emptyStateDescription"
+      />
 
-    <div v-else-if="filteredMappings.length === 0" role="alert" class="alert alert-info alert-soft">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>{{ t("skillsPage.emptyState") }}</span>
-    </div>
+      <EmptyState
+        v-else-if="filteredMappings.length === 0"
+        title-key="skillsPage.filteredEmptyTitle"
+        description-key="skillsPage.filteredEmptyDescription"
+      />
 
-    <div v-else class="space-y-4">
-      <div class="overflow-x-auto hidden md:block">
-        <table class="table table-zebra" :aria-label="t('skillsPage.table.ariaLabel')">
-          <thead>
-            <tr>
-              <th>{{ t("skillsPage.table.columns.gamingExperience") }}</th>
-              <th>{{ t("skillsPage.table.columns.transferableSkill") }}</th>
-              <th>{{ t("skillsPage.table.columns.applications") }}</th>
-              <th>{{ t("skillsPage.table.columns.confidence") }}</th>
-              <th>{{ t("skillsPage.table.columns.category") }}</th>
-              <th>{{ t("skillsPage.table.columns.actions") }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="mapping in filteredMappings" :key="mapping.id">
-              <td class="font-medium">{{ mapping.gameExpression }}</td>
-              <td>{{ mapping.transferableSkill }}</td>
-              <td>
-                <div class="flex flex-wrap gap-1">
-                  <span
-                    v-for="application in mapping.industryApplications.slice(0, 3)"
-                    :key="application"
-                    class="badge badge-sm badge-soft"
+      <div v-else class="space-y-4">
+        <div class="hidden overflow-x-auto md:block">
+          <table class="table table-zebra" :aria-label="t('skillsPage.table.ariaLabel')">
+            <thead>
+              <tr>
+                <th scope="col">{{ t("skillsPage.table.columns.gamingExperience") }}</th>
+                <th scope="col">{{ t("skillsPage.table.columns.transferableSkill") }}</th>
+                <th scope="col">{{ t("skillsPage.table.columns.applications") }}</th>
+                <th scope="col">{{ t("skillsPage.table.columns.confidence") }}</th>
+                <th scope="col">{{ t("skillsPage.table.columns.category") }}</th>
+                <th scope="col">{{ t("skillsPage.table.columns.actions") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="mapping in filteredMappings" :key="mapping.id">
+                <td class="font-medium">{{ mapping.gameExpression }}</td>
+                <td>{{ mapping.transferableSkill }}</td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="application in mapping.industryApplications.slice(0, 3)"
+                      :key="application"
+                      class="badge badge-sm badge-soft"
+                    >
+                      {{ application }}
+                    </span>
+                    <span v-if="mapping.industryApplications.length > 3" class="badge badge-sm badge-ghost">
+                      {{ t("skillsPage.table.moreApplications", { count: mapping.industryApplications.length - 3 }) }}
+                    </span>
+                  </div>
+                </td>
+                <td class="w-40">
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between text-xs font-semibold">
+                      <span>{{ mapping.confidence }}%</span>
+                      <span class="text-base-content/60">
+                        {{ resolveCategoryLabel(mapping.category) }}
+                      </span>
+                    </div>
+                    <progress
+                      class="progress progress-primary w-full"
+                      :value="normalizedConfidence(mapping.confidence)"
+                      :max="SKILLS_CONFIDENCE_MAX"
+                      :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
+                    ></progress>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge badge-outline badge-sm">
+                    {{ resolveCategoryLabel(mapping.category) }}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    class="btn btn-ghost btn-sm btn-error"
+                    :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
+                    @click="requestDeleteMapping(mapping.id)"
                   >
-                    {{ application }}
-                  </span>
-                  <span v-if="mapping.industryApplications.length > 3" class="badge badge-sm badge-ghost">
-                    {{ t("skillsPage.table.moreApplications", { count: mapping.industryApplications.length - 3 }) }}
-                  </span>
+                    {{ t("skillsPage.table.deleteButton") }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="space-y-3 md:hidden">
+          <article
+            v-for="mapping in filteredMappings"
+            :key="mapping.id"
+            class="card card-border bg-base-100 shadow-sm"
+            :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
+          >
+            <div class="card-body gap-3">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h2 class="card-title text-base">{{ mapping.transferableSkill }}</h2>
+                  <p class="text-sm text-base-content/70">{{ mapping.gameExpression }}</p>
                 </div>
-              </td>
-              <td>
-                <div class="radial-progress text-primary" :style="confidenceProgressStyle(mapping.confidence)" role="progressbar" :aria-valuenow="mapping.confidence" :aria-valuemin="SKILLS_CONFIDENCE_MIN" :aria-valuemax="SKILLS_CONFIDENCE_MAX" :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })">
-                  <span class="text-xs font-semibold">{{ mapping.confidence }}%</span>
-                </div>
-              </td>
-              <td>
-                <span class="badge badge-outline badge-sm">
-                  {{ resolveCategoryLabel(mapping.category) }}
+                <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
+              </div>
+
+              <progress
+                class="progress progress-primary w-full"
+                :value="normalizedConfidence(mapping.confidence)"
+                :max="SKILLS_CONFIDENCE_MAX"
+                :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
+              ></progress>
+
+              <div class="flex flex-wrap gap-1">
+                <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
+                <span
+                  v-for="application in mapping.industryApplications.slice(0, 3)"
+                  :key="application"
+                  class="badge badge-sm badge-soft"
+                >
+                  {{ application }}
                 </span>
-              </td>
-              <td>
+              </div>
+
+              <div class="card-actions justify-end">
                 <button
                   class="btn btn-ghost btn-sm btn-error"
                   :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
@@ -578,52 +664,10 @@ function removeApplication(index: number): void {
                 >
                   {{ t("skillsPage.table.deleteButton") }}
                 </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="md:hidden space-y-3">
-        <article
-          v-for="mapping in filteredMappings"
-          :key="mapping.id"
-          class="card card-border bg-base-100"
-          :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
-        >
-          <div class="card-body gap-3">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <h2 class="card-title text-base">{{ mapping.transferableSkill }}</h2>
-                <p class="text-sm text-base-content/70">{{ mapping.gameExpression }}</p>
-              </div>
-              <div class="radial-progress text-primary" :style="confidenceProgressStyle(mapping.confidence)" role="progressbar" :aria-valuenow="mapping.confidence" :aria-valuemin="SKILLS_CONFIDENCE_MIN" :aria-valuemax="SKILLS_CONFIDENCE_MAX" :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })">
-                <span class="text-xs font-semibold">{{ mapping.confidence }}%</span>
               </div>
             </div>
-
-            <div class="flex flex-wrap gap-1">
-              <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
-              <span
-                v-for="application in mapping.industryApplications.slice(0, 3)"
-                :key="application"
-                class="badge badge-sm badge-soft"
-              >
-                {{ application }}
-              </span>
-            </div>
-
-            <div class="card-actions justify-end">
-              <button
-                class="btn btn-ghost btn-sm btn-error"
-                :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
-                @click="requestDeleteMapping(mapping.id)"
-              >
-                {{ t("skillsPage.table.deleteButton") }}
-              </button>
-            </div>
-          </div>
-        </article>
+          </article>
+        </div>
       </div>
     </div>
 
@@ -764,5 +808,5 @@ function removeApplication(index: number): void {
       @confirm="handleDeleteMapping"
       @cancel="clearDeleteMappingState"
     />
-  </section>
+  </PageScaffold>
 </template>

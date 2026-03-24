@@ -271,6 +271,7 @@ const getRecommendations = async (): Promise<JobRecommendationsResponse> => {
 
   const aiService = AIService.fromSettings(settingsResult.value[0]);
   const response = await aiService.generate(buildRecommendationPrompt(profile, recentJobs), {
+    purpose: "jobMatch",
     temperature: AI_DEFAULT_TEMPERATURE,
     maxTokens: AI_MAX_TOKENS_MATCH,
   });

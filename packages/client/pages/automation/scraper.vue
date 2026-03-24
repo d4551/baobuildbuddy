@@ -6,6 +6,7 @@ import {
   type AutomationScrapeTarget,
   formatRelativeTimeForDate,
   JOB_PREVIEW_LIMIT,
+  type Job,
   type RpaCapabilityAuditEntry,
   type RpaCapabilityAuditReport,
   type RpaRunExecutionEnvelope,
@@ -107,6 +108,9 @@ const sortedJobs = computed(() => {
 
 const topJobs = computed(() => sortedJobs.value.slice(0, JOB_PREVIEW_LIMIT));
 const jobCount = computed(() => sortedJobs.value.length);
+const enrichedJobCount = computed(
+  () => sortedJobs.value.filter((job) => typeof job.enrichment?.summary === "string").length,
+);
 const capabilityAudit = computed(() => capabilityAuditData.value ?? null);
 const scrapeCapabilities = computed<readonly ScrapeCapabilityCard[]>(() =>
   (capabilityAudit.value?.capabilities ?? []).filter(isScrapeCapabilityCard),
@@ -375,14 +379,24 @@ function cardRunButtonLabel(target: AutomationScrapeTarget): string {
     ? t("automation.scraper.studioCard.runButton")
     : t("automation.scraper.jobCard.runButton");
 }
+
+function hasJobEnrichment(job: Job): boolean {
+  return typeof job.enrichment?.summary === "string" && job.enrichment.summary.length > 0;
+}
+
+function jobInterviewFocusAreas(job: Job): string[] {
+  return job.enrichment?.interviewFocusAreas.slice(0, 2) ?? [];
+}
 </script>
 
 <template>
   <PageScaffold tag="section" width-token="content" labelled-by="automation-scraper-title">
-    <PageHeaderBlock
+    <PageHeroHeader
       title-id="automation-scraper-title"
       :title="t('automation.scraper.title')"
       :description="t('automation.scraper.subtitle')"
+      description-class="text-base-content/70"
+      density="compact"
     />
 
     <div
@@ -451,8 +465,13 @@ function cardRunButtonLabel(target: AutomationScrapeTarget): string {
           </div>
           <div class="stat">
             <div class="stat-title">{{ t("automation.scraper.stats.availableJobsTitle") }}</div>
-            <div class="stat-value text-accent">{{ jobCount }}</div>
+            <div class="stat-value text-primary">{{ jobCount }}</div>
             <div class="stat-desc">{{ t("automation.scraper.stats.availableJobsDescription") }}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">{{ t("automation.scraper.stats.enrichedJobsTitle") }}</div>
+            <div class="stat-value text-secondary">{{ enrichedJobCount }}</div>
+            <div class="stat-desc">{{ t("automation.scraper.stats.enrichedJobsDescription") }}</div>
           </div>
           <div class="stat">
             <div class="stat-title">{{ t("automation.scraper.stats.jobStatusTitle") }}</div>
@@ -621,11 +640,13 @@ function cardRunButtonLabel(target: AutomationScrapeTarget): string {
               <table class="table table-zebra" :aria-label="t('automation.scraper.table.aria')">
                 <thead>
                   <tr>
-                    <th>{{ t("automation.scraper.table.columns.role") }}</th>
-                    <th>{{ t("automation.scraper.table.columns.company") }}</th>
-                    <th>{{ t("automation.scraper.table.columns.location") }}</th>
-                    <th>{{ t("automation.scraper.table.columns.posted") }}</th>
-                    <th></th>
+                    <th scope="col">{{ t("automation.scraper.table.columns.role") }}</th>
+                    <th scope="col">{{ t("automation.scraper.table.columns.company") }}</th>
+                    <th scope="col">{{ t("automation.scraper.table.columns.location") }}</th>
+                    <th scope="col">{{ t("automation.scraper.table.columns.posted") }}</th>
+                    <th scope="col">
+                      <span class="sr-only">{{ t("automation.scraper.table.actionsLabel") }}</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -633,12 +654,23 @@ function cardRunButtonLabel(target: AutomationScrapeTarget): string {
                     <td>
                       <div class="space-y-1">
                         <div class="font-medium">{{ job.title }}</div>
+                        <p v-if="hasJobEnrichment(job)" class="text-sm text-base-content/70">
+                          <span class="font-medium">{{ t("automation.scraper.table.personaSummaryLabel") }}</span>
+                          {{ job.enrichment?.summary }}
+                        </p>
                         <div class="flex flex-wrap gap-2">
                           <span v-if="job.remote" class="badge badge-ghost badge-sm">
                             {{ t("jobCard.remoteBadge") }}
                           </span>
                           <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
                             {{ t("jobCard.hybridBadge") }}
+                          </span>
+                          <span
+                            v-for="focusArea in jobInterviewFocusAreas(job)"
+                            :key="`${job.id}-${focusArea}`"
+                            class="badge badge-warning badge-soft badge-sm"
+                          >
+                            {{ focusArea }}
                           </span>
                         </div>
                       </div>

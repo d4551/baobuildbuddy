@@ -63,9 +63,9 @@ export declare const userRoutes: Elysia<"/user", {
                     email?: string | undefined;
                     location?: string | undefined;
                     website?: string | undefined;
+                    summary?: string | undefined;
                     phone?: string | undefined;
                     github?: string | undefined;
-                    summary?: string | undefined;
                     gamingExperience?: {} | undefined;
                     softSkills?: string[] | undefined;
                     linkedin?: string | undefined;

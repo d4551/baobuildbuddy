@@ -1,6 +1,8 @@
 import type {
   InterviewAnalysis,
+  InterviewCandidateContext,
   InterviewConfig,
+  InterviewConversationStyle,
   InterviewQuestion,
   InterviewResponse,
   InterviewSession,
@@ -56,6 +58,10 @@ type SubmitResponseBody = {
 };
 
 const interviewModeSchema = t.Union([t.Literal("studio"), t.Literal("job")]);
+const interviewConversationStyleSchema = t.Union([
+  t.Literal("natural"),
+  t.Literal("structured"),
+]);
 const voiceSettingsSchema = t.Object({
   microphoneId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
   speakerId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
@@ -83,6 +89,11 @@ const targetJobSchema = t.Object({
   postedDate: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
   url: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG })),
 });
+const candidateContextSchema = t.Object({
+  resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  coverLetterId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  portfolioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+});
 const sessionConfigSchema = t.Object({
   roleType: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
   roleCategory: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
@@ -105,7 +116,9 @@ const sessionConfigSchema = t.Object({
   ),
   voiceSettings: t.Optional(voiceSettingsSchema),
   interviewMode: t.Optional(interviewModeSchema),
+  conversationStyle: t.Optional(interviewConversationStyleSchema),
   targetJob: t.Optional(targetJobSchema),
+  candidateContext: t.Optional(candidateContextSchema),
 });
 
 function asNonNegativeInt(value: number | undefined): number | undefined {
@@ -198,11 +211,46 @@ function normalizeVoiceSettings(
   return normalized;
 }
 
+function parseCandidateContext(
+  value: CreateSessionConfigInput["candidateContext"],
+): InterviewCandidateContext | undefined {
+  if (!value) {
+    return;
+  }
+
+  const resumeId = asString(value.resumeId);
+  const coverLetterId = asString(value.coverLetterId);
+  const portfolioId = asString(value.portfolioId);
+  if (!(resumeId || coverLetterId || portfolioId)) {
+    return;
+  }
+
+  return {
+    ...(resumeId ? { resumeId } : {}),
+    ...(coverLetterId ? { coverLetterId } : {}),
+    ...(portfolioId ? { portfolioId } : {}),
+  };
+}
+
+function parseConversationStyle(
+  value: CreateSessionConfigInput["conversationStyle"],
+): InterviewConversationStyle | undefined {
+  if (value === "structured") {
+    return "structured";
+  }
+  if (value === "natural") {
+    return "natural";
+  }
+  return;
+}
+
 function sessionConfigFromUi(config: CreateSessionConfigInput): CreateSessionConfigInput {
   const targetJob = parseTargetJob(config.targetJob);
   const roleTypeFromJob = asString(targetJob?.title);
   const mode = config.interviewMode === "job" ? "job" : "studio";
   const focusAreas = asStringArrayTrimmed(config.focusAreas);
+  const candidateContext = parseCandidateContext(config.candidateContext);
+  const conversationStyle = parseConversationStyle(config.conversationStyle);
 
   return {
     roleType: asString(config.roleType) || roleTypeFromJob || INTERVIEW_DEFAULT_ROLE_TYPE,
@@ -218,7 +266,9 @@ function sessionConfigFromUi(config: CreateSessionConfigInput): CreateSessionCon
     technologies: asStringArrayTrimmed(config.technologies),
     voiceSettings: normalizeVoiceSettings(config.voiceSettings),
     interviewMode: mode,
+    conversationStyle,
     targetJob,
+    candidateContext,
   };
 }
 

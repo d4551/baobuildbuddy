@@ -56,6 +56,7 @@ import { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
+import { buildAIControlPlaneState } from "../services/ai/control-plane";
 import { contextManager } from "../services/ai/context-manager";
 import {
   buildSystemPrompt,
@@ -83,6 +84,26 @@ async function getAIService(settingsRow?: Awaited<ReturnType<typeof getAISetting
   const resolvedSettingsRow = settingsRow ?? (await getAISettingsRow());
   const aiService = AIService.fromSettings(resolvedSettingsRow);
   return aiService;
+}
+
+async function buildProviderModelsResponse() {
+  const settingsRow = await getAISettingsRow();
+  if (!settingsRow) {
+    return {
+      providers: AI_PROVIDER_CATALOG.map((provider) => ({
+        id: provider.id,
+        nameKey: provider.nameKey,
+        descriptionKey: provider.descriptionKey,
+        iconId: provider.iconId,
+        models: [...provider.modelHints],
+        available: false,
+        health: "unconfigured" as const,
+      })),
+      error: API_MESSAGE_AI_NO_PROVIDERS,
+    };
+  }
+
+  return buildAIControlPlaneState(settingsRow);
 }
 
 /**
@@ -614,6 +635,7 @@ const analyzeSingleJobMatch = async (
 ): Promise<MatchJobsResponse["matches"][number]> => {
   const responseResult = await settle(
     aiService.generate(buildJobMatchPromptText(profile, job), {
+      purpose: "jobMatch",
       temperature: AI_DEFAULT_TEMPERATURE,
       maxTokens: AI_MAX_TOKENS_CHAT,
     }),
@@ -747,6 +769,7 @@ const handleChatRoute = async (
   );
   const generationResult = await settle(
     aiService.generate(body.message, {
+      purpose: "chat",
       systemPrompt,
       messages: contextualConversation.messages,
       temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
@@ -787,6 +810,7 @@ const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody, set: RouteSetSt
   const aiService = await getAIService();
   const responseResult = await settle(
     aiService.generate(buildAnalyzeResumePrompt(resumeText, jobDescription), {
+      purpose: "resume",
       temperature: AI_DEFAULT_TEMPERATURE,
       maxTokens: SCHEMA_MAX_LENGTH_LONG,
     }),
@@ -827,6 +851,7 @@ const handleGenerateCoverLetterRoute = async (
   const aiService = await getAIService();
   const responseResult = await settle(
     aiService.generate(coverLetterPrompt(body.company, body.position, jobDescription, resumeText), {
+      purpose: "coverLetter",
       temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
       maxTokens: SCHEMA_MAX_LENGTH_LONG,
     }),
@@ -907,59 +932,7 @@ export const aiRoutes = new Elysia({ prefix: "/ai", tags: ["AI"] })
       preferences: t.Optional(aiPreferenceSchema),
     }),
   })
-  .get("/models", async () => {
-    const serviceResult = await settle(getAIService());
-    if (serviceResult.status === "rejected") {
-      const providers = AI_PROVIDER_CATALOG.map((provider) => ({
-        id: provider.id,
-        nameKey: provider.nameKey,
-        descriptionKey: provider.descriptionKey,
-        iconId: provider.iconId,
-        models: [...provider.modelHints],
-        available: false,
-        health: "unconfigured" as const,
-      }));
-      return {
-        providers,
-        error: API_MESSAGE_AI_NO_PROVIDERS,
-      };
-    }
-
-    const aiService = serviceResult.value;
-    const providerStatuses = await aiService.getAvailableProviders();
-    const statusByProvider = new Map(providerStatuses.map((status) => [status.provider, status]));
-
-    const localProviders = await aiService.detectLocalProviders();
-    const localProviderAvailable = localProviders.some((provider) => provider.available);
-
-    const activeLocalModel = aiService.getActiveModel("local");
-    const providers = AI_PROVIDER_CATALOG.map((provider) => {
-      const status = statusByProvider.get(provider.id);
-      const available =
-        provider.id === "local" ? (status?.available ?? localProviderAvailable) : status?.available;
-
-      const models =
-        provider.id === "local" && activeLocalModel
-          ? [activeLocalModel, ...provider.modelHints.filter((h) => h !== activeLocalModel)]
-          : [...provider.modelHints];
-
-      return {
-        id: provider.id,
-        nameKey: provider.nameKey,
-        descriptionKey: provider.descriptionKey,
-        iconId: provider.iconId,
-        models,
-        available: available ?? false,
-        health: status?.health ?? (available ? "healthy" : "unconfigured"),
-      };
-    });
-
-    return {
-      providers,
-      preferredProvider: aiService.getFallbackOrder()[0],
-      configuredProviders: aiService.getConfiguredProviders(),
-    };
-  })
+  .get("/models", async () => buildProviderModelsResponse())
   .get("/usage", async () => {
     const chatMessages = await db.select().from(chatHistory);
 

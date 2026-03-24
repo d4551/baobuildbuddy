@@ -236,6 +236,7 @@ const analyzeSkillMappings = async (
   }
 
   const response = await aiService.generate(skillAnalysisPrompt(skillsToAnalyze), {
+    purpose: "jobMatch",
     temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
     maxTokens: SCHEMA_MAX_LENGTH_LONG,
   });

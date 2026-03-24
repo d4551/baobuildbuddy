@@ -380,6 +380,9 @@ const esES: AppTranslationOverrides = {
     seoDescription:
       "Busca y filtra roles de la industria de videojuegos por plataforma, tipo de estudio, género y nivel de experiencia.",
     title: "Bolsa de Empleo",
+    emptyStateTitle: "No hay empleos que coincidan con tus filtros",
+    emptyStateDescription:
+      "Ajusta la búsqueda o los filtros para ampliar la vista actual de descubrimiento de empleos.",
     refreshButton: "Actualizar Empleos",
     refreshAria: "Actualizar feed de empleos",
     searchPlaceholder: "Buscar empleos por título, empresa o palabras clave...",
@@ -521,12 +524,20 @@ const esES: AppTranslationOverrides = {
     },
   },
   resumePreview: {
+    pageTitle: "Vista Previa del Currículum",
+    description: "Revisa el diseño imprimible del currículum antes de exportarlo o compartirlo.",
     defaultName: "Tu Nombre",
     present: "Actual",
     gpaLabel: "Promedio: {gpa}",
     printButton: "Imprimir",
     printAria: "Imprimir vista previa del currículum",
+    retryButton: "Reintentar",
+    retryAria: "Reintentar carga de la vista previa del currículum",
+    loadError: "Error al cargar la vista previa del currículum.",
     notFound: "No se encontró el currículum. Selecciona uno para previsualizar.",
+    notFoundTitle: "No se encontró el currículum",
+    notFoundDescription:
+      "Selecciona un currículum guardado desde el espacio de currículums para abrir esta vista previa.",
     website: "Sitio Web",
     websiteLinkAria: "Abrir sitio web personal",
     linkedin: "LinkedIn",
@@ -546,6 +557,8 @@ const esES: AppTranslationOverrides = {
       "Traduce la experiencia en juegos en competencias profesionales con puntuación de confianza, mapeo de categorías y análisis asistido por IA.",
     title: "Mapeador de Habilidades",
     subtitle: "Convierte logros de juegos en señales claras de capacidad profesional.",
+    retryButton: "Reintentar",
+    retryAria: "Reintentar carga de mapeos de habilidades",
     description:
       "Mapea tus logros de juego a habilidades transferibles al trabajo, luego reutiliza estos mapeos en currículums y entrevistas.",
     gamification: {
@@ -582,7 +595,9 @@ const esES: AppTranslationOverrides = {
       topMappingsDescription:
         "Habilidades transferibles con mayor confianza, ordenadas por puntuación.",
       topMappingsAria: "Mejores mapeos de habilidades por confianza",
-      topMappingsEmpty: "Sin mapeos destacados aún. Añade o analiza mapeos para llenar esta lista.",
+      topMappingsEmptyTitle: "Todavía no hay mapeos destacados",
+      topMappingsEmptyDescription:
+        "Añade o analiza mapeos para rellenar el resumen de habilidades con mayor confianza.",
     },
     filters: {
       searchPlaceholder: "Buscar por experiencia de juego, habilidad transferible o aplicación...",
@@ -593,7 +608,12 @@ const esES: AppTranslationOverrides = {
       clearButton: "Limpiar Filtros",
       clearAria: "Limpiar filtros activos de mapeos",
     },
-    emptyState: "No se encontraron mapeos. Añade tu primer mapeo para empezar.",
+    emptyStateTitle: "Todavía no hay mapeos de habilidades",
+    emptyStateDescription:
+      "Añade tu primer mapeo de juego a carrera para empezar a construir evidencia reutilizable para currículums y entrevistas.",
+    filteredEmptyTitle: "Ningún mapeo coincide con estos filtros",
+    filteredEmptyDescription:
+      "Ajusta la búsqueda o los filtros de categoría para recuperar mapeos compatibles.",
     categories: {
       leadership: "Liderazgo",
       community: "Gestión de Comunidad",
@@ -752,6 +772,9 @@ const esES: AppTranslationOverrides = {
       },
       emptyState:
         "Los datos de preparación no están disponibles. Añade mapeos y ejecuta el análisis primero.",
+      emptyStateTitle: "Los datos de preparación aún no están disponibles",
+      emptyStateDescription:
+        "Añade más evidencia de habilidades mapeadas y vuelve a ejecutar el análisis para completar esta sección.",
     },
     pathways: {
       title: "Recomendaciones de Rutas",
@@ -767,6 +790,9 @@ const esES: AppTranslationOverrides = {
       },
       emptyState:
         "Sin rutas disponibles. Añade más habilidades mapeadas para generar recomendaciones.",
+      emptyStateTitle: "Aún no hay rutas disponibles",
+      emptyStateDescription:
+        "Amplía las habilidades mapeadas para desbloquear mejores recomendaciones y cobertura de rutas.",
     },
     errors: {
       loadFailed: "Error al cargar datos de rutas de carrera",
@@ -1262,10 +1288,14 @@ const esES: AppTranslationOverrides = {
     },
     preview: {
       pageTitle: "Vista Previa del Portafolio",
+      description: "Revisa la presentación publicada de tu portafolio antes de exportarla o compartirla.",
       backButton: "Volver al Editor",
       backButtonAria: "Volver al editor del portafolio",
       exportPdfButton: "Exportar PDF",
       exportPdfAria: "Exportar vista previa del portafolio como PDF",
+      retryButton: "Reintentar",
+      retryAria: "Reintentar carga de la vista previa del portafolio",
+      loadError: "Error al cargar la vista previa del portafolio.",
       defaultTitle: "Mi Portafolio",
       contactButton: "Contáctame",
       contactAria: "Contactar al propietario del portafolio por correo",
@@ -1274,8 +1304,11 @@ const esES: AppTranslationOverrides = {
       featuredProjectsTitle: "Proyectos Destacados",
       moreProjectsTitle: "Más Proyectos",
       viewButton: "Ver",
-      emptyState: "No hay proyectos para mostrar. Añade proyectos en el editor del portafolio.",
-      notFound: "No se encontró el portafolio. Crea tu portafolio primero.",
+      emptyStateTitle: "No hay proyectos para mostrar",
+      emptyStateDescription:
+        "Añade proyectos en el editor del portafolio para llenar esta vista previa con trabajo destacado y de apoyo.",
+      notFoundTitle: "No se encontró el portafolio",
+      notFoundDescription: "Crea tu portafolio primero y luego vuelve a esta vista previa.",
     },
     stats: {
       projectsTitle: "Proyectos",
@@ -1585,6 +1618,8 @@ const esES: AppTranslationOverrides = {
     retryAria: "Reintentar cargar el detalle del empleo",
     notFoundTitle: "Empleo no encontrado",
     notFoundBody: "Es posible que se haya eliminado o que el enlace no sea válido.",
+    invalidIdTitle: "No hay un empleo seleccionado",
+    invalidIdBody: "Elige un empleo de la lista para revisar sus detalles.",
     backToJobs: "Volver a empleos",
     backToJobsAria: "Volver a la lista de empleos",
     invalidId: "No hay ningún empleo seleccionado.",
@@ -1630,6 +1665,9 @@ const esES: AppTranslationOverrides = {
       yes: "Sí",
       no: "No",
     },
+    emptyTitle: "Estudio no disponible",
+    emptyDescription:
+      "Este perfil de estudio ya no está disponible. Vuelve al directorio y elige otro contexto de estudio.",
     errors: {
       invalidStudioId: "Identificador de estudio inválido.",
       notFound: "Estudio no encontrado.",
@@ -1643,10 +1681,14 @@ const esES: AppTranslationOverrides = {
     title: "Directorio de Estudios",
     subtitle:
       "Explora perfiles de estudios, filtra por atributos operativos y pasa directamente a la práctica de entrevistas.",
+    errorTitle: "Directorio de estudios no disponible",
     errorBannerAria: "Error del directorio de estudios",
     retryAria: "Reintentar carga de estudios",
     retryButton: "Reintentar",
     emptyState: "Ningún estudio coincide con tu búsqueda y filtros.",
+    emptyTitle: "Ningún estudio coincide con estos filtros",
+    emptyDescription:
+      "Ajusta la búsqueda actual o la combinación de filtros para mostrar otro perfil de estudio.",
     stats: {
       totalTitle: "Total de Estudios",
       totalDesc: "Perfiles actualmente indexados",
@@ -1739,9 +1781,15 @@ const esES: AppTranslationOverrides = {
   },
   studioAnalytics: {
     title: "Analíticas de Estudios",
+    description:
+      "Revisa la distribución de estudios, la cobertura de trabajo remoto y las tendencias tecnológicas compartidas del conjunto de estudios indexado.",
     errorBannerAria: "Error de analíticas de estudios",
     retryAria: "Reintentar carga de analíticas",
     retryButton: "Reintentar",
+    openDirectoryAria: "Abrir el directorio de estudios",
+    emptyTitle: "No hay analíticas de estudios disponibles",
+    emptyDescription:
+      "Actualiza los datos de estudios desde el directorio o el centro de extracción para rellenar las analíticas de este espacio.",
     progressAria: "Progreso de {label}",
     remoteWorkProgressAria: "Disponibilidad de trabajo remoto: {value} por ciento",
     overview: {
@@ -2157,6 +2205,8 @@ const esES: AppTranslationOverrides = {
       stats: {
         availableJobsTitle: "Empleos Extraídos Disponibles",
         availableJobsDescription: "Inventario actual listo para entrevista",
+        enrichedJobsTitle: "Empleos Enriquecidos por IA",
+        enrichedJobsDescription: "Filas con contexto de estudio y señales de contratación",
         jobStatusTitle: "Estado del Extractor de Empleos",
         jobStatusDescription: "Estado de la última ejecución",
         interviewEntryTitle: "Entrada a Entrevista",
@@ -2170,6 +2220,8 @@ const esES: AppTranslationOverrides = {
         aria: "Empleos extraídos disponibles para entrevista",
         interviewButton: "Entrevista para este Empleo",
         interviewAria: "Iniciar entrevista para {title} en {company}",
+        actionsLabel: "Acciones",
+        personaSummaryLabel: "Perfil:",
         columns: {
           role: "Rol",
           company: "Empresa",
@@ -2394,15 +2446,22 @@ const esES: AppTranslationOverrides = {
   },
   interviewHistory: {
     title: "Historial de Entrevistas",
+    subtitle:
+      "Revisa sesiones anteriores, compara puntuaciones en el tiempo y vuelve a abrir la retroalimentación completa de cada entrevista.",
     allSessionsTitle: "Todas las Sesiones",
     studioFilterAria: "Filtrar sesiones por estudio",
     allStudiosOption: "Todos los estudios",
     emptyState: "No se encontraron sesiones de entrevista.",
+    emptyStateTitle: "No se encontraron sesiones de entrevista",
+    emptyStateDescription:
+      "Inicia una nueva entrevista desde un empleo extraído o una práctica por estudio para llenar el historial.",
     tableAriaLabel: "Sesiones de entrevista",
     timelineAriaLabel: "Vista de línea temporal de sesiones",
     viewButton: "Ver",
     viewSessionAria: "Ver sesión de entrevista {id}",
     loadingDetails: "Cargando detalles de sesión...",
+    retryButtonLabel: "Reintentar",
+    retryAria: "Reintentar la carga de los detalles de la sesión de entrevista",
     detailsTitle: "Detalles de Sesión",
     closeDetailsAria: "Cerrar panel de detalles",
     detailStudioLabel: "Estudio",
@@ -2415,6 +2474,9 @@ const esES: AppTranslationOverrides = {
     questionHeader: "P{index}: {score}%",
     overallFeedbackLabel: "Feedback General",
     selectPrompt: "Selecciona una sesión para ver detalles",
+    selectPromptTitle: "Elige una sesión",
+    selectPromptDescription:
+      "Abre cualquier sesión de la lista para revisar puntuaciones, respuestas y comentarios de IA.",
     fetchErrorFallback: "Error al cargar sesiones de entrevista",
     sessionNotFound: "Sesión no encontrada",
     detailLoadErrorFallback: "Error al cargar detalles de sesión",
@@ -2563,6 +2625,12 @@ const esES: AppTranslationOverrides = {
       experienceAria: "Nivel de experiencia",
       questionCountLegend: "Número de preguntas",
       questionCountAria: "Número de preguntas",
+      conversationStyleLegend: "Estilo de conversación",
+      conversationStyleAria: "Estilo de conversación",
+      conversationStyleNatural: "Conversación natural",
+      conversationStyleStructured: "Rondas estructuradas",
+      conversationStyleHint:
+        "El modo natural genera una pregunta contextual cada vez. El modo estructurado prepara toda la entrevista desde el inicio.",
       enableVoiceAria: "Activar modo voz",
       enableVoiceLabel: "Activar modo voz",
       ttsVoiceLegend: "Voz TTS",
@@ -2813,9 +2881,69 @@ const esES: AppTranslationOverrides = {
       connectionFailed: "Conexión fallida",
       preferredProviderLegend: "Proveedor de IA preferido",
       preferredProviderAria: "Seleccionar proveedor de IA preferido",
+      preferredProviderSaveButton: "Guardar chat por defecto",
       preferredProviderHint:
-        "El sistema de IA intentará este proveedor primero y luego recurrirá a otros.",
+        "Este control rápido define el proveedor predeterminado para chat y conversaciones.",
       preferredProviderSaved: "Proveedor preferido actualizado",
+      routingTitle: "Enrutamiento por propósito",
+      routingSubtitle:
+        "Asigna un proveedor y un modelo opcional a cada capacidad de IA para que chat, entrevistas, exportaciones y automatizaciones no compartan una única configuración global.",
+      saveRoutingAria: "Guardar enrutamiento de IA por propósito",
+      saveRoutingButton: "Guardar enrutamiento",
+      routingSaved: "Enrutamiento de IA guardado",
+      purposeProviderLegend: "Proveedor",
+      purposeProviderAria: "Seleccionar proveedor para {purpose}",
+      purposeModelLegend: "Modelo específico",
+      purposeModelAria: "Definir modelo específico para {purpose}",
+      purposeModelPlaceholder: "Déjalo vacío para usar el modelo por defecto o la autodetección",
+      purposeModelHint:
+        "Usa un modelo concreto solo cuando este flujo lo necesite. Si lo dejas vacío, se mantiene el valor por defecto del proveedor.",
+      purposes: {
+        chat: {
+          label: "Conversación",
+          description: "Chat general, respuestas del asistente y conversaciones interactivas.",
+        },
+        interviewQuestions: {
+          label: "Preguntas de entrevista",
+          description:
+            "Generación de preguntas, repreguntas y ritmo conversacional de la entrevista.",
+        },
+        interviewFeedback: {
+          label: "Feedback de entrevista",
+          description:
+            "Puntuación de respuestas, feedback por rúbrica y resúmenes finales de entrevista.",
+        },
+        resume: {
+          label: "Currículum",
+          description:
+            "Síntesis, mejora, puntuación y salidas estructuradas del CV.",
+        },
+        coverLetter: {
+          label: "Carta de presentación",
+          description:
+            "Redacción, refinamiento y contenido listo para exportar de la carta.",
+        },
+        emailResponse: {
+          label: "Respuesta por email",
+          description:
+            "Borradores de respuesta a recruiters y generación de emails automáticos.",
+        },
+        jobMatch: {
+          label: "Ajuste al puesto",
+          description:
+            "Scoring de encaje, análisis del rol y resúmenes de recomendación.",
+        },
+        scrapeEnrichment: {
+          label: "Enriquecimiento de scraping",
+          description:
+            "Enriquecimiento de perfiles de estudio y análisis de señales de contratación tras el scrape.",
+        },
+        automationFieldMapping: {
+          label: "Mapeo de automatización",
+          description:
+            "Mapeo de campos, inferencia de selectores y automatización estructurada de formularios.",
+        },
+      },
       ollamaTipTitle: "Consejo: Ollama va por fuera de esta app",
       ollamaTipDescription:
         "Instálalo primero y sigue la configuración oficial de Ollama para tu propia máquina o proyecto en",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_ROUTES, SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
@@ -24,6 +24,7 @@ const showApplyModal = ref(false);
 const applicationNotes = ref("");
 const applying = ref(false);
 const JOB_APPLY_DIALOG_TITLE_ID = "job-detail-apply-dialog-title";
+const JOB_DETAIL_TITLE_ID = "job-detail-title";
 
 function routeParamToString(value: string | string[] | undefined): string {
   if (Array.isArray(value)) {
@@ -110,12 +111,6 @@ async function handleApply() {
   $toast.success(t("jobDetail.toasts.applicationSubmitted"));
 }
 
-function getMatchScoreColor(score: number) {
-  if (score >= SCORE_PASS_THRESHOLD) return "text-success";
-  if (score >= SCORE_WARNING_THRESHOLD) return "text-warning";
-  return "text-error";
-}
-
 function formatDate(date: string): string {
   return (
     formatDateWithLocale(date, locale.value, fallbackLocale.value, {
@@ -130,6 +125,8 @@ async function startJobInterview() {
   if (!job.value) return;
   await router.push(buildInterviewJobNavigation(job.value.id, "jobs"));
 }
+
+const jobHeroDescription = computed(() => job.value?.company ?? "");
 </script>
 
 <template>
@@ -146,26 +143,21 @@ async function startJobInterview() {
       @retry="() => refreshJobDetail()"
     />
 
-    <div
+    <EmptyState
       v-else-if="jobDetailStatus === 'success' && !job && jobId"
-      class="alert alert-info alert-soft"
-      role="status"
-    >
-      <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <div>
-        <p class="font-medium">{{ t("jobDetail.notFoundTitle") }}</p>
-        <p class="text-sm text-base-content/70">{{ t("jobDetail.notFoundBody") }}</p>
-      </div>
-      <NuxtLink :to="APP_ROUTES.jobs" class="btn btn-sm btn-ghost shrink-0" :aria-label="t('jobDetail.backToJobsAria')">
-        {{ t("jobDetail.backToJobs") }}
-      </NuxtLink>
-    </div>
+      title-key="jobDetail.notFoundTitle"
+      description-key="jobDetail.notFoundBody"
+      cta-label-key="jobDetail.backToJobs"
+      :cta-to="APP_ROUTES.jobs"
+    />
 
-    <div v-else-if="jobDetailStatus === 'success' && !jobId" class="alert alert-warning alert-soft" role="status">
-      <span>{{ t("jobDetail.invalidId") }}</span>
-    </div>
+    <EmptyState
+      v-else-if="jobDetailStatus === 'success' && !jobId"
+      title-key="jobDetail.invalidIdTitle"
+      description-key="jobDetail.invalidIdBody"
+      cta-label-key="jobDetail.backToJobs"
+      :cta-to="APP_ROUTES.jobs"
+    />
 
     <SectionGrid v-else-if="job" grid-token="threeColumnLg">
       <!-- Main Content -->
@@ -173,82 +165,81 @@ async function startJobInterview() {
         <!-- Job Header -->
         <div class="card bg-base-200">
           <div class="card-body">
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex-1">
-                <h1 class="text-3xl font-bold mb-2">{{ job.title }}</h1>
-                <p class="text-xl text-base-content/70 mb-4">{{ job.company }}</p>
-
-                <div class="flex flex-wrap gap-2">
-                  <span class="badge">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {{ job.location }}
-                  </span>
-
-                  <span v-if="job.remote" class="badge badge-success">
-                    {{ t("jobDetail.remoteBadge") }}
-                  </span>
-
-                  <span v-if="job.experienceLevel" class="badge badge-outline">
-                    {{ jobExperienceLabel(t, job.experienceLevel) }}
-                  </span>
-
-                  <span v-if="job.salary" class="badge badge-primary">
-                    {{ job.salary }}
-                  </span>
-                </div>
-              </div>
-
-              <div v-if="job.matchScore" class="text-center">
-                <div
-                  class="radial-progress"
-                  :class="getMatchScoreColor(job.matchScore)"
-                  :style="`--value:${job.matchScore}; --size:5rem;`"
-                  role="progressbar"
-                  :aria-label="t('jobDetail.scoreProgressAria')"
-                  :aria-valuenow="job.matchScore"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
+            <PageHeroHeader
+              :title-id="JOB_DETAIL_TITLE_ID"
+              :title="job.title"
+              :description="jobHeroDescription"
+              density="comfortable"
+            >
+              <template #actions>
+                <button
+                  class="btn btn-outline"
+                  :aria-label="t('jobDetail.interviewAria')"
+                  @click="startJobInterview"
                 >
-                  <span class="text-lg font-bold">{{ job.matchScore }}%</span>
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ t("jobDetail.interviewButton") }}
+                </button>
+
+                <button
+                  class="btn btn-primary"
+                  :aria-label="t('jobDetail.applyAria')"
+                  @click="showApplyModal = true"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {{ t("jobDetail.applyButton") }}
+                </button>
+
+                <button
+                  class="btn btn-outline"
+                  :class="{ 'btn-success': isSaved }"
+                  :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
+                  @click="handleSaveToggle"
+                >
+                  <svg class="h-5 w-5" :fill="isSaved ? 'currentColor' : 'none'" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  {{ isSaved ? t("jobDetail.savedButton") : t("jobDetail.saveButton") }}
+                </button>
+              </template>
+
+              <template v-if="typeof job.matchScore === 'number'" #aside>
+                <div class="flex items-center justify-start lg:justify-end">
+                  <div class="rounded-box bg-base-100 p-4">
+                    <JobMatchScore :score="job.matchScore" />
+                    <p class="mt-2 text-center text-xs text-base-content/60">
+                      {{ t("jobDetail.matchScoreLabel") }}
+                    </p>
+                  </div>
                 </div>
-                <p class="text-xs text-base-content/60 mt-1">{{ t("jobDetail.matchScoreLabel") }}</p>
-              </div>
-            </div>
+              </template>
+            </PageHeroHeader>
 
-            <div class="card-actions mt-4">
-              <button class="btn btn-secondary btn-outline" :aria-label="t('jobDetail.interviewAria')" @click="startJobInterview">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="badge">
+                <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                {{ t("jobDetail.interviewButton") }}
-              </button>
+                {{ job.location }}
+              </span>
 
-              <button
-                class="btn btn-primary"
-                :aria-label="t('jobDetail.applyAria')"
-                @click="showApplyModal = true"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                {{ t("jobDetail.applyButton") }}
-              </button>
+              <span v-if="job.remote" class="badge badge-success">
+                {{ t("jobDetail.remoteBadge") }}
+              </span>
 
-              <button
-                class="btn btn-outline"
-                :class="{ 'btn-success': isSaved }"
-                :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
-                @click="handleSaveToggle"
-              >
-                <svg class="w-5 h-5" :stroke="isSaved ? 'currentColor' : 'currentColor'" :fill="isSaved ? 'currentColor' : 'none'" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                {{ isSaved ? t("jobDetail.savedButton") : t("jobDetail.saveButton") }}
-              </button>
+              <span v-if="job.experienceLevel" class="badge badge-outline">
+                {{ jobExperienceLabel(t, job.experienceLevel) }}
+              </span>
+
+              <span v-if="job.salary" class="badge badge-primary">
+                {{ job.salary }}
+              </span>
             </div>
           </div>
         </div>

@@ -119,6 +119,8 @@ The email automation has two stages (immediate or scheduled):
 1. **Draft:** Generate a reply with the configured AI provider.
 2. **Deliver:** Optionally send through SMTP.
 
+The AI draft step now resolves through the shared per-purpose routing table with the `emailResponse` purpose, while the smart field mapper uses `automationFieldMapping`. That keeps automation AI selection aligned with the same server-owned settings contract used by chat, resume, interview, and cover-letter workflows.
+
 ```mermaid
 flowchart LR
   UI["automation/email page"] --> Route["POST /api/automation/email-response"]

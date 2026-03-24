@@ -35,13 +35,20 @@ export class HuggingFaceProvider extends BaseAIProvider {
     this.client = new HfInference(apiKey);
   }
 
+  private resolveModel(options?: GenerateOptions): string {
+    return typeof options?.model === "string" && options.model.trim().length > 0
+      ? options.model.trim()
+      : this.model;
+  }
+
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
+    const model = this.resolveModel(options);
     const messages = buildChatMessages(prompt, options?.systemPrompt);
 
     const responseResult = await settle(
       this.client.chatCompletion({
-        model: this.model,
+        model,
         messages,
         max_tokens: options?.maxTokens ?? 1024,
         temperature: options?.temperature ?? 0.7,
@@ -52,7 +59,7 @@ export class HuggingFaceProvider extends BaseAIProvider {
       return {
         id: this.generateId(),
         provider: this.name,
-        model: this.model,
+        model,
         content: "",
         error: toErrorMessage(responseResult.reason),
         timing: this.createTimingMetrics(startTime),
@@ -64,17 +71,18 @@ export class HuggingFaceProvider extends BaseAIProvider {
     return {
       id: this.generateId(),
       provider: this.name,
-      model: this.model,
+      model,
       content,
       timing: this.createTimingMetrics(startTime),
     };
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
+    const model = this.resolveModel(options);
     const messages = buildChatMessages(prompt, options?.systemPrompt);
 
     const stream = this.client.chatCompletionStream({
-      model: this.model,
+      model,
       messages,
       max_tokens: options?.maxTokens ?? 1024,
       temperature: options?.temperature ?? 0.7,

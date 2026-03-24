@@ -1,5 +1,13 @@
-import type { AIChatContextDomain, AIProviderType } from "../types/ai";
-import { AI_PROVIDER_IDS } from "../types/ai";
+import type {
+  AIChatContextDomain,
+  AIRouting,
+  AIRoutingPurpose,
+  AIRoutingTarget,
+  AIProviderType,
+} from "../types/ai";
+import { AI_PROVIDER_IDS, AI_ROUTING_PURPOSE_IDS } from "../types/ai";
+
+export { AI_ROUTING_PURPOSE_IDS };
 import { API_ENDPOINTS } from "./endpoints";
 import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "./routes";
 
@@ -32,6 +40,7 @@ export const AI_MAX_TOKENS_FEEDBACK = 500;
 export const AI_MAX_TOKENS_CV_QUESTION = 1200;
 export const AI_MAX_TOKENS_CV_ANALYSIS = 2000;
 export const AI_MAX_TOKENS_FIELD_MAPPER = 1000;
+export const AI_MAX_TOKENS_SCRAPE_ENRICHMENT = 900;
 export const AI_MAX_TOKENS_SCORE = 2000;
 const CLAUDE_TEST_MODEL = "claude-sonnet-4-5-20250929";
 
@@ -195,6 +204,48 @@ export const AI_PROVIDER_DEFAULT: AIProviderType =
   AI_PROVIDER_DEFAULT_ORDER[0] ?? AI_PROVIDER_IDS[0];
 
 export const AI_PROVIDER_LIST_FOR_FORMS = AI_PROVIDER_DEFAULT_ORDER;
+
+/**
+ * Default routing target derived from the default provider order.
+ */
+export const AI_ROUTING_DEFAULT_TARGET: AIRoutingTarget = {
+  provider: AI_PROVIDER_DEFAULT,
+};
+
+/**
+ * Default purpose-aware AI routing table.
+ */
+export const DEFAULT_AI_ROUTING: AIRouting = Object.freeze(
+  Object.fromEntries(
+    AI_ROUTING_PURPOSE_IDS.map((purpose) => [purpose, { ...AI_ROUTING_DEFAULT_TARGET }]),
+  ) as AIRouting,
+);
+
+/**
+ * Normalizes a partial routing payload into the full canonical routing table.
+ */
+export function normalizeAIRouting(
+  routing?: Partial<Record<AIRoutingPurpose, Partial<AIRoutingTarget> | undefined>> | null,
+  fallbackProvider: AIProviderType = AI_PROVIDER_DEFAULT,
+  fallbackModel?: string | null,
+): AIRouting {
+  return Object.fromEntries(
+    AI_ROUTING_PURPOSE_IDS.map((purpose) => {
+      const configuredTarget = routing?.[purpose];
+      const configuredProvider = configuredTarget?.provider;
+      const provider = AI_PROVIDER_ID_LIST.includes(configuredProvider ?? fallbackProvider)
+        ? (configuredProvider ?? fallbackProvider)
+        : fallbackProvider;
+      const model =
+        typeof configuredTarget?.model === "string" && configuredTarget.model.trim().length > 0
+          ? configuredTarget.model.trim()
+          : typeof fallbackModel === "string" && fallbackModel.trim().length > 0
+            ? fallbackModel.trim()
+            : undefined;
+      return [purpose, model ? { provider, model } : { provider }];
+    }),
+  ) as AIRouting;
+}
 
 /**
  * Max number of historical chat messages included in AI prompt context.

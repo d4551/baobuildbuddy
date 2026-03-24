@@ -22,11 +22,18 @@ export class ClaudeProvider extends BaseAIProvider {
     this.client = new Anthropic({ apiKey });
   }
 
+  private resolveModel(options?: GenerateOptions): string {
+    return typeof options?.model === "string" && options.model.trim().length > 0
+      ? options.model.trim()
+      : this.model;
+  }
+
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
+    const model = this.resolveModel(options);
     const responseResult = await settle(
       this.client.messages.create({
-        model: this.model,
+        model,
         max_tokens: options?.maxTokens ?? 4096,
         temperature: options?.temperature ?? 0.7,
         system: options?.systemPrompt,
@@ -42,7 +49,7 @@ export class ClaudeProvider extends BaseAIProvider {
       return {
         id: this.generateId(),
         provider: this.name,
-        model: this.model,
+        model,
         content: "",
         error: toErrorMessage(responseResult.reason),
         timing: this.createTimingMetrics(startTime),
@@ -57,7 +64,7 @@ export class ClaudeProvider extends BaseAIProvider {
     return {
       id: this.generateId(),
       provider: this.name,
-      model: this.model,
+      model,
       content: text,
       usage: {
         inputTokens: response.usage.input_tokens,
@@ -68,10 +75,11 @@ export class ClaudeProvider extends BaseAIProvider {
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
+    const model = this.resolveModel(options);
     const streamResult = await settle(
       Promise.resolve(
         this.client.messages.stream({
-          model: this.model,
+          model,
           max_tokens: options?.maxTokens ?? 4096,
           temperature: options?.temperature ?? 0.7,
           system: options?.systemPrompt,
@@ -113,11 +121,12 @@ export class ClaudeProvider extends BaseAIProvider {
 
   async isAvailable(): Promise<boolean> {
     // Make a minimal request to verify API key
+    const model = this.model;
     return (
       (
         await settle(
           this.client.messages.create({
-            model: this.model,
+            model,
             max_tokens: 10,
             messages: [{ role: "user", content: "test" }],
           }),

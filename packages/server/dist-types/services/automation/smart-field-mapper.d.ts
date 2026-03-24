@@ -4,6 +4,7 @@ import type { AIResponse } from "@bao/shared";
  */
 export interface FieldMapperAIClient {
     generate: (prompt: string, options?: {
+        purpose?: "automationFieldMapping";
         temperature?: number;
         maxTokens?: number;
     }) => Promise<AIResponse>;

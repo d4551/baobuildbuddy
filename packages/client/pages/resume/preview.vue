@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { APP_ROUTE_QUERY_KEYS, type ResumeData } from "@bao/shared";
+import { APP_ROUTES, APP_ROUTE_QUERY_KEYS, type ResumeData } from "@bao/shared";
+import { useAsyncData, useRoute, useRouter, useServerSeoMeta } from "#imports";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
+import { getErrorMessage } from "~/utils/errors";
 
 const route = useRoute();
 const router = useRouter();
@@ -9,16 +13,46 @@ const { t } = useI18n();
 
 if (import.meta.server) {
   useServerSeoMeta({
-    title: t("resumePage.seoTitle"),
-    description: t("resumePage.seoDescription"),
+    title: t("resumePreview.pageTitle"),
+    description: t("resumePreview.description"),
   });
 }
 
-const resume = ref<ResumeData | null>(null);
+const pageError = ref<string | null>(null);
 const resumeId = computed(() => {
   const routeResumeId = route.query[APP_ROUTE_QUERY_KEYS.id];
   return typeof routeResumeId === "string" ? routeResumeId : "";
 });
+
+const resumePreviewKey = computed(() =>
+  `resume-preview:${resumeId.value.length > 0 ? resumeId.value : "missing"}`
+);
+
+const { data: resume, pending: bootstrapPending, refresh: refreshResumePreview } =
+  await useAsyncData<ResumeData | null>(
+    resumePreviewKey,
+    async () => {
+      pageError.value = null;
+
+      if (!resumeId.value) {
+        return null;
+      }
+
+      const resumeResult = await settlePromise(
+        getResume(resumeId.value),
+        t("resumePreview.loadError"),
+      );
+      if (!resumeResult.ok) {
+        pageError.value = getErrorMessage(resumeResult.error, t("resumePreview.loadError"));
+        return null;
+      }
+
+      return resumeResult.value;
+    },
+    {
+      watch: [resumeId],
+    },
+  );
 
 const displaySkills = computed(() => {
   if (!resume.value?.skills) return [];
@@ -27,18 +61,19 @@ const displaySkills = computed(() => {
 });
 
 const hasGamingExperience = computed(() => {
-  const ge = resume.value?.gamingExperience;
-  return ge?.gameEngines || ge?.genres || ge?.shippedTitles;
-});
-
-onMounted(async () => {
-  if (resumeId.value) {
-    resume.value = await getResume(resumeId.value);
-  }
+  const gamingExperience = resume.value?.gamingExperience;
+  return Boolean(
+    gamingExperience?.gameEngines ||
+      gamingExperience?.genres ||
+      gamingExperience?.shippedTitles,
+  );
 });
 
 async function handleExport() {
-  if (!resumeId.value) return;
+  if (!resumeId.value) {
+    return;
+  }
+
   await exportResume(resumeId.value);
 }
 
@@ -48,200 +83,235 @@ function handlePrint() {
 </script>
 
 <template>
-  <div>
-    <div class="flex items-center justify-between mb-6 no-print">
-      <button class="btn btn-ghost btn-sm" :aria-label="t('resumePage.backButtonAria')" @click="router.back()">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        {{ t("resumePage.backButton") }}
-      </button>
+  <PageScaffold
+    tag="section"
+    width-token="content"
+    spacing-token="comfortable"
+    labelled-by="resume-preview-title"
+  >
+    <PageHeroHeader
+      title-id="resume-preview-title"
+      :title="t('resumePreview.pageTitle')"
+      :description="t('resumePreview.description')"
+    >
+      <template #actions>
+        <button
+          class="btn btn-ghost print:hidden"
+          :aria-label="t('resumePage.backButtonAria')"
+          @click="router.back()"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          {{ t("resumePage.backButton") }}
+        </button>
 
-      <div class="flex gap-2">
-        <button class="btn btn-sm btn-outline" :aria-label="t('resumePreview.printAria')" @click="handlePrint">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <button
+          class="btn btn-outline print:hidden"
+          :aria-label="t('resumePreview.printAria')"
+          @click="handlePrint"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
           {{ t("resumePreview.printButton") }}
         </button>
-        <button class="btn btn-sm btn-primary" :aria-label="t('resumePage.exportButtonAria')" @click="handleExport">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+
+        <button
+          class="btn btn-primary print:hidden"
+          :aria-label="t('resumePage.exportButtonAria')"
+          @click="handleExport"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           {{ t("resumePage.exportButton") }}
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeroHeader>
 
-    <LoadingSkeleton v-if="loading" :lines="10" />
+    <LoadingSkeleton v-if="bootstrapPending || loading" :lines="10" />
+
+    <BootstrapErrorAlert
+      v-else-if="pageError"
+      :title="t('resumePreview.pageTitle')"
+      :message="pageError"
+      :retry-label="t('resumePreview.retryButton')"
+      :retry-aria-label="t('resumePreview.retryAria')"
+      @retry="() => refreshResumePreview()"
+    />
+
+    <EmptyState
+      v-else-if="!resume"
+      title-key="resumePreview.notFoundTitle"
+      description-key="resumePreview.notFoundDescription"
+      cta-label-key="resumePage.backButton"
+      :cta-to="APP_ROUTES.resume"
+    />
 
     <div
-      v-else-if="resume"
-      class="resume-print-surface mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 p-8 text-base-content shadow-lg print:rounded-none print:border-0 print:shadow-none"
+      v-else
+      class="mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 p-8 text-base-content shadow-lg print:rounded-none print:border-0 print:p-0 print:shadow-none"
     >
-      <!-- Header -->
-      <div class="resume-print-divider mb-8 border-b-2 border-base-content/30 pb-4 text-center">
-        <h1 class="text-4xl font-bold mb-2">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h1>
+      <div class="mb-8 border-b-2 border-base-content/30 pb-4 text-center">
+        <h2 class="mb-2 text-4xl font-bold">
+          {{ resume.personalInfo?.name || t("resumePreview.defaultName") }}
+        </h2>
         <div class="flex flex-wrap justify-center gap-4 text-sm">
           <span v-if="resume.personalInfo?.email">{{ resume.personalInfo.email }}</span>
           <span v-if="resume.personalInfo?.phone">{{ resume.personalInfo.phone }}</span>
           <span v-if="resume.personalInfo?.location">{{ resume.personalInfo.location }}</span>
         </div>
-        <div v-if="resume.personalInfo?.linkedIn || resume.personalInfo?.portfolio" class="flex flex-wrap justify-center gap-4 text-sm mt-2">
+        <div
+          v-if="resume.personalInfo?.linkedIn || resume.personalInfo?.portfolio"
+          class="mt-2 flex flex-wrap justify-center gap-4 text-sm"
+        >
           <a
             v-if="resume.personalInfo?.linkedIn"
             :href="resume.personalInfo.linkedIn"
-            class="underline"
+            class="link link-hover"
             target="_blank"
             rel="noopener noreferrer"
-            :aria-label="t('resumePreview.linkedin')"
+            :aria-label="t('resumePreview.linkedinLinkAria')"
           >
             {{ t("resumePreview.linkedin") }}
           </a>
           <a
             v-if="resume.personalInfo?.portfolio"
             :href="resume.personalInfo.portfolio"
-            class="underline"
+            class="link link-hover"
             target="_blank"
             rel="noopener noreferrer"
-            :aria-label="t('resumePreview.website')"
+            :aria-label="t('resumePreview.websiteLinkAria')"
           >
             {{ t("resumePreview.website") }}
           </a>
         </div>
       </div>
 
-      <!-- Summary -->
       <div v-if="resume.summary" class="mb-6">
-        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">{{ t("resumePage.personal.summaryLegend") }}</h2>
+        <PageHeaderBlock
+          title-id="resume-preview-summary-title"
+          :title="t('resumePage.personal.summaryLegend')"
+          extra-class="mb-3"
+        />
         <p class="text-sm leading-relaxed">{{ resume.summary }}</p>
       </div>
 
-      <!-- Experience -->
       <div v-if="resume.experience?.length" class="mb-6">
-        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">{{ t("resumePage.experience.title") }}</h2>
+        <PageHeaderBlock
+          title-id="resume-preview-experience-title"
+          :title="t('resumePage.experience.title')"
+          extra-class="mb-3"
+        />
         <div
-          v-for="(exp, idx) in resume.experience"
-          :key="idx"
+          v-for="(experience, index) in resume.experience"
+          :key="`${experience.company}-${experience.title}-${index}`"
           class="mb-4"
         >
-          <div class="flex justify-between items-start mb-1">
+          <div class="mb-1 flex items-start justify-between">
             <div>
-              <h3 class="text-lg font-bold">{{ exp.title }}</h3>
-              <p class="text-base font-semibold">{{ exp.company }}</p>
+              <h3 class="text-lg font-bold">{{ experience.title }}</h3>
+              <p class="text-base font-semibold">{{ experience.company }}</p>
             </div>
             <div class="text-right text-sm">
-              <p>{{ exp.startDate }} - {{ exp.endDate || t("resumePreview.present") }}</p>
-              <p v-if="exp.location">{{ exp.location }}</p>
+              <p>{{ experience.startDate }} - {{ experience.endDate || t("resumePreview.present") }}</p>
+              <p v-if="experience.location">{{ experience.location }}</p>
             </div>
           </div>
-          <p v-if="exp.description" class="text-sm whitespace-pre-wrap leading-relaxed">{{ exp.description }}</p>
+          <p v-if="experience.description" class="whitespace-pre-wrap text-sm leading-relaxed">
+            {{ experience.description }}
+          </p>
         </div>
       </div>
 
-      <!-- Education -->
       <div v-if="resume.education?.length" class="mb-6">
-        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">{{ t("resumePage.education.title") }}</h2>
+        <PageHeaderBlock
+          title-id="resume-preview-education-title"
+          :title="t('resumePage.education.title')"
+          extra-class="mb-3"
+        />
         <div
-          v-for="(edu, idx) in resume.education"
-          :key="idx"
+          v-for="(education, index) in resume.education"
+          :key="`${education.school}-${education.degree}-${index}`"
           class="mb-3"
         >
-          <div class="flex justify-between items-start">
+          <div class="flex items-start justify-between">
             <div>
-              <h3 class="text-lg font-bold">{{ edu.degree }}</h3>
-              <p class="text-base">{{ edu.school }}</p>
+              <h3 class="text-lg font-bold">{{ education.degree }}</h3>
+              <p class="text-base">{{ education.school }}</p>
             </div>
             <div class="text-right text-sm">
-              <p>{{ edu.year }}</p>
-              <p v-if="edu.gpa">{{ t("resumePage.education.gpaAria") }}: {{ edu.gpa }}</p>
+              <p>{{ education.year }}</p>
+              <p v-if="education.gpa">{{ t("resumePreview.gpaLabel", { gpa: education.gpa }) }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Skills -->
       <div v-if="displaySkills.length" class="mb-6">
-        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">{{ t("resumePage.skills.title") }}</h2>
+        <PageHeaderBlock
+          title-id="resume-preview-skills-title"
+          :title="t('resumePage.skills.title')"
+          extra-class="mb-3"
+        />
         <div class="flex flex-wrap gap-2">
           <span
-            v-for="(skill, idx) in displaySkills"
-            :key="idx"
-            class="resume-print-chip rounded bg-base-200 px-3 py-1 text-sm text-base-content"
+            v-for="(skill, index) in displaySkills"
+            :key="`${skill}-${index}`"
+            class="badge badge-outline px-3 py-3 text-sm"
           >
             {{ skill }}
           </span>
         </div>
       </div>
 
-      <!-- Projects -->
       <div v-if="resume.projects?.length" class="mb-6">
-        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">{{ t("resumePage.projects.title") }}</h2>
+        <PageHeaderBlock
+          title-id="resume-preview-projects-title"
+          :title="t('resumePage.projects.title')"
+          extra-class="mb-3"
+        />
         <div
-          v-for="(project, idx) in resume.projects"
-          :key="idx"
+          v-for="(project, index) in resume.projects"
+          :key="`${project.title}-${index}`"
           class="mb-3"
         >
           <h3 class="text-lg font-bold">{{ project.title }}</h3>
-          <p v-if="project.link" class="text-sm underline mb-1">{{ project.link }}</p>
+          <p v-if="project.link" class="mb-1 text-sm">
+            {{ project.link }}
+          </p>
           <p class="text-sm leading-relaxed">{{ project.description }}</p>
         </div>
       </div>
 
-      <!-- Gaming Experience -->
       <div v-if="hasGamingExperience" class="mb-6">
-        <h2 class="resume-print-divider mb-3 border-b border-base-content/20 pb-1 text-2xl font-bold">{{ t("resumePage.gaming.title") }}</h2>
+        <PageHeaderBlock
+          title-id="resume-preview-gaming-title"
+          :title="t('resumePage.gaming.title')"
+          extra-class="mb-3"
+        />
         <div v-if="resume.gamingExperience?.gameEngines" class="mb-2">
-          <p class="font-semibold text-sm">{{ t("resumePage.gaming.rolesLegend") }}:</p>
+          <p class="text-sm font-semibold">{{ t("resumePage.gaming.rolesLegend") }}:</p>
           <p class="text-sm">{{ resume.gamingExperience.gameEngines }}</p>
         </div>
         <div v-if="resume.gamingExperience?.genres" class="mb-2">
-          <p class="font-semibold text-sm">{{ t("resumePage.gaming.genresLegend") }}:</p>
+          <p class="text-sm font-semibold">{{ t("resumePage.gaming.genresLegend") }}:</p>
           <p class="text-sm">{{ resume.gamingExperience.genres }}</p>
         </div>
         <div v-if="resume.gamingExperience?.shippedTitles">
-          <p class="font-semibold text-sm">{{ t("resumePage.gaming.achievementsLegend") }}:</p>
+          <p class="text-sm font-semibold">{{ t("resumePage.gaming.achievementsLegend") }}:</p>
           <ul class="list text-sm">
-            <li class="list-row px-0 py-1" v-for="(achievement, idx) in resume.gamingExperience.shippedTitles.split(';')" :key="idx">
+            <li
+              v-for="(achievement, index) in resume.gamingExperience.shippedTitles.split(';')"
+              :key="`${achievement}-${index}`"
+              class="list-row px-0 py-1"
+            >
               {{ achievement.trim() }}
             </li>
           </ul>
         </div>
       </div>
     </div>
-
-    <div v-else class="alert alert-error" role="alert" :aria-label="t('resumePreview.notFound')">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>{{ t("resumePreview.notFound") }}</span>
-    </div>
-  </div>
+  </PageScaffold>
 </template>
-
-<style>
-@media print {
-  .no-print {
-    display: none !important;
-  }
-
-  body {
-    background: var(--color-base-100);
-  }
-
-  .resume-print-surface {
-    background: var(--color-base-100) !important;
-    border-color: var(--color-base-300) !important;
-    color: var(--color-base-content) !important;
-  }
-
-  .resume-print-divider {
-    border-color: var(--color-base-300) !important;
-  }
-
-  .resume-print-chip {
-    background: var(--color-base-200) !important;
-    color: var(--color-base-content) !important;
-  }
-}
-</style>

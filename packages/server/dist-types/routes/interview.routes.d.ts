@@ -34,6 +34,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
                         includeStudioSpecific?: boolean | undefined;
                         enableVoiceMode?: boolean | undefined;
                         interviewMode?: "job" | "studio" | undefined;
+                        conversationStyle?: "natural" | "structured" | undefined;
                         targetJob?: {
                             source?: string | undefined;
                             description?: string | undefined;
@@ -45,6 +46,11 @@ export declare const interviewRoutes: Elysia<"/interview", {
                             title: string;
                             company: string;
                             location: string;
+                        } | undefined;
+                        candidateContext?: {
+                            resumeId?: string | undefined;
+                            coverLetterId?: string | undefined;
+                            portfolioId?: string | undefined;
                         } | undefined;
                         voiceSettings?: {
                             language?: string | undefined;

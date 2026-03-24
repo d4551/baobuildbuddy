@@ -9,8 +9,6 @@ import {
   JOB_GAME_GENRES,
   JOB_STUDIO_TYPES,
   JOB_SUPPORTED_PLATFORMS,
-  SCORE_PASS_THRESHOLD,
-  SCORE_WARNING_THRESHOLD,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -199,12 +197,6 @@ async function interviewJob(id: string) {
   await router.push(buildInterviewJobNavigation(id, "jobs-list"));
 }
 
-function getMatchScoreColor(score: number) {
-  if (score >= SCORE_PASS_THRESHOLD) return "text-success";
-  if (score >= SCORE_WARNING_THRESHOLD) return "text-warning";
-  return "text-error";
-}
-
 function formatDate(date: string) {
   return formatRelativeTimeForDate(
     date,
@@ -265,22 +257,26 @@ async function maybeAwardSearchXp(): Promise<void> {
 
 <template>
   <PageScaffold labelled-by="jobs-page-title">
-    <PageHeaderBlock title-id="jobs-page-title" :title="t('jobsPage.title')">
+    <PageHeroHeader
+      title-id="jobs-page-title"
+      :title="t('jobsPage.title')"
+      :description="t('jobsPage.seoDescription')"
+    >
       <template #actions>
         <button
-          class="btn btn-primary btn-sm"
+          class="btn btn-primary"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="refreshing"
           @click="handleRefresh"
         >
-          <span v-if="refreshing" class="loading loading-spinner loading-xs"></span>
+          <span v-if="refreshing" class="loading loading-spinner loading-sm"></span>
           <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           {{ t("jobsPage.refreshButton") }}
         </button>
       </template>
-    </PageHeaderBlock>
+    </PageHeroHeader>
 
     <div class="card mb-6 bg-base-200">
       <div class="card-body">
@@ -434,12 +430,11 @@ async function maybeAwardSearchXp(): Promise<void> {
           @retry="() => refreshJobsBootstrap()"
         />
 
-        <div v-else-if="paginatedJobs.length === 0" class="alert alert-info alert-soft">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{{ t("jobsPage.emptyState") }}</span>
-        </div>
+        <EmptyState
+          v-else-if="paginatedJobs.length === 0"
+          title-key="jobsPage.emptyStateTitle"
+          description-key="jobsPage.emptyStateDescription"
+        />
 
         <div v-else>
           <SectionGrid grid-token="twoColumn" extra-class="mb-6">
@@ -456,19 +451,7 @@ async function maybeAwardSearchXp(): Promise<void> {
               <div class="card-body relative z-10">
                 <div class="flex items-start justify-between gap-2">
                   <h3 class="card-title text-lg">{{ job.title }}</h3>
-                  <div
-                    v-if="job.matchScore"
-                    class="radial-progress text-xs font-bold"
-                    :class="getMatchScoreColor(job.matchScore)"
-                    :style="`--value:${job.matchScore}; --size:2.5rem; --thickness:0.22rem;`"
-                    role="progressbar"
-                    :aria-valuenow="job.matchScore"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    :aria-label="t('jobsPage.matchScoreAria')"
-                  >
-                    {{ job.matchScore }}%
-                  </div>
+                  <JobMatchScore v-if="typeof job.matchScore === 'number'" :score="job.matchScore" compact />
                 </div>
 
                 <p class="font-medium text-base-content/70">{{ job.company }}</p>

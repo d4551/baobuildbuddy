@@ -234,6 +234,7 @@ const handleResumeAiScore = async (
     aiService.generate(
       resumeScorePrompt(serializeResumeForAi(resume), serializeJobForAi(jobRows[0])),
       {
+        purpose: "resume",
         temperature: AI_DEFAULT_TEMPERATURE,
         maxTokens: AI_MAX_TOKENS_RESUME,
       },
@@ -550,6 +551,7 @@ ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingEx
 
       const aiResult = await settle(
         aiService.generate(prompt, {
+          purpose: "resume",
           temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
           maxTokens: AI_MAX_TOKENS_SCORE,
         }),

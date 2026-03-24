@@ -1,27 +1,31 @@
-import type { AIProviderConfig, AIProviderStatus, AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
+import type { AIRouting, AIProviderConfig, AIProviderStatus, AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
 import type { AIProvider } from "./provider-interface";
+type AIServiceSettings = {
+    geminiApiKey?: string | null;
+    claudeApiKey?: string | null;
+    openaiApiKey?: string | null;
+    huggingfaceToken?: string | null;
+    localModelEndpoint?: string | null;
+    localModelName?: string | null;
+    aiRouting?: AIRouting | null;
+    preferredProvider?: string | null;
+    preferredModel?: string | null;
+};
 /**
  * Multi-provider AI service with fallback capabilities
  */
 export declare class AIService {
     private providers;
     private preferredProvider?;
+    private routing;
     private fallbackOrder;
-    constructor(configs: AIProviderConfig[], preferredProvider?: AIProviderType);
+    constructor(configs: AIProviderConfig[], preferredProvider?: AIProviderType, routing?: AIRouting);
     /**
      * Create an AIService from a settings DB row.
      * Converts the flat settings config into AIProviderConfig[] format.
      * Used by WebSocket handlers, route handlers, and services.
      */
-    static fromSettings(settings?: {
-        geminiApiKey?: string | null;
-        claudeApiKey?: string | null;
-        openaiApiKey?: string | null;
-        huggingfaceToken?: string | null;
-        localModelEndpoint?: string | null;
-        localModelName?: string | null;
-        preferredProvider?: string | null;
-    }): AIService;
+    static fromSettings(settings?: AIServiceSettings): AIService;
     private static isTestRuntime;
     private static createDeterministicTestService;
     /**
@@ -43,6 +47,8 @@ export declare class AIService {
      * Get a specific provider by name
      */
     getProvider(name?: AIProviderType): AIProvider | null;
+    private resolveRoutingTarget;
+    private buildProviderOrder;
     private static mergePromptWithContext;
     private static toProviderOptions;
     private static pushProviderError;
@@ -76,6 +82,9 @@ export declare class AIService {
         baseUrl: string;
         name: string;
         available: boolean;
+        availableModels?: string[];
+        diagnosticCode?: AIProviderStatus["diagnosticCode"];
+        message?: string;
     }>>;
     /**
      * Update preferred provider
@@ -98,7 +107,12 @@ export declare class AIService {
      */
     getFallbackOrder(): AIProviderType[];
     /**
+     * Get the current purpose-aware routing table.
+     */
+    getRouting(): AIRouting;
+    /**
      * Get the active model name for a given provider (detected or configured).
      */
     getActiveModel(providerType: AIProviderType): string | null;
 }
+export {};

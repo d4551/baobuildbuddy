@@ -37,6 +37,7 @@ import {
   AI_MAX_TOKENS_CV_QUESTION,
   AI_MAX_TOKENS_FEEDBACK,
   AI_MAX_TOKENS_FIELD_MAPPER,
+  AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
   AI_MAX_TOKENS_MATCH,
   AI_MAX_TOKENS_QUESTION,
   AI_MAX_TOKENS_RESUME,
@@ -49,12 +50,16 @@ import {
   AI_PROVIDER_LIST_FOR_FORMS,
   AI_PROVIDER_TEST_STRATEGIES,
   AI_PROVIDER_TEST_STRATEGY_BY_ID,
+  AI_ROUTING_DEFAULT_TARGET,
+  AI_ROUTING_PURPOSE_IDS,
+  DEFAULT_AI_ROUTING,
   inferAIChatDomainFromRoutePath,
   LOCAL_AI_AUTO_DETECT_MODEL,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
   LOCAL_AI_RECOMMENDED_MODELS,
   LOCAL_AI_SERVERS,
+  normalizeAIRouting,
   OLLAMA_WEBSITE_URL,
 } from "./constants/ai";
 
@@ -96,6 +101,7 @@ export {
   AI_MAX_TOKENS_CV_QUESTION,
   AI_MAX_TOKENS_FEEDBACK,
   AI_MAX_TOKENS_FIELD_MAPPER,
+  AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
   AI_MAX_TOKENS_MATCH,
   AI_MAX_TOKENS_QUESTION,
   AI_MAX_TOKENS_RESUME,
@@ -108,12 +114,16 @@ export {
   AI_PROVIDER_LIST_FOR_FORMS,
   AI_PROVIDER_TEST_STRATEGIES,
   AI_PROVIDER_TEST_STRATEGY_BY_ID,
+  AI_ROUTING_DEFAULT_TARGET,
+  AI_ROUTING_PURPOSE_IDS,
+  DEFAULT_AI_ROUTING,
   inferAIChatDomainFromRoutePath,
   LOCAL_AI_AUTO_DETECT_MODEL,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
   LOCAL_AI_RECOMMENDED_MODELS,
   LOCAL_AI_SERVERS,
+  normalizeAIRouting,
   OLLAMA_WEBSITE_URL,
 };
 
@@ -467,6 +477,7 @@ import {
   A4_PAGE_HEIGHT,
   A4_PAGE_SIZE,
   A4_PAGE_WIDTH,
+  COVER_LETTER_EXPORT_THEME,
   COVER_LETTER_LINE_HEIGHT,
   COVER_LETTER_MARGIN,
   COVER_LETTER_PARAGRAPH_GAP,
@@ -482,10 +493,12 @@ import {
   DOCX_RESUME_FONT_NAME_PT,
   EXPORT_DATE_LOCALE,
   MIME_TYPE_DOCX,
+  PORTFOLIO_EXPORT_THEME,
   PORTFOLIO_FOOTER_X_OFFSET,
   PORTFOLIO_FOOTER_Y,
   PORTFOLIO_MARGIN,
   PORTFOLIO_PROJECT_SPACE,
+  RESUME_EXPORT_THEME_CONFIGS,
   RESUME_BODY_LINE_GAP,
   RESUME_CONTACT_SPACING,
   RESUME_DIVIDER_SPACING,
@@ -499,6 +512,7 @@ export {
   A4_PAGE_HEIGHT,
   A4_PAGE_SIZE,
   A4_PAGE_WIDTH,
+  COVER_LETTER_EXPORT_THEME,
   COVER_LETTER_LINE_HEIGHT,
   COVER_LETTER_MARGIN,
   COVER_LETTER_PARAGRAPH_GAP,
@@ -514,10 +528,12 @@ export {
   DOCX_RESUME_FONT_NAME_PT,
   EXPORT_DATE_LOCALE,
   MIME_TYPE_DOCX,
+  PORTFOLIO_EXPORT_THEME,
   PORTFOLIO_FOOTER_X_OFFSET,
   PORTFOLIO_FOOTER_Y,
   PORTFOLIO_MARGIN,
   PORTFOLIO_PROJECT_SPACE,
+  RESUME_EXPORT_THEME_CONFIGS,
   RESUME_BODY_LINE_GAP,
   RESUME_CONTACT_SPACING,
   RESUME_DIVIDER_SPACING,
@@ -525,6 +541,20 @@ export {
   RESUME_LINKS_SPACING,
   RESUME_SECTION_HEADER_SPACING,
   RESUME_SECTION_SPACE,
+};
+
+import {
+  collectDefinedStringValues,
+  formatExportDate,
+  resolveResumeExportTemplate,
+  toCoverLetterParagraphs,
+} from "./utils/export-contract";
+
+export {
+  collectDefinedStringValues,
+  formatExportDate,
+  resolveResumeExportTemplate,
+  toCoverLetterParagraphs,
 };
 
 import {
@@ -1456,6 +1486,8 @@ export type { AutomationRunUiState };
 
 import {
   apiKeyConfigSchema,
+  aiRoutingSchema,
+  aiRoutingTargetSchema,
   automationSettingsSchema,
   brandContentSettingsPatchSchema,
   brandContentSettingsSchema,
@@ -1486,6 +1518,8 @@ import {
 
 export {
   apiKeyConfigSchema,
+  aiRoutingSchema,
+  aiRoutingTargetSchema,
   automationSettingsSchema,
   brandContentSettingsPatchSchema,
   brandContentSettingsSchema,
@@ -1581,10 +1615,14 @@ import type {
   AIChatContextSource,
   AIChatContextState,
   AIChatFlowState,
+  AIProviderDiagnostic,
   AIModelInfo,
   AIProviderConfig,
   AIProviderStatus,
   AIProviderType,
+  AIRouting,
+  AIRoutingPurpose,
+  AIRoutingTarget,
   AIResponse,
   ChatMessage,
   GenerateOptions,
@@ -1602,10 +1640,14 @@ export type {
   AIChatContextSource,
   AIChatContextState,
   AIChatFlowState,
+  AIProviderDiagnostic,
   AIModelInfo,
   AIProviderConfig,
   AIProviderStatus,
   AIProviderType,
+  AIRouting,
+  AIRoutingPurpose,
+  AIRoutingTarget,
   AIResponse,
   ChatMessage,
   GenerateOptions,
@@ -1645,7 +1687,9 @@ export type {
 import type {
   GameStudio,
   InterviewAnalysis,
+  InterviewCandidateContext,
   InterviewConfig,
+  InterviewConversationStyle,
   InterviewerPersona,
   InterviewMode,
   InterviewQuestion,
@@ -1660,7 +1704,9 @@ import type {
 export type {
   GameStudio,
   InterviewAnalysis,
+  InterviewCandidateContext,
   InterviewConfig,
+  InterviewConversationStyle,
   InterviewerPersona,
   InterviewMode,
   InterviewQuestion,
@@ -1687,6 +1733,9 @@ import type {
   Platform,
   ProjectType,
   SalaryRange,
+  ScrapeEnrichmentRunSummary,
+  ScrapePersonaEnrichment,
+  ScraperOperationResult,
   SkillMatch,
   StudioType,
   TeamSize,
@@ -1707,6 +1756,9 @@ export type {
   Platform,
   ProjectType,
   SalaryRange,
+  ScrapeEnrichmentRunSummary,
+  ScrapePersonaEnrichment,
+  ScraperOperationResult,
   SkillMatch,
   StudioType,
   TeamSize,
@@ -1778,6 +1830,7 @@ export type {
 
 import {
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_APP_AI_ROUTING,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_JOB_PROVIDER_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
@@ -1787,6 +1840,7 @@ import {
 
 export {
   DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_APP_AI_ROUTING,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_JOB_PROVIDER_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
@@ -1796,6 +1850,7 @@ export {
 
 import type {
   APIKeyConfig,
+  AIProviderDiagnostics,
   AppSettings,
   AutomationSettings,
   BrandContentSettings,
@@ -1823,6 +1878,7 @@ import type {
 
 export type {
   APIKeyConfig,
+  AIProviderDiagnostics,
   AppSettings,
   AutomationSettings,
   BrandContentSettings,
@@ -1999,6 +2055,10 @@ export { asBoolean, asNumber, asRecord, asString, asStringArray, asUnknownArray,
 import { isEmailTransportConfigured } from "./utils/email-transport";
 
 export { isEmailTransportConfigured };
+
+import { normalizeScrapePersonaEnrichment } from "./utils/scrape-enrichment";
+
+export { normalizeScrapePersonaEnrichment };
 
 import { generateId, isValidEmail, isValidUrl, slugify } from "./utils/validation";
 

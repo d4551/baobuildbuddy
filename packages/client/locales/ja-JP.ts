@@ -79,6 +79,9 @@ const jaJPOverrides = {
     seoDescription:
       "プラットフォーム、スタジオ種別、ジャンル、経験レベルでゲーム業界の求人を検索・絞り込みできます。",
     title: "求人ボード",
+    emptyStateTitle: "フィルターに一致する求人がありません",
+    emptyStateDescription:
+      "現在の求人ビューを広げるために、検索条件またはフィルターを調整してください。",
     pagination: {
       navigationAria: "求人ページネーション",
       previousAria: "前の求人ページ",
@@ -135,11 +138,16 @@ const jaJPOverrides = {
   skillsPage: {
     seoTitle: "スキルマッパー",
     title: "スキルマッパー",
+    retryButton: "再試行",
+    retryAria: "スキルマッピングの読み込みを再試行",
   },
   skillsPathwaysPage: {
     seoTitle: "キャリアパス",
     title: "キャリアパス",
     readiness: {
+      emptyStateTitle: "準備状況データはまだ利用できません",
+      emptyStateDescription:
+        "マッピングしたスキルの証拠をさらに追加し、分析を再実行してこのセクションを埋めてください。",
       feedback: {
         empty: "{category} の準備データはまだありません。",
         early: "{category} は初期段階です。マッピングと証拠をさらに追加してください。",
@@ -186,6 +194,11 @@ const jaJPOverrides = {
         step_setup_profile: "プロフェッショナルプロフィールを整備しましょう。",
       },
     },
+    pathways: {
+      emptyStateTitle: "まだ利用可能なパスがありません",
+      emptyStateDescription:
+        "マッピング済みスキルを広げて、より良いロール提案と経路のカバレッジを解放してください。",
+    },
   },
   resumePage: {
     seoTitle: "履歴書ビルダー",
@@ -202,6 +215,16 @@ const jaJPOverrides = {
   },
   interviewHistory: {
     title: "面接履歴",
+    subtitle:
+      "過去の面接実行を確認し、スコア推移を比較しながら、各セッションの完全なフィードバックを再表示できます。",
+    emptyStateTitle: "面接セッションが見つかりません",
+    emptyStateDescription:
+      "スクレイプした求人またはスタジオ練習から新しい面接を開始して履歴を作成してください。",
+    retryButtonLabel: "再試行",
+    retryAria: "面接セッション詳細の読み込みを再試行",
+    selectPromptTitle: "セッションを選択",
+    selectPromptDescription:
+      "一覧から任意のセッションを開いて、スコア、回答、AIフィードバックを確認してください。",
     timelineScoreAria: "面接スコア: {score} パーセント",
     detailScoreAria: "面接スコア: {score} パーセント",
   },
@@ -210,6 +233,14 @@ const jaJPOverrides = {
     seoDescription:
       "求人ベースとスタジオベースの面接フローで練習し、スコア付きフィードバックで改善点を確認できます。",
     title: "面接準備ハブ",
+    config: {
+      conversationStyleLegend: "会話スタイル",
+      conversationStyleAria: "会話スタイル",
+      conversationStyleNatural: "自然な会話",
+      conversationStyleStructured: "構造化ラウンド",
+      conversationStyleHint:
+        "自然モードでは文脈に沿った質問を1つずつ生成します。構造化モードでは面接全体の質問セットを先に作成します。",
+    },
     errors: {
       bootstrapLoadFailed: "面接ハブのデータ読み込みに失敗しました",
       roleRecommendationsFailed: "最適化されたロール提案の読み込みに失敗しました",
@@ -274,9 +305,63 @@ const jaJPOverrides = {
       connectionSuccessful: "接続成功",
       connectionFailed: "接続失敗",
       preferredProviderLegend: "優先AIプロバイダー",
+      preferredProviderAria: "優先するAIプロバイダーを選択",
+      preferredProviderSaveButton: "チャット既定を保存",
       preferredProviderHint:
-        "AIシステムはこのプロバイダーを最初に試し、失敗した場合は他のプロバイダーにフォールバックします。",
+        "このクイック設定は、チャットや会話系フローの既定プロバイダーを決めます。",
       preferredProviderSaved: "優先プロバイダーが更新されました",
+      routingTitle: "用途別ルーティング",
+      routingSubtitle:
+        "チャット、面接、エクスポート、自動化ごとにプロバイダーと任意のモデルを割り当て、1つのグローバル既定値に依存しないようにします。",
+      saveRoutingAria: "用途別のAIルーティングを保存",
+      saveRoutingButton: "ルーティングを保存",
+      routingSaved: "AIルーティングを保存しました",
+      purposeProviderLegend: "プロバイダー",
+      purposeProviderAria: "{purpose} 用のプロバイダーを選択",
+      purposeModelLegend: "モデル上書き",
+      purposeModelAria: "{purpose} 用のモデル上書きを設定",
+      purposeModelPlaceholder:
+        "空欄のままにするとプロバイダー既定値または自動検出を使います",
+      purposeModelHint:
+        "このワークフローで特定モデルが必要な場合だけ指定してください。空欄ならプロバイダー既定値を使います。",
+      purposes: {
+        chat: {
+          label: "チャット",
+          description: "一般チャット、アシスタント応答、会話型のやり取り。",
+        },
+        interviewQuestions: {
+          label: "面接質問",
+          description: "質問生成、深掘り、会話型面接の進行制御。",
+        },
+        interviewFeedback: {
+          label: "面接フィードバック",
+          description: "回答採点、ルーブリック評価、最終サマリー生成。",
+        },
+        resume: {
+          label: "履歴書",
+          description: "履歴書の生成、改善、採点、構造化CV出力。",
+        },
+        coverLetter: {
+          label: "カバーレター",
+          description: "カバーレターの作成、推敲、書き出し向け表現調整。",
+        },
+        emailResponse: {
+          label: "メール返信",
+          description: "採用担当への返信文案と自動返信メール生成。",
+        },
+        jobMatch: {
+          label: "求人適合度",
+          description: "求人マッチ度の採点、役割分析、推薦サマリー。",
+        },
+        scrapeEnrichment: {
+          label: "スクレイプ拡張",
+          description: "スタジオペルソナの補完とスクレイプ後の採用シグナル分析。",
+        },
+        automationFieldMapping: {
+          label: "自動化フィールドマッピング",
+          description: "フィールド対応付け、セレクター推定、構造化フォーム自動化。",
+        },
+      },
       ollamaTipTitle: "補足: Ollama はこのアプリの外で導入します",
       ollamaTipDescription:
         "先にインストールし、あなた自身のマシンやプロジェクト向けの Ollama 公式セットアップに従ってください:",
@@ -339,6 +424,15 @@ const jaJPOverrides = {
     seoDescription:
       "スタジオプロフィールを検索し、運用属性で絞り込み、文脈付きの面接練習を開始できます。",
     title: "スタジオディレクトリ",
+    subtitle:
+      "スタジオプロフィールを確認し、運用属性で絞り込み、そのまま面接練習に進めます。",
+    errorTitle: "スタジオディレクトリを利用できません",
+    errorBannerAria: "スタジオディレクトリのエラー",
+    retryAria: "スタジオ読み込みを再試行",
+    retryButton: "再試行",
+    emptyTitle: "この条件に一致するスタジオがありません",
+    emptyDescription:
+      "現在の検索条件またはフィルターの組み合わせを調整して、別のスタジオプロフィールを表示してください。",
     options: {
       type: {
         indie: "インディー",
@@ -360,6 +454,20 @@ const jaJPOverrides = {
         notAvailable: "該当なし",
       },
     },
+  },
+  studioDetail: {
+    emptyTitle: "スタジオを表示できません",
+    emptyDescription:
+      "このスタジオプロフィールは現在利用できません。ディレクトリに戻って別のスタジオ文脈を選択してください。",
+  },
+  studioAnalytics: {
+    title: "スタジオ分析",
+    description:
+      "インデックス済みスタジオデータセットから、スタジオ分布、リモート勤務比率、共通技術トレンドを確認します。",
+    openDirectoryAria: "スタジオディレクトリを開く",
+    emptyTitle: "利用できるスタジオ分析がありません",
+    emptyDescription:
+      "この分析ビューを埋めるには、ディレクトリまたはスクレイパーハブからスタジオデータを更新してください。",
   },
   aiProviderCatalog: {
     local: {
@@ -597,6 +705,14 @@ const jaJPOverrides = {
     },
     scraper: {
       title: "スクレイパー運用ハブ",
+      stats: {
+        enrichedJobsTitle: "AI で拡張された求人",
+        enrichedJobsDescription: "スタジオ文脈と採用シグナルを含む行",
+      },
+      table: {
+        actionsLabel: "操作",
+        personaSummaryLabel: "ペルソナ:",
+      },
       errors: {
         rewardFailed: "スクレイパー進捗の付与に失敗しました。",
       },
@@ -645,9 +761,18 @@ const jaJPOverrides = {
     moreTechnologies: "+{count} 件追加",
   },
   resumePreview: {
+    pageTitle: "履歴書プレビュー",
+    description:
+      "エクスポートや共有の前に、印刷用の履歴書レイアウトを確認します。",
     printButton: "印刷",
     printAria: "履歴書プレビューを印刷",
+    retryButton: "再試行",
+    retryAria: "履歴書プレビューの読み込みを再試行",
+    loadError: "履歴書プレビューの読み込みに失敗しました。",
     notFound: "履歴書が見つかりません。プレビューする履歴書を選択してください。",
+    notFoundTitle: "履歴書が見つかりません",
+    notFoundDescription:
+      "このプレビューを開くには、履歴書ワークスペースから保存済みの履歴書を選択してください。",
     websiteLinkAria: "個人ウェブサイトを開く",
     linkedinLinkAria: "LinkedInプロフィールを開く",
     githubLinkAria: "GitHubプロフィールを開く",
@@ -656,10 +781,15 @@ const jaJPOverrides = {
     title: "ポートフォリオビルダー",
     preview: {
       pageTitle: "ポートフォリオプレビュー",
+      description:
+        "エクスポートや共有の前に、公開状態のポートフォリオ表示を確認します。",
       backButton: "ビルダーに戻る",
       backButtonAria: "ポートフォリオビルダーに戻る",
       exportPdfButton: "PDFをエクスポート",
       exportPdfAria: "ポートフォリオプレビューをPDFでエクスポート",
+      retryButton: "再試行",
+      retryAria: "ポートフォリオプレビューの読み込みを再試行",
+      loadError: "ポートフォリオプレビューの読み込みに失敗しました。",
       defaultTitle: "私のポートフォリオ",
       contactButton: "連絡する",
       contactAria: "メールでポートフォリオ所有者に連絡する",
@@ -668,9 +798,11 @@ const jaJPOverrides = {
       featuredProjectsTitle: "注目プロジェクト",
       moreProjectsTitle: "その他のプロジェクト",
       viewButton: "表示",
-      emptyState:
-        "表示するプロジェクトがありません。ポートフォリオビルダーでプロジェクトを追加してください。",
-      notFound: "ポートフォリオが見つかりません。先にポートフォリオを作成してください。",
+      emptyStateTitle: "表示できるプロジェクトがありません",
+      emptyStateDescription:
+        "ポートフォリオビルダーでプロジェクトを追加して、このプレビューに掲載してください。",
+      notFoundTitle: "ポートフォリオが見つかりません",
+      notFoundDescription: "先にポートフォリオを作成してから、このプレビューに戻ってください。",
     },
   },
   interviewScoreCard: {

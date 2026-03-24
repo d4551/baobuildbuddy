@@ -1,26 +1,37 @@
 import {
+  AI_DEFAULT_TEMPERATURE_STRUCTURED,
+  AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
   API_ERROR_INVALID_SCRAPER_JSON,
   API_ERROR_INVALID_SCRIPT_ID,
   type AutomationJobScrapeTarget,
   type AutomationScriptId,
+  DEFAULT_SETTINGS_ID,
   automationScrapeTargetToPortalId,
   automationScriptIdSchema,
   type GamingPortalId,
   gamingPortalScraperScriptIdByPortalId,
   generateId,
   type JobSearchResult,
+  normalizeScrapePersonaEnrichment,
+  type ScrapeEnrichmentRunSummary,
+  type ScrapePersonaEnrichment,
+  type ScraperOperationResult,
   type ScrapedJob,
   type ScrapedStudio,
   safeParseJson,
   scrapedJobSchema,
   scrapedStudioSchema,
+  settle,
   toErrorMessage,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { config } from "../config/env";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
+import { settings } from "../db/schema/settings";
 import { studios } from "../db/schema/studios";
+import { AIService } from "./ai/ai-service";
+import { scrapeJobEnrichmentPrompt, scrapeStudioEnrichmentPrompt } from "./ai/prompts";
 import { runAutomationScript } from "./automation/rpa-runner";
 import { loadJobProviderSettings } from "./jobs/providers/provider-settings";
 
@@ -45,6 +56,7 @@ const DEFAULT_JOB_TYPE = "full-time";
 const DEFAULT_JOB_SOURCE = "unknown-source";
 const CONTENT_HASH_PREFIX = "job";
 const CONTENT_HASH_LENGTH = 24;
+const SCRAPE_ENRICHMENT_WARNING_LIMIT = 25;
 const PORTAL_SCRIPT_ID_BY_ID = {
   hitmarker: HITMARKER_SCRIPT_ID,
   grackle: GRACKLE_SCRIPT_ID,
@@ -80,6 +92,47 @@ type AutomationScriptReference = {
 
 type ScriptReferenceOverride = {
   scriptPath: string;
+};
+
+type ScrapeEnrichmentAttempt = {
+  enrichment?: ScrapePersonaEnrichment;
+  warning?: string;
+  provider?: ScrapeEnrichmentRunSummary["provider"];
+  model?: string;
+};
+
+type ScrapeEnrichmentAccumulator = {
+  enabled: boolean;
+  enrichedRecords: number;
+  warnings: string[];
+  provider?: ScrapeEnrichmentRunSummary["provider"];
+  model?: string;
+};
+
+const createScrapeEnrichmentAccumulator = (): ScrapeEnrichmentAccumulator => ({
+  enabled: true,
+  enrichedRecords: 0,
+  warnings: [],
+});
+
+const toScrapeEnrichmentSummary = (
+  accumulator: ScrapeEnrichmentAccumulator,
+): ScrapeEnrichmentRunSummary => ({
+  enabled: accumulator.enabled,
+  enrichedRecords: accumulator.enrichedRecords,
+  warnings: accumulator.warnings,
+  ...(accumulator.provider ? { provider: accumulator.provider } : {}),
+  ...(accumulator.model ? { model: accumulator.model } : {}),
+});
+
+const pushScrapeEnrichmentWarning = (
+  accumulator: ScrapeEnrichmentAccumulator,
+  warning: string,
+): void => {
+  if (warning.length === 0 || accumulator.warnings.length >= SCRAPE_ENRICHMENT_WARNING_LIMIT) {
+    return;
+  }
+  accumulator.warnings.push(warning);
 };
 
 const runWithErrorCollection = async (
@@ -185,6 +238,115 @@ const toJobSearchResult = (rows: ScrapedJob[]): JobSearchResult => ({
  * Scraper service for studio/job ingestion via Bun automation scripts.
  */
 export class ScraperService {
+  /**
+   * Load the singleton settings row used to construct purpose-aware AI services.
+   */
+  private async loadSettingsRow() {
+    const rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID)).limit(1);
+    return rows[0];
+  }
+
+  /**
+   * Create the AI service used for scrape enrichment when settings are available.
+   */
+  private async createScrapeEnrichmentService(): Promise<AIService | null> {
+    const settingsRow = await this.loadSettingsRow();
+    if (!settingsRow) {
+      return null;
+    }
+    return AIService.fromSettings(settingsRow);
+  }
+
+  /**
+   * Generate studio persona enrichment for one scraped studio row.
+   */
+  private async enrichStudioRow(
+    studioRow: ScrapedStudio,
+    aiService: AIService | null,
+  ): Promise<ScrapeEnrichmentAttempt> {
+    if (!aiService) {
+      return {
+        warning: "Scrape enrichment skipped because settings are unavailable.",
+      };
+    }
+
+    const responseResult = await settle(
+      aiService.generate(scrapeStudioEnrichmentPrompt(studioRow), {
+        purpose: "scrapeEnrichment",
+        temperature: AI_DEFAULT_TEMPERATURE_STRUCTURED,
+        maxTokens: AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
+      }),
+    );
+    if (responseResult.status === "rejected") {
+      return {
+        warning: `Studio enrichment failed for ${studioRow.name}: ${toErrorMessage(responseResult.reason)}`,
+      };
+    }
+
+    const enrichment = normalizeScrapePersonaEnrichment(safeParseJson(responseResult.value.content));
+    if (!enrichment) {
+      return {
+        warning: `Studio enrichment returned invalid JSON for ${studioRow.name}.`,
+      };
+    }
+
+    return {
+      enrichment: {
+        ...enrichment,
+        updatedAt: new Date().toISOString(),
+        provider: responseResult.value.provider,
+        model: responseResult.value.model,
+      },
+      provider: responseResult.value.provider,
+      model: responseResult.value.model,
+    };
+  }
+
+  /**
+   * Generate job persona enrichment for one scraped job row.
+   */
+  private async enrichJobRow(
+    jobRow: ScrapedJob,
+    aiService: AIService | null,
+  ): Promise<ScrapeEnrichmentAttempt> {
+    if (!aiService) {
+      return {
+        warning: "Scrape enrichment skipped because settings are unavailable.",
+      };
+    }
+
+    const responseResult = await settle(
+      aiService.generate(scrapeJobEnrichmentPrompt(jobRow), {
+        purpose: "scrapeEnrichment",
+        temperature: AI_DEFAULT_TEMPERATURE_STRUCTURED,
+        maxTokens: AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
+      }),
+    );
+    if (responseResult.status === "rejected") {
+      return {
+        warning: `Job enrichment failed for ${jobRow.title} at ${jobRow.company}: ${toErrorMessage(responseResult.reason)}`,
+      };
+    }
+
+    const enrichment = normalizeScrapePersonaEnrichment(safeParseJson(responseResult.value.content));
+    if (!enrichment) {
+      return {
+        warning: `Job enrichment returned invalid JSON for ${jobRow.title} at ${jobRow.company}.`,
+      };
+    }
+
+    return {
+      enrichment: {
+        ...enrichment,
+        updatedAt: new Date().toISOString(),
+        provider: responseResult.value.provider,
+        model: responseResult.value.model,
+      },
+      provider: responseResult.value.provider,
+      model: responseResult.value.model,
+    };
+  }
+
   private async resolvePortalSourceUrl(portalId: GamingPortalId): Promise<string | null> {
     const providerSettings = await loadJobProviderSettings();
     const portalConfig =
@@ -201,7 +363,14 @@ export class ScraperService {
     return PORTAL_SCRIPT_ID_BY_ID[portalId];
   }
 
-  private async upsertStudioRow(studioRow: ScrapedStudio, now: string): Promise<void> {
+  /**
+   * Upsert a scraped studio row and persist the latest enrichment snapshot.
+   */
+  private async upsertStudioRow(
+    studioRow: ScrapedStudio,
+    now: string,
+    enrichment?: ScrapePersonaEnrichment,
+  ): Promise<void> {
     const id = studioRow.id || generateId();
     const studioData = {
       name: studioRow.name,
@@ -214,6 +383,7 @@ export class ScraperService {
       technologies: studioRow.technologies ?? [],
       interviewStyle: studioRow.interviewStyle ?? null,
       remoteWork: studioRow.remoteWork ?? null,
+      enrichment: enrichment ?? null,
     };
 
     await db
@@ -235,37 +405,96 @@ export class ScraperService {
       });
   }
 
-  private async insertScrapedJobIfMissing(
+  /**
+   * Upsert a scraped job row keyed by deterministic content hash and persist enrichment.
+   */
+  private async upsertScrapedJob(
     job: JobSearchResult["jobs"][number],
     now: string,
-  ): Promise<boolean> {
-    const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(
-      0,
-      100,
-    );
-    const existing = await db.select().from(jobs).where(eq(jobs.contentHash, contentHash));
-    if (existing.length > 0) {
-      return false;
-    }
+    enrichment?: ScrapePersonaEnrichment,
+  ): Promise<void> {
+    const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(0, 100);
 
-    await db.insert(jobs).values({
-      id: generateId(),
-      title: job.title,
-      company: job.company,
-      location: job.location,
-      remote: Boolean(job.remote),
-      hybrid: false,
-      description: job.description ?? null,
-      url: job.url ?? null,
-      source:
-        job.source?.trim() && job.source.trim().length > 0 ? job.source.trim() : DEFAULT_JOB_SOURCE,
-      contentHash,
-      postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
-      type: DEFAULT_JOB_TYPE,
-      createdAt: now,
-      updatedAt: now,
-    });
-    return true;
+    await db
+      .insert(jobs)
+      .values({
+        id: generateId(),
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        remote: Boolean(job.remote),
+        hybrid: false,
+        description: job.description ?? null,
+        url: job.url ?? null,
+        source:
+          job.source?.trim() && job.source.trim().length > 0 ? job.source.trim() : DEFAULT_JOB_SOURCE,
+        contentHash,
+        postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
+        type: DEFAULT_JOB_TYPE,
+        enrichment: enrichment ?? null,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: jobs.contentHash,
+        set: {
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          remote: Boolean(job.remote),
+          hybrid: false,
+          description: job.description ?? null,
+          url: job.url ?? null,
+          source:
+            job.source?.trim() && job.source.trim().length > 0
+              ? job.source.trim()
+              : DEFAULT_JOB_SOURCE,
+          postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
+          type: DEFAULT_JOB_TYPE,
+          enrichment: enrichment ?? null,
+          updatedAt: now,
+        },
+      });
+  }
+
+  /**
+   * Upsert a scraped job row and update the enrichment summary in-memory.
+   */
+  private async persistScrapedJobRow(
+    job: JobSearchResult["jobs"][number],
+    now: string,
+    enrichmentAttempt: ScrapeEnrichmentAttempt,
+    enrichmentAccumulator: ScrapeEnrichmentAccumulator,
+  ): Promise<void> {
+    if (enrichmentAttempt.warning) {
+      pushScrapeEnrichmentWarning(enrichmentAccumulator, enrichmentAttempt.warning);
+    }
+    await this.upsertScrapedJob(job, now, enrichmentAttempt.enrichment);
+    if (enrichmentAttempt.enrichment) {
+      enrichmentAccumulator.enrichedRecords += 1;
+      enrichmentAccumulator.provider = enrichmentAttempt.provider ?? enrichmentAccumulator.provider;
+      enrichmentAccumulator.model = enrichmentAttempt.model ?? enrichmentAccumulator.model;
+    }
+  }
+
+  /**
+   * Upsert a scraped studio row and update the enrichment summary in-memory.
+   */
+  private async persistScrapedStudioRow(
+    studioRow: ScrapedStudio,
+    now: string,
+    enrichmentAttempt: ScrapeEnrichmentAttempt,
+    enrichmentAccumulator: ScrapeEnrichmentAccumulator,
+  ): Promise<void> {
+    if (enrichmentAttempt.warning) {
+      pushScrapeEnrichmentWarning(enrichmentAccumulator, enrichmentAttempt.warning);
+    }
+    await this.upsertStudioRow(studioRow, now, enrichmentAttempt.enrichment);
+    if (enrichmentAttempt.enrichment) {
+      enrichmentAccumulator.enrichedRecords += 1;
+      enrichmentAccumulator.provider = enrichmentAttempt.provider ?? enrichmentAccumulator.provider;
+      enrichmentAccumulator.model = enrichmentAttempt.model ?? enrichmentAccumulator.model;
+    }
   }
 
   /**
@@ -299,15 +528,16 @@ export class ScraperService {
   private async scrapePortalJobs(
     portalId: GamingPortalId,
     scriptReference?: AutomationScriptId | ScriptReferenceOverride,
-  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+  ): Promise<ScraperOperationResult> {
     const errors: string[] = [];
     let scraped = 0;
     let upserted = 0;
+    const enrichment = createScrapeEnrichmentAccumulator();
 
     const resolvedSourceUrl = await this.resolvePortalSourceUrl(portalId);
     if (!resolvedSourceUrl) {
       errors.push(`Missing enabled ${portalId} portal fallbackUrl.`);
-      return { scraped, upserted, errors };
+      return { scraped, upserted, errors, enrichment: toScrapeEnrichmentSummary(enrichment) };
     }
 
     const effectiveReference = scriptReference
@@ -318,7 +548,7 @@ export class ScraperService {
     });
     if (!scriptResult.ok) {
       errors.push(scriptResult.error);
-      return { scraped, upserted, errors };
+      return { scraped, upserted, errors, enrichment: toScrapeEnrichmentSummary(enrichment) };
     }
 
     const parsedRows = this.parseJobRows(scriptResult.parsed);
@@ -327,18 +557,29 @@ export class ScraperService {
 
     const normalizedResult = toJobSearchResult(parsedRows.rows);
     const now = new Date().toISOString();
+    const aiService = await this.createScrapeEnrichmentService();
+    enrichment.enabled = aiService !== null;
     await Promise.allSettled(
-      normalizedResult.jobs.map((job) =>
+      normalizedResult.jobs.map((job, index) =>
         runWithErrorCollection(async () => {
-          const inserted = await this.insertScrapedJobIfMissing(job, now);
-          if (inserted) {
-            upserted += 1;
-          }
+          const enrichmentAttempt = await this.enrichJobRow(parsedRows.rows[index] ?? {
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            description: job.description,
+            url: job.url,
+            source: job.source,
+            contentHash: job.contentHash,
+            postDate: job.postedDate,
+            remote: job.remote,
+          }, aiService);
+          await this.persistScrapedJobRow(job, now, enrichmentAttempt, enrichment);
+          upserted += 1;
         }, errors),
       ),
     );
 
-    return { scraped, upserted, errors };
+    return { scraped, upserted, errors, enrichment: toScrapeEnrichmentSummary(enrichment) };
   }
 
   /**
@@ -438,17 +679,18 @@ export class ScraperService {
   /**
    * Scrapes and upserts studio data.
    */
-  async scrapeStudios(): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+  async scrapeStudios(): Promise<ScraperOperationResult> {
     const errors: string[] = [];
     let scraped = 0;
     let upserted = 0;
+    const enrichment = createScrapeEnrichmentAccumulator();
 
     const scriptResult = await this.runScraperScript({
       scriptId: STUDIO_SCRAPER_SCRIPT_ID,
     });
     if (!scriptResult.ok) {
       errors.push(scriptResult.error);
-      return { scraped, upserted, errors };
+      return { scraped, upserted, errors, enrichment: toScrapeEnrichmentSummary(enrichment) };
     }
 
     const parsedRows = this.parseStudioRows(scriptResult.parsed);
@@ -456,16 +698,19 @@ export class ScraperService {
     errors.push(...parsedRows.rowErrors);
 
     const now = new Date().toISOString();
+    const aiService = await this.createScrapeEnrichmentService();
+    enrichment.enabled = aiService !== null;
     await Promise.allSettled(
       parsedRows.rows.map((studioRow) =>
         runWithErrorCollection(async () => {
-          await this.upsertStudioRow(studioRow, now);
+          const enrichmentAttempt = await this.enrichStudioRow(studioRow, aiService);
+          await this.persistScrapedStudioRow(studioRow, now, enrichmentAttempt, enrichment);
           upserted += 1;
         }, errors),
       ),
     );
 
-    return { scraped, upserted, errors };
+    return { scraped, upserted, errors, enrichment: toScrapeEnrichmentSummary(enrichment) };
   }
 
   /**
@@ -518,7 +763,7 @@ export class ScraperService {
    */
   async scrapeHitmarkerJobs(
     scriptReference: AutomationScriptId | ScriptReferenceOverride = HITMARKER_SCRIPT_ID,
-  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+  ): Promise<ScraperOperationResult> {
     return this.scrapePortalJobs("hitmarker", scriptReference);
   }
 
@@ -527,7 +772,7 @@ export class ScraperService {
    */
   async scrapeJobsForTarget(
     target: AutomationJobScrapeTarget,
-  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+  ): Promise<ScraperOperationResult> {
     return this.scrapePortalJobs(automationScrapeTargetToPortalId(target));
   }
 
@@ -536,7 +781,7 @@ export class ScraperService {
    */
   async scrapeJobsForPortal(
     portalId: GamingPortalId,
-  ): Promise<{ scraped: number; upserted: number; errors: string[] }> {
+  ): Promise<ScraperOperationResult> {
     return this.scrapePortalJobs(portalId);
   }
 }

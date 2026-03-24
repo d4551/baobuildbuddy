@@ -1,4 +1,5 @@
 import {
+  type AIProviderDiagnostic,
   type AIResponse,
   API_ERROR_AI_STREAMING_FAILED,
   type GenerateOptions,
@@ -11,6 +12,174 @@ import {
 } from "@bao/shared";
 import OpenAI from "openai";
 import { BaseAIProvider } from "./provider-interface";
+
+const LOCAL_PROVIDER_HEALTH_TIMEOUT_MS = 3_000;
+const TRAILING_SLASH_PATTERN = /\/$/;
+
+const getModelIdFromPayloadEntry = (entry: unknown): string | null => {
+  if (typeof entry !== "object" || entry === null || !("id" in entry)) {
+    return null;
+  }
+
+  const candidateId = entry.id;
+  return typeof candidateId === "string" && candidateId.trim().length > 0
+    ? candidateId.trim()
+    : null;
+};
+
+const buildLocalProviderMessages = (
+  prompt: string,
+  systemPrompt?: string,
+): OpenAI.Chat.ChatCompletionMessageParam[] => {
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+  if (systemPrompt) {
+    messages.push({
+      role: "system",
+      content: systemPrompt,
+    });
+  }
+  messages.push({
+    role: "user",
+    content: prompt,
+  });
+  return messages;
+};
+
+type LocalDiagnosticInput = {
+  code: AIProviderDiagnostic["code"];
+  endpoint: string;
+  checkedAt: string;
+  selectedModel?: string;
+  message?: string;
+  availableModels?: string[];
+};
+
+type LocalModelDiscoveryResult =
+  | {
+      endpoint: string;
+      checkedAt: string;
+      availableModels: string[];
+    }
+  | {
+      diagnostic: AIProviderDiagnostic;
+    };
+
+const buildDiagnosticResponse = ({
+  code,
+  endpoint,
+  checkedAt,
+  selectedModel,
+  message,
+  availableModels,
+}: LocalDiagnosticInput): AIProviderDiagnostic => ({
+  provider: "local",
+  code,
+  checkedAt,
+  endpoint,
+  selectedModel,
+  availableModels,
+  ...(message ? { message } : {}),
+});
+
+const buildModelsUrl = (endpoint: string): string =>
+  endpoint.endsWith("/models") ? endpoint : `${endpoint.replace(TRAILING_SLASH_PATTERN, "")}/models`;
+
+const extractAvailableModels = (payload: unknown): string[] => {
+  const data =
+    typeof payload === "object" && payload !== null && "data" in payload ? payload.data : null;
+  return Array.isArray(data)
+    ? data.flatMap((entry) => {
+        const id = getModelIdFromPayloadEntry(entry);
+        return id ? [id] : [];
+      })
+    : [];
+};
+
+const buildFetchFailureDiagnostic = (
+  endpoint: string,
+  checkedAt: string,
+  selectedModel: string | undefined,
+  error: unknown,
+): AIProviderDiagnostic => {
+  const message = toErrorMessage(error);
+  return buildDiagnosticResponse({
+    code: message.toLowerCase().includes("timeout") ? "timeout" : "unreachable",
+    endpoint,
+    checkedAt,
+    selectedModel,
+    message,
+  });
+};
+
+const loadAvailableModels = async (
+  endpoint: string,
+  checkedAt: string,
+  selectedModel?: string,
+): Promise<LocalModelDiscoveryResult> => {
+  const responseResult = await settle(
+    fetch(buildModelsUrl(endpoint), {
+      method: "GET",
+      signal: AbortSignal.timeout(LOCAL_PROVIDER_HEALTH_TIMEOUT_MS),
+    }),
+  );
+
+  if (responseResult.status === "rejected") {
+    return {
+      diagnostic: buildFetchFailureDiagnostic(
+        endpoint,
+        checkedAt,
+        selectedModel,
+        responseResult.reason,
+      ),
+    };
+  }
+
+  const response = responseResult.value;
+  if (!response.ok) {
+    return {
+      diagnostic: buildDiagnosticResponse({
+        code: "unreachable",
+        endpoint,
+        checkedAt,
+        selectedModel,
+        message: `HTTP ${response.status}`,
+      }),
+    };
+  }
+
+  const payloadResult = await settle(response.json() as Promise<unknown>);
+  if (payloadResult.status === "rejected") {
+    return {
+      diagnostic: buildDiagnosticResponse({
+        code: "error",
+        endpoint,
+        checkedAt,
+        selectedModel,
+        message: toErrorMessage(payloadResult.reason),
+      }),
+    };
+  }
+
+  const availableModels = extractAvailableModels(payloadResult.value);
+  if (availableModels.length === 0) {
+    return {
+      diagnostic: buildDiagnosticResponse({
+        code: "empty-model-list",
+        endpoint,
+        checkedAt,
+        selectedModel,
+        message: "Endpoint responded without any available models",
+        availableModels,
+      }),
+    };
+  }
+
+  return {
+    endpoint,
+    checkedAt,
+    availableModels,
+  };
+};
 
 /**
  * Local AI Provider for RamaLama, Ollama, and other OpenAI-compatible local servers
@@ -34,37 +203,50 @@ export class LocalProvider extends BaseAIProvider {
     });
   }
 
-  async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
-    const startTime = Date.now();
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-
-    // Add system message if provided
-    if (options?.systemPrompt) {
-      messages.push({
-        role: "system",
-        content: options.systemPrompt,
-      });
+  private async resolveRequestedModel(requestedModel?: string): Promise<string | null> {
+    if (typeof requestedModel === "string" && requestedModel.trim().length > 0) {
+      return requestedModel.trim();
     }
 
-    messages.push({
-      role: "user",
-      content: prompt,
-    });
+    const resolved = await this.resolveModelIfNeeded();
+    return resolved ? this.model : null;
+  }
 
-    const responseResult = await settle(
-      this.client.chat.completions.create({
-        model: this.model,
-        messages,
-        max_tokens: options?.maxTokens ?? 2048,
-        temperature: options?.temperature ?? 0.7,
-        top_p: options?.topP ?? 1,
-      }),
-    );
+  private async createCompletion(
+    prompt: string,
+    model: string,
+    options?: GenerateOptions,
+  ): Promise<OpenAI.Chat.ChatCompletion> {
+    const messages = buildLocalProviderMessages(prompt, options?.systemPrompt);
+    return this.client.chat.completions.create({
+      model,
+      messages,
+      max_tokens: options?.maxTokens ?? 2048,
+      temperature: options?.temperature ?? 0.7,
+      top_p: options?.topP ?? 1,
+      stream: false,
+    });
+  }
+
+  async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
+    const startTime = Date.now();
+    const model = await this.resolveRequestedModel(options?.model);
+    if (!model) {
+      return {
+        id: this.generateId(),
+        provider: this.name,
+        model: "",
+        content: "",
+        error: "No local model available",
+        timing: this.createTimingMetrics(startTime),
+      };
+    }
+    const responseResult = await settle(this.createCompletion(prompt, model, options));
     if (responseResult.status === "rejected") {
       return {
         id: this.generateId(),
         provider: this.name,
-        model: this.model,
+        model,
         content: "",
         error: toErrorMessage(responseResult.reason),
         timing: this.createTimingMetrics(startTime),
@@ -75,7 +257,7 @@ export class LocalProvider extends BaseAIProvider {
     return {
       id: this.generateId(),
       provider: this.name,
-      model: this.model,
+      model,
       content: text,
       usage: response.usage
         ? {
@@ -88,24 +270,15 @@ export class LocalProvider extends BaseAIProvider {
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-
-    // Add system message if provided
-    if (options?.systemPrompt) {
-      messages.push({
-        role: "system",
-        content: options.systemPrompt,
-      });
+    const model = await this.resolveRequestedModel(options?.model);
+    if (!model) {
+      throw new Error("No local model available");
     }
-
-    messages.push({
-      role: "user",
-      content: prompt,
-    });
+    const messages = buildLocalProviderMessages(prompt, options?.systemPrompt);
 
     const streamResult = await settle(
       this.client.chat.completions.create({
-        model: this.model,
+        model,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: options?.temperature ?? 0.7,
@@ -171,23 +344,65 @@ export class LocalProvider extends BaseAIProvider {
    * Returns null if the server is unreachable or has no models.
    */
   static async detectFirstModel(baseUrl: string): Promise<string | null> {
-    const provider = new LocalProvider(baseUrl, LOCAL_AI_AUTO_DETECT_MODEL);
-    const listResult = await settle(provider.client.models.list());
-    if (listResult.status === "rejected") {
-      return null;
+    const diagnostics = await LocalProvider.inspectEndpoint(baseUrl);
+    return diagnostics.availableModels?.[0] ?? null;
+  }
+
+  /**
+   * Inspect a local OpenAI-compatible endpoint and return structured diagnostics.
+   */
+  static async inspectEndpoint(
+    baseUrl: string,
+    selectedModel?: string,
+  ): Promise<AIProviderDiagnostic> {
+    const checkedAt = new Date().toISOString();
+    const endpoint = baseUrl.trim();
+    const modelDiscovery = await loadAvailableModels(endpoint, checkedAt, selectedModel);
+    if ("diagnostic" in modelDiscovery) {
+      return modelDiscovery.diagnostic;
     }
-    const models: Array<{ id: string }> = [];
-    for await (const model of listResult.value) {
-      models.push(model);
+    const { availableModels } = modelDiscovery;
+
+    if (
+      selectedModel &&
+      selectedModel !== LOCAL_AI_AUTO_DETECT_MODEL &&
+      !availableModels.includes(selectedModel)
+    ) {
+      return buildDiagnosticResponse({
+        code: "invalid-model",
+        endpoint,
+        checkedAt,
+        selectedModel,
+        message: "Configured model was not returned by the endpoint",
+        availableModels,
+      });
     }
-    return models.length > 0 ? models[0].id : null;
+
+    return buildDiagnosticResponse({
+      code: "healthy",
+      endpoint,
+      checkedAt,
+      selectedModel:
+        selectedModel && selectedModel !== LOCAL_AI_AUTO_DETECT_MODEL
+          ? selectedModel
+          : availableModels[0],
+      availableModels,
+    });
   }
 
   /**
    * Static method to detect local AI servers
    */
   static async detectLocalServers(): Promise<
-    Array<{ id?: string; baseUrl: string; name: string; available: boolean }>
+    Array<{
+      id?: string;
+      baseUrl: string;
+      name: string;
+      available: boolean;
+      availableModels?: string[];
+      diagnosticCode?: AIProviderDiagnostic["code"];
+      message?: string;
+    }>
   > {
     const servers = LOCAL_AI_SERVERS.map((server) => ({
       id: server.id,
@@ -199,13 +414,23 @@ export class LocalProvider extends BaseAIProvider {
       servers.map(async (server) => {
         const result = await settle(
           Promise.resolve().then(async () => {
-            const provider = new LocalProvider(server.baseUrl);
-            const available = await provider.isAvailable();
-            return { ...server, available };
+            const diagnostics = await LocalProvider.inspectEndpoint(server.baseUrl);
+            return {
+              ...server,
+              available: diagnostics.code === "healthy",
+              availableModels: diagnostics.availableModels,
+              diagnosticCode: diagnostics.code,
+              message: diagnostics.message,
+            };
           }),
         );
         if (result.status === "rejected") {
-          return { ...server, available: false };
+          return {
+            ...server,
+            available: false,
+            diagnosticCode: "error" as const,
+            message: toErrorMessage(result.reason),
+          };
         }
         return result.value;
       }),

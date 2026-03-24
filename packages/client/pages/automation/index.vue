@@ -242,7 +242,11 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
 
 <template>
   <PageScaffold tag="section" labelled-by="automation-hub-title">
-    <PageHeaderBlock title-id="automation-hub-title" :title="t('automation.hub.title')">
+    <PageHeroHeader
+      title-id="automation-hub-title"
+      :title="t('automation.hub.title')"
+      :description="t('automation.hub.pageDescription')"
+    >
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.automationRuns"
@@ -252,32 +256,20 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
           {{ t("automation.hub.viewRunsButton") }}
         </NuxtLink>
       </template>
-    </PageHeaderBlock>
+    </PageHeroHeader>
 
     <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" variant="stats" :lines="4" />
 
-    <div v-else-if="uiState === 'error'" class="alert alert-error" role="alert">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span>{{ getErrorMessage(error, t("automation.hub.loadErrorFallback")) }}</span>
-      <button
-        type="button"
-        class="btn btn-sm btn-ghost"
-        :aria-label="t('automation.hub.retryAria')"
-        @click="retryLoad"
-      >
-        {{ t("automation.hub.retryButtonLabel") }}
-      </button>
-    </div>
+    <BootstrapErrorAlert
+      v-else-if="uiState === 'error'"
+      :message="getErrorMessage(error, t('automation.hub.loadErrorFallback'))"
+      :retry-label="t('automation.hub.retryButtonLabel')"
+      :retry-aria-label="t('automation.hub.retryAria')"
+      @retry="retryLoad"
+    />
 
     <template v-else>
-      <div class="stats stats-vertical md:stats-horizontal w-full bg-base-100 shadow">
+      <div class="stats stats-vertical w-full border border-base-300 bg-base-200 shadow-sm sm:stats-horizontal">
         <div class="stat">
           <div class="stat-title">{{ t("automation.hub.stats.totalRunsTitle") }}</div>
           <div class="stat-value">{{ totalRuns }}</div>
@@ -325,16 +317,17 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
 
           <LoadingSkeleton v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'" variant="stats" :lines="3" />
 
-          <div
+          <BootstrapErrorAlert
             v-else-if="capabilityAuditStatus === 'error'"
-            role="alert"
-            class="alert alert-warning alert-soft"
-          >
-            <span>{{ getErrorMessage(capabilityAuditError, t("automation.hub.audit.loadErrorFallback")) }}</span>
-          </div>
+            severity="warning"
+            :message="getErrorMessage(capabilityAuditError, t('automation.hub.audit.loadErrorFallback'))"
+            :retry-label="t('automation.hub.retryButtonLabel')"
+            :retry-aria-label="t('automation.hub.retryAria')"
+            @retry="() => refreshCapabilityAudit()"
+          />
 
           <template v-else-if="capabilitySummary">
-            <div class="stats stats-vertical lg:stats-horizontal border border-base-300 bg-base-100 shadow-sm">
+            <div class="stats stats-vertical border border-base-300 bg-base-200 shadow-sm lg:stats-horizontal">
               <div class="stat">
                 <div class="stat-title">{{ t("automation.hub.audit.summary.total") }}</div>
                 <div class="stat-value text-primary">{{ capabilitySummary.total }}</div>
@@ -359,14 +352,14 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
               >
                 <thead>
                   <tr>
-                    <th>{{ t("automation.hub.audit.columns.name") }}</th>
-                    <th>{{ t("automation.hub.audit.columns.category") }}</th>
-                    <th>{{ t("automation.hub.audit.columns.configured") }}</th>
-                    <th>{{ t("automation.hub.audit.columns.manual") }}</th>
-                    <th>{{ t("automation.hub.audit.columns.scheduled") }}</th>
-                    <th>{{ t("automation.hub.audit.columns.history") }}</th>
-                    <th>{{ t("automation.hub.audit.columns.live") }}</th>
-                    <th>{{ t("automation.hub.audit.columns.notes") }}</th>
+                    <th scope="col">{{ t("automation.hub.audit.columns.name") }}</th>
+                    <th scope="col">{{ t("automation.hub.audit.columns.category") }}</th>
+                    <th scope="col">{{ t("automation.hub.audit.columns.configured") }}</th>
+                    <th scope="col">{{ t("automation.hub.audit.columns.manual") }}</th>
+                    <th scope="col">{{ t("automation.hub.audit.columns.scheduled") }}</th>
+                    <th scope="col">{{ t("automation.hub.audit.columns.history") }}</th>
+                    <th scope="col">{{ t("automation.hub.audit.columns.live") }}</th>
+                    <th scope="col">{{ t("automation.hub.audit.columns.notes") }}</th>
                   </tr>
                 </thead>
                 <tbody>

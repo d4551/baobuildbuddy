@@ -23,11 +23,7 @@ export declare const scraperRoutes: Elysia<"/scraper", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        scraped: number;
-                        upserted: number;
-                        errors: string[];
-                    } | {
+                    200: import("@bao/shared").ScraperOperationResult | {
                         error: string;
                         details: string;
                     };
@@ -47,11 +43,7 @@ export declare const scraperRoutes: Elysia<"/scraper", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            scraped: number;
-                            upserted: number;
-                            errors: string[];
-                        } | {
+                        200: import("@bao/shared").ScraperOperationResult | {
                             error: string;
                             details: string;
                         };
