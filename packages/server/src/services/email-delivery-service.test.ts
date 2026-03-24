@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { EmailTransportSecurityOption } from "@bao/shared";
-import { emailDeliveryService } from "./email-delivery-service";
 import { createSmtpHarness, type SmtpHarnessHandle } from "../test-support/email/smtp-harness";
+import { emailDeliveryService } from "./email-delivery-service";
 
 const SMTP_LINE_BREAK = "\r\n" as const;
 const SMTP_USERNAME = "mailer@example.test";

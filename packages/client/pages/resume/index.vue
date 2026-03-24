@@ -9,6 +9,7 @@ import {
   type ResumeFormData,
   type ResumeTemplate,
   resumeDataToFormData,
+  type DashboardStats,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -35,6 +36,7 @@ type ResumeScoreResult = Awaited<ReturnType<ReturnType<typeof useResume>["aiScor
 const route = useRoute();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
+const i18n = useI18n();
 const { awardForAction } = usePipelineGamification();
 const { dashboard: dashboardStats, fetchDashboard } = useStatistics();
 
@@ -71,10 +73,9 @@ const scoreResult = ref<ResumeScoreResult | null>(null);
 const resumeSearchQuery = ref("");
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const templateLabelMap = computed<Record<ResumeTemplate, string>>(() => {
-  const templates = t("resumePage.createModal.templates") as Record<string, string>;
   return RESUME_TEMPLATE_OPTIONS.reduce(
     (acc, template) => {
-      acc[template] = templates[template] ?? template;
+      acc[template] = i18n.t(`resumePage.createModal.templates.${template}`);
       return acc;
     },
     {} as Record<ResumeTemplate, string>,
@@ -187,7 +188,7 @@ const filteredResumes = computed(() => {
   if (!query) return resumes.value;
 
   return resumes.value.filter((resume) => {
-    const name = resume.name.toLowerCase();
+    const name = (resume.name || "").toLowerCase();
     const template = (resume.template || "").toLowerCase();
     return name.includes(query) || template.includes(query);
   });
@@ -217,7 +218,7 @@ const coverLetterQuickActionRoute = computed(() => ({
 }));
 
 const flowInput = computed(() =>
-  createFlowEngineInput(dashboardStats.value, {
+  createFlowEngineInput(dashboardStats.value as DashboardStats | null, {
     hasResume: resumes.value.length > 0,
   }),
 );
@@ -281,7 +282,8 @@ function handleResumeTabKeydown(event: KeyboardEvent, index: number): void {
   if (event.key === "ArrowRight") {
     event.preventDefault();
     const nextIndex = index === lastTabIndex ? 0 : index + 1;
-    selectResumeTab(RESUME_TABS[nextIndex]);
+    const nextTab = RESUME_TABS[nextIndex];
+    if (nextTab) selectResumeTab(nextTab);
     focusResumeTab(nextIndex);
     return;
   }
@@ -289,21 +291,24 @@ function handleResumeTabKeydown(event: KeyboardEvent, index: number): void {
   if (event.key === "ArrowLeft") {
     event.preventDefault();
     const nextIndex = index === 0 ? lastTabIndex : index - 1;
-    selectResumeTab(RESUME_TABS[nextIndex]);
+    const nextTab = RESUME_TABS[nextIndex];
+    if (nextTab) selectResumeTab(nextTab);
     focusResumeTab(nextIndex);
     return;
   }
 
   if (event.key === "Home") {
     event.preventDefault();
-    selectResumeTab(RESUME_TABS[0]);
+    const firstTab = RESUME_TABS[0];
+    if (firstTab) selectResumeTab(firstTab);
     focusResumeTab(0);
     return;
   }
 
   if (event.key === "End") {
     event.preventDefault();
-    selectResumeTab(RESUME_TABS[lastTabIndex]);
+    const lastTab = RESUME_TABS[lastTabIndex];
+    if (lastTab) selectResumeTab(lastTab);
     focusResumeTab(lastTabIndex);
   }
 }
@@ -406,7 +411,7 @@ async function handleCreate() {
 
   showCreateModal.value = false;
   newResumeName.value = "";
-  selectedResumeId.value = createResult.value.id;
+  selectedResumeId.value = createResult.value.id ?? null;
   $toast.success(t("resumePage.toasts.resumeCreated"));
 }
 
@@ -455,10 +460,13 @@ async function handleSave() {
     return;
   }
 
+  const resumeId = selectedResumeId.value;
+  if (!resumeId) return;
+
   const saveResult = await settlePromise(
     (async () => {
       const updates = formDataToResumeData(formData);
-      await updateResume(selectedResumeId.value, updates);
+      await updateResume(resumeId, updates);
       return resolvePipelineReward("resumeSave");
     })(),
     t("resumePage.toasts.resumeSaveFailed"),
@@ -745,7 +753,7 @@ async function resolvePipelineReward(
               type="button"
               class="absolute inset-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
               :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
-              @click="selectedResumeId = resume.id"
+              @click="selectedResumeId = resume.id ?? null"
             />
             <div class="card-body relative z-10">
               <h3 class="card-title">{{ resume.name }}</h3>
@@ -757,14 +765,14 @@ async function resolvePipelineReward(
                 <button
                   class="btn btn-sm btn-outline relative z-20"
                   :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
-                  @click.stop="selectedResumeId = resume.id"
+                  @click.stop="selectedResumeId = resume.id ?? null"
                 >
                   {{ t("resumePage.editButton") }}
                 </button>
                 <button
                   class="btn btn-sm btn-error btn-outline relative z-20"
                   :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
-                  @click.stop="requestDeleteResume(resume.id)"
+                  @click.stop="resume.id ? requestDeleteResume(resume.id) : null"
                 >
                   {{ t("resumePage.deleteButton") }}
                 </button>
@@ -913,7 +921,7 @@ async function resolvePipelineReward(
           :aria-controls="resumeTabPanelId(tab)"
           :aria-label="resumeTabAriaLabel(tab)"
           :tabindex="activeTab === tab ? 0 : -1"
-          :ref="(element) => setResumeTabRef(index, element)"
+          :ref="(element) => setResumeTabRef(index, element as Element | null)"
           @click="selectResumeTab(tab)"
           @keydown="handleResumeTabKeydown($event, index)"
         >
@@ -1060,12 +1068,12 @@ async function resolvePipelineReward(
                     </fieldset>
                   </div>
                 </SectionGrid>
-                <div class="form-control">
+                <fieldset class="fieldset">
                   <label class="label cursor-pointer justify-start gap-2">
                     <input v-model="exp.current" type="checkbox" class="checkbox checkbox-sm" :aria-label="t('resumePage.experience.currentAria')"/>
-                    <span class="label-text">{{ t("resumePage.experience.currentLabel") }}</span>
+                    <span class="label">{{ t("resumePage.experience.currentLabel") }}</span>
                   </label>
-                </div>
+                </fieldset>
                 <fieldset class="fieldset">
                   <legend class="fieldset-legend">{{ t("resumePage.experience.descriptionLegend") }}</legend>
                   <textarea

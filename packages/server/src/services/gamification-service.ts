@@ -10,9 +10,9 @@ import {
   getGamificationAchievementIcon,
   getGamificationChallengeIcon,
   getLevelForXP,
+  isRecord,
   MS_PER_DAY,
   SCHEMA_MAX_ITEMS_BOARDS,
-  isRecord,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";

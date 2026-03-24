@@ -1,3 +1,4 @@
+import { isAbsolute, resolve } from "node:path";
 import type {
   AutomationScriptId,
   AutomationSettings,
@@ -17,7 +18,6 @@ import {
 } from "@bao/shared";
 import { config } from "../../config/env";
 import { SCRAPER_DIR } from "../../config/paths";
-import { isAbsolute, resolve } from "node:path";
 
 const DEFAULT_KILL_SIGNAL = "SIGKILL";
 const MAX_PROTOCOL_ERROR_LINES = 20;

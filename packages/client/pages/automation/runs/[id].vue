@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-  APP_ROUTES,
-  buildAutomationScreenshotEndpoint,
-  type RpaRunEvent,
-  type RpaRunExecutionEnvelope,
-  type RpaRunResult,
-} from "@bao/shared";
+import { APP_ROUTES, buildAutomationScreenshotEndpoint, type RpaRunResult } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { resolveApiEndpoint } from "~/utils/endpoints";
@@ -49,8 +43,8 @@ const runId = computed(() => {
 });
 
 const streamState = computed(() => runStream.state.value);
-const run = computed<RpaRunExecutionEnvelope | null>(() => runStream.run.value);
-const streamEvents = computed<readonly RpaRunEvent[]>(() => runStream.events.value);
+const run = computed(() => runStream.run.value);
+const streamEvents = computed(() => runStream.events.value);
 const streamError = computed(() => runStream.streamError.value);
 
 const isResultOutput = (value: unknown): value is RpaRunResult => {

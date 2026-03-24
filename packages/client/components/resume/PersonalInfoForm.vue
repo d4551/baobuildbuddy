@@ -49,7 +49,7 @@ watch(
           v-model="localValue.name"
           type="text"
           :placeholder="t('resumeComponentPersonalInfo.namePlaceholder')"
-          class="input input-bordered"
+          class="input"
           :aria-label="t('resumeComponentPersonalInfo.nameAria')"/>
       </div>
 
@@ -60,7 +60,7 @@ watch(
           v-model="localValue.email"
           type="email"
           :placeholder="t('resumeComponentPersonalInfo.emailPlaceholder')"
-          class="input input-bordered"
+          class="input"
           :aria-label="t('resumeComponentPersonalInfo.emailAria')"/>
       </div>
 
@@ -71,7 +71,7 @@ watch(
           v-model="localValue.phone"
           type="tel"
           :placeholder="t('resumeComponentPersonalInfo.phonePlaceholder')"
-          class="input input-bordered"
+          class="input"
           :aria-label="t('resumeComponentPersonalInfo.phoneAria')"/>
       </div>
 
@@ -82,7 +82,7 @@ watch(
           v-model="localValue.location"
           type="text"
           :placeholder="t('resumeComponentPersonalInfo.locationPlaceholder')"
-          class="input input-bordered"
+          class="input"
           :aria-label="t('resumeComponentPersonalInfo.locationAria')"/>
       </div>
 
@@ -93,7 +93,7 @@ watch(
           v-model="localValue.website"
           type="url"
           :placeholder="t('resumeComponentPersonalInfo.websitePlaceholder')"
-          class="input input-bordered"
+          class="input"
           :aria-label="t('resumeComponentPersonalInfo.websiteAria')"/>
       </div>
 
@@ -104,7 +104,7 @@ watch(
           v-model="localValue.linkedin"
           type="url"
           :placeholder="t('resumeComponentPersonalInfo.linkedinPlaceholder')"
-          class="input input-bordered"
+          class="input"
           :aria-label="t('resumeComponentPersonalInfo.linkedinAria')"/>
       </div>
 
@@ -115,7 +115,7 @@ watch(
           v-model="localValue.github"
           type="url"
           :placeholder="t('resumeComponentPersonalInfo.githubPlaceholder')"
-          class="input input-bordered"
+          class="input"
           :aria-label="t('resumeComponentPersonalInfo.githubAria')"/>
       </div>
     </div>

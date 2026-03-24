@@ -30,6 +30,8 @@ Thumbs.db
 # Editor directories and files
 .vscode/
 .idea/
+.cursor/
+.cursorrules
 
 # Database files
 *.db
@@ -47,8 +49,13 @@ __pycache__/
 packages/desktop/src-tauri/target/
 packages/desktop/src-tauri/target-linux/
 
-# Agentiflow
-agentiflow/
+# Agentiflow (ignore local scratch; keep generated matrix for CI drift checks)
+agentiflow/*
+!agentiflow/capability-matrix.generated.json
+.agentiflow/
 
 # Generated desktop packaging scratch space
 .tmp-*/
+
+# Desktop release staging (CI produces artifacts; do not commit local builds)
+.desktop-release-artifacts/

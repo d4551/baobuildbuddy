@@ -204,7 +204,7 @@ function backToTarget() {
             id="target-role"
             v-model="targetRole"
             type="text"
-            class="input input-bordered w-full"
+            class="input w-full"
             :placeholder="t('resumeBuildPage.target.rolePlaceholder')"
             :aria-label="t('resumeBuildPage.target.roleAria')"
           />
@@ -216,7 +216,7 @@ function backToTarget() {
           <select
             id="studio-select"
             v-model="studioId"
-            class="select select-bordered w-full"
+            class="select w-full"
             :aria-label="t('resumeBuildPage.target.studioAria')"
           >
             <option value="">{{ t("resumeBuildPage.target.noStudioOption") }}</option>
@@ -229,7 +229,7 @@ function backToTarget() {
             id="studio-name"
             v-model="studioName"
             type="text"
-            class="input input-bordered w-full"
+            class="input w-full"
             :placeholder="t('resumeBuildPage.target.studioNamePlaceholder')"
             :aria-label="t('resumeBuildPage.target.studioNameAria')"
           />
@@ -240,7 +240,7 @@ function backToTarget() {
           <select
             id="experience-level"
             v-model="experienceLevel"
-            class="select select-bordered w-full"
+            class="select w-full"
             :aria-label="t('resumeBuildPage.target.experienceAria')"
           >
             <option value="">{{ t("resumeBuildPage.experienceLevels.any") }}</option>
@@ -302,7 +302,7 @@ function backToTarget() {
           <textarea
             :id="`answer-${currentQuestion.id}`"
             v-model="answers[currentQuestion.id]"
-            class="textarea textarea-bordered w-full"
+            class="textarea w-full"
             rows="4"
             :placeholder="t('resumeBuildPage.questions.answerPlaceholder', { question: currentQuestion.question })"
             :aria-label="t('resumeBuildPage.questions.answerAria', { question: currentQuestion.question })"

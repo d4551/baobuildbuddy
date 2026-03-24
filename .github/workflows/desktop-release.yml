@@ -8,25 +8,25 @@ on:
       - "copilot/**"
   workflow_dispatch:
     inputs:
+      include_linux_appimage:
+        default: true
+        description: "Include Linux AppImage on x64 builds"
+        required: false
+        type: boolean
+      include_linux_signatures:
+        default: true
+        description: "Generate detached GPG signatures for Linux artifacts"
+        required: false
+        type: boolean
+      include_windows_msi:
+        default: true
+        description: "Include Windows MSI in addition to NSIS and portable"
+        required: false
+        type: boolean
       macos_architectures:
         description: "Optional comma-separated macOS architectures (aarch64,x86_64,universal)"
         required: false
         type: string
-      include_windows_msi:
-        description: "Include Windows MSI in addition to NSIS and portable"
-        required: false
-        default: true
-        type: boolean
-      include_linux_appimage:
-        description: "Include Linux AppImage on x64 builds"
-        required: false
-        default: true
-        type: boolean
-      include_linux_signatures:
-        description: "Generate detached GPG signatures for Linux artifacts"
-        required: false
-        default: true
-        type: boolean
 
 concurrency:
   group: desktop-release-${{ github.workflow }}-${{ github.ref }}
@@ -37,12 +37,12 @@ permissions:
 
 env:
   DESKTOP_RELEASE_RELEASE_MODE: "true"
-  # workflow_dispatch: must honor boolean `false` (do not use `input || vars` — false is falsy and would fall through to vars).
-  # push: use repository vars when set; otherwise leave empty so scripts apply defaults.
-  DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_APPIMAGE || github.event.inputs.include_linux_appimage }}
+  DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_linux_appimage || vars.DESKTOP_RELEASE_LINUX_APPIMAGE || 'true' }}
+  # workflow_dispatch: honour the boolean input directly (may be 'false').
+  # push: use repository var when set; otherwise default to 'true' (AppImage enabled).
   DESKTOP_RELEASE_LINUX_SIGNATURES: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_SIGNATURES || github.event.inputs.include_linux_signatures }}
-  DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_WINDOWS_MSI || github.event.inputs.include_windows_msi }}
   DESKTOP_RELEASE_MACOS_ARCHITECTURES: ${{ github.event.inputs.macos_architectures || vars.DESKTOP_RELEASE_MACOS_ARCHITECTURES }}
+  DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_WINDOWS_MSI || github.event.inputs.include_windows_msi }}
 
 jobs:
   quality-gates:
@@ -86,18 +86,21 @@ jobs:
     needs: quality-gates
     runs-on: macos-14
     timeout-minutes: 60
-    env:
-      APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-      APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-      # Expose signing material to steps via env (not secrets.*) so `if:` conditions validate on workflow_dispatch.
-      APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
-      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-      KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Evaluate Apple signing and notarization gates
+        id: apple
+        uses: ./.github/actions/evaluate-apple-signing
+        with:
+          apple_certificate: ${{ secrets.APPLE_CERTIFICATE }}
+          apple_certificate_password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          keychain_password: ${{ secrets.KEYCHAIN_PASSWORD }}
+          apple_signing_identity: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          apple_api_key_content: ${{ secrets.APPLE_API_KEY_CONTENT }}
+          apple_api_issuer: ${{ secrets.APPLE_API_ISSUER }}
+          apple_api_key: ${{ secrets.APPLE_API_KEY }}
 
       - name: Get Bun version from package.json
         id: bun-version
@@ -124,8 +127,20 @@ jobs:
       - name: Install Playwright Chromium
         run: bun run automation:browsers:install
 
+      - name: Disable Spotlight indexing to prevent hdiutil Resource busy
+        run: |
+          # Spotlight's mds_stores locks files during indexing, causing
+          # hdiutil: create failed - Resource busy on CI runners.
+          sudo mdutil -a -i off || true
+          sudo mdutil -i off "$GITHUB_WORKSPACE" || true
+          sudo mdutil -i off /Users/runner || true
+
       - name: Import Apple developer certificate
-        if: ${{ env.APPLE_CERTIFICATE != '' && env.APPLE_CERTIFICATE_PASSWORD != '' && env.KEYCHAIN_PASSWORD != '' }}
+        if: ${{ steps.apple.outputs.has_codesign == 'true' }}
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
@@ -137,15 +152,44 @@ jobs:
           security find-identity -v -p codesigning build.keychain
 
       - name: Prepare App Store Connect API key
-        if: ${{ env.APPLE_API_KEY_CONTENT != '' }}
+        if: ${{ steps.apple.outputs.full_notarize == 'true' }}
+        env:
+          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
         run: |
           APPLE_API_KEY_PATH="$RUNNER_TEMP/AuthKey_${APPLE_API_KEY}.p8"
           printf "%s" "$APPLE_API_KEY_CONTENT" > "$APPLE_API_KEY_PATH"
           chmod 600 "$APPLE_API_KEY_PATH"
           echo "APPLE_API_KEY_PATH=$APPLE_API_KEY_PATH" >> "$GITHUB_ENV"
 
-      - name: Build native macOS release artifacts
-        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
+      - name: Export Apple signing identity for Tauri
+        if: ${{ steps.apple.outputs.has_codesign == 'true' }}
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: echo "APPLE_SIGNING_IDENTITY=${APPLE_SIGNING_IDENTITY}" >> "$GITHUB_ENV"
+
+      - name: Export Apple notarization API environment for Tauri
+        if: ${{ steps.apple.outputs.full_notarize == 'true' }}
+        env:
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+        run: |
+          echo "APPLE_API_ISSUER=${APPLE_API_ISSUER}" >> "$GITHUB_ENV"
+          echo "APPLE_API_KEY=${APPLE_API_KEY}" >> "$GITHUB_ENV"
+
+      - name: Build native macOS release artifacts (notarized)
+        if: ${{ steps.apple.outputs.full_notarize == 'true' }}
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
+
+      - name: Build native macOS release artifacts (codesigned, not notarized)
+        if: ${{ steps.apple.outputs.has_codesign == 'true' && steps.apple.outputs.full_notarize != 'true' }}
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
+
+      - name: Build native macOS release artifacts (ad-hoc signed)
+        if: ${{ steps.apple.outputs.has_codesign != 'true' }}
+        env:
+          DESKTOP_RELEASE_RELEASE_MODE: "false"
+        run: bun run release:desktop:macos -- --output-root .desktop-release-artifacts --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target aarch64-apple-darwin
@@ -153,21 +197,27 @@ jobs:
       # Stapler + verify --release require a stapled notarization ticket. Skip when Apple API / signing
       # secrets are absent so forks and partial secret sets still produce signed or ad-hoc DMGs.
       - name: Validate notarized macOS artifacts
-        if: ${{ env.APPLE_API_KEY_CONTENT != '' && env.APPLE_API_ISSUER != '' && env.APPLE_API_KEY != '' && env.APPLE_SIGNING_IDENTITY != '' && env.APPLE_CERTIFICATE != '' && env.APPLE_CERTIFICATE_PASSWORD != '' && env.KEYCHAIN_PASSWORD != '' }}
+        if: ${{ steps.apple.outputs.full_notarize == 'true' }}
         run: |
           find .desktop-release-artifacts/macos -name '*.dmg' -print0 | while IFS= read -r -d '' artifact; do
             xcrun stapler validate -v "$artifact"
           done
 
       - name: Verify macOS release artifacts (stapled shipping build)
-        if: ${{ env.APPLE_API_KEY_CONTENT != '' && env.APPLE_API_ISSUER != '' && env.APPLE_API_KEY != '' && env.APPLE_SIGNING_IDENTITY != '' && env.APPLE_CERTIFICATE != '' && env.APPLE_CERTIFICATE_PASSWORD != '' && env.KEYCHAIN_PASSWORD != '' }}
-        run: bun run verify:desktop-releases -- --targets macos --release
+        if: ${{ steps.apple.outputs.full_notarize == 'true' }}
+        run: bun run verify:desktop-releases -- --targets macos --release --release-root .desktop-release-artifacts
 
-      - name: Verify macOS release artifacts (non-stapled CI)
-        if: ${{ env.APPLE_API_KEY_CONTENT == '' || env.APPLE_API_ISSUER == '' || env.APPLE_API_KEY == '' || env.APPLE_SIGNING_IDENTITY == '' || env.APPLE_CERTIFICATE == '' || env.APPLE_CERTIFICATE_PASSWORD == '' || env.KEYCHAIN_PASSWORD == '' }}
+      - name: Verify macOS release artifacts (codesigned, not stapled)
+        if: ${{ steps.apple.outputs.has_codesign == 'true' && steps.apple.outputs.full_notarize != 'true' }}
+        env:
+          DESKTOP_RELEASE_SKIP_MACOS_STAPLER: "true"
+        run: bun run verify:desktop-releases -- --targets macos --release --release-root .desktop-release-artifacts
+
+      - name: Verify macOS release artifacts (ad-hoc)
+        if: ${{ steps.apple.outputs.has_codesign != 'true' }}
         env:
           DESKTOP_RELEASE_RELEASE_MODE: "false"
-        run: bun run verify:desktop-releases -- --targets macos
+        run: bun run verify:desktop-releases -- --targets macos --release-root .desktop-release-artifacts
 
       - name: List staged macOS release files
         run: find .desktop-release-artifacts/macos -type f -print
@@ -264,15 +314,41 @@ jobs:
 
       - name: Build native Windows release artifacts
         shell: pwsh
-        run: bun run release:desktop:windows -- --output-root .desktop-release-artifacts --release
+        run: bun run release:desktop:windows -- --output-root .desktop-release-artifacts --release --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         shell: pwsh
         run: bun run verify:desktop-runtime -- --target x86_64-pc-windows-msvc
 
+      - name: Add signtool to PATH
+        shell: pwsh
+        run: |
+          $sdkRoots = @(
+            "${env:ProgramFiles(x86)}\Windows Kits\10\bin",
+            "${env:ProgramFiles}\Windows Kits\10\bin"
+          )
+          $found = $false
+          foreach ($sdkRoot in $sdkRoots) {
+            if (Test-Path $sdkRoot) {
+              $versions = Get-ChildItem $sdkRoot -Directory | Sort-Object Name -Descending
+              foreach ($ver in $versions) {
+                $signtoolPath = Join-Path $ver.FullName "x64\signtool.exe"
+                if (Test-Path $signtoolPath) {
+                  $binDir = Split-Path $signtoolPath
+                  Add-Content -Path $env:GITHUB_PATH -Value $binDir
+                  Write-Host "signtool found: $signtoolPath"
+                  $found = $true
+                  break
+                }
+              }
+              if ($found) { break }
+            }
+          }
+          if (-not $found) { throw 'signtool.exe not found in Windows SDK' }
+
       - name: Verify Windows release artifacts
         shell: pwsh
-        run: bun run verify:desktop-releases -- --targets windows --release
+        run: bun run verify:desktop-releases -- --targets windows --release --release-root .desktop-release-artifacts
 
       - name: List staged Windows release files
         shell: pwsh
@@ -351,13 +427,13 @@ jobs:
           echo "$DESKTOP_GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
 
       - name: Build native Linux x64 release artifacts
-        run: bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --verbose --release
+        run: bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --verbose --release --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target x86_64-unknown-linux-gnu
 
       - name: Verify Linux x64 release artifacts
-        run: bun run verify:desktop-releases -- --targets linux-x64 --release
+        run: bun run verify:desktop-releases -- --targets linux-x64 --release --release-root .desktop-release-artifacts
 
       - name: Require AppImage when enabled
         if: ${{ env.DESKTOP_RELEASE_LINUX_APPIMAGE != 'false' }}
@@ -365,7 +441,7 @@ jobs:
           set -euo pipefail
           appimages="$(find .desktop-release-artifacts/linux-x64 -maxdepth 1 -type f -name '*.AppImage' 2>/dev/null || true)"
           if [ -z "$appimages" ]; then
-            echo "::error::Expected at least one *.AppImage under .desktop-release-artifacts/linux-x64 (DESKTOP_RELEASE_LINUX_APPIMAGE is not false)."
+            echo "::error::Expected at least one *.AppImage under .desktop-release-artifacts/linux-x64 (DESKTOP_RELEASE_LINUX_APPIMAGE is not 'false')."
             find .desktop-release-artifacts/linux-x64 -type f -print || true
             exit 1
           fi
@@ -446,13 +522,13 @@ jobs:
           echo "$DESKTOP_GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
 
       - name: Build native Linux ARM64 release artifacts
-        run: bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --verbose --release
+        run: bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --verbose --release --no-sync-release-dir
 
       - name: Verify packaged desktop runtime
         run: bun run verify:desktop-runtime -- --target aarch64-unknown-linux-gnu
 
       - name: Verify Linux ARM64 release artifacts
-        run: bun run verify:desktop-releases -- --targets linux-arm64 --release
+        run: bun run verify:desktop-releases -- --targets linux-arm64 --release --release-root .desktop-release-artifacts
 
       - name: List staged Linux ARM64 release files
         run: find .desktop-release-artifacts/linux-arm64 -type f -print
@@ -473,18 +549,23 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 45
     env:
-      APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
-      APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-      APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-      KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
       DESKTOP_GPG_PRIVATE_KEY: ${{ secrets.DESKTOP_GPG_PRIVATE_KEY }}
       DESKTOP_RELEASE_GPG_KEY_ID: ${{ secrets.DESKTOP_RELEASE_GPG_KEY_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Evaluate Apple signing and notarization gates
+        id: apple
+        uses: ./.github/actions/evaluate-apple-signing
+        with:
+          apple_certificate: ${{ secrets.APPLE_CERTIFICATE }}
+          apple_certificate_password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          keychain_password: ${{ secrets.KEYCHAIN_PASSWORD }}
+          apple_signing_identity: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          apple_api_key_content: ${{ secrets.APPLE_API_KEY_CONTENT }}
+          apple_api_issuer: ${{ secrets.APPLE_API_ISSUER }}
+          apple_api_key: ${{ secrets.APPLE_API_KEY }}
 
       - name: Disable Linux detached signatures without GPG secrets
         if: ${{ env.DESKTOP_GPG_PRIVATE_KEY == '' || env.DESKTOP_RELEASE_GPG_KEY_ID == '' }}
@@ -531,14 +612,23 @@ jobs:
           path: .desktop-release-input/linux-arm64
 
       - name: Assemble canonical desktop release directory
+        env:
+          DESKTOP_RELEASE_RELEASE_MODE: ${{ steps.apple.outputs.has_codesign == 'true' && 'true' || 'false' }}
+          DESKTOP_RELEASE_SKIP_MACOS_STAPLER: ${{ steps.apple.outputs.full_notarize != 'true' && steps.apple.outputs.has_codesign == 'true' && 'true' || 'false' }}
         run: bun run release:refresh:all-os -- --source-root .desktop-release-input --targets macos,windows,linux-x64,linux-arm64
 
       - name: Verify assembled desktop releases (expect stapled macOS DMG)
-        if: ${{ env.APPLE_API_KEY_CONTENT != '' && env.APPLE_API_ISSUER != '' && env.APPLE_API_KEY != '' && env.APPLE_SIGNING_IDENTITY != '' && env.APPLE_CERTIFICATE != '' && env.APPLE_CERTIFICATE_PASSWORD != '' && env.KEYCHAIN_PASSWORD != '' }}
+        if: ${{ steps.apple.outputs.full_notarize == 'true' }}
         run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64 --release
 
-      - name: Verify assembled desktop releases (skip macOS stapler)
-        if: ${{ env.APPLE_API_KEY_CONTENT == '' || env.APPLE_API_ISSUER == '' || env.APPLE_API_KEY == '' || env.APPLE_SIGNING_IDENTITY == '' || env.APPLE_CERTIFICATE == '' || env.APPLE_CERTIFICATE_PASSWORD == '' || env.KEYCHAIN_PASSWORD == '' }}
+      - name: Verify assembled desktop releases (codesigned macOS, skip stapler)
+        if: ${{ steps.apple.outputs.has_codesign == 'true' && steps.apple.outputs.full_notarize != 'true' }}
+        env:
+          DESKTOP_RELEASE_SKIP_MACOS_STAPLER: "true"
+        run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64 --release
+
+      - name: Verify assembled desktop releases (ad-hoc macOS)
+        if: ${{ steps.apple.outputs.has_codesign != 'true' }}
         env:
           DESKTOP_RELEASE_RELEASE_MODE: "false"
         run: bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64

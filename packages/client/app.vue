@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import type { AvailableLocale } from "~/constants/i18n-catalog";
 import { buildBrandedLocaleMessages } from "~/utils/brand-overrides";
-import { useI18n } from "vue-i18n";
 
 const { settings, fetchSettings } = useSettings();
 const { resolvedBrand } = useBrand();
@@ -50,14 +50,14 @@ useHeadSafe(() => ({
   ],
 }));
 
-useSeoMeta(() => ({
-  title:
+useSeoMeta({
+  title: () =>
     resolvedBrand.value.content.defaultTitle ||
     t("meta.title", { brand: resolvedBrand.value.name }),
-  description: resolvedBrand.value.content.defaultDescription,
-  ogTitle: t("meta.title", { brand: resolvedBrand.value.name }),
-  ogDescription: t("meta.description"),
-}));
+  description: () => resolvedBrand.value.content.defaultDescription,
+  ogTitle: () => t("meta.title", { brand: resolvedBrand.value.name }),
+  ogDescription: () => t("meta.description"),
+});
 </script>
 
 <template>

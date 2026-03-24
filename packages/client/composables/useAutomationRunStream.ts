@@ -1,5 +1,5 @@
 import type { AutomationRunUiState, RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared";
-import { getCurrentScope, onScopeDispose, readonly, ref, type Ref } from "vue";
+import { getCurrentScope, onScopeDispose, type Ref, readonly, ref } from "vue";
 import { useAutomation } from "./useAutomation";
 
 const TERMINAL_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>(["success", "error"]);

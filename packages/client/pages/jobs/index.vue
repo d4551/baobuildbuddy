@@ -206,9 +206,13 @@ function getMatchScoreColor(score: number) {
 }
 
 function formatDate(date: string) {
-  return formatRelativeTimeForDate(date, (key, params) => t(key, params), {
-    keyPrefix: "jobsPage.date",
-  });
+  return formatRelativeTimeForDate(
+    date,
+    (key, params) => t(key, params as Record<string, unknown>),
+    {
+      keyPrefix: "jobsPage.date",
+    },
+  );
 }
 
 function experienceOptionLabel(value: FilterSelection<JobExperienceLevel>): string {
@@ -285,7 +289,7 @@ async function maybeAwardSearchXp(): Promise<void> {
             v-model="searchQuery"
             type="text"
             :placeholder="t('jobsPage.searchPlaceholder')"
-            class="input input-bordered flex-1"
+            class="input flex-1"
             :aria-label="t('jobsPage.searchAria')"
             @keyup.enter="handleSearch"
           />
@@ -336,9 +340,9 @@ async function maybeAwardSearchXp(): Promise<void> {
                 />
               </fieldset>
 
-              <div class="form-control">
+              <fieldset class="fieldset">
                 <label class="label cursor-pointer">
-                  <span class="label-text">{{ t("jobsPage.remoteOnlyLabel") }}</span>
+                  <span class="label">{{ t("jobsPage.remoteOnlyLabel") }}</span>
                   <input
                     v-model="localFilters.remote"
                     type="checkbox"
@@ -346,7 +350,7 @@ async function maybeAwardSearchXp(): Promise<void> {
                     :aria-label="t('jobsPage.remoteOnlyAria')"
                   />
                 </label>
-              </div>
+              </fieldset>
 
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">{{ t("jobsPage.experienceLegend") }}</legend>

@@ -6,20 +6,20 @@ import type {
   GenerateOptions,
 } from "@bao/shared";
 import {
-  LOCAL_AI_AUTO_DETECT_MODEL,
   AI_CHAT_CONTEXT_MESSAGE_LIMIT,
   AI_PROVIDER_DEFAULT_ORDER,
   API_ERROR_ALL_PROVIDERS_STREAM_FAILED,
   DECIMAL_RADIX,
+  LOCAL_AI_AUTO_DETECT_MODEL,
   toErrorMessage,
 } from "@bao/shared";
+import { createServerLogger } from "../../utils/logger";
 import { ClaudeProvider } from "./claude-provider";
 import { GeminiProvider } from "./gemini-provider";
 import { HuggingFaceProvider } from "./huggingface-provider";
 import { LocalProvider } from "./local-provider";
 import { OpenAIProvider } from "./openai-provider";
 import type { AIProvider } from "./provider-interface";
-import { createServerLogger } from "../../utils/logger";
 
 const TEST_AI_PROVIDER_NAME = "local" as const;
 const TEST_AI_MODEL_NAME = "deterministic-test-model";

@@ -1,20 +1,15 @@
 /**
- * Write a message to a destination stream with a trailing newline.
- */
-const writeLine = async (stream: Parameters<typeof Bun.write>[0], value: string): Promise<void> => {
-  await Bun.write(stream, `${value}\n`);
-};
-
-/**
  * Emit a standard output message.
  */
-export const writeOutput = async (value: string): Promise<void> => {
-  await writeLine(Bun.stdout, value);
+export const writeOutput = (value: string): Promise<void> => {
+  process.stdout.write(`${value}\n`);
+  return Promise.resolve();
 };
 
 /**
  * Emit a standard error message.
  */
-export const writeError = async (value: string): Promise<void> => {
-  await writeLine(Bun.stderr, value);
+export const writeError = (value: string): Promise<void> => {
+  process.stderr.write(`${value}\n`);
+  return Promise.resolve();
 };

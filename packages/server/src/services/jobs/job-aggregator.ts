@@ -28,16 +28,16 @@ import {
   JOB_TYPES,
   MS_PER_DAY,
 } from "@bao/shared";
-import { and, desc, eq, gte, inArray, like, sql, type SQLWrapper } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, like, type SQLWrapper, sql } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs, savedJobs } from "../../db/schema/jobs";
 import { createServerLogger } from "../../utils/logger";
 import { deduplicateJobs, generateContentHash } from "./deduplication";
 import { CompanyBoardsProvider } from "./providers/company-board";
 import {
-  hitmarkerPortalProvider,
   gamesJobsDirectProvider,
   grackleProvider,
+  hitmarkerPortalProvider,
   hitmarkerProvider,
   pocketGamerProvider,
   remoteGameJobsProvider,

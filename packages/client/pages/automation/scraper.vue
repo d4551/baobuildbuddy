@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import {
-  AUTOMATION_SCRAPE_TARGETS,
   APP_ROUTE_BUILDERS,
   APP_ROUTES,
+  AUTOMATION_SCRAPE_TARGETS,
+  type AutomationScrapeTarget,
   formatRelativeTimeForDate,
   JOB_PREVIEW_LIMIT,
-  SCRAPER_JOB_QUERY_LIMIT,
-  type AutomationScrapeTarget,
-  type Job,
   type RpaCapabilityAuditEntry,
   type RpaCapabilityAuditReport,
   type RpaRunExecutionEnvelope,
+  SCRAPER_JOB_QUERY_LIMIT,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -88,7 +87,7 @@ const {
   error: scraperJobsError,
   refresh: refreshScraperJobs,
 } = await useAsyncData("automation-scraper-jobs", async () => {
-  await searchJobs({ limit: SCRAPER_JOB_QUERY_LIMIT });
+  await searchJobs({ limit: String(SCRAPER_JOB_QUERY_LIMIT) });
   return true;
 });
 
@@ -106,7 +105,7 @@ const sortedJobs = computed(() => {
   return rows;
 });
 
-const topJobs = computed<Job[]>(() => sortedJobs.value.slice(0, JOB_PREVIEW_LIMIT));
+const topJobs = computed(() => sortedJobs.value.slice(0, JOB_PREVIEW_LIMIT));
 const jobCount = computed(() => sortedJobs.value.length);
 const capabilityAudit = computed(() => capabilityAuditData.value ?? null);
 const scrapeCapabilities = computed<readonly ScrapeCapabilityCard[]>(() =>
@@ -181,14 +180,18 @@ function toIsoTimestamp(dateTimeLocal: string): string | null {
 }
 
 function relativePostedDate(date: string): string {
-  return formatRelativeTimeForDate(date, (key, params) => t(key, params), {
-    keyPrefix: "automation.scraper",
-    unknownKey: "automation.scraper.unknownPostedDate",
-  });
+  return formatRelativeTimeForDate(
+    date,
+    (key, params) => t(key, params as Record<string, unknown>),
+    {
+      keyPrefix: "automation.scraper",
+      unknownKey: "automation.scraper.unknownPostedDate",
+    },
+  );
 }
 
 async function refreshJobsFeed() {
-  await searchJobs({ limit: SCRAPER_JOB_QUERY_LIMIT });
+  await searchJobs({ limit: String(SCRAPER_JOB_QUERY_LIMIT) });
 }
 
 function runStateLabel(state: RunState): string {
@@ -523,7 +526,7 @@ function cardRunButtonLabel(target: AutomationScrapeTarget): string {
                 <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
                 <input
                   v-model="scheduledRunAt[capability.target]"
-                  class="input input-bordered w-full"
+                  class="input w-full"
                   type="datetime-local"
                   :aria-label="t('automation.scraper.schedule.aria')"
                 />
@@ -582,9 +585,9 @@ function cardRunButtonLabel(target: AutomationScrapeTarget): string {
                   </p>
                 </div>
                 <NuxtLink
-                  :to="APP_ROUTE_BUILDERS.automationRunDetail(latestRuns[capability.target].id)"
+                  :to="APP_ROUTE_BUILDERS.automationRunDetail(latestRuns[capability.target]?.id ?? '')"
                   class="btn btn-ghost btn-sm"
-                  :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRuns[capability.target].id })"
+                  :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRuns[capability.target]?.id ?? '' })"
                 >
                   {{ t("automation.scraper.openRunDetailButton") }}
                 </NuxtLink>

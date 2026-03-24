@@ -271,7 +271,7 @@ if (import.meta.server) {
             <legend class="fieldset-legend">{{ t("automation.email.subjectLegend") }}</legend>
             <input
               v-model="form.subject"
-              class="input input-bordered w-full"
+              class="input w-full"
               type="text"
               required
               minlength="3"
@@ -286,7 +286,7 @@ if (import.meta.server) {
             <legend class="fieldset-legend">{{ t("automation.email.senderLegend") }}</legend>
             <input
               v-model="form.sender"
-              class="input input-bordered w-full"
+              class="input w-full"
               type="text"
               maxlength="200"
               :placeholder="t('automation.email.senderPlaceholder')"
@@ -299,7 +299,7 @@ if (import.meta.server) {
             <legend class="fieldset-legend">{{ t("automation.email.recipientLegend") }}</legend>
             <input
               v-model="form.recipientEmail"
-              class="input input-bordered w-full"
+              class="input w-full"
               type="email"
               maxlength="320"
               :placeholder="t('automation.email.recipientPlaceholder')"
@@ -312,7 +312,7 @@ if (import.meta.server) {
             <legend class="fieldset-legend">{{ t("automation.email.toneLegend") }}</legend>
             <select
               v-model="form.tone"
-              class="select select-bordered w-full"
+              class="select w-full"
               :aria-label="t('automation.email.toneAria')"
             >
               <option v-for="tone in toneOptions" :key="tone" :value="tone">
@@ -325,7 +325,7 @@ if (import.meta.server) {
             <legend class="fieldset-legend">{{ t("automation.email.messageLegend") }}</legend>
             <textarea
               v-model="form.message"
-              class="textarea textarea-bordered min-h-36 w-full"
+              class="textarea min-h-36 w-full"
               required
               minlength="10"
               maxlength="12000"
@@ -344,7 +344,7 @@ if (import.meta.server) {
                 :disabled="!emailDeliveryConfigured"
                 :aria-label="t('automation.email.deliverAria')"
               />
-              <span class="label-text font-medium">
+              <span class="label font-medium">
                 {{ t("automation.email.deliverLabel") }}
               </span>
             </label>
@@ -369,7 +369,7 @@ if (import.meta.server) {
             <legend class="fieldset-legend">{{ t("automation.email.schedule.legend") }}</legend>
             <input
               v-model="form.runAt"
-              class="input input-bordered w-full"
+              class="input w-full"
               type="datetime-local"
               :aria-label="t('automation.email.schedule.aria')"
             />
@@ -467,7 +467,7 @@ if (import.meta.server) {
         <fieldset class="fieldset mt-4">
           <legend class="fieldset-legend">{{ t("automation.email.replyLegend") }}</legend>
           <textarea
-            class="textarea textarea-bordered w-full min-h-40"
+            class="textarea w-full min-h-40"
             readonly
             :value="lastResult.reply"
             :aria-label="t('automation.email.replyAria')"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AI_CHAT_PAGE_PATH } from "@bao/shared";
+import { AI_CHAT_PAGE_PATH, type ChatMessage } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
@@ -51,7 +51,7 @@ const {
 } = useChatVoice({
   draft,
   locale,
-  messages,
+  messages: messages as Ref<ChatMessage[]>,
 });
 const chatPanelId = FLOATING_CHAT_PANEL_ID;
 const voiceErrorLabel = computed(() => {
@@ -363,7 +363,7 @@ onUnmounted(() => {
                   index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
                 "
                 :is-streaming="false"
-                :locale="locale.value"
+                :locale="locale"
                 :message="messageRow.message"
                 :user-label="t('floatingChat.youLabel')"
               />
@@ -374,7 +374,7 @@ onUnmounted(() => {
                 :context-chips-aria="t('floatingChat.contextChipsAria')"
                 :is-latest-assistant-message="true"
                 :is-streaming="true"
-                :locale="locale.value"
+                :locale="locale"
                 :message="streamingBubble"
                 :user-label="t('floatingChat.youLabel')"
               />
@@ -387,7 +387,7 @@ onUnmounted(() => {
                 ref="floatingChatInput"
                 v-model="draft"
                 rows="3"
-                class="textarea textarea-bordered min-h-24 w-full resize-y"
+                class="textarea min-h-24 w-full resize-y"
                 :placeholder="t('floatingChat.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
                 :aria-label="t('floatingChat.inputAria')"
                 :disabled="loading"

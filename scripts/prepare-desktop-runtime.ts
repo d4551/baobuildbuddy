@@ -11,6 +11,7 @@ import {
 } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, extname, join, resolve } from "node:path";
+import { gzipSync } from "node:zlib";
 import {
   DESKTOP_RUNTIME_API_BASE,
   DESKTOP_RUNTIME_BUILD_SERVER_PORT,
@@ -387,7 +388,7 @@ const runCommand = async (
     env?: Record<string, string | undefined>;
   } = {},
 ): Promise<void> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn(command as string[], {
     cwd: options.cwd ?? REPO_ROOT,
     env: options.env ?? process.env,
     stdout: "inherit",
@@ -420,7 +421,7 @@ const runCommandCaptured = async (
   readonly stdout: string;
   readonly stderr: string;
 }> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn(command as string[], {
     cwd: options.cwd ?? REPO_ROOT,
     env: options.env ?? process.env,
     stdout: "pipe",
@@ -618,14 +619,31 @@ const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
       const clientOutputDir = join(CLIENT_ROOT, ".output");
       await rm(clientNuxtDir, { recursive: true, force: true });
       await rm(clientOutputDir, { recursive: true, force: true });
-      await runCommand([process.execPath, "run", "--filter", "@bao/client", "generate"], {
-        env: {
-          ...process.env,
-          BAO_DISABLE_AUTH: "true",
-          NUXT_PUBLIC_API_BASE: BUILD_SERVER_API_BASE,
-          NUXT_PUBLIC_WS_BASE: BUILD_SERVER_WS_BASE,
-        },
-      });
+
+      const generateEnv = {
+        ...process.env,
+        BAO_DISABLE_AUTH: "true",
+        NUXT_PUBLIC_API_BASE: BUILD_SERVER_API_BASE,
+        NUXT_PUBLIC_WS_BASE: BUILD_SERVER_WS_BASE,
+      };
+
+      if (process.platform === "win32") {
+        /**
+         * On Windows, `bun --bun run nuxt generate` (the package.json script)
+         * causes a segfault because Bun's Node compatibility layer cannot handle
+         * Nuxt's complex SSR/prerender pipeline. Invoke `nuxt generate` directly
+         * without the `--bun` override so Bun delegates heavy Node.js work to
+         * its standard compatibility path.
+         */
+        await runCommand([process.execPath, "run", "nuxt", "generate"], {
+          cwd: CLIENT_ROOT,
+          env: generateEnv,
+        });
+      } else {
+        await runCommand([process.execPath, "run", "--filter", "@bao/client", "generate"], {
+          env: generateEnv,
+        });
+      }
     },
     () => stopProcess(proc),
   );
@@ -699,6 +717,41 @@ const removeStagedTestSourcesUnder = async (rootDir: string): Promise<void> => {
       }
     }),
   );
+};
+
+const LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME = "bao-desktop-server.payload.gz" as const;
+const LINUX_BUN_SCRIPT_RUNNER_PAYLOAD_BASENAME = "bao-bun.payload.gz" as const;
+
+/**
+ * AppImage bundling runs linuxdeploy, which walks bundled ELFs under `usr/lib/<app>/` and runs `ldd`.
+ * Bun-produced binaries can make that step abort; a shell launcher plus a `.gz` payload keeps the manifest
+ * paths stable while avoiding extra ELF registrations in the AppDir.
+ */
+const packLinuxElfBinaryAsGzipLauncher = async (
+  executablePath: string,
+  payloadBasename: string,
+): Promise<void> => {
+  const payloadPath = join(dirname(executablePath), payloadBasename);
+  const raw = await Bun.file(executablePath).arrayBuffer();
+  await Bun.write(payloadPath, gzipSync(Buffer.from(raw)));
+  await chmod(payloadPath, 0o644);
+  const launcher = [
+    "#!/usr/bin/env sh",
+    "set -eu",
+    // biome-ignore lint/security/noSecrets: POSIX launcher path resolution (false positive from entropy heuristic)
+    'here="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"',
+    `payload="$here/${payloadBasename}"`,
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: mktemp uses shell parameter expansion, not JS templates
+    'tmp="$(mktemp "${TMPDIR:-/tmp}/bao-rt.XXXXXX")"',
+    'cleanup() { rm -f "$tmp"; }',
+    "trap cleanup EXIT INT HUP TERM",
+    'command -v gzip >/dev/null 2>&1 || { echo "error: gzip is not installed or not in PATH" >&2; exit 1; }',
+    'gzip -dc "$payload" > "$tmp"',
+    'chmod 700 "$tmp"',
+    'exec "$tmp" "$@"',
+  ].join("\n");
+  await Bun.write(executablePath, `${launcher}\n`);
+  await chmod(executablePath, 0o755);
 };
 
 const compileRuntimeBinary = async (
@@ -818,11 +871,29 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
 
   await writeOutput(`desktop-runtime: compiling bundled desktop server (${compileTarget})`);
   await compileRuntimeBinary(compileTarget, SERVER_ENTRYPOINT, serverExecutablePath);
+  if (compileTarget.startsWith("bun-linux")) {
+    await writeOutput(
+      "desktop-runtime: packing Linux server as gzip payload + POSIX launcher (AppImage / linuxdeploy compatibility)",
+    );
+    await packLinuxElfBinaryAsGzipLauncher(
+      serverExecutablePath,
+      LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME,
+    );
+  }
 
   await writeOutput(
     `desktop-runtime: staging bundled Bun runtime and entrypoint helper for script execution (${compileTarget})`,
   );
   await stageBundledScriptRunnerRuntime(runtimeTargetInfo);
+  if (compileTarget.startsWith("bun-linux")) {
+    await writeOutput(
+      "desktop-runtime: packing Linux bundled Bun binary as gzip payload + POSIX launcher (AppImage / linuxdeploy compatibility)",
+    );
+    await packLinuxElfBinaryAsGzipLauncher(
+      join(RUNTIME_ROOT, runtimeTargetInfo.scriptRunnerExecutable),
+      LINUX_BUN_SCRIPT_RUNNER_PAYLOAD_BASENAME,
+    );
+  }
 
   await stageScraperRuntime();
   const webviewBootstrapperExecutable = await stageWebviewBootstrapper(runtimeTargetInfo);

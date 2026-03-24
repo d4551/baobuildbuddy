@@ -335,7 +335,8 @@ async function moveProject(projectId: string | undefined, direction: ProjectDire
   if (targetIndex < 0 || targetIndex >= projects.value.length) return;
 
   const reordered = [...displayProjects.value];
-  const [movedProject] = reordered.splice(index, 1);
+  const movedProject = reordered.splice(index, 1)[0];
+  if (!movedProject) return;
   reordered.splice(targetIndex, 0, movedProject);
 
   const orderedIds = reordered
@@ -772,7 +773,7 @@ function projectPageAria(page: number): string {
             class="checkbox checkbox-primary"
             :aria-label="t('portfolioPage.modal.featuredAria')"
           />
-          <span class="label-text">{{ t("portfolioPage.modal.featuredLabel") }}</span>
+          <span class="label">{{ t("portfolioPage.modal.featuredLabel") }}</span>
         </label>
       </div>
 

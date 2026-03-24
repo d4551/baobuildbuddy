@@ -67,9 +67,9 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
 <template>
   <div class="space-y-6">
     <!-- Technical Skills -->
-    <div class="form-control">
+    <fieldset class="fieldset">
       <div class="label">
-        <span class="label-text font-bold">{{ t("resumeComponentSkills.technicalTitle") }}</span>
+        <span class="font-bold">{{ t("resumeComponentSkills.technicalTitle") }}</span>
       </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
@@ -88,28 +88,28 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           </button>
         </div>
       </div>
-      <div class="input-group">
+      <div class="join">
         <input
           v-model="newSkill.technical"
           type="text"
           :placeholder="t('resumeComponentSkills.technicalPlaceholder')"
-          class="input input-bordered flex-1"
+          class="input flex-1 join-item"
           @keyup.enter="addSkill('technical')"
           :aria-label="t('resumeComponentSkills.technicalAria')"/>
         <button
-          class="btn btn-primary"
+          class="btn btn-primary join-item"
           :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.technicalTitle') })"
           @click="addSkill('technical')"
         >
           {{ t("resumeComponentSkills.addButton") }}
         </button>
       </div>
-    </div>
+    </fieldset>
 
     <!-- Soft Skills -->
-    <div class="form-control">
+    <fieldset class="fieldset">
       <div class="label">
-        <span class="label-text font-bold">{{ t("resumeComponentSkills.softTitle") }}</span>
+        <span class="font-bold">{{ t("resumeComponentSkills.softTitle") }}</span>
       </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
@@ -128,28 +128,28 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           </button>
         </div>
       </div>
-      <div class="input-group">
+      <div class="join">
         <input
           v-model="newSkill.soft"
           type="text"
           :placeholder="t('resumeComponentSkills.softPlaceholder')"
-          class="input input-bordered flex-1"
+          class="input flex-1 join-item"
           @keyup.enter="addSkill('soft')"
           :aria-label="t('resumeComponentSkills.softAria')"/>
         <button
-          class="btn btn-secondary"
+          class="btn btn-secondary join-item"
           :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.softTitle') })"
           @click="addSkill('soft')"
         >
           {{ t("resumeComponentSkills.addButton") }}
         </button>
       </div>
-    </div>
+    </fieldset>
 
     <!-- Gaming Skills -->
-    <div class="form-control">
+    <fieldset class="fieldset">
       <div class="label">
-        <span class="label-text font-bold">{{ t("resumeComponentSkills.gamingTitle") }}</span>
+        <span class="font-bold">{{ t("resumeComponentSkills.gamingTitle") }}</span>
       </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <div
@@ -168,22 +168,22 @@ function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
           </button>
         </div>
       </div>
-      <div class="input-group">
+      <div class="join">
         <input
           v-model="newSkill.gaming"
           type="text"
           :placeholder="t('resumeComponentSkills.gamingPlaceholder')"
-          class="input input-bordered flex-1"
+          class="input flex-1 join-item"
           @keyup.enter="addSkill('gaming')"
           :aria-label="t('resumeComponentSkills.gamingAria')"/>
         <button
-          class="btn btn-accent"
+          class="btn btn-accent join-item"
           :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.gamingTitle') })"
           @click="addSkill('gaming')"
         >
           {{ t("resumeComponentSkills.addButton") }}
         </button>
       </div>
-    </div>
+    </fieldset>
   </div>
 </template>

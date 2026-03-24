@@ -251,7 +251,9 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         ":id": {
             export: {
                 post: {
-                    body: unknown;
+                    body: {
+                        format?: string | undefined;
+                    };
                     params: {
                         id: string;
                     };

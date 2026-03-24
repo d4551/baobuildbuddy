@@ -1,4 +1,4 @@
-import { DEFAULT_BRAND_SETTINGS, type BrandSettings } from "@bao/shared";
+import { type BrandSettings, DEFAULT_BRAND_SETTINGS } from "@bao/shared";
 
 /**
  * AI prompt templates specialized for video game industry career guidance.

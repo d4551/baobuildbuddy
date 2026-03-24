@@ -54,6 +54,26 @@ export const COVER_LETTER_DEFAULT_CLOSING = "Thank you for your consideration.";
 export const COVER_LETTER_DEFAULT_SIGNATURE = "Sincerely,";
 
 /**
+ * Canonical cover-letter export format values shared across client and server layers.
+ */
+export const COVER_LETTER_EXPORT_FORMATS = ["pdf", "docx"] as const;
+
+/**
+ * Cover-letter export format union derived from canonical options.
+ */
+export type CoverLetterExportFormat = (typeof COVER_LETTER_EXPORT_FORMATS)[number];
+
+/**
+ * Type guard for supported cover-letter export formats.
+ */
+export function isCoverLetterExportFormat(
+  value: string | undefined | null,
+): value is CoverLetterExportFormat {
+  if (!value) return false;
+  return COVER_LETTER_EXPORT_FORMATS.some((format) => format === value);
+}
+
+/**
  * Type-guard for validating cover-letter template values from untyped boundaries.
  *
  * @param value Candidate template value.

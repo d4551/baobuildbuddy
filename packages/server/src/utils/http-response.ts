@@ -19,6 +19,13 @@ export const HEADER_CACHE_CONTROL = "cache-control";
 export const MIME_TYPE_PDF = "application/pdf";
 
 /**
+ * Canonical DOCX content-type value used by Word document export endpoints.
+ */
+import { MIME_TYPE_DOCX } from "@bao/shared";
+
+export { MIME_TYPE_DOCX };
+
+/**
  * Canonical generic binary content-type fallback value.
  */
 export const MIME_TYPE_OCTET_STREAM = "application/octet-stream";
@@ -63,6 +70,24 @@ export const createPdfAttachmentHeaders = (fileName: string): Readonly<Record<st
 export const createPdfAttachmentResponse = (payload: BinaryPayload, fileName: string): Response =>
   new Response(new Blob([normalizeBinaryPayload(payload)]), {
     headers: createPdfAttachmentHeaders(fileName),
+  });
+
+/**
+ * Creates canonical headers for a DOCX attachment response.
+ */
+export const createDocxAttachmentHeaders = (
+  fileName: string,
+): Readonly<Record<string, string>> => ({
+  [HEADER_CONTENT_TYPE]: MIME_TYPE_DOCX,
+  [HEADER_CONTENT_DISPOSITION]: createAttachmentDisposition(fileName),
+});
+
+/**
+ * Creates a binary DOCX attachment response with canonical headers.
+ */
+export const createDocxAttachmentResponse = (payload: BinaryPayload, fileName: string): Response =>
+  new Response(new Blob([normalizeBinaryPayload(payload)]), {
+    headers: createDocxAttachmentHeaders(fileName),
   });
 
 /**

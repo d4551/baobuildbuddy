@@ -1,8 +1,8 @@
-import { readonly } from "vue";
 import type { UserProfile } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
-import { useState } from "#imports";
+import { readonly } from "vue";
 import { useI18n } from "vue-i18n";
+import { useState } from "#imports";
 import { toUserProfile } from "./api-normalizers";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 import { useApi } from "./useApi";

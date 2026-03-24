@@ -1,19 +1,19 @@
 import {
   AI_DEFAULT_TEMPERATURE_CREATIVE,
-  API_ERROR_COVER_LETTER_NOT_FOUND,
   API_ERROR_AI_SETTINGS_NOT_CONFIGURED,
   API_ERROR_COVER_LETTER_GENERATION_FAILED,
-  COVER_LETTER_DEFAULT_CLOSING,
-  COVER_LETTER_DEFAULT_OPENING,
-  DEFAULT_UNSPECIFIED_LABEL,
-  API_MESSAGE_COVER_LETTER_GENERATED_ONLY,
-  API_MESSAGE_COVER_LETTER_GENERATED_SAVED,
-  DEFAULT_PROFILE_ID,
+  API_ERROR_COVER_LETTER_NOT_FOUND,
   API_ERROR_EXPORT_COVER_LETTER,
   API_ERROR_UNKNOWN,
+  API_MESSAGE_COVER_LETTER_GENERATED_ONLY,
+  API_MESSAGE_COVER_LETTER_GENERATED_SAVED,
+  COVER_LETTER_DEFAULT_CLOSING,
+  COVER_LETTER_DEFAULT_OPENING,
   COVER_LETTER_DEFAULT_TEMPLATE,
   COVER_LETTER_TEMPLATE_OPTIONS,
   type CoverLetterTemplate,
+  DEFAULT_PROFILE_ID,
+  DEFAULT_UNSPECIFIED_LABEL,
   generateId,
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -23,6 +23,7 @@ import {
   ROUTE_GAMIFICATION_XP,
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_MICRO,
   SCHEMA_MAX_LENGTH_SHORT,
   safeParseJson,
   settle,
@@ -34,11 +35,12 @@ import { coverLetters } from "../db/schema/cover-letters";
 import { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
-import { gamificationService } from "../services/gamification-service";
 import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts";
+import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
-import { createPdfAttachmentResponse } from "../utils/http-response";
+import { gamificationService } from "../services/gamification-service";
+import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
 
 const coverLetterTemplateBodySchema = t.String({
   enum: COVER_LETTER_TEMPLATE_OPTIONS,
@@ -321,7 +323,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
   })
   .post(
     "/:id/export",
-    async ({ params, set }) => {
+    async ({ params, body, set }) => {
       const rows = await db.select().from(coverLetters).where(eq(coverLetters.id, params.id));
       if (rows.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -354,16 +356,28 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
         sender.location = profile.location;
       }
 
-      const exportResult = await settle(
-        exportService.exportCoverLetterPDF(
-          {
-            company: letter.company,
-            position: letter.position,
-            content: toJsonRecord(letter.content),
-          },
-          sender,
-        ),
-      );
+      const letterPayload = {
+        company: letter.company,
+        position: letter.position,
+        content: toJsonRecord(letter.content),
+      };
+
+      if (body.format === "docx") {
+        const docxResult = await settle(
+          docxExportService.exportCoverLetterDocx(letterPayload, sender),
+        );
+        if (docxResult.status === "rejected") {
+          set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+          return {
+            error: API_ERROR_EXPORT_COVER_LETTER,
+            details:
+              docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
+          };
+        }
+        return createDocxAttachmentResponse(docxResult.value, `cover-letter-${params.id}.docx`);
+      }
+
+      const exportResult = await settle(exportService.exportCoverLetterPDF(letterPayload, sender));
       if (exportResult.status === "rejected") {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
         return {
@@ -381,6 +395,9 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
     {
       params: t.Object({
         id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+      }),
+      body: t.Object({
+        format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
       }),
     },
   );

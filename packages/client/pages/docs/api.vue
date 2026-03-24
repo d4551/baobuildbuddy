@@ -227,7 +227,7 @@ const readOpenApiSpec = (value: unknown): OpenApiSpec | null => {
       description: typeof infoRaw?.description === "string" ? infoRaw.description : undefined,
       version: typeof infoRaw?.version === "string" ? infoRaw.version : undefined,
     },
-    paths: isRecord(value.paths) ? value.paths : {},
+    paths: isRecord(value.paths) ? (value.paths as Record<string, Record<string, unknown>>) : {},
   };
 };
 
@@ -468,7 +468,7 @@ const testerStateLabel = computed(() => {
   return t(`apiDocs.state.${testerState.value}`);
 });
 const activeEndpointId = computed(() => {
-  if (activeSectionId.value.length > 0) {
+  if (activeSectionId.value && activeSectionId.value.length > 0) {
     return activeSectionId.value;
   }
   const firstGroup = endpointGroups.value[0];
@@ -755,7 +755,7 @@ onBeforeUnmount(() => {
         type="button"
         class="btn btn-sm btn-outline"
         :aria-label="t('apiDocs.actions.retry')"
-        @click="refreshSpec"
+        @click="() => refreshSpec()"
       >
         {{ t("apiDocs.actions.retry") }}
       </button>
@@ -812,7 +812,7 @@ onBeforeUnmount(() => {
               v-for="endpoint in group.endpoints"
               :id="endpoint.id"
               :key="endpoint.id"
-              :ref="(element) => setSectionRef(endpoint.id, element)"
+              :ref="(element) => setSectionRef(endpoint.id, element as Element | null)"
               tabindex="-1"
               class="scroll-mt-24 space-y-4 rounded-lg border border-base-200 bg-base-100 p-4"
             >
@@ -928,15 +928,15 @@ onBeforeUnmount(() => {
             <label
               v-for="parameterName in selectedEndpoint.pathParameters"
               :key="`path-${parameterName}`"
-              class="form-control"
+              class="fieldset"
             >
-              <span class="label-text">
+              <span class="label">
                 {{ t("apiDocs.tester.parameterLabel", { name: parameterName }) }}
               </span>
               <input
                 v-model="pathParameterValues[parameterName]"
                 type="text"
-                class="input input-bordered"
+                class="input"
                 :aria-label="t('apiDocs.tester.parameterLabel', { name: parameterName })"
               />
             </label>
@@ -953,15 +953,15 @@ onBeforeUnmount(() => {
             <label
               v-for="parameter in selectedEndpoint.queryParameters"
               :key="`query-${parameter.name}`"
-              class="form-control"
+              class="fieldset"
             >
-              <span class="label-text">
+              <span class="label">
                 {{ t("apiDocs.tester.parameterLabel", { name: parameter.name }) }}
               </span>
               <input
                 v-model="queryParameterValues[parameter.name]"
                 type="text"
-                class="input input-bordered"
+                class="input"
                 :aria-label="t('apiDocs.tester.parameterLabel', { name: parameter.name })"
               />
             </label>
@@ -976,7 +976,7 @@ onBeforeUnmount(() => {
           <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
           <textarea
             v-model="requestBodyValue"
-            class="textarea textarea-bordered min-h-40 w-full font-mono text-sm"
+            class="textarea min-h-40 w-full font-mono text-sm"
             :placeholder="t('apiDocs.tester.bodyPlaceholder')"
             :aria-label="t('apiDocs.tester.requestBodyAria')"
           />

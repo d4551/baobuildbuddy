@@ -1769,7 +1769,9 @@ export declare const app: Elysia<"/api", {
             ":id": {
                 export: {
                     post: {
-                        body: unknown;
+                        body: {
+                            format?: string | undefined;
+                        };
                         params: {
                             id: string;
                         };

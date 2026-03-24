@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FAB_QUICK_ACTIONS } from "~/constants/dashboard";
@@ -48,8 +49,12 @@ function getActionItems(): HTMLAnchorElement[] {
   return actionItemRefs.value.filter((element): element is HTMLAnchorElement => element !== null);
 }
 
-function setActiveActionRef(index: number, element: Element | null): void {
-  actionItemRefs.value[index] = element instanceof HTMLAnchorElement ? element : null;
+function setActiveActionRef(
+  index: number,
+  element: Element | ComponentPublicInstance | null,
+): void {
+  const el = element && "$el" in element ? (element.$el as Element | null) : element;
+  actionItemRefs.value[index] = el instanceof HTMLAnchorElement ? el : null;
 }
 
 function getActionIndex(currentIndex: number, direction: number): number {

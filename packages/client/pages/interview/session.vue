@@ -35,7 +35,11 @@ const router = useRouter();
 const { currentSession, loading, getSession, submitResponse, completeSession } = useInterview();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
-const sessionId = computed(() => normalizeSessionIdFromQuery(route.query[APP_ROUTE_QUERY_KEYS.id]));
+const sessionId = computed(() =>
+  normalizeSessionIdFromQuery(
+    route.query[APP_ROUTE_QUERY_KEYS.id] as string | string[] | undefined,
+  ),
+);
 const voiceSettings = computed(() => currentSession.value?.config?.voiceSettings);
 const tts = useTTS(voiceSettings);
 const stt = useSTT(voiceSettings);
@@ -311,7 +315,7 @@ function estimateElapsedTime(
   }
 
   const start = Number.isFinite(startTime) ? startTime : fallbackSeconds;
-  const end = Number.isFinite(endTime ?? Number.NaN) ? endTime : Date.now();
+  const end = typeof endTime === "number" && Number.isFinite(endTime) ? endTime : Date.now();
   const rawSeconds = Math.floor((end - start) / 1000);
   return Math.max(0, rawSeconds);
 }
@@ -593,6 +597,7 @@ async function handleCompleteInterview() {
         <div class="card-body">
           <h3 class="card-title text-lg">{{ t("interviewSession.feedbackTitle") }}</h3>
           <div
+            v-if="currentQuestion.score !== undefined"
             class="alert"
             :class="{
               'alert-success': currentQuestion.score >= SCORE_PASS_THRESHOLD,

@@ -7,6 +7,8 @@ import type {
 } from "@bao/shared";
 import { APP_ROUTES, formatRelativeTime, getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { toUserProfile } from "~/composables/api-normalizers";
+import { requireValue } from "~/composables/async-flow";
 import {
   DASHBOARD_A11Y_KEYS,
   DASHBOARD_ACTIVITY_FALLBACK_KEY,
@@ -35,8 +37,6 @@ import {
   GAMIFICATION_LEVEL_ICON,
   GAMIFICATION_XP_TARGET_FALLBACK,
 } from "~/constants/gamification";
-import { requireValue } from "~/composables/async-flow";
-import { toUserProfile } from "~/composables/api-normalizers";
 import { getErrorMessage } from "~/utils/errors";
 
 interface DashboardActivity {
@@ -705,11 +705,13 @@ async function requestData<T>(request: Promise<EdenResponse>, fallbackMessage: s
       </section>
 
       <WorkPipeline
-        :title="t(DASHBOARD_COPY_KEYS.pipelineTitle)"
-        :description="t(DASHBOARD_COPY_KEYS.pipelineDescription)"
-        :aria-label="t(DASHBOARD_COPY_KEYS.pipelineAria)"
-        :steps="pipelineSteps"
-        :next-step-label="nextPipelineStepLabel"
+        v-bind="{
+          title: t(DASHBOARD_COPY_KEYS.pipelineTitle),
+          description: t(DASHBOARD_COPY_KEYS.pipelineDescription),
+          ariaLabel: t(DASHBOARD_COPY_KEYS.pipelineAria),
+          steps: pipelineSteps,
+          nextStepLabel: nextPipelineStepLabel,
+        }"
       />
     </div>
   </PageScaffold>

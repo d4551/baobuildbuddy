@@ -1,5 +1,7 @@
 import z from "zod";
 import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST } from "../constants/ai";
+import { DEFAULT_BRAND_SETTINGS, normalizeAppDataTheme, THEME_NAMES } from "../constants/branding";
+import { MAX_PORT, MIN_PORT } from "../constants/ports";
 import {
   SCHEMA_MAX_LENGTH_EMAIL,
   SCHEMA_MAX_LENGTH_LONG,
@@ -13,12 +15,11 @@ import {
   APP_LANGUAGE_CODES,
   AUTOMATION_BROWSER_OPTIONS,
   DEFAULT_APP_LANGUAGE,
+  DEFAULT_SPEECH_SETTINGS,
   EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
   EMAIL_TRANSPORT_SECURITY_OPTIONS,
-  DEFAULT_SPEECH_SETTINGS,
   SPEECH_PROVIDER_OPTIONS,
 } from "../constants/settings";
-import { MAX_PORT, MIN_PORT } from "../constants/ports";
 import type { AIProviderType } from "../types/ai";
 import {
   DEFAULT_AUTOMATION_SETTINGS,
@@ -26,7 +27,6 @@ import {
   DEFAULT_JOB_PROVIDER_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "../types/settings";
-import { DEFAULT_BRAND_SETTINGS, THEME_NAMES, normalizeAppDataTheme } from "../constants/branding";
 
 export const apiKeyConfigSchema = z.object({
   provider: z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]),

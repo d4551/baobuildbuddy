@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ChatMessage } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { CHAT_PAGE_CONTAINER_CLASS } from "~/constants/chat";
 import {
@@ -69,7 +70,9 @@ const voiceErrorLabel = computed(() => {
 
   return t("aiChatCommon.voice.errorLabel", { error: t(voiceErrorMessageKey.value) });
 });
-const renderedMessages = computed(() => buildChatMessageRenderRows(messages.value));
+const renderedMessages = computed(() =>
+  buildChatMessageRenderRows(messages.value as ChatMessage[]),
+);
 const renderedMessageSignature = computed(() =>
   renderedMessages.value
     .map(({ message }) => [message.id, message.role, message.timestamp, message.content].join(":"))
@@ -290,7 +293,7 @@ onMounted(async () => {
                   index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
                 "
                 :is-streaming="false"
-                :locale="locale.value"
+                :locale="locale"
                 :message="messageRow.message"
                 :user-label="t('aiChatPage.youLabel')"
               />
@@ -301,7 +304,7 @@ onMounted(async () => {
                 :context-chips-aria="t('floatingChat.contextChipsAria')"
                 :is-latest-assistant-message="true"
                 :is-streaming="true"
-                :locale="locale.value"
+                :locale="locale"
                 :message="streamingBubble"
                 :user-label="t('aiChatPage.youLabel')"
               />
@@ -319,7 +322,7 @@ onMounted(async () => {
                   ref="aiChatComposer"
                   v-model="input"
                   rows="3"
-                  class="textarea textarea-bordered min-h-28 w-full resize-y"
+                  class="textarea min-h-28 w-full resize-y"
                   :placeholder="t('aiChatPage.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
                   :disabled="loading"
                   :aria-label="t('aiChatPage.inputAria')"

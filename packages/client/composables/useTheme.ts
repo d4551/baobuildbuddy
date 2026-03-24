@@ -1,7 +1,7 @@
 import type { AppDataTheme } from "@bao/shared";
-import { STATE_KEYS, THEME_NAMES, normalizeAppDataTheme } from "@bao/shared";
-import { useState } from "#imports";
+import { normalizeAppDataTheme, STATE_KEYS, THEME_NAMES } from "@bao/shared";
 import { readonly } from "vue";
+import { useState } from "#imports";
 
 /**
  * Theme toggle: daisyUI `corporate` (light) / `business` (dark), driven by `data-theme`.

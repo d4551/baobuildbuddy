@@ -97,7 +97,8 @@ The canonical release flow performs:
 - **Windows MSI (WiX):** Tauri needs the WiX toolset; CI installs it via Chocolatey. If `light.exe` fails with script errors, ensure the **VBSCRIPT** optional Windows feature is enabled (see [Tauri prerequisites — Windows](https://v2.tauri.app/start/prerequisites/)); GitHub-hosted runners usually have it on.
 - **`DESKTOP_RELEASE_*` workflow env:** On `push`, **repository variables** (`vars.DESKTOP_RELEASE_*`) apply when set; otherwise env is empty and scripts use built-in defaults (MSI / AppImage / Linux signatures on). On `workflow_dispatch`, **boolean inputs always win** (including `false`); the workflow must not use `input || vars` for booleans because `false` would incorrectly fall through to vars. String inputs (e.g. macOS architectures) still use `input || vars`.
 - **AppImage count:** The canonical contract includes **one** AppImage (Linux x64 only). Linux ARM64 intentionally omits AppImage (linuxdeploy instability). The Linux x64 CI job fails if AppImage is enabled but no `*.AppImage` is staged.
-- **AppImage from macOS:** Use GitHub Actions (`desktop-release` workflow) or a real **x86_64 Linux** machine. Docker `--platform linux/amd64` on Apple Silicon often hits QEMU limitations and can abort the Tauri CLI mid-build; see `scripts/docker-linux-x64-desktop-release.sh` for a script intended for native x64 Linux.
+- **AppImage from macOS:** Use GitHub Actions (`desktop-release` workflow) or a real **x86_64 Linux** machine. Docker `--platform linux/amd64` on Apple Silicon often hits QEMU limitations and can abort the Tauri CLI mid-build.
+- **Linux bundled server layout:** On Linux targets, `prepare-desktop-runtime.ts` ships `server/bao-desktop-server` and `bin/bao-bun` as POSIX shell launchers plus adjacent `*.payload.gz` blobs (gzip of the Bun binaries) so linuxdeploy does not run `ldd` on those payloads during AppImage creation. Manifest paths are unchanged; Rust `Command::new` still launches them.
 - **Local commands:** Prefer `bun run test` (workspace-scoped) for CI parity. A bare `bun test` at the repo root uses [bunfig.toml](../../../bunfig.toml) (`preload` for server test env, `pathIgnorePatterns` for desktop `target/` when supported). Stale `packages/server/dist/**/*.test.js` from old builds duplicates server tests—`bun run --filter '@bao/server' build` clears `dist` first. After `prepare:desktop-runtime`, staged scraper sources omit `*.test.ts` so they are not shipped into app bundles.
 
 Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact. The canonical release set ships both the NSIS setup installer and a portable `.zip` that keeps the executable, bundled `gen/runtime` tree, and WebView2 bootstrapper together.
@@ -149,7 +150,7 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 
 - `linux-x64/${APP_PRODUCT_NAME}_<VERSION>_amd64.deb`
 - `linux-x64/${APP_PRODUCT_NAME}-<VERSION>-1.x86_64.rpm`
-- `linux-x64/${APP_PRODUCT_NAME}_<VERSION>_x86_64.AppImage` (omit with `DESKTOP_RELEASE_LINUX_APPIMAGE=false`)
+- `linux-x64/${APP_PRODUCT_NAME}_<VERSION>_amd64.AppImage` (omit with `DESKTOP_RELEASE_LINUX_APPIMAGE=false`)
 - detached `.sig` files for each Linux artifact when signatures are enabled and GPG env is configured (omit with `DESKTOP_RELEASE_LINUX_SIGNATURES=false`)
 
 ### Linux ARM64

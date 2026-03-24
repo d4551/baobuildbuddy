@@ -46,9 +46,7 @@ export const isDesktopReleaseTarget = (value: string): value is DesktopReleaseTa
 /**
  * Returns true when a provenance payload is structurally valid for release assembly.
  */
-export const isDesktopReleaseProvenance = (
-  value: NativeDesktopReleaseProvenance,
-): boolean =>
+export const isDesktopReleaseProvenance = (value: NativeDesktopReleaseProvenance): boolean =>
   value.schemaVersion === 1 &&
   typeof value.target === "string" &&
   isDesktopReleaseTarget(value.target) &&
@@ -66,11 +64,8 @@ export const isDesktopReleaseProvenance = (
 /**
  * Returns true when a provenance payload represents a fresh native build instead of staged carry-forward artifacts.
  */
-export const hasNativeDesktopReleaseProvenance = (
-  value: NativeDesktopReleaseProvenance,
-): boolean =>
-  isDesktopReleaseProvenance(value) &&
-  isNativeBuildCommandList(value.buildCommands);
+export const hasNativeDesktopReleaseProvenance = (value: NativeDesktopReleaseProvenance): boolean =>
+  isDesktopReleaseProvenance(value) && isNativeBuildCommandList(value.buildCommands);
 
 /**
  * Parses an explicit `--targets` CLI argument into canonical release targets.

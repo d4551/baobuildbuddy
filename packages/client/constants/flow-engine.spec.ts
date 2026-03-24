@@ -1,8 +1,8 @@
 import type { DashboardStats } from "@bao/shared";
 import { describe, expect, it } from "vitest";
 import {
-  FLOW_PROFILE_COMPLETENESS_THRESHOLD,
   createFlowEngineInput,
+  FLOW_PROFILE_COMPLETENESS_THRESHOLD,
   resolveFlowRecommendations,
 } from "./flow-engine";
 

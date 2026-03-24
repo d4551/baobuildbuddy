@@ -83,19 +83,25 @@ function removeHighlight(itemId: string, index: number) {
 
 function moveUp(index: number) {
   if (index > 0) {
-    const temp = localValue.value[index];
-    localValue.value[index] = localValue.value[index - 1];
-    localValue.value[index - 1] = temp;
-    updateValue();
+    const current = localValue.value[index];
+    const prev = localValue.value[index - 1];
+    if (current && prev) {
+      localValue.value[index] = prev;
+      localValue.value[index - 1] = current;
+      updateValue();
+    }
   }
 }
 
 function moveDown(index: number) {
   if (index < localValue.value.length - 1) {
-    const temp = localValue.value[index];
-    localValue.value[index] = localValue.value[index + 1];
-    localValue.value[index + 1] = temp;
-    updateValue();
+    const current = localValue.value[index];
+    const next = localValue.value[index + 1];
+    if (current && next) {
+      localValue.value[index] = next;
+      localValue.value[index + 1] = current;
+      updateValue();
+    }
   }
 }
 </script>
@@ -156,60 +162,60 @@ function moveDown(index: number) {
 
         <div v-if="editingId === item.id" class="space-y-3 mt-2">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="form-control">
-              <div class="label label-text-alt">{{ t("resumeComponentExperience.companyLabel") }}</div>
+            <fieldset class="fieldset">
+              <div class="label text-sm">{{ t("resumeComponentExperience.companyLabel") }}</div>
               <input
                 v-model="item.company"
                 type="text"
                 :placeholder="t('resumeComponentExperience.companyPlaceholder')"
-                class="input input-bordered input-sm"
+                class="input input-sm"
                 @input="updateValue"
                 :aria-label="t('resumeComponentExperience.companyAria')"/>
-            </div>
-            <div class="form-control">
-              <div class="label label-text-alt">{{ t("resumeComponentExperience.titleLabel") }}</div>
+            </fieldset>
+            <fieldset class="fieldset">
+              <div class="label text-sm">{{ t("resumeComponentExperience.titleLabel") }}</div>
               <input
                 v-model="item.title"
                 type="text"
                 :placeholder="t('resumeComponentExperience.titlePlaceholder')"
-                class="input input-bordered input-sm"
+                class="input input-sm"
                 @input="updateValue"
                 :aria-label="t('resumeComponentExperience.titleAria')"/>
-            </div>
-            <div class="form-control">
-              <div class="label label-text-alt">{{ t("resumeComponentExperience.startDateLabel") }}</div>
+            </fieldset>
+            <fieldset class="fieldset">
+              <div class="label text-sm">{{ t("resumeComponentExperience.startDateLabel") }}</div>
               <input
                 v-model="item.startDate"
                 type="month"
-                class="input input-bordered input-sm"
+                class="input input-sm"
                 @input="updateValue"
                 :aria-label="t('resumeComponentExperience.startDateAria')"/>
-            </div>
-            <div class="form-control">
-              <div class="label label-text-alt">{{ t("resumeComponentExperience.endDateLabel") }}</div>
+            </fieldset>
+            <fieldset class="fieldset">
+              <div class="label text-sm">{{ t("resumeComponentExperience.endDateLabel") }}</div>
               <input
                 v-model="item.endDate"
                 type="month"
                 :placeholder="t('resumeComponentExperience.endDatePlaceholder')"
-                class="input input-bordered input-sm"
+                class="input input-sm"
                 @input="updateValue"
                 :aria-label="t('resumeComponentExperience.endDateAria')"/>
-            </div>
+            </fieldset>
           </div>
 
-          <div class="form-control">
-            <div class="label label-text-alt">{{ t("resumeComponentExperience.descriptionLabel") }}</div>
+          <fieldset class="fieldset">
+            <div class="label text-sm">{{ t("resumeComponentExperience.descriptionLabel") }}</div>
             <textarea
               v-model="item.description"
-              class="textarea textarea-bordered"
+              class="textarea"
               rows="3"
               :placeholder="t('resumeComponentExperience.descriptionPlaceholder')"
               @input="updateValue"
               :aria-label="t('resumeComponentExperience.descriptionAria')"></textarea>
-          </div>
+          </fieldset>
 
-          <div class="form-control">
-            <div class="label label-text-alt">{{ t("resumeComponentExperience.highlightsLabel") }}</div>
+          <fieldset class="fieldset">
+            <div class="label text-sm">{{ t("resumeComponentExperience.highlightsLabel") }}</div>
             <div class="space-y-2">
               <div
                 v-for="(highlight, hIndex) in item.highlights"
@@ -226,16 +232,16 @@ function moveDown(index: number) {
                   <CloseIcon class="h-3 w-3" />
                 </button>
               </div>
-              <div class="input-group input-group-sm">
+              <div class="join">
                 <input
                   v-model="newHighlight[item.id]"
                   type="text"
                   :placeholder="t('resumeComponentExperience.newHighlightPlaceholder')"
-                  class="input input-bordered input-sm flex-1"
+                  class="input input-sm join-item flex-1"
                   @keyup.enter="addHighlight(item.id)"
                   :aria-label="t('resumeComponentExperience.newHighlightAria')"/>
                 <button
-                  class="btn btn-primary btn-sm"
+                  class="btn btn-primary btn-sm join-item"
                   :aria-label="t('resumeComponentExperience.addHighlightAria')"
                   @click="addHighlight(item.id)"
                 >
@@ -243,7 +249,7 @@ function moveDown(index: number) {
                 </button>
               </div>
             </div>
-          </div>
+          </fieldset>
         </div>
 
         <div v-else class="text-sm text-base-content/70 mt-2">

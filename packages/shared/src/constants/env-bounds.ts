@@ -3,8 +3,8 @@
  * Single source of truth for min/max/default values used by parseBoundedInt in server config.
  */
 
-import { DEFAULT_AUTOMATION_SETTINGS } from "../types/settings";
 import { RPA_STDIO_BUFFER_LIMIT } from "../schemas/rpa-protocol.schema";
+import { DEFAULT_AUTOMATION_SETTINGS } from "../types/settings";
 
 /** Automation script timeout: min 1s, max 30min. Default from automation settings (seconds → ms). */
 export const ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_DEFAULT =

@@ -1,0 +1,57 @@
+name: 'Evaluate Apple signing and notarization gates'
+description: 'Evaluates has_codesign and full_notarize based on Apple secrets availability'
+inputs:
+  apple_certificate:
+    required: false
+    description: 'Base64-encoded Apple developer certificate'
+  apple_certificate_password:
+    required: false
+    description: 'Password for the certificate'
+  keychain_password:
+    required: false
+    description: 'Keychain password'
+  apple_signing_identity:
+    required: false
+    description: 'Signing identity'
+  apple_api_key_content:
+    required: false
+    description: 'App Store Connect API key content'
+  apple_api_issuer:
+    required: false
+    description: 'App Store Connect API issuer'
+  apple_api_key:
+    required: false
+    description: 'App Store Connect API key ID'
+outputs:
+  has_codesign:
+    description: 'Whether code signing secrets are available'
+    value: ${{ steps.eval.outputs.has_codesign }}
+  full_notarize:
+    description: 'Whether full notarization (codesign + API key) is available'
+    value: ${{ steps.eval.outputs.full_notarize }}
+runs:
+  using: 'composite'
+  steps:
+    - id: eval
+      shell: bash
+      env:
+        APPLE_CERTIFICATE: ${{ inputs.apple_certificate }}
+        APPLE_CERTIFICATE_PASSWORD: ${{ inputs.apple_certificate_password }}
+        KEYCHAIN_PASSWORD: ${{ inputs.keychain_password }}
+        APPLE_SIGNING_IDENTITY: ${{ inputs.apple_signing_identity }}
+        APPLE_API_KEY_CONTENT: ${{ inputs.apple_api_key_content }}
+        APPLE_API_ISSUER: ${{ inputs.apple_api_issuer }}
+        APPLE_API_KEY: ${{ inputs.apple_api_key }}
+      run: |
+        has_codesign=false
+        if [ -n "${APPLE_CERTIFICATE}" ] && [ -n "${APPLE_CERTIFICATE_PASSWORD}" ] && \
+           [ -n "${KEYCHAIN_PASSWORD}" ] && [ -n "${APPLE_SIGNING_IDENTITY}" ]; then
+          has_codesign=true
+        fi
+        full_notarize=false
+        if [ "${has_codesign}" = true ] && [ -n "${APPLE_API_KEY_CONTENT}" ] && \
+           [ -n "${APPLE_API_ISSUER}" ] && [ -n "${APPLE_API_KEY}" ]; then
+          full_notarize=true
+        fi
+        echo "has_codesign=${has_codesign}" >> "${GITHUB_OUTPUT}"
+        echo "full_notarize=${full_notarize}" >> "${GITHUB_OUTPUT}"

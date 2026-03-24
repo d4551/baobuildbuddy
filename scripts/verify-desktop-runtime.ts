@@ -10,12 +10,12 @@ import {
 } from "../packages/shared/src/constants/endpoints";
 import {
   DESKTOP_RUNTIME_API_BASE,
-  DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS,
   DESKTOP_RUNTIME_BUILD_SERVER_PORT,
   DESKTOP_RUNTIME_CORS_ORIGINS,
   DESKTOP_RUNTIME_HOST,
   DESKTOP_RUNTIME_MANIFEST_PATH,
   DESKTOP_RUNTIME_RESOURCE_DIR,
+  DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS,
   DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT,
   DESKTOP_RUNTIME_WS_BASE,
 } from "../packages/shared/src/constants/scripts";
@@ -26,12 +26,12 @@ import {
 } from "../packages/shared/src/schemas/rpa-events.schema";
 import {
   buildDesktopRuntimeManifest,
+  type DesktopRuntimeManifest,
   getDesktopRuntimeManifestMismatches,
   listDesktopRuntimeContractPaths,
   parseDesktopRuntimeManifest,
   resolveDesktopRuntimeTargetInfoFromHost,
   resolveDesktopRuntimeTargetInfoFromTauriTarget,
-  type DesktopRuntimeManifest,
 } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -62,9 +62,11 @@ type BrowserInstance = {
 
 type PlaywrightLaunchOptions = {
   headless: boolean;
+  channel?: string;
   executablePath?: string;
   timeout?: number;
   args?: string[];
+  ignoreDefaultArgs?: string[];
 };
 
 type PlaywrightChromium = {
@@ -176,7 +178,7 @@ const runCommand = async (
   cwd: string = REPO_ROOT,
   env: Record<string, string | undefined> = process.env,
 ): Promise<void> => {
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn([...command], {
     cwd,
     env,
     stdout: "inherit",
@@ -683,8 +685,16 @@ const verifyCorsContract = async (
   }
 };
 
-/** Chromium args that improve headless launch reliability on Windows CI (GitHub Actions). */
+/**
+ * Chromium args that improve headless launch reliability on Windows CI (GitHub Actions).
+ *
+ * Critically, `--remote-debugging-port=0` forces TCP-based debugging instead of
+ * Playwright's default `--remote-debugging-pipe`. The named-pipe protocol is
+ * incompatible with Bun's child process handling on Windows, causing a 120s
+ * timeout even though the browser PID starts successfully.
+ */
 const WINDOWS_CI_CHROMIUM_ARGS: string[] = [
+  "--remote-debugging-port=0",
   "--disable-gpu",
   "--disable-software-rasterizer",
   "--disable-dev-shm-usage",
@@ -699,14 +709,20 @@ const WINDOWS_CI_CHROMIUM_ARGS: string[] = [
   "--no-first-run",
 ];
 
-const buildLaunchOptions = (executablePath: string): PlaywrightLaunchOptions => {
+/** Whether to use the pre-installed Microsoft Edge instead of bundled Chromium. */
+const USE_WINDOWS_EDGE_CHANNEL = process.platform === "win32";
+
+const buildLaunchOptions = (executablePath: string | null): PlaywrightLaunchOptions => {
   const launchOptions: PlaywrightLaunchOptions = {
-    executablePath,
     headless: true,
     timeout: DESKTOP_RUNTIME_VERIFY_BROWSER_LAUNCH_TIMEOUT_MS,
   };
-  if (process.platform === "win32") {
+  if (USE_WINDOWS_EDGE_CHANNEL) {
+    launchOptions.channel = "msedge";
     launchOptions.args = WINDOWS_CI_CHROMIUM_ARGS;
+    launchOptions.ignoreDefaultArgs = ["--remote-debugging-pipe"];
+  } else if (executablePath) {
+    launchOptions.executablePath = executablePath;
   }
   return launchOptions;
 };
@@ -716,7 +732,7 @@ const BROWSER_LAUNCH_RETRY_DELAY_MS = 3_000;
 
 const attemptBrowserLaunch = async (
   chromium: PlaywrightChromium,
-  executablePath: string,
+  executablePath: string | null,
   attempt: number,
 ): Promise<BrowserInstance> => {
   const result = await captureResult(() => chromium.launch(buildLaunchOptions(executablePath)));
@@ -736,6 +752,13 @@ const attemptBrowserLaunch = async (
 const launchVerificationBrowser = async (playwrightModule: {
   chromium: PlaywrightChromium;
 }): Promise<BrowserInstance> => {
+  if (USE_WINDOWS_EDGE_CHANNEL) {
+    await writeOutput(
+      "desktop-runtime: launching verification browser via pre-installed Microsoft Edge (msedge channel)",
+    );
+    return attemptBrowserLaunch(playwrightModule.chromium, null, 1);
+  }
+
   const browserExecutablePath = playwrightModule.chromium.executablePath().trim();
   if (browserExecutablePath.length === 0) {
     throw new Error("Playwright did not provide a bundled Chromium executable path.");
@@ -761,7 +784,61 @@ const launchVerificationBrowser = async (playwrightModule: {
   return attemptBrowserLaunch(playwrightModule.chromium, browserExecutablePath, 1);
 };
 
+/**
+ * Verifies frontend and API health using native `fetch` + `WebSocket` instead
+ * of Playwright browser automation. Used on Windows where Bun's subprocess
+ * management is incompatible with Playwright's debugging protocol (both pipe
+ * and TCP-based connections time out despite the browser process starting).
+ */
+const runNativeBrowserChecks = async (
+  apiBase: string,
+  wsBase: string,
+  frontendUrl: string,
+): Promise<BrowserCheckResult> => {
+  await writeOutput("desktop-runtime: running native HTTP/WS browser checks (Playwright skipped)");
+
+  const htmlResponse = await fetch(frontendUrl);
+  if (!htmlResponse.ok) {
+    throw new Error(
+      `Frontend HTML fetch failed: ${htmlResponse.status} ${htmlResponse.statusText}`,
+    );
+  }
+  const html = await htmlResponse.text();
+  const titleMatch = /<title>([^<]*)<\/title>/i.exec(html);
+  const pageTitle = titleMatch?.[1]?.trim() ?? "untitled";
+
+  const healthResponse = await fetch(`${apiBase}/api/health`);
+  if (!healthResponse.ok) {
+    throw new Error(
+      `Health endpoint failed: ${healthResponse.status} ${healthResponse.statusText}`,
+    );
+  }
+  const healthPayload = (await healthResponse.json()) as { status?: string };
+  const healthStatus = typeof healthPayload.status === "string" ? healthPayload.status : "unknown";
+
+  const websocketUrl = `${wsBase}/api/ws/automation`;
+  const websocketOpened = await new Promise<boolean>((resolve) => {
+    const timeout = setTimeout(() => resolve(false), 5_000);
+    const socket = new WebSocket(websocketUrl);
+    socket.addEventListener("open", () => {
+      clearTimeout(timeout);
+      socket.close();
+      resolve(true);
+    });
+    socket.addEventListener("error", () => {
+      clearTimeout(timeout);
+      resolve(false);
+    });
+  });
+
+  return { pageTitle, healthStatus, websocketOpened };
+};
+
 const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<BrowserCheckResult> => {
+  if (USE_WINDOWS_EDGE_CHANNEL) {
+    return runNativeBrowserChecks(apiBase, wsBase, VERIFY_FRONTEND_URL);
+  }
+
   const playwrightModule = (await import(pathToFileURL(PLAYWRIGHT_ENTRYPOINT).href)) as {
     chromium: PlaywrightChromium;
   };

@@ -17,13 +17,13 @@ import { useSpeech } from "./useSpeech";
 export interface UseChatVoiceOptions {
   draft: Ref<string>;
   locale: Ref<string>;
-  messages: Readonly<Ref<ChatMessage[]>>;
+  messages: Readonly<Ref<readonly ChatMessage[]>>;
 }
 
 interface VoiceWatchInput {
   speech: ReturnType<typeof useSpeech>;
   locale: Ref<string>;
-  messages: Readonly<Ref<ChatMessage[]>>;
+  messages: Readonly<Ref<readonly ChatMessage[]>>;
   draft: Ref<string>;
   autoSpeakReplies: Ref<boolean>;
   selectedVoiceId: Ref<string>;

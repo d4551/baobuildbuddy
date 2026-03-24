@@ -1,3 +1,6 @@
+import { beforeAll, describe, expect, test } from "bun:test";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   API_ERROR_AUTH_SETUP_TOKEN_INVALID,
   API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
@@ -9,9 +12,6 @@ import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
 } from "@bao/shared";
-import { beforeAll, describe, expect, test } from "bun:test";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { requestJson } from "../test-utils";
 
 type SearchCountSnapshot = {

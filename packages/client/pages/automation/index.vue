@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useAsyncData, useServerSeoMeta } from "#imports";
 import type {
   DashboardStats,
   RpaCapabilityAuditEntry,
   RpaCapabilityAuditReport,
 } from "@bao/shared";
 import { APP_ROUTES } from "@bao/shared";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useAsyncData, useServerSeoMeta } from "#imports";
 import { useAutomation } from "~/composables/useAutomation";
 import { useFlowEngine } from "~/composables/useFlowEngine";
 import {
@@ -296,11 +296,13 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
       </div>
 
       <WorkPipeline
-        :title="t('automation.hub.pipelineTitle')"
-        :description="t('automation.hub.pipelineDescription')"
-        :aria-label="t('automation.hub.pipelineAria')"
-        :steps="pipelineSteps"
-        :next-step-label="nextPipelineStepLabel"
+        v-bind="{
+          title: t('automation.hub.pipelineTitle'),
+          description: t('automation.hub.pipelineDescription'),
+          ariaLabel: t('automation.hub.pipelineAria'),
+          steps: pipelineSteps,
+          nextStepLabel: nextPipelineStepLabel,
+        }"
       />
 
       <section class="card card-border bg-base-100" :aria-label="t('automation.hub.audit.aria')">

@@ -162,7 +162,7 @@ function handleAutoSpeakChange(event: Event): void {
     <legend class="fieldset-legend text-xs">{{ t("aiChatCommon.voice.voiceLegend") }}</legend>
     <select
       :value="props.selectedVoiceId"
-      class="select select-bordered select-xs w-full"
+      class="select select-xs w-full"
       :aria-label="t('aiChatCommon.voice.voiceAria')"
       @change="handleVoiceSelectionChange"
     >
@@ -175,7 +175,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <div v-if="!props.compact && props.supportsSynthesis" class="mt-2 flex items-center justify-between gap-2">
     <label class="label cursor-pointer gap-2 py-0">
-      <span class="label-text text-xs">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
+      <span class="text-xs">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
       <input
         :checked="props.autoSpeakReplies"
         type="checkbox"

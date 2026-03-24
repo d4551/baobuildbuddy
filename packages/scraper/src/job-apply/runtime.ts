@@ -1,17 +1,17 @@
-import {
-  DEFAULT_AUTOMATION_SETTINGS,
-  jobApplyScriptEnvelopeSchema,
-  settle,
-  type JobApplyScriptEnvelope,
-  type RpaRunResult,
-} from "@bao/shared";
 import { mkdir } from "node:fs/promises";
 import { basename, join } from "node:path";
+import {
+  DEFAULT_AUTOMATION_SETTINGS,
+  type JobApplyScriptEnvelope,
+  jobApplyScriptEnvelopeSchema,
+  type RpaRunResult,
+  settle,
+} from "@bao/shared";
 import type { Locator, Page } from "playwright";
 import {
+  type AutomationBrowserSession,
   closeAutomationBrowser,
   launchAutomationBrowser,
-  type AutomationBrowserSession,
 } from "../runtime/browser";
 import { automationRuntimeConfig } from "../runtime/config";
 import { parseScriptInput } from "../runtime/io";
@@ -19,9 +19,9 @@ import { ProtocolEmitter } from "../runtime/protocol";
 import {
   JOB_APPLY_CONFIRMATION_PHRASES,
   JOB_APPLY_TOTAL_STEPS,
-  resolveJobApplyAdapter,
   type JobApplyAdapter,
   type JobApplySelectorBundle,
+  resolveJobApplyAdapter,
 } from "./adapters";
 
 type StepStatus = "ok" | "error";

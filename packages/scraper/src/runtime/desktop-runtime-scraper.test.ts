@@ -1,8 +1,8 @@
 import { afterAll, describe, expect, mock, test } from "bun:test";
 import { mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
+import type * as NodeModuleNamespace from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import type * as NodeModuleNamespace from "node:module";
 
 type PackageManifest = {
   readonly name: string;

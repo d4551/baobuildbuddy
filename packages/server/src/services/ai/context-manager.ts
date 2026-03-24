@@ -1,17 +1,17 @@
 import {
-  AI_CHAT_CONTEXT_AVAILABLE_RESUMES_LIMIT,
   AI_CHAT_CONTEXT_AUTOMATION_RUNS_LIMIT,
+  AI_CHAT_CONTEXT_AVAILABLE_RESUMES_LIMIT,
   AI_CHAT_CONTEXT_INTERVIEW_SESSIONS_LIMIT,
   AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT,
   AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT,
   AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT,
   AI_CHAT_HISTORY_FETCH_LIMIT,
-  resolveBrandSettings,
-  DEFAULT_PROFILE_ID,
-  settle,
   type AIChatContextDomain,
   type BrandSettings,
   type ChatMessage,
+  DEFAULT_PROFILE_ID,
+  resolveBrandSettings,
+  settle,
 } from "@bao/shared";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";

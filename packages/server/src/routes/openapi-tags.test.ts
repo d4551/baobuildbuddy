@@ -1,5 +1,5 @@
-import { API_ENDPOINTS } from "@bao/shared";
 import { beforeAll, describe, expect, test } from "bun:test";
+import { API_ENDPOINTS } from "@bao/shared";
 import { createTestDbPath, requestJson } from "../test-utils";
 
 type OpenApiOperation = {

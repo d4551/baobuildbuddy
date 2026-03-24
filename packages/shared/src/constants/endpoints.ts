@@ -1,8 +1,8 @@
 import {
-  automationScrapeTargetToPortalId,
-  isAutomationJobScrapeTarget,
   type AutomationScrapePortalId,
   type AutomationScrapeTarget,
+  automationScrapeTargetToPortalId,
+  isAutomationJobScrapeTarget,
 } from "./automation";
 
 /**

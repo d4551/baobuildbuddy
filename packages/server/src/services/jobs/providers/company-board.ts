@@ -1,10 +1,10 @@
 import {
-  generateId,
-  safeParseJson,
-  settle,
   type CompanyBoardATSType,
   type CompanyBoardConfig,
+  generateId,
   type JobProviderSettings,
+  safeParseJson,
+  settle,
 } from "@bao/shared";
 import type { JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";

@@ -69,7 +69,7 @@ const scheduledRun = ref<RpaRunExecutionEnvelope | null>(null);
 
 const streamRun = computed(() => runStream.run.value);
 const streamState = computed(() => runStream.state.value);
-const streamEvents = computed<readonly RpaRunEvent[]>(() => runStream.events.value);
+const streamEvents = computed(() => runStream.events.value);
 const streamError = computed(() => runStream.streamError.value);
 const activeRunId = computed<string>(() => streamRun.value?.id ?? startedRunId.value);
 const hasActiveRun = computed<boolean>(() => activeRunId.value.length > 0);
@@ -94,15 +94,15 @@ const streamTotalSteps = computed<number | null>(() => streamRun.value?.totalSte
 const streamStateLabelKey = computed<string>(
   () => `automation.jobApply.stream.states.${streamState.value}`,
 );
-const streamTimelineRows = computed<RpaRunEvent[]>(() =>
-  [...streamEvents.value].slice(-12).reverse(),
+const streamTimelineRows = computed<RpaRunEvent[]>(
+  () => [...streamEvents.value].slice(-12).reverse() as RpaRunEvent[],
 );
 
 const lifecycleStepClasses = computed<[string, string, string]>(() => {
   const runStatus = streamRun.value?.status ?? RUN_STATUS_PENDING;
   const queueStep = "step step-primary";
   const runningStep =
-    runStatus === RUN_STATUS_RUNNING || TERMINAL_RUN_STATUSES.has(runStatus)
+    runStatus === RUN_STATUS_RUNNING || TERMINAL_RUN_STATUSES.has(runStatus as "success" | "error")
       ? "step step-primary"
       : "step";
   const completionStep =
@@ -278,7 +278,7 @@ async function submitScheduledJobApply(): Promise<void> {
             <input
               v-model="form.jobUrl"
               type="url"
-              class="input input-bordered w-full"
+              class="input w-full"
               :placeholder="t('automation.jobApply.jobUrlPlaceholder')"
               :aria-label="t('automation.jobApply.jobUrlAria')"
             />
@@ -288,7 +288,7 @@ async function submitScheduledJobApply(): Promise<void> {
             <legend class="fieldset-legend">{{ t("automation.jobApply.resumeLegend") }}</legend>
             <select
               v-model="form.resumeId"
-              class="select select-bordered w-full"
+              class="select w-full"
               :aria-label="t('automation.jobApply.resumeAria')"
             >
               <option value="" disabled>{{ t("automation.jobApply.selectResumeOption") }}</option>
@@ -302,7 +302,7 @@ async function submitScheduledJobApply(): Promise<void> {
             <legend class="fieldset-legend">{{ t("automation.jobApply.coverLetterLegend") }}</legend>
             <select
               v-model="form.coverLetterId"
-              class="select select-bordered w-full"
+              class="select w-full"
               :aria-label="t('automation.jobApply.coverLetterAria')"
             >
               <option value="">{{ t("automation.jobApply.noCoverLetterOption") }}</option>
@@ -321,7 +321,7 @@ async function submitScheduledJobApply(): Promise<void> {
             <legend class="fieldset-legend">{{ t("automation.jobApply.jobIdLegend") }}</legend>
             <input
               v-model="form.jobId"
-              class="input input-bordered w-full"
+              class="input w-full"
               :placeholder="t('automation.jobApply.jobIdPlaceholder')"
               :aria-label="t('automation.jobApply.jobIdAria')"
             />
@@ -332,7 +332,7 @@ async function submitScheduledJobApply(): Promise<void> {
             <input
               v-model="form.runAt"
               type="datetime-local"
-              class="input input-bordered w-full"
+              class="input w-full"
               :aria-label="t('automation.jobApply.schedule.aria')"
             />
             <p class="validator-hint">{{ t("automation.jobApply.schedule.hint") }}</p>

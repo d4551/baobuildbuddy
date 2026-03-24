@@ -61,7 +61,7 @@ const runRefresh = async (
   return subprocess.exited;
 };
 
-describe("refresh-desktop-releases target preservation", () => {
+describe("refresh-desktop-releases - default target preservation", () => {
   let workspaceRoot: string | undefined;
   let stagingRoot: string | undefined;
 
@@ -94,6 +94,22 @@ describe("refresh-desktop-releases target preservation", () => {
     );
     expect(windowsBytes.toString()).toBe("windows-payload");
   });
+});
+
+describe("refresh-desktop-releases - replace-tree target preservation", () => {
+  let workspaceRoot: string | undefined;
+  let stagingRoot: string | undefined;
+
+  afterEach(async () => {
+    if (workspaceRoot) {
+      await rm(workspaceRoot, { force: true, recursive: true });
+      workspaceRoot = undefined;
+    }
+    if (stagingRoot) {
+      await rm(stagingRoot, { force: true, recursive: true });
+      stagingRoot = undefined;
+    }
+  });
 
   test("--replace-release-tree removes canonical targets not included in this refresh", async () => {
     const releaseWorkspace = await mkdtemp(join(tmpdir(), "bao-rel-ws-"));
@@ -106,14 +122,7 @@ describe("refresh-desktop-releases target preservation", () => {
 
     const code = await runRefresh(
       { ...process.env, BAO_DESKTOP_RELEASE_WORKSPACE_ROOT: releaseWorkspace },
-      [
-        "--source-root",
-        staging,
-        "--targets",
-        "macos",
-        "--replace-release-tree",
-        "--skip-verify",
-      ],
+      ["--source-root", staging, "--targets", "macos", "--replace-release-tree", "--skip-verify"],
     );
     expect(code).toBe(0);
 

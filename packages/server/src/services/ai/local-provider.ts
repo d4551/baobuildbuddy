@@ -1,13 +1,13 @@
 import {
+  type AIResponse,
   API_ERROR_AI_STREAMING_FAILED,
+  type GenerateOptions,
+  LOCAL_AI_AUTO_DETECT_MODEL,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
-  LOCAL_AI_AUTO_DETECT_MODEL,
   LOCAL_AI_SERVERS,
   settle,
   toErrorMessage,
-  type AIResponse,
-  type GenerateOptions,
 } from "@bao/shared";
 import OpenAI from "openai";
 import { BaseAIProvider } from "./provider-interface";

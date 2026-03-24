@@ -153,6 +153,10 @@ async function fetchGamificationHubData(): Promise<GamificationHubData> {
     requestData(api.gamification.challenges.get(), t("gamificationPage.loadErrorFallback")),
   ]);
 
+  if (!progress || !achievements || !challengePayload) {
+    throw new Error(t("gamificationPage.loadErrorFallback"));
+  }
+
   return {
     progress,
     achievements,

@@ -59,19 +59,25 @@ function toggleEdit(id: string) {
 
 function moveUp(index: number) {
   if (index > 0) {
-    const temp = localValue.value[index];
-    localValue.value[index] = localValue.value[index - 1];
-    localValue.value[index - 1] = temp;
-    updateValue();
+    const current = localValue.value[index];
+    const prev = localValue.value[index - 1];
+    if (current && prev) {
+      localValue.value[index] = prev;
+      localValue.value[index - 1] = current;
+      updateValue();
+    }
   }
 }
 
 function moveDown(index: number) {
   if (index < localValue.value.length - 1) {
-    const temp = localValue.value[index];
-    localValue.value[index] = localValue.value[index + 1];
-    localValue.value[index + 1] = temp;
-    updateValue();
+    const current = localValue.value[index];
+    const next = localValue.value[index + 1];
+    if (current && next) {
+      localValue.value[index] = next;
+      localValue.value[index + 1] = current;
+      updateValue();
+    }
   }
 }
 </script>
@@ -131,60 +137,60 @@ function moveDown(index: number) {
         </div>
 
         <div v-if="editingId === item.id" class="space-y-3 mt-2">
-          <div class="form-control">
-            <div class="label label-text-alt">{{ t("resumeComponentEducation.institutionLabel") }}</div>
+          <fieldset class="fieldset">
+            <div class="label text-sm">{{ t("resumeComponentEducation.institutionLabel") }}</div>
             <input
               v-model="item.institution"
               type="text"
               :placeholder="t('resumeComponentEducation.institutionPlaceholder')"
-              class="input input-bordered input-sm"
+              class="input input-sm"
               @input="updateValue"
               :aria-label="t('resumeComponentEducation.institutionAria')"/>
-          </div>
+          </fieldset>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="form-control">
-              <div class="label label-text-alt">{{ t("resumeComponentEducation.degreeLabel") }}</div>
+            <fieldset class="fieldset">
+              <div class="label text-sm">{{ t("resumeComponentEducation.degreeLabel") }}</div>
               <input
                 v-model="item.degree"
                 type="text"
                 :placeholder="t('resumeComponentEducation.degreePlaceholder')"
-                class="input input-bordered input-sm"
+                class="input input-sm"
                 @input="updateValue"
                 :aria-label="t('resumeComponentEducation.degreeAria')"/>
-            </div>
-            <div class="form-control">
-              <div class="label label-text-alt">{{ t("resumeComponentEducation.fieldLabel") }}</div>
+            </fieldset>
+            <fieldset class="fieldset">
+              <div class="label text-sm">{{ t("resumeComponentEducation.fieldLabel") }}</div>
               <input
                 v-model="item.field"
                 type="text"
                 :placeholder="t('resumeComponentEducation.fieldPlaceholder')"
-                class="input input-bordered input-sm"
+                class="input input-sm"
                 @input="updateValue"
                 :aria-label="t('resumeComponentEducation.fieldAria')"/>
-            </div>
+            </fieldset>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="form-control">
-              <div class="label label-text-alt">{{ t("resumeComponentEducation.graduationDateLabel") }}</div>
+            <fieldset class="fieldset">
+              <div class="label text-sm">{{ t("resumeComponentEducation.graduationDateLabel") }}</div>
               <input
                 v-model="item.graduationDate"
                 type="month"
-                class="input input-bordered input-sm"
+                class="input input-sm"
                 @input="updateValue"
                 :aria-label="t('resumeComponentEducation.graduationDateAria')"/>
-            </div>
-            <div class="form-control">
-              <div class="label label-text-alt">{{ t("resumeComponentEducation.gpaLabel") }}</div>
+            </fieldset>
+            <fieldset class="fieldset">
+              <div class="label text-sm">{{ t("resumeComponentEducation.gpaLabel") }}</div>
               <input
                 v-model="item.gpa"
                 type="text"
                 :placeholder="t('resumeComponentEducation.gpaPlaceholder')"
-                class="input input-bordered input-sm"
+                class="input input-sm"
                 @input="updateValue"
                 :aria-label="t('resumeComponentEducation.gpaAria')"/>
-            </div>
+            </fieldset>
           </div>
         </div>
 

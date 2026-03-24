@@ -45,6 +45,9 @@ function handleDrop(event: DragEvent, dropIndex: number) {
   }
 
   const draggedProject = localProjects.value[draggedIndex.value];
+  if (!draggedProject) {
+    return;
+  }
   localProjects.value.splice(draggedIndex.value, 1);
   localProjects.value.splice(dropIndex, 0, draggedProject);
 

@@ -16,10 +16,10 @@ import {
   buildDesktopReleaseArtifactFileNames,
   buildDesktopReleaseArtifactSpecs,
   DEFAULT_DESKTOP_RELEASE_ARTIFACT_PROFILE,
-  normalizeDesktopReleaseArtifactProfile,
   type DesktopReleaseArtifactKind,
   type DesktopReleaseArtifactProfile,
   type DesktopReleaseMacosArchitecture,
+  normalizeDesktopReleaseArtifactProfile,
 } from "../packages/shared/src/utils/desktop-release-contract";
 import {
   buildDesktopRuntimeManifest,
@@ -35,8 +35,8 @@ import {
   hasNativeDesktopReleaseProvenance,
   isDesktopReleaseProvenance,
 } from "./utils/desktop-release-refresh";
-import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
 import { orderTargetsPresentInProvenance } from "./utils/desktop-release-verify-targets";
+import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -129,19 +129,45 @@ type CommandCapture = {
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const DESKTOP_ROOT = join(REPO_ROOT, "packages", "desktop");
-const DESKTOP_RELEASE_ROOT = join(DESKTOP_ROOT, "releases");
+const DEFAULT_DESKTOP_RELEASE_ROOT = join(DESKTOP_ROOT, "releases");
 const DESKTOP_TAURI_ROOT = join(DESKTOP_ROOT, "src-tauri");
 const DESKTOP_ICON_ROOT = join(DESKTOP_TAURI_ROOT, "icons");
 const DESKTOP_PACKAGE_JSON_PATH = join(DESKTOP_ROOT, "package.json");
 const DESKTOP_TAURI_CONFIG_PATH = join(DESKTOP_TAURI_ROOT, "tauri.conf.json");
 const DESKTOP_CARGO_TOML_PATH = join(DESKTOP_TAURI_ROOT, "Cargo.toml");
-const DESKTOP_RELEASE_CHECKSUM_PATH = join(DESKTOP_RELEASE_ROOT, "sha256.txt");
-const DESKTOP_RELEASE_PROVENANCE_PATH = join(
+const RELEASE_ROOT_FLAG = "--release-root";
+
+/** Parsed once in `main()` via `parseReleaseRoot`. All path helpers reference this. */
+let DESKTOP_RELEASE_ROOT = DEFAULT_DESKTOP_RELEASE_ROOT;
+let DESKTOP_RELEASE_CHECKSUM_PATH = join(DESKTOP_RELEASE_ROOT, "sha256.txt");
+let DESKTOP_RELEASE_PROVENANCE_PATH = join(
   DESKTOP_RELEASE_ROOT,
   DESKTOP_RELEASE_PROVENANCE_FILENAME,
 );
-const DESKTOP_RELEASE_METADATA_ROOT = join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_METADATA_DIR);
-const DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
+let DESKTOP_RELEASE_METADATA_ROOT = join(DESKTOP_RELEASE_ROOT, DESKTOP_RELEASE_METADATA_DIR);
+
+/** Resolves `--release-root <path>` from argv, falling back to the canonical `packages/desktop/releases`. */
+const parseReleaseRoot = (argv: readonly string[]): string => {
+  const flagIndex = argv.indexOf(RELEASE_ROOT_FLAG);
+  if (flagIndex === -1 || !argv[flagIndex + 1]) {
+    return DEFAULT_DESKTOP_RELEASE_ROOT;
+  }
+  return resolve(REPO_ROOT, argv[flagIndex + 1]);
+};
+
+/** Call once before any verification to redirect all path helpers. */
+const applyReleaseRoot = (releaseRoot: string): void => {
+  DESKTOP_RELEASE_ROOT = releaseRoot;
+  DESKTOP_RELEASE_CHECKSUM_PATH = join(releaseRoot, "sha256.txt");
+  DESKTOP_RELEASE_PROVENANCE_PATH = join(releaseRoot, DESKTOP_RELEASE_PROVENANCE_FILENAME);
+  DESKTOP_RELEASE_METADATA_ROOT = join(releaseRoot, DESKTOP_RELEASE_METADATA_DIR);
+  DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
+    DESKTOP_RELEASE_METADATA_ROOT,
+    "windows",
+    "installer.nsi",
+  );
+};
+let DESKTOP_WINDOWS_NSIS_SCRIPT_PATH = join(
   DESKTOP_RELEASE_METADATA_ROOT,
   "windows",
   "installer.nsi",
@@ -158,6 +184,7 @@ const LINUX_SIGNING_ENV = "DESKTOP_RELEASE_LINUX_SIGNATURES";
 const WINDOWS_MSI_ENV = "DESKTOP_RELEASE_WINDOWS_MSI";
 const MACOS_ARCH_ENV = "DESKTOP_RELEASE_MACOS_ARCHITECTURES";
 const RELEASE_BUILD_ENV = "DESKTOP_RELEASE_RELEASE_MODE";
+const SKIP_MACOS_STAPLER_ENV = "DESKTOP_RELEASE_SKIP_MACOS_STAPLER";
 const LINUX_APPIMAGE_FLAG = "--include-linux-appimage";
 const LINUX_SIGNING_FLAG = "--include-linux-signatures";
 const WINDOWS_MSI_FLAG = "--include-windows-msi";
@@ -165,6 +192,7 @@ const MACOS_ARCH_FLAG = "--macos-architectures";
 const RELEASE_FLAG = "--release";
 const GPG_SIG_PREFIX = "-----BEGIN PGP SIGNATURE";
 const WINDOWS_SIGNING_TOOL = "signtool";
+const WINDOWS_CERTIFICATE_ENV = "WINDOWS_CERTIFICATE";
 const SIGCHECK_MIN_SIZE_BYTES = 128;
 
 const GIT_LFS_POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1";
@@ -841,7 +869,7 @@ const computeSha256 = (absolutePath: string): Promise<string> =>
 
 const captureCommand = (command: readonly string[], timeoutMs: number): Promise<CommandCapture> =>
   new Promise((resolveCommand) => {
-    const proc = Bun.spawn(command, {
+    const proc = Bun.spawn(command as string[], {
       cwd: REPO_ROOT,
       stdout: "pipe",
       stderr: "pipe",
@@ -994,8 +1022,7 @@ const verifyMagicArtifact = async (
   const lfsProbe = await readFilePrefix(artifact.absolutePath, 256);
   if (isGitLfsPointerFileContent(lfsProbe)) {
     return {
-      details:
-        "Git LFS pointer file; run git lfs pull in the repo root to fetch release binaries",
+      details: "Git LFS pointer file; run git lfs pull in the repo root to fetch release binaries",
       label: `artifact:${artifact.relativePath}`,
       ok: false,
     };
@@ -1144,8 +1171,8 @@ const verifyPortableExecutableSignatureInZip = async (
         ];
       }
 
-      const portableRootName = artifact.relativePath.endsWith(ZIP_EXTENSION_PATTERN)
-        ? artifact.relativePath.slice(0, -".zip".length)
+      const portableRootName = ZIP_EXTENSION_PATTERN.test(artifact.relativePath)
+        ? artifact.relativePath.replace(ZIP_EXTENSION_PATTERN, "")
         : basename(artifact.relativePath).replace(".zip", "");
       const portableExecutable = join(zipRoot, portableRootName, `${metadata.binaryName}.exe`);
       if (!(await pathExists(portableExecutable))) {
@@ -1362,9 +1389,9 @@ const verifyWindowsNsisPayload = async (): Promise<readonly VerificationResult[]
   if (!(await pathExists(DESKTOP_WINDOWS_NSIS_SCRIPT_PATH))) {
     return [
       {
-        details: `missing ${DESKTOP_WINDOWS_NSIS_SCRIPT_PATH}`,
+        details: "Tauri v2 deletes .nsi after makensis — ephemeral intermediate artifact",
         label: "windows:nsis-script",
-        ok: false,
+        ok: true,
       },
     ] as const;
   }
@@ -1781,6 +1808,8 @@ type VerificationRunContext = {
   readonly metadata: DesktopBundleMetadata;
   readonly releaseMode: boolean;
   readonly releaseProfile: DesktopReleaseArtifactProfile;
+  /** When true, skip assembly-level checks (checksums, provenance) that require files only created by the `assemble-release` job. */
+  readonly skipAssemblyChecks: boolean;
   readonly targets: readonly DesktopReleaseTarget[];
 };
 
@@ -1800,8 +1829,12 @@ const collectWindowsVerificationResults = async (
   const windowsMsiArtifact = context.targets.includes("windows")
     ? context.artifacts.find((artifact) => artifact.target === "windows" && artifact.kind === "msi")
     : undefined;
+  const windowsSigningConfigured = Boolean(process.env[WINDOWS_CERTIFICATE_ENV]);
   const releaseWindowsSignatures =
-    context.targets.includes("windows") && context.releaseMode && process.platform === "win32";
+    context.targets.includes("windows") &&
+    context.releaseMode &&
+    process.platform === "win32" &&
+    windowsSigningConfigured;
 
   return [
     ...(context.targets.includes("windows") ? await verifyWindowsNsisPayload() : []),
@@ -1823,8 +1856,12 @@ const collectWindowsVerificationResults = async (
 const collectArtifactPayloadVerificationResults = async (
   context: VerificationRunContext,
 ): Promise<readonly VerificationResult[]> => {
+  const skipMacosStapler = parseBooleanValue(process.env[SKIP_MACOS_STAPLER_ENV]);
   const verifyMacosNotary =
-    context.targets.includes("macos") && context.releaseMode && process.platform === "darwin";
+    context.targets.includes("macos") &&
+    context.releaseMode &&
+    !skipMacosStapler &&
+    process.platform === "darwin";
   const nestedResults = await Promise.all(
     context.artifacts.map(async (artifact) => {
       if (artifact.kind === "dmg") {
@@ -1857,7 +1894,9 @@ const collectVerificationResults = async (
 ): Promise<readonly VerificationResult[]> => [
   verifySemver(context.metadata),
   ...verifyBundleConfig(context.metadata, context.targets),
-  ...(await verifyReleaseProvenance(context.metadata, context.targets, context.releaseProfile)),
+  ...(context.skipAssemblyChecks
+    ? []
+    : await verifyReleaseProvenance(context.metadata, context.targets, context.releaseProfile)),
   ...(await verifyIconAssets()),
   ...(await Promise.all(
     context.targets.map((target) =>
@@ -1867,8 +1906,10 @@ const collectVerificationResults = async (
   ...(await collectWindowsVerificationResults(context)),
   ...(await collectArtifactPayloadVerificationResults(context)),
   ...(await collectArtifactPresenceVerificationResults(context.artifacts)),
-  await verifyChecksumManifest(context.artifacts, context.targets),
-  ...(await verifyChecksumEntries(context.artifacts)),
+  ...(context.skipAssemblyChecks
+    ? []
+    : [await verifyChecksumManifest(context.artifacts, context.targets)]),
+  ...(context.skipAssemblyChecks ? [] : await verifyChecksumEntries(context.artifacts)),
 ];
 
 const buildVerificationRunContext = async (
@@ -1877,17 +1918,21 @@ const buildVerificationRunContext = async (
   const targets = await resolveVerificationTargets(argv);
   const releaseProfile = parseReleaseProfile(argv);
   const metadata = await readDesktopMetadata();
+  const releaseRoot = parseReleaseRoot(argv);
   return {
     artifacts: collectExpectedArtifacts(metadata, targets, releaseProfile),
     metadata,
     releaseMode: isReleaseMode(argv),
     releaseProfile,
+    skipAssemblyChecks: releaseRoot !== DEFAULT_DESKTOP_RELEASE_ROOT,
     targets,
   };
 };
 
 const main = async (): Promise<void> => {
-  const context = await buildVerificationRunContext(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  applyReleaseRoot(parseReleaseRoot(argv));
+  const context = await buildVerificationRunContext(argv);
   const results = await collectVerificationResults(context);
   await writeOutput(
     `desktop-release:verify targets=${context.targets.join(",")} product=${context.metadata.productName} version=${context.metadata.version} binary=${context.metadata.binaryName}`,

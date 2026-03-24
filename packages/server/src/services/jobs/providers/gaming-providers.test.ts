@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { jobProviderSettingsSchema, type GamingPortalId } from "@bao/shared";
+import { type GamingPortalId, jobProviderSettingsSchema } from "@bao/shared";
 import type { ScrapedJob } from "../../scraper-service";
 import type * as GamingProvidersModule from "./gaming-providers";
 import type { JobProvider, RawJob } from "./provider-interface";

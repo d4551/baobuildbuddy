@@ -373,7 +373,7 @@ function handleExport() {
 
           <textarea
             v-model="formData.contentText"
-            class="textarea textarea-bordered w-full font-mono text-sm"
+            class="textarea w-full font-mono text-sm"
             rows="20"
             :placeholder="t('coverLetterDetailPage.editor.placeholder')"
             :aria-label="t('coverLetterDetailPage.editor.aria')"

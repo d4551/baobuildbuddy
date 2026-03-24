@@ -1,9 +1,9 @@
 import {
+  type AIResponse,
   API_ERROR_AI_STREAMING_FAILED,
+  type GenerateOptions,
   settle,
   toErrorMessage,
-  type AIResponse,
-  type GenerateOptions,
 } from "@bao/shared";
 import { type GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { BaseAIProvider } from "./provider-interface";

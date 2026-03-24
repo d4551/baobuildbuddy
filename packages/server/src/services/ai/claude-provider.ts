@@ -1,10 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
+  type AIResponse,
   API_ERROR_AI_STREAMING_FAILED,
+  type GenerateOptions,
   settle,
   toErrorMessage,
-  type AIResponse,
-  type GenerateOptions,
 } from "@bao/shared";
 import { BaseAIProvider } from "./provider-interface";
 

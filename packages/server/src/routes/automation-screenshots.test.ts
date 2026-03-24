@@ -1,8 +1,8 @@
-import { API_ERROR_SCREENSHOT_FILE_MISSING } from "@bao/shared";
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { API_ERROR_SCREENSHOT_FILE_MISSING } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";

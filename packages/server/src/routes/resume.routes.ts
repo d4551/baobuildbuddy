@@ -4,9 +4,6 @@ import {
   AI_MAX_TOKENS_RESUME,
   AI_MAX_TOKENS_SCORE,
   API_ERROR_AI_ENHANCEMENT_FAILED,
-  DEFAULT_UNSPECIFIED_LABEL,
-  RESUME_DEFAULT_NAME_QUESTIONNAIRE,
-  DEFAULT_SCORE_NEUTRAL,
   API_ERROR_AI_SCORING_FAILED,
   API_ERROR_EXPORT_RESUME,
   API_ERROR_GENERATE_QUESTIONS,
@@ -14,17 +11,22 @@ import {
   API_ERROR_RESUME_NOT_FOUND,
   API_ERROR_SYNTHESIZE_RESUME,
   API_ERROR_UNKNOWN,
+  DEFAULT_SCORE_NEUTRAL,
+  DEFAULT_UNSPECIFIED_LABEL,
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
   isResumeTemplate,
   RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_NAME_QUESTIONNAIRE,
   RESUME_DEFAULT_THEME,
-  ROUTE_GAMIFICATION_XP,
   RESUME_TEMPLATE_DEFAULT,
   RESUME_TEMPLATE_OPTIONS,
+  type ResumeData,
+  ROUTE_GAMIFICATION_XP,
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_ITEMS_SMALL,
+  SCHEMA_MAX_ITEMS_XXLARGE,
   SCHEMA_MAX_LENGTH_ACHIEVEMENT,
   SCHEMA_MAX_LENGTH_DATE,
   SCHEMA_MAX_LENGTH_DESCRIPTION,
@@ -33,11 +35,9 @@ import {
   SCHEMA_MAX_LENGTH_LABEL,
   SCHEMA_MAX_LENGTH_MICRO,
   SCHEMA_MAX_LENGTH_PHONE,
-  SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_SHIPPED,
+  SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_URL,
-  SCHEMA_MAX_ITEMS_XXLARGE,
-  type ResumeData,
   safeParseJson,
   settle,
 } from "@bao/shared";
@@ -49,10 +49,11 @@ import { settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
 import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
+import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";
-import { createPdfAttachmentResponse } from "../utils/http-response";
+import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
 
 const resumeTemplateBodySchema = t.String({
   enum: RESUME_TEMPLATE_OPTIONS,
@@ -483,6 +484,20 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
       }
 
       const templateName = body.template || resume.template || RESUME_TEMPLATE_DEFAULT;
+
+      if (body.format === "docx") {
+        const docxResult = await settle(docxExportService.exportResumeDocx(resume, templateName));
+        if (docxResult.status === "rejected") {
+          set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+          return {
+            error: API_ERROR_EXPORT_RESUME,
+            details:
+              docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
+          };
+        }
+        return createDocxAttachmentResponse(docxResult.value, `resume-${params.id}.docx`);
+      }
+
       const exportResult = await settle(exportService.exportResumePDF(resume, templateName));
       if (exportResult.status === "rejected") {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;

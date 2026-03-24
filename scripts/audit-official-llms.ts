@@ -188,3 +188,5 @@ writeLine(
 if (failedAudits.length > 0) {
   process.exitCode = 1;
 }
+
+export {};

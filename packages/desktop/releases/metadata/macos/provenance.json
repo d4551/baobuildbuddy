@@ -8,14 +8,10 @@
   "tauriTarget": "aarch64-apple-darwin",
   "artifactNames": ["BaoBuildBuddy_0.1.0_aarch64.dmg"],
   "buildCommands": [
-    "/Users/brandondonnelly/.bun/bin/bun tauri build --no-bundle --target aarch64-apple-darwin --verbose",
-    "/Users/brandondonnelly/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin --verbose",
-    "hdiutil create -srcfolder /Users/brandondonnelly/Downloads/baobuildbuddy/packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BaoBuildBuddy.app /Users/brandondonnelly/Downloads/baobuildbuddy/packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"
+    "~/.bun/bin/bun tauri build --no-bundle --target aarch64-apple-darwin --verbose",
+    "~/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin --verbose",
+    "hdiutil create -srcfolder ./packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BaoBuildBuddy.app ./packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"
   ],
   "builtAt": "2026-03-20T17:38:15.007Z",
-  "ci": {
-    "workflow": null,
-    "runId": null,
-    "runAttempt": null
-  }
+  "ci": { "workflow": null, "runId": null, "runAttempt": null }
 }
