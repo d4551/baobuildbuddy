@@ -1,4 +1,18 @@
-import { brandContentSettingsSchema, brandThemePaletteSchema, DEFAULT_APP_LANGUAGE, isValidEmail, parseJson } from "@bao/shared";
+import {
+  brandContentSettingsSchema,
+  brandThemePaletteSchema,
+  companyBoardApiTemplatesSchema,
+  companyBoardConfigSchema,
+  DEFAULT_APP_LANGUAGE,
+  greenhouseBoardConfigSchema,
+  isValidEmail,
+  jobTaxonomyKeywordEntrySchema,
+  parseJson,
+  studioClassificationRuleSchema,
+  gamingPortalConfigSchema,
+  leverCompanyConfigSchema,
+} from "@bao/shared";
+import z from "zod";
 import { parseDelimitedList, runStatefulSave, runToastTask } from "./shared";
 import type { SettingsPageState } from "./state";
 
@@ -199,6 +213,122 @@ function createHandleSaveAutomation(state: SettingsPageState) {
   };
 }
 
+function buildJobProvidersPayload(state: SettingsPageState) {
+  const greenhouseBoards = parseJson(
+    state.jobProviderForm.greenhouseBoardsJson,
+    z.array(greenhouseBoardConfigSchema),
+  );
+  const leverCompanies = parseJson(
+    state.jobProviderForm.leverCompaniesJson,
+    z.array(leverCompanyConfigSchema),
+  );
+  const companyBoards = parseJson(
+    state.jobProviderForm.companyBoardsJson,
+    z.array(companyBoardConfigSchema),
+  );
+  const companyBoardApiTemplates = parseJson(
+    state.jobProviderForm.companyBoardApiTemplatesJson,
+    companyBoardApiTemplatesSchema,
+  );
+  const gamingPortals = parseJson(
+    state.jobProviderForm.gamingPortalsJson,
+    z.array(gamingPortalConfigSchema),
+  );
+
+  if (
+    !(
+      greenhouseBoards &&
+      leverCompanies &&
+      companyBoards &&
+      companyBoardApiTemplates &&
+      gamingPortals
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    providerTimeoutMs: state.jobProviderForm.providerTimeoutMs,
+    companyBoardResultLimit: state.jobProviderForm.companyBoardResultLimit,
+    gamingBoardResultLimit: state.jobProviderForm.gamingBoardResultLimit,
+    unknownLocationLabel: state.jobProviderForm.unknownLocationLabel.trim(),
+    unknownCompanyLabel: state.jobProviderForm.unknownCompanyLabel.trim(),
+    hitmarkerEnabled: state.jobProviderForm.hitmarkerEnabled,
+    hitmarkerApiBaseUrl: state.jobProviderForm.hitmarkerApiBaseUrl.trim(),
+    hitmarkerDefaultQuery: state.jobProviderForm.hitmarkerDefaultQuery.trim(),
+    hitmarkerDefaultLocation: state.jobProviderForm.hitmarkerDefaultLocation.trim(),
+    greenhouseApiBaseUrl: state.jobProviderForm.greenhouseApiBaseUrl.trim(),
+    greenhouseMaxPages: state.jobProviderForm.greenhouseMaxPages,
+    greenhouseBoards,
+    leverApiBaseUrl: state.jobProviderForm.leverApiBaseUrl.trim(),
+    leverMaxPages: state.jobProviderForm.leverMaxPages,
+    leverCompanies,
+    companyBoardApiTemplates,
+    companyBoards,
+    gamingPortals,
+  };
+}
+
+function createHandleSaveJobProviders(state: SettingsPageState) {
+  return async () => {
+    const payload = buildJobProvidersPayload(state);
+    if (!payload) {
+      state.jobProvidersSaveState.value = "error";
+      state.$toast.error(state.t("settings.jobIntelligence.errors.invalidProviderConfig"));
+      return;
+    }
+
+    await runStatefulSave({
+      state: state.jobProvidersSaveState,
+      task: state.updateSettings({
+        automationSettings: {
+          ...state.automationForm,
+          jobProviders: payload,
+        },
+      }),
+      failureMessage: state.t("settings.jobIntelligence.errors.failedToSaveProviders"),
+      successMessage: state.t("settings.jobIntelligence.toasts.providersSaved"),
+      toast: state.$toast,
+    });
+  };
+}
+
+function buildJobTaxonomyPayload(state: SettingsPageState) {
+  const keywords = parseJson(
+    state.jobTaxonomyForm.keywordsJson,
+    z.array(jobTaxonomyKeywordEntrySchema),
+  );
+  const studioRules = parseJson(
+    state.jobTaxonomyForm.studioRulesJson,
+    z.array(studioClassificationRuleSchema),
+  );
+
+  if (!(keywords && studioRules)) {
+    return null;
+  }
+
+  return { keywords, studioRules };
+}
+
+function createHandleSaveJobTaxonomy(state: SettingsPageState) {
+  return async () => {
+    const payload = buildJobTaxonomyPayload(state);
+    if (!payload) {
+      state.jobTaxonomySaveState.value = "error";
+      state.$toast.error(state.t("settings.jobIntelligence.errors.invalidTaxonomy"));
+      return;
+    }
+
+    await runStatefulSave({
+      state: state.jobTaxonomySaveState,
+      task: state.updateJobTaxonomy(payload),
+      failureMessage: state.t("settings.jobIntelligence.errors.failedToSaveTaxonomy"),
+      successMessage: state.t("settings.jobIntelligence.toasts.taxonomySaved"),
+      toast: state.$toast,
+    });
+  };
+}
+
 function createHandleSaveEmailDeliverySettings(state: SettingsPageState) {
   return async () => {
     const senderEmail = state.emailTransportForm.fromEmail.trim();
@@ -266,6 +396,8 @@ export function createSettingsPageSaveActions(state: SettingsPageState) {
   const handleSaveProfile = createHandleSaveProfile(state);
   const handleSaveBrand = createHandleSaveBrand(state);
   const handleSaveAutomation = createHandleSaveAutomation(state);
+  const handleSaveJobProviders = createHandleSaveJobProviders(state);
+  const handleSaveJobTaxonomy = createHandleSaveJobTaxonomy(state);
   const handleSaveEmailDeliverySettings = createHandleSaveEmailDeliverySettings(state);
   const handleSaveEmailDeliveryPassword = createHandleSaveEmailDeliveryPassword(state);
   const handleClearEmailDeliveryPassword = createHandleClearEmailDeliveryPassword(state);
@@ -276,6 +408,8 @@ export function createSettingsPageSaveActions(state: SettingsPageState) {
     handleSaveProfile,
     handleSaveBrand,
     handleSaveAutomation,
+    handleSaveJobProviders,
+    handleSaveJobTaxonomy,
     handleSaveEmailDeliverySettings,
     handleSaveEmailDeliveryPassword,
     handleClearEmailDeliveryPassword,

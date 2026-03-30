@@ -39,8 +39,8 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 body: unknown;
                 params: {};
                 query: {
-                    search?: string | undefined;
                     category?: string | undefined;
+                    search?: string | undefined;
                 };
                 headers: unknown;
                 response: {
@@ -75,8 +75,8 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         mappings: {
             post: {
                 body: {
-                    confidence?: number | undefined;
                     category?: string | undefined;
+                    confidence?: number | undefined;
                     industryApplications?: string[] | undefined;
                     evidence?: {
                         [x: string]: unknown;
@@ -110,8 +110,8 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
             ":id": {
                 put: {
                     body: {
-                        confidence?: number | undefined;
                         category?: string | undefined;
+                        confidence?: number | undefined;
                         gameExpression?: string | undefined;
                         transferableSkill?: string | undefined;
                         industryApplications?: string[] | undefined;

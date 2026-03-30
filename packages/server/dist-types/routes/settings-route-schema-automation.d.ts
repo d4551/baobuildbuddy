@@ -62,6 +62,38 @@ export declare const speechSettingsBodySchema: import("@sinclair/typebox").TObje
         format: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"mp3">, import("@sinclair/typebox").TLiteral<"wav">]>;
     }>;
 }>;
+export declare const jobTaxonomyKeywordEntryBodySchema: import("@sinclair/typebox").TObject<{
+    id: import("@sinclair/typebox").TString;
+    category: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"remote-location">, import("@sinclair/typebox").TLiteral<"hybrid-location">, import("@sinclair/typebox").TLiteral<"requirement">, import("@sinclair/typebox").TLiteral<"technology">, import("@sinclair/typebox").TLiteral<"genre">, import("@sinclair/typebox").TLiteral<"platform">, import("@sinclair/typebox").TLiteral<"role">]>;
+    label: import("@sinclair/typebox").TString;
+    synonyms: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TString>;
+    sortOrder: import("@sinclair/typebox").TNumber;
+    enabled: import("@sinclair/typebox").TBoolean;
+}>;
+export declare const studioClassificationRuleBodySchema: import("@sinclair/typebox").TObject<{
+    id: import("@sinclair/typebox").TString;
+    studioType: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>]>;
+    keyword: import("@sinclair/typebox").TString;
+    sortOrder: import("@sinclair/typebox").TNumber;
+    enabled: import("@sinclair/typebox").TBoolean;
+}>;
+export declare const jobTaxonomySettingsBodySchema: import("@sinclair/typebox").TObject<{
+    keywords: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
+        id: import("@sinclair/typebox").TString;
+        category: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"remote-location">, import("@sinclair/typebox").TLiteral<"hybrid-location">, import("@sinclair/typebox").TLiteral<"requirement">, import("@sinclair/typebox").TLiteral<"technology">, import("@sinclair/typebox").TLiteral<"genre">, import("@sinclair/typebox").TLiteral<"platform">, import("@sinclair/typebox").TLiteral<"role">]>;
+        label: import("@sinclair/typebox").TString;
+        synonyms: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TString>;
+        sortOrder: import("@sinclair/typebox").TNumber;
+        enabled: import("@sinclair/typebox").TBoolean;
+    }>>;
+    studioRules: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
+        id: import("@sinclair/typebox").TString;
+        studioType: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>]>;
+        keyword: import("@sinclair/typebox").TString;
+        sortOrder: import("@sinclair/typebox").TNumber;
+        enabled: import("@sinclair/typebox").TBoolean;
+    }>>;
+}>;
 declare const jsonValueBodySchema: import("@sinclair/typebox").TRecursive<import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TString, import("@sinclair/typebox").TNumber, import("@sinclair/typebox").TBoolean, import("@sinclair/typebox").TNull, import("@sinclair/typebox").TArray<import("@sinclair/typebox").TThis>, import("@sinclair/typebox").TRecord<import("@sinclair/typebox").TString, import("@sinclair/typebox").TThis>]>>;
 export declare const nullableJsonValueBodySchema: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TRecursive<import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TString, import("@sinclair/typebox").TNumber, import("@sinclair/typebox").TBoolean, import("@sinclair/typebox").TNull, import("@sinclair/typebox").TArray<import("@sinclair/typebox").TThis>, import("@sinclair/typebox").TRecord<import("@sinclair/typebox").TString, import("@sinclair/typebox").TThis>]>>, import("@sinclair/typebox").TNull]>;
 export { jsonValueBodySchema };

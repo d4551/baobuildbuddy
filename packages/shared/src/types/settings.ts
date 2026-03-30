@@ -16,6 +16,7 @@ import {
   DEFAULT_SPEECH_SETTINGS,
 } from "../constants/settings";
 import type { AIProviderDiagnostic, AIProviderType, AIRouting } from "./ai";
+import type { JobTaxonomySettings } from "./jobs-taxonomy";
 
 /**
  * Per-provider model preferences.
@@ -469,6 +470,7 @@ export interface AppSettings {
   brandSettings?: BrandSettings;
   notifications: NotificationPreferences;
   automationSettings?: AutomationSettings;
+  jobTaxonomy?: JobTaxonomySettings;
   emailTransportSettings?: EmailTransportSettings;
   hasGeminiKey?: boolean;
   hasOpenaiKey?: boolean;

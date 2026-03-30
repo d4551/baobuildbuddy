@@ -1,3 +1,5 @@
+import { getJobTaxonomy } from "./jobs/job-taxonomy-service";
+
 interface ExtractedSkill {
   name: string;
   category:
@@ -23,36 +25,6 @@ interface SkillGapAnalysis {
 }
 
 const SKILL_PATTERNS: Record<string, Array<{ pattern: RegExp; name: string }>> = {
-  engines: [
-    { pattern: /\bUnity\b/i, name: "Unity" },
-    { pattern: /\bUnreal\s*Engine\s*[45]?\b/i, name: "Unreal Engine" },
-    { pattern: /\bGodot\b/i, name: "Godot" },
-    { pattern: /\bCryEngine\b/i, name: "CryEngine" },
-    { pattern: /\bSource\s*2?\b/i, name: "Source Engine" },
-    { pattern: /\bFrostbite\b/i, name: "Frostbite" },
-    { pattern: /\bid\s*Tech\b/i, name: "id Tech" },
-    { pattern: /\bRPG\s*Maker\b/i, name: "RPG Maker" },
-    { pattern: /\bGameMaker\b/i, name: "GameMaker" },
-    { pattern: /\bRen'?Py\b/i, name: "Ren'Py" },
-    { pattern: /\bPhaser\b/i, name: "Phaser" },
-    { pattern: /\bCocos2d/i, name: "Cocos2d" },
-  ],
-  programming: [
-    { pattern: /\bC\+\+\b/, name: "C++" },
-    { pattern: /\bC#\b/, name: "C#" },
-    { pattern: /\bPython\b/i, name: "Python" },
-    { pattern: /\bLua\b/i, name: "Lua" },
-    { pattern: /\bTypeScript\b/i, name: "TypeScript" },
-    { pattern: /\bJavaScript\b/i, name: "JavaScript" },
-    { pattern: /\bRust\b/i, name: "Rust" },
-    { pattern: /\bGDScript\b/i, name: "GDScript" },
-    { pattern: /\bHLSL\b/i, name: "HLSL" },
-    { pattern: /\bGLSL\b/i, name: "GLSL" },
-    { pattern: /\bJava\b(?!\s*Script)/i, name: "Java" },
-    { pattern: /\bSwift\b/i, name: "Swift" },
-    { pattern: /\bKotlin\b/i, name: "Kotlin" },
-    { pattern: /\bGo\b(?:lang)?\b/i, name: "Go" },
-  ],
   design: [
     { pattern: /\blevel\s*design/i, name: "Level Design" },
     { pattern: /\bgame\s*design/i, name: "Game Design" },
@@ -76,37 +48,6 @@ const SKILL_PATTERNS: Record<string, Array<{ pattern: RegExp; name: string }>> =
     { pattern: /\bcharacter\s*art/i, name: "Character Art" },
     { pattern: /\bpixel\s*art/i, name: "Pixel Art" },
     { pattern: /\btech(?:nical)?\s*art/i, name: "Technical Art" },
-  ],
-  tools: [
-    { pattern: /\bMaya\b/i, name: "Maya" },
-    { pattern: /\bBlender\b/i, name: "Blender" },
-    { pattern: /\b3ds\s*Max\b/i, name: "3ds Max" },
-    { pattern: /\bPhotoshop\b/i, name: "Photoshop" },
-    { pattern: /\bSubstance/i, name: "Substance" },
-    { pattern: /\bHoudini\b/i, name: "Houdini" },
-    { pattern: /\bZBrush\b/i, name: "ZBrush" },
-    { pattern: /\bPerforce\b/i, name: "Perforce" },
-    { pattern: /\bGit\b/, name: "Git" },
-    { pattern: /\bJira\b/i, name: "Jira" },
-    { pattern: /\bFigma\b/i, name: "Figma" },
-    { pattern: /\bAfter\s*Effects\b/i, name: "After Effects" },
-    { pattern: /\bSpine\b/i, name: "Spine" },
-    { pattern: /\bWwise\b/i, name: "Wwise" },
-    { pattern: /\bFMOD\b/i, name: "FMOD" },
-  ],
-  gamingTech: [
-    { pattern: /\bDirectX\b/i, name: "DirectX" },
-    { pattern: /\bOpenGL\b/i, name: "OpenGL" },
-    { pattern: /\bVulkan\b/i, name: "Vulkan" },
-    { pattern: /\bMetal\b/, name: "Metal" },
-    { pattern: /\bPhysX\b/i, name: "PhysX" },
-    { pattern: /\bHavok\b/i, name: "Havok" },
-    { pattern: /\bshader/i, name: "Shaders" },
-    { pattern: /\brendering/i, name: "Rendering" },
-    { pattern: /\bmultiplayer/i, name: "Multiplayer Networking" },
-    { pattern: /\bnetcode\b/i, name: "Netcode" },
-    { pattern: /\bprocedural\s*gen/i, name: "Procedural Generation" },
-    { pattern: /\bray\s*trac/i, name: "Ray Tracing" },
   ],
   esports: [
     { pattern: /\btournament/i, name: "Tournament Organization" },
@@ -160,13 +101,34 @@ const ADVANCED_PROFICIENCY_PATTERN = /\b(advanced|strong|deep|5\+?\s*years?|seni
 const INTERMEDIATE_PROFICIENCY_PATTERN =
   /\b(intermediate|experience\s+with|worked\s+with|3\+?\s*years?|familiar)\b/i;
 const BEGINNER_PROFICIENCY_PATTERN = /\b(beginner|learning|basic|introduct|exposure|coursework)\b/i;
+const REGEX_SPECIAL_CHARACTER_PATTERN = /[.*+?^${}()|[\]\\]/g;
+
+const escapeRegExp = (value: string): string => value.replace(REGEX_SPECIAL_CHARACTER_PATTERN, "\\$&");
+
+const buildDynamicSkillPatterns = async (): Promise<Array<{ pattern: RegExp; name: string }>> => {
+  const taxonomy = await getJobTaxonomy();
+  return taxonomy.keywords
+    .filter(
+      (entry) =>
+        entry.enabled && (entry.category === "technology" || entry.category === "requirement"),
+    )
+    .map((entry) => ({
+      pattern: new RegExp(`\\b${escapeRegExp(entry.label)}\\b`, "i"),
+      name: entry.label,
+    }));
+};
 
 export class SkillExtractor {
-  extractSkills(text: string): ExtractedSkill[] {
+  async extractSkills(text: string): Promise<ExtractedSkill[]> {
     const skills: ExtractedSkill[] = [];
     const seen = new Set<string>();
+    const dynamicPatterns = await buildDynamicSkillPatterns();
+    const patternGroups: Record<string, Array<{ pattern: RegExp; name: string }>> = {
+      ...SKILL_PATTERNS,
+      gamingTech: dynamicPatterns,
+    };
 
-    for (const [category, patterns] of Object.entries(SKILL_PATTERNS)) {
+    for (const [category, patterns] of Object.entries(patternGroups)) {
       for (const { pattern, name } of patterns) {
         if (seen.has(name)) continue;
         const match = text.match(pattern);
@@ -189,11 +151,11 @@ export class SkillExtractor {
     return skills;
   }
 
-  extractFromJobDescription(description: string): {
+  async extractFromJobDescription(description: string): Promise<{
     required: ExtractedSkill[];
     preferred: ExtractedSkill[];
-  } {
-    const allSkills = this.extractSkills(description);
+  }> {
+    const allSkills = await this.extractSkills(description);
 
     const sentences = description.split(SENTENCE_SPLIT_PATTERN);
     const requiredSentences = new Set<number>();
@@ -238,7 +200,9 @@ export class SkillExtractor {
     return { matchPercentage, matched, missing, extra, recommendations };
   }
 
-  mapGamingToCareer(gamingExperiences: string[]): Array<{ gaming: string; professional: string }> {
+  async mapGamingToCareer(
+    gamingExperiences: string[],
+  ): Promise<Array<{ gaming: string; professional: string }>> {
     const mappings: Array<{ gaming: string; professional: string }> = [];
 
     for (const exp of gamingExperiences) {
@@ -249,7 +213,7 @@ export class SkillExtractor {
       }
       // Fallback: if no direct match, extract general transferable skills
       if (!mappings.find((m) => m.gaming === exp)) {
-        const extracted = this.extractSkills(exp);
+        const extracted = await this.extractSkills(exp);
         const transferable = extracted.filter((s) => s.category === "transferable");
         if (transferable.length > 0) {
           mappings.push({ gaming: exp, professional: transferable.map((s) => s.name).join(", ") });

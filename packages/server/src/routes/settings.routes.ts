@@ -19,10 +19,12 @@ import { resolveRateLimitClientKey } from "../utils/request";
 import {
   apiKeysUpdateBodySchema,
   importSettingsBodySchema,
+  jobTaxonomyUpdateBodySchema,
   providerTestBodySchema,
   settingsUpdateBodySchema,
 } from "./settings-route-contracts";
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";
+import { updateJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
 import {
   readOrCreateSettingsRow,
@@ -72,6 +74,16 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
     },
     {
       body: settingsUpdateBodySchema,
+    },
+  )
+  .put(
+    "/job-taxonomy",
+    async ({ body }) => {
+      const jobTaxonomy = await updateJobTaxonomy(body);
+      return { success: true, jobTaxonomy };
+    },
+    {
+      body: jobTaxonomyUpdateBodySchema,
     },
   )
   .put(

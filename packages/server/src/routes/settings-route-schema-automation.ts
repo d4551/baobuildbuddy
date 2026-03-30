@@ -1,4 +1,5 @@
 import {
+  JOB_STUDIO_TYPES,
   SCHEMA_MAX_BOARD_RESULT_LIMIT,
   SCHEMA_MAX_ITEMS_BOARDS,
   SCHEMA_MAX_ITEMS_LARGE,
@@ -14,6 +15,7 @@ import {
   SCHEMA_PROVIDER_TIMEOUT_MIN_MS,
   SPEECH_PROVIDER_OPTIONS,
 } from "@bao/shared";
+import { JOB_TAXONOMY_KEYWORD_CATEGORY_IDS } from "@bao/shared/types/jobs-taxonomy";
 import { t } from "elysia";
 
 const COMPANY_BOARD_PROVIDER_TYPES = [
@@ -62,6 +64,26 @@ const [
   GAMING_PORTAL_POCKETGAMER,
 ] = GAMING_PORTAL_IDS;
 
+const [
+  JOB_TAXONOMY_KEYWORD_CATEGORY_REMOTE_LOCATION,
+  JOB_TAXONOMY_KEYWORD_CATEGORY_HYBRID_LOCATION,
+  JOB_TAXONOMY_KEYWORD_CATEGORY_REQUIREMENT,
+  JOB_TAXONOMY_KEYWORD_CATEGORY_TECHNOLOGY,
+  JOB_TAXONOMY_KEYWORD_CATEGORY_GENRE,
+  JOB_TAXONOMY_KEYWORD_CATEGORY_PLATFORM,
+  JOB_TAXONOMY_KEYWORD_CATEGORY_ROLE,
+] = JOB_TAXONOMY_KEYWORD_CATEGORY_IDS;
+
+const [
+  JOB_STUDIO_TYPE_AAA,
+  JOB_STUDIO_TYPE_INDIE,
+  JOB_STUDIO_TYPE_MOBILE,
+  JOB_STUDIO_TYPE_VR_AR,
+  JOB_STUDIO_TYPE_PLATFORM,
+  JOB_STUDIO_TYPE_ESPORTS,
+  JOB_STUDIO_TYPE_UNKNOWN,
+] = JOB_STUDIO_TYPES;
+
 const speechProviderBodySchema = t.Union([
   t.Literal(SPEECH_PROVIDER_BROWSER),
   t.Literal(SPEECH_PROVIDER_OPENAI),
@@ -88,6 +110,26 @@ const gamingPortalIdBodySchema = t.Union([
   t.Literal(GAMING_PORTAL_REMOTEGAMEJOBS),
   t.Literal(GAMING_PORTAL_GAMESJOBS_DIRECT),
   t.Literal(GAMING_PORTAL_POCKETGAMER),
+]);
+
+const jobTaxonomyKeywordCategoryBodySchema = t.Union([
+  t.Literal(JOB_TAXONOMY_KEYWORD_CATEGORY_REMOTE_LOCATION),
+  t.Literal(JOB_TAXONOMY_KEYWORD_CATEGORY_HYBRID_LOCATION),
+  t.Literal(JOB_TAXONOMY_KEYWORD_CATEGORY_REQUIREMENT),
+  t.Literal(JOB_TAXONOMY_KEYWORD_CATEGORY_TECHNOLOGY),
+  t.Literal(JOB_TAXONOMY_KEYWORD_CATEGORY_GENRE),
+  t.Literal(JOB_TAXONOMY_KEYWORD_CATEGORY_PLATFORM),
+  t.Literal(JOB_TAXONOMY_KEYWORD_CATEGORY_ROLE),
+]);
+
+const studioTypeBodySchema = t.Union([
+  t.Literal(JOB_STUDIO_TYPE_AAA),
+  t.Literal(JOB_STUDIO_TYPE_INDIE),
+  t.Literal(JOB_STUDIO_TYPE_MOBILE),
+  t.Literal(JOB_STUDIO_TYPE_VR_AR),
+  t.Literal(JOB_STUDIO_TYPE_PLATFORM),
+  t.Literal(JOB_STUDIO_TYPE_ESPORTS),
+  t.Literal(JOB_STUDIO_TYPE_UNKNOWN),
 ]);
 
 const companyBoardApiTemplatesBodySchema = t.Object({
@@ -167,6 +209,30 @@ export const speechSettingsBodySchema = t.Object({
     voice: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
     format: t.Union([t.Literal("mp3"), t.Literal("wav")]),
   }),
+});
+
+export const jobTaxonomyKeywordEntryBodySchema = t.Object({
+  id: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+  category: jobTaxonomyKeywordCategoryBodySchema,
+  label: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  synonyms: t.Array(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }), {
+    maxItems: SCHEMA_MAX_ITEMS_LARGE,
+  }),
+  sortOrder: t.Number({ minimum: 0, maximum: SCHEMA_MAX_ITEMS_LARGE }),
+  enabled: t.Boolean(),
+});
+
+export const studioClassificationRuleBodySchema = t.Object({
+  id: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+  studioType: studioTypeBodySchema,
+  keyword: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  sortOrder: t.Number({ minimum: 0, maximum: SCHEMA_MAX_ITEMS_LARGE }),
+  enabled: t.Boolean(),
+});
+
+export const jobTaxonomySettingsBodySchema = t.Object({
+  keywords: t.Array(jobTaxonomyKeywordEntryBodySchema, { maxItems: 1000 }),
+  studioRules: t.Array(studioClassificationRuleBodySchema, { maxItems: 1000 }),
 });
 
 const jsonValueBodySchema = t.Recursive((Self) =>

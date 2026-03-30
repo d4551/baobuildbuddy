@@ -13,16 +13,16 @@ interface SkillGapAnalysis {
     recommendations: string[];
 }
 export declare class SkillExtractor {
-    extractSkills(text: string): ExtractedSkill[];
-    extractFromJobDescription(description: string): {
+    extractSkills(text: string): Promise<ExtractedSkill[]>;
+    extractFromJobDescription(description: string): Promise<{
         required: ExtractedSkill[];
         preferred: ExtractedSkill[];
-    };
+    }>;
     compareSkills(userSkills: ExtractedSkill[], jobSkills: ExtractedSkill[]): SkillGapAnalysis;
-    mapGamingToCareer(gamingExperiences: string[]): Array<{
+    mapGamingToCareer(gamingExperiences: string[]): Promise<Array<{
         gaming: string;
         professional: string;
-    }>;
+    }>>;
     private detectProficiency;
     private getSurroundingText;
 }

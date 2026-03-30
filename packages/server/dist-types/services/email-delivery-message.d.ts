@@ -1,0 +1,10 @@
+import type { EmailDeliveryRequest, EmailTransportRuntimeConfig, SmtpAuthMode, SmtpResponse } from "./email-delivery-contracts";
+export declare const SMTP_LINE_BREAK = "\r\n";
+export declare const sanitizeHeaderValue: (value: string) => string;
+export declare const encodeBase64Utf8: (value: string) => string;
+export declare const dotStuffMessage: (value: string) => string;
+export declare const resolveEhloHost: (fromEmail: string, fallbackHost: string) => string;
+export declare const createMessageId: (domain: string) => string;
+export declare const smtpSupportsCapability: (capabilities: SmtpResponse, capability: string) => boolean;
+export declare const smtpSupportsAuthMode: (capabilities: SmtpResponse, authMode: SmtpAuthMode) => boolean;
+export declare const buildRfc822Message: (config: EmailTransportRuntimeConfig, request: EmailDeliveryRequest, deliveredAt: string, messageId: string) => string;

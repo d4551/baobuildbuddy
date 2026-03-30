@@ -582,10 +582,10 @@ export declare const automationRoutes: Elysia<"/automation", {
                         capabilities: {
                             name: string;
                             id: string;
+                            category: "scrape" | "job_apply";
                             issues: string[];
                             target: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null;
                             enabled: boolean;
-                            category: "scrape" | "job_apply";
                             configured: boolean;
                             implemented: boolean;
                             manualRunAvailable: boolean;

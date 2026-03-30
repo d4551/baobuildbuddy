@@ -21,6 +21,7 @@ import {
   resolveKnownProvider as resolveKnownProviderValue,
 } from "./settings-route-schema-ai-brand";
 import {
+  jobTaxonomySettingsBodySchema,
   jobProviderSettingsBodySchema,
   jsonValueBodySchema,
   nullableJsonValueBodySchema,
@@ -94,6 +95,8 @@ export const providerTestBodySchema = t.Object({
   key: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
   model: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
 });
+
+export const jobTaxonomyUpdateBodySchema = jobTaxonomySettingsBodySchema;
 
 export const importSettingsBodySchema = t.Object({
   version: t.Literal(DATA_EXPORT_VERSION),

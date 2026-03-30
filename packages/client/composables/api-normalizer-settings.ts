@@ -3,10 +3,12 @@ import {
   type AppSettings,
   type AutomationSettings,
   type EmailTransportSettings,
+  type JobTaxonomySettings,
   DEFAULT_APP_AI_ROUTING,
   DEFAULT_APP_LANGUAGE,
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  DEFAULT_JOB_TAXONOMY_SETTINGS,
   DEFAULT_SPEECH_SETTINGS,
   asBoolean,
   asNumber,
@@ -338,6 +340,52 @@ const normalizeEmailTransportSettings = (value: unknown): EmailTransportSettings
   };
 };
 
+const normalizeJobTaxonomySettings = (value: unknown): JobTaxonomySettings | undefined => {
+  if (!isRecord(value)) {
+    return;
+  }
+
+  const keywords = Array.isArray(value.keywords)
+    ? value.keywords
+        .filter(isRecord)
+        .map((entry, index) => ({
+          id: asString(entry.id) ?? `keyword-${index}`,
+          category: asEnum(entry.category, [
+            "remote-location",
+            "hybrid-location",
+            "requirement",
+            "technology",
+            "genre",
+            "platform",
+            "role",
+          ]) ?? "technology",
+          label: asString(entry.label) ?? "",
+          synonyms: asStringArray(entry.synonyms),
+          sortOrder: asNumber(entry.sortOrder) ?? index,
+          enabled: asBoolean(entry.enabled) ?? true,
+        }))
+    : DEFAULT_JOB_TAXONOMY_SETTINGS.keywords;
+
+  const studioRules = Array.isArray(value.studioRules)
+    ? value.studioRules
+        .filter(isRecord)
+        .map((entry, index) => ({
+          id: asString(entry.id) ?? `studio-rule-${index}`,
+          studioType:
+            asEnum(entry.studioType, ["AAA", "Indie", "Mobile", "VR/AR", "Platform", "Esports", "Unknown"]) ??
+            "Indie",
+          keyword: asString(entry.keyword) ?? "",
+          sortOrder: asNumber(entry.sortOrder) ?? index,
+          enabled: asBoolean(entry.enabled) ?? true,
+        }))
+    : DEFAULT_JOB_TAXONOMY_SETTINGS.studioRules;
+
+  return {
+    keywords,
+    studioRules,
+  };
+};
+
 export const toAppSettings = (value: unknown): AppSettings | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
@@ -367,6 +415,7 @@ export const toAppSettings = (value: unknown): AppSettings | null => {
       jobAlerts: asBoolean(notificationsRecord.jobAlerts) ?? true,
     },
     automationSettings: normalizeAutomationSettings(value.automationSettings),
+    jobTaxonomy: normalizeJobTaxonomySettings(value.jobTaxonomy),
     emailTransportSettings: normalizeEmailTransportSettings(value.emailTransportSettings),
     hasGeminiKey: asBoolean(value.hasGeminiKey),
     hasOpenaiKey: asBoolean(value.hasOpenaiKey),

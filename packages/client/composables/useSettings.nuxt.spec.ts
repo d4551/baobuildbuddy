@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type Ref, ref } from "vue";
+import type { JobTaxonomySettings } from "@bao/shared";
 
 const nuxtStateStore = new Map<string, Ref<unknown>>();
 const mockApi = {
   settings: {
     get: vi.fn(),
     put: vi.fn(),
+    "job-taxonomy": { put: vi.fn() },
     "api-keys": { put: vi.fn() },
     "test-api-key": { post: vi.fn() },
   },
@@ -103,5 +105,30 @@ describe("useSettings", () => {
 
     await fetchSettings();
     expect(isAiConfigurationIncomplete.value).toBe(true);
+  });
+
+  it("updates job taxonomy through the dedicated settings endpoint", async () => {
+    const mockSettings = { id: "default", theme: "corporate", jobTaxonomy: { keywords: [], studioRules: [] } };
+    mockApi.settings["job-taxonomy"].put.mockResolvedValueOnce({ data: { success: true }, error: null });
+    mockApi.settings.get.mockResolvedValueOnce({ data: mockSettings, error: null });
+
+    const { updateJobTaxonomy } = useSettings();
+    const payload: JobTaxonomySettings = {
+      keywords: [
+        {
+          id: "role:graphics-programmer",
+          category: "role",
+          label: "Graphics Programmer",
+          synonyms: [],
+          sortOrder: 0,
+          enabled: true,
+        },
+      ],
+      studioRules: [],
+    };
+
+    await updateJobTaxonomy(payload);
+    expect(mockApi.settings["job-taxonomy"].put).toHaveBeenCalledWith(payload);
+    expect(mockApi.settings.get).toHaveBeenCalled();
   });
 });

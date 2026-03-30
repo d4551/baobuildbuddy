@@ -252,6 +252,25 @@ const TABLE_DEFINITIONS = [
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
+  `CREATE TABLE IF NOT EXISTS job_taxonomy_keywords (
+      id TEXT PRIMARY KEY,
+      category TEXT NOT NULL,
+      label TEXT NOT NULL,
+      synonyms TEXT NOT NULL DEFAULT '[]',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS studio_classification_rules (
+      id TEXT PRIMARY KEY,
+      studio_type TEXT NOT NULL,
+      keyword TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
 ] as const;
 
 const INDEXES = [
@@ -264,6 +283,10 @@ const INDEXES = [
   "CREATE INDEX IF NOT EXISTS interview_sessions_studio_id_idx ON interview_sessions(studio_id)",
   "CREATE INDEX IF NOT EXISTS chat_history_session_id_idx ON chat_history(session_id)",
   "CREATE INDEX IF NOT EXISTS chat_history_timestamp_idx ON chat_history(timestamp)",
+  "CREATE INDEX IF NOT EXISTS job_taxonomy_keywords_category_idx ON job_taxonomy_keywords(category, sort_order)",
+  "CREATE INDEX IF NOT EXISTS job_taxonomy_keywords_enabled_idx ON job_taxonomy_keywords(enabled)",
+  "CREATE INDEX IF NOT EXISTS studio_classification_rules_type_idx ON studio_classification_rules(studio_type, sort_order)",
+  "CREATE INDEX IF NOT EXISTS studio_classification_rules_enabled_idx ON studio_classification_rules(enabled)",
 ] as const;
 
 const AUTOMATION_RUNS_TABLE_NAME = "automation_runs";

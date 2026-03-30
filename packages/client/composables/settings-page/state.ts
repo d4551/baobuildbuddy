@@ -120,6 +120,7 @@ function buildSettingsPageStateResult(options: SettingsPageStateResultOptions) {
     THEME_NAMES,
     fetchSettings: options.services.fetchSettings,
     updateSettings: options.services.updateSettings,
+    updateJobTaxonomy: options.services.updateJobTaxonomy,
     updateApiKeys: options.services.updateApiKeys,
     testApiKey: options.services.testApiKey,
     updateProfile: options.services.updateProfile,

@@ -18,6 +18,7 @@ export declare const buildSettingsResponse: (row: SettingsRow) => Promise<{
     hasHuggingfaceToken: boolean;
     hasEmailTransportPassword: boolean;
     hasLocalKey: boolean;
+    jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
     id: string;
     notifications: Record<string, boolean> | null;
     automationSettings: import("@bao/shared").AutomationSettings | null;

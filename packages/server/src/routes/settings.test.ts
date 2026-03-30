@@ -29,6 +29,10 @@ const getSettings = () =>
     hasEmailTransportPassword?: boolean;
     emailTransportPassword?: string | null;
     emailTransportSettings?: { host?: string };
+    jobTaxonomy?: {
+      keywords: Array<{ id: string; label: string; category: string }>;
+      studioRules: Array<{ id: string; keyword: string; studioType: string }>;
+    };
   }>(app, "GET", "/api/settings");
 
 describe("settings read routes", () => {
@@ -39,6 +43,8 @@ describe("settings read routes", () => {
     if (res.body.geminiApiKey) {
       expect(res.body.geminiApiKey).toMatch(MASKED_KEY_PATTERN);
     }
+    expect(Array.isArray(res.body.jobTaxonomy?.keywords)).toBe(true);
+    expect(Array.isArray(res.body.jobTaxonomy?.studioRules)).toBe(true);
   });
 
   test("GET /api/settings/export returns export payload", async () => {
@@ -107,5 +113,55 @@ describe("settings write routes", () => {
     expect(res.body.hasEmailTransportPassword).toBe(true);
     expect(res.body.emailTransportPassword).toBeUndefined();
     expect(res.body.emailTransportSettings?.host).toBe("smtp.example.test");
+  });
+
+  test("PUT /api/settings/job-taxonomy persists taxonomy updates outside the settings row", async () => {
+    const res = await requestJson<{
+      success: boolean;
+      jobTaxonomy: {
+        keywords: Array<{ id: string; label: string; category: string }>;
+        studioRules: Array<{ id: string; keyword: string; studioType: string }>;
+      };
+    }>(app, "PUT", "/api/settings/job-taxonomy", {
+      keywords: [
+        {
+          id: "role:technical-sound-designer",
+          category: "role",
+          label: "Technical Sound Designer",
+          synonyms: ["Audio Tools Designer"],
+          sortOrder: 0,
+          enabled: true,
+        },
+      ],
+      studioRules: [
+        {
+          id: "Platform:super-platform",
+          studioType: "Platform",
+          keyword: "super platform",
+          sortOrder: 0,
+          enabled: true,
+        },
+      ],
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.jobTaxonomy.keywords[0]?.label).toBe("Technical Sound Designer");
+
+    const updated = await getSettings();
+    expect(updated.body.jobTaxonomy?.keywords).toMatchObject([
+      {
+        id: "role:technical-sound-designer",
+        category: "role",
+        label: "Technical Sound Designer",
+      },
+    ]);
+    expect(updated.body.jobTaxonomy?.studioRules).toMatchObject([
+      {
+        id: "Platform:super-platform",
+        keyword: "super platform",
+        studioType: "Platform",
+      },
+    ]);
   });
 });

@@ -226,6 +226,23 @@ export declare const providerTestBodySchema: import("@sinclair/typebox").TObject
     key: import("@sinclair/typebox").TString;
     model: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
 }>;
+export declare const jobTaxonomyUpdateBodySchema: import("@sinclair/typebox").TObject<{
+    keywords: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
+        id: import("@sinclair/typebox").TString;
+        category: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"remote-location">, import("@sinclair/typebox").TLiteral<"hybrid-location">, import("@sinclair/typebox").TLiteral<"requirement">, import("@sinclair/typebox").TLiteral<"technology">, import("@sinclair/typebox").TLiteral<"genre">, import("@sinclair/typebox").TLiteral<"platform">, import("@sinclair/typebox").TLiteral<"role">]>;
+        label: import("@sinclair/typebox").TString;
+        synonyms: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TString>;
+        sortOrder: import("@sinclair/typebox").TNumber;
+        enabled: import("@sinclair/typebox").TBoolean;
+    }>>;
+    studioRules: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
+        id: import("@sinclair/typebox").TString;
+        studioType: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>]>;
+        keyword: import("@sinclair/typebox").TString;
+        sortOrder: import("@sinclair/typebox").TNumber;
+        enabled: import("@sinclair/typebox").TBoolean;
+    }>>;
+}>;
 export declare const importSettingsBodySchema: import("@sinclair/typebox").TObject<{
     version: import("@sinclair/typebox").TLiteral<"1.0">;
     exportedAt: import("@sinclair/typebox").TString;

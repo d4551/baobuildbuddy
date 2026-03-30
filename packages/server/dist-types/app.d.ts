@@ -292,6 +292,7 @@ export declare const app: Elysia<"/api", {
                         hasHuggingfaceToken: boolean;
                         hasEmailTransportPassword: boolean;
                         hasLocalKey: boolean;
+                        jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
                         id: string;
                         notifications: Record<string, boolean> | null;
                         automationSettings: import("@bao/shared").AutomationSettings | null;
@@ -547,6 +548,48 @@ export declare const app: Elysia<"/api", {
         };
     } & {
         settings: {
+            "job-taxonomy": {
+                put: {
+                    body: {
+                        keywords: {
+                            id: string;
+                            label: string;
+                            category: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+                            enabled: boolean;
+                            sortOrder: number;
+                            synonyms: string[];
+                        }[];
+                        studioRules: {
+                            id: string;
+                            studioType: import("@bao/shared").StudioType;
+                            enabled: boolean;
+                            sortOrder: number;
+                            keyword: string;
+                        }[];
+                    };
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: {
+                            success: boolean;
+                            jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
+                        };
+                        422: {
+                            type: "validation";
+                            on: string;
+                            summary?: string;
+                            message?: string;
+                            found?: unknown;
+                            property?: string;
+                            expected?: string;
+                        };
+                    };
+                };
+            };
+        };
+    } & {
+        settings: {
             "api-keys": {
                 put: {
                     body: {
@@ -638,7 +681,7 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("./services/data-service").BaoExportData;
+                        200: import("./services/data-service-contracts").BaoExportData;
                     };
                 };
             };
@@ -691,7 +734,7 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("./services/data-service").ImportResult;
+                        200: import("./services/data-service-contracts").ImportResult;
                         422: {
                             type: "validation";
                             on: string;
@@ -713,15 +756,15 @@ export declare const app: Elysia<"/api", {
                 body: unknown;
                 params: {};
                 query: {
-                    location?: string | undefined;
+                    genre?: string | undefined;
+                    platform?: string | undefined;
+                    studioType?: string | undefined;
                     remote?: string | undefined;
+                    location?: string | undefined;
                     experienceLevel?: string | undefined;
                     limit?: string | undefined;
                     page?: string | undefined;
-                    studioType?: string | undefined;
-                    platform?: string | undefined;
                     q?: string | undefined;
-                    genre?: string | undefined;
                 };
                 headers: unknown;
                 response: {
@@ -730,11 +773,13 @@ export declare const app: Elysia<"/api", {
                             id: string;
                             source: string | null;
                             type: string | null;
+                            studioType: string | null;
+                            remote: boolean | null;
+                            hybrid: boolean | null;
                             title: string;
                             description: string | null;
                             company: string;
                             location: string;
-                            remote: boolean | null;
                             url: string | null;
                             contentHash: string | null;
                             postedDate: string | null;
@@ -743,13 +788,11 @@ export declare const app: Elysia<"/api", {
                             requirements: string[] | null;
                             enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                             experienceLevel: string | null;
-                            hybrid: boolean | null;
                             gameGenres: string[] | null;
                             platforms: string[] | null;
                             tags: string[] | null;
                             createdAt: string;
                             salary: Record<string, unknown> | null;
-                            studioType: string | null;
                             companyLogo: string | null;
                             applicationUrl: string | null;
                         }[];
@@ -1092,42 +1135,7 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            recommendations: ({
-                                id: string;
-                                source: string | null;
-                                type: string | null;
-                                title: string;
-                                description: string | null;
-                                company: string;
-                                location: string;
-                                remote: boolean | null;
-                                url: string | null;
-                                contentHash: string | null;
-                                postedDate: string | null;
-                                technologies: string[] | null;
-                                updatedAt: string;
-                                requirements: string[] | null;
-                                enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
-                                experienceLevel: string | null;
-                                hybrid: boolean | null;
-                                gameGenres: string[] | null;
-                                platforms: string[] | null;
-                                tags: string[] | null;
-                                createdAt: string;
-                                salary: Record<string, unknown> | null;
-                                studioType: string | null;
-                                companyLogo: string | null;
-                                applicationUrl: string | null;
-                            } & {
-                                matchScore: number;
-                                matchReason: string;
-                                rank: number;
-                            })[];
-                            reason: string;
-                            aiPowered: boolean;
-                            provider?: string;
-                        };
+                        200: import("./routes/jobs-route-recommendations").JobRecommendationsResponse;
                     };
                 };
             };
@@ -1903,6 +1911,7 @@ export declare const app: Elysia<"/api", {
             projects: {
                 post: {
                     body: {
+                        role?: string | undefined;
                         technologies?: string[] | undefined;
                         platforms?: string[] | undefined;
                         featured?: boolean | undefined;
@@ -1910,7 +1919,6 @@ export declare const app: Elysia<"/api", {
                         liveUrl?: string | undefined;
                         githubUrl?: string | undefined;
                         tags?: string[] | undefined;
-                        role?: string | undefined;
                         engines?: string[] | undefined;
                         sortOrder?: number | undefined;
                         title: string;
@@ -1971,6 +1979,7 @@ export declare const app: Elysia<"/api", {
                 ":id": {
                     put: {
                         body: {
+                            role?: string | undefined;
                             title?: string | undefined;
                             description?: string | undefined;
                             technologies?: string[] | undefined;
@@ -1980,7 +1989,6 @@ export declare const app: Elysia<"/api", {
                             liveUrl?: string | undefined;
                             githubUrl?: string | undefined;
                             tags?: string[] | undefined;
-                            role?: string | undefined;
                             engines?: string[] | undefined;
                             sortOrder?: number | undefined;
                         };
@@ -2152,9 +2160,7 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            [x: string]: unknown;
-                        }[];
+                        200: import("./routes/interview-route-contracts").SessionPayload[];
                     };
                 };
             };
@@ -2171,8 +2177,8 @@ export declare const app: Elysia<"/api", {
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                [x: string]: unknown;
+                            200: import("./routes/interview-route-contracts").SessionPayload | {
+                                error: string;
                             };
                             422: {
                                 type: "validation";
@@ -3022,8 +3028,8 @@ export declare const app: Elysia<"/api", {
                     body: unknown;
                     params: {};
                     query: {
-                        search?: string | undefined;
                         category?: string | undefined;
+                        search?: string | undefined;
                     };
                     headers: unknown;
                     response: {
@@ -3058,8 +3064,8 @@ export declare const app: Elysia<"/api", {
             mappings: {
                 post: {
                     body: {
-                        confidence?: number | undefined;
                         category?: string | undefined;
+                        confidence?: number | undefined;
                         industryApplications?: string[] | undefined;
                         evidence?: {
                             [x: string]: unknown;
@@ -3093,8 +3099,8 @@ export declare const app: Elysia<"/api", {
                 ":id": {
                     put: {
                         body: {
-                            confidence?: number | undefined;
                             category?: string | undefined;
+                            confidence?: number | undefined;
                             gameExpression?: string | undefined;
                             transferableSkill?: string | undefined;
                             industryApplications?: string[] | undefined;
@@ -3907,10 +3913,10 @@ export declare const app: Elysia<"/api", {
                             capabilities: {
                                 name: string;
                                 id: string;
+                                category: "scrape" | "job_apply";
                                 issues: string[];
                                 target: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null;
                                 enabled: boolean;
-                                category: "scrape" | "job_apply";
                                 configured: boolean;
                                 implemented: boolean;
                                 manualRunAvailable: boolean;

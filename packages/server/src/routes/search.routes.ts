@@ -35,9 +35,9 @@ export const searchRoutes = new Elysia({ prefix: "/search", tags: ["Search"] })
   )
   .get(
     "/autocomplete",
-    ({ query }) => {
+    async ({ query }) => {
       const prefix = query.prefix || "";
-      return searchService.autocomplete(prefix);
+      return await searchService.autocomplete(prefix);
     },
     {
       query: t.Object({

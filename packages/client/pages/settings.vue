@@ -36,6 +36,10 @@ const {
   brandEditorPanel,
   notificationForm,
   automationForm,
+  jobProviderForm,
+  jobTaxonomyForm,
+  jobProvidersSaveState,
+  jobTaxonomySaveState,
   emailTransportForm,
   emailTransportPasswordDraft,
   aiRoutingDraft,
@@ -60,6 +64,8 @@ const {
   handleSaveProfile,
   handleSaveBrand,
   handleSaveAutomation,
+  handleSaveJobProviders,
+  handleSaveJobTaxonomy,
   handleSaveEmailDeliverySettings,
   handleSaveEmailDeliveryPassword,
   handleClearEmailDeliveryPassword,
@@ -129,6 +135,15 @@ const {
           v-model:automation-form="automationForm"
           :automation-browser-options="automationBrowserOptionItems"
           @save="handleSaveAutomation"
+        />
+
+        <SettingsJobIntelligencePanel
+          v-model:job-provider-form="jobProviderForm"
+          v-model:job-taxonomy-form="jobTaxonomyForm"
+          :provider-save-state="jobProvidersSaveState"
+          :taxonomy-save-state="jobTaxonomySaveState"
+          @save-providers="handleSaveJobProviders"
+          @save-taxonomy="handleSaveJobTaxonomy"
         />
 
         <SettingsEmailDeliveryPanel

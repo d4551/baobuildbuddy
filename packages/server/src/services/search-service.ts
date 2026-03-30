@@ -10,87 +10,11 @@ import { jobs } from "../db/schema/jobs";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { studios } from "../db/schema/studios";
+import { getJobTaxonomy } from "./jobs/job-taxonomy-service";
 
 type SearchType = "jobs" | "studios" | "skills" | "resumes";
 
 const DEFAULT_SEARCH_TYPES: SearchType[] = ["jobs", "studios", "skills", "resumes"];
-const ROLE_AUTOCOMPLETE_OPTIONS = [
-  "Game Designer",
-  "Level Designer",
-  "Systems Designer",
-  "Narrative Designer",
-  "Quest Designer",
-  "Combat Designer",
-  "Economy Designer",
-  "UI/UX Designer",
-  "Gameplay Programmer",
-  "Engine Programmer",
-  "Graphics Programmer",
-  "AI Programmer",
-  "Network Programmer",
-  "Tools Programmer",
-  "Build Engineer",
-  "Technical Artist",
-  "Concept Artist",
-  "3D Modeler",
-  "Animator",
-  "VFX Artist",
-  "Environment Artist",
-  "Character Artist",
-  "Texture Artist",
-  "Sound Designer",
-  "Music Composer",
-  "Audio Engineer",
-  "Producer",
-  "Associate Producer",
-  "Executive Producer",
-  "QA Tester",
-  "QA Lead",
-  "QA Automation Engineer",
-  "Community Manager",
-  "DevOps Engineer",
-  "Data Analyst",
-  "Live Ops Manager",
-  "Monetization Designer",
-  "Localization Specialist",
-  "Art Director",
-  "Creative Director",
-  "Technical Director",
-  "Game Director",
-  "Studio Head",
-  "Project Manager",
-] as const;
-const TECHNOLOGY_AUTOCOMPLETE_OPTIONS = [
-  "Unity",
-  "Unreal Engine",
-  "Godot",
-  "CryEngine",
-  "Frostbite",
-  "C++",
-  "C#",
-  "Python",
-  "Lua",
-  "TypeScript",
-  "JavaScript",
-  "Rust",
-  "Maya",
-  "Blender",
-  "3ds Max",
-  "ZBrush",
-  "Houdini",
-  "Substance",
-  "DirectX",
-  "Vulkan",
-  "OpenGL",
-  "HLSL",
-  "GLSL",
-  "Perforce",
-  "Git",
-  "Jira",
-  "Figma",
-  "Photoshop",
-] as const;
-
 interface SearchResult {
   type: SearchType;
   id: string;
@@ -258,13 +182,20 @@ export class SearchService {
     };
   }
 
-  autocomplete(prefix: string): Array<{ text: string; type: string }> {
+  async autocomplete(prefix: string): Promise<Array<{ text: string; type: string }>> {
     if (prefix.length < 2) return [];
 
+    const taxonomy = await getJobTaxonomy();
     const lower = prefix.toLowerCase();
+    const roleOptions = taxonomy.keywords
+      .filter((entry) => entry.enabled && entry.category === "role")
+      .map((entry) => entry.label);
+    const technologyOptions = taxonomy.keywords
+      .filter((entry) => entry.enabled && entry.category === "technology")
+      .map((entry) => entry.label);
     const suggestions = [
-      ...this.collectAutocomplete(lower, ROLE_AUTOCOMPLETE_OPTIONS, "role"),
-      ...this.collectAutocomplete(lower, TECHNOLOGY_AUTOCOMPLETE_OPTIONS, "technology"),
+      ...this.collectAutocomplete(lower, roleOptions, "role"),
+      ...this.collectAutocomplete(lower, technologyOptions, "technology"),
     ];
 
     return suggestions.slice(0, 10);

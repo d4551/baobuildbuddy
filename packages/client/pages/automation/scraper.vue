@@ -72,7 +72,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
       class="alert alert-info alert-soft alert-vertical gap-4 rounded-box border border-info/20 bg-base-100 sm:alert-horizontal"
     >
       <div class="space-y-1">
-        <p class="font-display text-sm font-semibold uppercase tracking-[0.24em] text-info">
+        <p class="font-display text-sm font-semibold uppercase tracking-widest text-info">
           {{ t("automation.hub.audit.title") }}
         </p>
         <p class="text-sm text-base-content/75">

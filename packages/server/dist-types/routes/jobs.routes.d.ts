@@ -1,17 +1,4 @@
 import { Elysia } from "elysia";
-import { jobs } from "../db/schema/jobs";
-type JobRow = typeof jobs.$inferSelect;
-type JobRecommendation = JobRow & {
-    matchScore: number;
-    matchReason: string;
-    rank: number;
-};
-type JobRecommendationsResponse = {
-    recommendations: JobRecommendation[];
-    reason: string;
-    aiPowered: boolean;
-    provider?: string;
-};
 export declare const jobsRoutes: Elysia<"/jobs", {
     decorator: {};
     store: {};
@@ -33,15 +20,15 @@ export declare const jobsRoutes: Elysia<"/jobs", {
             body: unknown;
             params: {};
             query: {
-                location?: string | undefined;
+                genre?: string | undefined;
+                platform?: string | undefined;
+                studioType?: string | undefined;
                 remote?: string | undefined;
+                location?: string | undefined;
                 experienceLevel?: string | undefined;
                 limit?: string | undefined;
                 page?: string | undefined;
-                studioType?: string | undefined;
-                platform?: string | undefined;
                 q?: string | undefined;
-                genre?: string | undefined;
             };
             headers: unknown;
             response: {
@@ -50,11 +37,13 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                         id: string;
                         source: string | null;
                         type: string | null;
+                        studioType: string | null;
+                        remote: boolean | null;
+                        hybrid: boolean | null;
                         title: string;
                         description: string | null;
                         company: string;
                         location: string;
-                        remote: boolean | null;
                         url: string | null;
                         contentHash: string | null;
                         postedDate: string | null;
@@ -63,13 +52,11 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                         requirements: string[] | null;
                         enrichment: import("@bao/shared").ScrapePersonaEnrichment | null;
                         experienceLevel: string | null;
-                        hybrid: boolean | null;
                         gameGenres: string[] | null;
                         platforms: string[] | null;
                         tags: string[] | null;
                         createdAt: string;
                         salary: Record<string, unknown> | null;
-                        studioType: string | null;
                         companyLogo: string | null;
                         applicationUrl: string | null;
                     }[];
@@ -412,7 +399,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: JobRecommendationsResponse;
+                    200: import("./jobs-route-recommendations").JobRecommendationsResponse;
                 };
             };
         };
@@ -450,4 +437,3 @@ export declare const jobsRoutes: Elysia<"/jobs", {
     standaloneSchema: {};
     response: {};
 }>;
-export {};

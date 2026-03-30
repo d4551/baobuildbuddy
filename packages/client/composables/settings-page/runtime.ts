@@ -3,6 +3,7 @@ import type {
   AutomationSettings,
   BrandSettings,
   EmailTransportSettings,
+  JobTaxonomySettings,
 } from "@bao/shared";
 import {
   AI_PROVIDER_DEFAULT,
@@ -13,6 +14,7 @@ import {
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_BRAND_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  DEFAULT_JOB_TAXONOMY_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
@@ -52,6 +54,7 @@ export function createSettingsPageServices() {
     rawSettings: settingsApi.settings,
     fetchSettings: settingsApi.fetchSettings,
     updateSettings: settingsApi.updateSettings,
+    updateJobTaxonomy: settingsApi.updateJobTaxonomy,
     updateApiKeys: settingsApi.updateApiKeys,
     testApiKey: settingsApi.testApiKey,
     settingsLoading: settingsApi.loading,
@@ -98,8 +101,54 @@ export function createSettingsPageSaveRuntimeState() {
     preferencesSaveState: ref<SaveState>("idle"),
     profileSaveState: ref<SaveState>("idle"),
     brandSaveState: ref<SaveState>("idle"),
+    jobProvidersSaveState: ref<SaveState>("idle"),
+    jobTaxonomySaveState: ref<SaveState>("idle"),
     notificationForm: reactive({ ...DEFAULT_NOTIFICATION_PREFERENCES }),
     automationForm: reactive<AutomationSettings>({ ...DEFAULT_AUTOMATION_SETTINGS }),
+    jobProviderForm: reactive({
+      providerTimeoutMs: DEFAULT_AUTOMATION_SETTINGS.jobProviders.providerTimeoutMs,
+      companyBoardResultLimit: DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardResultLimit,
+      gamingBoardResultLimit: DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingBoardResultLimit,
+      unknownLocationLabel: DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownLocationLabel,
+      unknownCompanyLabel: DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownCompanyLabel,
+      hitmarkerEnabled: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerEnabled,
+      hitmarkerApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerApiBaseUrl,
+      hitmarkerDefaultQuery: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultQuery,
+      hitmarkerDefaultLocation: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultLocation,
+      greenhouseApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseApiBaseUrl,
+      greenhouseMaxPages: DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseMaxPages,
+      leverApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverApiBaseUrl,
+      leverMaxPages: DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverMaxPages,
+      greenhouseBoardsJson: JSON.stringify(
+        DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseBoards,
+        null,
+        2,
+      ),
+      leverCompaniesJson: JSON.stringify(
+        DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverCompanies,
+        null,
+        2,
+      ),
+      companyBoardsJson: JSON.stringify(
+        DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoards,
+        null,
+        2,
+      ),
+      companyBoardApiTemplatesJson: JSON.stringify(
+        DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates,
+        null,
+        2,
+      ),
+      gamingPortalsJson: JSON.stringify(
+        DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals,
+        null,
+        2,
+      ),
+    }),
+    jobTaxonomyForm: reactive({
+      keywordsJson: JSON.stringify(DEFAULT_JOB_TAXONOMY_SETTINGS.keywords, null, 2),
+      studioRulesJson: JSON.stringify(DEFAULT_JOB_TAXONOMY_SETTINGS.studioRules, null, 2),
+    }),
     emailTransportForm: reactive<EmailTransportSettings>({
       ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,
     }),
@@ -212,7 +261,56 @@ export function syncSettingsState(
       ...DEFAULT_AUTOMATION_SETTINGS,
       ...currentSettings.automationSettings,
     });
+    Object.assign(saveState.jobProviderForm, {
+      providerTimeoutMs: currentSettings.automationSettings.jobProviders.providerTimeoutMs,
+      companyBoardResultLimit:
+        currentSettings.automationSettings.jobProviders.companyBoardResultLimit,
+      gamingBoardResultLimit:
+        currentSettings.automationSettings.jobProviders.gamingBoardResultLimit,
+      unknownLocationLabel: currentSettings.automationSettings.jobProviders.unknownLocationLabel,
+      unknownCompanyLabel: currentSettings.automationSettings.jobProviders.unknownCompanyLabel,
+      hitmarkerEnabled: currentSettings.automationSettings.jobProviders.hitmarkerEnabled,
+      hitmarkerApiBaseUrl: currentSettings.automationSettings.jobProviders.hitmarkerApiBaseUrl,
+      hitmarkerDefaultQuery: currentSettings.automationSettings.jobProviders.hitmarkerDefaultQuery,
+      hitmarkerDefaultLocation:
+        currentSettings.automationSettings.jobProviders.hitmarkerDefaultLocation,
+      greenhouseApiBaseUrl:
+        currentSettings.automationSettings.jobProviders.greenhouseApiBaseUrl,
+      greenhouseMaxPages: currentSettings.automationSettings.jobProviders.greenhouseMaxPages,
+      leverApiBaseUrl: currentSettings.automationSettings.jobProviders.leverApiBaseUrl,
+      leverMaxPages: currentSettings.automationSettings.jobProviders.leverMaxPages,
+      greenhouseBoardsJson: JSON.stringify(
+        currentSettings.automationSettings.jobProviders.greenhouseBoards,
+        null,
+        2,
+      ),
+      leverCompaniesJson: JSON.stringify(
+        currentSettings.automationSettings.jobProviders.leverCompanies,
+        null,
+        2,
+      ),
+      companyBoardsJson: JSON.stringify(
+        currentSettings.automationSettings.jobProviders.companyBoards,
+        null,
+        2,
+      ),
+      companyBoardApiTemplatesJson: JSON.stringify(
+        currentSettings.automationSettings.jobProviders.companyBoardApiTemplates,
+        null,
+        2,
+      ),
+      gamingPortalsJson: JSON.stringify(
+        currentSettings.automationSettings.jobProviders.gamingPortals,
+        null,
+        2,
+      ),
+    });
   }
+
+  const jobTaxonomy: JobTaxonomySettings =
+    currentSettings.jobTaxonomy ?? DEFAULT_JOB_TAXONOMY_SETTINGS;
+  saveState.jobTaxonomyForm.keywordsJson = JSON.stringify(jobTaxonomy.keywords, null, 2);
+  saveState.jobTaxonomyForm.studioRulesJson = JSON.stringify(jobTaxonomy.studioRules, null, 2);
 
   Object.assign(saveState.emailTransportForm, {
     ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,

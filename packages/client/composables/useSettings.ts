@@ -1,4 +1,5 @@
 import type { AppSettings } from "@bao/shared";
+import type { JobTaxonomySettings } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { computed, readonly } from "vue";
 import { useI18n } from "vue-i18n";
@@ -17,6 +18,7 @@ type ApiClient = ReturnType<typeof useApi>;
 type UpdateSettingsInput = NonNullable<Parameters<ApiClient["settings"]["put"]>[0]>;
 type UpdateApiKeysInput = NonNullable<Parameters<ApiClient["settings"]["api-keys"]["put"]>[0]>;
 type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
+type UpdateJobTaxonomyInput = JobTaxonomySettings;
 type ProviderTestResult = ClientProviderTestResult & {
   provider: TestApiKeyInput["provider"];
 };
@@ -97,6 +99,13 @@ function createSettingsActions(context: SettingsContext) {
       await fetchSettings();
     });
 
+  const updateJobTaxonomy = async (taxonomy: UpdateJobTaxonomyInput) =>
+    withLoadingState(context.loading, async () => {
+      const { error } = await context.api.settings["job-taxonomy"].put(taxonomy);
+      assertApiResponse(error, context.t("apiErrors.settings.updateFailed"));
+      await fetchSettings();
+    });
+
   const testApiKey = async (
     provider: TestApiKeyInput["provider"],
     key: string,
@@ -122,6 +131,7 @@ function createSettingsActions(context: SettingsContext) {
     fetchSettings,
     updateSettings,
     updateApiKeys,
+    updateJobTaxonomy,
     testApiKey,
   };
 }

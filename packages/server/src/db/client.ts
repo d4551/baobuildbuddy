@@ -11,6 +11,7 @@ import {
   coverLetters,
   gamification,
   interviewSessions,
+  jobTaxonomyKeywords,
   jobs,
   portfolioProjects,
   portfolios,
@@ -18,6 +19,7 @@ import {
   savedJobs,
   settings,
   skillMappings,
+  studioClassificationRules,
   studios,
   userProfile,
 } from "./schema/schema-modules";
@@ -30,6 +32,7 @@ const schema = {
   coverLetters,
   gamification,
   interviewSessions,
+  jobTaxonomyKeywords,
   jobs,
   portfolioProjects,
   portfolios,
@@ -37,6 +40,7 @@ const schema = {
   savedJobs,
   settings,
   skillMappings,
+  studioClassificationRules,
   studios,
   userProfile,
 };

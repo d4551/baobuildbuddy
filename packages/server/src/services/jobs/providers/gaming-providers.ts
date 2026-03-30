@@ -58,8 +58,19 @@ const logProviderSkip = (providerName: string, reason: string, details?: unknown
   return [];
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isHitmarkerJob = (value: unknown): value is HitmarkerJob => isRecord(value);
+
+const isHitmarkerResponse = (value: unknown): value is HitmarkerResponse =>
+  (Array.isArray(value) && value.every(isHitmarkerJob)) ||
+  (isRecord(value) &&
+    ((Array.isArray(value.jobs) && value.jobs.every(isHitmarkerJob)) ||
+      (Array.isArray(value.data) && value.data.every(isHitmarkerJob))));
+
 const resolveHitmarkerJobs = (payload: HitmarkerResponse): HitmarkerJob[] =>
-  Array.isArray(payload) ? payload : (payload.jobs ?? payload.data ?? []);
+  Array.isArray(payload) ? payload : payload.jobs ?? payload.data ?? [];
 
 const resolveCompanyName = (company: HitmarkerJob["company"], fallback: string): string => {
   if (typeof company === "string" && company.length > 0) {
@@ -139,7 +150,12 @@ export class HitmarkerProvider implements JobProvider {
         requestUrl: requestUrl.toString(),
       });
     }
-    const payload = parsed as HitmarkerResponse;
+    if (!isHitmarkerResponse(parsed)) {
+      return logProviderFailure(this.name, "invalid_payload", {
+        requestUrl: requestUrl.toString(),
+      });
+    }
+    const payload = parsed;
     const jobs = resolveHitmarkerJobs(payload);
     const hitmarkerOrigin = new URL(providerSettings.hitmarkerApiBaseUrl).origin;
 

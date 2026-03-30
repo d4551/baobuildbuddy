@@ -46,7 +46,7 @@ const brandPreviewSecondaryActionStyle = computed<Record<string, string>>(() => 
     <div class="card-body gap-4">
       <div class="flex items-start justify-between gap-3">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-base-content/45">
+          <p class="text-xs font-semibold uppercase tracking-widest text-base-content/45">
             {{ t("settings.brand.previewEyebrow") }}
           </p>
           <h3 class="card-title mt-2">
@@ -77,7 +77,7 @@ const brandPreviewSecondaryActionStyle = computed<Record<string, string>>(() => 
             {{ brandPreviewInitial }}
           </div>
           <div class="min-w-0">
-            <p class="text-xs uppercase tracking-[0.2em] opacity-60">
+            <p class="text-xs uppercase tracking-widest opacity-60">
               {{ t("settings.brand.previewEyebrow") }}
             </p>
             <p class="truncate text-sm font-medium opacity-80">

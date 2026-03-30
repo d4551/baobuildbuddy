@@ -942,6 +942,18 @@ import {
 export { ALL_GAME_ENGINES, ALL_GENRES, ALL_PLATFORMS, GAMING_TECHNOLOGIES };
 
 import {
+  DEFAULT_JOB_TAXONOMY_KEYWORDS,
+  DEFAULT_JOB_TAXONOMY_SETTINGS,
+  DEFAULT_STUDIO_CLASSIFICATION_RULES,
+} from "./constants/jobs-taxonomy";
+
+export {
+  DEFAULT_JOB_TAXONOMY_KEYWORDS,
+  DEFAULT_JOB_TAXONOMY_SETTINGS,
+  DEFAULT_STUDIO_CLASSIFICATION_RULES,
+};
+
+import {
   AI_OPERATION_TIMEOUT_MS,
   INTERVIEW_DEFAULT_DURATION_MINUTES,
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
@@ -1553,6 +1565,24 @@ import type { SettingsInput } from "./schemas/settings.schema";
 export type { SettingsInput };
 
 import {
+  jobTaxonomyKeywordCategorySchema,
+  jobTaxonomyKeywordEntrySchema,
+  jobTaxonomySettingsSchema,
+  studioClassificationRuleSchema,
+} from "./schemas/jobs-taxonomy.schema";
+
+export {
+  jobTaxonomyKeywordCategorySchema,
+  jobTaxonomyKeywordEntrySchema,
+  jobTaxonomySettingsSchema,
+  studioClassificationRuleSchema,
+};
+
+import type { JobTaxonomySettingsInput } from "./schemas/jobs-taxonomy.schema";
+
+export type { JobTaxonomySettingsInput };
+
+import {
   careerPathwaySchema,
   careerPathwaysSchema,
   categoryAssessmentSchema,
@@ -1878,6 +1908,17 @@ import type {
   TextToSpeechSettings,
 } from "./types/settings";
 
+import type {
+  JobTaxonomyKeywordCategory,
+  JobTaxonomyKeywordEntry,
+  JobTaxonomySettings,
+  StudioClassificationRule,
+} from "./types/jobs-taxonomy";
+
+import { JOB_TAXONOMY_KEYWORD_CATEGORY_IDS } from "./types/jobs-taxonomy";
+
+export { JOB_TAXONOMY_KEYWORD_CATEGORY_IDS };
+
 export type {
   APIKeyConfig,
   AIProviderDiagnostics,
@@ -1898,10 +1939,14 @@ export type {
   GamingPortalId,
   GreenhouseBoardConfig,
   JobProviderSettings,
+  JobTaxonomyKeywordCategory,
+  JobTaxonomyKeywordEntry,
+  JobTaxonomySettings,
   LeverCompanyConfig,
   NotificationPreferences,
   ProviderModelPreferences,
   SpeechSettings,
+  StudioClassificationRule,
   SpeechToTextSettings,
   TextToSpeechSettings,
 };

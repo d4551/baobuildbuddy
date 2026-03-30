@@ -21,10 +21,10 @@ export declare class SearchService {
     private searchResumes;
     private collectAutocomplete;
     searchAll(query: string, types?: SearchType[]): Promise<UnifiedSearchResult>;
-    autocomplete(prefix: string): Array<{
+    autocomplete(prefix: string): Promise<Array<{
         text: string;
         type: string;
-    }>;
+    }>>;
 }
 export declare const searchService: SearchService;
 export {};

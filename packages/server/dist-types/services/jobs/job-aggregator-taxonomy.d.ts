@@ -1,0 +1,17 @@
+import type { GameGenre, JobExperienceLevel, JobType, Platform, StudioType } from "@bao/shared";
+import type { RawJob } from "./providers/provider-interface";
+export declare const detectRemote: (location: string) => Promise<boolean>;
+export declare const detectHybrid: (location: string) => Promise<boolean>;
+export declare const normalizeStudioType: (value: string | null) => StudioType | undefined;
+export declare const normalizeGameGenres: (value: string[] | null) => GameGenre[] | undefined;
+export declare const normalizePlatforms: (value: string[] | null) => Platform[] | undefined;
+export declare const normalizeExperienceLevel: (value: string | null) => JobExperienceLevel | undefined;
+export declare const normalizeJobType: (value: string | null) => JobType;
+export declare const detectExperienceLevel: (title: string) => JobExperienceLevel | undefined;
+export declare const detectJobType: (title: string) => JobType;
+export declare const detectStudioType: (company: string) => Promise<StudioType>;
+export declare const extractRequirements: (description?: string) => Promise<string[]>;
+export declare const extractTechnologies: (description?: string) => Promise<string[]>;
+export declare const extractGenres: (description?: string) => Promise<string[]>;
+export declare const extractPlatforms: (description?: string) => Promise<string[]>;
+export declare const generateTags: (raw: RawJob) => Promise<string[]>;

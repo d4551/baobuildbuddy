@@ -43,6 +43,14 @@ type ATSResponse = ATSJob[] | (ATSResponseFields & Record<string, unknown>);
 
 const REMOTE_PATTERN = /remote/i;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isAtsJob = (value: unknown): value is ATSJob => isRecord(value);
+
+const isAtsResponse = (value: unknown): value is ATSResponse =>
+  (Array.isArray(value) && value.every(isAtsJob)) || isRecord(value);
+
 const resolveLocation = (location: ATSJob["location"]): string => {
   if (typeof location === "string") {
     return location;
@@ -153,8 +161,10 @@ export class CompanyBoardProvider implements JobProvider {
     if (parsed === null) {
       return [];
     }
-    const data = parsed as ATSResponse;
-    return this.parseJobs(data, providerSettings);
+    if (!isAtsResponse(parsed)) {
+      return [];
+    }
+    return this.parseJobs(parsed, providerSettings);
   }
 
   private parseJobs(data: ATSResponse, providerSettings: JobProviderSettings): RawJob[] {

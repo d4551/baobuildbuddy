@@ -4,6 +4,7 @@ import { chatHistory } from "./chat-history";
 import { coverLetters } from "./cover-letters";
 import { gamification } from "./gamification";
 import { interviewSessions } from "./interviews";
+import { jobTaxonomyKeywords, studioClassificationRules } from "./job-taxonomy";
 import { applications, jobs, savedJobs } from "./jobs";
 import { portfolioProjects, portfolios } from "./portfolios";
 import { resumes } from "./resumes";
@@ -20,6 +21,7 @@ export {
   coverLetters,
   gamification,
   interviewSessions,
+  jobTaxonomyKeywords,
   jobs,
   portfolioProjects,
   portfolios,
@@ -28,5 +30,6 @@ export {
   settings,
   skillMappings,
   studios,
+  studioClassificationRules,
   userProfile,
 };

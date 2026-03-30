@@ -49,6 +49,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     hasHuggingfaceToken: boolean;
                     hasEmailTransportPassword: boolean;
                     hasLocalKey: boolean;
+                    jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
                     id: string;
                     notifications: Record<string, boolean> | null;
                     automationSettings: import("@bao/shared").AutomationSettings | null;
@@ -304,6 +305,48 @@ export declare const settingsRoutes: Elysia<"/settings", {
     };
 } & {
     settings: {
+        "job-taxonomy": {
+            put: {
+                body: {
+                    keywords: {
+                        id: string;
+                        label: string;
+                        category: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+                        enabled: boolean;
+                        sortOrder: number;
+                        synonyms: string[];
+                    }[];
+                    studioRules: {
+                        id: string;
+                        studioType: import("@bao/shared").StudioType;
+                        enabled: boolean;
+                        sortOrder: number;
+                        keyword: string;
+                    }[];
+                };
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        success: boolean;
+                        jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
+                    };
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
+                    };
+                };
+            };
+        };
+    };
+} & {
+    settings: {
         "api-keys": {
             put: {
                 body: {
@@ -395,7 +438,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/data-service").BaoExportData;
+                    200: import("../services/data-service-contracts").BaoExportData;
                 };
             };
         };
@@ -448,7 +491,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/data-service").ImportResult;
+                    200: import("../services/data-service-contracts").ImportResult;
                     422: {
                         type: "validation";
                         on: string;

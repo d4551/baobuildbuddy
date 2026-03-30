@@ -9,6 +9,7 @@ import {
 } from "@bao/shared";
 import type { settings as settingsTable } from "../db/schema/settings";
 import { buildAIControlPlaneState } from "../services/ai/control-plane";
+import { getJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { LocalProvider } from "../services/ai/local-provider";
 
 const KEY_MASK_VISIBLE_CHARS = 4;
@@ -16,7 +17,10 @@ type SettingsRow = typeof settingsTable.$inferSelect;
 
 export const buildSettingsResponse = async (row: SettingsRow) => {
   const { emailTransportPassword, ...publicRow } = row;
-  const controlPlane = await buildAIControlPlaneState(row);
+  const [controlPlane, jobTaxonomy] = await Promise.all([
+    buildAIControlPlaneState(row),
+    getJobTaxonomy(),
+  ]);
 
   return {
     ...publicRow,
@@ -38,6 +42,7 @@ export const buildSettingsResponse = async (row: SettingsRow) => {
     hasHuggingfaceToken: Boolean(row.huggingfaceToken),
     hasEmailTransportPassword: Boolean(emailTransportPassword),
     hasLocalKey: Boolean(row.localModelEndpoint),
+    jobTaxonomy,
   };
 };
 

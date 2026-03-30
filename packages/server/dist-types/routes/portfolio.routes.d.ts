@@ -56,6 +56,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         projects: {
             post: {
                 body: {
+                    role?: string | undefined;
                     technologies?: string[] | undefined;
                     platforms?: string[] | undefined;
                     featured?: boolean | undefined;
@@ -63,7 +64,6 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                     liveUrl?: string | undefined;
                     githubUrl?: string | undefined;
                     tags?: string[] | undefined;
-                    role?: string | undefined;
                     engines?: string[] | undefined;
                     sortOrder?: number | undefined;
                     title: string;
@@ -124,6 +124,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
             ":id": {
                 put: {
                     body: {
+                        role?: string | undefined;
                         title?: string | undefined;
                         description?: string | undefined;
                         technologies?: string[] | undefined;
@@ -133,7 +134,6 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                         liveUrl?: string | undefined;
                         githubUrl?: string | undefined;
                         tags?: string[] | undefined;
-                        role?: string | undefined;
                         engines?: string[] | undefined;
                         sortOrder?: number | undefined;
                     };

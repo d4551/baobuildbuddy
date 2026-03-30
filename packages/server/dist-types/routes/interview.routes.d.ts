@@ -1,5 +1,4 @@
 import { Elysia } from "elysia";
-type SessionPayload = Record<string, unknown>;
 export declare const interviewRoutes: Elysia<"/interview", {
     decorator: {};
     store: {};
@@ -92,7 +91,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: SessionPayload[];
+                    200: import("./interview-route-contracts").SessionPayload[];
                 };
             };
         };
@@ -109,7 +108,9 @@ export declare const interviewRoutes: Elysia<"/interview", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: SessionPayload;
+                        200: import("./interview-route-contracts").SessionPayload | {
+                            error: string;
+                        };
                         422: {
                             type: "validation";
                             on: string;
@@ -233,4 +234,3 @@ export declare const interviewRoutes: Elysia<"/interview", {
     standaloneSchema: {};
     response: {};
 }>;
-export {};
