@@ -3,17 +3,21 @@ import { useI18n } from "vue-i18n";
 import { createFlowEngineInput } from "~/constants/flow-engine";
 import {
   DASHBOARD_A11Y_KEYS,
-  DASHBOARD_ASYNC_DATA_KEY,
   DASHBOARD_COPY_KEYS,
   DASHBOARD_MOTIVATIONAL_PHRASE_KEYS,
   DASHBOARD_PIPELINE_STATUS_KEYS,
+  DASHBOARD_WELCOME_HEADING_KEYS,
+} from "~/constants/dashboard-copy";
+import {
+  DASHBOARD_ASYNC_DATA_KEY,
   DASHBOARD_STAT_CARDS,
   DASHBOARD_TIME_CONSTANTS,
-  DASHBOARD_WELCOME_HEADING_KEYS,
-  type DashboardPipelineStepViewModel,
-  type DashboardStatKey,
-  resolveDashboardPipelineSteps,
-} from "~/constants/dashboard";
+} from "~/constants/dashboard-core";
+import type {
+  DashboardPipelineStepViewModel,
+  DashboardStatKey,
+} from "~/constants/dashboard-contracts";
+import { resolveDashboardPipelineSteps } from "~/constants/dashboard-pipeline";
 import { GAMIFICATION_XP_TARGET_FALLBACK } from "~/constants/gamification";
 import type {
   DashboardStatCardViewModel,

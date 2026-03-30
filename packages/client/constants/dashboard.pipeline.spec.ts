@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveDashboardFlowActions, resolveDashboardPipelineSteps } from "./dashboard";
+import { resolveDashboardFlowActions, resolveDashboardPipelineSteps } from "./dashboard-pipeline";
 
 describe("resolveDashboardPipelineSteps", () => {
   it("marks first step as in progress when no data is available", () => {

@@ -78,14 +78,14 @@ const createResolvedRecipientEmailComputed = (form: EmailFormState) =>
   });
 
 const createToLocalizedDateTime = (
-  locale: Readonly<Ref<string>>,
-  fallbackLocale: Readonly<Ref<string | string[]>>,
+  localeValue: () => unknown,
+  fallbackLocaleValue: () => unknown,
 ) => {
   return (value: string): string => {
     const formatted = formatDateWithLocale(
       value,
-      locale.value,
-      fallbackLocale.value,
+      localeValue(),
+      fallbackLocaleValue(),
       DATE_FORMAT_OPTIONS,
     );
     return formatted ?? value;
@@ -381,7 +381,10 @@ const buildAutomationEmailPageState = async () => {
 export async function useAutomationEmailPage() {
   const state = await buildAutomationEmailPageState();
   const pending = computed(() => state.resultState.pendingAction.value !== null);
-  const toLocalizedDateTime = createToLocalizedDateTime(state.locale, state.fallbackLocale);
+  const toLocalizedDateTime = createToLocalizedDateTime(
+    () => state.locale.value,
+    () => state.fallbackLocale.value,
+  );
 
   return {
     t: state.t,

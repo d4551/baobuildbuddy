@@ -2,7 +2,7 @@
 import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { FAB_QUICK_ACTIONS } from "~/constants/dashboard";
+import { FAB_QUICK_ACTIONS } from "~/constants/dashboard-pipeline";
 import { QUICK_ACTION_MENU_ID } from "~/constants/layout";
 
 const { t } = useI18n();

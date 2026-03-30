@@ -4,9 +4,9 @@ import {
   DASHBOARD_A11Y_KEYS,
   DASHBOARD_COPY_KEYS,
   DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY,
-  DASHBOARD_GAMIFICATION_PROGRESS_MIN,
-  getDashboardActivityEmoji,
-} from "~/constants/dashboard";
+} from "~/constants/dashboard-copy";
+import { DASHBOARD_GAMIFICATION_PROGRESS_MIN } from "~/constants/dashboard-core";
+import { getDashboardActivityEmoji } from "~/constants/dashboard-pipeline";
 import type {
   DashboardActivity,
   DashboardChallengeViewModel,

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { UserGamificationData } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { DASHBOARD_A11Y_KEYS } from "~/constants/dashboard-copy";
 import {
-  DASHBOARD_A11Y_KEYS,
   DASHBOARD_GAMIFICATION_PROGRESS_MAX,
   DASHBOARD_GAMIFICATION_PROGRESS_MIN,
   getDashboardGamificationDialStyle,
-} from "~/constants/dashboard";
+} from "~/constants/dashboard-core";
 import {
   GAMIFICATION_CURRENT_STREAK_ICON,
   GAMIFICATION_LEVEL_ICON,

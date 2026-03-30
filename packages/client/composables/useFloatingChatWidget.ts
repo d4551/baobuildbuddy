@@ -179,27 +179,6 @@ const createFloatingChatWidgetMessageActions = (options: {
     options.scrollToBottom(true);
   };
 
-  const handleSaveSpeechConfig = async (): Promise<void> => {
-    const saveSpeechResult = await options.saveSpeechConfig(
-      options.t("floatingChat.voiceSettings.saveErrorFallback"),
-    );
-    if (!saveSpeechResult.ok) {
-      options.toast.error(
-        getErrorMessage(
-          saveSpeechResult.error,
-          options.t("floatingChat.voiceSettings.saveErrorFallback"),
-        ),
-      );
-      return;
-    }
-
-    if (!saveSpeechResult.saved) {
-      return;
-    }
-
-    options.toast.success(options.t("floatingChat.voiceSettings.saveSuccess"));
-  };
-
   const handlePromptInput = (prompt: string): void => {
     options.draft.value = prompt;
     requestAnimationFrame(() => {
@@ -318,7 +297,7 @@ const createFloatingChatWidgetDerivedState = (options: {
   };
 };
 
-const buildFloatingChatWidgetState = () => {
+const createFloatingChatWidgetCoreState = () => {
   const route = useRoute();
   const ai = useAI();
   const { $toast } = useNuxtApp();
@@ -332,54 +311,147 @@ const buildFloatingChatWidgetState = () => {
     locale,
     messages: typedMessages,
   });
-  const derivedState = createFloatingChatWidgetDerivedState({
-    messages: ai.messages,
-    streaming: ai.streaming,
-    route,
-    buildCurrentContext: ai.buildCurrentContext,
-    t,
-    voiceErrorMessageKey: voice.errorMessageKey,
-  });
-  const { scrollToBottom, handlePanelScroll } = createWidgetScrollHandlers(
-    uiState.panelBodyRef,
-    uiState.shouldStickToBottom,
-  );
-  const panelActions = createFloatingChatWidgetPanelActions({
-    isOpen: uiState.isOpen,
-    isSpeechSettingsOpen: uiState.isSpeechSettingsOpen,
-    unreadCount: uiState.unreadCount,
-    inputRef: uiState.inputRef,
-  });
-  const messageActions = createFloatingChatWidgetMessageActions({
-    draft: uiState.draft,
-    loading: ai.loading,
-    isVoiceListening: voice.isListening,
-    stopListening: voice.stopListening,
-    shouldStickToBottom: uiState.shouldStickToBottom,
-    sendMessage: ai.sendMessage,
-    inputRef: uiState.inputRef,
-    scrollToBottom,
-  });
-  const speechActions = createFloatingChatWidgetSpeechActions({
-    saveSpeechConfig: speechProfiles.saveSpeechConfig,
-    toast: $toast,
-    t,
-  });
 
   return {
+    route,
     ai,
+    toast: $toast,
     t,
     locale,
     resolvedBrand,
     uiState,
     speechProfiles,
     voice,
+  };
+};
+
+const createFloatingChatWidgetBehaviorState = (
+  coreState: ReturnType<typeof createFloatingChatWidgetCoreState>,
+) => {
+  const derivedState = createFloatingChatWidgetDerivedState({
+    messages: coreState.ai.messages,
+    streaming: coreState.ai.streaming,
+    route: coreState.route,
+    buildCurrentContext: coreState.ai.buildCurrentContext,
+    t: coreState.t,
+    voiceErrorMessageKey: coreState.voice.errorMessageKey,
+  });
+  const { scrollToBottom, handlePanelScroll } = createWidgetScrollHandlers(
+    coreState.uiState.panelBodyRef,
+    coreState.uiState.shouldStickToBottom,
+  );
+  const panelActions = createFloatingChatWidgetPanelActions({
+    isOpen: coreState.uiState.isOpen,
+    isSpeechSettingsOpen: coreState.uiState.isSpeechSettingsOpen,
+    unreadCount: coreState.uiState.unreadCount,
+    inputRef: coreState.uiState.inputRef,
+  });
+  const messageActions = createFloatingChatWidgetMessageActions({
+    draft: coreState.uiState.draft,
+    loading: coreState.ai.loading,
+    isVoiceListening: coreState.voice.isListening,
+    stopListening: coreState.voice.stopListening,
+    shouldStickToBottom: coreState.uiState.shouldStickToBottom,
+    sendMessage: coreState.ai.sendMessage,
+    inputRef: coreState.uiState.inputRef,
+    scrollToBottom,
+  });
+  const speechActions = createFloatingChatWidgetSpeechActions({
+    saveSpeechConfig: coreState.speechProfiles.saveSpeechConfig,
+    toast: coreState.toast,
+    t: coreState.t,
+  });
+
+  return {
     derivedState,
     panelActions,
     messageActions,
     speechActions,
     scrollToBottom,
     handlePanelScroll,
+  };
+};
+
+const buildFloatingChatWidgetState = () => {
+  const coreState = createFloatingChatWidgetCoreState();
+  const behaviorState = createFloatingChatWidgetBehaviorState(coreState);
+
+  return {
+    ...coreState,
+    ...behaviorState,
+  };
+};
+
+const createFloatingChatWidgetUiExposedState = (
+  state: ReturnType<typeof buildFloatingChatWidgetState>,
+) => {
+  return {
+    AI_CHAT_PAGE_PATH,
+    chatPanelId: FLOATING_CHAT_PANEL_ID,
+    resolvedBrand: state.resolvedBrand,
+    t: state.t,
+    locale: state.locale,
+    messages: state.ai.messages,
+    loading: state.ai.loading,
+    streaming: state.ai.streaming,
+    clearMessages: state.ai.clearMessages,
+    isOpen: state.uiState.isOpen,
+    isSpeechSettingsOpen: state.uiState.isSpeechSettingsOpen,
+    draft: state.uiState.draft,
+    unreadCount: state.uiState.unreadCount,
+    panelBodyRef: state.uiState.panelBodyRef,
+    inputRef: state.uiState.inputRef,
+    contextChips: state.derivedState.contextChips,
+    contextualPrompts: state.derivedState.contextualPrompts,
+    currentContextLabel: state.derivedState.currentContextLabel,
+    focusedEntityLabel: state.derivedState.focusedEntityLabel,
+    renderedMessages: state.derivedState.renderedMessages,
+    latestAssistantMessageIndex: state.derivedState.latestAssistantMessageIndex,
+    streamingBubble: state.derivedState.streamingBubble,
+    hasConversation: state.derivedState.hasConversation,
+    showWidget: state.derivedState.showWidget,
+    handlePanelScroll: state.handlePanelScroll,
+    toggleWidget: state.panelActions.toggleWidget,
+    closeWidget: state.panelActions.closeWidget,
+    toggleSpeechSettings: state.panelActions.toggleSpeechSettings,
+    handleSendMessage: state.messageActions.handleSendMessage,
+    handlePromptInput: state.messageActions.handlePromptInput,
+    handleDraftKeydown: state.messageActions.handleDraftKeydown,
+  };
+};
+
+const createFloatingChatWidgetSpeechExposedState = (
+  state: ReturnType<typeof buildFloatingChatWidgetState>,
+) => {
+  return {
+    autoSpeakReplies: state.voice.autoSpeakReplies,
+    canReplayAssistant: state.voice.canReplayAssistant,
+    voiceSupportHintKey: state.voice.supportHintKey,
+    voiceErrorLabel: state.derivedState.voiceErrorLabel,
+    isVoiceListening: state.voice.isListening,
+    isVoiceSpeaking: state.voice.isSpeaking,
+    supportsRecognition: state.voice.supportsRecognition,
+    supportsSynthesis: state.voice.supportsSynthesis,
+    selectedVoiceId: state.voice.selectedVoiceId,
+    availableVoices: state.voice.voices,
+    speakLatestAssistantMessage: state.voice.speakLatestAssistantMessage,
+    toggleListening: state.voice.toggleListening,
+    speechProviderOptions: state.speechProfiles.speechProviderOptions,
+    speechConfig: state.speechProfiles.speechConfig,
+    sttModelOptions: state.speechProfiles.sttModelOptions,
+    ttsModelOptions: state.speechProfiles.ttsModelOptions,
+    speechConfigSaving: state.speechProfiles.speechConfigSaving,
+    isSpeechConfigDirty: state.speechProfiles.isSpeechConfigDirty,
+    handleSaveSpeechConfig: state.speechActions.handleSaveSpeechConfig,
+  };
+};
+
+const createFloatingChatWidgetExposedState = (
+  state: ReturnType<typeof buildFloatingChatWidgetState>,
+) => {
+  return {
+    ...createFloatingChatWidgetUiExposedState(state),
+    ...createFloatingChatWidgetSpeechExposedState(state),
   };
 };
 
@@ -405,56 +477,5 @@ export function useFloatingChatWidget() {
     handleFocusChatShortcut: state.panelActions.handleFocusChatShortcut,
   });
 
-  return {
-    AI_CHAT_PAGE_PATH,
-    chatPanelId: FLOATING_CHAT_PANEL_ID,
-    resolvedBrand: state.resolvedBrand,
-    t: state.t,
-    locale: state.locale,
-    messages: state.ai.messages,
-    loading: state.ai.loading,
-    streaming: state.ai.streaming,
-    clearMessages: state.ai.clearMessages,
-    isOpen: state.uiState.isOpen,
-    isSpeechSettingsOpen: state.uiState.isSpeechSettingsOpen,
-    draft: state.uiState.draft,
-    unreadCount: state.uiState.unreadCount,
-    panelBodyRef: state.uiState.panelBodyRef,
-    inputRef: state.uiState.inputRef,
-    autoSpeakReplies: state.voice.autoSpeakReplies,
-    canReplayAssistant: state.voice.canReplayAssistant,
-    voiceSupportHintKey: state.voice.supportHintKey,
-    voiceErrorLabel: state.derivedState.voiceErrorLabel,
-    isVoiceListening: state.voice.isListening,
-    isVoiceSpeaking: state.voice.isSpeaking,
-    supportsRecognition: state.voice.supportsRecognition,
-    supportsSynthesis: state.voice.supportsSynthesis,
-    selectedVoiceId: state.voice.selectedVoiceId,
-    availableVoices: state.voice.voices,
-    speakLatestAssistantMessage: state.voice.speakLatestAssistantMessage,
-    toggleListening: state.voice.toggleListening,
-    speechProviderOptions: state.speechProfiles.speechProviderOptions,
-    speechConfig: state.speechProfiles.speechConfig,
-    sttModelOptions: state.speechProfiles.sttModelOptions,
-    ttsModelOptions: state.speechProfiles.ttsModelOptions,
-    speechConfigSaving: state.speechProfiles.speechConfigSaving,
-    isSpeechConfigDirty: state.speechProfiles.isSpeechConfigDirty,
-    contextChips: state.derivedState.contextChips,
-    contextualPrompts: state.derivedState.contextualPrompts,
-    currentContextLabel: state.derivedState.currentContextLabel,
-    focusedEntityLabel: state.derivedState.focusedEntityLabel,
-    renderedMessages: state.derivedState.renderedMessages,
-    latestAssistantMessageIndex: state.derivedState.latestAssistantMessageIndex,
-    streamingBubble: state.derivedState.streamingBubble,
-    hasConversation: state.derivedState.hasConversation,
-    showWidget: state.derivedState.showWidget,
-    handlePanelScroll: state.handlePanelScroll,
-    toggleWidget: state.panelActions.toggleWidget,
-    closeWidget: state.panelActions.closeWidget,
-    toggleSpeechSettings: state.panelActions.toggleSpeechSettings,
-    handleSendMessage: state.messageActions.handleSendMessage,
-    handleSaveSpeechConfig: state.speechActions.handleSaveSpeechConfig,
-    handlePromptInput: state.messageActions.handlePromptInput,
-    handleDraftKeydown: state.messageActions.handleDraftKeydown,
-  };
+  return createFloatingChatWidgetExposedState(state);
 }

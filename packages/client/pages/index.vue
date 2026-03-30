@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard";
+import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
 
 const {
   resolvedBrand,

@@ -10,10 +10,8 @@ import { useI18n } from "vue-i18n";
 import { useAsyncData, useServerSeoMeta } from "#imports";
 import { useAutomation } from "~/composables/useAutomation";
 import { useFlowEngine } from "~/composables/useFlowEngine";
-import {
-  type DashboardPipelineStepViewModel,
-  resolveDashboardPipelineSteps,
-} from "~/constants/dashboard";
+import type { DashboardPipelineStepViewModel } from "~/constants/dashboard-contracts";
+import { resolveDashboardPipelineSteps } from "~/constants/dashboard-pipeline";
 import { createFlowEngineInput, type FlowActionId } from "~/constants/flow-engine";
 import { getErrorMessage } from "~/utils/errors";
 

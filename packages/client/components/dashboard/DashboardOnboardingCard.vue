@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { DASHBOARD_COPY_KEYS, DASHBOARD_ONBOARDING_STEPS } from "~/constants/dashboard";
+import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
+import { DASHBOARD_ONBOARDING_STEPS } from "~/constants/dashboard-core";
 
 defineProps<{
   primaryRoute: string;

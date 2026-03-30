@@ -9,8 +9,8 @@ import { requireValue } from "~/composables/async-flow";
 import {
   DASHBOARD_ACTIVITY_FALLBACK_KEY,
   DASHBOARD_ERROR_KEYS,
-  DASHBOARD_RECENT_ACTIVITY_LIMIT,
-} from "~/constants/dashboard";
+} from "~/constants/dashboard-copy";
+import { DASHBOARD_RECENT_ACTIVITY_LIMIT } from "~/constants/dashboard-core";
 import type {
   DashboardActivity,
   DashboardChallengeViewModel,
