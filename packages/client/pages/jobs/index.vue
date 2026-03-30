@@ -1,37 +1,8 @@
 <script setup lang="ts">
-import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared";
-import {
-  APP_ROUTE_BUILDERS,
-  formatRelativeTimeForDate,
-  JOB_DISCOVERY_DEFAULT_PAGE_SIZE,
-  JOB_EXPERIENCE_LEVELS,
-  JOB_FILTER_ALL_VALUE,
-  JOB_GAME_GENRES,
-  JOB_STUDIO_TYPES,
-  JOB_SUPPORTED_PLATFORMS,
-} from "@bao/shared";
+import { APP_ROUTE_BUILDERS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
-import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
-import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
-
-type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
-
-interface JobsFilterState {
-  location: string;
-  remote: boolean;
-  experienceLevel: FilterSelection<JobExperienceLevel>;
-  studioType: FilterSelection<StudioType>;
-  platform: FilterSelection<Platform>;
-  genre: FilterSelection<GameGenre>;
-}
-
-const { jobs, loading, searchJobs, refreshJobs } = useJobs();
-const router = useRouter();
 const { t } = useI18n();
-const { $toast } = useNuxtApp();
-const { awardForAction } = usePipelineGamification();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -39,220 +10,7 @@ if (import.meta.server) {
     description: t("jobsPage.seoDescription"),
   });
 }
-
-const searchQuery = ref("");
-const localFilters = reactive<JobsFilterState>({
-  location: "",
-  remote: false,
-  experienceLevel: JOB_FILTER_ALL_VALUE,
-  studioType: JOB_FILTER_ALL_VALUE,
-  platform: JOB_FILTER_ALL_VALUE,
-  genre: JOB_FILTER_ALL_VALUE,
-});
-const currentPage = ref(1);
-const pageSize = JOB_DISCOVERY_DEFAULT_PAGE_SIZE;
-const refreshing = ref(false);
-const showFilters = ref(false);
-
-const experienceOptions = JOB_EXPERIENCE_LEVELS;
-const studioTypeOptions = JOB_STUDIO_TYPES;
-const platformOptions = JOB_SUPPORTED_PLATFORMS;
-const genreOptions = JOB_GAME_GENRES;
-
-const {
-  error: jobsBootstrapError,
-  status: jobsBootstrapStatus,
-  refresh: refreshJobsBootstrap,
-} = await useAsyncData("jobs-page-bootstrap", async () => {
-  await searchJobs();
-  return true;
-});
-
-const filteredJobs = computed(() => {
-  let result = [...jobs.value];
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    result = result.filter(
-      (job) =>
-        job.title.toLowerCase().includes(query) ||
-        job.company.toLowerCase().includes(query) ||
-        (job.description || "").toLowerCase().includes(query),
-    );
-  }
-
-  if (localFilters.location) {
-    const normalizedLocation = localFilters.location.toLowerCase();
-    result = result.filter((job) => job.location.toLowerCase().includes(normalizedLocation));
-  }
-
-  if (localFilters.remote) {
-    result = result.filter((job) => job.remote);
-  }
-
-  if (localFilters.experienceLevel !== JOB_FILTER_ALL_VALUE) {
-    const selectedExperienceLevel = localFilters.experienceLevel;
-    result = result.filter((job) => job.experienceLevel === selectedExperienceLevel);
-  }
-
-  if (localFilters.studioType !== JOB_FILTER_ALL_VALUE) {
-    const selectedStudioType = localFilters.studioType;
-    result = result.filter((job) => job.studioType === selectedStudioType);
-  }
-
-  if (localFilters.platform !== JOB_FILTER_ALL_VALUE) {
-    const selectedPlatform = localFilters.platform;
-    result = result.filter((job) => job.platforms?.includes(selectedPlatform));
-  }
-
-  if (localFilters.genre !== JOB_FILTER_ALL_VALUE) {
-    const selectedGenre = localFilters.genre;
-    result = result.filter((job) => job.gameGenres?.includes(selectedGenre));
-  }
-
-  return result;
-});
-
-const paginatedJobs = computed(() => {
-  const start = (currentPage.value - 1) * pageSize;
-  const end = start + pageSize;
-  return filteredJobs.value.slice(start, end);
-});
-
-const totalPages = computed(() => Math.ceil(filteredJobs.value.length / pageSize));
-const pageNumbers = computed(() =>
-  Array.from({ length: totalPages.value }, (_, index) => index + 1),
-);
-const jobsPaginationSummary = computed(() =>
-  t("jobsPage.pagination.summary", {
-    start: filteredJobs.value.length === 0 ? 0 : (currentPage.value - 1) * pageSize + 1,
-    end: Math.min(currentPage.value * pageSize, filteredJobs.value.length),
-    total: filteredJobs.value.length,
-  }),
-);
-
-watch(
-  () => ({
-    search: searchQuery.value,
-    location: localFilters.location,
-    remote: localFilters.remote,
-    experienceLevel: localFilters.experienceLevel,
-    studioType: localFilters.studioType,
-    platform: localFilters.platform,
-    genre: localFilters.genre,
-  }),
-  () => {
-    currentPage.value = 1;
-  },
-);
-
-watch(totalPages, (nextTotal) => {
-  if (nextTotal <= 0) {
-    currentPage.value = 1;
-    return;
-  }
-  if (currentPage.value > nextTotal) {
-    currentPage.value = nextTotal;
-  }
-});
-
-async function handleRefresh() {
-  refreshing.value = true;
-  const refreshResult = await settlePromise(refreshJobs(), t("apiErrors.jobs.refreshFailed"));
-  if (refreshResult.ok) {
-    await maybeAwardSearchXp();
-  }
-  refreshing.value = false;
-
-  if (!refreshResult.ok) {
-    throw refreshResult.error;
-  }
-}
-
-async function handleSearch() {
-  currentPage.value = 1;
-  if (!hasSearchCriteria()) {
-    return;
-  }
-
-  await maybeAwardSearchXp();
-}
-
-function clearFilters() {
-  searchQuery.value = "";
-  localFilters.location = "";
-  localFilters.remote = false;
-  localFilters.experienceLevel = JOB_FILTER_ALL_VALUE;
-  localFilters.studioType = JOB_FILTER_ALL_VALUE;
-  localFilters.platform = JOB_FILTER_ALL_VALUE;
-  localFilters.genre = JOB_FILTER_ALL_VALUE;
-  currentPage.value = 1;
-}
-
-async function viewJob(id: string) {
-  await router.push(APP_ROUTE_BUILDERS.jobDetail(id));
-}
-
-async function interviewJob(id: string) {
-  await router.push(buildInterviewJobNavigation(id, "jobs-list"));
-}
-
-function formatDate(date: string) {
-  return formatRelativeTimeForDate(
-    date,
-    (key, params) => t(key, params as Record<string, unknown>),
-    {
-      keyPrefix: "jobsPage.date",
-    },
-  );
-}
-
-function experienceOptionLabel(value: FilterSelection<JobExperienceLevel>): string {
-  if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.all");
-  return jobExperienceLabel(t, value);
-}
-
-function studioTypeOptionLabel(value: FilterSelection<StudioType>): string {
-  if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.allTypes");
-  return studioTypeLabel(t, value);
-}
-
-function platformOptionLabel(value: FilterSelection<Platform>): string {
-  if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.allPlatforms");
-  return platformLabel(t, value);
-}
-
-function genreOptionLabel(value: FilterSelection<GameGenre>): string {
-  if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.allGenres");
-  return gameGenreLabel(t, value);
-}
-
-function hasSearchCriteria(): boolean {
-  return (
-    searchQuery.value.trim().length > 0 ||
-    localFilters.location.trim().length > 0 ||
-    localFilters.remote ||
-    localFilters.experienceLevel !== JOB_FILTER_ALL_VALUE ||
-    localFilters.studioType !== JOB_FILTER_ALL_VALUE ||
-    localFilters.platform !== JOB_FILTER_ALL_VALUE ||
-    localFilters.genre !== JOB_FILTER_ALL_VALUE
-  );
-}
-
-async function maybeAwardSearchXp(): Promise<void> {
-  const rewardResult = await settlePromise(
-    awardForAction("jobSearch"),
-    t("apiErrors.gamification.awardXPFailed"),
-  );
-  if (!rewardResult.ok) {
-    // Search UX must not fail if gamification awarding is unavailable.
-    return;
-  }
-
-  if (rewardResult.value.awarded) {
-    $toast.success(t("jobsPage.toasts.searchReward", { xp: rewardResult.value.amount }));
-  }
-}
+const page = await useJobsIndexPage();
 </script>
 
 <template>
@@ -266,10 +24,10 @@ async function maybeAwardSearchXp(): Promise<void> {
         <button
           class="btn btn-primary"
           :aria-label="t('jobsPage.refreshAria')"
-          :disabled="refreshing"
-          @click="handleRefresh"
+          :disabled="page.refreshing.value"
+          @click="page.handleRefresh()"
         >
-          <span v-if="refreshing" class="loading loading-spinner loading-sm"></span>
+          <span v-if="page.refreshing.value" class="loading loading-spinner loading-sm"></span>
           <IconRefresh v-else class="h-4 w-4" />
           {{ t("jobsPage.refreshButton") }}
         </button>
@@ -280,21 +38,21 @@ async function maybeAwardSearchXp(): Promise<void> {
       <div class="card-body">
         <div class="flex flex-col gap-3 sm:flex-row">
           <input
-            v-model="searchQuery"
+            v-model="page.searchQuery.value"
             type="text"
             :placeholder="t('jobsPage.searchPlaceholder')"
             class="input flex-1"
             :aria-label="t('jobsPage.searchAria')"
-            @keyup.enter="handleSearch"
+            @keyup.enter="page.handleSearch()"
           />
-          <button class="btn btn-primary" :aria-label="t('jobsPage.searchButtonAria')" @click="handleSearch">
+          <button class="btn btn-primary" :aria-label="t('jobsPage.searchButtonAria')" @click="page.handleSearch()">
             <IconSearch class="h-5 w-5" />
             {{ t("jobsPage.searchButton") }}
           </button>
           <button
             class="btn btn-outline sm:hidden"
             :aria-label="t('jobsPage.toggleFiltersAria')"
-            @click="showFilters = !showFilters"
+            @click="page.showFilters.value = !page.showFilters.value"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -306,128 +64,42 @@ async function maybeAwardSearchXp(): Promise<void> {
     </div>
 
     <SectionGrid grid-token="sidebar">
-      <div class="w-full shrink-0 lg:w-64" :class="{ 'hidden lg:block': !showFilters }">
-        <div class="card sticky top-6 bg-base-200">
-          <div class="card-body">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="card-title text-lg">{{ t("jobsPage.filtersTitle") }}</h2>
-              <button
-                class="btn btn-ghost btn-xs"
-                :aria-label="t('jobsPage.clearFiltersAria')"
-                @click="clearFilters"
-              >
-                {{ t("jobsPage.clearFiltersButton") }}
-              </button>
-            </div>
-
-            <div class="space-y-4">
-              <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("jobsPage.locationLegend") }}</legend>
-                <input
-                  v-model="localFilters.location"
-                  type="text"
-                  :placeholder="t('jobsPage.locationPlaceholder')"
-                  class="input input-sm w-full"
-                  :aria-label="t('jobsPage.locationAria')"
-                />
-              </fieldset>
-
-              <fieldset class="fieldset">
-                <label class="label cursor-pointer">
-                  <span class="label">{{ t("jobsPage.remoteOnlyLabel") }}</span>
-                  <input
-                    v-model="localFilters.remote"
-                    type="checkbox"
-                    class="toggle toggle-primary toggle-sm"
-                    :aria-label="t('jobsPage.remoteOnlyAria')"
-                  />
-                </label>
-              </fieldset>
-
-              <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("jobsPage.experienceLegend") }}</legend>
-                <select
-                  v-model="localFilters.experienceLevel"
-                  class="select select-sm w-full"
-                  :aria-label="t('jobsPage.experienceAria')"
-                >
-                  <option :value="JOB_FILTER_ALL_VALUE">
-                    {{ experienceOptionLabel(JOB_FILTER_ALL_VALUE) }}
-                  </option>
-                  <option v-for="level in experienceOptions" :key="level" :value="level">
-                    {{ experienceOptionLabel(level) }}
-                  </option>
-                </select>
-              </fieldset>
-
-              <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("jobsPage.studioTypeLegend") }}</legend>
-                <select
-                  v-model="localFilters.studioType"
-                  class="select select-sm w-full"
-                  :aria-label="t('jobsPage.studioTypeAria')"
-                >
-                  <option :value="JOB_FILTER_ALL_VALUE">
-                    {{ studioTypeOptionLabel(JOB_FILTER_ALL_VALUE) }}
-                  </option>
-                  <option v-for="studioType in studioTypeOptions" :key="studioType" :value="studioType">
-                    {{ studioTypeOptionLabel(studioType) }}
-                  </option>
-                </select>
-              </fieldset>
-
-              <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("jobsPage.platformLegend") }}</legend>
-                <select
-                  v-model="localFilters.platform"
-                  class="select select-sm w-full"
-                  :aria-label="t('jobsPage.platformAria')"
-                >
-                  <option :value="JOB_FILTER_ALL_VALUE">
-                    {{ platformOptionLabel(JOB_FILTER_ALL_VALUE) }}
-                  </option>
-                  <option v-for="platform in platformOptions" :key="platform" :value="platform">
-                    {{ platformOptionLabel(platform) }}
-                  </option>
-                </select>
-              </fieldset>
-
-              <fieldset class="fieldset">
-                <legend class="fieldset-legend">{{ t("jobsPage.genreLegend") }}</legend>
-                <select
-                  v-model="localFilters.genre"
-                  class="select select-sm w-full"
-                  :aria-label="t('jobsPage.genreAria')"
-                >
-                  <option :value="JOB_FILTER_ALL_VALUE">
-                    {{ genreOptionLabel(JOB_FILTER_ALL_VALUE) }}
-                  </option>
-                  <option v-for="genre in genreOptions" :key="genre" :value="genre">
-                    {{ genreOptionLabel(genre) }}
-                  </option>
-                </select>
-              </fieldset>
-            </div>
-          </div>
-        </div>
+      <div class="w-full shrink-0 lg:w-64" :class="{ 'hidden lg:block': !page.showFilters.value }">
+        <JobsPageFiltersCard
+          v-model:location="page.localFilters.location"
+          v-model:remote="page.localFilters.remote"
+          v-model:experience-level="page.localFilters.experienceLevel"
+          v-model:studio-type="page.localFilters.studioType"
+          v-model:platform="page.localFilters.platform"
+          v-model:genre="page.localFilters.genre"
+          :experience-options="page.experienceOptions"
+          :experience-option-label="(value) => page.experienceOptionLabel(value)"
+          :studio-type-options="page.studioTypeOptions"
+          :studio-type-option-label="(value) => page.studioTypeOptionLabel(value)"
+          :platform-options="page.platformOptions"
+          :platform-option-label="(value) => page.platformOptionLabel(value)"
+          :genre-options="page.genreOptions"
+          :genre-option-label="(value) => page.genreOptionLabel(value)"
+          @clear="page.clearFilters"
+        />
       </div>
 
       <div class="min-w-0 flex-1">
         <LoadingSkeleton
-          v-if="loading || jobsBootstrapStatus === 'pending'"
+          v-if="page.loading.value || page.jobsBootstrapStatus.value === 'pending'"
           variant="cards"
         />
 
         <BootstrapErrorAlert
-          v-else-if="jobsBootstrapError"
-          :message="getErrorMessage(jobsBootstrapError, t('jobsPage.bootstrapError'))"
+          v-else-if="page.jobsBootstrapError.value"
+          :message="getErrorMessage(page.jobsBootstrapError.value, t('jobsPage.bootstrapError'))"
           :retry-label="t('jobsPage.bootstrapRetry')"
           :retry-aria-label="t('jobsPage.bootstrapRetryAria')"
-          @retry="() => refreshJobsBootstrap()"
+          @retry="() => page.refreshJobsBootstrap()"
         />
 
         <EmptyState
-          v-else-if="paginatedJobs.length === 0"
+          v-else-if="page.paginatedJobs.value.length === 0"
           title-key="jobsPage.emptyStateTitle"
           description-key="jobsPage.emptyStateDescription"
         />
@@ -435,7 +107,7 @@ async function maybeAwardSearchXp(): Promise<void> {
         <div v-else>
           <SectionGrid grid-token="twoColumn" extra-class="mb-6">
             <article
-              v-for="job in paginatedJobs"
+              v-for="job in page.paginatedJobs.value"
               :key="job.id"
               class="card card-border relative h-full overflow-hidden bg-base-100 transition-colors hover:bg-base-200"
             >
@@ -466,7 +138,7 @@ async function maybeAwardSearchXp(): Promise<void> {
                   </span>
 
                   <span v-if="job.experienceLevel" class="badge badge-sm badge-outline">
-                    {{ experienceOptionLabel(job.experienceLevel) }}
+                    {{ page.experienceOptionLabel(job.experienceLevel) }}
                   </span>
                 </div>
 
@@ -476,20 +148,20 @@ async function maybeAwardSearchXp(): Promise<void> {
 
                 <div class="card-actions mt-2 items-center justify-between">
                   <span class="text-xs text-base-content/50">
-                    {{ formatDate(job.postedDate) }}
+                    {{ page.formatDate(job.postedDate) }}
                   </span>
                   <div class="flex gap-2">
                     <button
                       class="btn btn-outline btn-sm relative z-20"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
-                      @click.stop="interviewJob(job.id)"
+                      @click.stop="page.interviewJob(job.id)"
                     >
                       {{ t("jobsPage.interviewButton") }}
                     </button>
                     <button
                       class="btn btn-primary btn-sm relative z-20"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
-                      @click.stop="viewJob(job.id)"
+                      @click.stop="page.viewJob(job.id)"
                     >
                       {{ t("jobsPage.viewButton") }}
                     </button>
@@ -500,11 +172,11 @@ async function maybeAwardSearchXp(): Promise<void> {
           </SectionGrid>
 
           <AppPagination
-            v-if="totalPages > 1"
-            v-model:current-page="currentPage"
-            :total-pages="totalPages"
-            :page-numbers="pageNumbers"
-            :summary="jobsPaginationSummary"
+            v-if="page.totalPages.value > 1"
+            v-model:current-page="page.currentPage.value"
+            :total-pages="page.totalPages.value"
+            :page-numbers="page.pageNumbers.value"
+            :summary="page.jobsPaginationSummary.value"
             :navigation-aria="t('jobsPage.pagination.navigationAria')"
             :previous-aria="t('jobsPage.pagination.previousAria')"
             :next-aria="t('jobsPage.pagination.nextAria')"

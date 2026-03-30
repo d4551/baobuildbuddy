@@ -2985,17 +2985,7 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            challengesCompleted: number;
-                            xpEarned: number;
-                            actionsCount: number;
-                            days: {
-                                date: string;
-                                actions: number;
-                                xpEarned: number;
-                            }[];
-                            topCategory: string;
-                        };
+                        200: import("./services/gamification-definitions").WeeklyProgressResult;
                     };
                 };
             };

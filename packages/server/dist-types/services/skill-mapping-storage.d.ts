@@ -1,0 +1,11 @@
+import type { SkillMapping } from "@bao/shared";
+import { skillMappings } from "../db/schema/skill-mappings";
+export type SkillMappingInsert = Omit<SkillMapping, "id">;
+export type SkillMappingUpdate = Partial<SkillMapping>;
+type SkillMappingRow = typeof skillMappings.$inferSelect;
+export declare function listSkillMappingRows(): Promise<SkillMappingRow[]>;
+export declare function readSkillMappingRow(id: string): Promise<SkillMappingRow | null>;
+export declare function createSkillMappingRow(data: SkillMappingInsert): Promise<string>;
+export declare function updateSkillMappingRow(id: string, data: SkillMappingUpdate): Promise<void>;
+export declare function deleteSkillMappingRow(id: string): Promise<void>;
+export {};

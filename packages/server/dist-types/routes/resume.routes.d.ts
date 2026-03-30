@@ -1,4 +1,3 @@
-import { type ResumeData } from "@bao/shared";
 import { Elysia } from "elysia";
 export declare const resumeRoutes: Elysia<"/resumes", {
     decorator: {};
@@ -69,7 +68,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: ResumeData | {
+                        200: import("@bao/shared").ResumeData | {
                             error: string;
                             details: string;
                         };
@@ -95,7 +94,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
             query: unknown;
             headers: unknown;
             response: {
-                200: ResumeData[];
+                200: import("@bao/shared").ResumeData[];
             };
         };
     };
@@ -157,7 +156,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
             query: unknown;
             headers: unknown;
             response: {
-                200: ResumeData;
+                200: import("@bao/shared").ResumeData;
                 422: {
                     type: "validation";
                     on: string;
@@ -181,7 +180,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: ResumeData | {
+                    200: import("@bao/shared").ResumeData | {
                         error: string;
                     };
                     422: {
@@ -258,7 +257,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: ResumeData | {
+                    200: import("@bao/shared").ResumeData | {
                         error: string;
                     };
                     422: {
@@ -370,7 +369,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                             suggestions?: undefined;
                             section?: undefined;
                         } | {
-                            resume: ResumeData;
+                            resume: import("@bao/shared").ResumeData;
                             suggestions: import("@bao/shared").JsonArray;
                             section: string;
                             error?: undefined;

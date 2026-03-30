@@ -1,76 +1,16 @@
 import type { Achievement, DailyChallenge, GamificationStats, LevelUpResult, UserGamificationData } from "@bao/shared";
-type WeeklyDaySummary = {
-    date: string;
-    actions: number;
-    xpEarned: number;
-};
-type WeeklyProgressResult = {
-    challengesCompleted: number;
-    xpEarned: number;
-    actionsCount: number;
-    days: WeeklyDaySummary[];
-    topCategory: string;
-};
+import { type WeeklyProgressResult } from "./gamification-definitions";
 export declare class GamificationService {
     private readonly DEFAULT_ID;
-    private typeSafeStats;
-    private toNumericStats;
-    private toActionHistory;
-    private isNumberValue;
-    private getNumericStat;
-    /**
-     * Get or create the gamification progress record
-     */
     getProgress(): Promise<UserGamificationData>;
-    /**
-     * Get streak multiplier based on consecutive active days
-     */
-    private getStreakMultiplier;
-    /**
-     * Award XP and handle level ups with streak multiplier
-     */
     awardXP(amount: number, reason: string): Promise<LevelUpResult | null>;
-    private persistAwardedXP;
-    private appendActionHistoryEntry;
-    /**
-     * Get all achievements with unlock status
-     */
     getAchievements(): Promise<Achievement[]>;
-    /**
-     * Check and unlock achievements based on current stats
-     */
     checkAchievements(stats: Partial<GamificationStats>): Promise<Achievement[]>;
-    private areAchievementRequirementsMet;
     private awardAchievementsSequentially;
-    /**
-     * Get daily challenges
-     */
     getDailyChallenges(): Promise<DailyChallenge[]>;
-    /**
-     * Get predefined daily challenges
-     */
-    private getDefinedChallenges;
-    /**
-     * Complete a daily challenge
-     */
     completeChallenge(challengeId: string): Promise<boolean>;
-    /**
-     * Update consecutive active day streak
-     */
     updateStreak(): Promise<void>;
-    /**
-     * Get weekly progress from action history
-     */
     getWeeklyProgress(): Promise<WeeklyProgressResult>;
-    private filterActionsByDate;
-    private groupActionsByDate;
-    private groupCategoriesByAction;
-    private buildWeeklyDaySummaries;
-    private resolveTopCategory;
-    private countCompletedChallenges;
-    /**
-     * Get monthly statistics
-     */
     getMonthlyStats(): Promise<{
         totalXP: number;
         levelsGained: number;
@@ -79,14 +19,7 @@ export declare class GamificationService {
         actionsCount: number;
         streakDays: number;
     }>;
-    /**
-     * Increment a stat counter, award XP, and check for newly unlocked achievements.
-     */
     trackAction(statKey: keyof GamificationStats, xpAmount: number, reason: string): Promise<void>;
-    /**
-     * Fire-and-forget trackAction for use in route handlers. Logs errors without blocking response.
-     */
     trackActionFireAndForget(statKey: keyof GamificationStats, xpAmount: number, reason: string): void;
 }
 export declare const gamificationService: GamificationService;
-export {};
