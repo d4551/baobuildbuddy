@@ -21,6 +21,14 @@ export interface GamificationStats {
   weeklyProgress: number;
   interviewsCompleted: number;
   studiosExplored: number;
+  actionHistory?: GamificationActionHistoryEntry[];
+}
+
+export interface GamificationActionHistoryEntry {
+  action: string;
+  xpGained: number;
+  multiplier?: number;
+  timestamp: string;
 }
 
 export interface Achievement {

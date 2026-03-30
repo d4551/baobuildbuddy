@@ -2,11 +2,12 @@ import type { AppSettings } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { computed, readonly } from "vue";
 import { useI18n } from "vue-i18n";
-import { toAppSettings } from "./api-normalizers";
+import { toAppSettings } from "./api-normalizer-settings";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 import { useNuxtState } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 import {
+  type ClientProviderTestResult,
   resolveAIRoutingPreference,
   resolveLocalProviderState,
   resolveProviderDiagnostics,
@@ -16,13 +17,8 @@ type ApiClient = ReturnType<typeof useApi>;
 type UpdateSettingsInput = NonNullable<Parameters<ApiClient["settings"]["put"]>[0]>;
 type UpdateApiKeysInput = NonNullable<Parameters<ApiClient["settings"]["api-keys"]["put"]>[0]>;
 type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
-type ProviderTestResult = {
-  valid: boolean;
+type ProviderTestResult = ClientProviderTestResult & {
   provider: TestApiKeyInput["provider"];
-  diagnosticCode?: string;
-  message?: string;
-  availableModels?: string[];
-  selectedModel?: string;
 };
 
 interface SettingsContext {

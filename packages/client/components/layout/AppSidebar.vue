@@ -99,22 +99,19 @@ onMounted(() => {
           </NuxtLink>
         </li>
         <li class="mt-auto pt-4">
-          <label
-            :for="APP_DRAWER_ID"
-            role="button"
-            tabindex="0"
+          <button
+            type="button"
             class="btn btn-ghost btn-sm w-full justify-start is-drawer-close:btn-square"
             :aria-label="t('a11y.toggleSidebarNavigation')"
             :aria-controls="APP_DRAWER_ID"
             :aria-expanded="isDrawerOpen"
-            @keydown.enter.prevent="setDrawerToggleState(!isDrawerOpen)"
-            @keydown.space.prevent="setDrawerToggleState(!isDrawerOpen)"
+            @click="setDrawerToggleState(!isDrawerOpen)"
           >
             <svg class="h-5 w-5 transition-transform duration-200 is-drawer-open:rotate-y-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
             <span class="is-drawer-close:hidden">{{ t("a11y.toggleSidebarNavigation") }}</span>
-          </label>
+          </button>
         </li>
       </ul>
     </nav>

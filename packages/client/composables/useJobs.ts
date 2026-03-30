@@ -1,7 +1,7 @@
 import type { Job } from "@bao/shared";
 import { isRecord, STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { toJob } from "./api-normalizers";
+import { toJob } from "./api-normalizer-jobs";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
 const toJobList = (value: unknown): Job[] =>

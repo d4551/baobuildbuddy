@@ -1,7 +1,7 @@
 import type { GameStudio } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { toGameStudio } from "./api-normalizers";
+import { toGameStudio } from "./api-normalizer-studios";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 
 type ApiClient = ReturnType<typeof useApi>;

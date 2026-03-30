@@ -5,8 +5,6 @@ import {
   INTERVIEW_MIN_RESPONSE_LENGTH,
   INTERVIEW_PROGRESS_MAX,
   INTERVIEW_PROGRESS_MIN,
-  SCORE_PASS_THRESHOLD,
-  SCORE_WARNING_THRESHOLD,
 } from "@bao/shared";
 import { onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
@@ -35,6 +33,7 @@ const router = useRouter();
 const { currentSession, loading, getSession, submitResponse, completeSession } = useInterview();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
+const { getAlertClass } = useScoreColor();
 const sessionId = computed(() =>
   normalizeSessionIdFromQuery(
     route.query[APP_ROUTE_QUERY_KEYS.id] as string | string[] | undefined,
@@ -599,11 +598,7 @@ async function handleCompleteInterview() {
           <div
             v-if="currentQuestion.score !== undefined"
             class="alert"
-            :class="{
-              'alert-success': currentQuestion.score >= SCORE_PASS_THRESHOLD,
-              'alert-warning': currentQuestion.score >= SCORE_WARNING_THRESHOLD && currentQuestion.score < SCORE_PASS_THRESHOLD,
-              'alert-error': currentQuestion.score < SCORE_WARNING_THRESHOLD,
-            }"
+            :class="getAlertClass(currentQuestion.score)"
             aria-live="polite"
           >
             <div>

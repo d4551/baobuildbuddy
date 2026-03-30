@@ -1,0 +1,184 @@
+import {
+  SCHEMA_MAX_BOARD_RESULT_LIMIT,
+  SCHEMA_MAX_ITEMS_BOARDS,
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_MICRO,
+  SCHEMA_MAX_LENGTH_MODEL,
+  SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
+  SCHEMA_MAX_LENGTH_SETTINGS_URL,
+  SCHEMA_MAX_PAGES_MAX,
+  SCHEMA_MAX_PAGES_MIN,
+  SCHEMA_PROVIDER_TIMEOUT_MAX_MS,
+  SCHEMA_PROVIDER_TIMEOUT_MIN_MS,
+  SPEECH_PROVIDER_OPTIONS,
+} from "@bao/shared";
+import { t } from "elysia";
+
+const COMPANY_BOARD_PROVIDER_TYPES = [
+  "greenhouse",
+  "lever",
+  "recruitee",
+  "workable",
+  "ashby",
+  "smartrecruiters",
+  "teamtailor",
+  "workday",
+] as const;
+
+const GAMING_PORTAL_IDS = [
+  "hitmarker",
+  "grackle",
+  "workwithindies",
+  "remotegamejobs",
+  "gamesjobsdirect",
+  "pocketgamer",
+] as const;
+
+const [
+  SPEECH_PROVIDER_BROWSER,
+  SPEECH_PROVIDER_OPENAI,
+  SPEECH_PROVIDER_HUGGINGFACE,
+  SPEECH_PROVIDER_LOCAL,
+  SPEECH_PROVIDER_CUSTOM,
+] = SPEECH_PROVIDER_OPTIONS;
+const [
+  COMPANY_BOARD_GREENHOUSE,
+  COMPANY_BOARD_LEVER,
+  COMPANY_BOARD_RECRUITEE,
+  COMPANY_BOARD_WORKABLE,
+  COMPANY_BOARD_ASHBY,
+  COMPANY_BOARD_SMARTRECRUITERS,
+  COMPANY_BOARD_TEAMTAILOR,
+  COMPANY_BOARD_WORKDAY,
+] = COMPANY_BOARD_PROVIDER_TYPES;
+const [
+  GAMING_PORTAL_HITMARKER,
+  GAMING_PORTAL_GRACKLE,
+  GAMING_PORTAL_WORKWITHINDIES,
+  GAMING_PORTAL_REMOTEGAMEJOBS,
+  GAMING_PORTAL_GAMESJOBS_DIRECT,
+  GAMING_PORTAL_POCKETGAMER,
+] = GAMING_PORTAL_IDS;
+
+const speechProviderBodySchema = t.Union([
+  t.Literal(SPEECH_PROVIDER_BROWSER),
+  t.Literal(SPEECH_PROVIDER_OPENAI),
+  t.Literal(SPEECH_PROVIDER_HUGGINGFACE),
+  t.Literal(SPEECH_PROVIDER_LOCAL),
+  t.Literal(SPEECH_PROVIDER_CUSTOM),
+]);
+
+const companyBoardTypeBodySchema = t.Union([
+  t.Literal(COMPANY_BOARD_GREENHOUSE),
+  t.Literal(COMPANY_BOARD_LEVER),
+  t.Literal(COMPANY_BOARD_RECRUITEE),
+  t.Literal(COMPANY_BOARD_WORKABLE),
+  t.Literal(COMPANY_BOARD_ASHBY),
+  t.Literal(COMPANY_BOARD_SMARTRECRUITERS),
+  t.Literal(COMPANY_BOARD_TEAMTAILOR),
+  t.Literal(COMPANY_BOARD_WORKDAY),
+]);
+
+const gamingPortalIdBodySchema = t.Union([
+  t.Literal(GAMING_PORTAL_HITMARKER),
+  t.Literal(GAMING_PORTAL_GRACKLE),
+  t.Literal(GAMING_PORTAL_WORKWITHINDIES),
+  t.Literal(GAMING_PORTAL_REMOTEGAMEJOBS),
+  t.Literal(GAMING_PORTAL_GAMESJOBS_DIRECT),
+  t.Literal(GAMING_PORTAL_POCKETGAMER),
+]);
+
+const companyBoardApiTemplatesBodySchema = t.Object({
+  greenhouse: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  lever: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  recruitee: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  workable: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  ashby: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  smartrecruiters: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  teamtailor: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  workday: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+});
+
+const companyBoardConfigBodySchema = t.Object({
+  name: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  token: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  type: companyBoardTypeBodySchema,
+  enabled: t.Boolean(),
+  priority: t.Number({ minimum: 0, maximum: 1000 }),
+});
+
+const greenhouseBoardConfigBodySchema = t.Object({
+  board: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  company: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  enabled: t.Boolean(),
+});
+
+const leverCompanyConfigBodySchema = t.Object({
+  slug: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  company: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  enabled: t.Boolean(),
+});
+
+const gamingPortalConfigBodySchema = t.Object({
+  id: gamingPortalIdBodySchema,
+  name: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  source: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+  fallbackUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  enabled: t.Boolean(),
+});
+
+export const jobProviderSettingsBodySchema = t.Object({
+  providerTimeoutMs: t.Number({
+    minimum: SCHEMA_PROVIDER_TIMEOUT_MIN_MS,
+    maximum: SCHEMA_PROVIDER_TIMEOUT_MAX_MS,
+  }),
+  companyBoardResultLimit: t.Number({ minimum: 1, maximum: SCHEMA_MAX_BOARD_RESULT_LIMIT }),
+  gamingBoardResultLimit: t.Number({ minimum: 1, maximum: SCHEMA_MAX_BOARD_RESULT_LIMIT }),
+  unknownLocationLabel: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  unknownCompanyLabel: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  hitmarkerEnabled: t.Boolean(),
+  hitmarkerApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  hitmarkerDefaultQuery: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  hitmarkerDefaultLocation: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+  greenhouseApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  greenhouseMaxPages: t.Number({ minimum: SCHEMA_MAX_PAGES_MIN, maximum: SCHEMA_MAX_PAGES_MAX }),
+  greenhouseBoards: t.Array(greenhouseBoardConfigBodySchema, { maxItems: SCHEMA_MAX_ITEMS_BOARDS }),
+  leverApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
+  leverMaxPages: t.Number({ minimum: SCHEMA_MAX_PAGES_MIN, maximum: SCHEMA_MAX_PAGES_MAX }),
+  leverCompanies: t.Array(leverCompanyConfigBodySchema, { maxItems: SCHEMA_MAX_ITEMS_BOARDS }),
+  companyBoardApiTemplates: companyBoardApiTemplatesBodySchema,
+  companyBoards: t.Array(companyBoardConfigBodySchema, { maxItems: SCHEMA_MAX_ITEMS_BOARDS }),
+  gamingPortals: t.Array(gamingPortalConfigBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+});
+
+export const speechSettingsBodySchema = t.Object({
+  locale: t.String({ minLength: 2, maxLength: SCHEMA_MAX_LENGTH_MICRO }),
+  stt: t.Object({
+    provider: speechProviderBodySchema,
+    model: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_MODEL }),
+    endpoint: t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG }),
+  }),
+  tts: t.Object({
+    provider: speechProviderBodySchema,
+    model: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_MODEL }),
+    endpoint: t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    voice: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
+    format: t.Union([t.Literal("mp3"), t.Literal("wav")]),
+  }),
+});
+
+const jsonValueBodySchema = t.Recursive((Self) =>
+  t.Union([
+    t.String(),
+    t.Number(),
+    t.Boolean(),
+    t.Null(),
+    t.Array(Self),
+    t.Record(t.String(), Self),
+  ]),
+);
+
+export const nullableJsonValueBodySchema = t.Union([jsonValueBodySchema, t.Null()]);
+export { jsonValueBodySchema };

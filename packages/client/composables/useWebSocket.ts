@@ -103,14 +103,11 @@ function logSettledTask(
   logger: ReturnType<typeof createClientLogger>,
   task: Promise<unknown>,
   errorPrefix: string,
-): void {
-  const settleTask = settlePromise(task, errorPrefix).then((result) => {
+): Promise<void> {
+  return settlePromise(task, errorPrefix).then((result) => {
     if (!result.ok) {
       logger.error(errorPrefix, result.error);
     }
-  });
-  settleTask.catch((error: unknown) => {
-    logger.error(errorPrefix, error);
   });
 }
 
@@ -119,7 +116,7 @@ function runHandlerTask(
   task: () => void,
   errorPrefix: string,
 ): void {
-  logSettledTask(logger, Promise.resolve().then(task), errorPrefix);
+  logSettledTask(logger, Promise.resolve().then(task), errorPrefix).then(undefined, () => undefined);
 }
 
 function containsCircularOrBigInt(value: unknown, seen: WeakSet<object>): boolean {
@@ -157,7 +154,7 @@ function startPingInterval(context: WebSocketContext): void {
         context.state.socket?.send(JSON.stringify({ type: "ping" }));
       }),
       "WebSocket ping failed",
-    );
+    ).then(undefined, () => undefined);
   }, PING_INTERVAL);
 }
 
@@ -282,7 +279,7 @@ function createConnect(context: WebSocketContext) {
     context.state.currentPath = path;
     const wsUrl = buildWebSocketUrl(path, resolveWebSocketBase(context));
 
-    const connectionTask = settlePromise(
+    settlePromise(
       Promise.resolve().then(() => new WebSocket(wsUrl)),
       "Failed to create WebSocket connection",
     ).then((connectionResult) => {
@@ -295,10 +292,7 @@ function createConnect(context: WebSocketContext) {
       context.state.socket = connectionResult.value;
       setConnectionTimeout(context, connectionResult.value);
       attachSocketHandlers(context, connectionResult.value, connect);
-    });
-    connectionTask.catch((error: unknown) => {
-      context.logger.error("WebSocket connection task failed:", error);
-    });
+    }, () => undefined);
   };
 
   return connect;

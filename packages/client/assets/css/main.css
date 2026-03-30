@@ -57,6 +57,36 @@ samp {
   }
 }
 
+.hero-text-rotate-enter-active,
+.hero-text-rotate-leave-active,
+.toast-motion-enter-active,
+.toast-motion-leave-active,
+.toast-motion-move {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.hero-text-rotate-enter-from,
+.hero-text-rotate-leave-to,
+.toast-motion-enter-from,
+.toast-motion-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-text-rotate-enter-from {
+    transform: translateY(0.4rem);
+  }
+
+  .hero-text-rotate-leave-to {
+    transform: translateY(-0.4rem);
+  }
+
+  .toast-motion-enter-from,
+  .toast-motion-leave-to {
+    transform: translateY(-0.5rem) scale(0.98);
+  }
+}
+
 /*
  * WCAG 2.1 AA text contrast (4.5:1) on semantic pairs — daisyUI stock corporate/business
  * miss a few pairs; overrides merge with node_modules/daisyui/themes.css in validate-ui-accessibility.ts.

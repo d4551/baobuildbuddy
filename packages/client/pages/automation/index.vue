@@ -269,23 +269,14 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
     />
 
     <template v-else>
-      <div class="stats stats-vertical w-full border border-base-300 bg-base-200 shadow-sm sm:stats-horizontal">
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.hub.stats.totalRunsTitle") }}</div>
-          <div class="stat-value">{{ totalRuns }}</div>
-          <div class="stat-desc">{{ t("automation.hub.stats.totalRunsDescription") }}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.hub.stats.todayRunsTitle") }}</div>
-          <div class="stat-value">{{ todayRuns }}</div>
-          <div class="stat-desc">{{ t("automation.hub.stats.todayRunsDescription") }}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.hub.stats.successRateTitle") }}</div>
-          <div class="stat-value">{{ successRate }}%</div>
-          <div class="stat-desc">{{ t("automation.hub.stats.successRateDescription") }}</div>
-        </div>
-      </div>
+      <StatsRow
+        background-class="border border-base-300 bg-base-200"
+        :stats="[
+          { titleKey: 'automation.hub.stats.totalRunsTitle', value: totalRuns, descKey: 'automation.hub.stats.totalRunsDescription' },
+          { titleKey: 'automation.hub.stats.todayRunsTitle', value: todayRuns, descKey: 'automation.hub.stats.todayRunsDescription' },
+          { titleKey: 'automation.hub.stats.successRateTitle', value: `${successRate}%`, descKey: 'automation.hub.stats.successRateDescription' },
+        ]"
+      />
 
       <WorkPipeline
         v-bind="{
@@ -327,23 +318,14 @@ function capabilityStatusLabel(value: boolean, issueCount = 0): string {
           />
 
           <template v-else-if="capabilitySummary">
-            <div class="stats stats-vertical border border-base-300 bg-base-200 shadow-sm lg:stats-horizontal">
-              <div class="stat">
-                <div class="stat-title">{{ t("automation.hub.audit.summary.total") }}</div>
-                <div class="stat-value text-primary">{{ capabilitySummary.total }}</div>
-                <div class="stat-desc">{{ t("automation.hub.audit.summary.totalDesc") }}</div>
-              </div>
-              <div class="stat">
-                <div class="stat-title">{{ t("automation.hub.audit.summary.configured") }}</div>
-                <div class="stat-value text-success">{{ capabilitySummary.configured }}</div>
-                <div class="stat-desc">{{ t("automation.hub.audit.summary.configuredDesc") }}</div>
-              </div>
-              <div class="stat">
-                <div class="stat-title">{{ t("automation.hub.audit.summary.live") }}</div>
-                <div class="stat-value text-secondary">{{ capabilitySummary.liveUpdatesAvailable }}</div>
-                <div class="stat-desc">{{ t("automation.hub.audit.summary.liveDesc") }}</div>
-              </div>
-            </div>
+            <StatsRow
+              background-class="border border-base-300 bg-base-200"
+              :stats="[
+                { titleKey: 'automation.hub.audit.summary.total', value: capabilitySummary.total, valueClass: 'text-primary', descKey: 'automation.hub.audit.summary.totalDesc' },
+                { titleKey: 'automation.hub.audit.summary.configured', value: capabilitySummary.configured, valueClass: 'text-success', descKey: 'automation.hub.audit.summary.configuredDesc' },
+                { titleKey: 'automation.hub.audit.summary.live', value: capabilitySummary.liveUpdatesAvailable, valueClass: 'text-secondary', descKey: 'automation.hub.audit.summary.liveDesc' },
+              ]"
+            />
 
             <div class="overflow-x-auto">
               <table

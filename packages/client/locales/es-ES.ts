@@ -604,6 +604,7 @@ const esES: AppTranslationOverrides = {
       searchAria: "Buscar mapeos de habilidades",
       categoryGroupAria: "Filtrar mapeos por categoría",
       allAria: "Mostrar todas las categorías",
+      allButton: "Todos",
       categoryAria: "Filtrar por categoría {category}",
       clearButton: "Limpiar Filtros",
       clearAria: "Limpiar filtros activos de mapeos",

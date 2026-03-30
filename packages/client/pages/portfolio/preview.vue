@@ -28,7 +28,10 @@ const { pending: bootstrapPending, refresh: refreshPortfolioPreview } = await us
       t("portfolioPage.preview.loadError"),
     );
     if (!portfolioResult.ok) {
-      pageError.value = getErrorMessage(portfolioResult.error, t("portfolioPage.preview.loadError"));
+      pageError.value = getErrorMessage(
+        portfolioResult.error,
+        t("portfolioPage.preview.loadError"),
+      );
     }
     return portfolio.value;
   },
@@ -57,9 +60,7 @@ async function handleExport() {
           :aria-label="t('portfolioPage.preview.backButtonAria')"
           @click="router.back()"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
+          <IconArrowLeft class="h-4 w-4" />
           {{ t("portfolioPage.preview.backButton") }}
         </button>
 
@@ -68,9 +69,7 @@ async function handleExport() {
           :aria-label="t('portfolioPage.preview.exportPdfAria')"
           @click="handleExport"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
+          <IconDownload class="h-4 w-4" />
           {{ t("portfolioPage.preview.exportPdfButton") }}
         </button>
       </template>
@@ -124,9 +123,7 @@ async function handleExport() {
               class="btn btn-outline"
               :aria-label="t('portfolioPage.preview.websiteAria')"
             >
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-              </svg>
+              <IconGlobe class="h-5 w-5" />
               {{ t("portfolioPage.preview.websiteButton") }}
             </a>
           </div>
@@ -174,9 +171,7 @@ async function handleExport() {
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.projects.openProjectButton") }}
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
+                  <IconExternalLink class="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -225,9 +220,7 @@ async function handleExport() {
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.preview.viewButton") }}
-                  <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
+                  <IconExternalLink class="h-3 w-3" />
                 </a>
               </div>
             </div>

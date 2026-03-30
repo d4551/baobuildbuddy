@@ -325,7 +325,7 @@ onBeforeUnmount(() => {
                   <th scope="col">{{ t("automation.runDetail.timeline.columns.message") }}</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody aria-live="polite">
                 <tr v-for="entry in timelineEntries" :key="entry.id">
                   <td>{{ toLocalizedDateTime(entry.timestamp) }}</td>
                   <td>{{ entry.stage }}</td>

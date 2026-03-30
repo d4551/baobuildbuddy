@@ -270,9 +270,7 @@ async function maybeAwardSearchXp(): Promise<void> {
           @click="handleRefresh"
         >
           <span v-if="refreshing" class="loading loading-spinner loading-sm"></span>
-          <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          <IconRefresh v-else class="h-4 w-4" />
           {{ t("jobsPage.refreshButton") }}
         </button>
       </template>
@@ -290,9 +288,7 @@ async function maybeAwardSearchXp(): Promise<void> {
             @keyup.enter="handleSearch"
           />
           <button class="btn btn-primary" :aria-label="t('jobsPage.searchButtonAria')" @click="handleSearch">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <IconSearch class="h-5 w-5" />
             {{ t("jobsPage.searchButton") }}
           </button>
           <button

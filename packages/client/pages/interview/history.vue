@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-  APP_ROUTE_QUERY_KEYS,
-  DECIMAL_RADIX,
-  type InterviewSession,
-  SCORE_PASS_THRESHOLD,
-  SCORE_WARNING_THRESHOLD,
-} from "@bao/shared";
+import { APP_ROUTE_QUERY_KEYS, DECIMAL_RADIX, type InterviewSession } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import type { LocationQueryValue } from "vue-router";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
@@ -18,6 +12,11 @@ const router = useRouter();
 const { t, locale, fallbackLocale } = useI18n();
 const { $toast } = useNuxtApp();
 const { sessions, loading, fetchSessions, getSession } = useInterview();
+const {
+  getScoreBadgeClass: composableGetBadgeClass,
+  getScoreColorClass: composableGetScoreClass,
+  getTimelineLineClass: composableGetTimelineClass,
+} = useScoreColor();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -201,17 +200,6 @@ function formatScore(value: number | undefined): string {
   return `${value}%`;
 }
 
-function scoreBadgeClass(value: number | undefined): string {
-  if (!Number.isFinite(value ?? NaN)) {
-    return "badge-warning";
-  }
-
-  const validScore = value ?? 0;
-  if (validScore >= SCORE_PASS_THRESHOLD) return "badge-success";
-  if (validScore >= SCORE_WARNING_THRESHOLD) return "badge-warning";
-  return "badge-error";
-}
-
 function questionScoreText(score: number | undefined): number {
   if (!Number.isFinite(score ?? NaN)) {
     return 0;
@@ -219,20 +207,16 @@ function questionScoreText(score: number | undefined): number {
   return score ?? 0;
 }
 
+function scoreBadgeClass(value: number | undefined): string {
+  return composableGetBadgeClass(value);
+}
+
 function getScoreColorClass(score: number | undefined): string {
-  if (!Number.isFinite(score ?? NaN)) return "text-warning";
-  const validScore = score ?? 0;
-  if (validScore >= SCORE_PASS_THRESHOLD) return "text-success";
-  if (validScore >= SCORE_WARNING_THRESHOLD) return "text-warning";
-  return "text-error";
+  return composableGetScoreClass(score);
 }
 
 function getTimelineLineClass(score: number | undefined): string {
-  if (!Number.isFinite(score ?? NaN)) return "bg-warning";
-  const validScore = score ?? 0;
-  if (validScore >= SCORE_PASS_THRESHOLD) return "bg-success";
-  if (validScore >= SCORE_WARNING_THRESHOLD) return "bg-warning";
-  return "bg-error";
+  return composableGetTimelineClass(score);
 }
 </script>
 

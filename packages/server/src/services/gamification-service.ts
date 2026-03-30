@@ -1,6 +1,7 @@
 import type {
   Achievement,
   DailyChallenge,
+  GamificationActionHistoryEntry,
   GamificationStats,
   LevelUpResult,
   UserGamificationData,
@@ -13,6 +14,7 @@ import {
   isRecord,
   MS_PER_DAY,
   SCHEMA_MAX_ITEMS_BOARDS,
+  settle,
 } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -21,12 +23,7 @@ import { createServerLogger } from "../utils/logger";
 
 const gamificationLogger = createServerLogger("gamification");
 
-type ActionHistoryEntry = {
-  action: string;
-  xpGained: number;
-  multiplier?: number;
-  timestamp: string;
-};
+type ActionHistoryEntry = GamificationActionHistoryEntry;
 type AchievementDefinition = Omit<Achievement, "unlocked" | "unlockedAt">;
 type WeeklyDaySummary = { date: string; actions: number; xpEarned: number };
 type WeeklyProgressResult = {
@@ -944,9 +941,18 @@ export class GamificationService {
     xpAmount: number,
     reason: string,
   ): void {
-    this.trackAction(statKey, xpAmount, reason).catch((err: unknown) => {
-      gamificationLogger.error("trackAction failed", { statKey, reason, err });
-    });
+    settle(this.trackAction(statKey, xpAmount, reason)).then(
+      (result) => {
+        if (result.status === "rejected") {
+          gamificationLogger.error("trackAction failed", {
+            statKey,
+            reason,
+            err: result.reason instanceof Error ? result.reason.message : String(result.reason),
+          });
+        }
+      },
+      () => undefined,
+    );
   }
 }
 

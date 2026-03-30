@@ -9,12 +9,41 @@ import {
   type AIProviderDiagnostics,
   type AIProviderType,
   type AIRoutingPurpose,
-  type AppSettings,
 } from "@bao/shared";
 
-const providerCatalogById = new Map(
-  AI_PROVIDER_CATALOG.map((provider) => [provider.id, provider] as const),
+type AppSettingsSnapshot = {
+  readonly preferredProvider?: string | null;
+  readonly preferredModel?: string | null;
+  readonly localModelName?: string | null;
+  readonly localModelEndpoint?: string | null;
+  readonly hasLocalKey?: boolean;
+  readonly hasGeminiKey?: boolean;
+  readonly hasOpenaiKey?: boolean;
+  readonly hasClaudeKey?: boolean;
+  readonly hasHuggingfaceToken?: boolean;
+  readonly providerDiagnostics?: AIProviderDiagnostics | null;
+  readonly aiRouting?:
+    | Partial<
+        Record<
+          AIRoutingPurpose,
+          {
+            readonly provider?: AIProviderType;
+            readonly model?: string | null;
+          }
+        >
+      >
+    | null;
+};
+
+const providerCatalogById = new Map<AIProviderType, AIProviderMetadata>(
+  AI_PROVIDER_CATALOG.map<[AIProviderType, AIProviderMetadata]>((provider) => [
+    provider.id,
+    provider,
+  ]),
 );
+
+const isProviderId = (value: string): value is AIProviderType =>
+  AI_PROVIDER_CATALOG.some((provider) => provider.id === value);
 
 const resolveNonEmptyString = (value?: string | null): string => value?.trim() ?? "";
 
@@ -29,10 +58,10 @@ const uniqueNonEmptyStrings = (values: Iterable<string | null | undefined>): str
   return [...ordered];
 };
 
-const resolvePreferredProviderId = (value?: string | null): AIProviderType =>
-  providerCatalogById.has((value ?? "") as AIProviderType)
-    ? ((value ?? AI_PROVIDER_DEFAULT) as AIProviderType)
-    : AI_PROVIDER_DEFAULT;
+const resolvePreferredProviderId = (value?: string | null): AIProviderType => {
+  const candidate = resolveNonEmptyString(value);
+  return candidate && isProviderId(candidate) ? candidate : AI_PROVIDER_DEFAULT;
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -46,9 +75,6 @@ const asBoolean = (value: unknown): boolean | undefined =>
 const asStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
 
-const isProviderId = (value: string): value is AIProviderType =>
-  providerCatalogById.has(value as AIProviderType);
-
 const providerHealthValues = new Set(["healthy", "degraded", "down", "unconfigured"]);
 
 const isProviderHealth = (value: string): value is AIProviderHealth =>
@@ -58,7 +84,7 @@ const hasExplicitOverride = (value: string | null | undefined): boolean =>
   value !== undefined && value !== null;
 
 const resolveLocalConfiguredModel = (
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
   model?: string | null,
 ): string =>
   hasExplicitOverride(model)
@@ -66,7 +92,7 @@ const resolveLocalConfiguredModel = (
     : resolveNonEmptyString(settings?.localModelName);
 
 const resolveLocalEndpoint = (
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
   endpoint?: string | null,
 ): string =>
   hasExplicitOverride(endpoint)
@@ -168,7 +194,7 @@ export function resolveProviderMetadata(
  * Returns a stable provider-diagnostics map from persisted settings.
  */
 export function resolveProviderDiagnostics(
-  settings?: AppSettings | null,
+  settings?: AppSettingsSnapshot | null,
 ): AIProviderDiagnostics {
   return settings?.providerDiagnostics ?? {};
 }
@@ -177,7 +203,7 @@ export function resolveProviderDiagnostics(
  * Resolves whether the given provider is configured from the canonical settings payload.
  */
 export function isProviderConfigured(
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
   providerId: AIProviderType,
 ): boolean {
   if (!settings) {
@@ -203,7 +229,7 @@ export function isProviderConfigured(
  * Resolves the canonical provider/model selection for one AI routing purpose.
  */
 export function resolveAIRoutingPreference(
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
   purpose: AIRoutingPurpose = "chat",
 ): AIRoutingPreferenceState {
   const preferredProvider = resolvePreferredProviderId(settings?.preferredProvider);
@@ -224,7 +250,7 @@ export function resolveAIRoutingPreference(
  */
 export function resolveProviderModelOptions(
   providerId: AIProviderType,
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
   extraModels: readonly string[] = [],
 ): string[] {
   const diagnostics = resolveProviderDiagnostics(settings)[providerId];
@@ -246,7 +272,7 @@ export function resolveProviderModelOptions(
  */
 export function resolveProviderModelSelection(
   providerId: AIProviderType,
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
   extraModels: readonly string[] = [],
 ): string {
   const chatRouting = resolveAIRoutingPreference(settings, "chat");
@@ -259,7 +285,7 @@ export function resolveProviderModelSelection(
 
 const normalizeProviderRow = (
   row: unknown,
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
 ): AIProviderRow | null => {
   if (!isRecord(row)) {
     return null;
@@ -299,7 +325,7 @@ const normalizeProviderRow = (
  */
 export function normalizeProviderRows(
   value: unknown,
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
 ): AIProviderRow[] {
   if (!isRecord(value)) {
     return [];
@@ -315,7 +341,7 @@ export function normalizeProviderRows(
  * Builds fallback provider rows when diagnostics are unavailable.
  */
 export function buildFallbackProviderRows(
-  settings: AppSettings | null | undefined,
+  settings: AppSettingsSnapshot | null | undefined,
 ): AIProviderRow[] {
   return AI_PROVIDER_DEFAULT_ORDER.map((providerId) => {
     const catalogEntry = resolveProviderMetadata(providerId);
@@ -334,7 +360,7 @@ export function buildFallbackProviderRows(
  * Resolves the local-provider endpoint, model, and diagnostics into one stable presentation state.
  */
 export function resolveLocalProviderState(options: {
-  settings?: AppSettings | null;
+  settings?: AppSettingsSnapshot | null;
   endpoint?: string | null;
   model?: string | null;
   diagnostic?: AIProviderDiagnostic | null;

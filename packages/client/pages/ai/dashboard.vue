@@ -2,8 +2,8 @@
 import {
   AI_PROVIDER_DEFAULT,
   AI_ROUTING_PURPOSE_IDS,
-  type AIRouting,
   type AIProviderType,
+  type AIRouting,
   APP_ROUTES,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
@@ -65,13 +65,8 @@ const HEALTH_BADGE_CLASS_BY_VALUE: Record<ProviderHealth, string> = {
 };
 
 const { t } = useI18n();
-const {
-  settings,
-  fetchSettings,
-  testApiKey,
-  chatRoutingPreference,
-  localProviderState,
-} = useSettings();
+const { settings, fetchSettings, testApiKey, chatRoutingPreference, localProviderState } =
+  useSettings();
 const { $toast } = useNuxtApp();
 const api = useApi();
 
@@ -217,10 +212,7 @@ async function fetchProviderStats() {
 async function loadDashboardState(): Promise<DashboardBootstrap> {
   await fetchSettings();
 
-  const [usageResult, modelsResult] = await Promise.all([
-    api.ai.usage.get(),
-    api.ai.models.get(),
-  ]);
+  const [usageResult, modelsResult] = await Promise.all([api.ai.usage.get(), api.ai.models.get()]);
 
   if (usageResult.error) {
     throw new Error(t("aiDashboard.errors.usageLoadFailed"));
@@ -317,7 +309,9 @@ async function handleTestProvider(providerId: AIProviderType) {
         valid,
         message:
           result.message ||
-          (valid ? t("aiDashboard.tests.connectionSuccess") : t("aiDashboard.tests.connectionFailure")),
+          (valid
+            ? t("aiDashboard.tests.connectionSuccess")
+            : t("aiDashboard.tests.connectionFailure")),
       };
     })(),
     t("aiDashboard.tests.connectionFailure"),
@@ -344,7 +338,10 @@ async function handleSetPreference() {
         aiRouting: {
           ...(settings.value?.aiRouting ??
             (Object.fromEntries(
-              AI_ROUTING_PURPOSE_IDS.map((purpose) => [purpose, { provider: selectedProvider.value }]),
+              AI_ROUTING_PURPOSE_IDS.map((purpose) => [
+                purpose,
+                { provider: selectedProvider.value },
+              ]),
             ) as AIRouting)),
           chat: {
             provider: selectedProvider.value,
@@ -415,39 +412,15 @@ const activeProviderLabel = computed(() =>
     />
 
     <div v-else class="space-y-6">
-      <div
+      <StatsRow
         v-if="providerStats"
-        class="stats stats-vertical lg:stats-horizontal w-full border border-base-300 bg-base-100 shadow-sm"
-      >
-        <div class="stat">
-          <div class="stat-title">{{ t("aiDashboard.stats.totalRequestsTitle") }}</div>
-          <div class="stat-value text-primary">{{ providerStats.totalRequests }}</div>
-          <div class="stat-desc">{{ t("aiDashboard.stats.totalRequestsDesc") }}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("aiDashboard.stats.successRateTitle") }}</div>
-          <div class="stat-value text-success">{{ providerStats.successRate }}%</div>
-          <div class="stat-desc">{{ t("aiDashboard.stats.successRateDesc") }}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("aiDashboard.stats.averageResponseTitle") }}</div>
-          <div class="stat-value text-secondary">
-            {{
-              t("aiDashboard.stats.averageResponseValue", {
-                seconds: providerStats.averageResponseTimeSeconds,
-              })
-            }}
-          </div>
-          <div class="stat-desc">{{ t("aiDashboard.stats.averageResponseDesc") }}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("aiDashboard.stats.sessionsTitle") }}</div>
-          <div class="stat-value text-accent">{{ providerStats.sessions }}</div>
-          <div class="stat-desc">
-            {{ t("aiDashboard.stats.sessionsDesc", { provider: activeProviderLabel }) }}
-          </div>
-        </div>
-      </div>
+        :stats="[
+          { titleKey: 'aiDashboard.stats.totalRequestsTitle', value: providerStats.totalRequests, valueClass: 'text-primary', descKey: 'aiDashboard.stats.totalRequestsDesc' },
+          { titleKey: 'aiDashboard.stats.successRateTitle', value: `${providerStats.successRate}%`, valueClass: 'text-success', descKey: 'aiDashboard.stats.successRateDesc' },
+          { titleKey: 'aiDashboard.stats.averageResponseTitle', value: t('aiDashboard.stats.averageResponseValue', { seconds: providerStats.averageResponseTimeSeconds }), valueClass: 'text-secondary', descKey: 'aiDashboard.stats.averageResponseDesc' },
+          { titleKey: 'aiDashboard.stats.sessionsTitle', value: providerStats.sessions, valueClass: 'text-accent', descKey: 'aiDashboard.stats.sessionsDesc', descInterpolation: { provider: activeProviderLabel } },
+        ]"
+      />
 
       <div class="card card-border bg-base-100 shadow-sm">
         <div class="card-body gap-4">

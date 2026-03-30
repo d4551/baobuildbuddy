@@ -1,33 +1,4 @@
 import { Elysia } from "elysia";
-type MatchJobsResponse = {
-    message: string;
-    matches: Array<{
-        jobId: string;
-        title: string;
-        company: string;
-        location: string | null;
-        remote: boolean;
-        score: number;
-        strengths: string[];
-        concerns: string[];
-        highlightSkills: string[];
-    }>;
-    recommendations: string[];
-};
-type CoverLetterSections = {
-    introduction: string;
-    body: string;
-    conclusion: string;
-};
-type ResumeAnalysisResult = {
-    score: number;
-    strengths: string[];
-    improvements: string[];
-    keywords: string[];
-};
-/**
- * AI route group for chat, content generation, matching, and automation triggers.
- */
 export declare const aiRoutes: Elysia<"/ai", {
     decorator: {};
     store: {};
@@ -144,7 +115,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                         message: string;
                         resumeId: string;
                         jobId: string | null;
-                        analysis: ResumeAnalysisResult;
+                        analysis: import("./ai-route-contracts").ResumeAnalysisResult;
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         error?: undefined;
@@ -184,7 +155,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                         model?: undefined;
                     } | {
                         message: string;
-                        content: CoverLetterSections;
+                        content: import("./ai-route-contracts").CoverLetterSections;
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         model: string;
                         error?: undefined;
@@ -215,7 +186,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: MatchJobsResponse | {
+                    200: import("./ai-route-contracts").MatchJobsResponse | {
                         error: string;
                     };
                     422: {
@@ -340,4 +311,3 @@ export declare const aiRoutes: Elysia<"/ai", {
     resolve: {};
     schema: {};
 }>;
-export {};

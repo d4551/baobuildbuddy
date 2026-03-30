@@ -75,17 +75,3 @@ function resolveIconPath(type: ToastType): string {
     </TransitionGroup>
   </div>
 </template>
-
-<style scoped>
-.toast-motion-enter-active,
-.toast-motion-leave-active,
-.toast-motion-move {
-  transition: all 0.2s ease;
-}
-
-.toast-motion-enter-from,
-.toast-motion-leave-to {
-  opacity: 0;
-  transform: translateY(-0.5rem) scale(0.98);
-}
-</style>

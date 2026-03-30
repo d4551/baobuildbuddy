@@ -1,4 +1,3 @@
-import type { AIRouting, AppDataTheme, AutomationSettings, BrandSettings, EmailTransportSettings } from "@bao/shared";
 import { Elysia } from "elysia";
 export declare const settingsRoutes: Elysia<"/settings", {
     decorator: {};
@@ -34,12 +33,12 @@ export declare const settingsRoutes: Elysia<"/settings", {
             headers: unknown;
             response: {
                 200: {
-                    aiRouting: AIRouting;
-                    providerDiagnostics: Record<string, unknown> | undefined;
+                    aiRouting: import("@bao/shared").AIRouting;
+                    providerDiagnostics: Partial<Record<"gemini" | "claude" | "openai" | "huggingface" | "local", import("@bao/shared").AIProviderDiagnostic>> | undefined;
                     preferredProvider: string | null;
                     preferredModel: string | null;
-                    theme: AppDataTheme;
-                    brandSettings: BrandSettings;
+                    theme: import("@bao/shared").AppDataTheme;
+                    brandSettings: import("@bao/shared").BrandSettings;
                     geminiApiKey: string | null;
                     openaiApiKey: string | null;
                     claudeApiKey: string | null;
@@ -52,8 +51,8 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     hasLocalKey: boolean;
                     id: string;
                     notifications: Record<string, boolean> | null;
-                    automationSettings: AutomationSettings | null;
-                    emailTransportSettings: EmailTransportSettings | null;
+                    automationSettings: import("@bao/shared").AutomationSettings | null;
+                    emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
                     localModelEndpoint: string | null;
                     localModelName: string | null;
                     language: string | null;
@@ -354,7 +353,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         provider: "local";
                         diagnosticCode: "healthy" | "unconfigured" | "unreachable" | "empty-model-list" | "invalid-model" | "timeout" | "error";
                         message: string | undefined;
-                        availableModels: string[] | undefined;
+                        availableModels: readonly string[] | undefined;
                         selectedModel: string | undefined;
                         error?: undefined;
                     } | {
@@ -368,7 +367,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     } | {
                         valid: boolean;
                         provider: "gemini" | "claude" | "openai" | "huggingface";
-                        diagnosticCode: string;
+                        diagnosticCode: "healthy" | "error";
                         message: string | undefined;
                         availableModels?: undefined;
                         selectedModel?: undefined;

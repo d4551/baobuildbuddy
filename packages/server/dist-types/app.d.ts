@@ -277,7 +277,7 @@ export declare const app: Elysia<"/api", {
                 response: {
                     200: {
                         aiRouting: import("@bao/shared").AIRouting;
-                        providerDiagnostics: Record<string, unknown> | undefined;
+                        providerDiagnostics: Partial<Record<"gemini" | "claude" | "openai" | "huggingface" | "local", import("@bao/shared").AIProviderDiagnostic>> | undefined;
                         preferredProvider: string | null;
                         preferredModel: string | null;
                         theme: import("@bao/shared").AppDataTheme;
@@ -596,7 +596,7 @@ export declare const app: Elysia<"/api", {
                             provider: "local";
                             diagnosticCode: "healthy" | "unconfigured" | "unreachable" | "empty-model-list" | "invalid-model" | "timeout" | "error";
                             message: string | undefined;
-                            availableModels: string[] | undefined;
+                            availableModels: readonly string[] | undefined;
                             selectedModel: string | undefined;
                             error?: undefined;
                         } | {
@@ -610,7 +610,7 @@ export declare const app: Elysia<"/api", {
                         } | {
                             valid: boolean;
                             provider: "gemini" | "claude" | "openai" | "huggingface";
-                            diagnosticCode: string;
+                            diagnosticCode: "healthy" | "error";
                             message: string | undefined;
                             availableModels?: undefined;
                             selectedModel?: undefined;
@@ -2678,12 +2678,7 @@ export declare const app: Elysia<"/api", {
                             message: string;
                             resumeId: string;
                             jobId: string | null;
-                            analysis: {
-                                score: number;
-                                strengths: string[];
-                                improvements: string[];
-                                keywords: string[];
-                            };
+                            analysis: import("./routes/ai-route-contracts").ResumeAnalysisResult;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             model: string;
                             error?: undefined;
@@ -2723,11 +2718,7 @@ export declare const app: Elysia<"/api", {
                             model?: undefined;
                         } | {
                             message: string;
-                            content: {
-                                introduction: string;
-                                body: string;
-                                conclusion: string;
-                            };
+                            content: import("./routes/ai-route-contracts").CoverLetterSections;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                             model: string;
                             error?: undefined;
@@ -2758,21 +2749,7 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            message: string;
-                            matches: Array<{
-                                jobId: string;
-                                title: string;
-                                company: string;
-                                location: string | null;
-                                remote: boolean;
-                                score: number;
-                                strengths: string[];
-                                concerns: string[];
-                                highlightSkills: string[];
-                            }>;
-                            recommendations: string[];
-                        } | {
+                        200: import("./routes/ai-route-contracts").MatchJobsResponse | {
                             error: string;
                         };
                         422: {

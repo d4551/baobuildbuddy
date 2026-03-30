@@ -132,6 +132,9 @@ const frFROverrides = {
     title: "Cartographie des compétences",
     retryButton: "Réessayer",
     retryAria: "Réessayer le chargement des correspondances de compétences",
+    filters: {
+      allButton: "Tous",
+    },
   },
   skillsPathwaysPage: {
     seoTitle: "Parcours de carrière",

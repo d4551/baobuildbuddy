@@ -250,25 +250,14 @@ watch(
       density="comfortable"
     />
 
-    <div class="stats stats-vertical lg:stats-horizontal w-full border border-base-300 bg-base-100 shadow-sm">
-      <div class="stat">
-        <div class="stat-title">{{ t("studiosIndex.stats.totalTitle") }}</div>
-        <div class="stat-value text-primary">{{ totalStudios }}</div>
-        <div class="stat-desc">{{ t("studiosIndex.stats.totalDesc") }}</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-title">{{ t("studiosIndex.stats.filteredTitle") }}</div>
-        <div class="stat-value text-secondary">{{ filteredStudios.length }}</div>
-        <div class="stat-desc">{{ t("studiosIndex.stats.filteredDesc") }}</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-title">{{ t("studiosIndex.stats.remoteTitle") }}</div>
-        <div class="stat-value text-accent">{{ remoteFriendlyStudios }}</div>
-        <div class="stat-desc">{{ t("studiosIndex.stats.remoteDesc") }}</div>
-      </div>
-    </div>
+    <StatsRow
+      background-class="border border-base-300 bg-base-100"
+      :stats="[
+        { titleKey: 'studiosIndex.stats.totalTitle', value: totalStudios, valueClass: 'text-primary', descKey: 'studiosIndex.stats.totalDesc' },
+        { titleKey: 'studiosIndex.stats.filteredTitle', value: filteredStudios.length, valueClass: 'text-secondary', descKey: 'studiosIndex.stats.filteredDesc' },
+        { titleKey: 'studiosIndex.stats.remoteTitle', value: remoteFriendlyStudios, valueClass: 'text-accent', descKey: 'studiosIndex.stats.remoteDesc' },
+      ]"
+    />
 
     <BootstrapErrorAlert
       v-if="pageError"

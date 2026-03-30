@@ -210,9 +210,7 @@ function studioLocationLabel(location: string): string {
         </span>
       </span>
       <span v-else class="text-base-content/50">{{ t("studioSelector.selectPlaceholder") }}</span>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-      </svg>
+      <IconChevronDown class="h-5 w-5 shrink-0" />
     </button>
 
     <div

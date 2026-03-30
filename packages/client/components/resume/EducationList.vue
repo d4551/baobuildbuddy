@@ -1,212 +1,148 @@
 <script setup lang="ts">
+import type { ResumeFormEducation } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 
-interface EducationItem {
-  id: string;
-  institution: string;
-  degree: string;
-  field: string;
-  graduationDate: string;
-  gpa?: string;
-}
-
 const props = defineProps<{
-  modelValue: EducationItem[];
+  modelValue: ResumeFormEducation[];
 }>();
 
 const emit = defineEmits<{
-  "update:modelValue": [value: EducationItem[]];
+  "update:modelValue": [value: ResumeFormEducation[]];
 }>();
 const { t } = useI18n();
 
-const localValue = ref<EducationItem[]>([...props.modelValue]);
-const editingId = ref<string | null>(null);
+function cloneEducationItem(item: ResumeFormEducation): ResumeFormEducation {
+  return {
+    ...item,
+  };
+}
+
+function cloneEducationList(items: readonly ResumeFormEducation[]): ResumeFormEducation[] {
+  return items.map(cloneEducationItem);
+}
+
+const localValue = ref<ResumeFormEducation[]>(cloneEducationList(props.modelValue));
 
 watch(
   () => props.modelValue,
   (newValue) => {
-    localValue.value = [...newValue];
+    localValue.value = cloneEducationList(newValue);
   },
   { deep: true },
 );
 
-function updateValue() {
-  emit("update:modelValue", [...localValue.value]);
+function emitValue(): void {
+  emit("update:modelValue", cloneEducationList(localValue.value));
 }
 
-function addItem() {
-  const newItem: EducationItem = {
-    id: Date.now().toString(),
-    institution: "",
+function addEducation(): void {
+  localValue.value.push({
     degree: "",
-    field: "",
+    school: "",
+    location: "",
     graduationDate: "",
     gpa: "",
-  };
-  localValue.value.push(newItem);
-  editingId.value = newItem.id;
-  updateValue();
+  });
+  emitValue();
 }
 
-function removeItem(id: string) {
-  localValue.value = localValue.value.filter((item) => item.id !== id);
-  updateValue();
-}
-
-function toggleEdit(id: string) {
-  editingId.value = editingId.value === id ? null : id;
-}
-
-function moveUp(index: number) {
-  if (index > 0) {
-    const current = localValue.value[index];
-    const prev = localValue.value[index - 1];
-    if (current && prev) {
-      localValue.value[index] = prev;
-      localValue.value[index - 1] = current;
-      updateValue();
-    }
-  }
-}
-
-function moveDown(index: number) {
-  if (index < localValue.value.length - 1) {
-    const current = localValue.value[index];
-    const next = localValue.value[index + 1];
-    if (current && next) {
-      localValue.value[index] = next;
-      localValue.value[index + 1] = current;
-      updateValue();
-    }
-  }
+function removeEducation(index: number): void {
+  localValue.value.splice(index, 1);
+  emitValue();
 }
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div
-      v-for="(item, index) in localValue"
-      :key="item.id"
-      class="card bg-base-200"
-    >
-      <div class="card-body">
-        <div class="flex justify-between items-start">
-          <h3 class="card-title text-base">
-            {{ item.degree || t("resumeComponentEducation.newItemTitle") }}
-          </h3>
-          <div class="flex gap-1">
+  <div class="card-body">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="card-title">{{ t("resumePage.education.title") }}</h2>
+      <button
+        class="btn btn-sm btn-primary"
+        :aria-label="t('resumePage.education.addButtonAria')"
+        @click="addEducation"
+      >
+        {{ t("resumePage.education.addButton") }}
+      </button>
+    </div>
+    <div class="space-y-6">
+      <div
+        v-for="(education, index) in localValue"
+        :key="`${education.school}-${education.degree}-${index}`"
+        class="card bg-base-100"
+      >
+        <div class="card-body">
+          <div class="mb-4 flex items-center justify-between">
+            <h3 class="font-semibold">
+              {{ t("resumePage.education.itemTitle", { index: index + 1 }) }}
+            </h3>
             <button
-              class="btn btn-ghost btn-xs btn-square"
-              :aria-label="t('resumeComponentEducation.moveUpAria')"
-              @click="moveUp(index)"
-              :disabled="index === 0"
+              class="btn btn-error btn-xs"
+              :aria-label="t('resumePage.education.removeButtonAria', { index: index + 1 })"
+              @click="removeEducation(index)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-              </svg>
-            </button>
-            <button
-              class="btn btn-ghost btn-xs btn-square"
-              :aria-label="t('resumeComponentEducation.moveDownAria')"
-              @click="moveDown(index)"
-              :disabled="index === localValue.length - 1"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <button
-              class="btn btn-ghost btn-xs btn-square"
-              :aria-label="t('resumeComponentEducation.toggleEditAria')"
-              @click="toggleEdit(item.id)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-            </button>
-            <button
-              class="btn btn-ghost btn-xs btn-square text-error"
-              :aria-label="t('resumeComponentEducation.removeItemAria')"
-              @click="removeItem(item.id)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+              {{ t("resumePage.education.removeButton") }}
             </button>
           </div>
-        </div>
-
-        <div v-if="editingId === item.id" class="space-y-3 mt-2">
-          <fieldset class="fieldset">
-            <div class="label text-sm">{{ t("resumeComponentEducation.institutionLabel") }}</div>
-            <input
-              v-model="item.institution"
-              type="text"
-              :placeholder="t('resumeComponentEducation.institutionPlaceholder')"
-              class="input input-sm"
-              @input="updateValue"
-              :aria-label="t('resumeComponentEducation.institutionAria')"/>
-          </fieldset>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
-              <div class="label text-sm">{{ t("resumeComponentEducation.degreeLabel") }}</div>
+              <legend class="fieldset-legend">{{ t("resumePage.education.degreeLegend") }}</legend>
               <input
-                v-model="item.degree"
+                v-model="education.degree"
                 type="text"
-                :placeholder="t('resumeComponentEducation.degreePlaceholder')"
-                class="input input-sm"
-                @input="updateValue"
-                :aria-label="t('resumeComponentEducation.degreeAria')"/>
+                required
+                minlength="2"
+                class="input validator w-full input-sm"
+                :aria-label="t('resumePage.education.degreeAria')"
+                @input="emitValue"
+              />
+              <p class="validator-hint">{{ t("resumePage.education.degreeHint") }}</p>
             </fieldset>
             <fieldset class="fieldset">
-              <div class="label text-sm">{{ t("resumeComponentEducation.fieldLabel") }}</div>
+              <legend class="fieldset-legend">{{ t("resumePage.education.schoolLegend") }}</legend>
               <input
-                v-model="item.field"
+                v-model="education.school"
                 type="text"
-                :placeholder="t('resumeComponentEducation.fieldPlaceholder')"
-                class="input input-sm"
-                @input="updateValue"
-                :aria-label="t('resumeComponentEducation.fieldAria')"/>
+                required
+                minlength="2"
+                class="input validator w-full input-sm"
+                :aria-label="t('resumePage.education.schoolAria')"
+                @input="emitValue"
+              />
+              <p class="validator-hint">{{ t("resumePage.education.schoolHint") }}</p>
             </fieldset>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <fieldset class="fieldset">
-              <div class="label text-sm">{{ t("resumeComponentEducation.graduationDateLabel") }}</div>
+              <legend class="fieldset-legend">{{ t("resumePage.education.locationLegend") }}</legend>
               <input
-                v-model="item.graduationDate"
+                v-model="education.location"
+                type="text"
+                class="input w-full input-sm"
+                :aria-label="t('resumePage.education.locationAria')"
+                @input="emitValue"
+              />
+            </fieldset>
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">{{ t("resumePage.education.graduationDateLegend") }}</legend>
+              <input
+                v-model="education.graduationDate"
                 type="month"
-                class="input input-sm"
-                @input="updateValue"
-                :aria-label="t('resumeComponentEducation.graduationDateAria')"/>
+                class="input w-full input-sm"
+                :aria-label="t('resumePage.education.graduationDateAria')"
+                @input="emitValue"
+              />
             </fieldset>
             <fieldset class="fieldset">
-              <div class="label text-sm">{{ t("resumeComponentEducation.gpaLabel") }}</div>
+              <legend class="fieldset-legend">{{ t("resumePage.education.gpaLegend") }}</legend>
               <input
-                v-model="item.gpa"
+                v-model="education.gpa"
                 type="text"
-                :placeholder="t('resumeComponentEducation.gpaPlaceholder')"
-                class="input input-sm"
-                @input="updateValue"
-                :aria-label="t('resumeComponentEducation.gpaAria')"/>
+                class="input w-full input-sm"
+                :aria-label="t('resumePage.education.gpaAria')"
+                @input="emitValue"
+              />
             </fieldset>
-          </div>
-        </div>
-
-        <div v-else class="text-sm text-base-content/70 mt-2">
-          <p class="font-medium">{{ item.institution }}</p>
-          <p class="text-xs">{{ item.field }}</p>
-          <p class="text-xs">{{ item.graduationDate }}</p>
+          </SectionGrid>
         </div>
       </div>
     </div>
-
-    <button class="btn btn-outline btn-block" :aria-label="t('resumeComponentEducation.addItemAria')" @click="addItem">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      {{ t("resumeComponentEducation.addItemButton") }}
-    </button>
   </div>
 </template>

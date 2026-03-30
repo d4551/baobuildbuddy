@@ -12,7 +12,7 @@ import {
   AutomationDependencyMissingError,
   AutomationRunNotFoundError,
   AutomationValidationError,
-} from "../services/automation/application-automation-service";
+} from "../services/automation/automation-errors";
 
 export type AutomationRouteErrorResult = {
   status: number;

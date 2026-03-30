@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import {
-  APP_ROUTE_BUILDERS,
-  formatRelativeTimeForDate,
-  SCORE_PASS_THRESHOLD,
-  SCORE_WARNING_THRESHOLD,
-} from "@bao/shared";
+import { APP_ROUTE_BUILDERS, formatRelativeTimeForDate } from "@bao/shared";
 import { useI18n } from "vue-i18n";
+import { useScoreColor } from "~/composables/useScoreColor";
 
 const props = defineProps<{
   job: {
@@ -32,11 +28,11 @@ const isSaved = ref(false);
 const visibleTechs = computed(() => props.job.technologies.slice(0, 5));
 const remainingCount = computed(() => Math.max(0, props.job.technologies.length - 5));
 
+const { getScoreBadgeClass } = useScoreColor();
+
 const matchScoreColor = computed(() => {
-  if (!props.job.matchScore) return "badge-ghost";
-  if (props.job.matchScore >= SCORE_PASS_THRESHOLD) return "badge-success";
-  if (props.job.matchScore >= SCORE_WARNING_THRESHOLD) return "badge-warning";
-  return "badge-error";
+  if (props.job.matchScore === undefined) return "badge-ghost";
+  return getScoreBadgeClass(props.job.matchScore);
 });
 
 const relativeTime = computed(() =>

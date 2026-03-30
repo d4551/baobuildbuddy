@@ -17,7 +17,7 @@ interface GamificationContext extends GamificationState {
   t: ReturnType<typeof useI18n>["t"];
 }
 
-type GamificationStatKey = keyof UserGamificationData["stats"];
+type GamificationStatKey = Exclude<keyof UserGamificationData["stats"], "actionHistory">;
 
 const GAMIFICATION_STAT_KEYS: readonly GamificationStatKey[] = [
   "profileComplete",
@@ -26,7 +26,12 @@ const GAMIFICATION_STAT_KEYS: readonly GamificationStatKey[] = [
   "jobApplications",
   "chatSessions",
   "resumesGenerated",
+  "coverLettersGenerated",
   "savedJobs",
+  "jobsSaved",
+  "interviewScore",
+  "dataExported",
+  "earlyLogin",
   "totalTimeSpent",
   "featuresUsed",
   "dailyStreak",

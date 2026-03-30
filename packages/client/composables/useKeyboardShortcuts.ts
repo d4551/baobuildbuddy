@@ -1,4 +1,4 @@
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES, settle } from "@bao/shared";
 import { onMounted, onUnmounted, ref, useRoute, useRouter } from "#imports";
 import type { NavigationItem } from "~/constants/navigation";
 import { createClientLogger } from "~/utils/client-logger";
@@ -41,10 +41,20 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 const shortcutLogger = createClientLogger("keyboard-shortcuts");
 
-function pushShortcutRoute(router: ReturnType<typeof useRouter>, targetRoute: string): void {
-  router.push(targetRoute).catch((err: unknown) => {
-    shortcutLogger.debug("Shortcut navigation failed (duplicate or guard)", { targetRoute, err });
-  });
+async function pushShortcutRoute(
+  router: ReturnType<typeof useRouter>,
+  targetRoute: string,
+): Promise<void> {
+  const navigationResult = await settle(router.push(targetRoute));
+  if (navigationResult.status === "rejected") {
+    shortcutLogger.debug("Shortcut navigation failed (duplicate or guard)", {
+      targetRoute,
+      err:
+        navigationResult.reason instanceof Error
+          ? navigationResult.reason.message
+          : String(navigationResult.reason),
+    });
+  }
 }
 
 function isFocusChatShortcut(event: KeyboardEvent): boolean {
@@ -81,7 +91,7 @@ function createKeyDownHandler(input: {
       input.resetPrefix();
       if (targetRoute && input.route.path !== targetRoute) {
         event.preventDefault();
-        pushShortcutRoute(input.router, targetRoute);
+        pushShortcutRoute(input.router, targetRoute).then(undefined, () => undefined);
       }
       return;
     }

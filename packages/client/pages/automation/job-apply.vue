@@ -462,7 +462,7 @@ async function submitScheduledJobApply(): Promise<void> {
                   <th scope="col">{{ t("automation.jobApply.stream.events.columns.message") }}</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody aria-live="polite">
                 <tr v-for="event in streamTimelineRows" :key="`${event.runId}-${event.sequence}`">
                   <td>{{ toLocalizedDateTime(event.timestamp) }}</td>
                   <td>{{ resolveStreamEventStageLabel(event) }}</td>

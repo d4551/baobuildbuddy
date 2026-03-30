@@ -1,0 +1,259 @@
+import type {
+  AIRouting,
+  AIProviderType,
+  AppDataTheme,
+  AutomationSettings,
+  BrandSettings,
+  BrandSettingsPatch,
+  EmailTransportSettings,
+  NotificationPreferences,
+} from "@bao/shared";
+import {
+  automationSettingsSchema,
+  brandSettingsPatchSchema,
+  brandSettingsSchema,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  emailTransportSettingsSchema,
+  mergeBrandSettings,
+  normalizeAIRouting,
+  normalizeAppDataTheme,
+  resolveBrandSettings,
+} from "@bao/shared";
+import type { settings as settingsTable } from "../db/schema/settings";
+import { resolveKnownProvider } from "./settings-route-contracts";
+
+const automationSettingsPatchSchema = automationSettingsSchema.removeDefault().partial();
+const emailTransportSettingsPatchSchema = emailTransportSettingsSchema.removeDefault().partial();
+type SettingsRow = typeof settingsTable.$inferSelect;
+type SettingsInsert = typeof settingsTable.$inferInsert;
+
+const normalizeNotificationPreferences = (
+  current: Record<string, boolean> | NotificationPreferences | null | undefined,
+): NotificationPreferences => ({
+  ...DEFAULT_NOTIFICATION_PREFERENCES,
+  achievements:
+    typeof current?.achievements === "boolean"
+      ? current.achievements
+      : DEFAULT_NOTIFICATION_PREFERENCES.achievements,
+  dailyChallenges:
+    typeof current?.dailyChallenges === "boolean"
+      ? current.dailyChallenges
+      : DEFAULT_NOTIFICATION_PREFERENCES.dailyChallenges,
+  levelUp:
+    typeof current?.levelUp === "boolean"
+      ? current.levelUp
+      : DEFAULT_NOTIFICATION_PREFERENCES.levelUp,
+  jobAlerts:
+    typeof current?.jobAlerts === "boolean"
+      ? current.jobAlerts
+      : DEFAULT_NOTIFICATION_PREFERENCES.jobAlerts,
+});
+
+const toNotificationRecord = (value: NotificationPreferences): Record<string, boolean> => ({
+  achievements: value.achievements,
+  dailyChallenges: value.dailyChallenges,
+  levelUp: value.levelUp,
+  jobAlerts: value.jobAlerts,
+});
+
+const mergeNotifications = (
+  current: Record<string, boolean> | NotificationPreferences | null | undefined,
+  patch: Partial<NotificationPreferences> | null | undefined,
+): NotificationPreferences => ({
+  ...DEFAULT_NOTIFICATION_PREFERENCES,
+  ...normalizeNotificationPreferences(current),
+  ...(patch ?? {}),
+});
+
+const mergeAutomationSettings = (
+  current: AutomationSettings | null | undefined,
+  patch: Partial<AutomationSettings> | null | undefined,
+): AutomationSettings | null => {
+  const currentParsed = automationSettingsSchema.safeParse(current);
+  const patchParsed = automationSettingsPatchSchema.safeParse(patch ?? {});
+  if (!(currentParsed.success && patchParsed.success)) {
+    return null;
+  }
+
+  const mergedCandidate: AutomationSettings = {
+    ...currentParsed.data,
+    ...patchParsed.data,
+    jobProviders: patchParsed.data.jobProviders ?? currentParsed.data.jobProviders,
+  };
+
+  const mergedParsed = automationSettingsSchema.safeParse(mergedCandidate);
+  return mergedParsed.success ? mergedParsed.data : null;
+};
+
+const mergeEmailTransportSettings = (
+  current: EmailTransportSettings | null | undefined,
+  patch: Partial<EmailTransportSettings> | null | undefined,
+): EmailTransportSettings | null => {
+  const currentParsed = emailTransportSettingsSchema.safeParse(
+    current ?? DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  );
+  const patchParsed = emailTransportSettingsPatchSchema.safeParse(patch ?? {});
+  if (!(currentParsed.success && patchParsed.success)) {
+    return null;
+  }
+
+  const mergedCandidate: EmailTransportSettings = {
+    ...currentParsed.data,
+    ...patchParsed.data,
+  };
+
+  const mergedParsed = emailTransportSettingsSchema.safeParse(mergedCandidate);
+  return mergedParsed.success ? mergedParsed.data : null;
+};
+
+const mergePersistedBrandSettings = (
+  current: BrandSettings | null | undefined,
+  patch: BrandSettingsPatch | null | undefined,
+): BrandSettings | null => {
+  const currentParsed = brandSettingsSchema.safeParse(resolveBrandSettings(current));
+  const patchParsed = brandSettingsPatchSchema.safeParse(patch ?? {});
+  if (!(currentParsed.success && patchParsed.success)) {
+    return null;
+  }
+
+  const mergedCandidate = mergeBrandSettings(currentParsed.data, patchParsed.data);
+  const mergedParsed = brandSettingsSchema.safeParse(mergedCandidate);
+  return mergedParsed.success ? mergedParsed.data : null;
+};
+
+interface SettingsUpdateInput {
+  aiRouting?: AIRouting;
+  preferredProvider?: AIProviderType;
+  preferredModel?: string;
+  theme?: AppDataTheme | "bao-light" | "bao-dark";
+  language?: string;
+  brandSettings?: BrandSettingsPatch;
+  notifications?: Partial<NotificationPreferences>;
+  automationSettings?: Partial<AutomationSettings>;
+  emailTransportSettings?: Partial<EmailTransportSettings>;
+}
+
+const resolveRoutingUpdate = (
+  existingRow: SettingsRow,
+  body: SettingsUpdateInput,
+) => {
+  const nextPreferredProvider =
+    body.preferredProvider ?? resolveKnownProvider(existingRow.preferredProvider);
+  const nextPreferredModel = body.preferredModel ?? existingRow.preferredModel ?? undefined;
+  const shouldUpdateRouting =
+    body.aiRouting !== undefined ||
+    body.preferredProvider !== undefined ||
+    body.preferredModel !== undefined;
+
+  if (!shouldUpdateRouting) {
+    return;
+  }
+
+  const aiRouting = normalizeAIRouting(
+    body.aiRouting ?? existingRow.aiRouting,
+    nextPreferredProvider,
+    nextPreferredModel,
+  );
+
+  return {
+    aiRouting,
+    preferredProvider: aiRouting.chat.provider,
+    preferredModel: aiRouting.chat.model ?? null,
+  };
+};
+
+export const buildSettingsUpdate = (
+  existingRow: SettingsRow,
+  body: SettingsUpdateInput,
+): Partial<SettingsInsert> | null => {
+  const update: Partial<SettingsInsert> = {};
+  const routingUpdate = resolveRoutingUpdate(existingRow, body);
+
+  if (routingUpdate) {
+    update.aiRouting = routingUpdate.aiRouting;
+    update.preferredProvider = routingUpdate.preferredProvider;
+    update.preferredModel = routingUpdate.preferredModel;
+  }
+
+  if (body.theme !== undefined) {
+    update.theme = normalizeAppDataTheme(body.theme);
+  }
+  if (body.language !== undefined) {
+    update.language = body.language;
+  }
+
+  if (body.brandSettings !== undefined) {
+    const mergedBrandSettings = mergePersistedBrandSettings(existingRow.brandSettings, body.brandSettings);
+    if (!mergedBrandSettings) {
+      return null;
+    }
+    update.brandSettings = mergedBrandSettings;
+  }
+
+  if (body.notifications !== undefined) {
+    update.notifications = toNotificationRecord(
+      mergeNotifications(existingRow.notifications, body.notifications),
+    );
+  }
+
+  if (body.automationSettings !== undefined) {
+    const mergedAutomationSettings = mergeAutomationSettings(
+      existingRow.automationSettings,
+      body.automationSettings,
+    );
+    if (!mergedAutomationSettings) {
+      return null;
+    }
+    update.automationSettings = mergedAutomationSettings;
+  }
+
+  if (body.emailTransportSettings !== undefined) {
+    const mergedEmailTransportSettings = mergeEmailTransportSettings(
+      existingRow.emailTransportSettings,
+      body.emailTransportSettings,
+    );
+    if (!mergedEmailTransportSettings) {
+      return null;
+    }
+    update.emailTransportSettings = mergedEmailTransportSettings;
+  }
+
+  return update;
+};
+
+export const buildApiKeysUpdate = (body: {
+  geminiApiKey?: string;
+  openaiApiKey?: string;
+  claudeApiKey?: string;
+  huggingfaceToken?: string;
+  localModelEndpoint?: string;
+  localModelName?: string;
+  emailTransportPassword?: string;
+}): Partial<SettingsInsert> => {
+  const update: Partial<SettingsInsert> = {};
+  if (body.geminiApiKey !== undefined) {
+    update.geminiApiKey = body.geminiApiKey;
+  }
+  if (body.openaiApiKey !== undefined) {
+    update.openaiApiKey = body.openaiApiKey;
+  }
+  if (body.claudeApiKey !== undefined) {
+    update.claudeApiKey = body.claudeApiKey;
+  }
+  if (body.huggingfaceToken !== undefined) {
+    update.huggingfaceToken = body.huggingfaceToken;
+  }
+  if (body.localModelEndpoint !== undefined) {
+    update.localModelEndpoint = body.localModelEndpoint;
+  }
+  if (body.localModelName !== undefined) {
+    update.localModelName = body.localModelName;
+  }
+  if (body.emailTransportPassword !== undefined) {
+    update.emailTransportPassword =
+      body.emailTransportPassword.length > 0 ? body.emailTransportPassword : null;
+  }
+  update.updatedAt = new Date().toISOString();
+  return update;
+};

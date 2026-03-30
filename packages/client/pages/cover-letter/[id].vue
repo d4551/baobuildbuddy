@@ -8,7 +8,6 @@ import {
   type CoverLetterData,
   type CoverLetterTemplate,
   isCoverLetterTemplate,
-  isRecord,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import {
@@ -22,6 +21,7 @@ definePageMeta({
 
 const route = useRoute();
 const { getCoverLetter, updateCoverLetter, generateCoverLetter, loading } = useCoverLetter();
+type GenerateCoverLetterResult = Awaited<ReturnType<typeof generateCoverLetter>>;
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
 
@@ -110,27 +110,10 @@ onMounted(async () => {
   await loadCoverLetter();
 });
 
-function toCoverLetterContent(value: unknown): CoverLetterData["content"] | null {
-  if (!isRecord(value)) return null;
-
-  const content: CoverLetterData["content"] = {};
-  for (const [key, entry] of Object.entries(value)) {
-    if (typeof entry === "string" && entry.trim().length > 0) {
-      content[key] = entry;
-    }
-  }
-
-  return Object.keys(content).length > 0 ? content : null;
-}
-
-function resolveGeneratedContent(value: unknown): CoverLetterData["content"] | null {
-  if (!isRecord(value)) return null;
-
-  const direct = toCoverLetterContent(value.content);
-  if (direct) return direct;
-
-  if (!isRecord(value.coverLetter)) return null;
-  return toCoverLetterContent(value.coverLetter.content);
+function resolveGeneratedContent(
+  value: Exclude<GenerateCoverLetterResult, null>,
+): CoverLetterData["content"] {
+  return "content" in value ? value.content : value.coverLetter.content;
 }
 
 function requestRegenerate() {
@@ -259,9 +242,7 @@ function handleExport() {
           @click="requestRegenerate"
         >
           <span v-if="regenerating" class="loading loading-spinner loading-xs"></span>
-          <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          <IconRefresh v-else class="h-4 w-4" />
           {{ t("coverLetterDetailPage.actions.regenerateButton") }}
         </button>
 
@@ -270,9 +251,7 @@ function handleExport() {
           :aria-label="t('coverLetterDetailPage.actions.exportAria')"
           @click="handleExport"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
+          <IconDownload class="h-4 w-4" />
           {{ t("coverLetterDetailPage.actions.exportButton") }}
         </button>
 
@@ -365,9 +344,7 @@ function handleExport() {
           <h2 class="card-title">{{ t("coverLetterDetailPage.editor.title") }}</h2>
 
           <div class="alert alert-info alert-soft" role="status">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <IconInfoCircle class="h-5 w-5" />
             <span>{{ t("coverLetterDetailPage.editor.info") }}</span>
           </div>
 

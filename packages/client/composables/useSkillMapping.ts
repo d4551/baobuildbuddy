@@ -17,7 +17,7 @@ import {
   STATE_KEYS,
 } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { toSkillMapping } from "./api-normalizers";
+import { toSkillMapping } from "./api-normalizer-skills";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
 type ApiClient = ReturnType<typeof useApi>;

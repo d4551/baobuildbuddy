@@ -2,7 +2,7 @@ import type { AppSettings } from "@bao/shared";
 import { toErrorMessage } from "@bao/shared";
 import { useQuery } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
-import { toAppSettings } from "./api-normalizers";
+import { toAppSettings } from "./api-normalizer-settings";
 
 export function useSettingsQuery() {
   const api = useApi();

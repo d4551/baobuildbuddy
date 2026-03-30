@@ -1,5 +1,5 @@
 import { AI_PROVIDER_CATALOG, normalizeAIRouting } from "@bao/shared";
-import type { AIProviderStatus } from "@bao/shared";
+import type { AIProviderDiagnostics, AIProviderStatus } from "@bao/shared";
 import type { settings as settingsTable } from "../../db/schema/settings";
 import { AIService } from "./ai-service";
 type SettingsRow = typeof settingsTable.$inferSelect;
@@ -13,7 +13,7 @@ interface AIControlPlaneProviderRow {
     health: "healthy" | "degraded" | "down" | "unconfigured";
     selectedModel?: string;
     diagnosticCode?: AIProviderStatus["diagnosticCode"];
-    availableModels?: string[];
+    availableModels?: readonly string[];
     error?: string;
 }
 /**
@@ -25,7 +25,7 @@ export interface AIControlPlaneState {
     error?: string;
     preferredModel: string | null;
     preferredProvider: SettingsRow["preferredProvider"];
-    providerDiagnostics?: Record<string, unknown>;
+    providerDiagnostics?: AIProviderDiagnostics;
     providers: AIControlPlaneProviderRow[];
 }
 /**

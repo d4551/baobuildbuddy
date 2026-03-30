@@ -609,6 +609,7 @@ const enUS = {
       searchAria: "Search skill mappings",
       categoryGroupAria: "Filter mappings by category",
       allAria: "Show all categories",
+      allButton: "All",
       categoryAria: "Filter by category {category}",
       clearButton: "Clear Filters",
       clearAria: "Clear active skill mapping filters",

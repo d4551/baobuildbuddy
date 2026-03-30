@@ -1,0 +1,60 @@
+import type { AIProviderType } from "@bao/shared";
+import type { settings as settingsTable } from "../db/schema/settings";
+type SettingsRow = typeof settingsTable.$inferSelect;
+export declare const buildSettingsResponse: (row: SettingsRow) => Promise<{
+    aiRouting: import("@bao/shared").AIRouting;
+    providerDiagnostics: Partial<Record<"gemini" | "claude" | "openai" | "huggingface" | "local", import("@bao/shared").AIProviderDiagnostic>> | undefined;
+    preferredProvider: string | null;
+    preferredModel: string | null;
+    theme: import("@bao/shared").AppDataTheme;
+    brandSettings: import("@bao/shared").BrandSettings;
+    geminiApiKey: string | null;
+    openaiApiKey: string | null;
+    claudeApiKey: string | null;
+    huggingfaceToken: string | null;
+    hasGeminiKey: boolean;
+    hasOpenaiKey: boolean;
+    hasClaudeKey: boolean;
+    hasHuggingfaceToken: boolean;
+    hasEmailTransportPassword: boolean;
+    hasLocalKey: boolean;
+    id: string;
+    notifications: Record<string, boolean> | null;
+    automationSettings: import("@bao/shared").AutomationSettings | null;
+    emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
+    localModelEndpoint: string | null;
+    localModelName: string | null;
+    language: string | null;
+    updatedAt: string;
+    createdAt: string;
+}>;
+export declare const testProviderConnection: (body: {
+    provider: AIProviderType;
+    key: string;
+    model?: string;
+}) => Promise<{
+    valid: boolean;
+    provider: "local";
+    diagnosticCode: "healthy" | "unconfigured" | "unreachable" | "empty-model-list" | "invalid-model" | "timeout" | "error";
+    message: string | undefined;
+    availableModels: readonly string[] | undefined;
+    selectedModel: string | undefined;
+    error?: undefined;
+} | {
+    valid: boolean;
+    provider: "gemini" | "claude" | "openai" | "huggingface";
+    error: string;
+    diagnosticCode?: undefined;
+    message?: undefined;
+    availableModels?: undefined;
+    selectedModel?: undefined;
+} | {
+    valid: boolean;
+    provider: "gemini" | "claude" | "openai" | "huggingface";
+    diagnosticCode: "healthy" | "error";
+    message: string | undefined;
+    availableModels?: undefined;
+    selectedModel?: undefined;
+    error?: undefined;
+}>;
+export {};

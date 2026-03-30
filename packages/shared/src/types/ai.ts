@@ -55,7 +55,7 @@ export interface AIProviderDiagnostic {
   checkedAt: string;
   endpoint?: string;
   selectedModel?: string;
-  availableModels?: string[];
+  availableModels?: readonly string[];
   message?: string;
 }
 
@@ -124,7 +124,7 @@ export interface AIProviderStatus {
   error?: string;
   endpoint?: string;
   selectedModel?: string;
-  availableModels?: string[];
+  availableModels?: readonly string[];
   diagnosticCode?: AIProviderDiagnostic["code"];
 }
 

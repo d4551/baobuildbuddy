@@ -31,7 +31,7 @@ interface AIControlPlaneProviderRow {
   health: "healthy" | "degraded" | "down" | "unconfigured";
   selectedModel?: string;
   diagnosticCode?: AIProviderStatus["diagnosticCode"];
-  availableModels?: string[];
+  availableModels?: readonly string[];
   error?: string;
 }
 
@@ -102,12 +102,12 @@ const resolveFallbackSelectedModel = (
   aiRouting: ReturnType<typeof normalizeAIRouting>,
 ): string | undefined => {
   if (providerId === "local") {
-    return row.localModelName ?? aiRouting.chat.model ?? undefined;
+    return row.localModelName ?? aiRouting.chat.model;
   }
   if (aiRouting.chat.provider === providerId) {
     return aiRouting.chat.model ?? row.preferredModel ?? undefined;
   }
-  return undefined;
+  return;
 };
 
 const resolveFallbackModels = (

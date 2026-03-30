@@ -1,0 +1,120 @@
+<script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
+defineProps<{
+  brandName: string;
+  assistantName: string;
+  authBootstrapRequired: boolean;
+  authSetupTokenConfigured: boolean;
+  needsStoredApiKey: boolean;
+  authSetupToken: string;
+  existingApiKey: string;
+  saving: boolean;
+}>();
+
+const emit = defineEmits<{
+  "update:auth-setup-token": [value: string];
+  "update:existing-api-key": [value: string];
+  back: [];
+  complete: [];
+}>();
+
+const { t } = useI18n();
+
+function updateTextValue(
+  event: Event,
+  emitEvent: "update:auth-setup-token" | "update:existing-api-key",
+): void {
+  const target = event.target;
+  if (target instanceof HTMLInputElement) {
+    emit(emitEvent, target.value);
+  }
+}
+</script>
+
+<template>
+  <div class="space-y-4 text-center">
+    <div class="mb-4 flex justify-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="h-14 w-14 text-success"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+      </svg>
+      <span class="sr-only">{{ t("setup.successStatusAria") }}</span>
+    </div>
+    <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
+    <p class="text-base-content/70">
+      {{ t("setup.doneDescription", { assistant: assistantName }) }}
+    </p>
+
+    <div
+      v-if="authBootstrapRequired && authSetupTokenConfigured"
+      role="alert"
+      class="alert alert-info alert-vertical text-left sm:alert-horizontal"
+    >
+      <div>
+        <h3 class="font-bold">{{ t("setup.auth.setupTokenTitle") }}</h3>
+        <div class="text-sm">{{ t("setup.auth.setupTokenDescription") }}</div>
+      </div>
+    </div>
+
+    <div
+      v-else-if="authBootstrapRequired"
+      role="alert"
+      class="alert alert-warning alert-vertical text-left sm:alert-horizontal"
+    >
+      <div>
+        <h3 class="font-bold">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
+        <div class="text-sm">{{ t("setup.auth.bootstrapUnavailableDescription") }}</div>
+      </div>
+    </div>
+
+    <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label w-full text-left">
+      <span>{{ t("setup.auth.setupTokenLegend") }}</span>
+      <input
+        :value="authSetupToken"
+        type="password"
+        :placeholder="t('setup.auth.setupTokenPlaceholder')"
+        class="input w-full"
+        :aria-label="t('setup.auth.setupTokenAria')"
+        @input="updateTextValue($event, 'update:auth-setup-token')"
+      />
+    </label>
+
+    <label v-if="needsStoredApiKey" class="floating-label w-full text-left">
+      <span>{{ t("setup.auth.apiKeyLegend") }}</span>
+      <input
+        :value="existingApiKey"
+        type="password"
+        :placeholder="t('setup.auth.apiKeyPlaceholder')"
+        class="input w-full"
+        :aria-label="t('setup.auth.apiKeyAria')"
+        @input="updateTextValue($event, 'update:existing-api-key')"
+      />
+    </label>
+
+    <div class="flex justify-center gap-2">
+      <button class="btn btn-ghost" :aria-label="t('setup.backToAiConfigAria')" @click="emit('back')">
+        {{ t("setup.backButton") }}
+      </button>
+      <button
+        class="btn btn-primary"
+        :disabled="saving"
+        :aria-label="t('setup.launchAria')"
+        @click="emit('complete')"
+      >
+        <span v-if="saving" class="loading loading-spinner loading-xs"></span>
+        {{ t("setup.launchButton", { brand: brandName }) }}
+      </button>
+    </div>
+  </div>
+</template>

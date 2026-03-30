@@ -1,0 +1,21 @@
+export declare const readOrCreateSettingsRow: () => Promise<{
+    id: string;
+    geminiApiKey: string | null;
+    openaiApiKey: string | null;
+    claudeApiKey: string | null;
+    huggingfaceToken: string | null;
+    localModelEndpoint: string | null;
+    localModelName: string | null;
+    aiRouting: import("@bao/shared").AIRouting | null;
+    preferredProvider: string | null;
+    preferredModel: string | null;
+    theme: string | null;
+    language: string | null;
+    brandSettings: import("@bao/shared").BrandSettings | null;
+    notifications: Record<string, boolean> | null;
+    automationSettings: import("@bao/shared").AutomationSettings | null;
+    emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
+    emailTransportPassword: string | null;
+    createdAt: string;
+    updatedAt: string;
+}>;

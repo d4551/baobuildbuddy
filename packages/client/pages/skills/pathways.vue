@@ -257,7 +257,7 @@ function getReadinessDialStyle(score: number): Record<string, string> {
     <template v-else>
       <section
         v-if="readinessAssessment"
-        class="card bg-gradient-to-br from-primary to-secondary text-primary-content"
+        class="card bg-linear-to-br from-primary to-secondary text-primary-content"
       >
         <div class="card-body gap-4">
           <h2 class="card-title text-2xl">{{ t("skillsPathwaysPage.readiness.title") }}</h2>

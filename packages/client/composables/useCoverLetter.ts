@@ -1,7 +1,7 @@
 import type { CoverLetterData } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS, isRecord } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { toCoverLetterData } from "./api-normalizers";
+import { toCoverLetterData } from "./api-normalizer-cover-letter";
 
 interface CreateCoverLetterInput {
   company: string;
@@ -13,7 +13,7 @@ interface CreateCoverLetterInput {
 
 type UpdateCoverLetterInput = Partial<CreateCoverLetterInput>;
 
-interface GenerateCoverLetterInput {
+export interface GenerateCoverLetterInput {
   company: string;
   position: string;
   resumeId?: string;
@@ -21,6 +21,16 @@ interface GenerateCoverLetterInput {
   save?: boolean;
   jobInfo?: Record<string, unknown>;
 }
+
+export type GenerateCoverLetterResult =
+  | {
+      message: string;
+      content: CoverLetterData["content"];
+    }
+  | {
+      message: string;
+      coverLetter: CoverLetterData;
+    };
 
 interface CoverLetterContext {
   api: ReturnType<typeof useApi>;
@@ -30,6 +40,43 @@ interface CoverLetterContext {
   coverLetters: ReturnType<typeof useState<CoverLetterData[]>>;
   currentLetter: ReturnType<typeof useState<CoverLetterData | null>>;
 }
+
+const toCoverLetterContent = (value: unknown): CoverLetterData["content"] | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const content: CoverLetterData["content"] = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry === "string") {
+      content[key] = entry;
+    }
+  }
+
+  return Object.keys(content).length > 0 ? content : null;
+};
+
+const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const message = typeof value.message === "string" ? value.message : "";
+  const content = toCoverLetterContent(value.content);
+  if (content) {
+    return { message, content };
+  }
+
+  const coverLetter = toCoverLetterData(value.coverLetter);
+  if (!coverLetter) {
+    return null;
+  }
+
+  return {
+    message,
+    coverLetter,
+  };
+};
 
 async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
   context.loading.value = true;
@@ -73,7 +120,7 @@ async function getCoverLetter(
 async function createCoverLetter(
   context: CoverLetterContext,
   letterData: CreateCoverLetterInput,
-): Promise<unknown> {
+): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const { data, error } = await context.api["cover-letters"].post(letterData);
   context.loading.value = false;
@@ -83,15 +130,21 @@ async function createCoverLetter(
     return null;
   }
 
+  const normalized = toCoverLetterData(data);
+  if (!normalized) {
+    context.toast.error(context.t("coverLetterPage.toasts.generateFailed"));
+    return null;
+  }
+
   await fetchCoverLetters(context);
-  return data;
+  return normalized;
 }
 
 async function updateCoverLetter(
   context: CoverLetterContext,
   id: string,
   updates: UpdateCoverLetterInput,
-): Promise<unknown> {
+): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const { data, error } = await context.api["cover-letters"]({ id }).put(updates);
   context.loading.value = false;
@@ -106,7 +159,7 @@ async function updateCoverLetter(
     context.currentLetter.value = normalized;
   }
   await fetchCoverLetters(context);
-  return data;
+  return normalized;
 }
 
 async function deleteCoverLetter(context: CoverLetterContext, id: string): Promise<void> {
@@ -128,7 +181,7 @@ async function deleteCoverLetter(context: CoverLetterContext, id: string): Promi
 async function generateCoverLetter(
   context: CoverLetterContext,
   generationData: GenerateCoverLetterInput,
-): Promise<unknown> {
+): Promise<GenerateCoverLetterResult | null> {
   context.loading.value = true;
   const { data, error } = await context.api["cover-letters"].generate.post(generationData);
   context.loading.value = false;
@@ -141,7 +194,7 @@ async function generateCoverLetter(
   if (generationData.save) {
     await fetchCoverLetters(context);
   }
-  return data;
+  return toGenerateCoverLetterResult(data);
 }
 
 async function exportDocument(

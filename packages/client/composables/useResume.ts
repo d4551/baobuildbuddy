@@ -2,7 +2,7 @@ import { API_ENDPOINTS, type ResumeData, type ResumeTemplate, STATE_KEYS } from 
 import { useI18n } from "vue-i18n";
 import { getStoredApiKey } from "~/plugins/eden";
 import { resolveApiEndpoint } from "~/utils/endpoints";
-import { toResumeData } from "./api-normalizers";
+import { toResumeData } from "./api-normalizer-resume";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 
 type ApiClient = ReturnType<typeof useApi>;

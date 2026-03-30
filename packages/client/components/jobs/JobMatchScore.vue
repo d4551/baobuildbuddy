@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
-import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useScoreColor } from "~/composables/useScoreColor";
 
 interface MatchBreakdown {
   skills: number;
@@ -9,33 +8,23 @@ interface MatchBreakdown {
   location: number;
 }
 
-const props = withDefaults(defineProps<{
-  score: number;
-  breakdown?: MatchBreakdown;
-  compact?: boolean;
-}>(), {
-  breakdown: undefined,
-  compact: false,
-});
+const props = withDefaults(
+  defineProps<{
+    score: number;
+    breakdown?: MatchBreakdown;
+    compact?: boolean;
+  }>(),
+  {
+    breakdown: undefined,
+    compact: false,
+  },
+);
 const { t } = useI18n();
+const { getScoreTextClass, getScoreProgressClass, getScoreBadgeClass } = useScoreColor();
 
-const scoreTextClass = computed(() => {
-  if (props.score >= SCORE_PASS_THRESHOLD) return "text-success";
-  if (props.score >= SCORE_WARNING_THRESHOLD) return "text-warning";
-  return "text-error";
-});
-
-const scoreProgressClass = computed(() => {
-  if (props.score >= SCORE_PASS_THRESHOLD) return "progress-success";
-  if (props.score >= SCORE_WARNING_THRESHOLD) return "progress-warning";
-  return "progress-error";
-});
-
-const scoreBadgeClass = computed(() => {
-  if (props.score >= SCORE_PASS_THRESHOLD) return "badge-success";
-  if (props.score >= SCORE_WARNING_THRESHOLD) return "badge-warning";
-  return "badge-error";
-});
+const scoreTextClass = computed(() => getScoreTextClass(props.score));
+const scoreProgressClass = computed(() => getScoreProgressClass(props.score));
+const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
 </script>
 
 <template>

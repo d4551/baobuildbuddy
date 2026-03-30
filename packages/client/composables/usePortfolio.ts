@@ -1,7 +1,7 @@
 import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
 import { STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { toPortfolioData } from "./api-normalizers";
+import { toPortfolioData } from "./api-normalizer-portfolio";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
 type ApiClient = ReturnType<typeof useApi>;

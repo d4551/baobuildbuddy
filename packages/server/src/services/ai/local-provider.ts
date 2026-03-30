@@ -1,4 +1,5 @@
 import {
+  type AIProviderType,
   type AIProviderDiagnostic,
   type AIResponse,
   API_ERROR_AI_STREAMING_FAILED,
@@ -6,26 +7,16 @@ import {
   LOCAL_AI_AUTO_DETECT_MODEL,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
-  LOCAL_AI_SERVERS,
   settle,
   toErrorMessage,
 } from "@bao/shared";
 import OpenAI from "openai";
+import {
+  detectFirstLocalProviderModel,
+  detectLocalProviderServers,
+  inspectLocalProviderEndpoint,
+} from "./local-provider-diagnostics";
 import { BaseAIProvider } from "./provider-interface";
-
-const LOCAL_PROVIDER_HEALTH_TIMEOUT_MS = 3_000;
-const TRAILING_SLASH_PATTERN = /\/$/;
-
-const getModelIdFromPayloadEntry = (entry: unknown): string | null => {
-  if (typeof entry !== "object" || entry === null || !("id" in entry)) {
-    return null;
-  }
-
-  const candidateId = entry.id;
-  return typeof candidateId === "string" && candidateId.trim().length > 0
-    ? candidateId.trim()
-    : null;
-};
 
 const buildLocalProviderMessages = (
   prompt: string,
@@ -45,148 +36,12 @@ const buildLocalProviderMessages = (
   return messages;
 };
 
-type LocalDiagnosticInput = {
-  code: AIProviderDiagnostic["code"];
-  endpoint: string;
-  checkedAt: string;
-  selectedModel?: string;
-  message?: string;
-  availableModels?: string[];
-};
-
-type LocalModelDiscoveryResult =
-  | {
-      endpoint: string;
-      checkedAt: string;
-      availableModels: string[];
-    }
-  | {
-      diagnostic: AIProviderDiagnostic;
-    };
-
-const buildDiagnosticResponse = ({
-  code,
-  endpoint,
-  checkedAt,
-  selectedModel,
-  message,
-  availableModels,
-}: LocalDiagnosticInput): AIProviderDiagnostic => ({
-  provider: "local",
-  code,
-  checkedAt,
-  endpoint,
-  selectedModel,
-  availableModels,
-  ...(message ? { message } : {}),
-});
-
-const buildModelsUrl = (endpoint: string): string =>
-  endpoint.endsWith("/models") ? endpoint : `${endpoint.replace(TRAILING_SLASH_PATTERN, "")}/models`;
-
-const extractAvailableModels = (payload: unknown): string[] => {
-  const data =
-    typeof payload === "object" && payload !== null && "data" in payload ? payload.data : null;
-  return Array.isArray(data)
-    ? data.flatMap((entry) => {
-        const id = getModelIdFromPayloadEntry(entry);
-        return id ? [id] : [];
-      })
-    : [];
-};
-
-const buildFetchFailureDiagnostic = (
-  endpoint: string,
-  checkedAt: string,
-  selectedModel: string | undefined,
-  error: unknown,
-): AIProviderDiagnostic => {
-  const message = toErrorMessage(error);
-  return buildDiagnosticResponse({
-    code: message.toLowerCase().includes("timeout") ? "timeout" : "unreachable",
-    endpoint,
-    checkedAt,
-    selectedModel,
-    message,
-  });
-};
-
-const loadAvailableModels = async (
-  endpoint: string,
-  checkedAt: string,
-  selectedModel?: string,
-): Promise<LocalModelDiscoveryResult> => {
-  const responseResult = await settle(
-    fetch(buildModelsUrl(endpoint), {
-      method: "GET",
-      signal: AbortSignal.timeout(LOCAL_PROVIDER_HEALTH_TIMEOUT_MS),
-    }),
-  );
-
-  if (responseResult.status === "rejected") {
-    return {
-      diagnostic: buildFetchFailureDiagnostic(
-        endpoint,
-        checkedAt,
-        selectedModel,
-        responseResult.reason,
-      ),
-    };
-  }
-
-  const response = responseResult.value;
-  if (!response.ok) {
-    return {
-      diagnostic: buildDiagnosticResponse({
-        code: "unreachable",
-        endpoint,
-        checkedAt,
-        selectedModel,
-        message: `HTTP ${response.status}`,
-      }),
-    };
-  }
-
-  const payloadResult = await settle(response.json() as Promise<unknown>);
-  if (payloadResult.status === "rejected") {
-    return {
-      diagnostic: buildDiagnosticResponse({
-        code: "error",
-        endpoint,
-        checkedAt,
-        selectedModel,
-        message: toErrorMessage(payloadResult.reason),
-      }),
-    };
-  }
-
-  const availableModels = extractAvailableModels(payloadResult.value);
-  if (availableModels.length === 0) {
-    return {
-      diagnostic: buildDiagnosticResponse({
-        code: "empty-model-list",
-        endpoint,
-        checkedAt,
-        selectedModel,
-        message: "Endpoint responded without any available models",
-        availableModels,
-      }),
-    };
-  }
-
-  return {
-    endpoint,
-    checkedAt,
-    availableModels,
-  };
-};
-
 /**
  * Local AI Provider for RamaLama, Ollama, and other OpenAI-compatible local servers
  * Uses the OpenAI SDK pointed at a local endpoint
  */
 export class LocalProvider extends BaseAIProvider {
-  name = "local" as const;
+  name: AIProviderType = "local";
   model: string;
   private client: OpenAI;
 
@@ -344,8 +199,7 @@ export class LocalProvider extends BaseAIProvider {
    * Returns null if the server is unreachable or has no models.
    */
   static async detectFirstModel(baseUrl: string): Promise<string | null> {
-    const diagnostics = await LocalProvider.inspectEndpoint(baseUrl);
-    return diagnostics.availableModels?.[0] ?? null;
+    return await detectFirstLocalProviderModel(baseUrl);
   }
 
   /**
@@ -355,39 +209,7 @@ export class LocalProvider extends BaseAIProvider {
     baseUrl: string,
     selectedModel?: string,
   ): Promise<AIProviderDiagnostic> {
-    const checkedAt = new Date().toISOString();
-    const endpoint = baseUrl.trim();
-    const modelDiscovery = await loadAvailableModels(endpoint, checkedAt, selectedModel);
-    if ("diagnostic" in modelDiscovery) {
-      return modelDiscovery.diagnostic;
-    }
-    const { availableModels } = modelDiscovery;
-
-    if (
-      selectedModel &&
-      selectedModel !== LOCAL_AI_AUTO_DETECT_MODEL &&
-      !availableModels.includes(selectedModel)
-    ) {
-      return buildDiagnosticResponse({
-        code: "invalid-model",
-        endpoint,
-        checkedAt,
-        selectedModel,
-        message: "Configured model was not returned by the endpoint",
-        availableModels,
-      });
-    }
-
-    return buildDiagnosticResponse({
-      code: "healthy",
-      endpoint,
-      checkedAt,
-      selectedModel:
-        selectedModel && selectedModel !== LOCAL_AI_AUTO_DETECT_MODEL
-          ? selectedModel
-          : availableModels[0],
-      availableModels,
-    });
+    return await inspectLocalProviderEndpoint(baseUrl, selectedModel);
   }
 
   /**
@@ -399,43 +221,11 @@ export class LocalProvider extends BaseAIProvider {
       baseUrl: string;
       name: string;
       available: boolean;
-      availableModels?: string[];
+      availableModels?: readonly string[];
       diagnosticCode?: AIProviderDiagnostic["code"];
       message?: string;
     }>
   > {
-    const servers = LOCAL_AI_SERVERS.map((server) => ({
-      id: server.id,
-      baseUrl: server.baseUrl,
-      name: server.name,
-    }));
-
-    const results = await Promise.all(
-      servers.map(async (server) => {
-        const result = await settle(
-          Promise.resolve().then(async () => {
-            const diagnostics = await LocalProvider.inspectEndpoint(server.baseUrl);
-            return {
-              ...server,
-              available: diagnostics.code === "healthy",
-              availableModels: diagnostics.availableModels,
-              diagnosticCode: diagnostics.code,
-              message: diagnostics.message,
-            };
-          }),
-        );
-        if (result.status === "rejected") {
-          return {
-            ...server,
-            available: false,
-            diagnosticCode: "error" as const,
-            message: toErrorMessage(result.reason),
-          };
-        }
-        return result.value;
-      }),
-    );
-
-    return results;
+    return await detectLocalProviderServers();
   }
 }

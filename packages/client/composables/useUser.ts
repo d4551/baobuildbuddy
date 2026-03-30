@@ -3,7 +3,7 @@ import { STATE_KEYS } from "@bao/shared";
 import { readonly } from "vue";
 import { useI18n } from "vue-i18n";
 import { useState } from "#imports";
-import { toUserProfile } from "./api-normalizers";
+import { toUserProfile } from "./api-normalizer-user";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
 import { useApi } from "./useApi";
 

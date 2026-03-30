@@ -212,7 +212,7 @@ async function requestData<T>(
     />
 
     <div v-else-if="hubData" class="space-y-6">
-      <section class="card bg-gradient-to-br from-primary to-secondary text-primary-content">
+      <section class="card bg-linear-to-br from-primary to-secondary text-primary-content">
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <div>
@@ -242,30 +242,14 @@ async function requestData<T>(
         </div>
       </section>
 
-      <section class="stats stats-vertical lg:stats-horizontal w-full bg-base-200">
-        <div class="stat">
-          <div class="stat-figure text-4xl" aria-hidden="true">{{ GAMIFICATION_CURRENT_STREAK_ICON }}</div>
-          <div class="stat-title">{{ t("gamificationPage.currentStreakTitle") }}</div>
-          <div class="stat-value text-primary">{{ hubData.progress.currentStreak || 0 }}</div>
-          <div class="stat-desc">{{ t("gamificationPage.streakDaysSuffix") }}</div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-figure text-4xl" aria-hidden="true">{{ GAMIFICATION_LONGEST_STREAK_ICON }}</div>
-          <div class="stat-title">{{ t("gamificationPage.longestStreakTitle") }}</div>
-          <div class="stat-value text-secondary">{{ hubData.progress.longestStreak || 0 }}</div>
-          <div class="stat-desc">{{ t("gamificationPage.longestStreakDesc") }}</div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-figure text-4xl" aria-hidden="true">{{ GAMIFICATION_ACHIEVEMENTS_ICON }}</div>
-          <div class="stat-title">{{ t("gamificationPage.achievementsTitle") }}</div>
-          <div class="stat-value text-accent">{{ unlockedAchievements.length }}</div>
-          <div class="stat-desc">
-            {{ unlockedAchievements.length }} / {{ hubData.achievements.length }}
-          </div>
-        </div>
-      </section>
+      <StatsRow
+        background-class="bg-base-200"
+        :stats="[
+          { titleKey: 'gamificationPage.currentStreakTitle', value: hubData.progress.currentStreak || 0, valueClass: 'text-primary', descKey: 'gamificationPage.streakDaysSuffix', figure: GAMIFICATION_CURRENT_STREAK_ICON },
+          { titleKey: 'gamificationPage.longestStreakTitle', value: hubData.progress.longestStreak || 0, valueClass: 'text-secondary', descKey: 'gamificationPage.longestStreakDesc', figure: GAMIFICATION_LONGEST_STREAK_ICON },
+          { titleKey: 'gamificationPage.achievementsTitle', value: unlockedAchievements.length, valueClass: 'text-accent', descKey: 'gamificationPage.longestStreakDesc', figure: GAMIFICATION_ACHIEVEMENTS_ICON },
+        ]"
+      />
 
       <section class="card bg-base-200">
         <div class="card-body">
