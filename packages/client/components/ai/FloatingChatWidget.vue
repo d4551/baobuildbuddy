@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useFloatingChatWidget } from "~/composables/useFloatingChatWidget";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
 const {

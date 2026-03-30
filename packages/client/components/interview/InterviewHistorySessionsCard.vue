@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { InterviewSession } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
 
 const props = defineProps<{

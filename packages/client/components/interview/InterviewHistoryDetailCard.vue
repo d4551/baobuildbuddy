@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { InterviewSession } from "@bao/shared";
+import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 defineProps<{
