@@ -7,7 +7,7 @@ import {
   AUTOMATION_MAX_SCREENSHOT_RETENTION_DAYS,
   MS_PER_DAY,
 } from "@bao/shared";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, inArray, sql } from "drizzle-orm";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";

@@ -1,4 +1,4 @@
-import { type EmailTransportRuntimeConfig, type SmtpResponse } from "./email-delivery-contracts";
+import type { EmailTransportRuntimeConfig, SmtpResponse } from "./email-delivery-contracts";
 export declare class SmtpConnection {
     private readonly config;
     private readonly state;

@@ -18,8 +18,6 @@ import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-r
 import { parseResponsePayload, sessionConfigFromUi } from "./interview-route-config";
 import { sessionWithDerivedFields } from "./interview-route-presentation";
 
-export { sessionWithDerivedFields } from "./interview-route-presentation";
-
 const buildDefaultResponse = (questionId: string, answer: string): InterviewResponse => ({
   questionId,
   transcript: answer,

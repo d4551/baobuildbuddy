@@ -1,22 +1,22 @@
 import {
-  API_ERROR_AUTOMATION_RUN_NOT_FOUND,
-  API_ERROR_INVALID_RUN_ID,
-  API_ERROR_RUN_NOT_FOUND,
-  API_ERROR_SCHEDULED_RUN_NOT_FOUND,
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
-  RUN_ID_MIN_LENGTH,
-  settle,
-  type EmailResponseRequest,
 } from "@bao/shared";
 import { Elysia, t } from "elysia";
-
-import { config } from "../config/env";
-import { applicationAutomationService } from "../services/automation/application-automation-service";
-import { mapAutomationRouteError, toRouteError } from "../utils/automation-route-error";
 import { automationRateLimit } from "../utils/rate-limit";
+import {
+  handleAutomationCapabilitiesRoute,
+  handleAutomationRunByIdRoute,
+  handleEmailResponseRoute,
+  handleJobApplyRoute,
+  handleScheduledEmailResponseRoute,
+  handleScheduledJobApplyRoute,
+  handleScheduledScrapeRoute,
+  handleScrapeRoute,
+  handleVerifyAutomationContext,
+} from "./automation-route-actions";
 import {
   automationRouteErrorResponses,
   automationRunEnvelopeBodySchema,
@@ -27,22 +27,13 @@ import {
   emailResponseBodySchema,
   jobApplyBodySchema,
   routeErrorBodySchema,
-  RUN_ID_PATTERN,
   scheduledEmailResponseBodySchema,
   scheduledJobApplyBodySchema,
   scheduledScrapeBodySchema,
   scrapeBodySchema,
-  type JobApplyRequestBody,
-  type RunScrapeRequestBody,
-  type ScheduleEmailResponseRequestBody,
-  type ScheduleJobApplyRequestBody,
-  type ScheduleScrapeRequestBody,
 } from "./automation-route-contracts";
 import {
-  ensureAutomationVerifyContext,
   listAutomationRuns,
-  readAutomationRunById,
-  runJobApplyInBackground,
 } from "./automation-route-support";
 
 /**
@@ -52,15 +43,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   .use(automationRateLimit)
   .get(
     "/verify/context",
-    async ({ set }) => {
-      if (!config.enableAutomationVerification) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return ensureAutomationVerifyContext();
-    },
+    async ({ set }) => handleVerifyAutomationContext(set),
     {
       response: {
         [HTTP_STATUS_OK]: t.Object({
@@ -72,25 +55,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   )
   .post(
     "/job-apply",
-    async ({ body, set }) => {
-      const payload: JobApplyRequestBody = body;
-      const createRunResult = await settle(applicationAutomationService.createJobApplyRun(payload));
-      if (createRunResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(createRunResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
-      }
-
-      runJobApplyInBackground(createRunResult.value, payload);
-      const run = await readAutomationRunById(createRunResult.value);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
-    },
+    async ({ body, set }) => handleJobApplyRoute(body, set),
     {
       body: jobApplyBodySchema,
       response: {
@@ -101,35 +66,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   )
   .post(
     "/job-apply/schedule",
-    async ({ body, set }) => {
-      const payload: ScheduleJobApplyRequestBody = body;
-      const scheduleResult = await settle(
-        applicationAutomationService.createScheduledJobApplyRun(
-          {
-            jobUrl: payload.jobUrl,
-            resumeId: payload.resumeId,
-            ...(payload.coverLetterId ? { coverLetterId: payload.coverLetterId } : {}),
-            ...(payload.jobId ? { jobId: payload.jobId } : {}),
-            ...(payload.customAnswers ? { customAnswers: payload.customAnswers } : {}),
-          },
-          payload.runAt,
-        ),
-      );
-      if (scheduleResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(scheduleResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
-      }
-
-      const run = await readAutomationRunById(scheduleResult.value.runId);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
-    },
+    async ({ body, set }) => handleScheduledJobApplyRoute(body, set),
     {
       body: scheduledJobApplyBodySchema,
       response: {
@@ -140,20 +77,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   )
   .post(
     "/email-response",
-    async ({ body, set }) => {
-      const payload: EmailResponseRequest = body;
-      const emailResponseResult = await settle(
-        applicationAutomationService.runEmailResponse(payload),
-      );
-      if (emailResponseResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(emailResponseResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return emailResponseResult.value;
-    },
+    async ({ body, set }) => handleEmailResponseRoute(body, set),
     {
       body: emailResponseBodySchema,
       response: {
@@ -174,38 +98,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   )
   .post(
     "/email-response/schedule",
-    async ({ body, set }) => {
-      const payload: ScheduleEmailResponseRequestBody = body;
-      const scheduleResult = await settle(
-        applicationAutomationService.createScheduledEmailResponseRun(
-          {
-            subject: payload.subject,
-            message: payload.message,
-            ...(payload.sender ? { sender: payload.sender } : {}),
-            ...(payload.tone ? { tone: payload.tone } : {}),
-            ...(payload.recipientEmail ? { recipientEmail: payload.recipientEmail } : {}),
-            ...(payload.deliverAfterGeneration !== undefined
-              ? { deliverAfterGeneration: payload.deliverAfterGeneration }
-              : {}),
-          },
-          payload.runAt,
-        ),
-      );
-      if (scheduleResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(scheduleResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
-      }
-
-      const run = await readAutomationRunById(scheduleResult.value.runId);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
-    },
+    async ({ body, set }) => handleScheduledEmailResponseRoute(body, set),
     {
       body: scheduledEmailResponseBodySchema,
       response: {
@@ -216,24 +109,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   )
   .post(
     "/scrape",
-    async ({ body, set }) => {
-      const payload: RunScrapeRequestBody = body;
-      const runResult = await settle(applicationAutomationService.runScrape(payload.target));
-      if (runResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(runResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
-      }
-
-      const run = await readAutomationRunById(runResult.value);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
-    },
+    async ({ body, set }) => handleScrapeRoute(body, set),
     {
       body: scrapeBodySchema,
       response: {
@@ -244,26 +120,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   )
   .post(
     "/scrape/schedule",
-    async ({ body, set }) => {
-      const payload: ScheduleScrapeRequestBody = body;
-      const scheduleResult = await settle(
-        applicationAutomationService.createScheduledScrapeRun(payload.target, payload.runAt),
-      );
-      if (scheduleResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(scheduleResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
-      }
-
-      const run = await readAutomationRunById(scheduleResult.value.runId);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
-    },
+    async ({ body, set }) => handleScheduledScrapeRoute(body, set),
     {
       body: scheduledScrapeBodySchema,
       response: {
@@ -274,16 +131,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   )
   .get(
     "/capabilities",
-    async ({ set }) => {
-      const auditResult = await settle(applicationAutomationService.getRpaCapabilityAudit());
-      if (auditResult.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", "Failed to load RPA capability audit.");
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return auditResult.value;
-    },
+    async ({ set }) => handleAutomationCapabilitiesRoute(set),
     {
       response: {
         [HTTP_STATUS_OK]: capabilityAuditReportBodySchema,
@@ -301,21 +149,7 @@ export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Auto
   )
   .get(
     "/runs/:id",
-    async ({ params, set }) => {
-      if (params.id.length < RUN_ID_MIN_LENGTH || !RUN_ID_PATTERN.test(params.id)) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_INVALID_RUN_ID);
-      }
-
-      const run = await readAutomationRunById(params.id);
-      if (!run) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
-    },
+    async ({ params, set }) => handleAutomationRunByIdRoute(params.id, set),
     {
       params: automationRunIdParamsSchema,
       response: {

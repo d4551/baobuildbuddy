@@ -23,6 +23,7 @@ import { portfolioProjects } from "../../db/schema/portfolios";
 import { resumes } from "../../db/schema/resumes";
 import { skillMappings } from "../../db/schema/skill-mappings";
 import { userProfile } from "../../db/schema/user";
+import { getContextManagerFollowUps } from "./context-manager-followups";
 import { buildDomainSystemPrompts, GAMING_INDUSTRY_CONTEXT } from "./prompts";
 
 interface ConversationContext {
@@ -272,45 +273,7 @@ export class ConversationContextManager {
    * Generate follow-up suggestions based on domain and last response
    */
   generateFollowUps(domain: AIChatContextDomain): string[] {
-    const followUps: Record<AIChatContextDomain, string[]> = {
-      resume: [
-        "Can you help me improve my summary section?",
-        "What skills should I highlight for this role?",
-        "How can I quantify my achievements better?",
-      ],
-      job_search: [
-        "What studios are hiring for my skills?",
-        "How does my profile match this role?",
-        "What salary should I expect?",
-      ],
-      interview: [
-        "Give me a practice question for this role",
-        "How should I answer behavioral questions?",
-        "What questions should I ask the interviewer?",
-      ],
-      portfolio: [
-        "How can I improve my project descriptions?",
-        "What projects should I add to stand out?",
-        "How should I organize my portfolio?",
-      ],
-      skills: [
-        "What skills am I missing for this career path?",
-        "How do my gaming skills translate professionally?",
-        "What should I learn next?",
-      ],
-      automation: [
-        "What's the status of my last application?",
-        "Show my automation run history",
-        "Apply to another job",
-      ],
-      general: [
-        "Help me with my resume",
-        "Find jobs that match my profile",
-        "Prepare me for an interview",
-      ],
-    };
-
-    return followUps[domain] || followUps.general;
+    return getContextManagerFollowUps(domain);
   }
 }
 

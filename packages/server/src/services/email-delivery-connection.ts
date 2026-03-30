@@ -1,7 +1,4 @@
-import {
-  type EmailTransportRuntimeConfig,
-  type SmtpResponse,
-} from "./email-delivery-contracts";
+import type { EmailTransportRuntimeConfig, SmtpResponse } from "./email-delivery-contracts";
 import { settle } from "@bao/shared";
 import { dotStuffMessage, encodeBase64Utf8, SMTP_LINE_BREAK } from "./email-delivery-message";
 import {

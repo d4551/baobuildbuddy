@@ -7,11 +7,9 @@ import {
   API_ERROR_GENERATE_COVER_LETTER,
   API_ERROR_MATCH_JOBS,
   API_ERROR_RESUME_NOT_FOUND,
-  API_ERROR_UNSUPPORTED_AUTOMATION_ACTION,
   API_MESSAGE_COVER_LETTER_GENERATED,
   API_MESSAGE_RESUME_ANALYSIS_COMPLETE,
   generateId,
-  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
   resolveBrandSettings,
@@ -25,9 +23,6 @@ import { chatHistory } from "../db/schema/chat-history";
 import { resumes } from "../db/schema/resumes";
 import { contextManager } from "../services/ai/context-manager";
 import { buildSystemPrompt } from "../services/ai/prompts";
-import { applicationAutomationService } from "../services/automation/application-automation-service";
-import { mapAutomationRouteError } from "../utils/automation-route-error";
-import { createServerLogger } from "../utils/logger";
 import {
   composeChatSystemPrompt,
   normalizeClientChatContext,
@@ -49,8 +44,6 @@ import {
 } from "./ai-route-content";
 import { runJobMatchingFlow } from "./ai-route-job-matching";
 import { getAIService, getAISettingsRow } from "./ai-route-support";
-
-const aiRoutesLogger = createServerLogger("ai-routes");
 
 type ChatHistoryInsert = typeof chatHistory.$inferInsert;
 
@@ -83,20 +76,6 @@ const buildChatRouteResponse = (
   followUps: contextManager.generateFollowUps(preferredDomain),
   contextDomain: preferredDomain,
 });
-
-const startJobApplyRun = (
-  runId: string,
-  payload: {
-    jobUrl: string;
-    resumeId: string;
-    coverLetterId?: string;
-    jobId?: string;
-  },
-) => {
-  applicationAutomationService.runJobApply(runId, payload).then(undefined, (error: unknown) => {
-    aiRoutesLogger.error("Failed to execute job application automation run:", error);
-  });
-};
 
 export const handleChatRoute = async (
   body: { message: string; sessionId?: string; context?: ChatContextPayload },
@@ -253,51 +232,4 @@ export const handleMatchJobsRoute = async (
     return { error: toErrorMessage(flowResult.reason, API_ERROR_MATCH_JOBS) };
   }
   return flowResult.value;
-};
-
-export const handleAutomationActionRoute = async (
-  body: {
-    action: string;
-    jobUrl: string;
-    resumeId: string;
-    coverLetterId?: string;
-    jobId?: string;
-  },
-  set: RouteSetState,
-) => {
-  const { action, jobUrl, resumeId, coverLetterId, jobId } = body;
-
-  if (action !== "job_apply") {
-    set.status = HTTP_STATUS_BAD_REQUEST;
-    return { error: API_ERROR_UNSUPPORTED_AUTOMATION_ACTION.replace("__ACTION__", action) };
-  }
-
-  const runResult = await settle(
-    applicationAutomationService.createJobApplyRun(
-      { jobUrl, resumeId, coverLetterId, jobId },
-      { includeActionInPayload: true },
-    ),
-  );
-  if (runResult.status === "rejected") {
-    const mapped = mapAutomationRouteError(runResult.reason);
-    set.status = mapped.status;
-    return {
-      error: mapped.body.error.message,
-    };
-  }
-
-  const runId = runResult.value;
-  startJobApplyRun(runId, {
-    jobUrl,
-    resumeId,
-    coverLetterId,
-    jobId,
-  });
-
-  return {
-    runId,
-    status: "running",
-    message:
-      "Job application automation started. Use GET /api/automation/runs/:id to check status.",
-  };
 };

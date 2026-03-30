@@ -9,9 +9,9 @@ import {
   completeInterviewSession,
   createInterviewSession,
   getInterviewSession,
-  sessionWithDerivedFields,
   submitInterviewResponse,
 } from "./interview-route-support";
+import { sessionWithDerivedFields } from "./interview-route-presentation";
 import { getInterviewStats } from "./interview-route-stats";
 import { interviewService } from "../services/interview-service";
 

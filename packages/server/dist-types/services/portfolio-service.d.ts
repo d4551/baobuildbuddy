@@ -1,11 +1,6 @@
-import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
+import type { PortfolioData, PortfolioProject } from "@bao/shared";
+import type { CreatePortfolioProjectPayload, PortfolioUpdatePayload, UpdatePortfolioProjectPayload } from "./portfolio-service-contracts";
 export declare class PortfolioService {
-    private toMetadataOrDefault;
-    private metadataToRecord;
-    private toProject;
-    private toPortfolioData;
-    private getOrCreateDefaultPortfolio;
-    private getPortfolioRecord;
     /**
      * Get the full portfolio contract (header + projects).
      */
@@ -13,9 +8,7 @@ export declare class PortfolioService {
     /**
      * Update portfolio metadata
      */
-    updatePortfolio(data: {
-        metadata?: PortfolioMetadata;
-    }): Promise<PortfolioData>;
+    updatePortfolio(data: PortfolioUpdatePayload): Promise<PortfolioData>;
     /**
      * Get all projects for a portfolio
      */
@@ -23,7 +16,7 @@ export declare class PortfolioService {
     /**
      * Add a new project to a portfolio
      */
-    addProject(portfolioId: string, data: Omit<PortfolioProject, "id" | "portfolioId">): Promise<PortfolioProject>;
+    addProject(portfolioId: string, data: CreatePortfolioProjectPayload): Promise<PortfolioProject>;
     /**
      * Get a single project by ID
      */
@@ -31,7 +24,7 @@ export declare class PortfolioService {
     /**
      * Update a project
      */
-    updateProject(id: string, data: Partial<PortfolioProject>): Promise<PortfolioProject | null>;
+    updateProject(id: string, data: UpdatePortfolioProjectPayload): Promise<PortfolioProject | null>;
     /**
      * Delete a project
      */

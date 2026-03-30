@@ -8,11 +8,11 @@ import { chatHistory } from "../db/schema/chat-history";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
   handleAnalyzeResumeRoute,
-  handleAutomationActionRoute,
   handleChatRoute,
   handleGenerateCoverLetterRoute,
   handleMatchJobsRoute,
 } from "./ai-route-actions";
+import { handleAutomationActionRoute } from "./ai-route-automation";
 import {
   analyzeResumeRouteBodySchema,
   automationActionRouteBodySchema,

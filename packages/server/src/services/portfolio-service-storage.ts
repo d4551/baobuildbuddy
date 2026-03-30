@@ -85,7 +85,15 @@ export const createProject = async (
 
   await db
     .insert(portfolioProjects)
-    .values(createProjectInsert(id, portfolioId, data, now, data.sortOrder ?? maxSortOrder + 1));
+    .values(
+      createProjectInsert({
+        id,
+        portfolioId,
+        data,
+        now,
+        sortOrder: data.sortOrder ?? maxSortOrder + 1,
+      }),
+    );
 
   return id;
 };

@@ -1,5 +1,4 @@
 import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
-export { sessionWithDerivedFields } from "./interview-route-presentation";
 export declare const createInterviewSession: (studioId: string | undefined, config: CreateSessionConfigInput | undefined) => Promise<{
     status: number;
     body: {

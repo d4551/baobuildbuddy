@@ -94,29 +94,29 @@ export const toPortfolioData = (
   updatedAt: portfolio.updatedAt,
 });
 
-export const createProjectInsert = (
-  id: string,
-  portfolioId: string,
-  data: CreatePortfolioProjectPayload,
-  now: string,
-  sortOrder: number,
-): PortfolioProjectInsert => ({
-  id,
-  portfolioId,
-  title: data.title,
-  description: data.description,
-  technologies: data.technologies || [],
-  image: data.image,
-  liveUrl: data.liveUrl,
-  githubUrl: data.githubUrl,
-  tags: data.tags || [],
-  featured: data.featured,
-  role: data.role,
-  platforms: data.platforms,
-  engines: data.engines,
-  sortOrder,
-  createdAt: now,
-  updatedAt: now,
+export const createProjectInsert = (options: {
+  id: string;
+  portfolioId: string;
+  data: CreatePortfolioProjectPayload;
+  now: string;
+  sortOrder: number;
+}): PortfolioProjectInsert => ({
+  id: options.id,
+  portfolioId: options.portfolioId,
+  title: options.data.title,
+  description: options.data.description,
+  technologies: options.data.technologies || [],
+  image: options.data.image,
+  liveUrl: options.data.liveUrl,
+  githubUrl: options.data.githubUrl,
+  tags: options.data.tags || [],
+  featured: options.data.featured,
+  role: options.data.role,
+  platforms: options.data.platforms,
+  engines: options.data.engines,
+  sortOrder: options.sortOrder,
+  createdAt: options.now,
+  updatedAt: options.now,
 });
 
 export const createProjectUpdate = (

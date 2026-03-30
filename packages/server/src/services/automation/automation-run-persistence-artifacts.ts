@@ -142,7 +142,7 @@ export const copyAndIndexScreenshots = async (
 };
 
 export const normalizeExecutionArtifacts = async (
-  runId: string,
+  _runId: string,
   runDir: string,
   execution: RpaScriptExecutionResult,
 ): Promise<RpaRunResult> => {

@@ -1,7 +1,4 @@
-import {
-  type PortfolioMetadata,
-  type PortfolioProject,
-} from "@bao/shared";
+import type { PortfolioMetadata, PortfolioProject } from "@bao/shared";
 import { addPortfolioPageNumbers, createPortfolioContext } from "./export-service-portfolio-context";
 import {
   renderPortfolioCoverPage,

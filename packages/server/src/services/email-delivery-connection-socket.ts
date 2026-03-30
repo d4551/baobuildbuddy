@@ -88,7 +88,7 @@ const waitForTlsUpgrade = async (
 
 export const upgradeSmtpSocket = async (
   state: SmtpConnectionState,
-  config: EmailTransportRuntimeConfig,
+  _config: EmailTransportRuntimeConfig,
   socket: Bun.Socket<undefined>,
 ): Promise<Bun.Socket<undefined>> =>
   waitForTlsUpgrade(state, () =>
