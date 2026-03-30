@@ -1,7 +1,5 @@
-import type { InterviewSession } from "@bao/shared";
-import type { CreateSessionConfigInput, SessionPayload, SubmitResponseBody } from "./interview-route-contracts";
-export declare const sessionConfigFromUi: (config: CreateSessionConfigInput) => CreateSessionConfigInput;
-export declare const sessionWithDerivedFields: (session: InterviewSession) => Promise<SessionPayload>;
+import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
+export { sessionWithDerivedFields } from "./interview-route-presentation";
 export declare const createInterviewSession: (studioId: string | undefined, config: CreateSessionConfigInput | undefined) => Promise<{
     status: number;
     body: {
@@ -15,7 +13,7 @@ export declare const getInterviewSession: (id: string) => Promise<{
     };
 } | {
     status: null;
-    body: SessionPayload;
+    body: import("./interview-route-contracts").SessionPayload;
 }>;
 export declare const submitInterviewResponse: (id: string, body: SubmitResponseBody) => Promise<{
     status: number;

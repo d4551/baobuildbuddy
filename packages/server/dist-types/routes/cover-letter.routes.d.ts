@@ -1,9 +1,4 @@
 import { Elysia } from "elysia";
-type GeneratedCoverLetterContent = {
-    introduction: string;
-    body: string;
-    conclusion: string;
-};
 export declare const coverLetterRoutes: Elysia<"/cover-letters", {
     decorator: {};
     store: {};
@@ -58,8 +53,8 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                     id: string;
                     company: string;
                     position: string;
-                    jobInfo: {};
-                    content: {};
+                    jobInfo: Record<string, unknown>;
+                    content: Record<string, unknown>;
                     template: "professional" | "creative" | "gaming" | "executive" | "technical";
                 };
                 422: {
@@ -215,7 +210,11 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                         coverLetter?: undefined;
                     } | {
                         message: string;
-                        content: GeneratedCoverLetterContent;
+                        content: {
+                            introduction: string;
+                            body: string;
+                            conclusion: string;
+                        };
                         error?: undefined;
                         details?: undefined;
                         coverLetter?: undefined;
@@ -226,7 +225,11 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
                             company: string;
                             position: string;
                             jobInfo: Record<string, unknown>;
-                            content: GeneratedCoverLetterContent;
+                            content: {
+                                introduction: string;
+                                body: string;
+                                conclusion: string;
+                            };
                             template: "professional" | "creative" | "gaming" | "executive" | "technical";
                         };
                         error?: undefined;
@@ -293,4 +296,3 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
     standaloneSchema: {};
     response: {};
 }>;
-export {};

@@ -1,18 +1,9 @@
-import { join } from "node:path";
-import type { ResumeData, RpaRunEvent } from "@bao/shared";
-import { settle } from "@bao/shared";
+import type { RpaRunEvent } from "@bao/shared";
 import { and, count, eq, ne } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { coverLetters, resumes } from "../../db/schema/schema-modules";
-import { createServerLogger } from "../../utils/logger";
-import { exportService } from "../export-service";
 import { resumeService } from "../resume-service";
-import {
-  type SmartFieldAnalysisContext,
-  type SmartFieldAnalysisResult,
-  smartFieldMapper,
-} from "./smart-field-mapper";
 import {
   AutomationConcurrencyLimitError,
   AutomationDependencyMissingError,
@@ -21,214 +12,16 @@ import {
 } from "./automation-errors";
 import { assertRunExists, markRunFailed, resolveRunArtifactDir } from "./automation-run-persistence";
 import type { JobApplyExecutionPayload, JobApplyPayload } from "./automation-run-inputs";
-import { loadAutomationSettings, resolveMaxConcurrentRuns, tryLoadAIService } from "./automation-settings-support";
-import type {
-  AutofillAnalysisOptions,
-  JobApplyRunPreparation,
-} from "./automation-service-contracts";
+import { loadAutomationSettings, resolveMaxConcurrentRuns } from "./automation-settings-support";
+import {
+  normalizeGeneratedFieldAnswers,
+  resolveAutofillAnalysis,
+} from "./automation-job-apply-autofill";
+import { createResumeUploadArtifact } from "./automation-job-apply-resume-artifact";
+import type { JobApplyRunPreparation } from "./automation-service-contracts";
 import { sanitizeAndValidateJobUrl, sanitizeCustomAnswers } from "./automation-validation";
 
-const automationPreparationLogger = createServerLogger("automation-job-apply-preparation");
 const MIN_RESUME_ID_LENGTH = 1;
-const SMART_FIELD_CORE_KEYS = [
-  "fullName",
-  "email",
-  "phone",
-  "resume",
-  "coverLetter",
-  "submit",
-] as const;
-
-const normalizeGeneratedFieldAnswers = (
-  fieldAnswers: Record<string, string>,
-): Record<string, string> => {
-  const reservedFieldKeys = new Set<string>(SMART_FIELD_CORE_KEYS);
-  const normalizedAnswers: Record<string, string> = {};
-
-  for (const [key, value] of Object.entries(fieldAnswers)) {
-    const normalizedKey = key.trim();
-    const normalizedValue = value.trim();
-    if (
-      normalizedKey.length === 0 ||
-      normalizedValue.length === 0 ||
-      reservedFieldKeys.has(normalizedKey)
-    ) {
-      continue;
-    }
-
-    normalizedAnswers[normalizedKey] = normalizedValue;
-  }
-
-  return normalizedAnswers;
-};
-
-const createEmptyAutofillAnalysis = (): SmartFieldAnalysisResult => ({
-  selectorMap: {},
-  fieldAnswers: {},
-});
-
-const buildSmartFieldAnalysisContext = (
-  options: Pick<AutofillAnalysisOptions, "resume" | "coverLetter" | "existingAnswers">,
-): SmartFieldAnalysisContext => ({
-  resume: Object.fromEntries(Object.entries(options.resume)),
-  coverLetter: options.coverLetter ? { content: options.coverLetter.content || {} } : null,
-  existingAnswers: options.existingAnswers,
-});
-
-const collectResumeHeaderLines = (resume: ResumeData): string[] => {
-  const lines: string[] = [];
-  const personalInfo = resume.personalInfo;
-
-  if (resume.name) {
-    lines.push(resume.name);
-  }
-  if (personalInfo?.name && personalInfo.name !== resume.name) {
-    lines.push(personalInfo.name);
-  }
-
-  const contactLines = [
-    personalInfo?.email,
-    personalInfo?.phone,
-    personalInfo?.location,
-    personalInfo?.website,
-    personalInfo?.linkedIn,
-    personalInfo?.github,
-    personalInfo?.portfolio,
-  ].filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
-  if (contactLines.length > 0) {
-    lines.push(contactLines.join(" | "));
-  }
-
-  return lines;
-};
-
-const appendSection = (lines: string[], title: string, entries: string[]): void => {
-  if (entries.length === 0) {
-    return;
-  }
-
-  lines.push("", title, ...entries);
-};
-
-const collectResumeExperienceLines = (resume: ResumeData): string[] => {
-  const lines: string[] = [];
-
-  for (const experience of resume.experience ?? []) {
-    const headerParts = [experience.title, experience.company].filter(
-      (entry): entry is string => typeof entry === "string" && entry.trim().length > 0,
-    );
-    if (headerParts.length > 0) {
-      lines.push(headerParts.join(" - "));
-    }
-    if (experience.description?.trim()) {
-      lines.push(experience.description.trim());
-    }
-    for (const achievement of experience.achievements ?? []) {
-      if (achievement.trim().length > 0) {
-        lines.push(`- ${achievement.trim()}`);
-      }
-    }
-  }
-
-  return lines;
-};
-
-const collectResumeEducationLines = (resume: ResumeData): string[] => {
-  const lines: string[] = [];
-
-  for (const education of resume.education ?? []) {
-    const headerParts = [education.degree, education.field, education.school].filter(
-      (entry): entry is string => typeof entry === "string" && entry.trim().length > 0,
-    );
-    if (headerParts.length > 0) {
-      lines.push(headerParts.join(" - "));
-    }
-  }
-
-  return lines;
-};
-
-const collectResumeSkillSections = (
-  resume: ResumeData,
-): Array<{ title: string; lines: string[] }> => {
-  const skillSections = [
-    ["Technical Skills", resume.skills?.technical],
-    ["Soft Skills", resume.skills?.soft],
-    ["Gaming Skills", resume.skills?.gaming],
-  ] as const;
-
-  return skillSections.reduce<Array<{ title: string; lines: string[] }>>(
-    (sections, [title, values]) => {
-      if (Array.isArray(values) && values.length > 0) {
-        sections.push({ title, lines: [values.join(", ")] });
-      }
-      return sections;
-    },
-    [],
-  );
-};
-
-const serializeResumeUploadFallback = (resume: ResumeData): string => {
-  const lines = collectResumeHeaderLines(resume);
-  appendSection(lines, "Summary", resume.summary?.trim() ? [resume.summary.trim()] : []);
-  appendSection(lines, "Experience", collectResumeExperienceLines(resume));
-  appendSection(lines, "Education", collectResumeEducationLines(resume));
-  for (const section of collectResumeSkillSections(resume)) {
-    appendSection(lines, section.title, section.lines);
-  }
-  return lines.join("\n").trim();
-};
-
-const createResumeUploadArtifact = async (
-  runArtifactDir: string,
-  resume: ResumeData,
-): Promise<string | undefined> => {
-  const pdfResult = await settle(exportService.exportResumePDF(resume, resume.template));
-  if (pdfResult.status === "fulfilled") {
-    const pdfPath = join(runArtifactDir, "resume.pdf");
-    const writePdfResult = await settle(Bun.write(pdfPath, pdfResult.value));
-    if (writePdfResult.status === "fulfilled") {
-      return pdfPath;
-    }
-  }
-
-  const fallbackResumePath = join(runArtifactDir, "resume.txt");
-  const fallbackResume = serializeResumeUploadFallback(resume);
-  const writeFallbackResult = await settle(Bun.write(fallbackResumePath, fallbackResume));
-  if (writeFallbackResult.status === "fulfilled") {
-    return fallbackResumePath;
-  }
-};
-
-const resolveAutofillAnalysis = async (
-  options: AutofillAnalysisOptions,
-): Promise<SmartFieldAnalysisResult> => {
-  if (!options.automationSettings.enableSmartSelectors) {
-    automationPreparationLogger.debug("Smart field mapping skipped: enableSmartSelectors is off");
-    return createEmptyAutofillAnalysis();
-  }
-
-  const aiService = await tryLoadAIService();
-  if (!aiService) {
-    automationPreparationLogger.debug("Smart field mapping skipped: AI service unavailable");
-    return createEmptyAutofillAnalysis();
-  }
-
-  const result = await smartFieldMapper.analyze(
-    options.jobUrl,
-    [...SMART_FIELD_CORE_KEYS],
-    buildSmartFieldAnalysisContext(options),
-    aiService,
-  );
-  const isEmpty =
-    Object.keys(result.selectorMap).length === 0 && Object.keys(result.fieldAnswers).length === 0;
-  if (isEmpty) {
-    automationPreparationLogger.debug("Smart field mapping returned empty result", {
-      jobUrl: options.jobUrl,
-    });
-  }
-  return result;
-};
 
 const assertConcurrencyLimit = async (runId: string, maxConcurrentRuns: number): Promise<void> => {
   const runningRows = await db

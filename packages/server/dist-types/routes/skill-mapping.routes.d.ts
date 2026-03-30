@@ -1,12 +1,4 @@
-import { type SkillMapping } from "@bao/shared";
 import { Elysia } from "elysia";
-type SkillAnalysisResponse = {
-    message: string;
-    detectedSkills: string[];
-    suggestedMappings: Record<string, unknown>[];
-    recommendations: string[];
-    provider?: string;
-};
 export declare const skillMappingRoutes: Elysia<"/skills", {
     decorator: {};
     store: {};
@@ -90,7 +82,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: SkillMapping;
+                    200: import("@bao/shared").SkillMapping;
                     422: {
                         type: "validation";
                         on: string;
@@ -127,7 +119,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: SkillMapping | {
+                        200: import("@bao/shared").SkillMapping | {
                             error: string;
                         };
                         422: {
@@ -156,27 +148,14 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            readonly message: "Skill mapping deleted";
-                            readonly id: string;
-                        } & ({
-                            readonly message: "Skill mapping deleted";
-                            readonly id: string;
-                        } | {
+                        [x: number]: {
                             error: string;
-                        });
-                        410: {
-                            readonly error: "Skill mapping already deleted";
-                            readonly id: string;
-                        };
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
+                            id: string;
+                            message?: undefined;
+                        } | {
+                            message: string;
+                            id: string;
+                            error?: undefined;
                         };
                     };
                 };
@@ -247,7 +226,13 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: SkillAnalysisResponse;
+                    200: {
+                        message: string;
+                        detectedSkills: string[];
+                        suggestedMappings: Record<string, unknown>[];
+                        recommendations: string[];
+                        provider?: string;
+                    };
                     422: {
                         type: "validation";
                         on: string;
@@ -282,4 +267,3 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
     resolve: {};
     schema: {};
 }>;
-export {};

@@ -1,5 +1,6 @@
-import type { Achievement, DailyChallenge, GamificationActionHistoryEntry, GamificationStats } from "@bao/shared";
-type AchievementDefinition = Omit<Achievement, "unlocked" | "unlockedAt">;
+import type { GamificationActionHistoryEntry } from "@bao/shared";
+import { ACHIEVEMENT_DEFINITIONS, GAMIFICATION_STAT_KEYS } from "./gamification-achievement-definitions";
+import { DAILY_CHALLENGE_DEFINITIONS } from "./gamification-challenge-definitions";
 export declare const GAMIFICATION_DEFAULT_ID = "default";
 export declare const MAX_ACTION_HISTORY = 500;
 export declare const WEEK_DAYS = 7;
@@ -17,7 +18,4 @@ export type WeeklyProgressResult = {
     days: WeeklyDaySummary[];
     topCategory: string;
 };
-export declare const GAMIFICATION_STAT_KEYS: Array<keyof GamificationStats>;
-export declare const ACHIEVEMENT_DEFINITIONS: AchievementDefinition[];
-export declare const DAILY_CHALLENGE_DEFINITIONS: DailyChallenge[];
-export {};
+export { ACHIEVEMENT_DEFINITIONS, DAILY_CHALLENGE_DEFINITIONS, GAMIFICATION_STAT_KEYS, };

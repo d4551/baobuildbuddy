@@ -1637,8 +1637,8 @@ export declare const app: Elysia<"/api", {
                         id: string;
                         company: string;
                         position: string;
-                        jobInfo: {};
-                        content: {};
+                        jobInfo: Record<string, unknown>;
+                        content: Record<string, unknown>;
                         template: "professional" | "creative" | "gaming" | "executive" | "technical";
                     };
                     422: {
@@ -3145,27 +3145,14 @@ export declare const app: Elysia<"/api", {
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                readonly message: "Skill mapping deleted";
-                                readonly id: string;
-                            } & ({
-                                readonly message: "Skill mapping deleted";
-                                readonly id: string;
-                            } | {
+                            [x: number]: {
                                 error: string;
-                            });
-                            410: {
-                                readonly error: "Skill mapping already deleted";
-                                readonly id: string;
-                            };
-                            422: {
-                                type: "validation";
-                                on: string;
-                                summary?: string;
-                                message?: string;
-                                found?: unknown;
-                                property?: string;
-                                expected?: string;
+                                id: string;
+                                message?: undefined;
+                            } | {
+                                message: string;
+                                id: string;
+                                error?: undefined;
                             };
                         };
                     };
