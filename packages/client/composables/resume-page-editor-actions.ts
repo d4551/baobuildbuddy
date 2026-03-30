@@ -134,7 +134,32 @@ export function useResumeEditorActions(
   const { $toast } = feedback.nuxtApp;
   const { t } = feedback;
 
-  async function handleAIEnhance(): Promise<void> {
+  const handleAIEnhance = createResumeEnhanceAction(input, support, { $toast, t });
+  const handleAIScore = createResumeScoreAction(input, { $toast, t });
+  const handleSave = createResumeSaveAction(input, support, { $toast, t });
+
+  return {
+    handleAIEnhance,
+    handleAIScore,
+    handleSave,
+  };
+}
+
+function createResumeEnhanceAction(
+  input: Pick<
+    ResumePageActionsInput,
+    "aiEnhance" | "enhancing" | "formData" | "selectedResumeId"
+  >,
+  support: Pick<
+    Parameters<typeof useResumeEditorActions>[1],
+    "progress" | "resolveReward"
+  >,
+  feedback: {
+    $toast: Pick<NuxtApp["$toast"], "error" | "success">;
+    t: ComposerTranslation;
+  },
+) {
+  return async function handleAIEnhance(): Promise<void> {
     if (!input.selectedResumeId.value) {
       return;
     }
@@ -143,26 +168,36 @@ export function useResumeEditorActions(
     support.progress.startAiEnhancementProgress();
     const enhanceResult = await settlePromise(
       input.aiEnhance(input.selectedResumeId.value),
-      t("resumePage.toasts.resumeEnhanceFailed"),
+      feedback.t("resumePage.toasts.resumeEnhanceFailed"),
     );
     support.progress.stopAiEnhancementProgress();
     input.enhancing.value = false;
 
     if (!enhanceResult.ok) {
-      $toast.error(getErrorMessage(enhanceResult.error, t("resumePage.toasts.resumeEnhanceFailed")));
+      feedback.$toast.error(
+        getErrorMessage(enhanceResult.error, feedback.t("resumePage.toasts.resumeEnhanceFailed")),
+      );
       return;
     }
 
     Object.assign(input.formData, resumeDataToFormData(enhanceResult.value));
     const reward = await support.resolveReward("resumeEnhance");
-    $toast.success(
+    feedback.$toast.success(
       reward
-        ? t("resumePage.toasts.resumeEnhancedWithXp", { xp: reward })
-        : t("resumePage.toasts.resumeEnhanced"),
+        ? feedback.t("resumePage.toasts.resumeEnhancedWithXp", { xp: reward })
+        : feedback.t("resumePage.toasts.resumeEnhanced"),
     );
-  }
+  };
+}
 
-  async function handleAIScore(): Promise<void> {
+function createResumeScoreAction(
+  input: Pick<ResumePageActionsInput, "aiScore" | "scoring" | "selectedResumeId">,
+  feedback: {
+    $toast: Pick<NuxtApp["$toast"], "error" | "success">;
+    t: ComposerTranslation;
+  },
+) {
+  return async function handleAIScore(): Promise<void> {
     if (!input.selectedResumeId.value) {
       return;
     }
@@ -170,19 +205,33 @@ export function useResumeEditorActions(
     input.scoring.value = true;
     const scoreSubmission = await settlePromise(
       input.aiScore(input.selectedResumeId.value, ""),
-      t("resumePage.toasts.resumeScoreFailed"),
+      feedback.t("resumePage.toasts.resumeScoreFailed"),
     );
     input.scoring.value = false;
 
     if (!scoreSubmission.ok) {
-      $toast.error(getErrorMessage(scoreSubmission.error, t("resumePage.toasts.resumeScoreFailed")));
+      feedback.$toast.error(
+        getErrorMessage(scoreSubmission.error, feedback.t("resumePage.toasts.resumeScoreFailed")),
+      );
       return;
     }
 
-    $toast.success(t("resumePage.toasts.resumeScored"));
-  }
+    feedback.$toast.success(feedback.t("resumePage.toasts.resumeScored"));
+  };
+}
 
-  async function handleSave(): Promise<void> {
+function createResumeSaveAction(
+  input: Pick<ResumePageActionsInput, "formData" | "selectedResumeId" | "updateResume">,
+  support: Pick<
+    Parameters<typeof useResumeEditorActions>[1],
+    "resolveReward" | "validate"
+  >,
+  feedback: {
+    $toast: Pick<NuxtApp["$toast"], "error" | "success">;
+    t: ComposerTranslation;
+  },
+) {
+  return async function handleSave(): Promise<void> {
     const resumeId = input.selectedResumeId.value;
     if (!(resumeId && support.validate.validateResumeForm())) {
       return;
@@ -193,24 +242,20 @@ export function useResumeEditorActions(
         await input.updateResume(resumeId, formDataToResumeData(input.formData));
         return support.resolveReward("resumeSave");
       })(),
-      t("resumePage.toasts.resumeSaveFailed"),
+      feedback.t("resumePage.toasts.resumeSaveFailed"),
     );
     if (!saveResult.ok) {
-      $toast.error(getErrorMessage(saveResult.error, t("resumePage.toasts.resumeSaveFailed")));
+      feedback.$toast.error(
+        getErrorMessage(saveResult.error, feedback.t("resumePage.toasts.resumeSaveFailed")),
+      );
       return;
     }
 
     const reward = saveResult.value;
-    $toast.success(
+    feedback.$toast.success(
       reward
-        ? t("resumePage.toasts.resumeSavedWithXp", { xp: reward })
-        : t("resumePage.toasts.resumeSaved"),
+        ? feedback.t("resumePage.toasts.resumeSavedWithXp", { xp: reward })
+        : feedback.t("resumePage.toasts.resumeSaved"),
     );
-  }
-
-  return {
-    handleAIEnhance,
-    handleAIScore,
-    handleSave,
   };
 }

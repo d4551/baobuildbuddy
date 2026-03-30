@@ -17,11 +17,9 @@ import type {
 } from "~/types/automation-scraper";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
-export function createAutomationPresentation(
+function createAutomationDateFormatting(
   input: {
     fallbackLocale: Ref<unknown>;
-    lastRunAt: Record<AutomationScrapeTarget, string | null>;
-    latestRuns: Record<AutomationScrapeTarget, AutomationRunEnvelope | null>;
     locale: Ref<string>;
   },
   t: ComposerTranslation,
@@ -51,6 +49,13 @@ export function createAutomationPresentation(
   };
 
   return {
+    formatRunTime,
+    toLocalizedDateTime,
+  };
+}
+
+function createCapabilityPresentation(t: ComposerTranslation) {
+  return {
     capabilityAvailabilityBadgeClass(capability: ScrapeCapabilityCard): string {
       if (capability.configured) {
         return "badge-success";
@@ -69,6 +74,11 @@ export function createAutomationPresentation(
       }
       return t("automation.hub.audit.unavailable");
     },
+  };
+}
+
+function createScraperCardPresentation(t: ComposerTranslation) {
+  return {
     cardDescription(target: AutomationScrapeTarget): string {
       return target === "studios"
         ? t("automation.scraper.studioCard.description")
@@ -84,6 +94,11 @@ export function createAutomationPresentation(
         ? t("automation.scraper.studioCard.runButton")
         : t("automation.scraper.jobCard.runButton");
     },
+  };
+}
+
+function createJobPresentation() {
+  return {
     hasJobEnrichment(job: {
       readonly enrichment?: { readonly summary?: string; readonly interviewFocusAreas: readonly string[] };
     }): boolean {
@@ -94,6 +109,18 @@ export function createAutomationPresentation(
     }): string[] {
       return [...(job.enrichment?.interviewFocusAreas.slice(0, 2) ?? [])];
     },
+  };
+}
+
+function createAutomationRunPresentation(
+  input: {
+    lastRunAt: Record<AutomationScrapeTarget, string | null>;
+    latestRuns: Record<AutomationScrapeTarget, AutomationRunEnvelope | null>;
+  },
+  formatting: ReturnType<typeof createAutomationDateFormatting>,
+  t: ComposerTranslation,
+) {
+  return {
     latestRunNoticeText(target: AutomationScrapeTarget): string {
       const run = input.latestRuns[target];
       if (!run) {
@@ -101,11 +128,11 @@ export function createAutomationPresentation(
       }
       if (run.status === "pending") {
         return t("automation.scraper.schedule.scheduledForLabel", {
-          date: toLocalizedDateTime(resolveScheduledRunAt(run)),
+          date: formatting.toLocalizedDateTime(resolveScheduledRunAt(run)),
         });
       }
       return t("automation.scraper.lastRunLabel", {
-        value: formatRunTime(input.lastRunAt[target]),
+        value: formatting.formatRunTime(input.lastRunAt[target]),
       });
     },
     latestRunStatusText(target: AutomationScrapeTarget): string {
@@ -132,6 +159,25 @@ export function createAutomationPresentation(
       if (state === "error") return t("automation.scraper.state.error");
       return t("automation.scraper.state.idle");
     },
+  };
+}
+
+export function createAutomationPresentation(
+  input: {
+    fallbackLocale: Ref<unknown>;
+    lastRunAt: Record<AutomationScrapeTarget, string | null>;
+    latestRuns: Record<AutomationScrapeTarget, AutomationRunEnvelope | null>;
+    locale: Ref<string>;
+  },
+  t: ComposerTranslation,
+) {
+  const formatting = createAutomationDateFormatting(input, t);
+
+  return {
+    ...createCapabilityPresentation(t),
+    ...createScraperCardPresentation(t),
+    ...createJobPresentation(),
+    ...createAutomationRunPresentation(input, formatting, t),
   };
 }
 

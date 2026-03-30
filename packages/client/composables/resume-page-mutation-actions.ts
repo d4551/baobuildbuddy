@@ -20,6 +20,98 @@ function createResumeCreationPayload(
   };
 }
 
+function resolveCreatedResumeId(
+  result: Awaited<ReturnType<ResumePageActionsInput["createResume"]>>,
+): string | null {
+  if (
+    typeof result === "object" &&
+    result !== null &&
+    "id" in result &&
+    typeof result.id === "string"
+  ) {
+    return result.id;
+  }
+  return null;
+}
+
+function createResumeCreateAction(
+  input: Pick<
+    ResumePageActionsInput,
+    "createResume" | "creating" | "newResumeName" | "newResumeTemplate" | "selectedResumeId" | "showCreateModal"
+  >,
+  feedback: {
+    $toast: Pick<NuxtApp["$toast"], "error" | "success">;
+    t: ComposerTranslation;
+  },
+) {
+  return async function handleCreate(): Promise<void> {
+    if (!input.newResumeName.value.trim()) {
+      return;
+    }
+    if (input.newResumeName.value.trim().length < 2) {
+      feedback.$toast.error(feedback.t("resumePage.toasts.resumeNameMinLength"));
+      return;
+    }
+
+    input.creating.value = true;
+    const createResult = await settlePromise(
+      input.createResume(
+        createResumeCreationPayload(input.newResumeName.value, input.newResumeTemplate.value),
+      ),
+      feedback.t("resumePage.toasts.resumeCreateFailed"),
+    );
+    input.creating.value = false;
+
+    if (!createResult.ok) {
+      feedback.$toast.error(
+        getErrorMessage(createResult.error, feedback.t("resumePage.toasts.resumeCreateFailed")),
+      );
+      return;
+    }
+
+    input.showCreateModal.value = false;
+    input.newResumeName.value = "";
+    input.selectedResumeId.value = resolveCreatedResumeId(createResult.value);
+    feedback.$toast.success(feedback.t("resumePage.toasts.resumeCreated"));
+  };
+}
+
+function createResumeDeleteAction(
+  input: Pick<
+    ResumePageActionsInput,
+    "closeDeleteResumeDialog" | "deleteResume" | "pendingDeleteResumeId" | "selectedResumeId"
+  >,
+  feedback: {
+    $toast: Pick<NuxtApp["$toast"], "error" | "success">;
+    t: ComposerTranslation;
+  },
+) {
+  return async function handleDeleteResume(): Promise<void> {
+    const id = input.pendingDeleteResumeId.value;
+    if (!id) {
+      return;
+    }
+
+    const deleteResult = await settlePromise(
+      input.deleteResume(id),
+      feedback.t("resumePage.toasts.resumeDeleteFailed"),
+    );
+    input.closeDeleteResumeDialog();
+
+    if (!deleteResult.ok) {
+      feedback.$toast.error(
+        getErrorMessage(deleteResult.error, feedback.t("resumePage.toasts.resumeDeleteFailed")),
+      );
+      return;
+    }
+
+    if (input.selectedResumeId.value === id) {
+      input.selectedResumeId.value = null;
+    }
+    feedback.$toast.success(feedback.t("resumePage.toasts.resumeDeleted"));
+  };
+}
+
 export function useResumeMutationActions(
   {
     closeDeleteResumeDialog,
@@ -47,62 +139,27 @@ export function useResumeMutationActions(
   t: ComposerTranslation,
 ) {
   const { $toast } = nuxtApp;
-
-  async function handleCreate(): Promise<void> {
-    if (!newResumeName.value.trim()) {
-      return;
-    }
-    if (newResumeName.value.trim().length < 2) {
-      $toast.error(t("resumePage.toasts.resumeNameMinLength"));
-      return;
-    }
-
-    creating.value = true;
-    const createResult = await settlePromise(
-      createResume(createResumeCreationPayload(newResumeName.value, newResumeTemplate.value)),
-      t("resumePage.toasts.resumeCreateFailed"),
-    );
-    creating.value = false;
-
-    if (!createResult.ok) {
-      $toast.error(getErrorMessage(createResult.error, t("resumePage.toasts.resumeCreateFailed")));
-      return;
-    }
-
-    showCreateModal.value = false;
-    newResumeName.value = "";
-    selectedResumeId.value =
-      typeof createResult.value === "object" &&
-      createResult.value !== null &&
-      "id" in createResult.value &&
-      typeof createResult.value.id === "string"
-        ? createResult.value.id
-        : null;
-    $toast.success(t("resumePage.toasts.resumeCreated"));
-  }
-
-  async function handleDeleteResume(): Promise<void> {
-    const id = pendingDeleteResumeId.value;
-    if (!id) {
-      return;
-    }
-
-    const deleteResult = await settlePromise(
-      deleteResume(id),
-      t("resumePage.toasts.resumeDeleteFailed"),
-    );
-    closeDeleteResumeDialog();
-
-    if (!deleteResult.ok) {
-      $toast.error(getErrorMessage(deleteResult.error, t("resumePage.toasts.resumeDeleteFailed")));
-      return;
-    }
-
-    if (selectedResumeId.value === id) {
-      selectedResumeId.value = null;
-    }
-    $toast.success(t("resumePage.toasts.resumeDeleted"));
-  }
+  const feedback = { $toast, t };
+  const handleCreate = createResumeCreateAction(
+    {
+      createResume,
+      creating,
+      newResumeName,
+      newResumeTemplate,
+      selectedResumeId,
+      showCreateModal,
+    },
+    feedback,
+  );
+  const handleDeleteResume = createResumeDeleteAction(
+    {
+      closeDeleteResumeDialog,
+      deleteResume,
+      pendingDeleteResumeId,
+      selectedResumeId,
+    },
+    feedback,
+  );
 
   return {
     handleCreate,

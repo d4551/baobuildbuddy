@@ -50,22 +50,10 @@ const DEFAULT_SKILL_FORM_STATE = {
   category: SKILLS_DEFAULT_CATEGORY,
 } satisfies NewSkillMappingFormState;
 
-export function createSkillsPageActions({
-  api,
-  toast,
-  t,
-  awardXP,
-  fetchProgress,
-  mappings,
-  loading,
-  analyzing,
-  pageError,
-  showAddModal,
-  pendingDeleteMappingId,
-  closeDeleteMappingDialog,
-  newApplication,
-  newMapping,
-}: SkillsPageActionsInput) {
+function createSkillFormActions(
+  newApplication: SkillsPageActionsInput["newApplication"],
+  newMapping: SkillsPageActionsInput["newMapping"],
+) {
   function resetForm(): void {
     newMapping.gameExpression = DEFAULT_SKILL_FORM_STATE.gameExpression;
     newMapping.transferableSkill = DEFAULT_SKILL_FORM_STATE.transferableSkill;
@@ -75,6 +63,38 @@ export function createSkillsPageActions({
     newApplication.value = "";
   }
 
+  function addApplication(): void {
+    const normalizedApplication = newApplication.value.trim();
+    if (normalizedApplication.length === 0) {
+      return;
+    }
+
+    newMapping.industryApplications.push(normalizedApplication);
+    newApplication.value = "";
+  }
+
+  function removeApplication(index: number): void {
+    newMapping.industryApplications.splice(index, 1);
+  }
+
+  return {
+    addApplication,
+    removeApplication,
+    resetForm,
+  };
+}
+
+function createFetchMappingsAction({
+  api,
+  toast,
+  t,
+  mappings,
+  loading,
+  pageError,
+}: Pick<
+  SkillsPageActionsInput,
+  "api" | "toast" | "t" | "mappings" | "loading" | "pageError"
+>) {
   async function fetchMappings(): Promise<void> {
     pageError.value = null;
     loading.value = true;
@@ -98,101 +118,165 @@ export function createSkillsPageActions({
       : [];
   }
 
-  async function syncGamificationProgress(): Promise<void> {
-    await settlePromise(fetchProgress(), t("skillsPage.errors.gamificationLoadFailed"));
-  }
+  return { fetchMappings };
+}
 
-  async function initializeSkillsPage(): Promise<void> {
-    await Promise.all([fetchMappings(), syncGamificationProgress()]);
+function createSkillsGamificationActions(
+  input: Pick<SkillsPageActionsInput, "awardXP" | "fetchProgress" | "t">,
+) {
+  async function syncGamificationProgress(): Promise<void> {
+    await settlePromise(input.fetchProgress(), input.t("skillsPage.errors.gamificationLoadFailed"));
   }
 
   async function tryAwardSkillXp(amount: number, reason: SkillsGamificationReason): Promise<boolean> {
     const awardResult = await settlePromise(
-      awardXP(amount, reason),
-      t("apiErrors.gamification.awardXPFailed"),
+      input.awardXP(amount, reason),
+      input.t("apiErrors.gamification.awardXPFailed"),
     );
     return awardResult.ok;
   }
 
-  async function handleAddMapping(): Promise<void> {
-    const normalizedGameExpression = newMapping.gameExpression.trim();
+  return {
+    syncGamificationProgress,
+    tryAwardSkillXp,
+  };
+}
+
+function createSkillsMutationActions(
+  input: Pick<
+    SkillsPageActionsInput,
+    | "api"
+    | "toast"
+    | "t"
+    | "loading"
+    | "analyzing"
+    | "showAddModal"
+    | "pendingDeleteMappingId"
+    | "closeDeleteMappingDialog"
+    | "newMapping"
+  >,
+  support: {
+    fetchMappings: () => Promise<void>;
+    resetForm: () => void;
+    tryAwardSkillXp: (amount: number, reason: SkillsGamificationReason) => Promise<boolean>;
+  },
+) {
+  const handleAddMapping = createAddMappingAction(input, support);
+  const handleDeleteMapping = createDeleteMappingAction(input, support);
+  const handleAIAnalyze = createAnalyzeSkillsAction(input, support);
+
+  return {
+    handleAddMapping,
+    handleAIAnalyze,
+    handleDeleteMapping,
+  };
+}
+
+function createAddMappingAction(
+  input: Pick<
+    SkillsPageActionsInput,
+    "api" | "toast" | "t" | "loading" | "showAddModal" | "newMapping"
+  >,
+  support: Pick<
+    Parameters<typeof createSkillsMutationActions>[1],
+    "fetchMappings" | "resetForm"
+  >,
+) {
+  return async function handleAddMapping(): Promise<void> {
+    const normalizedGameExpression = input.newMapping.gameExpression.trim();
     if (normalizedGameExpression.length < SKILLS_MIN_GAME_EXPRESSION_LENGTH) {
-      toast.error(t("skillsPage.errors.gameExpressionMinLength"));
+      input.toast.error(input.t("skillsPage.errors.gameExpressionMinLength"));
       return;
     }
 
-    const normalizedTransferableSkill = newMapping.transferableSkill.trim();
+    const normalizedTransferableSkill = input.newMapping.transferableSkill.trim();
     if (normalizedTransferableSkill.length < SKILLS_MIN_TRANSFERABLE_SKILL_LENGTH) {
-      toast.error(t("skillsPage.errors.transferableSkillMinLength"));
+      input.toast.error(input.t("skillsPage.errors.transferableSkillMinLength"));
       return;
     }
 
-    loading.value = true;
+    input.loading.value = true;
     const addMappingResult = await settlePromise(
       (async () => {
-        await api.skills.mappings.post({
+        await input.api.skills.mappings.post({
           gameExpression: normalizedGameExpression,
           transferableSkill: normalizedTransferableSkill,
-          industryApplications: newMapping.industryApplications,
-          confidence: newMapping.confidence,
-          category: newMapping.category,
+          industryApplications: input.newMapping.industryApplications,
+          confidence: input.newMapping.confidence,
+          category: input.newMapping.category,
           demandLevel: SKILLS_DEFAULT_DEMAND_LEVEL,
         });
-        await fetchMappings();
-        showAddModal.value = false;
-        resetForm();
+        await support.fetchMappings();
+        input.showAddModal.value = false;
+        support.resetForm();
       })(),
-      t("skillsPage.errors.addFailed"),
+      input.t("skillsPage.errors.addFailed"),
     );
-    loading.value = false;
+    input.loading.value = false;
 
     if (!addMappingResult.ok) {
-      toast.error(getErrorMessage(addMappingResult.error, t("skillsPage.errors.addFailed")));
+      input.toast.error(getErrorMessage(addMappingResult.error, input.t("skillsPage.errors.addFailed")));
       return;
     }
 
-    toast.success(
-      t("skillsPage.toasts.mappingAddedWithXp", {
+    input.toast.success(
+      input.t("skillsPage.toasts.mappingAddedWithXp", {
         xp: ROUTE_GAMIFICATION_XP.skillsMapped,
       }),
     );
-  }
+  };
+}
 
-  async function handleDeleteMapping(): Promise<void> {
-    const id = pendingDeleteMappingId.value;
+function createDeleteMappingAction(
+  input: Pick<
+    SkillsPageActionsInput,
+    "api" | "toast" | "t" | "loading" | "pendingDeleteMappingId" | "closeDeleteMappingDialog"
+  >,
+  support: Pick<Parameters<typeof createSkillsMutationActions>[1], "fetchMappings">,
+) {
+  return async function handleDeleteMapping(): Promise<void> {
+    const id = input.pendingDeleteMappingId.value;
     if (!id) {
       return;
     }
 
-    loading.value = true;
+    input.loading.value = true;
     const deleteResult = await settlePromise(
       (async () => {
-        await api.skills.mappings({ id }).delete();
-        await fetchMappings();
+        await input.api.skills.mappings({ id }).delete();
+        await support.fetchMappings();
       })(),
-      t("skillsPage.errors.deleteFailed"),
+      input.t("skillsPage.errors.deleteFailed"),
     );
-    loading.value = false;
-    closeDeleteMappingDialog();
+    input.loading.value = false;
+    input.closeDeleteMappingDialog();
 
     if (!deleteResult.ok) {
-      toast.error(getErrorMessage(deleteResult.error, t("skillsPage.errors.deleteFailed")));
+      input.toast.error(getErrorMessage(deleteResult.error, input.t("skillsPage.errors.deleteFailed")));
       return;
     }
 
-    toast.success(t("skillsPage.toasts.mappingDeleted"));
-  }
+    input.toast.success(input.t("skillsPage.toasts.mappingDeleted"));
+  };
+}
 
-  async function handleAIAnalyze(): Promise<void> {
-    analyzing.value = true;
+function createAnalyzeSkillsAction(
+  input: Pick<SkillsPageActionsInput, "api" | "toast" | "t" | "analyzing">,
+  support: Pick<
+    Parameters<typeof createSkillsMutationActions>[1],
+    "fetchMappings" | "tryAwardSkillXp"
+  >,
+) {
+  return async function handleAIAnalyze(): Promise<void> {
+    input.analyzing.value = true;
     const analysisResult = await settlePromise(
-      api.skills["ai-analyze"].post({}),
-      t("skillsPage.errors.analysisFailed"),
+      input.api.skills["ai-analyze"].post({}),
+      input.t("skillsPage.errors.analysisFailed"),
     );
-    analyzing.value = false;
+    input.analyzing.value = false;
 
     if (!analysisResult.ok) {
-      toast.error(getErrorMessage(analysisResult.error, t("skillsPage.errors.analysisFailed")));
+      input.toast.error(getErrorMessage(analysisResult.error, input.t("skillsPage.errors.analysisFailed")));
       return;
     }
 
@@ -200,42 +284,39 @@ export function createSkillsPageActions({
       return;
     }
 
-    await fetchMappings();
-    const awardedXp = await tryAwardSkillXp(
+    await support.fetchMappings();
+    const awardedXp = await support.tryAwardSkillXp(
       SKILLS_GAMIFICATION_XP.aiAnalysisCompleted,
       SKILLS_GAMIFICATION_REASONS.aiAnalysisCompleted,
     );
-    toast.success(
+    input.toast.success(
       awardedXp
-        ? t("skillsPage.toasts.analysisCompletedWithXp", {
+        ? input.t("skillsPage.toasts.analysisCompletedWithXp", {
             xp: SKILLS_GAMIFICATION_XP.aiAnalysisCompleted,
           })
-        : t("skillsPage.toasts.analysisCompleted"),
+        : input.t("skillsPage.toasts.analysisCompleted"),
     );
-  }
+  };
+}
 
-  function addApplication(): void {
-    const normalizedApplication = newApplication.value.trim();
-    if (normalizedApplication.length === 0) {
-      return;
-    }
+export function createSkillsPageActions(input: SkillsPageActionsInput) {
+  const form = createSkillFormActions(input.newApplication, input.newMapping);
+  const fetchActions = createFetchMappingsAction(input);
+  const gamification = createSkillsGamificationActions(input);
+  const mutations = createSkillsMutationActions(input, {
+    fetchMappings: fetchActions.fetchMappings,
+    resetForm: form.resetForm,
+    tryAwardSkillXp: gamification.tryAwardSkillXp,
+  });
 
-    newMapping.industryApplications.push(normalizedApplication);
-    newApplication.value = "";
-  }
-
-  function removeApplication(index: number): void {
-    newMapping.industryApplications.splice(index, 1);
+  async function initializeSkillsPage(): Promise<void> {
+    await Promise.all([fetchActions.fetchMappings(), gamification.syncGamificationProgress()]);
   }
 
   return {
-    addApplication,
-    fetchMappings,
-    handleAddMapping,
-    handleAIAnalyze,
-    handleDeleteMapping,
+    ...fetchActions,
+    ...form,
+    ...mutations,
     initializeSkillsPage,
-    removeApplication,
-    resetForm,
   };
 }

@@ -6,21 +6,39 @@ import { createSkillsPageDerived } from "~/composables/skills-page-derived";
 
 type SkillsFilterValue = typeof SKILLS_FILTER_ALL_VALUE | NewSkillMappingFormState["category"];
 
-export function useSkillsPage() {
-  const api = useApi();
-  const { $toast } = useNuxtApp();
-  const { t } = useI18n();
-  const { awardXP, progress, fetchProgress } = useGamification();
+function useSkillsPageDependencies() {
+  return {
+    api: useApi(),
+    toast: useNuxtApp().$toast,
+    t: useI18n().t,
+    gamification: useGamification(),
+  };
+}
 
-  const mappings = ref<SkillMapping[]>([]);
-  const loading = ref(false);
-  const analyzing = ref(false);
-  const pageError = ref<string | null>(null);
-  const showAddModal = ref(false);
-  const categoryFilter = ref<SkillsFilterValue>(SKILLS_FILTER_ALL_VALUE);
-  const searchFilter = ref("");
-  const newApplication = ref("");
+function createSkillsPageState() {
+  return {
+    mappings: ref<SkillMapping[]>([]),
+    loading: ref(false),
+    analyzing: ref(false),
+    pageError: ref<string | null>(null),
+    showAddModal: ref(false),
+    categoryFilter: ref<SkillsFilterValue>(SKILLS_FILTER_ALL_VALUE),
+    searchFilter: ref(""),
+    newApplication: ref(""),
+  };
+}
 
+function createSkillsPageFormState() {
+  return reactive<NewSkillMappingFormState>({
+    gameExpression: "",
+    transferableSkill: "",
+    industryApplications: [],
+    confidence: SKILLS_DEFAULT_CONFIDENCE,
+    category: SKILLS_DEFAULT_CATEGORY,
+  });
+}
+
+function useSkillsPageDeleteState() {
   const {
     showDeleteDialog: showDeleteMappingDialog,
     pendingDeleteId: pendingDeleteMappingId,
@@ -29,58 +47,86 @@ export function useSkillsPage() {
     closeDeleteDialog: closeDeleteMappingDialog,
   } = useDeleteConfirmation();
 
-  const newMapping = reactive<NewSkillMappingFormState>({
-    gameExpression: "",
-    transferableSkill: "",
-    industryApplications: [],
-    confidence: SKILLS_DEFAULT_CONFIDENCE,
-    category: SKILLS_DEFAULT_CATEGORY,
-  });
+  return {
+    showDeleteMappingDialog,
+    pendingDeleteMappingId,
+    requestDeleteMapping,
+    clearDeleteMappingState,
+    closeDeleteMappingDialog,
+  };
+}
 
-  const level = computed(() => progress.value?.level ?? 1);
-  const xp = computed(() => progress.value?.xp ?? 0);
+function createSkillsProgress(gamification: ReturnType<typeof useGamification>) {
+  return {
+    level: computed(() => gamification.progress.value?.level ?? 1),
+    xp: computed(() => gamification.progress.value?.xp ?? 0),
+  };
+}
+
+function mergeSkillsPageState(input: {
+  state: ReturnType<typeof createSkillsPageState>;
+  newMapping: NewSkillMappingFormState;
+  deletion: ReturnType<typeof useSkillsPageDeleteState>;
+  derived: ReturnType<typeof createSkillsPageDerived>;
+  actions: ReturnType<typeof createSkillsPageActions>;
+}) {
+  return {
+    analyzing: input.state.analyzing,
+    categoryFilter: input.state.categoryFilter,
+    clearDeleteMappingState: input.deletion.clearDeleteMappingState,
+    closeDeleteMappingDialog: input.deletion.closeDeleteMappingDialog,
+    loading: input.state.loading,
+    newApplication: input.state.newApplication,
+    newMapping: input.newMapping,
+    pageError: input.state.pageError,
+    pendingDeleteMappingId: input.deletion.pendingDeleteMappingId,
+    requestDeleteMapping: input.deletion.requestDeleteMapping,
+    searchFilter: input.state.searchFilter,
+    showAddModal: input.state.showAddModal,
+    showDeleteMappingDialog: input.deletion.showDeleteMappingDialog,
+    ...input.derived,
+    ...input.actions,
+  };
+}
+
+export function useSkillsPage() {
+  const { api, toast, t, gamification } = useSkillsPageDependencies();
+  const state = createSkillsPageState();
+  const deletion = useSkillsPageDeleteState();
+  const newMapping = createSkillsPageFormState();
+  const progress = createSkillsProgress(gamification);
 
   const derived = createSkillsPageDerived({
-    mappings,
-    categoryFilter,
-    searchFilter,
-    level,
-    xp,
+    mappings: state.mappings,
+    categoryFilter: state.categoryFilter,
+    searchFilter: state.searchFilter,
+    level: progress.level,
+    xp: progress.xp,
     t,
   });
 
   const actions = createSkillsPageActions({
     api,
-    toast: $toast,
+    toast,
     t,
-    awardXP,
-    fetchProgress,
-    mappings,
-    loading,
-    analyzing,
-    pageError,
-    showAddModal,
-    pendingDeleteMappingId,
-    closeDeleteMappingDialog,
-    newApplication,
+    awardXP: gamification.awardXP,
+    fetchProgress: gamification.fetchProgress,
+    mappings: state.mappings,
+    loading: state.loading,
+    analyzing: state.analyzing,
+    pageError: state.pageError,
+    showAddModal: state.showAddModal,
+    pendingDeleteMappingId: deletion.pendingDeleteMappingId,
+    closeDeleteMappingDialog: deletion.closeDeleteMappingDialog,
+    newApplication: state.newApplication,
     newMapping,
   });
 
-  return {
-    analyzing,
-    categoryFilter,
-    clearDeleteMappingState,
-    closeDeleteMappingDialog,
-    loading,
-    newApplication,
+  return mergeSkillsPageState({
+    state,
     newMapping,
-    pageError,
-    pendingDeleteMappingId,
-    requestDeleteMapping,
-    searchFilter,
-    showAddModal,
-    showDeleteMappingDialog,
-    ...derived,
-    ...actions,
-  };
+    deletion,
+    derived,
+    actions,
+  });
 }
