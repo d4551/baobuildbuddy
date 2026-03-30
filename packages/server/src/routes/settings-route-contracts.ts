@@ -9,7 +9,7 @@ import {
   SCHEMA_MAX_LENGTH_SETTINGS_URL,
 } from "@bao/shared";
 import { t } from "elysia";
-import { DATA_EXPORT_VERSION } from "../services/data-service";
+import { DATA_EXPORT_VERSION } from "../services/data-service-contracts";
 import {
   aiRoutingBodySchema,
   brandSettingsPatchBodySchema,

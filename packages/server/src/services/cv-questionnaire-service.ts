@@ -12,7 +12,10 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { AIService } from "./ai/ai-service";
-import { cvQuestionnaireQuestionsPrompt, cvQuestionnaireSynthesizePrompt } from "./ai/prompts";
+import {
+  cvQuestionnaireQuestionsPrompt,
+  cvQuestionnaireSynthesizePrompt,
+} from "./ai/prompts-cv";
 
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
 const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;

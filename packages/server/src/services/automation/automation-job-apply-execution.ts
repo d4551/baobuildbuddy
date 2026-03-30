@@ -19,7 +19,8 @@ import type {
   JobApplyExecutionTracking,
   JobApplyRunPreparation,
 } from "./automation-service-contracts";
-import { type RpaScriptExecutionResult, runRpaScript } from "./rpa-runner";
+import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
+import { runRpaScript } from "./rpa-runner-protocol";
 
 export const createExecutionTracking = (): JobApplyExecutionTracking => ({
   exitCode: null,

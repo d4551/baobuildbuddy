@@ -11,7 +11,7 @@ import {
   type ScrapedStudio,
 } from "@bao/shared";
 import { config } from "../config/env";
-import { runAutomationScript } from "./automation/rpa-runner";
+import { runAutomationScript } from "./automation/rpa-runner-process";
 import type {
   AutomationScriptReference,
   ScriptExecutionOptions,

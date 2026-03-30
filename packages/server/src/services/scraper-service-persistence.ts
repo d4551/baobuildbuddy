@@ -128,42 +128,47 @@ export const upsertScrapedJob = async (
     });
 };
 
-export const persistScrapedJobRow = async (
-  job: JobSearchResult["jobs"][number],
-  now: string,
+type PersistScrapedEntityOptions = {
+  now: string;
+  enrichmentAttempt: ScrapeEnrichmentAttempt;
+  enrichmentAccumulator: ScrapeEnrichmentAccumulator;
+  pushWarning: (accumulator: ScrapeEnrichmentAccumulator, warning: string) => void;
+};
+
+const applyEnrichmentTracking = (
   enrichmentAttempt: ScrapeEnrichmentAttempt,
   enrichmentAccumulator: ScrapeEnrichmentAccumulator,
-  pushWarning: (accumulator: ScrapeEnrichmentAccumulator, warning: string) => void,
+) => {
+  if (!enrichmentAttempt.enrichment) {
+    return;
+  }
+
+  enrichmentAccumulator.enrichedRecords += 1;
+  enrichmentAccumulator.provider = enrichmentAttempt.provider ?? enrichmentAccumulator.provider;
+  enrichmentAccumulator.model = enrichmentAttempt.model ?? enrichmentAccumulator.model;
+};
+
+const persistScrapedRowBase = (
+  options: PersistScrapedEntityOptions,
+) => {
+  if (options.enrichmentAttempt.warning) {
+    options.pushWarning(options.enrichmentAccumulator, options.enrichmentAttempt.warning);
+  }
+  applyEnrichmentTracking(options.enrichmentAttempt, options.enrichmentAccumulator);
+};
+
+export const persistScrapedJobRow = async (
+  job: JobSearchResult["jobs"][number],
+  options: PersistScrapedEntityOptions,
 ): Promise<void> => {
-  if (enrichmentAttempt.warning) {
-    pushWarning(enrichmentAccumulator, enrichmentAttempt.warning);
-  }
-
-  await upsertScrapedJob(job, now, enrichmentAttempt.enrichment);
-
-  if (enrichmentAttempt.enrichment) {
-    enrichmentAccumulator.enrichedRecords += 1;
-    enrichmentAccumulator.provider = enrichmentAttempt.provider ?? enrichmentAccumulator.provider;
-    enrichmentAccumulator.model = enrichmentAttempt.model ?? enrichmentAccumulator.model;
-  }
+  persistScrapedRowBase(options);
+  await upsertScrapedJob(job, options.now, options.enrichmentAttempt.enrichment);
 };
 
 export const persistScrapedStudioRow = async (
   studioRow: ScrapedStudio,
-  now: string,
-  enrichmentAttempt: ScrapeEnrichmentAttempt,
-  enrichmentAccumulator: ScrapeEnrichmentAccumulator,
-  pushWarning: (accumulator: ScrapeEnrichmentAccumulator, warning: string) => void,
+  options: PersistScrapedEntityOptions,
 ): Promise<void> => {
-  if (enrichmentAttempt.warning) {
-    pushWarning(enrichmentAccumulator, enrichmentAttempt.warning);
-  }
-
-  await upsertStudioRow(studioRow, now, enrichmentAttempt.enrichment);
-
-  if (enrichmentAttempt.enrichment) {
-    enrichmentAccumulator.enrichedRecords += 1;
-    enrichmentAccumulator.provider = enrichmentAttempt.provider ?? enrichmentAccumulator.provider;
-    enrichmentAccumulator.model = enrichmentAttempt.model ?? enrichmentAccumulator.model;
-  }
+  persistScrapedRowBase(options);
+  await upsertStudioRow(studioRow, options.now, options.enrichmentAttempt.enrichment);
 };

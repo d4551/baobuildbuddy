@@ -1,237 +1,55 @@
 <script setup lang="ts">
-import { AI_CHAT_PAGE_PATH, type ChatMessage } from "@bao/shared";
-import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
-import { FLOATING_CHAT_PANEL_ID } from "~/constants/layout";
-import {
-  buildChatMessageRenderRows,
-  createStreamingAssistantMessage,
-  resolveLatestAssistantMessageIndex,
-} from "~/utils/chat";
-import { getErrorMessage } from "~/utils/errors";
-
-const route = useRoute();
-const { messages, loading, streaming, sendMessage, clearMessages, buildCurrentContext } = useAI();
-const { $toast } = useNuxtApp();
-const { t, locale } = useI18n();
-const { resolvedBrand } = useBrand();
 const {
-  speechProviderOptions,
-  speechConfig,
-  sttModelOptions,
-  ttsModelOptions,
-  speechConfigSaving,
-  isSpeechConfigDirty,
-  ensureSpeechConfigLoaded,
-  saveSpeechConfig,
-} = useSpeechModelProfiles({ locale });
-
-const isOpen = ref(false);
-const isSpeechSettingsOpen = ref(false);
-const draft = ref("");
-const unreadCount = ref(0);
-const panelBodyRef = useTemplateRef<HTMLElement>("floatingChatPanelBody");
-const inputRef = useTemplateRef<HTMLTextAreaElement>("floatingChatInput");
-const shouldStickToBottom = ref(true);
-const {
+  AI_CHAT_PAGE_PATH,
+  availableVoices,
   autoSpeakReplies,
   canReplayAssistant,
-  errorMessageKey: voiceErrorMessageKey,
-  supportHintKey: voiceSupportHintKey,
-  isListening: isVoiceListening,
-  isSpeaking: isVoiceSpeaking,
+  chatPanelId,
+  clearMessages,
+  closeWidget,
+  contextChips,
+  contextualPrompts,
+  currentContextLabel,
+  draft,
+  focusedEntityLabel,
+  handleDraftKeydown,
+  handlePanelScroll,
+  handlePromptInput,
+  handleSaveSpeechConfig,
+  handleSendMessage,
+  hasConversation,
+  isOpen,
+  isSpeechConfigDirty,
+  isSpeechSettingsOpen,
+  isVoiceListening,
+  isVoiceSpeaking,
+  latestAssistantMessageIndex,
+  loading,
+  locale,
+  renderedMessages,
+  resolvedBrand,
+  selectedVoiceId,
+  showWidget,
+  speakLatestAssistantMessage,
+  speechConfig,
+  speechConfigSaving,
+  speechProviderOptions,
+  sttModelOptions,
+  streaming,
+  streamingBubble,
   supportsRecognition,
   supportsSynthesis,
-  selectedVoiceId,
-  voices: availableVoices,
-  speakLatestAssistantMessage,
-  stopListening,
+  t,
   toggleListening,
-} = useChatVoice({
-  draft,
-  locale,
-  messages: messages as Ref<ChatMessage[]>,
-});
-const chatPanelId = FLOATING_CHAT_PANEL_ID;
-const voiceErrorLabel = computed(() => {
-  if (voiceErrorMessageKey.value.length === 0) {
-    return "";
-  }
-
-  return t("aiChatCommon.voice.errorLabel", { error: t(voiceErrorMessageKey.value) });
-});
-const chatContext = computed(() => buildCurrentContext("floating-widget"));
-const renderedMessages = computed(() => buildChatMessageRenderRows(messages.value));
-const renderedMessageSignature = computed(() =>
-  renderedMessages.value
-    .map(({ message }) => [message.id, message.role, message.timestamp, message.content].join(":"))
-    .join("\n"),
-);
-const latestAssistantMessageIndex = computed(() =>
-  resolveLatestAssistantMessageIndex(messages.value),
-);
-const streamingBubble = computed(() => createStreamingAssistantMessage("floatingWidget"));
-const { contextChips, contextualPrompts, currentContextLabel, focusedEntityLabel } =
-  useAIChatContextSummary(chatContext, t);
-const hasConversation = computed(() => renderedMessages.value.length > 0 || streaming.value);
-
-const showWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
-
-watch(showWidget, (visible) => {
-  if (!visible) {
-    isOpen.value = false;
-    isSpeechSettingsOpen.value = false;
-    unreadCount.value = 0;
-  }
-});
-
-watch(
-  () => messages.value.length,
-  (nextCount, previousCount) => {
-    if (isOpen.value) {
-      unreadCount.value = 0;
-      scrollToBottom(true);
-      return;
-    }
-
-    if (nextCount > previousCount) {
-      unreadCount.value += nextCount - previousCount;
-    }
-  },
-);
-watch(renderedMessageSignature, () => {
-  if (!isOpen.value) {
-    return;
-  }
-
-  if (shouldStickToBottom.value || streaming.value || loading.value) {
-    scrollToBottom(true);
-  }
-});
-
-watch(streaming, () => {
-  if (streaming.value && isOpen.value) {
-    shouldStickToBottom.value = true;
-    scrollToBottom(true);
-  }
-});
-
-watch(isOpen, (open) => {
-  if (!open) {
-    isSpeechSettingsOpen.value = false;
-    return;
-  }
-  unreadCount.value = 0;
-  shouldStickToBottom.value = true;
-  scrollToBottom(true);
-  requestAnimationFrame(() => {
-    inputRef.value?.focus();
-  });
-});
-
-function updateScrollStickiness(): void {
-  const panelBody = panelBodyRef.value;
-  if (!panelBody) return;
-  const remainingScrollDistance =
-    panelBody.scrollHeight - panelBody.scrollTop - panelBody.clientHeight;
-  shouldStickToBottom.value = remainingScrollDistance <= 96;
-}
-
-function handlePanelScroll(): void {
-  updateScrollStickiness();
-}
-
-function scrollToBottom(force = false) {
-  requestAnimationFrame(() => {
-    const panelBody = panelBodyRef.value;
-    if (!panelBody) return;
-    if (!force && !shouldStickToBottom.value) return;
-    panelBody.scrollTop = panelBody.scrollHeight;
-    updateScrollStickiness();
-  });
-}
-
-function toggleWidget() {
-  isOpen.value = !isOpen.value;
-}
-
-function closeWidget() {
-  isOpen.value = false;
-}
-
-function toggleSpeechSettings(): void {
-  isSpeechSettingsOpen.value = !isSpeechSettingsOpen.value;
-}
-
-function handleFocusChatShortcut() {
-  isOpen.value = true;
-  unreadCount.value = 0;
-  requestAnimationFrame(() => {
-    inputRef.value?.focus();
-  });
-}
-
-function onFocusChatShortcut() {
-  handleFocusChatShortcut();
-}
-
-async function handleSendMessage() {
-  if (!draft.value.trim() || loading.value) return;
-
-  if (isVoiceListening.value) {
-    stopListening();
-  }
-
-  shouldStickToBottom.value = true;
-  const content = draft.value.trim();
-  draft.value = "";
-  await sendMessage(content, { source: "floating-widget" });
-  scrollToBottom(true);
-}
-
-async function handleSaveSpeechConfig(): Promise<void> {
-  const saveSpeechResult = await saveSpeechConfig(
-    t("floatingChat.voiceSettings.saveErrorFallback"),
-  );
-  if (!saveSpeechResult.ok) {
-    $toast.error(
-      getErrorMessage(saveSpeechResult.error, t("floatingChat.voiceSettings.saveErrorFallback")),
-    );
-    return;
-  }
-
-  if (!saveSpeechResult.saved) {
-    return;
-  }
-
-  $toast.success(t("floatingChat.voiceSettings.saveSuccess"));
-}
-
-function handlePromptInput(prompt: string): void {
-  draft.value = prompt;
-  requestAnimationFrame(() => {
-    inputRef.value?.focus();
-  });
-}
-
-function handleDraftKeydown(event: KeyboardEvent): void {
-  if (event.key !== "Enter" || event.shiftKey || event.isComposing) {
-    return;
-  }
-
-  event.preventDefault();
-  void handleSendMessage();
-}
-
-onMounted(async () => {
-  await ensureSpeechConfigLoaded();
-  window.addEventListener("bao:focus-chat", onFocusChatShortcut);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("bao:focus-chat", onFocusChatShortcut);
-});
+  toggleSpeechSettings,
+  toggleWidget,
+  ttsModelOptions,
+  unreadCount,
+  voiceErrorLabel,
+  voiceSupportHintKey,
+} = useFloatingChatWidget();
 </script>
 
 <template>

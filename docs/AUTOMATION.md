@@ -15,7 +15,8 @@ flowchart LR
   UI --> AutomationWs["/api/ws/automation"]
   AutomationRoutes --> Service["application-automation-service.ts"]
   ScraperRoutes --> ScraperService["scraper-service.ts"]
-  Service --> Runner["automation/rpa-runner.ts"]
+  Service --> RunnerProtocol["automation/rpa-runner-protocol.ts"]
+  Service --> RunnerProcess["automation/rpa-runner-process.ts"]
   ScraperService --> Runner
   Runner --> Scripts["packages/scraper/src/scripts/*.ts"]
   Scripts --> Runtime["Playwright runtime + ATS adapters + provider extractors"]
@@ -29,7 +30,8 @@ flowchart LR
 ```
 
 **Key files:**
-- `packages/server/src/services/automation/rpa-runner.ts` -- resolves script IDs and spawns Bun entrypoints
+- `packages/server/src/services/automation/rpa-runner-protocol.ts` -- coordinates protocol execution for RPA scripts
+- `packages/server/src/services/automation/rpa-runner-process.ts` -- spawns Bun entrypoints and streams process output
 - `packages/scraper/src/scripts` -- individual automation scripts
 - `@bao/shared` -- script IDs, input schemas, and normalized row schemas
 

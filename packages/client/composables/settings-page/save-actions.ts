@@ -213,7 +213,7 @@ function createHandleSaveAutomation(state: SettingsPageState) {
   };
 }
 
-function buildJobProvidersPayload(state: SettingsPageState) {
+function parseJobProviderCollections(state: SettingsPageState) {
   const greenhouseBoards = parseJson(
     state.jobProviderForm.greenhouseBoardsJson,
     z.array(greenhouseBoardConfigSchema),
@@ -235,15 +235,22 @@ function buildJobProvidersPayload(state: SettingsPageState) {
     z.array(gamingPortalConfigSchema),
   );
 
-  if (
-    !(
-      greenhouseBoards &&
-      leverCompanies &&
-      companyBoards &&
-      companyBoardApiTemplates &&
-      gamingPortals
-    )
-  ) {
+  if (!(greenhouseBoards && leverCompanies && companyBoards && companyBoardApiTemplates && gamingPortals)) {
+    return null;
+  }
+
+  return {
+    greenhouseBoards,
+    leverCompanies,
+    companyBoards,
+    companyBoardApiTemplates,
+    gamingPortals,
+  };
+}
+
+function buildJobProvidersPayload(state: SettingsPageState) {
+  const collections = parseJobProviderCollections(state);
+  if (!collections) {
     return null;
   }
 
@@ -259,13 +266,13 @@ function buildJobProvidersPayload(state: SettingsPageState) {
     hitmarkerDefaultLocation: state.jobProviderForm.hitmarkerDefaultLocation.trim(),
     greenhouseApiBaseUrl: state.jobProviderForm.greenhouseApiBaseUrl.trim(),
     greenhouseMaxPages: state.jobProviderForm.greenhouseMaxPages,
-    greenhouseBoards,
+    greenhouseBoards: collections.greenhouseBoards,
     leverApiBaseUrl: state.jobProviderForm.leverApiBaseUrl.trim(),
     leverMaxPages: state.jobProviderForm.leverMaxPages,
-    leverCompanies,
-    companyBoardApiTemplates,
-    companyBoards,
-    gamingPortals,
+    leverCompanies: collections.leverCompanies,
+    companyBoardApiTemplates: collections.companyBoardApiTemplates,
+    companyBoards: collections.companyBoards,
+    gamingPortals: collections.gamingPortals,
   };
 }
 

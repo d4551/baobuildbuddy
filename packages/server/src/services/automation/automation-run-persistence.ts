@@ -13,7 +13,7 @@ import {
   createProgressUpdate,
   purgeExpiredAutomationScreenshots,
 } from "./automation-run-persistence-updates";
-import type { RpaScriptExecutionResult } from "./rpa-runner";
+import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 
 export const resolveRunArtifactDir = (
   runId: string,

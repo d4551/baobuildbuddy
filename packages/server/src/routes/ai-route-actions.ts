@@ -22,7 +22,7 @@ import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import { resumes } from "../db/schema/resumes";
 import { contextManager } from "../services/ai/context-manager";
-import { buildSystemPrompt } from "../services/ai/prompts";
+import { buildSystemPrompt } from "../services/ai/prompts-system";
 import {
   composeChatSystemPrompt,
   normalizeClientChatContext,

@@ -3,7 +3,7 @@ import {
   API_ERROR_NO_AI_PROVIDER_EMAIL,
   settle,
 } from "@bao/shared";
-import { emailResponsePrompt } from "../ai/prompts";
+import { emailResponsePrompt } from "../ai/prompts-career";
 import { emailDeliveryService } from "../email-delivery-service";
 import type {
   EmailDeliveryResult,

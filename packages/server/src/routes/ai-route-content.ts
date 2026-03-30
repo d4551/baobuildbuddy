@@ -2,7 +2,11 @@ import { asNumber, asString, asStringArray, isRecord, safeParseJson } from "@bao
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
-import { coverLetterPrompt, resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts";
+import {
+  coverLetterPrompt,
+  resumeEnhancePrompt,
+  resumeScorePrompt,
+} from "../services/ai/prompts-resume";
 import type {
   CoverLetterSections,
   ResumeAnalysisResult,

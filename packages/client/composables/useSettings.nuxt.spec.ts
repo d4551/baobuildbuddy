@@ -46,7 +46,7 @@ beforeEach(() => {
   resetNuxtState();
 });
 
-describe("useSettings", () => {
+describe("useSettings fetchSettings", () => {
   it("fetchSettings sets loading and updates settings on success", async () => {
     const mockSettings = { id: "default", theme: "corporate" };
     mockApi.settings.get.mockResolvedValueOnce({ data: mockSettings, error: null });
@@ -81,7 +81,9 @@ describe("useSettings", () => {
     await expect(fetchSettings()).rejects.toThrow("apiErrors.settings.fetchFailed");
     expect(loading.value).toBe(false);
   });
+});
 
+describe("useSettings ai diagnostics", () => {
   it("treats unhealthy local diagnostics as incomplete when no cloud provider is configured", async () => {
     mockApi.settings.get.mockResolvedValueOnce({
       data: {
@@ -106,7 +108,9 @@ describe("useSettings", () => {
     await fetchSettings();
     expect(isAiConfigurationIncomplete.value).toBe(true);
   });
+});
 
+describe("useSettings job taxonomy", () => {
   it("updates job taxonomy through the dedicated settings endpoint", async () => {
     const mockSettings = { id: "default", theme: "corporate", jobTaxonomy: { keywords: [], studioRules: [] } };
     mockApi.settings["job-taxonomy"].put.mockResolvedValueOnce({ data: { success: true }, error: null });

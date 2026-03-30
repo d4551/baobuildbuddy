@@ -14,7 +14,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { AIService } from "./ai/ai-service";
-import { scrapeJobEnrichmentPrompt, scrapeStudioEnrichmentPrompt } from "./ai/prompts";
+import { scrapeJobEnrichmentPrompt, scrapeStudioEnrichmentPrompt } from "./ai/prompts-scrape";
 import type {
   ScrapeEnrichmentAccumulator,
   ScrapeEnrichmentAttempt,

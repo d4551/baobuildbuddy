@@ -12,7 +12,7 @@ import { z } from "zod";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
-import { skillAnalysisPrompt } from "../services/ai/prompts";
+import { skillAnalysisPrompt } from "../services/ai/prompts-career";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { createServerLogger } from "../utils/logger";
 import type {

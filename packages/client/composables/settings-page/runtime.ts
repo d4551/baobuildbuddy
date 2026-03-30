@@ -96,6 +96,70 @@ export function createSettingsPageProviderRuntimeState() {
   };
 }
 
+function createDefaultNotificationForm() {
+  return reactive({ ...DEFAULT_NOTIFICATION_PREFERENCES });
+}
+
+function createDefaultAutomationForm() {
+  return reactive<AutomationSettings>({ ...DEFAULT_AUTOMATION_SETTINGS });
+}
+
+function createDefaultJobProviderForm() {
+  return reactive({
+    providerTimeoutMs: DEFAULT_AUTOMATION_SETTINGS.jobProviders.providerTimeoutMs,
+    companyBoardResultLimit: DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardResultLimit,
+    gamingBoardResultLimit: DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingBoardResultLimit,
+    unknownLocationLabel: DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownLocationLabel,
+    unknownCompanyLabel: DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownCompanyLabel,
+    hitmarkerEnabled: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerEnabled,
+    hitmarkerApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerApiBaseUrl,
+    hitmarkerDefaultQuery: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultQuery,
+    hitmarkerDefaultLocation: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultLocation,
+    greenhouseApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseApiBaseUrl,
+    greenhouseMaxPages: DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseMaxPages,
+    leverApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverApiBaseUrl,
+    leverMaxPages: DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverMaxPages,
+    greenhouseBoardsJson: JSON.stringify(
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseBoards,
+      null,
+      2,
+    ),
+    leverCompaniesJson: JSON.stringify(
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverCompanies,
+      null,
+      2,
+    ),
+    companyBoardsJson: JSON.stringify(
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoards,
+      null,
+      2,
+    ),
+    companyBoardApiTemplatesJson: JSON.stringify(
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates,
+      null,
+      2,
+    ),
+    gamingPortalsJson: JSON.stringify(
+      DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals,
+      null,
+      2,
+    ),
+  });
+}
+
+function createDefaultJobTaxonomyForm() {
+  return reactive({
+    keywordsJson: JSON.stringify(DEFAULT_JOB_TAXONOMY_SETTINGS.keywords, null, 2),
+    studioRulesJson: JSON.stringify(DEFAULT_JOB_TAXONOMY_SETTINGS.studioRules, null, 2),
+  });
+}
+
+function createDefaultEmailTransportForm() {
+  return reactive<EmailTransportSettings>({
+    ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  });
+}
+
 export function createSettingsPageSaveRuntimeState() {
   return {
     preferencesSaveState: ref<SaveState>("idle"),
@@ -103,55 +167,11 @@ export function createSettingsPageSaveRuntimeState() {
     brandSaveState: ref<SaveState>("idle"),
     jobProvidersSaveState: ref<SaveState>("idle"),
     jobTaxonomySaveState: ref<SaveState>("idle"),
-    notificationForm: reactive({ ...DEFAULT_NOTIFICATION_PREFERENCES }),
-    automationForm: reactive<AutomationSettings>({ ...DEFAULT_AUTOMATION_SETTINGS }),
-    jobProviderForm: reactive({
-      providerTimeoutMs: DEFAULT_AUTOMATION_SETTINGS.jobProviders.providerTimeoutMs,
-      companyBoardResultLimit: DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardResultLimit,
-      gamingBoardResultLimit: DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingBoardResultLimit,
-      unknownLocationLabel: DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownLocationLabel,
-      unknownCompanyLabel: DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownCompanyLabel,
-      hitmarkerEnabled: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerEnabled,
-      hitmarkerApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerApiBaseUrl,
-      hitmarkerDefaultQuery: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultQuery,
-      hitmarkerDefaultLocation: DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultLocation,
-      greenhouseApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseApiBaseUrl,
-      greenhouseMaxPages: DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseMaxPages,
-      leverApiBaseUrl: DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverApiBaseUrl,
-      leverMaxPages: DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverMaxPages,
-      greenhouseBoardsJson: JSON.stringify(
-        DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseBoards,
-        null,
-        2,
-      ),
-      leverCompaniesJson: JSON.stringify(
-        DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverCompanies,
-        null,
-        2,
-      ),
-      companyBoardsJson: JSON.stringify(
-        DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoards,
-        null,
-        2,
-      ),
-      companyBoardApiTemplatesJson: JSON.stringify(
-        DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoardApiTemplates,
-        null,
-        2,
-      ),
-      gamingPortalsJson: JSON.stringify(
-        DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals,
-        null,
-        2,
-      ),
-    }),
-    jobTaxonomyForm: reactive({
-      keywordsJson: JSON.stringify(DEFAULT_JOB_TAXONOMY_SETTINGS.keywords, null, 2),
-      studioRulesJson: JSON.stringify(DEFAULT_JOB_TAXONOMY_SETTINGS.studioRules, null, 2),
-    }),
-    emailTransportForm: reactive<EmailTransportSettings>({
-      ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,
-    }),
+    notificationForm: createDefaultNotificationForm(),
+    automationForm: createDefaultAutomationForm(),
+    jobProviderForm: createDefaultJobProviderForm(),
+    jobTaxonomyForm: createDefaultJobTaxonomyForm(),
+    emailTransportForm: createDefaultEmailTransportForm(),
   };
 }
 
@@ -234,11 +254,9 @@ export function syncBrandForm(
   );
 }
 
-export function syncSettingsState(
+function syncProviderSettingsState(
   currentSettings: AppSettings,
   providerState: ProviderRuntimeState,
-  saveState: SaveRuntimeState,
-  brandState: BrandRuntimeState,
 ) {
   providerState.apiKeys.localModelEndpoint =
     currentSettings.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT;
@@ -250,71 +268,95 @@ export function syncSettingsState(
     "chat",
   ).provider;
   assignAiRoutingDraft(providerState.aiRoutingDraft, currentSettings.aiRouting);
+}
+
+function syncNotificationSettingsState(
+  currentSettings: AppSettings,
+  saveState: SaveRuntimeState,
+) {
   saveState.notificationForm.achievements = currentSettings.notifications?.achievements ?? true;
   saveState.notificationForm.dailyChallenges =
     currentSettings.notifications?.dailyChallenges ?? true;
   saveState.notificationForm.levelUp = currentSettings.notifications?.levelUp ?? true;
   saveState.notificationForm.jobAlerts = currentSettings.notifications?.jobAlerts ?? true;
+}
 
-  if (currentSettings.automationSettings) {
-    Object.assign(saveState.automationForm, {
-      ...DEFAULT_AUTOMATION_SETTINGS,
-      ...currentSettings.automationSettings,
-    });
-    Object.assign(saveState.jobProviderForm, {
-      providerTimeoutMs: currentSettings.automationSettings.jobProviders.providerTimeoutMs,
-      companyBoardResultLimit:
-        currentSettings.automationSettings.jobProviders.companyBoardResultLimit,
-      gamingBoardResultLimit:
-        currentSettings.automationSettings.jobProviders.gamingBoardResultLimit,
-      unknownLocationLabel: currentSettings.automationSettings.jobProviders.unknownLocationLabel,
-      unknownCompanyLabel: currentSettings.automationSettings.jobProviders.unknownCompanyLabel,
-      hitmarkerEnabled: currentSettings.automationSettings.jobProviders.hitmarkerEnabled,
-      hitmarkerApiBaseUrl: currentSettings.automationSettings.jobProviders.hitmarkerApiBaseUrl,
-      hitmarkerDefaultQuery: currentSettings.automationSettings.jobProviders.hitmarkerDefaultQuery,
-      hitmarkerDefaultLocation:
-        currentSettings.automationSettings.jobProviders.hitmarkerDefaultLocation,
-      greenhouseApiBaseUrl:
-        currentSettings.automationSettings.jobProviders.greenhouseApiBaseUrl,
-      greenhouseMaxPages: currentSettings.automationSettings.jobProviders.greenhouseMaxPages,
-      leverApiBaseUrl: currentSettings.automationSettings.jobProviders.leverApiBaseUrl,
-      leverMaxPages: currentSettings.automationSettings.jobProviders.leverMaxPages,
-      greenhouseBoardsJson: JSON.stringify(
-        currentSettings.automationSettings.jobProviders.greenhouseBoards,
-        null,
-        2,
-      ),
-      leverCompaniesJson: JSON.stringify(
-        currentSettings.automationSettings.jobProviders.leverCompanies,
-        null,
-        2,
-      ),
-      companyBoardsJson: JSON.stringify(
-        currentSettings.automationSettings.jobProviders.companyBoards,
-        null,
-        2,
-      ),
-      companyBoardApiTemplatesJson: JSON.stringify(
-        currentSettings.automationSettings.jobProviders.companyBoardApiTemplates,
-        null,
-        2,
-      ),
-      gamingPortalsJson: JSON.stringify(
-        currentSettings.automationSettings.jobProviders.gamingPortals,
-        null,
-        2,
-      ),
-    });
+function syncAutomationSettingsState(
+  currentSettings: AppSettings,
+  saveState: SaveRuntimeState,
+) {
+  if (!currentSettings.automationSettings) {
+    return;
   }
 
+  Object.assign(saveState.automationForm, {
+    ...DEFAULT_AUTOMATION_SETTINGS,
+    ...currentSettings.automationSettings,
+  });
+}
+
+function syncJobProviderSettingsState(
+  currentSettings: AppSettings,
+  saveState: SaveRuntimeState,
+) {
+  if (!currentSettings.automationSettings) {
+    return;
+  }
+
+  const { jobProviders } = currentSettings.automationSettings;
+  Object.assign(saveState.jobProviderForm, {
+    providerTimeoutMs: jobProviders.providerTimeoutMs,
+    companyBoardResultLimit: jobProviders.companyBoardResultLimit,
+    gamingBoardResultLimit: jobProviders.gamingBoardResultLimit,
+    unknownLocationLabel: jobProviders.unknownLocationLabel,
+    unknownCompanyLabel: jobProviders.unknownCompanyLabel,
+    hitmarkerEnabled: jobProviders.hitmarkerEnabled,
+    hitmarkerApiBaseUrl: jobProviders.hitmarkerApiBaseUrl,
+    hitmarkerDefaultQuery: jobProviders.hitmarkerDefaultQuery,
+    hitmarkerDefaultLocation: jobProviders.hitmarkerDefaultLocation,
+    greenhouseApiBaseUrl: jobProviders.greenhouseApiBaseUrl,
+    greenhouseMaxPages: jobProviders.greenhouseMaxPages,
+    leverApiBaseUrl: jobProviders.leverApiBaseUrl,
+    leverMaxPages: jobProviders.leverMaxPages,
+    greenhouseBoardsJson: JSON.stringify(jobProviders.greenhouseBoards, null, 2),
+    leverCompaniesJson: JSON.stringify(jobProviders.leverCompanies, null, 2),
+    companyBoardsJson: JSON.stringify(jobProviders.companyBoards, null, 2),
+    companyBoardApiTemplatesJson: JSON.stringify(jobProviders.companyBoardApiTemplates, null, 2),
+    gamingPortalsJson: JSON.stringify(jobProviders.gamingPortals, null, 2),
+  });
+}
+
+function syncJobTaxonomySettingsState(
+  currentSettings: AppSettings,
+  saveState: SaveRuntimeState,
+) {
   const jobTaxonomy: JobTaxonomySettings =
     currentSettings.jobTaxonomy ?? DEFAULT_JOB_TAXONOMY_SETTINGS;
   saveState.jobTaxonomyForm.keywordsJson = JSON.stringify(jobTaxonomy.keywords, null, 2);
   saveState.jobTaxonomyForm.studioRulesJson = JSON.stringify(jobTaxonomy.studioRules, null, 2);
+}
 
+function syncEmailTransportSettingsState(
+  currentSettings: AppSettings,
+  saveState: SaveRuntimeState,
+) {
   Object.assign(saveState.emailTransportForm, {
     ...DEFAULT_EMAIL_TRANSPORT_SETTINGS,
     ...currentSettings.emailTransportSettings,
   });
+}
+
+export function syncSettingsState(
+  currentSettings: AppSettings,
+  providerState: ProviderRuntimeState,
+  saveState: SaveRuntimeState,
+  brandState: BrandRuntimeState,
+) {
+  syncProviderSettingsState(currentSettings, providerState);
+  syncNotificationSettingsState(currentSettings, saveState);
+  syncAutomationSettingsState(currentSettings, saveState);
+  syncJobProviderSettingsState(currentSettings, saveState);
+  syncJobTaxonomySettingsState(currentSettings, saveState);
+  syncEmailTransportSettingsState(currentSettings, saveState);
   syncBrandForm(currentSettings, brandState);
 }

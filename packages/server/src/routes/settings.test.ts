@@ -62,7 +62,7 @@ describe("settings read routes", () => {
   });
 });
 
-describe("settings write routes", () => {
+describe("settings write routes - preferences", () => {
   test("PUT /api/settings updates", async () => {
     const res = await requestJson<{ success: boolean }>(app, "PUT", "/api/settings", {
       theme: "bao-dark",
@@ -97,7 +97,9 @@ describe("settings write routes", () => {
     expect(updated.body.preferredProvider).toBe("openai");
     expect(updated.body.preferredModel).toBe("gpt-4o-mini");
   });
+});
 
+describe("settings write routes - api keys", () => {
   test("PUT /api/settings/api-keys updates keys", async () => {
     const res = await requestJson<{ success: boolean }>(app, "PUT", "/api/settings/api-keys", {
       localModelEndpoint: "http://localhost:1234",
@@ -114,7 +116,9 @@ describe("settings write routes", () => {
     expect(res.body.emailTransportPassword).toBeUndefined();
     expect(res.body.emailTransportSettings?.host).toBe("smtp.example.test");
   });
+});
 
+describe("settings write routes - taxonomy", () => {
   test("PUT /api/settings/job-taxonomy persists taxonomy updates outside the settings row", async () => {
     const res = await requestJson<{
       success: boolean;

@@ -1,5 +1,5 @@
 import type { AutomationSettings, ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
-import type { RpaScriptExecutionResult } from "./rpa-runner";
+import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 export declare const resolveRunArtifactDir: (runId: string, invalidRunIdMessage: string) => string;
 export declare const normalizeExecutionResult: (runId: string, execution: RpaScriptExecutionResult, invalidRunIdMessage: string) => Promise<RpaRunResult>;
 export declare const persistProgress: (event: RpaRunEvent) => Promise<void>;

@@ -203,25 +203,32 @@ export class SkillExtractor {
   async mapGamingToCareer(
     gamingExperiences: string[],
   ): Promise<Array<{ gaming: string; professional: string }>> {
-    const mappings: Array<{ gaming: string; professional: string }> = [];
+    const mappingGroups = await Promise.all(
+      gamingExperiences.map(async (experience) => {
+        const directMappings = Object.entries(GAMING_TO_PROFESSIONAL)
+          .filter(([gaming]) => experience.toLowerCase().includes(gaming.toLowerCase()))
+          .map(([, professional]) => ({ gaming: experience, professional }));
 
-    for (const exp of gamingExperiences) {
-      for (const [gaming, professional] of Object.entries(GAMING_TO_PROFESSIONAL)) {
-        if (exp.toLowerCase().includes(gaming.toLowerCase())) {
-          mappings.push({ gaming: exp, professional });
+        if (directMappings.length > 0) {
+          return directMappings;
         }
-      }
-      // Fallback: if no direct match, extract general transferable skills
-      if (!mappings.find((m) => m.gaming === exp)) {
-        const extracted = await this.extractSkills(exp);
-        const transferable = extracted.filter((s) => s.category === "transferable");
-        if (transferable.length > 0) {
-          mappings.push({ gaming: exp, professional: transferable.map((s) => s.name).join(", ") });
-        }
-      }
-    }
 
-    return mappings;
+        const extracted = await this.extractSkills(experience);
+        const transferable = extracted.filter((skill) => skill.category === "transferable");
+        if (transferable.length === 0) {
+          return [];
+        }
+
+        return [
+          {
+            gaming: experience,
+            professional: transferable.map((skill) => skill.name).join(", "),
+          },
+        ];
+      }),
+    );
+
+    return mappingGroups.flat();
   }
 
   private detectProficiency(text: string, skillName: string): ExtractedSkill["proficiency"] {

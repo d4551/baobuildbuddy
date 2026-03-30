@@ -73,8 +73,8 @@ function createLocalProviderStateComputed(
   return computed(() => resolveLocalProviderState({ settings: settings.value }));
 }
 
-function createSettingsActions(context: SettingsContext) {
-  const fetchSettings = async () =>
+function createFetchSettingsAction(context: SettingsContext) {
+  return async () =>
     withLoadingState(context.loading, async () => {
       const { data, error } = await context.api.settings.get();
       assertApiResponse(error, context.t("apiErrors.settings.fetchFailed"));
@@ -84,29 +84,46 @@ function createSettingsActions(context: SettingsContext) {
       );
       context.settings.value = normalized;
     });
+}
 
-  const updateSettings = async (updates: UpdateSettingsInput) =>
+function createUpdateSettingsAction(
+  context: SettingsContext,
+  fetchSettings: ReturnType<typeof createFetchSettingsAction>,
+) {
+  return async (updates: UpdateSettingsInput) =>
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.settings.put(updates);
       assertApiResponse(error, context.t("apiErrors.settings.updateFailed"));
       await fetchSettings();
     });
+}
 
-  const updateApiKeys = async (keys: UpdateApiKeysInput) =>
+function createUpdateApiKeysAction(
+  context: SettingsContext,
+  fetchSettings: ReturnType<typeof createFetchSettingsAction>,
+) {
+  return async (keys: UpdateApiKeysInput) =>
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.settings["api-keys"].put(keys);
       assertApiResponse(error, context.t("apiErrors.settings.updateApiKeysFailed"));
       await fetchSettings();
     });
+}
 
-  const updateJobTaxonomy = async (taxonomy: UpdateJobTaxonomyInput) =>
+function createUpdateJobTaxonomyAction(
+  context: SettingsContext,
+  fetchSettings: ReturnType<typeof createFetchSettingsAction>,
+) {
+  return async (taxonomy: UpdateJobTaxonomyInput) =>
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.settings["job-taxonomy"].put(taxonomy);
       assertApiResponse(error, context.t("apiErrors.settings.updateFailed"));
       await fetchSettings();
     });
+}
 
-  const testApiKey = async (
+function createTestApiKeyAction(context: SettingsContext) {
+  return async (
     provider: TestApiKeyInput["provider"],
     key: string,
     model?: string,
@@ -126,13 +143,16 @@ function createSettingsActions(context: SettingsContext) {
       selectedModel: typeof data.selectedModel === "string" ? data.selectedModel : undefined,
     };
   };
+}
 
+function createSettingsActions(context: SettingsContext) {
+  const fetchSettings = createFetchSettingsAction(context);
   return {
     fetchSettings,
-    updateSettings,
-    updateApiKeys,
-    updateJobTaxonomy,
-    testApiKey,
+    updateSettings: createUpdateSettingsAction(context, fetchSettings),
+    updateApiKeys: createUpdateApiKeysAction(context, fetchSettings),
+    updateJobTaxonomy: createUpdateJobTaxonomyAction(context, fetchSettings),
+    testApiKey: createTestApiKeyAction(context),
   };
 }
 

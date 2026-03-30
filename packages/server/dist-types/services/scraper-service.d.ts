@@ -5,6 +5,9 @@ export type { ScrapedJob } from "./scraper-service-contracts";
  * Scraper service for studio/job ingestion via Bun automation scripts.
  */
 export declare class ScraperService {
+    private createScrapeFailureResult;
+    private runPortalJobScript;
+    private persistPortalJobs;
     private scrapePortalJobsRaw;
     private scrapePortalJobs;
     scrapeStudios(): Promise<ScraperOperationResult>;

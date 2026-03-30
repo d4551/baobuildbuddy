@@ -17,7 +17,7 @@ import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { resumes } from "../db/schema/resumes";
 import { userProfile } from "../db/schema/user";
-import { jobMatchPrompt } from "../services/ai/prompts";
+import { jobMatchPrompt } from "../services/ai/prompts-career";
 import { createServerLogger } from "../utils/logger";
 import type { MatchJobsResponse } from "./ai-route-contracts";
 import { extractResumeSkills } from "./ai-route-content";

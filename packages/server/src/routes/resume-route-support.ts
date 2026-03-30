@@ -26,7 +26,7 @@ import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
-import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts";
+import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts-resume";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { resumeService } from "../services/resume-service";

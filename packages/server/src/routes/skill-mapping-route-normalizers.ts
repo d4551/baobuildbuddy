@@ -51,38 +51,44 @@ export const normalizeStringArray = (value: unknown): string[] =>
         .filter((entry) => entry.length > 0)
     : [];
 
-export const normalizeSkillEvidence = (value: unknown): SkillEvidence[] => {
-  if (!Array.isArray(value)) return [];
+const normalizeSkillEvidenceType = (value: unknown): SkillEvidenceType =>
+  typeof value === "string" && isSkillEvidenceType(value) ? value : "document";
 
-  const normalized: SkillEvidence[] = [];
-  for (const entry of value) {
-    if (!isRecord(entry)) continue;
-    const title = asNonEmptyString(entry.title);
-    const description = asNonEmptyString(entry.description);
-    if (!(title && description)) continue;
+const normalizeSkillEvidenceVerification = (
+  value: unknown,
+): SkillEvidenceVerificationStatus =>
+  typeof value === "string" && isSkillEvidenceVerificationStatus(value) ? value : "pending";
 
-    const evidenceEntry: SkillEvidence = {
-      id: asNonEmptyString(entry.id) ?? generateId(),
-      type:
-        typeof entry.type === "string" && isSkillEvidenceType(entry.type)
-          ? entry.type
-          : "document",
-      title,
-      description,
-      verificationStatus:
-        typeof entry.verificationStatus === "string" &&
-        isSkillEvidenceVerificationStatus(entry.verificationStatus)
-          ? entry.verificationStatus
-          : "pending",
-    };
-    const url = asNonEmptyString(entry.url);
-    if (url) {
-      evidenceEntry.url = url;
-    }
-    normalized.push(evidenceEntry);
+const normalizeSkillEvidenceEntry = (value: unknown): SkillEvidence | null => {
+  if (!isRecord(value)) {
+    return null;
   }
 
-  return normalized;
+  const title = asNonEmptyString(value.title);
+  const description = asNonEmptyString(value.description);
+  if (!(title && description)) {
+    return null;
+  }
+
+  const evidenceEntry: SkillEvidence = {
+    id: asNonEmptyString(value.id) ?? generateId(),
+    type: normalizeSkillEvidenceType(value.type),
+    title,
+    description,
+    verificationStatus: normalizeSkillEvidenceVerification(value.verificationStatus),
+  };
+  const url = asNonEmptyString(value.url);
+  if (url) {
+    evidenceEntry.url = url;
+  }
+  return evidenceEntry;
+};
+
+export const normalizeSkillEvidence = (value: unknown): SkillEvidence[] => {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => normalizeSkillEvidenceEntry(entry))
+    .filter((entry): entry is SkillEvidence => entry !== null);
 };
 
 export const clampConfidence = (value: number | undefined): number =>

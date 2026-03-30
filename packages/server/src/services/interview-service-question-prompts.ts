@@ -5,7 +5,7 @@ import {
   type InterviewQuestion,
   type InterviewResponse,
 } from "@bao/shared";
-import { interviewPersonaPrompt, interviewQuestionPrompt } from "./ai/prompts";
+import { interviewPersonaPrompt, interviewQuestionPrompt } from "./ai/prompts-interview";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
 import {
   buildCandidatePromptContext,

@@ -27,7 +27,7 @@ import { resumes } from "../db/schema/resumes";
 import { settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
-import { coverLetterPrompt } from "../services/ai/prompts";
+import { coverLetterPrompt } from "../services/ai/prompts-resume";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";

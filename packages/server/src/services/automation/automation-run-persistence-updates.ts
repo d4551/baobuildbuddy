@@ -11,7 +11,7 @@ import { and, inArray, sql } from "drizzle-orm";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
-import type { RpaScriptExecutionResult } from "./rpa-runner";
+import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 
 const AUTOMATION_TERMINAL_STATUSES = ["success", "error"];
 const DECIMAL_RADIX = 10;

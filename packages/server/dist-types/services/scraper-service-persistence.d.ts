@@ -5,5 +5,12 @@ export declare const resolvePortalSourceUrl: (portalId: GamingPortalId) => Promi
 export declare const resolvePortalScriptId: (portalId: GamingPortalId) => "scraper-hitmarker" | "scraper-grackle" | "scraper-workwithindies" | "scraper-remotegamejobs" | "scraper-gamesjobsdirect" | "scraper-pocketgamer";
 export declare const upsertStudioRow: (studioRow: ScrapedStudio, now: string, enrichment?: ScrapePersonaEnrichment) => Promise<void>;
 export declare const upsertScrapedJob: (job: JobSearchResult["jobs"][number], now: string, enrichment?: ScrapePersonaEnrichment) => Promise<void>;
-export declare const persistScrapedJobRow: (job: JobSearchResult["jobs"][number], now: string, enrichmentAttempt: ScrapeEnrichmentAttempt, enrichmentAccumulator: ScrapeEnrichmentAccumulator, pushWarning: (accumulator: ScrapeEnrichmentAccumulator, warning: string) => void) => Promise<void>;
-export declare const persistScrapedStudioRow: (studioRow: ScrapedStudio, now: string, enrichmentAttempt: ScrapeEnrichmentAttempt, enrichmentAccumulator: ScrapeEnrichmentAccumulator, pushWarning: (accumulator: ScrapeEnrichmentAccumulator, warning: string) => void) => Promise<void>;
+type PersistScrapedEntityOptions = {
+    now: string;
+    enrichmentAttempt: ScrapeEnrichmentAttempt;
+    enrichmentAccumulator: ScrapeEnrichmentAccumulator;
+    pushWarning: (accumulator: ScrapeEnrichmentAccumulator, warning: string) => void;
+};
+export declare const persistScrapedJobRow: (job: JobSearchResult["jobs"][number], options: PersistScrapedEntityOptions) => Promise<void>;
+export declare const persistScrapedStudioRow: (studioRow: ScrapedStudio, options: PersistScrapedEntityOptions) => Promise<void>;
+export {};

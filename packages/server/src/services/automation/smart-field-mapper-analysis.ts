@@ -4,7 +4,7 @@ import {
   safeParseJson,
 } from "@bao/shared";
 import { config } from "../../config/env";
-import { formFieldAnalysisPrompt } from "../ai/prompts";
+import { formFieldAnalysisPrompt } from "../ai/prompts-automation";
 import {
   EMPTY_FIELD_ANALYSIS_RESULT,
   fieldAnalysisSchema,

@@ -24,7 +24,7 @@ import { resumes } from "../../db/schema/resumes";
 import { skillMappings } from "../../db/schema/skill-mappings";
 import { userProfile } from "../../db/schema/user";
 import { getContextManagerFollowUps } from "./context-manager-followups";
-import { buildDomainSystemPrompts, GAMING_INDUSTRY_CONTEXT } from "./prompts";
+import { buildDomainSystemPrompts, GAMING_INDUSTRY_CONTEXT } from "./prompts-system";
 
 interface ConversationContext {
   systemPrompt: string;

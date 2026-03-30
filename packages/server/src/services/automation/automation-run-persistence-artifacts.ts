@@ -10,7 +10,7 @@ import {
   MAX_CUSTOM_ANSWER_KEY_LENGTH,
   MAX_CUSTOM_ANSWER_VALUE_LENGTH,
 } from "./automation-validation";
-import type { RpaScriptExecutionResult } from "./rpa-runner";
+import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 
 const SUPPORTED_SCREENSHOT_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"] as const;
 const RUN_SCREENSHOT_PREFIX = "step";

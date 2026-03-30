@@ -8,7 +8,7 @@ import {
   type InterviewConfig,
   type InterviewResponse,
 } from "@bao/shared";
-import { interviewPersonaPrompt } from "./ai/prompts";
+import { interviewPersonaPrompt } from "./ai/prompts-interview";
 import type { FinalAnalysisPromptContext, StudioContext } from "./interview-service-contracts";
 import {
   buildCandidatePromptContext,
