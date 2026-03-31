@@ -2,6 +2,7 @@
 import type { EmailTransportSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 defineProps<{
   emailDeliveryConfigured: boolean;
@@ -30,28 +31,23 @@ const { t } = useI18n();
 <template>
   <div class="card card-border bg-base-100">
     <div class="card-body">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <h2 class="card-title">
-            {{ t("settings.emailDelivery.title") }}
-          </h2>
-          <p class="text-sm text-base-content/70">
-            {{ t("settings.emailDelivery.subtitle") }}
-          </p>
-        </div>
-        <span
-          class="badge"
-          :class="
-            emailDeliveryConfigured ? 'badge-success' : 'badge-warning'
-          "
-        >
-          {{
-            emailDeliveryConfigured
-              ? t("settings.emailDelivery.configuredBadge")
-              : t("settings.emailDelivery.incompleteBadge")
-          }}
-        </span>
-      </div>
+      <SettingsPanelHeader
+        :title="t('settings.emailDelivery.title')"
+        :description="t('settings.emailDelivery.subtitle')"
+      >
+        <template #meta>
+          <span
+            class="badge"
+            :class="emailDeliveryConfigured ? 'badge-success' : 'badge-warning'"
+          >
+            {{
+              emailDeliveryConfigured
+                ? t("settings.emailDelivery.configuredBadge")
+                : t("settings.emailDelivery.incompleteBadge")
+            }}
+          </span>
+        </template>
+      </SettingsPanelHeader>
 
       <div class="space-y-4">
         <fieldset class="fieldset">

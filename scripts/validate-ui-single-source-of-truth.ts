@@ -16,6 +16,11 @@ const scanRoots = [
 const vueFileLimit = 300;
 const styleBlockPattern = /<style\b/gu;
 const lineBreakPattern = /\r?\n/u;
+const settingsPanelPathPattern =
+  /^packages\/client\/components\/settings\/Settings[A-Za-z0-9]+Panel\.vue$/u;
+const settingsPanelHeaderUsagePattern = /<SettingsPanelHeader\b/u;
+const brittleSettingsHeaderPattern =
+  /\bclass\s*=\s*["']flex items-center justify-between gap-3["']/gu;
 
 const collectVueFiles = async (): Promise<string[]> => {
   const fileGroups = await Promise.all(
@@ -54,6 +59,30 @@ export const collectUiSingleSourceViolationsForContent = (
       line: 1,
       message: `Vue UI file exceeds ${vueFileLimit} lines. Break the monolith into focused components/composables.`,
     });
+  }
+
+  if (
+    settingsPanelPathPattern.test(filePath) &&
+    !settingsPanelHeaderUsagePattern.test(fileContent)
+  ) {
+    violations.push({
+      filePath,
+      line: 1,
+      message:
+        "Settings panels must use the shared `SettingsPanelHeader` component so title, subtitle, and trailing status content stay DRY and responsive.",
+    });
+  }
+
+  if (settingsPanelPathPattern.test(filePath)) {
+    brittleSettingsHeaderPattern.lastIndex = 0;
+    for (const match of fileContent.matchAll(brittleSettingsHeaderPattern)) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(fileContent, match.index ?? 0),
+        message:
+          "Bespoke `flex items-center justify-between gap-3` settings headers are forbidden. Use `SettingsPanelHeader` for wrapped copy and trailing badges.",
+      });
+    }
   }
 
   return violations;

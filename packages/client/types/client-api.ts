@@ -49,13 +49,16 @@ const REQUIRED_API_BRANCHES = [
   "studios",
 ] as const satisfies readonly (keyof ClientApi)[];
 
+const isRouteGroup = (value: unknown): value is object =>
+  typeof value === "function" || isRecord(value);
+
 export function assertClientApi(value: unknown): asserts value is ClientApi {
-  if (!isRecord(value)) {
+  if (!isRouteGroup(value)) {
     throw new Error("Nuxt API client is unavailable.");
   }
 
   for (const branch of REQUIRED_API_BRANCHES) {
-    if (!isRecord(value[branch])) {
+    if (!isRouteGroup(Reflect.get(value, branch))) {
       throw new Error(`Nuxt API client is missing the '${branch}' route group.`);
     }
   }

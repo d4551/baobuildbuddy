@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 const props = defineProps<{
   profileSaveState: SaveState;
@@ -37,15 +38,18 @@ const profileSaveStateLabel = computed(() => {
 <template>
   <div class="card card-border bg-base-100">
     <div class="card-body">
-      <div class="flex items-center justify-between gap-3">
-        <h2 class="card-title">{{ t("settings.profile.title") }}</h2>
-        <span
-          class="badge"
-          :class="getSaveStateBadgeClass(profileSaveState)"
-        >
-          {{ profileSaveStateLabel }}
-        </span>
-      </div>
+      <SettingsPanelHeader :title="t('settings.profile.title')">
+        <template #meta>
+          <span
+            class="badge"
+            :class="getSaveStateBadgeClass(profileSaveState)"
+            role="status"
+            aria-live="polite"
+          >
+            {{ profileSaveStateLabel }}
+          </span>
+        </template>
+      </SettingsPanelHeader>
 
       <SectionGrid grid-token="twoColumn">
         <label class="floating-label w-full">

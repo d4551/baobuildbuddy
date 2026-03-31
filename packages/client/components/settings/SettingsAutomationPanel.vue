@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 defineProps<{
   automationBrowserOptions: ReadonlyArray<{ value: string; label: string }>;
@@ -20,10 +21,10 @@ const { t } = useI18n();
 <template>
   <div class="card card-border bg-base-100">
     <div class="card-body">
-      <h2 class="card-title">{{ t("settings.automation.title") }}</h2>
-      <p class="text-sm text-base-content/70 mb-2">
-        {{ t("settings.automation.subtitle") }}
-      </p>
+      <SettingsPanelHeader
+        :title="t('settings.automation.title')"
+        :description="t('settings.automation.subtitle')"
+      />
 
       <div class="space-y-4">
         <div class="flex items-center justify-between">

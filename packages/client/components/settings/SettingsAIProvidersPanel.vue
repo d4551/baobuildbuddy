@@ -2,6 +2,7 @@
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 type ProviderField =
   | "localModelEndpoint"
@@ -71,10 +72,10 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 <template>
   <div class="card card-border bg-base-100">
     <div class="card-body">
-      <h2 class="card-title">{{ t("settings.aiProviders.title") }}</h2>
-      <p class="text-sm text-base-content/70 mb-3">
-        {{ t("settings.aiProviders.subtitle") }}
-      </p>
+      <SettingsPanelHeader
+        :title="t('settings.aiProviders.title')"
+        :description="t('settings.aiProviders.subtitle')"
+      />
 
       <fieldset class="fieldset mb-4">
         <legend class="fieldset-legend">

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SaveState } from "~/components/settings/save-state";
 import { useI18n } from "vue-i18n";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 defineProps<{
   providerSaveState: SaveState;
@@ -44,12 +45,10 @@ const { t } = useI18n();
 <template>
   <div class="card card-border bg-base-100">
     <div class="card-body gap-6">
-      <div>
-        <h2 class="card-title">{{ t("settings.jobIntelligence.title") }}</h2>
-        <p class="text-sm text-base-content/70">
-          {{ t("settings.jobIntelligence.subtitle") }}
-        </p>
-      </div>
+      <SettingsPanelHeader
+        :title="t('settings.jobIntelligence.title')"
+        :description="t('settings.jobIntelligence.subtitle')"
+      />
 
       <div class="space-y-4">
         <h3 class="font-semibold text-base">{{ t("settings.jobIntelligence.providersTitle") }}</h3>

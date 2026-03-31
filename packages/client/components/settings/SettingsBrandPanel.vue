@@ -10,6 +10,7 @@ import BrandStatsCard from "./brand/BrandStatsCard.vue";
 import BrandThemeSwatches from "./brand/BrandThemeSwatches.vue";
 import BrandThemesTab from "./brand/BrandThemesTab.vue";
 import BrandTypographyTab from "./brand/BrandTypographyTab.vue";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 type BrandEditorPanel = "identity" | "typography" | "themes" | "content";
 
@@ -112,22 +113,21 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 <template>
   <div class="card card-border bg-base-100 shadow-sm">
     <div class="card-body gap-6">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <h2 class="card-title">{{ t("settings.brand.title") }}</h2>
-          <p class="text-sm text-base-content/70">
-            {{ t("settings.brand.subtitle") }}
-          </p>
-        </div>
-        <span
-          class="badge"
-          :class="getSaveStateBadgeClass(brandSaveState)"
-          role="status"
-          aria-live="polite"
-        >
-          {{ brandSaveStateLabel }}
-        </span>
-      </div>
+      <SettingsPanelHeader
+        :title="t('settings.brand.title')"
+        :description="t('settings.brand.subtitle')"
+      >
+        <template #meta>
+          <span
+            class="badge"
+            :class="getSaveStateBadgeClass(brandSaveState)"
+            role="status"
+            aria-live="polite"
+          >
+            {{ brandSaveStateLabel }}
+          </span>
+        </template>
+      </SettingsPanelHeader>
 
       <div role="alert" class="alert alert-info alert-soft">
         <svg

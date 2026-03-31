@@ -2,6 +2,7 @@
 import type { NotificationPreferences } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "./save-state";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 defineProps<{
   theme: string;
@@ -26,7 +27,7 @@ const { t } = useI18n();
 <template>
   <div class="card card-border bg-base-100">
     <div class="card-body">
-      <h2 class="card-title">{{ t("settings.preferences.title") }}</h2>
+      <SettingsPanelHeader :title="t('settings.preferences.title')" />
 
       <div class="space-y-4">
         <div class="flex items-center justify-between">

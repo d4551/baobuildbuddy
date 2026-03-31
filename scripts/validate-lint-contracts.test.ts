@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { ROUTE_JOBS } from "../packages/shared/src/constants/routes";
 import { collectClientFetchDriftViolationsForContent } from "./validate-no-client-fetch-drift";
+import { collectDaisyUiContractViolationsForContent } from "./validate-daisyui-contracts";
 import { collectDirectEnvAccessViolationsForContent } from "./validate-no-direct-env-access";
 import { collectFallbackShimViolationsForContent } from "./validate-no-fallback-shims";
 import { collectHardcodedUserStringViolationsForContent } from "./validate-no-hardcoded-user-strings";
@@ -8,6 +9,47 @@ import { collectNoHtmxViolationsForContent } from "./validate-no-htmx";
 import { collectPageStateViolationsForContent } from "./validate-page-state-contracts";
 import { collectNoTryCatchViolationsForContent } from "./validate-no-try-catch";
 import { collectUiSingleSourceViolationsForContent } from "./validate-ui-single-source-of-truth";
+
+const BRAND_PREVIEW_FILE_PATH = "packages/client/components/settings/brand/BrandPreviewCard.vue";
+const BROKEN_BRAND_PREVIEW_SAMPLE = [
+  '<script setup lang="ts">',
+  "const createPreviewSurfaceStyle = () => ({ '--brand-preview-base-100': '#fff' });",
+  "</script>",
+].join("\n");
+const VALID_BRAND_PREVIEW_SAMPLE = [
+  '<script setup lang="ts">',
+  "const createPreviewSurfaceStyle = () => ({",
+  "  '--color-base-100': '#fff',",
+  "  '--color-base-200': '#f8f8f8',",
+  "  '--color-base-300': '#efefef',",
+  "  '--color-base-content': '#111',",
+  "  '--color-primary': '#1d4ed8',",
+  "  '--color-primary-content': '#fff',",
+  "  '--color-secondary': '#0f766e',",
+  "  '--color-secondary-content': '#fff',",
+  "  '--color-accent': '#65a30d',",
+  "  '--color-accent-content': '#111',",
+  "  '--color-neutral': '#1f2937',",
+  "  '--color-neutral-content': '#fff',",
+  "  '--color-info': '#0284c7',",
+  "  '--color-info-content': '#fff',",
+  "  '--color-success': '#15803d',",
+  "  '--color-success-content': '#fff',",
+  "  '--color-warning': '#f59e0b',",
+  "  '--color-warning-content': '#111',",
+  "  '--color-error': '#dc2626',",
+  "  '--color-error-content': '#fff',",
+  "  '--radius-selector': '0.5rem',",
+  "  '--radius-field': '0.25rem',",
+  "  '--radius-box': '0.75rem',",
+  "  '--size-selector': '0.25rem',",
+  "  '--size-field': '0.25rem',",
+  "  '--border': '1px',",
+  "  '--depth': '1',",
+  "  '--noise': '0',",
+  "});",
+  "</script>",
+].join("\n");
 
 describe("collectNoHtmxViolationsForContent", () => {
   test("flags hx attributes in Vue templates", () => {
@@ -40,6 +82,43 @@ describe("collectUiSingleSourceViolationsForContent", () => {
     );
 
     expect(violations.some((violation) => violation.message.includes("<style> blocks"))).toBe(true);
+  });
+
+  test("requires shared settings panel headers", () => {
+    const violations = collectUiSingleSourceViolationsForContent(
+      "packages/client/components/settings/SettingsEmailDeliveryPanel.vue",
+      [
+        "<template>",
+        '<div class="card"><div class="card-body"><div class="flex items-center justify-between gap-3"></div></div></div>',
+        "</template>",
+      ].join("\n"),
+    );
+
+    expect(violations.some((violation) => violation.message.includes("SettingsPanelHeader"))).toBe(
+      true,
+    );
+  });
+});
+
+describe("collectDaisyUiContractViolationsForContent", () => {
+  test("requires brand previews to scope daisyUI theme variables locally", () => {
+    const violations = collectDaisyUiContractViolationsForContent(
+      BRAND_PREVIEW_FILE_PATH,
+      BROKEN_BRAND_PREVIEW_SAMPLE,
+    );
+
+    expect(
+      violations.some((violation) => violation.message.includes("Brand preview surfaces")),
+    ).toBe(true);
+  });
+
+  test("accepts brand previews that scope the full daisyUI theme contract", () => {
+    const violations = collectDaisyUiContractViolationsForContent(
+      BRAND_PREVIEW_FILE_PATH,
+      VALID_BRAND_PREVIEW_SAMPLE,
+    );
+
+    expect(violations).toHaveLength(0);
   });
 });
 
