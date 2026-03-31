@@ -57,7 +57,6 @@ const runJobApplyScript = async (): Promise<number> => {
   return runtimeModule.runJobApplyAutomation();
 };
 
-process.exitCode =
-  automationRuntimeConfig.enableAutomationVerify
-    ? await emitVerificationRun()
-    : await runJobApplyScript();
+process.exitCode = automationRuntimeConfig.enableAutomationVerify
+  ? await emitVerificationRun()
+  : await runJobApplyScript();

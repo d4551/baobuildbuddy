@@ -32,7 +32,10 @@ export const collectFallbackShimViolationsForContent = (
     if (filePath.endsWith("scripts/validate-no-fallback-shims.ts")) {
       continue;
     }
-    if (value.toLowerCase().startsWith("polyfill") && isDisabledPolyfillConfiguration(content, matchIndex)) {
+    if (
+      value.toLowerCase().startsWith("polyfill") &&
+      isDisabledPolyfillConfiguration(content, matchIndex)
+    ) {
       continue;
     }
     violations.push({

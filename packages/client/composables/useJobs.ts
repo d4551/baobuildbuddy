@@ -3,7 +3,11 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { Job } from "@bao/shared/types/jobs";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { requestApi, useClientApiRequestRuntime, type ClientApiRequestRuntime } from "./api-request";
+import {
+  requestApi,
+  useClientApiRequestRuntime,
+  type ClientApiRequestRuntime,
+} from "./api-request";
 import { toJob } from "./api-normalizer-jobs";
 import { withLoadingState } from "./async-flow";
 

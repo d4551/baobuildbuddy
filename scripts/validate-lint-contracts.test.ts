@@ -130,7 +130,9 @@ describe("collectDirectEnvAccessViolationsForContent", () => {
       "const enabled = Bun.env.BAO_FLAG === '1';",
     );
 
-    expect(violations.some((violation) => violation.message.includes("Direct environment access"))).toBe(true);
+    expect(
+      violations.some((violation) => violation.message.includes("Direct environment access")),
+    ).toBe(true);
   });
 
   test("allows env reads inside config modules", () => {

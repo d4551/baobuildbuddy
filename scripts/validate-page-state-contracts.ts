@@ -21,8 +21,8 @@ export const collectPageStateViolationsForContent = (
     return [];
   }
 
-  const missingStates = Object.entries(requiredStatePatterns).flatMap(([stateName, statePattern]) =>
-    statePattern.test(content) ? [] : [stateName],
+  const missingStates = Object.entries(requiredStatePatterns).flatMap(
+    ([stateName, statePattern]) => (statePattern.test(content) ? [] : [stateName]),
   );
   if (!(successStatePattern.test(content) || successFallbackPattern.test(content))) {
     missingStates.push("success");

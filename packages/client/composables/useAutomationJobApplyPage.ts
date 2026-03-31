@@ -110,9 +110,7 @@ const toCoverLetterSelectOptions = (value: unknown): CoverLetterSelectOption[] =
       )
     : [];
 
-async function useAutomationJobApplyBootstrap(input: {
-  api: ReturnType<typeof useApi>;
-}) {
+async function useAutomationJobApplyBootstrap(input: { api: ReturnType<typeof useApi> }) {
   const { data: resumesData } = await useAsyncData<ResumeSelectOption[]>(
     "automation-job-apply-resumes",
     async () => toResumeSelectOptions(await readApiData(input.api.resumes.get())),

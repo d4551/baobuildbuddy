@@ -3,7 +3,11 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { requestApi, useClientApiRequestRuntime, type ClientApiRequestRuntime } from "./api-request";
+import {
+  requestApi,
+  useClientApiRequestRuntime,
+  type ClientApiRequestRuntime,
+} from "./api-request";
 import { toGameStudio } from "./api-normalizer-studios";
 import { requireValue, withLoadingState } from "./async-flow";
 

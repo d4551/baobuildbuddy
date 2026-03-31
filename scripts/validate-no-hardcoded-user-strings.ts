@@ -36,12 +36,12 @@ const keyedLiteralFieldNames = [
 const BACKTICK = "`";
 const quoteClassPattern = `['"${BACKTICK}]`;
 const literalBodyPattern = `[^'"${BACKTICK}\\n]+`;
-const keyedLiteralPattern =
-  new RegExp(
-    `\\b(?:${keyedLiteralFieldNames.join("|")})\\s*:\\s*(${quoteClassPattern})(${literalBodyPattern})\\1`,
-    "gu",
-  );
-const seoLiteralPattern = /\b(?:useServerSeoMeta|useSeoMeta)\s*\([\s\S]*?\b(?:title|description)\s*:\s*(['"`])([^'"`\n]+)\1/gu;
+const keyedLiteralPattern = new RegExp(
+  `\\b(?:${keyedLiteralFieldNames.join("|")})\\s*:\\s*(${quoteClassPattern})(${literalBodyPattern})\\1`,
+  "gu",
+);
+const seoLiteralPattern =
+  /\b(?:useServerSeoMeta|useSeoMeta)\s*\([\s\S]*?\b(?:title|description)\s*:\s*(['"`])([^'"`\n]+)\1/gu;
 const toastLiteralPattern =
   /\b(?:\$toast|toast)\s*\.\s*(?:success|error|info|warning)\s*\(\s*(['"`])([^'"`\n]+)\1/gu;
 const isIgnoredFile = (filePath: string): boolean =>
