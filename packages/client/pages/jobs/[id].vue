@@ -22,7 +22,6 @@ const showApplyModal = ref(false);
 const applicationNotes = ref("");
 const applying = ref(false);
 const JOB_APPLY_DIALOG_TITLE_ID = "job-detail-apply-dialog-title";
-const JOB_DETAIL_TITLE_ID = "job-detail-title";
 
 function routeParamToString(value: string | string[] | undefined): string {
   if (Array.isArray(value)) {
@@ -132,7 +131,11 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
 </script>
 
 <template>
-  <PageScaffold width-token="content" spacing-token="comfortable">
+  <PageScaffold
+    width-token="content"
+    spacing-token="comfortable"
+    labelled-by="job-detail-title"
+  >
     <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
 
     <LoadingSkeleton v-if="jobDetailPending" :lines="10" />
@@ -165,7 +168,7 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
       <JobDetailMainContent
         :job="job"
         :is-saved="isSaved"
-        :title-id="JOB_DETAIL_TITLE_ID"
+        title-id="job-detail-title"
         :hero-description="jobHeroDescription"
         :t="t"
         :job-experience-label="formatExperienceLabel"

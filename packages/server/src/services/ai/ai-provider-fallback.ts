@@ -1,3 +1,7 @@
+import {
+  HUGGING_FACE_SUPPORTED_MODELS,
+  LOCAL_AI_AUTO_DETECT_MODEL,
+} from "@bao/shared/constants/ai-provider";
 import { AI_CHAT_CONTEXT_MESSAGE_LIMIT } from "@bao/shared/constants/ai-chat";
 import { API_ERROR_ALL_PROVIDERS_STREAM_FAILED } from "@bao/shared/constants/api-errors";
 import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
@@ -13,6 +17,11 @@ export type ProviderFailure = { provider: AIProviderType; error: string };
 interface FallbackRequest {
   providers: Map<AIProviderType, AIProvider>;
   providerOrder: AIProviderType[];
+  routingTarget: {
+    purpose: GenerateOptions["purpose"] extends infer P ? P : string;
+    provider: AIProviderType;
+    model?: string;
+  };
   contextualPrompt: string;
   providerOptions: Omit<GenerateOptions, "messages"> | undefined;
 }
@@ -56,22 +65,29 @@ const withRequestedProvider = (
 const isNonEmptyString = (value?: string): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
+const NON_CONCRETE_MODELS = new Set([LOCAL_AI_AUTO_DETECT_MODEL, "auto-router"]);
+const isSupportedHuggingFaceModel = (
+  value: string,
+): value is (typeof HUGGING_FACE_SUPPORTED_MODELS)[number] =>
+  HUGGING_FACE_SUPPORTED_MODELS.some((model) => model === value);
+
 const resolveProviderModel = (
   provider: AIProvider,
   providerName: AIProviderType,
+  routingTarget: FallbackRequest["routingTarget"],
   providerOptions?: Omit<GenerateOptions, "messages">,
 ): string | undefined => {
-  const requestedModelValue = providerOptions?.model;
-  const requestedModel = isNonEmptyString(requestedModelValue)
-    ? requestedModelValue.trim()
-    : undefined;
   const providerModel = isNonEmptyString(provider.model) ? provider.model.trim() : undefined;
+  const requestedModel =
+    providerName === routingTarget.provider && isNonEmptyString(providerOptions?.model)
+      ? providerOptions.model.trim()
+      : undefined;
+  const requestedModelIsConcrete =
+    requestedModel &&
+    !NON_CONCRETE_MODELS.has(requestedModel) &&
+    (providerName !== "huggingface" || isSupportedHuggingFaceModel(requestedModel));
 
-  if (providerOptions?.provider === providerName && requestedModel) {
-    return requestedModel;
-  }
-
-  return providerModel ?? requestedModel;
+  return (requestedModelIsConcrete ? requestedModel : undefined) ?? providerModel;
 };
 
 const buildProviderOptionsForProvider = (
@@ -80,24 +96,29 @@ const buildProviderOptionsForProvider = (
   provider: AIProvider,
 ): Omit<GenerateOptions, "messages"> | undefined => {
   const providerOptions = withRequestedProvider(providerName, request.providerOptions);
-  const model = resolveProviderModel(provider, providerName, providerOptions);
+  const model = resolveProviderModel(
+    provider,
+    providerName,
+    request.routingTarget,
+    providerOptions,
+  );
 
   if (!providerOptions) {
     return model
       ? {
-          purpose: "chat",
+          purpose: request.routingTarget.purpose,
           provider: providerName,
           model,
         }
       : {
-          purpose: "chat",
+          purpose: request.routingTarget.purpose,
           provider: providerName,
         };
   }
 
   const { temperature, maxTokens, topP, topK, timeout, systemPrompt } = providerOptions;
   return {
-    purpose: providerOptions.purpose,
+    purpose: request.routingTarget.purpose,
     provider: providerName,
     ...(model ? { model } : {}),
     temperature,
@@ -327,7 +348,7 @@ const streamWithFallbackAtIndex = async function* (
 
   const providerStream = provider.stream(
     request.contextualPrompt,
-    withRequestedProvider(providerName, request.providerOptions),
+    buildProviderOptionsForProvider(request, providerName, provider),
   );
   const iterator = providerStream[Symbol.asyncIterator]();
   const streamResult = yield* streamProviderIterator(providerName, iterator, errors, false);

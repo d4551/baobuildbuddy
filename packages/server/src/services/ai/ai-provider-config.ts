@@ -1,5 +1,6 @@
 import {
   AI_PROVIDER_DEFAULT_ORDER,
+  HUGGING_FACE_DEFAULT_MODEL,
   LOCAL_AI_AUTO_DETECT_MODEL,
   normalizeAIRouting,
 } from "@bao/shared/constants/ai-provider";
@@ -64,11 +65,17 @@ export const buildProviderConfigs = (settings?: AIServiceSettings): AIProviderCo
   appendOptionalProviderConfig(configs, "gemini", settings?.geminiApiKey);
   appendOptionalProviderConfig(configs, "claude", settings?.claudeApiKey);
   appendOptionalProviderConfig(configs, "openai", settings?.openaiApiKey);
-  configs.push({
-    provider: "huggingface",
-    enabled: true,
-    ...(settings?.huggingfaceToken ? { apiKey: settings.huggingfaceToken } : {}),
-  });
+  if (
+    typeof settings?.huggingfaceToken === "string" &&
+    settings.huggingfaceToken.trim().length > 0
+  ) {
+    configs.push({
+      provider: "huggingface",
+      enabled: true,
+      apiKey: settings.huggingfaceToken.trim(),
+      model: HUGGING_FACE_DEFAULT_MODEL,
+    });
+  }
 
   return configs;
 };
@@ -90,6 +97,14 @@ export const canCreateLocalProvider = (config: AIProviderConfig): boolean =>
   config.baseUrl.trim().length > 0 &&
   URL.canParse(config.baseUrl);
 
+export const isConfiguredProviderConfig = (config: AIProviderConfig): boolean => {
+  if (config.provider === "local") {
+    return canCreateLocalProvider(config);
+  }
+
+  return typeof config.apiKey === "string" && config.apiKey.trim().length > 0;
+};
+
 export const createProvider = (config: AIProviderConfig): AIProvider | null => {
   switch (config.provider) {
     case "gemini":
@@ -99,7 +114,7 @@ export const createProvider = (config: AIProviderConfig): AIProvider | null => {
     case "openai":
       return config.apiKey ? new OpenAIProvider(config.apiKey, config.model) : null;
     case "huggingface":
-      return new HuggingFaceProvider(config.apiKey, config.model);
+      return config.apiKey ? new HuggingFaceProvider(config.apiKey, config.model) : null;
     case "local":
       if (!canCreateLocalProvider(config)) {
         return null;

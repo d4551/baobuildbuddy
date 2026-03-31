@@ -78,7 +78,11 @@ function updateProjectForm(value: typeof projectForm): void {
 </script>
 
 <template>
-  <PageScaffold width-token="wide" spacing-token="comfortable">
+  <PageScaffold
+    width-token="wide"
+    spacing-token="comfortable"
+    labelled-by="portfolio-page-title"
+  >
     <PageHeroHeader
       title-id="portfolio-page-title"
       :title="t('portfolioPage.title')"

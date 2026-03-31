@@ -6,22 +6,8 @@ import type {
   AIRoutingPurpose,
   GenerateOptions,
 } from "@bao/shared/types/ai";
-import { createProvider } from "./ai-provider-config";
+import { createProvider, isConfiguredProviderConfig } from "./ai-provider-config";
 import type { AIProvider } from "./provider-interface";
-
-const ensureHuggingFaceFallback = (providers: Map<AIProviderType, AIProvider>): void => {
-  if (providers.has("huggingface")) {
-    return;
-  }
-
-  const fallbackProvider = createProvider({
-    provider: "huggingface",
-    enabled: true,
-  });
-  if (fallbackProvider) {
-    providers.set("huggingface", fallbackProvider);
-  }
-};
 
 export const initializeProviders = (
   configs: AIProviderConfig[],
@@ -29,7 +15,7 @@ export const initializeProviders = (
   const providers = new Map<AIProviderType, AIProvider>();
 
   for (const config of configs) {
-    if (!config.enabled) {
+    if (!(config.enabled && isConfiguredProviderConfig(config))) {
       continue;
     }
 
@@ -39,7 +25,6 @@ export const initializeProviders = (
     }
   }
 
-  ensureHuggingFaceFallback(providers);
   return providers;
 };
 
@@ -48,7 +33,11 @@ export const buildFallbackOrder = (
   preferredProvider?: AIProviderType,
 ): AIProviderType[] => {
   const enabledProviders: AIProviderType[] = Array.from(
-    new Set(configs.filter((config) => config.enabled).map((config) => config.provider)),
+    new Set(
+      configs
+        .filter((config) => config.enabled && isConfiguredProviderConfig(config))
+        .map((config) => config.provider),
+    ),
   );
 
   const ordered: AIProviderType[] = [];

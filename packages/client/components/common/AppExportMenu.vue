@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 
 type ExportFormat = "pdf" | "docx";
@@ -22,6 +21,7 @@ const emit = defineEmits<{
 
 const exportFormats: readonly ExportFormat[] = ["pdf", "docx"];
 const exportMenuId = `app-export-menu-${useId()}`;
+const exportTriggerId = `app-export-trigger-${useId()}`;
 const menu = ref<HTMLElement | null>(null);
 const isOpen = ref(false);
 const activeFormatIndex = ref(0);
@@ -44,9 +44,8 @@ function getMenuItems(): HTMLButtonElement[] {
   return menuItemRefs.value.filter((element): element is HTMLButtonElement => element !== null);
 }
 
-function setMenuItemRef(index: number, element: Element | ComponentPublicInstance | null): void {
-  const menuElement = element && "$el" in element ? (element.$el as Element | null) : element;
-  menuItemRefs.value[index] = menuElement instanceof HTMLButtonElement ? menuElement : null;
+function setMenuItemRef(index: number, element: HTMLButtonElement | null): void {
+  menuItemRefs.value[index] = element;
 }
 
 function focusMenuItem(index: number): void {
@@ -68,20 +67,23 @@ function getMenuIndex(currentIndex: number, direction: number): number {
   return currentIndex <= 0 ? maxIndex : currentIndex - 1;
 }
 
-function openMenu(startingIndex = 0): void {
+async function openMenu(startingIndex = 0): Promise<void> {
   if (props.disabled) {
     return;
   }
 
   activeFormatIndex.value = startingIndex;
   isOpen.value = true;
-  void nextTick(() => {
+
+  await nextTick();
+  if (isOpen.value) {
     focusMenuItem(startingIndex);
-  });
+  }
 }
 
 function closeMenu(): void {
   isOpen.value = false;
+  activeFormatIndex.value = 0;
 }
 
 function toggleMenu(): void {
@@ -90,10 +92,12 @@ function toggleMenu(): void {
     return;
   }
 
-  openMenu();
+  void openMenu();
 }
 
-function handleTriggerClick(): void {
+function handleTriggerClick(event: MouseEvent): void {
+  event.preventDefault();
+  event.stopPropagation();
   toggleMenu();
 }
 
@@ -106,13 +110,13 @@ function handleTriggerKeydown(event: KeyboardEvent): void {
 
   if (event.key === "ArrowDown") {
     event.preventDefault();
-    openMenu(0);
+    void openMenu(0);
     return;
   }
 
   if (event.key === "ArrowUp") {
     event.preventDefault();
-    openMenu(exportFormats.length - 1);
+    void openMenu(exportFormats.length - 1);
     return;
   }
 
@@ -150,29 +154,50 @@ function handleMenuItemKeydown(event: KeyboardEvent, index: number): void {
   if (event.key === "ArrowUp") {
     event.preventDefault();
     focusMenuItem(getMenuIndex(index, -1));
+    return;
+  }
+
+  if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+    event.preventDefault();
+    emitExport(exportFormats[index]);
+    return;
+  }
+
+  if (event.key === "Tab") {
+    closeMenu();
   }
 }
 
 function handleDocumentPointerDown(event: PointerEvent): void {
-  const target = event.target;
-  if (!(target instanceof Node) || !menu.value?.contains(target)) {
+  if (!isOpen.value) {
+    return;
+  }
+
+  const pointerPath = event.composedPath();
+  if (!menu.value || !pointerPath.includes(menu.value)) {
     closeMenu();
   }
 }
 
 function handleDocumentKeydown(event: KeyboardEvent): void {
-  if (event.key === "Escape") {
+  if (isOpen.value && event.key === "Escape") {
+    event.preventDefault();
     closeMenu();
   }
 }
 
 function handleMenuFocusOut(event: FocusEvent): void {
   const nextTarget = event.relatedTarget;
-  if (!isOpen.value || !(nextTarget instanceof HTMLElement)) {
+  if (!isOpen.value) {
     return;
   }
 
-  if (!menu.value?.contains(nextTarget) && !trigger.value?.contains(nextTarget)) {
+  if (!(nextTarget instanceof Node)) {
+    closeMenu();
+    return;
+  }
+
+  if (!menu.value?.contains(nextTarget)) {
     closeMenu();
   }
 }
@@ -209,6 +234,7 @@ function emitExport(format: ExportFormat): void {
 <template>
   <div ref="menu" class="dropdown dropdown-end" :class="{ 'dropdown-open': isOpen }">
     <button
+      :id="exportTriggerId"
       ref="exportTrigger"
       type="button"
       class="list-none"
@@ -231,18 +257,20 @@ function emitExport(format: ExportFormat): void {
       class="menu dropdown-content z-20 mt-2 w-40 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
       role="menu"
       aria-orientation="vertical"
+      :aria-labelledby="exportTriggerId"
       :aria-label="props.buttonAriaLabel"
       @focusout="handleMenuFocusOut"
     >
       <li v-for="(format, index) in exportFormats" :key="format" role="none">
         <button
+          :id="`${exportMenuId}-${format}`"
           type="button"
           role="menuitem"
           :disabled="props.disabled"
           :tabindex="index === activeFormatIndex ? 0 : -1"
           :aria-label="exportFormatAriaLabel(format)"
           @keydown="handleMenuItemKeydown($event, index)"
-          @click="emitExport(format)"
+          @click.stop="emitExport(format)"
           :ref="(element) => setMenuItemRef(index, element)"
         >
           {{ formatLabels[format] }}

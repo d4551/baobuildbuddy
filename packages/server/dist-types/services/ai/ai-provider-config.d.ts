@@ -15,6 +15,7 @@ export declare const appendOptionalProviderConfig: (configs: AIProviderConfig[],
 export declare const buildProviderConfigs: (settings?: AIServiceSettings) => AIProviderConfig[];
 export declare const resolvePreferredProvider: (preferredProvider?: string | null) => AIProviderType;
 export declare const canCreateLocalProvider: (config: AIProviderConfig) => boolean;
+export declare const isConfiguredProviderConfig: (config: AIProviderConfig) => boolean;
 export declare const createProvider: (config: AIProviderConfig) => AIProvider | null;
 export declare const createDeterministicServiceState: () => {
     fallbackOrder: AIProviderType[];

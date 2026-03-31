@@ -7,6 +7,11 @@ export type ProviderFailure = {
 interface FallbackRequest {
     providers: Map<AIProviderType, AIProvider>;
     providerOrder: AIProviderType[];
+    routingTarget: {
+        purpose: GenerateOptions["purpose"] extends infer P ? P : string;
+        provider: AIProviderType;
+        model?: string;
+    };
     contextualPrompt: string;
     providerOptions: Omit<GenerateOptions, "messages"> | undefined;
 }

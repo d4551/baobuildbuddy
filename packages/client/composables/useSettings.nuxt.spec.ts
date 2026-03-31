@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { type Ref, ref } from "vue";
+import { ref } from "vue";
 import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
 
-const nuxtStateStore = new Map<string, Ref<unknown>>();
+const nuxtStateStore = new Map<string, ReturnType<typeof ref>>();
 const mockApi = {
   settings: {
     get: vi.fn(),
@@ -13,11 +13,11 @@ const mockApi = {
   },
 };
 
-function getNuxtState<T>(key: string, initializer?: () => T) {
+function getNuxtState(key: string, initializer?: () => unknown) {
   if (!nuxtStateStore.has(key)) {
-    nuxtStateStore.set(key, ref(initializer ? initializer() : undefined) as Ref<unknown>);
+    nuxtStateStore.set(key, ref(initializer ? initializer() : undefined));
   }
-  return nuxtStateStore.get(key) as Ref<T>;
+  return nuxtStateStore.get(key) ?? ref(undefined);
 }
 
 function resetNuxtState() {

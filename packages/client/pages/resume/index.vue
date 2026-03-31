@@ -68,7 +68,7 @@ const {
 </script>
 
 <template>
-  <PageScaffold>
+  <PageScaffold labelled-by="resume-page-title">
     <PageHeroHeader
       title-id="resume-page-title"
       :title="t('resumePage.title')"

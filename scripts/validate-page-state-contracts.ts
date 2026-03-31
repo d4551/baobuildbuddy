@@ -10,6 +10,8 @@ const pageStateComponentSignalPatterns = [
   /<BootstrapErrorAlert\b/u,
   /<EmptyState\b/u,
 ] as const;
+const emptyStateEvidencePatterns = [/['"]empty['"]/u, /<EmptyState\b/u] as const;
+const emptyStateRequirementPatterns = [/['"]empty['"]/u, /\bisEmpty\b/u] as const;
 const requiredStatePatterns = {
   loading: [/['"](?:loading|idle)['"]/u, /<LoadingSkeleton\b/u],
   error: [/['"](?:error[^'"]*|unauthorized)['"]/u, /<BootstrapErrorAlert\b/u],
@@ -17,12 +19,18 @@ const requiredStatePatterns = {
 const successStatePattern = /['"]success['"]/u;
 const successFallbackPattern = /\bv-else(?:\s|>)/u;
 
+const matchesAnyPattern = (content: string, patterns: readonly RegExp[]): boolean =>
+  patterns.some((pattern) => pattern.test(content));
+
 const exposesPageStateContract = (content: string): boolean =>
   pageStateReferencePattern.test(content) ||
   pageStateComponentSignalPatterns.filter((pattern) => pattern.test(content)).length >= 2;
 
 const requiresEmptyState = (content: string): boolean =>
-  /['"]empty['"]/u.test(content) || /<EmptyState\b/u.test(content);
+  matchesAnyPattern(content, emptyStateRequirementPatterns);
+
+const hasExplicitEmptyState = (content: string): boolean =>
+  matchesAnyPattern(content, emptyStateEvidencePatterns);
 
 export const collectPageStateViolationsForContent = (
   filePath: string,
@@ -36,10 +44,7 @@ export const collectPageStateViolationsForContent = (
     ([stateName, statePatterns]) =>
       statePatterns.some((statePattern) => statePattern.test(content)) ? [] : [stateName],
   );
-  if (
-    requiresEmptyState(content) &&
-    ![/['"]empty['"]/u, /<EmptyState\b/u].some((pattern) => pattern.test(content))
-  ) {
+  if (requiresEmptyState(content) && !hasExplicitEmptyState(content)) {
     missingStates.push("empty");
   }
   if (!(successStatePattern.test(content) || successFallbackPattern.test(content))) {

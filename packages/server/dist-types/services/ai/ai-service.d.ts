@@ -19,6 +19,7 @@ export declare class AIService {
     static fromSettings(settings?: AIServiceSettings): AIService;
     private static createDeterministicTestService;
     private refreshFallbackOrder;
+    private resolveHealthyProviderOrder;
     /**
      * Get a specific provider by name
      */

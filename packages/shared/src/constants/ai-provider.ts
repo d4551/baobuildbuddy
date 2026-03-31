@@ -35,7 +35,11 @@ export const LOCAL_AI_SERVERS: readonly LocalProviderServer[] = [
   { id: "ollama", name: "Ollama", baseUrl: LOCAL_AI_DEFAULT_ENDPOINT },
 ] as const;
 
-export const HUGGING_FACE_SUPPORTED_MODELS = ["katanemo/Arch-Router-1.5B"] as const;
+export const HUGGING_FACE_SUPPORTED_MODELS = [
+  "Qwen/Qwen2.5-7B-Instruct",
+  "mistralai/Mistral-7B-Instruct-v0.3",
+  "HuggingFaceTB/SmolLM3-3B",
+] as const;
 export const HUGGING_FACE_DEFAULT_MODEL = HUGGING_FACE_SUPPORTED_MODELS[0];
 
 export type AIProviderMetadata = {

@@ -20,6 +20,7 @@ import {
 } from "@bao/shared/constants/client-config";
 import { DEFAULT_CLIENT_DEV_PORT, DEFAULT_SERVER_PORT } from "@bao/shared/constants/ports";
 import { APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
+import { buildApiProxyWildcardTarget, normalizeApiProxyTarget } from "./utils/api-proxy-target";
 
 const DEFAULT_CLIENT_PORT = String(DEFAULT_CLIENT_DEV_PORT);
 const DEFAULT_API_SERVER_PORT = String(DEFAULT_SERVER_PORT);
@@ -37,13 +38,14 @@ const resolvedDevServerPort =
     ? configuredClientPort
     : DEFAULT_CLIENT_PORT;
 const defaultLocalApiProxy = `http://localhost:${resolvedApiServerPort}`;
-const apiBaseProxy =
-  configuredApiProxy ||
-  (configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : undefined) ||
-  defaultLocalApiProxy;
 const HTTPS_URL_PATTERN = /^https?:\/\//u;
-const absoluteApiProxyBase =
-  apiBaseProxy && HTTPS_URL_PATTERN.test(apiBaseProxy) ? apiBaseProxy : undefined;
+const absoluteConfiguredApiBase =
+  configuredApiBase && HTTPS_URL_PATTERN.test(configuredApiBase) ? configuredApiBase : undefined;
+const apiProxyCandidate = configuredApiProxy || absoluteConfiguredApiBase || defaultLocalApiProxy;
+const normalizedApiProxyTarget = normalizeApiProxyTarget(apiProxyCandidate);
+const apiProxyWildcardTarget = normalizedApiProxyTarget
+  ? buildApiProxyWildcardTarget(normalizedApiProxyTarget)
+  : undefined;
 const DEFAULT_APP_TITLE = `${APP_BRAND.name} - ${APP_BRAND_TAGLINE}`;
 const DEFAULT_I18N_LOCALE = DEFAULT_APP_LANGUAGE;
 const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
@@ -170,7 +172,7 @@ const configuredWsBase = process.env.NUXT_PUBLIC_WS_BASE;
 const resolvedWsBase =
   configuredWsBase && configuredWsBase !== "/" ? configuredWsBase : resolvedApiBase;
 const shouldPrerenderApplicationRoutes =
-  Boolean(absoluteApiProxyBase) ||
+  Boolean(apiProxyWildcardTarget) ||
   Boolean(configuredApiBase && HTTPS_URL_PATTERN.test(configuredApiBase));
 
 export default defineNuxtConfig({
@@ -257,19 +259,19 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "bun",
-    ...(apiBaseProxy
+    ...(normalizedApiProxyTarget
       ? {
           devProxy: {
             [API_ENDPOINT_PREFIX]: {
-              target: apiBaseProxy,
+              target: normalizedApiProxyTarget,
               changeOrigin: true,
             },
           },
-          ...(absoluteApiProxyBase
+          ...(apiProxyWildcardTarget
             ? {
                 routeRules: {
                   [API_ENDPOINT_WILDCARD]: {
-                    proxy: `${absoluteApiProxyBase}${API_ENDPOINT_WILDCARD}`,
+                    proxy: apiProxyWildcardTarget,
                   },
                 },
               }

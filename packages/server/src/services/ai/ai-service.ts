@@ -37,7 +37,9 @@ import {
   resolveRoutingTarget,
 } from "./ai-provider-state";
 import type { AIProvider } from "./provider-interface";
+import { settle } from "@bao/shared/utils/promise";
 import { isTestRuntime } from "../../config/env";
+
 type AIServiceSettings = Parameters<typeof buildProviderConfigs>[0];
 
 /**
@@ -96,6 +98,31 @@ export class AIService {
     this.fallbackOrder = rebuildFallbackOrderFromProviders(this.providers, this.preferredProvider);
   }
 
+  private async resolveHealthyProviderOrder(options?: GenerateOptions): Promise<AIProviderType[]> {
+    const baseOrder = buildProviderOrder(
+      this.fallbackOrder,
+      this.routing,
+      this.preferredProvider,
+      options,
+    );
+    const availabilityResult = await settle(this.getAvailableProviders());
+    if (availabilityResult.status === "rejected") {
+      return baseOrder;
+    }
+
+    const healthyProviders = new Set(
+      availabilityResult.value
+        .filter((status) => status.available)
+        .map((status) => status.provider),
+    );
+    if (healthyProviders.size === 0) {
+      return baseOrder;
+    }
+
+    const healthyOrder = baseOrder.filter((provider) => healthyProviders.has(provider));
+    return healthyOrder.length > 0 ? healthyOrder : baseOrder;
+  }
+
   /**
    * Get a specific provider by name
    */
@@ -118,23 +145,19 @@ export class AIService {
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const contextualPrompt = mergePromptWithContext(prompt, options);
     const routingTarget = resolveRoutingTarget(this.routing, this.preferredProvider, options);
-    const providerOrder = buildProviderOrder(
-      this.fallbackOrder,
-      this.routing,
-      this.preferredProvider,
-      options,
-    );
+    const providerOrder = await this.resolveHealthyProviderOrder(options);
     const providerOptions = toProviderOptions(routingTarget, options);
     const { response, errors } = await generateWithFallback({
       providers: this.providers,
       providerOrder,
+      routingTarget,
       contextualPrompt,
       providerOptions,
     });
     if (response) {
       return response;
     }
-    return buildGenerateFailureResponse(errors, routingTarget.provider);
+    return buildGenerateFailureResponse(errors, providerOrder[0] ?? routingTarget.provider);
   }
 
   /**
@@ -146,16 +169,12 @@ export class AIService {
   ): AsyncGenerator<{ chunk: string; provider: AIProviderType }> {
     const contextualPrompt = mergePromptWithContext(prompt, options);
     const routingTarget = resolveRoutingTarget(this.routing, this.preferredProvider, options);
-    const providerOrder = buildProviderOrder(
-      this.fallbackOrder,
-      this.routing,
-      this.preferredProvider,
-      options,
-    );
+    const providerOrder = await this.resolveHealthyProviderOrder(options);
     const providerOptions = toProviderOptions(routingTarget, options);
     const streamResult = yield* streamWithFallback({
       providers: this.providers,
       providerOrder,
+      routingTarget,
       contextualPrompt,
       providerOptions,
     });

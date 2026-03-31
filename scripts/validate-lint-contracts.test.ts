@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { collectAccessibilityLandmarkViolationsForContent } from "./validate-accessibility-landmarks";
 import { ROUTE_JOBS } from "../packages/shared/src/constants/routes";
 import { collectClientFetchDriftViolationsForContent } from "./validate-no-client-fetch-drift";
 import { collectDaisyUiContractViolationsForContent } from "./validate-daisyui-contracts";
@@ -50,6 +51,52 @@ const VALID_BRAND_PREVIEW_SAMPLE = [
   "});",
   "</script>",
 ].join("\n");
+const PAGE_STATE_EXAMPLE_PATH = "packages/client/pages/example.vue";
+const PAGE_STATE_DOCS_PATH = "packages/client/pages/docs.vue";
+const PAGE_STATE_MISSING_SUCCESS_SAMPLE = [
+  "<template>",
+  `<LoadingSkeleton v-if="uiState === 'loading'" />`,
+  `<BootstrapErrorAlert v-else-if="uiState === 'error'" />`,
+  `<EmptyState v-else-if="uiState === 'empty'" />`,
+  "</template>",
+].join("\n");
+const PAGE_STATE_COMPONENT_SIGNAL_SAMPLE = [
+  "<template>",
+  '<LoadingSkeleton v-if="pending" />',
+  '<BootstrapErrorAlert v-else-if="errorMessage" />',
+  '<EmptyState v-else-if="isEmpty" />',
+  "</template>",
+].join("\n");
+const PAGE_STATE_EXPLICIT_EMPTY_SAMPLE = [
+  "<template>",
+  '<LoadingSkeleton v-if="pending" />',
+  '<BootstrapErrorAlert v-else-if="errorMessage" />',
+  `<section v-else-if="state === 'empty'"><EmptyState /></section>`,
+  '<section v-else><article v-for="item in items" :key="item.id" /></section>',
+  "</template>",
+].join("\n");
+const PAGE_STATE_V_ELSE_SUCCESS_SAMPLE = [
+  "<template>",
+  `<LoadingSkeleton v-if="docsUiState === 'loading'" />`,
+  `<EmptyState v-else-if="docsUiState === 'empty'" />`,
+  `<BootstrapErrorAlert v-else-if="docsUiState === 'errorRetryable' || docsUiState === 'unauthorized'" />`,
+  "<section v-else />",
+  "</template>",
+].join("\n");
+
+const collectExamplePageStateViolations = (content: string) =>
+  collectPageStateViolationsForContent(PAGE_STATE_EXAMPLE_PATH, content);
+const expectMissingPageState = (content: string, missingState: string): void => {
+  const violations = collectExamplePageStateViolations(content);
+
+  expect(violations.some((violation) => violation.message.includes(missingState))).toBe(true);
+};
+
+const expectNoPageStateViolations = (filePath: string, content: string): void => {
+  const violations = collectPageStateViolationsForContent(filePath, content);
+
+  expect(violations).toHaveLength(0);
+};
 
 describe("collectNoHtmxViolationsForContent", () => {
   test("flags hx attributes in Vue templates", () => {
@@ -188,60 +235,79 @@ describe("collectHardcodedUserStringViolationsForContent", () => {
 
 describe("collectPageStateViolationsForContent", () => {
   test("requires a success branch in addition to loading, error, and empty states", () => {
-    const violations = collectPageStateViolationsForContent(
-      "packages/client/pages/example.vue",
-      [
-        "<template>",
-        `<LoadingSkeleton v-if="uiState === 'loading'" />`,
-        `<BootstrapErrorAlert v-else-if="uiState === 'error'" />`,
-        `<EmptyState v-else-if="uiState === 'empty'" />`,
-        "</template>",
-      ].join("\n"),
-    );
-
-    expect(violations.some((violation) => violation.message.includes("success"))).toBe(true);
+    expectMissingPageState(PAGE_STATE_MISSING_SUCCESS_SAMPLE, "success");
   });
 
   test("detects page-state contracts from shared state components even without uiState naming", () => {
-    const violations = collectPageStateViolationsForContent(
-      "packages/client/pages/example.vue",
-      [
-        "<template>",
-        '<LoadingSkeleton v-if="pending" />',
-        '<BootstrapErrorAlert v-else-if="errorMessage" />',
-        '<EmptyState v-else-if="isEmpty" />',
-        "</template>",
-      ].join("\n"),
-    );
-
-    expect(violations.some((violation) => violation.message.includes("success"))).toBe(true);
+    expectMissingPageState(PAGE_STATE_COMPONENT_SIGNAL_SAMPLE, "success");
   });
+});
 
-  test("requires empty states when the page explicitly models emptiness", () => {
-    const violations = collectPageStateViolationsForContent(
-      "packages/client/pages/example.vue",
+describe("collectPageStateViolationsForContent empty state coverage", () => {
+  test("requires an explicit empty branch when the page models emptiness via isEmpty", () => {
+    expectMissingPageState(
       [
         "<template>",
         '<LoadingSkeleton v-if="pending" />',
         '<BootstrapErrorAlert v-else-if="errorMessage" />',
-        "<section v-else-if=\"state === 'empty'\"><EmptyState /></section>",
+        '<section v-else-if="isEmpty" />',
         '<section v-else><article v-for="item in items" :key="item.id" /></section>',
         "</template>",
       ].join("\n"),
+      "empty",
     );
+  });
 
-    expect(violations).toHaveLength(0);
+  test("requires empty states when the page explicitly models emptiness", () => {
+    expectNoPageStateViolations(PAGE_STATE_EXAMPLE_PATH, PAGE_STATE_EXPLICIT_EMPTY_SAMPLE);
   });
 
   test("accepts an explicit v-else success branch for alternate state names", () => {
-    const violations = collectPageStateViolationsForContent(
-      "packages/client/pages/docs.vue",
+    expectNoPageStateViolations(PAGE_STATE_DOCS_PATH, PAGE_STATE_V_ELSE_SUCCESS_SAMPLE);
+  });
+});
+
+describe("accessibility landmark validation", () => {
+  test("flags routed pages that omit a labelled scaffold target", () => {
+    const violations = collectAccessibilityLandmarkViolationsForContent(
+      "packages/client/pages/example.vue",
       [
         "<template>",
-        `<LoadingSkeleton v-if="docsUiState === 'loading'" />`,
-        `<EmptyState v-else-if="docsUiState === 'empty'" />`,
-        `<BootstrapErrorAlert v-else-if="docsUiState === 'errorRetryable' || docsUiState === 'unauthorized'" />`,
-        "<section v-else />",
+        "<PageScaffold>",
+        '<PageHeroHeader title-id="example-page-title" :title="t(\'example.title\')" />',
+        "</PageScaffold>",
+        "</template>",
+      ].join("\n"),
+    );
+
+    expect(violations.some((violation) => violation.message.includes("labelled-by"))).toBe(true);
+  });
+
+  test("flags routed pages that attempt to declare their own main landmark", () => {
+    const violations = collectAccessibilityLandmarkViolationsForContent(
+      "packages/client/pages/example.vue",
+      [
+        "<template>",
+        '<PageScaffold tag="main" labelled-by="example-page-title">',
+        '<h1 id="example-page-title">{{ t("example.title") }}</h1>',
+        "</PageScaffold>",
+        "</template>",
+      ].join("\n"),
+    );
+
+    expect(violations.some((violation) => violation.message.includes("single main landmark"))).toBe(
+      true,
+    );
+  });
+
+  test("accepts routed pages with a labelled scaffold that matches the shared heading id", () => {
+    const violations = collectAccessibilityLandmarkViolationsForContent(
+      "packages/client/pages/example.vue",
+      [
+        "<template>",
+        '<PageScaffold labelled-by="example-page-title">',
+        '<PageHeroHeader title-id="example-page-title" :title="t(\'example.title\')" />',
+        "</PageScaffold>",
         "</template>",
       ].join("\n"),
     );

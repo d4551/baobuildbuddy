@@ -45,7 +45,7 @@ useSeoMeta({
 
 <template>
   <PageScaffold
-    tag="main"
+    tag="section"
     width-token="shell"
     spacing-token="compact"
     labelled-by="setup-title"

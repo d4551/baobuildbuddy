@@ -58,7 +58,11 @@ const bootstrapErrorMessage = computed(() =>
 </script>
 
 <template>
-  <PageScaffold width-token="wide" spacing-token="comfortable">
+  <PageScaffold
+    width-token="wide"
+    spacing-token="comfortable"
+    labelled-by="cover-letter-page-title"
+  >
     <PageHeroHeader
       title-id="cover-letter-page-title"
       :title="t('coverLetterPage.title')"

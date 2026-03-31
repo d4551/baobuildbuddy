@@ -172,7 +172,8 @@ const collectFileViolations = async (filePath: string): Promise<Violation[]> => 
 
 const collectViolations = async (): Promise<Violation[]> => {
   const glob = new Bun.Glob(`${clientPagesRoot}/**/*.vue`);
-  const pagePaths = (await Array.fromAsync(glob.scan({ cwd: projectRoot, onlyFiles: true })))
+  const scannedPaths = await Array.fromAsync(glob.scan({ cwd: projectRoot, onlyFiles: true }));
+  const pagePaths = scannedPaths
     .map((pathValue) => pathValue.replace(/\\/gu, "/"))
     .filter((pathValue) => !shouldIgnorePath(pathValue));
 

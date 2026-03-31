@@ -18,7 +18,7 @@ const props = withDefaults(
     extraClass?: string;
   }>(),
   {
-    tag: "div",
+    tag: "section",
     widthToken: "shell",
     spacingToken: "comfortable",
     labelledBy: undefined,

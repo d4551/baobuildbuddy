@@ -16,6 +16,7 @@ const ignoredPaths = [
   "**/.output/**",
   "**/.venv/**",
   ".tmp*/**",
+  "packages/client/**",
   "packages/desktop/**",
 ];
 
