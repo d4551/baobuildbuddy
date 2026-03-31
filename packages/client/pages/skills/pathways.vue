@@ -8,7 +8,7 @@ definePageMeta({
   middleware: ["auth"],
 });
 const { t } = useI18n();
-const page = await useSkillsPathwaysPage();
+const page = useSkillsPathwaysPage();
 
 if (import.meta.server) {
   useServerSeoMeta({
@@ -20,7 +20,7 @@ if (import.meta.server) {
 
 <template>
   <PageScaffold tag="section" labelled-by="skills-pathways-title">
-    <AppBreadcrumbs :crumbs="page.breadcrumbs" />
+    <AppBreadcrumbs :crumbs="page.breadcrumbs.value" />
 
     <PageHeroHeader
       title-id="skills-pathways-title"
@@ -29,18 +29,23 @@ if (import.meta.server) {
     >
       <template #actions>
         <NuxtLink
-          v-if="page.gamificationReady"
+          v-if="page.gamificationReady.value"
           :to="APP_ROUTES.gamification"
           class="btn btn-ghost"
           :aria-label="t('skillsPathwaysPage.gamification.openProgressAria')"
         >
           <span class="badge badge-primary badge-sm">
-            {{ t("skillsPathwaysPage.gamification.levelLabel", { level: page.gamificationLevel }) }}
+            {{ t("skillsPathwaysPage.gamification.levelLabel", { level: page.gamificationLevel.value }) }}
           </span>
-          <span class="text-xs">{{ t("skillsPathwaysPage.gamification.xpLabel", { xp: page.gamificationXP }) }}</span>
+          <span class="text-xs">{{
+            t("skillsPathwaysPage.gamification.xpLabel", { xp: page.gamificationXP.value })
+          }}</span>
         </NuxtLink>
         <span
-          v-else-if="page.gamificationStatus === 'pending' || page.gamificationStatus === 'idle'"
+          v-else-if="
+            page.gamificationStatus.value === 'pending' ||
+            page.gamificationStatus.value === 'idle'
+          "
           class="badge badge-ghost badge-sm"
         >
           {{ t("skillsPathwaysPage.gamification.unavailableHint") }}
@@ -49,26 +54,31 @@ if (import.meta.server) {
     </PageHeroHeader>
 
     <BootstrapErrorAlert
-      v-if="page.gamificationStatus === 'error'"
+      v-if="page.gamificationStatus.value === 'error'"
       severity="warning"
-      :message="getErrorMessage(page.gamificationError, t('skillsPathwaysPage.errors.gamificationLoadFailed'))"
+      :message="
+        getErrorMessage(
+          page.gamificationError.value,
+          t('skillsPathwaysPage.errors.gamificationLoadFailed'),
+        )
+      "
       :retry-label="t('skillsPathwaysPage.gamification.retryButton')"
       :retry-aria-label="t('skillsPathwaysPage.gamification.retryAria')"
       @retry="() => page.refreshGamificationProgress()"
     />
 
-    <LoadingSkeleton v-if="page.uiState === 'loading'" variant="cards" :lines="8" />
+    <LoadingSkeleton v-if="page.uiState.value === 'loading'" variant="cards" :lines="8" />
 
     <BootstrapErrorAlert
-      v-else-if="page.uiState === 'error'"
-      :message="getErrorMessage(page.error, t('skillsPathwaysPage.errors.loadFailed'))"
+      v-else-if="page.uiState.value === 'error'"
+      :message="getErrorMessage(page.error.value, t('skillsPathwaysPage.errors.loadFailed'))"
       :retry-label="t('skillsPathwaysPage.retryButtonLabel')"
       :retry-aria-label="t('skillsPathwaysPage.retryAria')"
       @retry="page.retryLoad"
     />
 
     <EmptyState
-      v-else-if="page.uiState === 'empty'"
+      v-else-if="page.uiState.value === 'empty'"
       title-key="skillsPathwaysPage.pathways.emptyStateTitle"
       description-key="skillsPathwaysPage.pathways.emptyStateDescription"
       cta-label-key="nav.skills"
@@ -77,8 +87,8 @@ if (import.meta.server) {
 
     <template v-else>
       <SkillsPathwaysReadinessCard
-        :readiness-assessment="page.readinessAssessment"
-        :readiness-categories="page.readinessCategories"
+        :readiness-assessment="page.readinessAssessment.value"
+        :readiness-categories="page.readinessCategories.value"
         :readiness-min="page.readinessMin"
         :readiness-max="page.readinessMax"
         :get-category-label="page.getCategoryLabel"
@@ -90,7 +100,7 @@ if (import.meta.server) {
       />
 
       <SkillsPathwaysGrid
-        :pathways="page.sortedPathways"
+        :pathways="page.sortedPathways.value"
         :readiness-max="page.readinessMax"
         :get-pathway-icon="page.getPathwayIcon"
         :get-readiness-badge-color="page.getReadinessBadgeColor"

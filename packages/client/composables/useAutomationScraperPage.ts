@@ -6,14 +6,14 @@ import { useAutomationScraperDerived } from "~/composables/automation-scraper-de
 import { useAutomation } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";
 
-export async function useAutomationScraperPage() {
+export function useAutomationScraperPage() {
   const jobsApi = useJobs();
   const router = useRouter();
   const { $toast } = useNuxtApp();
   const i18n = useI18n();
   const { awardForAction } = usePipelineGamification();
   const automation = useAutomation();
-  const bootstrap = await useAutomationScraperBootstrap({
+  const bootstrap = useAutomationScraperBootstrap({
     getRpaCapabilities: automation.getRpaCapabilities,
     searchJobs: jobsApi.searchJobs,
   });

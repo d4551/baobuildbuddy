@@ -176,12 +176,12 @@ const useSetupPageContext = (t: ReturnType<typeof useI18n>["t"]) => {
   return { ...services, ...state, ...derived };
 };
 
-const useSetupPageAsyncState = async (
+const useSetupPageAsyncState = (
   context: ReturnType<typeof useSetupPageContext>,
   t: ReturnType<typeof useI18n>["t"],
 ) => {
   const { setupBootstrapError, setupBootstrapPending, refreshSetupBootstrap } =
-    await useSetupPageBootstrap({
+    useSetupPageBootstrap({
       authStatus: context.authStatus,
       checkAuthStatus: context.auth.checkAuthStatus,
       dashboardStats: context.dashboardStats,
@@ -225,10 +225,10 @@ const useSetupPageAsyncState = async (
   return { ...actions, refreshSetupBootstrap, setupBootstrapError, setupBootstrapPending };
 };
 
-export async function useSetupPage() {
+export function useSetupPage() {
   const { t } = useI18n();
   const context = useSetupPageContext(t);
-  const asyncState = await useSetupPageAsyncState(context, t);
+  const asyncState = useSetupPageAsyncState(context, t);
   return {
     resolvedBrand: context.brand.resolvedBrand,
     OLLAMA_WEBSITE_URL: asyncState.OLLAMA_WEBSITE_URL,

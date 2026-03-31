@@ -153,7 +153,7 @@ async function loadStudioAnalyticsData(
   };
 }
 
-export async function useStudioAnalyticsPage() {
+export function useStudioAnalyticsPage() {
   const { $toast } = useNuxtApp();
   const api = useApi();
   const { t } = useI18n();
@@ -173,7 +173,7 @@ export async function useStudioAnalyticsPage() {
     }
   };
 
-  const { pending: loading, refresh: refreshAnalytics } = await useAsyncData(
+  const { pending: loading, refresh: refreshAnalytics } = useAsyncData(
     "studio-analytics",
     async () => {
       await fetchAnalytics();

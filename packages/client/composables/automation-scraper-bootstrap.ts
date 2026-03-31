@@ -68,7 +68,7 @@ type AutomationScraperBootstrapInput = {
   searchJobs: (input: { limit: string }) => Promise<void>;
 };
 
-export async function useAutomationScraperBootstrap({
+export function useAutomationScraperBootstrap({
   getRpaCapabilities,
   searchJobs,
 }: AutomationScraperBootstrapInput) {
@@ -84,7 +84,7 @@ export async function useAutomationScraperBootstrap({
     status: capabilityAuditStatus,
     error: capabilityAuditError,
     refresh: refreshCapabilityAudit,
-  } = await useAsyncData<RpaCapabilityAuditReport>(
+  } = useAsyncData<RpaCapabilityAuditReport>(
     "automation-scraper-capabilities",
     () => getRpaCapabilities(),
     {
@@ -97,7 +97,7 @@ export async function useAutomationScraperBootstrap({
     status: scraperJobsStatus,
     error: scraperJobsError,
     refresh: refreshScraperJobs,
-  } = await useAsyncData("automation-scraper-jobs", async () => {
+  } = useAsyncData("automation-scraper-jobs", async () => {
     await searchJobs({ limit: String(SCRAPER_JOB_QUERY_LIMIT) });
     return true;
   });

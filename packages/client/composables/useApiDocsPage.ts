@@ -20,11 +20,11 @@ const createApiDocsPageRuntime = () => {
   };
 };
 
-const createApiDocsPageState = async (input: {
+const createApiDocsPageState = (input: {
   readonly t: ApiDocsTranslate;
   readonly runtime: ReturnType<typeof createApiDocsPageRuntime>;
 }) => {
-  const docsData = await useApiDocsPageData({
+  const docsData = useApiDocsPageData({
     t: input.t,
     apiBase: input.runtime.apiBase,
     requestUrl: input.runtime.requestUrl,
@@ -49,9 +49,9 @@ const createApiDocsPageState = async (input: {
   };
 };
 
-export async function useApiDocsPage(t: ApiDocsTranslate) {
+export function useApiDocsPage(t: ApiDocsTranslate) {
   const runtime = createApiDocsPageRuntime();
-  const pageState = await createApiDocsPageState({ t, runtime });
+  const pageState = createApiDocsPageState({ t, runtime });
 
   return {
     docsUiState: pageState.docsData.docsUiState,

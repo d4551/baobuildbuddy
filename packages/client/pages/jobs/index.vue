@@ -10,7 +10,7 @@ if (import.meta.server) {
     description: t("jobsPage.seoDescription"),
   });
 }
-const page = await useJobsIndexPage();
+const page = useJobsIndexPage();
 </script>
 
 <template>

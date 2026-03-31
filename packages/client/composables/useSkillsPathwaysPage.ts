@@ -12,7 +12,7 @@ import {
 } from "~/composables/skills-pathways-page-data";
 import { SKILLS_READINESS_MAX, SKILLS_READINESS_MIN } from "~/constants/skills";
 import { getErrorMessage } from "~/utils/errors";
-const useSkillsPathwaysBootstrap = async (
+const useSkillsPathwaysBootstrap = (
   api: ReturnType<typeof useApi>,
   t: ReturnType<typeof useI18n>["t"],
 ) =>
@@ -40,7 +40,7 @@ const useSkillsPathwaysBootstrap = async (
     },
   );
 
-const useSkillsPathwaysGamification = async (
+const useSkillsPathwaysGamification = (
   api: ReturnType<typeof useApi>,
   t: ReturnType<typeof useI18n>["t"],
 ) =>
@@ -123,18 +123,18 @@ const registerSkillsPathwaysErrorToast = (
   );
 };
 
-export const useSkillsPathwaysPage = async () => {
+export const useSkillsPathwaysPage = () => {
   const api = useApi();
   const { $toast } = useNuxtApp();
   const { t } = useI18n();
   const presentation = createSkillsPathwaysPresentation({ t });
-  const { data, status, error, refresh } = await useSkillsPathwaysBootstrap(api, t);
+  const { data, status, error, refresh } = useSkillsPathwaysBootstrap(api, t);
   const {
     data: gamificationProgress,
     status: gamificationStatus,
     error: gamificationError,
     refresh: refreshGamificationProgress,
-  } = await useSkillsPathwaysGamification(api, t);
+  } = useSkillsPathwaysGamification(api, t);
   const derived = createSkillsPathwaysDerivedState({
     data,
     gamificationProgress,

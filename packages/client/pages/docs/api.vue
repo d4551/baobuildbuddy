@@ -34,7 +34,7 @@ const {
   executeEndpointRequest,
   API_TESTER_DIALOG_TITLE_ID,
   API_TESTER_DIALOG_DESCRIPTION_ID,
-} = await useApiDocsPage(t);
+} = useApiDocsPage(t);
 </script>
 
 <template>

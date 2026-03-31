@@ -6,14 +6,14 @@ import {
   registerJobsPageEffects,
 } from "~/composables/jobs-index-page-runtime";
 
-export async function useJobsIndexPage() {
+export function useJobsIndexPage() {
   const runtime = createJobsPageRuntime();
 
   const {
     error: jobsBootstrapError,
     status: jobsBootstrapStatus,
     refresh: refreshJobsBootstrap,
-  } = await useAsyncData("jobs-page-bootstrap", async () => {
+  } = useAsyncData("jobs-page-bootstrap", async () => {
     await runtime.searchJobs();
     return true;
   });

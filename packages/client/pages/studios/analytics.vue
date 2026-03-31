@@ -17,7 +17,7 @@ const {
   remoteWorkStudios,
   topTechnologies,
   totalStudios,
-} = await useStudioAnalyticsPage();
+} = useStudioAnalyticsPage();
 
 if (import.meta.server) {
   useServerSeoMeta({

@@ -33,7 +33,7 @@ const {
   handleComplete,
   copyOllamaCommand,
   updateProviderCredential,
-} = await useSetupPage();
+} = useSetupPage();
 
 const { t } = useI18n();
 

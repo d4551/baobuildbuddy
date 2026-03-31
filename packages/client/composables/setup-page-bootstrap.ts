@@ -26,7 +26,7 @@ interface SetupPageBootstrapContext {
   t: (key: string) => string;
 }
 
-export async function useSetupPageBootstrap({
+export function useSetupPageBootstrap({
   authStatus,
   checkAuthStatus,
   dashboardStats,
@@ -37,7 +37,7 @@ export async function useSetupPageBootstrap({
   settings,
   t,
 }: SetupPageBootstrapContext) {
-  const { error, refresh, status } = await useAsyncData(
+  const { error, refresh, status } = useAsyncData(
     "setup-bootstrap",
     async () => {
       const settingsResult = await settlePromise(

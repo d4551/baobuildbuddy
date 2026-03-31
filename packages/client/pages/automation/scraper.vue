@@ -50,7 +50,7 @@ const {
   summaryStats,
   topJobs,
   jobInterviewFocusAreas,
-} = await useAutomationScraperPage();
+} = useAutomationScraperPage();
 
 function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string): void {
   scheduledRunAt[target] = value;

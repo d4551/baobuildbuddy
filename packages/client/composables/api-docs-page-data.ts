@@ -17,7 +17,7 @@ interface ApiDocsPageDataOptions {
   readonly requestUrl: URL;
 }
 
-export const useApiDocsPageData = async ({ t, apiBase, requestUrl }: ApiDocsPageDataOptions) => {
+export const useApiDocsPageData = ({ t, apiBase, requestUrl }: ApiDocsPageDataOptions) => {
   const fetchOpenApiSpec = (): Promise<unknown> =>
     $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJson)).then(
       (value) => value,
@@ -30,7 +30,7 @@ export const useApiDocsPageData = async ({ t, apiBase, requestUrl }: ApiDocsPage
     status: rawSpecStatus,
     error: rawSpecError,
     refresh: refreshSpec,
-  } = await useAsyncData<unknown>(API_DOCS_ASYNC_DATA_KEY, fetchOpenApiSpec, {
+  } = useAsyncData<unknown>(API_DOCS_ASYNC_DATA_KEY, fetchOpenApiSpec, {
     server: true,
     default: () => null,
   });
