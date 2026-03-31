@@ -1,4 +1,5 @@
 import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
+import { HUGGING_FACE_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
 import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
@@ -6,7 +7,6 @@ import { HfInference } from "@huggingface/inference";
 import { BaseAIProvider } from "./provider-interface";
 
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
-
 const buildChatMessages = (prompt: string, systemPrompt?: string): ChatMessage[] => {
   const messages: ChatMessage[] = [];
   if (systemPrompt) {
@@ -15,6 +15,8 @@ const buildChatMessages = (prompt: string, systemPrompt?: string): ChatMessage[]
   messages.push({ role: "user", content: prompt });
   return messages;
 };
+
+const HUGGING_FACE_INFERENCE_PROVIDER = "hf-inference" as const;
 
 /**
  * Hugging Face AI Provider
@@ -26,9 +28,10 @@ export class HuggingFaceProvider extends BaseAIProvider {
   model: string;
   private client: HfInference;
 
-  constructor(apiKey?: string, model = "Qwen/Qwen2.5-Coder-32B-Instruct") {
+  constructor(apiKey?: string, model?: string) {
     super(apiKey);
-    this.model = model;
+    this.model =
+      typeof model === "string" && model.trim().length > 0 ? model : HUGGING_FACE_DEFAULT_MODEL;
     this.client = new HfInference(apiKey);
   }
 
@@ -45,6 +48,7 @@ export class HuggingFaceProvider extends BaseAIProvider {
 
     const responseResult = await settle(
       this.client.chatCompletion({
+        provider: HUGGING_FACE_INFERENCE_PROVIDER,
         model,
         messages,
         max_tokens: options?.maxTokens ?? 1024,
@@ -79,6 +83,7 @@ export class HuggingFaceProvider extends BaseAIProvider {
     const messages = buildChatMessages(prompt, options?.systemPrompt);
 
     const stream = this.client.chatCompletionStream({
+      provider: HUGGING_FACE_INFERENCE_PROVIDER,
       model,
       messages,
       max_tokens: options?.maxTokens ?? 1024,

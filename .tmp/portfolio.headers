@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="portfolio-019ce7ac-48b7-7000-8146-c21b3aa0457a.pdf"
+Access-Control-Allow-Credentials: true
+Vary: Origin
+Access-Control-Allow-Methods: POST
+Access-Control-Allow-Headers: host, user-agent, accept, content-type, content-length
+Access-Control-Expose-Headers: host, user-agent, accept, content-type, content-length
+RateLimit-Limit: 100
+RateLimit-Remaining: 97
+RateLimit-Reset: 60
+Date: Tue, 31 Mar 2026 17:00:38 GMT
+Content-Length: 1260
+

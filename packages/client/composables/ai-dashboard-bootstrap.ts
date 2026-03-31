@@ -92,7 +92,9 @@ function useDashboardBootstrap(input: {
   resolveDefaultModel: (providerId: AIProviderType) => string;
 }) {
   async function loadDashboardState(): Promise<DashboardBootstrap> {
-    await input.fetchSettings();
+    if (!input.settings.value) {
+      await input.fetchSettings();
+    }
     const [usageResult, modelsResult] = await Promise.all([
       input.api.ai.usage.get(),
       input.api.ai.models.get(),

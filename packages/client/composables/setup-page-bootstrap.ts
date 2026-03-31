@@ -41,7 +41,7 @@ export function useSetupPageBootstrap({
     "setup-bootstrap",
     async () => {
       const settingsResult = await settlePromise(
-        fetchSettings(),
+        settings.value ? Promise.resolve() : fetchSettings(),
         t("apiErrors.settings.fetchFailed"),
       );
       if (!settingsResult.ok) {

@@ -248,12 +248,15 @@ export function useCoverLetterListPage() {
   const actions = createCoverLetterActions(services, state);
   const coverLetterCards = createCoverLetterCards(services, filterState.coverLetterPagination);
 
-  useCoverLetterPageBootstrap(services, state);
+  const bootstrapState = useCoverLetterPageBootstrap(services, state);
 
   return {
     coverLetters: services.coverLetters,
     loading: services.loading,
     resumes: services.resumes,
+    bootstrapPending: bootstrapState.pending,
+    bootstrapError: bootstrapState.error,
+    refreshCoverLetterBootstrap: bootstrapState.refresh,
     COVER_LETTER_COMPANY_MIN_LENGTH,
     COVER_LETTER_GENERATE_DIALOG_TITLE_ID,
     COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH,

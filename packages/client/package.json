@@ -19,13 +19,10 @@
     "preview": "bun --bun run nuxt preview",
     "prepare:nuxt": "bun --bun run nuxt prepare",
     "prepare:workspace-types": "bun run --cwd ../server build:types && bun run prepare:nuxt",
-    "lint:eslint:app": "bun --bun run eslint app.vue error.vue layouts pages middleware plugins",
-    "lint:eslint:components": "bun --bun run eslint components",
-    "lint:eslint:logic": "bun --bun run eslint composables constants types utils",
     "typecheck": "bun run prepare:workspace-types && bun --bun run nuxt typecheck",
     "test": "bun --bun run vitest run",
     "test:watch": "bun --bun run vitest",
-    "lint": "bun run prepare:workspace-types && bun run lint:eslint:app && bun run lint:eslint:components && bun run lint:eslint:logic"
+    "lint": "bun run prepare:workspace-types && bun --bun run eslint ."
   },
   "dependencies": {
     "@bao/shared": "workspace:*",

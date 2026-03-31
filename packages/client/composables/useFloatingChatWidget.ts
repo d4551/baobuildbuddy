@@ -32,6 +32,9 @@ const createFloatingChatWidgetBehaviorState = (
     isSpeechSettingsOpen: coreState.uiState.isSpeechSettingsOpen,
     unreadCount: coreState.uiState.unreadCount,
     inputRef: coreState.uiState.inputRef,
+    ensureSpeechConfigLoaded: coreState.speechProfiles.ensureSpeechConfigLoaded,
+    toast: coreState.toast,
+    t: coreState.t,
   });
   const messageActions = createFloatingChatWidgetMessageActions({
     draft: coreState.uiState.draft,
@@ -87,7 +90,6 @@ export function useFloatingChatWidget() {
   });
 
   useFloatingChatWidgetLifecycle({
-    ensureSpeechConfigLoaded: state.speechProfiles.ensureSpeechConfigLoaded,
     handleFocusChatShortcut: state.panelActions.handleFocusChatShortcut,
   });
 

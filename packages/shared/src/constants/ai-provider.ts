@@ -35,6 +35,9 @@ export const LOCAL_AI_SERVERS: readonly LocalProviderServer[] = [
   { id: "ollama", name: "Ollama", baseUrl: LOCAL_AI_DEFAULT_ENDPOINT },
 ] as const;
 
+export const HUGGING_FACE_SUPPORTED_MODELS = ["katanemo/Arch-Router-1.5B"] as const;
+export const HUGGING_FACE_DEFAULT_MODEL = HUGGING_FACE_SUPPORTED_MODELS[0];
+
 export type AIProviderMetadata = {
   id: AIProviderType;
   nameKey: string;
@@ -82,7 +85,7 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderMetadata[] = [
     nameKey: "aiProviderCatalog.huggingface.name",
     descriptionKey: "aiProviderCatalog.huggingface.description",
     iconId: "huggingface",
-    modelHints: ["Qwen/Qwen2.5-Coder-32B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"],
+    modelHints: [...HUGGING_FACE_SUPPORTED_MODELS],
     requiresCredential: false,
   },
 ] as const;

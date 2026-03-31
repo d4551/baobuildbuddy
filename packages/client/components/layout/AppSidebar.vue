@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { APP_SEMVER } from "@bao/shared/constants/app-version";
 import { useI18n } from "vue-i18n";
-import { settlePromise } from "~/composables/async-flow";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
 import { APP_DRAWER_ID, SHELL_SIDEBAR_MENU_CLASS } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
@@ -12,7 +11,7 @@ const route = useRoute();
 const sidebarItems = getSidebarNavigationItems();
 const { t } = useI18n();
 const { resolvedBrand } = useBrand();
-const { settings, fetchSettings, isAiConfigurationIncomplete } = useSettings();
+const { isAiConfigurationIncomplete } = useSettings();
 const isDrawerOpen = useState<boolean>(APP_DRAWER_ID, () => false);
 
 const shortcutByNavigationId = new Map(
@@ -51,17 +50,6 @@ function sidebarLinkClass(item: NavigationItem): string[] {
     isSidebarItemActive(item) ? "menu-active font-medium" : "",
   ];
 }
-
-async function hydrateSidebarSettings(): Promise<void> {
-  if (settings.value) {
-    return;
-  }
-  await settlePromise(fetchSettings(), t("apiErrors.settings.fetchFailed"));
-}
-
-onMounted(() => {
-  void hydrateSidebarSettings();
-});
 </script>
 
 <template>

@@ -109,11 +109,9 @@ export const useFloatingChatWidgetWatchers = (options: {
 };
 
 export const useFloatingChatWidgetLifecycle = (options: {
-  ensureSpeechConfigLoaded: ReturnType<typeof useSpeechModelProfiles>["ensureSpeechConfigLoaded"];
   handleFocusChatShortcut: () => void;
 }) => {
-  onMounted(async () => {
-    await options.ensureSpeechConfigLoaded();
+  onMounted(() => {
     window.addEventListener("bao:focus-chat", options.handleFocusChatShortcut);
   });
 

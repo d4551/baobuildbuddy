@@ -46,7 +46,7 @@ beforeEach(() => {
   resetNuxtState();
 });
 
-describe("useSettings fetchSettings", () => {
+describe("useSettings fetchSettings state", () => {
   it("fetchSettings sets loading and updates settings on success", async () => {
     const mockSettings = { id: "default", theme: "corporate" };
     mockApi.settings.get.mockResolvedValueOnce({ data: mockSettings, error: null });
@@ -80,6 +80,46 @@ describe("useSettings fetchSettings", () => {
 
     await expect(fetchSettings()).rejects.toThrow("apiErrors.settings.fetchFailed");
     expect(loading.value).toBe(false);
+  });
+});
+
+describe("useSettings fetchSettings caching", () => {
+  it("reuses the in-flight settings request for concurrent callers", async () => {
+    const mockSettings = { id: "default", theme: "corporate" };
+    let resolveRequest!: (value: { data: typeof mockSettings; error: null }) => void;
+    const responsePromise = new Promise<{ data: typeof mockSettings; error: null }>((resolve) => {
+      resolveRequest = resolve;
+    });
+
+    mockApi.settings.get.mockImplementationOnce(() => responsePromise);
+
+    const firstCaller = useSettings();
+    const secondCaller = useSettings();
+
+    const firstRequest = firstCaller.fetchSettings();
+    const secondRequest = secondCaller.fetchSettings();
+
+    expect(mockApi.settings.get).toHaveBeenCalledTimes(1);
+    resolveRequest({ data: mockSettings, error: null });
+
+    await Promise.all([firstRequest, secondRequest]);
+
+    expect(firstCaller.settings.value).toMatchObject({ id: "default", theme: "corporate" });
+    expect(secondCaller.settings.value).toMatchObject({ id: "default", theme: "corporate" });
+  });
+
+  it("skips the API request when settings state is already populated", async () => {
+    const mockSettings = { id: "default", theme: "corporate" };
+    mockApi.settings.get.mockResolvedValueOnce({ data: mockSettings, error: null });
+
+    const { fetchSettings } = useSettings();
+
+    await fetchSettings();
+    vi.clearAllMocks();
+
+    await fetchSettings();
+
+    expect(mockApi.settings.get).not.toHaveBeenCalled();
   });
 });
 

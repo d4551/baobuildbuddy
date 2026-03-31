@@ -92,8 +92,7 @@ export function useAIChatPage() {
   const core = createAIChatPageCoreState();
   const pageState = createAIChatPageState(core);
 
-  onMounted(async () => {
-    await core.speech.ensureSpeechConfigLoaded();
+  onMounted(() => {
     pageState.scroll.scrollToBottom(true);
   });
 

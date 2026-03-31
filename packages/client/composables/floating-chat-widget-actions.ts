@@ -1,5 +1,7 @@
 import type { Ref } from "vue";
 import type { useI18n } from "vue-i18n";
+import { settlePromise } from "./async-flow";
+import type { useSpeechModelProfiles } from "./useSpeechModelProfiles";
 import { getErrorMessage } from "~/utils/errors";
 
 export const createFloatingChatWidgetPanelActions = (options: {
@@ -7,6 +9,9 @@ export const createFloatingChatWidgetPanelActions = (options: {
   isSpeechSettingsOpen: Ref<boolean>;
   unreadCount: Ref<number>;
   inputRef: ReturnType<typeof useTemplateRef<HTMLTextAreaElement>>;
+  ensureSpeechConfigLoaded: ReturnType<typeof useSpeechModelProfiles>["ensureSpeechConfigLoaded"];
+  toast: ReturnType<typeof useNuxtApp>["$toast"];
+  t: ReturnType<typeof useI18n>["t"];
 }) => {
   const toggleWidget = () => {
     options.isOpen.value = !options.isOpen.value;
@@ -16,8 +21,24 @@ export const createFloatingChatWidgetPanelActions = (options: {
     options.isOpen.value = false;
   };
 
-  const toggleSpeechSettings = (): void => {
-    options.isSpeechSettingsOpen.value = !options.isSpeechSettingsOpen.value;
+  const toggleSpeechSettings = async (): Promise<void> => {
+    if (options.isSpeechSettingsOpen.value) {
+      options.isSpeechSettingsOpen.value = false;
+      return;
+    }
+
+    const loadSpeechConfigResult = await settlePromise(
+      options.ensureSpeechConfigLoaded(),
+      options.t("apiErrors.settings.fetchFailed"),
+    );
+    if (!loadSpeechConfigResult.ok) {
+      options.toast.error(
+        getErrorMessage(loadSpeechConfigResult.error, options.t("apiErrors.settings.fetchFailed")),
+      );
+      return;
+    }
+
+    options.isSpeechSettingsOpen.value = true;
   };
 
   const handleFocusChatShortcut = () => {

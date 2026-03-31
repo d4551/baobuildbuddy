@@ -7,7 +7,12 @@ import {
 } from "./utils/validation-helpers";
 
 const sourceExtensions = new Set([".ts", ".tsx", ".vue"]);
-const scanRoots = ["packages/client", "packages/server/src", "packages/shared/src"] as const;
+const scanRoots = [
+  "packages/client",
+  "packages/server/src",
+  "packages/shared/src",
+  "packages/scraper/src",
+] as const;
 const maxVueLines = 350;
 const maxTypeScriptLines = 400;
 const maxFunctionBodyLines = 80;
@@ -18,7 +23,8 @@ const isIgnoredFile = (filePath: string): boolean =>
   filePath.endsWith(".test.ts") ||
   (filePath.includes("/locales/") && filePath.endsWith("/catalog.ts")) ||
   filePath.includes("/dist-types/") ||
-  filePath.includes("/db/seed/");
+  filePath.includes("/db/seed/") ||
+  filePath.endsWith("/studios.generated.ts");
 
 const functionPattern =
   /(?:^|\n)(?:export\s+)?(?:async\s+)?function\s+[A-Za-z0-9_]+\s*\(([^)]*)\)\s*(?::[^{=\n]+)?\{/gu;

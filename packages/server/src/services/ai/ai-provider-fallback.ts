@@ -39,6 +39,76 @@ const pushProviderError = (
   errors.push({ provider, error });
 };
 
+const withRequestedProvider = (
+  providerName: AIProviderType,
+  providerOptions?: Omit<GenerateOptions, "messages">,
+): Omit<GenerateOptions, "messages"> | undefined => {
+  if (!providerOptions) {
+    return { provider: providerName };
+  }
+
+  return {
+    ...providerOptions,
+    provider: providerName,
+  };
+};
+
+const isNonEmptyString = (value?: string): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const resolveProviderModel = (
+  provider: AIProvider,
+  providerName: AIProviderType,
+  providerOptions?: Omit<GenerateOptions, "messages">,
+): string | undefined => {
+  const requestedModelValue = providerOptions?.model;
+  const requestedModel = isNonEmptyString(requestedModelValue)
+    ? requestedModelValue.trim()
+    : undefined;
+  const providerModel = isNonEmptyString(provider.model) ? provider.model.trim() : undefined;
+
+  if (providerOptions?.provider === providerName && requestedModel) {
+    return requestedModel;
+  }
+
+  return providerModel ?? requestedModel;
+};
+
+const buildProviderOptionsForProvider = (
+  request: FallbackRequest,
+  providerName: AIProviderType,
+  provider: AIProvider,
+): Omit<GenerateOptions, "messages"> | undefined => {
+  const providerOptions = withRequestedProvider(providerName, request.providerOptions);
+  const model = resolveProviderModel(provider, providerName, providerOptions);
+
+  if (!providerOptions) {
+    return model
+      ? {
+          purpose: "chat",
+          provider: providerName,
+          model,
+        }
+      : {
+          purpose: "chat",
+          provider: providerName,
+        };
+  }
+
+  const { temperature, maxTokens, topP, topK, timeout, systemPrompt } = providerOptions;
+  return {
+    purpose: providerOptions.purpose,
+    provider: providerName,
+    ...(model ? { model } : {}),
+    temperature,
+    maxTokens,
+    topP,
+    topK,
+    timeout,
+    systemPrompt,
+  };
+};
+
 export const buildFailureMessage = (errors: ProviderFailure[]): string =>
   errors.map((entry) => `${entry.provider}: ${entry.error}`).join("; ");
 
@@ -133,8 +203,9 @@ const generateFromProvider = async (
     return null;
   }
 
+  const providerOptions = buildProviderOptionsForProvider(request, providerName, provider);
   const generationResult = await settle(
-    provider.generate(request.contextualPrompt, request.providerOptions),
+    provider.generate(request.contextualPrompt, providerOptions),
   );
   if (generationResult.status === "rejected") {
     pushProviderError(
@@ -254,7 +325,10 @@ const streamWithFallbackAtIndex = async function* (
     return yield* streamWithFallbackAtIndex(request, errors, index + 1);
   }
 
-  const providerStream = provider.stream(request.contextualPrompt, request.providerOptions);
+  const providerStream = provider.stream(
+    request.contextualPrompt,
+    withRequestedProvider(providerName, request.providerOptions),
+  );
   const iterator = providerStream[Symbol.asyncIterator]();
   const streamResult = yield* streamProviderIterator(providerName, iterator, errors, false);
   if (streamResult.hasYielded && !streamResult.failed) {

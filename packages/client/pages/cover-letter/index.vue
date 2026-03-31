@@ -14,6 +14,9 @@ useSeoMeta({
 });
 
 const {
+  bootstrapPending,
+  bootstrapError,
+  refreshCoverLetterBootstrap,
   coverLetters,
   coverLetterCards,
   loading,
@@ -46,6 +49,12 @@ const {
   handleGenerate,
   templateLabel,
 } = useCoverLetterListPage();
+
+const bootstrapErrorMessage = computed(() =>
+  bootstrapError.value
+    ? getErrorMessage(bootstrapError.value, t("coverLetterPage.toasts.fetchFailed"))
+    : "",
+);
 </script>
 
 <template>
@@ -135,7 +144,17 @@ const {
       </div>
     </section>
 
-    <LoadingSkeleton v-if="loading && coverLetters.length === 0" variant="cards" :lines="6" />
+    <LoadingSkeleton
+      v-if="bootstrapPending || (loading && coverLetters.length === 0)"
+      variant="cards"
+      :lines="6"
+    />
+
+    <BootstrapErrorAlert
+      v-else-if="bootstrapErrorMessage"
+      :message="bootstrapErrorMessage"
+      @retry="refreshCoverLetterBootstrap"
+    />
 
     <EmptyState
       v-else-if="coverLetters.length === 0"

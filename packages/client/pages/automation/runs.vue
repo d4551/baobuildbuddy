@@ -7,6 +7,8 @@ import {
 } from "@bao/shared/constants/automation";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import { useSeoMeta } from "#imports";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAutomation } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";

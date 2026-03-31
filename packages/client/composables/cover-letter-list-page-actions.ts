@@ -6,7 +6,7 @@ import {
   type CoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
 import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
-import { onMounted, type Ref } from "vue";
+import type { Ref } from "vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import type { GenerateCoverLetterInput, GenerateCoverLetterResult } from "./useCoverLetter";
@@ -220,26 +220,31 @@ export function useCoverLetterPageBootstrap(
   >,
   state: Pick<CoverLetterPageActionState, "generateForm" | "initialResumeId">,
 ) {
-  onMounted(async () => {
+  return useAsyncData("cover-letter-page-bootstrap", async () => {
     initializeResumeSelection(state, services.route);
-    const [coverLettersResult, resumesResult] = await Promise.allSettled([
-      services.fetchCoverLetters(),
-      services.fetchResumes(),
+    const [coverLettersResult, resumesResult] = await Promise.all([
+      settlePromise(services.fetchCoverLetters(), services.t("coverLetterPage.toasts.fetchFailed")),
+      settlePromise(services.fetchResumes(), services.t("apiErrors.resumes.fetchListFailed")),
     ]);
 
-    if (coverLettersResult.status === "rejected") {
-      services.$toast.error(
-        getErrorMessage(
-          coverLettersResult.reason,
-          services.t("coverLetterPage.toasts.fetchFailed"),
-        ),
+    if (!coverLettersResult.ok) {
+      const failure = getErrorMessage(
+        coverLettersResult.error,
+        services.t("coverLetterPage.toasts.fetchFailed"),
       );
+      services.$toast.error(failure);
+      throw coverLettersResult.error;
     }
 
-    if (resumesResult.status === "rejected") {
-      services.$toast.error(
-        getErrorMessage(resumesResult.reason, services.t("apiErrors.resumes.fetchListFailed")),
+    if (!resumesResult.ok) {
+      const failure = getErrorMessage(
+        resumesResult.error,
+        services.t("apiErrors.resumes.fetchListFailed"),
       );
+      services.$toast.error(failure);
+      throw resumesResult.error;
     }
+
+    return true;
   });
 }

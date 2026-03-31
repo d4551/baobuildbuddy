@@ -5,25 +5,43 @@ import {
 } from "./utils/validation-helpers";
 
 const pageStateReferencePattern = /\b(?:uiState|[a-z][A-Za-z0-9]*UiState)\b/u;
+const pageStateComponentSignalPatterns = [
+  /<LoadingSkeleton\b/u,
+  /<BootstrapErrorAlert\b/u,
+  /<EmptyState\b/u,
+] as const;
 const requiredStatePatterns = {
-  loading: /['"](?:loading|idle)['"]/u,
-  error: /['"](?:error[^'"]*|unauthorized)['"]/u,
-  empty: /['"]empty['"]/u,
+  loading: [/['"](?:loading|idle)['"]/u, /<LoadingSkeleton\b/u],
+  error: [/['"](?:error[^'"]*|unauthorized)['"]/u, /<BootstrapErrorAlert\b/u],
 } as const;
 const successStatePattern = /['"]success['"]/u;
 const successFallbackPattern = /\bv-else(?:\s|>)/u;
+
+const exposesPageStateContract = (content: string): boolean =>
+  pageStateReferencePattern.test(content) ||
+  pageStateComponentSignalPatterns.filter((pattern) => pattern.test(content)).length >= 2;
+
+const requiresEmptyState = (content: string): boolean =>
+  /['"]empty['"]/u.test(content) || /<EmptyState\b/u.test(content);
 
 export const collectPageStateViolationsForContent = (
   filePath: string,
   content: string,
 ): ValidationViolation[] => {
-  if (!pageStateReferencePattern.test(content)) {
+  if (!exposesPageStateContract(content)) {
     return [];
   }
 
   const missingStates = Object.entries(requiredStatePatterns).flatMap(
-    ([stateName, statePattern]) => (statePattern.test(content) ? [] : [stateName]),
+    ([stateName, statePatterns]) =>
+      statePatterns.some((statePattern) => statePattern.test(content)) ? [] : [stateName],
   );
+  if (
+    requiresEmptyState(content) &&
+    ![/['"]empty['"]/u, /<EmptyState\b/u].some((pattern) => pattern.test(content))
+  ) {
+    missingStates.push("empty");
+  }
   if (!(successStatePattern.test(content) || successFallbackPattern.test(content))) {
     missingStates.push("success");
   }

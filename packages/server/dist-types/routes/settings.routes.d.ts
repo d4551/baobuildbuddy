@@ -23,8 +23,6 @@ export declare const settingsRoutes: Elysia<string, {
     macroFn: {};
     parser: {};
 }, {
-    [x: string]: {};
-} & {
     [x: string]: {
         get: {
             body: unknown;
@@ -311,9 +309,7 @@ export declare const settingsRoutes: Elysia<string, {
                 };
             };
         };
-    };
-} & {
-    [x: string]: {
+    } & {
         "job-taxonomy": {
             put: {
                 body: {
@@ -353,9 +349,7 @@ export declare const settingsRoutes: Elysia<string, {
                 };
             };
         };
-    };
-} & {
-    [x: string]: {
+    } & {
         "api-keys": {
             put: {
                 body: {} & {
@@ -386,9 +380,7 @@ export declare const settingsRoutes: Elysia<string, {
                 };
             };
         };
-    };
-} & {
-    [x: string]: {
+    } & {
         "test-api-key": {
             post: {
                 body: {
@@ -438,9 +430,7 @@ export declare const settingsRoutes: Elysia<string, {
                 };
             };
         };
-    };
-} & {
-    [x: string]: {
+    } & {
         export: {
             get: {
                 body: unknown;
@@ -452,9 +442,7 @@ export declare const settingsRoutes: Elysia<string, {
                 };
             };
         };
-    };
-} & {
-    [x: string]: {
+    } & {
         import: {
             post: {
                 body: {
@@ -497,11 +485,13 @@ export declare const settingsRoutes: Elysia<string, {
     schema: {};
     standaloneSchema: {};
     response: {};
-} & {
+}, {
     derive: {};
     resolve: {};
     schema: {};
-}, {
+    standaloneSchema: {};
+    response: {};
+} & {
     derive: {};
     resolve: {};
     schema: {};

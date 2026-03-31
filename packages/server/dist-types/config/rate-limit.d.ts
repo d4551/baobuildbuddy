@@ -17,5 +17,7 @@ export declare const RATE_LIMIT_AUTH_BOOTSTRAP_DURATION_MS: number;
 export declare const RATE_LIMIT_AUTH_BOOTSTRAP_MAX_REQUESTS = 5;
 /** Settings route rate limit window duration (1 minute). */
 export declare const RATE_LIMIT_SETTINGS_DURATION_MS: number;
-/** Max requests per window for settings routes. */
-export declare const RATE_LIMIT_SETTINGS_MAX_REQUESTS = 10;
+/** Max settings read requests per window. */
+export declare const RATE_LIMIT_SETTINGS_READ_MAX_REQUESTS: number;
+/** Max settings mutation requests per window. */
+export declare const RATE_LIMIT_SETTINGS_WRITE_MAX_REQUESTS: number;

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-31T15:47:33.674Z",
+  "generatedAt": "2026-03-31T16:48:56.270Z",
   "repository": {
     "name": "bao-build-buddy",
     "packageManager": "bun@1.3.11",
@@ -93,9 +93,6 @@
         "dev",
         "generate",
         "lint",
-        "lint:eslint:app",
-        "lint:eslint:components",
-        "lint:eslint:logic",
         "prepare:nuxt",
         "prepare:workspace-types",
         "preview",

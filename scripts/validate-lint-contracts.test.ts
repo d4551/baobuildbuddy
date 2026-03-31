@@ -100,6 +100,45 @@ describe("collectUiSingleSourceViolationsForContent", () => {
   });
 });
 
+describe("collectUiSingleSourceViolationsForContent settings bootstrap", () => {
+  test("flags unguarded settings bootstrap refetches in client composables", () => {
+    const violations = collectUiSingleSourceViolationsForContent(
+      "packages/client/composables/ai-dashboard-bootstrap.ts",
+      [
+        "export function useDashboardBootstrap(input: { fetchSettings: () => Promise<void> }) {",
+        '  return useAsyncData("ai-dashboard-bootstrap", async () => {',
+        "    await input.fetchSettings();",
+        "    return true;",
+        "  });",
+        "}",
+      ].join("\n"),
+    );
+
+    expect(violations.some((violation) => violation.message.includes("single-source"))).toBe(true);
+  });
+
+  test("allows guarded settings bootstrap reuse in client composables", () => {
+    const violations = collectUiSingleSourceViolationsForContent(
+      "packages/client/composables/ai-dashboard-bootstrap.ts",
+      [
+        "export function useDashboardBootstrap(input: {",
+        "  settings: { value: object | null };",
+        "  fetchSettings: () => Promise<void>;",
+        "}) {",
+        '  return useAsyncData("ai-dashboard-bootstrap", async () => {',
+        "    if (!input.settings.value) {",
+        "      await input.fetchSettings();",
+        "    }",
+        "    return true;",
+        "  });",
+        "}",
+      ].join("\n"),
+    );
+
+    expect(violations.some((violation) => violation.message.includes("single-source"))).toBe(false);
+  });
+});
+
 describe("collectDaisyUiContractViolationsForContent", () => {
   test("requires brand previews to scope daisyUI theme variables locally", () => {
     const violations = collectDaisyUiContractViolationsForContent(
@@ -161,6 +200,37 @@ describe("collectPageStateViolationsForContent", () => {
     );
 
     expect(violations.some((violation) => violation.message.includes("success"))).toBe(true);
+  });
+
+  test("detects page-state contracts from shared state components even without uiState naming", () => {
+    const violations = collectPageStateViolationsForContent(
+      "packages/client/pages/example.vue",
+      [
+        "<template>",
+        '<LoadingSkeleton v-if="pending" />',
+        '<BootstrapErrorAlert v-else-if="errorMessage" />',
+        '<EmptyState v-else-if="isEmpty" />',
+        "</template>",
+      ].join("\n"),
+    );
+
+    expect(violations.some((violation) => violation.message.includes("success"))).toBe(true);
+  });
+
+  test("requires empty states when the page explicitly models emptiness", () => {
+    const violations = collectPageStateViolationsForContent(
+      "packages/client/pages/example.vue",
+      [
+        "<template>",
+        '<LoadingSkeleton v-if="pending" />',
+        '<BootstrapErrorAlert v-else-if="errorMessage" />',
+        "<section v-else-if=\"state === 'empty'\"><EmptyState /></section>",
+        '<section v-else><article v-for="item in items" :key="item.id" /></section>',
+        "</template>",
+      ].join("\n"),
+    );
+
+    expect(violations).toHaveLength(0);
   });
 
   test("accepts an explicit v-else success branch for alternate state names", () => {

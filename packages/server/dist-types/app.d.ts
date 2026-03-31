@@ -277,8 +277,6 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        [x: string]: {};
-    } & {
         [x: string]: {
             get: {
                 body: unknown;
@@ -565,9 +563,7 @@ export declare const app: Elysia<"/api", {
                     };
                 };
             };
-        };
-    } & {
-        [x: string]: {
+        } & {
             "job-taxonomy": {
                 put: {
                     body: {
@@ -607,9 +603,7 @@ export declare const app: Elysia<"/api", {
                     };
                 };
             };
-        };
-    } & {
-        [x: string]: {
+        } & {
             "api-keys": {
                 put: {
                     body: {} & {
@@ -640,9 +634,7 @@ export declare const app: Elysia<"/api", {
                     };
                 };
             };
-        };
-    } & {
-        [x: string]: {
+        } & {
             "test-api-key": {
                 post: {
                     body: {
@@ -692,9 +684,7 @@ export declare const app: Elysia<"/api", {
                     };
                 };
             };
-        };
-    } & {
-        [x: string]: {
+        } & {
             export: {
                 get: {
                     body: unknown;
@@ -706,9 +696,7 @@ export declare const app: Elysia<"/api", {
                     };
                 };
             };
-        };
-    } & {
-        [x: string]: {
+        } & {
             import: {
                 post: {
                     body: {

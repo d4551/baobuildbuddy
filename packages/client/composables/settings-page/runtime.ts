@@ -224,7 +224,8 @@ export function createSettingsPageProfileRuntimeState() {
 
 export function useSettingsPageBootstrap(services: SettingsPageServices) {
   return useAsyncData("settings-bootstrap", async () => {
-    await Promise.all([services.fetchSettings(), services.fetchProfile()]);
+    const settingsLoad = services.rawSettings.value ? Promise.resolve() : services.fetchSettings();
+    await Promise.all([settingsLoad, services.fetchProfile()]);
     return true;
   });
 }

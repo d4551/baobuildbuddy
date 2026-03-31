@@ -41,10 +41,7 @@ const findSeoBlock = (fileContent: string): SeoBlock | null => {
   }
   const seoComposableOffset = seoComposableMatch.index;
 
-  const openParenthesisOffset = fileContent.indexOf(
-    "(",
-    seoComposableOffset,
-  );
+  const openParenthesisOffset = fileContent.indexOf("(", seoComposableOffset);
   if (openParenthesisOffset === -1) {
     return null;
   }

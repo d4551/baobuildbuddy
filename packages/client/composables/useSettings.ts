@@ -19,6 +19,7 @@ type UpdateSettingsInput = NonNullable<Parameters<ApiClient["settings"]["put"]>[
 type UpdateApiKeysInput = NonNullable<Parameters<ApiClient["settings"]["api-keys"]["put"]>[0]>;
 type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
 type UpdateJobTaxonomyInput = JobTaxonomySettings;
+type SettingsGetResult = Awaited<ReturnType<ApiClient["settings"]["get"]>>;
 type ProviderTestResult = ClientProviderTestResult & {
   provider: TestApiKeyInput["provider"];
 };
@@ -29,6 +30,12 @@ interface SettingsContext {
   settings: ReturnType<typeof useNuxtState<AppSettings | null>>;
   loading: ReturnType<typeof useNuxtState<boolean>>;
 }
+
+interface FetchSettingsOptions {
+  force?: boolean;
+}
+
+let pendingSettingsRequest: Promise<SettingsGetResult> | null = null;
 
 function createAiConfigurationIncompleteComputed(
   settings: ReturnType<typeof useNuxtState<AppSettings | null>>,
@@ -73,9 +80,18 @@ function createLocalProviderStateComputed(
 }
 
 function createFetchSettingsAction(context: SettingsContext) {
-  return async () =>
+  return async (options?: FetchSettingsOptions) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.settings.get();
+      if (context.settings.value && !options?.force) {
+        return;
+      }
+      const nextSettingsResult = pendingSettingsRequest ?? context.api.settings.get();
+      pendingSettingsRequest = nextSettingsResult;
+      const { data, error } = await nextSettingsResult.finally(() => {
+        if (pendingSettingsRequest === nextSettingsResult) {
+          pendingSettingsRequest = null;
+        }
+      });
       assertApiResponse(error, context.t("apiErrors.settings.fetchFailed"));
       const normalized = requireValue(
         toAppSettings(data),
@@ -93,7 +109,7 @@ function createUpdateSettingsAction(
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.settings.put(updates);
       assertApiResponse(error, context.t("apiErrors.settings.updateFailed"));
-      await fetchSettings();
+      await fetchSettings({ force: true });
     });
 }
 
@@ -105,7 +121,7 @@ function createUpdateApiKeysAction(
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.settings["api-keys"].put(keys);
       assertApiResponse(error, context.t("apiErrors.settings.updateApiKeysFailed"));
-      await fetchSettings();
+      await fetchSettings({ force: true });
     });
 }
 
@@ -117,7 +133,7 @@ function createUpdateJobTaxonomyAction(
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.settings["job-taxonomy"].put(taxonomy);
       assertApiResponse(error, context.t("apiErrors.settings.updateFailed"));
-      await fetchSettings();
+      await fetchSettings({ force: true });
     });
 }
 
@@ -177,10 +193,12 @@ export function useSettings() {
   const providerDiagnostics = createProviderDiagnosticsComputed(context.settings);
   const localProviderState = createLocalProviderStateComputed(context.settings);
   const actions = createSettingsActions(context);
+  const readonlySettings = computed(() => context.settings.value);
+  const readonlyLoading = computed(() => context.loading.value);
 
   return {
-    settings: readonly(context.settings),
-    loading: readonly(context.loading),
+    settings: readonly(readonlySettings),
+    loading: readonly(readonlyLoading),
     isAiConfigurationIncomplete: readonly(isAiConfigurationIncomplete),
     chatRoutingPreference: readonly(chatRoutingPreference),
     providerDiagnostics: readonly(providerDiagnostics),
