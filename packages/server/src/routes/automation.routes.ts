@@ -1,3 +1,4 @@
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CONFLICT,
@@ -55,7 +56,10 @@ const readValidationErrorMessage = (error: unknown): string => {
 /**
  * Automation API routes for RPA-driven workflows and run history.
  */
-export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Automation"] })
+export const automationRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.automationBase),
+  tags: ["Automation"],
+})
   .use(automationRateLimit)
   .onError(({ code, error, set }) => {
     if (code !== "VALIDATION") {

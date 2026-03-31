@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { startJobApplyFixtureServer } from "../packages/server/src/test-support/automation/job-apply-fixture";
 import {
   API_ENDPOINTS,
+  API_ENDPOINT_PREFIX,
   buildAutomationRunEndpoint,
   WS_ENDPOINTS,
 } from "../packages/shared/src/constants/endpoints";
@@ -116,7 +117,6 @@ const VERIFY_FRONTEND_URL = `${VERIFY_FRONTEND_ORIGIN}/`;
 const DESKTOP_RUNTIME_VERIFY_SERVER_PORT = DESKTOP_RUNTIME_VERIFY_FRONTEND_PORT + 1;
 const VERIFY_API_BASE = `http://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_VERIFY_SERVER_PORT}`;
 const VERIFY_WS_BASE = `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_VERIFY_SERVER_PORT}`;
-const VERIFY_API_ROUTE_BASE = `${VERIFY_API_BASE}/api`;
 const READY_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 250;
 const RUN_COMPLETION_TIMEOUT_MS = 45_000;
@@ -305,7 +305,7 @@ const configureVerificationSettings = async (): Promise<void> => {
 };
 
 const readAutomationVerifyContext = async (): Promise<AutomationVerifyContext> => {
-  const response = await requestJson<unknown>("/api/automation/verify/context");
+  const response = await requestJson<unknown>(API_ENDPOINTS.automationVerifyContext);
   if (response.status !== 200 || !hasAutomationVerifyContext(response.body)) {
     throw new Error(`Failed to read automation verification context (status ${response.status})`);
   }
@@ -667,7 +667,7 @@ const verifyCorsContract = async (
   manifest: DesktopRuntimeManifest,
   origin: string,
 ): Promise<void> => {
-  const response = await fetch(`${apiBase}/api/health`, {
+  const response = await fetch(`${apiBase}${API_ENDPOINTS.health}`, {
     headers: {
       origin,
     },
@@ -808,7 +808,7 @@ const runNativeBrowserChecks = async (
   const titleMatch = HTML_TITLE_PATTERN.exec(html);
   const pageTitle = titleMatch?.[1]?.trim() ?? "untitled";
 
-  const healthResponse = await fetch(`${apiBase}/api/health`);
+  const healthResponse = await fetch(`${apiBase}${API_ENDPOINTS.health}`);
   if (!healthResponse.ok) {
     throw new Error(
       `Health endpoint failed: ${healthResponse.status} ${healthResponse.statusText}`,
@@ -817,7 +817,7 @@ const runNativeBrowserChecks = async (
   const healthPayload = (await healthResponse.json()) as { status?: string };
   const healthStatus = typeof healthPayload.status === "string" ? healthPayload.status : "unknown";
 
-  const websocketUrl = `${wsBase}/api/ws/automation`;
+  const websocketUrl = `${wsBase}${WS_ENDPOINTS.automation}`;
   const websocketOpened = await new Promise<boolean>((resolve) => {
     const timeout = setTimeout(() => resolve(false), 5_000);
     const socket = new WebSocket(websocketUrl);
@@ -856,13 +856,13 @@ const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<Browse
 
           const pageTitle = await page.title();
           const healthStatus = await page.evaluate(async (runtimeApiBase) => {
-            const response = await fetch(`${runtimeApiBase}/api/health`);
+            const response = await fetch(`${runtimeApiBase}${API_ENDPOINTS.health}`);
             const payload = (await response.json()) as { status?: string };
             return typeof payload.status === "string" ? payload.status : "unknown";
           }, apiBase);
 
           const websocketOpened = await page.evaluate(async (runtimeWsBase) => {
-            const targetUrl = `${runtimeWsBase}/api/ws/automation`;
+            const targetUrl = `${runtimeWsBase}${WS_ENDPOINTS.automation}`;
             return new Promise<boolean>((resolve) => {
               const timeout = window.setTimeout(() => resolve(false), 5_000);
               const socket = new WebSocket(targetUrl);
@@ -1019,7 +1019,7 @@ const startPackagedServer = async (
     stderr: "inherit",
   });
 
-  await waitForService(`${VERIFY_API_BASE}/api/health`);
+  await waitForService(`${VERIFY_API_BASE}${API_ENDPOINTS.health}`);
   return proc;
 };
 
@@ -1093,7 +1093,7 @@ const runPackagedRuntimeChecks = async (
     async () => {
       await verifyCorsContract(VERIFY_API_BASE, manifest, DESKTOP_RUNTIME_CORS_ORIGINS[0]);
       await verifyCorsContract(VERIFY_API_BASE, manifest, VERIFY_FRONTEND_ORIGIN);
-      await assertAutomationEndpoints(VERIFY_API_ROUTE_BASE);
+      await assertAutomationEndpoints(`${VERIFY_API_BASE}${API_ENDPOINT_PREFIX}`);
       const browserResult = await runBrowserChecks(VERIFY_API_BASE, VERIFY_WS_BASE);
       assertBrowserChecksPassed(browserResult);
       await configureVerificationSettings();

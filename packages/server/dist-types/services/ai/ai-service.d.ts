@@ -17,7 +17,6 @@ export declare class AIService {
      * Used by WebSocket handlers, route handlers, and services.
      */
     static fromSettings(settings?: AIServiceSettings): AIService;
-    private static isTestRuntime;
     private static createDeterministicTestService;
     private refreshFallbackOrder;
     /**

@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
 type OklchColor = {
   lightnessPercent: number;
@@ -42,15 +43,6 @@ const daisyColorTokenPattern =
 
 const allowedColorLiteralFiles = new Set([themeFilePath]);
 const scannedExtensions = new Set([".vue", ".ts", ".tsx", ".js", ".mjs", ".cjs", ".css"]);
-const ignoredDirectoryNames = new Set([
-  "node_modules",
-  ".git",
-  ".nuxt",
-  ".output",
-  "dist",
-  "dist-types",
-  "coverage",
-]);
 
 const contrastPairs: Array<readonly [string, string]> = [
   ["base-100", "base-content"],
@@ -76,9 +68,6 @@ const hasScannedExtension = (pathValue: string): boolean => {
   return false;
 };
 
-const shouldIgnorePath = (pathValue: string): boolean =>
-  pathValue.split("/").some((segment) => ignoredDirectoryNames.has(segment));
-
 const collectScannableFiles = async (): Promise<string[]> => {
   const files: string[] = [];
   const glob = new Bun.Glob(`${clientRoot}/**/*`);
@@ -92,21 +81,6 @@ const collectScannableFiles = async (): Promise<string[]> => {
   }
 
   return files;
-};
-
-const getLineFromOffset = (text: string, offset: number): number => {
-  if (offset <= 0) {
-    return 1;
-  }
-
-  let line = 1;
-  for (let index = 0; index < offset; index += 1) {
-    if (text.charCodeAt(index) === 10) {
-      line += 1;
-    }
-  }
-
-  return line;
 };
 
 const clamp01 = (value: number): number => {

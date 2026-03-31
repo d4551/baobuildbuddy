@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 /**
  * Serves automation run screenshots from managed run directories.
  */
-export declare const automationScreenshotRoutes: Elysia<"/automation/screenshots", {
+export declare const automationScreenshotRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -18,35 +18,33 @@ export declare const automationScreenshotRoutes: Elysia<"/automation/screenshots
     parser: {};
     response: {};
 }, {
-    automation: {
-        screenshots: {
-            ":runId": {
-                ":index": {
-                    get: {
-                        body: unknown;
-                        params: {
-                            index: string;
-                            runId: string;
-                        } & {};
-                        query: unknown;
-                        headers: unknown;
-                        response: {
-                            200: unknown;
-                            400: {} & {
-                                error?: string | undefined;
-                            };
-                            404: {} & {
-                                error?: string | undefined;
-                            };
-                            422: {
-                                type: "validation";
-                                on: string;
-                                summary?: string;
-                                message?: string;
-                                found?: unknown;
-                                property?: string;
-                                expected?: string;
-                            };
+    [x: string]: {
+        ":runId": {
+            ":index": {
+                get: {
+                    body: unknown;
+                    params: {
+                        index: string;
+                        runId: string;
+                    } & {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: unknown;
+                        400: {} & {
+                            error?: string | undefined;
+                        };
+                        404: {} & {
+                            error?: string | undefined;
+                        };
+                        422: {
+                            type: "validation";
+                            on: string;
+                            summary?: string;
+                            message?: string;
+                            found?: unknown;
+                            property?: string;
+                            expected?: string;
                         };
                     };
                 };

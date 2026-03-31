@@ -3,12 +3,10 @@ import { AUTH_KEY_STORAGE_KEY } from "@bao/shared/constants/auth";
 import { treaty } from "@elysiajs/eden";
 import { tryUseNuxtApp } from "nuxt/app";
 import type { Ref } from "vue";
+import { assertClientApi } from "~/types/client-api";
 import { resolveApiBase } from "~/utils/endpoints";
 
 const AUTH_KEY = AUTH_KEY_STORAGE_KEY;
-
-type TreatyClient = ReturnType<typeof treaty<App>>;
-export type EdenApiNamespace = TreatyClient["api"];
 
 type StoredApiKey = string | null;
 type AuthKeyCookieRef = Ref<StoredApiKey> | null;
@@ -78,6 +76,8 @@ export default defineNuxtPlugin(() => {
       }
     },
   });
+
+  assertClientApi(api.api);
 
   return {
     provide: {

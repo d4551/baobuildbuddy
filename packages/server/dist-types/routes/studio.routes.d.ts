@@ -9,7 +9,7 @@ export interface StudioAnalytics {
         count: number;
     }>;
 }
-export declare const studioRoutes: Elysia<"/studios", {
+export declare const studioRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -25,7 +25,7 @@ export declare const studioRoutes: Elysia<"/studios", {
     parser: {};
     response: {};
 }, {
-    studios: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
@@ -68,7 +68,7 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         ":id": {
             get: {
                 body: unknown;
@@ -112,7 +112,7 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         post: {
             body: {
                 name: string;
@@ -167,7 +167,7 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         ":id": {
             put: {
                 body: {} & {
@@ -227,7 +227,7 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         ":id": {
             delete: {
                 body: unknown;
@@ -260,7 +260,7 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         analytics: {
             get: {
                 body: unknown;

@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const authRoutes: Elysia<"/auth", {
+export declare const authRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -23,8 +23,8 @@ export declare const authRoutes: Elysia<"/auth", {
     macroFn: {};
     parser: {};
 }, {
-    auth: {
-        status: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -42,8 +42,8 @@ export declare const authRoutes: Elysia<"/auth", {
         };
     };
 } & {
-    auth: {
-        configured: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -58,8 +58,8 @@ export declare const authRoutes: Elysia<"/auth", {
         };
     };
 } & {
-    auth: {
-        init: {
+    [x: string]: {
+        [x: string]: {
             post: {
                 body: {} & {
                     setupToken?: string | undefined;

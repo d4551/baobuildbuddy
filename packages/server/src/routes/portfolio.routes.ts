@@ -5,6 +5,7 @@ import {
   API_ERROR_PROJECT_NOT_FOUND,
   API_ERROR_UNKNOWN,
 } from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
 import {
   HTTP_STATUS_CREATED,
@@ -33,7 +34,10 @@ import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
 
-export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfolio"] })
+export const portfolioRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.portfolioBase),
+  tags: ["Portfolio"],
+})
   .get("/", async () => {
     return await portfolioService.getPortfolioPayload();
   })

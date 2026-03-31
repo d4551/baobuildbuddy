@@ -5,23 +5,31 @@ import {
 } from "./utils/validation-helpers";
 
 const importPathPattern = /from\s+['"`]([^'"`]+)['"`]/gu;
+const sideEffectImportPathPattern = /\bimport\s+['"`]([^'"`]+)['"`]/gu;
 const dynamicImportPathPattern = /import\(\s*['"`]([^'"`]+)['"`]\s*\)/gu;
 const namedExportPattern =
   /\bexport\s+(?:async\s+)?(?:class|function|const|let|var|type|interface)\s+([A-Za-z0-9_]+)/gu;
 const reExportPattern = /\bexport\s*\{\s*([^}]+)\s*\}/gu;
+const exportFromPathPattern =
+  /\bexport\s+(?:\*\s*(?:as\s+[A-Za-z0-9_]+\s*)?|\{[^}]+\})\s*from\s*['"`]([^'"`]+)['"`]/gu;
+const defaultExportPattern = /\bexport\s+default\b/gu;
 const LEADING_SLASH_PATTERN = /^\/+/u;
 const FILE_EXTENSION_PATTERN = /\.(ts|vue)$/u;
 const NUXT_IMPORTS_MANIFEST_PATH = "packages/client/.nuxt/imports.d.ts";
 const autoImportExportPattern = /\bexport\s*\{\s*([^}]+)\s*\}\s*from\s*['"`][^'"`]+['"`]/gu;
 const AS_CLAUSE_PATTERN = /\s+as\s+/u;
 
-const isIgnoredDeadExportFile = (filePath: string): boolean =>
-  filePath.endsWith("index.ts") ||
+const isFrameworkEntrypointFile = (filePath: string): boolean =>
   filePath.endsWith(".test.ts") ||
-  filePath.includes("/pages/") ||
-  filePath.includes("/plugins/") ||
-  filePath.includes("/layouts/") ||
-  filePath.includes("/locales/");
+  filePath === "packages/client/app.vue" ||
+  filePath === "packages/client/error.vue" ||
+  filePath === "packages/client/nuxt.config.ts" ||
+  filePath === "packages/client/vitest.config.ts" ||
+  filePath.startsWith("packages/client/pages/") ||
+  filePath.startsWith("packages/client/plugins/") ||
+  filePath.startsWith("packages/client/layouts/") ||
+  filePath.startsWith("packages/client/middleware/") ||
+  filePath.startsWith("packages/client/locales/");
 
 const normalizeImportTargets = (sourceFilePath: string, importPath: string): string[] => {
   if (importPath.startsWith("@bao/shared/")) {
@@ -103,14 +111,24 @@ const collectNuxtAutoImportNames = async (): Promise<Set<string>> => {
   return names;
 };
 
-const hasNamedExports = (content: string): boolean => {
+const hasExports = (content: string): boolean => {
   namedExportPattern.lastIndex = 0;
   if (namedExportPattern.test(content)) {
     return true;
   }
 
   reExportPattern.lastIndex = 0;
-  return reExportPattern.test(content);
+  if (reExportPattern.test(content)) {
+    return true;
+  }
+
+  exportFromPathPattern.lastIndex = 0;
+  if (exportFromPathPattern.test(content)) {
+    return true;
+  }
+
+  defaultExportPattern.lastIndex = 0;
+  return defaultExportPattern.test(content);
 };
 
 const hasAutoImportConsumer = (
@@ -136,24 +154,30 @@ const hasAutoImportConsumer = (
   });
 };
 
-const collectImportedTargets = (
+export const collectImportedTargets = (
   importSources: Array<{ filePath: string; content: string }>,
 ): Set<string> => {
   const importedTargets = new Set<string>();
+  const importPatterns = [
+    importPathPattern,
+    sideEffectImportPathPattern,
+    dynamicImportPathPattern,
+    exportFromPathPattern,
+  ];
+
+  const collectPatternTargets = (filePath: string, content: string, pattern: RegExp): string[] => {
+    pattern.lastIndex = 0;
+    const targets: string[] = [];
+    for (const match of content.matchAll(pattern)) {
+      const importPath = match[1] ?? "";
+      targets.push(...normalizeImportTargets(filePath, importPath));
+    }
+    return targets;
+  };
 
   for (const { filePath, content } of importSources) {
-    importPathPattern.lastIndex = 0;
-    for (const match of content.matchAll(importPathPattern)) {
-      const importPath = match[1] ?? "";
-      for (const normalizedTarget of normalizeImportTargets(filePath, importPath)) {
-        importedTargets.add(normalizedTarget);
-      }
-    }
-
-    dynamicImportPathPattern.lastIndex = 0;
-    for (const match of content.matchAll(dynamicImportPathPattern)) {
-      const importPath = match[1] ?? "";
-      for (const normalizedTarget of normalizeImportTargets(filePath, importPath)) {
+    for (const importPattern of importPatterns) {
+      for (const normalizedTarget of collectPatternTargets(filePath, content, importPattern)) {
         importedTargets.add(normalizedTarget);
       }
     }
@@ -162,7 +186,7 @@ const collectImportedTargets = (
   return importedTargets;
 };
 
-const isDeadExportViolation = (options: {
+export const isDeadExportViolation = (options: {
   filePath: string;
   content: string;
   importSources: Array<{ filePath: string; content: string }>;
@@ -170,7 +194,7 @@ const isDeadExportViolation = (options: {
   importedTargets: Set<string>;
 }): ValidationViolation[] => {
   const { filePath, content, importSources, autoImportNames, importedTargets } = options;
-  if (isIgnoredDeadExportFile(filePath) || !hasNamedExports(content)) {
+  if (isFrameworkEntrypointFile(filePath) || !hasExports(content)) {
     return [];
   }
 
@@ -202,14 +226,13 @@ const isDeadExportViolation = (options: {
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const files = await collectProjectFileEntries({
     scanRoots: [
-      "packages/client/composables",
-      "packages/client/utils",
+      "packages/client",
       "packages/server/src",
       "packages/shared/src",
       "packages/scraper/src",
       "scripts",
     ],
-    allowedExtensions: new Set([".ts"]),
+    allowedExtensions: new Set([".ts", ".vue"]),
   });
   const importSources = await collectProjectFileEntries({
     scanRoots: [

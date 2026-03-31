@@ -99,8 +99,8 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        auth: {
-            status: {
+        [x: string]: {
+            [x: string]: {
                 get: {
                     body: unknown;
                     params: {};
@@ -118,8 +118,8 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        auth: {
-            configured: {
+        [x: string]: {
+            [x: string]: {
                 get: {
                     body: unknown;
                     params: {};
@@ -134,8 +134,8 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        auth: {
-            init: {
+        [x: string]: {
+            [x: string]: {
                 post: {
                     body: {} & {
                         setupToken?: string | undefined;
@@ -177,8 +177,8 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        user: {
-            profile: {
+        [x: string]: {
+            [x: string]: {
                 get: {
                     body: unknown;
                     params: {};
@@ -217,8 +217,8 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        user: {
-            profile: {
+        [x: string]: {
+            [x: string]: {
                 put: {
                     body: {} & {
                         name?: string | undefined;
@@ -277,9 +277,9 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        settings: {};
+        [x: string]: {};
     } & {
-        settings: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -320,7 +320,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        settings: {
+        [x: string]: {
             put: {
                 body: {} & {
                     theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
@@ -567,7 +567,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        settings: {
+        [x: string]: {
             "job-taxonomy": {
                 put: {
                     body: {
@@ -609,7 +609,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        settings: {
+        [x: string]: {
             "api-keys": {
                 put: {
                     body: {} & {
@@ -642,7 +642,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        settings: {
+        [x: string]: {
             "test-api-key": {
                 post: {
                     body: {
@@ -694,7 +694,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        settings: {
+        [x: string]: {
             export: {
                 get: {
                     body: unknown;
@@ -708,7 +708,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        settings: {
+        [x: string]: {
             import: {
                 post: {
                     body: {
@@ -748,7 +748,7 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        jobs: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -810,7 +810,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             ":id": {
                 get: {
                     body: unknown;
@@ -863,7 +863,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             save: {
                 post: {
                     body: {
@@ -904,7 +904,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             save: {
                 ":jobId": {
                     delete: {
@@ -934,7 +934,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             saved: {
                 get: {
                     body: unknown;
@@ -979,7 +979,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             apply: {
                 post: {
                     body: {
@@ -1034,7 +1034,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             apply: {
                 ":id": {
                     put: {
@@ -1075,7 +1075,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             applications: {
                 get: {
                     body: unknown;
@@ -1125,7 +1125,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             recommendations: {
                 get: {
                     body: unknown;
@@ -1139,7 +1139,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        jobs: {
+        [x: string]: {
             refresh: {
                 post: {
                     body: unknown;
@@ -1161,80 +1161,76 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        resumes: {
-            "from-questions": {
-                generate: {
-                    post: {
-                        body: {
-                            targetRole: string;
-                        } & {
-                            experienceLevel?: string | undefined;
-                            studioName?: string | undefined;
+        [x: string]: {
+            [x: string]: {
+                post: {
+                    body: {
+                        targetRole: string;
+                    } & {
+                        experienceLevel?: string | undefined;
+                        studioName?: string | undefined;
+                    };
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: {
+                            error: string;
+                            details: string;
+                            questions?: undefined;
+                        } | {
+                            questions: import("./services/cv-questionnaire-service").CvQuestion[];
+                            error?: undefined;
+                            details?: undefined;
                         };
-                        params: {};
-                        query: unknown;
-                        headers: unknown;
-                        response: {
-                            200: {
-                                error: string;
-                                details: string;
-                                questions?: undefined;
-                            } | {
-                                questions: import("./services/cv-questionnaire-service").CvQuestion[];
-                                error?: undefined;
-                                details?: undefined;
-                            };
-                            422: {
-                                type: "validation";
-                                on: string;
-                                summary?: string;
-                                message?: string;
-                                found?: unknown;
-                                property?: string;
-                                expected?: string;
-                            };
+                        422: {
+                            type: "validation";
+                            on: string;
+                            summary?: string;
+                            message?: string;
+                            found?: unknown;
+                            property?: string;
+                            expected?: string;
                         };
                     };
                 };
             };
         };
     } & {
-        resumes: {
-            "from-questions": {
-                synthesize: {
-                    post: {
-                        body: {
-                            questionsAndAnswers: ({
-                                id: string;
-                                category: string;
-                                question: string;
-                                answer: string;
-                            } & {})[];
-                        } & {};
-                        params: {};
-                        query: unknown;
-                        headers: unknown;
-                        response: {
-                            200: import("@bao/shared/types/resume").ResumeData | {
-                                error: string;
-                                details: string;
-                            };
-                            422: {
-                                type: "validation";
-                                on: string;
-                                summary?: string;
-                                message?: string;
-                                found?: unknown;
-                                property?: string;
-                                expected?: string;
-                            };
+        [x: string]: {
+            [x: string]: {
+                post: {
+                    body: {
+                        questionsAndAnswers: ({
+                            id: string;
+                            category: string;
+                            question: string;
+                            answer: string;
+                        } & {})[];
+                    } & {};
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: import("@bao/shared/types/resume").ResumeData | {
+                            error: string;
+                            details: string;
+                        };
+                        422: {
+                            type: "validation";
+                            on: string;
+                            summary?: string;
+                            message?: string;
+                            found?: unknown;
+                            property?: string;
+                            expected?: string;
                         };
                     };
                 };
             };
         };
     } & {
-        resumes: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -1246,7 +1242,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        resumes: {
+        [x: string]: {
             post: {
                 body: {} & {
                     skills?: ({} & {
@@ -1320,7 +1316,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        resumes: {
+        [x: string]: {
             ":id": {
                 get: {
                     body: unknown;
@@ -1347,7 +1343,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        resumes: {
+        [x: string]: {
             ":id": {
                 put: {
                     body: {} & {
@@ -1427,7 +1423,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        resumes: {
+        [x: string]: {
             ":id": {
                 delete: {
                     body: unknown;
@@ -1460,7 +1456,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        resumes: {
+        [x: string]: {
             ":id": {
                 export: {
                     post: {
@@ -1496,7 +1492,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        resumes: {
+        [x: string]: {
             ":id": {
                 "ai-enhance": {
                     post: {
@@ -1543,7 +1539,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        resumes: {
+        [x: string]: {
             ":id": {
                 "ai-score": {
                     post: {
@@ -1604,7 +1600,7 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        "cover-letters": {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -1625,7 +1621,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        "cover-letters": {
+        [x: string]: {
             post: {
                 body: {
                     company: string;
@@ -1660,7 +1656,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        "cover-letters": {
+        [x: string]: {
             ":id": {
                 get: {
                     body: unknown;
@@ -1696,7 +1692,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        "cover-letters": {
+        [x: string]: {
             ":id": {
                 put: {
                     body: {} & {
@@ -1738,7 +1734,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        "cover-letters": {
+        [x: string]: {
             ":id": {
                 delete: {
                     body: unknown;
@@ -1771,8 +1767,8 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        "cover-letters": {
-            generate: {
+        [x: string]: {
+            [x: string]: {
                 post: {
                     body: {
                         company: string;
@@ -1841,7 +1837,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        "cover-letters": {
+        [x: string]: {
             ":id": {
                 export: {
                     post: {
@@ -1877,7 +1873,7 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        portfolio: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -1889,7 +1885,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        portfolio: {
+        [x: string]: {
             put: {
                 body: {
                     metadata: Record<string, unknown>;
@@ -1912,7 +1908,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        portfolio: {
+        [x: string]: {
             projects: {
                 post: {
                     body: {
@@ -1951,7 +1947,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        portfolio: {
+        [x: string]: {
             projects: {
                 reorder: {
                     post: {
@@ -1980,7 +1976,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        portfolio: {
+        [x: string]: {
             projects: {
                 ":id": {
                     put: {
@@ -2022,7 +2018,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        portfolio: {
+        [x: string]: {
             projects: {
                 ":id": {
                     delete: {
@@ -2057,7 +2053,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        portfolio: {
+        [x: string]: {
             export: {
                 post: {
                     body: {} & {
@@ -2090,7 +2086,7 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        interview: {
+        [x: string]: {
             sessions: {
                 post: {
                     body: {} & {
@@ -2159,7 +2155,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        interview: {
+        [x: string]: {
             sessions: {
                 get: {
                     body: unknown;
@@ -2173,7 +2169,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        interview: {
+        [x: string]: {
             sessions: {
                 ":id": {
                     get: {
@@ -2202,7 +2198,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        interview: {
+        [x: string]: {
             sessions: {
                 ":id": {
                     response: {
@@ -2241,7 +2237,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        interview: {
+        [x: string]: {
             sessions: {
                 ":id": {
                     complete: {
@@ -2275,8 +2271,8 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        interview: {
-            stats: {
+        [x: string]: {
+            [x: string]: {
                 get: {
                     body: unknown;
                     params: {};
@@ -2301,7 +2297,7 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        studios: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -2344,7 +2340,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        studios: {
+        [x: string]: {
             ":id": {
                 get: {
                     body: unknown;
@@ -2388,7 +2384,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        studios: {
+        [x: string]: {
             post: {
                 body: {
                     name: string;
@@ -2443,7 +2439,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        studios: {
+        [x: string]: {
             ":id": {
                 put: {
                     body: {} & {
@@ -2503,7 +2499,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        studios: {
+        [x: string]: {
             ":id": {
                 delete: {
                     body: unknown;
@@ -2536,7 +2532,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        studios: {
+        [x: string]: {
             analytics: {
                 get: {
                     body: unknown;
@@ -2552,8 +2548,8 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        scraper: {
-            studios: {
+        [x: string]: {
+            [x: string]: {
                 post: {
                     body: unknown;
                     params: {};
@@ -2569,30 +2565,28 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        scraper: {
-            jobs: {
-                ":portalId": {
-                    post: {
-                        body: unknown;
-                        params: {
-                            portalId: string;
-                        } & {};
-                        query: unknown;
-                        headers: unknown;
-                        response: {
-                            200: import("@bao/shared/types/jobs").ScraperOperationResult | {
-                                error: string;
-                                details: string;
-                            };
-                            422: {
-                                type: "validation";
-                                on: string;
-                                summary?: string;
-                                message?: string;
-                                found?: unknown;
-                                property?: string;
-                                expected?: string;
-                            };
+        [x: string]: {
+            [x: string]: {
+                post: {
+                    body: unknown;
+                    params: {
+                        portalId: string;
+                    } & {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: import("@bao/shared/types/jobs").ScraperOperationResult | {
+                            error: string;
+                            details: string;
+                        };
+                        422: {
+                            type: "validation";
+                            on: string;
+                            summary?: string;
+                            message?: string;
+                            found?: unknown;
+                            property?: string;
+                            expected?: string;
                         };
                     };
                 };
@@ -2601,9 +2595,9 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        ai: {};
+        [x: string]: {};
     } & {
-        ai: {
+        [x: string]: {
             chat: {
                 post: {
                     body: {
@@ -2670,7 +2664,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        ai: {
+        [x: string]: {
             "analyze-resume": {
                 post: {
                     body: {
@@ -2713,7 +2707,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        ai: {
+        [x: string]: {
             "generate-cover-letter": {
                 post: {
                     body: {
@@ -2754,7 +2748,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        ai: {
+        [x: string]: {
             "match-jobs": {
                 post: {
                     body: {} & {
@@ -2783,7 +2777,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        ai: {
+        [x: string]: {
             models: {
                 get: {
                     body: unknown;
@@ -2808,7 +2802,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        ai: {
+        [x: string]: {
             usage: {
                 get: {
                     body: unknown;
@@ -2832,7 +2826,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        ai: {
+        [x: string]: {
             "automation-action": {
                 post: {
                     body: {
@@ -2874,7 +2868,7 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        gamification: {
+        [x: string]: {
             progress: {
                 get: {
                     body: unknown;
@@ -2888,7 +2882,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        gamification: {
+        [x: string]: {
             "award-xp": {
                 post: {
                     body: {} & {
@@ -2930,7 +2924,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        gamification: {
+        [x: string]: {
             achievements: {
                 get: {
                     body: unknown;
@@ -2944,7 +2938,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        gamification: {
+        [x: string]: {
             challenges: {
                 get: {
                     body: unknown;
@@ -2963,7 +2957,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        gamification: {
+        [x: string]: {
             challenges: {
                 ":id": {
                     complete: {
@@ -2995,7 +2989,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        gamification: {
+        [x: string]: {
             weekly: {
                 get: {
                     body: unknown;
@@ -3009,7 +3003,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        gamification: {
+        [x: string]: {
             monthly: {
                 get: {
                     body: unknown;
@@ -3032,9 +3026,9 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        skills: {};
+        [x: string]: {};
     } & {
-        skills: {
+        [x: string]: {
             mappings: {
                 get: {
                     body: unknown;
@@ -3072,7 +3066,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        skills: {
+        [x: string]: {
             mappings: {
                 post: {
                     body: {
@@ -3105,7 +3099,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        skills: {
+        [x: string]: {
             mappings: {
                 ":id": {
                     put: {
@@ -3143,7 +3137,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        skills: {
+        [x: string]: {
             mappings: {
                 ":id": {
                     delete: {
@@ -3169,7 +3163,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        skills: {
+        [x: string]: {
             pathways: {
                 get: {
                     body: unknown;
@@ -3183,7 +3177,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        skills: {
+        [x: string]: {
             readiness: {
                 get: {
                     body: unknown;
@@ -3220,7 +3214,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        skills: {
+        [x: string]: {
             "ai-analyze": {
                 post: {
                     body: {} & {
@@ -3255,32 +3249,34 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        search: {
-            get: {
-                body: unknown;
-                params: {};
-                query: {} & {
-                    types?: string | ("skills" | "studios" | "jobs" | "resumes")[] | undefined;
-                    q?: string | undefined;
-                };
-                headers: unknown;
-                response: {
-                    200: import("./services/search-service").UnifiedSearchResult;
-                    422: {
-                        type: "validation";
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
+        [x: string]: {
+            [x: string]: {
+                get: {
+                    body: unknown;
+                    params: {};
+                    query: {} & {
+                        types?: string | ("skills" | "studios" | "jobs" | "resumes")[] | undefined;
+                        q?: string | undefined;
+                    };
+                    headers: unknown;
+                    response: {
+                        200: import("./services/search-service").UnifiedSearchResult;
+                        422: {
+                            type: "validation";
+                            on: string;
+                            summary?: string;
+                            message?: string;
+                            found?: unknown;
+                            property?: string;
+                            expected?: string;
+                        };
                     };
                 };
             };
         };
     } & {
-        search: {
-            autocomplete: {
+        [x: string]: {
+            [x: string]: {
                 get: {
                     body: unknown;
                     params: {};
@@ -3309,8 +3305,8 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        stats: {
-            dashboard: {
+        [x: string]: {
+            [x: string]: {
                 get: {
                     body: unknown;
                     params: {};
@@ -3323,8 +3319,8 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        stats: {
-            weekly: {
+        [x: string]: {
+            [x: string]: {
                 get: {
                     body: unknown;
                     params: {};
@@ -3337,8 +3333,8 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        stats: {
-            career: {
+        [x: string]: {
+            [x: string]: {
                 get: {
                     body: unknown;
                     params: {};
@@ -3353,9 +3349,9 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        automation: {};
+        [x: string]: {};
     } & {
-        automation: {
+        [x: string]: {
             verify: {
                 context: {
                     get: {
@@ -3389,7 +3385,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             "job-apply": {
                 post: {
                     body: {
@@ -3471,7 +3467,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             "job-apply": {
                 schedule: {
                     post: {
@@ -3556,7 +3552,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             "email-response": {
                 post: {
                     body: {
@@ -3623,7 +3619,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             "email-response": {
                 schedule: {
                     post: {
@@ -3709,7 +3705,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             scrape: {
                 post: {
                     body: {
@@ -3786,7 +3782,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             scrape: {
                 schedule: {
                     post: {
@@ -3866,7 +3862,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             capabilities: {
                 get: {
                     body: unknown;
@@ -3920,7 +3916,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             runs: {
                 get: {
                     body: unknown;
@@ -3972,7 +3968,7 @@ export declare const app: Elysia<"/api", {
             };
         };
     } & {
-        automation: {
+        [x: string]: {
             runs: {
                 ":id": {
                     get: {
@@ -4041,35 +4037,33 @@ export declare const app: Elysia<"/api", {
     };
 } & {
     api: {
-        automation: {
-            screenshots: {
-                ":runId": {
-                    ":index": {
-                        get: {
-                            body: unknown;
-                            params: {
-                                index: string;
-                                runId: string;
-                            } & {};
-                            query: unknown;
-                            headers: unknown;
-                            response: {
-                                200: unknown;
-                                400: {} & {
-                                    error?: string | undefined;
-                                };
-                                404: {} & {
-                                    error?: string | undefined;
-                                };
-                                422: {
-                                    type: "validation";
-                                    on: string;
-                                    summary?: string;
-                                    message?: string;
-                                    found?: unknown;
-                                    property?: string;
-                                    expected?: string;
-                                };
+        [x: string]: {
+            ":runId": {
+                ":index": {
+                    get: {
+                        body: unknown;
+                        params: {
+                            index: string;
+                            runId: string;
+                        } & {};
+                        query: unknown;
+                        headers: unknown;
+                        response: {
+                            200: unknown;
+                            400: {} & {
+                                error?: string | undefined;
+                            };
+                            404: {} & {
+                                error?: string | undefined;
+                            };
+                            422: {
+                                type: "validation";
+                                on: string;
+                                summary?: string;
+                                message?: string;
+                                found?: unknown;
+                                property?: string;
+                                expected?: string;
                             };
                         };
                     };

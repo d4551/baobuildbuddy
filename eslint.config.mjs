@@ -1,13 +1,14 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 
-const lintTargets = ["**/*.ts"];
+const typeScriptLintTargets = ["**/*.ts", "**/*.d.ts"];
+const javaScriptLintTargets = ["**/*.js", "**/*.mjs", "**/*.cjs"];
+const typeCheckedConfigs = tseslint.configs.recommendedTypeChecked.map((config) => ({
+  ...config,
+  files: typeScriptLintTargets,
+}));
 
 const ignoredPaths = [
-  "**/*.d.ts",
-  "**/*.js",
-  "**/*.mjs",
-  "**/*.cjs",
   "**/node_modules/**",
   "**/dist/**",
   "**/dist-types/**",
@@ -24,9 +25,20 @@ export default tseslint.config(
     ignores: ignoredPaths,
   },
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
   {
-    files: lintTargets,
+    files: javaScriptLintTargets,
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+    },
+    rules: {
+      "no-console": "error",
+      "no-debugger": "error",
+    },
+  },
+  ...typeCheckedConfigs,
+  {
+    files: typeScriptLintTargets,
     languageOptions: {
       parserOptions: {
         projectService: true,

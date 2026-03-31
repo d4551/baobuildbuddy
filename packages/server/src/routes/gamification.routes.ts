@@ -1,4 +1,5 @@
 import { API_ERROR_CHALLENGE_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { API_MESSAGE_CHALLENGE_COMPLETED } from "@bao/shared/constants/api-messages";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
@@ -7,7 +8,10 @@ import Type from "baobox";
 import { Elysia } from "elysia";
 import { gamificationService } from "../services/gamification-service";
 
-export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["Gamification"] })
+export const gamificationRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.gamificationBase),
+  tags: ["Gamification"],
+})
   .get("/progress", async () => {
     return gamificationService.getProgress();
   })

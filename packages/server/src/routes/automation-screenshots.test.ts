@@ -3,6 +3,10 @@ import { mkdirSync, rmSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { API_ERROR_SCREENSHOT_FILE_MISSING } from "@bao/shared/constants/api-errors";
+import {
+  API_ENDPOINT_PREFIX,
+  buildAutomationScreenshotEndpoint,
+} from "@bao/shared/constants/endpoints";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
@@ -51,7 +55,7 @@ beforeAll(async () => {
   initModule.initializeDatabase(sqlite);
   seedModule.seedDatabase(db);
 
-  app = new Elysia({ prefix: "/api" }).use(automationScreenshotRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(automationScreenshotRoutes);
 });
 
 afterEach(async () => {
@@ -74,7 +78,7 @@ describe("automationScreenshotRoutes", () => {
     await createRunRecord(runId, ["step-01.png"]);
 
     const response = await app.handle(
-      new Request(`http://localhost/api/automation/screenshots/${runId}/0`),
+      new Request(`http://localhost${buildAutomationScreenshotEndpoint(runId, 0)}`),
     );
 
     expect(response.status).toBe(404);
@@ -88,7 +92,7 @@ describe("automationScreenshotRoutes", () => {
     await writeFile(join(runDir, "step-01.png"), PNG_BYTES);
 
     const response = await app.handle(
-      new Request(`http://localhost/api/automation/screenshots/${runId}/0`),
+      new Request(`http://localhost${buildAutomationScreenshotEndpoint(runId, 0)}`),
     );
 
     expect(response.status).toBe(200);

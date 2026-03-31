@@ -1,3 +1,4 @@
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
@@ -22,7 +23,7 @@ import {
 } from "./ai-route-contracts";
 import { buildProviderModelsResponse } from "./ai-route-support";
 
-export const aiRoutes = new Elysia({ prefix: "/ai", tags: ["AI"] })
+export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBase), tags: ["AI"] })
   .use(
     rateLimit({
       scoping: "scoped",

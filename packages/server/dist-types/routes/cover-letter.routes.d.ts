@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const coverLetterRoutes: Elysia<"/cover-letters", {
+export declare const coverLetterRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,7 +15,7 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
     parser: {};
     response: {};
 }, {
-    "cover-letters": {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
@@ -36,7 +36,7 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         };
     };
 } & {
-    "cover-letters": {
+    [x: string]: {
         post: {
             body: {
                 company: string;
@@ -71,7 +71,7 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         };
     };
 } & {
-    "cover-letters": {
+    [x: string]: {
         ":id": {
             get: {
                 body: unknown;
@@ -107,7 +107,7 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         };
     };
 } & {
-    "cover-letters": {
+    [x: string]: {
         ":id": {
             put: {
                 body: {} & {
@@ -149,7 +149,7 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         };
     };
 } & {
-    "cover-letters": {
+    [x: string]: {
         ":id": {
             delete: {
                 body: unknown;
@@ -182,8 +182,8 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         };
     };
 } & {
-    "cover-letters": {
-        generate: {
+    [x: string]: {
+        [x: string]: {
             post: {
                 body: {
                     company: string;
@@ -252,7 +252,7 @@ export declare const coverLetterRoutes: Elysia<"/cover-letters", {
         };
     };
 } & {
-    "cover-letters": {
+    [x: string]: {
         ":id": {
             export: {
                 post: {

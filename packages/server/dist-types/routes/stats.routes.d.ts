@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const statsRoutes: Elysia<"/stats", {
+export declare const statsRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,8 +15,8 @@ export declare const statsRoutes: Elysia<"/stats", {
     parser: {};
     response: {};
 }, {
-    stats: {
-        dashboard: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -29,8 +29,8 @@ export declare const statsRoutes: Elysia<"/stats", {
         };
     };
 } & {
-    stats: {
-        weekly: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -43,8 +43,8 @@ export declare const statsRoutes: Elysia<"/stats", {
         };
     };
 } & {
-    stats: {
-        career: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};

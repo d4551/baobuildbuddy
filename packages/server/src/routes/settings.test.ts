@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { AI_ROUTING_PURPOSE_IDS } from "@bao/shared/types/ai";
+import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -15,7 +16,7 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 
-  app = new Elysia({ prefix: "/api" }).use(routesModule.settingsRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.settingsRoutes);
 });
 
 const getSettings = () =>
@@ -33,10 +34,10 @@ const getSettings = () =>
       keywords: Array<{ id: string; label: string; category: string }>;
       studioRules: Array<{ id: string; keyword: string; studioType: string }>;
     };
-  }>(app, "GET", "/api/settings");
+  }>(app, "GET", API_ENDPOINTS.settings);
 
 describe("settings read routes", () => {
-  test("GET /api/settings returns settings", async () => {
+  test("GET settings returns settings", async () => {
     const res = await getSettings();
     expect(res.status).toBe(200);
     expect(res.body.id).toBeDefined();
@@ -47,14 +48,14 @@ describe("settings read routes", () => {
     expect(Array.isArray(res.body.jobTaxonomy?.studioRules)).toBe(true);
   });
 
-  test("GET /api/settings/export returns export payload", async () => {
+  test("GET settings export returns export payload", async () => {
     const res = await requestJson<{
       version: string;
       exportedAt: string;
       profile: unknown;
       settings: unknown;
       resumes: unknown[];
-    }>(app, "GET", "/api/settings/export");
+    }>(app, "GET", API_ENDPOINTS.settingsExport);
     expect(res.status).toBe(200);
     expect(res.body.version).toBe("1.0");
     expect(res.body.exportedAt).toBeDefined();
@@ -63,8 +64,8 @@ describe("settings read routes", () => {
 });
 
 describe("settings write routes - preferences", () => {
-  test("PUT /api/settings updates", async () => {
-    const res = await requestJson<{ success: boolean }>(app, "PUT", "/api/settings", {
+  test("PUT settings updates", async () => {
+    const res = await requestJson<{ success: boolean }>(app, "PUT", API_ENDPOINTS.settings, {
       theme: "bao-dark",
       aiRouting: Object.fromEntries(
         AI_ROUTING_PURPOSE_IDS.map((purpose) => [
@@ -100,8 +101,8 @@ describe("settings write routes - preferences", () => {
 });
 
 describe("settings write routes - api keys", () => {
-  test("PUT /api/settings/api-keys updates keys", async () => {
-    const res = await requestJson<{ success: boolean }>(app, "PUT", "/api/settings/api-keys", {
+  test("PUT settings api keys updates keys", async () => {
+    const res = await requestJson<{ success: boolean }>(app, "PUT", API_ENDPOINTS.settingsApiKeys, {
       localModelEndpoint: "http://localhost:1234",
       emailTransportPassword: "super-secret-password",
     });
@@ -109,7 +110,7 @@ describe("settings write routes - api keys", () => {
     expect(res.body.success).toBe(true);
   });
 
-  test("GET /api/settings exposes email delivery password presence without returning the secret", async () => {
+  test("GET settings exposes email delivery password presence without returning the secret", async () => {
     const res = await getSettings();
     expect(res.status).toBe(200);
     expect(res.body.hasEmailTransportPassword).toBe(true);
@@ -119,14 +120,14 @@ describe("settings write routes - api keys", () => {
 });
 
 describe("settings write routes - taxonomy", () => {
-  test("PUT /api/settings/job-taxonomy persists taxonomy updates outside the settings row", async () => {
+  test("PUT settings job taxonomy persists taxonomy updates outside the settings row", async () => {
     const res = await requestJson<{
       success: boolean;
       jobTaxonomy: {
         keywords: Array<{ id: string; label: string; category: string }>;
         studioRules: Array<{ id: string; keyword: string; studioType: string }>;
       };
-    }>(app, "PUT", "/api/settings/job-taxonomy", {
+    }>(app, "PUT", API_ENDPOINTS.settingsJobTaxonomy, {
       keywords: [
         {
           id: "role:technical-sound-designer",

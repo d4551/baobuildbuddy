@@ -5,7 +5,7 @@ import {
 } from "@bao/shared/schemas/automation-scripts.schema";
 import { RPA_PROTOCOL_VERSION } from "@bao/shared/schemas/rpa-protocol.schema";
 import { config } from "../../config/env";
-import { SCRAPER_DIR } from "../../config/paths";
+import { readAutomationScriptRunnerConfig, SCRAPER_DIR } from "../../config/paths";
 import type {
   AutomationScriptExecutionResult,
   RunAutomationScriptOptions,
@@ -141,12 +141,11 @@ const resolveAutomationScriptPath = (options: RunAutomationScriptOptions): strin
 };
 
 const resolveAutomationCommand = (scriptPath: string): string[] => {
-  const scriptRunnerPath = process.env.BAO_SCRIPT_RUNNER_PATH?.trim();
-  const scriptRunnerEntrypointPath = process.env.BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH?.trim();
-  if (scriptRunnerPath && scriptRunnerPath.length > 0) {
-    return scriptRunnerEntrypointPath && scriptRunnerEntrypointPath.length > 0
-      ? [scriptRunnerPath, scriptRunnerEntrypointPath, SCRAPER_DIR, scriptPath]
-      : [scriptRunnerPath, SCRAPER_DIR, scriptPath];
+  const { executablePath, entrypointPath } = readAutomationScriptRunnerConfig();
+  if (executablePath) {
+    return entrypointPath
+      ? [executablePath, entrypointPath, SCRAPER_DIR, scriptPath]
+      : [executablePath, SCRAPER_DIR, scriptPath];
   }
 
   return [process.execPath, scriptPath];

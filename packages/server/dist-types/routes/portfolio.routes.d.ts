@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const portfolioRoutes: Elysia<"/portfolio", {
+export declare const portfolioRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,7 +15,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
     parser: {};
     response: {};
 }, {
-    portfolio: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
@@ -27,7 +27,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         put: {
             body: {
                 metadata: Record<string, unknown>;
@@ -50,7 +50,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         projects: {
             post: {
                 body: {
@@ -89,7 +89,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         projects: {
             reorder: {
                 post: {
@@ -118,7 +118,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         projects: {
             ":id": {
                 put: {
@@ -160,7 +160,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         projects: {
             ":id": {
                 delete: {
@@ -195,7 +195,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         export: {
             post: {
                 body: {} & {

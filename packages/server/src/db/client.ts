@@ -45,7 +45,7 @@ const schema = {
   userProfile,
 };
 
-const dbPath = resolveDatabasePath(Bun.env.DB_PATH ?? config.dbPath);
+const dbPath = resolveDatabasePath(config.dbPath);
 const sqlite = new Database(dbPath);
 sqlite.exec("PRAGMA journal_mode = WAL;");
 sqlite.exec("PRAGMA foreign_keys = ON;");

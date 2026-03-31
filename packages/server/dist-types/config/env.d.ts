@@ -1,3 +1,5 @@
+export declare const isProductionRuntime: () => boolean;
+export declare const isTestRuntime: boolean;
 /**
  * Resolves the current server runtime configuration from environment variables.
  */

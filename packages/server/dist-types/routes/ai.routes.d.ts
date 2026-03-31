@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const aiRoutes: Elysia<"/ai", {
+export declare const aiRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -23,9 +23,9 @@ export declare const aiRoutes: Elysia<"/ai", {
     macroFn: {};
     parser: {};
 }, {
-    ai: {};
+    [x: string]: {};
 } & {
-    ai: {
+    [x: string]: {
         chat: {
             post: {
                 body: {
@@ -92,7 +92,7 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         "analyze-resume": {
             post: {
                 body: {
@@ -135,7 +135,7 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         "generate-cover-letter": {
             post: {
                 body: {
@@ -176,7 +176,7 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         "match-jobs": {
             post: {
                 body: {} & {
@@ -205,7 +205,7 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         models: {
             get: {
                 body: unknown;
@@ -230,7 +230,7 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         usage: {
             get: {
                 body: unknown;
@@ -254,7 +254,7 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         "automation-action": {
             post: {
                 body: {

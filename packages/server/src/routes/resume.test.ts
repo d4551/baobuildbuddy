@@ -1,4 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import {
+  API_ENDPOINTS,
+  API_ENDPOINT_PREFIX,
+  buildResumeExportEndpoint,
+} from "@bao/shared/constants/endpoints";
 import { generateId } from "@bao/shared/utils/validation";
 import { requestJson } from "../test-utils";
 
@@ -31,17 +36,17 @@ beforeAll(async () => {
     type: "full-time",
   });
 
-  app = new Elysia({ prefix: "/api" }).use(routesModule.resumeRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.resumeRoutes);
 });
 
 afterAll(() => {});
 
 function registerQuestionnaireRouteTests(): void {
-  test("POST /api/resumes/from-questions/generate returns interview questionnaire prompts", async () => {
+  test("POST resume from questions generate returns interview questionnaire prompts", async () => {
     const res = await requestJson<{ questions: Array<{ id: string; question: string }> }>(
       app,
       "POST",
-      "/api/resumes/from-questions/generate",
+      API_ENDPOINTS.resumeFromQuestionsGenerate,
       {
         targetRole: "Technical Designer",
         studioName: "Test Studio",
@@ -53,11 +58,11 @@ function registerQuestionnaireRouteTests(): void {
     expect(typeof res.body.questions[0]?.question).toBe("string");
   });
 
-  test("POST /api/resumes/from-questions/synthesize creates a dynamic resume payload", async () => {
+  test("POST resume from questions synthesize creates a dynamic resume payload", async () => {
     const res = await requestJson<{ id: string; name: string; summary: string }>(
       app,
       "POST",
-      "/api/resumes/from-questions/synthesize",
+      API_ENDPOINTS.resumeFromQuestionsSynthesize,
       {
         questionsAndAnswers: [
           {
@@ -83,57 +88,71 @@ function registerQuestionnaireRouteTests(): void {
 }
 
 function registerResumeCrudTests(): void {
-  test("POST /api/resumes creates resume", async () => {
-    const res = await requestJson<{ id: string; name: string }>(app, "POST", "/api/resumes", {
-      name: "Test Resume",
-      summary: "A test summary",
-    });
+  test("POST resumes creates resume", async () => {
+    const res = await requestJson<{ id: string; name: string }>(
+      app,
+      "POST",
+      API_ENDPOINTS.resumes,
+      {
+        name: "Test Resume",
+        summary: "A test summary",
+      },
+    );
     expect(res.status).toBe(201);
     expect(res.body.name).toBe("Test Resume");
     expect(res.body.id).toBeDefined();
     createdId = res.body.id;
   });
 
-  test("GET /api/resumes returns list", async () => {
-    const res = await requestJson<Array<{ id: string }>>(app, "GET", "/api/resumes");
+  test("GET resumes returns list", async () => {
+    const res = await requestJson<Array<{ id: string }>>(app, "GET", API_ENDPOINTS.resumes);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  test("GET /api/resumes/:id returns created resume", async () => {
+  test("GET resume detail returns created resume", async () => {
     const res = await requestJson<{ id: string; name: string }>(
       app,
       "GET",
-      `/api/resumes/${createdId}`,
+      `${API_ENDPOINTS.resumes}/${createdId}`,
     );
     expect(res.status).toBe(200);
     expect(res.body.id).toBe(createdId);
     expect(res.body.name).toBe("Test Resume");
   });
 
-  test("GET /api/resumes/:id returns 404 for missing", async () => {
-    const res = await requestJson<{ error: string }>(app, "GET", "/api/resumes/nonexistent-id");
+  test("GET resume detail returns 404 for missing", async () => {
+    const res = await requestJson<{ error: string }>(
+      app,
+      "GET",
+      `${API_ENDPOINTS.resumes}/nonexistent-id`,
+    );
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Resume not found");
   });
 }
 
 function registerResumeDynamicFlowTests(): void {
-  test("PUT /api/resumes/:id updates resume", async () => {
-    const res = await requestJson<{ name: string }>(app, "PUT", `/api/resumes/${createdId}`, {
-      name: "Updated Resume",
-    });
+  test("PUT resume detail updates resume", async () => {
+    const res = await requestJson<{ name: string }>(
+      app,
+      "PUT",
+      `${API_ENDPOINTS.resumes}/${createdId}`,
+      {
+        name: "Updated Resume",
+      },
+    );
     expect(res.status).toBe(200);
     expect(res.body.name).toBe("Updated Resume");
   });
 }
 
 function registerResumeAiFlowTests(): void {
-  test("POST /api/resumes/:id/ai-enhance returns structured suggestions", async () => {
+  test("POST resume ai enhance returns structured suggestions", async () => {
     const res = await requestJson<{
       section: string;
       suggestions: Array<Record<string, unknown>>;
-    }>(app, "POST", `/api/resumes/${createdId}/ai-enhance`, {
+    }>(app, "POST", `${API_ENDPOINTS.resumes}/${createdId}/ai-enhance`, {
       section: "summary",
     });
     expect(res.status).toBe(200);
@@ -141,14 +160,14 @@ function registerResumeAiFlowTests(): void {
     expect(res.body.suggestions.length).toBeGreaterThan(0);
   });
 
-  test("POST /api/resumes/:id/ai-score returns dynamic scoring details", async () => {
+  test("POST resume ai score returns dynamic scoring details", async () => {
     const res = await requestJson<{
       jobId: string;
       score: number;
       strengths: string[];
       improvements: string[];
       keywords: string[];
-    }>(app, "POST", `/api/resumes/${createdId}/ai-score`, {
+    }>(app, "POST", `${API_ENDPOINTS.resumes}/${createdId}/ai-score`, {
       jobId,
     });
     expect(res.status).toBe(200);
@@ -161,9 +180,9 @@ function registerResumeAiFlowTests(): void {
 }
 
 function registerResumeExportTests(): void {
-  test("POST /api/resumes/:id/export returns a PDF attachment", async () => {
+  test("POST resume export returns a PDF attachment", async () => {
     const response = await app.handle(
-      new Request(`http://localhost/api/resumes/${createdId}/export`, {
+      new Request(`http://localhost${buildResumeExportEndpoint(createdId)}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ format: "pdf" }),
@@ -175,9 +194,9 @@ function registerResumeExportTests(): void {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
 
-  test("POST /api/resumes/:id/export returns a DOCX attachment", async () => {
+  test("POST resume export returns a DOCX attachment", async () => {
     const response = await app.handle(
-      new Request(`http://localhost/api/resumes/${createdId}/export`, {
+      new Request(`http://localhost${buildResumeExportEndpoint(createdId)}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ format: "docx" }),
@@ -193,27 +212,31 @@ function registerResumeExportTests(): void {
 }
 
 function registerResumeDeletionTests(): void {
-  test("DELETE /api/resumes/:id removes resume", async () => {
+  test("DELETE resume detail removes resume", async () => {
     const res = await requestJson<{ success: boolean; id: string }>(
       app,
       "DELETE",
-      `/api/resumes/${createdId}`,
+      `${API_ENDPOINTS.resumes}/${createdId}`,
     );
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.id).toBe(createdId);
   });
 
-  test("GET /api/resumes/:id returns 404 after delete", async () => {
-    const res = await requestJson<{ error: string }>(app, "GET", `/api/resumes/${createdId}`);
+  test("GET resume detail returns 404 after delete", async () => {
+    const res = await requestJson<{ error: string }>(
+      app,
+      "GET",
+      `${API_ENDPOINTS.resumes}/${createdId}`,
+    );
     expect(res.status).toBe(404);
   });
 
-  test("GET /api/resumes/:id still returns synthesized resumes", async () => {
+  test("GET resume detail still returns synthesized resumes", async () => {
     const res = await requestJson<{ id: string }>(
       app,
       "GET",
-      `/api/resumes/${questionnaireResumeId}`,
+      `${API_ENDPOINTS.resumes}/${questionnaireResumeId}`,
     );
     expect(res.status).toBe(200);
     expect(res.body.id).toBe(questionnaireResumeId);

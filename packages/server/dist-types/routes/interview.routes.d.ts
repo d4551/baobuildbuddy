@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const interviewRoutes: Elysia<"/interview", {
+export declare const interviewRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,7 +15,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
     parser: {};
     response: {};
 }, {
-    interview: {
+    [x: string]: {
         sessions: {
             post: {
                 body: {} & {
@@ -84,7 +84,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
+    [x: string]: {
         sessions: {
             get: {
                 body: unknown;
@@ -98,7 +98,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
+    [x: string]: {
         sessions: {
             ":id": {
                 get: {
@@ -127,7 +127,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
+    [x: string]: {
         sessions: {
             ":id": {
                 response: {
@@ -166,7 +166,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
+    [x: string]: {
         sessions: {
             ":id": {
                 complete: {
@@ -200,8 +200,8 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
-        stats: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};

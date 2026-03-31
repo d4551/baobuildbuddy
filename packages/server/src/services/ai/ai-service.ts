@@ -37,6 +37,7 @@ import {
   resolveRoutingTarget,
 } from "./ai-provider-state";
 import type { AIProvider } from "./provider-interface";
+import { isTestRuntime } from "../../config/env";
 type AIServiceSettings = Parameters<typeof buildProviderConfigs>[0];
 
 /**
@@ -65,7 +66,7 @@ export class AIService {
    * Used by WebSocket handlers, route handlers, and services.
    */
   static fromSettings(settings?: AIServiceSettings): AIService {
-    if (AIService.isTestRuntime()) {
+    if (isTestRuntime) {
       return AIService.createDeterministicTestService();
     }
 
@@ -79,10 +80,6 @@ export class AIService {
       settings?.preferredModel,
     );
     return new AIService(configs, preferredProvider, routing);
-  }
-
-  private static isTestRuntime(): boolean {
-    return process.env.NODE_ENV === "test" || process.env.BAO_TEST_MODE === "1";
   }
 
   private static createDeterministicTestService(): AIService {

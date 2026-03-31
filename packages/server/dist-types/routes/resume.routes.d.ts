@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const resumeRoutes: Elysia<"/resumes", {
+export declare const resumeRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,80 +15,76 @@ export declare const resumeRoutes: Elysia<"/resumes", {
     parser: {};
     response: {};
 }, {
-    resumes: {
-        "from-questions": {
-            generate: {
-                post: {
-                    body: {
-                        targetRole: string;
-                    } & {
-                        experienceLevel?: string | undefined;
-                        studioName?: string | undefined;
+    [x: string]: {
+        [x: string]: {
+            post: {
+                body: {
+                    targetRole: string;
+                } & {
+                    experienceLevel?: string | undefined;
+                    studioName?: string | undefined;
+                };
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        error: string;
+                        details: string;
+                        questions?: undefined;
+                    } | {
+                        questions: import("../services/cv-questionnaire-service").CvQuestion[];
+                        error?: undefined;
+                        details?: undefined;
                     };
-                    params: {};
-                    query: unknown;
-                    headers: unknown;
-                    response: {
-                        200: {
-                            error: string;
-                            details: string;
-                            questions?: undefined;
-                        } | {
-                            questions: import("../services/cv-questionnaire-service").CvQuestion[];
-                            error?: undefined;
-                            details?: undefined;
-                        };
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };
         };
     };
 } & {
-    resumes: {
-        "from-questions": {
-            synthesize: {
-                post: {
-                    body: {
-                        questionsAndAnswers: ({
-                            id: string;
-                            category: string;
-                            question: string;
-                            answer: string;
-                        } & {})[];
-                    } & {};
-                    params: {};
-                    query: unknown;
-                    headers: unknown;
-                    response: {
-                        200: import("@bao/shared/types/resume").ResumeData | {
-                            error: string;
-                            details: string;
-                        };
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+    [x: string]: {
+        [x: string]: {
+            post: {
+                body: {
+                    questionsAndAnswers: ({
+                        id: string;
+                        category: string;
+                        question: string;
+                        answer: string;
+                    } & {})[];
+                } & {};
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: import("@bao/shared/types/resume").ResumeData | {
+                        error: string;
+                        details: string;
+                    };
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
@@ -100,7 +96,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         post: {
             body: {} & {
                 skills?: ({} & {
@@ -174,7 +170,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             get: {
                 body: unknown;
@@ -201,7 +197,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             put: {
                 body: {} & {
@@ -281,7 +277,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             delete: {
                 body: unknown;
@@ -314,7 +310,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             export: {
                 post: {
@@ -350,7 +346,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             "ai-enhance": {
                 post: {
@@ -397,7 +393,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             "ai-score": {
                 post: {

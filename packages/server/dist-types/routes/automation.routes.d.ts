@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 /**
  * Automation API routes for RPA-driven workflows and run history.
  */
-export declare const automationRoutes: Elysia<"/automation", {
+export declare const automationRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -26,9 +26,9 @@ export declare const automationRoutes: Elysia<"/automation", {
     macroFn: {};
     parser: {};
 }, {
-    automation: {};
+    [x: string]: {};
 } & {
-    automation: {
+    [x: string]: {
         verify: {
             context: {
                 get: {
@@ -62,7 +62,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         "job-apply": {
             post: {
                 body: {
@@ -144,7 +144,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         "job-apply": {
             schedule: {
                 post: {
@@ -229,7 +229,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         "email-response": {
             post: {
                 body: {
@@ -296,7 +296,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         "email-response": {
             schedule: {
                 post: {
@@ -382,7 +382,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         scrape: {
             post: {
                 body: {
@@ -459,7 +459,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         scrape: {
             schedule: {
                 post: {
@@ -539,7 +539,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         capabilities: {
             get: {
                 body: unknown;
@@ -593,7 +593,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         runs: {
             get: {
                 body: unknown;
@@ -645,7 +645,7 @@ export declare const automationRoutes: Elysia<"/automation", {
         };
     };
 } & {
-    automation: {
+    [x: string]: {
         runs: {
             ":id": {
                 get: {

@@ -3,6 +3,7 @@ import {
   API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
   API_ERROR_AUTH_SETUP_TOKEN_UNAVAILABLE,
 } from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
   API_MESSAGE_AUTH_DISABLED,
@@ -59,8 +60,11 @@ function generateApiKey(): string {
   return `${AUTH_KEY_PREFIX}${encodeBase64Url(bytes)}`;
 }
 
-export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
-  .get("/status", async () => {
+export const authRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.authBase),
+  tags: ["Auth"],
+})
+  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus), async () => {
     if (config.disableAuth) {
       return {
         configured: false,
@@ -78,7 +82,7 @@ export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
       setupTokenConfigured: config.authSetupToken !== null,
     };
   })
-  .get("/configured", async () => {
+  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured), async () => {
     if (config.disableAuth) {
       return { configured: false };
     }
@@ -97,7 +101,7 @@ export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
         }),
       )
       .post(
-        "/init",
+        toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
         async ({ body, request, status }) => {
           if (config.disableAuth) {
             return { configured: false, message: API_MESSAGE_AUTH_DISABLED };

@@ -1,108 +1,29 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
-import { settlePromise } from "~/composables/async-flow";
-import { getErrorMessage } from "~/utils/errors";
 
-type ApiClient = ReturnType<typeof useApi>;
-type AnalyticsResponse = Awaited<ReturnType<ApiClient["studios"]["analytics"]["get"]>>["data"];
-type AnalyticsByBreakdown = Record<string, number>;
-type AnalyticsTechnology = {
-  name: string;
-  count: number;
-};
-
-type StudioAnalytics = {
-  totalStudios: number;
-  byType: AnalyticsByBreakdown;
-  bySize: AnalyticsByBreakdown;
-  remoteWorkStudios: number;
-  topTechnologies: AnalyticsTechnology[];
-};
-
-const { $toast } = useNuxtApp();
-const api = useApi();
 const { t } = useI18n();
+const {
+  analytics,
+  bySizeEntries,
+  byTypeEntries,
+  getMaxCount,
+  indieStudiosCount,
+  loading,
+  onSiteOnlyCount,
+  pageError,
+  refreshAnalytics,
+  remoteWorkPercentage,
+  remoteWorkStudios,
+  topTechnologies,
+  totalStudios,
+} = await useStudioAnalyticsPage();
 
 if (import.meta.server) {
   useServerSeoMeta({
     title: t("studioAnalytics.title"),
     description: t("studiosIndex.seoDescription"),
   });
-}
-
-const analytics = ref<StudioAnalytics | null>(null);
-const pageError = ref<string | null>(null);
-
-const totalStudios = computed(() => analytics.value?.totalStudios ?? 0);
-const remoteWorkStudios = computed(() => analytics.value?.remoteWorkStudios ?? 0);
-const remoteWorkPercentage = computed(() => {
-  if (totalStudios.value === 0) return 0;
-  return Math.round((remoteWorkStudios.value / totalStudios.value) * 100);
-});
-const byTypeEntries = computed(() => Object.entries(analytics.value?.byType ?? {}));
-const bySizeEntries = computed(() => Object.entries(analytics.value?.bySize ?? {}));
-const topTechnologies = computed(() => analytics.value?.topTechnologies ?? []);
-const indieStudiosCount = computed(() => analytics.value?.byType.Indie ?? 0);
-const onSiteOnlyCount = computed(() => Math.max(0, totalStudios.value - remoteWorkStudios.value));
-
-const { pending: loading, refresh: refreshAnalytics } = await useAsyncData(
-  "studio-analytics",
-  async () => {
-    await fetchAnalytics();
-    return analytics.value;
-  },
-);
-
-function mapAnalyticsResponse(data: AnalyticsResponse): StudioAnalytics | null {
-  if (!data) return null;
-  return {
-    totalStudios: typeof data.totalStudios === "number" ? data.totalStudios : 0,
-    byType: data.byType ?? {},
-    bySize: data.bySize ?? {},
-    remoteWorkStudios: typeof data.remoteWorkStudios === "number" ? data.remoteWorkStudios : 0,
-    topTechnologies: Array.isArray(data.topTechnologies)
-      ? data.topTechnologies.map((technology) => ({
-          name: technology.name,
-          count: technology.count,
-        }))
-      : [],
-  };
-}
-
-function showErrorToast(message: string) {
-  if (import.meta.client) {
-    $toast.error(message);
-  }
-}
-
-async function fetchAnalytics() {
-  pageError.value = null;
-  const analyticsResult = await settlePromise(
-    api.studios.analytics.get(),
-    t("studioAnalytics.errors.loadFailed"),
-  );
-  if (!analyticsResult.ok) {
-    pageError.value = getErrorMessage(
-      analyticsResult.error,
-      t("studioAnalytics.errors.loadFailed"),
-    );
-    showErrorToast(pageError.value);
-    return;
-  }
-
-  const { data, error } = analyticsResult.value;
-  if (error) {
-    pageError.value = getErrorMessage(error, t("studioAnalytics.errors.loadFailed"));
-    showErrorToast(pageError.value);
-    return;
-  }
-
-  analytics.value = mapAnalyticsResponse(data);
-}
-
-function getMaxCount(items: readonly AnalyticsTechnology[]) {
-  return Math.max(1, ...items.map((item) => item.count));
 }
 </script>
 

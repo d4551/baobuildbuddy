@@ -1,3 +1,4 @@
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { StandardSchemaV1 } from "baobox";
 import { status } from "elysia";
 import { Elysia } from "elysia";
@@ -20,7 +21,10 @@ import {
 } from "./skill-mapping-route-support";
 import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
 
-export const skillMappingRoutes = new Elysia({ prefix: "/skills", tags: ["Skill Mapping"] })
+export const skillMappingRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.skillsBase),
+  tags: ["Skill Mapping"],
+})
   .use(skillAnalysisRateLimit)
   .get("/mappings", async ({ query }) => listSkillMappings(query), {
     query: StandardSchemaV1(skillMappingsQuerySchema),

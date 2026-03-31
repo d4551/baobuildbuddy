@@ -1,3 +1,4 @@
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_ITEMS_XXLARGE,
@@ -16,8 +17,11 @@ import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
 
-export const userRoutes = new Elysia({ prefix: "/user", tags: ["User"] })
-  .get("/profile", async () => {
+export const userRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.userBase),
+  tags: ["User"],
+})
+  .get(toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile), async () => {
     const rows = await db.select().from(userProfile).where(eq(userProfile.id, DEFAULT_PROFILE_ID));
     if (rows.length === 0) {
       // Auto-create default profile
@@ -35,7 +39,7 @@ export const userRoutes = new Elysia({ prefix: "/user", tags: ["User"] })
     return rows[0];
   })
   .put(
-    "/profile",
+    toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
     async ({ body }) => {
       const existing = await db
         .select()

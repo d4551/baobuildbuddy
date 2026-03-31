@@ -1,4 +1,5 @@
 import { APP_BRAND } from "@bao/shared/constants/branding";
+import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import {
   APP_BRAND_TAGLINE,
   DECIMAL_RADIX,
@@ -22,6 +23,7 @@ import { APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/
 
 const DEFAULT_CLIENT_PORT = String(DEFAULT_CLIENT_DEV_PORT);
 const DEFAULT_API_SERVER_PORT = String(DEFAULT_SERVER_PORT);
+const API_ENDPOINT_WILDCARD = `${API_ENDPOINT_PREFIX}/**`;
 const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
 const configuredApiProxy = process.env.NUXT_PUBLIC_API_PROXY;
 const configuredServerPort = process.env.SERVER_PORT || process.env.PORT;
@@ -258,7 +260,7 @@ export default defineNuxtConfig({
     ...(apiBaseProxy
       ? {
           devProxy: {
-            "/api": {
+            [API_ENDPOINT_PREFIX]: {
               target: apiBaseProxy,
               changeOrigin: true,
             },
@@ -266,8 +268,8 @@ export default defineNuxtConfig({
           ...(absoluteApiProxyBase
             ? {
                 routeRules: {
-                  "/api/**": {
-                    proxy: `${absoluteApiProxyBase}/api/**`,
+                  [API_ENDPOINT_WILDCARD]: {
+                    proxy: `${absoluteApiProxyBase}${API_ENDPOINT_WILDCARD}`,
                   },
                 },
               }

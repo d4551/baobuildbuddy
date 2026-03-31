@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const settingsRoutes: Elysia<"/settings", {
+export declare const settingsRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -23,9 +23,9 @@ export declare const settingsRoutes: Elysia<"/settings", {
     macroFn: {};
     parser: {};
 }, {
-    settings: {};
+    [x: string]: {};
 } & {
-    settings: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
@@ -66,7 +66,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
         };
     };
 } & {
-    settings: {
+    [x: string]: {
         put: {
             body: {} & {
                 theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
@@ -313,7 +313,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
         };
     };
 } & {
-    settings: {
+    [x: string]: {
         "job-taxonomy": {
             put: {
                 body: {
@@ -355,7 +355,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
         };
     };
 } & {
-    settings: {
+    [x: string]: {
         "api-keys": {
             put: {
                 body: {} & {
@@ -388,7 +388,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
         };
     };
 } & {
-    settings: {
+    [x: string]: {
         "test-api-key": {
             post: {
                 body: {
@@ -440,7 +440,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
         };
     };
 } & {
-    settings: {
+    [x: string]: {
         export: {
             get: {
                 body: unknown;
@@ -454,7 +454,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
         };
     };
 } & {
-    settings: {
+    [x: string]: {
         import: {
             post: {
                 body: {

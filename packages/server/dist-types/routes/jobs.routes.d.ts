@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const jobsRoutes: Elysia<"/jobs", {
+export declare const jobsRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,7 +15,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
     parser: {};
     response: {};
 }, {
-    jobs: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
@@ -77,7 +77,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         ":id": {
             get: {
                 body: unknown;
@@ -130,7 +130,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         save: {
             post: {
                 body: {
@@ -171,7 +171,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         save: {
             ":jobId": {
                 delete: {
@@ -201,7 +201,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         saved: {
             get: {
                 body: unknown;
@@ -246,7 +246,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         apply: {
             post: {
                 body: {
@@ -301,7 +301,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         apply: {
             ":id": {
                 put: {
@@ -342,7 +342,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         applications: {
             get: {
                 body: unknown;
@@ -392,7 +392,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         recommendations: {
             get: {
                 body: unknown;
@@ -406,7 +406,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         refresh: {
             post: {
                 body: unknown;

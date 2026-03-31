@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const userRoutes: Elysia<"/user", {
+export declare const userRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,8 +15,8 @@ export declare const userRoutes: Elysia<"/user", {
     parser: {};
     response: {};
 }, {
-    user: {
-        profile: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -55,8 +55,8 @@ export declare const userRoutes: Elysia<"/user", {
         };
     };
 } & {
-    user: {
-        profile: {
+    [x: string]: {
+        [x: string]: {
             put: {
                 body: {} & {
                     name?: string | undefined;

@@ -3,6 +3,7 @@ import {
   API_ERROR_INVALID_AUTOMATION_PAYLOAD,
   API_ERROR_LOAD_SETTINGS,
 } from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
@@ -31,7 +32,10 @@ import { updateJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
 import { readOrCreateSettingsRow } from "./settings-route-support";
 
-export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings"] })
+export const settingsRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.settings),
+  tags: ["Settings"],
+})
   .use(
     rateLimit({
       scoping: "scoped",

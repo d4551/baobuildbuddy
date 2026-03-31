@@ -1,3 +1,4 @@
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
@@ -16,7 +17,10 @@ import { sessionWithDerivedFields } from "./interview-route-presentation";
 import { getInterviewStats } from "./interview-route-stats";
 import { interviewService } from "../services/interview-service";
 
-export const interviewRoutes = new Elysia({ prefix: "/interview", tags: ["Interview"] })
+export const interviewRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.interviewBase),
+  tags: ["Interview"],
+})
   .post(
     "/sessions",
     async ({ body, set }) => {
@@ -72,4 +76,6 @@ export const interviewRoutes = new Elysia({ prefix: "/interview", tags: ["Interv
       params: StandardSchemaV1(interviewSessionParamsSchema),
     },
   )
-  .get("/stats", async () => getInterviewStats());
+  .get(toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewStats), async () =>
+    getInterviewStats(),
+  );

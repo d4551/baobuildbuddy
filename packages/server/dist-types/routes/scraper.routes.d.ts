@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const scraperRoutes: Elysia<"/scraper", {
+export declare const scraperRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,8 +15,8 @@ export declare const scraperRoutes: Elysia<"/scraper", {
     parser: {};
     response: {};
 }, {
-    scraper: {
-        studios: {
+    [x: string]: {
+        [x: string]: {
             post: {
                 body: unknown;
                 params: {};
@@ -32,30 +32,28 @@ export declare const scraperRoutes: Elysia<"/scraper", {
         };
     };
 } & {
-    scraper: {
-        jobs: {
-            ":portalId": {
-                post: {
-                    body: unknown;
-                    params: {
-                        portalId: string;
-                    } & {};
-                    query: unknown;
-                    headers: unknown;
-                    response: {
-                        200: import("@bao/shared/types/jobs").ScraperOperationResult | {
-                            error: string;
-                            details: string;
-                        };
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+    [x: string]: {
+        [x: string]: {
+            post: {
+                body: unknown;
+                params: {
+                    portalId: string;
+                } & {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: import("@bao/shared/types/jobs").ScraperOperationResult | {
+                        error: string;
+                        details: string;
+                    };
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };

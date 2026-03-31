@@ -36,6 +36,10 @@ import {
   LOOPBACK_HOST_IPV4,
 } from "@bao/shared/constants/runtime";
 
+export const isProductionRuntime = (): boolean => process.env.NODE_ENV === "production";
+
+export const isTestRuntime = process.env.NODE_ENV === "test" || process.env.BAO_TEST_MODE === "1";
+
 const configuredServerPort = [Bun.env.SERVER_PORT, Bun.env.PORT].find(
   (value) => value?.trim().length,
 );
@@ -92,7 +96,7 @@ function parseCorsOrigins(value?: string): string[] {
 
 const resolveCorsOrigins = (serverPort: number, clientPort: number): string[] => {
   const parsedCorsOrigins = parseCorsOrigins(Bun.env.CORS_ORIGINS);
-  if (process.env.NODE_ENV === "production") {
+  if (isProductionRuntime()) {
     return parsedCorsOrigins;
   }
 

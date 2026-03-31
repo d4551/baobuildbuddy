@@ -1,4 +1,11 @@
 import {
+  API_ENDPOINT_PREFIX,
+  API_ENDPOINTS,
+  toApiScopedPath,
+} from "../packages/shared/src/constants/endpoints";
+import { APP_ROUTES } from "../packages/shared/src/constants/routes";
+import { escapeRegExp } from "../packages/shared/src/utils/string";
+import {
   collectProjectFileEntries,
   getLineFromOffset,
   reportViolations,
@@ -8,15 +15,22 @@ import {
 
 const allowedExtensions = new Set([".ts", ".vue"]);
 const scanRoots = ["packages/client", "packages/server/src", "scripts"] as const;
-const routeLiteralPattern =
-  /(['"`])(\/(?:api|jobs|resume|cover-letter|portfolio|interview|skills|studios|automation|settings|docs|ai|gamification|setup)(?:\/[^'"`\s]*)?)\1/gu;
+const disallowedRouteLiterals = [
+  ...new Set([
+    API_ENDPOINT_PREFIX,
+    ...Object.values(APP_ROUTES),
+    ...Object.values(API_ENDPOINTS).map((endpoint) => toApiScopedPath(endpoint)),
+  ]),
+]
+  .filter((routeLiteral) => routeLiteral !== "/")
+  .sort((left, right) => right.length - left.length);
+const routeLiteralPattern = new RegExp(
+  `(['"\`])(${disallowedRouteLiterals.map((routeLiteral) => escapeRegExp(routeLiteral)).join("|")})(?:\\/[^'"\`\\s]*)?\\1`,
+  "gu",
+);
 
 const isAllowedRouteLiteralPath = (filePath: string): boolean =>
-  filePath.includes("constants/routes") ||
-  filePath.includes("constants/endpoints") ||
-  filePath.endsWith("nuxt.config.ts") ||
-  filePath.includes("/routes/") ||
-  filePath.includes("verify-desktop-runtime.ts");
+  filePath.includes("constants/routes") || filePath.includes("constants/endpoints");
 
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const files = await collectProjectFileEntries({

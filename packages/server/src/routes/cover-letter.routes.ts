@@ -1,4 +1,5 @@
 import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import {
@@ -20,7 +21,10 @@ import {
   handleGenerateCoverLetter,
 } from "./cover-letter-route-generation";
 
-export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["Cover Letters"] })
+export const coverLetterRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.coverLettersBase),
+  tags: ["Cover Letters"],
+})
   .get("/", async () => listCoverLetters())
   .post(
     "/",
@@ -46,9 +50,13 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
   .delete("/:id", async ({ params, set }) => deleteCoverLetter(params.id, set), {
     params: StandardSchemaV1(coverLetterIdParamsSchema),
   })
-  .post("/generate", async ({ body, set }) => handleGenerateCoverLetter(body, set), {
-    body: StandardSchemaV1(generateCoverLetterBodySchema),
-  })
+  .post(
+    toApiChildPath(API_ENDPOINTS.coverLettersBase, API_ENDPOINTS.coverLettersGenerate),
+    async ({ body, set }) => handleGenerateCoverLetter(body, set),
+    {
+      body: StandardSchemaV1(generateCoverLetterBodySchema),
+    },
+  )
   .post(
     "/:id/export",
     async ({ params, body, set }) => exportCoverLetterAttachment(params.id, body.format, set),

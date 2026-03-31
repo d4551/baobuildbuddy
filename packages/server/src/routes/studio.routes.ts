@@ -1,6 +1,7 @@
 import { API_ERROR_STUDIO_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_STUDIO_DELETED } from "@bao/shared/constants/api-messages";
 import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_ITEMS_MEDIUM,
@@ -28,7 +29,10 @@ export interface StudioAnalytics {
   topTechnologies: Array<{ name: string; count: number }>;
 }
 
-export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] })
+export const studioRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.studiosBase),
+  tags: ["Studios"],
+})
   .get(
     "/",
     async ({ query }) => {

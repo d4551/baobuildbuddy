@@ -4,6 +4,7 @@ import {
   API_ERROR_UNKNOWN,
 } from "@bao/shared/constants/api-errors";
 import { isAutomationScrapePortalId } from "@bao/shared/constants/automation";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -14,8 +15,13 @@ import Type from "baobox";
 import { Elysia } from "elysia";
 import { scraperService } from "../services/scraper-service";
 
-export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] })
-  .post("/studios", async ({ set }) => {
+const SCRAPER_BASE_PATH = API_ENDPOINTS.scraperBase;
+
+export const scraperRoutes = new Elysia({
+  prefix: toApiScopedPath(SCRAPER_BASE_PATH),
+  tags: ["Scraper"],
+})
+  .post(toApiChildPath(SCRAPER_BASE_PATH, API_ENDPOINTS.scraperStudios), async ({ set }) => {
     const scrapeStudiosResult = await settle(scraperService.scrapeStudios());
     if (scrapeStudiosResult.status === "rejected") {
       set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -30,7 +36,7 @@ export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] 
     return scrapeStudiosResult.value;
   })
   .post(
-    "/jobs/:portalId",
+    toApiChildPath(SCRAPER_BASE_PATH, `${API_ENDPOINTS.scraperJobsBase}/:portalId`),
     async ({ params, set }) => {
       const portalId = params.portalId.trim();
       if (!isAutomationScrapePortalId(portalId)) {

@@ -1,4 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import {
+  API_ENDPOINTS,
+  API_ENDPOINT_PREFIX,
+  buildCoverLetterExportEndpoint,
+} from "@bao/shared/constants/endpoints";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -15,17 +20,17 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 
-  app = new Elysia({ prefix: "/api" }).use(routesModule.coverLetterRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.coverLetterRoutes);
 });
 
 afterAll(() => {});
 
 function registerCreateAndReadTests(): void {
-  test("POST /api/cover-letters creates cover letter", async () => {
+  test("POST cover letters creates cover letter", async () => {
     const res = await requestJson<{ id: string; company: string; position: string }>(
       app,
       "POST",
-      "/api/cover-letters",
+      API_ENDPOINTS.coverLetters,
       { company: "Test Co", position: "Game Designer" },
     );
     expect(res.status).toBe(201);
@@ -35,28 +40,28 @@ function registerCreateAndReadTests(): void {
     createdId = res.body.id;
   });
 
-  test("GET /api/cover-letters returns list", async () => {
-    const res = await requestJson<Array<{ id: string }>>(app, "GET", "/api/cover-letters");
+  test("GET cover letters returns list", async () => {
+    const res = await requestJson<Array<{ id: string }>>(app, "GET", API_ENDPOINTS.coverLetters);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  test("GET /api/cover-letters/:id returns created", async () => {
+  test("GET cover letter detail returns created", async () => {
     const res = await requestJson<{ id: string; company: string }>(
       app,
       "GET",
-      `/api/cover-letters/${createdId}`,
+      `${API_ENDPOINTS.coverLetters}/${createdId}`,
     );
     expect(res.status).toBe(200);
     expect(res.body.id).toBe(createdId);
     expect(res.body.company).toBe("Test Co");
   });
 
-  test("GET /api/cover-letters/:id returns 404 for missing", async () => {
+  test("GET cover letter detail returns 404 for missing", async () => {
     const res = await requestJson<{ error: string }>(
       app,
       "GET",
-      "/api/cover-letters/nonexistent-id",
+      `${API_ENDPOINTS.coverLetters}/nonexistent-id`,
     );
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Cover letter not found");
@@ -64,22 +69,22 @@ function registerCreateAndReadTests(): void {
 }
 
 function registerUpdateAndDeleteTests(): void {
-  test("PUT /api/cover-letters/:id updates", async () => {
+  test("PUT cover letter detail updates", async () => {
     const res = await requestJson<{ position: string }>(
       app,
       "PUT",
-      `/api/cover-letters/${createdId}`,
+      `${API_ENDPOINTS.coverLetters}/${createdId}`,
       { position: "Senior Game Designer" },
     );
     expect(res.status).toBe(200);
     expect(res.body.position).toBe("Senior Game Designer");
   });
 
-  test("DELETE /api/cover-letters/:id removes", async () => {
+  test("DELETE cover letter detail removes", async () => {
     const res = await requestJson<{ success: boolean }>(
       app,
       "DELETE",
-      `/api/cover-letters/${createdId}`,
+      `${API_ENDPOINTS.coverLetters}/${createdId}`,
     );
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -87,11 +92,11 @@ function registerUpdateAndDeleteTests(): void {
 }
 
 function registerDynamicGenerationTests(): void {
-  test("POST /api/cover-letters/generate returns unsaved dynamic content", async () => {
+  test("POST cover letters generate returns unsaved dynamic content", async () => {
     const res = await requestJson<{
       message: string;
       content: { introduction: string; body: string; conclusion: string };
-    }>(app, "POST", "/api/cover-letters/generate", {
+    }>(app, "POST", API_ENDPOINTS.coverLettersGenerate, {
       company: "Studio Nova",
       position: "Narrative Designer",
       jobInfo: {
@@ -106,11 +111,11 @@ function registerDynamicGenerationTests(): void {
     expect(res.body.content.conclusion.length).toBeGreaterThan(0);
   });
 
-  test("POST /api/cover-letters/generate persists a saved cover letter", async () => {
+  test("POST cover letters generate persists a saved cover letter", async () => {
     const res = await requestJson<{
       message: string;
       coverLetter: { id: string; company: string; content: Record<string, unknown> };
-    }>(app, "POST", "/api/cover-letters/generate", {
+    }>(app, "POST", API_ENDPOINTS.coverLettersGenerate, {
       company: "Studio Nova",
       position: "Systems Designer",
       save: true,
@@ -123,9 +128,9 @@ function registerDynamicGenerationTests(): void {
 }
 
 function registerCoverLetterExportTests(): void {
-  test("POST /api/cover-letters/:id/export returns a PDF attachment", async () => {
+  test("POST cover letter export returns a PDF attachment", async () => {
     const response = await app.handle(
-      new Request(`http://localhost/api/cover-letters/${generatedId}/export`, {
+      new Request(`http://localhost${buildCoverLetterExportEndpoint(generatedId)}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ format: "pdf" }),
@@ -139,9 +144,9 @@ function registerCoverLetterExportTests(): void {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
 
-  test("POST /api/cover-letters/:id/export returns a DOCX attachment", async () => {
+  test("POST cover letter export returns a DOCX attachment", async () => {
     const response = await app.handle(
-      new Request(`http://localhost/api/cover-letters/${generatedId}/export`, {
+      new Request(`http://localhost${buildCoverLetterExportEndpoint(generatedId)}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ format: "docx" }),

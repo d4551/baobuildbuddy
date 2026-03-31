@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const gamificationRoutes: Elysia<"/gamification", {
+export declare const gamificationRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,7 +15,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
     parser: {};
     response: {};
 }, {
-    gamification: {
+    [x: string]: {
         progress: {
             get: {
                 body: unknown;
@@ -29,7 +29,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         "award-xp": {
             post: {
                 body: {} & {
@@ -71,7 +71,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         achievements: {
             get: {
                 body: unknown;
@@ -85,7 +85,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         challenges: {
             get: {
                 body: unknown;
@@ -104,7 +104,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         challenges: {
             ":id": {
                 complete: {
@@ -136,7 +136,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         weekly: {
             get: {
                 body: unknown;
@@ -150,7 +150,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         monthly: {
             get: {
                 body: unknown;

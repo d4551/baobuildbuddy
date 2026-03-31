@@ -62,7 +62,7 @@ export function useAuth(): UseAuthState {
     if (error) {
       throw new Error(toErrorMessage(error, AUTH_INIT_FAILED_ERROR_KEY));
     }
-    const payload = data ?? {};
+    const payload: unknown = data ?? {};
     if (!isRecord(payload)) {
       return { configured: false };
     }

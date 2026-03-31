@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const skillMappingRoutes: Elysia<"/skills", {
+export declare const skillMappingRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -23,9 +23,9 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
     macroFn: {};
     parser: {};
 }, {
-    skills: {};
+    [x: string]: {};
 } & {
-    skills: {
+    [x: string]: {
         mappings: {
             get: {
                 body: unknown;
@@ -63,7 +63,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         mappings: {
             post: {
                 body: {
@@ -96,7 +96,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         mappings: {
             ":id": {
                 put: {
@@ -134,7 +134,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         mappings: {
             ":id": {
                 delete: {
@@ -160,7 +160,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         pathways: {
             get: {
                 body: unknown;
@@ -174,7 +174,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         readiness: {
             get: {
                 body: unknown;
@@ -211,7 +211,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         "ai-analyze": {
             post: {
                 body: {} & {

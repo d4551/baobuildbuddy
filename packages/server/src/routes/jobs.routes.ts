@@ -1,4 +1,5 @@
 import { API_ERROR_JOB_NOT_FOUND, API_ERROR_UNKNOWN } from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { API_MESSAGE_JOB_REFRESH_COMPLETE } from "@bao/shared/constants/api-messages";
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -32,7 +33,10 @@ import { getRecommendations } from "./jobs-route-recommendations";
 
 const jobsRoutesLogger = createServerLogger("jobs-routes");
 
-export const jobsRoutes = new Elysia({ prefix: "/jobs", tags: ["Jobs"] })
+export const jobsRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.jobsBase),
+  tags: ["Jobs"],
+})
   .get("/", async ({ query }) => listJobs(query), {
     query: StandardSchemaV1(jobsListQuerySchema),
   })

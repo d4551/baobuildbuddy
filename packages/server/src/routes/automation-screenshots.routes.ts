@@ -8,6 +8,7 @@ import {
   API_ERROR_SCREENSHOT_NOT_FOUND,
 } from "@bao/shared/constants/api-errors";
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import { RUN_ID_MIN_LENGTH, RUN_ID_SAFE_PATTERN_SOURCE } from "@bao/shared/constants/schema-limits";
 import { settle } from "@bao/shared/utils/promise";
@@ -105,7 +106,7 @@ const readScreenshotPayload = async (filePath: string): Promise<BinaryPayload | 
  * Serves automation run screenshots from managed run directories.
  */
 export const automationScreenshotRoutes = new Elysia({
-  prefix: "/automation/screenshots",
+  prefix: toApiScopedPath(API_ENDPOINTS.automationScreenshotsBase),
   tags: ["Automation"],
 }).get(
   "/:runId/:index",

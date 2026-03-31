@@ -1,5 +1,7 @@
 import { afterAll, afterEach, beforeAll, expect, mock, spyOn, test } from "bun:test";
 import { AI_CHAT_API_ENDPOINT } from "@bao/shared/constants/ai-chat";
+import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
@@ -18,7 +20,7 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 
-  app = new Elysia({ prefix: "/api" }).use(routesModule.aiRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.aiRoutes);
 });
 
 afterAll(() => {});
@@ -27,7 +29,7 @@ afterEach(() => {
   mock.restore();
 });
 
-test("GET /api/ai/models returns the shared AI control-plane contract", async () => {
+test("GET ai models returns the shared AI control-plane contract", async () => {
   const res = await requestJson<{
     aiRouting?: { chat?: { provider?: string; model?: string } };
     preferredProvider?: string;
@@ -35,7 +37,7 @@ test("GET /api/ai/models returns the shared AI control-plane contract", async ()
     providerDiagnostics?: Record<string, { provider?: string }>;
     providers?: Array<{ id?: string; selectedModel?: string }>;
     configuredProviders?: string[];
-  }>(app, "GET", "/api/ai/models");
+  }>(app, "GET", API_ENDPOINTS.aiModels);
 
   expect(res.status).toBe(200);
   expect(res.body.aiRouting?.chat?.provider).toBe(res.body.preferredProvider);
@@ -50,7 +52,7 @@ test("GET /api/ai/models returns the shared AI control-plane contract", async ()
   }
 });
 
-test("POST /api/ai/chat accepts message", async () => {
+test("POST ai chat accepts message", async () => {
   const res = await requestJson<{ content?: string; error?: string }>(
     app,
     "POST",
@@ -64,12 +66,12 @@ test("POST /api/ai/chat accepts message", async () => {
   expect(res.body).toBeDefined();
 });
 
-test("POST /api/ai/chat requires message (validation error)", async () => {
+test("POST ai chat requires message (validation error)", async () => {
   const res = await requestJson<{ error?: string }>(app, "POST", AI_CHAT_API_ENDPOINT, {});
   expect([400, 422]).toContain(res.status);
 });
 
-test("POST /api/ai/chat accepts contextual payload without validation drift", async () => {
+test("POST ai chat accepts contextual payload without validation drift", async () => {
   const res = await requestJson<{ content?: string; error?: string }>(
     app,
     "POST",
@@ -81,7 +83,7 @@ test("POST /api/ai/chat accepts contextual payload without validation drift", as
         source: "floating-widget",
         domain: "interview",
         route: {
-          path: "/interview",
+          path: APP_ROUTES.interview,
           name: "interview",
           params: {},
           query: { job: "job-123" },
@@ -110,7 +112,7 @@ test("POST /api/ai/chat accepts contextual payload without validation drift", as
   expect(res.body).toBeDefined();
 });
 
-test("GET /api/ai/models preserves configured providers when provider probing fails", async () => {
+test("GET ai models preserves configured providers when provider probing fails", async () => {
   await db
     .update(settings)
     .set({
@@ -127,7 +129,7 @@ test("GET /api/ai/models preserves configured providers when provider probing fa
     configuredProviders?: string[];
     providerDiagnostics?: Record<string, { code?: string; endpoint?: string; message?: string }>;
     providers?: Array<{ id?: string; health?: string }>;
-  }>(app, "GET", "/api/ai/models");
+  }>(app, "GET", API_ENDPOINTS.aiModels);
 
   expect(res.status).toBe(200);
   expect(res.body.error).toBe("probe failed");

@@ -1,3 +1,4 @@
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import { StandardSchemaV1 } from "baobox";
 import Type from "baobox";
@@ -21,9 +22,12 @@ const parseSearchTypes = (value: string | string[] | undefined): SearchType[] | 
   return parsedTypes.length > 0 ? parsedTypes : undefined;
 };
 
-export const searchRoutes = new Elysia({ prefix: "/search", tags: ["Search"] })
+export const searchRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.searchBase),
+  tags: ["Search"],
+})
   .get(
-    "/",
+    toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
     ({ query }) => {
       const q = query.q || "";
       if (q.length < 2) {
@@ -52,7 +56,7 @@ export const searchRoutes = new Elysia({ prefix: "/search", tags: ["Search"] })
     },
   )
   .get(
-    "/autocomplete",
+    toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.searchAutocomplete),
     async ({ query }) => {
       const prefix = query.prefix || "";
       return await searchService.autocomplete(prefix);

@@ -4,6 +4,7 @@ import {
   API_ERROR_SYNTHESIZE_RESUME,
   API_ERROR_UNKNOWN,
 } from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
 import {
   HTTP_STATUS_CREATED,
@@ -34,9 +35,12 @@ import {
   handleResumeAiScore,
 } from "./resume-route-support";
 
-export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] })
+export const resumeRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.resumes),
+  tags: ["Resumes"],
+})
   .post(
-    "/from-questions/generate",
+    toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsGenerate),
     async ({ body, set }) => {
       const result = await settle(
         cvQuestionnaireService.generateQuestions({
@@ -59,7 +63,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
     },
   )
   .post(
-    "/from-questions/synthesize",
+    toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsSynthesize),
     async ({ body, set }) => {
       const synthesizeResult = await settle(
         cvQuestionnaireService.synthesizeResume(body.questionsAndAnswers),
