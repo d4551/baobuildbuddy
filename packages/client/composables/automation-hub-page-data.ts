@@ -11,21 +11,36 @@ import type {
 } from "~/composables/automation-hub-page-contracts";
 import { useAutomation } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";
+import { isRecord } from "@bao/shared/utils/type-guards";
 
 const AUTOMATION_HUB_ASYNC_DATA_KEY = "automation-hub-stats";
 const AUTOMATION_HUB_CAPABILITIES_ASYNC_DATA_KEY = "automation-hub-capabilities";
 
+const readApiData = async (
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> => {
+  const response = await request;
+  if (!isRecord(response) || !("data" in response)) {
+    throw new Error(fallbackMessage);
+  }
+  if ("error" in response && response.error) {
+    throw new Error(getErrorMessage(response.error, fallbackMessage));
+  }
+  return response.data;
+};
+
 const useAutomationHubStatsData = (t: AutomationHubTranslate) => {
   const api = useApi();
 
-  return useAsyncData<DashboardStats>(
+  return useAsyncData<DashboardStats | null>(
     AUTOMATION_HUB_ASYNC_DATA_KEY,
     async () => {
-      const response = await api.stats.dashboard.get();
-      if (response.error) {
-        throw new Error(getErrorMessage(response.error, t("automation.hub.loadErrorFallback")));
-      }
-      return response.data;
+      const data = await readApiData(
+        api.stats.dashboard.get(),
+        t("automation.hub.loadErrorFallback"),
+      );
+      return data;
     },
     {
       lazy: false,

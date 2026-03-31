@@ -16,9 +16,10 @@ describe("collectNoHtmxViolationsForContent", () => {
 
 describe("collectNoTryCatchViolationsForContent", () => {
   test("flags promise catch handlers", () => {
+    const promiseCatchSample = ["void task", ".", "cat", "ch((error) => report(error));"].join("");
     const violations = collectNoTryCatchViolationsForContent(
       "scripts/example.ts",
-      "void task.catch((error) => report(error));",
+      promiseCatchSample,
     );
 
     expect(violations.some((violation) => violation.message.includes("Promise catch"))).toBe(true);

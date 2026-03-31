@@ -1,16 +1,17 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
-import type { CareerPathway, ReadinessAssessment } from "@bao/shared/types/skill-mapping";
+import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { computed, type Ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { createSkillsPathwaysPresentation } from "~/composables/skills-pathways-page-presentation";
+import {
+  readApiData,
+  toGamificationProgress,
+  toSkillsPathwaysBootstrapData,
+  type SkillsPathwaysBootstrapData,
+  type SkillsPathwaysGamificationProgress,
+} from "~/composables/skills-pathways-page-data";
 import { SKILLS_READINESS_MAX, SKILLS_READINESS_MIN } from "~/constants/skills";
 import { getErrorMessage } from "~/utils/errors";
-
-interface SkillsPathwaysBootstrapData {
-  readonly pathways: readonly CareerPathway[];
-  readonly readiness: ReadinessAssessment;
-}
-
 const useSkillsPathwaysBootstrap = async (
   api: ReturnType<typeof useApi>,
   t: ReturnType<typeof useI18n>["t"],
@@ -18,32 +19,23 @@ const useSkillsPathwaysBootstrap = async (
   useAsyncData<SkillsPathwaysBootstrapData>(
     "skills-pathways-bootstrap",
     async () => {
-      const [pathwaysResponse, readinessResponse] = await Promise.all([
+      const [pathwaysData, readinessData] = await Promise.all([
         api.skills.pathways.get(),
         api.skills.readiness.get(),
       ]);
-
-      if (pathwaysResponse.error) {
-        throw new Error(
-          getErrorMessage(
-            pathwaysResponse.error,
-            t("skillsPathwaysPage.errors.pathwaysLoadFailed"),
-          ),
-        );
+      const pathways = await readApiData(
+        pathwaysData,
+        t("skillsPathwaysPage.errors.pathwaysLoadFailed"),
+      );
+      const readiness = await readApiData(
+        readinessData,
+        t("skillsPathwaysPage.errors.readinessLoadFailed"),
+      );
+      const normalized = toSkillsPathwaysBootstrapData({ pathways, readiness });
+      if (!normalized) {
+        throw new Error(t("skillsPathwaysPage.errors.loadFailed"));
       }
-      if (readinessResponse.error) {
-        throw new Error(
-          getErrorMessage(
-            readinessResponse.error,
-            t("skillsPathwaysPage.errors.readinessLoadFailed"),
-          ),
-        );
-      }
-
-      return {
-        pathways: pathwaysResponse.data,
-        readiness: readinessResponse.data,
-      };
+      return normalized;
     },
     {
       lazy: false,
@@ -58,17 +50,15 @@ const useSkillsPathwaysGamification = async (
   useAsyncData(
     "skills-pathways-gamification-progress",
     async () => {
-      const progressResponse = await api.gamification.progress.get();
-      if (progressResponse.error) {
-        throw new Error(
-          getErrorMessage(
-            progressResponse.error,
-            t("skillsPathwaysPage.errors.gamificationLoadFailed"),
-          ),
-        );
+      const progress = await readApiData(
+        api.gamification.progress.get(),
+        t("skillsPathwaysPage.errors.gamificationLoadFailed"),
+      );
+      const normalized = toGamificationProgress(progress);
+      if (!normalized) {
+        throw new Error(t("skillsPathwaysPage.errors.gamificationLoadFailed"));
       }
-
-      return progressResponse.data;
+      return normalized;
     },
     {
       lazy: false,
@@ -78,7 +68,7 @@ const useSkillsPathwaysGamification = async (
 
 const createSkillsPathwaysDerivedState = (options: {
   readonly data: Ref<SkillsPathwaysBootstrapData | null | undefined>;
-  readonly gamificationProgress: Ref<{ level?: number; xp?: number } | null | undefined>;
+  readonly gamificationProgress: Ref<SkillsPathwaysGamificationProgress | null | undefined>;
   readonly status: Ref<"idle" | "pending" | "success" | "error">;
   readonly gamificationStatus: Ref<"idle" | "pending" | "success" | "error">;
   readonly presentation: ReturnType<typeof createSkillsPathwaysPresentation>;

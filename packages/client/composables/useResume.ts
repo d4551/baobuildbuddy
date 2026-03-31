@@ -7,6 +7,7 @@ import { getStoredApiKey } from "~/plugins/eden";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 import { toResumeData } from "./api-normalizer-resume";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
+import { isRecord } from "@bao/shared/utils/type-guards";
 
 type ApiClient = ReturnType<typeof useApi>;
 type CreateResumeInput = NonNullable<Parameters<ApiClient["resumes"]["post"]>[0]>;
@@ -47,8 +48,19 @@ interface ResumeExportRequest {
   errorMessage: string;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+const readApiData = async (
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> => {
+  const response = await request;
+  if (!isRecord(response) || !("data" in response)) {
+    throw new Error(fallbackMessage);
+  }
+  if ("error" in response && response.error) {
+    throw new Error(fallbackMessage);
+  }
+  return response.data;
+};
 
 const isResumeSynthesisError = (
   value: ResumeSynthesisSuccess | ResumeSynthesisError,
@@ -83,16 +95,20 @@ function toExportPayload(template?: ResumeTemplate, format?: string): ExportResu
 
 async function fetchResumes(context: ResumeContext): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.resumes.get();
-    assertApiResponse(error, context.t("apiErrors.resumes.fetchListFailed"));
+    const data = await readApiData(
+      context.api.resumes.get(),
+      context.t("apiErrors.resumes.fetchListFailed"),
+    );
     context.resumes.value = toResumeList(data);
   });
 }
 
 async function getResume(context: ResumeContext, id: string): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.resumes({ id }).get();
-    assertApiResponse(error, context.t("apiErrors.resumes.fetchFailed"));
+    const data = await readApiData(
+      context.api.resumes({ id }).get(),
+      context.t("apiErrors.resumes.fetchFailed"),
+    );
     const normalized = requireValue(
       toResumeData(data),
       context.t("apiErrors.resumes.invalidPayload"),
@@ -107,8 +123,10 @@ async function createResume(
   resumeData: CreateResumeInput,
 ): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.resumes.post(resumeData);
-    assertApiResponse(error, context.t("apiErrors.resumes.createFailed"));
+    const data = await readApiData(
+      context.api.resumes.post(resumeData),
+      context.t("apiErrors.resumes.createFailed"),
+    );
     const normalized = requireValue(
       toResumeData(data),
       context.t("apiErrors.resumes.invalidPayload"),
@@ -124,8 +142,10 @@ async function updateResume(
   updates: UpdateResumeInput,
 ): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.resumes({ id }).put(updates);
-    assertApiResponse(error, context.t("apiErrors.resumes.updateFailed"));
+    const data = await readApiData(
+      context.api.resumes({ id }).put(updates),
+      context.t("apiErrors.resumes.updateFailed"),
+    );
     const normalized = requireValue(
       toResumeData(data),
       context.t("apiErrors.resumes.invalidPayload"),
@@ -152,11 +172,12 @@ async function performExportResume(
   request: ResumeExportRequest,
 ): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api
-      .resumes({ id: request.id })
-      .export.post(toExportPayload(request.template, request.format));
-    assertApiResponse(error, request.errorMessage);
-    return data;
+    return readApiData(
+      context.api
+        .resumes({ id: request.id })
+        .export.post(toExportPayload(request.template, request.format)),
+      request.errorMessage,
+    );
   });
 }
 
@@ -190,8 +211,10 @@ async function exportResumeOnePage(
 
 async function aiEnhance(context: ResumeContext, id: string): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.resumes({ id })["ai-enhance"].post({});
-    assertApiResponse(error, context.t("apiErrors.resumes.enhanceFailed"));
+    const data = await readApiData(
+      context.api.resumes({ id })["ai-enhance"].post({}),
+      context.t("apiErrors.resumes.enhanceFailed"),
+    );
     const normalized = requireValue(
       toResumeData(data),
       context.t("apiErrors.resumes.invalidPayload"),
@@ -209,8 +232,10 @@ async function aiScore(
 ): Promise<ScoreResumeSuccess> {
   return withLoadingState(context.loading, async () => {
     const payload: ScoreResumeInput = { jobId };
-    const { data, error } = await context.api.resumes({ id })["ai-score"].post(payload);
-    assertApiResponse(error, context.t("apiErrors.resumes.scoreFailed"));
+    const data = await readApiData(
+      context.api.resumes({ id })["ai-score"].post(payload),
+      context.t("apiErrors.resumes.scoreFailed"),
+    );
     const normalized = requireValue(data, context.t("apiErrors.resumes.invalidPayload"));
     if (isResumeScoreError(normalized)) {
       throw new Error(

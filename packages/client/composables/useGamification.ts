@@ -6,7 +6,7 @@ import type {
 } from "@bao/shared/types/gamification";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { assertApiResponse, withLoadingState } from "./async-flow";
+import { withLoadingState } from "./async-flow";
 
 interface GamificationState {
   progress: ReturnType<typeof useState<UserGamificationData | null>>;
@@ -44,6 +44,20 @@ const GAMIFICATION_STAT_KEYS: readonly GamificationStatKey[] = [
   "interviewsCompleted",
   "studiosExplored",
 ];
+
+const readApiData = async (
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> => {
+  const response = await request;
+  if (!isRecord(response) || !("data" in response)) {
+    throw new Error(fallbackMessage);
+  }
+  if ("error" in response && response.error) {
+    throw new Error(fallbackMessage);
+  }
+  return response.data;
+};
 
 const toNumberWithDefault = (value: unknown, fallback: number): number =>
   typeof value === "number" ? value : fallback;
@@ -122,8 +136,10 @@ const createGamificationState = (): GamificationState => ({
 
 const createFetchProgressAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.gamification.progress.get();
-    assertApiResponse(error, context.t("apiErrors.gamification.fetchProgressFailed"));
+    const data = await readApiData(
+      context.api.gamification.progress.get(),
+      context.t("apiErrors.gamification.fetchProgressFailed"),
+    );
     const normalized = normalizeProgress(data);
     if (normalized) {
       context.progress.value = normalized;
@@ -134,16 +150,19 @@ const createAwardXpAction =
   (context: GamificationContext, fetchProgress: () => Promise<void>) =>
   async (amount: number, reason: string) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.gamification["award-xp"].post({ amount, reason });
-      assertApiResponse(error, context.t("apiErrors.gamification.awardXPFailed"));
+      await readApiData(
+        context.api.gamification["award-xp"].post({ amount, reason }),
+        context.t("apiErrors.gamification.awardXPFailed"),
+      );
       await fetchProgress();
-      return data;
     });
 
 const createFetchAchievementsAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.gamification.achievements.get();
-    assertApiResponse(error, context.t("apiErrors.gamification.fetchAchievementsFailed"));
+    const data = await readApiData(
+      context.api.gamification.achievements.get(),
+      context.t("apiErrors.gamification.fetchAchievementsFailed"),
+    );
     context.achievements.value = Array.isArray(data)
       ? data.filter((entry): entry is Achievement => isRecord(entry))
       : [];
@@ -151,8 +170,10 @@ const createFetchAchievementsAction = (context: GamificationContext) => async ()
 
 const createFetchChallengesAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.gamification.challenges.get();
-    assertApiResponse(error, context.t("apiErrors.gamification.fetchChallengesFailed"));
+    const data = await readApiData(
+      context.api.gamification.challenges.get(),
+      context.t("apiErrors.gamification.fetchChallengesFailed"),
+    );
     if (!(isRecord(data) && Array.isArray(data.challenges))) {
       context.challenges.value = [];
       return;
@@ -170,24 +191,29 @@ const createCompleteChallengeAction =
   ) =>
   async (id: string) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.gamification.challenges({ id }).complete.post();
-      assertApiResponse(error, context.t("apiErrors.gamification.completeChallengeFailed"));
+      await readApiData(
+        context.api.gamification.challenges({ id }).complete.post(),
+        context.t("apiErrors.gamification.completeChallengeFailed"),
+      );
       await fetchChallenges();
       await fetchProgress();
-      return data;
     });
 
 const createFetchWeeklyProgressAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.gamification.weekly.get();
-    assertApiResponse(error, context.t("apiErrors.gamification.fetchWeeklyFailed"));
+    const data = await readApiData(
+      context.api.gamification.weekly.get(),
+      context.t("apiErrors.gamification.fetchWeeklyFailed"),
+    );
     context.weeklyProgress.value = isRecord(data) ? data : null;
   });
 
 const createFetchMonthlyStatsAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.gamification.monthly.get();
-    assertApiResponse(error, context.t("apiErrors.gamification.fetchMonthlyFailed"));
+    const data = await readApiData(
+      context.api.gamification.monthly.get(),
+      context.t("apiErrors.gamification.fetchMonthlyFailed"),
+    );
     context.monthlyStats.value = isRecord(data) ? data : null;
   });
 

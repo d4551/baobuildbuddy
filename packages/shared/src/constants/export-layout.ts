@@ -337,6 +337,8 @@ export const RESUME_EXPORT_THEME_CONFIGS = {
   },
 } as const satisfies Record<ResumeTemplate, ResumeExportTheme>;
 
+export type ResumePdfThemeConfig = (typeof RESUME_EXPORT_THEME_CONFIGS)[ResumeTemplate]["pdf"];
+
 /**
  * Shared cover-letter export theme for PDF and DOCX output.
  */
