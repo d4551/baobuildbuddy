@@ -1,24 +1,12 @@
-import type {
-  AppSettings,
-  AutomationSettings,
-  BrandSettings,
-  EmailTransportSettings,
-  JobTaxonomySettings,
-} from "@bao/shared";
-import {
-  AI_PROVIDER_DEFAULT,
-  type AIProviderType,
-  type AppLanguageCode,
-  brandSettingsSchema,
-  DEFAULT_APP_LANGUAGE,
-  DEFAULT_AUTOMATION_SETTINGS,
-  DEFAULT_BRAND_SETTINGS,
-  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
-  DEFAULT_JOB_TAXONOMY_SETTINGS,
-  DEFAULT_NOTIFICATION_PREFERENCES,
-  LOCAL_AI_DEFAULT_ENDPOINT,
-  LOCAL_AI_DEFAULT_MODEL,
-} from "@bao/shared";
+import { AI_PROVIDER_DEFAULT, LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
+import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/constants/branding";
+import { DEFAULT_JOB_TAXONOMY_SETTINGS } from "@bao/shared/constants/jobs-taxonomy";
+import { DEFAULT_APP_LANGUAGE, type AppLanguageCode } from "@bao/shared/constants/settings";
+import { brandSettingsSchema } from "@bao/shared/schemas/settings.schema";
+import type { AIProviderType } from "@bao/shared/types/ai";
+import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
+import type { AppSettings, AutomationSettings, BrandSettings, EmailTransportSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_EMAIL_TRANSPORT_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES } from "@bao/shared/types/settings-defaults";
 import { reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAsyncData, useNuxtApp } from "#imports";

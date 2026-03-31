@@ -1,7 +1,7 @@
 import { JOB_APPLY_CONFIRMATION_PHRASES, JOB_APPLY_TOTAL_STEPS } from "./adapters";
 import type { JobApplyStrategy } from "./adapters";
 import { automationRuntimeConfig } from "../runtime/config";
-import { settle } from "@bao/shared";
+import { settle } from "@bao/shared/utils/promise";
 import { addStep, captureScreenshot } from "./runtime-artifacts";
 import { JOB_APPLY_STEP_INDEX, type JobApplyExecutionState } from "./runtime-contracts";
 import { clickFirstMatchingField } from "./runtime-locators";

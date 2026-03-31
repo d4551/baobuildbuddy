@@ -1,4 +1,4 @@
-import type { AIProviderType, AIResponse } from "@bao/shared";
+import type { AIProviderType, AIResponse } from "@bao/shared/types/ai";
 import type { AIProvider } from "./provider-interface";
 import { buildDeterministicContent } from "./ai-deterministic-provider-content";
 

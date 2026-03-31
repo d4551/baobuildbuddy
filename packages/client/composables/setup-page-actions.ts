@@ -1,4 +1,4 @@
-import { OLLAMA_WEBSITE_URL } from "@bao/shared";
+import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import { settlePromise } from "~/composables/async-flow";
 import type { CloudProvider, SetupProvider } from "~/components/setup/setup-page-contracts";
 import type {

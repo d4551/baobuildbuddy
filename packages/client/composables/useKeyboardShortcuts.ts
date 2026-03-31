@@ -1,4 +1,5 @@
-import { APP_ROUTES, settle } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { settle } from "@bao/shared/utils/promise";
 import { onMounted, onUnmounted, ref, useRoute, useRouter } from "#imports";
 import type { NavigationItem } from "~/constants/navigation";
 import { createClientLogger } from "~/utils/client-logger";

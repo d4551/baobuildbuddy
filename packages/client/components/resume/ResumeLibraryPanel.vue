@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
 
 interface ResumeLibraryPanelProps {

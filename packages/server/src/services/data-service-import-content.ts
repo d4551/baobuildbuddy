@@ -1,13 +1,5 @@
-import {
-  API_ERROR_INVALID_COVER_LETTER_PAYLOAD,
-  API_ERROR_INVALID_INTERVIEW_SESSION_PAYLOAD,
-  API_ERROR_INVALID_PORTFOLIO_PAYLOAD,
-  API_ERROR_INVALID_PORTFOLIO_PROJECT_PAYLOAD,
-  API_ERROR_INVALID_RESUME_PAYLOAD,
-  API_ERROR_INVALID_SKILL_MAPPING_PAYLOAD,
-  asString,
-  isRecord,
-} from "@bao/shared";
+import { API_ERROR_INVALID_COVER_LETTER_PAYLOAD, API_ERROR_INVALID_INTERVIEW_SESSION_PAYLOAD, API_ERROR_INVALID_PORTFOLIO_PAYLOAD, API_ERROR_INVALID_PORTFOLIO_PROJECT_PAYLOAD, API_ERROR_INVALID_RESUME_PAYLOAD, API_ERROR_INVALID_SKILL_MAPPING_PAYLOAD } from "@bao/shared/constants/api-errors";
+import { asString, isRecord } from "@bao/shared/utils/type-guards";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import { coverLetters } from "../db/schema/cover-letters";

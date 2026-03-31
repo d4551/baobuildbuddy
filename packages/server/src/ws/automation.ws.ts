@@ -1,10 +1,6 @@
-import {
-  type RpaRunEvent,
-  rpaRunEventSchema,
-  SCHEMA_MAX_LENGTH_RUN_ID,
-  toApiScopedPath,
-  WS_ENDPOINTS,
-} from "@bao/shared";
+import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { SCHEMA_MAX_LENGTH_RUN_ID } from "@bao/shared/constants/schema-limits";
+import { rpaRunEventSchema, type RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
 import Type, { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 

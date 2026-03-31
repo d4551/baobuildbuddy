@@ -1,5 +1,5 @@
-import type { AutomationScrapeTarget, EmailResponseTone } from "@bao/shared";
-import { AUTOMATION_SCRAPE_TARGETS, automationScrapeTargetToAction } from "@bao/shared";
+import { AUTOMATION_SCRAPE_TARGETS, automationScrapeTargetToAction, type AutomationScrapeTarget } from "@bao/shared/constants/automation";
+import type { EmailResponseTone } from "@bao/shared/schemas/automation-email.schema";
 import { AutomationValidationError } from "./automation-errors";
 
 export interface JobApplyPayload {

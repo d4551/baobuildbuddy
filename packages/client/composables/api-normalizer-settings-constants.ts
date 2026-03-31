@@ -1,4 +1,5 @@
-import type { AutomationSettings, JobTaxonomySettings } from "@bao/shared";
+import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 
 export const SPEECH_AUDIO_FORMATS: readonly AutomationSettings["speech"]["tts"]["format"][] = [
   "mp3",

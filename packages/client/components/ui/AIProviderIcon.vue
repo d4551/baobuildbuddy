@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AIProviderType } from "@bao/shared";
+import type { AIProviderType } from "@bao/shared/types/ai";
 
 type IconPath = {
   readonly d: string;

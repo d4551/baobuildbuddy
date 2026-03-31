@@ -1,13 +1,7 @@
 <script setup lang="ts">
-import {
-  APP_ROUTES,
-  AUTOMATION_RUN_STATUSES,
-  AUTOMATION_RUN_TYPES,
-  type AutomationRunStatus,
-  type AutomationRunType,
-  type RpaRunEvent,
-  type RpaRunExecutionEnvelope,
-} from "@bao/shared";
+import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES, type AutomationRunStatus, type AutomationRunType } from "@bao/shared/constants/automation";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { useI18n } from "vue-i18n";
 import { useAutomation } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";

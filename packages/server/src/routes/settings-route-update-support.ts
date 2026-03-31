@@ -1,25 +1,9 @@
-import type {
-  AIRouting,
-  AIProviderType,
-  AppDataTheme,
-  AutomationSettings,
-  BrandSettings,
-  BrandSettingsPatch,
-  EmailTransportSettings,
-  NotificationPreferences,
-} from "@bao/shared";
-import {
-  automationSettingsSchema,
-  brandSettingsPatchSchema,
-  brandSettingsSchema,
-  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
-  DEFAULT_NOTIFICATION_PREFERENCES,
-  emailTransportSettingsSchema,
-  mergeBrandSettings,
-  normalizeAIRouting,
-  normalizeAppDataTheme,
-  resolveBrandSettings,
-} from "@bao/shared";
+import { normalizeAIRouting } from "@bao/shared/constants/ai-provider";
+import { mergeBrandSettings, normalizeAppDataTheme, resolveBrandSettings, type AppDataTheme } from "@bao/shared/constants/branding";
+import { automationSettingsSchema, brandSettingsPatchSchema, brandSettingsSchema, emailTransportSettingsSchema } from "@bao/shared/schemas/settings.schema";
+import type { AIProviderType, AIRouting } from "@bao/shared/types/ai";
+import type { AutomationSettings, BrandSettings, BrandSettingsPatch, EmailTransportSettings, NotificationPreferences } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_EMAIL_TRANSPORT_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES } from "@bao/shared/types/settings-defaults";
 import {
   normalizeAutomationSettings,
   normalizeLocalModelEndpoint,

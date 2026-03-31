@@ -1,4 +1,4 @@
-import type { JobApplyScriptEnvelope } from "@bao/shared";
+import type { JobApplyScriptEnvelope } from "@bao/shared/schemas/automation-scripts.schema";
 import type { Page } from "playwright";
 import type { AutomationBrowserSession } from "../runtime/browser";
 import type { ProtocolEmitter } from "../runtime/protocol";

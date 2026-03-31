@@ -1,11 +1,6 @@
-import {
-  API_ERROR_INIT_SETTINGS_ROW,
-  API_ERROR_INVALID_AUTOMATION_PAYLOAD,
-  API_ERROR_LOAD_SETTINGS,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_UNPROCESSABLE_ENTITY,
-  DEFAULT_SETTINGS_ID,
-} from "@bao/shared";
+import { API_ERROR_INIT_SETTINGS_ROW, API_ERROR_INVALID_AUTOMATION_PAYLOAD, API_ERROR_LOAD_SETTINGS } from "@bao/shared/constants/api-errors";
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_UNPROCESSABLE_ENTITY } from "@bao/shared/constants/http";
+import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";

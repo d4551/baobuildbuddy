@@ -1,13 +1,8 @@
-import {
-  AI_DEFAULT_TEMPERATURE_INTERVIEW,
-  AI_MAX_TOKENS_QUESTION,
-  API_ERROR_AI_OPERATION_TIMEOUT,
-  SCORE_PASS_THRESHOLD,
-  SCORE_WARNING_THRESHOLD,
-  type InterviewAnalysis,
-  type InterviewConfig,
-  type InterviewResponse,
-} from "@bao/shared";
+import { AI_DEFAULT_TEMPERATURE_INTERVIEW, AI_MAX_TOKENS_QUESTION } from "@bao/shared/constants/ai-generation";
+import { API_ERROR_AI_OPERATION_TIMEOUT } from "@bao/shared/constants/api-errors";
+import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared/constants/score-thresholds";
+import type { InterviewAnalysis, InterviewConfig, InterviewResponse } from "@bao/shared/types/interview";
+import { settle } from "@bao/shared/utils/promise";
 import { interviewPersonaPrompt } from "./ai/prompts-interview";
 import type { FinalAnalysisPromptContext, StudioContext } from "./interview-service-contracts";
 import {
@@ -20,7 +15,6 @@ import { createAIService, resolveCandidateInterviewContext } from "./interview-s
 import { normalizeScore } from "./interview-service-normalizers";
 import { isRecord, parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
 import { withAiOperationTimeout } from "./interview-service-ai";
-import { settle } from "@bao/shared";
 
 function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnalysis {
   if (responses.length === 0) {

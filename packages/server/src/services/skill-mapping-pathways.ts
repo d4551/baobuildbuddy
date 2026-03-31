@@ -1,5 +1,6 @@
-import type { CareerPathway, SkillCategory, SkillMapping } from "@bao/shared";
-import { getGamificationPathwayIcon, PATHWAY_SALARY_RANGES } from "@bao/shared";
+import { getGamificationPathwayIcon } from "@bao/shared/constants/gamification-icons";
+import { PATHWAY_SALARY_RANGES } from "@bao/shared/constants/salary-ranges";
+import type { CareerPathway, SkillCategory, SkillMapping } from "@bao/shared/types/skill-mapping";
 
 type CareerPathwayDefinition = Omit<CareerPathway, "id" | "matchScore">;
 

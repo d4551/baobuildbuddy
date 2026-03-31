@@ -1,5 +1,5 @@
-import type { DailyChallenge } from "@bao/shared";
-import { getGamificationChallengeIcon } from "@bao/shared";
+import { getGamificationChallengeIcon } from "@bao/shared/constants/gamification-icons";
+import type { DailyChallenge } from "@bao/shared/types/gamification";
 
 const resolveChallengeIcon = (challengeId: string): string =>
   getGamificationChallengeIcon(challengeId);

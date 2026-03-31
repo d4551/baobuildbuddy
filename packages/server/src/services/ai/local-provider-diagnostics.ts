@@ -1,10 +1,7 @@
-import {
-  type AIProviderDiagnostic,
-  LOCAL_AI_AUTO_DETECT_MODEL,
-  LOCAL_AI_SERVERS,
-  settle,
-  toErrorMessage,
-} from "@bao/shared";
+import { LOCAL_AI_AUTO_DETECT_MODEL, LOCAL_AI_SERVERS } from "@bao/shared/constants/ai-provider";
+import type { AIProviderDiagnostic } from "@bao/shared/types/ai";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 
 const LOCAL_PROVIDER_HEALTH_TIMEOUT_MS = 3_000;
 export const LOCAL_PROVIDER_ERROR_CODE: AIProviderDiagnostic["code"] = "error";

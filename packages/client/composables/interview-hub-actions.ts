@@ -1,11 +1,7 @@
-import {
-  APP_ROUTE_QUERY_KEYS,
-  APP_ROUTES,
-  INTERVIEW_FALLBACK_STUDIO_ID,
-  type InterviewMode,
-  type InterviewTargetJob,
-  type Job,
-} from "@bao/shared";
+import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared/constants/interview";
+import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import type { InterviewMode, InterviewTargetJob } from "@bao/shared/types/interview";
+import type { Job } from "@bao/shared/types/jobs";
 import type { NuxtApp } from "#app";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Router } from "vue-router";

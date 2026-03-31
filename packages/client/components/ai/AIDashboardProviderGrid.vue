@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { APP_ROUTES, type AIProviderType } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { AIProviderType } from "@bao/shared/types/ai";
 import type {
   ProviderConfig,
   ProviderConnectivityResult,

@@ -1,4 +1,5 @@
-import { AI_PROVIDER_DEFAULT, type AIProviderType } from "@bao/shared";
+import { AI_PROVIDER_DEFAULT } from "@bao/shared/constants/ai-provider";
+import type { AIProviderType } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import type {
   DashboardStats,

@@ -1,10 +1,5 @@
-import type { SkillCategory, SkillEvidence, SkillMapping } from "@bao/shared";
-import {
-  isRecord,
-  SKILL_CATEGORY_IDS,
-  SKILL_EVIDENCE_TYPE_IDS,
-  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
-} from "@bao/shared";
+import { SKILL_CATEGORY_IDS, SKILL_EVIDENCE_TYPE_IDS, SKILL_EVIDENCE_VERIFICATION_STATUS_IDS, type SkillCategory, type SkillEvidence, type SkillMapping } from "@bao/shared/types/skill-mapping";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { skillMappings } from "../db/schema/skill-mappings";
 
 type SkillMappingRow = typeof skillMappings.$inferSelect;

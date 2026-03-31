@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { generateId } from "@bao/shared";
+import { generateId } from "@bao/shared/utils/validation";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { requestJson } from "../test-utils";

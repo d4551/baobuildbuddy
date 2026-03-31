@@ -1,11 +1,7 @@
-import type {
-  ErrorEnvelope,
-  JsonObject,
-  RpaRunErrorCode,
-  RpaRunEvent,
-  RpaRunResult,
-} from "@bao/shared";
-import { RPA_PROTOCOL_VERSION } from "@bao/shared";
+import type { ErrorEnvelope, RpaRunErrorCode } from "@bao/shared/schemas/error-envelope.schema";
+import type { RpaRunEvent, RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
+import { RPA_PROTOCOL_VERSION } from "@bao/shared/schemas/rpa-protocol.schema";
+import type { JsonObject } from "@bao/shared/utils/json";
 
 type ProtocolOutputStream = "stdout" | "stderr";
 

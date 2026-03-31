@@ -1,18 +1,9 @@
-import {
-  AI_CHAT_CONTEXT_AUTOMATION_RUNS_LIMIT,
-  AI_CHAT_CONTEXT_AVAILABLE_RESUMES_LIMIT,
-  AI_CHAT_CONTEXT_INTERVIEW_SESSIONS_LIMIT,
-  AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT,
-  AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT,
-  AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT,
-  AI_CHAT_HISTORY_FETCH_LIMIT,
-  type AIChatContextDomain,
-  type BrandSettings,
-  type ChatMessage,
-  DEFAULT_PROFILE_ID,
-  resolveBrandSettings,
-  settle,
-} from "@bao/shared";
+import { AI_CHAT_CONTEXT_AUTOMATION_RUNS_LIMIT, AI_CHAT_CONTEXT_AVAILABLE_RESUMES_LIMIT, AI_CHAT_CONTEXT_INTERVIEW_SESSIONS_LIMIT, AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT, AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT, AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT, AI_CHAT_HISTORY_FETCH_LIMIT } from "@bao/shared/constants/ai-chat";
+import { resolveBrandSettings } from "@bao/shared/constants/branding";
+import type { AIChatContextDomain, ChatMessage } from "@bao/shared/types/ai";
+import type { BrandSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import { settle } from "@bao/shared/utils/promise";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NotificationPreferences } from "@bao/shared";
+import type { NotificationPreferences } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "./save-state";
 

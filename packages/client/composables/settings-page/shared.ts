@@ -1,5 +1,6 @@
-import type { AIRouting, AIRoutingPurpose } from "@bao/shared";
-import { AI_PROVIDER_DEFAULT, type AIProviderType, type AppLanguageCode } from "@bao/shared";
+import { AI_PROVIDER_DEFAULT } from "@bao/shared/constants/ai-provider";
+import type { AppLanguageCode } from "@bao/shared/constants/settings";
+import type { AIProviderType, AIRouting, AIRoutingPurpose } from "@bao/shared/types/ai";
 import type { useI18n } from "vue-i18n";
 import { resolveLocaleLabel } from "~/constants/i18n";
 import type { SaveState } from "~/components/settings/save-state";

@@ -1,4 +1,6 @@
-import { DEFAULT_AUTOMATION_SETTINGS, scraperScriptEnvelopeSchema, settle } from "@bao/shared";
+import { scraperScriptEnvelopeSchema } from "@bao/shared/schemas/automation-scripts.schema";
+import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import { settle } from "@bao/shared/utils/promise";
 import type { PortalJobExtractor } from "../providers/provider-types";
 import { closeAutomationBrowser, launchAutomationBrowser } from "./browser";
 import { automationRuntimeConfig } from "./config";

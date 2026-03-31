@@ -1,8 +1,6 @@
-import {
-  isEmailTransportConfigured,
-  isValidEmail,
-  type RpaRunExecutionEnvelope,
-} from "@bao/shared";
+import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import { isEmailTransportConfigured } from "@bao/shared/utils/email-transport";
+import { isValidEmail } from "@bao/shared/utils/validation";
 import type { Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";

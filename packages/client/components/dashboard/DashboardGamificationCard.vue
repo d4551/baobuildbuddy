@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserGamificationData } from "@bao/shared";
+import type { UserGamificationData } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_A11Y_KEYS } from "~/constants/dashboard-copy";
 import {

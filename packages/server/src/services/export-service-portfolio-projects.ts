@@ -1,8 +1,6 @@
-import {
-  collectDefinedStringValues,
-  PORTFOLIO_PROJECT_SPACE,
-  type PortfolioProject,
-} from "@bao/shared";
+import { PORTFOLIO_PROJECT_SPACE } from "@bao/shared/constants/export-layout";
+import type { PortfolioProject } from "@bao/shared/types/portfolio";
+import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 

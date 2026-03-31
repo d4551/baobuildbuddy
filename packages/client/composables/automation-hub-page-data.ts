@@ -1,8 +1,5 @@
-import type {
-  DashboardStats,
-  RpaCapabilityAuditEntry,
-  RpaCapabilityAuditReport,
-} from "@bao/shared";
+import type { RpaCapabilityAuditEntry, RpaCapabilityAuditReport } from "@bao/shared/constants/automation";
+import type { DashboardStats } from "@bao/shared/types/search";
 import { computed } from "vue";
 import type { Ref } from "vue";
 import type {

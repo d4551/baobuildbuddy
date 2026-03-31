@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BrandSettings } from "@bao/shared";
+import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";

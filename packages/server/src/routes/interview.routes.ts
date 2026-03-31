@@ -1,4 +1,4 @@
-import { HTTP_STATUS_CREATED } from "@bao/shared";
+import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import {

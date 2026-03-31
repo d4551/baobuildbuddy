@@ -1,4 +1,4 @@
-import { formDataToResumeData, resumeDataToFormData } from "@bao/shared";
+import { formDataToResumeData, resumeDataToFormData } from "@bao/shared/utils/resume-transform";
 import type { NuxtApp } from "#app";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";

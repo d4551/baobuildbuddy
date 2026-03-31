@@ -1,4 +1,6 @@
-import { type AutomationSettings, DEFAULT_AUTOMATION_SETTINGS, settle } from "@bao/shared";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import { settle } from "@bao/shared/utils/promise";
 import { type Browser, type BrowserContext, chromium, type Page } from "playwright";
 import { automationRuntimeConfig } from "./config";
 

@@ -1,18 +1,5 @@
-import type {
-  AIRouting,
-  AIProviderConfig,
-  AIProviderStatus,
-  AIProviderType,
-  AIResponse,
-  GenerateOptions,
-} from "@bao/shared";
-import {
-  AI_PROVIDER_DEFAULT,
-  AI_PROVIDER_DEFAULT_ORDER,
-  DEFAULT_AI_ROUTING,
-  LOCAL_AI_AUTO_DETECT_MODEL,
-  normalizeAIRouting,
-} from "@bao/shared";
+import { AI_PROVIDER_DEFAULT, AI_PROVIDER_DEFAULT_ORDER, DEFAULT_AI_ROUTING, LOCAL_AI_AUTO_DETECT_MODEL, normalizeAIRouting } from "@bao/shared/constants/ai-provider";
+import type { AIProviderConfig, AIProviderStatus, AIProviderType, AIResponse, AIRouting, GenerateOptions } from "@bao/shared/types/ai";
 import { TEST_AI_PROVIDER_NAME } from "./ai-deterministic-provider";
 import { detectLocalProviders, getProviderStatuses } from "./ai-provider-diagnostics";
 import {

@@ -1,4 +1,6 @@
-import { APP_ROUTES, buildAutomationScreenshotEndpoint, type RpaRunResult } from "@bao/shared";
+import { buildAutomationScreenshotEndpoint } from "@bao/shared/constants/endpoints";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { type ComputedRef, computed, onBeforeUnmount, type Ref, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import type { TimelineEntry } from "~/composables/automation-run-detail-page-contracts";

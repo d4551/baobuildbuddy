@@ -1,4 +1,4 @@
-import type { ScrapedJob, ScrapedStudio } from "@bao/shared";
+import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
 
 /**
  * Scrape enrichment prompt for a normalized scraped job row.

@@ -1,17 +1,9 @@
-import {
-  AI_DEFAULT_TEMPERATURE_INTERVIEW,
-  AI_DEFAULT_TEMPERATURE_INTERVIEW_QUESTIONS,
-  AI_MAX_TOKENS_ANALYSIS,
-  AI_MAX_TOKENS_QUESTION,
-  API_ERROR_AI_NO_QUESTIONS,
-  API_ERROR_AI_OPERATION_TIMEOUT,
-  INTERVIEW_DEFAULT_ROLE_TYPE,
-  settle,
-  toErrorMessage,
-  type InterviewConfig,
-  type InterviewQuestion,
-  type InterviewResponse,
-} from "@bao/shared";
+import { AI_DEFAULT_TEMPERATURE_INTERVIEW, AI_DEFAULT_TEMPERATURE_INTERVIEW_QUESTIONS, AI_MAX_TOKENS_ANALYSIS, AI_MAX_TOKENS_QUESTION } from "@bao/shared/constants/ai-generation";
+import { API_ERROR_AI_NO_QUESTIONS, API_ERROR_AI_OPERATION_TIMEOUT } from "@bao/shared/constants/api-errors";
+import { INTERVIEW_DEFAULT_ROLE_TYPE } from "@bao/shared/constants/interview";
+import type { InterviewConfig, InterviewQuestion, InterviewResponse } from "@bao/shared/types/interview";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 import { createServerLogger } from "../utils/logger";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
 import { createAIService, resolveCandidateInterviewContext } from "./interview-service-context";

@@ -1,10 +1,8 @@
-import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
-import {
-  AI_CHAT_CONTEXT_MESSAGE_LIMIT,
-  API_ERROR_ALL_PROVIDERS_STREAM_FAILED,
-  settle,
-  toErrorMessage,
-} from "@bao/shared";
+import { AI_CHAT_CONTEXT_MESSAGE_LIMIT } from "@bao/shared/constants/ai-chat";
+import { API_ERROR_ALL_PROVIDERS_STREAM_FAILED } from "@bao/shared/constants/api-errors";
+import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 import { createServerLogger } from "../../utils/logger";
 import type { AIProvider } from "./provider-interface";
 

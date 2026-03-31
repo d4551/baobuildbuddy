@@ -1,4 +1,5 @@
-import { AI_PROVIDER_CATALOG, API_MESSAGE_AI_NO_PROVIDERS } from "@bao/shared";
+import { AI_PROVIDER_CATALOG } from "@bao/shared/constants/ai-provider";
+import { API_MESSAGE_AI_NO_PROVIDERS } from "@bao/shared/constants/api-messages";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";

@@ -1,18 +1,9 @@
 import { join } from "node:path";
-import {
-  API_ERROR_INVALID_RUN_ID,
-  API_ERROR_INVALID_SCREENSHOT_INDEX,
-  API_ERROR_INVALID_SCREENSHOT_METADATA,
-  API_ERROR_SCREENSHOT_FILE_MISSING,
-  API_ERROR_SCREENSHOT_INDEX_OUT_OF_RANGE,
-  API_ERROR_SCREENSHOT_NOT_FOUND,
-  DECIMAL_RADIX,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_NOT_FOUND,
-  RUN_ID_MIN_LENGTH,
-  RUN_ID_SAFE_PATTERN_SOURCE,
-  settle,
-} from "@bao/shared";
+import { API_ERROR_INVALID_RUN_ID, API_ERROR_INVALID_SCREENSHOT_INDEX, API_ERROR_INVALID_SCREENSHOT_METADATA, API_ERROR_SCREENSHOT_FILE_MISSING, API_ERROR_SCREENSHOT_INDEX_OUT_OF_RANGE, API_ERROR_SCREENSHOT_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { RUN_ID_MIN_LENGTH, RUN_ID_SAFE_PATTERN_SOURCE } from "@bao/shared/constants/schema-limits";
+import { settle } from "@bao/shared/utils/promise";
 import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
 import Type from "baobox";

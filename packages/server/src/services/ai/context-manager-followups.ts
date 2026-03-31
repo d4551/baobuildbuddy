@@ -1,4 +1,4 @@
-import type { AIChatContextDomain } from "@bao/shared";
+import type { AIChatContextDomain } from "@bao/shared/types/ai";
 
 const DOMAIN_FOLLOW_UPS: Record<AIChatContextDomain, string[]> = {
   resume: [

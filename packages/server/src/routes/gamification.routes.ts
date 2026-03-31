@@ -1,11 +1,7 @@
-import {
-  API_ERROR_CHALLENGE_NOT_FOUND,
-  API_MESSAGE_CHALLENGE_COMPLETED,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_CREATED,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_SHORT,
-} from "@bao/shared";
+import { API_ERROR_CHALLENGE_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { API_MESSAGE_CHALLENGE_COMPLETED } from "@bao/shared/constants/api-messages";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
+import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import { StandardSchemaV1 } from "baobox";
 import Type from "baobox";
 import { Elysia } from "elysia";

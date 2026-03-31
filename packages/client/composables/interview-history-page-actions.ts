@@ -1,4 +1,4 @@
-import { APP_ROUTE_QUERY_KEYS } from "@bao/shared";
+import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 import type { InterviewHistoryPageContext } from "./interview-history-page-contracts";

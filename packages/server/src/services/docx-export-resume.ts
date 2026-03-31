@@ -1,9 +1,7 @@
-import {
-  RESUME_EXPORT_THEME_CONFIGS,
-  RESUME_TEMPLATE_DEFAULT,
-  resolveResumeExportTemplate,
-  type ResumeData,
-} from "@bao/shared";
+import { RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-layout";
+import { RESUME_TEMPLATE_DEFAULT } from "@bao/shared/constants/resume";
+import type { ResumeData } from "@bao/shared/types/resume";
+import { resolveResumeExportTemplate } from "@bao/shared/utils/export-contract";
 import { Document, Packer } from "docx";
 import { buildResumeSections } from "./docx-export-resume-sections";
 

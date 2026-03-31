@@ -1,12 +1,10 @@
-import type {
-  ChatMessage,
-  GameStudio,
-  InterviewSession,
-  Job,
-  PortfolioData,
-  ResumeData,
-} from "@bao/shared";
-import { generateId, STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { ChatMessage } from "@bao/shared/types/ai";
+import type { GameStudio, InterviewSession } from "@bao/shared/types/interview";
+import type { Job } from "@bao/shared/types/jobs";
+import type { PortfolioData } from "@bao/shared/types/portfolio";
+import type { ResumeData } from "@bao/shared/types/resume";
+import { generateId } from "@bao/shared/utils/validation";
 import type { ComposerTranslation } from "vue-i18n";
 import { createChatMessage } from "~/utils/chat";
 

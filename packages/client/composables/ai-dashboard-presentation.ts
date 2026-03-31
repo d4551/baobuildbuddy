@@ -1,4 +1,4 @@
-import type { AIProviderType } from "@bao/shared";
+import type { AIProviderType } from "@bao/shared/types/ai";
 import type { ComputedRef, Ref } from "vue";
 import type {
   DashboardStats,

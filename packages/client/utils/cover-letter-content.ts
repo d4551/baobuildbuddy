@@ -1,4 +1,4 @@
-import type { CoverLetterData } from "@bao/shared";
+import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 
 const COVER_LETTER_PRIMARY_SECTION_KEYS = [
   "opening",

@@ -1,5 +1,5 @@
 import type { NuxtApp } from "#app";
-import type { AutomationScrapeTarget } from "@bao/shared";
+import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";
 import type { Router } from "vue-router";

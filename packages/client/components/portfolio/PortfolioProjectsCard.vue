@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { PortfolioProject } from "@bao/shared";
-import { PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT } from "@bao/shared";
+import { PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT } from "@bao/shared/constants/portfolio";
+import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 import type { ProjectDirection } from "~/composables/usePortfolioPage";
 

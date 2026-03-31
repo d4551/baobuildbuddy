@@ -1,4 +1,4 @@
-import { collectDefinedStringValues } from "@bao/shared";
+import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import { AlignmentType, Paragraph, TextRun } from "docx";
 import {
   type DocxTemplateConfig,

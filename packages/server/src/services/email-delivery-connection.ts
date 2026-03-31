@@ -1,5 +1,5 @@
 import type { EmailTransportRuntimeConfig, SmtpResponse } from "./email-delivery-contracts";
-import { settle } from "@bao/shared";
+import { settle } from "@bao/shared/utils/promise";
 import { dotStuffMessage, encodeBase64Utf8, SMTP_LINE_BREAK } from "./email-delivery-message";
 import {
   assertExpectedCode,

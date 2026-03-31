@@ -1,12 +1,7 @@
-import {
-  API_ERROR_SCRAPE_JOBS_FAILED,
-  API_ERROR_SCRAPE_STUDIOS_FAILED,
-  API_ERROR_UNKNOWN,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  isAutomationScrapePortalId,
-  settle,
-} from "@bao/shared";
+import { API_ERROR_SCRAPE_JOBS_FAILED, API_ERROR_SCRAPE_STUDIOS_FAILED, API_ERROR_UNKNOWN } from "@bao/shared/constants/api-errors";
+import { isAutomationScrapePortalId } from "@bao/shared/constants/automation";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
+import { settle } from "@bao/shared/utils/promise";
 import { StandardSchemaV1 } from "baobox";
 import Type from "baobox";
 import { Elysia } from "elysia";

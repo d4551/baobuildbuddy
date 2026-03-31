@@ -1,19 +1,6 @@
-import type {
-  GameGenre,
-  JobExperienceLevel,
-  JobTaxonomyKeywordCategory,
-  JobTaxonomyKeywordEntry,
-  JobType,
-  Platform,
-  StudioType,
-} from "@bao/shared";
-import {
-  JOB_EXPERIENCE_LEVELS,
-  JOB_GAME_GENRES,
-  JOB_STUDIO_TYPES,
-  JOB_SUPPORTED_PLATFORMS,
-  JOB_TYPES,
-} from "@bao/shared";
+import { JOB_EXPERIENCE_LEVELS, JOB_GAME_GENRES, JOB_STUDIO_TYPES, JOB_SUPPORTED_PLATFORMS, JOB_TYPES } from "@bao/shared/constants/jobs";
+import type { GameGenre, JobExperienceLevel, JobType, Platform, StudioType } from "@bao/shared/types/jobs";
+import type { JobTaxonomyKeywordCategory, JobTaxonomyKeywordEntry } from "@bao/shared/types/jobs-taxonomy";
 import type { RawJob } from "./providers/provider-interface";
 import { getJobTaxonomy } from "./job-taxonomy-service";
 

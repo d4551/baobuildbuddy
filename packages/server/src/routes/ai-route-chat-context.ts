@@ -1,16 +1,6 @@
-import type { AIChatContext } from "@bao/shared";
-import {
-  AI_CHAT_CONTEXT_DOMAIN_IDS,
-  AI_CHAT_CONTEXT_ENTITY_TYPE_IDS,
-  AI_CHAT_CONTEXT_SOURCE_IDS,
-  inferAIChatDomainFromRoutePath,
-  SCHEMA_MAX_LENGTH_DEVICE,
-  SCHEMA_MAX_LENGTH_ENTITY_TYPE,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_SHORT,
-  SCHEMA_MAX_LENGTH_SOURCE,
-  SCHEMA_MAX_LENGTH_URL,
-} from "@bao/shared";
+import { inferAIChatDomainFromRoutePath } from "@bao/shared/constants/ai-chat";
+import { SCHEMA_MAX_LENGTH_DEVICE, SCHEMA_MAX_LENGTH_ENTITY_TYPE, SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT, SCHEMA_MAX_LENGTH_SOURCE, SCHEMA_MAX_LENGTH_URL } from "@bao/shared/constants/schema-limits";
+import { AI_CHAT_CONTEXT_DOMAIN_IDS, AI_CHAT_CONTEXT_ENTITY_TYPE_IDS, AI_CHAT_CONTEXT_SOURCE_IDS, type AIChatContext } from "@bao/shared/types/ai";
 import Type, { type StaticParse } from "baobox";
 
 export const chatContextSchema = Type.Object(

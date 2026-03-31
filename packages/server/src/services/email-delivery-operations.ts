@@ -1,4 +1,4 @@
-import { isValidEmail } from "@bao/shared";
+import { isValidEmail } from "@bao/shared/utils/validation";
 import type { SmtpConnection } from "./email-delivery-connection";
 import type {
   DeliveryEnvelopeMetadata,

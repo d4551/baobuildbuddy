@@ -1,11 +1,7 @@
-import {
-  APP_ROUTE_QUERY_KEYS,
-  type DashboardStats,
-  type ResumeFormData,
-  RESUME_TEMPLATE_DEFAULT,
-  type ResumeTemplate,
-  resumeDataToFormData,
-} from "@bao/shared";
+import { RESUME_TEMPLATE_DEFAULT, type ResumeTemplate } from "@bao/shared/constants/resume";
+import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import type { DashboardStats } from "@bao/shared/types/search";
+import { resumeDataToFormData, type ResumeFormData } from "@bao/shared/utils/resume-transform";
 import type { Ref } from "vue";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import type { ResumeTabId } from "~/components/resume/resume-page-contracts";

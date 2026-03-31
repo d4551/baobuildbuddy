@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChatMessage } from "@bao/shared";
+import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 
 defineProps<{

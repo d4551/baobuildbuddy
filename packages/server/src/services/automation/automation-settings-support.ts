@@ -1,14 +1,9 @@
-import type { AutomationSettings } from "@bao/shared";
-import {
-  AUTOMATION_MAX_CONCURRENT_RUNS,
-  AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS,
-  DEFAULT_AUTOMATION_SETTINGS,
-  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
-  automationSettingsSchema,
-  emailTransportSettingsSchema,
-  isEmailTransportConfigured,
-  settle,
-} from "@bao/shared";
+import { AUTOMATION_MAX_CONCURRENT_RUNS, AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS } from "@bao/shared/constants/automation";
+import { automationSettingsSchema, emailTransportSettingsSchema } from "@bao/shared/schemas/settings.schema";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_EMAIL_TRANSPORT_SETTINGS } from "@bao/shared/types/settings-defaults";
+import { isEmailTransportConfigured } from "@bao/shared/utils/email-transport";
+import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";

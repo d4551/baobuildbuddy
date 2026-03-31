@@ -1,5 +1,5 @@
-import type { GameStudio } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import { toGameStudio } from "./api-normalizer-studios";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";

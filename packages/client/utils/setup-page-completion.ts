@@ -1,4 +1,4 @@
-import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared";
+import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
 import { settlePromise } from "~/composables/async-flow";
 import {
   API_KEY_FIELD_BY_PROVIDER,

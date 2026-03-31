@@ -1,4 +1,4 @@
-import { COVER_LETTER_DEFAULT_TEMPLATE } from "@bao/shared";
+import { COVER_LETTER_DEFAULT_TEMPLATE } from "@bao/shared/constants/cover-letter";
 import { sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 

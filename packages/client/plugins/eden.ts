@@ -1,5 +1,5 @@
 import type { App } from "@bao/server/app";
-import { AUTH_KEY_STORAGE_KEY } from "@bao/shared";
+import { AUTH_KEY_STORAGE_KEY } from "@bao/shared/constants/auth";
 import { treaty } from "@elysiajs/eden";
 import { tryUseNuxtApp } from "nuxt/app";
 import type { Ref } from "vue";

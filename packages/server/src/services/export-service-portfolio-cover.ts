@@ -1,4 +1,4 @@
-import type { PortfolioMetadata } from "@bao/shared";
+import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
 import { drawPortfolioWrappedText } from "./export-service-portfolio-context";
 

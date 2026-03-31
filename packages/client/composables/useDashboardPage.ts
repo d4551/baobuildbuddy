@@ -1,4 +1,5 @@
-import { formatRelativeTime, getXPProgress } from "@bao/shared";
+import { getXPProgress } from "@bao/shared/constants/xp-levels";
+import { formatRelativeTime } from "@bao/shared/utils/date-helpers";
 import { useI18n } from "vue-i18n";
 import { createFlowEngineInput } from "~/constants/flow-engine";
 import {

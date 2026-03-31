@@ -1,5 +1,6 @@
-import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
-import { DEFAULT_PROFILE_ID, isRecord } from "@bao/shared";
+import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared/types/search";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { STATISTICS_AUTOMATION_RUNS_LIMIT } from "@bao/shared/constants/statistics";
 import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";

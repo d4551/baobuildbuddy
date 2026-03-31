@@ -1,20 +1,10 @@
-import {
-  API_ERROR_APPLICATION_NOT_FOUND,
-  API_ERROR_JOB_NOT_FOUND,
-  API_MESSAGE_ALREADY_APPLIED,
-  API_MESSAGE_JOB_ALREADY_SAVED,
-  DECIMAL_RADIX,
-  generateId,
-  HTTP_STATUS_NOT_FOUND,
-  JOB_EXPERIENCE_LEVELS,
-  JOB_GAME_GENRES,
-  JOB_QUERY_DEFAULT_LIMIT,
-  JOB_QUERY_DEFAULT_PAGE,
-  JOB_QUERY_MAX_LIMIT,
-  JOB_STUDIO_TYPES,
-  JOB_SUPPORTED_PLATFORMS,
-  ROUTE_GAMIFICATION_XP,
-} from "@bao/shared";
+import { API_ERROR_APPLICATION_NOT_FOUND, API_ERROR_JOB_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { API_MESSAGE_ALREADY_APPLIED, API_MESSAGE_JOB_ALREADY_SAVED } from "@bao/shared/constants/api-messages";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
+import { HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { JOB_EXPERIENCE_LEVELS, JOB_GAME_GENRES, JOB_QUERY_DEFAULT_LIMIT, JOB_QUERY_DEFAULT_PAGE, JOB_QUERY_MAX_LIMIT, JOB_STUDIO_TYPES, JOB_SUPPORTED_PLATFORMS } from "@bao/shared/constants/jobs";
+import { generateId } from "@bao/shared/utils/validation";
 import { and, desc, eq, like, or } from "drizzle-orm";
 import { db } from "../db/client";
 import { applications, jobs, savedJobs } from "../db/schema/jobs";

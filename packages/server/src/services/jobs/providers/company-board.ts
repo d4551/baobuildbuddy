@@ -1,10 +1,7 @@
-import {
-  type CompanyBoardConfig,
-  generateId,
-  type JobProviderSettings,
-  safeParseJson,
-  settle,
-} from "@bao/shared";
+import type { CompanyBoardConfig, JobProviderSettings } from "@bao/shared/types/settings-contracts";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { settle } from "@bao/shared/utils/promise";
+import { generateId } from "@bao/shared/utils/validation";
 import type { JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 import {

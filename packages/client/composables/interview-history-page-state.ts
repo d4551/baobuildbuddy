@@ -1,4 +1,4 @@
-import { DECIMAL_RADIX } from "@bao/shared";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import type { LocationQueryValue } from "vue-router";
 import type {
   InterviewHistoryPageState,

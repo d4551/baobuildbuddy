@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
-import { generateId, settle } from "@bao/shared";
+import { settle } from "@bao/shared/utils/promise";
+import { generateId } from "@bao/shared/utils/validation";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";

@@ -1,4 +1,5 @@
-import { DECIMAL_RADIX, safeParseJson } from "@bao/shared";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import { safeParseJson } from "@bao/shared/utils/json";
 import type { JsonRecord } from "./interview-service-contracts";
 
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;

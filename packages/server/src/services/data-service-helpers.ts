@@ -1,4 +1,4 @@
-import { toErrorMessage } from "@bao/shared";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 
 export const runWithErrorHandler = async (
   operation: () => Promise<void>,

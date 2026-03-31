@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS_ID } from "@bao/shared";
+import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";

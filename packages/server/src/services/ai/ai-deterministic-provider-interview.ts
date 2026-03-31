@@ -1,4 +1,4 @@
-import { DECIMAL_RADIX } from "@bao/shared";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 
 const TEST_AI_MAX_QUESTION_COUNT = 12;
 const EXACT_QUESTION_COUNT_PATTERN = /exactly\s+(\d+)\s+questions/i;

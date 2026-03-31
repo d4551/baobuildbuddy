@@ -1,20 +1,9 @@
-import type {
-  AIChatContext,
-  AIChatContextEntity,
-  AIChatContextEntityType,
-  AIChatContextSource,
-  GameStudio,
-  InterviewSession,
-  Job,
-  PortfolioData,
-  ResumeData,
-} from "@bao/shared";
-import {
-  AI_CHAT_ENTITY_ROUTE_PATHS,
-  AI_CHAT_PAGE_PATH,
-  AI_CHAT_ROUTE_QUERY_KEYS,
-  inferAIChatDomainFromRoutePath,
-} from "@bao/shared";
+import { AI_CHAT_ENTITY_ROUTE_PATHS, AI_CHAT_PAGE_PATH, AI_CHAT_ROUTE_QUERY_KEYS, inferAIChatDomainFromRoutePath } from "@bao/shared/constants/ai-chat";
+import type { AIChatContext, AIChatContextEntity, AIChatContextEntityType, AIChatContextSource } from "@bao/shared/types/ai";
+import type { GameStudio, InterviewSession } from "@bao/shared/types/interview";
+import type { Job } from "@bao/shared/types/jobs";
+import type { PortfolioData } from "@bao/shared/types/portfolio";
+import type { ResumeData } from "@bao/shared/types/resume";
 import type { LocationQueryValue } from "vue-router";
 
 interface EntityContextInput {

@@ -1,4 +1,4 @@
-import type { RpaRunResult } from "@bao/shared";
+import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { ProtocolEmitter } from "../runtime/protocol";
 
 const emitVerificationRun = async (): Promise<number> => {

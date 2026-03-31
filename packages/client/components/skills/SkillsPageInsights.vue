@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { APP_ROUTES, type SkillMapping } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 
 defineProps<{

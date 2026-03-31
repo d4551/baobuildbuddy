@@ -1,19 +1,8 @@
-import {
-  API_ERROR_STUDIO_NOT_FOUND,
-  API_MESSAGE_STUDIO_DELETED,
-  generateId,
-  HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
-  SCHEMA_MAX_ITEMS_LARGE,
-  SCHEMA_MAX_ITEMS_MEDIUM,
-  SCHEMA_MAX_ITEMS_SMALL,
-  SCHEMA_MAX_LENGTH_DESCRIPTION,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_LABEL,
-  SCHEMA_MAX_LENGTH_SHORT,
-  SCHEMA_MAX_LENGTH_TINY,
-  SCHEMA_MAX_LENGTH_URL,
-} from "@bao/shared";
+import { API_ERROR_STUDIO_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { API_MESSAGE_STUDIO_DELETED } from "@bao/shared/constants/api-messages";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { SCHEMA_MAX_ITEMS_LARGE, SCHEMA_MAX_ITEMS_MEDIUM, SCHEMA_MAX_ITEMS_SMALL, SCHEMA_MAX_LENGTH_DESCRIPTION, SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_LABEL, SCHEMA_MAX_LENGTH_SHORT, SCHEMA_MAX_LENGTH_TINY, SCHEMA_MAX_LENGTH_URL } from "@bao/shared/constants/schema-limits";
+import { generateId } from "@bao/shared/utils/validation";
 import { StandardSchemaV1 } from "baobox";
 import { desc, eq } from "drizzle-orm";
 import Type from "baobox";

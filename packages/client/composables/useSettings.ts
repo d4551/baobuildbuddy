@@ -1,6 +1,6 @@
-import type { AppSettings } from "@bao/shared";
-import type { JobTaxonomySettings } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
+import type { AppSettings } from "@bao/shared/types/settings-contracts";
 import { computed, readonly } from "vue";
 import { useI18n } from "vue-i18n";
 import { toAppSettings } from "./api-normalizer-settings";

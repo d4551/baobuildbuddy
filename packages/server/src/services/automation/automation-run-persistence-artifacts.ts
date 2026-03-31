@@ -1,10 +1,7 @@
 import { join, resolve } from "node:path";
-import type { RpaRunResult } from "@bao/shared";
-import {
-  AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
-  AUTOMATION_MIN_ID_LENGTH,
-  settle,
-} from "@bao/shared";
+import { AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH, AUTOMATION_MIN_ID_LENGTH } from "@bao/shared/constants/automation";
+import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
+import { settle } from "@bao/shared/utils/promise";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
 import {
   MAX_CUSTOM_ANSWER_KEY_LENGTH,

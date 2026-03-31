@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { APP_ROUTE_BUILDERS, formatRelativeTimeForDate } from "@bao/shared";
+import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import { formatRelativeTimeForDate } from "@bao/shared/utils/date-helpers";
 import { useI18n } from "vue-i18n";
 import { useScoreColor } from "~/composables/useScoreColor";
 

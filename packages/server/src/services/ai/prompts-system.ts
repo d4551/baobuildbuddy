@@ -1,4 +1,4 @@
-import { DEFAULT_BRAND_SETTINGS } from "@bao/shared";
+import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/constants/branding";
 import type { BrandPromptIdentity } from "./prompt-contracts";
 
 /**

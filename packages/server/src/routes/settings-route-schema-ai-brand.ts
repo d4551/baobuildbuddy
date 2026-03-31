@@ -1,14 +1,7 @@
-import type { AIProviderType } from "@bao/shared";
-import {
-  AI_PROVIDER_ID_LIST,
-  APP_LANGUAGE_CODES,
-  AUTOMATION_BROWSER_OPTIONS,
-  EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
-  EMAIL_TRANSPORT_SECURITY_OPTIONS,
-  SCHEMA_MAX_LENGTH_LONG,
-  SCHEMA_MAX_LENGTH_MODEL,
-  SCHEMA_MAX_LENGTH_SHORT,
-} from "@bao/shared";
+import { AI_PROVIDER_ID_LIST } from "@bao/shared/constants/ai-provider";
+import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_MODEL, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
+import { APP_LANGUAGE_CODES, AUTOMATION_BROWSER_OPTIONS, EMAIL_TRANSPORT_AUTH_MODE_OPTIONS, EMAIL_TRANSPORT_SECURITY_OPTIONS } from "@bao/shared/constants/settings";
+import type { AIProviderType } from "@bao/shared/types/ai";
 import Type from "baobox";
 
 export const VALID_PROVIDERS = AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]];

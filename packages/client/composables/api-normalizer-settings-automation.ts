@@ -1,13 +1,7 @@
-import {
-  type AutomationSettings,
-  DEFAULT_AUTOMATION_SETTINGS,
-  DEFAULT_SPEECH_SETTINGS,
-  asBoolean,
-  asNumber,
-  asString,
-  isRecord,
-  SPEECH_PROVIDER_OPTIONS,
-} from "@bao/shared";
+import { DEFAULT_SPEECH_SETTINGS, SPEECH_PROVIDER_OPTIONS } from "@bao/shared/constants/settings";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import { asBoolean, asNumber, asString, isRecord } from "@bao/shared/utils/type-guards";
 import { normalizeJobProviderSettings as normalizeSharedJobProviderSettings } from "@bao/shared/types/settings-normalization";
 import { asEnum } from "~/composables/api-normalizer-shared";
 import {

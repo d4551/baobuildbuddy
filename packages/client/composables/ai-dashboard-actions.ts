@@ -1,4 +1,4 @@
-import { AI_ROUTING_PURPOSE_IDS, type AIProviderType, type AIRouting } from "@bao/shared";
+import { AI_ROUTING_PURPOSE_IDS, type AIProviderType, type AIRouting } from "@bao/shared/types/ai";
 import type { Ref } from "vue";
 import { settlePromise } from "~/composables/async-flow";
 import type { ProviderConnectivityResult } from "~/types/ai-dashboard";

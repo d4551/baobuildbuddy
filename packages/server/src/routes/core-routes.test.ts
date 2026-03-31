@@ -1,17 +1,11 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import {
-  API_ERROR_AUTH_SETUP_TOKEN_INVALID,
-  API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
-  API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
-  API_MESSAGE_AUTH_DISABLED,
-  API_MESSAGE_SAVE_API_KEY_ONCE,
-  AUTH_API_KEY_PREFIX_PATTERN,
-  DEFAULT_PROFILE_ID,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_FORBIDDEN,
-} from "@bao/shared";
+import { API_ERROR_AUTH_SETUP_TOKEN_INVALID, API_ERROR_AUTH_SETUP_TOKEN_REQUIRED } from "@bao/shared/constants/api-errors";
+import { API_MESSAGE_API_KEY_ALREADY_CONFIGURED, API_MESSAGE_AUTH_DISABLED, API_MESSAGE_SAVE_API_KEY_ONCE } from "@bao/shared/constants/api-messages";
+import { AUTH_API_KEY_PREFIX_PATTERN } from "@bao/shared/constants/auth";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/constants/http";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { requestJson } from "../test-utils";
 
 type SearchCountSnapshot = {

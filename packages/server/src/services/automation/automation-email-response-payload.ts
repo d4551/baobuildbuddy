@@ -1,9 +1,7 @@
-import type { EmailResponseRequest, EmailResponseTone } from "@bao/shared";
-import {
-  AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH,
-  isValidEmail,
-  SCHEMA_MAX_LENGTH_SHORT,
-} from "@bao/shared";
+import { AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH } from "@bao/shared/constants/automation";
+import { SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
+import type { EmailResponseRequest, EmailResponseTone } from "@bao/shared/schemas/automation-email.schema";
+import { isValidEmail } from "@bao/shared/utils/validation";
 import { AutomationValidationError } from "./automation-errors";
 import type { EmailResponseExecutionPayload } from "./automation-run-inputs";
 

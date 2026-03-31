@@ -1,8 +1,8 @@
-import { API_ERROR_APPLICATION_NOT_FOUND } from "@bao/shared";
+import { API_ERROR_APPLICATION_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import type { Job } from "@bao/shared/types/jobs";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { applications, jobs } from "../../db/schema/jobs";
-import type { Job } from "@bao/shared";
 import { dbRowToJob } from "./job-aggregator-mappers";
 
 export const applyToJob = async (jobId: string, notes?: string): Promise<string> => {

@@ -1,16 +1,7 @@
-import {
-  APP_ROUTE_QUERY_KEYS,
-  INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
-  INTERVIEW_DEFAULT_QUESTION_COUNT,
-  INTERVIEW_DEFAULT_ROLE_TYPE,
-  INTERVIEW_DEFAULT_VOICE_SETTINGS,
-  INTERVIEW_HUB_EXPERIENCE_OPTIONS,
-  INTERVIEW_HUB_JOB_QUERY_LIMIT,
-  INTERVIEW_HUB_QUESTION_COUNT_OPTIONS,
-  type InterviewMode,
-  type Job,
-  type VoiceSettings,
-} from "@bao/shared";
+import { INTERVIEW_DEFAULT_EXPERIENCE_LEVEL, INTERVIEW_DEFAULT_QUESTION_COUNT, INTERVIEW_DEFAULT_ROLE_TYPE, INTERVIEW_DEFAULT_VOICE_SETTINGS, INTERVIEW_HUB_EXPERIENCE_OPTIONS, INTERVIEW_HUB_JOB_QUERY_LIMIT, INTERVIEW_HUB_QUESTION_COUNT_OPTIONS } from "@bao/shared/constants/interview";
+import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import type { InterviewMode, VoiceSettings } from "@bao/shared/types/interview";
+import type { Job } from "@bao/shared/types/jobs";
 import type { ComposerTranslation } from "vue-i18n";
 import type { ComputedRef } from "vue";
 import type { LocationQueryValue, RouteLocationNormalizedLoaded } from "vue-router";

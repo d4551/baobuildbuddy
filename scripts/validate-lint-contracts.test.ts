@@ -5,10 +5,9 @@ import { collectUiSingleSourceViolationsForContent } from "./validate-ui-single-
 
 describe("collectNoHtmxViolationsForContent", () => {
   test("flags hx attributes in Vue templates", () => {
-    const jobsRoute = "/" + "jobs";
     const violations = collectNoHtmxViolationsForContent(
       "packages/client/pages/example.vue",
-      `<template><button hx-get="${jobsRoute}">Load</button></template>`,
+      `<template><button hx-get="/jobs">Load</button></template>`,
     );
 
     expect(violations.some((violation) => violation.message.includes("hx attributes"))).toBe(true);
@@ -19,7 +18,7 @@ describe("collectNoTryCatchViolationsForContent", () => {
   test("flags promise catch handlers", () => {
     const violations = collectNoTryCatchViolationsForContent(
       "scripts/example.ts",
-      `void task.${"catch"}((error) => report(error));`,
+      "void task.catch((error) => report(error));",
     );
 
     expect(violations.some((violation) => violation.message.includes("Promise catch"))).toBe(true);

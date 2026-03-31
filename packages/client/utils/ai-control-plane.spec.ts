@@ -1,4 +1,4 @@
-import type { AppSettings } from "@bao/shared";
+import type { AppSettings } from "@bao/shared/types/settings-contracts";
 import { expect, it } from "vitest";
 import {
   buildFallbackProviderRows,

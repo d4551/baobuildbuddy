@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AutomationSettings } from "@bao/shared";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 
 defineProps<{

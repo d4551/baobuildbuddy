@@ -1,4 +1,4 @@
-import type { Job, SalaryRange } from "@bao/shared";
+import type { Job, SalaryRange } from "@bao/shared/types/jobs";
 import type { jobs } from "../../db/schema/jobs";
 import { generateContentHash } from "./deduplication";
 import type { RawJob } from "./providers/provider-interface";

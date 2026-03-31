@@ -1,9 +1,5 @@
-import {
-  COVER_LETTER_DEFAULT_SIGNATURE,
-  collectDefinedStringValues,
-  formatExportDate,
-  toCoverLetterParagraphs,
-} from "@bao/shared";
+import { COVER_LETTER_DEFAULT_SIGNATURE } from "@bao/shared/constants/cover-letter";
+import { collectDefinedStringValues, formatExportDate, toCoverLetterParagraphs } from "@bao/shared/utils/export-contract";
 import { Document, Paragraph, Packer, TextRun } from "docx";
 import {
   COVER_LETTER_DOCX_FONT_FAMILY,

@@ -1,5 +1,5 @@
-import type { UserProfile } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { UserProfile } from "@bao/shared/types/user";
 import { readonly } from "vue";
 import { useI18n } from "vue-i18n";
 import { useState } from "#imports";

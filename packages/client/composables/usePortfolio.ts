@@ -1,5 +1,5 @@
-import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 import { toPortfolioData } from "./api-normalizer-portfolio";
 import { assertApiResponse, withLoadingState } from "./async-flow";

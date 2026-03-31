@@ -1,16 +1,8 @@
-import type { AIRouting, AutomationSettings, EmailTransportSettings } from "@bao/shared";
-import {
-  AI_PROVIDER_DEFAULT_ORDER,
-  DEFAULT_AUTOMATION_SETTINGS,
-  DEFAULT_AI_ROUTING,
-  DEFAULT_BRAND_SETTINGS,
-  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
-  DEFAULT_NOTIFICATION_PREFERENCES,
-  DEFAULT_SETTINGS_ID,
-  LOCAL_AI_DEFAULT_ENDPOINT,
-  LOCAL_AI_DEFAULT_MODEL,
-  THEME_NAMES,
-} from "@bao/shared";
+import { AI_PROVIDER_DEFAULT_ORDER, DEFAULT_AI_ROUTING, LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
+import { DEFAULT_BRAND_SETTINGS, THEME_NAMES } from "@bao/shared/constants/branding";
+import type { AIRouting } from "@bao/shared/types/ai";
+import type { AutomationSettings, EmailTransportSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_EMAIL_TRANSPORT_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 

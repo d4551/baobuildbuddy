@@ -1,4 +1,4 @@
-import { API_ENDPOINT_PREFIX } from "@bao/shared";
+import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 
 const ABSOLUTE_HTTP_URL_PATTERN = /^https?:\/\//i;
 const ABSOLUTE_WS_URL_PATTERN = /^wss?:\/\//i;

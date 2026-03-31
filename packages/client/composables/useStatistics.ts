@@ -1,5 +1,6 @@
-import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
-import { asNumber, asString, isRecord, STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared/types/search";
+import { asNumber, asString, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 

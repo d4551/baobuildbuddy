@@ -1,11 +1,7 @@
-import {
-  automationScrapeTargetToPortalId,
-  type AutomationJobScrapeTarget,
-  type AutomationScriptId,
-  type GamingPortalId,
-  type ScraperOperationResult,
-  type ScrapedJob,
-} from "@bao/shared";
+import { automationScrapeTargetToPortalId, type AutomationJobScrapeTarget } from "@bao/shared/constants/automation";
+import type { AutomationScriptId, ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
+import type { ScraperOperationResult } from "@bao/shared/types/jobs";
+import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
 import type { ScriptReferenceOverride } from "./scraper-service-contracts";
 import { PORTAL_SCRIPT_ID_BY_ID, STUDIO_SCRAPER_SCRIPT_ID } from "./scraper-service-contracts";
 import {

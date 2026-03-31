@@ -1,10 +1,6 @@
-import {
-  AUTOMATION_SCRAPE_TARGETS,
-  type RpaCapabilityAuditEntry,
-  type RpaCapabilityAuditReport,
-  type RpaRunExecutionEnvelope,
-  SCRAPER_JOB_QUERY_LIMIT,
-} from "@bao/shared";
+import { AUTOMATION_SCRAPE_TARGETS, type RpaCapabilityAuditEntry, type RpaCapabilityAuditReport } from "@bao/shared/constants/automation";
+import { SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared/constants/interview";
+import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,

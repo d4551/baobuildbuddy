@@ -1,10 +1,5 @@
-import {
-  PIPELINE_GAMIFICATION_REASONS,
-  PIPELINE_GAMIFICATION_XP,
-  type PipelineGamificationAction,
-  type PipelineGamificationReason,
-  STATE_KEYS,
-} from "@bao/shared";
+import { PIPELINE_GAMIFICATION_REASONS, PIPELINE_GAMIFICATION_XP, type PipelineGamificationAction, type PipelineGamificationReason } from "@bao/shared/constants/gamification";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 
 type AwardedReasonState = Partial<Record<PipelineGamificationReason, true>>;
 

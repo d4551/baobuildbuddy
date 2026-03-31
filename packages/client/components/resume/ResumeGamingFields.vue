@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ResumeFormData } from "@bao/shared";
+import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
 
 type ResumeGamingFields = ResumeFormData["gaming"];

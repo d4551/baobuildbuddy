@@ -1,4 +1,4 @@
-import type { InterviewSession } from "@bao/shared";
+import type { InterviewSession } from "@bao/shared/types/interview";
 import type { Ref } from "vue";
 import type { useI18n } from "vue-i18n";
 

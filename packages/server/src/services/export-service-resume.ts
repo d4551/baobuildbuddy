@@ -1,4 +1,4 @@
-import type { ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
 import { PDFDocument } from "pdf-lib";
 import { createResumeContext, resolveResumePdfTemplate } from "./export-service-resume-layout";
 import { renderResumeEducation, renderResumeSkills } from "./export-service-resume-profile";

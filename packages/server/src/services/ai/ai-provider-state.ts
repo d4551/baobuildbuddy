@@ -1,11 +1,5 @@
-import type {
-  AIRouting,
-  AIRoutingPurpose,
-  AIProviderConfig,
-  AIProviderType,
-  GenerateOptions,
-} from "@bao/shared";
-import { AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared";
+import { AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared/constants/ai-provider";
+import type { AIProviderConfig, AIProviderType, AIRouting, AIRoutingPurpose, GenerateOptions } from "@bao/shared/types/ai";
 import { createProvider } from "./ai-provider-config";
 import type { AIProvider } from "./provider-interface";
 

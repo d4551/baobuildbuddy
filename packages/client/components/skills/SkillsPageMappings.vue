@@ -4,7 +4,7 @@ import {
   SKILLS_CONFIDENCE_MAX,
   SKILLS_CONFIDENCE_MIN,
 } from "~/constants/skills";
-import type { SkillMapping } from "@bao/shared";
+import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 
 defineProps<{

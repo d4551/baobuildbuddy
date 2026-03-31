@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ResumeFormProject } from "@bao/shared";
+import type { ResumeFormProject } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{

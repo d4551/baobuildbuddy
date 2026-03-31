@@ -1,4 +1,5 @@
-import { APP_ROUTE_QUERY_KEYS, INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared";
+import { INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
+import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import {

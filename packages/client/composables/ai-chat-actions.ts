@@ -1,5 +1,5 @@
-import type { AIChatContext, AIChatContextSource, ChatMessage } from "@bao/shared";
-import { generateId } from "@bao/shared";
+import type { AIChatContext, AIChatContextSource, ChatMessage } from "@bao/shared/types/ai";
+import { generateId } from "@bao/shared/utils/validation";
 import type { ComposerTranslation } from "vue-i18n";
 import { assertApiResponse, settlePromise, withLoadingState } from "~/composables/async-flow";
 import { createChatMessage } from "~/utils/chat";

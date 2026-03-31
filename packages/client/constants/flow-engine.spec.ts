@@ -1,4 +1,4 @@
-import type { DashboardStats } from "@bao/shared";
+import type { DashboardStats } from "@bao/shared/types/search";
 import { describe, expect, it } from "vitest";
 import {
   createFlowEngineInput,

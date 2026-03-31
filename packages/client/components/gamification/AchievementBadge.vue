@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GAMIFICATION_ICON_FALLBACK } from "@bao/shared";
+import { GAMIFICATION_ICON_FALLBACK } from "@bao/shared/constants/gamification-icons";
 import { useI18n } from "vue-i18n";
 
 defineProps<{

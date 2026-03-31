@@ -1,4 +1,4 @@
-import { settle } from "@bao/shared";
+import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";

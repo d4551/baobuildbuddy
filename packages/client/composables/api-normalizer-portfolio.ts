@@ -1,14 +1,5 @@
-import {
-  asBoolean,
-  asNumber,
-  asRecord,
-  asString,
-  asStringArray,
-  isRecord,
-  type PortfolioData,
-  type PortfolioMetadata,
-  type PortfolioProject,
-} from "@bao/shared";
+import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
+import { asBoolean, asNumber, asRecord, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
 
 const toPortfolioProject = (value: unknown): PortfolioProject | null => {
   if (!isRecord(value)) return null;

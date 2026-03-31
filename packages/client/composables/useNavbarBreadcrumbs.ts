@@ -1,4 +1,4 @@
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { normalizeRoutePath, resolveLongestMatchingSidebarNavItem } from "~/constants/navigation";
 

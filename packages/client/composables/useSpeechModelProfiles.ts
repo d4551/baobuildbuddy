@@ -1,10 +1,5 @@
-import {
-  DEFAULT_AUTOMATION_SETTINGS,
-  DEFAULT_SPEECH_SETTINGS,
-  SPEECH_MODEL_OPTIONS,
-  SPEECH_PROVIDER_OPTIONS,
-  type SpeechProviderOption,
-} from "@bao/shared";
+import { DEFAULT_SPEECH_SETTINGS, SPEECH_MODEL_OPTIONS, SPEECH_PROVIDER_OPTIONS, type SpeechProviderOption } from "@bao/shared/constants/settings";
+import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 import type { ComputedRef, Ref } from "vue";
 import { computed, reactive, ref, watch } from "vue";
 import { settlePromise } from "./async-flow";

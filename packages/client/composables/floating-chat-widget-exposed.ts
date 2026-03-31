@@ -1,4 +1,4 @@
-import { AI_CHAT_PAGE_PATH } from "@bao/shared";
+import { AI_CHAT_PAGE_PATH } from "@bao/shared/constants/ai-chat";
 import { FLOATING_CHAT_PANEL_ID } from "~/constants/layout";
 import type { FloatingChatWidgetState } from "./floating-chat-widget-contracts";
 

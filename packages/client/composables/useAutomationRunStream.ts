@@ -1,4 +1,5 @@
-import type { AutomationRunUiState, RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared";
+import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
 import { getCurrentScope, onScopeDispose, type Ref, readonly, ref } from "vue";
 import automationJobApplyCatalog from "~/locales/en-US/automation/jobApply";
 import { useAutomation } from "./useAutomation";

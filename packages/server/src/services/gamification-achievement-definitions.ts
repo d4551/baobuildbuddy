@@ -1,5 +1,5 @@
-import type { Achievement, GamificationStats } from "@bao/shared";
-import { getGamificationAchievementIcon } from "@bao/shared";
+import { getGamificationAchievementIcon } from "@bao/shared/constants/gamification-icons";
+import type { Achievement, GamificationStats } from "@bao/shared/types/gamification";
 
 type AchievementDefinition = Omit<Achievement, "unlocked" | "unlockedAt">;
 

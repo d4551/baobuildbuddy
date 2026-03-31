@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Job } from "@bao/shared";
+import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
 
 defineProps<{

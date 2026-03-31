@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AIProviderType, AIRoutingPurpose } from "@bao/shared";
+import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 
 type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
 

@@ -1,11 +1,5 @@
-import type {
-  InterviewAnalysis,
-  InterviewConfig,
-  InterviewConversationStyle,
-  InterviewResponse,
-  ScrapePersonaEnrichment,
-  VoiceSettings,
-} from "@bao/shared";
+import type { InterviewAnalysis, InterviewConfig, InterviewConversationStyle, InterviewResponse, VoiceSettings } from "@bao/shared/types/interview";
+import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import type { interviewSessions } from "../db/schema/interviews";
 
 export type DBInterviewSession = typeof interviewSessions.$inferSelect;

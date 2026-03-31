@@ -1,4 +1,6 @@
-import { API_ERROR_INVALID_GAMIFICATION_PAYLOAD, DEFAULT_PROFILE_ID, isRecord } from "@bao/shared";
+import { API_ERROR_INVALID_GAMIFICATION_PAYLOAD } from "@bao/shared/constants/api-errors";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { gamification } from "../db/schema/gamification";

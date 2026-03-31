@@ -2,7 +2,7 @@ import { describe, expect, setDefaultTimeout, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { generateId } from "@bao/shared";
+import { generateId } from "@bao/shared/utils/validation";
 import {
   createJobApplyFixtureSelectorMap,
   type SubmittedJobApplyFixturePayload,

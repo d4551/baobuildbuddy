@@ -1,16 +1,8 @@
-import {
-  COVER_LETTER_DEFAULT_TEMPLATE,
-  DEFAULT_AUTOMATION_SETTINGS,
-  DEFAULT_AI_ROUTING,
-  DEFAULT_BRAND_SETTINGS,
-  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
-  DEFAULT_NOTIFICATION_PREFERENCES,
-  DEFAULT_PROFILE_ID,
-  DEFAULT_SETTINGS_ID,
-  RESUME_DEFAULT_NAME,
-  RESUME_DEFAULT_THEME,
-  RESUME_TEMPLATE_DEFAULT,
-} from "@bao/shared";
+import { DEFAULT_AI_ROUTING } from "@bao/shared/constants/ai-provider";
+import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/constants/branding";
+import { COVER_LETTER_DEFAULT_TEMPLATE } from "@bao/shared/constants/cover-letter";
+import { RESUME_DEFAULT_NAME, RESUME_DEFAULT_THEME, RESUME_TEMPLATE_DEFAULT } from "@bao/shared/constants/resume";
+import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_EMAIL_TRANSPORT_SETTINGS, DEFAULT_NOTIFICATION_PREFERENCES, DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 
 const escapeSqlString = (value: string): string => value.replaceAll("'", "''");
 const DEFAULT_BRAND_SETTINGS_SQL = escapeSqlString(JSON.stringify(DEFAULT_BRAND_SETTINGS));

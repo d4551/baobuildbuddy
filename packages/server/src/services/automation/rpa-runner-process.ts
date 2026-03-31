@@ -1,9 +1,6 @@
 import { isAbsolute, resolve } from "node:path";
-import {
-  automationScriptEntryById,
-  automationScriptIdSchema,
-  RPA_PROTOCOL_VERSION,
-} from "@bao/shared";
+import { automationScriptEntryById, automationScriptIdSchema } from "@bao/shared/schemas/automation-scripts.schema";
+import { RPA_PROTOCOL_VERSION } from "@bao/shared/schemas/rpa-protocol.schema";
 import { config } from "../../config/env";
 import { SCRAPER_DIR } from "../../config/paths";
 import type {

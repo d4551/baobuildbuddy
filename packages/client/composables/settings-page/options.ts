@@ -1,10 +1,5 @@
-import {
-  AI_PROVIDER_CATALOG,
-  APP_LANGUAGE_OPTIONS,
-  AUTOMATION_BROWSER_OPTIONS,
-  EMAIL_TRANSPORT_AUTH_MODE_OPTIONS,
-  EMAIL_TRANSPORT_SECURITY_OPTIONS,
-} from "@bao/shared";
+import { AI_PROVIDER_CATALOG } from "@bao/shared/constants/ai-provider";
+import { APP_LANGUAGE_OPTIONS, AUTOMATION_BROWSER_OPTIONS, EMAIL_TRANSPORT_AUTH_MODE_OPTIONS, EMAIL_TRANSPORT_SECURITY_OPTIONS } from "@bao/shared/constants/settings";
 import { computed } from "vue";
 import type { TranslateFn } from "./shared";
 import {

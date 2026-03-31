@@ -1,5 +1,5 @@
-import type { AppSettings } from "@bao/shared";
-import { THEME_NAMES } from "@bao/shared";
+import { THEME_NAMES } from "@bao/shared/constants/branding";
+import type { AppSettings } from "@bao/shared/types/settings-contracts";
 import { computed, watch, type Ref } from "vue";
 import { toAppSettings } from "../api-normalizer-settings";
 import { createSettingsPageDerivedState } from "./derived";

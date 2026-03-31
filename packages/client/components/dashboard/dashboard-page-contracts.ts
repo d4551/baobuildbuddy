@@ -1,4 +1,5 @@
-import type { DailyChallenge, UserGamificationData, UserProfile } from "@bao/shared";
+import type { DailyChallenge, UserGamificationData } from "@bao/shared/types/gamification";
+import type { UserProfile } from "@bao/shared/types/user";
 import type { RouteLocationRaw } from "vue-router";
 
 export interface DashboardActivity {

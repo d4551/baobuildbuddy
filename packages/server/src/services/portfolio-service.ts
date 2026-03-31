@@ -1,5 +1,5 @@
-import type { PortfolioData, PortfolioProject } from "@bao/shared";
-import { API_ERROR_CREATE_PROJECT, API_ERROR_INVALID_PROJECT_ID_REORDER } from "@bao/shared";
+import { API_ERROR_CREATE_PROJECT, API_ERROR_INVALID_PROJECT_ID_REORDER } from "@bao/shared/constants/api-errors";
+import type { PortfolioData, PortfolioProject } from "@bao/shared/types/portfolio";
 import {
   createProject,
   deleteProjectById,

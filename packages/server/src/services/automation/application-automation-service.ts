@@ -1,16 +1,9 @@
-import type {
-  AutomationScrapeTarget,
-  EmailResponseRequest,
-  EmailResponseResult,
-  RpaCapabilityAuditReport,
-  RpaRunEvent,
-} from "@bao/shared";
-import {
-  API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING,
-  API_ERROR_RUN_ID_INVALID,
-  generateId,
-  settle,
-} from "@bao/shared";
+import { API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING, API_ERROR_RUN_ID_INVALID } from "@bao/shared/constants/api-errors";
+import type { AutomationScrapeTarget, RpaCapabilityAuditReport } from "@bao/shared/constants/automation";
+import type { EmailResponseRequest, EmailResponseResult } from "@bao/shared/schemas/automation-email.schema";
+import type { RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
+import { settle } from "@bao/shared/utils/promise";
+import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";

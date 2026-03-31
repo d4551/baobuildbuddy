@@ -1,7 +1,7 @@
 import type { NuxtApp } from "#app";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";
-import type { ResumeFormData } from "@bao/shared";
+import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
 import type { ResumePageActionsInput } from "~/composables/resume-page-actions-contracts";
 import {
   useAiEnhancementProgress,

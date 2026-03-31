@@ -1,4 +1,4 @@
-import type { ResumeFormData } from "@bao/shared";
+import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
 import type { RouteLocationRaw } from "vue-router";
 
 export type ResumeTabId =

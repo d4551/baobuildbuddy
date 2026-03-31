@@ -1,9 +1,5 @@
-import {
-  SCORE_PASS_THRESHOLD,
-  SCORE_WARNING_THRESHOLD,
-  SKILLS_DEFAULT_CONFIDENCE,
-  type SkillCategory,
-} from "@bao/shared";
+import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared/constants/score-thresholds";
+import { SKILLS_DEFAULT_CONFIDENCE, type SkillCategory } from "@bao/shared/types/skill-mapping";
 
 /**
  * Non-category sentinel used by UI filters to represent all mappings.

@@ -1,13 +1,5 @@
-import {
-  asBoolean,
-  asNumber,
-  asRecord,
-  asString,
-  asStringArray,
-  asUnknownArray,
-  DEFAULT_PROFILE_ID,
-  isRecord,
-} from "@bao/shared";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import { asBoolean, asNumber, asRecord, asString, asStringArray, asUnknownArray, isRecord } from "@bao/shared/utils/type-guards";
 import type { chatHistory } from "../db/schema/chat-history";
 import type { coverLetters } from "../db/schema/cover-letters";
 import type { gamification } from "../db/schema/gamification";

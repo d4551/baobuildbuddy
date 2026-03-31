@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import type { EmailTransportSecurityOption } from "@bao/shared";
+import type { EmailTransportSecurityOption } from "@bao/shared/constants/settings";
 import { createSmtpHarness, type SmtpHarnessHandle } from "../test-support/email/smtp-harness";
 import { emailDeliveryService } from "./email-delivery-service";
 

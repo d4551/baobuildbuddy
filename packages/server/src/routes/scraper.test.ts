@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
-import { API_ERROR_SCRAPE_JOBS_FAILED, API_ERROR_SCRAPE_STUDIOS_FAILED } from "@bao/shared";
+import { API_ERROR_SCRAPE_JOBS_FAILED, API_ERROR_SCRAPE_STUDIOS_FAILED } from "@bao/shared/constants/api-errors";
 import { scraperService } from "../services/scraper-service";
 import { requestJson } from "../test-utils";
 

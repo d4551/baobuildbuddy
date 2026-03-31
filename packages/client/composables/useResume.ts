@@ -1,4 +1,7 @@
-import { API_ENDPOINTS, type ResumeData, type ResumeTemplate, STATE_KEYS } from "@bao/shared";
+import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import type { ResumeTemplate } from "@bao/shared/constants/resume";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
 import { getStoredApiKey } from "~/plugins/eden";
 import { resolveApiEndpoint } from "~/utils/endpoints";

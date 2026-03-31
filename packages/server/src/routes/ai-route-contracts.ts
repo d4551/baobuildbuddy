@@ -1,12 +1,5 @@
-import {
-  AI_CHAT_CONTEXT_TAIL_LIMIT,
-  SCHEMA_MAX_ITEMS_XXLARGE,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_LABEL,
-  SCHEMA_MAX_LENGTH_LONG,
-  SCHEMA_MAX_LENGTH_MESSAGE,
-  SCHEMA_MAX_LENGTH_SHORT,
-} from "@bao/shared";
+import { AI_CHAT_CONTEXT_TAIL_LIMIT } from "@bao/shared/constants/ai-chat";
+import { SCHEMA_MAX_ITEMS_XXLARGE, SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_LABEL, SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_MESSAGE, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import Type from "baobox";
 import { aiPreferenceSchema, chatContextSchema } from "./ai-route-chat-context";
 

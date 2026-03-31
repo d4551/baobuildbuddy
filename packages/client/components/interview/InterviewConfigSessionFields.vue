@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { InterviewConversationStyle, InterviewMode } from "@bao/shared";
+import type { InterviewConversationStyle, InterviewMode } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import type { InterviewHubSessionConfig } from "~/types/interview";
 

@@ -1,11 +1,8 @@
-import {
-  API_ERROR_AUTOMATION_PAYLOAD_VALIDATION_FAILED,
-  AUTOMATION_RUN_HISTORY_LIMIT,
-  type RpaRunExecutionEnvelope,
-  jsonObjectSchema,
-  rpaRunErrorCodeSchema,
-  rpaRunExecutionEnvelopeSchema,
-} from "@bao/shared";
+import { API_ERROR_AUTOMATION_PAYLOAD_VALIDATION_FAILED } from "@bao/shared/constants/api-errors";
+import { AUTOMATION_RUN_HISTORY_LIMIT } from "@bao/shared/constants/automation";
+import { rpaRunErrorCodeSchema } from "@bao/shared/schemas/error-envelope.schema";
+import { jsonObjectSchema } from "@bao/shared/schemas/json.schema";
+import { rpaRunExecutionEnvelopeSchema, type RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";

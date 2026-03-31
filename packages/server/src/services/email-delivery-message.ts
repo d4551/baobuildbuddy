@@ -1,4 +1,4 @@
-import { generateId } from "@bao/shared";
+import { generateId } from "@bao/shared/utils/validation";
 import type {
   EmailDeliveryRequest,
   EmailTransportRuntimeConfig,

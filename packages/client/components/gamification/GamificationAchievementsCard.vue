@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Achievement } from "@bao/shared";
+import type { Achievement } from "@bao/shared/types/gamification";
 
 defineProps<{
   unlockedAchievements: readonly Achievement[];

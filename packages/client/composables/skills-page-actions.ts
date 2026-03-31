@@ -1,4 +1,5 @@
-import { ROUTE_GAMIFICATION_XP, type SkillCategory, type SkillMapping } from "@bao/shared";
+import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
+import type { SkillCategory, SkillMapping } from "@bao/shared/types/skill-mapping";
 import type { Ref } from "vue";
 import { toSkillMapping } from "~/composables/api-normalizer-skills";
 import { settlePromise } from "~/composables/async-flow";

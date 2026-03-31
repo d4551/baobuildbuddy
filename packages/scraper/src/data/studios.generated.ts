@@ -1,4 +1,4 @@
-import type { ScrapedStudio } from "@bao/shared";
+import type { ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
 
 /**
  * Canonical curated studio rows consumed by the Bun automation runtime.

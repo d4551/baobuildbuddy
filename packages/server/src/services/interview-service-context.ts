@@ -1,12 +1,8 @@
-import {
-  DEFAULT_PROFILE_ID,
-  DEFAULT_SETTINGS_ID,
-  DEFAULT_UNSPECIFIED_LABEL,
-  INTERVIEW_FALLBACK_STUDIO_ID,
-  normalizeScrapePersonaEnrichment,
-  type InterviewCandidateContext,
-  type InterviewConfig,
-} from "@bao/shared";
+import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
+import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared/constants/interview";
+import type { InterviewCandidateContext, InterviewConfig } from "@bao/shared/types/interview";
+import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
+import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema/cover-letters";

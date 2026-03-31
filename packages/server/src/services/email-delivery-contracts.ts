@@ -1,4 +1,4 @@
-import type { EmailTransportSettings } from "@bao/shared";
+import type { EmailTransportSettings } from "@bao/shared/types/settings-contracts";
 
 export type SmtpAuthMode = EmailTransportSettings["authMethod"];
 

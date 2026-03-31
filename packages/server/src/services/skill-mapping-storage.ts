@@ -1,5 +1,5 @@
-import type { SkillMapping } from "@bao/shared";
-import { generateId } from "@bao/shared";
+import type { SkillMapping } from "@bao/shared/types/skill-mapping";
+import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { skillMappings } from "../db/schema/skill-mappings";

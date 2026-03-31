@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { AI_ROUTING_PURPOSE_IDS } from "@bao/shared";
+import { AI_ROUTING_PURPOSE_IDS } from "@bao/shared/types/ai";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };

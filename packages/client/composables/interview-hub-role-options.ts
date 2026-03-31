@@ -1,4 +1,4 @@
-import { INTERVIEW_DEFAULT_ROLE_TYPE } from "@bao/shared";
+import { INTERVIEW_DEFAULT_ROLE_TYPE } from "@bao/shared/constants/interview";
 import type { Ref } from "vue";
 import {
   normalizeRoleCandidate,

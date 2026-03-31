@@ -1,4 +1,4 @@
-import { safeParseJson } from "@bao/shared";
+import { safeParseJson } from "@bao/shared/utils/json";
 import type { ZodType } from "zod";
 
 type ParseScriptInputSuccess<T> = {

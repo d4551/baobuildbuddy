@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CareerPathway } from "@bao/shared";
+import type { CareerPathway } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 
 defineProps<{

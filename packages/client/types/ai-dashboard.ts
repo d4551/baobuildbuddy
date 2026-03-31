@@ -1,4 +1,4 @@
-import type { AIProviderType } from "@bao/shared";
+import type { AIProviderType } from "@bao/shared/types/ai";
 
 export type ProviderHealth = "healthy" | "degraded" | "down" | "unconfigured";
 

@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "@bao/shared";
+import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { computed } from "vue";
 import type { ApiDocsUiState, ApiEndpointGroup } from "~/types/api-docs";
 import {

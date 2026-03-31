@@ -17,7 +17,8 @@ import type * as schema from "./db/schema/schema-modules";
 const INTERVIEW_TEST_TIMEOUT_MS = 15_000;
 setDefaultTimeout(INTERVIEW_TEST_TIMEOUT_MS);
 
-import { API_ENDPOINT_PREFIX, type InterviewResponse, type InterviewSession } from "@bao/shared";
+import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import type { InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
 import { coverLetters } from "./db/schema/cover-letters";
 import { portfolioProjects, portfolios } from "./db/schema/portfolios";
 import { resumes } from "./db/schema/resumes";

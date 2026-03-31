@@ -1,5 +1,6 @@
-import type { CoverLetterData } from "@bao/shared";
-import { STATE_KEYS, isRecord } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { CoverLetterData } from "@bao/shared/types/cover-letter";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { toCoverLetterData } from "./api-normalizer-cover-letter";
 

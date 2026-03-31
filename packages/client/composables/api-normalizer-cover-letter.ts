@@ -1,11 +1,6 @@
-import {
-  asRecord,
-  asString,
-  isCoverLetterTemplate,
-  isRecord,
-  COVER_LETTER_DEFAULT_TEMPLATE,
-  type CoverLetterData,
-} from "@bao/shared";
+import { COVER_LETTER_DEFAULT_TEMPLATE, isCoverLetterTemplate } from "@bao/shared/constants/cover-letter";
+import type { CoverLetterData } from "@bao/shared/types/cover-letter";
+import { asRecord, asString, isRecord } from "@bao/shared/utils/type-guards";
 
 export const toCoverLetterData = (value: unknown): CoverLetterData | null => {
   if (!isRecord(value)) return null;

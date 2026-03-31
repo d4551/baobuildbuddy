@@ -1,4 +1,5 @@
-import { collectDefinedStringValues, type ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
+import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import type {
   ResumeEducationItem,
   ResumeRenderContext,

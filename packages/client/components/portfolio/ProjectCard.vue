@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { PortfolioProject } from "@bao/shared";
-import { PORTFOLIO_PROJECT_DESCRIPTION_PREVIEW_LENGTH } from "@bao/shared";
+import { PORTFOLIO_PROJECT_DESCRIPTION_PREVIEW_LENGTH } from "@bao/shared/constants/portfolio";
+import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{

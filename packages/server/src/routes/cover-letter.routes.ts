@@ -1,4 +1,4 @@
-import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared";
+import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import {

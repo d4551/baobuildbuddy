@@ -1,4 +1,4 @@
-import { toErrorMessage } from "@bao/shared";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { useNuxtRuntimeApp } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 

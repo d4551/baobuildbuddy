@@ -1,4 +1,5 @@
-import { API_ERROR_NETWORK_REQUEST_FAILED, HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared";
+import { API_ERROR_NETWORK_REQUEST_FAILED } from "@bao/shared/constants/api-errors";
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
 import { config } from "../../config/env";
 import type { FetchPageResult } from "./smart-field-mapper-contracts";
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AutomationScrapeTarget } from "@bao/shared";
+import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { useI18n } from "vue-i18n";
 import type {
   AutomationRunEnvelope,

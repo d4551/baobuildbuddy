@@ -1,11 +1,6 @@
-import {
-  resolveBrandSettings,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_LABEL,
-  SCHEMA_MAX_LENGTH_MESSAGE,
-  toApiScopedPath,
-  WS_ENDPOINTS,
-} from "@bao/shared";
+import { resolveBrandSettings } from "@bao/shared/constants/branding";
+import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_LABEL, SCHEMA_MAX_LENGTH_MESSAGE } from "@bao/shared/constants/schema-limits";
 import Type, { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SkillCategory } from "@bao/shared";
+import type { SkillCategory } from "@bao/shared/types/skill-mapping";
 import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
 import { useI18n } from "vue-i18n";
 

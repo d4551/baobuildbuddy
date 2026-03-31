@@ -1,11 +1,6 @@
-import {
-  collectDefinedStringValues,
-  RESUME_CONTACT_SPACING,
-  RESUME_DIVIDER_SPACING,
-  RESUME_HEADER_NAME_SPACING,
-  RESUME_LINKS_SPACING,
-  type ResumeData,
-} from "@bao/shared";
+import { RESUME_CONTACT_SPACING, RESUME_DIVIDER_SPACING, RESUME_HEADER_NAME_SPACING, RESUME_LINKS_SPACING } from "@bao/shared/constants/export-layout";
+import type { ResumeData } from "@bao/shared/types/resume";
+import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import {
   toPdfColor,
   type ResumePersonalInfo,

@@ -1,4 +1,4 @@
-import { RESUME_DEFAULT_NAME, RESUME_DEFAULT_THEME, RESUME_TEMPLATE_DEFAULT } from "@bao/shared";
+import { RESUME_DEFAULT_NAME, RESUME_DEFAULT_THEME, RESUME_TEMPLATE_DEFAULT } from "@bao/shared/constants/resume";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 

@@ -1,12 +1,8 @@
 import { join } from "node:path";
-import type { ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
-import {
-  AUTOMATION_CLEANUP_LIMIT,
-  AUTOMATION_FINISHED_PROGRESS,
-  AUTOMATION_MAX_PROGRESS_STEPS,
-  AUTOMATION_MAX_SCREENSHOT_RETENTION_DAYS,
-  MS_PER_DAY,
-} from "@bao/shared";
+import { AUTOMATION_CLEANUP_LIMIT, AUTOMATION_FINISHED_PROGRESS, AUTOMATION_MAX_PROGRESS_STEPS, AUTOMATION_MAX_SCREENSHOT_RETENTION_DAYS } from "@bao/shared/constants/automation";
+import { MS_PER_DAY } from "@bao/shared/constants/time";
+import type { ErrorEnvelope } from "@bao/shared/schemas/error-envelope.schema";
+import type { RpaRunEvent, RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { and, inArray, sql } from "drizzle-orm";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
 import { db } from "../../db/client";

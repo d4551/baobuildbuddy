@@ -1,4 +1,4 @@
-import { settle } from "@bao/shared";
+import { settle } from "@bao/shared/utils/promise";
 import { createServerLogger } from "../utils/logger";
 import { SmtpConnection } from "./email-delivery-connection";
 export type {

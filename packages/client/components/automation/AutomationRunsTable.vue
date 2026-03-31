@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { APP_ROUTE_BUILDERS, type RpaRunExecutionEnvelope } from "@bao/shared";
+import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 
 defineProps<{
   runs: ReadonlyArray<RpaRunExecutionEnvelope>;

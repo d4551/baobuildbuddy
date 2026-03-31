@@ -1,9 +1,6 @@
-import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared";
-import {
-  formatRelativeTimeForDate,
-  JOB_DISCOVERY_DEFAULT_PAGE_SIZE,
-  JOB_FILTER_ALL_VALUE,
-} from "@bao/shared";
+import { JOB_DISCOVERY_DEFAULT_PAGE_SIZE, JOB_FILTER_ALL_VALUE } from "@bao/shared/constants/jobs";
+import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared/types/jobs";
+import { formatRelativeTimeForDate } from "@bao/shared/utils/date-helpers";
 import { computed } from "vue";
 import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
 import type {

@@ -1,15 +1,11 @@
-import {
-  AI_DEFAULT_TEMPERATURE_STRUCTURED,
-  AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
-  DEFAULT_SETTINGS_ID,
-  normalizeScrapePersonaEnrichment,
-  safeParseJson,
-  settle,
-  toErrorMessage,
-  type ScrapeEnrichmentRunSummary,
-  type ScrapedJob,
-  type ScrapedStudio,
-} from "@bao/shared";
+import { AI_DEFAULT_TEMPERATURE_STRUCTURED, AI_MAX_TOKENS_SCRAPE_ENRICHMENT } from "@bao/shared/constants/ai-generation";
+import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
+import type { ScrapeEnrichmentRunSummary } from "@bao/shared/types/jobs";
+import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { settle } from "@bao/shared/utils/promise";
+import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";

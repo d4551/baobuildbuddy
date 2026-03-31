@@ -1,4 +1,5 @@
-import { DECIMAL_RADIX, DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 
 const parsePositiveInt = (rawValue: string | undefined, fallbackValue: number): number => {
   if (!rawValue) {

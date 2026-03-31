@@ -1,8 +1,6 @@
-import {
-  API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING,
-  AUTOMATION_SCHEDULE_RETRY_DELAY_MS,
-  settle,
-} from "@bao/shared";
+import { API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING } from "@bao/shared/constants/api-errors";
+import { AUTOMATION_SCHEDULE_RETRY_DELAY_MS } from "@bao/shared/constants/automation";
+import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";

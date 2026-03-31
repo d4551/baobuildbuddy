@@ -1,4 +1,5 @@
-import { DEFAULT_AUTOMATION_SETTINGS, settle } from "@bao/shared";
+import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import { settle } from "@bao/shared/utils/promise";
 import type { Locator } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { basename, join } from "node:path";

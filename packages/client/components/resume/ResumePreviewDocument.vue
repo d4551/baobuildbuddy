@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
 
 defineProps<{
   resume: ResumeData;

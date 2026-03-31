@@ -1,10 +1,6 @@
-import {
-  APP_ROUTES,
-  DASHBOARD_HERO_TEXT_ROTATE_INTERVAL_MS,
-  MS_PER_DAY,
-  MS_PER_HOUR,
-  MS_PER_MINUTE,
-} from "@bao/shared";
+import { DASHBOARD_HERO_TEXT_ROTATE_INTERVAL_MS } from "@bao/shared/constants/dashboard";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from "@bao/shared/constants/time";
 import type { DashboardOnboardingStep, DashboardStatCard } from "./dashboard-contracts";
 
 /**

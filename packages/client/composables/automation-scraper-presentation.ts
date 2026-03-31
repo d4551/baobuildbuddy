@@ -1,4 +1,5 @@
-import { formatRelativeTimeForDate, type AutomationScrapeTarget } from "@bao/shared";
+import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
+import { formatRelativeTimeForDate } from "@bao/shared/utils/date-helpers";
 import type { ComposerTranslation } from "vue-i18n";
 import type { ComputedRef, Ref } from "vue";
 import {

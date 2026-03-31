@@ -1,4 +1,5 @@
-import { API_ENDPOINTS, DEFAULT_LOG_LEVEL } from "@bao/shared";
+import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { DEFAULT_LOG_LEVEL } from "@bao/shared/constants/runtime";
 import { createPinoLogger } from "@bogeychan/elysia-logger";
 
 export const log = createPinoLogger({

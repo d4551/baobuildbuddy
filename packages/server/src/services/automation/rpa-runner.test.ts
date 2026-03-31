@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
-import { generateId } from "@bao/shared";
+import { generateId } from "@bao/shared/utils/validation";
 import { SCRAPER_DIR } from "../../config/paths";
 import { runRpaScript } from "./rpa-runner-protocol";
 

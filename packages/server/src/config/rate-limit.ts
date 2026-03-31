@@ -2,7 +2,7 @@
  * Rate limit configuration. Single source of truth for duration and max requests.
  */
 
-import { MS_PER_MINUTE } from "@bao/shared";
+import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 
 /** Rate limit window duration (1 minute). */
 export const RATE_LIMIT_DURATION_MS = MS_PER_MINUTE;

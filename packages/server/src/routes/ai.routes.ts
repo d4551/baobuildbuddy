@@ -1,4 +1,4 @@
-import { MS_PER_MINUTE } from "@bao/shared";
+import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";

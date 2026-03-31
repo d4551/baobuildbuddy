@@ -1,4 +1,4 @@
-import type { DashboardStats } from "@bao/shared";
+import type { DashboardStats } from "@bao/shared/types/search";
 import { computed } from "vue";
 import type { Ref } from "vue";
 import { useFlowEngine } from "~/composables/useFlowEngine";

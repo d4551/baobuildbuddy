@@ -1,4 +1,5 @@
-import { DEFAULT_AI_ROUTING, DEFAULT_EMAIL_TRANSPORT_SETTINGS } from "@bao/shared";
+import { DEFAULT_AI_ROUTING } from "@bao/shared/constants/ai-provider";
+import { DEFAULT_EMAIL_TRANSPORT_SETTINGS } from "@bao/shared/types/settings-defaults";
 
 const escapeSqlString = (value: string): string => value.replaceAll("'", "''");
 const DEFAULT_AI_ROUTING_SQL = escapeSqlString(JSON.stringify(DEFAULT_AI_ROUTING));

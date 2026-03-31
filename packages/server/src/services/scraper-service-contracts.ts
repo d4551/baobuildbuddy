@@ -1,13 +1,6 @@
-import type {
-  AutomationScriptId,
-  GamingPortalId,
-  JobSearchResult,
-  ScrapeEnrichmentRunSummary,
-  ScrapePersonaEnrichment,
-  ScrapedJob,
-  ScrapedStudio,
-} from "@bao/shared";
-import { gamingPortalScraperScriptIdByPortalId } from "@bao/shared";
+import { gamingPortalScraperScriptIdByPortalId, type AutomationScriptId, type ScrapedJob, type ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
+import type { JobSearchResult, ScrapeEnrichmentRunSummary, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
+import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
 
 export type ScriptInputPayload = {
   sourceUrl?: string;

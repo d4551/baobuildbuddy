@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import SkillsPageFilters from "~/components/skills/SkillsPageFilters.vue";
 import SkillsPageInsights from "~/components/skills/SkillsPageInsights.vue";

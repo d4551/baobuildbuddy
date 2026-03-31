@@ -1,9 +1,5 @@
-import {
-  DEFAULT_UNSPECIFIED_LABEL,
-  type InterviewConfig,
-  type InterviewQuestion,
-  type InterviewResponse,
-} from "@bao/shared";
+import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
+import type { InterviewConfig, InterviewQuestion, InterviewResponse } from "@bao/shared/types/interview";
 import type {
   CandidateInterviewContext,
   FallbackInterviewContext,

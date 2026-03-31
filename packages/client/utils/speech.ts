@@ -1,4 +1,4 @@
-import { AI_CHAT_VOICE_DEFAULT_LOCALE } from "@bao/shared";
+import { AI_CHAT_VOICE_DEFAULT_LOCALE } from "@bao/shared/constants/ai-voice";
 
 /**
  * Resolves the browser speech recognition constructor when available.

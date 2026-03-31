@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS, type ResumeData } from "@bao/shared";
+import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import type { ResumeData } from "@bao/shared/types/resume";
 import { useAsyncData, useRoute, useRouter, useServerSeoMeta } from "#imports";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";

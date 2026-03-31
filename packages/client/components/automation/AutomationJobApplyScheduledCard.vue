@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RpaRunExecutionEnvelope } from "@bao/shared";
+import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { useI18n } from "vue-i18n";
 
 defineProps<{

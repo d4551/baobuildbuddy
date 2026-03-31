@@ -1,4 +1,5 @@
-import { asNumber, asString, asStringArray, isRecord, safeParseJson } from "@bao/shared";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";

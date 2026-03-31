@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { SQLITE_BUSY_TIMEOUT_MS } from "@bao/shared";
+import { SQLITE_BUSY_TIMEOUT_MS } from "@bao/shared/constants/database";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { config } from "../config/env";
 import { resolveDatabasePath } from "../config/paths";

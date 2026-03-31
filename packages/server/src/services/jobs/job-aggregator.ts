@@ -3,12 +3,8 @@
  * Orchestrates job fetching, caching, and searching across multiple providers.
  */
 
-import type { Job, JobFilters, JobSearchResult } from "@bao/shared";
-import {
-  JOB_AGGREGATOR_CACHE_EXPIRY_MS,
-  JOB_QUERY_DEFAULT_LIMIT,
-  JOB_QUERY_DEFAULT_PAGE,
-} from "@bao/shared";
+import { JOB_AGGREGATOR_CACHE_EXPIRY_MS, JOB_QUERY_DEFAULT_LIMIT, JOB_QUERY_DEFAULT_PAGE } from "@bao/shared/constants/jobs";
+import type { Job, JobFilters, JobSearchResult } from "@bao/shared/types/jobs";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { jobs, savedJobs } from "../../db/schema/jobs";

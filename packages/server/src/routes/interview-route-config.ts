@@ -1,19 +1,6 @@
-import type {
-  InterviewCandidateContext,
-  InterviewConversationStyle,
-  InterviewTargetJob,
-  VoiceSettings,
-} from "@bao/shared";
-import {
-  asString,
-  asStringArray,
-  INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
-  INTERVIEW_DEFAULT_FOCUS_AREAS,
-  INTERVIEW_DEFAULT_QUESTION_COUNT,
-  INTERVIEW_DEFAULT_ROLE_CATEGORY,
-  INTERVIEW_DEFAULT_ROLE_TYPE,
-  INTERVIEW_DEFAULT_VOICE_SETTINGS,
-} from "@bao/shared";
+import { INTERVIEW_DEFAULT_EXPERIENCE_LEVEL, INTERVIEW_DEFAULT_FOCUS_AREAS, INTERVIEW_DEFAULT_QUESTION_COUNT, INTERVIEW_DEFAULT_ROLE_CATEGORY, INTERVIEW_DEFAULT_ROLE_TYPE, INTERVIEW_DEFAULT_VOICE_SETTINGS } from "@bao/shared/constants/interview";
+import type { InterviewCandidateContext, InterviewConversationStyle, InterviewTargetJob, VoiceSettings } from "@bao/shared/types/interview";
+import { asString, asStringArray } from "@bao/shared/utils/type-guards";
 import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
 
 const asNonNegativeInt = (value: number | undefined): number | undefined => {

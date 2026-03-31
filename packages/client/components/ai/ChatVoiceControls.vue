@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import {
-  AI_CHAT_VOICE_DEFAULT_ID,
-  DEFAULT_SPEECH_SETTINGS,
-  type SpeechProviderOption,
-} from "@bao/shared";
+import { AI_CHAT_VOICE_DEFAULT_ID } from "@bao/shared/constants/ai-voice";
+import { DEFAULT_SPEECH_SETTINGS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 import { useI18n } from "vue-i18n";
 
 interface ChatVoiceControlsProps {

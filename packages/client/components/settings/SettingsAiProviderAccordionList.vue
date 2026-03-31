@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { AIProviderType } from "@bao/shared";
-import { LOCAL_AI_DEFAULT_ENDPOINT, OLLAMA_WEBSITE_URL } from "@bao/shared";
+import { LOCAL_AI_DEFAULT_ENDPOINT, OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
+import type { AIProviderType } from "@bao/shared/types/ai";
 
 type ProviderField =
   | "localModelEndpoint"

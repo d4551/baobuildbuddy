@@ -1,4 +1,4 @@
-import type { GamificationStats, UserGamificationData } from "@bao/shared";
+import type { GamificationStats, UserGamificationData } from "@bao/shared/types/gamification";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { gamification } from "../db/schema/schema-modules";

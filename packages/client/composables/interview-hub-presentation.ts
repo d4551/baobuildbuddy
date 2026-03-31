@@ -1,4 +1,4 @@
-import type { InterviewMode } from "@bao/shared";
+import type { InterviewMode } from "@bao/shared/types/interview";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";
 import { formatDateWithLocale } from "~/utils/locale-format";

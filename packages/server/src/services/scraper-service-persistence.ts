@@ -1,11 +1,8 @@
-import {
-  generateId,
-  toErrorMessage,
-  type GamingPortalId,
-  type JobSearchResult,
-  type ScrapePersonaEnrichment,
-  type ScrapedStudio,
-} from "@bao/shared";
+import type { ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
+import type { JobSearchResult, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
+import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { generateId } from "@bao/shared/utils/validation";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { studios } from "../db/schema/studios";

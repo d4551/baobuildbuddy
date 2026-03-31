@@ -1,4 +1,4 @@
-import type { JobTaxonomySettings } from "@bao/shared";
+import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
 import { readJobTaxonomy, replaceJobTaxonomy } from "./job-taxonomy-repository";
 
 let taxonomyCache: Promise<JobTaxonomySettings> | null = null;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_SEMVER } from "@bao/shared";
+import { APP_SEMVER } from "@bao/shared/constants/app-version";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";

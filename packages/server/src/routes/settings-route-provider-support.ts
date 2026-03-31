@@ -1,12 +1,9 @@
-import type { AIProviderType } from "@bao/shared";
-import {
-  AI_PROVIDER_TEST_STRATEGY_BY_ID,
-  API_ERROR_UNKNOWN_PROVIDER,
-  normalizeAppDataTheme,
-  resolveBrandSettings,
-  settle,
-  toErrorMessage,
-} from "@bao/shared";
+import { AI_PROVIDER_TEST_STRATEGY_BY_ID } from "@bao/shared/constants/ai-provider";
+import { API_ERROR_UNKNOWN_PROVIDER } from "@bao/shared/constants/api-errors";
+import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/constants/branding";
+import type { AIProviderType } from "@bao/shared/types/ai";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 import {
   normalizeAutomationSettings,
   normalizeLocalModelEndpoint,

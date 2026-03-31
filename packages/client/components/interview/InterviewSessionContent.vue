@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import type { InterviewQuestion, InterviewSession, InterviewTargetJob } from "@bao/shared";
-import {
-  INTERVIEW_MIN_RESPONSE_LENGTH,
-  INTERVIEW_PROGRESS_MAX,
-  INTERVIEW_PROGRESS_MIN,
-} from "@bao/shared";
+import { INTERVIEW_MIN_RESPONSE_LENGTH, INTERVIEW_PROGRESS_MAX, INTERVIEW_PROGRESS_MIN } from "@bao/shared/constants/interview";
+import type { InterviewQuestion, InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 
 type InterviewCompletionState =

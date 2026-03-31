@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ChatMessage } from "@bao/shared";
-import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
+import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
+import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import {
   CHAT_AVATAR_SIZE_CLASS_BY_DENSITY,

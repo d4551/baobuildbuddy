@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { CoverLetterTemplate, ResumeData } from "@bao/shared";
+import type { CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
+import type { ResumeData } from "@bao/shared/types/resume";
 import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPage";
 
 const open = defineModel<boolean>("open", { default: false });

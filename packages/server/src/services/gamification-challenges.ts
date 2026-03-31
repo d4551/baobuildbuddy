@@ -1,5 +1,5 @@
-import type { DailyChallenge } from "@bao/shared";
-import { MS_PER_DAY } from "@bao/shared";
+import { MS_PER_DAY } from "@bao/shared/constants/time";
+import type { DailyChallenge } from "@bao/shared/types/gamification";
 import { getDefinedChallenges } from "./gamification-progress";
 
 export function buildDailyChallengesView(

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { AIProviderType, AIRoutingPurpose } from "@bao/shared";
-import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared";
+import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
+import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 
 type ProviderField =

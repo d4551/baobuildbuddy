@@ -1,5 +1,5 @@
-import type { RpaRunEvent } from "@bao/shared";
-import { RPA_PROTOCOL_VERSION, rpaProgressEventSchema } from "@bao/shared";
+import { rpaProgressEventSchema, type RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
+import { RPA_PROTOCOL_VERSION } from "@bao/shared/schemas/rpa-protocol.schema";
 import { createServerLogger } from "../../utils/logger";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { persistProgress } from "./automation-run-persistence";

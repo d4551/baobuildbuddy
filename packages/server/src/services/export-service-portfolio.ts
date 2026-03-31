@@ -1,4 +1,4 @@
-import type { PortfolioMetadata, PortfolioProject } from "@bao/shared";
+import type { PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 import {
   addPortfolioPageNumbers,
   createPortfolioContext,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DailyChallenge } from "@bao/shared";
+import type { DailyChallenge } from "@bao/shared/types/gamification";
 import { GAMIFICATION_PROGRESS_MIN } from "~/constants/gamification";
 
 defineProps<{

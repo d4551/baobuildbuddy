@@ -1,4 +1,4 @@
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { AppTranslationSchema } from "~/locales/en-US";
 
 const PATH_SPLIT_PATTERN = /[?#]/u;

@@ -1,13 +1,8 @@
-import {
-  API_ERROR_COVER_LETTER_NOT_FOUND,
-  COVER_LETTER_DEFAULT_TEMPLATE,
-  type CoverLetterTemplate,
-  generateId,
-  HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
-  isCoverLetterTemplate,
-  ROUTE_GAMIFICATION_XP,
-} from "@bao/shared";
+import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { COVER_LETTER_DEFAULT_TEMPLATE, isCoverLetterTemplate, type CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
+import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { generateId } from "@bao/shared/utils/validation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema/cover-letters";

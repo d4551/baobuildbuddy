@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SPEECH_PROVIDER_OPTIONS, type SpeechProviderOption } from "@bao/shared";
+import { SPEECH_PROVIDER_OPTIONS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 import { useI18n } from "vue-i18n";
 
 interface SpeechModelProfileFieldsProps {

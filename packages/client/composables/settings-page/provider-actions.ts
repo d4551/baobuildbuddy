@@ -1,4 +1,4 @@
-import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared";
+import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
 import { buildAiRoutingPayload, providerFieldById, runToastTask, showToastError } from "./shared";
 import type { SettingsPageState } from "./state";
 

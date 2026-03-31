@@ -1,12 +1,5 @@
-import {
-  APP_ROUTE_BUILDERS,
-  APP_ROUTE_QUERY_KEYS,
-  COVER_LETTER_COMPANY_MIN_LENGTH,
-  COVER_LETTER_DEFAULT_TEMPLATE,
-  COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH,
-  COVER_LETTER_POSITION_MIN_LENGTH,
-  type CoverLetterTemplate,
-} from "@bao/shared";
+import { COVER_LETTER_COMPANY_MIN_LENGTH, COVER_LETTER_DEFAULT_TEMPLATE, COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH, COVER_LETTER_POSITION_MIN_LENGTH, type CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
+import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { onMounted, type Ref } from "vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";

@@ -1,4 +1,4 @@
-import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared";
+import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import { StandardSchemaV1 } from "baobox";
 import Type from "baobox";
 import { Elysia } from "elysia";

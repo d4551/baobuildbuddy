@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, expect, mock, spyOn, test } from "bun:test";
-import { AI_CHAT_API_ENDPOINT } from "@bao/shared";
+import { AI_CHAT_API_ENDPOINT } from "@bao/shared/constants/ai-chat";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";

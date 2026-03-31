@@ -1,4 +1,5 @@
-import { brandContentSettingsSchema, brandThemePaletteSchema, parseJson } from "@bao/shared";
+import { brandContentSettingsSchema, brandThemePaletteSchema } from "@bao/shared/schemas/settings.schema";
+import { parseJson } from "@bao/shared/utils/json";
 import type { SettingsPageState } from "./state";
 
 function buildBrandContentPayload(state: SettingsPageState) {

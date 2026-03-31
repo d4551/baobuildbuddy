@@ -1,13 +1,7 @@
-import {
-  API_ERROR_SKILL_MAPPING_ALREADY_DELETED,
-  API_ERROR_SKILL_MAPPING_NOT_FOUND,
-  API_MESSAGE_SKILL_MAPPING_DELETED,
-  HTTP_STATUS_CREATED,
-  HTTP_STATUS_GONE,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_OK,
-  ROUTE_GAMIFICATION_XP,
-} from "@bao/shared";
+import { API_ERROR_SKILL_MAPPING_ALREADY_DELETED, API_ERROR_SKILL_MAPPING_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { API_MESSAGE_SKILL_MAPPING_DELETED } from "@bao/shared/constants/api-messages";
+import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_GONE, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { skillMappings } from "../db/schema/skill-mappings";

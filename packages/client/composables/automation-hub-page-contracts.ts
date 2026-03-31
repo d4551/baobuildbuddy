@@ -1,4 +1,4 @@
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { FlowActionId } from "~/constants/flow-engine";
 
 export type AutomationHubUiState = "idle" | "loading" | "error" | "success";

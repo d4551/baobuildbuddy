@@ -1,11 +1,7 @@
-import type {
-  Achievement,
-  DailyChallenge,
-  GamificationStats,
-  LevelUpResult,
-  UserGamificationData,
-} from "@bao/shared";
-import { getLevelForXP, MS_PER_DAY, settle } from "@bao/shared";
+import { MS_PER_DAY } from "@bao/shared/constants/time";
+import { getLevelForXP } from "@bao/shared/constants/xp-levels";
+import type { Achievement, DailyChallenge, GamificationStats, LevelUpResult, UserGamificationData } from "@bao/shared/types/gamification";
+import { settle } from "@bao/shared/utils/promise";
 import { createServerLogger } from "../utils/logger";
 import { findUnlockableAchievements, buildAchievementStatuses } from "./gamification-achievements";
 import { completeChallengeState, buildDailyChallengesView } from "./gamification-challenges";

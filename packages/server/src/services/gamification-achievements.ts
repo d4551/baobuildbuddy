@@ -1,4 +1,4 @@
-import type { Achievement } from "@bao/shared";
+import type { Achievement } from "@bao/shared/types/gamification";
 import { ACHIEVEMENT_DEFINITIONS, type NumericGamificationStats } from "./gamification-definitions";
 import { areAchievementRequirementsMet } from "./gamification-progress";
 

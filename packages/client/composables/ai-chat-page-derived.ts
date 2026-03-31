@@ -1,4 +1,4 @@
-import type { ChatMessage } from "@bao/shared";
+import type { ChatMessage } from "@bao/shared/types/ai";
 import { computed } from "vue";
 import {
   buildChatMessageRenderRows,

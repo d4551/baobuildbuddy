@@ -1,4 +1,6 @@
-import { API_ENDPOINTS, APP_ROUTE_BUILDERS, type RpaRunExecutionEnvelope } from "@bao/shared";
+import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { useI18n } from "vue-i18n";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 import {

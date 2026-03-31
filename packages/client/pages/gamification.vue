@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared";
-import { APP_ROUTES, getXPProgress } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { getXPProgress } from "@bao/shared/constants/xp-levels";
+import type { Achievement, DailyChallenge, UserGamificationData } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {

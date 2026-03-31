@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { JOB_FILTER_ALL_VALUE } from "@bao/shared";
-import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared";
+import { JOB_FILTER_ALL_VALUE } from "@bao/shared/constants/jobs";
+import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;

@@ -1,4 +1,4 @@
-import { AI_CHAT_PAGE_PATH } from "@bao/shared";
+import { AI_CHAT_PAGE_PATH } from "@bao/shared/constants/ai-chat";
 import type { Ref } from "vue";
 import { computed, onMounted, onUnmounted, watch } from "vue";
 import type { useI18n } from "vue-i18n";

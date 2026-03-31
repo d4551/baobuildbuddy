@@ -1,4 +1,4 @@
-import type { ScrapePersonaEnrichment } from "@bao/shared";
+import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, unique, uniqueIndex } from "drizzle-orm/sqlite-core";
 

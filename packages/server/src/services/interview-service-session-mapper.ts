@@ -1,4 +1,4 @@
-import type { InterviewSession } from "@bao/shared";
+import type { InterviewSession } from "@bao/shared/types/interview";
 import type { DBInterviewSession } from "./interview-service-contracts";
 import { buildInterviewerPersona } from "./interview-service-prompt-context";
 import { resolveStudioContext } from "./interview-service-context";

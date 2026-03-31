@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PortfolioProject } from "@bao/shared";
+import type { PortfolioProject } from "@bao/shared/types/portfolio";
 
 const props = defineProps<{
   projects: PortfolioProject[];

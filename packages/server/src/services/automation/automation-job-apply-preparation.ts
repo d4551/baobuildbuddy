@@ -1,4 +1,4 @@
-import type { RpaRunEvent } from "@bao/shared";
+import type { RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
 import { and, count, eq, ne } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";

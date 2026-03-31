@@ -1,5 +1,6 @@
-import type { GamificationActionHistoryEntry } from "@bao/shared";
-import { DEFAULT_PROFILE_ID, SCHEMA_MAX_ITEMS_BOARDS } from "@bao/shared";
+import { SCHEMA_MAX_ITEMS_BOARDS } from "@bao/shared/constants/schema-limits";
+import type { GamificationActionHistoryEntry } from "@bao/shared/types/gamification";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import {
   ACHIEVEMENT_DEFINITIONS,
   GAMIFICATION_STAT_KEYS,

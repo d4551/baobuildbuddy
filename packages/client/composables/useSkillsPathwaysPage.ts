@@ -1,5 +1,5 @@
-import type { CareerPathway, ReadinessAssessment } from "@bao/shared";
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { CareerPathway, ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { computed, type Ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { createSkillsPathwaysPresentation } from "~/composables/skills-pathways-page-presentation";

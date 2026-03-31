@@ -1,9 +1,6 @@
-import type {
-  AutomationScrapeTarget,
-  Job,
-  RpaCapabilityAuditEntry,
-  RpaRunExecutionEnvelope,
-} from "@bao/shared";
+import type { AutomationScrapeTarget, RpaCapabilityAuditEntry } from "@bao/shared/constants/automation";
+import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import type { Job } from "@bao/shared/types/jobs";
 
 export type AutomationScraperRunState = "idle" | "running" | "success" | "error";
 

@@ -1,10 +1,6 @@
-import {
-  DEFAULT_JOB_TAXONOMY_SETTINGS,
-  jobTaxonomySettingsSchema,
-  type JobTaxonomyKeywordEntry,
-  type JobTaxonomySettings,
-  type StudioClassificationRule,
-} from "@bao/shared";
+import { DEFAULT_JOB_TAXONOMY_SETTINGS } from "@bao/shared/constants/jobs-taxonomy";
+import { jobTaxonomySettingsSchema } from "@bao/shared/schemas/jobs-taxonomy.schema";
+import type { JobTaxonomyKeywordEntry, JobTaxonomySettings, StudioClassificationRule } from "@bao/shared/types/jobs-taxonomy";
 import { asc } from "drizzle-orm";
 import { db } from "../../db/client";
 import { jobTaxonomyKeywords, studioClassificationRules } from "../../db/schema/job-taxonomy";

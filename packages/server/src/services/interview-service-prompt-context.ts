@@ -1,8 +1,5 @@
-import {
-  DEFAULT_UNSPECIFIED_LABEL,
-  type InterviewConfig,
-  type InterviewerPersona,
-} from "@bao/shared";
+import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
+import type { InterviewConfig, InterviewerPersona } from "@bao/shared/types/interview";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
 
 export function buildCandidatePromptContext(candidateContext: CandidateInterviewContext): string {

@@ -1,5 +1,5 @@
-import type { DashboardStats } from "@bao/shared";
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { DashboardStats } from "@bao/shared/types/search";
 
 /**
  * Profile completeness threshold used when deriving setup readiness from dashboard stats.

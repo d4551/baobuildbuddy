@@ -1,4 +1,4 @@
-import { safeParseJson } from "@bao/shared";
+import { safeParseJson } from "@bao/shared/utils/json";
 import { $fetch } from "ofetch";
 import type { ApiDocsTranslate } from "~/composables/api-docs-page-contracts";
 import type { ApiEndpoint, FetchEndpointResult, FetchEndpointResultOk } from "~/types/api-docs";

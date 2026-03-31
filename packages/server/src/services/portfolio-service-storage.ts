@@ -1,4 +1,4 @@
-import { generateId } from "@bao/shared";
+import { generateId } from "@bao/shared/utils/validation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { portfolioProjects, portfolios } from "../db/schema/schema-modules";

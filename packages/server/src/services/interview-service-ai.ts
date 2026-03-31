@@ -1,4 +1,4 @@
-import { AI_OPERATION_TIMEOUT_MS } from "@bao/shared";
+import { AI_OPERATION_TIMEOUT_MS } from "@bao/shared/constants/interview";
 
 export async function withAiOperationTimeout<T>(
   operation: () => Promise<T>,

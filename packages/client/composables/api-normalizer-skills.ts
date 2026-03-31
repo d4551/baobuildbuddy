@@ -1,16 +1,5 @@
-import {
-  asBoolean,
-  asNumber,
-  asString,
-  asStringArray,
-  isRecord,
-  SKILL_CATEGORY_IDS,
-  SKILL_DEMAND_LEVEL_IDS,
-  SKILL_EVIDENCE_TYPE_IDS,
-  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
-  type SkillEvidence,
-  type SkillMapping,
-} from "@bao/shared";
+import { SKILL_CATEGORY_IDS, SKILL_DEMAND_LEVEL_IDS, SKILL_EVIDENCE_TYPE_IDS, SKILL_EVIDENCE_VERIFICATION_STATUS_IDS, type SkillEvidence, type SkillMapping } from "@bao/shared/types/skill-mapping";
+import { asBoolean, asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
 import { asEnum, toResumeCollection } from "~/composables/api-normalizer-shared";
 
 const SKILL_EVIDENCE_TYPES: readonly SkillEvidence["type"][] = SKILL_EVIDENCE_TYPE_IDS;

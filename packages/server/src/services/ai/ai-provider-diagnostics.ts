@@ -1,5 +1,7 @@
-import type { AIProviderStatus, AIProviderType } from "@bao/shared";
-import { LOCAL_AI_AUTO_DETECT_MODEL, settle, toErrorMessage } from "@bao/shared";
+import { LOCAL_AI_AUTO_DETECT_MODEL } from "@bao/shared/constants/ai-provider";
+import type { AIProviderStatus, AIProviderType } from "@bao/shared/types/ai";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 import { LocalProvider } from "./local-provider";
 import type { AIProvider } from "./provider-interface";
 

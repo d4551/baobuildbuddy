@@ -1,6 +1,6 @@
 import { join } from "node:path";
-import type { ResumeData } from "@bao/shared";
-import { settle } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
+import { settle } from "@bao/shared/utils/promise";
 import { exportService } from "../export-service";
 
 const collectResumeHeaderLines = (resume: ResumeData): string[] => {

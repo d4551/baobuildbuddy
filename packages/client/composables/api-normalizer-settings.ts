@@ -1,22 +1,11 @@
-import {
-  APP_LANGUAGE_CODES,
-  type AppSettings,
-  type EmailTransportSettings,
-  type JobTaxonomySettings,
-  DEFAULT_APP_AI_ROUTING,
-  DEFAULT_APP_LANGUAGE,
-  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
-  DEFAULT_JOB_TAXONOMY_SETTINGS,
-  asBoolean,
-  asNumber,
-  asRecord,
-  asString,
-  asStringArray,
-  isRecord,
-  normalizeAIRouting,
-  normalizeAppDataTheme,
-  resolveBrandSettings,
-} from "@bao/shared";
+import { normalizeAIRouting } from "@bao/shared/constants/ai-provider";
+import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/constants/branding";
+import { DEFAULT_JOB_TAXONOMY_SETTINGS } from "@bao/shared/constants/jobs-taxonomy";
+import { APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
+import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
+import type { AppSettings, EmailTransportSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_APP_AI_ROUTING, DEFAULT_EMAIL_TRANSPORT_SETTINGS } from "@bao/shared/types/settings-defaults";
+import { asBoolean, asNumber, asRecord, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
 import { normalizeLocalModelEndpoint } from "@bao/shared/types/settings-normalization";
 import {
   asEnum,

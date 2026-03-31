@@ -1,4 +1,4 @@
-import { APP_LANGUAGE_CODES, type AppLanguageCode } from "@bao/shared";
+import { APP_LANGUAGE_CODES, type AppLanguageCode } from "@bao/shared/constants/settings";
 
 export const LOCALE_NAME_KEY_BY_CODE = {
   "en-US": "common.localeNames.enUS",

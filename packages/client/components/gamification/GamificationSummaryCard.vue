@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserGamificationData } from "@bao/shared";
+import type { UserGamificationData } from "@bao/shared/types/gamification";
 import {
   GAMIFICATION_ACHIEVEMENTS_ICON,
   GAMIFICATION_CURRENT_STREAK_ICON,

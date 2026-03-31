@@ -1,4 +1,4 @@
-import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared";
+import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared/constants/interview";
 
 export const SEED_STUDIOS = [
   {

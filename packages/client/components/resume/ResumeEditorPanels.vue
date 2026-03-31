@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ResumeFormData } from "@bao/shared";
+import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
 
 type ResumeEditorTabId = "personal" | "experience" | "education" | "skills" | "projects" | "gaming";
 

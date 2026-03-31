@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PortfolioMetadata } from "@bao/shared";
+import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{

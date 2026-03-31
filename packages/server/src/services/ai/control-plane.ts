@@ -1,18 +1,9 @@
-import {
-  AI_PROVIDER_DEFAULT,
-  AI_PROVIDER_ID_LIST,
-  AI_PROVIDER_CATALOG,
-  API_MESSAGE_AI_NO_PROVIDERS,
-  normalizeAIRouting,
-  toErrorMessage,
-} from "@bao/shared";
-import type {
-  AIProviderDiagnostic,
-  AIProviderDiagnostics,
-  AIProviderStatus,
-  AIProviderType,
-} from "@bao/shared";
-import { settle } from "@bao/shared";
+import { AI_PROVIDER_CATALOG, AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST, normalizeAIRouting } from "@bao/shared/constants/ai-provider";
+import { API_MESSAGE_AI_NO_PROVIDERS } from "@bao/shared/constants/api-messages";
+import type { AIProviderDiagnostic, AIProviderStatus, AIProviderType } from "@bao/shared/types/ai";
+import type { AIProviderDiagnostics } from "@bao/shared/types/settings-contracts";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 import type { settings as settingsTable } from "../../db/schema/settings";
 import { AIService } from "./ai-service";
 

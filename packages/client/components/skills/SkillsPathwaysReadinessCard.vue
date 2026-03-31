@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ReadinessAssessment } from "@bao/shared";
+import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import type { ReadinessCategoryStat } from "~/composables/skills-pathways-page-contracts";
 

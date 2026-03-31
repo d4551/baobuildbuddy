@@ -1,12 +1,7 @@
-import {
-  API_ENDPOINT_PREFIX,
-  API_ENDPOINTS,
-  APP_BRAND,
-  HTTP_STATUS_OK,
-  OPENAPI_VERSION,
-  settle,
-  toApiScopedPath,
-} from "@bao/shared";
+import { APP_BRAND } from "@bao/shared/constants/branding";
+import { API_ENDPOINTS, API_ENDPOINT_PREFIX, OPENAPI_VERSION, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { settle } from "@bao/shared/utils/promise";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import Type, { StandardSchemaV1 } from "baobox";

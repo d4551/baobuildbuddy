@@ -1,6 +1,7 @@
 import { Database } from "bun:sqlite";
 import { afterEach, describe, expect, test } from "bun:test";
-import { automationSettingsSchema, DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared";
+import { automationSettingsSchema } from "@bao/shared/schemas/settings.schema";
+import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { initializeDatabase } from "./init";
 
 const transientDatabases: Database[] = [];

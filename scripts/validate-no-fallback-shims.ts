@@ -6,13 +6,14 @@ import {
 } from "./utils/validation-helpers";
 
 const bannedPattern = /\b(?:shim|polyfill|compat(?:ibility)?|wrapper|adapter)\b/giu;
+const disabledPolyfillPattern = /\bpolyfill\s*:\s*false\b/u;
 
 const isDisabledPolyfillConfiguration = (content: string, matchIndex: number): boolean => {
   const surroundingSnippet = content.slice(
     Math.max(0, matchIndex - 16),
     Math.min(content.length, matchIndex + 24),
   );
-  return /\bpolyfill\s*:\s*false\b/u.test(surroundingSnippet);
+  return disabledPolyfillPattern.test(surroundingSnippet);
 };
 
 const collectViolations = async (): Promise<ValidationViolation[]> => {

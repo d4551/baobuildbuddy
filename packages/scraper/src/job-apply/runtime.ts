@@ -1,4 +1,4 @@
-import { jobApplyScriptEnvelopeSchema } from "@bao/shared";
+import { jobApplyScriptEnvelopeSchema } from "@bao/shared/schemas/automation-scripts.schema";
 import { parseScriptInput } from "../runtime/io";
 import { ProtocolEmitter } from "../runtime/protocol";
 import { fillCustomFieldsStep, fillPrimaryFields } from "./runtime-field-fill";

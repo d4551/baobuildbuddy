@@ -1,19 +1,6 @@
-import type {
-  InterviewCandidateContext,
-  InterviewConfig,
-  InterviewConversationStyle,
-  InterviewMode,
-  InterviewSession,
-  InterviewTargetJob,
-} from "@bao/shared";
-import {
-  asBoolean,
-  asNumber,
-  asString,
-  asStringArray,
-  isRecord,
-  normalizeScrapePersonaEnrichment,
-} from "@bao/shared";
+import type { InterviewCandidateContext, InterviewConfig, InterviewConversationStyle, InterviewMode, InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
+import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
+import { asBoolean, asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
 
 const INTERVIEW_STATUS_VALUES = [
   "preparing",

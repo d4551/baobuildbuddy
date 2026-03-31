@@ -1,8 +1,5 @@
-import {
-  API_ERROR_EMPTY_EMAIL_RESPONSE,
-  API_ERROR_NO_AI_PROVIDER_EMAIL,
-  settle,
-} from "@bao/shared";
+import { API_ERROR_EMPTY_EMAIL_RESPONSE, API_ERROR_NO_AI_PROVIDER_EMAIL } from "@bao/shared/constants/api-errors";
+import { settle } from "@bao/shared/utils/promise";
 import { emailResponsePrompt } from "../ai/prompts-career";
 import { emailDeliveryService } from "../email-delivery-service";
 import type {

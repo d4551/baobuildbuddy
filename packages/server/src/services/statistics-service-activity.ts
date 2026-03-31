@@ -1,5 +1,5 @@
-import type { CareerProgress, WeeklyActivity } from "@bao/shared";
-import { isRecord } from "@bao/shared";
+import type { CareerProgress, WeeklyActivity } from "@bao/shared/types/search";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { STATISTICS_SKILL_COVERAGE_TARGET } from "@bao/shared/constants/statistics";
 
 type ActionHistoryEntry = { action: string; xpGained: number; timestamp: string };

@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import {
-  AUTOMATION_RUN_STATUSES,
-  type AutomationRunUiState,
-  type RpaRunEvent,
-  type RpaRunExecutionEnvelope,
-} from "@bao/shared";
+import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
+import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
 import { useI18n } from "vue-i18n";
 
 const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
