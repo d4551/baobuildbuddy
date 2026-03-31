@@ -4,7 +4,7 @@ import { treaty } from "@elysiajs/eden";
 import { tryUseNuxtApp } from "nuxt/app";
 import type { Ref } from "vue";
 import { assertClientApi } from "~/types/client-api";
-import { resolveApiBase } from "~/utils/endpoints";
+import { resolveTreatyBase } from "~/utils/treaty-base";
 
 const AUTH_KEY = AUTH_KEY_STORAGE_KEY;
 
@@ -57,12 +57,12 @@ export default defineNuxtPlugin(() => {
   const cookieRef = getAuthKeyCookieRef();
 
   const configuredBase = (config.public.apiBase || "/").toString();
-  const apiBase = resolveApiBase(configuredBase, requestUrl);
+  const treatyBase = resolveTreatyBase(configuredBase, requestUrl);
 
   const readApiKey = () => readStoredApiKey(cookieRef);
   const writeApiKey = (key: string | null) => writeStoredApiKey(cookieRef, key);
 
-  const api = treaty<App>(apiBase, {
+  const api = treaty<App>(treatyBase, {
     fetch: {
       credentials: "include",
     },

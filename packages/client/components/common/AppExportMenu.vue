@@ -26,7 +26,6 @@ const menu = ref<HTMLElement | null>(null);
 const isOpen = ref(false);
 const activeFormatIndex = ref(0);
 const trigger = useTemplateRef<HTMLButtonElement>("exportTrigger");
-const menuItemRefs = ref<(HTMLButtonElement | null)[]>([]);
 const { t } = useI18n();
 const formatLabels = computed(() => ({
   docx: t("common.exportMenu.formats.docx"),
@@ -41,11 +40,9 @@ function exportFormatAriaLabel(format: ExportFormat): string {
 }
 
 function getMenuItems(): HTMLButtonElement[] {
-  return menuItemRefs.value.filter((element): element is HTMLButtonElement => element !== null);
-}
-
-function setMenuItemRef(index: number, element: HTMLButtonElement | null): void {
-  menuItemRefs.value[index] = element;
+  return Array.from(
+    menu.value?.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]') ?? [],
+  );
 }
 
 function focusMenuItem(index: number): void {
@@ -203,11 +200,6 @@ function handleMenuFocusOut(event: FocusEvent): void {
 }
 
 watch(isOpen, (nextOpen, previousOpen) => {
-  if (nextOpen) {
-    menuItemRefs.value = new Array<HTMLButtonElement | null>(exportFormats.length).fill(null);
-    return;
-  }
-
   if (previousOpen) {
     void nextTick(() => {
       trigger.value?.focus();
@@ -252,7 +244,7 @@ function emitExport(format: ExportFormat): void {
     </button>
 
     <ul
-      v-if="isOpen"
+      v-show="isOpen"
       :id="exportMenuId"
       class="menu dropdown-content z-20 mt-2 w-40 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
       role="menu"
@@ -271,7 +263,6 @@ function emitExport(format: ExportFormat): void {
           :aria-label="exportFormatAriaLabel(format)"
           @keydown="handleMenuItemKeydown($event, index)"
           @click.stop="emitExport(format)"
-          :ref="(element) => setMenuItemRef(index, element)"
         >
           {{ formatLabels[format] }}
         </button>

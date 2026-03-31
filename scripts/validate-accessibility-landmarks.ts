@@ -17,10 +17,7 @@ const titleIdPattern = /\btitle-id\s*=\s*["']([^"']+)["']/gu;
 const headingIdPattern = /<h1\b[^>]*\bid\s*=\s*["']([^"']+)["']/gu;
 const mainTagPattern = /<main\b/gu;
 
-const collectLayoutViolations = (
-  filePath: string,
-  content: string,
-): ValidationViolation[] => {
+const collectLayoutViolations = (filePath: string, content: string): ValidationViolation[] => {
   const mainCount = [...content.matchAll(mainTagPattern)].length;
   if (mainCount === 1) {
     return [];
@@ -83,7 +80,7 @@ export const collectAccessibilityLandmarkViolationsForContent = (
         filePath,
         line,
         message:
-          "Routed pages must not declare `PageScaffold tag=\"main\"`; layouts own the single main landmark.",
+          'Routed pages must not declare `PageScaffold tag="main"`; layouts own the single main landmark.',
       });
     }
 
@@ -103,8 +100,7 @@ export const collectAccessibilityLandmarkViolationsForContent = (
       violations.push({
         filePath,
         line,
-        message:
-          `PageScaffold labelled-by target "${labelledByTarget}" must match a shared page heading id or title-id.`,
+        message: `PageScaffold labelled-by target "${labelledByTarget}" must match a shared page heading id or title-id.`,
       });
     }
   }
