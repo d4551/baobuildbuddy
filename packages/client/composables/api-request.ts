@@ -10,7 +10,7 @@ export interface ClientApiRequestRuntime {
 
 interface ClientApiRequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
-  body?: BodyInit | Record<string, unknown> | null;
+  body?: BodyInit | object | null;
   query?: Record<string, string | number | boolean | undefined>;
   headers?: Record<string, string>;
 }

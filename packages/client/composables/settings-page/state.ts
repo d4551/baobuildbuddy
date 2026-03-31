@@ -19,7 +19,7 @@ import {
   useSettingsPageBootstrap,
 } from "./runtime";
 
-type SettingsPageBootstrapState = Awaited<ReturnType<typeof useSettingsPageBootstrap>>;
+type SettingsPageBootstrapState = ReturnType<typeof useSettingsPageBootstrap>;
 type SettingsPageOptionState = ReturnType<typeof createSettingsPageOptionState>;
 type SettingsPageDerivedState = ReturnType<typeof createSettingsPageDerivedState>;
 type UserProfileSnapshot = {
@@ -148,7 +148,7 @@ function buildSettingsPageStateResult(options: SettingsPageStateResultOptions) {
   };
 }
 
-export async function useSettingsPageState() {
+export function useSettingsPageState() {
   const services = createSettingsPageServices();
   const settings = computed(() => toAppSettings(services.rawSettings.value));
 
@@ -157,7 +157,7 @@ export async function useSettingsPageState() {
   const saveState = createSettingsPageSaveRuntimeState();
   const brandState = createSettingsPageBrandRuntimeState();
   const profileState = createSettingsPageProfileRuntimeState();
-  const bootstrapState = await useSettingsPageBootstrap(services);
+  const bootstrapState = useSettingsPageBootstrap(services);
 
   setupSettingsPageWatchers({
     settings,

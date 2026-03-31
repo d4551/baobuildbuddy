@@ -12,7 +12,7 @@ if (import.meta.server) {
   });
 }
 
-const page = await useAIDashboardPage();
+const page = useAIDashboardPage();
 </script>
 
 <template>

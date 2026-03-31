@@ -222,8 +222,8 @@ export function createSettingsPageProfileRuntimeState() {
   };
 }
 
-export async function useSettingsPageBootstrap(services: SettingsPageServices) {
-  return await useAsyncData("settings-bootstrap", async () => {
+export function useSettingsPageBootstrap(services: SettingsPageServices) {
+  return useAsyncData("settings-bootstrap", async () => {
     await Promise.all([services.fetchSettings(), services.fetchProfile()]);
     return true;
   });

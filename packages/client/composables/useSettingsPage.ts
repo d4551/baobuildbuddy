@@ -2,8 +2,8 @@ import { createSettingsPageProviderActions } from "./settings-page/provider-acti
 import { createSettingsPageSaveActions } from "./settings-page/save-actions";
 import { useSettingsPageState } from "./settings-page/state";
 
-export async function useSettingsPage() {
-  const state = await useSettingsPageState();
+export function useSettingsPage() {
+  const state = useSettingsPageState();
   const providerActions = createSettingsPageProviderActions(state);
   const saveActions = createSettingsPageSaveActions(state);
 

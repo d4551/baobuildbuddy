@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 
 const STUDIOS_PREVIEW_DIALOG_TITLE_ID = "studios-index-preview-dialog-title";
 const { t } = useI18n();
-const page = await useStudiosIndexPage();
+const page = useStudiosIndexPage();
 
 if (import.meta.server) {
   useServerSeoMeta({

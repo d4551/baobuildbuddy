@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { isRecord } from "@bao/shared/utils/type-guards";
@@ -8,6 +9,7 @@ import {
   resolveScheduledRunAt,
   toIsoTimestamp,
 } from "~/composables/automation-scraper-bootstrap";
+import { requestApi, useClientApiRequestRuntime } from "~/composables/api-request";
 import { settlePromise } from "~/composables/async-flow";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { getErrorMessage } from "~/utils/errors";
@@ -54,6 +56,7 @@ function useAutomationJobApplyForm() {
 function useAutomationJobApplyDependencies() {
   const { t, locale, fallbackLocale } = useI18n();
   const api = useApi();
+  const runtime = useClientApiRequestRuntime();
   const { triggerJobApply, scheduleJobApply } = useAutomation();
   const runStream = useAutomationRunStream({
     fallbackMessage: t("automation.jobApply.stream.startErrorFallback"),
@@ -64,6 +67,7 @@ function useAutomationJobApplyDependencies() {
     fallbackLocale,
     locale,
     runStream,
+    runtime,
     scheduleJobApply,
     t,
     triggerJobApply,
@@ -72,13 +76,16 @@ function useAutomationJobApplyDependencies() {
 
 const readApiData = async (request: Promise<unknown>): Promise<unknown> => {
   const response = await request;
-  if (!(isRecord(response) && "data" in response)) {
+  if (!(isRecord(response) || Array.isArray(response))) {
     return [];
   }
-  if ("error" in response && response.error) {
+  if (isRecord(response) && "error" in response && response.error) {
     return [];
   }
-  return response.data;
+  if (isRecord(response) && "data" in response) {
+    return response.data;
+  }
+  return response;
 };
 
 const toResumeSelectOptions = (value: unknown): ResumeSelectOption[] =>
@@ -110,8 +117,11 @@ const toCoverLetterSelectOptions = (value: unknown): CoverLetterSelectOption[] =
       )
     : [];
 
-async function useAutomationJobApplyBootstrap(input: { api: ReturnType<typeof useApi> }) {
-  const { data: resumesData } = await useAsyncData<ResumeSelectOption[]>(
+function useAutomationJobApplyBootstrap(input: {
+  api: ReturnType<typeof useApi>;
+  runtime: ReturnType<typeof useClientApiRequestRuntime>;
+}) {
+  const { data: resumesData } = useAsyncData<ResumeSelectOption[]>(
     "automation-job-apply-resumes",
     async () => toResumeSelectOptions(await readApiData(input.api.resumes.get())),
     {
@@ -119,9 +129,16 @@ async function useAutomationJobApplyBootstrap(input: { api: ReturnType<typeof us
     },
   );
 
-  const { data: coverLettersData } = await useAsyncData<CoverLetterSelectOption[]>(
+  const { data: coverLettersData } = useAsyncData<CoverLetterSelectOption[]>(
     "automation-job-apply-cover-letters",
-    async () => toCoverLetterSelectOptions(await readApiData(input.api.coverLetters.get())),
+    async () =>
+      toCoverLetterSelectOptions(
+        await readApiData(
+          requestApi<unknown>(input.runtime, API_ENDPOINTS.coverLetters, {
+            method: "GET",
+          }),
+        ),
+      ),
     {
       default: () => [],
     },
@@ -320,11 +337,12 @@ function createAutomationScheduledJobApplyAction(input: {
   };
 }
 
-export async function useAutomationJobApplyPage() {
+export function useAutomationJobApplyPage() {
   const dependencies = useAutomationJobApplyDependencies();
   const form = useAutomationJobApplyForm();
-  const bootstrap = await useAutomationJobApplyBootstrap({
+  const bootstrap = useAutomationJobApplyBootstrap({
     api: dependencies.api,
+    runtime: dependencies.runtime,
   });
   const state = createAutomationJobApplyState(dependencies.runStream);
   const presentation = createAutomationJobApplyPresentation({

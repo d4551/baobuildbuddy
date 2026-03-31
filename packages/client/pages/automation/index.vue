@@ -20,7 +20,7 @@ const {
   refreshCapabilityAudit,
   capabilityStatusClass,
   capabilityStatusLabel,
-} = await useAutomationHubPage();
+} = useAutomationHubPage();
 
 useServerSeoMeta({
   title: t("automation.hub.pageTitle"),

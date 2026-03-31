@@ -19,7 +19,7 @@ function useResumePageDependencies() {
 }
 
 function createResumePageActionsInput(
-  bootstrap: Awaited<ReturnType<typeof useResumePageBootstrap>>,
+  bootstrap: ReturnType<typeof useResumePageBootstrap>,
   derived: ReturnType<typeof useResumePageDerived>,
   dependencies: ReturnType<typeof useResumePageDependencies>,
 ) {
@@ -44,11 +44,11 @@ function createResumePageActionsInput(
   };
 }
 
-export async function useResumePage() {
+export function useResumePage() {
   const dependencies = useResumePageDependencies();
   const { i18n } = dependencies;
 
-  const bootstrap = await useResumePageBootstrap({
+  const bootstrap = useResumePageBootstrap({
     fetchDashboard: dependencies.statistics.fetchDashboard,
     fetchResumes: dependencies.resumeApi.fetchResumes,
     getResume: dependencies.resumeApi.getResume,

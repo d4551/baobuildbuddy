@@ -238,7 +238,7 @@ const createSubmitScheduledEmailResponse = (options: {
   };
 };
 
-const useAutomationEmailSettingsState = async (
+const useAutomationEmailSettingsState = (
   settings: ReturnType<typeof useSettings>["settings"],
   fetchSettings: ReturnType<typeof useSettings>["fetchSettings"],
 ) => {
@@ -246,7 +246,7 @@ const useAutomationEmailSettingsState = async (
     status: emailSettingsStatus,
     error: emailSettingsError,
     refresh: refreshEmailSettings,
-  } = await useAsyncData("automation-email-settings", async () => {
+  } = useAsyncData("automation-email-settings", async () => {
     if (!settings.value) {
       await fetchSettings();
     }
@@ -324,14 +324,14 @@ const createAutomationEmailPageActions = (options: {
   };
 };
 
-const buildAutomationEmailPageState = async () => {
+const buildAutomationEmailPageState = () => {
   const { t, locale, fallbackLocale } = useI18n();
   const { triggerEmailResponse, scheduleEmailResponse } = useAutomation();
   const { settings, fetchSettings } = useSettings();
   const form = createEmailAutomationForm();
   const resultState = createEmailAutomationResultState();
   const { emailSettingsStatus, emailSettingsError, refreshEmailSettings } =
-    await useAutomationEmailSettingsState(settings, fetchSettings);
+    useAutomationEmailSettingsState(settings, fetchSettings);
   const derivedState = useAutomationEmailDerivedState(settings, emailSettingsStatus, form);
   const actions = createAutomationEmailPageActions({
     t,
@@ -356,8 +356,8 @@ const buildAutomationEmailPageState = async () => {
     actions,
   };
 };
-export async function useAutomationEmailPage() {
-  const state = await buildAutomationEmailPageState();
+export function useAutomationEmailPage() {
+  const state = buildAutomationEmailPageState();
   const pending = computed(() => state.resultState.pendingAction.value !== null);
   const toLocalizedDateTime = createToLocalizedDateTime(
     () => state.locale.value,

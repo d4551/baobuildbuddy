@@ -69,7 +69,7 @@ const {
   handleSaveEmailDeliverySettings,
   handleSaveEmailDeliveryPassword,
   handleClearEmailDeliveryPassword,
-} = await useSettingsPage();
+} = useSettingsPage();
 </script>
 
 <template>

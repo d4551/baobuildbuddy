@@ -1,4 +1,5 @@
 import {
+  API_ENDPOINTS,
   buildCoverLetterDetailEndpoint,
   buildCoverLetterExportEndpoint,
 } from "@bao/shared/constants/endpoints";
@@ -43,7 +44,6 @@ export type GenerateCoverLetterResult =
     };
 
 interface CoverLetterContext {
-  api: ReturnType<typeof useApi>;
   runtime: ClientApiRequestRuntime;
   toast: ReturnType<typeof useNuxtApp>["$toast"];
   t: ReturnType<typeof useI18n>["t"];
@@ -57,13 +57,16 @@ const readApiData = async (
   fallbackMessage: string,
 ): Promise<unknown> => {
   const response = await request;
-  if (!isRecord(response)) {
+  if (!(isRecord(response) || Array.isArray(response))) {
     throw new Error(fallbackMessage);
   }
-  if ("error" in response && response.error) {
+  if (isRecord(response) && "error" in response && response.error) {
     throw new Error(fallbackMessage);
   }
-  return "data" in response ? response.data : undefined;
+  if (isRecord(response) && "data" in response) {
+    return response.data;
+  }
+  return response;
 };
 
 const toCoverLetterContent = (value: unknown): CoverLetterData["content"] | null => {
@@ -106,7 +109,9 @@ const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult 
 async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
   context.loading.value = true;
   const data = await readApiData(
-    context.api.coverLetters.get(),
+    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLetters, {
+      method: "GET",
+    }),
     context.t("coverLetterPage.toasts.fetchFailed"),
   );
   context.loading.value = false;
@@ -146,7 +151,10 @@ async function createCoverLetter(
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const data = await readApiData(
-    context.api.coverLetters.post(letterData),
+    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLetters, {
+      method: "POST",
+      body: letterData,
+    }),
     context.t("coverLetterPage.toasts.generateFailed"),
   );
   context.loading.value = false;
@@ -203,7 +211,10 @@ async function generateCoverLetter(
 ): Promise<GenerateCoverLetterResult | null> {
   context.loading.value = true;
   const data = await readApiData(
-    context.api.coverLetters.generate.post(generationData),
+    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLettersGenerate, {
+      method: "POST",
+      body: generationData,
+    }),
     context.t("coverLetterPage.toasts.generateFailed"),
   );
   context.loading.value = false;
@@ -235,7 +246,6 @@ async function exportDocument(
  */
 export function useCoverLetter() {
   const context: CoverLetterContext = {
-    api: useApi(),
     runtime: useClientApiRequestRuntime(),
     toast: useNuxtApp().$toast,
     t: useI18n().t,

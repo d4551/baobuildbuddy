@@ -82,19 +82,15 @@ const createAutomationHubCapabilityState = (
   };
 };
 
-export const useAutomationHubPageData = async (t: AutomationHubTranslate) => {
+export const useAutomationHubPageData = (t: AutomationHubTranslate) => {
   const { getRpaCapabilities } = useAutomation();
-  const statsDataPromise = useAutomationHubStatsData(t);
-  const capabilityDataPromise = useAutomationHubCapabilityData(getRpaCapabilities);
-  const [
-    { data, status, error, refresh },
-    {
-      data: capabilityAuditData,
-      status: capabilityAuditStatus,
-      error: capabilityAuditError,
-      refresh: refreshCapabilityAudit,
-    },
-  ] = await Promise.all([statsDataPromise, capabilityDataPromise]);
+  const { data, status, error, refresh } = useAutomationHubStatsData(t);
+  const {
+    data: capabilityAuditData,
+    status: capabilityAuditStatus,
+    error: capabilityAuditError,
+    refresh: refreshCapabilityAudit,
+  } = useAutomationHubCapabilityData(getRpaCapabilities);
   const uiState = computed<AutomationHubUiState>(() => {
     if (status.value === "pending") return "loading";
     if (status.value === "error") return "error";

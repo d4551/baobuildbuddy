@@ -30,11 +30,11 @@ import { getErrorMessage } from "~/utils/errors";
 type DashboardAsyncState = Awaited<ReturnType<typeof useDashboardAsyncState>>;
 type DashboardRef = DashboardAsyncState["dashboard"];
 
-const useDashboardAsyncState = async (
+const useDashboardAsyncState = (
   api: ReturnType<typeof useApi>,
   t: ReturnType<typeof useI18n>["t"],
 ) => {
-  const { data, error, refresh, status } = await useAsyncData(
+  const { data, error, refresh, status } = useAsyncData(
     DASHBOARD_ASYNC_DATA_KEY,
     () => fetchDashboardViewModel(api, t),
     { lazy: false, server: true },
@@ -176,13 +176,13 @@ const useDashboardErrorToast = (
   });
 };
 
-export async function useDashboardPage() {
+export function useDashboardPage() {
   const api = useApi();
   const { $toast } = useNuxtApp();
   const { t } = useI18n();
   const { resolvedBrand } = useBrand();
   const activeHeroPhrase = useDashboardHeroPhrase(t);
-  const { dashboard, error, refresh, uiState } = await useDashboardAsyncState(api, t);
+  const { dashboard, error, refresh, uiState } = useDashboardAsyncState(api, t);
   const welcomeHeading = useDashboardWelcomeHeading(t, dashboard);
   const { levelProgress, xpTarget } = useDashboardProgress(dashboard);
   const { nextPipelineStepLabel, pipelineSteps } = useDashboardPipeline(t, dashboard);

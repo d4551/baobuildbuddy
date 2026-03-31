@@ -111,7 +111,7 @@ function createInterviewHubBootstrapInput(
 
 function createInterviewHubDerivedInput(
   dependencies: ReturnType<typeof useInterviewHubDependencies>,
-  bootstrap: Awaited<ReturnType<typeof useInterviewHubBootstrap>>,
+  bootstrap: ReturnType<typeof useInterviewHubBootstrap>,
 ) {
   return {
     coverLetters: dependencies.coverLetterApi.coverLetters,
@@ -134,7 +134,7 @@ function createInterviewHubDerivedInput(
 
 function createInterviewHubActionsInput(
   dependencies: ReturnType<typeof useInterviewHubDependencies>,
-  bootstrap: Awaited<ReturnType<typeof useInterviewHubBootstrap>>,
+  bootstrap: ReturnType<typeof useInterviewHubBootstrap>,
   derived: ReturnType<typeof useInterviewHubDerived>,
 ) {
   return {
@@ -156,12 +156,12 @@ function createInterviewHubActionsInput(
   };
 }
 
-export async function useInterviewHubPage() {
+export function useInterviewHubPage() {
   const dependencies = useInterviewHubDependencies();
   const { i18n } = dependencies;
   const { getScoreBadgeClass } = useScoreColor();
 
-  const bootstrap = await useInterviewHubBootstrap(
+  const bootstrap = useInterviewHubBootstrap(
     createInterviewHubBootstrapInput(dependencies),
     i18n.t,
   );
@@ -193,7 +193,7 @@ export async function useInterviewHubPage() {
     retryPathwaysFromWarning: async () => {
       await actions.retryPathwaysFromWarning(bootstrap.refreshInterviewHub);
     },
-    tts: dependencies.tts,
+    ttsVoices: dependencies.tts.voices,
     selectJobById: async (jobId: string) => {
       await actions.selectJobById(jobId, derived.availableJobs.value);
     },

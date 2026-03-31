@@ -19,7 +19,7 @@ const {
   statCards,
   retryDashboardLoad,
   formatTimeAgo,
-} = await useDashboardPage();
+} = useDashboardPage();
 
 const { t } = useI18n();
 

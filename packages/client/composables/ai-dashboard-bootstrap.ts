@@ -83,7 +83,7 @@ function useAIDashboardDependencies() {
   };
 }
 
-async function useDashboardBootstrap(input: {
+function useDashboardBootstrap(input: {
   api: ReturnType<typeof useApi>;
   fetchSettings: ReturnType<typeof useSettings>["fetchSettings"];
   settings: ReturnType<typeof useSettings>["settings"];
@@ -128,7 +128,7 @@ async function useDashboardBootstrap(input: {
     };
   }
 
-  return await useAsyncData("ai-dashboard-bootstrap", loadDashboardState, {
+  return useAsyncData("ai-dashboard-bootstrap", loadDashboardState, {
     server: true,
     lazy: false,
   });
@@ -148,7 +148,7 @@ export function createAIDashboardRuntime() {
   };
 }
 
-export async function createAIDashboardBootstrapState(
+export function createAIDashboardBootstrapState(
   runtime: ReturnType<typeof createAIDashboardRuntime>,
   resolveDefaultModel: (providerId: AIProviderType) => string,
 ) {
@@ -157,7 +157,7 @@ export async function createAIDashboardBootstrapState(
     error: dashboardBootstrapError,
     refresh: refreshDashboardBootstrap,
     status: dashboardBootstrapStatus,
-  } = await useDashboardBootstrap({
+  } = useDashboardBootstrap({
     api: runtime.dependencies.api,
     fetchSettings: runtime.dependencies.fetchSettings,
     settings: runtime.dependencies.settings,

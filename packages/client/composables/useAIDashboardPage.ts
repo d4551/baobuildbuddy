@@ -53,10 +53,10 @@ function createAIDashboardLoadingState(
   return computed(() => bootstrapStatus.value === "pending" || bootstrapStatus.value === "idle");
 }
 
-export async function useAIDashboardPage() {
+export function useAIDashboardPage() {
   const runtime = createAIDashboardRuntime();
   const bootstrapSelection = createAIDashboardSelectionState(runtime);
-  const bootstrap = await createAIDashboardBootstrapState(
+  const bootstrap = createAIDashboardBootstrapState(
     runtime,
     bootstrapSelection.resolveDefaultModel,
   );

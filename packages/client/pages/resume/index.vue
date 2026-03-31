@@ -66,7 +66,7 @@ const {
   updatePersonalInfo,
   updateProjects,
   updateSkills,
-} = await useResumePage();
+} = useResumePage();
 </script>
 
 <template>

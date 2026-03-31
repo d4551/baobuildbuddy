@@ -114,7 +114,7 @@ function syncSelectedResumeIdFromRoute(
   }
 }
 
-export async function useResumePageBootstrap({
+export function useResumePageBootstrap({
   fetchDashboard,
   fetchResumes,
   getResume,
@@ -126,7 +126,7 @@ export async function useResumePageBootstrap({
     error: resumeBootstrapError,
     status: resumeBootstrapStatus,
     refresh: refreshResumeBootstrap,
-  } = await useAsyncData("resume-page-bootstrap", async () => {
+  } = useAsyncData("resume-page-bootstrap", async () => {
     await fetchResumes();
     await fetchDashboard();
     syncSelectedResumeIdFromRoute(route, state.selectedResumeId);

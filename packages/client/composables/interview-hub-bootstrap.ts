@@ -227,7 +227,7 @@ async function loadInterviewHubBootstrapData(
   return true;
 }
 
-export async function useInterviewHubBootstrap(
+export function useInterviewHubBootstrap(
   input: InterviewHubBootstrapInput,
   t: ComposerTranslation,
 ) {
@@ -240,7 +240,7 @@ export async function useInterviewHubBootstrap(
     status: interviewHubStatus,
     error: interviewHubError,
     refresh: refreshInterviewHub,
-  } = await useAsyncData("interview-hub-bootstrap", async () =>
+  } = useAsyncData("interview-hub-bootstrap", async () =>
     loadInterviewHubBootstrapData({ input, requestedMode, routeStudioId, sessionConfig, state }, t),
   );
 

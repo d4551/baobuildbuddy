@@ -307,11 +307,11 @@ function registerStudiosIndexEffects(input: {
   );
 }
 
-export async function useStudiosIndexPage() {
+export function useStudiosIndexPage() {
   const runtime = createStudiosIndexRuntime();
   const actions = createStudiosIndexActions(runtime);
 
-  const { pending: bootstrapPending, refresh: refreshStudios } = await useAsyncData(
+  const { pending: bootstrapPending, refresh: refreshStudios } = useAsyncData(
     "studios-index",
     async () => {
       await actions.loadStudios();

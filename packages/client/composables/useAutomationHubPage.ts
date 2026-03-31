@@ -2,10 +2,10 @@ import { useI18n } from "vue-i18n";
 import { createAutomationHubPagePresentation } from "~/composables/automation-hub-page-presentation";
 import { useAutomationHubPageData } from "~/composables/automation-hub-page-data";
 
-export async function useAutomationHubPage() {
+export function useAutomationHubPage() {
   const { t } = useI18n();
 
-  const data = await useAutomationHubPageData(t);
+  const data = useAutomationHubPageData(t);
   const presentation = createAutomationHubPagePresentation({
     stats: data.stats,
     t,

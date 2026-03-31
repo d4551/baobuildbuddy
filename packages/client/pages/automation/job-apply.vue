@@ -2,7 +2,7 @@
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
-const page = await useAutomationJobApplyPage();
+const page = useAutomationJobApplyPage();
 
 if (import.meta.server) {
   useServerSeoMeta({

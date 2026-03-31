@@ -58,12 +58,12 @@ const {
   starting,
   studiosForSelector,
   totalSessions,
-  tts,
+  ttsVoices,
   viewSession,
   experienceLabel,
   isStartDisabled,
   selectJobById,
-} = await useInterviewHubPage();
+} = useInterviewHubPage();
 </script>
 
 <template>
@@ -264,7 +264,7 @@ const {
       :interview-role-options="interviewRoleOptions"
       :interview-experience-options="interviewExperienceOptions"
       :interview-question-count-options="interviewQuestionCountOptions"
-      :tts-voices="tts.voices"
+      :tts-voices="ttsVoices"
       :starting="starting"
       :is-start-disabled="isStartDisabled"
       :experience-label="experienceLabel"

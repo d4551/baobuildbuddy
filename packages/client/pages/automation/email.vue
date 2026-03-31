@@ -19,7 +19,7 @@ const {
   resolveScheduledRunAt,
   submitEmailResponse,
   submitScheduledEmailResponse,
-} = await useAutomationEmailPage();
+} = useAutomationEmailPage();
 
 if (import.meta.server) {
   useServerSeoMeta({
