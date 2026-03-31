@@ -1,4 +1,10 @@
-import { JOB_EXPERIENCE_LEVELS, JOB_FILTER_ALL_VALUE, JOB_GAME_GENRES, JOB_STUDIO_TYPES, JOB_SUPPORTED_PLATFORMS } from "@bao/shared/constants/jobs";
+import {
+  JOB_EXPERIENCE_LEVELS,
+  JOB_FILTER_ALL_VALUE,
+  JOB_GAME_GENRES,
+  JOB_STUDIO_TYPES,
+  JOB_SUPPORTED_PLATFORMS,
+} from "@bao/shared/constants/jobs";
 import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared/types/jobs";
 
 export type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;

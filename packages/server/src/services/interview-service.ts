@@ -1,4 +1,8 @@
-import type { InterviewQuestion, InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
+import type {
+  InterviewQuestion,
+  InterviewResponse,
+  InterviewSession,
+} from "@bao/shared/types/interview";
 import { generateId } from "@bao/shared/utils/validation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";

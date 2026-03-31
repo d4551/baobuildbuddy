@@ -1,6 +1,15 @@
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
-import { jobTaxonomyKeywordEntrySchema, studioClassificationRuleSchema } from "@bao/shared/schemas/jobs-taxonomy.schema";
-import { companyBoardApiTemplatesSchema, companyBoardConfigSchema, gamingPortalConfigSchema, greenhouseBoardConfigSchema, leverCompanyConfigSchema } from "@bao/shared/schemas/settings.schema";
+import {
+  jobTaxonomyKeywordEntrySchema,
+  studioClassificationRuleSchema,
+} from "@bao/shared/schemas/jobs-taxonomy.schema";
+import {
+  companyBoardApiTemplatesSchema,
+  companyBoardConfigSchema,
+  gamingPortalConfigSchema,
+  greenhouseBoardConfigSchema,
+  leverCompanyConfigSchema,
+} from "@bao/shared/schemas/settings.schema";
 import { parseJson } from "@bao/shared/utils/json";
 import { isValidEmail } from "@bao/shared/utils/validation";
 import z from "zod";

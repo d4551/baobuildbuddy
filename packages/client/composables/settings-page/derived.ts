@@ -1,7 +1,14 @@
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
-import { brandContentSettingsSchema, brandThemePaletteSchema } from "@bao/shared/schemas/settings.schema";
+import {
+  brandContentSettingsSchema,
+  brandThemePaletteSchema,
+} from "@bao/shared/schemas/settings.schema";
 import { AI_ROUTING_PURPOSE_IDS, type AIProviderType } from "@bao/shared/types/ai";
-import type { AppSettings, BrandSettings, EmailTransportSettings } from "@bao/shared/types/settings-contracts";
+import type {
+  AppSettings,
+  BrandSettings,
+  EmailTransportSettings,
+} from "@bao/shared/types/settings-contracts";
 import { isEmailTransportConfigured } from "@bao/shared/utils/email-transport";
 import { parseJson } from "@bao/shared/utils/json";
 import { computed } from "vue";

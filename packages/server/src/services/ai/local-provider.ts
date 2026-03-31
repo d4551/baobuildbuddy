@@ -1,6 +1,15 @@
-import { LOCAL_AI_AUTO_DETECT_MODEL, LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
+import {
+  LOCAL_AI_AUTO_DETECT_MODEL,
+  LOCAL_AI_DEFAULT_ENDPOINT,
+  LOCAL_AI_DEFAULT_MODEL,
+} from "@bao/shared/constants/ai-provider";
 import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
-import type { AIProviderDiagnostic, AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
+import type {
+  AIProviderDiagnostic,
+  AIProviderType,
+  AIResponse,
+  GenerateOptions,
+} from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import OpenAI from "openai";

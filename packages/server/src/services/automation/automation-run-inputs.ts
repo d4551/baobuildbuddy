@@ -1,4 +1,8 @@
-import { AUTOMATION_SCRAPE_TARGETS, automationScrapeTargetToAction, type AutomationScrapeTarget } from "@bao/shared/constants/automation";
+import {
+  AUTOMATION_SCRAPE_TARGETS,
+  automationScrapeTargetToAction,
+  type AutomationScrapeTarget,
+} from "@bao/shared/constants/automation";
 import type { EmailResponseTone } from "@bao/shared/schemas/automation-email.schema";
 import { AutomationValidationError } from "./automation-errors";
 

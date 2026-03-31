@@ -1,6 +1,9 @@
 import { AI_CHAT_RECENT_JOBS_LIMIT } from "@bao/shared/constants/ai-chat";
 import { AI_DEFAULT_TEMPERATURE, AI_MAX_TOKENS_CHAT } from "@bao/shared/constants/ai-generation";
-import { API_MESSAGE_AI_NO_JOBS_FOR_MATCHING, API_MESSAGE_JOB_MATCHING_COMPLETE } from "@bao/shared/constants/api-messages";
+import {
+  API_MESSAGE_AI_NO_JOBS_FOR_MATCHING,
+  API_MESSAGE_JOB_MATCHING_COMPLETE,
+} from "@bao/shared/constants/api-messages";
 import { DEFAULT_SCORE_NEUTRAL } from "@bao/shared/constants/jobs";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { safeParseJson } from "@bao/shared/utils/json";

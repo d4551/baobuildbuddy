@@ -1,5 +1,16 @@
-import type { ResumeData, ResumeEducationItem, ResumeExperienceItem, ResumeProject } from "@bao/shared/types/resume";
-import { asBoolean, asRecord, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
+import type {
+  ResumeData,
+  ResumeEducationItem,
+  ResumeExperienceItem,
+  ResumeProject,
+} from "@bao/shared/types/resume";
+import {
+  asBoolean,
+  asRecord,
+  asString,
+  asStringArray,
+  isRecord,
+} from "@bao/shared/utils/type-guards";
 import { normalizeResumeTemplate, toResumeCollection } from "~/composables/api-normalizer-shared";
 
 const toResumeExperience = (value: unknown): ResumeExperienceItem | null => {

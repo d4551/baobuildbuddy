@@ -1,4 +1,8 @@
-import { SKILL_CATEGORY_IDS, type SkillCategory, type SkillMapping } from "@bao/shared/types/skill-mapping";
+import {
+  SKILL_CATEGORY_IDS,
+  type SkillCategory,
+  type SkillMapping,
+} from "@bao/shared/types/skill-mapping";
 import type { ComputedRef, Ref } from "vue";
 import {
   SKILLS_CATEGORY_LABEL_KEYS,

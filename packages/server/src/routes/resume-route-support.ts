@@ -1,9 +1,29 @@
-import { AI_DEFAULT_TEMPERATURE, AI_DEFAULT_TEMPERATURE_CREATIVE, AI_MAX_TOKENS_RESUME, AI_MAX_TOKENS_SCORE } from "@bao/shared/constants/ai-generation";
-import { API_ERROR_AI_ENHANCEMENT_FAILED, API_ERROR_AI_SCORING_FAILED, API_ERROR_EXPORT_RESUME, API_ERROR_JOB_NOT_FOUND, API_ERROR_RESUME_NOT_FOUND, API_ERROR_UNKNOWN } from "@bao/shared/constants/api-errors";
+import {
+  AI_DEFAULT_TEMPERATURE,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  AI_MAX_TOKENS_RESUME,
+  AI_MAX_TOKENS_SCORE,
+} from "@bao/shared/constants/ai-generation";
+import {
+  API_ERROR_AI_ENHANCEMENT_FAILED,
+  API_ERROR_AI_SCORING_FAILED,
+  API_ERROR_EXPORT_RESUME,
+  API_ERROR_JOB_NOT_FOUND,
+  API_ERROR_RESUME_NOT_FOUND,
+  API_ERROR_UNKNOWN,
+} from "@bao/shared/constants/api-errors";
 import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
-import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+} from "@bao/shared/constants/http";
 import { DEFAULT_SCORE_NEUTRAL } from "@bao/shared/constants/jobs";
-import { RESUME_DEFAULT_NAME, RESUME_DEFAULT_THEME, RESUME_TEMPLATE_DEFAULT, isResumeTemplate } from "@bao/shared/constants/resume";
+import {
+  RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_THEME,
+  RESUME_TEMPLATE_DEFAULT,
+  isResumeTemplate,
+} from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";

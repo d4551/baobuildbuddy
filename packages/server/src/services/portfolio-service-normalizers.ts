@@ -1,4 +1,8 @@
-import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
+import type {
+  PortfolioData,
+  PortfolioMetadata,
+  PortfolioProject,
+} from "@bao/shared/types/portfolio";
 import type {
   CreatePortfolioProjectPayload,
   PortfolioProjectInsert,

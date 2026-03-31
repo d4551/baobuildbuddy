@@ -1,4 +1,10 @@
-import type { InterviewAnalysis, InterviewConfig, InterviewConversationStyle, InterviewResponse, VoiceSettings } from "@bao/shared/types/interview";
+import type {
+  InterviewAnalysis,
+  InterviewConfig,
+  InterviewConversationStyle,
+  InterviewResponse,
+  VoiceSettings,
+} from "@bao/shared/types/interview";
 import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import type { interviewSessions } from "../db/schema/interviews";
 

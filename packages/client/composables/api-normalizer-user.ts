@@ -1,5 +1,12 @@
 import type { UserProfile } from "@bao/shared/types/user";
-import { asBoolean, asNumber, asRecord, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
+import {
+  asBoolean,
+  asNumber,
+  asRecord,
+  asString,
+  asStringArray,
+  isRecord,
+} from "@bao/shared/utils/type-guards";
 import { asEnum, asEnumArray } from "~/composables/api-normalizer-shared";
 
 const USER_EXPERIENCE_LEVELS: readonly Exclude<

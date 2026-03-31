@@ -1,5 +1,11 @@
 import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
-import { SCHEMA_MAX_LENGTH_DESCRIPTION, SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_LABEL, SCHEMA_MAX_LENGTH_SHORT, SCHEMA_MAX_LENGTH_TINY } from "@bao/shared/constants/schema-limits";
+import {
+  SCHEMA_MAX_LENGTH_DESCRIPTION,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LABEL,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_LENGTH_TINY,
+} from "@bao/shared/constants/schema-limits";
 import Type from "baobox";
 
 export type JobListQuery = {

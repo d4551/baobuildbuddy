@@ -1,4 +1,13 @@
-import { SCHEMA_MAX_ITEMS_LARGE, SCHEMA_MAX_ITEMS_XXLARGE, SCHEMA_MAX_LENGTH_DESCRIPTION, SCHEMA_MAX_LENGTH_EMAIL, SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_PHONE, SCHEMA_MAX_LENGTH_SHORT, SCHEMA_MAX_LENGTH_URL } from "@bao/shared/constants/schema-limits";
+import {
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_ITEMS_XXLARGE,
+  SCHEMA_MAX_LENGTH_DESCRIPTION,
+  SCHEMA_MAX_LENGTH_EMAIL,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_PHONE,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_LENGTH_URL,
+} from "@bao/shared/constants/schema-limits";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";

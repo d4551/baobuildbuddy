@@ -1,4 +1,11 @@
-import { AI_PROVIDER_CATALOG, AI_PROVIDER_DEFAULT, AI_PROVIDER_DEFAULT_ORDER, LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_RECOMMENDED_MODELS, type AIProviderMetadata } from "@bao/shared/constants/ai-provider";
+import {
+  AI_PROVIDER_CATALOG,
+  AI_PROVIDER_DEFAULT,
+  AI_PROVIDER_DEFAULT_ORDER,
+  LOCAL_AI_DEFAULT_ENDPOINT,
+  LOCAL_AI_RECOMMENDED_MODELS,
+  type AIProviderMetadata,
+} from "@bao/shared/constants/ai-provider";
 import type { AIProviderDiagnostic, AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import type { AIProviderDiagnostics } from "@bao/shared/types/settings-contracts";
 

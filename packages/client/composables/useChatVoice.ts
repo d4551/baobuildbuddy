@@ -1,4 +1,9 @@
-import { AI_CHAT_VOICE_AUTO_SPEAK_DEFAULT, AI_CHAT_VOICE_DEFAULT_ID, AI_CHAT_VOICE_ERROR_MESSAGE_KEYS, type AIChatVoiceErrorCode } from "@bao/shared/constants/ai-voice";
+import {
+  AI_CHAT_VOICE_AUTO_SPEAK_DEFAULT,
+  AI_CHAT_VOICE_DEFAULT_ID,
+  AI_CHAT_VOICE_ERROR_MESSAGE_KEYS,
+  type AIChatVoiceErrorCode,
+} from "@bao/shared/constants/ai-voice";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import type { Ref } from "vue";

@@ -1,5 +1,12 @@
 import { MAX_PORT, MIN_PORT } from "@bao/shared/constants/ports";
-import { SCHEMA_MAX_LENGTH_API_KEY, SCHEMA_MAX_LENGTH_EMAIL, SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_MODEL, SCHEMA_MAX_LENGTH_SETTINGS_LABEL, SCHEMA_MAX_LENGTH_SETTINGS_URL } from "@bao/shared/constants/schema-limits";
+import {
+  SCHEMA_MAX_LENGTH_API_KEY,
+  SCHEMA_MAX_LENGTH_EMAIL,
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_MODEL,
+  SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
+  SCHEMA_MAX_LENGTH_SETTINGS_URL,
+} from "@bao/shared/constants/schema-limits";
 import Type from "baobox";
 import { DATA_EXPORT_VERSION } from "../services/data-service-contracts";
 import {

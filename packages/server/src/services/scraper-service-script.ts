@@ -1,5 +1,15 @@
-import { API_ERROR_INVALID_SCRAPER_JSON, API_ERROR_INVALID_SCRIPT_ID } from "@bao/shared/constants/api-errors";
-import { automationScriptIdSchema, scrapedJobSchema, scrapedStudioSchema, type AutomationScriptId, type ScrapedJob, type ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
+import {
+  API_ERROR_INVALID_SCRAPER_JSON,
+  API_ERROR_INVALID_SCRIPT_ID,
+} from "@bao/shared/constants/api-errors";
+import {
+  automationScriptIdSchema,
+  scrapedJobSchema,
+  scrapedStudioSchema,
+  type AutomationScriptId,
+  type ScrapedJob,
+  type ScrapedStudio,
+} from "@bao/shared/schemas/automation-scripts.schema";
 import type { JobSearchResult } from "@bao/shared/types/jobs";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { generateId } from "@bao/shared/utils/validation";

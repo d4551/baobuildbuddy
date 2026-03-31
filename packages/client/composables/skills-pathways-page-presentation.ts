@@ -1,5 +1,9 @@
 import { getGamificationPathwayIcon } from "@bao/shared/constants/gamification-icons";
-import type { CareerPathway, ReadinessAssessment, SkillReadinessFeedbackId } from "@bao/shared/types/skill-mapping";
+import type {
+  CareerPathway,
+  ReadinessAssessment,
+  SkillReadinessFeedbackId,
+} from "@bao/shared/types/skill-mapping";
 import {
   READINESS_CATEGORY_KEYS,
   READINESS_CATEGORY_LABEL_KEYS,

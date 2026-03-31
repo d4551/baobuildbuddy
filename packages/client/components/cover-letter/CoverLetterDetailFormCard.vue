@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { COVER_LETTER_COMPANY_MIN_LENGTH, COVER_LETTER_POSITION_MIN_LENGTH, COVER_LETTER_TEMPLATE_OPTIONS, type CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
+import {
+  COVER_LETTER_COMPANY_MIN_LENGTH,
+  COVER_LETTER_POSITION_MIN_LENGTH,
+  COVER_LETTER_TEMPLATE_OPTIONS,
+  type CoverLetterTemplate,
+} from "@bao/shared/constants/cover-letter";
 
 defineProps<{
   templateLabel: (template: CoverLetterTemplate) => string;

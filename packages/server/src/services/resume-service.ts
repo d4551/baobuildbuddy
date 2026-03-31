@@ -1,7 +1,24 @@
 import { API_ERROR_CREATE_RESUME } from "@bao/shared/constants/api-errors";
-import { RESUME_DEFAULT_NAME, RESUME_DEFAULT_THEME, RESUME_TEMPLATE_DEFAULT, isResumeTemplate } from "@bao/shared/constants/resume";
-import { resumeEducationSchema, resumeExperienceSchema, resumeGamingExperienceSchema, resumePersonalInfoSchema, resumeProjectSchema, resumeSkillsSchema } from "@bao/shared/schemas/resume.schema";
-import type { GamingExperience, ResumeData, ResumePersonalInfo, ResumeSkills } from "@bao/shared/types/resume";
+import {
+  RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_THEME,
+  RESUME_TEMPLATE_DEFAULT,
+  isResumeTemplate,
+} from "@bao/shared/constants/resume";
+import {
+  resumeEducationSchema,
+  resumeExperienceSchema,
+  resumeGamingExperienceSchema,
+  resumePersonalInfoSchema,
+  resumeProjectSchema,
+  resumeSkillsSchema,
+} from "@bao/shared/schemas/resume.schema";
+import type {
+  GamingExperience,
+  ResumeData,
+  ResumePersonalInfo,
+  ResumeSkills,
+} from "@bao/shared/types/resume";
 import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
 import { z } from "zod";

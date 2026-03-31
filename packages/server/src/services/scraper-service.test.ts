@@ -3,7 +3,10 @@ import { rmSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { JobProviderSettings } from "@bao/shared/types/settings-contracts";
-import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
+import {
+  DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_SETTINGS_ID,
+} from "@bao/shared/types/settings-defaults";
 import { SCRAPER_DIR } from "../config/paths";
 import { db, sqlite } from "../db/client";
 import { initializeDatabase } from "../db/init";

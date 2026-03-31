@@ -1,4 +1,8 @@
-import { API_ERROR_EMPTY_API_KEY, API_ERROR_INVALID_API_KEY, API_ERROR_MISSING_AUTH_HEADER } from "@bao/shared/constants/api-errors";
+import {
+  API_ERROR_EMPTY_API_KEY,
+  API_ERROR_INVALID_API_KEY,
+  API_ERROR_MISSING_AUTH_HEADER,
+} from "@bao/shared/constants/api-errors";
 import { HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";

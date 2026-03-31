@@ -1,4 +1,9 @@
-import { PORTFOLIO_FOOTER_X_OFFSET, PORTFOLIO_FOOTER_Y, PORTFOLIO_MARGIN, RESUME_BODY_LINE_GAP } from "@bao/shared/constants/export-layout";
+import {
+  PORTFOLIO_FOOTER_X_OFFSET,
+  PORTFOLIO_FOOTER_Y,
+  PORTFOLIO_MARGIN,
+  RESUME_BODY_LINE_GAP,
+} from "@bao/shared/constants/export-layout";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import {
   addA4Page,

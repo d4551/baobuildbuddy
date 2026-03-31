@@ -1,4 +1,7 @@
-import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared/constants/score-thresholds";
+import {
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
+} from "@bao/shared/constants/score-thresholds";
 import { SKILLS_DEFAULT_CONFIDENCE, type SkillCategory } from "@bao/shared/types/skill-mapping";
 
 /**

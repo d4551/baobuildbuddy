@@ -1,4 +1,7 @@
-import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared/constants/score-thresholds";
+import {
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
+} from "@bao/shared/constants/score-thresholds";
 
 export type ScoreLevel = "pass" | "warning" | "developing" | "unknown";
 

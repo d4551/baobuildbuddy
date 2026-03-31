@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH, PORTFOLIO_PROJECT_TITLE_MIN_LENGTH } from "@bao/shared/constants/portfolio";
+import {
+  PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH,
+  PORTFOLIO_PROJECT_TITLE_MIN_LENGTH,
+} from "@bao/shared/constants/portfolio";
 import { useI18n } from "vue-i18n";
 
 type PortfolioProjectForm = {

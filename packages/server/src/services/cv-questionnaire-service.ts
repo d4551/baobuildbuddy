@@ -1,4 +1,9 @@
-import { AI_DEFAULT_TEMPERATURE, AI_DEFAULT_TEMPERATURE_CREATIVE, AI_MAX_TOKENS_CV_ANALYSIS, AI_MAX_TOKENS_CV_QUESTION } from "@bao/shared/constants/ai-generation";
+import {
+  AI_DEFAULT_TEMPERATURE,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  AI_MAX_TOKENS_CV_ANALYSIS,
+  AI_MAX_TOKENS_CV_QUESTION,
+} from "@bao/shared/constants/ai-generation";
 import { API_ERROR_PARSE_RESUME_SYNTHESIS } from "@bao/shared/constants/api-errors";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { safeParseJson } from "@bao/shared/utils/json";

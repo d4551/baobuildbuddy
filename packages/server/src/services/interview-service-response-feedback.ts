@@ -1,6 +1,13 @@
-import { AI_DEFAULT_TEMPERATURE_INTERVIEW, AI_MAX_TOKENS_FEEDBACK } from "@bao/shared/constants/ai-generation";
+import {
+  AI_DEFAULT_TEMPERATURE_INTERVIEW,
+  AI_MAX_TOKENS_FEEDBACK,
+} from "@bao/shared/constants/ai-generation";
 import { API_ERROR_AI_OPERATION_TIMEOUT } from "@bao/shared/constants/api-errors";
-import type { InterviewConfig, InterviewQuestion, InterviewResponse } from "@bao/shared/types/interview";
+import type {
+  InterviewConfig,
+  InterviewQuestion,
+  InterviewResponse,
+} from "@bao/shared/types/interview";
 import { settle } from "@bao/shared/utils/promise";
 import { interviewFeedbackPrompt, interviewPersonaPrompt } from "./ai/prompts-interview";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";

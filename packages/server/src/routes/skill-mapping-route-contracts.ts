@@ -1,4 +1,9 @@
-import { SCHEMA_MAX_ITEMS_LARGE, SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_LABEL, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
+import {
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_LABEL,
+  SCHEMA_MAX_LENGTH_SHORT,
+} from "@bao/shared/constants/schema-limits";
 import Type from "baobox";
 
 export type SkillMappingsQuery = {

@@ -1,4 +1,9 @@
-import { AI_PROVIDER_CATALOG, AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST, normalizeAIRouting } from "@bao/shared/constants/ai-provider";
+import {
+  AI_PROVIDER_CATALOG,
+  AI_PROVIDER_DEFAULT,
+  AI_PROVIDER_ID_LIST,
+  normalizeAIRouting,
+} from "@bao/shared/constants/ai-provider";
 import { API_MESSAGE_AI_NO_PROVIDERS } from "@bao/shared/constants/api-messages";
 import type { AIProviderDiagnostic, AIProviderStatus, AIProviderType } from "@bao/shared/types/ai";
 import type { AIProviderDiagnostics } from "@bao/shared/types/settings-contracts";

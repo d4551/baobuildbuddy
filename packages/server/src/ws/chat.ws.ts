@@ -1,8 +1,14 @@
-import { AI_DEFAULT_TEMPERATURE_CREATIVE, AI_MAX_TOKENS_WS } from "@bao/shared/constants/ai-generation";
+import {
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  AI_MAX_TOKENS_WS,
+} from "@bao/shared/constants/ai-generation";
 import { API_ERROR_GENERATE_RESPONSE } from "@bao/shared/constants/api-errors";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
 import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_MESSAGE } from "@bao/shared/constants/schema-limits";
+import {
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_MESSAGE,
+} from "@bao/shared/constants/schema-limits";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";

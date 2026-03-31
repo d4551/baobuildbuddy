@@ -1,4 +1,7 @@
-import { AI_DEFAULT_TEMPERATURE_STRUCTURED, AI_MAX_TOKENS_SCRAPE_ENRICHMENT } from "@bao/shared/constants/ai-generation";
+import {
+  AI_DEFAULT_TEMPERATURE_STRUCTURED,
+  AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
+} from "@bao/shared/constants/ai-generation";
 import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
 import type { ScrapeEnrichmentRunSummary } from "@bao/shared/types/jobs";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";

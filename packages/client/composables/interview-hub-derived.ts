@@ -1,4 +1,7 @@
-import { INTERVIEW_HUB_RECENT_SESSION_LIMIT, JOB_PREVIEW_LIMIT } from "@bao/shared/constants/interview";
+import {
+  INTERVIEW_HUB_RECENT_SESSION_LIMIT,
+  JOB_PREVIEW_LIMIT,
+} from "@bao/shared/constants/interview";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { InterviewMode } from "@bao/shared/types/interview";
 import type { Job } from "@bao/shared/types/jobs";

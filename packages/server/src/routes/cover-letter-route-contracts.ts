@@ -1,5 +1,9 @@
 import { COVER_LETTER_TEMPLATE_OPTIONS } from "@bao/shared/constants/cover-letter";
-import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_MICRO, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
+import {
+  SCHEMA_MAX_LENGTH_ID,
+  SCHEMA_MAX_LENGTH_MICRO,
+  SCHEMA_MAX_LENGTH_SHORT,
+} from "@bao/shared/constants/schema-limits";
 import Type from "baobox";
 
 export type GenerateCoverLetterBody = {

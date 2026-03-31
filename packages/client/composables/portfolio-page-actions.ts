@@ -1,4 +1,7 @@
-import { PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH, PORTFOLIO_PROJECT_TITLE_MIN_LENGTH } from "@bao/shared/constants/portfolio";
+import {
+  PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH,
+  PORTFOLIO_PROJECT_TITLE_MIN_LENGTH,
+} from "@bao/shared/constants/portfolio";
 import type { PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 import type { ComposerTranslation } from "vue-i18n";
 import type { ComputedRef, Ref } from "vue";

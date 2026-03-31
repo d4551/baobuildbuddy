@@ -1,6 +1,15 @@
-import { API_ERROR_GENERATE_QUESTIONS, API_ERROR_RESUME_NOT_FOUND, API_ERROR_SYNTHESIZE_RESUME, API_ERROR_UNKNOWN } from "@bao/shared/constants/api-errors";
+import {
+  API_ERROR_GENERATE_QUESTIONS,
+  API_ERROR_RESUME_NOT_FOUND,
+  API_ERROR_SYNTHESIZE_RESUME,
+  API_ERROR_UNKNOWN,
+} from "@bao/shared/constants/api-errors";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
-import { HTTP_STATUS_CREATED, HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+} from "@bao/shared/constants/http";
 import { RESUME_DEFAULT_NAME_QUESTIONNAIRE } from "@bao/shared/constants/resume";
 import { settle } from "@bao/shared/utils/promise";
 import { StandardSchemaV1 } from "baobox";

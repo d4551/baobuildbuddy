@@ -1,4 +1,7 @@
-import { API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED, API_ERROR_RUN_ID_INVALID } from "@bao/shared/constants/api-errors";
+import {
+  API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED,
+  API_ERROR_RUN_ID_INVALID,
+} from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_JOB_APPLICATION_AUTOMATION_COMPLETED } from "@bao/shared/constants/api-messages";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";

@@ -1,10 +1,18 @@
 import { AI_PROVIDER_DEFAULT } from "@bao/shared/constants/ai-provider";
 import { JOB_EXPERIENCE_LEVELS, JOB_TYPES } from "@bao/shared/constants/jobs";
-import { RESUME_TEMPLATE_DEFAULT, RESUME_TEMPLATE_OPTIONS, type ResumeTemplate } from "@bao/shared/constants/resume";
+import {
+  RESUME_TEMPLATE_DEFAULT,
+  RESUME_TEMPLATE_OPTIONS,
+  type ResumeTemplate,
+} from "@bao/shared/constants/resume";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type { StudioCulture } from "@bao/shared/types/interview";
 import type { JobExperienceLevel, JobType } from "@bao/shared/types/jobs";
-import type { ResumeEducationItem, ResumeExperienceItem, ResumeProject } from "@bao/shared/types/resume";
+import type {
+  ResumeEducationItem,
+  ResumeExperienceItem,
+  ResumeProject,
+} from "@bao/shared/types/resume";
 
 export const AI_PROVIDERS: readonly AIProviderType[] = [
   "local",

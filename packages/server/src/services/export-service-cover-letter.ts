@@ -1,6 +1,15 @@
 import { COVER_LETTER_DEFAULT_SIGNATURE } from "@bao/shared/constants/cover-letter";
-import { COVER_LETTER_LINE_HEIGHT, COVER_LETTER_MARGIN, COVER_LETTER_PARAGRAPH_GAP, COVER_LETTER_PARAGRAPH_SIZE } from "@bao/shared/constants/export-layout";
-import { collectDefinedStringValues, formatExportDate, toCoverLetterParagraphs } from "@bao/shared/utils/export-contract";
+import {
+  COVER_LETTER_LINE_HEIGHT,
+  COVER_LETTER_MARGIN,
+  COVER_LETTER_PARAGRAPH_GAP,
+  COVER_LETTER_PARAGRAPH_SIZE,
+} from "@bao/shared/constants/export-layout";
+import {
+  collectDefinedStringValues,
+  formatExportDate,
+  toCoverLetterParagraphs,
+} from "@bao/shared/utils/export-contract";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import {
   addA4Page,

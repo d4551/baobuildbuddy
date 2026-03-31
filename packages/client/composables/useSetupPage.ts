@@ -1,4 +1,7 @@
-import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
+import {
+  LOCAL_AI_DEFAULT_ENDPOINT,
+  LOCAL_AI_DEFAULT_MODEL,
+} from "@bao/shared/constants/ai-provider";
 import type { DashboardStats } from "@bao/shared/types/search";
 import { useI18n } from "vue-i18n";
 import { createFlowEngineInput } from "~/constants/flow-engine";

@@ -1,7 +1,17 @@
-import { JOB_GAME_GENRES, JOB_STUDIO_TYPES, JOB_SUPPORTED_PLATFORMS } from "@bao/shared/constants/jobs";
+import {
+  JOB_GAME_GENRES,
+  JOB_STUDIO_TYPES,
+  JOB_SUPPORTED_PLATFORMS,
+} from "@bao/shared/constants/jobs";
 import type { Job } from "@bao/shared/types/jobs";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
-import { asBoolean, asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
+import {
+  asBoolean,
+  asNumber,
+  asString,
+  asStringArray,
+  isRecord,
+} from "@bao/shared/utils/type-guards";
 import {
   asEnum,
   asEnumArray,

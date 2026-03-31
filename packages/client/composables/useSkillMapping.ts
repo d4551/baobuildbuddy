@@ -1,5 +1,15 @@
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
-import { SKILL_READINESS_FEEDBACK_IDS, SKILL_READINESS_IMPROVEMENT_IDS, SKILL_READINESS_NEXT_STEP_IDS, type CareerPathway, type ReadinessAssessment, type SkillMapping, type SkillReadinessFeedbackId, type SkillReadinessImprovementId, type SkillReadinessNextStepId } from "@bao/shared/types/skill-mapping";
+import {
+  SKILL_READINESS_FEEDBACK_IDS,
+  SKILL_READINESS_IMPROVEMENT_IDS,
+  SKILL_READINESS_NEXT_STEP_IDS,
+  type CareerPathway,
+  type ReadinessAssessment,
+  type SkillMapping,
+  type SkillReadinessFeedbackId,
+  type SkillReadinessImprovementId,
+  type SkillReadinessNextStepId,
+} from "@bao/shared/types/skill-mapping";
 import { asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { toSkillMapping } from "./api-normalizer-skills";

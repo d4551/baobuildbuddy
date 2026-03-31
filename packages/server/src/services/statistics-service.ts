@@ -1,4 +1,9 @@
-import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared/types/search";
+import type {
+  AutomationStats,
+  CareerProgress,
+  DashboardStats,
+  WeeklyActivity,
+} from "@bao/shared/types/search";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { STATISTICS_AUTOMATION_RUNS_LIMIT } from "@bao/shared/constants/statistics";

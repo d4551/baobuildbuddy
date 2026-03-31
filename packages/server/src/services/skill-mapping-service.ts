@@ -1,5 +1,9 @@
 import { API_ERROR_CREATE_SKILL_MAPPING } from "@bao/shared/constants/api-errors";
-import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@bao/shared/types/skill-mapping";
+import type {
+  CareerPathway,
+  ReadinessAssessment,
+  SkillMapping,
+} from "@bao/shared/types/skill-mapping";
 import { buildCareerPathways } from "./skill-mapping-pathways";
 import { buildSkillReadinessAssessment } from "./skill-mapping-readiness";
 import { toSkillMapping } from "./skill-mapping-normalizers";

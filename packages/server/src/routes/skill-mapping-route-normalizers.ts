@@ -1,4 +1,13 @@
-import { SKILLS_DEFAULT_CONFIDENCE, SKILL_CATEGORY_IDS, SKILL_DEMAND_LEVEL_IDS, SKILL_EVIDENCE_TYPE_IDS, SKILL_EVIDENCE_VERIFICATION_STATUS_IDS, type SkillCategory, type SkillEvidence, type SkillMapping } from "@bao/shared/types/skill-mapping";
+import {
+  SKILLS_DEFAULT_CONFIDENCE,
+  SKILL_CATEGORY_IDS,
+  SKILL_DEMAND_LEVEL_IDS,
+  SKILL_EVIDENCE_TYPE_IDS,
+  SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
+  type SkillCategory,
+  type SkillEvidence,
+  type SkillMapping,
+} from "@bao/shared/types/skill-mapping";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { generateId } from "@bao/shared/utils/validation";
 

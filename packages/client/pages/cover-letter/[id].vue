@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { COVER_LETTER_DEFAULT_TEMPLATE, isCoverLetterTemplate, type CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
+import {
+  COVER_LETTER_DEFAULT_TEMPLATE,
+  isCoverLetterTemplate,
+  type CoverLetterTemplate,
+} from "@bao/shared/constants/cover-letter";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { useI18n } from "vue-i18n";

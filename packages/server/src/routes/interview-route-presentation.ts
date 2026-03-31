@@ -1,5 +1,10 @@
 import { INTERVIEW_DEFAULT_ROLE_CATEGORY } from "@bao/shared/constants/interview";
-import type { InterviewAnalysis, InterviewQuestion, InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
+import type {
+  InterviewAnalysis,
+  InterviewQuestion,
+  InterviewResponse,
+  InterviewSession,
+} from "@bao/shared/types/interview";
 import { asString } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";

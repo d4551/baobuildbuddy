@@ -1,7 +1,23 @@
-import type { AutomationRunStatus, AutomationRunType, AutomationScrapeTarget, RpaCapabilityAuditReport } from "@bao/shared/constants/automation";
-import { API_ENDPOINTS, WS_ENDPOINTS, buildAutomationRunEndpoint } from "@bao/shared/constants/endpoints";
-import type { EmailResponseRequest, EmailResponseResult } from "@bao/shared/schemas/automation-email.schema";
-import { rpaRunEventSchema, type RpaRunEvent, type RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import type {
+  AutomationRunStatus,
+  AutomationRunType,
+  AutomationScrapeTarget,
+  RpaCapabilityAuditReport,
+} from "@bao/shared/constants/automation";
+import {
+  API_ENDPOINTS,
+  WS_ENDPOINTS,
+  buildAutomationRunEndpoint,
+} from "@bao/shared/constants/endpoints";
+import type {
+  EmailResponseRequest,
+  EmailResponseResult,
+} from "@bao/shared/schemas/automation-email.schema";
+import {
+  rpaRunEventSchema,
+  type RpaRunEvent,
+  type RpaRunExecutionEnvelope,
+} from "@bao/shared/schemas/rpa-events.schema";
 import { safeParseJson } from "@bao/shared/utils/json";
 import type { AsyncData } from "nuxt/app";
 import { $fetch, type FetchError } from "ofetch";

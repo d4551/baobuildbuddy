@@ -1,4 +1,7 @@
-import type { ReadinessAssessment, SkillReadinessFeedbackId } from "@bao/shared/types/skill-mapping";
+import type {
+  ReadinessAssessment,
+  SkillReadinessFeedbackId,
+} from "@bao/shared/types/skill-mapping";
 
 export type ReadinessCategoryKey = "technical" | "softSkills" | "industryKnowledge" | "portfolio";
 

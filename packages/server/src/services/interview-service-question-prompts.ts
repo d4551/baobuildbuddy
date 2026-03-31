@@ -1,6 +1,10 @@
 import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
 import { INTERVIEW_DEFAULT_EXPERIENCE_LEVEL } from "@bao/shared/constants/interview";
-import type { InterviewConfig, InterviewQuestion, InterviewResponse } from "@bao/shared/types/interview";
+import type {
+  InterviewConfig,
+  InterviewQuestion,
+  InterviewResponse,
+} from "@bao/shared/types/interview";
 import { interviewPersonaPrompt, interviewQuestionPrompt } from "./ai/prompts-interview";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
 import {

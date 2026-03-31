@@ -1,4 +1,8 @@
-import { AI_CHAT_VOICE_DEFAULT_ID, AI_CHAT_VOICE_ERROR_CODES, type AIChatVoiceErrorCode } from "@bao/shared/constants/ai-voice";
+import {
+  AI_CHAT_VOICE_DEFAULT_ID,
+  AI_CHAT_VOICE_ERROR_CODES,
+  type AIChatVoiceErrorCode,
+} from "@bao/shared/constants/ai-voice";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { beforeEach, describe, expect, it, vi } from "vitest";

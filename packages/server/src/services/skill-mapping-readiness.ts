@@ -1,5 +1,15 @@
-import { SCORE_DEVELOPING_THRESHOLD, SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared/constants/score-thresholds";
-import type { ReadinessAssessment, SkillMapping, SkillReadinessFeedbackId, SkillReadinessImprovementId, SkillReadinessNextStepId } from "@bao/shared/types/skill-mapping";
+import {
+  SCORE_DEVELOPING_THRESHOLD,
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
+} from "@bao/shared/constants/score-thresholds";
+import type {
+  ReadinessAssessment,
+  SkillMapping,
+  SkillReadinessFeedbackId,
+  SkillReadinessImprovementId,
+  SkillReadinessNextStepId,
+} from "@bao/shared/types/skill-mapping";
 
 type ReadinessMetrics = {
   technicalSkills: SkillMapping[];

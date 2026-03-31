@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { RpaCapabilityAuditEntry, RpaCapabilityAuditReport } from "@bao/shared/constants/automation";
+import type {
+  RpaCapabilityAuditEntry,
+  RpaCapabilityAuditReport,
+} from "@bao/shared/constants/automation";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { getErrorMessage } from "~/utils/errors";

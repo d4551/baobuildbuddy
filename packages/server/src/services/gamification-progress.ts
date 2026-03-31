@@ -1,5 +1,9 @@
 import { MS_PER_DAY } from "@bao/shared/constants/time";
-import type { Achievement, DailyChallenge, GamificationStats } from "@bao/shared/types/gamification";
+import type {
+  Achievement,
+  DailyChallenge,
+  GamificationStats,
+} from "@bao/shared/types/gamification";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import {
   DAILY_CHALLENGE_DEFINITIONS,

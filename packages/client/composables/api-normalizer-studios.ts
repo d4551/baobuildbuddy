@@ -1,6 +1,12 @@
 import type { GameStudio } from "@bao/shared/types/interview";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
-import { asBoolean, asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
+import {
+  asBoolean,
+  asNumber,
+  asString,
+  asStringArray,
+  isRecord,
+} from "@bao/shared/utils/type-guards";
 import { asEnum, normalizeStudioCulture } from "~/composables/api-normalizer-shared";
 
 const STUDIO_CATEGORIES: readonly Exclude<GameStudio["category"], undefined>[] = [

@@ -1,7 +1,11 @@
 import { AI_DEFAULT_TEMPERATURE, AI_MAX_TOKENS_MATCH } from "@bao/shared/constants/ai-generation";
 import { API_ERROR_UNKNOWN } from "@bao/shared/constants/api-errors";
 import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
-import { JOB_DEFAULT_RECOMMENDATION_REASON, JOB_DEFAULT_RECOMMENDATION_SCORE, JOB_QUERY_DEFAULT_LIMIT } from "@bao/shared/constants/jobs";
+import {
+  JOB_DEFAULT_RECOMMENDATION_REASON,
+  JOB_DEFAULT_RECOMMENDATION_SCORE,
+  JOB_QUERY_DEFAULT_LIMIT,
+} from "@bao/shared/constants/jobs";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { desc } from "drizzle-orm";

@@ -1,4 +1,10 @@
-import type { InterviewAnalysis, InterviewConfig, InterviewQuestion, InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
+import type {
+  InterviewAnalysis,
+  InterviewConfig,
+  InterviewQuestion,
+  InterviewResponse,
+  InterviewSession,
+} from "@bao/shared/types/interview";
 import type { DBInterviewSession } from "./interview-service-contracts";
 import { normalizeConfig } from "./interview-service-config-normalizers";
 import { isRecord, parseNumber, parseStringArray } from "./interview-service-value-parsers";

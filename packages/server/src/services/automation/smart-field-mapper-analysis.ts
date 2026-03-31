@@ -1,4 +1,7 @@
-import { AI_DEFAULT_TEMPERATURE_STRUCTURED, AI_MAX_TOKENS_FIELD_MAPPER } from "@bao/shared/constants/ai-generation";
+import {
+  AI_DEFAULT_TEMPERATURE_STRUCTURED,
+  AI_MAX_TOKENS_FIELD_MAPPER,
+} from "@bao/shared/constants/ai-generation";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { config } from "../../config/env";
 import { formFieldAnalysisPrompt } from "../ai/prompts-automation";

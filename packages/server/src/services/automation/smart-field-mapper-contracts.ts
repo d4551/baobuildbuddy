@@ -1,5 +1,12 @@
-import { AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH, AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH } from "@bao/shared/constants/automation";
-import { SCHEMA_MAX_ITEMS_SMALL, SCHEMA_MAX_LENGTH_SHORT, SCHEMA_MAX_LENGTH_URL } from "@bao/shared/constants/schema-limits";
+import {
+  AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH,
+  AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH,
+} from "@bao/shared/constants/automation";
+import {
+  SCHEMA_MAX_ITEMS_SMALL,
+  SCHEMA_MAX_LENGTH_SHORT,
+  SCHEMA_MAX_LENGTH_URL,
+} from "@bao/shared/constants/schema-limits";
 import type { AIResponse } from "@bao/shared/types/ai";
 import { z } from "zod";
 

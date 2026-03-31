@@ -1,4 +1,7 @@
-import type { AutomationScrapeTarget, RpaCapabilityAuditReport } from "@bao/shared/constants/automation";
+import type {
+  AutomationScrapeTarget,
+  RpaCapabilityAuditReport,
+} from "@bao/shared/constants/automation";
 import { JOB_PREVIEW_LIMIT } from "@bao/shared/constants/interview";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";

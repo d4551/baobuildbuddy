@@ -882,7 +882,7 @@ Migrations live in `packages/server/src/db/migrations/`. Seed data in `packages/
     |   |   |   |   +-- portfolio.schema, skill-mapping.schema
     |   |   |   +-- constants/      Runtime, API, automation, AI, and UI contract constants
     |   |   |   +-- utils/          Shared parsing, validation, and formatting helpers
-    |   |   |   +-- public-api.ts   Package export surface
+    |   |   |   +-- constants/, schemas/, types/, utils/  Direct subpath export surface
     |   +-- scraper/                Bun automation runtime
     |       +-- src/scripts/        Bun/TS automation entrypoints
     |       +-- src/providers/      Playwright scraper extractors

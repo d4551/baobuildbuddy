@@ -1,4 +1,8 @@
-import { AI_PROVIDER_DEFAULT_ORDER, LOCAL_AI_AUTO_DETECT_MODEL, normalizeAIRouting } from "@bao/shared/constants/ai-provider";
+import {
+  AI_PROVIDER_DEFAULT_ORDER,
+  LOCAL_AI_AUTO_DETECT_MODEL,
+  normalizeAIRouting,
+} from "@bao/shared/constants/ai-provider";
 import type { AIProviderConfig, AIProviderType, AIRouting } from "@bao/shared/types/ai";
 import { normalizeLocalModelEndpoint } from "@bao/shared/types/settings-normalization";
 import {

@@ -1,7 +1,17 @@
-import { AI_DEFAULT_TEMPERATURE_INTERVIEW, AI_MAX_TOKENS_QUESTION } from "@bao/shared/constants/ai-generation";
+import {
+  AI_DEFAULT_TEMPERATURE_INTERVIEW,
+  AI_MAX_TOKENS_QUESTION,
+} from "@bao/shared/constants/ai-generation";
 import { API_ERROR_AI_OPERATION_TIMEOUT } from "@bao/shared/constants/api-errors";
-import { SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared/constants/score-thresholds";
-import type { InterviewAnalysis, InterviewConfig, InterviewResponse } from "@bao/shared/types/interview";
+import {
+  SCORE_PASS_THRESHOLD,
+  SCORE_WARNING_THRESHOLD,
+} from "@bao/shared/constants/score-thresholds";
+import type {
+  InterviewAnalysis,
+  InterviewConfig,
+  InterviewResponse,
+} from "@bao/shared/types/interview";
 import { settle } from "@bao/shared/utils/promise";
 import { interviewPersonaPrompt } from "./ai/prompts-interview";
 import type { FinalAnalysisPromptContext, StudioContext } from "./interview-service-contracts";

@@ -16,7 +16,6 @@ const autoImportExportPattern = /\bexport\s*\{\s*([^}]+)\s*\}\s*from\s*['"`][^'"
 const AS_CLAUSE_PATTERN = /\s+as\s+/u;
 
 const isIgnoredDeadExportFile = (filePath: string): boolean =>
-  filePath.endsWith("public-api.ts") ||
   filePath.endsWith("index.ts") ||
   filePath.endsWith(".test.ts") ||
   filePath.includes("/pages/") ||
@@ -25,10 +24,6 @@ const isIgnoredDeadExportFile = (filePath: string): boolean =>
   filePath.includes("/locales/");
 
 const normalizeImportTargets = (sourceFilePath: string, importPath: string): string[] => {
-  if (importPath === "@bao/shared") {
-    return ["packages/shared/src/public-api.ts"];
-  }
-
   if (importPath.startsWith("@bao/shared/")) {
     const relative = importPath.slice("@bao/shared/".length);
     return [
@@ -167,27 +162,6 @@ const collectImportedTargets = (
   return importedTargets;
 };
 
-const extendImportedTargetsFromSharedPublicApi = async (
-  importedTargets: Set<string>,
-): Promise<void> => {
-  if (!importedTargets.has("packages/shared/src/public-api.ts")) {
-    return;
-  }
-
-  const sharedFiles = await collectProjectFileEntries({
-    scanRoots: ["packages/shared/src"],
-    allowedExtensions: new Set([".ts"]),
-  });
-  for (const { filePath, content } of sharedFiles) {
-    if (filePath.endsWith("public-api.ts")) {
-      continue;
-    }
-    if (content.includes("export ")) {
-      importedTargets.add(filePath);
-    }
-  }
-};
-
 const isDeadExportViolation = (options: {
   filePath: string;
   content: string;
@@ -249,7 +223,6 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
   });
   const autoImportNames = await collectNuxtAutoImportNames();
   const importedTargets = collectImportedTargets(importSources);
-  await extendImportedTargetsFromSharedPublicApi(importedTargets);
 
   return files.flatMap(({ filePath, content }) =>
     isDeadExportViolation({

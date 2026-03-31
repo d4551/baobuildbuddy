@@ -1,4 +1,7 @@
-import { automationScrapeTargetToPortalId, type AutomationJobScrapeTarget } from "@bao/shared/constants/automation";
+import {
+  automationScrapeTargetToPortalId,
+  type AutomationJobScrapeTarget,
+} from "@bao/shared/constants/automation";
 import type { AutomationScriptId, ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
 import type { ScraperOperationResult } from "@bao/shared/types/jobs";
 import type { GamingPortalId } from "@bao/shared/types/settings-contracts";

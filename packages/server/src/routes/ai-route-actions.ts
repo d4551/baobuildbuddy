@@ -1,8 +1,23 @@
-import { AI_DEFAULT_TEMPERATURE, AI_DEFAULT_TEMPERATURE_CREATIVE } from "@bao/shared/constants/ai-generation";
-import { API_ERROR_ANALYZE_RESUME, API_ERROR_GENERATE_AI_RESPONSE, API_ERROR_GENERATE_COVER_LETTER, API_ERROR_MATCH_JOBS, API_ERROR_RESUME_NOT_FOUND } from "@bao/shared/constants/api-errors";
-import { API_MESSAGE_COVER_LETTER_GENERATED, API_MESSAGE_RESUME_ANALYSIS_COMPLETE } from "@bao/shared/constants/api-messages";
+import {
+  AI_DEFAULT_TEMPERATURE,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+} from "@bao/shared/constants/ai-generation";
+import {
+  API_ERROR_ANALYZE_RESUME,
+  API_ERROR_GENERATE_AI_RESPONSE,
+  API_ERROR_GENERATE_COVER_LETTER,
+  API_ERROR_MATCH_JOBS,
+  API_ERROR_RESUME_NOT_FOUND,
+} from "@bao/shared/constants/api-errors";
+import {
+  API_MESSAGE_COVER_LETTER_GENERATED,
+  API_MESSAGE_RESUME_ANALYSIS_COMPLETE,
+} from "@bao/shared/constants/api-messages";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
-import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+} from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
 import type { AIChatContextDomain, AIResponse } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";

@@ -1,4 +1,7 @@
-import { brandContentSettingsSchema, brandThemePaletteSchema } from "@bao/shared/schemas/settings.schema";
+import {
+  brandContentSettingsSchema,
+  brandThemePaletteSchema,
+} from "@bao/shared/schemas/settings.schema";
 import { parseJson } from "@bao/shared/utils/json";
 import type { SettingsPageState } from "./state";
 

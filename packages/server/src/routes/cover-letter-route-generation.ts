@@ -1,9 +1,25 @@
 import { AI_DEFAULT_TEMPERATURE_CREATIVE } from "@bao/shared/constants/ai-generation";
-import { API_ERROR_AI_SETTINGS_NOT_CONFIGURED, API_ERROR_COVER_LETTER_GENERATION_FAILED, API_ERROR_COVER_LETTER_NOT_FOUND, API_ERROR_EXPORT_COVER_LETTER, API_ERROR_UNKNOWN } from "@bao/shared/constants/api-errors";
-import { API_MESSAGE_COVER_LETTER_GENERATED_ONLY, API_MESSAGE_COVER_LETTER_GENERATED_SAVED } from "@bao/shared/constants/api-messages";
-import { COVER_LETTER_DEFAULT_CLOSING, COVER_LETTER_DEFAULT_OPENING } from "@bao/shared/constants/cover-letter";
+import {
+  API_ERROR_AI_SETTINGS_NOT_CONFIGURED,
+  API_ERROR_COVER_LETTER_GENERATION_FAILED,
+  API_ERROR_COVER_LETTER_NOT_FOUND,
+  API_ERROR_EXPORT_COVER_LETTER,
+  API_ERROR_UNKNOWN,
+} from "@bao/shared/constants/api-errors";
+import {
+  API_MESSAGE_COVER_LETTER_GENERATED_ONLY,
+  API_MESSAGE_COVER_LETTER_GENERATED_SAVED,
+} from "@bao/shared/constants/api-messages";
+import {
+  COVER_LETTER_DEFAULT_CLOSING,
+  COVER_LETTER_DEFAULT_OPENING,
+} from "@bao/shared/constants/cover-letter";
 import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
-import { HTTP_STATUS_CREATED, HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_SERVICE_UNAVAILABLE } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_SERVICE_UNAVAILABLE,
+} from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
 import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { safeParseJson } from "@bao/shared/utils/json";

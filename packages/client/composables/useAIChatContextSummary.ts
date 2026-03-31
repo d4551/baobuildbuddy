@@ -1,4 +1,8 @@
-import { AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS, AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS, AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY } from "@bao/shared/constants/ai-chat";
+import {
+  AI_CHAT_FLOATING_CONTEXT_DOMAIN_LABEL_KEYS,
+  AI_CHAT_FLOATING_CONTEXT_PROMPT_KEYS,
+  AI_CHAT_FLOATING_FOCUSED_ENTITY_PROMPT_KEY,
+} from "@bao/shared/constants/ai-chat";
 import type { AIChatContext, AIChatContextEntityType } from "@bao/shared/types/ai";
 import { type ComputedRef, computed } from "vue";
 

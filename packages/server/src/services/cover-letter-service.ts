@@ -1,5 +1,9 @@
 import { API_ERROR_CREATE_COVER_LETTER } from "@bao/shared/constants/api-errors";
-import { COVER_LETTER_DEFAULT_TEMPLATE, isCoverLetterTemplate, type CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
+import {
+  COVER_LETTER_DEFAULT_TEMPLATE,
+  isCoverLetterTemplate,
+  type CoverLetterTemplate,
+} from "@bao/shared/constants/cover-letter";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { generateId } from "@bao/shared/utils/validation";

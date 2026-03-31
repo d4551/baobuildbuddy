@@ -1,5 +1,11 @@
-import { API_ERROR_EMAIL_DELIVERY_FAILED, API_ERROR_GENERATE_EMAIL_RESPONSE } from "@bao/shared/constants/api-errors";
-import { API_MESSAGE_EMAIL_RESPONSE_DELIVERED, API_MESSAGE_EMAIL_RESPONSE_GENERATED } from "@bao/shared/constants/api-messages";
+import {
+  API_ERROR_EMAIL_DELIVERY_FAILED,
+  API_ERROR_GENERATE_EMAIL_RESPONSE,
+} from "@bao/shared/constants/api-errors";
+import {
+  API_MESSAGE_EMAIL_RESPONSE_DELIVERED,
+  API_MESSAGE_EMAIL_RESPONSE_GENERATED,
+} from "@bao/shared/constants/api-messages";
 import { AUTOMATION_FINISHED_PROGRESS } from "@bao/shared/constants/automation";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { eq } from "drizzle-orm";

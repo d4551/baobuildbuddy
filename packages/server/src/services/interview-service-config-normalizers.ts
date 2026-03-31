@@ -1,5 +1,21 @@
-import { INTERVIEW_DEFAULT_DURATION_MINUTES, INTERVIEW_DEFAULT_EXPERIENCE_LEVEL, INTERVIEW_DEFAULT_FOCUS_AREAS, INTERVIEW_DEFAULT_QUESTION_COUNT, INTERVIEW_DEFAULT_ROLE_CATEGORY, INTERVIEW_DEFAULT_ROLE_TYPE, INTERVIEW_DEFAULT_VOICE_SETTINGS, INTERVIEW_SERVICE_MAX_QUESTION_COUNT } from "@bao/shared/constants/interview";
-import type { InterviewCandidateContext, InterviewConfig, InterviewConversationStyle, InterviewMode, InterviewTargetJob, VoiceSettings } from "@bao/shared/types/interview";
+import {
+  INTERVIEW_DEFAULT_DURATION_MINUTES,
+  INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
+  INTERVIEW_DEFAULT_FOCUS_AREAS,
+  INTERVIEW_DEFAULT_QUESTION_COUNT,
+  INTERVIEW_DEFAULT_ROLE_CATEGORY,
+  INTERVIEW_DEFAULT_ROLE_TYPE,
+  INTERVIEW_DEFAULT_VOICE_SETTINGS,
+  INTERVIEW_SERVICE_MAX_QUESTION_COUNT,
+} from "@bao/shared/constants/interview";
+import type {
+  InterviewCandidateContext,
+  InterviewConfig,
+  InterviewConversationStyle,
+  InterviewMode,
+  InterviewTargetJob,
+  VoiceSettings,
+} from "@bao/shared/types/interview";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import type { InterviewConfigInput } from "./interview-service-contracts";
 import {

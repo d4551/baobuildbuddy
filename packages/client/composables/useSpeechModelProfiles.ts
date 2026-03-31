@@ -1,4 +1,9 @@
-import { DEFAULT_SPEECH_SETTINGS, SPEECH_MODEL_OPTIONS, SPEECH_PROVIDER_OPTIONS, type SpeechProviderOption } from "@bao/shared/constants/settings";
+import {
+  DEFAULT_SPEECH_SETTINGS,
+  SPEECH_MODEL_OPTIONS,
+  SPEECH_PROVIDER_OPTIONS,
+  type SpeechProviderOption,
+} from "@bao/shared/constants/settings";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 import type { ComputedRef, Ref } from "vue";
 import { computed, reactive, ref, watch } from "vue";
