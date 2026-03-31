@@ -33,12 +33,10 @@ const experienceLevelOptions = [
   { value: "Lead", labelKey: "resumeBuildPage.experienceLevels.lead" },
 ] as const;
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("resumeBuildPage.seoTitle"),
-    description: t("resumeBuildPage.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("resumeBuildPage.seoTitle"),
+  description: t("resumeBuildPage.seoDescription"),
+});
 
 onMounted(async () => {
   await searchStudios();

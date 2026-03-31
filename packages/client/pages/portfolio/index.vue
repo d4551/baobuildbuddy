@@ -1,19 +1,27 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   middleware: ["auth"],
 });
 
 const { t } = useI18n();
+const page = usePortfolioPage();
+const {
+  pending: bootstrapPending,
+  error: bootstrapError,
+  refresh: refreshPortfolio,
+} = await useAsyncData("portfolio-page-bootstrap", async () => {
+  await page.loadPortfolio();
+  return true;
+});
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("portfolioPage.title"),
-    description: t("portfolioPage.subtitle"),
-  });
-}
+useSeoMeta({
+  title: t("portfolioPage.title"),
+  description: t("portfolioPage.subtitle"),
+});
 
 const {
   PORTFOLIO_PROJECT_DIALOG_TITLE_ID,
@@ -30,10 +38,10 @@ const {
   hasFiltersApplied,
   hasMetadata,
   loading,
+  portfolio,
   newTech,
   openAddModal,
   openEditModal,
-  portfolio,
   portfolioForm,
   projectForm,
   projectPageAria,
@@ -49,7 +57,16 @@ const {
   showDeleteProjectDialog,
   moveProject,
   editingProject,
-} = usePortfolioPage();
+} = page;
+
+const bootstrapErrorMessage = computed(() =>
+  bootstrapError.value
+    ? getErrorMessage(bootstrapError.value, t("portfolioPage.bootstrap.loadError"))
+    : "",
+);
+
+const hasPortfolioContent = computed(() => hasMetadata.value || projects.value.length > 0);
+const isPortfolioEmpty = computed(() => !hasPortfolioContent.value);
 
 function updatePortfolioForm(value: typeof portfolioForm): void {
   Object.assign(portfolioForm, value);
@@ -81,13 +98,13 @@ function updateProjectForm(value: typeof projectForm): void {
           {{ t("portfolioPage.actions.previewButton") }}
         </NuxtLink>
 
-        <button
-          class="btn btn-primary"
-          :aria-label="t('portfolioPage.actions.exportAria')"
-          @click="handleExport"
-        >
-          {{ t("portfolioPage.actions.exportButton") }}
-        </button>
+        <AppExportMenu
+          :button-label="t('portfolioPage.actions.exportButton')"
+          :button-aria-label="t('portfolioPage.actions.exportAria')"
+          :disabled="loading"
+          summary-class="btn btn-primary"
+          @export="handleExport"
+        />
       </template>
       <template #aside>
         <StatsRow
@@ -101,32 +118,57 @@ function updateProjectForm(value: typeof projectForm): void {
       </template>
     </PageHeroHeader>
 
-    <section class="card card-border bg-base-100">
-      <div class="card-body">
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <fieldset class="fieldset lg:col-span-2">
-            <legend class="fieldset-legend">{{ t("portfolioPage.filters.searchLegend") }}</legend>
-            <input
-              v-model="searchQuery"
-              type="search"
-              class="input w-full"
-              :placeholder="t('portfolioPage.filters.searchPlaceholder')"
-              :aria-label="t('portfolioPage.filters.searchAria')"
-            />
-          </fieldset>
-        </div>
+    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="8" />
 
-        <div v-if="hasFiltersApplied" class="card-actions justify-end">
-          <button class="btn btn-sm btn-ghost" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
-            {{ t("portfolioPage.filters.clearButton") }}
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <LoadingSkeleton v-if="loading && !portfolio" :lines="8" />
+    <BootstrapErrorAlert
+      v-else-if="bootstrapErrorMessage"
+      :message="bootstrapErrorMessage"
+      :retry-label="t('portfolioPage.bootstrap.retryButton')"
+      :retry-aria-label="t('portfolioPage.bootstrap.retryAria')"
+      @retry="refreshPortfolio"
+    />
 
     <div v-else class="space-y-6">
+      <section v-if="isPortfolioEmpty" class="card card-border bg-base-100">
+        <div class="card-body">
+          <EmptyState
+            title-key="portfolioPage.emptyState.title"
+            description-key="portfolioPage.emptyState.description"
+          />
+          <div class="flex flex-wrap justify-center gap-3">
+            <a href="#portfolio-profile-card" class="btn btn-outline">
+              {{ t("portfolioPage.emptyState.profileButton") }}
+            </a>
+            <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="openAddModal">
+              {{ t("portfolioPage.projects.addButton") }}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-border bg-base-100">
+        <div class="card-body">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <fieldset class="fieldset lg:col-span-2">
+              <legend class="fieldset-legend">{{ t("portfolioPage.filters.searchLegend") }}</legend>
+              <input
+                v-model="searchQuery"
+                type="search"
+                class="input w-full"
+                :placeholder="t('portfolioPage.filters.searchPlaceholder')"
+                :aria-label="t('portfolioPage.filters.searchAria')"
+              />
+            </fieldset>
+          </div>
+
+          <div v-if="hasFiltersApplied" class="card-actions justify-end">
+            <button class="btn btn-sm btn-ghost" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
+              {{ t("portfolioPage.filters.clearButton") }}
+            </button>
+          </div>
+        </div>
+      </section>
+
       <PortfolioProfileCard
         :portfolio-form="portfolioForm"
         @update:portfolio-form="updatePortfolioForm"

@@ -49,12 +49,10 @@ const {
   topMappings,
 } = useSkillsPage();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("skillsPage.seoTitle"),
-    description: t("skillsPage.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("skillsPage.seoTitle"),
+  description: t("skillsPage.seoDescription"),
+});
 
 const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsyncData(
   "skills-page-bootstrap",

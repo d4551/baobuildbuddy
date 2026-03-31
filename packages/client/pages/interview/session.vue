@@ -4,12 +4,10 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const page = useInterviewSessionPage();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("interviewSession.title"),
-    description: t("interviewHub.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("interviewSession.title"),
+  description: t("interviewHub.seoDescription"),
+});
 </script>
 
 <template>

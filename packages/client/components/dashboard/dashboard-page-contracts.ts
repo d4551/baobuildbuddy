@@ -1,9 +1,10 @@
 import type { DailyChallenge, UserGamificationData } from "@bao/shared/types/gamification";
 import type { UserProfile } from "@bao/shared/types/user";
 import type { RouteLocationRaw } from "vue-router";
+import type { DashboardActivityType } from "~/constants/dashboard-pipeline";
 
 export interface DashboardActivity {
-  readonly type: string;
+  readonly type: DashboardActivityType;
   readonly description: string;
   readonly timestamp: Date;
 }

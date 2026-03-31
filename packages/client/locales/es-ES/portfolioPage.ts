@@ -9,6 +9,17 @@ const catalog = {
       exportButton: "Exportar",
       exportAria: "Exportar portafolio",
     },
+    bootstrap: {
+      loadError: "Error al cargar los datos del portafolio.",
+      retryButton: "Reintentar",
+      retryAria: "Reintentar carga de datos del portafolio",
+    },
+    emptyState: {
+      title: "Tu portafolio está listo para construirse",
+      description:
+        "Empieza con los detalles de tu perfil y después añade uno o más proyectos para dar forma a la vista pública del portafolio.",
+      profileButton: "Editar perfil",
+    },
     preview: {
       pageTitle: "Vista Previa del Portafolio",
       description:

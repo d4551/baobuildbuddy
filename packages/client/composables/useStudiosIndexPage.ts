@@ -310,16 +310,7 @@ function registerStudiosIndexEffects(input: {
 export function useStudiosIndexPage() {
   const runtime = createStudiosIndexRuntime();
   const actions = createStudiosIndexActions(runtime);
-
-  const { pending: bootstrapPending, refresh: refreshStudios } = useAsyncData(
-    "studios-index",
-    async () => {
-      await actions.loadStudios();
-      return true;
-    },
-  );
   const derived = createStudiosIndexDerivedState(runtime);
-  const loading = computed(() => bootstrapPending.value || derived.loading.value);
   registerStudiosIndexEffects({
     derived,
     runtime,
@@ -331,11 +322,11 @@ export function useStudiosIndexPage() {
     filteredStudios: derived.filteredStudios,
     filters: runtime.filters,
     hasAdditionalStudios: derived.hasAdditionalStudios,
-    loading,
+    loadStudios: actions.loadStudios,
+    loading: derived.loading,
     openStudioPreview: actions.openStudioPreview,
     pageError: runtime.pageError,
     previewStudio: derived.previewStudio,
-    refreshStudios,
     remoteFriendlyStudios: derived.remoteFriendlyStudios,
     searchQuery: runtime.searchQuery,
     showMoreStudios: () => actions.showMoreStudios(derived.filteredStudios.value.length),

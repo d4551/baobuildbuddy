@@ -6,6 +6,7 @@ import type {
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { getErrorMessage } from "~/utils/errors";
+import { resolveAutomationCapabilityIssues } from "~/utils/automation-capabilities";
 
 defineProps<{
   capabilityAuditStatus: "idle" | "pending" | "success" | "error";
@@ -21,6 +22,12 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const capabilityIssues = (capability: RpaCapabilityAuditEntry): string[] =>
+  resolveAutomationCapabilityIssues(capability);
+
+const capabilityIssueCount = (capability: RpaCapabilityAuditEntry): number =>
+  capabilityIssues(capability).length;
 </script>
 
 <template>
@@ -103,11 +110,11 @@ const { t } = useI18n();
                 <td>
                   <span
                     :class="[
-                      capabilityStatusClass(capability.configured, capability.issues.length),
+                      capabilityStatusClass(capability.configured, capabilityIssueCount(capability)),
                       'whitespace-nowrap',
                     ]"
                   >
-                    {{ capabilityStatusLabel(capability.configured, capability.issues.length) }}
+                    {{ capabilityStatusLabel(capability.configured, capabilityIssueCount(capability)) }}
                   </span>
                 </td>
                 <td>
@@ -151,7 +158,7 @@ const { t } = useI18n();
                   </span>
                 </td>
                 <td class="max-w-xs whitespace-normal break-words text-sm text-base-content/70">
-                  {{ capability.issues[0] || t("automation.hub.audit.noIssues") }}
+                  {{ capabilityIssues(capability)[0] || t("automation.hub.audit.noIssues") }}
                 </td>
               </tr>
             </tbody>

@@ -8,6 +8,7 @@ import type {
   ScrapePendingAction,
   TargetRecord,
 } from "~/types/automation-scraper";
+import { resolveAutomationCapabilityIssues } from "~/utils/automation-capabilities";
 
 defineProps<{
   capabilities: readonly ScrapeCapabilityCard[];
@@ -37,6 +38,9 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const capabilityIssues = (capability: ScrapeCapabilityCard): string[] =>
+  resolveAutomationCapabilityIssues(capability);
 
 function handleScheduleInput(target: AutomationScrapeTarget, event: Event): void {
   const input = event.target;
@@ -89,11 +93,15 @@ function handleScheduleInput(target: AutomationScrapeTarget, event: Event): void
           {{ cardDescription(capability.target) }}
         </p>
 
-        <div v-if="capability.issues.length > 0" role="alert" class="alert alert-warning alert-soft">
+        <div
+          v-if="capabilityIssues(capability).length > 0"
+          role="alert"
+          class="alert alert-warning alert-soft"
+        >
           <div class="space-y-1">
             <p class="font-medium">{{ capabilityAvailabilityLabel(capability) }}</p>
             <ul class="space-y-1 text-sm">
-              <li v-for="issue in capability.issues" :key="issue">
+              <li v-for="issue in capabilityIssues(capability)" :key="issue">
                 {{ issue }}
               </li>
             </ul>

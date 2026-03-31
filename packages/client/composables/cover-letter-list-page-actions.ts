@@ -214,11 +214,32 @@ export function createCoverLetterActions(
 }
 
 export function useCoverLetterPageBootstrap(
-  services: Pick<CoverLetterPageActionServices, "fetchCoverLetters" | "fetchResumes" | "route">,
+  services: Pick<
+    CoverLetterPageActionServices,
+    "fetchCoverLetters" | "fetchResumes" | "route" | "$toast" | "t"
+  >,
   state: Pick<CoverLetterPageActionState, "generateForm" | "initialResumeId">,
 ) {
   onMounted(async () => {
     initializeResumeSelection(state, services.route);
-    await Promise.all([services.fetchCoverLetters(), services.fetchResumes()]);
+    const [coverLettersResult, resumesResult] = await Promise.allSettled([
+      services.fetchCoverLetters(),
+      services.fetchResumes(),
+    ]);
+
+    if (coverLettersResult.status === "rejected") {
+      services.$toast.error(
+        getErrorMessage(
+          coverLettersResult.reason,
+          services.t("coverLetterPage.toasts.fetchFailed"),
+        ),
+      );
+    }
+
+    if (resumesResult.status === "rejected") {
+      services.$toast.error(
+        getErrorMessage(resumesResult.reason, services.t("apiErrors.resumes.fetchListFailed")),
+      );
+    }
   });
 }

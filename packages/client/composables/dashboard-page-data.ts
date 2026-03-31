@@ -5,6 +5,7 @@ import { toUserProfile } from "~/composables/api-normalizer-user";
 import { requireValue } from "~/composables/async-flow";
 import { DASHBOARD_ACTIVITY_FALLBACK_KEY, DASHBOARD_ERROR_KEYS } from "~/constants/dashboard-copy";
 import { DASHBOARD_RECENT_ACTIVITY_LIMIT } from "~/constants/dashboard-core";
+import { resolveDashboardActivityType } from "~/constants/dashboard-pipeline";
 import type {
   DashboardActivity,
   DashboardChallengeViewModel,
@@ -41,33 +42,6 @@ function pickDailyChallenge(
   return currentChallenge ? mapDailyChallenge(currentChallenge) : null;
 }
 
-function resolveActivityType(action: string): string {
-  const normalizedAction = action.toLowerCase();
-  if (
-    normalizedAction.includes("automation") ||
-    normalizedAction.includes("apply") ||
-    normalizedAction.includes("scrape")
-  ) {
-    return "automation";
-  }
-  if (normalizedAction.includes("challenge") || normalizedAction.includes("xp")) {
-    return "gamification";
-  }
-  if (normalizedAction.includes("job")) {
-    return "job";
-  }
-  if (normalizedAction.includes("resume")) {
-    return "resume";
-  }
-  if (normalizedAction.includes("interview")) {
-    return "interview";
-  }
-  if (normalizedAction.includes("portfolio")) {
-    return "portfolio";
-  }
-  return "activity";
-}
-
 function getRecentActivity(
   progress: UserGamificationData | null,
   t: TranslateFn,
@@ -99,7 +73,7 @@ function getRecentActivity(
       }
 
       return {
-        type: resolveActivityType(action),
+        type: resolveDashboardActivityType(action),
         description: action,
         timestamp,
       };

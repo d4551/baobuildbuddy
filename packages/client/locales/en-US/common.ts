@@ -1,5 +1,12 @@
 const common = {
   common: {
+    exportMenu: {
+      formatAria: "{action} {format}",
+      formats: {
+        pdf: "PDF",
+        docx: "DOCX",
+      },
+    },
     localeNames: {
       enUS: "English",
       esES: "Spanish",

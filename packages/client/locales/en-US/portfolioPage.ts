@@ -9,6 +9,17 @@ const portfolioPage = {
       exportButton: "Export",
       exportAria: "Export portfolio",
     },
+    bootstrap: {
+      loadError: "Failed to load portfolio data.",
+      retryButton: "Retry",
+      retryAria: "Retry loading portfolio data",
+    },
+    emptyState: {
+      title: "Your portfolio is ready to build",
+      description:
+        "Start with your profile details, then add one or more projects to shape the public portfolio view.",
+      profileButton: "Edit profile",
+    },
     preview: {
       pageTitle: "Portfolio Preview",
       description:

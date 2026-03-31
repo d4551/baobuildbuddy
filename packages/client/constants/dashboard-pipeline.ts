@@ -150,15 +150,100 @@ export const FAB_QUICK_ACTIONS: readonly DashboardQuickAction[] = [
 ] as const;
 
 /**
- * Maps activity categories to emoji glyphs for quick scanning.
+ * Canonical dashboard activity categories used by the recent-activity feed.
  */
-export function getDashboardActivityEmoji(activityType: string): string {
-  return DASHBOARD_ACTIVITY_EMOJIS.find(([pattern]) => activityType.includes(pattern))?.[1] ?? "⚡";
+export const DASHBOARD_ACTIVITY_TYPES = [
+  "activity",
+  "automation",
+  "gamification",
+  "interview",
+  "job",
+  "portfolio",
+  "resume",
+] as const;
+
+export type DashboardActivityType = (typeof DASHBOARD_ACTIVITY_TYPES)[number];
+
+type DashboardActivityPresentation = {
+  readonly avatarClass: string;
+  readonly iconClass: string;
+  readonly iconPath: string;
+};
+
+const DASHBOARD_ACTIVITY_AVATAR_CLASS =
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-content";
+const DASHBOARD_ACTIVITY_ICON_CLASS = "h-5 w-5 shrink-0";
+
+const DASHBOARD_ACTIVITY_TYPE_MATCHERS: readonly Readonly<
+  [pattern: string, activityType: DashboardActivityType]
+>[] = [
+  ["cover_letter", "resume"],
+  ["resume", "resume"],
+  ["skill_", "gamification"],
+  ["challenge", "gamification"],
+  ["xp", "gamification"],
+  ["automation", "automation"],
+  ["apply", "automation"],
+  ["scrape", "automation"],
+  ["audit", "automation"],
+  ["job", "job"],
+  ["interview", "interview"],
+  ["portfolio", "portfolio"],
+] as const;
+
+const DASHBOARD_ACTIVITY_PRESENTATIONS = {
+  activity: {
+    avatarClass: DASHBOARD_ACTIVITY_AVATAR_CLASS,
+    iconClass: DASHBOARD_ACTIVITY_ICON_CLASS,
+    iconPath: "M13 10V3L4 14h7v7l9-11h-7z",
+  },
+  automation: {
+    avatarClass: DASHBOARD_ACTIVITY_AVATAR_CLASS,
+    iconClass: DASHBOARD_ACTIVITY_ICON_CLASS,
+    iconPath: "M4 7h16M4 12h16M4 17h10",
+  },
+  gamification: {
+    avatarClass: DASHBOARD_ACTIVITY_AVATAR_CLASS,
+    iconClass: DASHBOARD_ACTIVITY_ICON_CLASS,
+    iconPath:
+      "M12 17l-5.878 3.09 1.122-6.545L2.488 8.91l6.573-.955L12 2l2.939 5.955 6.573.955-4.756 4.635 1.122 6.545z",
+  },
+  interview: {
+    avatarClass: DASHBOARD_ACTIVITY_AVATAR_CLASS,
+    iconClass: DASHBOARD_ACTIVITY_ICON_CLASS,
+    iconPath:
+      "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
+  },
+  job: {
+    avatarClass: DASHBOARD_ACTIVITY_AVATAR_CLASS,
+    iconClass: DASHBOARD_ACTIVITY_ICON_CLASS,
+    iconPath:
+      "M8 7V6a4 4 0 118 0v1m-12 0h16a1 1 0 011 1v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a1 1 0 011-1z",
+  },
+  portfolio: {
+    avatarClass: DASHBOARD_ACTIVITY_AVATAR_CLASS,
+    iconClass: DASHBOARD_ACTIVITY_ICON_CLASS,
+    iconPath:
+      "M3 7.5A1.5 1.5 0 014.5 6h4.379a1.5 1.5 0 011.06.44l.621.62a1.5 1.5 0 001.06.44H19.5A1.5 1.5 0 0121 9v8.5A1.5 1.5 0 0119.5 19h-15A1.5 1.5 0 013 17.5v-10z",
+  },
+  resume: {
+    avatarClass: DASHBOARD_ACTIVITY_AVATAR_CLASS,
+    iconClass: DASHBOARD_ACTIVITY_ICON_CLASS,
+    iconPath:
+      "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+  },
+} as const satisfies Record<DashboardActivityType, DashboardActivityPresentation>;
+
+export function resolveDashboardActivityType(action: string): DashboardActivityType {
+  const normalizedAction = action.toLowerCase();
+  return (
+    DASHBOARD_ACTIVITY_TYPE_MATCHERS.find(([pattern]) => normalizedAction.includes(pattern))?.[1] ??
+    "activity"
+  );
 }
 
-const DASHBOARD_ACTIVITY_EMOJIS = [
-  ["job", "📝"],
-  ["resume", "📄"],
-  ["interview", "🎤"],
-  ["portfolio", "🧩"],
-] as const;
+export function getDashboardActivityPresentation(
+  activityType: DashboardActivityType,
+): DashboardActivityPresentation {
+  return DASHBOARD_ACTIVITY_PRESENTATIONS[activityType];
+}

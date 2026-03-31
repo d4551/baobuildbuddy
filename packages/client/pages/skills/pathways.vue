@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { definePageMeta, useSeoMeta } from "#imports";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useSkillsPathwaysPage } from "~/composables/useSkillsPathwaysPage";
@@ -10,12 +11,10 @@ definePageMeta({
 const { t } = useI18n();
 const page = useSkillsPathwaysPage();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("skillsPathwaysPage.seoTitle"),
-    description: t("skillsPathwaysPage.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("skillsPathwaysPage.seoTitle"),
+  description: t("skillsPathwaysPage.seoDescription"),
+});
 </script>
 
 <template>
@@ -44,7 +43,7 @@ if (import.meta.server) {
         <span
           v-else-if="
             page.gamificationStatus.value === 'pending' ||
-            page.gamificationStatus.value === 'idle'
+              page.gamificationStatus.value === 'idle'
           "
           class="badge badge-ghost badge-sm"
         >

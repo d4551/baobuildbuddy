@@ -46,8 +46,26 @@ const createLoadSelectedSession = (context: InterviewHistoryPageContext) => {
   };
 };
 
+const createLoadInterviewSessions = (context: InterviewHistoryPageContext) => {
+  return async (): Promise<void> => {
+    context.state.sessionsError.value = "";
+    const sessionsResult = await settlePromise(
+      context.fetchSessions(),
+      context.t("interviewHistory.fetchErrorFallback"),
+    );
+    if (!sessionsResult.ok) {
+      context.state.sessionsError.value = getErrorMessage(
+        sessionsResult.error,
+        context.t("interviewHistory.fetchErrorFallback"),
+      );
+      context.toast.error(context.state.sessionsError.value);
+    }
+  };
+};
+
 export const createInterviewHistoryDetailActions = (context: InterviewHistoryPageContext) => {
   const loadSelectedSession = createLoadSelectedSession(context);
+  const loadInterviewSessions = createLoadInterviewSessions(context);
 
   const viewSessionDetail = async (id: string): Promise<void> => {
     await context.router.replace({
@@ -69,6 +87,7 @@ export const createInterviewHistoryDetailActions = (context: InterviewHistoryPag
   };
 
   return {
+    loadInterviewSessions,
     loadSelectedSession,
     viewSessionDetail,
     closeDetail,
@@ -80,18 +99,6 @@ export const useInterviewHistoryPageSessionSync = (
   context: InterviewHistoryPageContext,
   loadSelectedSession: (nextSessionId: string | null) => Promise<void>,
 ) => {
-  onMounted(async () => {
-    const sessionsResult = await settlePromise(
-      context.fetchSessions(),
-      context.t("interviewHistory.fetchErrorFallback"),
-    );
-    if (!sessionsResult.ok) {
-      context.toast.error(
-        getErrorMessage(sessionsResult.error, context.t("interviewHistory.fetchErrorFallback")),
-      );
-    }
-  });
-
   watch(
     () => context.route.query[APP_ROUTE_QUERY_KEYS.sessionId],
     async (nextSessionQuery) => {

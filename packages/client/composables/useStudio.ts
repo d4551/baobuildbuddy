@@ -1,7 +1,6 @@
 import { API_ENDPOINTS, buildStudioDetailEndpoint } from "@bao/shared/constants/endpoints";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { GameStudio } from "@bao/shared/types/interview";
-import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import {
   requestApi,
@@ -10,6 +9,7 @@ import {
 } from "./api-request";
 import { toGameStudio } from "./api-normalizer-studios";
 import { requireValue, withLoadingState } from "./async-flow";
+import { requireApiResponsePayload } from "~/utils/api-response";
 
 interface StudioContext {
   t: ReturnType<typeof useI18n>["t"];
@@ -38,13 +38,7 @@ const readApiData = async (
   fallbackMessage: string,
 ): Promise<unknown> => {
   const response = await request;
-  if (!isRecord(response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  return "data" in response ? response.data : undefined;
+  return requireApiResponsePayload(response, fallbackMessage);
 };
 
 function createReadStudioActions(context: StudioContext) {

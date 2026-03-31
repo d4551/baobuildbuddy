@@ -35,6 +35,7 @@ const interviewHistory = {
     fetchErrorFallback: "Failed to load interview sessions",
     sessionNotFound: "Session not found",
     detailLoadErrorFallback: "Failed to load session details",
+    fetchErrorTitle: "Could not load interview sessions",
     notAvailable: "N/A",
     minutesLabel: "{count} min",
     viewModes: {

@@ -6,7 +6,7 @@ import {
   DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY,
 } from "~/constants/dashboard-copy";
 import { DASHBOARD_GAMIFICATION_PROGRESS_MIN } from "~/constants/dashboard-core";
-import { getDashboardActivityEmoji } from "~/constants/dashboard-pipeline";
+import { getDashboardActivityPresentation } from "~/constants/dashboard-pipeline";
 import type { DashboardActivity, DashboardChallengeViewModel } from "./dashboard-page-contracts";
 
 defineProps<{
@@ -58,12 +58,23 @@ const { t } = useI18n();
           <li
             v-for="(activity, index) in recentActivity"
             :key="`${activity.timestamp.toISOString()}-${index}`"
-            class="list-row"
+            class="list-row items-center"
           >
-            <div class="avatar placeholder">
-              <div class="bg-primary text-primary-content w-10 rounded-full">
-                <span class="text-xs">{{ getDashboardActivityEmoji(activity.type) }}</span>
-              </div>
+            <div :class="getDashboardActivityPresentation(activity.type).avatarClass">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                :class="getDashboardActivityPresentation(activity.type).iconClass"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  :d="getDashboardActivityPresentation(activity.type).iconPath"
+                />
+              </svg>
             </div>
             <div class="list-col-grow">
               <p class="text-sm font-medium">{{ activity.description }}</p>

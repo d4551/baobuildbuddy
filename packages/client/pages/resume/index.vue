@@ -8,12 +8,10 @@ definePageMeta({
 });
 
 const { t } = useI18n();
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("resumePage.seoTitle"),
-    description: t("resumePage.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("resumePage.seoTitle"),
+  description: t("resumePage.seoDescription"),
+});
 
 const {
   RESUME_CREATE_DIALOG_TITLE_ID,

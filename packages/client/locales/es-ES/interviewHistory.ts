@@ -35,6 +35,7 @@ const catalog = {
     fetchErrorFallback: "Error al cargar sesiones de entrevista",
     sessionNotFound: "Sesión no encontrada",
     detailLoadErrorFallback: "Error al cargar detalles de sesión",
+    fetchErrorTitle: "No se pudieron cargar las sesiones de entrevista",
     notAvailable: "N/D",
     viewModes: {
       table: "Tabla",

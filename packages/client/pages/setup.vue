@@ -37,12 +37,10 @@ const {
 
 const { t } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("setup.seoTitle", { brand: resolvedBrand.name }),
-    description: t("setup.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("setup.seoTitle", { brand: resolvedBrand.name }),
+  description: t("setup.seoDescription"),
+});
 </script>
 
 <template>

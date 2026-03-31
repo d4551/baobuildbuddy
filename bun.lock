@@ -9,7 +9,7 @@
         "@eslint/js": "^10.0.1",
         "@tailwindcss/cli": "^4.2.2",
         "better-sqlite3": "^12.8.0",
-        "bun-types": "1.3.10",
+        "bun-types": "1.3.11",
         "drizzle-kit": "^0.31.10",
         "eslint": "^10.0.3",
         "typescript": "^5.9.3",
@@ -69,7 +69,7 @@
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@types/bun": "1.3.10",
+        "@types/bun": "1.3.11",
         "happy-dom": "^20.8.4",
         "typescript": "^5.9.3",
       },
@@ -96,7 +96,7 @@
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@types/bun": "1.3.10",
+        "@types/bun": "1.3.11",
         "drizzle-kit": "^0.31.10",
         "pino-pretty": "^13.1.3",
         "typescript": "^5.9.3",
@@ -109,7 +109,7 @@
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@types/bun": "1.3.10",
+        "@types/bun": "1.3.11",
         "typescript": "^5.9.3",
       },
     },
@@ -759,7 +759,7 @@
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
-    "@types/bun": ["@types/bun@1.3.10", "", { "dependencies": { "bun-types": "1.3.10" } }, "sha512-0+rlrUrOrTSskibryHbvQkDOWRJwJZqZlxrUs1u4oOoTln8+WIXBPmAuCF35SWB2z4Zl3E84Nl/D0P7803nigQ=="],
+    "@types/bun": ["@types/bun@1.3.11", "", { "dependencies": { "bun-types": "1.3.11" } }, "sha512-5vPne5QvtpjGpsGYXiFyycfpDF2ECyPcTSsFBMa0fraoxiQyMJ3SmuQIGhzPg2WJuWxVBoxWJ2kClYTcw/4fAg=="],
 
     "@types/chai": ["@types/chai@5.2.3", "", { "dependencies": { "@types/deep-eql": "*", "assertion-error": "^2.0.1" } }, "sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA=="],
 
@@ -935,7 +935,7 @@
 
     "buffer-from": ["buffer-from@1.1.2", "", {}, "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="],
 
-    "bun-types": ["bun-types@1.3.10", "", { "dependencies": { "@types/node": "*" } }, "sha512-tcpfCCl6XWo6nCVnpcVrxQ+9AYN1iqMIzgrSKYMB/fjLtV2eyAVEg7AxQJuCq/26R6HpKWykQXuSOq/21RYcbg=="],
+    "bun-types": ["bun-types@1.3.11", "", { "dependencies": { "@types/node": "*" } }, "sha512-1KGPpoxQWl9f6wcZh57LvrPIInQMn2TQ7jsgxqpRzg+l0QPOFvJVH7HmvHo/AiPgwXy+/Thf6Ov3EdVn1vOabg=="],
 
     "bundle-name": ["bundle-name@4.1.0", "", { "dependencies": { "run-applescript": "^7.0.0" } }, "sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q=="],
 

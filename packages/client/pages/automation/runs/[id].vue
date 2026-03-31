@@ -26,12 +26,10 @@ const {
   retryRunStream,
 } = useAutomationRunDetailPage();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("automation.runDetail.title"),
-    description: t("automation.hub.cards.runHistory.description"),
-  });
-}
+useSeoMeta({
+  title: t("automation.runDetail.title"),
+  description: t("automation.hub.cards.runHistory.description"),
+});
 </script>
 
 <template>

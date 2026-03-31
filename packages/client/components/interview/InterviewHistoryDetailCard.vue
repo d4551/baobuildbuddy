@@ -2,6 +2,7 @@
 import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
+import { createInterviewHistoryRadialProgressStyle } from "./interview-history-radial-progress";
 
 defineProps<{
   detailError: string;
@@ -18,6 +19,9 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const buildDetailScoreStyle = (score: number | undefined): Record<string, string> =>
+  createInterviewHistoryRadialProgressStyle(score ?? 0, "detail");
 </script>
 
 <template>
@@ -67,7 +71,7 @@ const { t } = useI18n();
               <div
                 class="radial-progress"
                 :class="getScoreColorClass(selectedSession.score ?? 0)"
-                :style="{ '--value': selectedSession.score ?? 0, '--size': '3rem' }"
+                :style="buildDetailScoreStyle(selectedSession.score)"
                 role="progressbar"
                 :aria-label="t('interviewHistory.detailScoreAria', { score: selectedSession.score ?? 0 })"
                 :aria-valuenow="selectedSession.score ?? 0"

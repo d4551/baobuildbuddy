@@ -5,12 +5,10 @@ import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("aiDashboard.title"),
-    description: t("aiDashboard.subtitle"),
-  });
-}
+useSeoMeta({
+  title: t("aiDashboard.title"),
+  description: t("aiDashboard.subtitle"),
+});
 
 const page = useAIDashboardPage();
 </script>

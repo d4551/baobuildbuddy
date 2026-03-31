@@ -75,6 +75,10 @@ type PlaywrightChromium = {
   executablePath(): string;
 };
 
+type PlaywrightModule = {
+  chromium: PlaywrightChromium;
+};
+
 type StaticServerHandle = {
   stop(closeActiveConnections?: boolean): Promise<void>;
 };
@@ -154,6 +158,36 @@ const TRAILING_PATHNAME_SLASH_PATTERN = /\/+$/u;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
+
+const resolveHealthStatus = (payload: unknown): string => {
+  if (!isRecord(payload)) {
+    return "unknown";
+  }
+
+  return typeof payload.status === "string" ? payload.status : "unknown";
+};
+
+const hasPlaywrightChromium = (value: unknown): value is PlaywrightModule => {
+  if (!(isRecord(value) && "chromium" in value && isRecord(value.chromium))) {
+    return false;
+  }
+
+  return (
+    typeof value.chromium.launch === "function" &&
+    typeof value.chromium.executablePath === "function"
+  );
+};
+
+const loadPlaywrightChromium = async (): Promise<PlaywrightChromium> => {
+  const moduleCandidate: unknown = await import(pathToFileURL(PLAYWRIGHT_ENTRYPOINT).href);
+  if (!hasPlaywrightChromium(moduleCandidate)) {
+    throw new Error(
+      `Playwright entrypoint did not expose a Chromium launcher: ${PLAYWRIGHT_ENTRYPOINT}`,
+    );
+  }
+
+  return moduleCandidate.chromium;
+};
 
 const parseTargetArg = (argv: readonly string[]): string | null => {
   const targetIndex = argv.findIndex((argument) => argument === "--target" || argument === "-t");
@@ -814,8 +848,8 @@ const runNativeBrowserChecks = async (
       `Health endpoint failed: ${healthResponse.status} ${healthResponse.statusText}`,
     );
   }
-  const healthPayload = (await healthResponse.json()) as { status?: string };
-  const healthStatus = typeof healthPayload.status === "string" ? healthPayload.status : "unknown";
+  const healthPayload: unknown = await healthResponse.json();
+  const healthStatus = resolveHealthStatus(healthPayload);
 
   const websocketUrl = `${wsBase}${WS_ENDPOINTS.automation}`;
   const websocketOpened = await new Promise<boolean>((resolve) => {
@@ -835,17 +869,65 @@ const runNativeBrowserChecks = async (
   return { pageTitle, healthStatus, websocketOpened };
 };
 
-const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<BrowserCheckResult> => {
-  if (USE_WINDOWS_EDGE_CHANNEL) {
-    return runNativeBrowserChecks(apiBase, wsBase, VERIFY_FRONTEND_URL);
-  }
+const readPlaywrightHealthStatus = async (
+  page: BrowserPage,
+  apiBase: string,
+): Promise<BrowserCheckResult["healthStatus"]> =>
+  page.evaluate(
+    async ({ healthEndpoint, runtimeApiBase }) => {
+      const response = await fetch(`${runtimeApiBase}${healthEndpoint}`);
+      const payload: unknown = await response.json();
+      if (
+        typeof payload === "object" &&
+        payload !== null &&
+        "status" in payload &&
+        typeof payload.status === "string"
+      ) {
+        return payload.status;
+      }
 
-  const playwrightModule = (await import(pathToFileURL(PLAYWRIGHT_ENTRYPOINT).href)) as {
-    chromium: PlaywrightChromium;
-  };
+      return "unknown";
+    },
+    {
+      healthEndpoint: API_ENDPOINTS.health,
+      runtimeApiBase: apiBase,
+    },
+  );
 
-  const browser = await launchVerificationBrowser(playwrightModule);
-  return withCleanup(
+const readPlaywrightWebsocketStatus = async (
+  page: BrowserPage,
+  wsBase: string,
+): Promise<BrowserCheckResult["websocketOpened"]> =>
+  page.evaluate(
+    async ({ automationWebsocketEndpoint, runtimeWsBase }) => {
+      const targetUrl = `${runtimeWsBase}${automationWebsocketEndpoint}`;
+      return new Promise<boolean>((resolve) => {
+        const timeout = window.setTimeout(() => resolve(false), 5_000);
+        const socket = new WebSocket(targetUrl);
+
+        socket.onopen = () => {
+          clearTimeout(timeout);
+          socket.close();
+          resolve(true);
+        };
+        socket.onerror = () => {
+          clearTimeout(timeout);
+          resolve(false);
+        };
+      });
+    },
+    {
+      automationWebsocketEndpoint: WS_ENDPOINTS.automation,
+      runtimeWsBase: wsBase,
+    },
+  );
+
+const runPlaywrightBrowserChecks = async (
+  browser: BrowserInstance,
+  apiBase: string,
+  wsBase: string,
+): Promise<BrowserCheckResult> =>
+  withCleanup(
     async () => {
       const page = await browser.newPage();
       return withCleanup(
@@ -855,29 +937,8 @@ const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<Browse
           await page.waitForTimeout(1_000);
 
           const pageTitle = await page.title();
-          const healthStatus = await page.evaluate(async (runtimeApiBase) => {
-            const response = await fetch(`${runtimeApiBase}${API_ENDPOINTS.health}`);
-            const payload = (await response.json()) as { status?: string };
-            return typeof payload.status === "string" ? payload.status : "unknown";
-          }, apiBase);
-
-          const websocketOpened = await page.evaluate(async (runtimeWsBase) => {
-            const targetUrl = `${runtimeWsBase}${WS_ENDPOINTS.automation}`;
-            return new Promise<boolean>((resolve) => {
-              const timeout = window.setTimeout(() => resolve(false), 5_000);
-              const socket = new WebSocket(targetUrl);
-
-              socket.onopen = () => {
-                clearTimeout(timeout);
-                socket.close();
-                resolve(true);
-              };
-              socket.onerror = () => {
-                clearTimeout(timeout);
-                resolve(false);
-              };
-            });
-          }, wsBase);
+          const healthStatus = await readPlaywrightHealthStatus(page, apiBase);
+          const websocketOpened = await readPlaywrightWebsocketStatus(page, wsBase);
 
           return {
             pageTitle,
@@ -890,6 +951,15 @@ const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<Browse
     },
     () => browser.close(),
   );
+
+const runBrowserChecks = async (apiBase: string, wsBase: string): Promise<BrowserCheckResult> => {
+  if (USE_WINDOWS_EDGE_CHANNEL) {
+    return runNativeBrowserChecks(apiBase, wsBase, VERIFY_FRONTEND_URL);
+  }
+
+  const playwrightChromium = await loadPlaywrightChromium();
+  const browser = await launchVerificationBrowser({ chromium: playwrightChromium });
+  return runPlaywrightBrowserChecks(browser, apiBase, wsBase);
 };
 
 const assertAutomationEndpoints = async (apiBase: string): Promise<void> => {

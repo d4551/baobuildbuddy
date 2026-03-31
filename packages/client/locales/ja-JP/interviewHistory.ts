@@ -8,6 +8,7 @@ const catalog = {
       "スクレイプした求人またはスタジオ練習から新しい面接を開始して履歴を作成してください。",
     retryButtonLabel: "再試行",
     retryAria: "面接セッション詳細の読み込みを再試行",
+    fetchErrorTitle: "面接セッションを読み込めませんでした",
     selectPromptTitle: "セッションを選択",
     selectPromptDescription:
       "一覧から任意のセッションを開いて、スコア、回答、AIフィードバックを確認してください。",

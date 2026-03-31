@@ -1,4 +1,5 @@
 import type { NuxtApp } from "#app";
+import type { ResumeTemplate } from "@bao/shared/constants/resume";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
@@ -65,12 +66,19 @@ export function useResumePageActions(
   const { $toast } = nuxtApp;
   const { editor, mutations, progress, view } = createResumeActionModules(input, nuxtApp, t);
 
-  async function handleExport(exportResume: (id: string) => Promise<unknown>): Promise<void> {
+  async function handleExport(
+    exportResume: (
+      id: string,
+      template?: ResumeTemplate,
+      format?: "pdf" | "docx",
+    ) => Promise<unknown>,
+    format: "pdf" | "docx",
+  ): Promise<void> {
     if (!input.selectedResumeId.value) {
       return;
     }
     const exportResult = await settlePromise(
-      exportResume(input.selectedResumeId.value),
+      exportResume(input.selectedResumeId.value, undefined, format),
       t("resumePage.toasts.resumeExportFailed"),
     );
     if (!exportResult.ok) {

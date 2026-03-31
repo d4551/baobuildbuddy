@@ -11,12 +11,14 @@ import type { ResumeData } from "@bao/shared/types/resume";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import {
+  downloadApiFile,
   requestApi,
   useClientApiRequestRuntime,
   type ClientApiRequestRuntime,
 } from "./api-request";
 import { toResumeData } from "./api-normalizer-resume";
 import { requireValue, withLoadingState } from "./async-flow";
+import { requireApiResponsePayload } from "~/utils/api-response";
 type CreateResumeInput = Record<string, unknown>;
 type UpdateResumeInput = Record<string, unknown>;
 type ExportResumeInput = Record<string, unknown>;
@@ -65,13 +67,7 @@ const readApiData = async (
   fallbackMessage: string,
 ): Promise<unknown> => {
   const response = await request;
-  if (!isRecord(response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  return "data" in response ? response.data : undefined;
+  return requireApiResponsePayload(response, fallbackMessage);
 };
 
 const isResumeSynthesisError = (value: unknown): value is ResumeSynthesisError =>
@@ -196,14 +192,16 @@ async function deleteResume(context: ResumeContext, id: string): Promise<void> {
 async function performExportResume(
   context: ResumeContext,
   request: ResumeExportRequest,
-): Promise<unknown> {
+): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    return readApiData(
-      requestApi<unknown>(context.runtime, buildResumeExportEndpoint(request.id), {
+    await downloadApiFile(
+      context.runtime,
+      buildResumeExportEndpoint(request.id),
+      {
         method: "POST",
         body: toExportPayload(request.template, request.format),
-      }),
-      request.errorMessage,
+      },
+      `resume-${request.id}.${request.format === "docx" ? "docx" : "pdf"}`,
     );
   });
 }

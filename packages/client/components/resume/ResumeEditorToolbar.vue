@@ -12,7 +12,7 @@ const emit = defineEmits<{
   back: [];
   enhance: [];
   score: [];
-  export: [];
+  export: [format: "pdf" | "docx"];
   save: [];
 }>();
 
@@ -46,9 +46,12 @@ const { t } = useI18n();
         <span v-if="scoring" class="loading loading-spinner loading-xs"></span>
         {{ t("resumePage.aiScoreButton") }}
       </button>
-      <button class="btn btn-sm btn-outline" :aria-label="t('resumePage.exportButtonAria')" @click="emit('export')">
-        {{ t("resumePage.exportButton") }}
-      </button>
+      <AppExportMenu
+        :button-label="t('resumePage.exportButton')"
+        :button-aria-label="t('resumePage.exportButtonAria')"
+        summary-class="btn btn-sm btn-outline"
+        @export="emit('export', $event)"
+      />
       <button class="btn btn-sm btn-primary" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">
         {{ t("resumePage.saveButton") }}
       </button>

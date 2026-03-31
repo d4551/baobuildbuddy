@@ -1,6 +1,17 @@
 const catalog = {
   portfolioPage: {
     title: "Créateur de portfolio",
+    bootstrap: {
+      loadError: "Impossible de charger les données du portfolio.",
+      retryButton: "Réessayer",
+      retryAria: "Réessayer le chargement des données du portfolio",
+    },
+    emptyState: {
+      title: "Votre portfolio est prêt à être construit",
+      description:
+        "Commencez par les informations de votre profil, puis ajoutez un ou plusieurs projets pour façonner la vue publique du portfolio.",
+      profileButton: "Modifier le profil",
+    },
     preview: {
       pageTitle: "Aperçu du portfolio",
       description:

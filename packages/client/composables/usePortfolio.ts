@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type {
   PortfolioData,
@@ -6,6 +7,11 @@ import type {
 } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 import { toPortfolioData } from "./api-normalizer-portfolio";
+import {
+  downloadApiFile,
+  useClientApiRequestRuntime,
+  type ClientApiRequestRuntime,
+} from "./api-request";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 import { isRecord } from "@bao/shared/utils/type-guards";
 
@@ -21,6 +27,7 @@ interface PortfolioContext {
   loading: ReturnType<typeof useState<boolean>>;
   portfolio: ReturnType<typeof useState<PortfolioData | null>>;
   projects: ReturnType<typeof useState<PortfolioProject[]>>;
+  runtime: ClientApiRequestRuntime;
 }
 
 const readApiData = async (
@@ -116,10 +123,14 @@ async function reorderProjects(context: PortfolioContext, orderedIds: string[]):
 
 async function exportPortfolio(context: PortfolioContext, format?: string): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const payload = format ? { format } : {};
-    await readApiData(
-      context.api.portfolio.export.post(payload),
-      context.t("apiErrors.portfolio.exportFailed"),
+    await downloadApiFile(
+      context.runtime,
+      `${API_ENDPOINTS.portfolio}/export`,
+      {
+        method: "POST",
+        body: format ? { format } : {},
+      },
+      `portfolio.${format === "docx" ? "docx" : "pdf"}`,
     );
   });
 }
@@ -134,6 +145,7 @@ export function usePortfolio() {
     portfolio: useState<PortfolioData | null>(STATE_KEYS.PORTFOLIO_DATA, () => null),
     projects: useState<PortfolioProject[]>(STATE_KEYS.PORTFOLIO_PROJECTS, () => []),
     loading: useState(STATE_KEYS.PORTFOLIO_LOADING, () => false),
+    runtime: useClientApiRequestRuntime(),
   };
 
   return {

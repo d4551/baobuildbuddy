@@ -12,12 +12,10 @@ const router = useRouter();
 const { t } = useI18n();
 const { studio, loading: studioLoading, fetchStudioById } = useStudio();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("studioDetail.breadcrumbs.detail"),
-    description: t("studiosIndex.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("studioDetail.breadcrumbs.detail"),
+  description: t("studiosIndex.seoDescription"),
+});
 
 const pageError = ref<string | null>(null);
 const studioId = computed(() => {

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { useServerSeoMeta } from "#imports";
+import { useSeoMeta } from "#imports";
 import { useSettingsPage } from "~/composables/useSettingsPage";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 
-useServerSeoMeta({
+useSeoMeta({
   title: t("settings.seoTitle"),
   description: t("settings.seoDescription"),
 });

@@ -7,26 +7,27 @@ import {
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import {
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
 } from "~/utils/cover-letter-content";
+import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   middleware: ["auth"],
 });
 
 const route = useRoute();
-const { getCoverLetter, updateCoverLetter, generateCoverLetter, loading } = useCoverLetter();
+const { getCoverLetter, updateCoverLetter, generateCoverLetter, exportDocument, loading } =
+  useCoverLetter();
 type GenerateCoverLetterResult = Awaited<ReturnType<typeof generateCoverLetter>>;
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("coverLetterDetailPage.details.title"),
-    description: t("coverLetterPage.subtitle"),
-  });
-}
+useSeoMeta({
+  title: t("coverLetterDetailPage.details.title"),
+  description: t("coverLetterPage.subtitle"),
+});
 
 const letter = ref<CoverLetterData | null>(null);
 const letterId = computed(() => {
@@ -186,40 +187,21 @@ function clearContent() {
   formData.contentText = "";
 }
 
-function toFileSegment(value: string, fallback: string): string {
-  const normalized = value.trim().toLowerCase();
-  if (!normalized) return fallback;
-
-  const sanitized = normalized
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
-
-  return sanitized.length > 0 ? sanitized : fallback;
-}
-
-function handleExport() {
-  const text = formData.contentText.trim();
-  if (!text) {
-    $toast.error(t("coverLetterDetailPage.toasts.exportEmpty"));
+async function handleExport(format: "pdf" | "docx") {
+  if (!letterId.value) {
     return;
   }
 
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  const companySegment = toFileSegment(
-    formData.company,
-    t("coverLetterDetailPage.export.fallbackCompany"),
+  const exportResult = await settlePromise(
+    exportDocument(letterId.value, format),
+    t("coverLetterDetailPage.toasts.exportFailed"),
   );
-  const positionSegment = toFileSegment(
-    formData.position,
-    t("coverLetterDetailPage.export.fallbackPosition"),
-  );
-  anchor.download = `${companySegment}-${positionSegment}-${t("coverLetterDetailPage.export.suffix")}.txt`;
-  anchor.click();
-  URL.revokeObjectURL(url);
+  if (!exportResult.ok) {
+    $toast.error(
+      getErrorMessage(exportResult.error, t("coverLetterDetailPage.toasts.exportFailed")),
+    );
+    return;
+  }
 
   $toast.success(t("coverLetterDetailPage.toasts.exported"));
 }
@@ -242,14 +224,13 @@ function handleExport() {
           {{ t("coverLetterDetailPage.actions.regenerateButton") }}
         </button>
 
-        <button
-          class="btn btn-sm btn-outline"
-          :aria-label="t('coverLetterDetailPage.actions.exportAria')"
-          @click="handleExport"
-        >
-          <IconDownload class="h-4 w-4" />
-          {{ t("coverLetterDetailPage.actions.exportButton") }}
-        </button>
+        <AppExportMenu
+          :button-label="t('coverLetterDetailPage.actions.exportButton')"
+          :button-aria-label="t('coverLetterDetailPage.actions.exportAria')"
+          :disabled="loading"
+          summary-class="btn btn-sm btn-outline"
+          @export="handleExport"
+        />
 
         <button
           class="btn btn-sm btn-primary"

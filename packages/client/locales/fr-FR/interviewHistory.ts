@@ -8,6 +8,7 @@ const catalog = {
       "Démarrez un nouvel entretien depuis une offre récupérée ou un exercice studio pour alimenter l'historique.",
     retryButtonLabel: "Réessayer",
     retryAria: "Réessayer le chargement des détails de l'entretien",
+    fetchErrorTitle: "Impossible de charger les sessions d'entretien",
     selectPromptTitle: "Choisissez une session",
     selectPromptDescription:
       "Ouvrez n'importe quelle session de la liste pour revoir les scores, réponses et retours IA.",

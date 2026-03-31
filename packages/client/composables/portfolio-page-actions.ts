@@ -33,16 +33,13 @@ type PortfolioPageActionsInput = {
   };
   displayProjects: ComputedRef<readonly PortfolioProject[]>;
   editingProject: Ref<PortfolioProject | null>;
-  exportPortfolio: () => Promise<unknown>;
-  fetchPortfolio: () => Promise<void>;
+  exportPortfolio: (format?: "pdf" | "docx") => Promise<unknown>;
   newTech: Ref<string>;
-  portfolio: Ref<{ metadata?: PortfolioMetadata | null } | null>;
   portfolioForm: PortfolioMetadata;
   projectForm: PortfolioProjectForm;
   projects: Ref<readonly PortfolioProjectView[]>;
   reorderProjects: (orderedIds: string[]) => Promise<unknown>;
   reorderingProjectId: Ref<string | null>;
-  syncPortfolioMetadata: (metadata: PortfolioMetadata | null | undefined) => void;
   updatePortfolio: (metadata: Partial<PortfolioMetadata>) => Promise<unknown>;
   updateProject: (id: string, payload: PortfolioProjectPayload) => Promise<unknown>;
 };
@@ -205,17 +202,6 @@ function usePortfolioProjectOrdering(
   };
 }
 
-function usePortfolioMetadataSync({
-  fetchPortfolio,
-  portfolio,
-  syncPortfolioMetadata,
-}: Pick<PortfolioPageActionsInput, "fetchPortfolio" | "portfolio" | "syncPortfolioMetadata">) {
-  onMounted(async () => {
-    await fetchPortfolio();
-    syncPortfolioMetadata(portfolio.value?.metadata);
-  });
-}
-
 function usePortfolioMutationActions(
   input: PortfolioPageActionsInput,
   validation: ReturnType<typeof usePortfolioProjectValidation>,
@@ -250,9 +236,9 @@ function createPortfolioCrudActions(
   const { $toast } = nuxtApp;
 
   return {
-    async handleExport(): Promise<void> {
+    async handleExport(format: "pdf" | "docx"): Promise<void> {
       const exportResult = await settlePromise(
-        input.exportPortfolio(),
+        input.exportPortfolio(format),
         t("portfolioPage.toasts.exportFailed"),
       );
       if (!exportResult.ok) {
@@ -373,7 +359,6 @@ export function usePortfolioPageActions(
     t,
   );
   const mutations = usePortfolioMutationActions(input, validation, nuxtApp, t);
-  usePortfolioMetadataSync(input);
 
   function clearFilters(searchQuery: Ref<string>): void {
     searchQuery.value = "";
@@ -385,7 +370,7 @@ export function usePortfolioPageActions(
       ordering.canMove(projectId, direction),
     clearFilters,
     handleDeleteProject: () => mutations.handleDeleteProject(),
-    handleExport: () => mutations.handleExport(),
+    handleExport: (format: "pdf" | "docx") => mutations.handleExport(format),
     handleSavePortfolio: () => mutations.handleSavePortfolio(),
     handleSaveProject: (clearProjectForm: () => void) =>
       mutations.handleSaveProject(clearProjectForm),

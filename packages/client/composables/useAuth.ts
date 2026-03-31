@@ -35,16 +35,16 @@ const AUTH_INIT_FAILED_ERROR_KEY = "apiErrors.auth.initFailed";
 export function useAuth(): UseAuthState {
   const api = useApi();
   const nuxtApp = useNuxtRuntimeApp();
-  const authNotConfigured: AuthStatus = {
-    authRequired: false,
+  const authStatusErrorFallback: AuthStatus = {
+    authRequired: true,
     configured: false,
-    bootstrapRequired: false,
+    bootstrapRequired: true,
     setupTokenConfigured: false,
   };
 
   async function checkAuthStatus(): Promise<AuthStatus> {
     const { data, error } = await api.auth.status.get();
-    if (error) return authNotConfigured;
+    if (error) return authStatusErrorFallback;
     return {
       authRequired: data?.authRequired ?? true,
       configured: data?.configured ?? false,

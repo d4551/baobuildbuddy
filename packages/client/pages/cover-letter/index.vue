@@ -8,7 +8,7 @@ definePageMeta({
 });
 
 const { t } = useI18n();
-useServerSeoMeta({
+useSeoMeta({
   title: () => t("coverLetterPage.title"),
   description: () => t("coverLetterPage.subtitle"),
 });
@@ -144,7 +144,7 @@ const {
     />
 
     <FilteredEmptyAlert
-      v-else-if="displayCoverLetters.length === 0"
+      v-else-if="coverLetterCards.length === 0"
       message-key="coverLetterPage.filteredEmptyState"
     />
 

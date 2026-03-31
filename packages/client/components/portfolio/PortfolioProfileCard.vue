@@ -27,7 +27,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 </script>
 
 <template>
-  <section class="card bg-base-200">
+  <section id="portfolio-profile-card" class="card bg-base-200">
     <div class="card-body">
       <h2 class="card-title">{{ t("portfolioPage.profile.title") }}</h2>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">

@@ -35,12 +35,10 @@ const statusFilter = ref<RunFilterStatus>("");
 const typeFilter = ref<RunFilterType>("");
 const { fetchRuns, subscribeToRun } = useAutomation();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("automation.runs.title"),
-    description: t("automation.hub.cards.runHistory.description"),
-  });
-}
+useSeoMeta({
+  title: t("automation.runs.title"),
+  description: t("automation.hub.cards.runHistory.description"),
+});
 
 const activeSubscriptions = new Map<string, () => void>();
 const liveRunById = ref<Record<string, RpaRunExecutionEnvelope>>({});

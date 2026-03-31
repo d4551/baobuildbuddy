@@ -1,5 +1,12 @@
 const catalog = {
   common: {
+    exportMenu: {
+      formatAria: "{action} {format}",
+      formats: {
+        pdf: "PDF",
+        docx: "DOCX",
+      },
+    },
     localeNames: {
       enUS: "Inglés",
       esES: "Español",

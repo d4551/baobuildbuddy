@@ -9,6 +9,7 @@ export interface InterviewHistoryPageState {
   selectedSession: Ref<InterviewSession | null>;
   studioFilter: Ref<string>;
   historyView: Ref<InterviewHistoryView>;
+  sessionsError: Ref<string>;
   detailLoading: Ref<boolean>;
   detailError: Ref<string>;
 }

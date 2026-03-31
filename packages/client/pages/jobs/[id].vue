@@ -13,12 +13,10 @@ const { getJob, saveJob, unsaveJob, applyToJob, savedJobs } = useJobs();
 const { $toast } = useNuxtApp();
 const { t, locale, fallbackLocale } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("jobDetail.breadcrumbs.detailFallback"),
-    description: t("jobsPage.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("jobDetail.breadcrumbs.detailFallback"),
+  description: t("jobsPage.seoDescription"),
+});
 
 const showApplyModal = ref(false);
 const applicationNotes = ref("");

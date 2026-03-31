@@ -4,12 +4,10 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const page = useAutomationJobApplyPage();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("automation.jobApply.title"),
-    description: t("automation.hub.cards.jobApply.description"),
-  });
-}
+useSeoMeta({
+  title: t("automation.jobApply.title"),
+  description: t("automation.hub.cards.jobApply.description"),
+});
 </script>
 
 <template>

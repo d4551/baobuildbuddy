@@ -47,7 +47,7 @@ const {
   handleSaveSpeechConfig,
 } = useAIChatPage();
 
-useServerSeoMeta({
+useSeoMeta({
   title: t("aiChatPage.seoTitle", { brand: resolvedBrand.value.name }),
   description: t("aiChatPage.seoDescription"),
 });

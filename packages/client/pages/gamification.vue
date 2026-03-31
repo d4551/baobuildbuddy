@@ -30,12 +30,10 @@ const { t } = useI18n();
 const { resolvedBrand } = useBrand();
 const completingChallenge = ref<string | null>(null);
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("gamificationPage.seoTitle", { brand: resolvedBrand.value.name }),
-    description: t("gamificationPage.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("gamificationPage.seoTitle", { brand: resolvedBrand.value.name }),
+  description: t("gamificationPage.seoDescription"),
+});
 
 const { data, status, error, refresh } = await useAsyncData<GamificationHubData>(
   GAMIFICATION_ASYNC_DATA_KEY,

@@ -19,12 +19,10 @@ const {
   totalStudios,
 } = useStudioAnalyticsPage();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("studioAnalytics.title"),
-    description: t("studiosIndex.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("studioAnalytics.title"),
+  description: t("studiosIndex.seoDescription"),
+});
 </script>
 
 <template>

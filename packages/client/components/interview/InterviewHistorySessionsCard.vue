@@ -2,6 +2,7 @@
 import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
+import { createInterviewHistoryRadialProgressStyle } from "./interview-history-radial-progress";
 
 const props = defineProps<{
   filteredSessions: InterviewSession[];
@@ -40,6 +41,9 @@ const updateStudioFilter = (event: Event): void => {
 const viewSession = (id: string): void => {
   emit("view", id);
 };
+
+const buildTimelineScoreStyle = (score: number | undefined): Record<string, string> =>
+  createInterviewHistoryRadialProgressStyle(score ?? 0, "compact");
 </script>
 
 <template>
@@ -134,7 +138,7 @@ const viewSession = (id: string): void => {
               <div
                 class="radial-progress text-xs font-semibold"
                 :class="props.getScoreColorClass(session.score ?? 0)"
-                :style="`--value:${session.score ?? 0}; --size:2.5rem; --thickness:0.18rem;`"
+                :style="buildTimelineScoreStyle(session.score)"
                 role="progressbar"
                 :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })"
                 :aria-valuenow="session.score ?? 0"

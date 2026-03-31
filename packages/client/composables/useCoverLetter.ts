@@ -9,6 +9,7 @@ import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { toCoverLetterData } from "./api-normalizer-cover-letter";
 import {
+  downloadApiFile,
   type ClientApiRequestRuntime,
   requestApi,
   useClientApiRequestRuntime,
@@ -229,16 +230,18 @@ async function exportDocument(
   context: CoverLetterContext,
   id: string,
   format?: string,
-): Promise<unknown> {
+): Promise<void> {
   context.loading.value = true;
-  const payload = format ? { format } : {};
-  const response = await requestApi<unknown>(context.runtime, buildCoverLetterExportEndpoint(id), {
-    method: "POST",
-    body: payload,
-  });
+  await downloadApiFile(
+    context.runtime,
+    buildCoverLetterExportEndpoint(id),
+    {
+      method: "POST",
+      body: format ? { format } : {},
+    },
+    `cover-letter-${id}.${format === "docx" ? "docx" : "pdf"}`,
+  );
   context.loading.value = false;
-
-  return response;
 }
 
 /**

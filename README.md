@@ -92,7 +92,7 @@ Not sure where to start? Choose the guide that matches your goal:
 
 | Required        | Purpose                               |
 |-----------------|---------------------------------------|
-| Bun (>=1.3.10)  | Runtime, package manager, test runner |
+| Bun (>=1.3.11)  | Runtime, package manager, test runner |
 | Git             | Source control                        |
 
 Optional: Rust + Cargo (for desktop builds), `curl`/`jq` (for diagnostics), at least one AI provider key.
@@ -101,7 +101,7 @@ Check your Bun version against the workspace manifest:
 
 ```bash
 bun pm pkg get packageManager
-# -> "bun@1.3.10"
+# -> "bun@1.3.11"
 ```
 
 ### Automated setup (recommended)

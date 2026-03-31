@@ -1,6 +1,17 @@
 const catalog = {
   portfolioPage: {
     title: "ポートフォリオビルダー",
+    bootstrap: {
+      loadError: "ポートフォリオデータの読み込みに失敗しました。",
+      retryButton: "再試行",
+      retryAria: "ポートフォリオデータの読み込みを再試行",
+    },
+    emptyState: {
+      title: "ポートフォリオの準備ができました",
+      description:
+        "まずプロフィール情報を入力し、その後1件以上のプロジェクトを追加して公開ポートフォリオを形にしてください。",
+      profileButton: "プロフィールを編集",
+    },
     preview: {
       pageTitle: "ポートフォリオプレビュー",
       description: "エクスポートや共有の前に、公開状態のポートフォリオ表示を確認します。",

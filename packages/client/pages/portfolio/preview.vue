@@ -8,12 +8,10 @@ const router = useRouter();
 const { portfolio, projects, loading, fetchPortfolio, exportPortfolio } = usePortfolio();
 const { t } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("portfolioPage.preview.pageTitle"),
-    description: t("portfolioPage.preview.description"),
-  });
-}
+useSeoMeta({
+  title: t("portfolioPage.preview.pageTitle"),
+  description: t("portfolioPage.preview.description"),
+});
 
 const pageError = ref<string | null>(null);
 const featuredProjects = computed(() => projects.value.filter((project) => project.featured));
@@ -37,8 +35,8 @@ const { pending: bootstrapPending, refresh: refreshPortfolioPreview } = await us
   },
 );
 
-async function handleExport() {
-  await exportPortfolio();
+async function handleExport(format: "pdf" | "docx") {
+  await exportPortfolio(format);
 }
 </script>
 
@@ -64,14 +62,13 @@ async function handleExport() {
           {{ t("portfolioPage.preview.backButton") }}
         </button>
 
-        <button
-          class="btn btn-primary print:hidden"
-          :aria-label="t('portfolioPage.preview.exportPdfAria')"
-          @click="handleExport"
-        >
-          <IconDownload class="h-4 w-4" />
-          {{ t("portfolioPage.preview.exportPdfButton") }}
-        </button>
+        <AppExportMenu
+          :button-label="t('portfolioPage.actions.exportButton')"
+          :button-aria-label="t('portfolioPage.actions.exportAria')"
+          :disabled="loading"
+          summary-class="btn btn-primary print:hidden"
+          @export="handleExport"
+        />
       </template>
     </PageHeroHeader>
 

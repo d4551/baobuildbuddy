@@ -7,12 +7,10 @@ definePageMeta({
 
 const { t } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("automation.scraper.title"),
-    description: t("automation.scraper.subtitle"),
-  });
-}
+useSeoMeta({
+  title: t("automation.scraper.title"),
+  description: t("automation.scraper.subtitle"),
+});
 
 const {
   APP_ROUTE_BUILDERS,

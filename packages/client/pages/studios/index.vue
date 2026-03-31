@@ -4,13 +4,18 @@ import { useI18n } from "vue-i18n";
 const STUDIOS_PREVIEW_DIALOG_TITLE_ID = "studios-index-preview-dialog-title";
 const { t } = useI18n();
 const page = useStudiosIndexPage();
+const { pending: bootstrapPending, refresh: refreshStudios } = await useAsyncData(
+  "studios-index",
+  async () => {
+    await page.loadStudios();
+    return true;
+  },
+);
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("studiosIndex.seoTitle"),
-    description: t("studiosIndex.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("studiosIndex.seoTitle"),
+  description: t("studiosIndex.seoDescription"),
+});
 </script>
 
 <template>
@@ -38,7 +43,7 @@ if (import.meta.server) {
       :message="page.pageError.value"
       :retry-label="t('studiosIndex.retryButton')"
       :retry-aria-label="t('studiosIndex.retryAria')"
-      @retry="() => page.refreshStudios()"
+      @retry="refreshStudios"
     />
 
     <StudiosIndexFiltersCard
@@ -51,7 +56,10 @@ if (import.meta.server) {
       @clear="page.clearFilters"
     />
 
-    <LoadingSkeleton v-if="page.loading.value && page.filteredStudios.value.length === 0" :lines="6" />
+    <LoadingSkeleton
+      v-if="(bootstrapPending || page.loading.value) && page.filteredStudios.value.length === 0"
+      :lines="6"
+    />
 
     <EmptyState
       v-else-if="page.filteredStudios.value.length === 0"

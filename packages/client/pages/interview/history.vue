@@ -2,7 +2,7 @@
 const {
   t,
   sessions,
-  loading,
+  sessionsError,
   filteredSessions,
   studios,
   historyView,
@@ -20,14 +20,20 @@ const {
   scoreBadgeClass,
   getScoreColorClass,
   getTimelineLineClass,
+  loadSessions,
 } = useInterviewHistoryPage();
+const { pending: bootstrapPending, refresh: refreshSessions } = await useAsyncData(
+  "interview-history-bootstrap",
+  async () => {
+    await loadSessions();
+    return true;
+  },
+);
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("interviewHistory.title"),
-    description: t("interviewHub.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("interviewHistory.title"),
+  description: t("interviewHub.seoDescription"),
+});
 </script>
 
 <template>
@@ -38,7 +44,22 @@ if (import.meta.server) {
       :description="t('interviewHistory.subtitle')"
     />
 
-    <LoadingSkeleton v-if="loading && !sessions.length" :lines="8" />
+    <LoadingSkeleton v-if="bootstrapPending && !sessions.length" :lines="8" />
+
+    <BootstrapErrorAlert
+      v-else-if="sessionsError"
+      :title="t('interviewHistory.fetchErrorTitle')"
+      :message="sessionsError"
+      :retry-label="t('interviewHistory.retryButtonLabel')"
+      :retry-aria-label="t('interviewHistory.retryAria')"
+      @retry="refreshSessions"
+    />
+
+    <EmptyState
+      v-else-if="!sessions.length"
+      title-key="interviewHistory.emptyStateTitle"
+      description-key="interviewHistory.emptyStateDescription"
+    />
 
     <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div class="lg:col-span-2 space-y-6">

@@ -21,12 +21,10 @@ const {
   submitScheduledEmailResponse,
 } = useAutomationEmailPage();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("automation.email.title"),
-    description: t("automation.email.pageDescription"),
-  });
-}
+useSeoMeta({
+  title: t("automation.email.title"),
+  description: t("automation.email.pageDescription"),
+});
 </script>
 
 <template>

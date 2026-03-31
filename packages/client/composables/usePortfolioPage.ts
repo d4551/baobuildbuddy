@@ -29,6 +29,12 @@ export function usePortfolioPage() {
     },
     i18n.t,
   );
+
+  async function loadPortfolio(): Promise<void> {
+    await portfolioApi.fetchPortfolio();
+    state.syncPortfolioMetadata(portfolioApi.portfolio.value?.metadata);
+  }
+
   const actions = usePortfolioPageActions(
     {
       addProject: portfolioApi.addProject,
@@ -41,15 +47,12 @@ export function usePortfolioPage() {
       displayProjects: derived.displayProjects,
       editingProject: state.editingProject,
       exportPortfolio: portfolioApi.exportPortfolio,
-      fetchPortfolio: portfolioApi.fetchPortfolio,
       newTech: state.newTech,
-      portfolio: portfolioApi.portfolio,
       portfolioForm: state.portfolioForm,
       projectForm: state.projectForm,
       projects: portfolioApi.projects,
       reorderProjects: portfolioApi.reorderProjects,
       reorderingProjectId: state.reorderingProjectId,
-      syncPortfolioMetadata: state.syncPortfolioMetadata,
       updatePortfolio: portfolioApi.updatePortfolio,
       updateProject: portfolioApi.updateProject,
     },
@@ -61,6 +64,7 @@ export function usePortfolioPage() {
     PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH,
     PORTFOLIO_PROJECT_DIALOG_TITLE_ID,
     PORTFOLIO_PROJECT_TITLE_MIN_LENGTH,
+    loadPortfolio,
     ...state,
     ...derived,
     ...actions,

@@ -5,7 +5,7 @@ definePageMeta({
   middleware: ["auth"],
 });
 const { t } = useI18n();
-useServerSeoMeta({
+useSeoMeta({
   title: t("apiDocs.seoTitle"),
   description: t("apiDocs.seoDescription"),
 });

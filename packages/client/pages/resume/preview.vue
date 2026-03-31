@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import type { ResumeData } from "@bao/shared/types/resume";
-import { useAsyncData, useRoute, useRouter, useServerSeoMeta } from "#imports";
+import { useAsyncData, useRoute, useRouter, useSeoMeta } from "#imports";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -12,12 +12,10 @@ const router = useRouter();
 const { getResume, exportResume, loading } = useResume();
 const { t } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("resumePreview.pageTitle"),
-    description: t("resumePreview.description"),
-  });
-}
+useSeoMeta({
+  title: t("resumePreview.pageTitle"),
+  description: t("resumePreview.description"),
+});
 
 const pageError = ref<string | null>(null);
 const resumeId = computed(() => {
@@ -71,12 +69,12 @@ const hasGamingExperience = computed(() => {
   );
 });
 
-async function handleExport() {
+async function handleExport(format: "pdf" | "docx") {
   if (!resumeId.value) {
     return;
   }
 
-  await exportResume(resumeId.value);
+  await exportResume(resumeId.value, undefined, format);
 }
 
 function handlePrint() {
@@ -117,14 +115,13 @@ function handlePrint() {
           {{ t("resumePreview.printButton") }}
         </button>
 
-        <button
-          class="btn btn-primary print:hidden"
-          :aria-label="t('resumePage.exportButtonAria')"
-          @click="handleExport"
-        >
-          <IconDownload class="h-4 w-4" />
-          {{ t("resumePage.exportButton") }}
-        </button>
+        <AppExportMenu
+          :button-label="t('resumePage.exportButton')"
+          :button-aria-label="t('resumePage.exportButtonAria')"
+          :disabled="loading"
+          summary-class="btn btn-primary print:hidden"
+          @export="handleExport"
+        />
       </template>
     </PageHeroHeader>
 

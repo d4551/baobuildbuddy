@@ -61,6 +61,7 @@ export const createInterviewHistoryPageState = (): InterviewHistoryPageState => 
   selectedSession: ref(null),
   studioFilter: ref(""),
   historyView: ref<InterviewHistoryView>("table"),
+  sessionsError: ref(""),
   detailLoading: ref(false),
   detailError: ref(""),
 });

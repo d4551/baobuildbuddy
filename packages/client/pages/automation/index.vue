@@ -1,28 +1,50 @@
 <script setup lang="ts">
+import { useSeoMeta } from "#imports";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { useI18n } from "vue-i18n";
 import { getErrorMessage } from "~/utils/errors";
+
+const { t } = useI18n();
+const page = useAutomationHubPage();
 const {
-  t,
-  error,
-  uiState,
-  totalRuns,
-  todayRuns,
-  successRate,
-  pipelineSteps,
-  nextPipelineStepLabel,
-  capabilityAuditStatus,
   capabilityAuditError,
-  capabilitySummary,
+  capabilityAuditStatus,
   capabilityEntries,
-  orderedCards,
-  primaryCardId,
-  retryLoad,
-  refreshCapabilityAudit,
+  capabilitySummary,
   capabilityStatusClass,
   capabilityStatusLabel,
-} = useAutomationHubPage();
+  error,
+  nextPipelineStepLabel,
+  orderedCards,
+  pipelineSteps,
+  primaryCardId,
+  refreshCapabilityAudit,
+  retryLoad,
+  successRate,
+  todayRuns,
+  totalRuns,
+  uiState,
+} = {
+  capabilityAuditError: page.capabilityAuditError,
+  capabilityAuditStatus: page.capabilityAuditStatus,
+  capabilityEntries: page.capabilityEntries,
+  capabilitySummary: page.capabilitySummary,
+  capabilityStatusClass: page.capabilityStatusClass,
+  capabilityStatusLabel: page.capabilityStatusLabel,
+  error: page.error,
+  nextPipelineStepLabel: page.nextPipelineStepLabel,
+  orderedCards: page.orderedCards,
+  pipelineSteps: page.pipelineSteps,
+  primaryCardId: page.primaryCardId,
+  refreshCapabilityAudit: page.refreshCapabilityAudit,
+  retryLoad: page.retryLoad,
+  successRate: page.successRate,
+  todayRuns: page.todayRuns,
+  totalRuns: page.totalRuns,
+  uiState: page.uiState,
+};
 
-useServerSeoMeta({
+useSeoMeta({
   title: t("automation.hub.pageTitle"),
   description: t("automation.hub.pageDescription"),
 });
@@ -75,13 +97,11 @@ useServerSeoMeta({
       />
 
       <WorkPipeline
-        v-bind="{
-          title: t('automation.hub.pipelineTitle'),
-          description: t('automation.hub.pipelineDescription'),
-          ariaLabel: t('automation.hub.pipelineAria'),
-          steps: pipelineSteps,
-          nextStepLabel: nextPipelineStepLabel,
-        }"
+        :title="t('automation.hub.pipelineTitle')"
+        :description="t('automation.hub.pipelineDescription')"
+        :aria-label="t('automation.hub.pipelineAria')"
+        :steps="pipelineSteps"
+        :next-step-label="nextPipelineStepLabel"
       />
 
       <AutomationHubAuditCard

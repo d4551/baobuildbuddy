@@ -23,12 +23,10 @@ const {
 
 const { t } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t(DASHBOARD_COPY_KEYS.pageTitle),
-    description: t(DASHBOARD_COPY_KEYS.seoDescription),
-  });
-}
+useSeoMeta({
+  title: t(DASHBOARD_COPY_KEYS.pageTitle),
+  description: t(DASHBOARD_COPY_KEYS.seoDescription),
+});
 </script>
 
 <template>
@@ -88,13 +86,11 @@ if (import.meta.server) {
       <DashboardQuickActionsCard :actions="dashboardQuickActions" />
 
       <WorkPipeline
-        v-bind="{
-          title: t(DASHBOARD_COPY_KEYS.pipelineTitle),
-          description: t(DASHBOARD_COPY_KEYS.pipelineDescription),
-          ariaLabel: t(DASHBOARD_COPY_KEYS.pipelineAria),
-          steps: pipelineSteps,
-          nextStepLabel: nextPipelineStepLabel,
-        }"
+        :title="t(DASHBOARD_COPY_KEYS.pipelineTitle)"
+        :description="t(DASHBOARD_COPY_KEYS.pipelineDescription)"
+        :aria-label="t(DASHBOARD_COPY_KEYS.pipelineAria)"
+        :steps="pipelineSteps"
+        :next-step-label="nextPipelineStepLabel"
       />
     </div>
   </PageScaffold>

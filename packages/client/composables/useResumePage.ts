@@ -87,8 +87,8 @@ export function useResumePage() {
     handleCompletionTabSelect: (tabId: string) => {
       actions.handleCompletionTabSelect(bootstrap.activeTab, tabId);
     },
-    handleExport: async () => {
-      await actions.handleExport(dependencies.resumeApi.exportResume);
+    handleExport: async (format: "pdf" | "docx") => {
+      await actions.handleExport(dependencies.resumeApi.exportResume, format);
     },
     selectResumeTab: (tab: ResumeTabId) => {
       actions.selectResumeTab(bootstrap.activeTab, tab);

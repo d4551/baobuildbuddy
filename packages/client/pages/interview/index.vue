@@ -8,12 +8,10 @@ definePageMeta({
 
 const { t } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("interviewHub.seoTitle"),
-    description: t("interviewHub.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("interviewHub.seoTitle"),
+  description: t("interviewHub.seoDescription"),
+});
 
 const {
   APP_ROUTES,
