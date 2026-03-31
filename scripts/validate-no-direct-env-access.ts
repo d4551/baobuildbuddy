@@ -14,13 +14,29 @@ const isAllowedFile = (filePath: string): boolean =>
   filePath.includes("/config/") ||
   filePath.endsWith("nuxt.config.ts") ||
   filePath.includes("/runtime/config.ts") ||
-  filePath.endsWith("/job-apply.ts") ||
-  filePath.endsWith("/middleware/logger.ts") ||
-  filePath.endsWith("/db/client.ts") ||
-  filePath.endsWith("/services/ai/ai-service.ts") ||
-  filePath.endsWith("/services/automation/rpa-runner-process.ts") ||
   filePath.endsWith("/test-utils.ts") ||
   filePath.endsWith("/test-setup.ts");
+
+export const collectDirectEnvAccessViolationsForContent = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  if (isAllowedFile(filePath)) {
+    return [];
+  }
+
+  const violations: ValidationViolation[] = [];
+  envPattern.lastIndex = 0;
+  for (const match of content.matchAll(envPattern)) {
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message:
+        "Direct environment access is forbidden here. Read from the package config module instead.",
+    });
+  }
+  return violations;
+};
 
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const files = await collectProjectFileEntries({
@@ -28,23 +44,9 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
     allowedExtensions,
   });
 
-  return files.flatMap(({ filePath, content }) => {
-    if (isAllowedFile(filePath)) {
-      return [];
-    }
-
-    const violations: ValidationViolation[] = [];
-    envPattern.lastIndex = 0;
-    for (const match of content.matchAll(envPattern)) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(content, match.index ?? 0),
-        message:
-          "Direct environment access is forbidden here. Read from the package config module instead.",
-      });
-    }
-    return violations;
-  });
+  return files.flatMap(({ filePath, content }) =>
+    collectDirectEnvAccessViolationsForContent(filePath, content),
+  );
 };
 
 if (import.meta.main) {

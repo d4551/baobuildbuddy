@@ -1,4 +1,5 @@
 import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
+import { automationRuntimeConfig } from "../runtime/config";
 import { ProtocolEmitter } from "../runtime/protocol";
 
 const emitVerificationRun = async (): Promise<number> => {
@@ -57,6 +58,6 @@ const runJobApplyScript = async (): Promise<number> => {
 };
 
 process.exitCode =
-  process.env.BAO_ENABLE_AUTOMATION_VERIFY === "true"
+  automationRuntimeConfig.enableAutomationVerify
     ? await emitVerificationRun()
     : await runJobApplyScript();

@@ -1,5 +1,5 @@
-import { JOB_APPLY_CONFIRMATION_PHRASES, JOB_APPLY_TOTAL_STEPS } from "./adapters";
-import type { JobApplyStrategy } from "./adapters";
+import { JOB_APPLY_CONFIRMATION_PHRASES, JOB_APPLY_TOTAL_STEPS } from "./strategy-registry";
+import type { JobApplyStrategy } from "./strategy-registry";
 import { automationRuntimeConfig } from "../runtime/config";
 import { settle } from "@bao/shared/utils/promise";
 import { addStep, captureScreenshot } from "./runtime-artifacts";

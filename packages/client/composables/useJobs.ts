@@ -3,6 +3,7 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { Job } from "@bao/shared/types/jobs";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
+import { requestApi, useClientApiRequestRuntime, type ClientApiRequestRuntime } from "./api-request";
 import { toJob } from "./api-normalizer-jobs";
 import { withLoadingState } from "./async-flow";
 
@@ -13,6 +14,7 @@ const toJobList = (value: unknown): Job[] =>
 
 interface JobsContext {
   api: ReturnType<typeof useApi>;
+  runtime: ClientApiRequestRuntime;
   t: ReturnType<typeof useI18n>["t"];
   loading: ReturnType<typeof useState<boolean>>;
   jobs: ReturnType<typeof useState<Job[]>>;
@@ -56,7 +58,9 @@ async function searchJobs(
 async function getJob(context: JobsContext, id: string): Promise<Job | null> {
   return withLoadingState(context.loading, async () => {
     const data = await readApiData(
-      $fetch<unknown>(buildJobDetailEndpoint(id)),
+      requestApi<unknown>(context.runtime, buildJobDetailEndpoint(id), {
+        method: "GET",
+      }),
       context.t("apiErrors.jobs.fetchFailed"),
     );
     return toJob(data);
@@ -172,6 +176,7 @@ async function fetchRecommendations(context: JobsContext): Promise<void> {
 export function useJobs() {
   const context: JobsContext = {
     api: useApi(),
+    runtime: useClientApiRequestRuntime(),
     t: useI18n().t,
     jobs: useState<Job[]>(STATE_KEYS.JOBS_LIST, () => []),
     savedJobs: useState<Job[]>(STATE_KEYS.JOBS_SAVED, () => []),

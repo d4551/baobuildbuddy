@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { resolveJobApplyStrategy } from "./adapters";
+import { resolveJobApplyStrategy } from "./strategy-registry";
 
 describe("resolveJobApplyStrategy", () => {
   test("detects Greenhouse-hosted forms", () => {

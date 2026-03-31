@@ -11,6 +11,7 @@ export const IGNORED_DIRECTORY_NAMES = new Set([
   "dist",
   "dist-types",
   "coverage",
+  "target",
 ]);
 
 export type ValidationViolation = {

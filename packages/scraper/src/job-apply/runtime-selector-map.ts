@@ -1,4 +1,4 @@
-import type { JobApplyStrategy, JobApplySelectorBundle } from "./adapters";
+import type { JobApplyStrategy, JobApplySelectorBundle } from "./strategy-registry";
 import type { SelectorMapInput } from "./runtime-contracts";
 import { getCustomSelectorList } from "./runtime-locators";
 

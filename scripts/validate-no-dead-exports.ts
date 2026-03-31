@@ -18,6 +18,28 @@ const FILE_EXTENSION_PATTERN = /\.(ts|vue)$/u;
 const NUXT_IMPORTS_MANIFEST_PATH = "packages/client/.nuxt/imports.d.ts";
 const autoImportExportPattern = /\bexport\s*\{\s*([^}]+)\s*\}\s*from\s*['"`][^'"`]+['"`]/gu;
 const AS_CLAUSE_PATTERN = /\s+as\s+/u;
+const SOURCE_FILE_EXTENSIONS = [".ts", ".tsx", ".vue", ".js", ".mjs", ".cjs"] as const;
+
+const stripSourceExtension = (pathValue: string): string => {
+  for (const extension of SOURCE_FILE_EXTENSIONS) {
+    if (pathValue.endsWith(extension)) {
+      return pathValue.slice(0, -extension.length);
+    }
+  }
+  return pathValue;
+};
+
+const collectSourceCandidates = (pathValue: string): string[] => {
+  const basePath = stripSourceExtension(pathValue);
+  const candidates = new Set<string>([pathValue, basePath]);
+
+  for (const extension of SOURCE_FILE_EXTENSIONS) {
+    candidates.add(`${basePath}${extension}`);
+    candidates.add(`${basePath}/index${extension}`);
+  }
+
+  return [...candidates];
+};
 
 const isFrameworkEntrypointFile = (filePath: string): boolean =>
   filePath.endsWith(".test.ts") ||
@@ -34,11 +56,7 @@ const isFrameworkEntrypointFile = (filePath: string): boolean =>
 const normalizeImportTargets = (sourceFilePath: string, importPath: string): string[] => {
   if (importPath.startsWith("@bao/shared/")) {
     const relative = importPath.slice("@bao/shared/".length);
-    return [
-      `packages/shared/src/${relative}.ts`,
-      `packages/shared/src/${relative}.vue`,
-      `packages/shared/src/${relative}/index.ts`,
-    ];
+    return collectSourceCandidates(`packages/shared/src/${relative}`);
   }
 
   if (importPath.startsWith(".")) {
@@ -47,16 +65,12 @@ const normalizeImportTargets = (sourceFilePath: string, importPath: string): str
       LEADING_SLASH_PATTERN,
       "",
     );
-    return [joined, `${joined}.ts`, `${joined}.vue`, `${joined}.js`, `${joined}/index.ts`];
+    return collectSourceCandidates(joined);
   }
 
   if (importPath.startsWith("~/")) {
     const relative = importPath.slice(2);
-    return [
-      `packages/client/${relative}.ts`,
-      `packages/client/${relative}.vue`,
-      `packages/client/${relative}/index.ts`,
-    ];
+    return collectSourceCandidates(`packages/client/${relative}`);
   }
 
   return [];

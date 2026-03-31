@@ -5,31 +5,56 @@ import {
   type ValidationViolation,
 } from "./utils/validation-helpers";
 
-const fetchPattern = /\bfetch\s*\(/gu;
+const scanRoots = ["packages/client"] as const;
+const allowedExtensions = new Set([".vue", ".ts"]);
+const clientFetchCallPatterns: Array<{ label: string; pattern: RegExp }> = [
+  { label: "fetch", pattern: /(?:^|[^\w$])fetch\s*(?:<[^()]*>)?\s*\(/gu },
+  { label: "$fetch", pattern: /(?:^|[^\w$])\$fetch\s*(?:<[^()]*>)?\s*\(/gu },
+  { label: "$fetch.raw", pattern: /(?:^|[^\w$])\$fetch\.raw\s*\(/gu },
+  { label: "useFetch", pattern: /(?:^|[^\w$])useFetch\s*(?:<[^()]*>)?\s*\(/gu },
+  { label: "useLazyFetch", pattern: /(?:^|[^\w$])useLazyFetch\s*(?:<[^()]*>)?\s*\(/gu },
+] as const;
 
-const collectViolations = async (): Promise<ValidationViolation[]> => {
-  const files = await collectProjectFileEntries({
-    scanRoots: [
-      "packages/client/pages",
-      "packages/client/components",
-      "packages/client/composables",
-    ],
-    allowedExtensions: new Set([".vue", ".ts"]),
-  });
+const isAllowedFile = (filePath: string): boolean =>
+  filePath.endsWith(".test.ts") ||
+  filePath.endsWith(".spec.ts") ||
+  filePath.includes("/locales/") ||
+  filePath === "packages/client/composables/api-request.ts" ||
+  filePath === "packages/client/composables/useAutomation.ts" ||
+  filePath === "packages/client/composables/api-docs-page-data.ts" ||
+  filePath === "packages/client/composables/api-docs-page-tester-request.ts";
 
-  return files.flatMap(({ filePath, content }) => {
-    const violations: ValidationViolation[] = [];
-    fetchPattern.lastIndex = 0;
-    for (const match of content.matchAll(fetchPattern)) {
+export const collectClientFetchDriftViolationsForContent = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  if (isAllowedFile(filePath)) {
+    return [];
+  }
+
+  const violations: ValidationViolation[] = [];
+  for (const { label, pattern } of clientFetchCallPatterns) {
+    pattern.lastIndex = 0;
+    for (const match of content.matchAll(pattern)) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, match.index ?? 0),
-        message:
-          "Direct client fetch calls are forbidden in pages and components. Route them through shared composables or API utilities.",
+        message: `Direct client ${label} calls are forbidden outside the shared API boundary. Route them through useApi/requestApi.`,
       });
     }
-    return violations;
+  }
+  return violations;
+};
+
+const collectViolations = async (): Promise<ValidationViolation[]> => {
+  const files = await collectProjectFileEntries({
+    scanRoots,
+    allowedExtensions,
   });
+
+  return files.flatMap(({ filePath, content }) =>
+    collectClientFetchDriftViolationsForContent(filePath, content),
+  );
 };
 
 if (import.meta.main) {

@@ -1,6 +1,6 @@
-import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 import {
@@ -10,7 +10,6 @@ import {
 } from "~/composables/automation-scraper-bootstrap";
 import { settlePromise } from "~/composables/async-flow";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
-import { resolveApiEndpoint } from "~/utils/endpoints";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
@@ -54,18 +53,16 @@ function useAutomationJobApplyForm() {
 
 function useAutomationJobApplyDependencies() {
   const { t, locale, fallbackLocale } = useI18n();
+  const api = useApi();
   const { triggerJobApply, scheduleJobApply } = useAutomation();
-  const requestUrl = useRequestURL();
-  const apiBase = String(useRuntimeConfig().public.apiBase || "/");
   const runStream = useAutomationRunStream({
     fallbackMessage: t("automation.jobApply.stream.startErrorFallback"),
   });
 
   return {
-    apiBase,
+    api,
     fallbackLocale,
     locale,
-    requestUrl,
     runStream,
     scheduleJobApply,
     t,
@@ -73,18 +70,62 @@ function useAutomationJobApplyDependencies() {
   };
 }
 
-async function useAutomationJobApplyBootstrap(input: { apiBase: string; requestUrl: URL }) {
-  const { data: resumesData } = await useFetch<ResumeSelectOption[]>(
-    resolveApiEndpoint(input.apiBase, input.requestUrl, API_ENDPOINTS.resumes),
+const readApiData = async (request: Promise<unknown>): Promise<unknown> => {
+  const response = await request;
+  if (!(isRecord(response) && "data" in response)) {
+    return [];
+  }
+  if ("error" in response && response.error) {
+    return [];
+  }
+  return response.data;
+};
+
+const toResumeSelectOptions = (value: unknown): ResumeSelectOption[] =>
+  Array.isArray(value)
+    ? value.flatMap((entry) =>
+        isRecord(entry) && typeof entry.id === "string"
+          ? [
+              {
+                id: entry.id,
+                ...(typeof entry.name === "string" ? { name: entry.name } : {}),
+              } satisfies ResumeSelectOption,
+            ]
+          : [],
+      )
+    : [];
+
+const toCoverLetterSelectOptions = (value: unknown): CoverLetterSelectOption[] =>
+  Array.isArray(value)
+    ? value.flatMap((entry) =>
+        isRecord(entry) && typeof entry.id === "string"
+          ? [
+              {
+                id: entry.id,
+                ...(typeof entry.company === "string" ? { company: entry.company } : {}),
+                ...(typeof entry.position === "string" ? { position: entry.position } : {}),
+              } satisfies CoverLetterSelectOption,
+            ]
+          : [],
+      )
+    : [];
+
+async function useAutomationJobApplyBootstrap(input: {
+  api: ReturnType<typeof useApi>;
+}) {
+  const { data: resumesData } = await useAsyncData<ResumeSelectOption[]>(
+    "automation-job-apply-resumes",
+    async () => toResumeSelectOptions(await readApiData(input.api.resumes.get())),
     {
-      method: "GET",
+      default: () => [],
     },
   );
 
-  const { data: coverLettersData } = await useFetch<CoverLetterSelectOption[]>(
-    resolveApiEndpoint(input.apiBase, input.requestUrl, API_ENDPOINTS.coverLetters),
+  const { data: coverLettersData } = await useAsyncData<CoverLetterSelectOption[]>(
+    "automation-job-apply-cover-letters",
+    async () => toCoverLetterSelectOptions(await readApiData(input.api.coverLetters.get())),
     {
-      method: "GET",
+      default: () => [],
     },
   );
 
@@ -285,8 +326,7 @@ export async function useAutomationJobApplyPage() {
   const dependencies = useAutomationJobApplyDependencies();
   const form = useAutomationJobApplyForm();
   const bootstrap = await useAutomationJobApplyBootstrap({
-    apiBase: dependencies.apiBase,
-    requestUrl: dependencies.requestUrl,
+    api: dependencies.api,
   });
   const state = createAutomationJobApplyState(dependencies.runStream);
   const presentation = createAutomationJobApplyPresentation({

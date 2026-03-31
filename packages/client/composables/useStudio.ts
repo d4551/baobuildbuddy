@@ -3,11 +3,13 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
+import { requestApi, useClientApiRequestRuntime, type ClientApiRequestRuntime } from "./api-request";
 import { toGameStudio } from "./api-normalizer-studios";
 import { requireValue, withLoadingState } from "./async-flow";
 
 interface StudioContext {
   t: ReturnType<typeof useI18n>["t"];
+  runtime: ClientApiRequestRuntime;
   loading: ReturnType<typeof useState<boolean>>;
   studios: ReturnType<typeof useState<GameStudio[]>>;
   currentStudio: ReturnType<typeof useState<GameStudio | null>>;
@@ -45,7 +47,10 @@ function createReadStudioActions(context: StudioContext) {
   const searchStudios = async (query?: Record<string, string>) =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        $fetch<unknown>(API_ENDPOINTS.studios, { query: query || {} }),
+        requestApi<unknown>(context.runtime, API_ENDPOINTS.studios, {
+          method: "GET",
+          query: query || {},
+        }),
         context.t("apiErrors.studios.searchFailed"),
       );
       context.studios.value = toStudioList(data);
@@ -54,7 +59,9 @@ function createReadStudioActions(context: StudioContext) {
   const getStudio = async (id: string) =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        $fetch<unknown>(buildStudioDetailEndpoint(id)),
+        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
+          method: "GET",
+        }),
         context.t("apiErrors.studios.fetchFailed"),
       );
       const normalized = requireValue(
@@ -68,7 +75,9 @@ function createReadStudioActions(context: StudioContext) {
   const getAnalytics = async () =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        $fetch<unknown>(API_ENDPOINTS.studiosAnalytics),
+        requestApi<unknown>(context.runtime, API_ENDPOINTS.studiosAnalytics, {
+          method: "GET",
+        }),
         context.t("apiErrors.studios.fetchAnalyticsFailed"),
       );
       return data;
@@ -88,7 +97,7 @@ function createWriteStudioActions(
   const createStudio = async (studioData: CreateStudioInput) =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        $fetch<unknown>(API_ENDPOINTS.studios, {
+        requestApi<unknown>(context.runtime, API_ENDPOINTS.studios, {
           method: "POST",
           body: studioData,
         }),
@@ -105,7 +114,7 @@ function createWriteStudioActions(
   const updateStudio = async (id: string, updates: UpdateStudioInput) =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        $fetch<unknown>(buildStudioDetailEndpoint(id), {
+        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
           method: "PUT",
           body: updates,
         }),
@@ -123,7 +132,7 @@ function createWriteStudioActions(
   const deleteStudio = async (id: string) =>
     withLoadingState(context.loading, async () => {
       await readApiData(
-        $fetch<unknown>(buildStudioDetailEndpoint(id), {
+        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
           method: "DELETE",
         }),
         context.t("apiErrors.studios.deleteFailed"),
@@ -147,6 +156,7 @@ function createWriteStudioActions(
 export function useStudio() {
   const context: StudioContext = {
     t: useI18n().t,
+    runtime: useClientApiRequestRuntime(),
     studios: useState<GameStudio[]>(STATE_KEYS.STUDIOS_LIST, () => []),
     currentStudio: useState<GameStudio | null>(STATE_KEYS.STUDIO_CURRENT, () => null),
     loading: useState(STATE_KEYS.STUDIO_LOADING, () => false),

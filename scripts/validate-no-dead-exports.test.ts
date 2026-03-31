@@ -23,6 +23,18 @@ describe("collectImportedTargets", () => {
 
     expect(importedTargets.has("packages/shared/src/constants/routes.ts")).toBe(true);
   });
+
+  test("resolves directory imports to index modules", () => {
+    const importedTargets = collectImportedTargets([
+      {
+        filePath: "packages/client/pages/example.vue",
+        content: 'const card = await import("../components/ui");',
+      },
+    ]);
+
+    expect(importedTargets.has("packages/client/components/ui/index.ts")).toBe(true);
+    expect(importedTargets.has("packages/client/components/ui/index.vue")).toBe(true);
+  });
 });
 
 describe("isDeadExportViolation", () => {

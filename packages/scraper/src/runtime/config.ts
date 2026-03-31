@@ -22,6 +22,8 @@ export interface AutomationRuntimeConfig {
   readonly secondaryNavigationDelayMs: number;
   /** Delay after submit actions before verification runs. */
   readonly postSubmitDelayMs: number;
+  /** Enables deterministic verification runs instead of live automation. */
+  readonly enableAutomationVerify: boolean;
 }
 
 /**
@@ -38,4 +40,5 @@ export const automationRuntimeConfig: AutomationRuntimeConfig = {
     2_000,
   ),
   postSubmitDelayMs: parsePositiveInt(Bun.env.AUTOMATION_POST_SUBMIT_DELAY_MS, 3_000),
+  enableAutomationVerify: Bun.env.BAO_ENABLE_AUTOMATION_VERIFY === "true",
 };

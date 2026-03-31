@@ -9,7 +9,7 @@ import {
   initializeApplicationPage,
 } from "./runtime-page-setup";
 import { submitApplicationStep, verifySubmissionStep } from "./runtime-submission";
-import type { JobApplyStrategy } from "./adapters";
+import type { JobApplyStrategy } from "./strategy-registry";
 
 /**
  * Executes the Bun-based job-apply runtime using shared contracts.
