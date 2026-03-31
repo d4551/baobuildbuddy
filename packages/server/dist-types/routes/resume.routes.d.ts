@@ -69,7 +69,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("@bao/shared").ResumeData | {
+                        200: import("@bao/shared/types/resume").ResumeData | {
                             error: string;
                             details: string;
                         };
@@ -95,7 +95,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
             query: unknown;
             headers: unknown;
             response: {
-                200: import("@bao/shared").ResumeData[];
+                200: import("@bao/shared/types/resume").ResumeData[];
             };
         };
     };
@@ -109,15 +109,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     soft?: string[] | undefined;
                 }) | undefined;
                 name?: string | undefined;
-                theme?: "light" | "dark" | undefined;
-                summary?: string | undefined;
-                projects?: ({
-                    title: string;
-                    description: string;
-                } & {
-                    link?: string | undefined;
-                    technologies?: string[] | undefined;
-                })[] | undefined;
+                template?: "creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz" | undefined;
                 personalInfo?: ({} & {
                     portfolio?: string | undefined;
                     name?: string | undefined;
@@ -125,27 +117,35 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     location?: string | undefined;
                     website?: string | undefined;
                     phone?: string | undefined;
-                    linkedIn?: string | undefined;
                     github?: string | undefined;
+                    linkedIn?: string | undefined;
                 }) | undefined;
+                summary?: string | undefined;
                 experience?: ({
-                    title: string;
                     company: string;
+                    title: string;
                     startDate: string;
                 } & {
-                    description?: string | undefined;
                     achievements?: string[] | undefined;
                     location?: string | undefined;
+                    description?: string | undefined;
                     technologies?: string[] | undefined;
                     endDate?: string | undefined;
                 })[] | undefined;
                 education?: ({
                     degree: string;
+                    year: string;
                     field: string;
                     school: string;
-                    year: string;
                 } & {
                     gpa?: string | undefined;
+                })[] | undefined;
+                projects?: ({
+                    title: string;
+                    description: string;
+                } & {
+                    link?: string | undefined;
+                    technologies?: string[] | undefined;
                 })[] | undefined;
                 gamingExperience?: ({} & {
                     platforms?: string | undefined;
@@ -153,14 +153,14 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     genres?: string | undefined;
                     shippedTitles?: string | undefined;
                 }) | undefined;
-                template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
+                theme?: "light" | "dark" | undefined;
                 isDefault?: boolean | undefined;
             };
             params: {};
             query: unknown;
             headers: unknown;
             response: {
-                200: import("@bao/shared").ResumeData;
+                200: import("@bao/shared/types/resume").ResumeData;
                 422: {
                     type: "validation";
                     on: string;
@@ -184,7 +184,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").ResumeData | {
+                    200: import("@bao/shared/types/resume").ResumeData | {
                         error: string;
                     };
                     422: {
@@ -211,15 +211,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         soft?: string[] | undefined;
                     }) | undefined;
                     name?: string | undefined;
-                    theme?: "light" | "dark" | undefined;
-                    summary?: string | undefined;
-                    projects?: ({
-                        title: string;
-                        description: string;
-                    } & {
-                        link?: string | undefined;
-                        technologies?: string[] | undefined;
-                    })[] | undefined;
+                    template?: "creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz" | undefined;
                     personalInfo?: ({} & {
                         portfolio?: string | undefined;
                         name?: string | undefined;
@@ -227,27 +219,35 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         location?: string | undefined;
                         website?: string | undefined;
                         phone?: string | undefined;
-                        linkedIn?: string | undefined;
                         github?: string | undefined;
+                        linkedIn?: string | undefined;
                     }) | undefined;
+                    summary?: string | undefined;
                     experience?: ({
-                        title: string;
                         company: string;
+                        title: string;
                         startDate: string;
                     } & {
-                        description?: string | undefined;
                         achievements?: string[] | undefined;
                         location?: string | undefined;
+                        description?: string | undefined;
                         technologies?: string[] | undefined;
                         endDate?: string | undefined;
                     })[] | undefined;
                     education?: ({
                         degree: string;
+                        year: string;
                         field: string;
                         school: string;
-                        year: string;
                     } & {
                         gpa?: string | undefined;
+                    })[] | undefined;
+                    projects?: ({
+                        title: string;
+                        description: string;
+                    } & {
+                        link?: string | undefined;
+                        technologies?: string[] | undefined;
                     })[] | undefined;
                     gamingExperience?: ({} & {
                         platforms?: string | undefined;
@@ -255,7 +255,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         genres?: string | undefined;
                         shippedTitles?: string | undefined;
                     }) | undefined;
-                    template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
+                    theme?: "light" | "dark" | undefined;
                     isDefault?: boolean | undefined;
                 };
                 params: {
@@ -264,7 +264,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").ResumeData | {
+                    200: import("@bao/shared/types/resume").ResumeData | {
                         error: string;
                     };
                     422: {
@@ -320,7 +320,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 post: {
                     body: {} & {
                         format?: string | undefined;
-                        template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
+                        template?: "creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz" | undefined;
                     };
                     params: {
                         id: string;
@@ -376,8 +376,8 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                             suggestions?: undefined;
                             section?: undefined;
                         } | {
-                            resume: import("@bao/shared").ResumeData;
-                            suggestions: import("@bao/shared").JsonArray;
+                            resume: import("@bao/shared/types/resume").ResumeData;
+                            suggestions: import("@bao/shared/utils/json").JsonArray;
                             section: string;
                             error?: undefined;
                             details?: undefined;

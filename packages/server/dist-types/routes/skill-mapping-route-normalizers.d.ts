@@ -1,4 +1,4 @@
-import { type SkillCategory, type SkillEvidence, type SkillMapping } from "@bao/shared";
+import { type SkillCategory, type SkillEvidence, type SkillMapping } from "@bao/shared/types/skill-mapping";
 type DemandLevel = SkillMapping["demandLevel"];
 export declare const normalizeCategory: (value: unknown) => SkillCategory;
 export declare const normalizeDemandLevel: (value: unknown) => DemandLevel;
@@ -12,7 +12,7 @@ export declare const mapSuggestedMappingToCreateInput: (suggestedMapping: Record
     evidence: SkillEvidence[];
     confidence: number;
     category: "creative" | "technical" | "leadership" | "community" | "analytical" | "communication" | "project_management";
-    demandLevel: "low" | "medium" | "high";
+    demandLevel: "medium" | "low" | "high";
     verified: boolean;
     aiGenerated: boolean;
 } | null;

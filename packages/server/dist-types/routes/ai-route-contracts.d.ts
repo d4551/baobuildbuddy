@@ -94,5 +94,5 @@ export declare const automationActionRouteBodySchema: Type.TObject<{
     readonly resumeId: Type.TString;
     readonly coverLetterId: Type.TOptional<Type.TString>;
     readonly jobId: Type.TOptional<Type.TString>;
-}, "resumeId" | "jobUrl" | "action", never>;
+}, "resumeId" | "action" | "jobUrl", never>;
 export declare const usageTailLimit = 10;

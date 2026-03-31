@@ -1,15 +1,15 @@
-import type { AIProviderType } from "@bao/shared";
+import type { AIProviderType } from "@bao/shared/types/ai";
 import type { settings as settingsTable } from "../db/schema/settings";
 type SettingsRow = typeof settingsTable.$inferSelect;
 export declare const buildSettingsResponse: (row: SettingsRow) => Promise<{
-    automationSettings: import("@bao/shared").AutomationSettings | null;
+    automationSettings: import("@bao/shared/types/settings-contracts").AutomationSettings | null;
     localModelEndpoint: string | null;
-    aiRouting: import("@bao/shared").AIRouting;
-    providerDiagnostics: Partial<Record<"gemini" | "claude" | "openai" | "huggingface" | "local", import("@bao/shared").AIProviderDiagnostic>> | undefined;
+    aiRouting: import("@bao/shared/types/ai").AIRouting;
+    providerDiagnostics: Partial<Record<"openai" | "huggingface" | "local" | "gemini" | "claude", import("@bao/shared/types/ai").AIProviderDiagnostic>> | undefined;
     preferredProvider: string | null;
     preferredModel: string | null;
-    theme: import("@bao/shared").AppDataTheme;
-    brandSettings: import("@bao/shared").BrandSettings;
+    theme: import("@bao/shared/constants/branding").AppDataTheme;
+    brandSettings: import("@bao/shared/types/settings-contracts").BrandSettings;
     geminiApiKey: string | null;
     openaiApiKey: string | null;
     claudeApiKey: string | null;
@@ -20,14 +20,14 @@ export declare const buildSettingsResponse: (row: SettingsRow) => Promise<{
     hasHuggingfaceToken: boolean;
     hasEmailTransportPassword: boolean;
     hasLocalKey: boolean;
-    jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
+    jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
     id: string;
-    notifications: Record<string, boolean> | null;
-    emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
+    createdAt: string;
+    updatedAt: string;
     localModelName: string | null;
     language: string | null;
-    updatedAt: string;
-    createdAt: string;
+    notifications: Record<string, boolean> | null;
+    emailTransportSettings: import("@bao/shared/types/settings-contracts").EmailTransportSettings | null;
 }>;
 export declare const testProviderConnection: (body: {
     provider: AIProviderType;
@@ -43,7 +43,7 @@ export declare const testProviderConnection: (body: {
     error?: undefined;
 } | {
     valid: boolean;
-    provider: "gemini" | "claude" | "openai" | "huggingface";
+    provider: "openai" | "huggingface" | "gemini" | "claude";
     error: string;
     diagnosticCode?: undefined;
     message?: undefined;
@@ -51,7 +51,7 @@ export declare const testProviderConnection: (body: {
     selectedModel?: undefined;
 } | {
     valid: boolean;
-    provider: "gemini" | "claude" | "openai" | "huggingface";
+    provider: "openai" | "huggingface" | "gemini" | "claude";
     diagnosticCode: "healthy" | "error";
     message: string | undefined;
     availableModels?: undefined;

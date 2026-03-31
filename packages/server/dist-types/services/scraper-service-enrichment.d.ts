@@ -1,4 +1,5 @@
-import { type ScrapeEnrichmentRunSummary, type ScrapedJob, type ScrapedStudio } from "@bao/shared";
+import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
+import type { ScrapeEnrichmentRunSummary } from "@bao/shared/types/jobs";
 import { AIService } from "./ai/ai-service";
 import type { ScrapeEnrichmentAccumulator, ScrapeEnrichmentAttempt } from "./scraper-service-contracts";
 export declare const createScrapeEnrichmentAccumulator: () => ScrapeEnrichmentAccumulator;

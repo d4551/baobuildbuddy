@@ -1,4 +1,4 @@
-import type { EmailResponseResult } from "@bao/shared";
+import type { EmailResponseResult } from "@bao/shared/schemas/automation-email.schema";
 import type { AIService } from "../ai/ai-service";
 import type { EmailTransportRuntimeConfig } from "../email-delivery-service";
 import type { EmailResponseExecutionPayload } from "./automation-run-inputs";

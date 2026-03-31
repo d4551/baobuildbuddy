@@ -1,4 +1,5 @@
-import type { AutomationScriptId, JobSearchResult, ScrapeEnrichmentRunSummary, ScrapePersonaEnrichment, ScrapedJob, ScrapedStudio } from "@bao/shared";
+import { type AutomationScriptId, type ScrapedJob, type ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
+import type { JobSearchResult, ScrapeEnrichmentRunSummary, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 export type ScriptInputPayload = {
     sourceUrl?: string;
 };

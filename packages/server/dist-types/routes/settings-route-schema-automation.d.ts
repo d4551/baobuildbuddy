@@ -73,7 +73,7 @@ export declare const jobTaxonomyKeywordEntryBodySchema: Type.TRequired<Type.TObj
 }, never, never>>;
 export declare const studioClassificationRuleBodySchema: Type.TRequired<Type.TObject<{
     readonly id: Type.TString;
-    readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared").StudioType>[]>;
+    readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared/types/jobs").StudioType>[]>;
     readonly keyword: Type.TString;
     readonly sortOrder: Type.TNumber;
     readonly enabled: Type.TBoolean;
@@ -89,7 +89,7 @@ export declare const jobTaxonomySettingsBodySchema: Type.TRequired<Type.TObject<
     }, never, never>>>;
     readonly studioRules: Type.TArray<Type.TRequired<Type.TObject<{
         readonly id: Type.TString;
-        readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared").StudioType>[]>;
+        readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared/types/jobs").StudioType>[]>;
         readonly keyword: Type.TString;
         readonly sortOrder: Type.TNumber;
         readonly enabled: Type.TBoolean;

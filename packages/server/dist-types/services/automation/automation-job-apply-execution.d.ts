@@ -1,4 +1,4 @@
-import type { AutomationSettings } from "@bao/shared";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import type { CreateProgressEvent, JobApplyExecutionTracking, JobApplyRunPreparation } from "./automation-service-contracts";
 export declare const createExecutionTracking: () => JobApplyExecutionTracking;
 export declare const markJobApplyRunStarted: (runId: string) => Promise<void>;

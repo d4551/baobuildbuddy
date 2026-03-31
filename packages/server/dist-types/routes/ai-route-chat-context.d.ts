@@ -1,4 +1,4 @@
-import type { AIChatContext } from "@bao/shared";
+import { type AIChatContext } from "@bao/shared/types/ai";
 import Type, { type StaticParse } from "baobox";
 export declare const chatContextSchema: Type.TObject<{
     readonly source: Type.TString;

@@ -1,4 +1,4 @@
-import type { GameGenre, JobExperienceLevel, JobType, Platform, StudioType } from "@bao/shared";
+import type { GameGenre, JobExperienceLevel, JobType, Platform, StudioType } from "@bao/shared/types/jobs";
 import type { RawJob } from "./providers/provider-interface";
 export declare const detectRemote: (location: string) => Promise<boolean>;
 export declare const detectHybrid: (location: string) => Promise<boolean>;

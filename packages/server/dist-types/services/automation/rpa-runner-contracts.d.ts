@@ -1,4 +1,8 @@
-import type { AutomationScriptId, AutomationSettings, ErrorEnvelope, JsonObject, RpaRunEvent, RpaRunResult } from "@bao/shared";
+import type { AutomationScriptId } from "@bao/shared/schemas/automation-scripts.schema";
+import type { ErrorEnvelope } from "@bao/shared/schemas/error-envelope.schema";
+import type { RpaRunEvent, RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
+import type { JsonObject } from "@bao/shared/utils/json";
 /**
  * Generic process-level result for automation script execution.
  */

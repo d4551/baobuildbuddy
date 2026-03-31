@@ -25,8 +25,8 @@ export declare const automationScreenshotRoutes: Elysia<"/automation/screenshots
                     get: {
                         body: unknown;
                         params: {
-                            runId: string;
                             index: string;
+                            runId: string;
                         } & {};
                         query: unknown;
                         headers: unknown;

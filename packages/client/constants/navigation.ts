@@ -1,13 +1,15 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { AppTranslationSchema } from "~/locales/en-US";
 
+type StringKeyOf<T> = Extract<keyof T, string>;
+
 const PATH_SPLIT_PATTERN = /[?#]/u;
 const MULTIPLE_SLASH_PATTERN = /\/{2,}/gu;
 
 /**
  * Translation keys available for navigation labels.
  */
-type NavigationLabelKey = `nav.${keyof AppTranslationSchema["nav"]}`;
+type NavigationLabelKey = `nav.${StringKeyOf<AppTranslationSchema["nav"]>}`;
 
 /**
  * Shared navigation item contract for app chrome components.

@@ -1,4 +1,4 @@
-import type { SkillMapping } from "@bao/shared";
+import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { skillMappings } from "../db/schema/skill-mappings";
 export type SkillMappingInsert = Omit<SkillMapping, "id">;
 export type SkillMappingUpdate = Partial<SkillMapping>;

@@ -1,43 +1,43 @@
-import type { AIProviderType } from "@bao/shared";
+import type { AIProviderType } from "@bao/shared/types/ai";
 import Type from "baobox";
 export declare const VALID_PROVIDERS: [AIProviderType, ...AIProviderType[]];
 export declare const resolveKnownProvider: (value?: string | null) => AIProviderType;
-export declare const preferredProviderBodySchema: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+export declare const preferredProviderBodySchema: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
 export declare const aiRoutingBodySchema: Type.TObject<{
     readonly chat: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
     readonly interviewQuestions: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
     readonly interviewFeedback: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
     readonly resume: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
     readonly coverLetter: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
     readonly emailResponse: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
     readonly jobMatch: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
     readonly scrapeEnrichment: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
     readonly automationFieldMapping: Type.TObject<{
-        readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+        readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
     }, "provider", never>;
 }, "chat" | "interviewQuestions" | "interviewFeedback" | "resume" | "coverLetter" | "emailResponse" | "jobMatch" | "scrapeEnrichment" | "automationFieldMapping", never>;

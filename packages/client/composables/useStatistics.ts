@@ -229,7 +229,7 @@ const readApiData = async (
   fallbackMessage: string,
 ): Promise<unknown> => {
   const response = await request;
-  if (!isRecord(response) || !("data" in response)) {
+  if (!(isRecord(response) && "data" in response)) {
     throw new Error(fallbackMessage);
   }
   if ("error" in response && response.error) {

@@ -1,4 +1,4 @@
-import { type AIResponse, type GenerateOptions } from "@bao/shared";
+import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { BaseAIProvider } from "./provider-interface";
 /**
  * Hugging Face AI Provider

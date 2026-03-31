@@ -16,12 +16,14 @@ import { isRecord } from "@bao/shared/utils/type-guards";
 const AUTOMATION_HUB_ASYNC_DATA_KEY = "automation-hub-stats";
 const AUTOMATION_HUB_CAPABILITIES_ASYNC_DATA_KEY = "automation-hub-capabilities";
 
-const readApiData = async (
-  request: Promise<unknown>,
+const readApiData = <TData>(
+  response: {
+    data: TData;
+    error?: unknown;
+  },
   fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  if (!isRecord(response) || !("data" in response)) {
+): TData => {
+  if (!(isRecord(response) && "data" in response)) {
     throw new Error(fallbackMessage);
   }
   if ("error" in response && response.error) {
@@ -36,11 +38,8 @@ const useAutomationHubStatsData = (t: AutomationHubTranslate) => {
   return useAsyncData<DashboardStats | null>(
     AUTOMATION_HUB_ASYNC_DATA_KEY,
     async () => {
-      const data = await readApiData(
-        api.stats.dashboard.get(),
-        t("automation.hub.loadErrorFallback"),
-      );
-      return data;
+      const response = await api.stats.dashboard.get();
+      return readApiData(response, t("automation.hub.loadErrorFallback"));
     },
     {
       lazy: false,

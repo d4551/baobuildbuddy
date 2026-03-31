@@ -1,4 +1,4 @@
-import { type ResumeTemplate } from "@bao/shared";
+import { type ResumeTemplate } from "@bao/shared/constants/resume";
 import { type ResumeRenderContext, type ResumeTemplateDefinition, type WrappedTextOptions } from "./export-service-contracts";
 export declare function resolveResumePdfTemplate(requestedTemplate: string | undefined, resumeTemplate: ResumeTemplate | undefined): ResumeTemplateDefinition;
 export declare function applyResumeBackground(context: ResumeRenderContext, page?: import("pdf-lib").PDFPage): void;

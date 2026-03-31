@@ -22,7 +22,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
             query: unknown;
             headers: unknown;
             response: {
-                200: import("@bao/shared").PortfolioData;
+                200: import("@bao/shared/types/portfolio").PortfolioData;
             };
         };
     };
@@ -36,7 +36,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
             query: unknown;
             headers: unknown;
             response: {
-                200: import("@bao/shared").PortfolioData;
+                200: import("@bao/shared/types/portfolio").PortfolioData;
                 422: {
                     type: "validation";
                     on: string;
@@ -58,21 +58,21 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                     description: string;
                 } & {
                     role?: string | undefined;
+                    sortOrder?: number | undefined;
                     technologies?: string[] | undefined;
                     platforms?: string[] | undefined;
-                    featured?: boolean | undefined;
-                    sortOrder?: number | undefined;
+                    tags?: string[] | undefined;
                     image?: string | undefined;
                     liveUrl?: string | undefined;
                     githubUrl?: string | undefined;
-                    tags?: string[] | undefined;
+                    featured?: boolean | undefined;
                     engines?: string[] | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").PortfolioProject | {
+                    200: import("@bao/shared/types/portfolio").PortfolioProject | {
                         error: string;
                     };
                     422: {
@@ -100,7 +100,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("@bao/shared").PortfolioData | {
+                        200: import("@bao/shared/types/portfolio").PortfolioData | {
                             error: string;
                         };
                         422: {
@@ -124,16 +124,16 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                 put: {
                     body: {} & {
                         role?: string | undefined;
+                        sortOrder?: number | undefined;
                         title?: string | undefined;
                         description?: string | undefined;
                         technologies?: string[] | undefined;
                         platforms?: string[] | undefined;
-                        featured?: boolean | undefined;
-                        sortOrder?: number | undefined;
+                        tags?: string[] | undefined;
                         image?: string | undefined;
                         liveUrl?: string | undefined;
                         githubUrl?: string | undefined;
-                        tags?: string[] | undefined;
+                        featured?: boolean | undefined;
                         engines?: string[] | undefined;
                     };
                     params: {
@@ -142,7 +142,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("@bao/shared").PortfolioProject | {
+                        200: import("@bao/shared/types/portfolio").PortfolioProject | {
                             error: string;
                         };
                         422: {

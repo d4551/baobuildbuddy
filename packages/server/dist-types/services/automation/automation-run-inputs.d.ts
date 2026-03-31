@@ -1,4 +1,5 @@
-import type { AutomationScrapeTarget, EmailResponseTone } from "@bao/shared";
+import { type AutomationScrapeTarget } from "@bao/shared/constants/automation";
+import type { EmailResponseTone } from "@bao/shared/schemas/automation-email.schema";
 export interface JobApplyPayload {
     jobUrl: string;
     resumeId: string;

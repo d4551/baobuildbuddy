@@ -1,4 +1,4 @@
-import type { GamificationActionHistoryEntry } from "@bao/shared";
+import type { GamificationActionHistoryEntry } from "@bao/shared/types/gamification";
 import { ACHIEVEMENT_DEFINITIONS, GAMIFICATION_STAT_KEYS } from "./gamification-achievement-definitions";
 import { DAILY_CHALLENGE_DEFINITIONS } from "./gamification-challenge-definitions";
 export declare const GAMIFICATION_DEFAULT_ID = "default";

@@ -1,10 +1,10 @@
-import { type EmailResponseRequest } from "@bao/shared";
+import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { JobApplyRequestBody, RunScrapeRequestBody, ScheduleEmailResponseRequestBody, ScheduleJobApplyRequestBody, ScheduleScrapeRequestBody } from "./automation-route-contracts";
 interface RouteSetState {
     status?: number | string;
 }
 export declare const handleVerifyAutomationContext: (set: RouteSetState) => Promise<{
-    error: import("@bao/shared").ErrorEnvelope;
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 } | {
     resumeId: string;
 }>;
@@ -51,7 +51,7 @@ export declare const handleJobApplyRoute: (payload: JobApplyRequestBody, set: Ro
     aborted: boolean;
     executionMs: number | null;
 } | {
-    error: import("@bao/shared").ErrorEnvelope;
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
 export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyRequestBody, set: RouteSetState) => Promise<{
     id: string;
@@ -96,7 +96,7 @@ export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyReq
     aborted: boolean;
     executionMs: number | null;
 } | {
-    error: import("@bao/shared").ErrorEnvelope;
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
 export declare const handleEmailResponseRoute: (payload: EmailResponseRequest, set: RouteSetState) => Promise<{
     runId: string;
@@ -109,7 +109,7 @@ export declare const handleEmailResponseRoute: (payload: EmailResponseRequest, s
     deliveredAt?: string | undefined;
     messageId?: string | undefined;
 } | {
-    error: import("@bao/shared").ErrorEnvelope;
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
 export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailResponseRequestBody, set: RouteSetState) => Promise<{
     id: string;
@@ -154,7 +154,7 @@ export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailR
     aborted: boolean;
     executionMs: number | null;
 } | {
-    error: import("@bao/shared").ErrorEnvelope;
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
 export declare const handleScrapeRoute: (payload: RunScrapeRequestBody, set: RouteSetState) => Promise<{
     id: string;
@@ -199,7 +199,7 @@ export declare const handleScrapeRoute: (payload: RunScrapeRequestBody, set: Rou
     aborted: boolean;
     executionMs: number | null;
 } | {
-    error: import("@bao/shared").ErrorEnvelope;
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
 export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequestBody, set: RouteSetState) => Promise<{
     id: string;
@@ -244,10 +244,10 @@ export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequest
     aborted: boolean;
     executionMs: number | null;
 } | {
-    error: import("@bao/shared").ErrorEnvelope;
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
-export declare const handleAutomationCapabilitiesRoute: (set: RouteSetState) => Promise<import("@bao/shared").RpaCapabilityAuditReport | {
-    error: import("@bao/shared").ErrorEnvelope;
+export declare const handleAutomationCapabilitiesRoute: (set: RouteSetState) => Promise<import("@bao/shared/constants/automation").RpaCapabilityAuditReport | {
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
 export declare const handleAutomationRunByIdRoute: (runId: string, set: RouteSetState) => Promise<{
     id: string;
@@ -292,6 +292,6 @@ export declare const handleAutomationRunByIdRoute: (runId: string, set: RouteSet
     aborted: boolean;
     executionMs: number | null;
 } | {
-    error: import("@bao/shared").ErrorEnvelope;
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
 export {};

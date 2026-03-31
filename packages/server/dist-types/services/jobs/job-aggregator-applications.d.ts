@@ -1,5 +1,5 @@
+import type { Job } from "@bao/shared/types/jobs";
 import { applications } from "../../db/schema/jobs";
-import type { Job } from "@bao/shared";
 export declare const applyToJob: (jobId: string, notes?: string) => Promise<string>;
 export declare const getApplications: () => Promise<Array<typeof applications.$inferSelect & {
     job: Job;

@@ -1,4 +1,4 @@
-import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
+import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared/types/search";
 export declare class StatisticsService {
     private runBestEffort;
     getDashboardStats(): Promise<DashboardStats>;

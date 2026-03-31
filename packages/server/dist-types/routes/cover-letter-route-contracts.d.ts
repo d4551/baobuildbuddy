@@ -10,7 +10,7 @@ export type GenerateCoverLetterBody = {
 export type RouteSetState = {
     status?: number | string;
 };
-export declare const coverLetterTemplateBodySchema: Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "professional">[]>;
+export declare const coverLetterTemplateBodySchema: Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>;
 export declare const coverLetterIdParamsSchema: Type.TObject<{
     readonly id: Type.TString;
 }, "id", never>;
@@ -19,21 +19,21 @@ export declare const coverLetterMutationBodySchema: Type.TObject<{
     readonly position: Type.TString;
     readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "professional">[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
 }, "company" | "position", never>;
 export declare const coverLetterUpdateBodySchema: Type.TObject<{
     readonly company: Type.TOptional<Type.TString>;
     readonly position: Type.TOptional<Type.TString>;
     readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "professional">[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
 }, never, never>;
 export declare const generateCoverLetterBodySchema: Type.TObject<{
     readonly company: Type.TString;
     readonly position: Type.TString;
     readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly resumeId: Type.TOptional<Type.TString>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "professional">[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
     readonly save: Type.TOptional<Type.TBoolean>;
 }, "company" | "position", never>;
 export declare const coverLetterExportBodySchema: Type.TObject<{

@@ -71,7 +71,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                         message: string;
                         sessionId: string | null | undefined;
                         timestamp: string;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                         model: string;
                         followUps: string[];
                         contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
@@ -117,7 +117,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                         resumeId: string;
                         jobId: string | null;
                         analysis: import("./ai-route-contracts").ResumeAnalysisResult;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                         model: string;
                         error?: undefined;
                     };
@@ -158,7 +158,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                     } | {
                         message: string;
                         content: import("./ai-route-contracts").CoverLetterSections;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                         model: string;
                         error?: undefined;
                     };
@@ -215,10 +215,10 @@ export declare const aiRoutes: Elysia<"/ai", {
                 response: {
                     200: import("../services/ai/control-plane").AIControlPlaneState | {
                         providers: {
-                            id: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                            id: "openai" | "huggingface" | "local" | "gemini" | "claude";
                             nameKey: string;
                             descriptionKey: string;
-                            iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                            iconId: "openai" | "huggingface" | "local" | "gemini" | "claude";
                             models: string[];
                             available: boolean;
                             health: "unconfigured";
@@ -259,11 +259,11 @@ export declare const aiRoutes: Elysia<"/ai", {
             post: {
                 body: {
                     resumeId: string;
-                    jobUrl: string;
                     action: string;
+                    jobUrl: string;
                 } & {
-                    coverLetterId?: string | undefined;
                     jobId?: string | undefined;
+                    coverLetterId?: string | undefined;
                 };
                 params: {};
                 query: unknown;

@@ -23,11 +23,8 @@ const useSkillsPathwaysBootstrap = async (
         api.skills.pathways.get(),
         api.skills.readiness.get(),
       ]);
-      const pathways = await readApiData(
-        pathwaysData,
-        t("skillsPathwaysPage.errors.pathwaysLoadFailed"),
-      );
-      const readiness = await readApiData(
+      const pathways = readApiData(pathwaysData, t("skillsPathwaysPage.errors.pathwaysLoadFailed"));
+      const readiness = readApiData(
         readinessData,
         t("skillsPathwaysPage.errors.readinessLoadFailed"),
       );
@@ -50,10 +47,8 @@ const useSkillsPathwaysGamification = async (
   useAsyncData(
     "skills-pathways-gamification-progress",
     async () => {
-      const progress = await readApiData(
-        api.gamification.progress.get(),
-        t("skillsPathwaysPage.errors.gamificationLoadFailed"),
-      );
+      const response = await api.gamification.progress.get();
+      const progress = readApiData(response, t("skillsPathwaysPage.errors.gamificationLoadFailed"));
       const normalized = toGamificationProgress(progress);
       if (!normalized) {
         throw new Error(t("skillsPathwaysPage.errors.gamificationLoadFailed"));

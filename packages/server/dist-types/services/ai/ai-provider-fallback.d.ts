@@ -1,4 +1,4 @@
-import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
+import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import type { AIProvider } from "./provider-interface";
 export type ProviderFailure = {
     provider: AIProviderType;

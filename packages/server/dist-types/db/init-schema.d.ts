@@ -1,4 +1,4 @@
-import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared";
+import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 export declare const TABLE_DEFINITIONS: readonly ["CREATE TABLE IF NOT EXISTS user_profile (\n      id TEXT PRIMARY KEY DEFAULT 'default',\n      name TEXT NOT NULL DEFAULT '',\n      email TEXT,\n      phone TEXT,\n      location TEXT,\n      website TEXT,\n      linkedin TEXT,\n      github TEXT,\n      summary TEXT,\n      current_role TEXT,\n      current_company TEXT,\n      years_experience INTEGER,\n      technical_skills TEXT DEFAULT '[]',\n      soft_skills TEXT DEFAULT '[]',\n      gaming_experience TEXT DEFAULT '{}',\n      career_goals TEXT DEFAULT '{}',\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", `CREATE TABLE IF NOT EXISTS settings (
       id TEXT PRIMARY KEY DEFAULT 'default',
       gemini_api_key TEXT,

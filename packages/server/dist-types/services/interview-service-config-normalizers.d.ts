@@ -1,4 +1,4 @@
-import { type InterviewCandidateContext, type InterviewConfig, type InterviewConversationStyle, type InterviewMode, type InterviewTargetJob, type VoiceSettings } from "@bao/shared";
+import type { InterviewCandidateContext, InterviewConfig, InterviewConversationStyle, InterviewMode, InterviewTargetJob, VoiceSettings } from "@bao/shared/types/interview";
 import type { InterviewConfigInput } from "./interview-service-contracts";
 export declare function normalizeInterviewMode(value: unknown): InterviewMode;
 export declare function normalizeConversationStyle(value: unknown): InterviewConversationStyle;

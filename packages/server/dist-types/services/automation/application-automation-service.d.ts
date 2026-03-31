@@ -1,4 +1,6 @@
-import type { AutomationScrapeTarget, EmailResponseRequest, EmailResponseResult, RpaCapabilityAuditReport, RpaRunEvent } from "@bao/shared";
+import type { AutomationScrapeTarget, RpaCapabilityAuditReport } from "@bao/shared/constants/automation";
+import type { EmailResponseRequest, EmailResponseResult } from "@bao/shared/schemas/automation-email.schema";
+import type { RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
 import { type JobApplyPayload } from "./automation-run-inputs";
 /**
  * Contract-driven job application automation workflow service.

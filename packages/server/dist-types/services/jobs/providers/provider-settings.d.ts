@@ -1,4 +1,4 @@
-import { type JobProviderSettings } from "@bao/shared";
+import type { JobProviderSettings } from "@bao/shared/types/settings-contracts";
 /**
  * Loads persisted job-provider runtime settings from the settings table.
  */

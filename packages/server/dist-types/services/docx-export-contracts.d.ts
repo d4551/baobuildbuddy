@@ -1,4 +1,6 @@
-import { DOCX_COVER_LETTER_FONT_BODY_PT, DOCX_COVER_LETTER_FONT_HEADER_PT, DOCX_PORTFOLIO_FONT_BODY_PT, DOCX_PORTFOLIO_FONT_HEADING_PT, DOCX_PORTFOLIO_FONT_TITLE_PT, DOCX_RESUME_FONT_ACCENT_PT, DOCX_RESUME_FONT_BODY_PT, DOCX_RESUME_FONT_HEADER_PT, DOCX_RESUME_FONT_NAME_PT, RESUME_EXPORT_THEME_CONFIGS, type ResumeData, type ResumeTemplate } from "@bao/shared";
+import { DOCX_COVER_LETTER_FONT_BODY_PT, DOCX_COVER_LETTER_FONT_HEADER_PT, DOCX_PORTFOLIO_FONT_BODY_PT, DOCX_PORTFOLIO_FONT_HEADING_PT, DOCX_PORTFOLIO_FONT_TITLE_PT, DOCX_RESUME_FONT_ACCENT_PT, DOCX_RESUME_FONT_BODY_PT, DOCX_RESUME_FONT_HEADER_PT, DOCX_RESUME_FONT_NAME_PT, RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-layout";
+import type { ResumeTemplate } from "@bao/shared/constants/resume";
+import type { ResumeData } from "@bao/shared/types/resume";
 import { Paragraph } from "docx";
 export type ResumeExperienceItem = NonNullable<ResumeData["experience"]>[number];
 export type ResumeEducationItem = NonNullable<ResumeData["education"]>[number];

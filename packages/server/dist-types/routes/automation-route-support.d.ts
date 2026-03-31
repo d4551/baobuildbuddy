@@ -1,4 +1,4 @@
-import { type RpaRunExecutionEnvelope } from "@bao/shared";
+import { type RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { JobApplyRequestBody } from "./automation-route-contracts";
 import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES } from "./automation-route-contracts";
 export declare const readAutomationRunById: (runId: string) => Promise<RpaRunExecutionEnvelope | null>;

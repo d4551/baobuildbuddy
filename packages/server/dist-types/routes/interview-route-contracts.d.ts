@@ -1,4 +1,4 @@
-import type { InterviewConfig, VoiceSettings } from "@bao/shared";
+import type { InterviewConfig, VoiceSettings } from "@bao/shared/types/interview";
 import Type from "baobox";
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
     voiceSettings?: Partial<VoiceSettings>;
@@ -43,7 +43,7 @@ export declare const sessionConfigSchema: Type.TObject<{
         readonly source: Type.TOptional<Type.TString>;
         readonly postedDate: Type.TOptional<Type.TString>;
         readonly url: Type.TOptional<Type.TString>;
-    }, "id" | "title" | "company" | "location", never>>;
+    }, "id" | "company" | "title" | "location", never>>;
     readonly candidateContext: Type.TOptional<Type.TObject<{
         readonly resumeId: Type.TOptional<Type.TString>;
         readonly coverLetterId: Type.TOptional<Type.TString>;
@@ -86,7 +86,7 @@ export declare const createSessionBodySchema: Type.TObject<{
             readonly source: Type.TOptional<Type.TString>;
             readonly postedDate: Type.TOptional<Type.TString>;
             readonly url: Type.TOptional<Type.TString>;
-        }, "id" | "title" | "company" | "location", never>>;
+        }, "id" | "company" | "title" | "location", never>>;
         readonly candidateContext: Type.TOptional<Type.TObject<{
             readonly resumeId: Type.TOptional<Type.TString>;
             readonly coverLetterId: Type.TOptional<Type.TString>;

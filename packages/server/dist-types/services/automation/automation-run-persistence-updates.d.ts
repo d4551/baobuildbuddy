@@ -1,4 +1,5 @@
-import type { ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
+import type { ErrorEnvelope } from "@bao/shared/schemas/error-envelope.schema";
+import type { RpaRunEvent, RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 type ProgressRunEvent = Extract<RpaRunEvent, {
     eventType: "progress";

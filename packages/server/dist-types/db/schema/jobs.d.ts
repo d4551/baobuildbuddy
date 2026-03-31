@@ -1,4 +1,4 @@
-import type { ScrapePersonaEnrichment } from "@bao/shared";
+import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 export declare const jobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "jobs";
     schema: undefined;

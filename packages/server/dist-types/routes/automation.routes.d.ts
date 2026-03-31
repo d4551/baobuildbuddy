@@ -69,9 +69,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                     resumeId: string;
                     jobUrl: string;
                 } & {
-                    customAnswers?: Record<string, string> | undefined;
-                    coverLetterId?: string | undefined;
                     jobId?: string | undefined;
+                    coverLetterId?: string | undefined;
+                    customAnswers?: Record<string, string> | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -97,19 +97,19 @@ export declare const automationRoutes: Elysia<"/automation", {
                         output?: Record<string, unknown> | null | undefined;
                         input?: Record<string, unknown> | null | undefined;
                         progress?: number | null | undefined;
-                        status?: "error" | "success" | "pending" | "running" | undefined;
-                        updatedAt?: string | undefined;
-                        createdAt?: string | undefined;
                         screenshots?: string[] | null | undefined;
-                        totalSteps?: number | null | undefined;
+                        status?: "error" | "success" | "pending" | "running" | undefined;
                         jobId?: string | null | undefined;
                         userId?: string | null | undefined;
                         currentStep?: number | null | undefined;
-                        startedAt?: string | null | undefined;
-                        completedAt?: string | null | undefined;
+                        totalSteps?: number | null | undefined;
                         exitCode?: number | null | undefined;
                         timedOut?: boolean | undefined;
                         executionMs?: number | null | undefined;
+                        startedAt?: string | null | undefined;
+                        completedAt?: string | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
                     };
                     400: {} & {
                         error?: ({} & {
@@ -153,9 +153,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                         jobUrl: string;
                         runAt: string;
                     } & {
-                        customAnswers?: Record<string, string> | undefined;
-                        coverLetterId?: string | undefined;
                         jobId?: string | undefined;
+                        coverLetterId?: string | undefined;
+                        customAnswers?: Record<string, string> | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -181,19 +181,19 @@ export declare const automationRoutes: Elysia<"/automation", {
                             output?: Record<string, unknown> | null | undefined;
                             input?: Record<string, unknown> | null | undefined;
                             progress?: number | null | undefined;
-                            status?: "error" | "success" | "pending" | "running" | undefined;
-                            updatedAt?: string | undefined;
-                            createdAt?: string | undefined;
                             screenshots?: string[] | null | undefined;
-                            totalSteps?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
                             jobId?: string | null | undefined;
                             userId?: string | null | undefined;
                             currentStep?: number | null | undefined;
-                            startedAt?: string | null | undefined;
-                            completedAt?: string | null | undefined;
+                            totalSteps?: number | null | undefined;
                             exitCode?: number | null | undefined;
                             timedOut?: boolean | undefined;
                             executionMs?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            createdAt?: string | undefined;
+                            updatedAt?: string | undefined;
                         };
                         400: {} & {
                             error?: ({} & {
@@ -255,9 +255,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                     200: {} & {
                         provider?: string | undefined;
                         model?: string | undefined;
+                        status?: "success" | undefined;
                         recipientEmail?: string | undefined;
                         runId?: string | undefined;
-                        status?: "success" | undefined;
                         reply?: string | undefined;
                         delivered?: boolean | undefined;
                         deliveredAt?: string | undefined;
@@ -334,19 +334,19 @@ export declare const automationRoutes: Elysia<"/automation", {
                             output?: Record<string, unknown> | null | undefined;
                             input?: Record<string, unknown> | null | undefined;
                             progress?: number | null | undefined;
-                            status?: "error" | "success" | "pending" | "running" | undefined;
-                            updatedAt?: string | undefined;
-                            createdAt?: string | undefined;
                             screenshots?: string[] | null | undefined;
-                            totalSteps?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
                             jobId?: string | null | undefined;
                             userId?: string | null | undefined;
                             currentStep?: number | null | undefined;
-                            startedAt?: string | null | undefined;
-                            completedAt?: string | null | undefined;
+                            totalSteps?: number | null | undefined;
                             exitCode?: number | null | undefined;
                             timedOut?: boolean | undefined;
                             executionMs?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            createdAt?: string | undefined;
+                            updatedAt?: string | undefined;
                         };
                         400: {} & {
                             error?: ({} & {
@@ -412,19 +412,19 @@ export declare const automationRoutes: Elysia<"/automation", {
                         output?: Record<string, unknown> | null | undefined;
                         input?: Record<string, unknown> | null | undefined;
                         progress?: number | null | undefined;
-                        status?: "error" | "success" | "pending" | "running" | undefined;
-                        updatedAt?: string | undefined;
-                        createdAt?: string | undefined;
                         screenshots?: string[] | null | undefined;
-                        totalSteps?: number | null | undefined;
+                        status?: "error" | "success" | "pending" | "running" | undefined;
                         jobId?: string | null | undefined;
                         userId?: string | null | undefined;
                         currentStep?: number | null | undefined;
-                        startedAt?: string | null | undefined;
-                        completedAt?: string | null | undefined;
+                        totalSteps?: number | null | undefined;
                         exitCode?: number | null | undefined;
                         timedOut?: boolean | undefined;
                         executionMs?: number | null | undefined;
+                        startedAt?: string | null | undefined;
+                        completedAt?: string | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
                     };
                     400: {} & {
                         error?: ({} & {
@@ -491,19 +491,19 @@ export declare const automationRoutes: Elysia<"/automation", {
                             output?: Record<string, unknown> | null | undefined;
                             input?: Record<string, unknown> | null | undefined;
                             progress?: number | null | undefined;
-                            status?: "error" | "success" | "pending" | "running" | undefined;
-                            updatedAt?: string | undefined;
-                            createdAt?: string | undefined;
                             screenshots?: string[] | null | undefined;
-                            totalSteps?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
                             jobId?: string | null | undefined;
                             userId?: string | null | undefined;
                             currentStep?: number | null | undefined;
-                            startedAt?: string | null | undefined;
-                            completedAt?: string | null | undefined;
+                            totalSteps?: number | null | undefined;
                             exitCode?: number | null | undefined;
                             timedOut?: boolean | undefined;
                             executionMs?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            createdAt?: string | undefined;
+                            updatedAt?: string | undefined;
                         };
                         400: {} & {
                             error?: ({} & {
@@ -567,9 +567,9 @@ export declare const automationRoutes: Elysia<"/automation", {
                             name?: string | undefined;
                             id?: string | undefined;
                             category?: "scrape" | "job_apply" | undefined;
-                            issues?: string[] | undefined;
-                            target?: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null | undefined;
                             enabled?: boolean | undefined;
+                            target?: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null | undefined;
+                            issues?: string[] | undefined;
                             configured?: boolean | undefined;
                             implemented?: boolean | undefined;
                             manualRunAvailable?: boolean | undefined;
@@ -617,19 +617,19 @@ export declare const automationRoutes: Elysia<"/automation", {
                         output?: Record<string, unknown> | null | undefined;
                         input?: Record<string, unknown> | null | undefined;
                         progress?: number | null | undefined;
-                        status?: "error" | "success" | "pending" | "running" | undefined;
-                        updatedAt?: string | undefined;
-                        createdAt?: string | undefined;
                         screenshots?: string[] | null | undefined;
-                        totalSteps?: number | null | undefined;
+                        status?: "error" | "success" | "pending" | "running" | undefined;
                         jobId?: string | null | undefined;
                         userId?: string | null | undefined;
                         currentStep?: number | null | undefined;
-                        startedAt?: string | null | undefined;
-                        completedAt?: string | null | undefined;
+                        totalSteps?: number | null | undefined;
                         exitCode?: number | null | undefined;
                         timedOut?: boolean | undefined;
                         executionMs?: number | null | undefined;
+                        startedAt?: string | null | undefined;
+                        completedAt?: string | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
                     })[];
                     422: {
                         type: "validation";
@@ -669,19 +669,19 @@ export declare const automationRoutes: Elysia<"/automation", {
                             output?: Record<string, unknown> | null | undefined;
                             input?: Record<string, unknown> | null | undefined;
                             progress?: number | null | undefined;
-                            status?: "error" | "success" | "pending" | "running" | undefined;
-                            updatedAt?: string | undefined;
-                            createdAt?: string | undefined;
                             screenshots?: string[] | null | undefined;
-                            totalSteps?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
                             jobId?: string | null | undefined;
                             userId?: string | null | undefined;
                             currentStep?: number | null | undefined;
-                            startedAt?: string | null | undefined;
-                            completedAt?: string | null | undefined;
+                            totalSteps?: number | null | undefined;
                             exitCode?: number | null | undefined;
                             timedOut?: boolean | undefined;
                             executionMs?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            createdAt?: string | undefined;
+                            updatedAt?: string | undefined;
                         };
                         400: {} & {
                             error?: ({} & {
@@ -728,7 +728,7 @@ export declare const automationRoutes: Elysia<"/automation", {
     standaloneSchema: {};
     response: {
         200: {
-            error: import("@bao/shared").ErrorEnvelope;
+            error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
         };
     };
 }>;

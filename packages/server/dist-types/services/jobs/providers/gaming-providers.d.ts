@@ -1,4 +1,4 @@
-import { type GamingPortalId } from "@bao/shared";
+import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
 /**
  * Provider for Hitmarker gaming jobs.

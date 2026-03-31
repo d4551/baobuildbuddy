@@ -33,14 +33,14 @@ export declare const settingsRoutes: Elysia<"/settings", {
             headers: unknown;
             response: {
                 200: {
-                    automationSettings: import("@bao/shared").AutomationSettings | null;
+                    automationSettings: import("@bao/shared/types/settings-contracts").AutomationSettings | null;
                     localModelEndpoint: string | null;
-                    aiRouting: import("@bao/shared").AIRouting;
-                    providerDiagnostics: Partial<Record<"gemini" | "claude" | "openai" | "huggingface" | "local", import("@bao/shared").AIProviderDiagnostic>> | undefined;
+                    aiRouting: import("@bao/shared/types/ai").AIRouting;
+                    providerDiagnostics: Partial<Record<"openai" | "huggingface" | "local" | "gemini" | "claude", import("@bao/shared/types/ai").AIProviderDiagnostic>> | undefined;
                     preferredProvider: string | null;
                     preferredModel: string | null;
-                    theme: import("@bao/shared").AppDataTheme;
-                    brandSettings: import("@bao/shared").BrandSettings;
+                    theme: import("@bao/shared/constants/branding").AppDataTheme;
+                    brandSettings: import("@bao/shared/types/settings-contracts").BrandSettings;
                     geminiApiKey: string | null;
                     openaiApiKey: string | null;
                     claudeApiKey: string | null;
@@ -51,14 +51,14 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     hasHuggingfaceToken: boolean;
                     hasEmailTransportPassword: boolean;
                     hasLocalKey: boolean;
-                    jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
+                    jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
                     id: string;
-                    notifications: Record<string, boolean> | null;
-                    emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
+                    createdAt: string;
+                    updatedAt: string;
                     localModelName: string | null;
                     language: string | null;
-                    updatedAt: string;
-                    createdAt: string;
+                    notifications: Record<string, boolean> | null;
+                    emailTransportSettings: import("@bao/shared/types/settings-contracts").EmailTransportSettings | null;
                 } | {
                     error: string;
                 };
@@ -69,145 +69,56 @@ export declare const settingsRoutes: Elysia<"/settings", {
     settings: {
         put: {
             body: {} & {
+                theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
                 aiRouting?: ({
                     chat: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                     interviewQuestions: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                     interviewFeedback: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                     resume: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                     coverLetter: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                     emailResponse: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                     jobMatch: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                     scrapeEnrichment: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                     automationFieldMapping: {
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     } & {
                         model?: string | undefined;
                     };
                 } & {}) | undefined;
-                notifications?: ({} & {
-                    achievements?: boolean | undefined;
-                    dailyChallenges?: boolean | undefined;
-                    levelUp?: boolean | undefined;
-                    jobAlerts?: boolean | undefined;
-                }) | undefined;
-                automationSettings?: ({} & {
-                    headless?: boolean | undefined;
-                    defaultTimeout?: number | undefined;
-                    screenshotRetention?: number | undefined;
-                    maxConcurrentRuns?: number | undefined;
-                    defaultBrowser?: "chrome" | "chromium" | "edge" | undefined;
-                    enableSmartSelectors?: boolean | undefined;
-                    autoSaveScreenshots?: boolean | undefined;
-                    speech?: {
-                        readonly locale: string;
-                        readonly stt: {
-                            provider: "openai" | "huggingface" | "local" | "browser" | "custom";
-                            model: string;
-                            endpoint: string;
-                        };
-                        readonly tts: {
-                            voice: string;
-                            format: "mp3" | "wav";
-                            provider: "openai" | "huggingface" | "local" | "browser" | "custom";
-                            model: string;
-                            endpoint: string;
-                        };
-                    } | undefined;
-                    jobProviders?: {
-                        readonly providerTimeoutMs: number;
-                        readonly companyBoardResultLimit: number;
-                        readonly gamingBoardResultLimit: number;
-                        readonly unknownLocationLabel: string;
-                        readonly unknownCompanyLabel: string;
-                        readonly hitmarkerEnabled: boolean;
-                        readonly hitmarkerApiBaseUrl: string;
-                        readonly hitmarkerDefaultQuery: string;
-                        readonly hitmarkerDefaultLocation: string;
-                        readonly greenhouseApiBaseUrl: string;
-                        readonly greenhouseMaxPages: number;
-                        readonly greenhouseBoards: {
-                            readonly board: string;
-                            readonly company: string;
-                            readonly enabled: boolean;
-                        }[];
-                        readonly leverApiBaseUrl: string;
-                        readonly leverMaxPages: number;
-                        readonly leverCompanies: {
-                            readonly slug: string;
-                            readonly company: string;
-                            readonly enabled: boolean;
-                        }[];
-                        readonly companyBoardApiTemplates: {
-                            readonly greenhouse: string;
-                            readonly lever: string;
-                            readonly recruitee: string;
-                            readonly workable: string;
-                            readonly ashby: string;
-                            readonly smartrecruiters: string;
-                            readonly teamtailor: string;
-                            readonly workday: string;
-                        };
-                        readonly companyBoards: {
-                            readonly name: string;
-                            readonly token: string;
-                            readonly type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
-                            readonly enabled: boolean;
-                            readonly priority: number;
-                        }[];
-                        readonly gamingPortals: {
-                            readonly id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
-                            readonly name: string;
-                            readonly source: string;
-                            readonly fallbackUrl: string;
-                            readonly enabled: boolean;
-                        }[];
-                    } | undefined;
-                }) | undefined;
-                emailTransportSettings?: ({} & {
-                    host?: string | undefined;
-                    port?: number | undefined;
-                    security?: "tls" | "starttls" | "plain" | undefined;
-                    username?: string | undefined;
-                    fromEmail?: string | undefined;
-                    fromName?: string | undefined;
-                    authMethod?: "plain" | "login" | undefined;
-                    connectionTimeoutSeconds?: number | undefined;
-                }) | undefined;
-                preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
+                preferredProvider?: "openai" | "huggingface" | "local" | "gemini" | "claude" | undefined;
                 preferredModel?: string | undefined;
-                theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
                 language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
                 brandSettings?: {
                     readonly name?: string | undefined;
@@ -288,6 +199,95 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         readonly contentOverrides?: Record<string, string> | undefined;
                     } | undefined;
                 } | undefined;
+                notifications?: ({} & {
+                    achievements?: boolean | undefined;
+                    dailyChallenges?: boolean | undefined;
+                    levelUp?: boolean | undefined;
+                    jobAlerts?: boolean | undefined;
+                }) | undefined;
+                automationSettings?: ({} & {
+                    headless?: boolean | undefined;
+                    defaultTimeout?: number | undefined;
+                    screenshotRetention?: number | undefined;
+                    maxConcurrentRuns?: number | undefined;
+                    defaultBrowser?: "chrome" | "chromium" | "edge" | undefined;
+                    enableSmartSelectors?: boolean | undefined;
+                    autoSaveScreenshots?: boolean | undefined;
+                    speech?: {
+                        readonly locale: string;
+                        readonly stt: {
+                            provider: "browser" | "openai" | "huggingface" | "local" | "custom";
+                            model: string;
+                            endpoint: string;
+                        };
+                        readonly tts: {
+                            voice: string;
+                            format: "mp3" | "wav";
+                            provider: "browser" | "openai" | "huggingface" | "local" | "custom";
+                            model: string;
+                            endpoint: string;
+                        };
+                    } | undefined;
+                    jobProviders?: {
+                        readonly providerTimeoutMs: number;
+                        readonly companyBoardResultLimit: number;
+                        readonly gamingBoardResultLimit: number;
+                        readonly unknownLocationLabel: string;
+                        readonly unknownCompanyLabel: string;
+                        readonly hitmarkerEnabled: boolean;
+                        readonly hitmarkerApiBaseUrl: string;
+                        readonly hitmarkerDefaultQuery: string;
+                        readonly hitmarkerDefaultLocation: string;
+                        readonly greenhouseApiBaseUrl: string;
+                        readonly greenhouseMaxPages: number;
+                        readonly greenhouseBoards: {
+                            readonly board: string;
+                            readonly company: string;
+                            readonly enabled: boolean;
+                        }[];
+                        readonly leverApiBaseUrl: string;
+                        readonly leverMaxPages: number;
+                        readonly leverCompanies: {
+                            readonly slug: string;
+                            readonly company: string;
+                            readonly enabled: boolean;
+                        }[];
+                        readonly companyBoardApiTemplates: {
+                            readonly greenhouse: string;
+                            readonly lever: string;
+                            readonly recruitee: string;
+                            readonly workable: string;
+                            readonly ashby: string;
+                            readonly smartrecruiters: string;
+                            readonly teamtailor: string;
+                            readonly workday: string;
+                        };
+                        readonly companyBoards: {
+                            readonly name: string;
+                            readonly token: string;
+                            readonly type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
+                            readonly enabled: boolean;
+                            readonly priority: number;
+                        }[];
+                        readonly gamingPortals: {
+                            readonly id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
+                            readonly name: string;
+                            readonly source: string;
+                            readonly fallbackUrl: string;
+                            readonly enabled: boolean;
+                        }[];
+                    } | undefined;
+                }) | undefined;
+                emailTransportSettings?: ({} & {
+                    authMethod?: "plain" | "login" | undefined;
+                    port?: number | undefined;
+                    fromEmail?: string | undefined;
+                    host?: string | undefined;
+                    security?: "tls" | "starttls" | "plain" | undefined;
+                    username?: string | undefined;
+                    fromName?: string | undefined;
+                    connectionTimeoutSeconds?: number | undefined;
+                }) | undefined;
             };
             params: {};
             query: unknown;
@@ -327,7 +327,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     }[];
                     readonly studioRules: {
                         readonly id: string;
-                        readonly studioType: import("@bao/shared").StudioType;
+                        readonly studioType: import("@bao/shared/types/jobs").StudioType;
                         readonly keyword: string;
                         readonly sortOrder: number;
                         readonly enabled: boolean;
@@ -339,7 +339,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 response: {
                     200: {
                         success: boolean;
-                        jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
+                        jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
                     };
                     422: {
                         type: "validation";
@@ -392,7 +392,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
         "test-api-key": {
             post: {
                 body: {
-                    provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     key: string;
                 } & {
                     model?: string | undefined;
@@ -411,7 +411,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         error?: undefined;
                     } | {
                         valid: boolean;
-                        provider: "gemini" | "claude" | "openai" | "huggingface";
+                        provider: "openai" | "huggingface" | "gemini" | "claude";
                         error: string;
                         diagnosticCode?: undefined;
                         message?: undefined;
@@ -419,7 +419,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                         selectedModel?: undefined;
                     } | {
                         valid: boolean;
-                        provider: "gemini" | "claude" | "openai" | "huggingface";
+                        provider: "openai" | "huggingface" | "gemini" | "claude";
                         diagnosticCode: "healthy" | "error";
                         message: string | undefined;
                         availableModels?: undefined;
@@ -459,17 +459,17 @@ export declare const settingsRoutes: Elysia<"/settings", {
             post: {
                 body: {
                     portfolio: unknown;
-                    profile: unknown;
-                    settings: unknown;
                     gamification: unknown;
                     applications: unknown[];
                     resumes: unknown[];
+                    settings: unknown;
                     chatHistory: unknown[];
                     coverLetters: unknown[];
                     interviewSessions: unknown[];
                     portfolioProjects: unknown[];
                     savedJobs: unknown[];
                     skillMappings: unknown[];
+                    profile: unknown;
                     version: "1.0";
                     exportedAt: string;
                 } & {};

@@ -1,4 +1,4 @@
-import { type ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
 import type { ResumeEnhanceBody, ResumeExportBody, ResumeMutationBody, ResumeRouteSetState, ResumeScoreBody } from "./resume-route-contracts";
 export declare const buildResumeCreatePayload: (body: ResumeMutationBody) => Omit<ResumeData, "id">;
 export declare const buildResumeUpdatePayload: (body: ResumeMutationBody) => Partial<ResumeData>;
@@ -23,7 +23,7 @@ export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhance
     section?: undefined;
 } | {
     resume: ResumeData;
-    suggestions: import("@bao/shared").JsonArray;
+    suggestions: import("@bao/shared/utils/json").JsonArray;
     section: string;
     error?: undefined;
     details?: undefined;

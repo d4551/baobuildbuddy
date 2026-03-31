@@ -28,6 +28,8 @@ export const APP_ROUTES = {
   setup: "/setup",
 } as const;
 
+export const ROUTE_JOBS = APP_ROUTES.jobs;
+
 /**
  * Canonical query-string keys for route-driven workflows.
  */

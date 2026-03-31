@@ -1,4 +1,4 @@
-import type { AutomationSettings } from "@bao/shared";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { AIService } from "../ai/ai-service";
 import type { EmailTransportRuntimeConfig } from "../email-delivery-service";
 export declare const loadAutomationSettings: () => Promise<AutomationSettings>;

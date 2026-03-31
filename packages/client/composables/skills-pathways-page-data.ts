@@ -1,8 +1,12 @@
 import {
   SKILL_READINESS_FEEDBACK_IDS,
+  SKILL_READINESS_IMPROVEMENT_IDS,
+  SKILL_READINESS_NEXT_STEP_IDS,
   type CareerPathway,
   type ReadinessAssessment,
   type SkillReadinessFeedbackId,
+  type SkillReadinessImprovementId,
+  type SkillReadinessNextStepId,
 } from "@bao/shared/types/skill-mapping";
 import { isRecord } from "@bao/shared/utils/type-guards";
 
@@ -16,14 +20,14 @@ export interface SkillsPathwaysGamificationProgress {
   readonly xp?: number;
 }
 
-const SKILL_READINESS_FEEDBACK_ID_SET = new Set<string>(SKILL_READINESS_FEEDBACK_IDS);
-
-export const readApiData = async (
-  request: Promise<unknown>,
+export const readApiData = <TData>(
+  response: {
+    data: TData;
+    error?: unknown;
+  },
   fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  if (!isRecord(response) || !("data" in response)) {
+): TData => {
+  if (!(isRecord(response) && "data" in response)) {
     throw new Error(fallbackMessage);
   }
   if ("error" in response && response.error) {
@@ -36,12 +40,21 @@ const toSkillReadinessFeedbackId = (value: unknown): SkillReadinessFeedbackId | 
   if (typeof value !== "string") {
     return null;
   }
-  return SKILL_READINESS_FEEDBACK_ID_SET.has(value) ? value : null;
+  return isSkillReadinessFeedbackId(value) ? value : null;
 };
+
+const isSkillReadinessFeedbackId = (value: string): value is SkillReadinessFeedbackId =>
+  SKILL_READINESS_FEEDBACK_IDS.some((entry) => entry === value);
+
+const isSkillReadinessImprovementId = (value: string): value is SkillReadinessImprovementId =>
+  SKILL_READINESS_IMPROVEMENT_IDS.some((entry) => entry === value);
+
+const isSkillReadinessNextStepId = (value: string): value is SkillReadinessNextStepId =>
+  SKILL_READINESS_NEXT_STEP_IDS.some((entry) => entry === value);
 
 const toCareerSalary = (value: unknown): CareerPathway["averageSalary"] => {
   if (!(isRecord(value) && typeof value.min === "number" && typeof value.max === "number")) {
-    return undefined;
+    return;
   }
 
   return {
@@ -140,54 +153,56 @@ const toReadinessCategory = (
       ? value.strengths.filter((entry): entry is string => typeof entry === "string")
       : [],
     improvements: Array.isArray(value.improvements)
-      ? value.improvements.filter((entry): entry is string => typeof entry === "string")
+      ? value.improvements.filter(
+          (entry): entry is SkillReadinessImprovementId =>
+            typeof entry === "string" && isSkillReadinessImprovementId(entry),
+        )
       : [],
   };
 };
 
 const toTargetRoleReadiness = (
   value: unknown,
-): NonNullable<ReadinessAssessment["targetRoleReadiness"]> => {
-  if (!Array.isArray(value)) {
-    return [];
+): NonNullable<ReadinessAssessment["targetRoleReadiness"]> =>
+  Array.isArray(value)
+    ? value
+        .map((entry) => toRoleReadiness(entry))
+        .filter(
+          (entry): entry is NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] =>
+            entry !== null,
+        )
+    : [];
+
+const toRoleReadiness = (
+  entry: unknown,
+): NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] | null => {
+  if (!isRecord(entry)) {
+    return null;
+  }
+  const roleId = typeof entry.roleId === "string" ? entry.roleId : undefined;
+  const roleTitle = typeof entry.roleTitle === "string" ? entry.roleTitle : undefined;
+  if (!(roleId && roleTitle)) {
+    return null;
   }
 
-  return value
-    .map((entry) => {
-      if (!isRecord(entry)) {
-        return null;
-      }
-      const roleId = typeof entry.roleId === "string" ? entry.roleId : undefined;
-      const roleTitle = typeof entry.roleTitle === "string" ? entry.roleTitle : undefined;
-      if (!(roleId && roleTitle)) {
-        return null;
-      }
-
-      const readiness: NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] = {
-        roleId,
-        roleTitle,
-        readinessScore: typeof entry.readinessScore === "number" ? entry.readinessScore : 0,
-        missingSkills: Array.isArray(entry.missingSkills)
-          ? entry.missingSkills.filter((skill): skill is string => typeof skill === "string")
-          : [],
-        matchingSkills: Array.isArray(entry.matchingSkills)
-          ? entry.matchingSkills.filter((skill): skill is string => typeof skill === "string")
-          : [],
-        recommendedActions: Array.isArray(entry.recommendedActions)
-          ? entry.recommendedActions.filter(
-              (action): action is string => typeof action === "string",
-            )
-          : [],
-      };
-      if (typeof entry.timeToReady === "string") {
-        readiness.timeToReady = entry.timeToReady;
-      }
-      return readiness;
-    })
-    .filter(
-      (entry): entry is NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] =>
-        entry !== null,
-    );
+  const readiness: NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] = {
+    roleId,
+    roleTitle,
+    readinessScore: typeof entry.readinessScore === "number" ? entry.readinessScore : 0,
+    missingSkills: Array.isArray(entry.missingSkills)
+      ? entry.missingSkills.filter((skill): skill is string => typeof skill === "string")
+      : [],
+    matchingSkills: Array.isArray(entry.matchingSkills)
+      ? entry.matchingSkills.filter((skill): skill is string => typeof skill === "string")
+      : [],
+    recommendedActions: Array.isArray(entry.recommendedActions)
+      ? entry.recommendedActions.filter((action): action is string => typeof action === "string")
+      : [],
+  };
+  if (typeof entry.timeToReady === "string") {
+    readiness.timeToReady = entry.timeToReady;
+  }
+  return readiness;
 };
 
 const toReadinessAssessment = (value: unknown): ReadinessAssessment | null => {
@@ -213,10 +228,16 @@ const toReadinessAssessment = (value: unknown): ReadinessAssessment | null => {
       portfolio,
     },
     improvementSuggestions: Array.isArray(value.improvementSuggestions)
-      ? value.improvementSuggestions.filter((entry): entry is string => typeof entry === "string")
+      ? value.improvementSuggestions.filter(
+          (entry): entry is SkillReadinessImprovementId =>
+            typeof entry === "string" && isSkillReadinessImprovementId(entry),
+        )
       : [],
     nextSteps: Array.isArray(value.nextSteps)
-      ? value.nextSteps.filter((entry): entry is string => typeof entry === "string")
+      ? value.nextSteps.filter(
+          (entry): entry is SkillReadinessNextStepId =>
+            typeof entry === "string" && isSkillReadinessNextStepId(entry),
+        )
       : [],
     targetRoleReadiness: toTargetRoleReadiness(value.targetRoleReadiness),
   };

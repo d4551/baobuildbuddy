@@ -1,4 +1,4 @@
-import type { GamificationStats, UserGamificationData } from "@bao/shared";
+import type { GamificationStats, UserGamificationData } from "@bao/shared/types/gamification";
 import { type ActionHistoryEntry } from "./gamification-definitions";
 export declare function getOrCreateGamificationProgress(id?: string): Promise<UserGamificationData>;
 export declare function persistAwardedXP(input: {

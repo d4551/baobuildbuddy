@@ -1,4 +1,4 @@
-import type { ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
 export interface CvQuestion {
     id: string;
     question: string;

@@ -1,4 +1,5 @@
-import type { AutomationScrapeTarget, EmailResponseRequest } from "@bao/shared";
+import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
+import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import { type JobApplyPayload } from "./automation-run-inputs";
 import type { CreateProgressEvent } from "./automation-service-contracts";
 type ScheduledRunQueue = (runId: string, runAt: string) => void;

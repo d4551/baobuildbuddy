@@ -1,4 +1,4 @@
-import { type ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
 import Type from "baobox";
 export type ResumeRouteSetState = {
     status?: number | string;
@@ -26,7 +26,7 @@ export type ResumeExportBody = {
 export type ResumeEnhanceBody = {
     section?: string;
 };
-export declare const resumeTemplateBodySchema: Type.TUnion<Type.TLiteral<"modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical">[]>;
+export declare const resumeTemplateBodySchema: Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>;
 export declare const resumeThemeBodySchema: Type.TUnion<(Type.TLiteral<"light"> | Type.TLiteral<"dark">)[]>;
 export declare const resumePersonalInfoBodySchema: Type.TObject<{
     readonly name: Type.TOptional<Type.TString>;
@@ -47,14 +47,14 @@ export declare const resumeExperienceBodySchema: Type.TObject<{
     readonly description: Type.TOptional<Type.TString>;
     readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
     readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-}, "title" | "company" | "startDate", never>;
+}, "company" | "title" | "startDate", never>;
 export declare const resumeEducationBodySchema: Type.TObject<{
     readonly degree: Type.TString;
     readonly field: Type.TString;
     readonly school: Type.TString;
     readonly year: Type.TString;
     readonly gpa: Type.TOptional<Type.TString>;
-}, "degree" | "field" | "school" | "year", never>;
+}, "degree" | "year" | "field" | "school", never>;
 export declare const resumeSkillsBodySchema: Type.TObject<{
     readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
     readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
@@ -94,14 +94,14 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly description: Type.TOptional<Type.TString>;
         readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
         readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    }, "title" | "company" | "startDate", never>>>;
+    }, "company" | "title" | "startDate", never>>>;
     readonly education: Type.TOptional<Type.TArray<Type.TObject<{
         readonly degree: Type.TString;
         readonly field: Type.TString;
         readonly school: Type.TString;
         readonly year: Type.TString;
         readonly gpa: Type.TOptional<Type.TString>;
-    }, "degree" | "field" | "school" | "year", never>>>;
+    }, "degree" | "year" | "field" | "school", never>>>;
     readonly skills: Type.TOptional<Type.TObject<{
         readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
         readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
@@ -119,7 +119,7 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly genres: Type.TOptional<Type.TString>;
         readonly shippedTitles: Type.TOptional<Type.TString>;
     }, never, never>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical">[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>>;
     readonly theme: Type.TOptional<Type.TUnion<(Type.TLiteral<"light"> | Type.TLiteral<"dark">)[]>>;
     readonly isDefault: Type.TOptional<Type.TBoolean>;
 }, never, never>;
@@ -141,7 +141,7 @@ export declare const resumeQuestionSynthesizeBodySchema: Type.TObject<{
 }, "questionsAndAnswers", never>;
 export declare const resumeExportBodySchema: Type.TObject<{
     readonly format: Type.TOptional<Type.TString>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical">[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>>;
 }, never, never>;
 export declare const resumeEnhanceBodySchema: Type.TObject<{
     readonly section: Type.TOptional<Type.TString>;

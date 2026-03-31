@@ -1,4 +1,4 @@
-import type { InterviewAnalysis, InterviewConfig, InterviewQuestion, InterviewResponse, InterviewSession } from "@bao/shared";
+import type { InterviewAnalysis, InterviewConfig, InterviewQuestion, InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
 import type { DBInterviewSession } from "./interview-service-contracts";
 export declare function normalizeQuestionType(value: unknown, fallback: InterviewQuestion["type"]): InterviewQuestion["type"];
 export declare function normalizeDifficulty(value: unknown): InterviewQuestion["difficulty"];

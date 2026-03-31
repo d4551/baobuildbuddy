@@ -1,4 +1,4 @@
-import type { CareerProgress, WeeklyActivity } from "@bao/shared";
+import type { CareerProgress, WeeklyActivity } from "@bao/shared/types/search";
 type ActionHistoryEntry = {
     action: string;
     xpGained: number;

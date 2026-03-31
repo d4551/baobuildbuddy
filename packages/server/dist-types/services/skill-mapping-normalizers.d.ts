@@ -1,4 +1,4 @@
-import type { SkillCategory, SkillEvidence, SkillMapping } from "@bao/shared";
+import { type SkillCategory, type SkillEvidence, type SkillMapping } from "@bao/shared/types/skill-mapping";
 import type { skillMappings } from "../db/schema/skill-mappings";
 type SkillMappingRow = typeof skillMappings.$inferSelect;
 type DemandLevel = SkillMapping["demandLevel"];

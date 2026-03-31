@@ -1,4 +1,4 @@
-import type { AIResponse } from "@bao/shared";
+import type { AIResponse } from "@bao/shared/types/ai";
 import { z } from "zod";
 export interface FieldMapperAIClient {
     generate: (prompt: string, options?: {

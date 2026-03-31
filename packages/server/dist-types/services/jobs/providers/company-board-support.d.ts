@@ -1,4 +1,4 @@
-import { type CompanyBoardATSType, type JobProviderSettings } from "@bao/shared";
+import type { CompanyBoardATSType, JobProviderSettings } from "@bao/shared/types/settings-contracts";
 export interface ATSJob extends Record<string, unknown> {
     id?: string;
     title?: string;

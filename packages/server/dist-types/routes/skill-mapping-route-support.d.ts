@@ -13,10 +13,10 @@ export declare const listSkillMappings: (query: SkillMappingsQuery) => Promise<{
     updatedAt: string;
 }[]>;
 export declare const createSkillMappingFromBody: (body: SkillMappingMutationBody) => Promise<{
-    mapping: import("@bao/shared").SkillMapping;
+    mapping: import("@bao/shared/types/skill-mapping").SkillMapping;
     statusCode: number;
 }>;
-export declare const updateSkillMappingFromBody: (id: string, body: SkillMappingUpdateBody, set: SkillMappingRouteSetState) => Promise<import("@bao/shared").SkillMapping | {
+export declare const updateSkillMappingFromBody: (id: string, body: SkillMappingUpdateBody, set: SkillMappingRouteSetState) => Promise<import("@bao/shared/types/skill-mapping").SkillMapping | {
     error: string;
 }>;
 export declare const deleteSkillMappingById: (id: string, set: SkillMappingRouteSetState) => Promise<{
@@ -44,16 +44,16 @@ export declare const deleteSkillMappingById: (id: string, set: SkillMappingRoute
     };
     statusCode: number;
 }>;
-export declare const getSkillReadiness: (jobId?: string) => Promise<import("@bao/shared").ReadinessAssessment | {
+export declare const getSkillReadiness: (jobId?: string) => Promise<import("@bao/shared/types/skill-mapping").ReadinessAssessment | {
     jobId: string;
     overallScore: number;
     categories: {
-        technical: import("@bao/shared").CategoryAssessment;
-        softSkills: import("@bao/shared").CategoryAssessment;
-        industryKnowledge: import("@bao/shared").CategoryAssessment;
-        portfolio: import("@bao/shared").CategoryAssessment;
+        technical: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+        softSkills: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+        industryKnowledge: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+        portfolio: import("@bao/shared/types/skill-mapping").CategoryAssessment;
     };
-    improvementSuggestions: import("@bao/shared").SkillReadinessImprovementId[];
-    nextSteps: import("@bao/shared").SkillReadinessNextStepId[];
-    targetRoleReadiness?: import("@bao/shared").RoleReadiness[];
+    improvementSuggestions: import("@bao/shared/types/skill-mapping").SkillReadinessImprovementId[];
+    nextSteps: import("@bao/shared/types/skill-mapping").SkillReadinessNextStepId[];
+    targetRoleReadiness?: import("@bao/shared/types/skill-mapping").RoleReadiness[];
 }>;

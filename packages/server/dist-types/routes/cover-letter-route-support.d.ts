@@ -1,4 +1,4 @@
-import { type CoverLetterTemplate } from "@bao/shared";
+import { type CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
 import type { RouteSetState } from "./cover-letter-route-contracts";
 export declare const normalizeTemplate: (value: string | undefined) => CoverLetterTemplate;
 export declare const listCoverLetters: () => Promise<{
@@ -24,7 +24,7 @@ export declare const createCoverLetter: (body: {
         position: string;
         jobInfo: Record<string, unknown>;
         content: Record<string, unknown>;
-        template: "creative" | "gaming" | "executive" | "technical" | "professional";
+        template: "professional" | "creative" | "gaming" | "executive" | "technical";
     };
     statusCode: number;
 }>;

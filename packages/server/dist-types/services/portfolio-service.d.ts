@@ -1,4 +1,4 @@
-import type { PortfolioData, PortfolioProject } from "@bao/shared";
+import type { PortfolioData, PortfolioProject } from "@bao/shared/types/portfolio";
 import type { CreatePortfolioProjectPayload, PortfolioUpdatePayload, UpdatePortfolioProjectPayload } from "./portfolio-service-contracts";
 export declare class PortfolioService {
     /**

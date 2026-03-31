@@ -1,4 +1,4 @@
-import { type RpaRunEvent } from "@bao/shared";
+import { type RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
 import { Elysia } from "elysia";
 /**
  * Broadcasts a validated automation event to subscribers of the matching run.

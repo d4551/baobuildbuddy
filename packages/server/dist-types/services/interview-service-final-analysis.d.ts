@@ -1,4 +1,4 @@
-import { type InterviewAnalysis, type InterviewConfig, type InterviewResponse } from "@bao/shared";
+import type { InterviewAnalysis, InterviewConfig, InterviewResponse } from "@bao/shared/types/interview";
 import type { StudioContext } from "./interview-service-contracts";
 export declare function generateFinalAnalysis(session: {
     config: InterviewConfig;

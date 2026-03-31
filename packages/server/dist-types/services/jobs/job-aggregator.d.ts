@@ -2,7 +2,7 @@
  * Job Aggregator Service
  * Orchestrates job fetching, caching, and searching across multiple providers.
  */
-import type { Job, JobFilters, JobSearchResult } from "@bao/shared";
+import type { Job, JobFilters, JobSearchResult } from "@bao/shared/types/jobs";
 import type { applications } from "../../db/schema/jobs";
 export declare class JobAggregator {
     private readonly providers;

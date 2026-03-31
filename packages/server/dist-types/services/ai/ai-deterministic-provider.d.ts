@@ -1,4 +1,4 @@
-import type { AIProviderType, AIResponse } from "@bao/shared";
+import type { AIProviderType, AIResponse } from "@bao/shared/types/ai";
 import type { AIProvider } from "./provider-interface";
 export declare const TEST_AI_PROVIDER_NAME: AIProviderType;
 export declare const TEST_AI_MODEL_NAME = "deterministic-test-model";

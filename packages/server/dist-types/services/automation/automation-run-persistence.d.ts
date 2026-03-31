@@ -1,4 +1,6 @@
-import type { AutomationSettings, ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
+import type { ErrorEnvelope } from "@bao/shared/schemas/error-envelope.schema";
+import type { RpaRunEvent, RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
+import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 export declare const resolveRunArtifactDir: (runId: string, invalidRunIdMessage: string) => string;
 export declare const normalizeExecutionResult: (runId: string, execution: RpaScriptExecutionResult, invalidRunIdMessage: string) => Promise<RpaRunResult>;

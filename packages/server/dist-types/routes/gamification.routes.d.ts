@@ -23,7 +23,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").UserGamificationData;
+                    200: import("@bao/shared/types/gamification").UserGamificationData;
                 };
             };
         };
@@ -52,7 +52,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                         xp: number;
                         level: number;
                         leveledUp: boolean;
-                        levelUp: import("@bao/shared").LevelUpResult | null;
+                        levelUp: import("@bao/shared/types/gamification").LevelUpResult | null;
                         reason: string;
                         message: string;
                         error?: undefined;
@@ -79,7 +79,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").Achievement[];
+                    200: import("@bao/shared/types/gamification").Achievement[];
                 };
             };
         };
@@ -95,7 +95,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                 response: {
                     200: {
                         date: string;
-                        challenges: import("@bao/shared").DailyChallenge[];
+                        challenges: import("@bao/shared/types/gamification").DailyChallenge[];
                         completedCount: number;
                         totalCount: number;
                     };

@@ -1,5 +1,6 @@
-import { AI_PROVIDER_CATALOG, normalizeAIRouting } from "@bao/shared";
-import type { AIProviderDiagnostics, AIProviderStatus } from "@bao/shared";
+import { AI_PROVIDER_CATALOG, normalizeAIRouting } from "@bao/shared/constants/ai-provider";
+import type { AIProviderStatus } from "@bao/shared/types/ai";
+import type { AIProviderDiagnostics } from "@bao/shared/types/settings-contracts";
 import type { settings as settingsTable } from "../../db/schema/settings";
 import { AIService } from "./ai-service";
 type SettingsRow = typeof settingsTable.$inferSelect;

@@ -1,4 +1,4 @@
-import type { InterviewSession } from "@bao/shared";
+import type { InterviewSession } from "@bao/shared/types/interview";
 export declare function calculateInterviewStats(sessions: InterviewSession[]): {
     totalInterviews: number;
     completedInterviews: number;

@@ -1,4 +1,4 @@
-import type { ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
 import { Paragraph } from "docx";
 import { type DocxTemplateConfig, type ResumeEducationItem, type ResumeExperienceItem, type ResumeProjectItem, type ResumeSkillsData } from "./docx-export-contracts";
 export declare function buildExperienceItem(item: ResumeExperienceItem, config: DocxTemplateConfig): Paragraph[];

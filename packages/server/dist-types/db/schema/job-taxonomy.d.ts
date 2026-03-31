@@ -1,4 +1,4 @@
-import type { StudioType } from "@bao/shared";
+import type { StudioType } from "@bao/shared/types/jobs";
 export declare const jobTaxonomyKeywords: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "job_taxonomy_keywords";
     schema: undefined;

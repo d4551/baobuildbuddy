@@ -1,4 +1,4 @@
-import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@bao/shared";
+import type { CareerPathway, ReadinessAssessment, SkillMapping } from "@bao/shared/types/skill-mapping";
 export declare class SkillMappingService {
     getMappings(): Promise<SkillMapping[]>;
     createMapping(data: Omit<SkillMapping, "id">): Promise<SkillMapping>;

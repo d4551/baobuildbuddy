@@ -1,4 +1,4 @@
-import type { EmailTransportSettings } from "@bao/shared";
+import type { EmailTransportSettings } from "@bao/shared/types/settings-contracts";
 export type SmtpAuthMode = EmailTransportSettings["authMethod"];
 /**
  * Runtime transport config with the secret SMTP password attached.

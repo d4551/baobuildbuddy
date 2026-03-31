@@ -1,46 +1,46 @@
 import Type from "baobox";
-export declare const preferredProviderBodySchema: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
-export declare const resolveKnownProvider: (value?: string | null) => import("@bao/shared").AIProviderType;
+export declare const preferredProviderBodySchema: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
+export declare const resolveKnownProvider: (value?: string | null) => import("@bao/shared/types/ai").AIProviderType;
 export declare const settingsUpdateBodySchema: Type.TObject<{
     readonly aiRouting: Type.TOptional<Type.TObject<{
         readonly chat: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
         readonly interviewQuestions: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
         readonly interviewFeedback: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
         readonly resume: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
         readonly coverLetter: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
         readonly emailResponse: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
         readonly jobMatch: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
         readonly scrapeEnrichment: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
         readonly automationFieldMapping: Type.TObject<{
-            readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+            readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
             readonly model: Type.TOptional<Type.TString>;
         }, "provider", never>;
     }, "chat" | "interviewQuestions" | "interviewFeedback" | "resume" | "coverLetter" | "emailResponse" | "jobMatch" | "scrapeEnrichment" | "automationFieldMapping", never>>;
-    readonly preferredProvider: Type.TOptional<Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>>;
+    readonly preferredProvider: Type.TOptional<Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>>;
     readonly preferredModel: Type.TOptional<Type.TString>;
     readonly theme: Type.TOptional<Type.TUnion<(Type.TLiteral<"corporate"> | Type.TLiteral<"business"> | Type.TLiteral<"bao-light"> | Type.TLiteral<"bao-dark">)[]>>;
     readonly language: Type.TOptional<Type.TUnion<(Type.TLiteral<"en-US"> | Type.TLiteral<"es-ES"> | Type.TLiteral<"fr-FR"> | Type.TLiteral<"ja-JP">)[]>>;
@@ -223,7 +223,7 @@ export declare const apiKeysUpdateBodySchema: Type.TObject<{
     readonly emailTransportPassword: Type.TOptional<Type.TString>;
 }, never, never>;
 export declare const providerTestBodySchema: Type.TObject<{
-    readonly provider: Type.TUnion<Type.TLiteral<"gemini" | "claude" | "openai" | "huggingface" | "local">[]>;
+    readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
     readonly key: Type.TString;
     readonly model: Type.TOptional<Type.TString>;
 }, "provider" | "key", never>;
@@ -238,7 +238,7 @@ export declare const jobTaxonomyUpdateBodySchema: Type.TRequired<Type.TObject<{
     }, never, never>>>;
     readonly studioRules: Type.TArray<Type.TRequired<Type.TObject<{
         readonly id: Type.TString;
-        readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared").StudioType>[]>;
+        readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared/types/jobs").StudioType>[]>;
         readonly keyword: Type.TString;
         readonly sortOrder: Type.TNumber;
         readonly enabled: Type.TBoolean;
@@ -259,4 +259,4 @@ export declare const importSettingsBodySchema: Type.TObject<{
     readonly chatHistory: Type.TArray<Type.TRecursive<Type.TSchema>>;
     readonly savedJobs: Type.TArray<Type.TRecursive<Type.TSchema>>;
     readonly skillMappings: Type.TArray<Type.TRecursive<Type.TSchema>>;
-}, "portfolio" | "profile" | "settings" | "gamification" | "applications" | "resumes" | "chatHistory" | "coverLetters" | "interviewSessions" | "portfolioProjects" | "savedJobs" | "skillMappings" | "version" | "exportedAt", never>;
+}, "portfolio" | "gamification" | "applications" | "resumes" | "settings" | "chatHistory" | "coverLetters" | "interviewSessions" | "portfolioProjects" | "savedJobs" | "skillMappings" | "profile" | "version" | "exportedAt", never>;

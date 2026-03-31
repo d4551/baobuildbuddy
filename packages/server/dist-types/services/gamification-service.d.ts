@@ -1,4 +1,4 @@
-import type { Achievement, DailyChallenge, GamificationStats, LevelUpResult, UserGamificationData } from "@bao/shared";
+import type { Achievement, DailyChallenge, GamificationStats, LevelUpResult, UserGamificationData } from "@bao/shared/types/gamification";
 import { type WeeklyProgressResult } from "./gamification-definitions";
 export declare class GamificationService {
     private readonly DEFAULT_ID;

@@ -1,5 +1,7 @@
 import type { AppTranslationSchema } from "~/locales/en-US";
 
+type StringKeyOf<T> = Extract<keyof T, string>;
+
 type DashboardRootSchema = AppTranslationSchema["dashboard"];
 type DashboardTopLevelKey =
   | "pageTitle"
@@ -24,13 +26,14 @@ type DashboardTopLevelKey =
   | "pipelineAria"
   | "pipelineNextStepLabel";
 type DashboardCopyKey = `dashboard.${DashboardTopLevelKey}`;
-type DashboardHeroPhraseKey = `dashboard.heroPhrases.${keyof DashboardRootSchema["heroPhrases"]}`;
-type DashboardStatLabelKey = `dashboard.stats.${keyof DashboardRootSchema["stats"]}`;
+type DashboardHeroPhraseKey =
+  `dashboard.heroPhrases.${StringKeyOf<DashboardRootSchema["heroPhrases"]>}`;
+type DashboardStatLabelKey = `dashboard.stats.${StringKeyOf<DashboardRootSchema["stats"]>}`;
 type DashboardPipelineStatusLabelKey =
-  `dashboard.pipeline.status.${keyof DashboardRootSchema["pipeline"]["status"]}`;
+  `dashboard.pipeline.status.${StringKeyOf<DashboardRootSchema["pipeline"]["status"]>}`;
 type DashboardWelcomeHeadingKey =
-  `dashboard.welcomeHeading.${keyof DashboardRootSchema["welcomeHeading"]}`;
-type DashboardErrorKey = `dashboard.errors.${keyof DashboardRootSchema["errors"]}`;
+  `dashboard.welcomeHeading.${StringKeyOf<DashboardRootSchema["welcomeHeading"]>}`;
+type DashboardErrorKey = `dashboard.errors.${StringKeyOf<DashboardRootSchema["errors"]>}`;
 type DashboardActivityFallbackKey = "dashboard.activityFallback";
 type DashboardDailyChallengeXpKey = "dashboard.dailyChallengeXpLabel";
 

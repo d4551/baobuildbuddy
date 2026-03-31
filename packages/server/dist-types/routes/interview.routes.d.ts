@@ -21,12 +21,21 @@ export declare const interviewRoutes: Elysia<"/interview", {
                 body: {} & {
                     studioId?: string | undefined;
                     config?: ({} & {
+                        duration?: number | undefined;
                         technologies?: string[] | undefined;
+                        experienceLevel?: string | undefined;
+                        voiceSettings?: ({} & {
+                            language?: string | undefined;
+                            microphoneId?: string | undefined;
+                            speakerId?: string | undefined;
+                            voiceId?: string | undefined;
+                            rate?: number | undefined;
+                            pitch?: number | undefined;
+                            volume?: number | undefined;
+                        }) | undefined;
                         roleType?: string | undefined;
                         roleCategory?: string | undefined;
-                        experienceLevel?: string | undefined;
                         focusAreas?: string[] | undefined;
-                        duration?: number | undefined;
                         questionCount?: number | undefined;
                         includeTechnical?: boolean | undefined;
                         includeBehavioral?: boolean | undefined;
@@ -36,30 +45,21 @@ export declare const interviewRoutes: Elysia<"/interview", {
                         conversationStyle?: "natural" | "structured" | undefined;
                         targetJob?: ({
                             id: string;
-                            title: string;
                             company: string;
+                            title: string;
                             location: string;
                         } & {
                             source?: string | undefined;
                             description?: string | undefined;
-                            url?: string | undefined;
-                            postedDate?: string | undefined;
-                            technologies?: string[] | undefined;
                             requirements?: string[] | undefined;
+                            technologies?: string[] | undefined;
+                            postedDate?: string | undefined;
+                            url?: string | undefined;
                         }) | undefined;
                         candidateContext?: ({} & {
                             resumeId?: string | undefined;
-                            coverLetterId?: string | undefined;
                             portfolioId?: string | undefined;
-                        }) | undefined;
-                        voiceSettings?: ({} & {
-                            language?: string | undefined;
-                            microphoneId?: string | undefined;
-                            speakerId?: string | undefined;
-                            voiceId?: string | undefined;
-                            rate?: number | undefined;
-                            pitch?: number | undefined;
-                            volume?: number | undefined;
+                            coverLetterId?: string | undefined;
                         }) | undefined;
                     }) | undefined;
                 };

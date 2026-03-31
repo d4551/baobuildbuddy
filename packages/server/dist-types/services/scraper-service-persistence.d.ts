@@ -1,4 +1,6 @@
-import { type GamingPortalId, type JobSearchResult, type ScrapePersonaEnrichment, type ScrapedStudio } from "@bao/shared";
+import type { ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
+import type { JobSearchResult, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
+import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
 import type { ScrapeEnrichmentAccumulator, ScrapeEnrichmentAttempt } from "./scraper-service-contracts";
 export declare const runWithErrorCollection: (operation: () => Promise<void>, errors: string[]) => Promise<void>;
 export declare const resolvePortalSourceUrl: (portalId: GamingPortalId) => Promise<string | null>;

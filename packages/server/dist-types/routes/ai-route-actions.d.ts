@@ -8,7 +8,7 @@ export declare const handleChatRoute: (body: {
     message: string;
     sessionId: string | null | undefined;
     timestamp: string;
-    provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
     model: string;
     followUps: string[];
     contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
@@ -28,7 +28,7 @@ export declare const handleAnalyzeResumeRoute: (body: AnalyzeResumeBody, set: Ro
     resumeId: string;
     jobId: string | null;
     analysis: import("./ai-route-contracts").ResumeAnalysisResult;
-    provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
     model: string;
     error?: undefined;
 }>;
@@ -41,7 +41,7 @@ export declare const handleGenerateCoverLetterRoute: (body: GenerateCoverLetterB
 } | {
     message: string;
     content: import("./ai-route-contracts").CoverLetterSections;
-    provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
     model: string;
     error?: undefined;
 }>;

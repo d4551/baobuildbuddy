@@ -1,4 +1,6 @@
-import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES, type AutomationScrapeTarget, type EmailResponseRequest, type RpaRunExecutionEnvelope } from "@bao/shared";
+import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES, type AutomationScrapeTarget } from "@bao/shared/constants/automation";
+import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
+import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import Type from "baobox";
 declare const AUTOMATION_STATUS_PENDING: "pending", AUTOMATION_STATUS_SUCCESS: "success", AUTOMATION_STATUS_ERROR: "error";
 export type AutomationJsonObject = NonNullable<RpaRunExecutionEnvelope["input"]>;

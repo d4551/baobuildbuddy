@@ -1,4 +1,4 @@
-import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
+import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 import type { CreatePortfolioProjectPayload, PortfolioProjectInsert, PortfolioProjectRecord, PortfolioProjectUpdate, PortfolioRecord, UpdatePortfolioProjectPayload } from "./portfolio-service-contracts";
 export declare const toMetadataOrDefault: (metadata?: Record<string, unknown> | null) => PortfolioMetadata;
 export declare const metadataToRecord: (metadata?: PortfolioMetadata) => Record<string, unknown>;

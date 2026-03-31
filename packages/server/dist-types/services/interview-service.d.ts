@@ -1,4 +1,4 @@
-import { type InterviewResponse, type InterviewSession } from "@bao/shared";
+import type { InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
 import type { InterviewConfigInput } from "./interview-service-contracts";
 export declare class InterviewService {
     startSession(studioId: string, rawConfig?: InterviewConfigInput): Promise<InterviewSession>;

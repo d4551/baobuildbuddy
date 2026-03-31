@@ -1857,7 +1857,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "jobs";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: import("@bao/shared").ScrapePersonaEnrichment;
+                data: import("@bao/shared/types/jobs").ScrapePersonaEnrichment;
                 driverParam: string;
                 notNull: false;
                 hasDefault: false;
@@ -1869,7 +1869,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: import("@bao/shared").ScrapePersonaEnrichment;
+                $type: import("@bao/shared/types/jobs").ScrapePersonaEnrichment;
             }>;
             createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "created_at";
@@ -2779,7 +2779,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "settings";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: import("@bao/shared").AIRouting;
+                data: import("@bao/shared/types/ai").AIRouting;
                 driverParam: string;
                 notNull: false;
                 hasDefault: true;
@@ -2791,7 +2791,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: import("@bao/shared").AIRouting;
+                $type: import("@bao/shared/types/ai").AIRouting;
             }>;
             preferredProvider: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "preferred_provider";
@@ -2874,7 +2874,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "settings";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: import("@bao/shared").BrandSettings;
+                data: import("@bao/shared/types/settings-contracts").BrandSettings;
                 driverParam: string;
                 notNull: false;
                 hasDefault: true;
@@ -2886,7 +2886,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: import("@bao/shared").BrandSettings;
+                $type: import("@bao/shared/types/settings-contracts").BrandSettings;
             }>;
             notifications: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "notifications";
@@ -2912,7 +2912,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "settings";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: import("@bao/shared").AutomationSettings;
+                data: import("@bao/shared/types/settings-contracts").AutomationSettings;
                 driverParam: string;
                 notNull: false;
                 hasDefault: true;
@@ -2924,14 +2924,14 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: import("@bao/shared").AutomationSettings;
+                $type: import("@bao/shared/types/settings-contracts").AutomationSettings;
             }>;
             emailTransportSettings: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "email_transport_settings";
                 tableName: "settings";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: import("@bao/shared").EmailTransportSettings;
+                data: import("@bao/shared/types/settings-contracts").EmailTransportSettings;
                 driverParam: string;
                 notNull: false;
                 hasDefault: true;
@@ -2943,7 +2943,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: import("@bao/shared").EmailTransportSettings;
+                $type: import("@bao/shared/types/settings-contracts").EmailTransportSettings;
             }>;
             emailTransportPassword: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "email_transport_password";
@@ -3245,7 +3245,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "studio_classification_rules";
                 dataType: "string";
                 columnType: "SQLiteText";
-                data: import("@bao/shared").StudioType;
+                data: import("@bao/shared/types/jobs").StudioType;
                 driverParam: string;
                 notNull: true;
                 hasDefault: false;
@@ -3258,7 +3258,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 generated: undefined;
             }, {}, {
                 length: number | undefined;
-                $type: import("@bao/shared").StudioType;
+                $type: import("@bao/shared/types/jobs").StudioType;
             }>;
             keyword: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "keyword";
@@ -3608,7 +3608,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "studios";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: import("@bao/shared").ScrapePersonaEnrichment;
+                data: import("@bao/shared/types/jobs").ScrapePersonaEnrichment;
                 driverParam: string;
                 notNull: false;
                 hasDefault: false;
@@ -3620,7 +3620,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: import("@bao/shared").ScrapePersonaEnrichment;
+                $type: import("@bao/shared/types/jobs").ScrapePersonaEnrichment;
             }>;
             createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "created_at";

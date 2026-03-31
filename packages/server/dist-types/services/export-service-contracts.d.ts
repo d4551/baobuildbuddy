@@ -1,12 +1,13 @@
-import { A4_PAGE_HEIGHT, A4_PAGE_WIDTH, type ResumeData, type ResumeTemplate } from "@bao/shared";
-import type * as Shared from "@bao/shared";
+import { A4_PAGE_HEIGHT, A4_PAGE_WIDTH } from "@bao/shared/constants/export-layout";
+import type { ResumeData } from "@bao/shared/types/resume";
+import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-layout";
 import { type Color, type PDFDocument, type PDFFont, type PDFPage } from "pdf-lib";
 export interface RGB {
     r: number;
     g: number;
     b: number;
 }
-export type ResumeTemplateDefinition = (typeof Shared.RESUME_EXPORT_THEME_CONFIGS)[ResumeTemplate]["pdf"];
+export type ResumeTemplateDefinition = ResumePdfThemeConfig;
 export type ResumeExperienceItem = NonNullable<ResumeData["experience"]>[number];
 export type ResumeEducationItem = NonNullable<ResumeData["education"]>[number];
 export type ResumeProjectItem = NonNullable<ResumeData["projects"]>[number];

@@ -30,7 +30,7 @@ export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, 
         position: string;
         jobInfo: Record<string, unknown>;
         content: GeneratedCoverLetterContent;
-        template: "creative" | "gaming" | "executive" | "technical" | "professional";
+        template: "professional" | "creative" | "gaming" | "executive" | "technical";
     };
     error?: undefined;
     details?: undefined;

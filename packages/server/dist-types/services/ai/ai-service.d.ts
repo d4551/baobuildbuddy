@@ -1,4 +1,4 @@
-import type { AIRouting, AIProviderConfig, AIProviderStatus, AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
+import type { AIProviderConfig, AIProviderStatus, AIProviderType, AIResponse, AIRouting, GenerateOptions } from "@bao/shared/types/ai";
 import { buildProviderConfigs } from "./ai-provider-config";
 import type { AIProvider } from "./provider-interface";
 type AIServiceSettings = Parameters<typeof buildProviderConfigs>[0];

@@ -1,4 +1,4 @@
-import { type AIProviderType, type AIProviderDiagnostic, type AIResponse, type GenerateOptions } from "@bao/shared";
+import type { AIProviderDiagnostic, AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { BaseAIProvider } from "./provider-interface";
 /**
  * Local AI Provider for RamaLama, Ollama, and other OpenAI-compatible local servers

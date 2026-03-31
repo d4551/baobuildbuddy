@@ -1,5 +1,7 @@
 import type { AppTranslationSchema } from "~/locales/en-US";
 
+type StringKeyOf<T> = Extract<keyof T, string>;
+
 /**
  * Primary stat identifiers rendered on dashboard hero tiles.
  */
@@ -7,19 +9,20 @@ export type DashboardStatKey = "savedJobs" | "resumeCount" | "interviewSessionCo
 
 type DashboardRootSchema = AppTranslationSchema["dashboard"];
 type DashboardOnboardingLabelKey =
-  `dashboard.onboarding.${keyof DashboardRootSchema["onboarding"]}`;
-type DashboardStatLabelKey = `dashboard.stats.${keyof DashboardRootSchema["stats"]}`;
+  `dashboard.onboarding.${StringKeyOf<DashboardRootSchema["onboarding"]>}`;
+type DashboardStatLabelKey = `dashboard.stats.${StringKeyOf<DashboardRootSchema["stats"]>}`;
 type DashboardQuickActionLabelKey =
-  `dashboard.quickActions.actions.${keyof DashboardRootSchema["quickActions"]["actions"]}`;
+  `dashboard.quickActions.actions.${StringKeyOf<DashboardRootSchema["quickActions"]["actions"]>}`;
 type DashboardPipelineStepLabelKey =
-  `dashboard.pipeline.steps.${keyof DashboardRootSchema["pipeline"]["steps"]}`;
+  `dashboard.pipeline.steps.${StringKeyOf<DashboardRootSchema["pipeline"]["steps"]>}`;
+type DashboardActionLabelKey = DashboardQuickActionLabelKey | DashboardPipelineStepLabelKey;
 
 /**
  * Dashboard quick-action configuration model.
  */
 export interface DashboardQuickAction {
   readonly id: string;
-  readonly labelKey: DashboardQuickActionLabelKey;
+  readonly labelKey: DashboardActionLabelKey;
   readonly to: string;
   readonly iconPath: string;
 }

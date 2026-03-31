@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { ROUTE_JOBS } from "../packages/shared/src/constants/routes";
 import { collectNoHtmxViolationsForContent } from "./validate-no-htmx";
 import { collectNoTryCatchViolationsForContent } from "./validate-no-try-catch";
 import { collectUiSingleSourceViolationsForContent } from "./validate-ui-single-source-of-truth";
@@ -7,7 +8,7 @@ describe("collectNoHtmxViolationsForContent", () => {
   test("flags hx attributes in Vue templates", () => {
     const violations = collectNoHtmxViolationsForContent(
       "packages/client/pages/example.vue",
-      `<template><button hx-get="/jobs">Load</button></template>`,
+      `<template><button hx-get="${ROUTE_JOBS}">Load</button></template>`,
     );
 
     expect(violations.some((violation) => violation.message.includes("hx attributes"))).toBe(true);

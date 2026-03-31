@@ -69,7 +69,77 @@ import studioSelector from "./studioSelector";
 import aiChatPage from "./aiChatPage";
 import aiChatCommon from "./aiChatCommon";
 
-const enUSCatalog = mergeLocaleCatalog(
+type EnglishLocaleCatalog = typeof meta &
+  typeof app &
+  typeof common &
+  typeof a11y &
+  typeof layout &
+  typeof apiErrors &
+  typeof confirmDialog &
+  typeof errorPage &
+  typeof nav &
+  typeof apiDocs &
+  typeof dashboard &
+  typeof gamificationPage &
+  typeof jobsPage &
+  typeof jobCard &
+  typeof resumePreview &
+  typeof skillsPage &
+  typeof skillsPathwaysPage &
+  typeof resumePage &
+  typeof resumeBuildPage &
+  typeof coverLetterPage &
+  typeof coverLetterDetailPage &
+  typeof portfolioPage &
+  typeof portfolioProjectCard &
+  typeof interviewChatComponent &
+  typeof interviewScoreCard &
+  typeof dailyChallengeCard &
+  typeof xpBar &
+  typeof resumeComponentPersonalInfo &
+  typeof resumeComponentExperience &
+  typeof resumeComponentEducation &
+  typeof resumeComponentSkills &
+  typeof jobDetail &
+  typeof studioDetail &
+  typeof studiosIndex &
+  typeof studioAnalytics &
+  typeof automationhub &
+  typeof automationruns &
+  typeof automationjobApply &
+  typeof automationemail &
+  typeof automationrunDetail &
+  typeof automationscraper &
+  typeof aiProviderCatalog &
+  typeof setup &
+  typeof aiDashboard &
+  typeof interviewHistory &
+  typeof interviewHub &
+  typeof interviewSession &
+  typeof settingsseoTitle &
+  typeof settingsseoDescription &
+  typeof settingstitle &
+  typeof settingssubtitle &
+  typeof settingsbootstrapError &
+  typeof settingsbootstrapRetry &
+  typeof settingsbootstrapRetryAria &
+  typeof settingssaveState &
+  typeof settingsprofile &
+  typeof settingspreferences &
+  typeof settingsautomation &
+  typeof settingsjobIntelligence &
+  typeof settingsemailDelivery &
+  typeof settingsaiProviders &
+  typeof settingsbrand &
+  typeof settingstoasts &
+  typeof settingserrors &
+  typeof quickFab &
+  typeof floatingChat &
+  typeof studioSelector &
+  typeof aiChatPage &
+  typeof aiChatCommon;
+
+const enUSCatalog = mergeLocaleCatalog<EnglishLocaleCatalog>(
   meta,
   app,
   common,

@@ -31,8 +31,8 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 body: unknown;
                 params: {};
                 query: {} & {
-                    category?: string | undefined;
                     search?: string | undefined;
+                    category?: string | undefined;
                 };
                 headers: unknown;
                 response: {
@@ -71,9 +71,9 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                     transferableSkill: string;
                 } & {
                     category?: string | undefined;
-                    confidence?: number | undefined;
                     industryApplications?: string[] | undefined;
                     evidence?: Record<string, unknown>[] | undefined;
+                    confidence?: number | undefined;
                     demandLevel?: string | undefined;
                     aiGenerated?: boolean | undefined;
                 };
@@ -81,7 +81,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").SkillMapping;
+                    200: import("@bao/shared/types/skill-mapping").SkillMapping;
                     422: {
                         type: "validation";
                         on: string;
@@ -102,11 +102,11 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 put: {
                     body: {} & {
                         category?: string | undefined;
-                        confidence?: number | undefined;
                         gameExpression?: string | undefined;
                         transferableSkill?: string | undefined;
                         industryApplications?: string[] | undefined;
                         evidence?: Record<string, unknown>[] | undefined;
+                        confidence?: number | undefined;
                         demandLevel?: string | undefined;
                         aiGenerated?: boolean | undefined;
                     };
@@ -116,7 +116,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("@bao/shared").SkillMapping | {
+                        200: import("@bao/shared/types/skill-mapping").SkillMapping | {
                             error: string;
                         };
                         422: {
@@ -168,7 +168,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").CareerPathway[];
+                    200: import("@bao/shared/types/skill-mapping").CareerPathway[];
                 };
             };
         };
@@ -184,18 +184,18 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 };
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").ReadinessAssessment | {
+                    200: import("@bao/shared/types/skill-mapping").ReadinessAssessment | {
                         jobId: string;
                         overallScore: number;
                         categories: {
-                            technical: import("@bao/shared").CategoryAssessment;
-                            softSkills: import("@bao/shared").CategoryAssessment;
-                            industryKnowledge: import("@bao/shared").CategoryAssessment;
-                            portfolio: import("@bao/shared").CategoryAssessment;
+                            technical: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+                            softSkills: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+                            industryKnowledge: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+                            portfolio: import("@bao/shared/types/skill-mapping").CategoryAssessment;
                         };
-                        improvementSuggestions: import("@bao/shared").SkillReadinessImprovementId[];
-                        nextSteps: import("@bao/shared").SkillReadinessNextStepId[];
-                        targetRoleReadiness?: import("@bao/shared").RoleReadiness[];
+                        improvementSuggestions: import("@bao/shared/types/skill-mapping").SkillReadinessImprovementId[];
+                        nextSteps: import("@bao/shared/types/skill-mapping").SkillReadinessNextStepId[];
+                        targetRoleReadiness?: import("@bao/shared/types/skill-mapping").RoleReadiness[];
                     };
                     422: {
                         type: "validation";

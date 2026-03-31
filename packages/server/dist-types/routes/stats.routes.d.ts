@@ -23,7 +23,7 @@ export declare const statsRoutes: Elysia<"/stats", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").DashboardStats;
+                    200: import("@bao/shared/types/search").DashboardStats;
                 };
             };
         };
@@ -37,7 +37,7 @@ export declare const statsRoutes: Elysia<"/stats", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").WeeklyActivity;
+                    200: import("@bao/shared/types/search").WeeklyActivity;
                 };
             };
         };
@@ -51,7 +51,7 @@ export declare const statsRoutes: Elysia<"/stats", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").CareerProgress;
+                    200: import("@bao/shared/types/search").CareerProgress;
                 };
             };
         };

@@ -1,8 +1,11 @@
 import baseCatalog from "./en-US/catalog";
-import type { AppTranslationOverrides } from "./en-US";
+import type { AppTranslationOverrides, AppTranslationSchema } from "./en-US";
 import catalog from "./fr-FR/catalog";
 import { mergeLocaleCatalog } from "./merge";
 
-const frFR = mergeLocaleCatalog(baseCatalog, catalog) satisfies AppTranslationOverrides;
+const frFR = mergeLocaleCatalog<AppTranslationSchema>(
+  baseCatalog,
+  catalog,
+) satisfies AppTranslationOverrides;
 
 export default frFR;

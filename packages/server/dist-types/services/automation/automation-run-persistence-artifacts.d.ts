@@ -1,4 +1,4 @@
-import type { RpaRunResult } from "@bao/shared";
+import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 export declare const sanitizeRunId: (runId: string, invalidRunIdMessage: string) => string;
 export declare const resolveRunArtifactDir: (runId: string, invalidRunIdMessage: string) => string;
