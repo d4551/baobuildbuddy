@@ -1,6 +1,7 @@
 import enUS, { type AppTranslationOverrides } from "../packages/client/locales/en-US";
-import frFR from "../packages/client/locales/fr-FR";
-import jaJP from "../packages/client/locales/ja-JP";
+import esES from "../packages/client/locales/es-ES/catalog";
+import frFR from "../packages/client/locales/fr-FR/catalog";
+import jaJP from "../packages/client/locales/ja-JP/catalog";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type Violation = {
@@ -15,6 +16,7 @@ type LocaleDefinition = {
 };
 
 const localeDefinitions: readonly LocaleDefinition[] = [
+  { locale: "es-ES", messages: esES },
   { locale: "fr-FR", messages: frFR },
   { locale: "ja-JP", messages: jaJP },
 ] as const;

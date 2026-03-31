@@ -1,7 +1,4 @@
-import type {
-  JobTaxonomyKeywordCategory,
-  StudioType,
-} from "@bao/shared";
+import type { JobTaxonomyKeywordCategory, StudioType } from "@bao/shared";
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 

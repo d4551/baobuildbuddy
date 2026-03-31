@@ -1,99 +1,100 @@
-export declare const jobProviderSettingsBodySchema: import("@sinclair/typebox").TObject<{
-    providerTimeoutMs: import("@sinclair/typebox").TNumber;
-    companyBoardResultLimit: import("@sinclair/typebox").TNumber;
-    gamingBoardResultLimit: import("@sinclair/typebox").TNumber;
-    unknownLocationLabel: import("@sinclair/typebox").TString;
-    unknownCompanyLabel: import("@sinclair/typebox").TString;
-    hitmarkerEnabled: import("@sinclair/typebox").TBoolean;
-    hitmarkerApiBaseUrl: import("@sinclair/typebox").TString;
-    hitmarkerDefaultQuery: import("@sinclair/typebox").TString;
-    hitmarkerDefaultLocation: import("@sinclair/typebox").TString;
-    greenhouseApiBaseUrl: import("@sinclair/typebox").TString;
-    greenhouseMaxPages: import("@sinclair/typebox").TNumber;
-    greenhouseBoards: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
-        board: import("@sinclair/typebox").TString;
-        company: import("@sinclair/typebox").TString;
-        enabled: import("@sinclair/typebox").TBoolean;
-    }>>;
-    leverApiBaseUrl: import("@sinclair/typebox").TString;
-    leverMaxPages: import("@sinclair/typebox").TNumber;
-    leverCompanies: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
-        slug: import("@sinclair/typebox").TString;
-        company: import("@sinclair/typebox").TString;
-        enabled: import("@sinclair/typebox").TBoolean;
-    }>>;
-    companyBoardApiTemplates: import("@sinclair/typebox").TObject<{
-        greenhouse: import("@sinclair/typebox").TString;
-        lever: import("@sinclair/typebox").TString;
-        recruitee: import("@sinclair/typebox").TString;
-        workable: import("@sinclair/typebox").TString;
-        ashby: import("@sinclair/typebox").TString;
-        smartrecruiters: import("@sinclair/typebox").TString;
-        teamtailor: import("@sinclair/typebox").TString;
-        workday: import("@sinclair/typebox").TString;
-    }>;
-    companyBoards: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
-        name: import("@sinclair/typebox").TString;
-        token: import("@sinclair/typebox").TString;
-        type: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"greenhouse">, import("@sinclair/typebox").TLiteral<"lever">, import("@sinclair/typebox").TLiteral<"recruitee">, import("@sinclair/typebox").TLiteral<"workable">, import("@sinclair/typebox").TLiteral<"ashby">, import("@sinclair/typebox").TLiteral<"smartrecruiters">, import("@sinclair/typebox").TLiteral<"teamtailor">, import("@sinclair/typebox").TLiteral<"workday">]>;
-        enabled: import("@sinclair/typebox").TBoolean;
-        priority: import("@sinclair/typebox").TNumber;
-    }>>;
-    gamingPortals: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
-        id: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"hitmarker">, import("@sinclair/typebox").TLiteral<"grackle">, import("@sinclair/typebox").TLiteral<"workwithindies">, import("@sinclair/typebox").TLiteral<"remotegamejobs">, import("@sinclair/typebox").TLiteral<"gamesjobsdirect">, import("@sinclair/typebox").TLiteral<"pocketgamer">]>;
-        name: import("@sinclair/typebox").TString;
-        source: import("@sinclair/typebox").TString;
-        fallbackUrl: import("@sinclair/typebox").TString;
-        enabled: import("@sinclair/typebox").TBoolean;
-    }>>;
-}>;
-export declare const speechSettingsBodySchema: import("@sinclair/typebox").TObject<{
-    locale: import("@sinclair/typebox").TString;
-    stt: import("@sinclair/typebox").TObject<{
-        provider: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"browser">, import("@sinclair/typebox").TLiteral<"openai">, import("@sinclair/typebox").TLiteral<"huggingface">, import("@sinclair/typebox").TLiteral<"local">, import("@sinclair/typebox").TLiteral<"custom">]>;
-        model: import("@sinclair/typebox").TString;
-        endpoint: import("@sinclair/typebox").TString;
-    }>;
-    tts: import("@sinclair/typebox").TObject<{
-        provider: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"browser">, import("@sinclair/typebox").TLiteral<"openai">, import("@sinclair/typebox").TLiteral<"huggingface">, import("@sinclair/typebox").TLiteral<"local">, import("@sinclair/typebox").TLiteral<"custom">]>;
-        model: import("@sinclair/typebox").TString;
-        endpoint: import("@sinclair/typebox").TString;
-        voice: import("@sinclair/typebox").TString;
-        format: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"mp3">, import("@sinclair/typebox").TLiteral<"wav">]>;
-    }>;
-}>;
-export declare const jobTaxonomyKeywordEntryBodySchema: import("@sinclair/typebox").TObject<{
-    id: import("@sinclair/typebox").TString;
-    category: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"remote-location">, import("@sinclair/typebox").TLiteral<"hybrid-location">, import("@sinclair/typebox").TLiteral<"requirement">, import("@sinclair/typebox").TLiteral<"technology">, import("@sinclair/typebox").TLiteral<"genre">, import("@sinclair/typebox").TLiteral<"platform">, import("@sinclair/typebox").TLiteral<"role">]>;
-    label: import("@sinclair/typebox").TString;
-    synonyms: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TString>;
-    sortOrder: import("@sinclair/typebox").TNumber;
-    enabled: import("@sinclair/typebox").TBoolean;
-}>;
-export declare const studioClassificationRuleBodySchema: import("@sinclair/typebox").TObject<{
-    id: import("@sinclair/typebox").TString;
-    studioType: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>]>;
-    keyword: import("@sinclair/typebox").TString;
-    sortOrder: import("@sinclair/typebox").TNumber;
-    enabled: import("@sinclair/typebox").TBoolean;
-}>;
-export declare const jobTaxonomySettingsBodySchema: import("@sinclair/typebox").TObject<{
-    keywords: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
-        id: import("@sinclair/typebox").TString;
-        category: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"remote-location">, import("@sinclair/typebox").TLiteral<"hybrid-location">, import("@sinclair/typebox").TLiteral<"requirement">, import("@sinclair/typebox").TLiteral<"technology">, import("@sinclair/typebox").TLiteral<"genre">, import("@sinclair/typebox").TLiteral<"platform">, import("@sinclair/typebox").TLiteral<"role">]>;
-        label: import("@sinclair/typebox").TString;
-        synonyms: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TString>;
-        sortOrder: import("@sinclair/typebox").TNumber;
-        enabled: import("@sinclair/typebox").TBoolean;
-    }>>;
-    studioRules: import("@sinclair/typebox").TArray<import("@sinclair/typebox").TObject<{
-        id: import("@sinclair/typebox").TString;
-        studioType: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>, import("@sinclair/typebox").TLiteral<import("@bao/shared").StudioType>]>;
-        keyword: import("@sinclair/typebox").TString;
-        sortOrder: import("@sinclair/typebox").TNumber;
-        enabled: import("@sinclair/typebox").TBoolean;
-    }>>;
-}>;
-declare const jsonValueBodySchema: import("@sinclair/typebox").TRecursive<import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TString, import("@sinclair/typebox").TNumber, import("@sinclair/typebox").TBoolean, import("@sinclair/typebox").TNull, import("@sinclair/typebox").TArray<import("@sinclair/typebox").TThis>, import("@sinclair/typebox").TRecord<import("@sinclair/typebox").TString, import("@sinclair/typebox").TThis>]>>;
-export declare const nullableJsonValueBodySchema: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TRecursive<import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TString, import("@sinclair/typebox").TNumber, import("@sinclair/typebox").TBoolean, import("@sinclair/typebox").TNull, import("@sinclair/typebox").TArray<import("@sinclair/typebox").TThis>, import("@sinclair/typebox").TRecord<import("@sinclair/typebox").TString, import("@sinclair/typebox").TThis>]>>, import("@sinclair/typebox").TNull]>;
+import Type from "baobox";
+export declare const jobProviderSettingsBodySchema: Type.TRequired<Type.TObject<{
+    readonly providerTimeoutMs: Type.TNumber;
+    readonly companyBoardResultLimit: Type.TNumber;
+    readonly gamingBoardResultLimit: Type.TNumber;
+    readonly unknownLocationLabel: Type.TString;
+    readonly unknownCompanyLabel: Type.TString;
+    readonly hitmarkerEnabled: Type.TBoolean;
+    readonly hitmarkerApiBaseUrl: Type.TString;
+    readonly hitmarkerDefaultQuery: Type.TString;
+    readonly hitmarkerDefaultLocation: Type.TString;
+    readonly greenhouseApiBaseUrl: Type.TString;
+    readonly greenhouseMaxPages: Type.TNumber;
+    readonly greenhouseBoards: Type.TArray<Type.TRequired<Type.TObject<{
+        readonly board: Type.TString;
+        readonly company: Type.TString;
+        readonly enabled: Type.TBoolean;
+    }, never, never>>>;
+    readonly leverApiBaseUrl: Type.TString;
+    readonly leverMaxPages: Type.TNumber;
+    readonly leverCompanies: Type.TArray<Type.TRequired<Type.TObject<{
+        readonly slug: Type.TString;
+        readonly company: Type.TString;
+        readonly enabled: Type.TBoolean;
+    }, never, never>>>;
+    readonly companyBoardApiTemplates: Type.TRequired<Type.TObject<{
+        readonly greenhouse: Type.TString;
+        readonly lever: Type.TString;
+        readonly recruitee: Type.TString;
+        readonly workable: Type.TString;
+        readonly ashby: Type.TString;
+        readonly smartrecruiters: Type.TString;
+        readonly teamtailor: Type.TString;
+        readonly workday: Type.TString;
+    }, never, never>>;
+    readonly companyBoards: Type.TArray<Type.TRequired<Type.TObject<{
+        readonly name: Type.TString;
+        readonly token: Type.TString;
+        readonly type: Type.TUnion<(Type.TLiteral<"greenhouse"> | Type.TLiteral<"lever"> | Type.TLiteral<"recruitee"> | Type.TLiteral<"workable"> | Type.TLiteral<"ashby"> | Type.TLiteral<"smartrecruiters"> | Type.TLiteral<"teamtailor"> | Type.TLiteral<"workday">)[]>;
+        readonly enabled: Type.TBoolean;
+        readonly priority: Type.TNumber;
+    }, never, never>>>;
+    readonly gamingPortals: Type.TArray<Type.TRequired<Type.TObject<{
+        readonly id: Type.TUnion<(Type.TLiteral<"hitmarker"> | Type.TLiteral<"grackle"> | Type.TLiteral<"workwithindies"> | Type.TLiteral<"remotegamejobs"> | Type.TLiteral<"gamesjobsdirect"> | Type.TLiteral<"pocketgamer">)[]>;
+        readonly name: Type.TString;
+        readonly source: Type.TString;
+        readonly fallbackUrl: Type.TString;
+        readonly enabled: Type.TBoolean;
+    }, never, never>>>;
+}, never, never>>;
+export declare const speechSettingsBodySchema: Type.TRequired<Type.TObject<{
+    readonly locale: Type.TString;
+    readonly stt: Type.TRequired<Type.TObject<{
+        provider: Type.TUnion<(Type.TLiteral<"browser"> | Type.TLiteral<"openai"> | Type.TLiteral<"huggingface"> | Type.TLiteral<"local"> | Type.TLiteral<"custom">)[]>;
+        model: Type.TString;
+        endpoint: Type.TString;
+    }, never, never>>;
+    readonly tts: Type.TRequired<Type.TObject<{
+        voice: Type.TString;
+        format: Type.TUnion<(Type.TLiteral<"mp3"> | Type.TLiteral<"wav">)[]>;
+        provider: Type.TUnion<(Type.TLiteral<"browser"> | Type.TLiteral<"openai"> | Type.TLiteral<"huggingface"> | Type.TLiteral<"local"> | Type.TLiteral<"custom">)[]>;
+        model: Type.TString;
+        endpoint: Type.TString;
+    }, never, never>>;
+}, never, never>>;
+export declare const jobTaxonomyKeywordEntryBodySchema: Type.TRequired<Type.TObject<{
+    readonly id: Type.TString;
+    readonly category: Type.TUnion<(Type.TLiteral<"remote-location"> | Type.TLiteral<"hybrid-location"> | Type.TLiteral<"requirement"> | Type.TLiteral<"technology"> | Type.TLiteral<"genre"> | Type.TLiteral<"platform"> | Type.TLiteral<"role">)[]>;
+    readonly label: Type.TString;
+    readonly synonyms: Type.TArray<Type.TString>;
+    readonly sortOrder: Type.TNumber;
+    readonly enabled: Type.TBoolean;
+}, never, never>>;
+export declare const studioClassificationRuleBodySchema: Type.TRequired<Type.TObject<{
+    readonly id: Type.TString;
+    readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared").StudioType>[]>;
+    readonly keyword: Type.TString;
+    readonly sortOrder: Type.TNumber;
+    readonly enabled: Type.TBoolean;
+}, never, never>>;
+export declare const jobTaxonomySettingsBodySchema: Type.TRequired<Type.TObject<{
+    readonly keywords: Type.TArray<Type.TRequired<Type.TObject<{
+        readonly id: Type.TString;
+        readonly category: Type.TUnion<(Type.TLiteral<"remote-location"> | Type.TLiteral<"hybrid-location"> | Type.TLiteral<"requirement"> | Type.TLiteral<"technology"> | Type.TLiteral<"genre"> | Type.TLiteral<"platform"> | Type.TLiteral<"role">)[]>;
+        readonly label: Type.TString;
+        readonly synonyms: Type.TArray<Type.TString>;
+        readonly sortOrder: Type.TNumber;
+        readonly enabled: Type.TBoolean;
+    }, never, never>>>;
+    readonly studioRules: Type.TArray<Type.TRequired<Type.TObject<{
+        readonly id: Type.TString;
+        readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared").StudioType>[]>;
+        readonly keyword: Type.TString;
+        readonly sortOrder: Type.TNumber;
+        readonly enabled: Type.TBoolean;
+    }, never, never>>>;
+}, never, never>>;
+declare const jsonValueBodySchema: Type.TRecursive<Type.TSchema>;
+export declare const nullableJsonValueBodySchema: Type.TUnion<(Type.TNull | Type.TRecursive<Type.TSchema>)[]>;
 export { jsonValueBodySchema };

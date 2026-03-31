@@ -9,10 +9,7 @@ import {
   type ResumeExperienceItem,
   type ResumeProject,
 } from "@bao/shared";
-import {
-  normalizeResumeTemplate,
-  toResumeCollection,
-} from "~/composables/api-normalizer-shared";
+import { normalizeResumeTemplate, toResumeCollection } from "~/composables/api-normalizer-shared";
 
 const toResumeExperience = (value: unknown): ResumeExperienceItem | null => {
   if (!isRecord(value)) return null;

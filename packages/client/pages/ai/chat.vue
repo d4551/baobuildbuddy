@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 definePageMeta({
   middleware: ["auth"],
 });
+const { t } = useI18n();
 const {
   CHAT_PAGE_CONTAINER_CLASS,
   locale,
@@ -43,6 +46,11 @@ const {
   handleSendMessage,
   handleSaveSpeechConfig,
 } = useAIChatPage();
+
+useServerSeoMeta({
+  title: t("aiChatPage.seoTitle", { brand: resolvedBrand.value.name }),
+  description: t("aiChatPage.seoDescription"),
+});
 </script>
 
 <template>

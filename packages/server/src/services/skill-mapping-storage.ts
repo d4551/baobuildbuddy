@@ -26,22 +26,19 @@ const toSkillMappingUpdate = (
   data: SkillMappingUpdate,
   now: string,
 ): Partial<typeof skillMappings.$inferInsert> => {
-  const updateData: Partial<typeof skillMappings.$inferInsert> = {
+  return {
     updatedAt: now,
+    ...(data.gameExpression !== undefined ? { gameExpression: data.gameExpression } : {}),
+    ...(data.transferableSkill !== undefined ? { transferableSkill: data.transferableSkill } : {}),
+    ...(data.industryApplications !== undefined
+      ? { industryApplications: data.industryApplications }
+      : {}),
+    ...(data.evidence !== undefined ? { evidence: data.evidence } : {}),
+    ...(data.confidence !== undefined ? { confidence: data.confidence } : {}),
+    ...(data.category !== undefined ? { category: data.category } : {}),
+    ...(data.demandLevel !== undefined ? { demandLevel: data.demandLevel } : {}),
+    ...(data.aiGenerated !== undefined ? { aiGenerated: data.aiGenerated } : {}),
   };
-
-  if (data.gameExpression !== undefined) updateData.gameExpression = data.gameExpression;
-  if (data.transferableSkill !== undefined) updateData.transferableSkill = data.transferableSkill;
-  if (data.industryApplications !== undefined) {
-    updateData.industryApplications = data.industryApplications;
-  }
-  if (data.evidence !== undefined) updateData.evidence = data.evidence;
-  if (data.confidence !== undefined) updateData.confidence = data.confidence;
-  if (data.category !== undefined) updateData.category = data.category;
-  if (data.demandLevel !== undefined) updateData.demandLevel = data.demandLevel;
-  if (data.aiGenerated !== undefined) updateData.aiGenerated = data.aiGenerated;
-
-  return updateData;
 };
 
 export async function listSkillMappingRows(): Promise<SkillMappingRow[]> {
@@ -60,12 +57,12 @@ export async function createSkillMappingRow(data: SkillMappingInsert): Promise<s
   return id;
 }
 
-export async function updateSkillMappingRow(
-  id: string,
-  data: SkillMappingUpdate,
-): Promise<void> {
+export async function updateSkillMappingRow(id: string, data: SkillMappingUpdate): Promise<void> {
   const now = new Date().toISOString();
-  await db.update(skillMappings).set(toSkillMappingUpdate(data, now)).where(eq(skillMappings.id, id));
+  await db
+    .update(skillMappings)
+    .set(toSkillMappingUpdate(data, now))
+    .where(eq(skillMappings.id, id));
 }
 
 export async function deleteSkillMappingRow(id: string): Promise<void> {

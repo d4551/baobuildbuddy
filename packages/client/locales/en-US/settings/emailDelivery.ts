@@ -1,0 +1,55 @@
+const settingsemailDelivery = {
+  settings: {
+    emailDelivery: {
+      title: "Email Delivery",
+      subtitle:
+        "Configure the outbound SMTP transport used when automation sends a generated reply.",
+      configuredBadge: "Ready",
+      incompleteBadge: "Needs setup",
+      hostLegend: "SMTP host",
+      hostPlaceholder: "smtp.mailprovider.com",
+      hostAria: "SMTP server host",
+      portLegend: "Port",
+      portAria: "SMTP server port",
+      timeoutLegend: "Connection timeout (seconds)",
+      timeoutAria: "SMTP connection timeout in seconds",
+      securityLegend: "Security",
+      securityAria: "SMTP transport security mode",
+      securityOptions: {
+        tls: "Implicit TLS",
+        starttls: "STARTTLS",
+        plain: "Plain TCP",
+      },
+      authLegend: "Authentication",
+      authAria: "SMTP authentication mode",
+      authOptions: {
+        plain: "AUTH PLAIN",
+        login: "AUTH LOGIN",
+      },
+      usernameLegend: "Username",
+      usernamePlaceholder: "mailer{'@'}studio.com",
+      usernameAria: "SMTP username",
+      fromNameLegend: "From name",
+      fromNamePlaceholder: "{brand}",
+      fromNameAria: "Outbound sender display name",
+      fromEmailLegend: "From email",
+      fromEmailPlaceholder: "mailer{'@'}studio.com",
+      fromEmailAria: "Outbound sender email",
+      fromEmailHint: "This address is used in the message From header.",
+      passwordLegend: "Password",
+      passwordPlaceholder: "Store or replace the SMTP password",
+      passwordAria: "SMTP password",
+      passwordHint: "Save a password if this transport requires authenticated delivery.",
+      passwordStoredHint:
+        "A password is already stored. Saving a new value will replace it, or clear it below.",
+      clearPasswordAria: "Clear stored email delivery password",
+      clearPasswordButton: "Clear Password",
+      savePasswordAria: "Save email delivery password",
+      savePasswordButton: "Save Password",
+      saveAria: "Save email delivery settings",
+      saveButton: "Save Delivery Settings",
+    },
+  },
+} as const;
+
+export default settingsemailDelivery;

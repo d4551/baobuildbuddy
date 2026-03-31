@@ -11,7 +11,10 @@ const createKeywordEntry = (
   sortOrder: number,
   synonyms: readonly string[] = [],
 ): JobTaxonomyKeywordEntry => ({
-  id: `${category}:${sortOrder}:${label.toLowerCase().replaceAll(/\s+/g, "-").replaceAll(/[^a-z0-9#+:/-]/g, "")}`,
+  id: `${category}:${sortOrder}:${label
+    .toLowerCase()
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/[^a-z0-9#+:/-]/g, "")}`,
   category,
   label,
   synonyms: [...synonyms],
@@ -24,7 +27,10 @@ const createStudioRule = (
   keyword: string,
   sortOrder: number,
 ): StudioClassificationRule => ({
-  id: `${studioType}:${sortOrder}:${keyword.toLowerCase().replaceAll(/\s+/g, "-").replaceAll(/[^a-z0-9/-]/g, "")}`,
+  id: `${studioType}:${sortOrder}:${keyword
+    .toLowerCase()
+    .replaceAll(/\s+/g, "-")
+    .replaceAll(/[^a-z0-9/-]/g, "")}`,
   studioType,
   keyword,
   sortOrder,

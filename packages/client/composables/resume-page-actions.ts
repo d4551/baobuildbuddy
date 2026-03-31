@@ -82,7 +82,8 @@ export function useResumePageActions(
 
   return {
     aiEnhancementStepIndex: progress.aiEnhancementStepIndex,
-    clearResumeFilters: (resumeSearchQuery: Ref<string>) => view.clearResumeFilters(resumeSearchQuery),
+    clearResumeFilters: (resumeSearchQuery: Ref<string>) =>
+      view.clearResumeFilters(resumeSearchQuery),
     handleAIEnhance: () => editor.handleAIEnhance(),
     handleAIScore: () => editor.handleAIScore(),
     handleCompletionTabSelect: view.handleCompletionTabSelect,

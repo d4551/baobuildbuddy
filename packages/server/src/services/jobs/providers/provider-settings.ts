@@ -7,6 +7,7 @@ import {
   type JobProviderSettings,
   jobProviderSettingsSchema,
 } from "@bao/shared";
+import { normalizeJobProviderSettings } from "@bao/shared/types/settings-normalization";
 import { eq } from "drizzle-orm";
 import { db } from "../../../db/client";
 import { settings } from "../../../db/schema/settings";
@@ -36,5 +37,5 @@ export async function loadJobProviderSettings(): Promise<JobProviderSettings> {
     throw new Error(API_ERROR_MISSING_JOB_PROVIDERS);
   }
 
-  return jobProviderParsed.data;
+  return normalizeJobProviderSettings(jobProviderParsed.data);
 }

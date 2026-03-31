@@ -1,7 +1,4 @@
-import {
-  APP_ROUTE_BUILDERS,
-  APP_ROUTES,
-} from "@bao/shared";
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { useAutomationScraperActions } from "~/composables/automation-scraper-actions";
 import { useAutomationScraperBootstrap } from "~/composables/automation-scraper-bootstrap";

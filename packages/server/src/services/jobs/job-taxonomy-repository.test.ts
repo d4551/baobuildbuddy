@@ -2,10 +2,7 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import { db, sqlite } from "../../db/client";
 import { initializeDatabase } from "../../db/init";
 import { seedDatabase } from "../../db/seed";
-import {
-  jobTaxonomyKeywords,
-  studioClassificationRules,
-} from "../../db/schema/job-taxonomy";
+import { jobTaxonomyKeywords, studioClassificationRules } from "../../db/schema/job-taxonomy";
 import { readJobTaxonomy, replaceJobTaxonomy } from "./job-taxonomy-repository";
 
 beforeAll(() => {

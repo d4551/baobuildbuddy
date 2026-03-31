@@ -8,7 +8,9 @@ import type {
   UpdatePortfolioProjectPayload,
 } from "./portfolio-service-contracts";
 
-export const toMetadataOrDefault = (metadata?: Record<string, unknown> | null): PortfolioMetadata => {
+export const toMetadataOrDefault = (
+  metadata?: Record<string, unknown> | null,
+): PortfolioMetadata => {
   if (!metadata) {
     return {};
   }

@@ -59,10 +59,7 @@ type SettingsPageStateResultOptions = {
   derivedState: SettingsPageDerivedState;
 };
 
-function syncProfileState(
-  currentProfile: UserProfileSnapshot,
-  profileState: ProfileRuntimeState,
-) {
+function syncProfileState(currentProfile: UserProfileSnapshot, profileState: ProfileRuntimeState) {
   profileState.profileForm.name = currentProfile.name || "";
   profileState.profileForm.email = currentProfile.email || "";
   profileState.profileForm.phone = currentProfile.phone || "";
@@ -79,16 +76,20 @@ function syncProfileState(
 }
 
 function setupSettingsPageWatchers(options: WatcherSetupOptions) {
-  watch(options.settings, (currentSettings) => {
-    if (currentSettings) {
-      syncSettingsState(
-        currentSettings,
-        options.providerState,
-        options.saveState,
-        options.brandState,
-      );
-    }
-  }, { immediate: true });
+  watch(
+    options.settings,
+    (currentSettings) => {
+      if (currentSettings) {
+        syncSettingsState(
+          currentSettings,
+          options.providerState,
+          options.saveState,
+          options.brandState,
+        );
+      }
+    },
+    { immediate: true },
+  );
 
   watch(options.providerState.preferredProviderSelection, (provider) => {
     if (options.providerState.aiRoutingDraft.chat.provider !== provider) {
@@ -96,17 +97,24 @@ function setupSettingsPageWatchers(options: WatcherSetupOptions) {
     }
   });
 
-  watch(() => options.providerState.aiRoutingDraft.chat.provider, (provider) => {
-    if (options.providerState.preferredProviderSelection.value !== provider) {
-      options.providerState.preferredProviderSelection.value = provider;
-    }
-  });
+  watch(
+    () => options.providerState.aiRoutingDraft.chat.provider,
+    (provider) => {
+      if (options.providerState.preferredProviderSelection.value !== provider) {
+        options.providerState.preferredProviderSelection.value = provider;
+      }
+    },
+  );
 
-  watch(options.profile, (currentProfile) => {
-    if (currentProfile) {
-      syncProfileState(currentProfile, options.profileState);
-    }
-  }, { immediate: true });
+  watch(
+    options.profile,
+    (currentProfile) => {
+      if (currentProfile) {
+        syncProfileState(currentProfile, options.profileState);
+      }
+    },
+    { immediate: true },
+  );
 }
 
 function buildSettingsPageStateResult(options: SettingsPageStateResultOptions) {

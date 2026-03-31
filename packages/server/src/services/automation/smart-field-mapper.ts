@@ -1,8 +1,5 @@
 import { config } from "../../config/env";
-import {
-  generateFieldAnalysisWithRetry,
-  stripToFormElements,
-} from "./smart-field-mapper-analysis";
+import { generateFieldAnalysisWithRetry, stripToFormElements } from "./smart-field-mapper-analysis";
 import {
   EMPTY_FIELD_ANALYSIS_RESULT,
   type FieldMapperAIClient,

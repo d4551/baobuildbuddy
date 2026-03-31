@@ -20,9 +20,10 @@ export declare const resumeRoutes: Elysia<"/resumes", {
             generate: {
                 post: {
                     body: {
+                        targetRole: string;
+                    } & {
                         experienceLevel?: string | undefined;
                         studioName?: string | undefined;
-                        targetRole: string;
                     };
                     params: {};
                     query: unknown;
@@ -57,13 +58,13 @@ export declare const resumeRoutes: Elysia<"/resumes", {
             synthesize: {
                 post: {
                     body: {
-                        questionsAndAnswers: {
+                        questionsAndAnswers: ({
                             id: string;
                             category: string;
                             question: string;
                             answer: string;
-                        }[];
-                    };
+                        } & {})[];
+                    } & {};
                     params: {};
                     query: unknown;
                     headers: unknown;
@@ -101,22 +102,23 @@ export declare const resumeRoutes: Elysia<"/resumes", {
 } & {
     resumes: {
         post: {
-            body: {
-                skills?: {
+            body: {} & {
+                skills?: ({} & {
                     gaming?: string[] | undefined;
                     technical?: string[] | undefined;
                     soft?: string[] | undefined;
-                } | undefined;
+                }) | undefined;
                 name?: string | undefined;
                 theme?: "light" | "dark" | undefined;
                 summary?: string | undefined;
-                projects?: {
-                    link?: string | undefined;
-                    technologies?: string[] | undefined;
+                projects?: ({
                     title: string;
                     description: string;
-                }[] | undefined;
-                personalInfo?: {
+                } & {
+                    link?: string | undefined;
+                    technologies?: string[] | undefined;
+                })[] | undefined;
+                personalInfo?: ({} & {
                     portfolio?: string | undefined;
                     name?: string | undefined;
                     email?: string | undefined;
@@ -125,31 +127,33 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                     phone?: string | undefined;
                     linkedIn?: string | undefined;
                     github?: string | undefined;
-                } | undefined;
-                experience?: {
+                }) | undefined;
+                experience?: ({
+                    title: string;
+                    company: string;
+                    startDate: string;
+                } & {
                     description?: string | undefined;
                     achievements?: string[] | undefined;
                     location?: string | undefined;
                     technologies?: string[] | undefined;
                     endDate?: string | undefined;
-                    title: string;
-                    company: string;
-                    startDate: string;
-                }[] | undefined;
-                education?: {
-                    gpa?: string | undefined;
-                    year: string;
+                })[] | undefined;
+                education?: ({
                     degree: string;
                     field: string;
                     school: string;
-                }[] | undefined;
-                gamingExperience?: {
+                    year: string;
+                } & {
+                    gpa?: string | undefined;
+                })[] | undefined;
+                gamingExperience?: ({} & {
                     platforms?: string | undefined;
                     gameEngines?: string | undefined;
                     genres?: string | undefined;
                     shippedTitles?: string | undefined;
-                } | undefined;
-                template?: string | undefined;
+                }) | undefined;
+                template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
                 isDefault?: boolean | undefined;
             };
             params: {};
@@ -176,7 +180,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -200,22 +204,23 @@ export declare const resumeRoutes: Elysia<"/resumes", {
     resumes: {
         ":id": {
             put: {
-                body: {
-                    skills?: {
+                body: {} & {
+                    skills?: ({} & {
                         gaming?: string[] | undefined;
                         technical?: string[] | undefined;
                         soft?: string[] | undefined;
-                    } | undefined;
+                    }) | undefined;
                     name?: string | undefined;
                     theme?: "light" | "dark" | undefined;
                     summary?: string | undefined;
-                    projects?: {
-                        link?: string | undefined;
-                        technologies?: string[] | undefined;
+                    projects?: ({
                         title: string;
                         description: string;
-                    }[] | undefined;
-                    personalInfo?: {
+                    } & {
+                        link?: string | undefined;
+                        technologies?: string[] | undefined;
+                    })[] | undefined;
+                    personalInfo?: ({} & {
                         portfolio?: string | undefined;
                         name?: string | undefined;
                         email?: string | undefined;
@@ -224,36 +229,38 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                         phone?: string | undefined;
                         linkedIn?: string | undefined;
                         github?: string | undefined;
-                    } | undefined;
-                    experience?: {
+                    }) | undefined;
+                    experience?: ({
+                        title: string;
+                        company: string;
+                        startDate: string;
+                    } & {
                         description?: string | undefined;
                         achievements?: string[] | undefined;
                         location?: string | undefined;
                         technologies?: string[] | undefined;
                         endDate?: string | undefined;
-                        title: string;
-                        company: string;
-                        startDate: string;
-                    }[] | undefined;
-                    education?: {
-                        gpa?: string | undefined;
-                        year: string;
+                    })[] | undefined;
+                    education?: ({
                         degree: string;
                         field: string;
                         school: string;
-                    }[] | undefined;
-                    gamingExperience?: {
+                        year: string;
+                    } & {
+                        gpa?: string | undefined;
+                    })[] | undefined;
+                    gamingExperience?: ({} & {
                         platforms?: string | undefined;
                         gameEngines?: string | undefined;
                         genres?: string | undefined;
                         shippedTitles?: string | undefined;
-                    } | undefined;
-                    template?: string | undefined;
+                    }) | undefined;
+                    template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
                     isDefault?: boolean | undefined;
                 };
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -280,7 +287,7 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -311,13 +318,13 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         ":id": {
             export: {
                 post: {
-                    body: {
+                    body: {} & {
                         format?: string | undefined;
-                        template?: string | undefined;
+                        template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -347,12 +354,12 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         ":id": {
             "ai-enhance": {
                 post: {
-                    body: {
+                    body: {} & {
                         section?: string | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -396,10 +403,10 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                 post: {
                     body: {
                         jobId: string;
-                    };
+                    } & {};
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {

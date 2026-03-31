@@ -1,8 +1,6 @@
 import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
 import { DEFAULT_PROFILE_ID, isRecord } from "@bao/shared";
-import {
-  STATISTICS_AUTOMATION_RUNS_LIMIT,
-} from "@bao/shared/constants/statistics";
+import { STATISTICS_AUTOMATION_RUNS_LIMIT } from "@bao/shared/constants/statistics";
 import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";

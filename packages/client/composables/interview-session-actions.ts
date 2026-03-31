@@ -1,8 +1,4 @@
-import {
-  APP_ROUTE_QUERY_KEYS,
-  APP_ROUTES,
-  INTERVIEW_MIN_RESPONSE_LENGTH,
-} from "@bao/shared";
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES, INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 

@@ -7,10 +7,7 @@ import {
 } from "~/constants/dashboard-copy";
 import { DASHBOARD_GAMIFICATION_PROGRESS_MIN } from "~/constants/dashboard-core";
 import { getDashboardActivityEmoji } from "~/constants/dashboard-pipeline";
-import type {
-  DashboardActivity,
-  DashboardChallengeViewModel,
-} from "./dashboard-page-contracts";
+import type { DashboardActivity, DashboardChallengeViewModel } from "./dashboard-page-contracts";
 
 defineProps<{
   dailyChallenge: DashboardChallengeViewModel | null;

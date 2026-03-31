@@ -134,10 +134,14 @@ export const uploadResumeArtifact = async ({
     return false;
   }
 
-  const uploadResult = await runOnFirstMatchingLocator(page, selectors, async (locator: Locator) => {
-    const matchingResult = await settle(locator.setInputFiles(artifactPath));
-    return matchingResult.status === "fulfilled" ? true : null;
-  });
+  const uploadResult = await runOnFirstMatchingLocator(
+    page,
+    selectors,
+    async (locator: Locator) => {
+      const matchingResult = await settle(locator.setInputFiles(artifactPath));
+      return matchingResult.status === "fulfilled" ? true : null;
+    },
+  );
   return uploadResult ?? false;
 };
 

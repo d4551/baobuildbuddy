@@ -1,6 +1,9 @@
 import { DECIMAL_RADIX } from "@bao/shared";
 import type { LocationQueryValue } from "vue-router";
-import type { InterviewHistoryPageState, InterviewHistoryView } from "./interview-history-page-contracts";
+import type {
+  InterviewHistoryPageState,
+  InterviewHistoryView,
+} from "./interview-history-page-contracts";
 
 export const normalizeInterviewHistoryQuerySession = (
   value: LocationQueryValue | readonly LocationQueryValue[] | undefined,

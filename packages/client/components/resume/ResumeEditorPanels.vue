@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import type { ResumeFormData } from "@bao/shared";
 
-type ResumeEditorTabId =
-  | "personal"
-  | "experience"
-  | "education"
-  | "skills"
-  | "projects"
-  | "gaming";
+type ResumeEditorTabId = "personal" | "experience" | "education" | "skills" | "projects" | "gaming";
 
 type ResumePersonalFields = Pick<
   ResumeFormData,

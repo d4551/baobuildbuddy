@@ -30,7 +30,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
             get: {
                 body: unknown;
                 params: {};
-                query: {
+                query: {} & {
                     category?: string | undefined;
                     search?: string | undefined;
                 };
@@ -67,16 +67,15 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         mappings: {
             post: {
                 body: {
+                    gameExpression: string;
+                    transferableSkill: string;
+                } & {
                     category?: string | undefined;
                     confidence?: number | undefined;
                     industryApplications?: string[] | undefined;
-                    evidence?: {
-                        [x: string]: unknown;
-                    }[] | undefined;
+                    evidence?: Record<string, unknown>[] | undefined;
                     demandLevel?: string | undefined;
                     aiGenerated?: boolean | undefined;
-                    gameExpression: string;
-                    transferableSkill: string;
                 };
                 params: {};
                 query: unknown;
@@ -101,21 +100,19 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         mappings: {
             ":id": {
                 put: {
-                    body: {
+                    body: {} & {
                         category?: string | undefined;
                         confidence?: number | undefined;
                         gameExpression?: string | undefined;
                         transferableSkill?: string | undefined;
                         industryApplications?: string[] | undefined;
-                        evidence?: {
-                            [x: string]: unknown;
-                        }[] | undefined;
+                        evidence?: Record<string, unknown>[] | undefined;
                         demandLevel?: string | undefined;
                         aiGenerated?: boolean | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -144,7 +141,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -182,7 +179,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
             get: {
                 body: unknown;
                 params: {};
-                query: {
+                query: {} & {
                     jobId?: string | undefined;
                 };
                 headers: unknown;
@@ -217,9 +214,9 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
     skills: {
         "ai-analyze": {
             post: {
-                body: {
-                    resume?: {} | undefined;
-                    gameExperience?: {} | undefined;
+                body: {} & {
+                    resume?: Record<string, unknown> | undefined;
+                    gameExperience?: Record<string, unknown> | undefined;
                     autoCreateMappings?: boolean | undefined;
                 };
                 params: {};

@@ -13,14 +13,13 @@ type DashboardQuickActionLabelKey =
   `dashboard.quickActions.actions.${keyof DashboardRootSchema["quickActions"]["actions"]}`;
 type DashboardPipelineStepLabelKey =
   `dashboard.pipeline.steps.${keyof DashboardRootSchema["pipeline"]["steps"]}`;
-type DashboardActionLabelKey = DashboardQuickActionLabelKey | DashboardPipelineStepLabelKey;
 
 /**
  * Dashboard quick-action configuration model.
  */
 export interface DashboardQuickAction {
   readonly id: string;
-  readonly labelKey: DashboardActionLabelKey;
+  readonly labelKey: DashboardQuickActionLabelKey;
   readonly to: string;
   readonly iconPath: string;
 }

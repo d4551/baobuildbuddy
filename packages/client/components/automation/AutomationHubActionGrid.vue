@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import type { AutomationHubCard } from "~/composables/useAutomationHubPage";
+import type { AutomationHubCard } from "~/composables/automation-hub-page-contracts";
 
 defineProps<{
   orderedCards: readonly AutomationHubCard[];

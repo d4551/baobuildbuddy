@@ -10,9 +10,7 @@ import {
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
 
-function queryValueToString(
-  value: string | null | Array<string | null> | undefined,
-): string {
+function queryValueToString(value: string | null | Array<string | null> | undefined): string {
   if (Array.isArray(value)) {
     const [firstValue] = value;
     return typeof firstValue === "string" ? firstValue : "";
@@ -198,9 +196,7 @@ function createStudiosIndexDerivedState(input: ReturnType<typeof createStudiosIn
   };
 }
 
-function createStudiosIndexFilterOptions(
-  studios: ReturnType<typeof useStudio>["studios"],
-) {
+function createStudiosIndexFilterOptions(studios: ReturnType<typeof useStudio>["studios"]) {
   const studioTypeOptions = computed(() =>
     sortUniqueOptions(studios.value.map((studio) => studio.type)),
   );
@@ -243,7 +239,10 @@ function createStudiosFilteredResults(input: {
 }
 
 function filterStudios(input: {
-  entries: Array<{ searchableText: string; studio: ReturnType<typeof useStudio>["studios"]["value"][number] }>;
+  entries: Array<{
+    searchableText: string;
+    studio: ReturnType<typeof useStudio>["studios"]["value"][number];
+  }>;
   filters: {
     remoteWork: boolean;
     size: string;
@@ -341,7 +340,8 @@ export async function useStudiosIndexPage() {
     searchQuery: runtime.searchQuery,
     showMoreStudios: () => actions.showMoreStudios(derived.filteredStudios.value.length),
     showPreviewModal: runtime.showPreviewModal,
-    startInterview: (studioId: string) => actions.startInterview(studioId, derived.routeStudioId.value),
+    startInterview: (studioId: string) =>
+      actions.startInterview(studioId, derived.routeStudioId.value),
     studioSizeOptions: derived.studioSizeOptions,
     studioTypeOptions: derived.studioTypeOptions,
     totalStudios: derived.totalStudios,

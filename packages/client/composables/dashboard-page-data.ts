@@ -1,15 +1,8 @@
-import type {
-  DailyChallenge,
-  DashboardStats,
-  UserGamificationData,
-} from "@bao/shared";
+import type { DailyChallenge, DashboardStats, UserGamificationData } from "@bao/shared";
 import { isRecord } from "@bao/shared";
 import { toUserProfile } from "~/composables/api-normalizer-user";
 import { requireValue } from "~/composables/async-flow";
-import {
-  DASHBOARD_ACTIVITY_FALLBACK_KEY,
-  DASHBOARD_ERROR_KEYS,
-} from "~/constants/dashboard-copy";
+import { DASHBOARD_ACTIVITY_FALLBACK_KEY, DASHBOARD_ERROR_KEYS } from "~/constants/dashboard-copy";
 import { DASHBOARD_RECENT_ACTIVITY_LIMIT } from "~/constants/dashboard-core";
 import type {
   DashboardActivity,

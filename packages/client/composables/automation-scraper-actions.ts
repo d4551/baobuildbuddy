@@ -5,10 +5,7 @@ import type { Ref } from "vue";
 import type { Router } from "vue-router";
 import { settlePromise } from "~/composables/async-flow";
 import { toIsoTimestamp } from "~/composables/automation-scraper-bootstrap";
-import type {
-  AutomationRunEnvelope,
-  ScrapePendingAction,
-} from "~/types/automation-scraper";
+import type { AutomationRunEnvelope, ScrapePendingAction } from "~/types/automation-scraper";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 
@@ -32,10 +29,24 @@ type AutomationScraperActionsInput = {
   triggerScrape: (input: { target: AutomationScrapeTarget }) => Promise<AutomationRunEnvelope>;
 };
 
-function createScheduleScrapeRun(
-  input: AutomationScraperActionsInput,
-  t: ComposerTranslation,
-) {
+type AutomationScraperRunStateStore = Pick<
+  AutomationScraperActionsInput,
+  "latestRuns" | "pendingAction" | "runMessages" | "runStates"
+>;
+
+type AutomationScraperSuccessStore = Pick<
+  AutomationScraperActionsInput,
+  "lastRunAt" | "latestRuns" | "runMessages" | "runStates"
+>;
+
+type AutomationScraperRefreshInput = Pick<
+  AutomationScraperActionsInput,
+  "refreshCapabilityAudit" | "refreshScraperJobs"
+> & {
+  target: AutomationScrapeTarget;
+};
+
+function createScheduleScrapeRun(input: AutomationScraperActionsInput, t: ComposerTranslation) {
   return async (target: AutomationScrapeTarget): Promise<void> => {
     const runAt = toIsoTimestamp(input.scheduledRunAt[target]);
     if (!runAt) {
@@ -139,9 +150,7 @@ function resolveRunFailureKey(target: AutomationScrapeTarget): string {
     : "automation.scraper.errors.jobFailed";
 }
 
-function resolveRewardAction(
-  target: AutomationScrapeTarget,
-): "scraperStudios" | "scraperJobs" {
+function resolveRewardAction(target: AutomationScrapeTarget): "scraperStudios" | "scraperJobs" {
   return target === "studios" ? "scraperStudios" : "scraperJobs";
 }
 
@@ -151,10 +160,7 @@ function resolveRewardToastKey(target: AutomationScrapeTarget): string {
     : "automation.scraper.toasts.jobReward";
 }
 
-function resolveCompletionMessageKey(
-  target: AutomationScrapeTarget,
-  hasReward: boolean,
-): string {
+function resolveCompletionMessageKey(target: AutomationScrapeTarget, hasReward: boolean): string {
   if (target === "studios") {
     return hasReward
       ? "automation.scraper.messages.studioCompletedWithXp"
@@ -167,15 +173,7 @@ function resolveCompletionMessageKey(
 
 function prepareManualRun(
   target: AutomationScrapeTarget,
-  {
-    latestRuns,
-    pendingAction,
-    runMessages,
-    runStates,
-  }: Pick<
-    AutomationScraperActionsInput,
-    "latestRuns" | "pendingAction" | "runMessages" | "runStates"
-  >,
+  { latestRuns, pendingAction, runMessages, runStates }: AutomationScraperRunStateStore,
 ): void {
   runStates[target] = "running";
   runMessages[target] = "";
@@ -188,11 +186,7 @@ function applyRunFailure(
     error,
     failureKey,
     target,
-  }: {
-    error: unknown;
-    failureKey: string;
-    target: AutomationScrapeTarget;
-  },
+  }: { error: unknown; failureKey: string; target: AutomationScrapeTarget },
   { runMessages, runStates }: Pick<AutomationScraperActionsInput, "runMessages" | "runStates">,
   t: ComposerTranslation,
 ): void {
@@ -200,16 +194,11 @@ function applyRunFailure(
   runMessages[target] = getErrorMessage(error, t(failureKey));
 }
 
-async function refreshManualRunArtifacts(
-  {
-    refreshCapabilityAudit,
-    refreshScraperJobs,
-    target,
-  }: Pick<
-    AutomationScraperActionsInput,
-    "refreshCapabilityAudit" | "refreshScraperJobs"
-  > & { target: AutomationScrapeTarget },
-): Promise<void> {
+async function refreshManualRunArtifacts({
+  refreshCapabilityAudit,
+  refreshScraperJobs,
+  target,
+}: AutomationScraperRefreshInput): Promise<void> {
   if (target !== "studios") {
     await refreshScraperJobs();
   }
@@ -221,20 +210,8 @@ function applyRunSuccess(
     completedRun,
     reward,
     target,
-  }: {
-    completedRun: AutomationRunEnvelope;
-    reward: number | null;
-    target: AutomationScrapeTarget;
-  },
-  {
-    lastRunAt,
-    latestRuns,
-    runMessages,
-    runStates,
-  }: Pick<
-    AutomationScraperActionsInput,
-    "lastRunAt" | "latestRuns" | "runMessages" | "runStates"
-  >,
+  }: { completedRun: AutomationRunEnvelope; reward: number | null; target: AutomationScrapeTarget },
+  { lastRunAt, latestRuns, runMessages, runStates }: AutomationScraperSuccessStore,
   t: ComposerTranslation,
 ): void {
   runStates[target] = "success";

@@ -1,8 +1,4 @@
-import {
-  AI_PROVIDER_ID_LIST,
-  type AIProviderType,
-  type DashboardStats,
-} from "@bao/shared";
+import { AI_PROVIDER_ID_LIST, type AIProviderType, type DashboardStats } from "@bao/shared";
 import type { ClientProviderTestResult } from "~/utils/ai-control-plane";
 
 export type SetupProvider = AIProviderType;

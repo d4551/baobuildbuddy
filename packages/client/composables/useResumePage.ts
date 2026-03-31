@@ -1,8 +1,5 @@
 import { useI18n } from "vue-i18n";
-import {
-  RESUME_TABS,
-  type ResumeTabId,
-} from "~/components/resume/resume-page-contracts";
+import { RESUME_TABS, type ResumeTabId } from "~/components/resume/resume-page-contracts";
 import { useResumePageActions } from "~/composables/resume-page-actions";
 import {
   RESUME_CREATE_DIALOG_TITLE_ID,

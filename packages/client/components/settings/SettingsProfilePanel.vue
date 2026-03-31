@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import {
-  getSaveStateBadgeClass,
-  getSaveStateLabelKey,
-  type SaveState,
-} from "./save-state";
+import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 
 const props = defineProps<{
   profileSaveState: SaveState;

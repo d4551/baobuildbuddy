@@ -38,10 +38,10 @@ export const SHELL_MAIN_INNER_CLASS =
 /** Root app drawer contract. */
 export const SHELL_DRAWER_CLASS = "min-h-screen lg:drawer-open";
 
-/** Drawer content wrapper containing navbar, main, and toast host. */
+/** Drawer content container containing navbar, main, and toast host. */
 export const SHELL_DRAWER_CONTENT_CLASS = "flex min-h-screen flex-col";
 
-/** Drawer side wrapper. */
+/** Drawer side container. */
 export const SHELL_DRAWER_SIDE_CLASS = "z-20 is-drawer-close:overflow-visible";
 
 /** Shared navbar classes for authenticated shell pages. */
@@ -52,7 +52,8 @@ export const SHELL_SIDEBAR_ASIDE_CLASS =
   "flex min-h-full flex-col items-start bg-base-200 transition-all duration-200 is-drawer-close:w-14 is-drawer-open:w-64";
 
 /** Shared sidebar menu layout classes. */
-export const SHELL_SIDEBAR_MENU_CLASS = "menu menu-sm flex min-h-0 w-full flex-1 flex-col gap-1 p-4";
+export const SHELL_SIDEBAR_MENU_CLASS =
+  "menu menu-sm flex min-h-0 w-full flex-1 flex-col gap-1 p-4";
 
 /** Skip link contract for keyboard navigation. */
 export const SHELL_SKIP_LINK_CLASS =

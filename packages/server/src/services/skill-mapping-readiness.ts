@@ -35,7 +35,8 @@ const buildEmptyReadinessAssessment = (): ReadinessAssessment => ({
 
 const calculateCategoryScore = (skills: SkillMapping[]): number => {
   if (skills.length === 0) return 0;
-  const averageConfidence = skills.reduce((sum, skill) => sum + skill.confidence, 0) / skills.length;
+  const averageConfidence =
+    skills.reduce((sum, skill) => sum + skill.confidence, 0) / skills.length;
   const countBonus = Math.min(20, skills.length * 2);
   return Math.min(100, Math.round(averageConfidence + countBonus));
 };
@@ -116,15 +117,35 @@ const getImprovementSuggestions = (
 
 const getNextSteps = (overall: number): SkillReadinessNextStepId[] => {
   if (overall >= SCORE_PASS_THRESHOLD) {
-    return ["step_apply_roles", "step_network_industry", "step_prepare_interviews", "step_polish_linkedin"];
+    return [
+      "step_apply_roles",
+      "step_network_industry",
+      "step_prepare_interviews",
+      "step_polish_linkedin",
+    ];
   }
   if (overall >= SCORE_WARNING_THRESHOLD) {
-    return ["step_complete_portfolio", "step_map_skills_15", "step_evidence_top", "step_research_targets"];
+    return [
+      "step_complete_portfolio",
+      "step_map_skills_15",
+      "step_evidence_top",
+      "step_research_targets",
+    ];
   }
   if (overall >= SCORE_DEVELOPING_THRESHOLD) {
-    return ["step_map_skills_10", "step_start_portfolio", "step_evidence_abilities", "step_explore_pathways"];
+    return [
+      "step_map_skills_10",
+      "step_start_portfolio",
+      "step_evidence_abilities",
+      "step_explore_pathways",
+    ];
   }
-  return ["step_map_skills_5", "step_explore_categories", "step_learn_careers", "step_setup_profile"];
+  return [
+    "step_map_skills_5",
+    "step_explore_categories",
+    "step_learn_careers",
+    "step_setup_profile",
+  ];
 };
 
 const buildReadinessAssessment = (metrics: ReadinessMetrics): ReadinessAssessment => ({
@@ -162,9 +183,7 @@ const buildReadinessAssessment = (metrics: ReadinessMetrics): ReadinessAssessmen
   nextSteps: getNextSteps(metrics.overallScore),
 });
 
-export const buildSkillReadinessAssessment = (
-  mappings: SkillMapping[],
-): ReadinessAssessment =>
+export const buildSkillReadinessAssessment = (mappings: SkillMapping[]): ReadinessAssessment =>
   mappings.length === 0
     ? buildEmptyReadinessAssessment()
     : buildReadinessAssessment(calculateReadinessMetrics(mappings));

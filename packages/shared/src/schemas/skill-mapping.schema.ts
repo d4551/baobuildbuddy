@@ -75,7 +75,7 @@ export const readinessAssessmentSchema = z.object({
 export const careerPathwaysSchema = z.array(careerPathwaySchema);
 
 /**
- * Type aliases for compatibility between shared schema and runtime types.
+ * Type aliases that keep shared schema and runtime types aligned.
  */
 export type ReadinessAssessmentSchema = ReadinessAssessment;
 export type CategoryAssessmentSchema = CategoryAssessment;

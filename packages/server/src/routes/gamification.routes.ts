@@ -1,11 +1,14 @@
 import {
   API_ERROR_CHALLENGE_NOT_FOUND,
   API_MESSAGE_CHALLENGE_COMPLETED,
+  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CREATED,
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared";
-import { Elysia, t } from "elysia";
+import { StandardSchemaV1 } from "baobox";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { gamificationService } from "../services/gamification-service";
 
 export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["Gamification"] })
@@ -14,7 +17,12 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["
   })
   .post(
     "/award-xp",
-    async ({ body }) => {
+    async ({ body, set }) => {
+      if (!(typeof body.amount === "number" && typeof body.reason === "string")) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return { error: "amount and reason are required." };
+      }
+
       const levelUp = await gamificationService.awardXP(body.amount, body.reason);
       const progress = await gamificationService.getProgress();
 
@@ -30,10 +38,12 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["
       };
     },
     {
-      body: t.Object({
-        amount: t.Number({ minimum: 0, maximum: 10000 }),
-        reason: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-      }),
+      body: StandardSchemaV1(
+        Type.Object({
+          amount: Type.Number({ minimum: 0, maximum: 10000 }),
+          reason: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+        }),
+      ),
     },
   )
   .get("/achievements", async () => {
@@ -54,6 +64,11 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["
   .post(
     "/challenges/:id/complete",
     async ({ params, set }) => {
+      if (!params.id) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return { message: API_ERROR_CHALLENGE_NOT_FOUND, completed: false };
+      }
+
       const completed = await gamificationService.completeChallenge(params.id);
 
       if (!completed) {
@@ -72,9 +87,11 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["
       };
     },
     {
-      params: t.Object({
-        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-      }),
+      params: StandardSchemaV1(
+        Type.Object({
+          id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+        }),
+      ),
     },
   )
   .get("/weekly", async () => {

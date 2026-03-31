@@ -1,5 +1,8 @@
 import type { PortfolioMetadata, PortfolioProject } from "@bao/shared";
-import { addPortfolioPageNumbers, createPortfolioContext } from "./export-service-portfolio-context";
+import {
+  addPortfolioPageNumbers,
+  createPortfolioContext,
+} from "./export-service-portfolio-context";
 import {
   renderPortfolioCoverPage,
   startPortfolioProjectsSection,

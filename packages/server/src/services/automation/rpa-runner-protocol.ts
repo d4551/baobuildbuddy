@@ -1,13 +1,5 @@
-import type {
-  ErrorEnvelope,
-  RpaRunEvent,
-  RpaRunResult,
-} from "@bao/shared";
-import {
-  DEFAULT_AUTOMATION_SETTINGS,
-  rpaRunEventSchema,
-  safeParseJson,
-} from "@bao/shared";
+import type { ErrorEnvelope, RpaRunEvent, RpaRunResult } from "@bao/shared";
+import { DEFAULT_AUTOMATION_SETTINGS, rpaRunEventSchema, safeParseJson } from "@bao/shared";
 import { config } from "../../config/env";
 import type {
   AutomationScriptExecutionResult,

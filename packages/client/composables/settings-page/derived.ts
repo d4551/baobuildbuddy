@@ -9,10 +9,7 @@ import {
   resolveBrandSettings,
 } from "@bao/shared";
 import { computed } from "vue";
-import {
-  resolveLocalProviderState,
-  resolveProviderModelOptions,
-} from "~/utils/ai-control-plane";
+import { resolveLocalProviderState, resolveProviderModelOptions } from "~/utils/ai-control-plane";
 import type { AIRoutingDraft, TranslateFn } from "./shared";
 
 type DerivedStateInput = {
@@ -86,8 +83,14 @@ function resolveRoutingOptions(input: DerivedStateInput, provider: AIProviderTyp
 function createRoutingModelOptions(input: DerivedStateInput) {
   return computed(() => ({
     chat: resolveRoutingOptions(input, input.aiRoutingDraft.chat.provider),
-    interviewQuestions: resolveRoutingOptions(input, input.aiRoutingDraft.interviewQuestions.provider),
-    interviewFeedback: resolveRoutingOptions(input, input.aiRoutingDraft.interviewFeedback.provider),
+    interviewQuestions: resolveRoutingOptions(
+      input,
+      input.aiRoutingDraft.interviewQuestions.provider,
+    ),
+    interviewFeedback: resolveRoutingOptions(
+      input,
+      input.aiRoutingDraft.interviewFeedback.provider,
+    ),
     resume: resolveRoutingOptions(input, input.aiRoutingDraft.resume.provider),
     coverLetter: resolveRoutingOptions(input, input.aiRoutingDraft.coverLetter.provider),
     emailResponse: resolveRoutingOptions(input, input.aiRoutingDraft.emailResponse.provider),
@@ -161,7 +164,8 @@ function createBrandDraft(input: DerivedStateInput) {
         defaultTitle:
           input.brandForm.defaultTitle.trim() || input.brandDefaults.content.defaultTitle,
         defaultDescription:
-          input.brandForm.defaultDescription.trim() || input.brandDefaults.content.defaultDescription,
+          input.brandForm.defaultDescription.trim() ||
+          input.brandDefaults.content.defaultDescription,
         contentOverrides: parseBrandContentOverrides(input),
       },
     }),
@@ -180,6 +184,8 @@ export function createSettingsPageDerivedState(input: DerivedStateInput) {
     providerConfiguredById: createProviderConfiguredById(input),
     parseBrandContentOverrides: () => parseBrandContentOverrides(input),
     brandDraft,
-    brandOverrideCount: computed(() => Object.keys(brandDraft.value.content.contentOverrides).length),
+    brandOverrideCount: computed(
+      () => Object.keys(brandDraft.value.content.contentOverrides).length,
+    ),
   };
 }

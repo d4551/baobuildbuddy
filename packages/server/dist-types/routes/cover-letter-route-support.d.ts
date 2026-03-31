@@ -24,7 +24,7 @@ export declare const createCoverLetter: (body: {
         position: string;
         jobInfo: Record<string, unknown>;
         content: Record<string, unknown>;
-        template: "professional" | "creative" | "gaming" | "executive" | "technical";
+        template: "creative" | "gaming" | "executive" | "technical" | "professional";
     };
     statusCode: number;
 }>;

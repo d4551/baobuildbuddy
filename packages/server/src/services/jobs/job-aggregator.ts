@@ -3,11 +3,7 @@
  * Orchestrates job fetching, caching, and searching across multiple providers.
  */
 
-import type {
-  Job,
-  JobFilters,
-  JobSearchResult,
-} from "@bao/shared";
+import type { Job, JobFilters, JobSearchResult } from "@bao/shared";
 import {
   JOB_AGGREGATOR_CACHE_EXPIRY_MS,
   JOB_QUERY_DEFAULT_LIMIT,
@@ -32,7 +28,6 @@ import {
   gamesJobsDirectProvider,
   grackleProvider,
   hitmarkerPortalProvider,
-  hitmarkerProvider,
   pocketGamerProvider,
   remoteGameJobsProvider,
   workWithIndiesProvider,
@@ -50,7 +45,6 @@ export class JobAggregator {
     this.providers = [
       new GreenhouseProvider(),
       new LeverProvider(),
-      hitmarkerProvider,
       hitmarkerPortalProvider,
       grackleProvider,
       workWithIndiesProvider,
@@ -78,9 +72,7 @@ export class JobAggregator {
     });
   }
 
-  private async saveOrUpdateJob(
-    rawJob: RawJob,
-  ): Promise<"new" | "updated" | "skipped"> {
+  private async saveOrUpdateJob(rawJob: RawJob): Promise<"new" | "updated" | "skipped"> {
     const job = await rawJobToInsert(rawJob);
     if (!job.contentHash) {
       return "skipped";

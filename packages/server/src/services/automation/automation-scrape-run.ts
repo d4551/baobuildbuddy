@@ -19,7 +19,11 @@ import { markRunFailed } from "./automation-run-persistence";
 import { createRpaCapabilityAuditReport } from "./automation-scrape-audit";
 import { loadAutomationSettings } from "./automation-settings-support";
 import type { CreateProgressEvent } from "./automation-service-contracts";
-import { buildScrapeInput, normalizeScrapeTarget, resolveScrapeAction } from "./automation-run-inputs";
+import {
+  buildScrapeInput,
+  normalizeScrapeTarget,
+  resolveScrapeAction,
+} from "./automation-run-inputs";
 
 const DEFAULT_PROGRESS = 0;
 

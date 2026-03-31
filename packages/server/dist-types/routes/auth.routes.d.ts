@@ -61,7 +61,7 @@ export declare const authRoutes: Elysia<"/auth", {
     auth: {
         init: {
             post: {
-                body: {
+                body: {} & {
                     setupToken?: string | undefined;
                 };
                 params: {};

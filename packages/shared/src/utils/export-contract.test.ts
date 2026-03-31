@@ -8,9 +8,10 @@ import {
 
 describe("export contract", () => {
   test("collects only defined non-empty string values", () => {
-    expect(
-      collectDefinedStringValues(["alpha", undefined, "", " beta ", "   "]),
-    ).toEqual(["alpha", " beta "]);
+    expect(collectDefinedStringValues(["alpha", undefined, "", " beta ", "   "])).toEqual([
+      "alpha",
+      " beta ",
+    ]);
   });
 
   test("resolves the explicit resume template first", () => {

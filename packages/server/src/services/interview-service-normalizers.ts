@@ -7,11 +7,7 @@ import type {
 } from "@bao/shared";
 import type { DBInterviewSession } from "./interview-service-contracts";
 import { normalizeConfig } from "./interview-service-config-normalizers";
-import {
-  isRecord,
-  parseNumber,
-  parseStringArray,
-} from "./interview-service-value-parsers";
+import { isRecord, parseNumber, parseStringArray } from "./interview-service-value-parsers";
 
 const questionTypePattern = new Set<string>([
   "behavioral",

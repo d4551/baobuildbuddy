@@ -70,7 +70,7 @@ const isHitmarkerResponse = (value: unknown): value is HitmarkerResponse =>
       (Array.isArray(value.data) && value.data.every(isHitmarkerJob))));
 
 const resolveHitmarkerJobs = (payload: HitmarkerResponse): HitmarkerJob[] =>
-  Array.isArray(payload) ? payload : payload.jobs ?? payload.data ?? [];
+  Array.isArray(payload) ? payload : (payload.jobs ?? payload.data ?? []);
 
 const resolveCompanyName = (company: HitmarkerJob["company"], fallback: string): string => {
   if (typeof company === "string" && company.length > 0) {

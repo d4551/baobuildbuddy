@@ -139,13 +139,9 @@ test("GET /api/ai/models preserves configured providers when provider probing fa
   expect(res.body.providerDiagnostics?.openai?.code).toBe("error");
   expect(res.body.providerDiagnostics?.openai?.message).toBe("probe failed");
   expect(res.body.providerDiagnostics?.claude?.code).toBe("unconfigured");
-  expect(
-    res.body.providers?.find((provider) => provider.id === "local")?.health,
-  ).toBe("degraded");
-  expect(
-    res.body.providers?.find((provider) => provider.id === "openai")?.health,
-  ).toBe("degraded");
-  expect(
-    res.body.providers?.find((provider) => provider.id === "claude")?.health,
-  ).toBe("unconfigured");
+  expect(res.body.providers?.find((provider) => provider.id === "local")?.health).toBe("degraded");
+  expect(res.body.providers?.find((provider) => provider.id === "openai")?.health).toBe("degraded");
+  expect(res.body.providers?.find((provider) => provider.id === "claude")?.health).toBe(
+    "unconfigured",
+  );
 });

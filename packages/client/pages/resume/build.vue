@@ -52,8 +52,6 @@ const displayedStudioName = computed(() => selectedStudio.value?.name ?? studioN
 
 const canProceedTarget = computed(() => targetRole.value.trim().length > 0);
 
-const currentQuestion = computed(() => aiQuestions.value[currentQuestionIndex.value] ?? null);
-
 const progressValue = computed(() => {
   if (phase.value === "target") return 0;
   if (phase.value === "generating" || phase.value === "synthesizing") return 50;
@@ -177,170 +175,54 @@ function backToTarget() {
 </script>
 
 <template>
-  <div class="container mx-auto max-w-3xl py-8">
-    <h1 class="text-3xl font-bold mb-2">{{ t("resumeBuildPage.title") }}</h1>
-    <p class="text-base-content/70 mb-8">
-      {{ t("resumeBuildPage.subtitle") }}
-    </p>
+  <PageScaffold tag="section" width-token="narrow" spacing-token="comfortable" labelled-by="resume-build-title">
+    <PageHeaderBlock
+      title-id="resume-build-title"
+      :title="t('resumeBuildPage.title')"
+      :description="t('resumeBuildPage.subtitle')"
+    />
 
     <progress
-      class="progress progress-primary w-full mb-8"
+      class="progress progress-primary mb-8 w-full"
       :value="progressValue"
       max="100"
       :aria-label="t('resumeBuildPage.progressAria')"
     ></progress>
 
-    <div v-if="phase === 'target'" class="card bg-base-200">
-      <div class="card-body">
-        <h2 class="card-title">{{ t("resumeBuildPage.target.title") }}</h2>
-        <p class="text-sm text-base-content/70 mb-4">
-          {{ t("resumeBuildPage.target.description") }}
-        </p>
+    <ResumeBuildTargetCard
+      v-if="phase === 'target'"
+      v-model:target-role="targetRole"
+      v-model:studio-name="studioName"
+      v-model:studio-id="studioId"
+      v-model:experience-level="experienceLevel"
+      :studios="studios"
+      :experience-level-options="experienceLevelOptions"
+      :can-proceed-target="canProceedTarget"
+      :error-message="errorMessage"
+      :t="t"
+      @generate="generateQuestions"
+    />
 
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("resumeBuildPage.target.roleLegend") }}</legend>
-          <label for="target-role" class="label">{{ t("resumeBuildPage.target.roleLabel") }}</label>
-          <input
-            id="target-role"
-            v-model="targetRole"
-            type="text"
-            class="input w-full"
-            :placeholder="t('resumeBuildPage.target.rolePlaceholder')"
-            :aria-label="t('resumeBuildPage.target.roleAria')"
-          />
-        </fieldset>
+    <ResumeBuildStatusCard
+      v-else-if="phase === 'generating'"
+      :loading-label="t('resumeBuildPage.generatingLabel')"
+    />
 
-        <fieldset class="fieldset mt-4">
-          <legend class="fieldset-legend">{{ t("resumeBuildPage.target.studioLegend") }}</legend>
-          <label for="studio-select" class="label">{{ t("resumeBuildPage.target.studioLabel") }}</label>
-          <select
-            id="studio-select"
-            v-model="studioId"
-            class="select w-full"
-            :aria-label="t('resumeBuildPage.target.studioAria')"
-          >
-            <option value="">{{ t("resumeBuildPage.target.noStudioOption") }}</option>
-            <option v-for="s in studios" :key="s.id" :value="s.id">
-              {{ s.name }}
-            </option>
-          </select>
-          <label for="studio-name" class="label mt-2">{{ t("resumeBuildPage.target.studioNameLabel") }}</label>
-          <input
-            id="studio-name"
-            v-model="studioName"
-            type="text"
-            class="input w-full"
-            :placeholder="t('resumeBuildPage.target.studioNamePlaceholder')"
-            :aria-label="t('resumeBuildPage.target.studioNameAria')"
-          />
-        </fieldset>
+    <ResumeBuildQuestionsCard
+      v-else-if="phase === 'questions'"
+      v-model:answers="answers"
+      :ai-questions="aiQuestions"
+      :current-question-index="currentQuestionIndex"
+      :error-message="errorMessage"
+      :t="t"
+      @previous="prevQuestion"
+      @next="nextQuestion"
+      @change-target="backToTarget"
+    />
 
-        <fieldset class="fieldset mt-4">
-          <legend class="fieldset-legend">{{ t("resumeBuildPage.target.experienceLegend") }}</legend>
-          <select
-            id="experience-level"
-            v-model="experienceLevel"
-            class="select w-full"
-            :aria-label="t('resumeBuildPage.target.experienceAria')"
-          >
-            <option value="">{{ t("resumeBuildPage.experienceLevels.any") }}</option>
-            <option
-              v-for="option in experienceLevelOptions"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ t(option.labelKey) }}
-            </option>
-          </select>
-        </fieldset>
-
-        <p v-if="errorMessage" class="text-error text-sm mt-2">{{ errorMessage }}</p>
-
-        <div class="card-actions justify-end mt-6">
-          <button
-            class="btn btn-primary"
-            :disabled="!canProceedTarget"
-            :aria-label="t('resumeBuildPage.target.generateAria')"
-            @click="generateQuestions"
-          >
-            {{ t("resumeBuildPage.target.generateButton") }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-else-if="phase === 'generating'" class="card bg-base-200">
-      <div class="card-body items-center justify-center min-h-48">
-        <span class="loading loading-spinner loading-lg text-primary"></span>
-        <p class="text-base-content/70 mt-4">{{ t("resumeBuildPage.generatingLabel") }}</p>
-      </div>
-    </div>
-
-    <div v-else-if="phase === 'questions'" class="card bg-base-200">
-      <div class="card-body">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="card-title">
-            {{
-              t("resumeBuildPage.questions.title", {
-                current: currentQuestionIndex + 1,
-                total: aiQuestions.length,
-              })
-            }}
-          </h2>
-          <button
-            class="btn btn-ghost btn-sm"
-            :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
-            @click="backToTarget"
-          >
-            {{ t("resumeBuildPage.questions.changeTargetButton") }}
-          </button>
-        </div>
-
-        <fieldset v-if="currentQuestion" class="fieldset">
-          <legend class="fieldset-legend">{{ currentQuestion.category }}</legend>
-          <label :for="`answer-${currentQuestion.id}`" class="label">{{ currentQuestion.question }}</label>
-          <textarea
-            :id="`answer-${currentQuestion.id}`"
-            v-model="answers[currentQuestion.id]"
-            class="textarea w-full"
-            rows="4"
-            :placeholder="t('resumeBuildPage.questions.answerPlaceholder', { question: currentQuestion.question })"
-            :aria-label="t('resumeBuildPage.questions.answerAria', { question: currentQuestion.question })"
-          />
-        </fieldset>
-
-        <p v-if="errorMessage" class="text-error text-sm mt-2">{{ errorMessage }}</p>
-
-        <div class="card-actions justify-between mt-6">
-          <button
-            class="btn btn-ghost"
-            :disabled="currentQuestionIndex === 0"
-            :aria-label="t('resumeBuildPage.questions.backAria')"
-            @click="prevQuestion"
-          >
-            {{ t("resumeBuildPage.questions.backButton") }}
-          </button>
-          <button
-            class="btn btn-primary"
-            :disabled="!answers[currentQuestion?.id ?? '']?.trim()"
-            :aria-label="t('resumeBuildPage.questions.nextAria')"
-            @click="nextQuestion"
-          >
-            {{
-              currentQuestionIndex < aiQuestions.length - 1
-                ? t("resumeBuildPage.questions.nextButton")
-                : t("resumeBuildPage.questions.createResumeButton")
-            }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-else-if="phase === 'synthesizing'" class="card bg-base-200">
-      <div class="card-body items-center justify-center min-h-48">
-        <span class="loading loading-spinner loading-lg text-primary"></span>
-        <p class="text-base-content/70 mt-4">{{ t("resumeBuildPage.synthesizingLabel") }}</p>
-      </div>
-    </div>
-  </div>
+    <ResumeBuildStatusCard
+      v-else-if="phase === 'synthesizing'"
+      :loading-label="t('resumeBuildPage.synthesizingLabel')"
+    />
+  </PageScaffold>
 </template>

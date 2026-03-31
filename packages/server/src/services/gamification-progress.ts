@@ -60,12 +60,15 @@ export function getNumericStat(stats: NumericGamificationStats, key: string): nu
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
+const STREAK_MULTIPLIER_STEPS = [
+  [30, 3.0],
+  [14, 2.0],
+  [7, 1.5],
+  [3, 1.25],
+] as const;
+
 export function getStreakMultiplier(currentStreak: number): number {
-  if (currentStreak >= 30) return 3.0;
-  if (currentStreak >= 14) return 2.0;
-  if (currentStreak >= 7) return 1.5;
-  if (currentStreak >= 3) return 1.25;
-  return 1.0;
+  return STREAK_MULTIPLIER_STEPS.find(([threshold]) => currentStreak >= threshold)?.[1] ?? 1.0;
 }
 
 export function areAchievementRequirementsMet(
@@ -73,12 +76,15 @@ export function areAchievementRequirementsMet(
   pendingStats: NumericGamificationStats,
   existingStats: NumericGamificationStats,
 ): boolean {
-  return Object.entries(achievement.requirements).every(([key, requiredValue]) => {
+  for (const [key, requiredValue] of Object.entries(achievement.requirements)) {
     const pendingValue = getNumericStat(pendingStats, key);
     const existingValue = getNumericStat(existingStats, key);
     const statValue = pendingValue || existingValue;
-    return statValue >= requiredValue;
-  });
+    if (statValue < requiredValue) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function getDefinedChallenges(): DailyChallenge[] {
@@ -150,14 +156,12 @@ export function countCompletedChallenges(
   start: Date,
   end: Date,
 ): number {
-  let challengesCompleted = 0;
-  for (const [dateKey, completed] of Object.entries(dailyChallenges)) {
+  return Object.entries(dailyChallenges).reduce((total, [dateKey, completed]) => {
     const date = new Date(dateKey);
-    if (date >= start && date <= end && Array.isArray(completed)) {
-      challengesCompleted += completed.length;
-    }
-  }
-  return challengesCompleted;
+    return date >= start && date <= end && Array.isArray(completed)
+      ? total + completed.length
+      : total;
+  }, 0);
 }
 
 export function buildWeeklyProgress(
@@ -188,19 +192,8 @@ export function buildMonthlyStats(input: {
   const actionHistory = typeSafeStats(input.stats).actionHistory;
   const now = new Date();
   const monthAgo = new Date(now.getTime() - 30 * MS_PER_DAY);
-  const monthActions = actionHistory.filter((action) => {
-    const timestamp = new Date(action.timestamp);
-    return timestamp >= monthAgo && timestamp <= now;
-  });
+  const monthActions = filterActionsByDate(actionHistory, monthAgo, now);
   const totalXP = monthActions.reduce((sum, action) => sum + (action.xpGained || 0), 0);
-
-  let challengesCompleted = 0;
-  for (const [dateKey, completed] of Object.entries(input.dailyChallenges)) {
-    const date = new Date(dateKey);
-    if (date >= monthAgo && date <= now && Array.isArray(completed)) {
-      challengesCompleted += completed.length;
-    }
-  }
 
   return {
     totalXP,
@@ -208,7 +201,7 @@ export function buildMonthlyStats(input: {
     achievementsUnlocked: monthActions.filter((action) =>
       action.action?.startsWith("Achievement unlocked:"),
     ).length,
-    challengesCompleted,
+    challengesCompleted: countCompletedChallenges(input.dailyChallenges, monthAgo, now),
     actionsCount: monthActions.length,
     streakDays: Math.min(input.currentStreak, 30),
   };

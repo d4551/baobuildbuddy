@@ -120,7 +120,9 @@ export const completeEmailResponseRun = async (
         provider: result.provider,
         model: result.model,
         delivered: result.delivery.delivered,
-        ...(result.delivery.recipientEmail ? { recipientEmail: result.delivery.recipientEmail } : {}),
+        ...(result.delivery.recipientEmail
+          ? { recipientEmail: result.delivery.recipientEmail }
+          : {}),
         ...(result.delivery.deliveredAt ? { deliveredAt: result.delivery.deliveredAt } : {}),
         ...(result.delivery.messageId ? { messageId: result.delivery.messageId } : {}),
       },

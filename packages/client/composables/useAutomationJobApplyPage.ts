@@ -1,8 +1,4 @@
-import {
-  API_ENDPOINTS,
-  APP_ROUTE_BUILDERS,
-  type RpaRunExecutionEnvelope,
-} from "@bao/shared";
+import { API_ENDPOINTS, APP_ROUTE_BUILDERS, type RpaRunExecutionEnvelope } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 import {
@@ -59,7 +55,9 @@ function useAutomationJobApplyDependencies() {
   const { triggerJobApply, scheduleJobApply } = useAutomation();
   const requestUrl = useRequestURL();
   const apiBase = String(useRuntimeConfig().public.apiBase || "/");
-  const runStream = useAutomationRunStream();
+  const runStream = useAutomationRunStream({
+    fallbackMessage: t("automation.jobApply.stream.startErrorFallback"),
+  });
 
   return {
     apiBase,
@@ -73,10 +71,7 @@ function useAutomationJobApplyDependencies() {
   };
 }
 
-async function useAutomationJobApplyBootstrap(input: {
-  apiBase: string;
-  requestUrl: URL;
-}) {
+async function useAutomationJobApplyBootstrap(input: { apiBase: string; requestUrl: URL }) {
   const { data: resumesData } = await useFetch<ResumeSelectOption[]>(
     resolveApiEndpoint(input.apiBase, input.requestUrl, API_ENDPOINTS.resumes),
     {

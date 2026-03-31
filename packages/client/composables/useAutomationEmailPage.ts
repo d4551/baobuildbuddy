@@ -31,12 +31,10 @@ interface EmailActionResult {
   deliveredAt?: string;
   messageId?: string;
 }
-
 const DATE_FORMAT_OPTIONS = {
   dateStyle: "medium",
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
-
 const EMAIL_TONE_OPTIONS: readonly EmailResponseTone[] = [
   "professional",
   "friendly",
@@ -76,21 +74,10 @@ const createResolvedRecipientEmailComputed = (form: EmailFormState) =>
     const sender = form.sender.trim();
     return isValidEmail(sender) ? sender : "";
   });
-
-const createToLocalizedDateTime = (
-  localeValue: () => unknown,
-  fallbackLocaleValue: () => unknown,
-) => {
-  return (value: string): string => {
-    const formatted = formatDateWithLocale(
-      value,
-      localeValue(),
-      fallbackLocaleValue(),
-      DATE_FORMAT_OPTIONS,
-    );
-    return formatted ?? value;
-  };
-};
+const createToLocalizedDateTime =
+  (localeValue: () => unknown, fallbackLocaleValue: () => unknown) =>
+  (value: string): string =>
+    formatDateWithLocale(value, localeValue(), fallbackLocaleValue(), DATE_FORMAT_OPTIONS) ?? value;
 
 const resolveScheduledRunAt = (run: RpaRunExecutionEnvelope): string => {
   const runInput = run.input;
@@ -113,7 +100,6 @@ const toIsoTimestamp = (dateTimeLocal: string): string | null => {
   }
   return parsed.toISOString();
 };
-
 const resetEmailAutomationResults = (
   submitError: Ref<string>,
   lastResult: Ref<EmailActionResult | null>,
@@ -144,20 +130,15 @@ const createValidateDeliverySettings = (options: {
   resolvedRecipientEmail: Readonly<Ref<string>>;
 }) => {
   return (): boolean => {
-    if (!options.form.deliverAfterGeneration) {
-      return true;
-    }
-
+    if (!options.form.deliverAfterGeneration) return true;
     if (!options.emailDeliveryConfigured.value) {
       options.submitError.value = options.t("automation.email.deliveryUnavailableDescription");
       return false;
     }
-
     if (!isValidEmail(options.resolvedRecipientEmail.value)) {
       options.submitError.value = options.t("automation.email.invalidRecipient");
       return false;
     }
-
     return true;
   };
 };
@@ -377,7 +358,6 @@ const buildAutomationEmailPageState = async () => {
     actions,
   };
 };
-
 export async function useAutomationEmailPage() {
   const state = await buildAutomationEmailPageState();
   const pending = computed(() => state.resultState.pendingAction.value !== null);

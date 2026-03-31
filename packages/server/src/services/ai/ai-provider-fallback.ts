@@ -1,8 +1,4 @@
-import type {
-  AIProviderType,
-  AIResponse,
-  GenerateOptions,
-} from "@bao/shared";
+import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
 import {
   AI_CHAT_CONTEXT_MESSAGE_LIMIT,
   API_ERROR_ALL_PROVIDERS_STREAM_FAILED,
@@ -48,10 +44,7 @@ const pushProviderError = (
 export const buildFailureMessage = (errors: ProviderFailure[]): string =>
   errors.map((entry) => `${entry.provider}: ${entry.error}`).join("; ");
 
-export const mergePromptWithContext = (
-  prompt: string,
-  options?: GenerateOptions,
-): string => {
+export const mergePromptWithContext = (prompt: string, options?: GenerateOptions): string => {
   const messageHistory = options?.messages;
   if (!messageHistory || messageHistory.length === 0) {
     return prompt;
@@ -263,9 +256,8 @@ const streamWithFallbackAtIndex = async function* (
     return yield* streamWithFallbackAtIndex(request, errors, index + 1);
   }
 
-  const iterator = provider.stream(request.contextualPrompt, request.providerOptions)[
-    Symbol.asyncIterator
-  ]();
+  const providerStream = provider.stream(request.contextualPrompt, request.providerOptions);
+  const iterator = providerStream[Symbol.asyncIterator]();
   const streamResult = yield* streamProviderIterator(providerName, iterator, errors, false);
   if (streamResult.hasYielded && !streamResult.failed) {
     return { streamed: true, errors };

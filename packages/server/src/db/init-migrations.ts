@@ -1,8 +1,5 @@
 import type { Database } from "bun:sqlite";
-import {
-  DEFAULT_PROFILE_ID,
-  DEFAULT_SETTINGS_ID,
-} from "./init-schema";
+import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "./init-schema";
 import {
   AUTOMATION_RUNS_REQUIRED_COLUMNS,
   AUTOMATION_RUNS_TABLE_NAME,

@@ -10,6 +10,7 @@ import {
   ROUTE_GAMIFICATION_XP,
   settle,
 } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { gamificationService } from "../services/gamification-service";
@@ -52,7 +53,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
       return { questions: result.value };
     },
     {
-      body: resumeQuestionGenerateBodySchema,
+      body: StandardSchemaV1(resumeQuestionGenerateBodySchema),
     },
   )
   .post(
@@ -91,7 +92,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
       return createResult.value;
     },
     {
-      body: resumeQuestionSynthesizeBodySchema,
+      body: StandardSchemaV1(resumeQuestionSynthesizeBodySchema),
     },
   )
   .get("/", async () => {
@@ -110,7 +111,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
       return created;
     },
     {
-      body: resumeMutationBodySchema,
+      body: StandardSchemaV1(resumeMutationBodySchema),
     },
   )
   .get(
@@ -126,7 +127,7 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
       return resume;
     },
     {
-      params: resumeIdParamsSchema,
+      params: StandardSchemaV1(resumeIdParamsSchema),
     },
   )
   .put(
@@ -140,8 +141,8 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
       return updated;
     },
     {
-      params: resumeIdParamsSchema,
-      body: resumeMutationBodySchema,
+      params: StandardSchemaV1(resumeIdParamsSchema),
+      body: StandardSchemaV1(resumeMutationBodySchema),
     },
   )
   .delete(
@@ -156,30 +157,26 @@ export const resumeRoutes = new Elysia({ prefix: "/resumes", tags: ["Resumes"] }
       return { success: true, id: params.id };
     },
     {
-      params: resumeIdParamsSchema,
+      params: StandardSchemaV1(resumeIdParamsSchema),
     },
   )
-  .post(
-    "/:id/export",
-    async ({ params, body, set }) => exportResumeAsset(params.id, body, set),
-    {
-      params: resumeIdParamsSchema,
-      body: resumeExportBodySchema,
-    },
-  )
+  .post("/:id/export", async ({ params, body, set }) => exportResumeAsset(params.id, body, set), {
+    params: StandardSchemaV1(resumeIdParamsSchema),
+    body: StandardSchemaV1(resumeExportBodySchema),
+  })
   .post(
     "/:id/ai-enhance",
     async ({ params, body, set }) => enhanceResumeWithAi(params.id, body, set),
     {
-      params: resumeIdParamsSchema,
-      body: resumeEnhanceBodySchema,
+      params: StandardSchemaV1(resumeIdParamsSchema),
+      body: StandardSchemaV1(resumeEnhanceBodySchema),
     },
   )
   .post(
     "/:id/ai-score",
     async ({ params, body, set }) => handleResumeAiScore(params.id, body, set),
     {
-      params: resumeIdParamsSchema,
-      body: resumeScoreBodySchema,
+      params: StandardSchemaV1(resumeIdParamsSchema),
+      body: StandardSchemaV1(resumeScoreBodySchema),
     },
   );

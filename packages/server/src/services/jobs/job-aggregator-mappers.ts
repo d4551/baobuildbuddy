@@ -47,10 +47,7 @@ const normalizeSalary = (value: Record<string, unknown> | null): Job["salary"] |
   }
 };
 
-const applyOptionalRowFields = (
-  job: Job,
-  row: typeof jobs.$inferSelect,
-): Job => ({
+const applyOptionalRowFields = (job: Job, row: typeof jobs.$inferSelect): Job => ({
   ...job,
   hybrid: row.hybrid ?? undefined,
   requirements: Array.isArray(row.requirements) ? row.requirements : undefined,

@@ -1,6 +1,9 @@
 import type { GamificationActionHistoryEntry } from "@bao/shared";
 import { DEFAULT_PROFILE_ID, SCHEMA_MAX_ITEMS_BOARDS } from "@bao/shared";
-import { ACHIEVEMENT_DEFINITIONS, GAMIFICATION_STAT_KEYS } from "./gamification-achievement-definitions";
+import {
+  ACHIEVEMENT_DEFINITIONS,
+  GAMIFICATION_STAT_KEYS,
+} from "./gamification-achievement-definitions";
 import { DAILY_CHALLENGE_DEFINITIONS } from "./gamification-challenge-definitions";
 
 export const GAMIFICATION_DEFAULT_ID = DEFAULT_PROFILE_ID;
@@ -17,8 +20,4 @@ export type WeeklyProgressResult = {
   topCategory: string;
 };
 
-export {
-  ACHIEVEMENT_DEFINITIONS,
-  DAILY_CHALLENGE_DEFINITIONS,
-  GAMIFICATION_STAT_KEYS,
-};
+export { ACHIEVEMENT_DEFINITIONS, DAILY_CHALLENGE_DEFINITIONS, GAMIFICATION_STAT_KEYS };

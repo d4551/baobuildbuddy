@@ -18,4 +18,4 @@ export type WeeklyProgressResult = {
     days: WeeklyDaySummary[];
     topCategory: string;
 };
-export { ACHIEVEMENT_DEFINITIONS, DAILY_CHALLENGE_DEFINITIONS, GAMIFICATION_STAT_KEYS, };
+export { ACHIEVEMENT_DEFINITIONS, DAILY_CHALLENGE_DEFINITIONS, GAMIFICATION_STAT_KEYS };

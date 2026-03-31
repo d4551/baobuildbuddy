@@ -7,10 +7,7 @@ import {
   resumeEnhancePrompt,
   resumeScorePrompt,
 } from "../services/ai/prompts-resume";
-import type {
-  CoverLetterSections,
-  ResumeAnalysisResult,
-} from "./ai-route-contracts";
+import type { CoverLetterSections, ResumeAnalysisResult } from "./ai-route-contracts";
 
 interface ExperienceEntry {
   title?: string;
@@ -259,17 +256,13 @@ export const parseResumeAnalysisResult = (content: string): ResumeAnalysisResult
 export const parseCoverLetterSections = (content: string): CoverLetterSections => {
   const parsed = parseJsonRecord(content);
   return {
-    introduction:
-      asString(parsed?.introduction) ?? DEFAULT_COVER_LETTER_RESPONSE.introduction,
+    introduction: asString(parsed?.introduction) ?? DEFAULT_COVER_LETTER_RESPONSE.introduction,
     body: asString(parsed?.body) ?? DEFAULT_COVER_LETTER_RESPONSE.body,
-    conclusion:
-      asString(parsed?.conclusion) ?? DEFAULT_COVER_LETTER_RESPONSE.conclusion,
+    conclusion: asString(parsed?.conclusion) ?? DEFAULT_COVER_LETTER_RESPONSE.conclusion,
   };
 };
 
-export const extractResumeSkills = (
-  resume: Pick<ResumeRecord, "skills">,
-): string[] =>
+export const extractResumeSkills = (resume: Pick<ResumeRecord, "skills">): string[] =>
   resume.skills ? Object.values(resume.skills).flatMap((value) => collectStringArray(value)) : [];
 
 const collectStringArray = (value: unknown): string[] => {

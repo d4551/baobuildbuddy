@@ -38,6 +38,14 @@ const JOB_SEARCH_DOMAIN_PATTERN = /\b(job|apply|salary|remote|position|company|h
 const INTERVIEW_DOMAIN_PATTERN = /\b(interview|question|answer|practice|mock|prepare)\b/;
 const PORTFOLIO_DOMAIN_PATTERN = /\b(portfolio|project|showcase|demo|sample)\b/;
 const SKILLS_DOMAIN_PATTERN = /\b(skill|mapping|transfer|learn|career\s*path|gap)\b/;
+const DOMAIN_PATTERN_ORDER: Array<[AIChatContextDomain, RegExp]> = [
+  ["automation", AUTOMATION_DOMAIN_PATTERN],
+  ["resume", RESUME_DOMAIN_PATTERN],
+  ["job_search", JOB_SEARCH_DOMAIN_PATTERN],
+  ["interview", INTERVIEW_DOMAIN_PATTERN],
+  ["portfolio", PORTFOLIO_DOMAIN_PATTERN],
+  ["skills", SKILLS_DOMAIN_PATTERN],
+];
 
 export class ConversationContextManager {
   private isChatRole(value: string): value is ChatMessage["role"] {
@@ -49,14 +57,7 @@ export class ConversationContextManager {
    */
   inferDomain(message: string): AIChatContextDomain {
     const lower = message.toLowerCase();
-    // Automation must be checked BEFORE job_search since "apply" overlaps
-    if (AUTOMATION_DOMAIN_PATTERN.test(lower)) return "automation";
-    if (RESUME_DOMAIN_PATTERN.test(lower)) return "resume";
-    if (JOB_SEARCH_DOMAIN_PATTERN.test(lower)) return "job_search";
-    if (INTERVIEW_DOMAIN_PATTERN.test(lower)) return "interview";
-    if (PORTFOLIO_DOMAIN_PATTERN.test(lower)) return "portfolio";
-    if (SKILLS_DOMAIN_PATTERN.test(lower)) return "skills";
-    return "general";
+    return DOMAIN_PATTERN_ORDER.find(([, pattern]) => pattern.test(lower))?.[0] ?? "general";
   }
 
   /**
@@ -139,17 +140,11 @@ export class ConversationContextManager {
     runtimeBrand: BrandSettings,
   ): string {
     const domainSystemPrompts = buildDomainSystemPrompts(runtimeBrand);
-    let systemPrompt = domainSystemPrompts[domain] || domainSystemPrompts.general;
-
-    if (profile) {
-      systemPrompt += `\n\nUser Context:\nName: ${profile.name || "Not set"}\nCurrent Role: ${profile.currentRole || "Not set"}\nYears Experience: ${profile.yearsExperience || "Not set"}\nLocation: ${profile.location || "Not set"}`;
-    }
-
-    if (domainContext) {
-      systemPrompt += `\n\nRelevant Data:\n${domainContext}`;
-    }
-
-    return `${systemPrompt}\n\n${GAMING_INDUSTRY_CONTEXT}`;
+    const userContext = profile
+      ? `\n\nUser Context:\nName: ${profile.name || "Not set"}\nCurrent Role: ${profile.currentRole || "Not set"}\nYears Experience: ${profile.yearsExperience || "Not set"}\nLocation: ${profile.location || "Not set"}`
+      : "";
+    const relevantData = domainContext ? `\n\nRelevant Data:\n${domainContext}` : "";
+    return `${domainSystemPrompts[domain] || domainSystemPrompts.general}${userContext}${relevantData}\n\n${GAMING_INDUSTRY_CONTEXT}`;
   }
 
   /**
@@ -172,22 +167,15 @@ export class ConversationContextManager {
   private getDomainContextLoader(
     domain: AIChatContextDomain,
   ): (() => Promise<string | null>) | null {
-    switch (domain) {
-      case "resume":
-        return () => this.loadResumeContext();
-      case "job_search":
-        return () => this.loadJobSearchContext();
-      case "interview":
-        return () => this.loadInterviewContext();
-      case "portfolio":
-        return () => this.loadPortfolioContext();
-      case "skills":
-        return () => this.loadSkillsContext();
-      case "automation":
-        return () => this.loadAutomationContext();
-      default:
-        return null;
-    }
+    const loaders = {
+      automation: () => this.loadAutomationContext(),
+      interview: () => this.loadInterviewContext(),
+      job_search: () => this.loadJobSearchContext(),
+      portfolio: () => this.loadPortfolioContext(),
+      resume: () => this.loadResumeContext(),
+      skills: () => this.loadSkillsContext(),
+    } as const;
+    return domain === "general" ? null : loaders[domain];
   }
 
   private async loadResumeContext(): Promise<string | null> {

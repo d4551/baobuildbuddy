@@ -14,17 +14,22 @@ import { DATA_EXPORT_VERSION } from "./data-service-contracts";
 import type { BaoExportData } from "./data-service-contracts";
 import { resolveProfileId } from "./data-service-parsers";
 
-const redactSettings = (value: typeof settings.$inferSelect | undefined): unknown => {
-  if (!value) {
-    return null;
-  }
+const REDACTED_SETTING_KEYS = [
+  "geminiApiKey",
+  "openaiApiKey",
+  "claudeApiKey",
+  "huggingfaceToken",
+  "emailTransportPassword",
+] as const satisfies readonly (keyof typeof settings.$inferSelect)[];
 
+const redactSettings = (value: typeof settings.$inferSelect | undefined): unknown => {
+  if (!value) return null;
   const safeSettings = { ...value };
-  if (safeSettings.geminiApiKey) safeSettings.geminiApiKey = "***REDACTED***";
-  if (safeSettings.openaiApiKey) safeSettings.openaiApiKey = "***REDACTED***";
-  if (safeSettings.claudeApiKey) safeSettings.claudeApiKey = "***REDACTED***";
-  if (safeSettings.huggingfaceToken) safeSettings.huggingfaceToken = "***REDACTED***";
-  if (safeSettings.emailTransportPassword) safeSettings.emailTransportPassword = "***REDACTED***";
+  for (const key of REDACTED_SETTING_KEYS) {
+    if (safeSettings[key]) {
+      safeSettings[key] = "***REDACTED***";
+    }
+  }
   return safeSettings;
 };
 

@@ -9,15 +9,12 @@ type InterviewHubRoleOptionsInput = {
   jobs: Ref<readonly InterviewJobView[]>;
   pathways: Ref<readonly { readonly title: string; readonly matchScore: number }[]>;
   profile: Ref<{ readonly currentRole?: string | null } | null>;
-  readiness: Ref<
-    | {
-        readonly targetRoleReadiness?: readonly {
-          readonly roleTitle: string;
-          readonly readinessScore: number;
-        }[];
-      }
-    | null
-  >;
+  readiness: Ref<{
+    readonly targetRoleReadiness?: readonly {
+      readonly roleTitle: string;
+      readonly readinessScore: number;
+    }[];
+  } | null>;
 };
 
 export function useInterviewRoleOptions({

@@ -1,18 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { resolveJobApplyAdapter } from "./adapters";
+import { resolveJobApplyStrategy } from "./adapters";
 
-describe("resolveJobApplyAdapter", () => {
+describe("resolveJobApplyStrategy", () => {
   test("detects Greenhouse-hosted forms", () => {
-    expect(resolveJobApplyAdapter("https://boards.greenhouse.io/example/jobs/1").id).toBe(
+    expect(resolveJobApplyStrategy("https://boards.greenhouse.io/example/jobs/1").id).toBe(
       "greenhouse",
     );
   });
 
   test("detects Lever-hosted forms", () => {
-    expect(resolveJobApplyAdapter("https://jobs.lever.co/example/123").id).toBe("lever");
+    expect(resolveJobApplyStrategy("https://jobs.lever.co/example/123").id).toBe("lever");
   });
 
   test("falls back to generic selectors", () => {
-    expect(resolveJobApplyAdapter("https://careers.example.com/open-role").id).toBe("generic");
+    expect(resolveJobApplyStrategy("https://careers.example.com/open-role").id).toBe("generic");
   });
 });

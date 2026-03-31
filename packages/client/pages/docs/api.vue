@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 definePageMeta({
   middleware: ["auth"],
 });
+const { t } = useI18n();
+useServerSeoMeta({
+  title: t("apiDocs.seoTitle"),
+  description: t("apiDocs.seoDescription"),
+});
+
 const {
-  t,
   docsUiState,
   endpointGroups,
   activeEndpointId,
@@ -27,7 +34,7 @@ const {
   executeEndpointRequest,
   API_TESTER_DIALOG_TITLE_ID,
   API_TESTER_DIALOG_DESCRIPTION_ID,
-} = await useApiDocsPage();
+} = await useApiDocsPage(t);
 </script>
 
 <template>
@@ -39,17 +46,8 @@ const {
       description-class="text-base-content/70"
     />
 
-    <div
-      v-if="docsUiState === 'loading'"
-      class="card card-border bg-base-100"
-      role="status"
-      aria-live="polite"
-      :aria-label="t('apiDocs.state.loading')"
-    >
-      <div class="card-body gap-4">
-        <p class="text-sm text-base-content/70">{{ t("apiDocs.state.loading") }}</p>
-        <LoadingSkeleton :lines="6" />
-      </div>
+    <div v-if="docsUiState === 'loading'" role="status" aria-live="polite" :aria-label="t('apiDocs.state.loading')">
+      <LoadingSkeleton :lines="6" />
     </div>
 
     <EmptyState

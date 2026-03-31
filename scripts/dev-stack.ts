@@ -215,26 +215,26 @@ const main = async (): Promise<void> => {
   write(`[bao/dev-stack] launching client on port ${toStringPort(clientPort)}\n`);
   const client = spawnClient();
 
-  trackProcess("server", server).catch((error: unknown) => {
+  trackProcess("server", server).then(undefined, (error: unknown) => {
     write(`[bao/dev-stack] failed to track server process: ${describeAsyncError(error)}\n`);
   });
-  trackProcess("client", client).catch((error: unknown) => {
+  trackProcess("client", client).then(undefined, (error: unknown) => {
     write(`[bao/dev-stack] failed to track client process: ${describeAsyncError(error)}\n`);
   });
 };
 
 process.once("SIGINT", () => {
-  shutdown("signal: SIGINT").catch((error: unknown) => {
+  shutdown("signal: SIGINT").then(undefined, (error: unknown) => {
     write(`[bao/dev-stack] failed to handle SIGINT shutdown: ${describeAsyncError(error)}\n`);
   });
 });
 process.once("SIGTERM", () => {
-  shutdown("signal: SIGTERM").catch((error: unknown) => {
+  shutdown("signal: SIGTERM").then(undefined, (error: unknown) => {
     write(`[bao/dev-stack] failed to handle SIGTERM shutdown: ${describeAsyncError(error)}\n`);
   });
 });
 
-main().catch((err: unknown) => {
+main().then(undefined, (err: unknown) => {
   write(`[bao/dev-stack] fatal: ${err instanceof Error ? err.message : String(err)}\n`);
   process.exit(1);
 });

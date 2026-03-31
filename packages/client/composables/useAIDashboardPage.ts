@@ -14,9 +14,7 @@ import {
   useAIDashboardSelection,
 } from "~/composables/ai-dashboard-selection";
 
-function createAIDashboardSelectionState(
-  runtime: ReturnType<typeof createAIDashboardRuntime>,
-) {
+function createAIDashboardSelectionState(runtime: ReturnType<typeof createAIDashboardRuntime>) {
   const placeholderProviders = computed<ProviderConfig[]>(() => []);
   return useAIDashboardSelection(runtime.dependencies.settings, placeholderProviders);
 }
@@ -25,8 +23,12 @@ function createAIDashboardPresentationState(input: {
   runtime: ReturnType<typeof createAIDashboardRuntime>;
   bootstrap: Awaited<ReturnType<typeof createAIDashboardBootstrapState>>;
 }) {
-  const providers = computed(() => input.bootstrap.dashboardBootstrap.value?.resolvedProviders ?? []);
-  const providerStats = computed(() => input.bootstrap.dashboardBootstrap.value?.normalizedStats ?? null);
+  const providers = computed(
+    () => input.bootstrap.dashboardBootstrap.value?.resolvedProviders ?? [],
+  );
+  const providerStats = computed(
+    () => input.bootstrap.dashboardBootstrap.value?.normalizedStats ?? null,
+  );
   const providerPresentation = createDashboardProviderPresentation(
     input.runtime.dependencies.t,
     input.runtime.dependencies.settings,

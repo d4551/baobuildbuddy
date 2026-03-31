@@ -1,11 +1,5 @@
-import type {
-  AutomationScrapeTarget,
-  EmailResponseRequest,
-} from "@bao/shared";
-import {
-  generateId,
-  SCHEMA_MAX_ITEMS_BOARDS,
-} from "@bao/shared";
+import type { AutomationScrapeTarget, EmailResponseRequest } from "@bao/shared";
+import { generateId, SCHEMA_MAX_ITEMS_BOARDS } from "@bao/shared";
 import { and, count, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";

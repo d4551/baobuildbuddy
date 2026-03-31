@@ -91,9 +91,7 @@ function previewContent(value: string): string {
   return `${value.slice(0, COVER_LETTER_CONTENT_PREVIEW_LENGTH)}…`;
 }
 
-function hasCoverLetterId(
-  letter: CoverLetterData,
-): letter is CoverLetterData & { id: string } {
+function hasCoverLetterId(letter: CoverLetterData): letter is CoverLetterData & { id: string } {
   return typeof letter.id === "string" && letter.id.trim().length > 0;
 }
 
@@ -204,10 +202,7 @@ function buildPreviewText(
   return previewContent(plainText);
 }
 
-function formatCreatedAt(
-  services: CoverLetterPageServices,
-  value: string | undefined,
-): string {
+function formatCreatedAt(services: CoverLetterPageServices, value: string | undefined): string {
   if (!value) {
     return services.t("coverLetterPage.notAvailable");
   }
@@ -251,10 +246,7 @@ export function useCoverLetterListPage() {
   const state = createCoverLetterPageState();
   const filterState = createCoverLetterFilterState(services, state);
   const actions = createCoverLetterActions(services, state);
-  const coverLetterCards = createCoverLetterCards(
-    services,
-    filterState.coverLetterPagination,
-  );
+  const coverLetterCards = createCoverLetterCards(services, filterState.coverLetterPagination);
 
   useCoverLetterPageBootstrap(services, state);
 

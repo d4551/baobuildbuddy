@@ -16,7 +16,8 @@ export interface RGB {
   b: number;
 }
 
-export type ResumeTemplateDefinition = (typeof Shared.RESUME_EXPORT_THEME_CONFIGS)[ResumeTemplate]["pdf"];
+export type ResumeTemplateDefinition =
+  (typeof Shared.RESUME_EXPORT_THEME_CONFIGS)[ResumeTemplate]["pdf"];
 export type ResumeExperienceItem = NonNullable<ResumeData["experience"]>[number];
 export type ResumeEducationItem = NonNullable<ResumeData["education"]>[number];
 export type ResumeProjectItem = NonNullable<ResumeData["projects"]>[number];

@@ -7,17 +7,12 @@ import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
-import {
-  executeEmailResponseRun,
-  markEmailResponseRunStarted,
-} from "./automation-email-response";
+import { executeEmailResponseRun, markEmailResponseRunStarted } from "./automation-email-response";
 import {
   DEFAULT_EMAIL_RESPONSE_TONE,
   isEmailResponseTone,
 } from "./automation-email-response-payload";
-import {
-  AutomationConcurrencyLimitError,
-} from "./automation-errors";
+import { AutomationConcurrencyLimitError } from "./automation-errors";
 import {
   buildScheduledJobApplyInput,
   parseScheduledEmailResponsePayload,
@@ -33,10 +28,7 @@ import {
   loadEmailTransportConfig,
   tryLoadAIService,
 } from "./automation-settings-support";
-import type {
-  AutomationRunRow,
-  CreateProgressEvent,
-} from "./automation-service-contracts";
+import type { AutomationRunRow, CreateProgressEvent } from "./automation-service-contracts";
 
 const SCHEDULED_ACTION_JOB_APPLY = "job_apply";
 
@@ -138,13 +130,10 @@ export class AutomationScheduledRunExecutor {
   }
 
   private async executeEmail(row: AutomationRunRow): Promise<void> {
-    const payload = parseScheduledEmailResponsePayload(
-      asJsonRecord(row.input),
-      {
-        defaultTone: DEFAULT_EMAIL_RESPONSE_TONE,
-        isEmailResponseTone,
-      },
-    );
+    const payload = parseScheduledEmailResponsePayload(asJsonRecord(row.input), {
+      defaultTone: DEFAULT_EMAIL_RESPONSE_TONE,
+      isEmailResponseTone,
+    });
     if (!payload) {
       await this.failValidation(row.id, "Scheduled email payload is invalid");
       return;

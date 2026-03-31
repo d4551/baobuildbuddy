@@ -18,9 +18,9 @@ export declare const interviewRoutes: Elysia<"/interview", {
     interview: {
         sessions: {
             post: {
-                body: {
+                body: {} & {
                     studioId?: string | undefined;
-                    config?: {
+                    config?: ({} & {
                         technologies?: string[] | undefined;
                         roleType?: string | undefined;
                         roleCategory?: string | undefined;
@@ -34,24 +34,25 @@ export declare const interviewRoutes: Elysia<"/interview", {
                         enableVoiceMode?: boolean | undefined;
                         interviewMode?: "job" | "studio" | undefined;
                         conversationStyle?: "natural" | "structured" | undefined;
-                        targetJob?: {
+                        targetJob?: ({
+                            id: string;
+                            title: string;
+                            company: string;
+                            location: string;
+                        } & {
                             source?: string | undefined;
                             description?: string | undefined;
                             url?: string | undefined;
                             postedDate?: string | undefined;
                             technologies?: string[] | undefined;
                             requirements?: string[] | undefined;
-                            id: string;
-                            title: string;
-                            company: string;
-                            location: string;
-                        } | undefined;
-                        candidateContext?: {
+                        }) | undefined;
+                        candidateContext?: ({} & {
                             resumeId?: string | undefined;
                             coverLetterId?: string | undefined;
                             portfolioId?: string | undefined;
-                        } | undefined;
-                        voiceSettings?: {
+                        }) | undefined;
+                        voiceSettings?: ({} & {
                             language?: string | undefined;
                             microphoneId?: string | undefined;
                             speakerId?: string | undefined;
@@ -59,8 +60,8 @@ export declare const interviewRoutes: Elysia<"/interview", {
                             rate?: number | undefined;
                             pitch?: number | undefined;
                             volume?: number | undefined;
-                        } | undefined;
-                    } | undefined;
+                        }) | undefined;
+                    }) | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -104,7 +105,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -132,13 +133,14 @@ export declare const interviewRoutes: Elysia<"/interview", {
                 response: {
                     post: {
                         body: {
+                            response: string;
+                        } & {
                             questionId?: string | undefined;
                             questionIndex?: number | undefined;
-                            response: string;
                         };
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -172,7 +174,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
                         body: unknown;
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {

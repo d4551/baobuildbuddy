@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { APP_ROUTES, type AIProviderType } from "@bao/shared";
-import type { ProviderConfig, ProviderConnectivityResult, ProviderHealth } from "~/types/ai-dashboard";
+import type {
+  ProviderConfig,
+  ProviderConnectivityResult,
+  ProviderHealth,
+} from "~/types/ai-dashboard";
 
 defineProps<{
   providers: readonly ProviderConfig[];

@@ -28,7 +28,9 @@ defineProps<{
   supportsSynthesis: boolean;
   selectedVoiceId: string;
   availableVoices: SpeechSynthesisVoice[];
-  speechProviderOptions: ReturnType<typeof useSpeechModelProfiles>["speechProviderOptions"]["value"];
+  speechProviderOptions: ReturnType<
+    typeof useSpeechModelProfiles
+  >["speechProviderOptions"]["value"];
   speechConfig: ReturnType<typeof useSpeechModelProfiles>["speechConfig"]["value"];
   sttModelOptions: ReturnType<typeof useSpeechModelProfiles>["sttModelOptions"]["value"];
   ttsModelOptions: ReturnType<typeof useSpeechModelProfiles>["ttsModelOptions"]["value"];

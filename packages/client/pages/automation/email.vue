@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import {
-  APP_ROUTE_BUILDERS,
-  APP_ROUTES,
-} from "@bao/shared";
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared";
 import { getErrorMessage } from "~/utils/errors";
 const {
   t,

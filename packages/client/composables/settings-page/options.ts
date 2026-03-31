@@ -29,7 +29,7 @@ export function createSettingsPageOptionState(t: TranslateFn) {
   const languageOptions = computed(() =>
     APP_LANGUAGE_OPTIONS.map((option) => ({
       value: option.value,
-      label: buildLanguageLabel(option.value),
+      label: buildLanguageLabel(t, option.value),
     })),
   );
 

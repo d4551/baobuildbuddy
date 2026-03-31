@@ -31,7 +31,11 @@ const createSocketLifecycle = (state: SmtpConnectionState) => ({
   error: (_socket: Bun.Socket<undefined>, error: Error) => {
     rejectAllPending(state, error);
   },
-  handshake: (_socket: Bun.Socket<undefined>, success: boolean, authorizationError: Error | null) => {
+  handshake: (
+    _socket: Bun.Socket<undefined>,
+    success: boolean,
+    authorizationError: Error | null,
+  ) => {
     handleHandshake(state, success, authorizationError);
   },
   timeout: (socket: Bun.Socket<undefined>) => {

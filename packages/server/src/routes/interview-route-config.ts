@@ -28,6 +28,18 @@ const asStringArrayTrimmed = (value: unknown): string[] =>
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
 
+function applyStringFields<T extends object>(
+  target: T,
+  fields: Array<[string, string | undefined]>,
+): T {
+  for (const [key, value] of fields) {
+    if (value) {
+      Object.assign(target, { [key]: value });
+    }
+  }
+  return target;
+}
+
 const parseTargetJob = (
   value: CreateSessionConfigInput["targetJob"],
 ): InterviewTargetJob | undefined => {
@@ -48,12 +60,14 @@ const parseTargetJob = (
   const postedDate = asString(value.postedDate);
   const url = asString(value.url);
 
-  if (description) targetJob.description = description;
+  applyStringFields(targetJob, [["description", description]]);
   if (requirements.length > 0) targetJob.requirements = requirements;
   if (technologies.length > 0) targetJob.technologies = technologies;
-  if (source) targetJob.source = source;
-  if (postedDate) targetJob.postedDate = postedDate;
-  if (url) targetJob.url = url;
+  applyStringFields(targetJob, [
+    ["source", source],
+    ["postedDate", postedDate],
+    ["url", url],
+  ]);
 
   return targetJob;
 };
@@ -76,9 +90,11 @@ const normalizeVoiceSettings = (
   const speakerId = asString(value.speakerId);
   const voiceId = asString(value.voiceId);
 
-  if (microphoneId) normalized.microphoneId = microphoneId;
-  if (speakerId) normalized.speakerId = speakerId;
-  if (voiceId) normalized.voiceId = voiceId;
+  applyStringFields(normalized, [
+    ["microphoneId", microphoneId],
+    ["speakerId", speakerId],
+    ["voiceId", voiceId],
+  ]);
 
   return normalized;
 };
@@ -97,11 +113,13 @@ const parseCandidateContext = (
     return;
   }
 
-  return {
-    ...(resumeId ? { resumeId } : {}),
-    ...(coverLetterId ? { coverLetterId } : {}),
-    ...(portfolioId ? { portfolioId } : {}),
-  };
+  const context: InterviewCandidateContext = {};
+  applyStringFields(context, [
+    ["resumeId", resumeId],
+    ["coverLetterId", coverLetterId],
+    ["portfolioId", portfolioId],
+  ]);
+  return context;
 };
 
 const parseConversationStyle = (

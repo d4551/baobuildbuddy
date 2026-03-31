@@ -12,8 +12,10 @@ import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
 } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "../config/env";
 import {
@@ -25,8 +27,8 @@ import { auth } from "../db/schema/auth";
 import { resolveRateLimitClientKey } from "../utils/rate-limit";
 
 const BASE64URL_PADDING_PATTERN = /=+$/u;
-const authBootstrapBodySchema = t.Object({
-  setupToken: t.Optional(t.String({ minLength: 1 })),
+const authBootstrapBodySchema = Type.Object({
+  setupToken: Type.Optional(Type.String({ minLength: 1 })),
 });
 
 const encodeBase64Url = (bytes: Uint8Array): string =>
@@ -140,7 +142,7 @@ export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
           };
         },
         {
-          body: authBootstrapBodySchema,
+          body: StandardSchemaV1(authBootstrapBodySchema),
         },
       ),
   );

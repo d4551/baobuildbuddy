@@ -19,8 +19,8 @@ export declare const searchRoutes: Elysia<"/search", {
         get: {
             body: unknown;
             params: {};
-            query: {
-                types?: string | undefined;
+            query: {} & {
+                types?: string | ("skills" | "studios" | "jobs" | "resumes")[] | undefined;
                 q?: string | undefined;
             };
             headers: unknown;
@@ -44,7 +44,7 @@ export declare const searchRoutes: Elysia<"/search", {
             get: {
                 body: unknown;
                 params: {};
-                query: {
+                query: {} & {
                     prefix?: string | undefined;
                 };
                 headers: unknown;

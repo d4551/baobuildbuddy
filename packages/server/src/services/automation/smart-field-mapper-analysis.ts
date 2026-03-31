@@ -15,7 +15,10 @@ import {
 import { wait } from "./smart-field-mapper-fetch";
 
 const parseFieldAnalysisResponse = (content: string): SmartFieldAnalysisResult => {
-  const cleaned = content.replace(/```json\n?/gu, "").replace(/```\n?/gu, "").trim();
+  const cleaned = content
+    .replace(/```json\n?/gu, "")
+    .replace(/```\n?/gu, "")
+    .trim();
   const parsedValue = safeParseJson(cleaned);
   const parsedAnalysis = fieldAnalysisSchema.safeParse(parsedValue);
   if (parsedAnalysis.success) {

@@ -22,17 +22,15 @@ type AppSettingsSnapshot = {
   readonly hasClaudeKey?: boolean;
   readonly hasHuggingfaceToken?: boolean;
   readonly providerDiagnostics?: AIProviderDiagnostics | null;
-  readonly aiRouting?:
-    | Partial<
-        Record<
-          AIRoutingPurpose,
-          {
-            readonly provider?: AIProviderType;
-            readonly model?: string | null;
-          }
-        >
-      >
-    | null;
+  readonly aiRouting?: Partial<
+    Record<
+      AIRoutingPurpose,
+      {
+        readonly provider?: AIProviderType;
+        readonly model?: string | null;
+      }
+    >
+  > | null;
 };
 
 const providerCatalogById = new Map<AIProviderType, AIProviderMetadata>(
@@ -304,11 +302,7 @@ const normalizeProviderRow = (
   const available = asBoolean(row.available) ?? isProviderConfigured(settings, rawId);
   const rawHealth = asString(row.health);
   const health =
-    rawHealth && isProviderHealth(rawHealth)
-      ? rawHealth
-      : available
-        ? "healthy"
-        : "unconfigured";
+    rawHealth && isProviderHealth(rawHealth) ? rawHealth : available ? "healthy" : "unconfigured";
   const models = asStringArray(row.models);
 
   return {
@@ -321,7 +315,7 @@ const normalizeProviderRow = (
 };
 
 /**
- * Normalizes provider rows from the canonical `/api/ai/models` payload shape.
+ * Normalizes provider rows from the canonical shared AI models payload shape.
  */
 export function normalizeProviderRows(
   value: unknown,

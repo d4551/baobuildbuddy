@@ -16,7 +16,7 @@ import {
   SCHEMA_MAX_LENGTH_URL,
   type ResumeData,
 } from "@bao/shared";
-import { t } from "elysia";
+import Type from "baobox";
 
 export type ResumeRouteSetState = {
   status?: number | string;
@@ -49,120 +49,160 @@ export type ResumeEnhanceBody = {
   section?: string;
 };
 
-export const resumeTemplateBodySchema = t.String({
-  enum: RESUME_TEMPLATE_OPTIONS,
+export const resumeTemplateBodySchema = Type.Union(
+  RESUME_TEMPLATE_OPTIONS.map((template) => Type.Literal(template)),
+);
+
+export const resumeThemeBodySchema = Type.Union([Type.Literal("light"), Type.Literal("dark")]);
+
+export const resumePersonalInfoBodySchema = Type.Object({
+  name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  email: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+  phone: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_PHONE })),
+  location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  linkedIn: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  github: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  portfolio: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
 });
 
-export const resumeThemeBodySchema = t.Union([t.Literal("light"), t.Literal("dark")]);
+export const resumeExperienceBodySchema = Type.Object(
+  {
+    title: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    company: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    startDate: Type.String({ maxLength: SCHEMA_MAX_LENGTH_DATE }),
+    endDate: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DATE })),
+    location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+    description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+    achievements: Type.Optional(
+      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ACHIEVEMENT }), {
+        maxItems: SCHEMA_MAX_ITEMS_LARGE,
+      }),
+    ),
+    technologies: Type.Optional(
+      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+        maxItems: SCHEMA_MAX_ITEMS_LARGE,
+      }),
+    ),
+  },
+  { required: ["title", "company", "startDate"] },
+);
 
-export const resumePersonalInfoBodySchema = t.Object({
-  name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  email: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
-  phone: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_PHONE })),
-  location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-  linkedIn: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-  github: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-  portfolio: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-});
+export const resumeEducationBodySchema = Type.Object(
+  {
+    degree: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    field: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    school: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    year: Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
+    gpa: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
+  },
+  { required: ["degree", "field", "school", "year"] },
+);
 
-export const resumeExperienceBodySchema = t.Object({
-  title: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  startDate: t.String({ maxLength: SCHEMA_MAX_LENGTH_DATE }),
-  endDate: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DATE })),
-  location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-  achievements: t.Optional(
-    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ACHIEVEMENT }), {
-      maxItems: SCHEMA_MAX_ITEMS_LARGE,
+export const resumeSkillsBodySchema = Type.Object({
+  technical: Type.Optional(
+    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+      maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
     }),
   ),
-  technologies: t.Optional(
-    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+  soft: Type.Optional(
+    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+      maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
+    }),
   ),
-});
-
-export const resumeEducationBodySchema = t.Object({
-  degree: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  field: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  school: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  year: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
-  gpa: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
-});
-
-export const resumeSkillsBodySchema = t.Object({
-  technical: t.Optional(
-    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_XXLARGE }),
-  ),
-  soft: t.Optional(
-    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_XXLARGE }),
-  ),
-  gaming: t.Optional(
-    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_XXLARGE }),
-  ),
-});
-
-export const resumeProjectBodySchema = t.Object({
-  title: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  description: t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION }),
-  technologies: t.Optional(
-    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
-  ),
-  link: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-});
-
-export const resumeGamingExperienceBodySchema = t.Object({
-  gameEngines: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-  platforms: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-  genres: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-  shippedTitles: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHIPPED })),
-});
-
-export const resumeMutationBodySchema = t.Object({
-  name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  personalInfo: t.Optional(resumePersonalInfoBodySchema),
-  summary: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-  experience: t.Optional(t.Array(resumeExperienceBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE })),
-  education: t.Optional(t.Array(resumeEducationBodySchema, { maxItems: SCHEMA_MAX_ITEMS_SMALL })),
-  skills: t.Optional(resumeSkillsBodySchema),
-  projects: t.Optional(t.Array(resumeProjectBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE })),
-  gamingExperience: t.Optional(resumeGamingExperienceBodySchema),
-  template: t.Optional(resumeTemplateBodySchema),
-  theme: t.Optional(resumeThemeBodySchema),
-  isDefault: t.Optional(t.Boolean()),
-});
-
-export const resumeIdParamsSchema = t.Object({
-  id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-});
-
-export const resumeQuestionGenerateBodySchema = t.Object({
-  targetRole: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  studioName: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  experienceLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-});
-
-export const resumeQuestionSynthesizeBodySchema = t.Object({
-  questionsAndAnswers: t.Array(
-    t.Object({
-      id: t.String(),
-      question: t.String(),
-      answer: t.String(),
-      category: t.String(),
+  gaming: Type.Optional(
+    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+      maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
     }),
   ),
 });
 
-export const resumeExportBodySchema = t.Object({
-  format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
-  template: t.Optional(resumeTemplateBodySchema),
+export const resumeProjectBodySchema = Type.Object(
+  {
+    title: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    description: Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION }),
+    technologies: Type.Optional(
+      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+        maxItems: SCHEMA_MAX_ITEMS_LARGE,
+      }),
+    ),
+    link: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  },
+  { required: ["title", "description"] },
+);
+
+export const resumeGamingExperienceBodySchema = Type.Object({
+  gameEngines: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  platforms: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  genres: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  shippedTitles: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHIPPED })),
 });
 
-export const resumeEnhanceBodySchema = t.Object({
-  section: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+export const resumeMutationBodySchema = Type.Object({
+  name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  personalInfo: Type.Optional(resumePersonalInfoBodySchema),
+  summary: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+  experience: Type.Optional(
+    Type.Array(resumeExperienceBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+  ),
+  education: Type.Optional(
+    Type.Array(resumeEducationBodySchema, { maxItems: SCHEMA_MAX_ITEMS_SMALL }),
+  ),
+  skills: Type.Optional(resumeSkillsBodySchema),
+  projects: Type.Optional(
+    Type.Array(resumeProjectBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+  ),
+  gamingExperience: Type.Optional(resumeGamingExperienceBodySchema),
+  template: Type.Optional(resumeTemplateBodySchema),
+  theme: Type.Optional(resumeThemeBodySchema),
+  isDefault: Type.Optional(Type.Boolean()),
 });
 
-export const resumeScoreBodySchema = t.Object({
-  jobId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+export const resumeIdParamsSchema = Type.Object(
+  {
+    id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+  },
+  { required: ["id"] },
+);
+
+export const resumeQuestionGenerateBodySchema = Type.Object(
+  {
+    targetRole: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    studioName: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+    experienceLevel: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  },
+  { required: ["targetRole"] },
+);
+
+export const resumeQuestionSynthesizeBodySchema = Type.Object(
+  {
+    questionsAndAnswers: Type.Array(
+      Type.Object(
+        {
+          id: Type.String(),
+          question: Type.String(),
+          answer: Type.String(),
+          category: Type.String(),
+        },
+        { required: ["id", "question", "answer", "category"] },
+      ),
+    ),
+  },
+  { required: ["questionsAndAnswers"] },
+);
+
+export const resumeExportBodySchema = Type.Object({
+  format: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
+  template: Type.Optional(resumeTemplateBodySchema),
 });
+
+export const resumeEnhanceBodySchema = Type.Object({
+  section: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+});
+
+export const resumeScoreBodySchema = Type.Object(
+  {
+    jobId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+  },
+  { required: ["jobId"] },
+);

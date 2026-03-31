@@ -7,6 +7,10 @@ import {
   settle,
   toErrorMessage,
 } from "@bao/shared";
+import {
+  normalizeAutomationSettings,
+  normalizeLocalModelEndpoint,
+} from "@bao/shared/types/settings-normalization";
 import type { settings as settingsTable } from "../db/schema/settings";
 import { buildAIControlPlaneState } from "../services/ai/control-plane";
 import { getJobTaxonomy } from "../services/jobs/job-taxonomy-service";
@@ -21,9 +25,14 @@ export const buildSettingsResponse = async (row: SettingsRow) => {
     buildAIControlPlaneState(row),
     getJobTaxonomy(),
   ]);
+  const automationSettings = row.automationSettings
+    ? normalizeAutomationSettings(row.automationSettings)
+    : row.automationSettings;
 
   return {
     ...publicRow,
+    automationSettings,
+    localModelEndpoint: normalizeLocalModelEndpoint(row.localModelEndpoint),
     aiRouting: controlPlane.aiRouting,
     providerDiagnostics: controlPlane.providerDiagnostics,
     preferredProvider: controlPlane.preferredProvider,
@@ -87,7 +96,9 @@ export const testProviderConnection = async (body: {
     };
   }
 
-  const responseResult = await settle(fetch(strategy.buildUrl(body.key), strategy.buildInit(body.key)));
+  const responseResult = await settle(
+    fetch(strategy.buildUrl(body.key), strategy.buildInit(body.key)),
+  );
   if (responseResult.status === "rejected") {
     return {
       valid: false,
@@ -101,7 +112,7 @@ export const testProviderConnection = async (body: {
   return {
     valid,
     provider: body.provider,
-    diagnosticCode: valid ? "healthy" as const : "error" as const,
+    diagnosticCode: valid ? ("healthy" as const) : ("error" as const),
     message: valid ? undefined : `HTTP ${responseResult.value.status}`,
   };
 };

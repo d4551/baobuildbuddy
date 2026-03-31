@@ -6,6 +6,7 @@ import {
   HTTP_STATUS_NOT_FOUND,
   settle,
 } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import { JobAggregator } from "../services/jobs/job-aggregator";
 import { createServerLogger } from "../utils/logger";
@@ -34,7 +35,7 @@ const jobsRoutesLogger = createServerLogger("jobs-routes");
 
 export const jobsRoutes = new Elysia({ prefix: "/jobs", tags: ["Jobs"] })
   .get("/", async ({ query }) => listJobs(query), {
-    query: jobsListQuerySchema,
+    query: StandardSchemaV1(jobsListQuerySchema),
   })
   .get(
     "/:id",
@@ -47,7 +48,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs", tags: ["Jobs"] })
       return job;
     },
     {
-      params: jobIdParamsSchema,
+      params: StandardSchemaV1(jobIdParamsSchema),
     },
   )
   .post(
@@ -60,16 +61,12 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs", tags: ["Jobs"] })
       return result.body;
     },
     {
-      body: saveJobBodySchema,
+      body: StandardSchemaV1(saveJobBodySchema),
     },
   )
-  .delete(
-    "/save/:jobId",
-    async ({ params }) => deleteSavedJob(params.jobId),
-    {
-      params: savedJobParamsSchema,
-    },
-  )
+  .delete("/save/:jobId", async ({ params }) => deleteSavedJob(params.jobId), {
+    params: StandardSchemaV1(savedJobParamsSchema),
+  })
   .get("/saved", async () => listSavedJobs())
   .post(
     "/apply",
@@ -81,7 +78,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs", tags: ["Jobs"] })
       return result.body;
     },
     {
-      body: applyJobBodySchema,
+      body: StandardSchemaV1(applyJobBodySchema),
     },
   )
   .put(
@@ -94,8 +91,8 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs", tags: ["Jobs"] })
       return result.body;
     },
     {
-      params: updateApplicationParamsSchema,
-      body: updateApplicationBodySchema,
+      params: StandardSchemaV1(updateApplicationParamsSchema),
+      body: StandardSchemaV1(updateApplicationBodySchema),
     },
   )
   .get("/applications", async () => listApplications())

@@ -53,10 +53,8 @@ export const sanitizeRunId = (runId: string, invalidRunIdMessage: string): strin
   return safeId;
 };
 
-export const resolveRunArtifactDir = (
-  runId: string,
-  invalidRunIdMessage: string,
-): string => join(AUTOMATION_SCREENSHOT_DIR, sanitizeRunId(runId, invalidRunIdMessage));
+export const resolveRunArtifactDir = (runId: string, invalidRunIdMessage: string): string =>
+  join(AUTOMATION_SCREENSHOT_DIR, sanitizeRunId(runId, invalidRunIdMessage));
 
 const resolveScreenshotExtension = (pathValue: string): string => {
   const lastDotIndex = pathValue.lastIndexOf(".");

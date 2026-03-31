@@ -31,30 +31,23 @@ export function resolveDashboardPipelineSteps(
     apply: snapshot.appliedJobs > 0 || snapshot.successfulAutomationRuns > 0,
     gamify: snapshot.gamificationXp > 0,
   } as const;
-
   const firstIncompleteStep =
     DASHBOARD_PIPELINE_STEPS.find((step) => !completion[step.id])?.id ?? null;
+  return DASHBOARD_PIPELINE_STEPS.map((step) => ({
+    ...step,
+    status: resolvePipelineStepStatus(step.id, firstIncompleteStep, completion),
+  }));
+}
 
-  return DASHBOARD_PIPELINE_STEPS.map((step) => {
-    if (completion[step.id]) {
-      return {
-        ...step,
-        status: "complete",
-      };
-    }
-
-    if (step.id === firstIncompleteStep) {
-      return {
-        ...step,
-        status: "inProgress",
-      };
-    }
-
-    return {
-      ...step,
-      status: "pending",
-    };
-  });
+function resolvePipelineStepStatus(
+  stepId: DashboardPipelineStep["id"],
+  firstIncompleteStep: DashboardPipelineStep["id"] | null,
+  completion: Record<DashboardPipelineStep["id"], boolean>,
+): DashboardPipelineStepViewModel["status"] {
+  if (completion[stepId]) {
+    return "complete";
+  }
+  return stepId === firstIncompleteStep ? "inProgress" : "pending";
 }
 
 type DashboardFlowActionId = DashboardPipelineStep["id"] | "interview" | "aiChat";
@@ -125,30 +118,16 @@ export function resolveDashboardFlowActions(
   pipelineSteps: readonly DashboardPipelineStepViewModel[],
 ): readonly DashboardQuickAction[] {
   const hasIncompleteStep = pipelineSteps.some((step) => step.status !== "complete");
-  const prioritizedPipelineActionIds = pipelineSteps
-    .filter((step) => step.status !== "complete")
-    .map((step) => step.id);
-  const orderedPipelineActionIds = pipelineSteps.map((step) => step.id);
   const actionPriorityQueue: DashboardFlowActionId[] = hasIncompleteStep
     ? [
-        ...prioritizedPipelineActionIds,
-        ...orderedPipelineActionIds,
+        ...pipelineSteps.filter((step) => step.status !== "complete").map((step) => step.id),
+        ...pipelineSteps.map((step) => step.id),
         ...DASHBOARD_FLOW_ACTION_FALLBACK_ORDER,
       ]
     : ["interview", "aiChat", ...DASHBOARD_FLOW_ACTION_FALLBACK_ORDER];
-
-  const uniqueActionIds: DashboardFlowActionId[] = [];
-  for (const actionId of actionPriorityQueue) {
-    if (uniqueActionIds.includes(actionId)) {
-      continue;
-    }
-    uniqueActionIds.push(actionId);
-    if (uniqueActionIds.length >= 4) {
-      break;
-    }
-  }
-
-  return uniqueActionIds.map((actionId) => DASHBOARD_FLOW_ACTIONS[actionId]);
+  return [...new Set(actionPriorityQueue)]
+    .slice(0, 4)
+    .map((actionId) => DASHBOARD_FLOW_ACTIONS[actionId]);
 }
 
 /**
@@ -174,9 +153,12 @@ export const FAB_QUICK_ACTIONS: readonly DashboardQuickAction[] = [
  * Maps activity categories to emoji glyphs for quick scanning.
  */
 export function getDashboardActivityEmoji(activityType: string): string {
-  if (activityType.includes("job")) return "📝";
-  if (activityType.includes("resume")) return "📄";
-  if (activityType.includes("interview")) return "🎤";
-  if (activityType.includes("portfolio")) return "🧩";
-  return "⚡";
+  return DASHBOARD_ACTIVITY_EMOJIS.find(([pattern]) => activityType.includes(pattern))?.[1] ?? "⚡";
 }
+
+const DASHBOARD_ACTIVITY_EMOJIS = [
+  ["job", "📝"],
+  ["resume", "📄"],
+  ["interview", "🎤"],
+  ["portfolio", "🧩"],
+] as const;

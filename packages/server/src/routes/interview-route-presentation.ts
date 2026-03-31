@@ -4,10 +4,7 @@ import type {
   InterviewResponse,
   InterviewSession,
 } from "@bao/shared";
-import {
-  asString,
-  INTERVIEW_DEFAULT_ROLE_CATEGORY,
-} from "@bao/shared";
+import { asString, INTERVIEW_DEFAULT_ROLE_CATEGORY } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { studios } from "../db/schema/schema-modules";

@@ -11,8 +11,9 @@ import {
   toApiScopedPath,
   WS_ENDPOINTS,
 } from "@bao/shared";
+import Type, { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
@@ -210,10 +211,12 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
 }
 
 export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat), {
-  body: t.Object({
-    content: t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
-    sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  }),
+  body: StandardSchemaV1(
+    Type.Object({
+      content: Type.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
+      sessionId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    }),
+  ),
   async open(ws) {
     const brand = resolveRuntimeBrand(await getSettingsRow());
     sendSocketPayload(ws, {
@@ -222,7 +225,19 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
     });
   },
   async message(ws, data) {
-    await handleChatMessage(ws, data);
+    if (!data.content) {
+      sendSocketPayload(ws, {
+        type: "error",
+        message: API_ERROR_GENERATE_RESPONSE,
+        sessionId: data.sessionId ?? generateId(),
+      });
+      return;
+    }
+
+    await handleChatMessage(ws, {
+      content: data.content,
+      ...(data.sessionId ? { sessionId: data.sessionId } : {}),
+    });
   },
   close() {
     // Connection closed

@@ -57,7 +57,7 @@ Not sure where to start? Choose the guide that matches your goal:
 - **SQLite** is the notebook that remembers things.
 - **Playwright** is the robot browser.
 - **Bun** is the runtime, package manager, bundler, and test runner.
-- **Tauri** is the desktop wrapper.
+- **Tauri** is the desktop shell.
 
 ---
 
@@ -469,7 +469,7 @@ bun run dev:client
 | Dev (stack)                 | `bun run dev:stack`                                    | Alias to `scripts/dev-stack.ts`                     |
 | Dev server                  | `bun run dev:server`                                   | Start API server only                               |
 | Dev client                  | `bun run dev:client`                                   | Start Nuxt client only                              |
-| Dev desktop                 | `bun run dev:desktop`                                  | Start Tauri desktop wrapper                         |
+| Dev desktop                 | `bun run dev:desktop`                                  | Start Tauri desktop shell                           |
 | Build                       | `bun run build`                                        | Build server and client                             |
 | Build desktop               | `bun run build:desktop`                                | Build Tauri installer for current host; merges into `packages/desktop/releases` without deleting other OS artifacts |
 | Typecheck                   | `bun run typecheck`                                    | TypeScript checking across all packages             |
@@ -681,10 +681,10 @@ The AI subsystem is in `packages/server/src/services/ai/`:
 | `ai-service.ts`          | Routes requests to the active provider                        |
 | `provider-interface.ts`  | Common interface for all providers                            |
 | `local-provider.ts`      | Connects to Ollama, LM Studio, etc.                           |
-| `openai-provider.ts`     | OpenAI API adapter                                            |
-| `gemini-provider.ts`     | Google Gemini API adapter                                     |
-| `claude-provider.ts`     | Anthropic Claude API adapter                                  |
-| `huggingface-provider.ts`| HuggingFace Inference API adapter                             |
+| `openai-provider.ts`     | OpenAI API integration                                        |
+| `gemini-provider.ts`     | Google Gemini API integration                                 |
+| `claude-provider.ts`     | Anthropic Claude API integration                              |
+| `huggingface-provider.ts`| HuggingFace Inference API integration                         |
 | `context-manager.ts`     | Manages conversation history and context windows              |
 | `prompts.ts`             | Prompt templates for resume review, interviews, cover letters |
 
@@ -886,7 +886,7 @@ Migrations live in `packages/server/src/db/migrations/`. Seed data in `packages/
     |   +-- scraper/                Bun automation runtime
     |       +-- src/scripts/        Bun/TS automation entrypoints
     |       +-- src/providers/      Playwright scraper extractors
-    |       +-- src/job-apply/      ATS adapter runtime
+|       +-- src/job-apply/      ATS integration runtime
     |       +-- src/runtime/        IO/protocol/browser helpers
     |       +-- package.json
     +-- scripts/

@@ -131,7 +131,9 @@ function useResumeSearch(
       return name.includes(query) || template.includes(query);
     });
   });
-  const resumePagination = usePagination(filteredResumes, RESUME_LIST_PAGE_SIZE, [resumeSearchQuery]);
+  const resumePagination = usePagination(filteredResumes, RESUME_LIST_PAGE_SIZE, [
+    resumeSearchQuery,
+  ]);
 
   return {
     filteredResumes,

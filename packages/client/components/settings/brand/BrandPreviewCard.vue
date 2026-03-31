@@ -3,42 +3,70 @@ import type { BrandSettings } from "@bao/shared";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
+type BrandPreviewTheme = "light" | "dark";
+
 const props = defineProps<{
   brandDraft: BrandSettings;
+  themeNames: { light: string; dark: string };
 }>();
 
 const { t } = useI18n();
 
 const brandPreviewInitial = computed(() => props.brandDraft.name.charAt(0).toUpperCase());
+const previewFontStylesheetUrl = computed(() =>
+  props.brandDraft.typography.fontStylesheetUrl.trim(),
+);
 
-const brandPreviewShellStyle = computed(() => ({
-  backgroundColor: props.brandDraft.lightTheme.base100,
-  color: props.brandDraft.lightTheme.baseContent,
+useHead(() => ({
+  link: previewFontStylesheetUrl.value
+    ? [{ key: "brand-preview-fonts", rel: "stylesheet", href: previewFontStylesheetUrl.value }]
+    : [],
 }));
 
-const brandPreviewHeadingStyle = computed<Record<string, string>>(() => ({
+const brandPreviewThemes = computed<
+  ReadonlyArray<{
+    id: BrandPreviewTheme;
+    label: string;
+    palette: BrandSettings["lightTheme"];
+  }>
+>(() => [
+  {
+    id: "light",
+    label: props.themeNames.light,
+    palette: props.brandDraft.lightTheme,
+  },
+  {
+    id: "dark",
+    label: props.themeNames.dark,
+    palette: props.brandDraft.darkTheme,
+  },
+]);
+
+const createPreviewSurfaceStyle = (palette: BrandSettings["lightTheme"]) => ({
+  "--brand-preview-base-100": palette.base100,
+  "--brand-preview-base-content": palette.baseContent,
+  "--brand-preview-secondary": palette.secondary,
+  "--brand-preview-accent": palette.accent,
+  "--brand-preview-accent-content": palette.accentContent,
+  backgroundColor: palette.base100,
+  borderColor: `color-mix(in srgb, ${palette.secondary} 24%, ${palette.base100})`,
+  color: palette.baseContent,
+  fontFamily: props.brandDraft.typography.bodyFontFamily,
+});
+
+const createPreviewDisplayStyle = () => ({
   fontFamily: props.brandDraft.typography.displayFontFamily,
-}));
+});
 
-const brandPreviewPrimaryBadgeStyle = computed<Record<string, string>>(() => ({
-  backgroundColor: props.brandDraft.lightTheme.primary,
-  color: props.brandDraft.lightTheme.primaryContent,
-}));
+const createPrimaryAccentStyle = (palette: BrandSettings["lightTheme"]) => ({
+  backgroundColor: palette.accent,
+  color: palette.accentContent,
+});
 
-const brandPreviewSecondaryBadgeStyle = computed<Record<string, string>>(() => ({
-  borderColor: props.brandDraft.lightTheme.secondary,
-  color: props.brandDraft.lightTheme.secondary,
-}));
-
-const brandPreviewPrimaryActionStyle = computed<Record<string, string>>(() => ({
-  backgroundColor: props.brandDraft.lightTheme.accent,
-  color: props.brandDraft.lightTheme.accentContent,
-}));
-
-const brandPreviewSecondaryActionStyle = computed<Record<string, string>>(() => ({
-  borderColor: props.brandDraft.lightTheme.secondary,
-  color: props.brandDraft.lightTheme.secondary,
-}));
+const createSecondaryAccentStyle = (palette: BrandSettings["lightTheme"]) => ({
+  borderColor: `color-mix(in srgb, ${palette.secondary} 40%, ${palette.base100})`,
+  color: palette.secondary,
+});
 </script>
 
 <template>
@@ -59,72 +87,79 @@ const brandPreviewSecondaryActionStyle = computed<Record<string, string>>(() => 
         <span class="badge badge-outline">{{ brandDraft.assistantName }}</span>
       </div>
 
-      <div
-        class="rounded-box border border-base-300/60 p-5 shadow-sm"
-        :style="brandPreviewShellStyle"
-      >
-        <div class="flex items-center gap-3">
-          <img
-            v-if="brandDraft.logoPath.length > 0"
-            :src="brandDraft.logoPath"
-            :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
-            class="h-10 w-10 rounded-box border border-white/20 bg-white/80 object-contain p-1 shadow-sm"
-          />
-          <div
-            v-else
-            class="flex h-10 w-10 items-center justify-center rounded-box border border-white/20 bg-white/80 text-sm font-semibold shadow-sm"
-          >
-            {{ brandPreviewInitial }}
+      <div class="grid gap-4 xl:grid-cols-2">
+        <section
+          v-for="themeSurface in brandPreviewThemes"
+          :key="themeSurface.id"
+          class="rounded-box border p-5 shadow-sm"
+          :style="createPreviewSurfaceStyle(themeSurface.palette)"
+          :aria-label="t('settings.brand.previewTitle')"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <img
+                v-if="brandDraft.logoPath.length > 0"
+                :src="brandDraft.logoPath"
+                :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
+                class="h-10 w-10 rounded-box border border-base-300/40 bg-base-100/80 object-contain p-1 shadow-sm"
+              />
+              <div
+                v-else
+                class="flex h-10 w-10 items-center justify-center rounded-box border border-base-300/40 bg-base-100/80 text-sm font-semibold shadow-sm"
+              >
+                {{ brandPreviewInitial }}
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs uppercase tracking-widest text-base-content/60">
+                  {{ t("settings.brand.previewEyebrow") }}
+                </p>
+                <p class="truncate text-sm font-medium text-base-content/80">
+                  {{ brandDraft.apiName }}
+                </p>
+              </div>
+            </div>
+            <span class="badge badge-outline border-current/20 text-current/80">
+              {{ themeSurface.label }}
+            </span>
           </div>
-          <div class="min-w-0">
-            <p class="text-xs uppercase tracking-widest opacity-60">
-              {{ t("settings.brand.previewEyebrow") }}
+
+          <div class="mt-5 space-y-2">
+            <h4
+              class="text-2xl font-semibold text-base-content"
+              :style="createPreviewDisplayStyle()"
+            >
+              {{ brandDraft.name }}
+            </h4>
+            <p class="max-w-md text-sm text-base-content/80">{{ brandDraft.content.tagline }}</p>
+            <p class="max-w-md text-xs text-base-content/60">
+              {{ brandDraft.content.defaultDescription }}
             </p>
-            <p class="truncate text-sm font-medium opacity-80">
+          </div>
+
+          <div class="mt-5 flex flex-wrap gap-2">
+            <span
+              class="badge badge-lg border-0 shadow-sm"
+              :style="createPrimaryAccentStyle(themeSurface.palette)"
+            >
+              {{ brandDraft.assistantName }}
+            </span>
+            <span class="badge badge-outline" :style="createSecondaryAccentStyle(themeSurface.palette)">
               {{ brandDraft.apiName }}
-            </p>
+            </span>
           </div>
-        </div>
 
-        <div class="mt-5 space-y-2">
-          <h4 class="text-2xl font-semibold" :style="brandPreviewHeadingStyle">
-            {{ brandDraft.name }}
-          </h4>
-          <p class="max-w-md text-sm opacity-80">{{ brandDraft.content.tagline }}</p>
-          <p class="max-w-md text-xs text-base-content/60">
-            {{ brandDraft.content.defaultDescription }}
-          </p>
-        </div>
-
-        <div class="mt-5 flex flex-wrap gap-2">
-          <span
-            class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-sm"
-            :style="brandPreviewPrimaryBadgeStyle"
-          >
-            {{ brandDraft.assistantName }}
-          </span>
-          <span
-            class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
-            :style="brandPreviewSecondaryBadgeStyle"
-          >
-            {{ brandDraft.apiName }}
-          </span>
-        </div>
-
-        <div class="mt-6 flex flex-wrap gap-3">
-          <span
-            class="inline-flex items-center rounded-field px-4 py-2 text-sm font-medium shadow-sm"
-            :style="brandPreviewPrimaryActionStyle"
-          >
-            {{ t("settings.brand.previewPrimaryAction") }}
-          </span>
-          <span
-            class="inline-flex items-center rounded-field border px-4 py-2 text-sm font-medium"
-            :style="brandPreviewSecondaryActionStyle"
-          >
-            {{ t("settings.brand.previewSecondaryAction") }}
-          </span>
-        </div>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <span
+              class="btn btn-primary border-0 shadow-sm"
+              :style="createPrimaryAccentStyle(themeSurface.palette)"
+            >
+              {{ t("settings.brand.previewPrimaryAction") }}
+            </span>
+            <span class="btn btn-outline" :style="createSecondaryAccentStyle(themeSurface.palette)">
+              {{ t("settings.brand.previewSecondaryAction") }}
+            </span>
+          </div>
+        </section>
       </div>
     </div>
   </div>

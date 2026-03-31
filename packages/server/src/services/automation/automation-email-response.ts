@@ -1,6 +1,4 @@
-import {
-  settle,
-} from "@bao/shared";
+import { settle } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -11,10 +9,7 @@ import type {
   EmailExecutionResult,
   EmailResponseRuntime,
 } from "./automation-email-response-contracts";
-import {
-  deliverGeneratedEmail,
-  generateEmailResponse,
-} from "./automation-email-response-delivery";
+import { deliverGeneratedEmail, generateEmailResponse } from "./automation-email-response-delivery";
 import {
   completeEmailResponseRun,
   failEmailResponseRun,
@@ -102,7 +97,11 @@ export const executeEmailResponseRun = async (
   const deliveryResult: PromiseSettledResult<EmailDeliveryResult> =
     normalized.deliverAfterGeneration
       ? await settle(
-          deliverGeneratedEmail(normalized, responseResult.value.reply, runtime.loadEmailTransportConfig),
+          deliverGeneratedEmail(
+            normalized,
+            responseResult.value.reply,
+            runtime.loadEmailTransportConfig,
+          ),
         )
       : await settle(Promise.resolve(noDelivery));
 
@@ -123,7 +122,9 @@ export const executeEmailResponseRun = async (
     status: "success",
     ...responseResult.value,
     delivered: deliveryResult.value.delivered,
-    ...(deliveryResult.value.recipientEmail ? { recipientEmail: deliveryResult.value.recipientEmail } : {}),
+    ...(deliveryResult.value.recipientEmail
+      ? { recipientEmail: deliveryResult.value.recipientEmail }
+      : {}),
     ...(deliveryResult.value.deliveredAt ? { deliveredAt: deliveryResult.value.deliveredAt } : {}),
     ...(deliveryResult.value.messageId ? { messageId: deliveryResult.value.messageId } : {}),
   };

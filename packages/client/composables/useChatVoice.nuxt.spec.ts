@@ -35,8 +35,11 @@ function useNuxtStateMock(
 ): Ref<string>;
 function useNuxtStateMock(
   key: string,
-  _initializer?: () => boolean | string,
+  initializer?: () => boolean | string,
 ): Ref<boolean | string> {
+  if (typeof initializer === "function") {
+    // Keep signature parity with Nuxt's state factory callback.
+  }
   if (key === STATE_KEYS.AI_CHAT_AUTO_SPEAK) {
     return autoSpeakState;
   }

@@ -2,11 +2,7 @@
 import type { BrandSettings } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import {
-  getSaveStateBadgeClass,
-  getSaveStateLabelKey,
-  type SaveState,
-} from "./save-state";
+import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
 import BrandPreviewCard from "./brand/BrandPreviewCard.vue";
@@ -156,7 +152,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 
       <SectionGrid grid-token="twoColumnWide" extra-class="items-start gap-6">
         <div class="space-y-4 xl:sticky xl:top-24">
-          <BrandPreviewCard :brand-draft="brandDraft" />
+          <BrandPreviewCard :brand-draft="brandDraft" :theme-names="themeNames" />
           <BrandStatsCard
             :brand-draft="brandDraft"
             :language-options-count="languageOptionsCount"

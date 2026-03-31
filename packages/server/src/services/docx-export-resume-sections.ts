@@ -16,16 +16,18 @@ import {
 } from "./docx-export-resume-content";
 import { buildResumeHeader } from "./docx-export-resume-header";
 
-function buildSummarySection(
-  resume: ResumeData,
-  config: DocxTemplateConfig,
-): Paragraph[] {
+function buildSummarySection(resume: ResumeData, config: DocxTemplateConfig): Paragraph[] {
   if (!resume.summary) {
     return [];
   }
 
   return [
-    createSectionHeading("Summary", config.primaryColorHex, DOCX_RESUME_FONT_HEADER_PT, config.fontFamily),
+    createSectionHeading(
+      "Summary",
+      config.primaryColorHex,
+      DOCX_RESUME_FONT_HEADER_PT,
+      config.fontFamily,
+    ),
     new Paragraph({
       children: [
         new TextRun({
@@ -48,17 +50,25 @@ function buildRepeatableSection(
     return [];
   }
 
-  return [createSectionHeading(title, config.primaryColorHex, DOCX_RESUME_FONT_HEADER_PT, config.fontFamily), ...items];
+  return [
+    createSectionHeading(
+      title,
+      config.primaryColorHex,
+      DOCX_RESUME_FONT_HEADER_PT,
+      config.fontFamily,
+    ),
+    ...items,
+  ];
 }
 
-export function buildResumeSections(
-  resume: ResumeData,
-  config: DocxTemplateConfig,
-): Paragraph[] {
-  const experienceItems = resume.experience?.flatMap((item) => buildExperienceItem(item, config)) ?? [];
-  const educationItems = resume.education?.flatMap((item) => buildEducationItem(item, config)) ?? [];
+export function buildResumeSections(resume: ResumeData, config: DocxTemplateConfig): Paragraph[] {
+  const experienceItems =
+    resume.experience?.flatMap((item) => buildExperienceItem(item, config)) ?? [];
+  const educationItems =
+    resume.education?.flatMap((item) => buildEducationItem(item, config)) ?? [];
   const skillItems = resume.skills ? buildSkillsSection(resume.skills, config) : [];
-  const projectItems = resume.projects?.flatMap((project) => buildProjectItem(project, config)) ?? [];
+  const projectItems =
+    resume.projects?.flatMap((project) => buildProjectItem(project, config)) ?? [];
   const gamingItems = resume.gamingExperience
     ? buildGamingExperienceSection(resume.gamingExperience, config)
     : [];

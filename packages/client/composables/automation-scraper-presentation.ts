@@ -1,7 +1,4 @@
-import {
-  formatRelativeTimeForDate,
-  type AutomationScrapeTarget,
-} from "@bao/shared";
+import { formatRelativeTimeForDate, type AutomationScrapeTarget } from "@bao/shared";
 import type { ComposerTranslation } from "vue-i18n";
 import type { ComputedRef, Ref } from "vue";
 import {
@@ -100,12 +97,18 @@ function createScraperCardPresentation(t: ComposerTranslation) {
 function createJobPresentation() {
   return {
     hasJobEnrichment(job: {
-      readonly enrichment?: { readonly summary?: string; readonly interviewFocusAreas: readonly string[] };
+      readonly enrichment?: {
+        readonly summary?: string;
+        readonly interviewFocusAreas: readonly string[];
+      };
     }): boolean {
       return typeof job.enrichment?.summary === "string" && job.enrichment.summary.length > 0;
     },
     jobInterviewFocusAreas(job: {
-      readonly enrichment?: { readonly summary?: string; readonly interviewFocusAreas: readonly string[] };
+      readonly enrichment?: {
+        readonly summary?: string;
+        readonly interviewFocusAreas: readonly string[];
+      };
     }): string[] {
       return [...(job.enrichment?.interviewFocusAreas.slice(0, 2) ?? [])];
     },

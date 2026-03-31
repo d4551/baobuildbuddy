@@ -59,7 +59,8 @@ export async function useSetupPageBootstrap({
         fetchDashboardStats(),
         t("apiErrors.statistics.fetchDashboardFailed"),
       );
-      dashboardStats.value = statsResult.ok && !statsResult.value.error ? statsResult.value.data : null;
+      dashboardStats.value =
+        statsResult.ok && !statsResult.value.error ? statsResult.value.data : null;
 
       const authStatusResult = await settlePromise(
         checkAuthStatus(),

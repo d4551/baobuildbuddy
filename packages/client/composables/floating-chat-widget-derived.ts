@@ -143,7 +143,9 @@ export const createFloatingChatWidgetDerivedState = (options: {
   const renderedMessages = computed(() => buildChatMessageRenderRows(options.messages.value));
   const renderedMessageSignature = computed(() =>
     renderedMessages.value
-      .map(({ message }) => [message.id, message.role, message.timestamp, message.content].join(":"))
+      .map(({ message }) =>
+        [message.id, message.role, message.timestamp, message.content].join(":"),
+      )
       .join("\n"),
   );
   const latestAssistantMessageIndex = computed(() =>

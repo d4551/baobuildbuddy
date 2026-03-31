@@ -15,10 +15,7 @@ import { AIService } from "../services/ai/ai-service";
 import { skillAnalysisPrompt } from "../services/ai/prompts-career";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { createServerLogger } from "../utils/logger";
-import type {
-  SkillAnalyzeBody,
-  SkillMappingRouteSetState,
-} from "./skill-mapping-route-contracts";
+import type { SkillAnalyzeBody, SkillMappingRouteSetState } from "./skill-mapping-route-contracts";
 import {
   mapSuggestedMappingToCreateInput,
   normalizeStringArray,

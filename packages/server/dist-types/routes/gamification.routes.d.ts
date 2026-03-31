@@ -32,21 +32,30 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
     gamification: {
         "award-xp": {
             post: {
-                body: {
-                    reason: string;
-                    amount: number;
+                body: {} & {
+                    reason?: string | undefined;
+                    amount?: number | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
                     200: {
+                        error: string;
+                        xp?: undefined;
+                        level?: undefined;
+                        leveledUp?: undefined;
+                        levelUp?: undefined;
+                        reason?: undefined;
+                        message?: undefined;
+                    } | {
                         xp: number;
                         level: number;
                         leveledUp: boolean;
                         levelUp: import("@bao/shared").LevelUpResult | null;
                         reason: string;
                         message: string;
+                        error?: undefined;
                     };
                     422: {
                         type: "validation";
@@ -101,8 +110,8 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                 complete: {
                     post: {
                         body: unknown;
-                        params: {
-                            id: string;
+                        params: {} & {
+                            id?: string | undefined;
                         };
                         query: unknown;
                         headers: unknown;
@@ -119,15 +128,6 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                                 completed: boolean;
                                 totalXP: number;
                                 level: number;
-                            };
-                            422: {
-                                type: "validation";
-                                on: string;
-                                summary?: string;
-                                message?: string;
-                                found?: unknown;
-                                property?: string;
-                                expected?: string;
                             };
                         };
                     };

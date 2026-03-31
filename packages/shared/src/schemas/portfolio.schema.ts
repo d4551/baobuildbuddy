@@ -94,7 +94,7 @@ export const portfolioProjectUpdateSchema = portfolioProjectCreateSchema.partial
 export type PortfolioSchema = z.infer<typeof portfolioDataSchema>;
 
 /**
- * Export for typed compatibility from shared schema + local type.
+ * Export for typed contract alignment between the shared schema and local type.
  */
 export type PortfolioSchemaInput = z.input<typeof portfolioDataSchema>;
 

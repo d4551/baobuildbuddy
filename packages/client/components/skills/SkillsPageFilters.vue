@@ -8,9 +8,12 @@ defineProps<{
   hasActiveFilters: boolean;
 }>();
 
-const categoryFilter = defineModel<typeof SKILLS_FILTER_ALL_VALUE | SkillCategory>("categoryFilter", {
-  required: true,
-});
+const categoryFilter = defineModel<typeof SKILLS_FILTER_ALL_VALUE | SkillCategory>(
+  "categoryFilter",
+  {
+    required: true,
+  },
+);
 const searchFilter = defineModel<string>("searchFilter", { required: true });
 
 const emit = defineEmits<{

@@ -228,10 +228,7 @@ export async function useSettingsPageBootstrap(services: SettingsPageServices) {
   });
 }
 
-export function syncBrandForm(
-  currentSettings: AppSettings,
-  brandState: BrandRuntimeState,
-) {
+export function syncBrandForm(currentSettings: AppSettings, brandState: BrandRuntimeState) {
   const nextBrand = currentSettings.brandSettings ?? brandState.brandDefaults;
   brandState.brandForm.name = nextBrand.name;
   brandState.brandForm.assistantName = nextBrand.assistantName;
@@ -260,8 +257,7 @@ function syncProviderSettingsState(
 ) {
   providerState.apiKeys.localModelEndpoint =
     currentSettings.localModelEndpoint || LOCAL_AI_DEFAULT_ENDPOINT;
-  providerState.apiKeys.localModelName =
-    currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
+  providerState.apiKeys.localModelName = currentSettings.localModelName || LOCAL_AI_DEFAULT_MODEL;
   providerState.preferencesLanguage.value = currentSettings.language || DEFAULT_APP_LANGUAGE;
   providerState.preferredProviderSelection.value = resolveAIRoutingPreference(
     currentSettings,
@@ -270,10 +266,7 @@ function syncProviderSettingsState(
   assignAiRoutingDraft(providerState.aiRoutingDraft, currentSettings.aiRouting);
 }
 
-function syncNotificationSettingsState(
-  currentSettings: AppSettings,
-  saveState: SaveRuntimeState,
-) {
+function syncNotificationSettingsState(currentSettings: AppSettings, saveState: SaveRuntimeState) {
   saveState.notificationForm.achievements = currentSettings.notifications?.achievements ?? true;
   saveState.notificationForm.dailyChallenges =
     currentSettings.notifications?.dailyChallenges ?? true;
@@ -281,10 +274,7 @@ function syncNotificationSettingsState(
   saveState.notificationForm.jobAlerts = currentSettings.notifications?.jobAlerts ?? true;
 }
 
-function syncAutomationSettingsState(
-  currentSettings: AppSettings,
-  saveState: SaveRuntimeState,
-) {
+function syncAutomationSettingsState(currentSettings: AppSettings, saveState: SaveRuntimeState) {
   if (!currentSettings.automationSettings) {
     return;
   }
@@ -295,10 +285,7 @@ function syncAutomationSettingsState(
   });
 }
 
-function syncJobProviderSettingsState(
-  currentSettings: AppSettings,
-  saveState: SaveRuntimeState,
-) {
+function syncJobProviderSettingsState(currentSettings: AppSettings, saveState: SaveRuntimeState) {
   if (!currentSettings.automationSettings) {
     return;
   }
@@ -326,10 +313,7 @@ function syncJobProviderSettingsState(
   });
 }
 
-function syncJobTaxonomySettingsState(
-  currentSettings: AppSettings,
-  saveState: SaveRuntimeState,
-) {
+function syncJobTaxonomySettingsState(currentSettings: AppSettings, saveState: SaveRuntimeState) {
   const jobTaxonomy: JobTaxonomySettings =
     currentSettings.jobTaxonomy ?? DEFAULT_JOB_TAXONOMY_SETTINGS;
   saveState.jobTaxonomyForm.keywordsJson = JSON.stringify(jobTaxonomy.keywords, null, 2);

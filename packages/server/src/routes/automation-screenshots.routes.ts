@@ -13,8 +13,10 @@ import {
   RUN_ID_SAFE_PATTERN_SOURCE,
   settle,
 } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -149,18 +151,27 @@ export const automationScreenshotRoutes = new Elysia({
     return createScreenshotResponse(contents, extension);
   },
   {
-    params: t.Object({
-      runId: t.String({ minLength: RUN_ID_MIN_LENGTH, pattern: RUN_ID_SAFE_PATTERN_SOURCE }),
-      index: t.String({ minLength: 1, pattern: "^(0|[1-9][0-9]*)$" }),
-    }),
+    params: StandardSchemaV1(
+      Type.Object(
+        {
+          runId: Type.String({ minLength: RUN_ID_MIN_LENGTH, pattern: RUN_ID_SAFE_PATTERN_SOURCE }),
+          index: Type.String({ minLength: 1, pattern: "^(0|[1-9][0-9]*)$" }),
+        },
+        { required: ["runId", "index"] },
+      ),
+    ),
     response: {
-      200: t.Unknown(),
-      400: t.Object({
-        error: t.String(),
-      }),
-      404: t.Object({
-        error: t.String(),
-      }),
+      200: StandardSchemaV1(Type.Unknown()),
+      400: StandardSchemaV1(
+        Type.Object({
+          error: Type.String(),
+        }),
+      ),
+      404: StandardSchemaV1(
+        Type.Object({
+          error: Type.String(),
+        }),
+      ),
     },
   },
 );

@@ -7,6 +7,32 @@ import type { ResumePageActionsInput } from "~/composables/resume-page-actions-c
 import { RESUME_EMAIL_PATTERN } from "~/composables/resume-page-bootstrap";
 import { getErrorMessage } from "~/utils/errors";
 
+type ResumeEditorSupport = {
+  progress: ReturnType<typeof useAiEnhancementProgress>;
+  resolveReward: ReturnType<typeof useResumeRewardResolver>;
+  validate: ReturnType<typeof useResumeFormValidation>;
+};
+
+type ResumeActionFeedback = {
+  $toast: Pick<NuxtApp["$toast"], "error" | "success">;
+  t: ComposerTranslation;
+};
+
+type ResumeEnhanceActionInput = Pick<
+  ResumePageActionsInput,
+  "aiEnhance" | "enhancing" | "formData" | "selectedResumeId"
+>;
+
+type ResumeScoreActionInput = Pick<
+  ResumePageActionsInput,
+  "aiScore" | "scoring" | "selectedResumeId"
+>;
+
+type ResumeSaveActionInput = Pick<
+  ResumePageActionsInput,
+  "formData" | "selectedResumeId" | "updateResume"
+>;
+
 export function useAiEnhancementProgress(aiEnhancementStepLabels: Ref<readonly string[]>) {
   const aiEnhancementStepIndex = ref(0);
   let aiEnhancementTimer: ReturnType<typeof setInterval> | null = null;
@@ -119,17 +145,16 @@ export function useResumeFormValidation(
 export function useResumeEditorActions(
   input: Pick<
     ResumePageActionsInput,
-    "aiEnhance" | "aiScore" | "enhancing" | "formData" | "scoring" | "selectedResumeId" | "updateResume"
+    | "aiEnhance"
+    | "aiScore"
+    | "enhancing"
+    | "formData"
+    | "scoring"
+    | "selectedResumeId"
+    | "updateResume"
   >,
-  support: {
-    progress: ReturnType<typeof useAiEnhancementProgress>;
-    resolveReward: ReturnType<typeof useResumeRewardResolver>;
-    validate: ReturnType<typeof useResumeFormValidation>;
-  },
-  feedback: {
-    nuxtApp: Pick<NuxtApp, "$toast">;
-    t: ComposerTranslation;
-  },
+  support: ResumeEditorSupport,
+  feedback: { nuxtApp: Pick<NuxtApp, "$toast">; t: ComposerTranslation },
 ) {
   const { $toast } = feedback.nuxtApp;
   const { t } = feedback;
@@ -146,18 +171,9 @@ export function useResumeEditorActions(
 }
 
 function createResumeEnhanceAction(
-  input: Pick<
-    ResumePageActionsInput,
-    "aiEnhance" | "enhancing" | "formData" | "selectedResumeId"
-  >,
-  support: Pick<
-    Parameters<typeof useResumeEditorActions>[1],
-    "progress" | "resolveReward"
-  >,
-  feedback: {
-    $toast: Pick<NuxtApp["$toast"], "error" | "success">;
-    t: ComposerTranslation;
-  },
+  input: ResumeEnhanceActionInput,
+  support: ResumeEditorSupport,
+  feedback: ResumeActionFeedback,
 ) {
   return async function handleAIEnhance(): Promise<void> {
     if (!input.selectedResumeId.value) {
@@ -190,13 +206,7 @@ function createResumeEnhanceAction(
   };
 }
 
-function createResumeScoreAction(
-  input: Pick<ResumePageActionsInput, "aiScore" | "scoring" | "selectedResumeId">,
-  feedback: {
-    $toast: Pick<NuxtApp["$toast"], "error" | "success">;
-    t: ComposerTranslation;
-  },
-) {
+function createResumeScoreAction(input: ResumeScoreActionInput, feedback: ResumeActionFeedback) {
   return async function handleAIScore(): Promise<void> {
     if (!input.selectedResumeId.value) {
       return;
@@ -221,15 +231,9 @@ function createResumeScoreAction(
 }
 
 function createResumeSaveAction(
-  input: Pick<ResumePageActionsInput, "formData" | "selectedResumeId" | "updateResume">,
-  support: Pick<
-    Parameters<typeof useResumeEditorActions>[1],
-    "resolveReward" | "validate"
-  >,
-  feedback: {
-    $toast: Pick<NuxtApp["$toast"], "error" | "success">;
-    t: ComposerTranslation;
-  },
+  input: ResumeSaveActionInput,
+  support: Pick<ResumeEditorSupport, "resolveReward" | "validate">,
+  feedback: ResumeActionFeedback,
 ) {
   return async function handleSave(): Promise<void> {
     const resumeId = input.selectedResumeId.value;

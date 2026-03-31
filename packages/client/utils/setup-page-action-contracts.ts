@@ -12,7 +12,10 @@ export interface SetupPageToastApi {
   error: (message: string) => void;
   success: (message: string) => void;
 }
-export interface ProfileUpdatePayload { name: string; currentRole?: string }
+export interface ProfileUpdatePayload {
+  name: string;
+  currentRole?: string;
+}
 
 export interface SettingsSnapshot {
   hasGeminiKey?: boolean | null;

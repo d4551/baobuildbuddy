@@ -1,8 +1,4 @@
-import type {
-  InterviewConversationStyle,
-  InterviewMode,
-  VoiceSettings,
-} from "@bao/shared";
+import type { InterviewConversationStyle, InterviewMode, VoiceSettings } from "@bao/shared";
 
 export interface InterviewHubSessionConfig {
   studioId: string;

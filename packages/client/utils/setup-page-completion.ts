@@ -1,9 +1,9 @@
-import {
-  LOCAL_AI_DEFAULT_ENDPOINT,
-  LOCAL_AI_DEFAULT_MODEL,
-} from "@bao/shared";
+import { LOCAL_AI_DEFAULT_ENDPOINT, LOCAL_AI_DEFAULT_MODEL } from "@bao/shared";
 import { settlePromise } from "~/composables/async-flow";
-import { API_KEY_FIELD_BY_PROVIDER, CLOUD_PROVIDER_IDS } from "~/components/setup/setup-page-contracts";
+import {
+  API_KEY_FIELD_BY_PROVIDER,
+  CLOUD_PROVIDER_IDS,
+} from "~/components/setup/setup-page-contracts";
 import type {
   ProviderCredentialState,
   SetupCompletionInput,

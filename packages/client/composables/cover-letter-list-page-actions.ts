@@ -10,10 +10,7 @@ import {
 import { onMounted, type Ref } from "vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
-import type {
-  GenerateCoverLetterInput,
-  GenerateCoverLetterResult,
-} from "./useCoverLetter";
+import type { GenerateCoverLetterInput, GenerateCoverLetterResult } from "./useCoverLetter";
 
 export type CoverLetterGenerateForm = {
   company: string;
@@ -31,9 +28,7 @@ type ToastApi = {
 
 type CoverLetterPageActionServices = {
   deleteCoverLetter(id: string): Promise<void>;
-  generateCoverLetter(
-    payload: GenerateCoverLetterInput,
-  ): Promise<GenerateCoverLetterResult | null>;
+  generateCoverLetter(payload: GenerateCoverLetterInput): Promise<GenerateCoverLetterResult | null>;
   fetchCoverLetters(): Promise<void>;
   fetchResumes(): Promise<void>;
   router: { push(path: string): Promise<unknown> };
@@ -73,11 +68,7 @@ function initializeResumeSelection(
   }
 }
 
-function validateGenerateForm(
-  state: CoverLetterPageActionState,
-  toast: ToastApi,
-  t: TranslateFn,
-) {
+function validateGenerateForm(state: CoverLetterPageActionState, toast: ToastApi, t: TranslateFn) {
   if (state.generateForm.company.trim().length < COVER_LETTER_COMPANY_MIN_LENGTH) {
     toast.error(
       t("coverLetterPage.toasts.companyMinLength", {
@@ -97,10 +88,7 @@ function validateGenerateForm(
   }
 
   const description = state.generateForm.jobDescription.trim();
-  if (
-    description.length > 0 &&
-    description.length < COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH
-  ) {
+  if (description.length > 0 && description.length < COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH) {
     toast.error(
       t("coverLetterPage.toasts.jobDescriptionMinLength", {
         count: COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH,
@@ -151,10 +139,7 @@ function createDeleteCoverLetterHandler(
 
     if (!deleteResult.ok) {
       services.$toast.error(
-        getErrorMessage(
-          deleteResult.error,
-          services.t("coverLetterPage.toasts.deleteFailed"),
-        ),
+        getErrorMessage(deleteResult.error, services.t("coverLetterPage.toasts.deleteFailed")),
       );
       return;
     }
@@ -163,9 +148,7 @@ function createDeleteCoverLetterHandler(
   };
 }
 
-function resolveGeneratedCoverLetterId(
-  result: GenerateCoverLetterResult | null,
-): string | null {
+function resolveGeneratedCoverLetterId(result: GenerateCoverLetterResult | null): string | null {
   if (!(result && "coverLetter" in result)) {
     return null;
   }
@@ -191,10 +174,7 @@ function createGenerateCoverLetterHandler(
 
     if (!generateResult.ok) {
       services.$toast.error(
-        getErrorMessage(
-          generateResult.error,
-          services.t("coverLetterPage.toasts.generateFailed"),
-        ),
+        getErrorMessage(generateResult.error, services.t("coverLetterPage.toasts.generateFailed")),
       );
       return;
     }
@@ -203,9 +183,7 @@ function createGenerateCoverLetterHandler(
     resetGenerateForm(state);
     const generatedId = resolveGeneratedCoverLetterId(generateResult.value);
     if (!generatedId) {
-      services.$toast.success(
-        services.t("coverLetterPage.toasts.generatedWithoutRedirect"),
-      );
+      services.$toast.success(services.t("coverLetterPage.toasts.generatedWithoutRedirect"));
       return;
     }
 
@@ -237,10 +215,7 @@ export function createCoverLetterActions(
 }
 
 export function useCoverLetterPageBootstrap(
-  services: Pick<
-    CoverLetterPageActionServices,
-    "fetchCoverLetters" | "fetchResumes" | "route"
-  >,
+  services: Pick<CoverLetterPageActionServices, "fetchCoverLetters" | "fetchResumes" | "route">,
   state: Pick<CoverLetterPageActionState, "generateForm" | "initialResumeId">,
 ) {
   onMounted(async () => {

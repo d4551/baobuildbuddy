@@ -33,10 +33,7 @@ export function resolveResumePdfTemplate(
   return template;
 }
 
-export function applyResumeBackground(
-  context: ResumeRenderContext,
-  page = context.page,
-): void {
+export function applyResumeBackground(context: ResumeRenderContext, page = context.page): void {
   if (context.background.r >= 0.5) {
     return;
   }
@@ -50,10 +47,7 @@ export function applyResumeBackground(
   });
 }
 
-export function ensureResumeSpace(
-  context: ResumeRenderContext,
-  requiredSpace: number,
-): void {
+export function ensureResumeSpace(context: ResumeRenderContext, requiredSpace: number): void {
   if (context.yPosition - requiredSpace >= context.margin) {
     return;
   }
@@ -136,10 +130,7 @@ export async function createResumeContext(
   return context;
 }
 
-export function renderResumeSectionHeader(
-  context: ResumeRenderContext,
-  title: string,
-): void {
+export function renderResumeSectionHeader(context: ResumeRenderContext, title: string): void {
   ensureResumeSpace(context, RESUME_SECTION_SPACE);
   context.page.drawText(title, {
     x: context.margin,

@@ -2,6 +2,8 @@ import type { AIProviderType } from "@bao/shared";
 import type { settings as settingsTable } from "../db/schema/settings";
 type SettingsRow = typeof settingsTable.$inferSelect;
 export declare const buildSettingsResponse: (row: SettingsRow) => Promise<{
+    automationSettings: import("@bao/shared").AutomationSettings | null;
+    localModelEndpoint: string | null;
     aiRouting: import("@bao/shared").AIRouting;
     providerDiagnostics: Partial<Record<"gemini" | "claude" | "openai" | "huggingface" | "local", import("@bao/shared").AIProviderDiagnostic>> | undefined;
     preferredProvider: string | null;
@@ -21,9 +23,7 @@ export declare const buildSettingsResponse: (row: SettingsRow) => Promise<{
     jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
     id: string;
     notifications: Record<string, boolean> | null;
-    automationSettings: import("@bao/shared").AutomationSettings | null;
     emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
-    localModelEndpoint: string | null;
     localModelName: string | null;
     language: string | null;
     updatedAt: string;

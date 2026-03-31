@@ -14,8 +14,10 @@ import {
   SCHEMA_MAX_LENGTH_TINY,
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { desc, eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
 
@@ -65,12 +67,14 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return results;
     },
     {
-      query: t.Object({
-        q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        remoteWork: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-      }),
+      query: StandardSchemaV1(
+        Type.Object({
+          q: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+          size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+          remoteWork: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+        }),
+      ),
     },
   )
   .get(
@@ -84,9 +88,14 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return rows[0];
     },
     {
-      params: t.Object({
-        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-      }),
+      params: StandardSchemaV1(
+        Type.Object(
+          {
+            id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+          },
+          { required: ["id"] },
+        ),
+      ),
     },
   )
   .post(
@@ -116,43 +125,48 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return newStudio;
     },
     {
-      body: t.Object({
-        name: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-        description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-        website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        founded: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-        remoteWork: t.Optional(t.Boolean()),
-        technologies: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
+      body: StandardSchemaV1(
+        Type.Object(
+          {
+            name: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+            description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+            website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+            location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+            type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+            size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+            founded: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+            remoteWork: Type.Optional(Type.Boolean()),
+            technologies: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+                maxItems: SCHEMA_MAX_ITEMS_LARGE,
+              }),
+            ),
+            genres: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+                maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+              }),
+            ),
+            platforms: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+                maxItems: SCHEMA_MAX_ITEMS_SMALL,
+              }),
+            ),
+            culture: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+            benefits: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+                maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+              }),
+            ),
+            socialMedia: Type.Optional(Type.Record(Type.String(), Type.String())),
+            notableGames: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+                maxItems: SCHEMA_MAX_ITEMS_LARGE,
+              }),
+            ),
+          },
+          { required: ["name"] },
         ),
-        genres: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        platforms: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_SMALL,
-          }),
-        ),
-        culture: t.Optional(t.Record(t.String(), t.Unknown())),
-        benefits: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        socialMedia: t.Optional(t.Record(t.String(), t.String())),
-        notableGames: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-      }),
+      ),
     },
   )
   .put(
@@ -174,44 +188,48 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return updated[0];
     },
     {
-      params: t.Object({ id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }),
-      body: t.Object({
-        name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-        website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        founded: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-        remoteWork: t.Optional(t.Boolean()),
-        technologies: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-        genres: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        platforms: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_SMALL,
-          }),
-        ),
-        culture: t.Optional(t.Record(t.String(), t.Unknown())),
-        benefits: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        socialMedia: t.Optional(t.Record(t.String(), t.String())),
-        notableGames: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-      }),
+      params: StandardSchemaV1(
+        Type.Object({ id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }, { required: ["id"] }),
+      ),
+      body: StandardSchemaV1(
+        Type.Object({
+          name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+          website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+          location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+          size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+          founded: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+          remoteWork: Type.Optional(Type.Boolean()),
+          technologies: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+              maxItems: SCHEMA_MAX_ITEMS_LARGE,
+            }),
+          ),
+          genres: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+              maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+            }),
+          ),
+          platforms: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+              maxItems: SCHEMA_MAX_ITEMS_SMALL,
+            }),
+          ),
+          culture: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+          benefits: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+              maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+            }),
+          ),
+          socialMedia: Type.Optional(Type.Record(Type.String(), Type.String())),
+          notableGames: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+              maxItems: SCHEMA_MAX_ITEMS_LARGE,
+            }),
+          ),
+        }),
+      ),
     },
   )
   .delete(
@@ -227,7 +245,9 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return { message: API_MESSAGE_STUDIO_DELETED, id: params.id };
     },
     {
-      params: t.Object({ id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }),
+      params: StandardSchemaV1(
+        Type.Object({ id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }, { required: ["id"] }),
+      ),
     },
   )
   .get("/analytics", async (): Promise<StudioAnalytics> => {

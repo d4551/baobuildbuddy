@@ -161,7 +161,8 @@ export function usePortfolioPageState() {
     portfolioForm,
     projectForm,
     reorderingProjectId,
-    requestDeleteProjectConfirmation: (id: string) => deleteState.requestDeleteProjectConfirmation(id),
+    requestDeleteProjectConfirmation: (id: string) =>
+      deleteState.requestDeleteProjectConfirmation(id),
     searchQuery,
     showAddModal: modalState.showAddModal,
     showDeleteProjectDialog: deleteState.showDeleteProjectDialog,

@@ -7,10 +7,7 @@ import {
 } from "@bao/shared";
 import { asc } from "drizzle-orm";
 import { db } from "../../db/client";
-import {
-  jobTaxonomyKeywords,
-  studioClassificationRules,
-} from "../../db/schema/job-taxonomy";
+import { jobTaxonomyKeywords, studioClassificationRules } from "../../db/schema/job-taxonomy";
 
 const mapKeywordRow = (row: typeof jobTaxonomyKeywords.$inferSelect): JobTaxonomyKeywordEntry => ({
   id: row.id,
@@ -31,7 +28,9 @@ const mapStudioRuleRow = (
   enabled: row.enabled,
 });
 
-const insertKeywordRow = (entry: JobTaxonomyKeywordEntry): typeof jobTaxonomyKeywords.$inferInsert => ({
+const insertKeywordRow = (
+  entry: JobTaxonomyKeywordEntry,
+): typeof jobTaxonomyKeywords.$inferInsert => ({
   id: entry.id,
   category: entry.category,
   label: entry.label,
@@ -54,12 +53,12 @@ const insertStudioRuleRow = (
 
 const seedDefaults = async (): Promise<void> => {
   await db.transaction(async (tx) => {
-    await tx.insert(jobTaxonomyKeywords).values(
-      DEFAULT_JOB_TAXONOMY_SETTINGS.keywords.map(insertKeywordRow),
-    );
-    await tx.insert(studioClassificationRules).values(
-      DEFAULT_JOB_TAXONOMY_SETTINGS.studioRules.map(insertStudioRuleRow),
-    );
+    await tx
+      .insert(jobTaxonomyKeywords)
+      .values(DEFAULT_JOB_TAXONOMY_SETTINGS.keywords.map(insertKeywordRow));
+    await tx
+      .insert(studioClassificationRules)
+      .values(DEFAULT_JOB_TAXONOMY_SETTINGS.studioRules.map(insertStudioRuleRow));
   });
 };
 

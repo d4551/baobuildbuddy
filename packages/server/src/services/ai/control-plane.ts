@@ -58,10 +58,10 @@ const toProviderDiagnosticEntry = (status: AIProviderStatus): AIProviderDiagnost
   message: status.error,
 });
 
-const buildProviderDiagnostics = (
-  providerStatuses: AIProviderStatus[],
-): AIProviderDiagnostics => {
-  const statusByProvider = new Map(providerStatuses.map((status) => [status.provider, status] as const));
+const buildProviderDiagnostics = (providerStatuses: AIProviderStatus[]): AIProviderDiagnostics => {
+  const statusByProvider = new Map(
+    providerStatuses.map((status) => [status.provider, status] as const),
+  );
 
   return Object.fromEntries(
     AI_PROVIDER_CATALOG.map((provider) => {
@@ -118,7 +118,10 @@ const resolveFallbackModels = (
   const catalogProvider = AI_PROVIDER_CATALOG.find((provider) => provider.id === providerId);
   const selectedModel = resolveFallbackSelectedModel(row, providerId, aiRouting);
   return selectedModel
-    ? [selectedModel, ...(catalogProvider?.modelHints.filter((hint) => hint !== selectedModel) ?? [])]
+    ? [
+        selectedModel,
+        ...(catalogProvider?.modelHints.filter((hint) => hint !== selectedModel) ?? []),
+      ]
     : [...(catalogProvider?.modelHints ?? [])];
 };
 
@@ -142,7 +145,11 @@ const buildFallbackProviderRows = (
       ...(provider.id === "local" &&
       typeof row.localModelEndpoint === "string" &&
       row.localModelEndpoint.trim().length > 0
-        ? { availableModels: [row.localModelName].filter((value): value is string => Boolean(value)) }
+        ? {
+            availableModels: [row.localModelName].filter((value): value is string =>
+              Boolean(value),
+            ),
+          }
         : {}),
     };
   });
@@ -187,10 +194,7 @@ const resolveConfiguredProvidersFromRow = (
     (provider) => provider.id,
   );
 
-const buildFallbackControlPlaneState = (
-  row: SettingsRow,
-  error: string,
-): AIControlPlaneState => {
+const buildFallbackControlPlaneState = (row: SettingsRow, error: string): AIControlPlaneState => {
   const aiRouting = normalizeAIRouting(
     row.aiRouting,
     resolveKnownProvider(row.preferredProvider),
@@ -212,7 +216,9 @@ const buildProviderRows = (
   providerStatuses: AIProviderStatus[],
   aiRouting: ReturnType<typeof normalizeAIRouting>,
 ): AIControlPlaneProviderRow[] => {
-  const statusByProvider = new Map(providerStatuses.map((status) => [status.provider, status] as const));
+  const statusByProvider = new Map(
+    providerStatuses.map((status) => [status.provider, status] as const),
+  );
 
   return AI_PROVIDER_CATALOG.map((provider) => {
     const status = statusByProvider.get(provider.id);

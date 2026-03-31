@@ -32,7 +32,10 @@ type DeepReadonly<T> = T extends (...args: never[]) => unknown
 
 export type InterviewJobView = DeepReadonly<Job>;
 
-export function ensureOptions<T>(options: readonly T[], fallbackOptions: readonly T[]): readonly T[] {
+export function ensureOptions<T>(
+  options: readonly T[],
+  fallbackOptions: readonly T[],
+): readonly T[] {
   if (options.length > 0) {
     return options;
   }
@@ -239,10 +242,7 @@ export async function useInterviewHubBootstrap(
     error: interviewHubError,
     refresh: refreshInterviewHub,
   } = await useAsyncData("interview-hub-bootstrap", async () =>
-    loadInterviewHubBootstrapData(
-      { input, requestedMode, routeStudioId, sessionConfig, state },
-      t,
-    ),
+    loadInterviewHubBootstrapData({ input, requestedMode, routeStudioId, sessionConfig, state }, t),
   );
 
   const interviewHubPending = computed(

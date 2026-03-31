@@ -1,8 +1,4 @@
-import {
-  API_ERROR_INVALID_GAMIFICATION_PAYLOAD,
-  DEFAULT_PROFILE_ID,
-  isRecord,
-} from "@bao/shared";
+import { API_ERROR_INVALID_GAMIFICATION_PAYLOAD, DEFAULT_PROFILE_ID, isRecord } from "@bao/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { gamification } from "../db/schema/gamification";
@@ -61,10 +57,7 @@ export const importSettingsSection = async (
   await runWithErrorHandler(
     async () => {
       const normalized = sanitizeImportedSettings(data.settings);
-      const existing = await db
-        .select()
-        .from(settings)
-        .where(eq(settings.id, DEFAULT_SETTINGS_ID));
+      const existing = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
       if (existing.length > 0) {
         await db
           .update(settings)

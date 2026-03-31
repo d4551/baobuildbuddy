@@ -7,7 +7,9 @@ import {
   isAutomationScrapePortalId,
   settle,
 } from "@bao/shared";
-import { Elysia, t } from "elysia";
+import { StandardSchemaV1 } from "baobox";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { scraperService } from "../services/scraper-service";
 
 export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] })
@@ -51,8 +53,13 @@ export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] 
       return scrapeJobsResult.value;
     },
     {
-      params: t.Object({
-        portalId: t.String({ minLength: 1 }),
-      }),
+      params: StandardSchemaV1(
+        Type.Object(
+          {
+            portalId: Type.String({ minLength: 1 }),
+          },
+          { required: ["portalId"] },
+        ),
+      ),
     },
   );

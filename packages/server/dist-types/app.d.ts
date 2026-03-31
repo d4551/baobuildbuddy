@@ -1,3 +1,4 @@
+import Type, { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 export declare const app: Elysia<"/api", {
     decorator: {};
@@ -12,16 +13,26 @@ export declare const app: Elysia<"/api", {
     resolve: {};
 }, {
     typebox: {
-        readonly HealthResponse: import("@sinclair/typebox").TObject<{
-            status: import("@sinclair/typebox").TString;
-            timestamp: import("@sinclair/typebox").TString;
-            database: import("@sinclair/typebox").TString;
-            uptime: import("@sinclair/typebox").TNumber;
-        }>;
-        readonly ErrorResponse: import("@sinclair/typebox").TObject<{
-            error: import("@sinclair/typebox").TString;
-            code: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-            fields: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TArray<import("@sinclair/typebox").TUnknown>>;
+        readonly HealthResponse: Type.TObject<{
+            readonly status: Type.TString;
+            readonly timestamp: Type.TString;
+            readonly database: Type.TString;
+            readonly uptime: Type.TNumber;
+        }, "status" | "timestamp" | "database" | "uptime", never> & StandardSchemaV1<unknown, {
+            status: string;
+            timestamp: string;
+            database: string;
+            uptime: number;
+        } & {}>;
+        readonly ErrorResponse: Type.TObject<{
+            readonly error: Type.TString;
+            readonly code: Type.TOptional<Type.TString>;
+            readonly fields: Type.TOptional<Type.TArray<Type.TString>>;
+        }, "error", never> & StandardSchemaV1<unknown, {
+            error: string;
+        } & {
+            code?: string | undefined;
+            fields?: string[] | undefined;
         }>;
     };
     error: {};
@@ -72,7 +83,7 @@ export declare const app: Elysia<"/api", {
                         timestamp: string;
                         database: string;
                         uptime: number;
-                    };
+                    } & {};
                     422: {
                         type: "validation";
                         on: string;
@@ -126,7 +137,7 @@ export declare const app: Elysia<"/api", {
         auth: {
             init: {
                 post: {
-                    body: {
+                    body: {} & {
                         setupToken?: string | undefined;
                     };
                     params: {};
@@ -209,7 +220,7 @@ export declare const app: Elysia<"/api", {
         user: {
             profile: {
                 put: {
-                    body: {
+                    body: {} & {
                         name?: string | undefined;
                         email?: string | undefined;
                         location?: string | undefined;
@@ -217,14 +228,14 @@ export declare const app: Elysia<"/api", {
                         summary?: string | undefined;
                         phone?: string | undefined;
                         github?: string | undefined;
-                        gamingExperience?: {} | undefined;
+                        gamingExperience?: Record<string, unknown> | undefined;
                         softSkills?: string[] | undefined;
                         linkedin?: string | undefined;
                         currentRole?: string | undefined;
                         currentCompany?: string | undefined;
                         yearsExperience?: number | undefined;
                         technicalSkills?: string[] | undefined;
-                        careerGoals?: {} | undefined;
+                        careerGoals?: Record<string, unknown> | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -276,6 +287,8 @@ export declare const app: Elysia<"/api", {
                 headers: unknown;
                 response: {
                     200: {
+                        automationSettings: import("@bao/shared").AutomationSettings | null;
+                        localModelEndpoint: string | null;
                         aiRouting: import("@bao/shared").AIRouting;
                         providerDiagnostics: Partial<Record<"gemini" | "claude" | "openai" | "huggingface" | "local", import("@bao/shared").AIProviderDiagnostic>> | undefined;
                         preferredProvider: string | null;
@@ -295,9 +308,7 @@ export declare const app: Elysia<"/api", {
                         jobTaxonomy: import("@bao/shared").JobTaxonomySettings;
                         id: string;
                         notifications: Record<string, boolean> | null;
-                        automationSettings: import("@bao/shared").AutomationSettings | null;
                         emailTransportSettings: import("@bao/shared").EmailTransportSettings | null;
-                        localModelEndpoint: string | null;
                         localModelName: string | null;
                         language: string | null;
                         updatedAt: string;
@@ -311,52 +322,61 @@ export declare const app: Elysia<"/api", {
     } & {
         settings: {
             put: {
-                body: {
-                    aiRouting?: {
+                body: {} & {
+                    aiRouting?: ({
                         chat: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
                         interviewQuestions: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
                         interviewFeedback: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
                         resume: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
                         coverLetter: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
                         emailResponse: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
                         jobMatch: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
                         scrapeEnrichment: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
                         automationFieldMapping: {
-                            model?: string | undefined;
                             provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        } & {
+                            model?: string | undefined;
                         };
-                    } | undefined;
-                    notifications?: {
+                    } & {}) | undefined;
+                    notifications?: ({} & {
                         achievements?: boolean | undefined;
                         dailyChallenges?: boolean | undefined;
                         levelUp?: boolean | undefined;
                         jobAlerts?: boolean | undefined;
-                    } | undefined;
-                    automationSettings?: {
+                    }) | undefined;
+                    automationSettings?: ({} & {
                         headless?: boolean | undefined;
                         defaultTimeout?: number | undefined;
                         screenshotRetention?: number | undefined;
@@ -365,71 +385,71 @@ export declare const app: Elysia<"/api", {
                         enableSmartSelectors?: boolean | undefined;
                         autoSaveScreenshots?: boolean | undefined;
                         speech?: {
-                            locale: string;
-                            stt: {
+                            readonly locale: string;
+                            readonly stt: {
                                 provider: "openai" | "huggingface" | "local" | "browser" | "custom";
                                 model: string;
                                 endpoint: string;
                             };
-                            tts: {
+                            readonly tts: {
+                                voice: string;
+                                format: "mp3" | "wav";
                                 provider: "openai" | "huggingface" | "local" | "browser" | "custom";
                                 model: string;
-                                format: "mp3" | "wav";
                                 endpoint: string;
-                                voice: string;
                             };
                         } | undefined;
                         jobProviders?: {
-                            companyBoardApiTemplates: {
-                                greenhouse: string;
-                                lever: string;
-                                recruitee: string;
-                                workable: string;
-                                ashby: string;
-                                smartrecruiters: string;
-                                teamtailor: string;
-                                workday: string;
+                            readonly providerTimeoutMs: number;
+                            readonly companyBoardResultLimit: number;
+                            readonly gamingBoardResultLimit: number;
+                            readonly unknownLocationLabel: string;
+                            readonly unknownCompanyLabel: string;
+                            readonly hitmarkerEnabled: boolean;
+                            readonly hitmarkerApiBaseUrl: string;
+                            readonly hitmarkerDefaultQuery: string;
+                            readonly hitmarkerDefaultLocation: string;
+                            readonly greenhouseApiBaseUrl: string;
+                            readonly greenhouseMaxPages: number;
+                            readonly greenhouseBoards: {
+                                readonly board: string;
+                                readonly company: string;
+                                readonly enabled: boolean;
+                            }[];
+                            readonly leverApiBaseUrl: string;
+                            readonly leverMaxPages: number;
+                            readonly leverCompanies: {
+                                readonly slug: string;
+                                readonly company: string;
+                                readonly enabled: boolean;
+                            }[];
+                            readonly companyBoardApiTemplates: {
+                                readonly greenhouse: string;
+                                readonly lever: string;
+                                readonly recruitee: string;
+                                readonly workable: string;
+                                readonly ashby: string;
+                                readonly smartrecruiters: string;
+                                readonly teamtailor: string;
+                                readonly workday: string;
                             };
-                            providerTimeoutMs: number;
-                            companyBoardResultLimit: number;
-                            gamingBoardResultLimit: number;
-                            unknownLocationLabel: string;
-                            unknownCompanyLabel: string;
-                            hitmarkerEnabled: boolean;
-                            hitmarkerApiBaseUrl: string;
-                            hitmarkerDefaultQuery: string;
-                            hitmarkerDefaultLocation: string;
-                            greenhouseApiBaseUrl: string;
-                            greenhouseMaxPages: number;
-                            greenhouseBoards: {
-                                enabled: boolean;
-                                board: string;
-                                company: string;
+                            readonly companyBoards: {
+                                readonly name: string;
+                                readonly token: string;
+                                readonly type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
+                                readonly enabled: boolean;
+                                readonly priority: number;
                             }[];
-                            leverApiBaseUrl: string;
-                            leverMaxPages: number;
-                            leverCompanies: {
-                                enabled: boolean;
-                                company: string;
-                                slug: string;
-                            }[];
-                            companyBoards: {
-                                name: string;
-                                type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
-                                token: string;
-                                enabled: boolean;
-                                priority: number;
-                            }[];
-                            gamingPortals: {
-                                name: string;
-                                id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
-                                source: string;
-                                enabled: boolean;
-                                fallbackUrl: string;
+                            readonly gamingPortals: {
+                                readonly id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
+                                readonly name: string;
+                                readonly source: string;
+                                readonly fallbackUrl: string;
+                                readonly enabled: boolean;
                             }[];
                         } | undefined;
-                    } | undefined;
-                    emailTransportSettings?: {
+                    }) | undefined;
+                    emailTransportSettings?: ({} & {
                         host?: string | undefined;
                         port?: number | undefined;
                         security?: "tls" | "starttls" | "plain" | undefined;
@@ -438,88 +458,88 @@ export declare const app: Elysia<"/api", {
                         fromName?: string | undefined;
                         authMethod?: "plain" | "login" | undefined;
                         connectionTimeoutSeconds?: number | undefined;
-                    } | undefined;
+                    }) | undefined;
                     preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
                     preferredModel?: string | undefined;
                     theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
                     language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
                     brandSettings?: {
-                        name?: string | undefined;
-                        assistantName?: string | undefined;
-                        apiName?: string | undefined;
-                        logoPath?: string | undefined;
-                        faviconPath?: string | undefined;
-                        content?: {
-                            tagline?: string | undefined;
-                            defaultTitle?: string | undefined;
-                            defaultDescription?: string | undefined;
-                            contentOverrides?: {} | undefined;
+                        readonly name?: string | undefined;
+                        readonly assistantName?: string | undefined;
+                        readonly apiName?: string | undefined;
+                        readonly logoPath?: string | undefined;
+                        readonly faviconPath?: string | undefined;
+                        readonly typography?: {
+                            readonly fontStylesheetUrl?: string | undefined;
+                            readonly displayFontFamily?: string | undefined;
+                            readonly bodyFontFamily?: string | undefined;
+                            readonly monoFontFamily?: string | undefined;
                         } | undefined;
-                        typography?: {
-                            fontStylesheetUrl?: string | undefined;
-                            displayFontFamily?: string | undefined;
-                            bodyFontFamily?: string | undefined;
-                            monoFontFamily?: string | undefined;
+                        readonly lightTheme?: {
+                            readonly base100?: string | undefined;
+                            readonly base200?: string | undefined;
+                            readonly base300?: string | undefined;
+                            readonly baseContent?: string | undefined;
+                            readonly primary?: string | undefined;
+                            readonly primaryContent?: string | undefined;
+                            readonly secondary?: string | undefined;
+                            readonly secondaryContent?: string | undefined;
+                            readonly accent?: string | undefined;
+                            readonly accentContent?: string | undefined;
+                            readonly neutral?: string | undefined;
+                            readonly neutralContent?: string | undefined;
+                            readonly info?: string | undefined;
+                            readonly infoContent?: string | undefined;
+                            readonly success?: string | undefined;
+                            readonly successContent?: string | undefined;
+                            readonly warning?: string | undefined;
+                            readonly warningContent?: string | undefined;
+                            readonly error?: string | undefined;
+                            readonly errorContent?: string | undefined;
+                            readonly radiusSelector?: string | undefined;
+                            readonly radiusField?: string | undefined;
+                            readonly radiusBox?: string | undefined;
+                            readonly sizeSelector?: string | undefined;
+                            readonly sizeField?: string | undefined;
+                            readonly border?: string | undefined;
+                            readonly depth?: string | undefined;
+                            readonly noise?: string | undefined;
                         } | undefined;
-                        lightTheme?: {
-                            error?: string | undefined;
-                            success?: string | undefined;
-                            base100?: string | undefined;
-                            base200?: string | undefined;
-                            base300?: string | undefined;
-                            baseContent?: string | undefined;
-                            primary?: string | undefined;
-                            primaryContent?: string | undefined;
-                            secondary?: string | undefined;
-                            secondaryContent?: string | undefined;
-                            accent?: string | undefined;
-                            accentContent?: string | undefined;
-                            neutral?: string | undefined;
-                            neutralContent?: string | undefined;
-                            info?: string | undefined;
-                            infoContent?: string | undefined;
-                            successContent?: string | undefined;
-                            warning?: string | undefined;
-                            warningContent?: string | undefined;
-                            errorContent?: string | undefined;
-                            radiusSelector?: string | undefined;
-                            radiusField?: string | undefined;
-                            radiusBox?: string | undefined;
-                            sizeSelector?: string | undefined;
-                            sizeField?: string | undefined;
-                            border?: string | undefined;
-                            depth?: string | undefined;
-                            noise?: string | undefined;
+                        readonly darkTheme?: {
+                            readonly base100?: string | undefined;
+                            readonly base200?: string | undefined;
+                            readonly base300?: string | undefined;
+                            readonly baseContent?: string | undefined;
+                            readonly primary?: string | undefined;
+                            readonly primaryContent?: string | undefined;
+                            readonly secondary?: string | undefined;
+                            readonly secondaryContent?: string | undefined;
+                            readonly accent?: string | undefined;
+                            readonly accentContent?: string | undefined;
+                            readonly neutral?: string | undefined;
+                            readonly neutralContent?: string | undefined;
+                            readonly info?: string | undefined;
+                            readonly infoContent?: string | undefined;
+                            readonly success?: string | undefined;
+                            readonly successContent?: string | undefined;
+                            readonly warning?: string | undefined;
+                            readonly warningContent?: string | undefined;
+                            readonly error?: string | undefined;
+                            readonly errorContent?: string | undefined;
+                            readonly radiusSelector?: string | undefined;
+                            readonly radiusField?: string | undefined;
+                            readonly radiusBox?: string | undefined;
+                            readonly sizeSelector?: string | undefined;
+                            readonly sizeField?: string | undefined;
+                            readonly border?: string | undefined;
+                            readonly depth?: string | undefined;
+                            readonly noise?: string | undefined;
                         } | undefined;
-                        darkTheme?: {
-                            error?: string | undefined;
-                            success?: string | undefined;
-                            base100?: string | undefined;
-                            base200?: string | undefined;
-                            base300?: string | undefined;
-                            baseContent?: string | undefined;
-                            primary?: string | undefined;
-                            primaryContent?: string | undefined;
-                            secondary?: string | undefined;
-                            secondaryContent?: string | undefined;
-                            accent?: string | undefined;
-                            accentContent?: string | undefined;
-                            neutral?: string | undefined;
-                            neutralContent?: string | undefined;
-                            info?: string | undefined;
-                            infoContent?: string | undefined;
-                            successContent?: string | undefined;
-                            warning?: string | undefined;
-                            warningContent?: string | undefined;
-                            errorContent?: string | undefined;
-                            radiusSelector?: string | undefined;
-                            radiusField?: string | undefined;
-                            radiusBox?: string | undefined;
-                            sizeSelector?: string | undefined;
-                            sizeField?: string | undefined;
-                            border?: string | undefined;
-                            depth?: string | undefined;
-                            noise?: string | undefined;
+                        readonly content?: {
+                            readonly tagline?: string | undefined;
+                            readonly defaultTitle?: string | undefined;
+                            readonly defaultDescription?: string | undefined;
+                            readonly contentOverrides?: Record<string, string> | undefined;
                         } | undefined;
                     } | undefined;
                 };
@@ -551,20 +571,20 @@ export declare const app: Elysia<"/api", {
             "job-taxonomy": {
                 put: {
                     body: {
-                        keywords: {
-                            id: string;
-                            label: string;
-                            category: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
-                            enabled: boolean;
-                            sortOrder: number;
-                            synonyms: string[];
+                        readonly keywords: {
+                            readonly id: string;
+                            readonly category: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+                            readonly label: string;
+                            readonly synonyms: string[];
+                            readonly sortOrder: number;
+                            readonly enabled: boolean;
                         }[];
-                        studioRules: {
-                            id: string;
-                            studioType: import("@bao/shared").StudioType;
-                            enabled: boolean;
-                            sortOrder: number;
-                            keyword: string;
+                        readonly studioRules: {
+                            readonly id: string;
+                            readonly studioType: import("@bao/shared").StudioType;
+                            readonly keyword: string;
+                            readonly sortOrder: number;
+                            readonly enabled: boolean;
                         }[];
                     };
                     params: {};
@@ -592,7 +612,7 @@ export declare const app: Elysia<"/api", {
         settings: {
             "api-keys": {
                 put: {
-                    body: {
+                    body: {} & {
                         geminiApiKey?: string | undefined;
                         openaiApiKey?: string | undefined;
                         claudeApiKey?: string | undefined;
@@ -626,9 +646,10 @@ export declare const app: Elysia<"/api", {
             "test-api-key": {
                 post: {
                     body: {
-                        model?: string | undefined;
                         provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
                         key: string;
+                    } & {
+                        model?: string | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -691,45 +712,21 @@ export declare const app: Elysia<"/api", {
             import: {
                 post: {
                     body: {
-                        portfolio: string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null;
-                        profile: string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null;
-                        settings: string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null;
-                        gamification: string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null;
-                        applications: (string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null)[];
-                        resumes: (string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null)[];
-                        chatHistory: (string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null)[];
-                        coverLetters: (string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null)[];
-                        interviewSessions: (string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null)[];
-                        portfolioProjects: (string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null)[];
-                        savedJobs: (string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null)[];
-                        skillMappings: (string | number | boolean | never[] | {
-                            [x: string]: never;
-                        } | null)[];
+                        portfolio: unknown;
+                        profile: unknown;
+                        settings: unknown;
+                        gamification: unknown;
+                        applications: unknown[];
+                        resumes: unknown[];
+                        chatHistory: unknown[];
+                        coverLetters: unknown[];
+                        interviewSessions: unknown[];
+                        portfolioProjects: unknown[];
+                        savedJobs: unknown[];
+                        skillMappings: unknown[];
                         version: "1.0";
                         exportedAt: string;
-                    };
+                    } & {};
                     params: {};
                     query: unknown;
                     headers: unknown;
@@ -755,7 +752,7 @@ export declare const app: Elysia<"/api", {
             get: {
                 body: unknown;
                 params: {};
-                query: {
+                query: {} & {
                     genre?: string | undefined;
                     platform?: string | undefined;
                     studioType?: string | undefined;
@@ -819,7 +816,7 @@ export declare const app: Elysia<"/api", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -871,7 +868,7 @@ export declare const app: Elysia<"/api", {
                 post: {
                     body: {
                         jobId: string;
-                    };
+                    } & {};
                     params: {};
                     query: unknown;
                     headers: unknown;
@@ -914,7 +911,7 @@ export declare const app: Elysia<"/api", {
                         body: unknown;
                         params: {
                             jobId: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -986,8 +983,9 @@ export declare const app: Elysia<"/api", {
             apply: {
                 post: {
                     body: {
-                        notes?: string | undefined;
                         jobId: string;
+                    } & {
+                        notes?: string | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -1040,13 +1038,13 @@ export declare const app: Elysia<"/api", {
             apply: {
                 ":id": {
                     put: {
-                        body: {
+                        body: {} & {
                             status?: string | undefined;
                             notes?: string | undefined;
                         };
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -1168,9 +1166,10 @@ export declare const app: Elysia<"/api", {
                 generate: {
                     post: {
                         body: {
+                            targetRole: string;
+                        } & {
                             experienceLevel?: string | undefined;
                             studioName?: string | undefined;
-                            targetRole: string;
                         };
                         params: {};
                         query: unknown;
@@ -1205,13 +1204,13 @@ export declare const app: Elysia<"/api", {
                 synthesize: {
                     post: {
                         body: {
-                            questionsAndAnswers: {
+                            questionsAndAnswers: ({
                                 id: string;
                                 category: string;
                                 question: string;
                                 answer: string;
-                            }[];
-                        };
+                            } & {})[];
+                        } & {};
                         params: {};
                         query: unknown;
                         headers: unknown;
@@ -1249,22 +1248,23 @@ export declare const app: Elysia<"/api", {
     } & {
         resumes: {
             post: {
-                body: {
-                    skills?: {
+                body: {} & {
+                    skills?: ({} & {
                         gaming?: string[] | undefined;
                         technical?: string[] | undefined;
                         soft?: string[] | undefined;
-                    } | undefined;
+                    }) | undefined;
                     name?: string | undefined;
                     theme?: "light" | "dark" | undefined;
                     summary?: string | undefined;
-                    projects?: {
-                        link?: string | undefined;
-                        technologies?: string[] | undefined;
+                    projects?: ({
                         title: string;
                         description: string;
-                    }[] | undefined;
-                    personalInfo?: {
+                    } & {
+                        link?: string | undefined;
+                        technologies?: string[] | undefined;
+                    })[] | undefined;
+                    personalInfo?: ({} & {
                         portfolio?: string | undefined;
                         name?: string | undefined;
                         email?: string | undefined;
@@ -1273,31 +1273,33 @@ export declare const app: Elysia<"/api", {
                         phone?: string | undefined;
                         linkedIn?: string | undefined;
                         github?: string | undefined;
-                    } | undefined;
-                    experience?: {
+                    }) | undefined;
+                    experience?: ({
+                        title: string;
+                        company: string;
+                        startDate: string;
+                    } & {
                         description?: string | undefined;
                         achievements?: string[] | undefined;
                         location?: string | undefined;
                         technologies?: string[] | undefined;
                         endDate?: string | undefined;
-                        title: string;
-                        company: string;
-                        startDate: string;
-                    }[] | undefined;
-                    education?: {
-                        gpa?: string | undefined;
-                        year: string;
+                    })[] | undefined;
+                    education?: ({
                         degree: string;
                         field: string;
                         school: string;
-                    }[] | undefined;
-                    gamingExperience?: {
+                        year: string;
+                    } & {
+                        gpa?: string | undefined;
+                    })[] | undefined;
+                    gamingExperience?: ({} & {
                         platforms?: string | undefined;
                         gameEngines?: string | undefined;
                         genres?: string | undefined;
                         shippedTitles?: string | undefined;
-                    } | undefined;
-                    template?: string | undefined;
+                    }) | undefined;
+                    template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
                     isDefault?: boolean | undefined;
                 };
                 params: {};
@@ -1324,7 +1326,7 @@ export declare const app: Elysia<"/api", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -1348,22 +1350,23 @@ export declare const app: Elysia<"/api", {
         resumes: {
             ":id": {
                 put: {
-                    body: {
-                        skills?: {
+                    body: {} & {
+                        skills?: ({} & {
                             gaming?: string[] | undefined;
                             technical?: string[] | undefined;
                             soft?: string[] | undefined;
-                        } | undefined;
+                        }) | undefined;
                         name?: string | undefined;
                         theme?: "light" | "dark" | undefined;
                         summary?: string | undefined;
-                        projects?: {
-                            link?: string | undefined;
-                            technologies?: string[] | undefined;
+                        projects?: ({
                             title: string;
                             description: string;
-                        }[] | undefined;
-                        personalInfo?: {
+                        } & {
+                            link?: string | undefined;
+                            technologies?: string[] | undefined;
+                        })[] | undefined;
+                        personalInfo?: ({} & {
                             portfolio?: string | undefined;
                             name?: string | undefined;
                             email?: string | undefined;
@@ -1372,36 +1375,38 @@ export declare const app: Elysia<"/api", {
                             phone?: string | undefined;
                             linkedIn?: string | undefined;
                             github?: string | undefined;
-                        } | undefined;
-                        experience?: {
+                        }) | undefined;
+                        experience?: ({
+                            title: string;
+                            company: string;
+                            startDate: string;
+                        } & {
                             description?: string | undefined;
                             achievements?: string[] | undefined;
                             location?: string | undefined;
                             technologies?: string[] | undefined;
                             endDate?: string | undefined;
-                            title: string;
-                            company: string;
-                            startDate: string;
-                        }[] | undefined;
-                        education?: {
-                            gpa?: string | undefined;
-                            year: string;
+                        })[] | undefined;
+                        education?: ({
                             degree: string;
                             field: string;
                             school: string;
-                        }[] | undefined;
-                        gamingExperience?: {
+                            year: string;
+                        } & {
+                            gpa?: string | undefined;
+                        })[] | undefined;
+                        gamingExperience?: ({} & {
                             platforms?: string | undefined;
                             gameEngines?: string | undefined;
                             genres?: string | undefined;
                             shippedTitles?: string | undefined;
-                        } | undefined;
-                        template?: string | undefined;
+                        }) | undefined;
+                        template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
                         isDefault?: boolean | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -1428,7 +1433,7 @@ export declare const app: Elysia<"/api", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -1459,13 +1464,13 @@ export declare const app: Elysia<"/api", {
             ":id": {
                 export: {
                     post: {
-                        body: {
+                        body: {} & {
                             format?: string | undefined;
-                            template?: string | undefined;
+                            template?: "modern" | "classic" | "creative" | "minimal" | "google-xyz" | "gaming" | "executive" | "technical" | undefined;
                         };
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -1495,12 +1500,12 @@ export declare const app: Elysia<"/api", {
             ":id": {
                 "ai-enhance": {
                     post: {
-                        body: {
+                        body: {} & {
                             section?: string | undefined;
                         };
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -1544,10 +1549,10 @@ export declare const app: Elysia<"/api", {
                     post: {
                         body: {
                             jobId: string;
-                        };
+                        } & {};
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -1623,11 +1628,12 @@ export declare const app: Elysia<"/api", {
         "cover-letters": {
             post: {
                 body: {
-                    content?: {} | undefined;
-                    template?: string | undefined;
-                    jobInfo?: {} | undefined;
                     company: string;
                     position: string;
+                } & {
+                    content?: Record<string, unknown> | undefined;
+                    template?: "creative" | "gaming" | "executive" | "technical" | "professional" | undefined;
+                    jobInfo?: Record<string, unknown> | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -1639,7 +1645,7 @@ export declare const app: Elysia<"/api", {
                         position: string;
                         jobInfo: Record<string, unknown>;
                         content: Record<string, unknown>;
-                        template: "professional" | "creative" | "gaming" | "executive" | "technical";
+                        template: "creative" | "gaming" | "executive" | "technical" | "professional";
                     };
                     422: {
                         type: "validation";
@@ -1660,7 +1666,7 @@ export declare const app: Elysia<"/api", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -1693,16 +1699,16 @@ export declare const app: Elysia<"/api", {
         "cover-letters": {
             ":id": {
                 put: {
-                    body: {
-                        content?: {} | undefined;
+                    body: {} & {
+                        content?: Record<string, unknown> | undefined;
                         company?: string | undefined;
-                        template?: string | undefined;
+                        template?: "creative" | "gaming" | "executive" | "technical" | "professional" | undefined;
                         position?: string | undefined;
-                        jobInfo?: {} | undefined;
+                        jobInfo?: Record<string, unknown> | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -1738,7 +1744,7 @@ export declare const app: Elysia<"/api", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -1769,12 +1775,13 @@ export declare const app: Elysia<"/api", {
             generate: {
                 post: {
                     body: {
-                        resumeId?: string | undefined;
-                        template?: string | undefined;
-                        jobInfo?: {} | undefined;
-                        save?: boolean | undefined;
                         company: string;
                         position: string;
+                    } & {
+                        resumeId?: string | undefined;
+                        template?: "creative" | "gaming" | "executive" | "technical" | "professional" | undefined;
+                        jobInfo?: Record<string, unknown> | undefined;
+                        save?: boolean | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -1814,7 +1821,7 @@ export declare const app: Elysia<"/api", {
                                     body: string;
                                     conclusion: string;
                                 };
-                                template: "professional" | "creative" | "gaming" | "executive" | "technical";
+                                template: "creative" | "gaming" | "executive" | "technical" | "professional";
                             };
                             error?: undefined;
                             details?: undefined;
@@ -1838,12 +1845,12 @@ export declare const app: Elysia<"/api", {
             ":id": {
                 export: {
                     post: {
-                        body: {
+                        body: {} & {
                             format?: string | undefined;
                         };
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -1885,10 +1892,8 @@ export declare const app: Elysia<"/api", {
         portfolio: {
             put: {
                 body: {
-                    metadata: {
-                        [x: string]: unknown;
-                    };
-                };
+                    metadata: Record<string, unknown>;
+                } & {};
                 params: {};
                 query: unknown;
                 headers: unknown;
@@ -1911,18 +1916,19 @@ export declare const app: Elysia<"/api", {
             projects: {
                 post: {
                     body: {
+                        title: string;
+                        description: string;
+                    } & {
                         role?: string | undefined;
                         technologies?: string[] | undefined;
                         platforms?: string[] | undefined;
                         featured?: boolean | undefined;
+                        sortOrder?: number | undefined;
                         image?: string | undefined;
                         liveUrl?: string | undefined;
                         githubUrl?: string | undefined;
                         tags?: string[] | undefined;
                         engines?: string[] | undefined;
-                        sortOrder?: number | undefined;
-                        title: string;
-                        description: string;
                     };
                     params: {};
                     query: unknown;
@@ -1951,7 +1957,7 @@ export declare const app: Elysia<"/api", {
                     post: {
                         body: {
                             orderedIds: string[];
-                        };
+                        } & {};
                         params: {};
                         query: unknown;
                         headers: unknown;
@@ -1978,23 +1984,23 @@ export declare const app: Elysia<"/api", {
             projects: {
                 ":id": {
                     put: {
-                        body: {
+                        body: {} & {
                             role?: string | undefined;
                             title?: string | undefined;
                             description?: string | undefined;
                             technologies?: string[] | undefined;
                             platforms?: string[] | undefined;
                             featured?: boolean | undefined;
+                            sortOrder?: number | undefined;
                             image?: string | undefined;
                             liveUrl?: string | undefined;
                             githubUrl?: string | undefined;
                             tags?: string[] | undefined;
                             engines?: string[] | undefined;
-                            sortOrder?: number | undefined;
                         };
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -2023,7 +2029,7 @@ export declare const app: Elysia<"/api", {
                         body: unknown;
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -2054,7 +2060,7 @@ export declare const app: Elysia<"/api", {
         portfolio: {
             export: {
                 post: {
-                    body: {
+                    body: {} & {
                         format?: string | undefined;
                     };
                     params: {};
@@ -2087,9 +2093,9 @@ export declare const app: Elysia<"/api", {
         interview: {
             sessions: {
                 post: {
-                    body: {
+                    body: {} & {
                         studioId?: string | undefined;
-                        config?: {
+                        config?: ({} & {
                             technologies?: string[] | undefined;
                             roleType?: string | undefined;
                             roleCategory?: string | undefined;
@@ -2103,24 +2109,25 @@ export declare const app: Elysia<"/api", {
                             enableVoiceMode?: boolean | undefined;
                             interviewMode?: "job" | "studio" | undefined;
                             conversationStyle?: "natural" | "structured" | undefined;
-                            targetJob?: {
+                            targetJob?: ({
+                                id: string;
+                                title: string;
+                                company: string;
+                                location: string;
+                            } & {
                                 source?: string | undefined;
                                 description?: string | undefined;
                                 url?: string | undefined;
                                 postedDate?: string | undefined;
                                 technologies?: string[] | undefined;
                                 requirements?: string[] | undefined;
-                                id: string;
-                                title: string;
-                                company: string;
-                                location: string;
-                            } | undefined;
-                            candidateContext?: {
+                            }) | undefined;
+                            candidateContext?: ({} & {
                                 resumeId?: string | undefined;
                                 coverLetterId?: string | undefined;
                                 portfolioId?: string | undefined;
-                            } | undefined;
-                            voiceSettings?: {
+                            }) | undefined;
+                            voiceSettings?: ({} & {
                                 language?: string | undefined;
                                 microphoneId?: string | undefined;
                                 speakerId?: string | undefined;
@@ -2128,8 +2135,8 @@ export declare const app: Elysia<"/api", {
                                 rate?: number | undefined;
                                 pitch?: number | undefined;
                                 volume?: number | undefined;
-                            } | undefined;
-                        } | undefined;
+                            }) | undefined;
+                        }) | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -2173,7 +2180,7 @@ export declare const app: Elysia<"/api", {
                         body: unknown;
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -2201,13 +2208,14 @@ export declare const app: Elysia<"/api", {
                     response: {
                         post: {
                             body: {
+                                response: string;
+                            } & {
                                 questionId?: string | undefined;
                                 questionIndex?: number | undefined;
-                                response: string;
                             };
                             params: {
                                 id: string;
-                            };
+                            } & {};
                             query: unknown;
                             headers: unknown;
                             response: {
@@ -2241,7 +2249,7 @@ export declare const app: Elysia<"/api", {
                             body: unknown;
                             params: {
                                 id: string;
-                            };
+                            } & {};
                             query: unknown;
                             headers: unknown;
                             response: {
@@ -2297,7 +2305,7 @@ export declare const app: Elysia<"/api", {
             get: {
                 body: unknown;
                 params: {};
-                query: {
+                query: {} & {
                     type?: string | undefined;
                     size?: string | undefined;
                     remoteWork?: string | undefined;
@@ -2342,7 +2350,7 @@ export declare const app: Elysia<"/api", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -2383,6 +2391,8 @@ export declare const app: Elysia<"/api", {
         studios: {
             post: {
                 body: {
+                    name: string;
+                } & {
                     type?: string | undefined;
                     description?: string | undefined;
                     location?: string | undefined;
@@ -2392,12 +2402,11 @@ export declare const app: Elysia<"/api", {
                     remoteWork?: boolean | undefined;
                     platforms?: string[] | undefined;
                     genres?: string[] | undefined;
-                    culture?: {} | undefined;
+                    culture?: Record<string, unknown> | undefined;
                     founded?: string | undefined;
                     benefits?: string[] | undefined;
-                    socialMedia?: {} | undefined;
+                    socialMedia?: Record<string, string> | undefined;
                     notableGames?: string[] | undefined;
-                    name: string;
                 };
                 params: {};
                 query: unknown;
@@ -2416,9 +2425,9 @@ export declare const app: Elysia<"/api", {
                         technologies: string[];
                         genres: string[];
                         platforms: string[];
-                        culture: {} | null;
+                        culture: Record<string, unknown> | null;
                         benefits: string[];
-                        socialMedia: {} | null;
+                        socialMedia: Record<string, string> | null;
                         notableGames: string[];
                     };
                     422: {
@@ -2437,7 +2446,7 @@ export declare const app: Elysia<"/api", {
         studios: {
             ":id": {
                 put: {
-                    body: {
+                    body: {} & {
                         name?: string | undefined;
                         type?: string | undefined;
                         description?: string | undefined;
@@ -2448,15 +2457,15 @@ export declare const app: Elysia<"/api", {
                         remoteWork?: boolean | undefined;
                         platforms?: string[] | undefined;
                         genres?: string[] | undefined;
-                        culture?: {} | undefined;
+                        culture?: Record<string, unknown> | undefined;
                         founded?: string | undefined;
                         benefits?: string[] | undefined;
-                        socialMedia?: {} | undefined;
+                        socialMedia?: Record<string, string> | undefined;
                         notableGames?: string[] | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -2500,7 +2509,7 @@ export declare const app: Elysia<"/api", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -2567,7 +2576,7 @@ export declare const app: Elysia<"/api", {
                         body: unknown;
                         params: {
                             portalId: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -2598,24 +2607,17 @@ export declare const app: Elysia<"/api", {
             chat: {
                 post: {
                     body: {
+                        message: string;
+                    } & {
                         sessionId?: string | undefined;
-                        context?: {
-                            domain?: string | undefined;
-                            entity?: {
-                                label?: string | undefined;
-                                id: string;
-                                type: string;
-                            } | undefined;
+                        context?: ({
                             source: string;
                             route: {
-                                name?: string | undefined;
                                 path: string;
-                                params: {
-                                    [x: string]: string;
-                                };
-                                query: {
-                                    [x: string]: string;
-                                };
+                                params: Record<string, string>;
+                                query: Record<string, string>;
+                            } & {
+                                name?: string | undefined;
                             };
                             state: {
                                 hasResumes: boolean;
@@ -2628,9 +2630,16 @@ export declare const app: Elysia<"/api", {
                                 interviewSessionCount: number;
                                 hasPortfolioProjects: boolean;
                                 portfolioProjectCount: number;
-                            };
-                        } | undefined;
-                        message: string;
+                            } & {};
+                        } & {
+                            domain?: string | undefined;
+                            entity?: ({
+                                id: string;
+                                type: string;
+                            } & {
+                                label?: string | undefined;
+                            }) | undefined;
+                        }) | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -2665,8 +2674,9 @@ export declare const app: Elysia<"/api", {
             "analyze-resume": {
                 post: {
                     body: {
-                        jobId?: string | undefined;
                         resumeId: string;
+                    } & {
+                        jobId?: string | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -2707,10 +2717,11 @@ export declare const app: Elysia<"/api", {
             "generate-cover-letter": {
                 post: {
                     body: {
-                        jobId?: string | undefined;
                         resumeId: string;
                         company: string;
                         position: string;
+                    } & {
+                        jobId?: string | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -2746,10 +2757,10 @@ export declare const app: Elysia<"/api", {
         ai: {
             "match-jobs": {
                 post: {
-                    body: {
+                    body: {} & {
                         skills?: string[] | undefined;
                         resumeId?: string | undefined;
-                        preferences?: {} | undefined;
+                        preferences?: Record<string, string | number | boolean> | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -2825,11 +2836,12 @@ export declare const app: Elysia<"/api", {
             "automation-action": {
                 post: {
                     body: {
-                        coverLetterId?: string | undefined;
-                        jobId?: string | undefined;
                         resumeId: string;
                         jobUrl: string;
                         action: string;
+                    } & {
+                        coverLetterId?: string | undefined;
+                        jobId?: string | undefined;
                     };
                     params: {};
                     query: unknown;
@@ -2879,21 +2891,30 @@ export declare const app: Elysia<"/api", {
         gamification: {
             "award-xp": {
                 post: {
-                    body: {
-                        reason: string;
-                        amount: number;
+                    body: {} & {
+                        reason?: string | undefined;
+                        amount?: number | undefined;
                     };
                     params: {};
                     query: unknown;
                     headers: unknown;
                     response: {
                         200: {
+                            error: string;
+                            xp?: undefined;
+                            level?: undefined;
+                            leveledUp?: undefined;
+                            levelUp?: undefined;
+                            reason?: undefined;
+                            message?: undefined;
+                        } | {
                             xp: number;
                             level: number;
                             leveledUp: boolean;
                             levelUp: import("@bao/shared").LevelUpResult | null;
                             reason: string;
                             message: string;
+                            error?: undefined;
                         };
                         422: {
                             type: "validation";
@@ -2948,8 +2969,8 @@ export declare const app: Elysia<"/api", {
                     complete: {
                         post: {
                             body: unknown;
-                            params: {
-                                id: string;
+                            params: {} & {
+                                id?: string | undefined;
                             };
                             query: unknown;
                             headers: unknown;
@@ -2966,15 +2987,6 @@ export declare const app: Elysia<"/api", {
                                     completed: boolean;
                                     totalXP: number;
                                     level: number;
-                                };
-                                422: {
-                                    type: "validation";
-                                    on: string;
-                                    summary?: string;
-                                    message?: string;
-                                    found?: unknown;
-                                    property?: string;
-                                    expected?: string;
                                 };
                             };
                         };
@@ -3027,7 +3039,7 @@ export declare const app: Elysia<"/api", {
                 get: {
                     body: unknown;
                     params: {};
-                    query: {
+                    query: {} & {
                         category?: string | undefined;
                         search?: string | undefined;
                     };
@@ -3064,16 +3076,15 @@ export declare const app: Elysia<"/api", {
             mappings: {
                 post: {
                     body: {
+                        gameExpression: string;
+                        transferableSkill: string;
+                    } & {
                         category?: string | undefined;
                         confidence?: number | undefined;
                         industryApplications?: string[] | undefined;
-                        evidence?: {
-                            [x: string]: unknown;
-                        }[] | undefined;
+                        evidence?: Record<string, unknown>[] | undefined;
                         demandLevel?: string | undefined;
                         aiGenerated?: boolean | undefined;
-                        gameExpression: string;
-                        transferableSkill: string;
                     };
                     params: {};
                     query: unknown;
@@ -3098,21 +3109,19 @@ export declare const app: Elysia<"/api", {
             mappings: {
                 ":id": {
                     put: {
-                        body: {
+                        body: {} & {
                             category?: string | undefined;
                             confidence?: number | undefined;
                             gameExpression?: string | undefined;
                             transferableSkill?: string | undefined;
                             industryApplications?: string[] | undefined;
-                            evidence?: {
-                                [x: string]: unknown;
-                            }[] | undefined;
+                            evidence?: Record<string, unknown>[] | undefined;
                             demandLevel?: string | undefined;
                             aiGenerated?: boolean | undefined;
                         };
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -3141,7 +3150,7 @@ export declare const app: Elysia<"/api", {
                         body: unknown;
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -3179,7 +3188,7 @@ export declare const app: Elysia<"/api", {
                 get: {
                     body: unknown;
                     params: {};
-                    query: {
+                    query: {} & {
                         jobId?: string | undefined;
                     };
                     headers: unknown;
@@ -3214,9 +3223,9 @@ export declare const app: Elysia<"/api", {
         skills: {
             "ai-analyze": {
                 post: {
-                    body: {
-                        resume?: {} | undefined;
-                        gameExperience?: {} | undefined;
+                    body: {} & {
+                        resume?: Record<string, unknown> | undefined;
+                        gameExperience?: Record<string, unknown> | undefined;
                         autoCreateMappings?: boolean | undefined;
                     };
                     params: {};
@@ -3250,8 +3259,8 @@ export declare const app: Elysia<"/api", {
             get: {
                 body: unknown;
                 params: {};
-                query: {
-                    types?: string | undefined;
+                query: {} & {
+                    types?: string | ("skills" | "studios" | "jobs" | "resumes")[] | undefined;
                     q?: string | undefined;
                 };
                 headers: unknown;
@@ -3275,7 +3284,7 @@ export declare const app: Elysia<"/api", {
                 get: {
                     body: unknown;
                     params: {};
-                    query: {
+                    query: {} & {
                         prefix?: string | undefined;
                     };
                     headers: unknown;
@@ -3355,15 +3364,15 @@ export declare const app: Elysia<"/api", {
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                resumeId: string;
+                            200: {} & {
+                                resumeId?: string | undefined;
                             };
-                            404: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            404: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
                             422: {
                                 type: "validation";
@@ -3384,81 +3393,78 @@ export declare const app: Elysia<"/api", {
             "job-apply": {
                 post: {
                     body: {
-                        customAnswers?: {} | undefined;
-                        coverLetterId?: string | undefined;
-                        jobId?: string | undefined;
                         resumeId: string;
                         jobUrl: string;
+                    } & {
+                        customAnswers?: Record<string, string> | undefined;
+                        coverLetterId?: string | undefined;
+                        jobId?: string | undefined;
                     };
                     params: {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        500: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        500: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        200: {
-                            error: string | {
-                                details?: {} | undefined;
-                                code: string;
-                                source: string;
-                                message: string;
-                            } | null;
-                            id: string;
-                            aborted: boolean;
-                            type: "scrape" | "job_apply" | "email";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
-                            progress: number | null;
-                            status: "error" | "success" | "pending" | "running";
-                            updatedAt: string;
-                            createdAt: string;
-                            screenshots: string[] | null;
-                            totalSteps: number | null;
-                            jobId: string | null;
-                            userId: string | null;
-                            currentStep: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            executionMs: number | null;
+                        200: {} & {
+                            error?: string | ({} & {
+                                code?: string | undefined;
+                                source?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | null | undefined;
+                            id?: string | undefined;
+                            aborted?: boolean | undefined;
+                            type?: "scrape" | "job_apply" | "email" | undefined;
+                            output?: Record<string, unknown> | null | undefined;
+                            input?: Record<string, unknown> | null | undefined;
+                            progress?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
+                            updatedAt?: string | undefined;
+                            createdAt?: string | undefined;
+                            screenshots?: string[] | null | undefined;
+                            totalSteps?: number | null | undefined;
+                            jobId?: string | null | undefined;
+                            userId?: string | null | undefined;
+                            currentStep?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            exitCode?: number | null | undefined;
+                            timedOut?: boolean | undefined;
+                            executionMs?: number | null | undefined;
                         };
-                        400: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        400: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        404: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        404: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        409: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        409: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        422: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        422: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
                     };
                 };
@@ -3470,82 +3476,79 @@ export declare const app: Elysia<"/api", {
                 schedule: {
                     post: {
                         body: {
-                            customAnswers?: {} | undefined;
-                            coverLetterId?: string | undefined;
-                            jobId?: string | undefined;
                             resumeId: string;
                             jobUrl: string;
                             runAt: string;
+                        } & {
+                            customAnswers?: Record<string, string> | undefined;
+                            coverLetterId?: string | undefined;
+                            jobId?: string | undefined;
                         };
                         params: {};
                         query: unknown;
                         headers: unknown;
                         response: {
-                            500: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            500: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            200: {
-                                error: string | {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    source: string;
-                                    message: string;
-                                } | null;
-                                id: string;
-                                aborted: boolean;
-                                type: "scrape" | "job_apply" | "email";
-                                output: {
-                                    [x: string]: unknown;
-                                } | null;
-                                input: {
-                                    [x: string]: unknown;
-                                } | null;
-                                progress: number | null;
-                                status: "error" | "success" | "pending" | "running";
-                                updatedAt: string;
-                                createdAt: string;
-                                screenshots: string[] | null;
-                                totalSteps: number | null;
-                                jobId: string | null;
-                                userId: string | null;
-                                currentStep: number | null;
-                                startedAt: string | null;
-                                completedAt: string | null;
-                                exitCode: number | null;
-                                timedOut: boolean;
-                                executionMs: number | null;
+                            200: {} & {
+                                error?: string | ({} & {
+                                    code?: string | undefined;
+                                    source?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | null | undefined;
+                                id?: string | undefined;
+                                aborted?: boolean | undefined;
+                                type?: "scrape" | "job_apply" | "email" | undefined;
+                                output?: Record<string, unknown> | null | undefined;
+                                input?: Record<string, unknown> | null | undefined;
+                                progress?: number | null | undefined;
+                                status?: "error" | "success" | "pending" | "running" | undefined;
+                                updatedAt?: string | undefined;
+                                createdAt?: string | undefined;
+                                screenshots?: string[] | null | undefined;
+                                totalSteps?: number | null | undefined;
+                                jobId?: string | null | undefined;
+                                userId?: string | null | undefined;
+                                currentStep?: number | null | undefined;
+                                startedAt?: string | null | undefined;
+                                completedAt?: string | null | undefined;
+                                exitCode?: number | null | undefined;
+                                timedOut?: boolean | undefined;
+                                executionMs?: number | null | undefined;
                             };
-                            400: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            400: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            404: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            404: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            409: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            409: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            422: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            422: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
                         };
                     };
@@ -3557,62 +3560,63 @@ export declare const app: Elysia<"/api", {
             "email-response": {
                 post: {
                     body: {
+                        message: string;
+                        subject: string;
+                    } & {
                         sender?: string | undefined;
                         tone?: "professional" | "friendly" | "concise" | undefined;
                         recipientEmail?: string | undefined;
                         deliverAfterGeneration?: boolean | undefined;
-                        message: string;
-                        subject: string;
                     };
                     params: {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        500: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        500: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        200: {
+                        200: {} & {
+                            provider?: string | undefined;
+                            model?: string | undefined;
                             recipientEmail?: string | undefined;
+                            runId?: string | undefined;
+                            status?: "success" | undefined;
+                            reply?: string | undefined;
+                            delivered?: boolean | undefined;
                             deliveredAt?: string | undefined;
                             messageId?: string | undefined;
-                            provider: string;
-                            model: string;
-                            runId: string;
-                            status: "success";
-                            reply: string;
-                            delivered: boolean;
                         };
-                        400: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        400: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        404: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        404: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        409: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        409: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        422: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        422: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
                     };
                 };
@@ -3624,83 +3628,80 @@ export declare const app: Elysia<"/api", {
                 schedule: {
                     post: {
                         body: {
+                            message: string;
+                            subject: string;
+                            runAt: string;
+                        } & {
                             sender?: string | undefined;
                             tone?: "professional" | "friendly" | "concise" | undefined;
                             recipientEmail?: string | undefined;
                             deliverAfterGeneration?: boolean | undefined;
-                            message: string;
-                            subject: string;
-                            runAt: string;
                         };
                         params: {};
                         query: unknown;
                         headers: unknown;
                         response: {
-                            500: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            500: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            200: {
-                                error: string | {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    source: string;
-                                    message: string;
-                                } | null;
-                                id: string;
-                                aborted: boolean;
-                                type: "scrape" | "job_apply" | "email";
-                                output: {
-                                    [x: string]: unknown;
-                                } | null;
-                                input: {
-                                    [x: string]: unknown;
-                                } | null;
-                                progress: number | null;
-                                status: "error" | "success" | "pending" | "running";
-                                updatedAt: string;
-                                createdAt: string;
-                                screenshots: string[] | null;
-                                totalSteps: number | null;
-                                jobId: string | null;
-                                userId: string | null;
-                                currentStep: number | null;
-                                startedAt: string | null;
-                                completedAt: string | null;
-                                exitCode: number | null;
-                                timedOut: boolean;
-                                executionMs: number | null;
+                            200: {} & {
+                                error?: string | ({} & {
+                                    code?: string | undefined;
+                                    source?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | null | undefined;
+                                id?: string | undefined;
+                                aborted?: boolean | undefined;
+                                type?: "scrape" | "job_apply" | "email" | undefined;
+                                output?: Record<string, unknown> | null | undefined;
+                                input?: Record<string, unknown> | null | undefined;
+                                progress?: number | null | undefined;
+                                status?: "error" | "success" | "pending" | "running" | undefined;
+                                updatedAt?: string | undefined;
+                                createdAt?: string | undefined;
+                                screenshots?: string[] | null | undefined;
+                                totalSteps?: number | null | undefined;
+                                jobId?: string | null | undefined;
+                                userId?: string | null | undefined;
+                                currentStep?: number | null | undefined;
+                                startedAt?: string | null | undefined;
+                                completedAt?: string | null | undefined;
+                                exitCode?: number | null | undefined;
+                                timedOut?: boolean | undefined;
+                                executionMs?: number | null | undefined;
                             };
-                            400: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            400: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            404: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            404: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            409: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            409: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            422: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            422: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
                         };
                     };
@@ -3713,76 +3714,72 @@ export declare const app: Elysia<"/api", {
                 post: {
                     body: {
                         target: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios";
-                    };
+                    } & {};
                     params: {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        500: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        500: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        200: {
-                            error: string | {
-                                details?: {} | undefined;
-                                code: string;
-                                source: string;
-                                message: string;
-                            } | null;
-                            id: string;
-                            aborted: boolean;
-                            type: "scrape" | "job_apply" | "email";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
-                            progress: number | null;
-                            status: "error" | "success" | "pending" | "running";
-                            updatedAt: string;
-                            createdAt: string;
-                            screenshots: string[] | null;
-                            totalSteps: number | null;
-                            jobId: string | null;
-                            userId: string | null;
-                            currentStep: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            executionMs: number | null;
+                        200: {} & {
+                            error?: string | ({} & {
+                                code?: string | undefined;
+                                source?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | null | undefined;
+                            id?: string | undefined;
+                            aborted?: boolean | undefined;
+                            type?: "scrape" | "job_apply" | "email" | undefined;
+                            output?: Record<string, unknown> | null | undefined;
+                            input?: Record<string, unknown> | null | undefined;
+                            progress?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
+                            updatedAt?: string | undefined;
+                            createdAt?: string | undefined;
+                            screenshots?: string[] | null | undefined;
+                            totalSteps?: number | null | undefined;
+                            jobId?: string | null | undefined;
+                            userId?: string | null | undefined;
+                            currentStep?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            exitCode?: number | null | undefined;
+                            timedOut?: boolean | undefined;
+                            executionMs?: number | null | undefined;
                         };
-                        400: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        400: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        404: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        404: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        409: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        409: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        422: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        422: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
                     };
                 };
@@ -3796,76 +3793,72 @@ export declare const app: Elysia<"/api", {
                         body: {
                             target: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios";
                             runAt: string;
-                        };
+                        } & {};
                         params: {};
                         query: unknown;
                         headers: unknown;
                         response: {
-                            500: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            500: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            200: {
-                                error: string | {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    source: string;
-                                    message: string;
-                                } | null;
-                                id: string;
-                                aborted: boolean;
-                                type: "scrape" | "job_apply" | "email";
-                                output: {
-                                    [x: string]: unknown;
-                                } | null;
-                                input: {
-                                    [x: string]: unknown;
-                                } | null;
-                                progress: number | null;
-                                status: "error" | "success" | "pending" | "running";
-                                updatedAt: string;
-                                createdAt: string;
-                                screenshots: string[] | null;
-                                totalSteps: number | null;
-                                jobId: string | null;
-                                userId: string | null;
-                                currentStep: number | null;
-                                startedAt: string | null;
-                                completedAt: string | null;
-                                exitCode: number | null;
-                                timedOut: boolean;
-                                executionMs: number | null;
+                            200: {} & {
+                                error?: string | ({} & {
+                                    code?: string | undefined;
+                                    source?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | null | undefined;
+                                id?: string | undefined;
+                                aborted?: boolean | undefined;
+                                type?: "scrape" | "job_apply" | "email" | undefined;
+                                output?: Record<string, unknown> | null | undefined;
+                                input?: Record<string, unknown> | null | undefined;
+                                progress?: number | null | undefined;
+                                status?: "error" | "success" | "pending" | "running" | undefined;
+                                updatedAt?: string | undefined;
+                                createdAt?: string | undefined;
+                                screenshots?: string[] | null | undefined;
+                                totalSteps?: number | null | undefined;
+                                jobId?: string | null | undefined;
+                                userId?: string | null | undefined;
+                                currentStep?: number | null | undefined;
+                                startedAt?: string | null | undefined;
+                                completedAt?: string | null | undefined;
+                                exitCode?: number | null | undefined;
+                                timedOut?: boolean | undefined;
+                                executionMs?: number | null | undefined;
                             };
-                            400: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            400: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            404: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            404: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            409: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            409: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            422: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            422: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
                         };
                     };
@@ -3881,37 +3874,37 @@ export declare const app: Elysia<"/api", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        500: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        500: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        200: {
-                            summary: {
-                                configured: number;
-                                manualRunAvailable: number;
-                                scheduledRunAvailable: number;
-                                runHistoryAvailable: number;
-                                liveUpdatesAvailable: number;
-                                total: number;
-                            };
-                            capabilities: {
-                                name: string;
-                                id: string;
-                                category: "scrape" | "job_apply";
-                                issues: string[];
-                                target: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null;
-                                enabled: boolean;
-                                configured: boolean;
-                                implemented: boolean;
-                                manualRunAvailable: boolean;
-                                scheduledRunAvailable: boolean;
-                                runHistoryAvailable: boolean;
-                                liveUpdatesAvailable: boolean;
-                            }[];
-                            generatedAt: string;
+                        200: {} & {
+                            summary?: ({} & {
+                                configured?: number | undefined;
+                                manualRunAvailable?: number | undefined;
+                                scheduledRunAvailable?: number | undefined;
+                                runHistoryAvailable?: number | undefined;
+                                liveUpdatesAvailable?: number | undefined;
+                                total?: number | undefined;
+                            }) | undefined;
+                            capabilities?: ({} & {
+                                name?: string | undefined;
+                                id?: string | undefined;
+                                category?: "scrape" | "job_apply" | undefined;
+                                issues?: string[] | undefined;
+                                target?: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null | undefined;
+                                enabled?: boolean | undefined;
+                                configured?: boolean | undefined;
+                                implemented?: boolean | undefined;
+                                manualRunAvailable?: boolean | undefined;
+                                scheduledRunAvailable?: boolean | undefined;
+                                runHistoryAvailable?: boolean | undefined;
+                                liveUpdatesAvailable?: boolean | undefined;
+                            })[] | undefined;
+                            generatedAt?: string | undefined;
                         };
                         422: {
                             type: "validation";
@@ -3932,43 +3925,39 @@ export declare const app: Elysia<"/api", {
                 get: {
                     body: unknown;
                     params: {};
-                    query: {
+                    query: {} & {
                         type?: "scrape" | "job_apply" | "email" | undefined;
                         status?: "error" | "success" | "pending" | "running" | undefined;
                     };
                     headers: unknown;
                     response: {
-                        200: {
-                            error: string | {
-                                details?: {} | undefined;
-                                code: string;
-                                source: string;
-                                message: string;
-                            } | null;
-                            id: string;
-                            aborted: boolean;
-                            type: "scrape" | "job_apply" | "email";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
-                            progress: number | null;
-                            status: "error" | "success" | "pending" | "running";
-                            updatedAt: string;
-                            createdAt: string;
-                            screenshots: string[] | null;
-                            totalSteps: number | null;
-                            jobId: string | null;
-                            userId: string | null;
-                            currentStep: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            executionMs: number | null;
-                        }[];
+                        200: ({} & {
+                            error?: string | ({} & {
+                                code?: string | undefined;
+                                source?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | null | undefined;
+                            id?: string | undefined;
+                            aborted?: boolean | undefined;
+                            type?: "scrape" | "job_apply" | "email" | undefined;
+                            output?: Record<string, unknown> | null | undefined;
+                            input?: Record<string, unknown> | null | undefined;
+                            progress?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
+                            updatedAt?: string | undefined;
+                            createdAt?: string | undefined;
+                            screenshots?: string[] | null | undefined;
+                            totalSteps?: number | null | undefined;
+                            jobId?: string | null | undefined;
+                            userId?: string | null | undefined;
+                            currentStep?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            exitCode?: number | null | undefined;
+                            timedOut?: boolean | undefined;
+                            executionMs?: number | null | undefined;
+                        })[];
                         422: {
                             type: "validation";
                             on: string;
@@ -3990,54 +3979,50 @@ export declare const app: Elysia<"/api", {
                         body: unknown;
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                error: string | {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    source: string;
-                                    message: string;
-                                } | null;
-                                id: string;
-                                aborted: boolean;
-                                type: "scrape" | "job_apply" | "email";
-                                output: {
-                                    [x: string]: unknown;
-                                } | null;
-                                input: {
-                                    [x: string]: unknown;
-                                } | null;
-                                progress: number | null;
-                                status: "error" | "success" | "pending" | "running";
-                                updatedAt: string;
-                                createdAt: string;
-                                screenshots: string[] | null;
-                                totalSteps: number | null;
-                                jobId: string | null;
-                                userId: string | null;
-                                currentStep: number | null;
-                                startedAt: string | null;
-                                completedAt: string | null;
-                                exitCode: number | null;
-                                timedOut: boolean;
-                                executionMs: number | null;
+                            200: {} & {
+                                error?: string | ({} & {
+                                    code?: string | undefined;
+                                    source?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | null | undefined;
+                                id?: string | undefined;
+                                aborted?: boolean | undefined;
+                                type?: "scrape" | "job_apply" | "email" | undefined;
+                                output?: Record<string, unknown> | null | undefined;
+                                input?: Record<string, unknown> | null | undefined;
+                                progress?: number | null | undefined;
+                                status?: "error" | "success" | "pending" | "running" | undefined;
+                                updatedAt?: string | undefined;
+                                createdAt?: string | undefined;
+                                screenshots?: string[] | null | undefined;
+                                totalSteps?: number | null | undefined;
+                                jobId?: string | null | undefined;
+                                userId?: string | null | undefined;
+                                currentStep?: number | null | undefined;
+                                startedAt?: string | null | undefined;
+                                completedAt?: string | null | undefined;
+                                exitCode?: number | null | undefined;
+                                timedOut?: boolean | undefined;
+                                executionMs?: number | null | undefined;
                             };
-                            400: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            400: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
-                            404: {
-                                error: {
-                                    details?: {} | undefined;
-                                    code: string;
-                                    message: string;
-                                };
+                            404: {} & {
+                                error?: ({} & {
+                                    code?: string | undefined;
+                                    message?: string | undefined;
+                                    details?: Record<string, unknown> | undefined;
+                                }) | undefined;
                             };
                             422: {
                                 type: "validation";
@@ -4065,16 +4050,16 @@ export declare const app: Elysia<"/api", {
                             params: {
                                 runId: string;
                                 index: string;
-                            };
+                            } & {};
                             query: unknown;
                             headers: unknown;
                             response: {
                                 200: unknown;
-                                400: {
-                                    error: string;
+                                400: {} & {
+                                    error?: string | undefined;
                                 };
-                                404: {
-                                    error: string;
+                                404: {} & {
+                                    error?: string | undefined;
                                 };
                                 422: {
                                     type: "validation";
@@ -4097,33 +4082,8 @@ export declare const app: Elysia<"/api", {
         [x: string]: {
             subscribe: {
                 body: {
+                    type?: "subscribe" | "unsubscribe" | undefined;
                     runId?: string | undefined;
-                    type: "subscribe" | "unsubscribe";
-                };
-                params: {};
-                query: {};
-                headers: {};
-                response: {
-                    422: {
-                        type: "validation";
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
-        };
-    };
-} & {
-    api: {
-        [x: string]: {
-            subscribe: {
-                body: {
-                    sessionId?: string | undefined;
-                    content: string;
                 };
                 params: {};
                 query: {};
@@ -4149,9 +4109,75 @@ export declare const app: Elysia<"/api", {
                 body: {
                     content?: string | undefined;
                     sessionId?: string | undefined;
+                };
+                params: {};
+                query: {};
+                headers: {};
+                response: {
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
+                    };
+                };
+            };
+        };
+    };
+} & {
+    api: {
+        [x: string]: {
+            subscribe: {
+                body: {
+                    content?: string | undefined;
+                    type?: string | undefined;
+                    sessionId?: string | undefined;
                     studioId?: string | undefined;
-                    config?: {} | undefined;
-                    type: string;
+                    config?: ({} & {
+                        technologies?: string[] | undefined;
+                        roleType?: string | undefined;
+                        roleCategory?: string | undefined;
+                        experienceLevel?: string | undefined;
+                        focusAreas?: string[] | undefined;
+                        duration?: number | undefined;
+                        questionCount?: number | undefined;
+                        includeTechnical?: boolean | undefined;
+                        includeBehavioral?: boolean | undefined;
+                        includeStudioSpecific?: boolean | undefined;
+                        enableVoiceMode?: boolean | undefined;
+                        interviewMode?: "job" | "studio" | undefined;
+                        conversationStyle?: "natural" | "structured" | undefined;
+                        targetJob?: ({
+                            id: string;
+                            title: string;
+                            company: string;
+                            location: string;
+                        } & {
+                            source?: string | undefined;
+                            description?: string | undefined;
+                            url?: string | undefined;
+                            postedDate?: string | undefined;
+                            technologies?: string[] | undefined;
+                            requirements?: string[] | undefined;
+                        }) | undefined;
+                        candidateContext?: ({} & {
+                            resumeId?: string | undefined;
+                            coverLetterId?: string | undefined;
+                            portfolioId?: string | undefined;
+                        }) | undefined;
+                        voiceSettings?: ({} & {
+                            language?: string | undefined;
+                            microphoneId?: string | undefined;
+                            speakerId?: string | undefined;
+                            voiceId?: string | undefined;
+                            rate?: number | undefined;
+                            pitch?: number | undefined;
+                            volume?: number | undefined;
+                        }) | undefined;
+                    }) | undefined;
                 };
                 params: {};
                 query: {};

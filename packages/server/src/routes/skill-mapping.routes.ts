@@ -1,3 +1,4 @@
+import { StandardSchemaV1 } from "baobox";
 import { status } from "elysia";
 import { Elysia } from "elysia";
 import { skillMappingService } from "../services/skill-mapping-service";
@@ -22,7 +23,7 @@ import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
 export const skillMappingRoutes = new Elysia({ prefix: "/skills", tags: ["Skill Mapping"] })
   .use(skillAnalysisRateLimit)
   .get("/mappings", async ({ query }) => listSkillMappings(query), {
-    query: skillMappingsQuerySchema,
+    query: StandardSchemaV1(skillMappingsQuerySchema),
   })
   .post(
     "/mappings",
@@ -31,14 +32,14 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills", tags: ["Skill 
       set.status = result.statusCode;
       return result.mapping;
     },
-    { body: skillMappingCreateBodySchema },
+    { body: StandardSchemaV1(skillMappingCreateBodySchema) },
   )
   .put(
     "/mappings/:id",
     async ({ params, body, set }) => updateSkillMappingFromBody(params.id, body, set),
     {
-      params: skillMappingIdParamsSchema,
-      body: skillMappingUpdateBodySchema,
+      params: StandardSchemaV1(skillMappingIdParamsSchema),
+      body: StandardSchemaV1(skillMappingUpdateBodySchema),
     },
   )
   .delete(
@@ -50,12 +51,12 @@ export const skillMappingRoutes = new Elysia({ prefix: "/skills", tags: ["Skill 
       }
       return result.payload;
     },
-    { params: skillMappingIdParamsSchema },
+    { params: StandardSchemaV1(skillMappingIdParamsSchema) },
   )
   .get("/pathways", async () => skillMappingService.getPathways())
-  .get("/readiness", async ({ query }) => getSkillReadiness(query?.jobId), {
-    query: skillReadinessQuerySchema,
+  .get("/readiness", async ({ query }) => getSkillReadiness(query.jobId), {
+    query: StandardSchemaV1(skillReadinessQuerySchema),
   })
   .post("/ai-analyze", async ({ body, set }) => analyzeSkillMappingsSafely(body, set), {
-    body: skillAnalysisBodySchema,
+    body: StandardSchemaV1(skillAnalysisBodySchema),
   });

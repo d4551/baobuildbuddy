@@ -7,10 +7,7 @@ import {
 } from "@bao/shared";
 import type { ComposerTranslation } from "vue-i18n";
 import type { ComputedRef, Ref } from "vue";
-import {
-  cloneJob,
-  type InterviewJobView,
-} from "~/composables/interview-hub-bootstrap";
+import { cloneJob, type InterviewJobView } from "~/composables/interview-hub-bootstrap";
 import { useInterviewRoleOptions } from "~/composables/interview-hub-role-options";
 
 type InterviewHubDerivedInput = {
@@ -20,22 +17,30 @@ type InterviewHubDerivedInput = {
   pathways: Ref<readonly { readonly title: string; readonly matchScore: number }[]>;
   portfolio: Ref<{ readonly id?: string; readonly projects: readonly unknown[] } | null>;
   profile: Ref<{ readonly currentRole?: string | null } | null>;
-  readiness: Ref<
-    | {
-        readonly targetRoleReadiness?: readonly {
-          readonly roleTitle: string;
-          readonly readinessScore: number;
-        }[];
-      }
-    | null
-  >;
+  readiness: Ref<{
+    readonly targetRoleReadiness?: readonly {
+      readonly roleTitle: string;
+      readonly readinessScore: number;
+    }[];
+  } | null>;
   selectedJobFallback: Ref<Job | null>;
   selectedJobId: Ref<string>;
   selectedMode: Ref<InterviewMode>;
   sessionConfig: { studioId: string; role: string };
   sessions: Ref<readonly unknown[]>;
-  stats: Ref<{ readonly totalSessions?: number; readonly averageScore?: number; readonly improvementTrend?: number } | null>;
-  studios: Ref<readonly { readonly id: string; readonly name: string; readonly type?: string; readonly location?: string }[]>;
+  stats: Ref<{
+    readonly totalSessions?: number;
+    readonly averageScore?: number;
+    readonly improvementTrend?: number;
+  } | null>;
+  studios: Ref<
+    readonly {
+      readonly id: string;
+      readonly name: string;
+      readonly type?: string;
+      readonly location?: string;
+    }[]
+  >;
   resumes: Ref<readonly { readonly id?: string; readonly isDefault?: boolean }[]>;
 };
 

@@ -1,11 +1,5 @@
-import type {
-  AutomationScrapeTarget,
-  EmailResponseTone,
-} from "@bao/shared";
-import {
-  AUTOMATION_SCRAPE_TARGETS,
-  automationScrapeTargetToAction,
-} from "@bao/shared";
+import type { AutomationScrapeTarget, EmailResponseTone } from "@bao/shared";
+import { AUTOMATION_SCRAPE_TARGETS, automationScrapeTargetToAction } from "@bao/shared";
 import { AutomationValidationError } from "./automation-errors";
 
 export interface JobApplyPayload {
@@ -169,9 +163,7 @@ export const buildEmailResponseInput = (
     ...(options.includeAction ? { action: "email_response" } : {}),
   };
 
-  return options.scheduledFor
-    ? withScheduleMetadata(baseInput, options.scheduledFor)
-    : baseInput;
+  return options.scheduledFor ? withScheduleMetadata(baseInput, options.scheduledFor) : baseInput;
 };
 
 export const parseScheduledEmailResponsePayload = (
@@ -192,9 +184,7 @@ export const parseScheduledEmailResponsePayload = (
   }
 
   const toneCandidate = typeof input.tone === "string" ? input.tone.trim() : "";
-  const tone = options.isEmailResponseTone(toneCandidate)
-    ? toneCandidate
-    : options.defaultTone;
+  const tone = options.isEmailResponseTone(toneCandidate) ? toneCandidate : options.defaultTone;
 
   return {
     subject,
@@ -230,9 +220,7 @@ export const buildScrapeInput = (
     ...(options.includeAction ? { action: resolveScrapeAction(payload.target) } : {}),
   };
 
-  return options.scheduledFor
-    ? withScheduleMetadata(baseInput, options.scheduledFor)
-    : baseInput;
+  return options.scheduledFor ? withScheduleMetadata(baseInput, options.scheduledFor) : baseInput;
 };
 
 export const parseScheduledScrapePayload = (

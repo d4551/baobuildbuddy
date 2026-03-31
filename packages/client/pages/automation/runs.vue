@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  APP_ROUTE_BUILDERS,
   APP_ROUTES,
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
@@ -73,13 +72,8 @@ const query = computed(() => {
 });
 
 const { data: runs, status: runFetchStatus, error, refresh } = fetchRuns(query);
-
-watch(query, () => {
-  void refresh();
-});
-
+watch(query, () => void refresh());
 const isLoading = computed(() => runFetchStatus.value === "pending");
-const hasRuns = computed(() => sortedRuns.value.length > 0);
 const errorMessage = computed(() =>
   error.value ? getErrorMessage(error.value, t("automation.runs.loadErrorFallback")) : "",
 );
@@ -269,37 +263,15 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
       </template>
     </PageHeroHeader>
 
-    <SectionGrid grid-token="twoColumn">
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">{{ t("automation.runs.typeLabel") }}</legend>
-        <select
-          v-model="typeFilter"
-          class="select"
-          :aria-label="t('automation.runs.typeFilterAria')"
-        >
-          <option value="">{{ t("automation.runs.allTypes") }}</option>
-          <option v-for="option in typeOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-      </fieldset>
+    <AutomationRunsFilters
+      v-model:type-filter="typeFilter"
+      v-model:status-filter="statusFilter"
+      :type-options="typeOptions"
+      :status-options="statusOptions"
+      :t="t"
+    />
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">{{ t("automation.runs.statusLabel") }}</legend>
-        <select
-          v-model="statusFilter"
-          class="select"
-          :aria-label="t('automation.runs.statusFilterAria')"
-        >
-          <option value="">{{ t("automation.runs.allStatuses") }}</option>
-          <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-      </fieldset>
-    </SectionGrid>
-
-    <LoadingSkeleton v-if="isLoading && !hasRuns" :lines="6" />
+    <LoadingSkeleton v-if="isLoading && sortedRuns.length === 0" :lines="6" />
 
     <BootstrapErrorAlert
       v-else-if="error"
@@ -310,57 +282,17 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
       @retry="() => refresh()"
     />
 
-    <div v-else class="card card-border bg-base-100">
-      <div class="card-body">
-        <div class="overflow-x-auto">
-          <table class="table table-zebra" :aria-label="t('automation.runs.tableAriaLabel')">
-            <thead>
-              <tr>
-                <th scope="col">{{ t("automation.runs.columns.id") }}</th>
-                <th scope="col">{{ t("automation.runs.columns.type") }}</th>
-                <th scope="col">{{ t("automation.runs.columns.status") }}</th>
-                <th scope="col" class="text-right">{{ t("automation.runs.columns.progress") }}</th>
-                <th scope="col">{{ t("automation.runs.columns.job") }}</th>
-                <th scope="col">{{ t("automation.runs.columns.updated") }}</th>
-                <th scope="col">{{ t("automation.runs.columns.actions") }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="run in sortedRuns" :key="run.id" :class="resolveRowClass(run)">
-                <th>{{ run.id }}</th>
-                <td>{{ formatRunType(run.type) }}</td>
-                <td>
-                  <div class="flex items-center gap-2">
-                    <span>{{ formatRunStatus(run.status) }}</span>
-                    <span
-                      v-if="isLiveRun(run)"
-                      class="badge badge-info badge-outline"
-                      :aria-label="t('automation.runs.liveBadgeAria')"
-                    >
-                      {{ t("automation.runs.liveBadge") }}
-                    </span>
-                  </div>
-                </td>
-                <td class="text-right">{{ formatRunProgress(run) }}</td>
-                <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
-                <td>{{ formatDate(run.updatedAt) }}</td>
-                <td>
-                  <NuxtLink
-                    :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
-                    class="btn btn-xs btn-ghost"
-                    :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
-                  >
-                    {{ t("automation.runs.openButton") }}
-                  </NuxtLink>
-                </td>
-              </tr>
-              <tr v-if="!isLoading && sortedRuns.length === 0">
-                <td colspan="7" class="text-center opacity-60">{{ t("automation.runs.emptyState") }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    <AutomationRunsTable
+      v-else
+      :runs="sortedRuns"
+      :is-loading="isLoading"
+      :t="t"
+      :is-live-run="isLiveRun"
+      :format-run-type="formatRunType"
+      :format-run-status="formatRunStatus"
+      :format-run-progress="formatRunProgress"
+      :format-date="formatDate"
+      :resolve-row-class="resolveRowClass"
+    />
   </PageScaffold>
 </template>

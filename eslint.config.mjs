@@ -1,20 +1,20 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 
-const lintTargets = [
-  "packages/server/src/**/*.ts",
-  "packages/shared/src/**/*.ts",
-  "packages/scraper/src/**/*.ts",
-  "scripts/**/*.ts",
-];
+const lintTargets = ["**/*.ts"];
 
 const ignoredPaths = [
   "**/*.d.ts",
+  "**/*.js",
+  "**/*.mjs",
+  "**/*.cjs",
   "**/node_modules/**",
   "**/dist/**",
   "**/dist-types/**",
   "**/.nuxt/**",
   "**/.output/**",
+  "**/.venv/**",
+  ".tmp*/**",
   "packages/desktop/**",
 ];
 

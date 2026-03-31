@@ -1,17 +1,13 @@
 import { JOB_APPLY_CONFIRMATION_PHRASES, JOB_APPLY_TOTAL_STEPS } from "./adapters";
-import type { JobApplyAdapter } from "./adapters";
+import type { JobApplyStrategy } from "./adapters";
 import { automationRuntimeConfig } from "../runtime/config";
 import { settle } from "@bao/shared";
 import { addStep, captureScreenshot } from "./runtime-artifacts";
 import { JOB_APPLY_STEP_INDEX, type JobApplyExecutionState } from "./runtime-contracts";
 import { clickFirstMatchingField } from "./runtime-locators";
-import { getAdapterSelectorList } from "./runtime-selector-map";
+import { getStrategySelectorList } from "./runtime-selector-map";
 
-const emitProgress = (
-  state: JobApplyExecutionState,
-  action: string,
-  step: number,
-): void => {
+const emitProgress = (state: JobApplyExecutionState, action: string, step: number): void => {
   state.emitter.emitProgress({
     action,
     status: "running",
@@ -22,12 +18,12 @@ const emitProgress = (
 
 export const submitApplicationStep = async (
   state: JobApplyExecutionState,
-  adapter: JobApplyAdapter,
+  strategy: JobApplyStrategy,
 ): Promise<void> => {
   emitProgress(state, "submit", JOB_APPLY_STEP_INDEX.submit);
   const submitted = await clickFirstMatchingField(
     state.session.page,
-    getAdapterSelectorList(adapter, state.payload.selectorMap, "submit"),
+    getStrategySelectorList(strategy, state.payload.selectorMap, "submit"),
   );
   if (!submitted) {
     await settle(state.session.page.keyboard.press("Enter"));

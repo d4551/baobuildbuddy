@@ -27,16 +27,16 @@ export declare const automationScreenshotRoutes: Elysia<"/automation/screenshots
                         params: {
                             runId: string;
                             index: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
                             200: unknown;
-                            400: {
-                                error: string;
+                            400: {} & {
+                                error?: string | undefined;
                             };
-                            404: {
-                                error: string;
+                            404: {} & {
+                                error?: string | undefined;
                             };
                             422: {
                                 type: "validation";

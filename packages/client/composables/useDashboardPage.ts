@@ -74,10 +74,7 @@ const useDashboardHeroPhrase = (t: ReturnType<typeof useI18n>["t"]) => {
   return activeHeroPhrase;
 };
 
-const useDashboardWelcomeHeading = (
-  t: ReturnType<typeof useI18n>["t"],
-  dashboard: DashboardRef,
-) =>
+const useDashboardWelcomeHeading = (t: ReturnType<typeof useI18n>["t"], dashboard: DashboardRef) =>
   computed(() => {
     const profileName = dashboard.value?.profile?.name?.trim();
     return profileName
@@ -85,9 +82,7 @@ const useDashboardWelcomeHeading = (
       : t(DASHBOARD_WELCOME_HEADING_KEYS.fallback);
   });
 
-const useDashboardProgress = (
-  dashboard: DashboardRef,
-) => ({
+const useDashboardProgress = (dashboard: DashboardRef) => ({
   levelProgress: computed(() => {
     const gamification = dashboard.value?.gamification;
     return gamification ? Math.round(getXPProgress(gamification.xp).progress * 100) : 0;
@@ -100,10 +95,7 @@ const useDashboardProgress = (
   }),
 });
 
-const useDashboardPipeline = (
-  t: ReturnType<typeof useI18n>["t"],
-  dashboard: DashboardRef,
-) => {
+const useDashboardPipeline = (t: ReturnType<typeof useI18n>["t"], dashboard: DashboardRef) => {
   const pipelineSteps = computed<readonly DashboardPipelineStepViewModel[]>(() => {
     const metrics = dashboard.value?.metrics;
     return resolveDashboardPipelineSteps({
@@ -129,10 +121,7 @@ const useDashboardPipeline = (
   };
 };
 
-const useDashboardFlowActions = (
-  t: ReturnType<typeof useI18n>["t"],
-  dashboard: DashboardRef,
-) => {
+const useDashboardFlowActions = (t: ReturnType<typeof useI18n>["t"], dashboard: DashboardRef) => {
   const flowInput = computed(() =>
     createFlowEngineInput(dashboard.value ? toFlowStats(dashboard.value) : null),
   );
@@ -147,10 +136,7 @@ const useDashboardFlowActions = (
   };
 };
 
-const getDashboardMetricValue = (
-  dashboard: DashboardRef,
-  statKey: DashboardStatKey,
-): number => {
+const getDashboardMetricValue = (dashboard: DashboardRef, statKey: DashboardStatKey): number => {
   const metrics = dashboard.value?.metrics;
   if (!metrics) return 0;
   if (statKey === "savedJobs") return metrics.savedJobs;
@@ -158,10 +144,7 @@ const getDashboardMetricValue = (
   return metrics.interviewSessionCount;
 };
 
-const useDashboardStatCards = (
-  t: ReturnType<typeof useI18n>["t"],
-  dashboard: DashboardRef,
-) =>
+const useDashboardStatCards = (t: ReturnType<typeof useI18n>["t"], dashboard: DashboardRef) =>
   computed<readonly DashboardStatCardViewModel[]>(() =>
     DASHBOARD_STAT_CARDS.map((statCard) => {
       const value = getDashboardMetricValue(dashboard, statCard.statKey);
@@ -197,13 +180,15 @@ export async function useDashboardPage() {
   const { $toast } = useNuxtApp();
   const { t } = useI18n();
   const { resolvedBrand } = useBrand();
-  const { dashboard, error, refresh, uiState } = await useDashboardAsyncState(api, t);
   const activeHeroPhrase = useDashboardHeroPhrase(t);
+  const { dashboard, error, refresh, uiState } = await useDashboardAsyncState(api, t);
   const welcomeHeading = useDashboardWelcomeHeading(t, dashboard);
   const { levelProgress, xpTarget } = useDashboardProgress(dashboard);
   const { nextPipelineStepLabel, pipelineSteps } = useDashboardPipeline(t, dashboard);
-  const { dashboardQuickActions, primaryFlowLabel, primaryFlowRoute } =
-    useDashboardFlowActions(t, dashboard);
+  const { dashboardQuickActions, primaryFlowLabel, primaryFlowRoute } = useDashboardFlowActions(
+    t,
+    dashboard,
+  );
   const statCards = useDashboardStatCards(t, dashboard);
   useDashboardErrorToast(error, t, $toast);
 

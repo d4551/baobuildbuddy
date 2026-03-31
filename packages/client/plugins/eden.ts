@@ -13,10 +13,6 @@ export type EdenApiNamespace = TreatyClient["api"];
 type StoredApiKey = string | null;
 type AuthKeyCookieRef = Ref<StoredApiKey> | null;
 
-function hasBrowserStorage(): boolean {
-  return import.meta.client && typeof window !== "undefined" && "localStorage" in window;
-}
-
 function getAuthKeyCookieRef() {
   return useCookie<StoredApiKey>(AUTH_KEY, {
     default: () => null,
@@ -25,38 +21,15 @@ function getAuthKeyCookieRef() {
   });
 }
 
-function getLocalStorageApiKey(): string | null {
-  if (!hasBrowserStorage()) return null;
-  return window.localStorage.getItem(AUTH_KEY);
-}
-
-function setLocalStorageApiKey(apiKey: string | null): void {
-  if (!hasBrowserStorage()) return;
-  if (apiKey) {
-    window.localStorage.setItem(AUTH_KEY, apiKey);
-    return;
-  }
-  window.localStorage.removeItem(AUTH_KEY);
-}
-
 function resolveAuthKeyCookieRef(): AuthKeyCookieRef {
   return tryUseNuxtApp() ? getAuthKeyCookieRef() : null;
 }
 
 function readStoredApiKey(cookieRef: AuthKeyCookieRef): string | null {
-  const localStorageApiKey = getLocalStorageApiKey();
-  if (localStorageApiKey) {
-    if (cookieRef && !cookieRef.value) {
-      cookieRef.value = localStorageApiKey;
-    }
-    return localStorageApiKey;
-  }
-
   return cookieRef?.value ?? null;
 }
 
 function writeStoredApiKey(cookieRef: AuthKeyCookieRef, apiKey: string | null): void {
-  setLocalStorageApiKey(apiKey);
   if (cookieRef) {
     cookieRef.value = apiKey;
   }

@@ -14,7 +14,9 @@ export function useAIDashboardSelection(
   const selectedProvider = ref<AIProviderType>(AI_PROVIDER_DEFAULT);
   const selectedModel = ref("");
   const selectedProviderModels = computed(() => {
-    const matchingProvider = providers.value.find((provider) => provider.id === selectedProvider.value);
+    const matchingProvider = providers.value.find(
+      (provider) => provider.id === selectedProvider.value,
+    );
     return resolveProviderModelOptions(
       selectedProvider.value,
       settings.value,
@@ -41,7 +43,9 @@ export function useAIDashboardSelection(
 }
 
 export function syncDashboardSelections(input: {
-  dashboardBootstrap: Ref<{ activeModel: string; activeProvider: AIProviderType } | null | undefined>;
+  dashboardBootstrap: Ref<
+    { activeModel: string; activeProvider: AIProviderType } | null | undefined
+  >;
   selectedProvider: Ref<AIProviderType>;
   selectedModel: Ref<string>;
   settings: ReturnType<typeof useSettings>["settings"];

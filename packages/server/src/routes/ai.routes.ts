@@ -1,6 +1,5 @@
-import {
-  MS_PER_MINUTE,
-} from "@bao/shared";
+import { MS_PER_MINUTE } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { db } from "../db/client";
@@ -21,9 +20,7 @@ import {
   matchJobsRouteBodySchema,
   usageTailLimit,
 } from "./ai-route-contracts";
-import {
-  buildProviderModelsResponse,
-} from "./ai-route-support";
+import { buildProviderModelsResponse } from "./ai-route-support";
 
 export const aiRoutes = new Elysia({ prefix: "/ai", tags: ["AI"] })
   .use(
@@ -35,20 +32,20 @@ export const aiRoutes = new Elysia({ prefix: "/ai", tags: ["AI"] })
     }),
   )
   .post("/chat", async ({ body, set }) => handleChatRoute(body, set), {
-    body: chatRouteBodySchema,
+    body: StandardSchemaV1(chatRouteBodySchema),
   })
   .post("/analyze-resume", async ({ body, set }) => handleAnalyzeResumeRoute(body, set), {
-    body: analyzeResumeRouteBodySchema,
+    body: StandardSchemaV1(analyzeResumeRouteBodySchema),
   })
   .post(
     "/generate-cover-letter",
     async ({ body, set }) => handleGenerateCoverLetterRoute(body, set),
     {
-      body: generateCoverLetterRouteBodySchema,
+      body: StandardSchemaV1(generateCoverLetterRouteBodySchema),
     },
   )
   .post("/match-jobs", async ({ body, set }) => handleMatchJobsRoute(body, set), {
-    body: matchJobsRouteBodySchema,
+    body: StandardSchemaV1(matchJobsRouteBodySchema),
   })
   .get("/models", async () => buildProviderModelsResponse())
   .get("/usage", async () => {
@@ -66,10 +63,6 @@ export const aiRoutes = new Elysia({ prefix: "/ai", tags: ["AI"] })
       })),
     };
   })
-  .post(
-    "/automation-action",
-    async ({ body, set }) => handleAutomationActionRoute(body, set),
-    {
-      body: automationActionRouteBodySchema,
-    },
-  );
+  .post("/automation-action", async ({ body, set }) => handleAutomationActionRoute(body, set), {
+    body: StandardSchemaV1(automationActionRouteBodySchema),
+  });

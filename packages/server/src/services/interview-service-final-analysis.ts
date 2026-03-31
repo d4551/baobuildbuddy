@@ -18,11 +18,7 @@ import {
 } from "./interview-service-prompt-context";
 import { createAIService, resolveCandidateInterviewContext } from "./interview-service-context";
 import { normalizeScore } from "./interview-service-normalizers";
-import {
-  isRecord,
-  parseStringArray,
-  safeParseJSON,
-} from "./interview-service-value-parsers";
+import { isRecord, parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
 import { withAiOperationTimeout } from "./interview-service-ai";
 import { settle } from "@bao/shared";
 
@@ -77,7 +73,8 @@ function buildFinalAnalysisPrompt({
   candidateContext,
 }: FinalAnalysisPromptContext): string {
   const responseLines = responses.map(
-    (response, index) => `Q${index + 1}: "${response.questionId}"\nA${index + 1}: ${response.transcript}`,
+    (response, index) =>
+      `Q${index + 1}: "${response.questionId}"\nA${index + 1}: ${response.transcript}`,
   );
 
   return `${interviewPersonaPrompt({
@@ -151,20 +148,19 @@ export async function generateFinalAnalysis(
     return calculateDefaultAnalysis(session.responses);
   }
 
-  const response =
-    (await withAiOperationTimeout(() =>
-      aiServiceResult.value.generate(prompt, {
-        purpose: "interviewFeedback",
-        temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
-        maxTokens: AI_MAX_TOKENS_QUESTION,
-      }),
-    )) ?? {
-      error: API_ERROR_AI_OPERATION_TIMEOUT,
-      content: "",
-      provider: "none",
-      id: "",
-      timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
-    };
+  const response = (await withAiOperationTimeout(() =>
+    aiServiceResult.value.generate(prompt, {
+      purpose: "interviewFeedback",
+      temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
+      maxTokens: AI_MAX_TOKENS_QUESTION,
+    }),
+  )) ?? {
+    error: API_ERROR_AI_OPERATION_TIMEOUT,
+    content: "",
+    provider: "none",
+    id: "",
+    timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
+  };
 
   if (response.error) {
     return calculateDefaultAnalysis(session.responses);

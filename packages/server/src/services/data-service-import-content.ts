@@ -16,7 +16,11 @@ import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import type { BaoExportData } from "./data-service-contracts";
-import { runIgnoringErrors, runTasksSequentially, runWithErrorHandler } from "./data-service-helpers";
+import {
+  runIgnoringErrors,
+  runTasksSequentially,
+  runWithErrorHandler,
+} from "./data-service-helpers";
 import {
   parseChatHistoryInsert,
   parseCoverLetterInsert,

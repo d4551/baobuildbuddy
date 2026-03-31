@@ -30,10 +30,8 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
     portfolio: {
         put: {
             body: {
-                metadata: {
-                    [x: string]: unknown;
-                };
-            };
+                metadata: Record<string, unknown>;
+            } & {};
             params: {};
             query: unknown;
             headers: unknown;
@@ -56,18 +54,19 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         projects: {
             post: {
                 body: {
+                    title: string;
+                    description: string;
+                } & {
                     role?: string | undefined;
                     technologies?: string[] | undefined;
                     platforms?: string[] | undefined;
                     featured?: boolean | undefined;
+                    sortOrder?: number | undefined;
                     image?: string | undefined;
                     liveUrl?: string | undefined;
                     githubUrl?: string | undefined;
                     tags?: string[] | undefined;
                     engines?: string[] | undefined;
-                    sortOrder?: number | undefined;
-                    title: string;
-                    description: string;
                 };
                 params: {};
                 query: unknown;
@@ -96,7 +95,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                 post: {
                     body: {
                         orderedIds: string[];
-                    };
+                    } & {};
                     params: {};
                     query: unknown;
                     headers: unknown;
@@ -123,23 +122,23 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         projects: {
             ":id": {
                 put: {
-                    body: {
+                    body: {} & {
                         role?: string | undefined;
                         title?: string | undefined;
                         description?: string | undefined;
                         technologies?: string[] | undefined;
                         platforms?: string[] | undefined;
                         featured?: boolean | undefined;
+                        sortOrder?: number | undefined;
                         image?: string | undefined;
                         liveUrl?: string | undefined;
                         githubUrl?: string | undefined;
                         tags?: string[] | undefined;
                         engines?: string[] | undefined;
-                        sortOrder?: number | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -168,7 +167,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -199,7 +198,7 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
     portfolio: {
         export: {
             post: {
-                body: {
+                body: {} & {
                     format?: string | undefined;
                 };
                 params: {};

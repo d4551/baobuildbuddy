@@ -5,10 +5,7 @@ import {
   MS_PER_HOUR,
   MS_PER_MINUTE,
 } from "@bao/shared";
-import type {
-  DashboardOnboardingStep,
-  DashboardStatCard,
-} from "./dashboard-contracts";
+import type { DashboardOnboardingStep, DashboardStatCard } from "./dashboard-contracts";
 
 /**
  * Progress and dial limits for dashboard gamification visuals.

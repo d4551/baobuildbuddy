@@ -1180,7 +1180,7 @@ const main = async (): Promise<void> => {
   await verifyPackagedRuntime(manifest, verificationFrontendRoot);
 };
 
-await main().catch(async (error: unknown) => {
+await main().then(undefined, async (error: unknown) => {
   const message = toErrorMessage(error);
   await writeError(`desktop-runtime: verification failed: ${message}`);
   process.exit(1);

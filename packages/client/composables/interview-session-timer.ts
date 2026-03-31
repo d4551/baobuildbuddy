@@ -51,10 +51,7 @@ export function createInterviewSessionTimer(input: {
   };
 }
 
-function createInterviewTimerPresentation(
-  timeElapsed: Ref<number>,
-  t: Translate,
-) {
+function createInterviewTimerPresentation(timeElapsed: Ref<number>, t: Translate) {
   const elapsedMinutes = computed(() => Math.floor(timeElapsed.value / SECONDS_PER_MINUTE));
   const elapsedSeconds = computed(() => timeElapsed.value % SECONDS_PER_MINUTE);
   const formattedElapsedMinutes = computed(() =>

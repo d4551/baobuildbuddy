@@ -163,10 +163,7 @@ function renderResumeProjectTechnologies(
   context.yPosition -= 15;
 }
 
-function renderResumeProjectItem(
-  context: ResumeRenderContext,
-  project: ResumeProjectItem,
-): void {
+function renderResumeProjectItem(context: ResumeRenderContext, project: ResumeProjectItem): void {
   ensureResumeSpace(context, 60);
   context.page.drawText(project.title, {
     x: context.margin,

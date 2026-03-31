@@ -100,10 +100,7 @@ function usePortfolioProjectValidation(
 }
 
 function usePortfolioTechnologyActions(
-  {
-    newTech,
-    projectForm,
-  }: Pick<PortfolioPageActionsInput, "newTech" | "projectForm">,
+  { newTech, projectForm }: Pick<PortfolioPageActionsInput, "newTech" | "projectForm">,
   nuxtApp: Pick<NuxtApp, "$toast">,
   t: ComposerTranslation,
 ) {
@@ -209,13 +206,11 @@ function usePortfolioProjectOrdering(
   };
 }
 
-function usePortfolioMetadataSync(
-  {
-    fetchPortfolio,
-    portfolio,
-    syncPortfolioMetadata,
-  }: Pick<PortfolioPageActionsInput, "fetchPortfolio" | "portfolio" | "syncPortfolioMetadata">,
-) {
+function usePortfolioMetadataSync({
+  fetchPortfolio,
+  portfolio,
+  syncPortfolioMetadata,
+}: Pick<PortfolioPageActionsInput, "fetchPortfolio" | "portfolio" | "syncPortfolioMetadata">) {
   onMounted(async () => {
     await fetchPortfolio();
     syncPortfolioMetadata(portfolio.value?.metadata);
@@ -275,7 +270,9 @@ function createPortfolioCrudActions(
         t("portfolioPage.toasts.saveFailed"),
       );
       if (!savePortfolioResult.ok) {
-        $toast.error(getErrorMessage(savePortfolioResult.error, t("portfolioPage.toasts.saveFailed")));
+        $toast.error(
+          getErrorMessage(savePortfolioResult.error, t("portfolioPage.toasts.saveFailed")),
+        );
         return;
       }
 
@@ -391,7 +388,8 @@ export function usePortfolioPageActions(
     handleDeleteProject: () => mutations.handleDeleteProject(),
     handleExport: () => mutations.handleExport(),
     handleSavePortfolio: () => mutations.handleSavePortfolio(),
-    handleSaveProject: (clearProjectForm: () => void) => mutations.handleSaveProject(clearProjectForm),
+    handleSaveProject: (clearProjectForm: () => void) =>
+      mutations.handleSaveProject(clearProjectForm),
     moveProject: (projectId: string | undefined, direction: ProjectDirection) =>
       ordering.moveProject(projectId, direction),
     removeTechnology: (index: number) => technology.removeTechnology(index),

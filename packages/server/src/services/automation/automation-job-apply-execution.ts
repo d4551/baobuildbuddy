@@ -13,7 +13,11 @@ import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { gamificationService } from "../gamification-service";
-import { markRunCompleted, markRunFailed, normalizeExecutionResult } from "./automation-run-persistence";
+import {
+  markRunCompleted,
+  markRunFailed,
+  normalizeExecutionResult,
+} from "./automation-run-persistence";
 import type {
   CreateProgressEvent,
   JobApplyExecutionTracking,
@@ -59,7 +63,9 @@ const runJobApplyScript = async (
       jobUrl: preparation.normalized.jobUrl,
       resume: preparation.resume,
       ...(preparation.resumeFilePath ? { resumeFilePath: preparation.resumeFilePath } : {}),
-      coverLetter: preparation.coverLetter ? { content: preparation.coverLetter.content || {} } : null,
+      coverLetter: preparation.coverLetter
+        ? { content: preparation.coverLetter.content || {} }
+        : null,
       customAnswers: preparation.normalized.customAnswers,
       selectorMap: preparation.selectorMap,
     },

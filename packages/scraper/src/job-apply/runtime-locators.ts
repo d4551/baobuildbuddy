@@ -18,7 +18,8 @@ export const inputSelectorByName = (fieldName: string): string => `input[name='$
 
 export const inputSelectorById = (fieldId: string): string => `input[id='${fieldId}']`;
 
-export const textareaSelectorByName = (fieldName: string): string => `textarea[name='${fieldName}']`;
+export const textareaSelectorByName = (fieldName: string): string =>
+  `textarea[name='${fieldName}']`;
 
 export const textareaSelectorById = (fieldId: string): string => `textarea[id='${fieldId}']`;
 
@@ -41,12 +42,7 @@ export const isRetryablePlaywrightError = (reason: unknown): boolean => {
 export const waitMs = (ms: number): Promise<void> =>
   new Promise((resolve) => {
     const t = setTimeout(resolve, ms);
-    if (
-      typeof t === "object" &&
-      t !== null &&
-      "unref" in t &&
-      typeof t.unref === "function"
-    ) {
+    if (typeof t === "object" && t !== null && "unref" in t && typeof t.unref === "function") {
       t.unref();
     }
   });

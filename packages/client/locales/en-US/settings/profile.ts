@@ -1,0 +1,37 @@
+const settingsprofile = {
+  settings: {
+    profile: {
+      title: "User Profile",
+      nameLegend: "Name",
+      nameAria: "Name",
+      nameHint: "Name must be at least 2 characters.",
+      emailLegend: "Email",
+      emailAria: "Email",
+      emailHint: "Enter a valid email address.",
+      currentRoleLegend: "Current Role",
+      currentRoleAria: "Current role",
+      currentCompanyLegend: "Current Company",
+      currentCompanyAria: "Current company",
+      locationLegend: "Location",
+      locationAria: "Location",
+      yearsExperienceLegend: "Years Experience",
+      yearsExperienceAria: "Years of experience",
+      githubLegend: "GitHub",
+      githubAria: "GitHub profile URL",
+      linkedinLegend: "LinkedIn",
+      linkedinAria: "LinkedIn profile URL",
+      summaryLegend: "Summary",
+      summaryAria: "Profile summary",
+      technicalSkillsLegend: "Technical Skills (comma-separated)",
+      technicalSkillsPlaceholder: "Unity, Unreal Engine, C++, TypeScript",
+      technicalSkillsAria: "Technical skills",
+      softSkillsLegend: "Soft Skills (comma-separated)",
+      softSkillsPlaceholder: "Communication, Leadership, Collaboration",
+      softSkillsAria: "Soft skills",
+      saveAria: "Save user profile settings",
+      saveButton: "Save Profile",
+    },
+  },
+} as const;
+
+export default settingsprofile;

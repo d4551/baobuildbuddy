@@ -29,7 +29,7 @@ export declare const studioRoutes: Elysia<"/studios", {
         get: {
             body: unknown;
             params: {};
-            query: {
+            query: {} & {
                 type?: string | undefined;
                 size?: string | undefined;
                 remoteWork?: string | undefined;
@@ -74,7 +74,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -115,6 +115,8 @@ export declare const studioRoutes: Elysia<"/studios", {
     studios: {
         post: {
             body: {
+                name: string;
+            } & {
                 type?: string | undefined;
                 description?: string | undefined;
                 location?: string | undefined;
@@ -124,12 +126,11 @@ export declare const studioRoutes: Elysia<"/studios", {
                 remoteWork?: boolean | undefined;
                 platforms?: string[] | undefined;
                 genres?: string[] | undefined;
-                culture?: {} | undefined;
+                culture?: Record<string, unknown> | undefined;
                 founded?: string | undefined;
                 benefits?: string[] | undefined;
-                socialMedia?: {} | undefined;
+                socialMedia?: Record<string, string> | undefined;
                 notableGames?: string[] | undefined;
-                name: string;
             };
             params: {};
             query: unknown;
@@ -148,9 +149,9 @@ export declare const studioRoutes: Elysia<"/studios", {
                     technologies: string[];
                     genres: string[];
                     platforms: string[];
-                    culture: {} | null;
+                    culture: Record<string, unknown> | null;
                     benefits: string[];
-                    socialMedia: {} | null;
+                    socialMedia: Record<string, string> | null;
                     notableGames: string[];
                 };
                 422: {
@@ -169,7 +170,7 @@ export declare const studioRoutes: Elysia<"/studios", {
     studios: {
         ":id": {
             put: {
-                body: {
+                body: {} & {
                     name?: string | undefined;
                     type?: string | undefined;
                     description?: string | undefined;
@@ -180,15 +181,15 @@ export declare const studioRoutes: Elysia<"/studios", {
                     remoteWork?: boolean | undefined;
                     platforms?: string[] | undefined;
                     genres?: string[] | undefined;
-                    culture?: {} | undefined;
+                    culture?: Record<string, unknown> | undefined;
                     founded?: string | undefined;
                     benefits?: string[] | undefined;
-                    socialMedia?: {} | undefined;
+                    socialMedia?: Record<string, string> | undefined;
                     notableGames?: string[] | undefined;
                 };
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -232,7 +233,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {

@@ -6,11 +6,12 @@ import {
   RESUME_LINKS_SPACING,
   type ResumeData,
 } from "@bao/shared";
-import { toPdfColor, type ResumePersonalInfo, type ResumeRenderContext } from "./export-service-contracts";
 import {
-  drawResumeWrappedText,
-  renderResumeSectionHeader,
-} from "./export-service-resume-layout";
+  toPdfColor,
+  type ResumePersonalInfo,
+  type ResumeRenderContext,
+} from "./export-service-contracts";
+import { drawResumeWrappedText, renderResumeSectionHeader } from "./export-service-resume-layout";
 
 function renderResumeName(context: ResumeRenderContext, name: string): void {
   if (context.layout.headerStyle === "banner") {

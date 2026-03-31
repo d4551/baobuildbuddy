@@ -1,9 +1,7 @@
 import {
   API_ERROR_START_INTERVIEW,
   API_ERROR_STUDIO_ID_REQUIRED,
-  DECIMAL_RADIX,
   INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
-  INTERVIEW_DEFAULT_FOCUS_AREAS,
   INTERVIEW_DEFAULT_QUESTION_COUNT,
   INTERVIEW_DEFAULT_ROLE_TYPE,
   INTERVIEW_MAX_QUESTION_COUNT,
@@ -11,6 +9,8 @@ import {
   settle,
 } from "@bao/shared";
 import { interviewService } from "../services/interview-service";
+import type { CreateSessionConfigInput } from "../routes/interview-route-contracts";
+import { sessionConfigFromUi } from "../routes/interview-route-config";
 
 type InterviewSocket = { send: (data: string) => void };
 
@@ -19,7 +19,7 @@ type InterviewMessage = {
   sessionId?: string;
   content?: string;
   studioId?: string;
-  config?: Record<string, unknown>;
+  config?: CreateSessionConfigInput;
 };
 
 type WsQuestion = {
@@ -36,79 +36,21 @@ type InterviewFeedback = {
   summary: string;
 };
 
-type WsCandidateContext = {
-  resumeId?: string;
-  coverLetterId?: string;
-  portfolioId?: string;
-};
-
-const toWsConfigRecord = (value: unknown): Record<string, unknown> | null => {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return null;
-  }
-
-  return Object.fromEntries(Object.entries(value));
-};
-
-const resolveWsConfigText = (value: unknown, fallback: string): string =>
-  typeof value === "string" && value.trim() ? value : fallback;
-
-const resolveWsQuestionCount = (value: unknown): number => {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return Math.max(1, Math.min(Math.floor(value), INTERVIEW_MAX_QUESTION_COUNT));
-  }
-
-  if (typeof value === "string") {
-    const parsed = Number.parseInt(value, DECIMAL_RADIX);
-    if (Number.isFinite(parsed)) {
-      return Math.max(1, Math.min(parsed, INTERVIEW_MAX_QUESTION_COUNT));
-    }
-  }
-
-  return INTERVIEW_DEFAULT_QUESTION_COUNT;
-};
-
-const resolveWsCandidateContext = (value: unknown): WsCandidateContext | undefined => {
-  const candidateContextValue = toWsConfigRecord(value);
-  if (!candidateContextValue) {
-    return;
-  }
-
-  const candidateContext: WsCandidateContext = {
-    ...(typeof candidateContextValue.resumeId === "string"
-      ? { resumeId: candidateContextValue.resumeId }
-      : {}),
-    ...(typeof candidateContextValue.coverLetterId === "string"
-      ? { coverLetterId: candidateContextValue.coverLetterId }
-      : {}),
-    ...(typeof candidateContextValue.portfolioId === "string"
-      ? { portfolioId: candidateContextValue.portfolioId }
-      : {}),
-  };
-
-  return candidateContext.resumeId || candidateContext.coverLetterId || candidateContext.portfolioId
-    ? candidateContext
-    : undefined;
-};
-
-const mapWsConfigToInterviewConfig = (config: Record<string, unknown>): Record<string, unknown> => {
-  const role = resolveWsConfigText(config.role, INTERVIEW_DEFAULT_ROLE_TYPE);
-  const level = resolveWsConfigText(config.level, INTERVIEW_DEFAULT_EXPERIENCE_LEVEL);
-  const questionCount = resolveWsQuestionCount(config.questionCount);
-  const candidateContext = resolveWsCandidateContext(config.candidateContext);
-
+const mapWsConfigToInterviewConfig = (config: CreateSessionConfigInput | undefined) => {
+  const normalizedConfig = sessionConfigFromUi(config ?? {});
   return {
-    roleType: role,
-    role,
-    experienceLevel: level,
-    level,
-    questionCount,
-    conversationStyle: config.conversationStyle === "structured" ? "structured" : "natural",
-    ...(candidateContext ? { candidateContext } : {}),
-    includeTechnical: true,
-    includeBehavioral: true,
-    includeStudioSpecific: true,
-    focusAreas: [...INTERVIEW_DEFAULT_FOCUS_AREAS],
+    ...normalizedConfig,
+    role: normalizedConfig.roleType ?? INTERVIEW_DEFAULT_ROLE_TYPE,
+    level: normalizedConfig.experienceLevel ?? INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
+    questionCount: Math.min(
+      normalizedConfig.questionCount ?? INTERVIEW_DEFAULT_QUESTION_COUNT,
+      INTERVIEW_MAX_QUESTION_COUNT,
+    ),
+    conversationStyle:
+      normalizedConfig.conversationStyle === "structured" ? "structured" : "natural",
+    includeTechnical: normalizedConfig.includeTechnical ?? true,
+    includeBehavioral: normalizedConfig.includeBehavioral ?? true,
+    includeStudioSpecific: normalizedConfig.includeStudioSpecific ?? true,
   };
 };
 
@@ -145,7 +87,7 @@ export async function handleStartSession(socket: InterviewSocket, data: Intervie
   }
 
   const sessionResult = await settle(
-    interviewService.startSession(data.studioId, mapWsConfigToInterviewConfig(data.config || {})),
+    interviewService.startSession(data.studioId, mapWsConfigToInterviewConfig(data.config)),
   );
   if (sessionResult.status === "rejected") {
     socket.send(

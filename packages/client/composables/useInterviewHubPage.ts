@@ -1,8 +1,5 @@
 import { useI18n } from "vue-i18n";
-import {
-  APP_ROUTES,
-  INTERVIEW_DEFAULT_ROLE_TYPE,
-} from "@bao/shared";
+import { APP_ROUTES, INTERVIEW_DEFAULT_ROLE_TYPE } from "@bao/shared";
 import { useInterviewHubActions } from "~/composables/interview-hub-actions";
 import {
   INTERVIEW_CONFIG_DIALOG_DESCRIPTION_ID,
@@ -57,10 +54,16 @@ function useInterviewHubPageWatchers(
         return;
       }
 
-      const normalizedCurrentRole = normalizeRoleCandidate(bootstrap.sessionConfig.role).toLowerCase();
+      const normalizedCurrentRole = normalizeRoleCandidate(
+        bootstrap.sessionConfig.role,
+      ).toLowerCase();
       const hasCurrentRole = options.some((role) => role.toLowerCase() === normalizedCurrentRole);
       if (!hasCurrentRole) {
-        bootstrap.sessionConfig.role = resolvePreferredOption(options, 0, INTERVIEW_DEFAULT_ROLE_TYPE);
+        bootstrap.sessionConfig.role = resolvePreferredOption(
+          options,
+          0,
+          INTERVIEW_DEFAULT_ROLE_TYPE,
+        );
         return;
       }
 
@@ -157,8 +160,14 @@ export async function useInterviewHubPage() {
   const { i18n } = dependencies;
   const { getScoreBadgeClass } = useScoreColor();
 
-  const bootstrap = await useInterviewHubBootstrap(createInterviewHubBootstrapInput(dependencies), i18n.t);
-  const derived = useInterviewHubDerived(createInterviewHubDerivedInput(dependencies, bootstrap), i18n.t);
+  const bootstrap = await useInterviewHubBootstrap(
+    createInterviewHubBootstrapInput(dependencies),
+    i18n.t,
+  );
+  const derived = useInterviewHubDerived(
+    createInterviewHubDerivedInput(dependencies, bootstrap),
+    i18n.t,
+  );
   const actions = useInterviewHubActions(
     createInterviewHubActionsInput(dependencies, bootstrap, derived),
     dependencies.router,

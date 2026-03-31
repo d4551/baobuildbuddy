@@ -28,9 +28,7 @@ const normalizeParagraphInput = (value: unknown): string[] => {
 /**
  * Collects only defined, non-empty string values.
  */
-export const collectDefinedStringValues = (
-  values: ReadonlyArray<string | undefined>,
-): string[] =>
+export const collectDefinedStringValues = (values: ReadonlyArray<string | undefined>): string[] =>
   values.filter((value): value is string => typeof value === "string" && value.trim().length > 0);
 
 /**

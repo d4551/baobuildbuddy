@@ -4,15 +4,9 @@ import { APP_ROUTES, getXPProgress } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {
-  GAMIFICATION_ACHIEVEMENTS_ICON,
   GAMIFICATION_ASYNC_DATA_KEY,
-  GAMIFICATION_CURRENT_STREAK_ICON,
   GAMIFICATION_DEFAULT_CHALLENGE_GOAL,
-  GAMIFICATION_LEVEL_ICON,
   GAMIFICATION_LOADING_SKELETON_LINES,
-  GAMIFICATION_LONGEST_STREAK_ICON,
-  GAMIFICATION_PROGRESS_MAX,
-  GAMIFICATION_PROGRESS_MIN,
   GAMIFICATION_XP_TARGET_FALLBACK,
 } from "~/constants/gamification";
 import { getErrorMessage } from "~/utils/errors";
@@ -212,130 +206,30 @@ async function requestData<T>(
     />
 
     <div v-else-if="hubData" class="space-y-6">
-      <section class="card bg-linear-to-br from-primary to-secondary text-primary-content">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h2 class="text-4xl font-bold">
-                {{ t("gamificationPage.levelPrefix") }} {{ hubData.progress.level }}
-              </h2>
-              <p class="opacity-80">
-                {{ hubData.progress.xp }} / {{ xpTarget }} {{ t("gamificationPage.xpSuffix") }}
-              </p>
-            </div>
-            <div class="text-6xl" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</div>
-          </div>
-
-          <progress
-            class="progress progress-primary-content w-full h-4"
-            :value="levelProgress"
-            :max="GAMIFICATION_PROGRESS_MAX"
-            :aria-valuenow="levelProgress"
-            :aria-valuemin="GAMIFICATION_PROGRESS_MIN"
-            :aria-valuemax="GAMIFICATION_PROGRESS_MAX"
-            :aria-label="t('gamificationPage.a11y.levelProgress')"
-          ></progress>
-
-          <p class="text-sm opacity-80 mt-2">
-            {{ xpUntilNextLevel }} {{ t("gamificationPage.xpUntilLevelLabel") }} {{ hubData.progress.level + 1 }}
-          </p>
-        </div>
-      </section>
-
-      <StatsRow
-        background-class="bg-base-200"
-        :stats="[
-          { titleKey: 'gamificationPage.currentStreakTitle', value: hubData.progress.currentStreak || 0, valueClass: 'text-primary', descKey: 'gamificationPage.streakDaysSuffix', figure: GAMIFICATION_CURRENT_STREAK_ICON },
-          { titleKey: 'gamificationPage.longestStreakTitle', value: hubData.progress.longestStreak || 0, valueClass: 'text-secondary', descKey: 'gamificationPage.longestStreakDesc', figure: GAMIFICATION_LONGEST_STREAK_ICON },
-          { titleKey: 'gamificationPage.achievementsTitle', value: unlockedAchievements.length, valueClass: 'text-accent', descKey: 'gamificationPage.longestStreakDesc', figure: GAMIFICATION_ACHIEVEMENTS_ICON },
-        ]"
+      <GamificationSummaryCard
+        :progress="hubData.progress"
+        :level-progress="levelProgress"
+        :xp-target="xpTarget"
+        :xp-until-next-level="xpUntilNextLevel"
+        :unlocked-achievements-count="unlockedAchievements.length"
+        :t="t"
       />
 
-      <section class="card bg-base-200">
-        <div class="card-body">
-          <h2 class="card-title mb-4">{{ t("gamificationPage.dailyChallengesTitle") }}</h2>
+      <GamificationChallengesCard
+        :challenges="hubData.challenges"
+        :completing-challenge="completingChallenge"
+        :t="t"
+        :get-challenge-goal="getChallengeGoal"
+        :get-challenge-progress="getChallengeProgress"
+        :can-claim-challenge="canClaimChallenge"
+        @claim="handleCompleteChallenge"
+      />
 
-          <div class="space-y-3" v-if="hubData.challenges.length > 0">
-            <article v-for="challenge in hubData.challenges" :key="challenge.id" class="card bg-base-100 card-border">
-              <div class="card-body p-4">
-                <div class="flex items-center justify-between mb-2">
-                  <h3 class="font-semibold">{{ challenge.name }}</h3>
-                  <div class="flex items-center gap-2">
-                    <span class="badge badge-primary">+{{ challenge.xpReward }} {{ t("gamificationPage.xpSuffix") }}</span>
-                    <span v-if="challenge.completed" class="badge badge-success">{{ t("gamificationPage.challengeDoneLabel") }}</span>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-3">
-                  <span class="w-8 text-lg" aria-hidden="true">{{ challenge.icon }}</span>
-                  <progress
-                    class="progress flex-1"
-                    :class="challenge.completed ? 'progress-success' : 'progress-primary'"
-                    :value="getChallengeProgress(challenge)"
-                    :max="getChallengeGoal(challenge)"
-                    :aria-valuenow="getChallengeProgress(challenge)"
-                    :aria-valuemin="GAMIFICATION_PROGRESS_MIN"
-                    :aria-valuemax="getChallengeGoal(challenge)"
-                    :aria-label="t('gamificationPage.a11y.challengeProgress')"
-                  ></progress>
-                  <span class="text-sm font-medium">
-                    {{ getChallengeProgress(challenge) }} / {{ getChallengeGoal(challenge) }}
-                  </span>
-                </div>
-
-                <div v-if="canClaimChallenge(challenge)" class="card-actions justify-end mt-2">
-                  <button
-                    type="button"
-                    class="btn btn-success btn-sm"
-                    :disabled="completingChallenge === challenge.id"
-                    :aria-label="t('gamificationPage.challengeClaimAria', { challenge: challenge.name })"
-                    @click="handleCompleteChallenge(challenge.id)"
-                  >
-                    <span
-                      v-if="completingChallenge === challenge.id"
-                      class="loading loading-spinner loading-xs"
-                      aria-hidden="true"
-                    ></span>
-                    {{ t("gamificationPage.challengeClaimLabel") }}
-                  </button>
-                </div>
-              </div>
-            </article>
-          </div>
-
-          <p v-else class="text-sm text-base-content/60">{{ t("gamificationPage.noChallengesLabel") }}</p>
-        </div>
-      </section>
-
-      <section class="card bg-base-200">
-        <div class="card-body">
-          <h2 class="card-title mb-4">{{ t("gamificationPage.achievementsTitle") }}</h2>
-
-          <div v-if="unlockedAchievements.length" class="mb-6">
-            <h3 class="font-semibold mb-3 text-success">{{ t("gamificationPage.achievementsUnlockedLabel") }}</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <AchievementBadge
-                v-for="achievement in unlockedAchievements"
-                :key="achievement.id"
-                :achievement="achievement"
-                class="card bg-base-100 border-2 border-success shadow-lg"
-              />
-            </div>
-          </div>
-
-          <div v-if="lockedAchievements.length">
-            <h3 class="font-semibold mb-3 text-base-content/60">{{ t("gamificationPage.achievementsLockedLabel") }}</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <AchievementBadge
-                v-for="achievement in lockedAchievements"
-                :key="achievement.id"
-                :achievement="achievement"
-                class="card bg-base-100 opacity-60"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      <GamificationAchievementsCard
+        :unlocked-achievements="unlockedAchievements"
+        :locked-achievements="lockedAchievements"
+        :t="t"
+      />
     </div>
   </PageScaffold>
 </template>

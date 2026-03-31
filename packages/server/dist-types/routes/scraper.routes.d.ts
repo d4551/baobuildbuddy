@@ -39,7 +39,7 @@ export declare const scraperRoutes: Elysia<"/scraper", {
                     body: unknown;
                     params: {
                         portalId: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {

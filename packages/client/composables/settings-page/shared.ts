@@ -1,6 +1,7 @@
 import type { AIRouting, AIRoutingPurpose } from "@bao/shared";
-import { AI_PROVIDER_DEFAULT, type AIProviderType, type AppLanguageCode, APP_LANGUAGE_LABELS } from "@bao/shared";
+import { AI_PROVIDER_DEFAULT, type AIProviderType, type AppLanguageCode } from "@bao/shared";
 import type { useI18n } from "vue-i18n";
+import { resolveLocaleLabel } from "~/constants/i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import { getErrorMessage } from "~/utils/errors";
 import { resolveProviderModelOptions } from "~/utils/ai-control-plane";
@@ -79,9 +80,7 @@ export function assignAiRoutingDraft(target: AIRoutingDraft, source: AIRouting):
 }
 
 export function buildAiRoutingPayload(draft: AIRoutingDraft): AIRouting {
-  const toTarget = (
-    value: AIRoutingDraft[AIRoutingPurpose],
-  ): AIRouting[AIRoutingPurpose] => {
+  const toTarget = (value: AIRoutingDraft[AIRoutingPurpose]): AIRouting[AIRoutingPurpose] => {
     const model = value.model.trim();
     return model ? { provider: value.provider, model } : { provider: value.provider };
   };
@@ -106,8 +105,8 @@ export function parseDelimitedList(raw: string): string[] {
     .filter((value) => value.length > 0);
 }
 
-export function buildLanguageLabel(value: AppLanguageCode): string {
-  return APP_LANGUAGE_LABELS[value] || value;
+export function buildLanguageLabel(t: TranslateFn, value: AppLanguageCode): string {
+  return resolveLocaleLabel(t, value);
 }
 
 function resolveDraftModelOptions(
@@ -141,11 +140,7 @@ export function resolveRoutingModelOptionsMap(
     ),
     resume: resolveDraftModelOptions(draft.resume.provider, settings, localModelName),
     coverLetter: resolveDraftModelOptions(draft.coverLetter.provider, settings, localModelName),
-    emailResponse: resolveDraftModelOptions(
-      draft.emailResponse.provider,
-      settings,
-      localModelName,
-    ),
+    emailResponse: resolveDraftModelOptions(draft.emailResponse.provider, settings, localModelName),
     jobMatch: resolveDraftModelOptions(draft.jobMatch.provider, settings, localModelName),
     scrapeEnrichment: resolveDraftModelOptions(
       draft.scrapeEnrichment.provider,
@@ -182,10 +177,7 @@ export function emailTransportSecurityLabel(
   return t("settings.emailDelivery.securityOptions.starttls");
 }
 
-export function emailTransportAuthModeLabel(
-  t: TranslateFn,
-  authMode: "login" | "plain",
-): string {
+export function emailTransportAuthModeLabel(t: TranslateFn, authMode: "login" | "plain"): string {
   if (authMode === "login") {
     return t("settings.emailDelivery.authOptions.login");
   }

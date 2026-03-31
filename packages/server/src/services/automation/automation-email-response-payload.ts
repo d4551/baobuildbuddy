@@ -39,9 +39,7 @@ const validateEmailResponseTextLengths = (
   }
 
   if (sender && sender.length > MAX_EMAIL_SENDER_LENGTH) {
-    throw new AutomationValidationError(
-      `sender must be <= ${MAX_EMAIL_SENDER_LENGTH} characters`,
-    );
+    throw new AutomationValidationError(`sender must be <= ${MAX_EMAIL_SENDER_LENGTH} characters`);
   }
 };
 
@@ -83,11 +81,7 @@ export const normalizeEmailResponsePayload = (
 
   validateEmailResponseTextLengths(subject, message, sender);
 
-  const recipientEmail = resolveRecipientEmail(
-    sender,
-    explicitRecipient,
-    deliverAfterGeneration,
-  );
+  const recipientEmail = resolveRecipientEmail(sender, explicitRecipient, deliverAfterGeneration);
   const tone = normalizeTone(payload.tone);
 
   return {

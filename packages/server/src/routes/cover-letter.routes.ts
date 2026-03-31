@@ -1,4 +1,5 @@
 import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import {
   coverLetterExportBodySchema,
@@ -28,7 +29,7 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
       set.status = result.statusCode;
       return result.coverLetter;
     },
-    { body: coverLetterMutationBodySchema },
+    { body: StandardSchemaV1(coverLetterMutationBodySchema) },
   )
   .get(
     "/:id",
@@ -36,29 +37,23 @@ export const coverLetterRoutes = new Elysia({ prefix: "/cover-letters", tags: ["
       const coverLetter = await getCoverLetterById(params.id, set);
       return coverLetter ?? { error: API_ERROR_COVER_LETTER_NOT_FOUND };
     },
-    { params: coverLetterIdParamsSchema },
+    { params: StandardSchemaV1(coverLetterIdParamsSchema) },
   )
-  .put(
-    "/:id",
-    async ({ params, body, set }) => updateCoverLetter(params.id, body, set),
-    {
-      params: coverLetterIdParamsSchema,
-      body: coverLetterUpdateBodySchema,
-    },
-  )
-  .delete(
-    "/:id",
-    async ({ params, set }) => deleteCoverLetter(params.id, set),
-    { params: coverLetterIdParamsSchema },
-  )
+  .put("/:id", async ({ params, body, set }) => updateCoverLetter(params.id, body, set), {
+    params: StandardSchemaV1(coverLetterIdParamsSchema),
+    body: StandardSchemaV1(coverLetterUpdateBodySchema),
+  })
+  .delete("/:id", async ({ params, set }) => deleteCoverLetter(params.id, set), {
+    params: StandardSchemaV1(coverLetterIdParamsSchema),
+  })
   .post("/generate", async ({ body, set }) => handleGenerateCoverLetter(body, set), {
-    body: generateCoverLetterBodySchema,
+    body: StandardSchemaV1(generateCoverLetterBodySchema),
   })
   .post(
     "/:id/export",
     async ({ params, body, set }) => exportCoverLetterAttachment(params.id, body.format, set),
     {
-      params: coverLetterIdParamsSchema,
-      body: coverLetterExportBodySchema,
+      params: StandardSchemaV1(coverLetterIdParamsSchema),
+      body: StandardSchemaV1(coverLetterExportBodySchema),
     },
   );

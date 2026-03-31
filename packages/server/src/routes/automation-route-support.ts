@@ -28,9 +28,7 @@ const AUTOMATION_VERIFY_RESUME_ID = "automation-verify-resume";
 const isAutomationRunType = (value: string): value is (typeof AUTOMATION_RUN_TYPES)[number] =>
   AUTOMATION_RUN_TYPES.some((runType) => runType === value);
 
-const isAutomationRunStatus = (
-  value: string,
-): value is (typeof AUTOMATION_RUN_STATUSES)[number] =>
+const isAutomationRunStatus = (value: string): value is (typeof AUTOMATION_RUN_STATUSES)[number] =>
   AUTOMATION_RUN_STATUSES.some((runStatus) => runStatus === value);
 
 const toJsonObject = (value: unknown): AutomationJsonObject | null => {

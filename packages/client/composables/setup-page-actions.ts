@@ -72,24 +72,26 @@ const useProviderTesting = ({
   };
 };
 
-const useOllamaCommandCopy = (
-  ollamaCommand: SetupPageActionsContext["ollamaCommand"],
-  t: SetupPageActionsContext["t"],
-  toast: SetupPageToastApi,
-) => async (): Promise<void> => {
-  if (!import.meta.client) return;
+const useOllamaCommandCopy =
+  (
+    ollamaCommand: SetupPageActionsContext["ollamaCommand"],
+    t: SetupPageActionsContext["t"],
+    toast: SetupPageToastApi,
+  ) =>
+  async (): Promise<void> => {
+    if (!import.meta.client) return;
 
-  const clipboardWriteResult = await settlePromise(
-    navigator.clipboard.writeText(ollamaCommand.value),
-    t("setup.ollamaCommandCopyFailed"),
-  );
-  if (!clipboardWriteResult.ok) {
-    toast.error(getErrorMessage(clipboardWriteResult.error, t("setup.ollamaCommandCopyFailed")));
-    return;
-  }
+    const clipboardWriteResult = await settlePromise(
+      navigator.clipboard.writeText(ollamaCommand.value),
+      t("setup.ollamaCommandCopyFailed"),
+    );
+    if (!clipboardWriteResult.ok) {
+      toast.error(getErrorMessage(clipboardWriteResult.error, t("setup.ollamaCommandCopyFailed")));
+      return;
+    }
 
-  toast.success(t("setup.ollamaCommandCopied"));
-};
+    toast.success(t("setup.ollamaCommandCopied"));
+  };
 
 export function createSetupPageActions(context: SetupPageActionsContext) {
   return {

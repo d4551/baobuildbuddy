@@ -1,4 +1,8 @@
-import { collectDefinedStringValues, type PortfolioMetadata, type PortfolioProject } from "@bao/shared";
+import {
+  collectDefinedStringValues,
+  type PortfolioMetadata,
+  type PortfolioProject,
+} from "@bao/shared";
 import {
   AlignmentType,
   Document,

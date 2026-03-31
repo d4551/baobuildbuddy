@@ -15,10 +15,7 @@ import {
 } from "./automation-run-persistence-updates";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 
-export const resolveRunArtifactDir = (
-  runId: string,
-  invalidRunIdMessage: string,
-): string => {
+export const resolveRunArtifactDir = (runId: string, invalidRunIdMessage: string): string => {
   const safeRunId = sanitizeRunId(runId, invalidRunIdMessage);
   const directory = resolveRunArtifactDirectory(safeRunId, invalidRunIdMessage);
   Bun.spawnSync(["mkdir", "-p", directory]);
@@ -84,7 +81,11 @@ export const assertRunExists = async (
   runId: string,
   createRunNotFoundError: (runId: string) => Error,
 ): Promise<void> => {
-  const runRows = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
+  const runRows = await db
+    .select()
+    .from(automationRuns)
+    .where(eq(automationRuns.id, runId))
+    .limit(1);
   if (runRows.length === 0) {
     throw createRunNotFoundError(runId);
   }

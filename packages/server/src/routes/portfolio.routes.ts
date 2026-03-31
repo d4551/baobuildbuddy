@@ -20,7 +20,9 @@ import {
   SCHEMA_MAX_LENGTH_URL,
   settle,
 } from "@bao/shared";
-import { Elysia, t } from "elysia";
+import { StandardSchemaV1 } from "baobox";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { gamificationService } from "../services/gamification-service";
@@ -37,9 +39,14 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
       return await portfolioService.updatePortfolio({ metadata: body.metadata });
     },
     {
-      body: t.Object({
-        metadata: t.Record(t.String(), t.Unknown()),
-      }),
+      body: StandardSchemaV1(
+        Type.Object(
+          {
+            metadata: Type.Record(Type.String(), Type.Unknown()),
+          },
+          { required: ["metadata"] },
+        ),
+      ),
     },
   )
   .post(
@@ -73,36 +80,41 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
       return newProject;
     },
     {
-      body: t.Object({
-        title: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-        description: t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION }),
-        technologies: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
+      body: StandardSchemaV1(
+        Type.Object(
+          {
+            title: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+            description: Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION }),
+            technologies: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+                maxItems: SCHEMA_MAX_ITEMS_LARGE,
+              }),
+            ),
+            image: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+            liveUrl: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+            githubUrl: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+            tags: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+                maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+              }),
+            ),
+            featured: Type.Optional(Type.Boolean()),
+            role: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+            platforms: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+                maxItems: SCHEMA_MAX_ITEMS_SMALL,
+              }),
+            ),
+            engines: Type.Optional(
+              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+                maxItems: SCHEMA_MAX_ITEMS_SMALL,
+              }),
+            ),
+            sortOrder: Type.Optional(Type.Number()),
+          },
+          { required: ["title", "description"] },
         ),
-        image: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        liveUrl: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        githubUrl: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        tags: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        featured: t.Optional(t.Boolean()),
-        role: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        platforms: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
-            maxItems: SCHEMA_MAX_ITEMS_SMALL,
-          }),
-        ),
-        engines: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
-            maxItems: SCHEMA_MAX_ITEMS_SMALL,
-          }),
-        ),
-        sortOrder: t.Optional(t.Number()),
-      }),
+      ),
     },
   )
   .post(
@@ -117,9 +129,14 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
       return await portfolioService.getPortfolioPayload();
     },
     {
-      body: t.Object({
-        orderedIds: t.Array(t.String({ minLength: 1 })),
-      }),
+      body: StandardSchemaV1(
+        Type.Object(
+          {
+            orderedIds: Type.Array(Type.String({ minLength: 1 })),
+          },
+          { required: ["orderedIds"] },
+        ),
+      ),
     },
   )
   .put(
@@ -148,39 +165,46 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
       return updated;
     },
     {
-      params: t.Object({
-        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-      }),
-      body: t.Object({
-        title: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-        technologies: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
+      params: StandardSchemaV1(
+        Type.Object(
+          {
+            id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+          },
+          { required: ["id"] },
         ),
-        image: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        liveUrl: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        githubUrl: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        tags: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        featured: t.Optional(t.Boolean()),
-        role: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        platforms: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
-            maxItems: SCHEMA_MAX_ITEMS_SMALL,
-          }),
-        ),
-        engines: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
-            maxItems: SCHEMA_MAX_ITEMS_SMALL,
-          }),
-        ),
-        sortOrder: t.Optional(t.Number()),
-      }),
+      ),
+      body: StandardSchemaV1(
+        Type.Object({
+          title: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+          technologies: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+              maxItems: SCHEMA_MAX_ITEMS_LARGE,
+            }),
+          ),
+          image: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+          liveUrl: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+          githubUrl: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+          tags: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+              maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
+            }),
+          ),
+          featured: Type.Optional(Type.Boolean()),
+          role: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          platforms: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+              maxItems: SCHEMA_MAX_ITEMS_SMALL,
+            }),
+          ),
+          engines: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }), {
+              maxItems: SCHEMA_MAX_ITEMS_SMALL,
+            }),
+          ),
+          sortOrder: Type.Optional(Type.Number()),
+        }),
+      ),
     },
   )
   .delete(
@@ -195,9 +219,14 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
       return { success: true, id: params.id };
     },
     {
-      params: t.Object({
-        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-      }),
+      params: StandardSchemaV1(
+        Type.Object(
+          {
+            id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+          },
+          { required: ["id"] },
+        ),
+      ),
     },
   )
   .post(
@@ -244,8 +273,10 @@ export const portfolioRoutes = new Elysia({ prefix: "/portfolio", tags: ["Portfo
       );
     },
     {
-      body: t.Object({
-        format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
-      }),
+      body: StandardSchemaV1(
+        Type.Object({
+          format: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
+        }),
+      ),
     },
   );

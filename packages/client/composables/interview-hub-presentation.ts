@@ -8,17 +8,27 @@ type InterviewHubPresentationInput = {
   locale: Ref<string>;
 };
 
+const EXPERIENCE_LABEL_KEYS = {
+  entry: "interviewHub.experience.entry",
+  lead: "interviewHub.experience.lead",
+  mid: "interviewHub.experience.mid",
+  senior: "interviewHub.experience.senior",
+} as const;
+
+const QUESTION_COUNT_LABEL_KEYS = {
+  3: "interviewHub.questionCount.quick",
+  5: "interviewHub.questionCount.standard",
+  8: "interviewHub.questionCount.deep",
+} as const;
+
 export function createInterviewHubPresentation(
   input: InterviewHubPresentationInput,
   t: ComposerTranslation,
 ) {
   return {
     experienceLabel(level: string): string {
-      if (level === "entry") return t("interviewHub.experience.entry");
-      if (level === "mid") return t("interviewHub.experience.mid");
-      if (level === "senior") return t("interviewHub.experience.senior");
-      if (level === "lead") return t("interviewHub.experience.lead");
-      return level;
+      const key = EXPERIENCE_LABEL_KEYS[level as keyof typeof EXPERIENCE_LABEL_KEYS];
+      return key ? t(key) : level;
     },
     formatSessionDate(value: string | undefined): string {
       if (!(typeof value === "string" && value.length > 0)) {
@@ -42,10 +52,8 @@ export function createInterviewHubPresentation(
       return ready ? "badge-success" : "badge-ghost";
     },
     questionCountLabel(count: number): string {
-      if (count === 3) return t("interviewHub.questionCount.quick");
-      if (count === 5) return t("interviewHub.questionCount.standard");
-      if (count === 8) return t("interviewHub.questionCount.deep");
-      return String(count);
+      const key = QUESTION_COUNT_LABEL_KEYS[count as keyof typeof QUESTION_COUNT_LABEL_KEYS];
+      return key ? t(key) : String(count);
     },
     recentSessionPageAria(page: number): string {
       return t("interviewHub.recent.pagination.pageAria", { page });

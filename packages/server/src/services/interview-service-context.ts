@@ -21,11 +21,7 @@ import type {
   JsonRecord,
   StudioContext,
 } from "./interview-service-contracts";
-import {
-  isRecord,
-  parseString,
-  parseStringArray,
-} from "./interview-service-value-parsers";
+import { isRecord, parseString, parseStringArray } from "./interview-service-value-parsers";
 
 type StudioRow = typeof studios.$inferSelect;
 

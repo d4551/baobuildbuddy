@@ -34,13 +34,15 @@ export const buildWeeklyActivity = (actionHistory: ActionHistoryEntry[]): Weekly
     days.push({ date: dateStr, actions: dayActions.length, xpEarned });
 
     for (const action of dayActions) {
-      categoryCounts[action.action || "other"] = (categoryCounts[action.action || "other"] || 0) + 1;
+      categoryCounts[action.action || "other"] =
+        (categoryCounts[action.action || "other"] || 0) + 1;
     }
   }
 
   return {
     days,
-    topCategory: Object.entries(categoryCounts).sort(([, left], [, right]) => right - left)[0]?.[0] || "none",
+    topCategory:
+      Object.entries(categoryCounts).sort(([, left], [, right]) => right - left)[0]?.[0] || "none",
     totalXP: days.reduce((sum, day) => sum + day.xpEarned, 0),
   };
 };

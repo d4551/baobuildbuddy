@@ -39,21 +39,25 @@ const toContentRecord = (
 const normalizeTemplate = (value: string | null | undefined): CoverLetterTemplate =>
   isCoverLetterTemplate(value) ? value : COVER_LETTER_DEFAULT_TEMPLATE;
 
+const buildCoverLetterUpdateData = (data: Partial<CoverLetterData>, now: string) => ({
+  updatedAt: now,
+  ...(data.company !== undefined ? { company: data.company } : {}),
+  ...(data.position !== undefined ? { position: data.position } : {}),
+  ...(data.jobInfo !== undefined ? { jobInfo: data.jobInfo } : {}),
+  ...(data.content !== undefined ? { content: toContentRecord(data.content) } : {}),
+  ...(data.template !== undefined ? { template: normalizeTemplate(data.template) } : {}),
+});
+
 export class CoverLetterService {
   private toCoverLetterData(row: typeof coverLetters.$inferSelect): CoverLetterData {
-    const result: CoverLetterData = {
+    return {
       id: row.id,
       company: row.company,
       position: row.position,
       content: toCoverLetterContent(row.content),
       template: normalizeTemplate(row.template),
+      ...(row.jobInfo ? { jobInfo: row.jobInfo } : {}),
     };
-
-    if (row.jobInfo) {
-      result.jobInfo = row.jobInfo;
-    }
-
-    return result;
   }
 
   /**
@@ -115,18 +119,10 @@ export class CoverLetterService {
       return null;
     }
 
-    const now = new Date().toISOString();
-    const updateData: Partial<typeof coverLetters.$inferInsert> = {
-      updatedAt: now,
-    };
-
-    if (data.company !== undefined) updateData.company = data.company;
-    if (data.position !== undefined) updateData.position = data.position;
-    if (data.jobInfo !== undefined) updateData.jobInfo = data.jobInfo;
-    if (data.content !== undefined) updateData.content = toContentRecord(data.content);
-    if (data.template !== undefined) updateData.template = normalizeTemplate(data.template);
-
-    await db.update(coverLetters).set(updateData).where(eq(coverLetters.id, id));
+    await db
+      .update(coverLetters)
+      .set(buildCoverLetterUpdateData(data, new Date().toISOString()))
+      .where(eq(coverLetters.id, id));
 
     return await this.getCoverLetter(id);
   }

@@ -19,7 +19,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         get: {
             body: unknown;
             params: {};
-            query: {
+            query: {} & {
                 genre?: string | undefined;
                 platform?: string | undefined;
                 studioType?: string | undefined;
@@ -83,7 +83,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -135,7 +135,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
             post: {
                 body: {
                     jobId: string;
-                };
+                } & {};
                 params: {};
                 query: unknown;
                 headers: unknown;
@@ -178,7 +178,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                     body: unknown;
                     params: {
                         jobId: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -250,8 +250,9 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         apply: {
             post: {
                 body: {
-                    notes?: string | undefined;
                     jobId: string;
+                } & {
+                    notes?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -304,13 +305,13 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         apply: {
             ":id": {
                 put: {
-                    body: {
+                    body: {} & {
                         status?: string | undefined;
                         notes?: string | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {

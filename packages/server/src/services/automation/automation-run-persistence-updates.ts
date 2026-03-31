@@ -62,7 +62,9 @@ export const createProgressUpdate = (event: ProgressRunEvent) => {
         AUTOMATION_FINISHED_PROGRESS,
         Math.max(
           0,
-          Math.round((updates.currentStep / (updates.totalSteps || 1)) * AUTOMATION_FINISHED_PROGRESS),
+          Math.round(
+            (updates.currentStep / (updates.totalSteps || 1)) * AUTOMATION_FINISHED_PROGRESS,
+          ),
         ),
       );
     }

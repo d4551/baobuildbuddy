@@ -11,10 +11,7 @@ import {
   type SkillEvidence,
   type SkillMapping,
 } from "@bao/shared";
-import {
-  asEnum,
-  toResumeCollection,
-} from "~/composables/api-normalizer-shared";
+import { asEnum, toResumeCollection } from "~/composables/api-normalizer-shared";
 
 const SKILL_EVIDENCE_TYPES: readonly SkillEvidence["type"][] = SKILL_EVIDENCE_TYPE_IDS;
 const SKILL_EVIDENCE_STATUSES: readonly SkillEvidence["verificationStatus"][] =

@@ -10,7 +10,11 @@ import {
   AutomationRunNotFoundError,
   AutomationValidationError,
 } from "./automation-errors";
-import { assertRunExists, markRunFailed, resolveRunArtifactDir } from "./automation-run-persistence";
+import {
+  assertRunExists,
+  markRunFailed,
+  resolveRunArtifactDir,
+} from "./automation-run-persistence";
 import type { JobApplyExecutionPayload, JobApplyPayload } from "./automation-run-inputs";
 import { loadAutomationSettings, resolveMaxConcurrentRuns } from "./automation-settings-support";
 import {
@@ -107,7 +111,11 @@ export const normalizeJobApplyPayload = (payload: JobApplyPayload): JobApplyExec
 export const assertJobApplyDependencies = async (
   payload: JobApplyExecutionPayload,
 ): Promise<void> => {
-  const resumeRows = await db.select().from(resumes).where(eq(resumes.id, payload.resumeId)).limit(1);
+  const resumeRows = await db
+    .select()
+    .from(resumes)
+    .where(eq(resumes.id, payload.resumeId))
+    .limit(1);
   if (resumeRows.length === 0) {
     throw new AutomationDependencyMissingError("resume", payload.resumeId);
   }
@@ -135,7 +143,10 @@ export const prepareJobApplyRun = async (params: {
 }): Promise<JobApplyRunPreparation> => {
   params.clearScheduledRunTimer(params.runId);
   const normalized = normalizeJobApplyPayload(params.payload);
-  await assertRunExists(params.runId, (missingRunId) => new AutomationRunNotFoundError(missingRunId));
+  await assertRunExists(
+    params.runId,
+    (missingRunId) => new AutomationRunNotFoundError(missingRunId),
+  );
 
   const automationSettings = await loadAutomationSettings();
   await assertConcurrencyLimit(params.runId, resolveMaxConcurrentRuns(automationSettings));

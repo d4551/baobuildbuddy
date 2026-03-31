@@ -1,20 +1,15 @@
 import { jobApplyScriptEnvelopeSchema } from "@bao/shared";
 import { parseScriptInput } from "../runtime/io";
 import { ProtocolEmitter } from "../runtime/protocol";
+import { fillCustomFieldsStep, fillPrimaryFields } from "./runtime-field-fill";
 import {
   createExecutionState,
-  detectAdapter,
+  detectStrategy,
   finalizeSuccessfulRun,
   initializeApplicationPage,
 } from "./runtime-page-setup";
-import {
-  fillCustomFieldsStep,
-  fillPrimaryFields,
-} from "./runtime-field-fill";
-import {
-  submitApplicationStep,
-  verifySubmissionStep,
-} from "./runtime-submission";
+import { submitApplicationStep, verifySubmissionStep } from "./runtime-submission";
+import type { JobApplyStrategy } from "./adapters";
 
 /**
  * Executes the Bun-based job-apply runtime using shared contracts.
@@ -31,6 +26,15 @@ export const runJobApplyAutomation = async (): Promise<number> => {
     return 1;
   }
 
+  const strategyPreview: JobApplyStrategy["id"] = "generic";
+  emitter.emitProgress({
+    action: "preflight_strategy",
+    status: "running",
+    step: 0,
+    totalSteps: 1,
+    message: `Detected ${strategyPreview}`,
+  });
+
   const state = await createExecutionState(inputResult.value, emitter);
   if (!state) {
     return 1;
@@ -41,10 +45,10 @@ export const runJobApplyAutomation = async (): Promise<number> => {
     return initializeResult;
   }
 
-  const adapter = await detectAdapter(state);
-  await fillPrimaryFields(state, adapter);
+  const strategy = await detectStrategy(state);
+  await fillPrimaryFields(state, strategy);
   await fillCustomFieldsStep(state);
-  await submitApplicationStep(state, adapter);
+  await submitApplicationStep(state, strategy);
   await verifySubmissionStep(state);
   return finalizeSuccessfulRun(state);
 };

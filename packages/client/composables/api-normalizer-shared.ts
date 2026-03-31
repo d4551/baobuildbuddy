@@ -36,7 +36,7 @@ export const isOneOf = <T extends string>(value: unknown, choices: readonly T[])
   typeof value === "string" && choices.some((choice) => choice === value);
 
 export const asEnum = <T extends string>(value: unknown, choices: readonly T[]): T | undefined =>
-  (isOneOf(value, choices) ? value : undefined);
+  isOneOf(value, choices) ? value : undefined;
 
 export const asEnumArray = <T extends string>(value: unknown, choices: readonly T[]): T[] =>
   Array.isArray(value) ? value.filter((entry): entry is T => isOneOf(entry, choices)) : [];
@@ -47,12 +47,14 @@ export const normalizeResumeTemplate = (value: unknown): ResumeTemplate =>
 export const normalizeJobExperienceLevel = (value: unknown): JobExperienceLevel | undefined =>
   asEnum(value, JOB_EXPERIENCE_LEVELS);
 
-export const normalizeJobType = (value: unknown): JobType => asEnum(value, JOB_TYPES) ?? "full-time";
+export const normalizeJobType = (value: unknown): JobType =>
+  asEnum(value, JOB_TYPES) ?? "full-time";
 
 export const normalizeAIProvider = (value: unknown): AIProviderType =>
   asEnum(value, AI_PROVIDERS) ?? AI_PROVIDER_DEFAULT;
 
-export const isProviderId = (value: string): value is AIProviderType => isOneOf(value, AI_PROVIDERS);
+export const isProviderId = (value: string): value is AIProviderType =>
+  isOneOf(value, AI_PROVIDERS);
 
 export const normalizeProviderDiagnosticCode = (value: unknown) =>
   asEnum(value, AI_PROVIDER_DIAGNOSTIC_CODES) ?? "error";
@@ -81,7 +83,8 @@ export const normalizeStudioCulture = (
 export const toResumeCollection = <T>(
   value: unknown,
   normalizer: (entry: unknown) => T | null,
-): T[] => (Array.isArray(value) ? value.map(normalizer).filter((entry): entry is T => entry !== null) : []);
+): T[] =>
+  Array.isArray(value) ? value.map(normalizer).filter((entry): entry is T => entry !== null) : [];
 
 export type ResumeItemNormalizers = {
   ResumeExperienceItem: ResumeExperienceItem;

@@ -37,7 +37,12 @@ function resolveCreatedResumeId(
 function createResumeCreateAction(
   input: Pick<
     ResumePageActionsInput,
-    "createResume" | "creating" | "newResumeName" | "newResumeTemplate" | "selectedResumeId" | "showCreateModal"
+    | "createResume"
+    | "creating"
+    | "newResumeName"
+    | "newResumeTemplate"
+    | "selectedResumeId"
+    | "showCreateModal"
   >,
   feedback: {
     $toast: Pick<NuxtApp["$toast"], "error" | "success">;

@@ -7,7 +7,7 @@ import {
   SCHEMA_MAX_LENGTH_MESSAGE,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared";
-import { t } from "elysia";
+import Type from "baobox";
 import { aiPreferenceSchema, chatContextSchema } from "./ai-route-chat-context";
 
 export type AnalyzeResumeBody = {
@@ -60,40 +60,52 @@ export type ResumeAnalysisResult = {
   keywords: string[];
 };
 
-export const chatRouteBodySchema = t.Object({
-  message: t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
-  sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  context: t.Optional(chatContextSchema),
-});
+export const chatRouteBodySchema = Type.Object(
+  {
+    message: Type.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
+    sessionId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    context: Type.Optional(chatContextSchema),
+  },
+  { required: ["message"] },
+);
 
-export const analyzeResumeRouteBodySchema = t.Object({
-  resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-  jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-});
+export const analyzeResumeRouteBodySchema = Type.Object(
+  {
+    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  },
+  { required: ["resumeId"] },
+);
 
-export const generateCoverLetterRouteBodySchema = t.Object({
-  resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-  jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-});
+export const generateCoverLetterRouteBodySchema = Type.Object(
+  {
+    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    company: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    position: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  },
+  { required: ["resumeId", "company", "position"] },
+);
 
-export const matchJobsRouteBodySchema = t.Object({
-  resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  skills: t.Optional(
-    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+export const matchJobsRouteBodySchema = Type.Object({
+  resumeId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  skills: Type.Optional(
+    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
       maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
     }),
   ),
-  preferences: t.Optional(aiPreferenceSchema),
+  preferences: Type.Optional(aiPreferenceSchema),
 });
 
-export const automationActionRouteBodySchema = t.Object({
-  action: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
-  jobUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
-  resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-  coverLetterId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-});
+export const automationActionRouteBodySchema = Type.Object(
+  {
+    action: Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
+    jobUrl: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    coverLetterId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  },
+  { required: ["action", "jobUrl", "resumeId"] },
+);
 
 export const usageTailLimit = AI_CHAT_CONTEXT_TAIL_LIMIT;

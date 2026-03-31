@@ -34,16 +34,45 @@ type InterviewHubActionsInput = {
     enableVoiceMode: boolean;
     voiceSettings: unknown;
   };
-  startSession: (studioId: string, config: Record<string, unknown>) => Promise<{ id?: string } | null>;
+  startSession: (
+    studioId: string,
+    config: Record<string, unknown>,
+  ) => Promise<{ id?: string } | null>;
   starting: Ref<boolean>;
   studios: Ref<readonly { readonly id: string; readonly name: string }[]>;
 };
 
+type InterviewHubJobSelectionInput = Pick<
+  InterviewHubActionsInput,
+  "getJob" | "selectedJobFallback" | "selectedJobId" | "sessionConfig"
+>;
+
+type InterviewHubSessionStartInput = Pick<
+  InterviewHubActionsInput,
+  | "closeConfig"
+  | "selectedCoverLetterId"
+  | "selectedJob"
+  | "selectedMode"
+  | "selectedPortfolioId"
+  | "selectedResumeId"
+  | "sessionConfig"
+  | "startSession"
+  | "starting"
+  | "studios"
+>;
+
+type InterviewHubSessionRequestInput = Pick<
+  InterviewHubActionsInput,
+  | "selectedCoverLetterId"
+  | "selectedJob"
+  | "selectedMode"
+  | "selectedPortfolioId"
+  | "selectedResumeId"
+  | "sessionConfig"
+>;
+
 function createJobSelectionAction(
-  input: Pick<
-    InterviewHubActionsInput,
-    "getJob" | "selectedJobFallback" | "selectedJobId" | "sessionConfig"
-  >,
+  input: InterviewHubJobSelectionInput,
   nuxtApp: Pick<NuxtApp, "$toast">,
   t: ComposerTranslation,
 ) {
@@ -58,7 +87,10 @@ function createJobSelectionAction(
       return;
     }
 
-    const fetchedJobResult = await settlePromise(input.getJob(jobId), t("interviewHub.errors.jobLoadFailed"));
+    const fetchedJobResult = await settlePromise(
+      input.getJob(jobId),
+      t("interviewHub.errors.jobLoadFailed"),
+    );
     if (!fetchedJobResult.ok) {
       input.selectedJobFallback.value = null;
       $toast.error(getErrorMessage(fetchedJobResult.error, t("interviewHub.errors.jobLoadFailed")));
@@ -72,19 +104,7 @@ function createJobSelectionAction(
 }
 
 function createSessionStartAction(
-  input: Pick<
-    InterviewHubActionsInput,
-    | "closeConfig"
-    | "selectedCoverLetterId"
-    | "selectedJob"
-    | "selectedMode"
-    | "selectedPortfolioId"
-    | "selectedResumeId"
-    | "sessionConfig"
-    | "startSession"
-    | "starting"
-    | "studios"
-  >,
+  input: InterviewHubSessionStartInput,
   router: Router,
   nuxtApp: Pick<NuxtApp, "$toast">,
   t: ComposerTranslation,
@@ -149,7 +169,9 @@ export function useInterviewHubActions(
   const selectJobById = createJobSelectionAction(input, nuxtApp, t);
   const handleStartInterview = createSessionStartAction(input, router, nuxtApp, t);
 
-  async function retryPathwaysFromWarning(refreshInterviewHub: () => Promise<unknown>): Promise<void> {
+  async function retryPathwaysFromWarning(
+    refreshInterviewHub: () => Promise<unknown>,
+  ): Promise<void> {
     await refreshInterviewHub();
   }
 
@@ -226,15 +248,7 @@ function createSessionRequest(
     selectedPortfolioId,
     selectedResumeId,
     sessionConfig,
-  }: Pick<
-    InterviewHubActionsInput,
-    | "selectedCoverLetterId"
-    | "selectedJob"
-    | "selectedMode"
-    | "selectedPortfolioId"
-    | "selectedResumeId"
-    | "sessionConfig"
-  >,
+  }: InterviewHubSessionRequestInput,
   toTargetJob: (job: Job) => InterviewTargetJob,
 ): Record<string, unknown> {
   return {

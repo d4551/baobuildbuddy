@@ -21,6 +21,11 @@ const {
   capabilityStatusClass,
   capabilityStatusLabel,
 } = await useAutomationHubPage();
+
+useServerSeoMeta({
+  title: t("automation.hub.pageTitle"),
+  description: t("automation.hub.pageDescription"),
+});
 </script>
 
 <template>
@@ -49,6 +54,14 @@ const {
       :retry-label="t('automation.hub.retryButtonLabel')"
       :retry-aria-label="t('automation.hub.retryAria')"
       @retry="retryLoad"
+    />
+
+    <EmptyState
+      v-else-if="uiState === 'empty'"
+      title-key="automation.hub.emptyStateTitle"
+      description-key="automation.hub.emptyStateDescription"
+      cta-label-key="automation.hub.emptyStateCta"
+      :cta-to="APP_ROUTES.automationScraper"
     />
 
     <template v-else>

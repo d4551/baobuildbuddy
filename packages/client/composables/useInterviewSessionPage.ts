@@ -7,7 +7,6 @@ import {
   type InterviewSessionFlowState as SessionFlowState,
 } from "~/composables/interview-session-actions";
 import { createInterviewSessionTimer } from "~/composables/interview-session-timer";
-
 function createInterviewSessionState() {
   const route = useRoute();
   const router = useRouter();
@@ -24,7 +23,6 @@ function createInterviewSessionState() {
   const response = ref("");
   const submitting = ref(false);
   const completing = ref(false);
-
   return {
     completeSession,
     completing,
@@ -210,7 +208,6 @@ function createInterviewSessionIdentity(input: ReturnType<typeof createInterview
   const totalQuestions = computed(() => activeSession.value?.questions.length ?? 0);
   const currentQuestionIndex = computed(() => activeSession.value?.currentQuestionIndex ?? 0);
   const canUseVoice = computed(() => enableVoiceMode.value && input.stt.isSupported.value);
-
   return {
     activeSession,
     canUseVoice,
@@ -392,11 +389,5 @@ export function useInterviewSessionPage() {
     state.tts.cancel();
     state.stt.stopListening();
   });
-
-  return buildInterviewSessionViewModel({
-    actions,
-    derived,
-    state,
-    timer,
-  });
+  return buildInterviewSessionViewModel({ actions, derived, state, timer });
 }

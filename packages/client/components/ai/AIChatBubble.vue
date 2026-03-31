@@ -2,7 +2,12 @@
 import type { ChatMessage } from "@bao/shared";
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import { CHAT_BUBBLE_SIZE_CLASS, CHAT_MESSAGE_WIDTH_CLASS } from "~/constants/chat";
+import {
+  CHAT_AVATAR_SIZE_CLASS_BY_DENSITY,
+  CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY,
+  CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY,
+  type ChatDensity,
+} from "~/constants/chat";
 import { formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(
@@ -15,6 +20,7 @@ const props = withDefaults(
     isLatestAssistantMessage?: boolean;
     contextChips?: string[];
     contextChipsAria?: string;
+    density?: ChatDensity;
   }>(),
   {
     locale: DEFAULT_APP_LANGUAGE,
@@ -22,6 +28,7 @@ const props = withDefaults(
     isLatestAssistantMessage: false,
     contextChips: () => [],
     contextChipsAria: "",
+    density: "comfortable",
   },
 );
 
@@ -43,8 +50,13 @@ const avatarLabel = computed(() =>
     : props.userLabel,
 );
 const chatBubbleClass = computed(() =>
-  isAssistant.value ? "chat-bubble-secondary" : "chat-bubble-primary",
+  isAssistant.value
+    ? "border border-base-300 bg-base-200 text-base-content shadow-sm"
+    : "chat-bubble-primary shadow-sm",
 );
+const messageWidthClass = computed(() => CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY[props.density]);
+const bubbleSizeClass = computed(() => CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY[props.density]);
+const avatarSizeClass = computed(() => CHAT_AVATAR_SIZE_CLASS_BY_DENSITY[props.density]);
 const formattedTime = computed(() => formatChatTimestamp(props.message.timestamp, props.locale));
 const messageTitle = computed(() => (isAssistant.value ? props.assistantLabel : props.userLabel));
 const userAvatarInitial = computed(() => {
@@ -90,7 +102,10 @@ const ariaLabel = computed(() => {
       :class="avatarClass"
       :aria-label="avatarLabel"
     >
-      <div class="w-10 rounded-full bg-secondary text-secondary-content flex items-center justify-center">
+      <div
+        class="flex items-center justify-center rounded-full border border-base-300 bg-base-200 text-base-content"
+        :class="avatarSizeClass"
+      >
         <IconLightbulb class="h-6 w-6" />
       </div>
     </div>
@@ -99,11 +114,14 @@ const ariaLabel = computed(() => {
       class="chat-image avatar placeholder"
       :aria-label="userLabel"
     >
-      <div class="flex w-10 items-center justify-center rounded-full bg-primary text-primary-content">
+      <div
+        class="flex items-center justify-center rounded-full bg-primary text-primary-content"
+        :class="avatarSizeClass"
+      >
         <span class="text-sm font-semibold">{{ userAvatarInitial }}</span>
       </div>
     </div>
-    <div class="chat-header mb-1" :class="CHAT_MESSAGE_WIDTH_CLASS">
+    <div class="chat-header mb-1" :class="messageWidthClass">
       {{ messageTitle }}
       <time
         v-if="formattedTime"
@@ -115,7 +133,7 @@ const ariaLabel = computed(() => {
     </div>
     <div
       class="chat-bubble whitespace-pre-wrap break-words"
-      :class="[chatBubbleClass, CHAT_BUBBLE_SIZE_CLASS, CHAT_MESSAGE_WIDTH_CLASS]"
+      :class="[chatBubbleClass, bubbleSizeClass, messageWidthClass]"
     >
       <ul
         v-if="props.contextChips.length > 0"

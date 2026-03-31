@@ -29,24 +29,17 @@ export declare const aiRoutes: Elysia<"/ai", {
         chat: {
             post: {
                 body: {
+                    message: string;
+                } & {
                     sessionId?: string | undefined;
-                    context?: {
-                        domain?: string | undefined;
-                        entity?: {
-                            label?: string | undefined;
-                            id: string;
-                            type: string;
-                        } | undefined;
+                    context?: ({
                         source: string;
                         route: {
-                            name?: string | undefined;
                             path: string;
-                            params: {
-                                [x: string]: string;
-                            };
-                            query: {
-                                [x: string]: string;
-                            };
+                            params: Record<string, string>;
+                            query: Record<string, string>;
+                        } & {
+                            name?: string | undefined;
                         };
                         state: {
                             hasResumes: boolean;
@@ -59,9 +52,16 @@ export declare const aiRoutes: Elysia<"/ai", {
                             interviewSessionCount: number;
                             hasPortfolioProjects: boolean;
                             portfolioProjectCount: number;
-                        };
-                    } | undefined;
-                    message: string;
+                        } & {};
+                    } & {
+                        domain?: string | undefined;
+                        entity?: ({
+                            id: string;
+                            type: string;
+                        } & {
+                            label?: string | undefined;
+                        }) | undefined;
+                    }) | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -96,8 +96,9 @@ export declare const aiRoutes: Elysia<"/ai", {
         "analyze-resume": {
             post: {
                 body: {
-                    jobId?: string | undefined;
                     resumeId: string;
+                } & {
+                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -138,10 +139,11 @@ export declare const aiRoutes: Elysia<"/ai", {
         "generate-cover-letter": {
             post: {
                 body: {
-                    jobId?: string | undefined;
                     resumeId: string;
                     company: string;
                     position: string;
+                } & {
+                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -177,10 +179,10 @@ export declare const aiRoutes: Elysia<"/ai", {
     ai: {
         "match-jobs": {
             post: {
-                body: {
+                body: {} & {
                     skills?: string[] | undefined;
                     resumeId?: string | undefined;
-                    preferences?: {} | undefined;
+                    preferences?: Record<string, string | number | boolean> | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -256,11 +258,12 @@ export declare const aiRoutes: Elysia<"/ai", {
         "automation-action": {
             post: {
                 body: {
-                    coverLetterId?: string | undefined;
-                    jobId?: string | undefined;
                     resumeId: string;
                     jobUrl: string;
                     action: string;
+                } & {
+                    coverLetterId?: string | undefined;
+                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;

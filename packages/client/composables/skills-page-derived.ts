@@ -35,7 +35,8 @@ function createFilteredMappings({
     const normalizedSearch = searchFilter.value.trim().toLowerCase();
     return mappings.value.filter((mapping) => {
       const categoryMatches =
-        categoryFilter.value === SKILLS_FILTER_ALL_VALUE || mapping.category === categoryFilter.value;
+        categoryFilter.value === SKILLS_FILTER_ALL_VALUE ||
+        mapping.category === categoryFilter.value;
       if (!categoryMatches) {
         return false;
       }
@@ -94,7 +95,8 @@ function createGamificationSummary({
     gamificationXP: computed(() => xp.value),
     hasMappings: computed(() => mappings.value.length > 0),
     hasActiveFilters: computed(
-      () => categoryFilter.value !== SKILLS_FILTER_ALL_VALUE || searchFilter.value.trim().length > 0,
+      () =>
+        categoryFilter.value !== SKILLS_FILTER_ALL_VALUE || searchFilter.value.trim().length > 0,
     ),
   };
 }

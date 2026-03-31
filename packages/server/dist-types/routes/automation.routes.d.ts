@@ -37,15 +37,15 @@ export declare const automationRoutes: Elysia<"/automation", {
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            resumeId: string;
+                        200: {} & {
+                            resumeId?: string | undefined;
                         };
-                        404: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        404: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
                         422: {
                             type: "validation";
@@ -66,81 +66,78 @@ export declare const automationRoutes: Elysia<"/automation", {
         "job-apply": {
             post: {
                 body: {
-                    customAnswers?: {} | undefined;
-                    coverLetterId?: string | undefined;
-                    jobId?: string | undefined;
                     resumeId: string;
                     jobUrl: string;
+                } & {
+                    customAnswers?: Record<string, string> | undefined;
+                    coverLetterId?: string | undefined;
+                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    500: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    500: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    200: {
-                        error: string | {
-                            details?: {} | undefined;
-                            code: string;
-                            source: string;
-                            message: string;
-                        } | null;
-                        id: string;
-                        aborted: boolean;
-                        type: "scrape" | "job_apply" | "email";
-                        output: {
-                            [x: string]: unknown;
-                        } | null;
-                        input: {
-                            [x: string]: unknown;
-                        } | null;
-                        progress: number | null;
-                        status: "error" | "success" | "pending" | "running";
-                        updatedAt: string;
-                        createdAt: string;
-                        screenshots: string[] | null;
-                        totalSteps: number | null;
-                        jobId: string | null;
-                        userId: string | null;
-                        currentStep: number | null;
-                        startedAt: string | null;
-                        completedAt: string | null;
-                        exitCode: number | null;
-                        timedOut: boolean;
-                        executionMs: number | null;
+                    200: {} & {
+                        error?: string | ({} & {
+                            code?: string | undefined;
+                            source?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | null | undefined;
+                        id?: string | undefined;
+                        aborted?: boolean | undefined;
+                        type?: "scrape" | "job_apply" | "email" | undefined;
+                        output?: Record<string, unknown> | null | undefined;
+                        input?: Record<string, unknown> | null | undefined;
+                        progress?: number | null | undefined;
+                        status?: "error" | "success" | "pending" | "running" | undefined;
+                        updatedAt?: string | undefined;
+                        createdAt?: string | undefined;
+                        screenshots?: string[] | null | undefined;
+                        totalSteps?: number | null | undefined;
+                        jobId?: string | null | undefined;
+                        userId?: string | null | undefined;
+                        currentStep?: number | null | undefined;
+                        startedAt?: string | null | undefined;
+                        completedAt?: string | null | undefined;
+                        exitCode?: number | null | undefined;
+                        timedOut?: boolean | undefined;
+                        executionMs?: number | null | undefined;
                     };
-                    400: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    400: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    404: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    404: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    409: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    409: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    422: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    422: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
                 };
             };
@@ -152,82 +149,79 @@ export declare const automationRoutes: Elysia<"/automation", {
             schedule: {
                 post: {
                     body: {
-                        customAnswers?: {} | undefined;
-                        coverLetterId?: string | undefined;
-                        jobId?: string | undefined;
                         resumeId: string;
                         jobUrl: string;
                         runAt: string;
+                    } & {
+                        customAnswers?: Record<string, string> | undefined;
+                        coverLetterId?: string | undefined;
+                        jobId?: string | undefined;
                     };
                     params: {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        500: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        500: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        200: {
-                            error: string | {
-                                details?: {} | undefined;
-                                code: string;
-                                source: string;
-                                message: string;
-                            } | null;
-                            id: string;
-                            aborted: boolean;
-                            type: "scrape" | "job_apply" | "email";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
-                            progress: number | null;
-                            status: "error" | "success" | "pending" | "running";
-                            updatedAt: string;
-                            createdAt: string;
-                            screenshots: string[] | null;
-                            totalSteps: number | null;
-                            jobId: string | null;
-                            userId: string | null;
-                            currentStep: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            executionMs: number | null;
+                        200: {} & {
+                            error?: string | ({} & {
+                                code?: string | undefined;
+                                source?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | null | undefined;
+                            id?: string | undefined;
+                            aborted?: boolean | undefined;
+                            type?: "scrape" | "job_apply" | "email" | undefined;
+                            output?: Record<string, unknown> | null | undefined;
+                            input?: Record<string, unknown> | null | undefined;
+                            progress?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
+                            updatedAt?: string | undefined;
+                            createdAt?: string | undefined;
+                            screenshots?: string[] | null | undefined;
+                            totalSteps?: number | null | undefined;
+                            jobId?: string | null | undefined;
+                            userId?: string | null | undefined;
+                            currentStep?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            exitCode?: number | null | undefined;
+                            timedOut?: boolean | undefined;
+                            executionMs?: number | null | undefined;
                         };
-                        400: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        400: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        404: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        404: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        409: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        409: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        422: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        422: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
                     };
                 };
@@ -239,62 +233,63 @@ export declare const automationRoutes: Elysia<"/automation", {
         "email-response": {
             post: {
                 body: {
+                    message: string;
+                    subject: string;
+                } & {
                     sender?: string | undefined;
                     tone?: "professional" | "friendly" | "concise" | undefined;
                     recipientEmail?: string | undefined;
                     deliverAfterGeneration?: boolean | undefined;
-                    message: string;
-                    subject: string;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    500: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    500: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    200: {
+                    200: {} & {
+                        provider?: string | undefined;
+                        model?: string | undefined;
                         recipientEmail?: string | undefined;
+                        runId?: string | undefined;
+                        status?: "success" | undefined;
+                        reply?: string | undefined;
+                        delivered?: boolean | undefined;
                         deliveredAt?: string | undefined;
                         messageId?: string | undefined;
-                        provider: string;
-                        model: string;
-                        runId: string;
-                        status: "success";
-                        reply: string;
-                        delivered: boolean;
                     };
-                    400: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    400: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    404: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    404: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    409: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    409: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    422: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    422: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
                 };
             };
@@ -306,83 +301,80 @@ export declare const automationRoutes: Elysia<"/automation", {
             schedule: {
                 post: {
                     body: {
+                        message: string;
+                        subject: string;
+                        runAt: string;
+                    } & {
                         sender?: string | undefined;
                         tone?: "professional" | "friendly" | "concise" | undefined;
                         recipientEmail?: string | undefined;
                         deliverAfterGeneration?: boolean | undefined;
-                        message: string;
-                        subject: string;
-                        runAt: string;
                     };
                     params: {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        500: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        500: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        200: {
-                            error: string | {
-                                details?: {} | undefined;
-                                code: string;
-                                source: string;
-                                message: string;
-                            } | null;
-                            id: string;
-                            aborted: boolean;
-                            type: "scrape" | "job_apply" | "email";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
-                            progress: number | null;
-                            status: "error" | "success" | "pending" | "running";
-                            updatedAt: string;
-                            createdAt: string;
-                            screenshots: string[] | null;
-                            totalSteps: number | null;
-                            jobId: string | null;
-                            userId: string | null;
-                            currentStep: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            executionMs: number | null;
+                        200: {} & {
+                            error?: string | ({} & {
+                                code?: string | undefined;
+                                source?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | null | undefined;
+                            id?: string | undefined;
+                            aborted?: boolean | undefined;
+                            type?: "scrape" | "job_apply" | "email" | undefined;
+                            output?: Record<string, unknown> | null | undefined;
+                            input?: Record<string, unknown> | null | undefined;
+                            progress?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
+                            updatedAt?: string | undefined;
+                            createdAt?: string | undefined;
+                            screenshots?: string[] | null | undefined;
+                            totalSteps?: number | null | undefined;
+                            jobId?: string | null | undefined;
+                            userId?: string | null | undefined;
+                            currentStep?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            exitCode?: number | null | undefined;
+                            timedOut?: boolean | undefined;
+                            executionMs?: number | null | undefined;
                         };
-                        400: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        400: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        404: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        404: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        409: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        409: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        422: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        422: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
                     };
                 };
@@ -395,76 +387,72 @@ export declare const automationRoutes: Elysia<"/automation", {
             post: {
                 body: {
                     target: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios";
-                };
+                } & {};
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    500: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    500: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    200: {
-                        error: string | {
-                            details?: {} | undefined;
-                            code: string;
-                            source: string;
-                            message: string;
-                        } | null;
-                        id: string;
-                        aborted: boolean;
-                        type: "scrape" | "job_apply" | "email";
-                        output: {
-                            [x: string]: unknown;
-                        } | null;
-                        input: {
-                            [x: string]: unknown;
-                        } | null;
-                        progress: number | null;
-                        status: "error" | "success" | "pending" | "running";
-                        updatedAt: string;
-                        createdAt: string;
-                        screenshots: string[] | null;
-                        totalSteps: number | null;
-                        jobId: string | null;
-                        userId: string | null;
-                        currentStep: number | null;
-                        startedAt: string | null;
-                        completedAt: string | null;
-                        exitCode: number | null;
-                        timedOut: boolean;
-                        executionMs: number | null;
+                    200: {} & {
+                        error?: string | ({} & {
+                            code?: string | undefined;
+                            source?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | null | undefined;
+                        id?: string | undefined;
+                        aborted?: boolean | undefined;
+                        type?: "scrape" | "job_apply" | "email" | undefined;
+                        output?: Record<string, unknown> | null | undefined;
+                        input?: Record<string, unknown> | null | undefined;
+                        progress?: number | null | undefined;
+                        status?: "error" | "success" | "pending" | "running" | undefined;
+                        updatedAt?: string | undefined;
+                        createdAt?: string | undefined;
+                        screenshots?: string[] | null | undefined;
+                        totalSteps?: number | null | undefined;
+                        jobId?: string | null | undefined;
+                        userId?: string | null | undefined;
+                        currentStep?: number | null | undefined;
+                        startedAt?: string | null | undefined;
+                        completedAt?: string | null | undefined;
+                        exitCode?: number | null | undefined;
+                        timedOut?: boolean | undefined;
+                        executionMs?: number | null | undefined;
                     };
-                    400: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    400: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    404: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    404: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    409: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    409: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    422: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    422: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
                 };
             };
@@ -478,76 +466,72 @@ export declare const automationRoutes: Elysia<"/automation", {
                     body: {
                         target: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios";
                         runAt: string;
-                    };
+                    } & {};
                     params: {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        500: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        500: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        200: {
-                            error: string | {
-                                details?: {} | undefined;
-                                code: string;
-                                source: string;
-                                message: string;
-                            } | null;
-                            id: string;
-                            aborted: boolean;
-                            type: "scrape" | "job_apply" | "email";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
-                            progress: number | null;
-                            status: "error" | "success" | "pending" | "running";
-                            updatedAt: string;
-                            createdAt: string;
-                            screenshots: string[] | null;
-                            totalSteps: number | null;
-                            jobId: string | null;
-                            userId: string | null;
-                            currentStep: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            executionMs: number | null;
+                        200: {} & {
+                            error?: string | ({} & {
+                                code?: string | undefined;
+                                source?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | null | undefined;
+                            id?: string | undefined;
+                            aborted?: boolean | undefined;
+                            type?: "scrape" | "job_apply" | "email" | undefined;
+                            output?: Record<string, unknown> | null | undefined;
+                            input?: Record<string, unknown> | null | undefined;
+                            progress?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
+                            updatedAt?: string | undefined;
+                            createdAt?: string | undefined;
+                            screenshots?: string[] | null | undefined;
+                            totalSteps?: number | null | undefined;
+                            jobId?: string | null | undefined;
+                            userId?: string | null | undefined;
+                            currentStep?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            exitCode?: number | null | undefined;
+                            timedOut?: boolean | undefined;
+                            executionMs?: number | null | undefined;
                         };
-                        400: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        400: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        404: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        404: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        409: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        409: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        422: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        422: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
                     };
                 };
@@ -563,37 +547,37 @@ export declare const automationRoutes: Elysia<"/automation", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    500: {
-                        error: {
-                            details?: {} | undefined;
-                            code: string;
-                            message: string;
-                        };
+                    500: {} & {
+                        error?: ({} & {
+                            code?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | undefined;
                     };
-                    200: {
-                        summary: {
-                            configured: number;
-                            manualRunAvailable: number;
-                            scheduledRunAvailable: number;
-                            runHistoryAvailable: number;
-                            liveUpdatesAvailable: number;
-                            total: number;
-                        };
-                        capabilities: {
-                            name: string;
-                            id: string;
-                            category: "scrape" | "job_apply";
-                            issues: string[];
-                            target: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null;
-                            enabled: boolean;
-                            configured: boolean;
-                            implemented: boolean;
-                            manualRunAvailable: boolean;
-                            scheduledRunAvailable: boolean;
-                            runHistoryAvailable: boolean;
-                            liveUpdatesAvailable: boolean;
-                        }[];
-                        generatedAt: string;
+                    200: {} & {
+                        summary?: ({} & {
+                            configured?: number | undefined;
+                            manualRunAvailable?: number | undefined;
+                            scheduledRunAvailable?: number | undefined;
+                            runHistoryAvailable?: number | undefined;
+                            liveUpdatesAvailable?: number | undefined;
+                            total?: number | undefined;
+                        }) | undefined;
+                        capabilities?: ({} & {
+                            name?: string | undefined;
+                            id?: string | undefined;
+                            category?: "scrape" | "job_apply" | undefined;
+                            issues?: string[] | undefined;
+                            target?: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null | undefined;
+                            enabled?: boolean | undefined;
+                            configured?: boolean | undefined;
+                            implemented?: boolean | undefined;
+                            manualRunAvailable?: boolean | undefined;
+                            scheduledRunAvailable?: boolean | undefined;
+                            runHistoryAvailable?: boolean | undefined;
+                            liveUpdatesAvailable?: boolean | undefined;
+                        })[] | undefined;
+                        generatedAt?: string | undefined;
                     };
                     422: {
                         type: "validation";
@@ -614,43 +598,39 @@ export declare const automationRoutes: Elysia<"/automation", {
             get: {
                 body: unknown;
                 params: {};
-                query: {
+                query: {} & {
                     type?: "scrape" | "job_apply" | "email" | undefined;
                     status?: "error" | "success" | "pending" | "running" | undefined;
                 };
                 headers: unknown;
                 response: {
-                    200: {
-                        error: string | {
-                            details?: {} | undefined;
-                            code: string;
-                            source: string;
-                            message: string;
-                        } | null;
-                        id: string;
-                        aborted: boolean;
-                        type: "scrape" | "job_apply" | "email";
-                        output: {
-                            [x: string]: unknown;
-                        } | null;
-                        input: {
-                            [x: string]: unknown;
-                        } | null;
-                        progress: number | null;
-                        status: "error" | "success" | "pending" | "running";
-                        updatedAt: string;
-                        createdAt: string;
-                        screenshots: string[] | null;
-                        totalSteps: number | null;
-                        jobId: string | null;
-                        userId: string | null;
-                        currentStep: number | null;
-                        startedAt: string | null;
-                        completedAt: string | null;
-                        exitCode: number | null;
-                        timedOut: boolean;
-                        executionMs: number | null;
-                    }[];
+                    200: ({} & {
+                        error?: string | ({} & {
+                            code?: string | undefined;
+                            source?: string | undefined;
+                            message?: string | undefined;
+                            details?: Record<string, unknown> | undefined;
+                        }) | null | undefined;
+                        id?: string | undefined;
+                        aborted?: boolean | undefined;
+                        type?: "scrape" | "job_apply" | "email" | undefined;
+                        output?: Record<string, unknown> | null | undefined;
+                        input?: Record<string, unknown> | null | undefined;
+                        progress?: number | null | undefined;
+                        status?: "error" | "success" | "pending" | "running" | undefined;
+                        updatedAt?: string | undefined;
+                        createdAt?: string | undefined;
+                        screenshots?: string[] | null | undefined;
+                        totalSteps?: number | null | undefined;
+                        jobId?: string | null | undefined;
+                        userId?: string | null | undefined;
+                        currentStep?: number | null | undefined;
+                        startedAt?: string | null | undefined;
+                        completedAt?: string | null | undefined;
+                        exitCode?: number | null | undefined;
+                        timedOut?: boolean | undefined;
+                        executionMs?: number | null | undefined;
+                    })[];
                     422: {
                         type: "validation";
                         on: string;
@@ -672,54 +652,50 @@ export declare const automationRoutes: Elysia<"/automation", {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            error: string | {
-                                details?: {} | undefined;
-                                code: string;
-                                source: string;
-                                message: string;
-                            } | null;
-                            id: string;
-                            aborted: boolean;
-                            type: "scrape" | "job_apply" | "email";
-                            output: {
-                                [x: string]: unknown;
-                            } | null;
-                            input: {
-                                [x: string]: unknown;
-                            } | null;
-                            progress: number | null;
-                            status: "error" | "success" | "pending" | "running";
-                            updatedAt: string;
-                            createdAt: string;
-                            screenshots: string[] | null;
-                            totalSteps: number | null;
-                            jobId: string | null;
-                            userId: string | null;
-                            currentStep: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            executionMs: number | null;
+                        200: {} & {
+                            error?: string | ({} & {
+                                code?: string | undefined;
+                                source?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | null | undefined;
+                            id?: string | undefined;
+                            aborted?: boolean | undefined;
+                            type?: "scrape" | "job_apply" | "email" | undefined;
+                            output?: Record<string, unknown> | null | undefined;
+                            input?: Record<string, unknown> | null | undefined;
+                            progress?: number | null | undefined;
+                            status?: "error" | "success" | "pending" | "running" | undefined;
+                            updatedAt?: string | undefined;
+                            createdAt?: string | undefined;
+                            screenshots?: string[] | null | undefined;
+                            totalSteps?: number | null | undefined;
+                            jobId?: string | null | undefined;
+                            userId?: string | null | undefined;
+                            currentStep?: number | null | undefined;
+                            startedAt?: string | null | undefined;
+                            completedAt?: string | null | undefined;
+                            exitCode?: number | null | undefined;
+                            timedOut?: boolean | undefined;
+                            executionMs?: number | null | undefined;
                         };
-                        400: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        400: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
-                        404: {
-                            error: {
-                                details?: {} | undefined;
-                                code: string;
-                                message: string;
-                            };
+                        404: {} & {
+                            error?: ({} & {
+                                code?: string | undefined;
+                                message?: string | undefined;
+                                details?: Record<string, unknown> | undefined;
+                            }) | undefined;
                         };
                         422: {
                             type: "validation";
@@ -750,9 +726,9 @@ export declare const automationRoutes: Elysia<"/automation", {
     resolve: {};
     schema: {};
     standaloneSchema: {};
-    response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
+    response: {
+        200: {
+            error: import("@bao/shared").ErrorEnvelope;
+        };
+    };
 }>;

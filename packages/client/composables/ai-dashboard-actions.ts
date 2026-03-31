@@ -7,6 +7,22 @@ import { getErrorMessage } from "~/utils/errors";
 type ApiClient = ReturnType<typeof useApi>;
 type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
 type Translate = (key: string, params?: Record<string, unknown>) => string;
+type ProviderTestMessageContext = {
+  providerId: AIProviderType;
+  valid: boolean;
+  t: Translate;
+};
+
+const PROVIDER_TEST_MESSAGES = {
+  local: {
+    false: "aiDashboard.tests.localFailure",
+    true: "aiDashboard.tests.localSuccess",
+  },
+  remote: {
+    false: "aiDashboard.tests.connectionFailure",
+    true: "aiDashboard.tests.connectionSuccess",
+  },
+} as const;
 
 export function createDefaultRouting(provider: AIProviderType) {
   const [
@@ -40,11 +56,19 @@ function resolveProviderCredential(
 ): string {
   const currentSettings = settings.value;
   if (!currentSettings) return "";
-  if (providerId === "gemini") return currentSettings.geminiApiKey ?? "";
-  if (providerId === "openai") return currentSettings.openaiApiKey ?? "";
-  if (providerId === "claude") return currentSettings.claudeApiKey ?? "";
-  if (providerId === "huggingface") return currentSettings.huggingfaceToken ?? "";
-  return "";
+  const credentialByProvider = {
+    claude: currentSettings.claudeApiKey ?? "",
+    gemini: currentSettings.geminiApiKey ?? "",
+    huggingface: currentSettings.huggingfaceToken ?? "",
+    openai: currentSettings.openaiApiKey ?? "",
+  } as const;
+  return credentialByProvider[providerId as keyof typeof credentialByProvider] ?? "";
+}
+
+function resolveTestMessage({ providerId, valid, t }: ProviderTestMessageContext): string {
+  const messageGroup =
+    providerId === "local" ? PROVIDER_TEST_MESSAGES.local : PROVIDER_TEST_MESSAGES.remote;
+  return t(messageGroup[valid ? "true" : "false"]);
 }
 
 async function testProviderConnectivity(input: {
@@ -64,9 +88,7 @@ async function testProviderConnectivity(input: {
       valid: result.valid,
       message:
         result.message ||
-        (result.valid
-          ? input.t("aiDashboard.tests.localSuccess")
-          : input.t("aiDashboard.tests.localFailure")),
+        resolveTestMessage({ providerId: "local", valid: result.valid, t: input.t }),
     };
   }
 
@@ -83,9 +105,7 @@ async function testProviderConnectivity(input: {
     valid: result.valid,
     message:
       result.message ||
-      (result.valid
-        ? input.t("aiDashboard.tests.connectionSuccess")
-        : input.t("aiDashboard.tests.connectionFailure")),
+      resolveTestMessage({ providerId: input.providerId, valid: result.valid, t: input.t }),
   };
 }
 
@@ -100,7 +120,9 @@ function createDashboardRefreshAction(input: {
       input.t("aiDashboard.toasts.loadFailed"),
     );
     if (!refreshResult.ok) {
-      input.toast.error(getErrorMessage(refreshResult.error, input.t("aiDashboard.toasts.loadFailed")));
+      input.toast.error(
+        getErrorMessage(refreshResult.error, input.t("aiDashboard.toasts.loadFailed")),
+      );
     }
   };
 }
@@ -132,7 +154,10 @@ function createProviderTestAction(input: {
     if (!providerTestResult.ok) {
       input.testResults[providerId] = {
         valid: false,
-        message: getErrorMessage(providerTestResult.error, input.t("aiDashboard.tests.connectionFailure")),
+        message: getErrorMessage(
+          providerTestResult.error,
+          input.t("aiDashboard.tests.connectionFailure"),
+        ),
       };
       return;
     }
@@ -161,7 +186,8 @@ function createDashboardPreferenceAction(
       (async () => {
         const { error } = await input.api.settings.put({
           aiRouting: {
-            ...(input.settings.value?.aiRouting ?? createDefaultRouting(input.selectedProvider.value)),
+            ...(input.settings.value?.aiRouting ??
+              createDefaultRouting(input.selectedProvider.value)),
             chat: {
               provider: input.selectedProvider.value,
               ...(input.selectedModel.value ? { model: input.selectedModel.value } : {}),

@@ -26,8 +26,8 @@ export declare const automationWebSocket: Elysia<"", {
     [x: string]: {
         subscribe: {
             body: {
+                type?: "subscribe" | "unsubscribe" | undefined;
                 runId?: string | undefined;
-                type: "subscribe" | "unsubscribe";
             };
             params: {};
             query: {};

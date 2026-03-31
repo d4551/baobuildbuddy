@@ -58,7 +58,7 @@ export declare const userRoutes: Elysia<"/user", {
     user: {
         profile: {
             put: {
-                body: {
+                body: {} & {
                     name?: string | undefined;
                     email?: string | undefined;
                     location?: string | undefined;
@@ -66,14 +66,14 @@ export declare const userRoutes: Elysia<"/user", {
                     summary?: string | undefined;
                     phone?: string | undefined;
                     github?: string | undefined;
-                    gamingExperience?: {} | undefined;
+                    gamingExperience?: Record<string, unknown> | undefined;
                     softSkills?: string[] | undefined;
                     linkedin?: string | undefined;
                     currentRole?: string | undefined;
                     currentCompany?: string | undefined;
                     yearsExperience?: number | undefined;
                     technicalSkills?: string[] | undefined;
-                    careerGoals?: {} | undefined;
+                    careerGoals?: Record<string, unknown> | undefined;
                 };
                 params: {};
                 query: unknown;

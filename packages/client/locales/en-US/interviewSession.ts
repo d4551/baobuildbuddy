@@ -1,0 +1,45 @@
+const interviewSession = {
+  interviewSession: {
+    title: "Interview Practice",
+    timeLabel: "Time",
+    timeAria: "Elapsed interview time {minutes} minutes and {seconds} seconds",
+    avatarLabelAi: "AI",
+    progressLabel: "Question {current} of {total}",
+    progressAria: "Interview progress",
+    jobTargetBadge: "Job Target",
+    interviewerLabel: "Interviewer",
+    feedbackTitle: "Feedback",
+    feedbackScore: "Score: {score}%",
+    responseTitle: "Your Response",
+    responsePlaceholder: "Type your answer here...",
+    responseAria: "Interview response text",
+    minResponseHint: "Response must be at least {count} characters.",
+    endAria: "End interview session",
+    endButton: "End Interview",
+    submitAria: "Submit interview response",
+    submitNextButton: "Submit & Next",
+    submitFinishButton: "Submit & Finish",
+    notFound: "Session not found. Please start a new interview.",
+    voice: {
+      listening: "Listening...",
+      idle: "Voice input",
+      startTitle: "Start voice input",
+      stopTitle: "Stop listening",
+      startAria: "Start voice input",
+      stopAria: "Stop voice input",
+      startButton: "Mic",
+      stopButton: "Stop",
+    },
+    toasts: {
+      responseRecorded: "Response recorded",
+      completed: "Interview completed",
+    },
+    errors: {
+      minResponseLength: "Response must be at least {count} characters",
+      submitFailed: "Failed to submit response",
+      completeFailed: "Failed to complete interview",
+    },
+  },
+} as const;
+
+export default interviewSession;

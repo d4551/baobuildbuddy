@@ -20,6 +20,10 @@ import {
   normalizeAppDataTheme,
   resolveBrandSettings,
 } from "@bao/shared";
+import {
+  normalizeAutomationSettings,
+  normalizeLocalModelEndpoint,
+} from "@bao/shared/types/settings-normalization";
 import type { settings as settingsTable } from "../db/schema/settings";
 import { resolveKnownProvider } from "./settings-route-contracts";
 
@@ -82,7 +86,9 @@ const mergeAutomationSettings = (
     jobProviders: patchParsed.data.jobProviders ?? currentParsed.data.jobProviders,
   };
 
-  const mergedParsed = automationSettingsSchema.safeParse(mergedCandidate);
+  const mergedParsed = automationSettingsSchema.safeParse(
+    normalizeAutomationSettings(mergedCandidate),
+  );
   return mergedParsed.success ? mergedParsed.data : null;
 };
 
@@ -134,10 +140,7 @@ interface SettingsUpdateInput {
   emailTransportSettings?: Partial<EmailTransportSettings>;
 }
 
-const resolveRoutingUpdate = (
-  existingRow: SettingsRow,
-  body: SettingsUpdateInput,
-) => {
+const resolveRoutingUpdate = (existingRow: SettingsRow, body: SettingsUpdateInput) => {
   const nextPreferredProvider =
     body.preferredProvider ?? resolveKnownProvider(existingRow.preferredProvider);
   const nextPreferredModel = body.preferredModel ?? existingRow.preferredModel ?? undefined;
@@ -184,7 +187,10 @@ export const buildSettingsUpdate = (
   }
 
   if (body.brandSettings !== undefined) {
-    const mergedBrandSettings = mergePersistedBrandSettings(existingRow.brandSettings, body.brandSettings);
+    const mergedBrandSettings = mergePersistedBrandSettings(
+      existingRow.brandSettings,
+      body.brandSettings,
+    );
     if (!mergedBrandSettings) {
       return null;
     }
@@ -245,7 +251,7 @@ export const buildApiKeysUpdate = (body: {
     update.huggingfaceToken = body.huggingfaceToken;
   }
   if (body.localModelEndpoint !== undefined) {
-    update.localModelEndpoint = body.localModelEndpoint;
+    update.localModelEndpoint = normalizeLocalModelEndpoint(body.localModelEndpoint);
   }
   if (body.localModelName !== undefined) {
     update.localModelName = body.localModelName;

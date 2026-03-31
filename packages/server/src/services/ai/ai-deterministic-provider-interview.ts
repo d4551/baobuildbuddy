@@ -65,8 +65,10 @@ const extractPromptHighlights = (value: string): string[] =>
     .slice(0, 3);
 
 const buildPromptContext = (prompt: string): DeterministicInterviewPromptContext => {
-  const studio = extractPromptLineValue(prompt, "Studio") || extractPromptBulletValue(prompt, "Name");
-  const role = extractPromptLineValue(prompt, "Role") || extractPromptBulletValue(prompt, "Job title");
+  const studio =
+    extractPromptLineValue(prompt, "Studio") || extractPromptBulletValue(prompt, "Name");
+  const role =
+    extractPromptLineValue(prompt, "Role") || extractPromptBulletValue(prompt, "Job title");
   const company = extractPromptBulletValue(prompt, "Company") || studio;
   const experienceHighlights = extractPromptHighlights(
     extractPromptBulletValue(prompt, "Experience highlights") ||
@@ -80,7 +82,9 @@ const buildPromptContext = (prompt: string): DeterministicInterviewPromptContext
     extractPromptBulletValue(prompt, "Technical skills") ||
       extractPromptBulletValue(prompt, "Technologies"),
   );
-  const focusAreas = extractPromptHighlights(extractPromptBulletValue(prompt, "Interview focus areas"));
+  const focusAreas = extractPromptHighlights(
+    extractPromptBulletValue(prompt, "Interview focus areas"),
+  );
   const hiringSignals = extractPromptHighlights(extractPromptBulletValue(prompt, "Hiring signals"));
   const candidatePitchAngles = extractPromptHighlights(
     extractPromptBulletValue(prompt, "Candidate pitch angles"),

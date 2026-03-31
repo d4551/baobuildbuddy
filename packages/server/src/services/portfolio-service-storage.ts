@@ -83,17 +83,15 @@ export const createProject = async (
   const projects = await getProjectsForPortfolio(portfolioId);
   const maxSortOrder = projects.reduce((max, project) => Math.max(max, project.sortOrder || 0), 0);
 
-  await db
-    .insert(portfolioProjects)
-    .values(
-      createProjectInsert({
-        id,
-        portfolioId,
-        data,
-        now,
-        sortOrder: data.sortOrder ?? maxSortOrder + 1,
-      }),
-    );
+  await db.insert(portfolioProjects).values(
+    createProjectInsert({
+      id,
+      portfolioId,
+      data,
+      now,
+      sortOrder: data.sortOrder ?? maxSortOrder + 1,
+    }),
+  );
 
   return id;
 };
@@ -141,7 +139,9 @@ export const reorderPortfolioProjects = async (
   }
 
   const orderedUpdateTimestamp = new Date().toISOString();
-  const orderedProjectIds = orderedIds.filter((orderedId): orderedId is string => Boolean(orderedId));
+  const orderedProjectIds = orderedIds.filter((orderedId): orderedId is string =>
+    Boolean(orderedId),
+  );
   await Promise.all(
     orderedProjectIds.map((orderedId, index) =>
       db

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { APP_LANGUAGE_LABELS, APP_ROUTES, type AppLanguageCode, THEME_NAMES } from "@bao/shared";
+import { APP_ROUTES, THEME_NAMES } from "@bao/shared";
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
+import { resolveLocaleLabel } from "~/constants/i18n";
 import { APP_DRAWER_ID, SHELL_NAVBAR_CLASS } from "~/constants/layout";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
 
@@ -14,14 +15,7 @@ const userMenuRef = useTemplateRef<HTMLDetailsElement>("userMenu");
 const isUserMenuOpen = ref(false);
 const isDarkTheme = computed(() => theme.value === THEME_NAMES.dark);
 const userMenuId = `app-navbar-user-menu-${useId()}`;
-
-const isAppLanguageCode = (localeCode: string): localeCode is AppLanguageCode =>
-  Object.hasOwn(APP_LANGUAGE_LABELS, localeCode);
-
-const getLocaleLabel = (localeCode: string): string => {
-  const directLabel = isAppLanguageCode(localeCode) ? APP_LANGUAGE_LABELS[localeCode] : undefined;
-  return directLabel || localeCode;
-};
+const getLocaleLabel = (localeCode: string): string => resolveLocaleLabel(t, localeCode);
 
 function closeUserMenu(): void {
   if (userMenuRef.value) {

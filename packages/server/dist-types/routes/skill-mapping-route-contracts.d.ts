@@ -1,3 +1,4 @@
+import Type from "baobox";
 export type SkillMappingsQuery = {
     category?: string;
     search?: string;
@@ -21,38 +22,38 @@ export type SkillAnalyzeBody = {
 export type SkillMappingRouteSetState = {
     status?: number | string;
 };
-export declare const skillMappingsQuerySchema: import("@sinclair/typebox").TObject<{
-    category: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-    search: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-}>;
-export declare const skillMappingIdParamsSchema: import("@sinclair/typebox").TObject<{
-    id: import("@sinclair/typebox").TString;
-}>;
-export declare const skillMappingCreateBodySchema: import("@sinclair/typebox").TObject<{
-    gameExpression: import("@sinclair/typebox").TString;
-    transferableSkill: import("@sinclair/typebox").TString;
-    industryApplications: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TArray<import("@sinclair/typebox").TString>>;
-    evidence: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TArray<import("@sinclair/typebox").TRecord<import("@sinclair/typebox").TString, import("@sinclair/typebox").TUnknown>>>;
-    confidence: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TNumber>;
-    category: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-    demandLevel: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-    aiGenerated: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TBoolean>;
-}>;
-export declare const skillMappingUpdateBodySchema: import("@sinclair/typebox").TObject<{
-    gameExpression: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-    transferableSkill: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-    industryApplications: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TArray<import("@sinclair/typebox").TString>>;
-    evidence: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TArray<import("@sinclair/typebox").TRecord<import("@sinclair/typebox").TString, import("@sinclair/typebox").TUnknown>>>;
-    confidence: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TNumber>;
-    category: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-    demandLevel: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-    aiGenerated: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TBoolean>;
-}>;
-export declare const skillAnalysisBodySchema: import("@sinclair/typebox").TObject<{
-    gameExperience: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TRecord<import("@sinclair/typebox").TString, import("@sinclair/typebox").TUnknown>>;
-    resume: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TRecord<import("@sinclair/typebox").TString, import("@sinclair/typebox").TUnknown>>;
-    autoCreateMappings: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TBoolean>;
-}>;
-export declare const skillReadinessQuerySchema: import("@sinclair/typebox").TObject<{
-    jobId: import("@sinclair/typebox").TOptional<import("@sinclair/typebox").TString>;
-}>;
+export declare const skillMappingsQuerySchema: Type.TObject<{
+    readonly category: Type.TOptional<Type.TString>;
+    readonly search: Type.TOptional<Type.TString>;
+}, never, never>;
+export declare const skillMappingIdParamsSchema: Type.TObject<{
+    readonly id: Type.TString;
+}, "id", never>;
+export declare const skillMappingCreateBodySchema: Type.TObject<{
+    readonly gameExpression: Type.TString;
+    readonly transferableSkill: Type.TString;
+    readonly industryApplications: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly evidence: Type.TOptional<Type.TArray<Type.TRecord<Type.TString, Type.TUnknown>>>;
+    readonly confidence: Type.TOptional<Type.TNumber>;
+    readonly category: Type.TOptional<Type.TString>;
+    readonly demandLevel: Type.TOptional<Type.TString>;
+    readonly aiGenerated: Type.TOptional<Type.TBoolean>;
+}, "gameExpression" | "transferableSkill", never>;
+export declare const skillMappingUpdateBodySchema: Type.TObject<{
+    readonly gameExpression: Type.TOptional<Type.TString>;
+    readonly transferableSkill: Type.TOptional<Type.TString>;
+    readonly industryApplications: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly evidence: Type.TOptional<Type.TArray<Type.TRecord<Type.TString, Type.TUnknown>>>;
+    readonly confidence: Type.TOptional<Type.TNumber>;
+    readonly category: Type.TOptional<Type.TString>;
+    readonly demandLevel: Type.TOptional<Type.TString>;
+    readonly aiGenerated: Type.TOptional<Type.TBoolean>;
+}, never, never>;
+export declare const skillAnalysisBodySchema: Type.TObject<{
+    readonly gameExperience: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly resume: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly autoCreateMappings: Type.TOptional<Type.TBoolean>;
+}, never, never>;
+export declare const skillReadinessQuerySchema: Type.TObject<{
+    readonly jobId: Type.TOptional<Type.TString>;
+}, never, never>;

@@ -1,14 +1,5 @@
-import type {
-  GameGenre,
-  Job,
-  JobFilters,
-  Platform,
-} from "@bao/shared";
-import {
-  DECIMAL_RADIX,
-  JOB_SALARY_PARSE_MULTIPLIER,
-  MS_PER_DAY,
-} from "@bao/shared";
+import type { GameGenre, Job, JobFilters, Platform } from "@bao/shared";
+import { DECIMAL_RADIX, JOB_SALARY_PARSE_MULTIPLIER, MS_PER_DAY } from "@bao/shared";
 import { eq, gte, inArray, like, sql, type SQLWrapper } from "drizzle-orm";
 import { jobs } from "../../db/schema/jobs";
 
@@ -64,8 +55,7 @@ const applyGenreFilter = (allJobs: Job[], gameGenres: GameGenre[] | undefined): 
   }
 
   return allJobs.filter(
-    (job) =>
-      Boolean(job.gameGenres) && gameGenres.some((genre) => job.gameGenres?.includes(genre)),
+    (job) => Boolean(job.gameGenres) && gameGenres.some((genre) => job.gameGenres?.includes(genre)),
   );
 };
 

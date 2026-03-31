@@ -30,5 +30,8 @@ export type ResumePageActionsInput = {
   scoring: Ref<boolean>;
   selectedResumeId: Ref<string | null>;
   showCreateModal: Ref<boolean>;
-  updateResume: (resumeId: string, updates: ReturnType<typeof formDataToResumeData>) => Promise<unknown>;
+  updateResume: (
+    resumeId: string,
+    updates: ReturnType<typeof formDataToResumeData>,
+  ) => Promise<unknown>;
 };

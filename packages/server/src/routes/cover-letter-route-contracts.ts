@@ -4,7 +4,7 @@ import {
   SCHEMA_MAX_LENGTH_MICRO,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared";
-import { t } from "elysia";
+import Type from "baobox";
 
 export type GenerateCoverLetterBody = {
   company: string;
@@ -19,39 +19,48 @@ export type RouteSetState = {
   status?: number | string;
 };
 
-export const coverLetterTemplateBodySchema = t.String({
-  enum: COVER_LETTER_TEMPLATE_OPTIONS,
+export const coverLetterTemplateBodySchema = Type.Union(
+  COVER_LETTER_TEMPLATE_OPTIONS.map((template) => Type.Literal(template)),
+);
+
+export const coverLetterIdParamsSchema = Type.Object(
+  {
+    id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+  },
+  { required: ["id"] },
+);
+
+export const coverLetterMutationBodySchema = Type.Object(
+  {
+    company: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    position: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    jobInfo: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+    content: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+    template: Type.Optional(coverLetterTemplateBodySchema),
+  },
+  { required: ["company", "position"] },
+);
+
+export const coverLetterUpdateBodySchema = Type.Object({
+  company: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  position: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  jobInfo: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  content: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  template: Type.Optional(coverLetterTemplateBodySchema),
 });
 
-export const coverLetterIdParamsSchema = t.Object({
-  id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-});
+export const generateCoverLetterBodySchema = Type.Object(
+  {
+    company: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    position: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    jobInfo: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+    resumeId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    template: Type.Optional(coverLetterTemplateBodySchema),
+    save: Type.Optional(Type.Boolean()),
+  },
+  { required: ["company", "position"] },
+);
 
-export const coverLetterMutationBodySchema = t.Object({
-  company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
-  content: t.Optional(t.Record(t.String(), t.Unknown())),
-  template: t.Optional(coverLetterTemplateBodySchema),
-});
-
-export const coverLetterUpdateBodySchema = t.Object({
-  company: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  position: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
-  content: t.Optional(t.Record(t.String(), t.Unknown())),
-  template: t.Optional(coverLetterTemplateBodySchema),
-});
-
-export const generateCoverLetterBodySchema = t.Object({
-  company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
-  resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  template: t.Optional(coverLetterTemplateBodySchema),
-  save: t.Optional(t.Boolean()),
-});
-
-export const coverLetterExportBodySchema = t.Object({
-  format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
+export const coverLetterExportBodySchema = Type.Object({
+  format: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
 });

@@ -1,5 +1,6 @@
 import type { AutomationRunUiState, RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared";
 import { getCurrentScope, onScopeDispose, type Ref, readonly, ref } from "vue";
+import automationJobApplyCatalog from "~/locales/en-US/automation/jobApply";
 import { useAutomation } from "./useAutomation";
 
 const TERMINAL_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>(["success", "error"]);
@@ -44,20 +45,23 @@ interface StreamDependencies {
   lifecycle: StreamLifecycle;
   getRun: ReturnType<typeof useAutomation>["getRun"];
   subscribeToRun: ReturnType<typeof useAutomation>["subscribeToRun"];
+  fallbackMessage: string;
+}
+
+interface UseAutomationRunStreamOptions {
+  fallbackMessage?: string;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-const toStreamError = (error: unknown): StreamError => {
+const toStreamError = (error: unknown, fallbackMessage: string): StreamError => {
   if (!isRecord(error)) {
-    return { message: "Automation stream request failed" };
+    return { message: fallbackMessage };
   }
 
   const message =
-    typeof error.message === "string" && error.message.length > 0
-      ? error.message
-      : "Automation stream request failed";
+    typeof error.message === "string" && error.message.length > 0 ? error.message : fallbackMessage;
   const statusCode =
     typeof error.status === "number"
       ? error.status
@@ -237,10 +241,11 @@ function applyEvent(refs: StreamStateRefs, lifecycle: StreamLifecycle, event: Rp
 async function fetchInitialRun(
   getRun: ReturnType<typeof useAutomation>["getRun"],
   runId: string,
+  fallbackMessage: string,
 ): Promise<{ ok: true; value: RpaRunExecutionEnvelope } | { ok: false; error: StreamError }> {
   return getRun(runId).then(
     (value: RpaRunExecutionEnvelope) => ({ ok: true as const, value }),
-    (error: unknown) => ({ ok: false as const, error: toStreamError(error) }),
+    (error: unknown) => ({ ok: false as const, error: toStreamError(error, fallbackMessage) }),
   );
 }
 
@@ -273,7 +278,11 @@ async function startStream(dependencies: StreamDependencies, runId: string): Pro
   }
 
   dependencies.refs.state.value = "loading";
-  const initialRun = await fetchInitialRun(dependencies.getRun, normalizedRunId);
+  const initialRun = await fetchInitialRun(
+    dependencies.getRun,
+    normalizedRunId,
+    dependencies.fallbackMessage,
+  );
   if (token !== dependencies.lifecycle.requestToken) {
     return;
   }
@@ -308,7 +317,7 @@ function cleanupStream(refs: StreamStateRefs, lifecycle: StreamLifecycle): void 
  * Reactive automation run stream composable.
  * Owns fetch + websocket lifecycle and deterministic UI-state mapping.
  */
-export function useAutomationRunStream() {
+export function useAutomationRunStream(options: UseAutomationRunStreamOptions = {}) {
   const { getRun, subscribeToRun } = useAutomation();
   const refs = createStreamStateRefs();
   const lifecycle: StreamLifecycle = {
@@ -320,6 +329,9 @@ export function useAutomationRunStream() {
     lifecycle,
     getRun,
     subscribeToRun,
+    fallbackMessage:
+      options.fallbackMessage ??
+      automationJobApplyCatalog.automation.jobApply.stream.startErrorFallback,
   };
   const start = (runId: string): Promise<void> => startStream(dependencies, runId);
   const retry = (): Promise<void> => start(refs.activeRunId.value);

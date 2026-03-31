@@ -22,7 +22,7 @@
     "typecheck": "bun run prepare:workspace-types && bun --bun run nuxt typecheck",
     "test": "bun --bun run vitest run",
     "test:watch": "bun --bun run vitest",
-    "lint": "bun run prepare:workspace-types && bun --bun run eslint app.vue error.vue components composables constants layouts locales middleware pages plugins types utils nuxt.config.ts vitest.config.ts"
+    "lint": "bun run prepare:workspace-types && bun --bun run eslint ."
   },
   "dependencies": {
     "@bao/shared": "workspace:*",

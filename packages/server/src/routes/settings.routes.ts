@@ -6,6 +6,7 @@ import {
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
   DEFAULT_SETTINGS_ID,
 } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
@@ -26,9 +27,7 @@ import {
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";
 import { updateJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
-import {
-  readOrCreateSettingsRow,
-} from "./settings-route-support";
+import { readOrCreateSettingsRow } from "./settings-route-support";
 
 export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings"] })
   .use(
@@ -73,7 +72,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
       return { success: true };
     },
     {
-      body: settingsUpdateBodySchema,
+      body: StandardSchemaV1(settingsUpdateBodySchema),
     },
   )
   .put(
@@ -83,7 +82,7 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
       return { success: true, jobTaxonomy };
     },
     {
-      body: jobTaxonomyUpdateBodySchema,
+      body: StandardSchemaV1(jobTaxonomyUpdateBodySchema),
     },
   )
   .put(
@@ -98,16 +97,12 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
       return { success: true };
     },
     {
-      body: apiKeysUpdateBodySchema,
+      body: StandardSchemaV1(apiKeysUpdateBodySchema),
     },
   )
-  .post(
-    "/test-api-key",
-    async ({ body }) => testProviderConnection(body),
-    {
-      body: providerTestBodySchema,
-    },
-  )
+  .post("/test-api-key", async ({ body }) => testProviderConnection(body), {
+    body: StandardSchemaV1(providerTestBodySchema),
+  })
   .get("/export", async () => {
     const { dataService } = await import("../services/data-service");
     return dataService.exportAll();
@@ -134,6 +129,6 @@ export const settingsRoutes = new Elysia({ prefix: "/settings", tags: ["Settings
       });
     },
     {
-      body: importSettingsBodySchema,
+      body: StandardSchemaV1(importSettingsBodySchema),
     },
   );

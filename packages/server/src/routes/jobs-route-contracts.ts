@@ -6,7 +6,7 @@ import {
   SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_TINY,
 } from "@bao/shared";
-import { t } from "elysia";
+import Type from "baobox";
 
 export type JobListQuery = {
   q?: string;
@@ -20,42 +20,57 @@ export type JobListQuery = {
   limit?: string;
 };
 
-export const jobsListQuerySchema = t.Object({
-  q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  remote: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-  experienceLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  studioType: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  platform: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  genre: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  page: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-  limit: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+export const jobsListQuerySchema = Type.Object({
+  q: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  remote: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+  experienceLevel: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  studioType: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  platform: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  genre: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  page: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+  limit: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
 });
 
-export const jobIdParamsSchema = t.Object({
-  id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-});
+export const jobIdParamsSchema = Type.Object(
+  {
+    id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+  },
+  { required: ["id"] },
+);
 
-export const saveJobBodySchema = t.Object({
-  jobId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-});
+export const saveJobBodySchema = Type.Object(
+  {
+    jobId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+  },
+  { required: ["jobId"] },
+);
 
-export const savedJobParamsSchema = t.Object({
-  jobId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-});
+export const savedJobParamsSchema = Type.Object(
+  {
+    jobId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+  },
+  { required: ["jobId"] },
+);
 
-export const applyJobBodySchema = t.Object({
-  jobId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-  notes: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-});
+export const applyJobBodySchema = Type.Object(
+  {
+    jobId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    notes: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+  },
+  { required: ["jobId"] },
+);
 
-export const updateApplicationParamsSchema = t.Object({
-  id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-});
+export const updateApplicationParamsSchema = Type.Object(
+  {
+    id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+  },
+  { required: ["id"] },
+);
 
-export const updateApplicationBodySchema = t.Object({
-  status: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  notes: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+export const updateApplicationBodySchema = Type.Object({
+  status: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  notes: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
 });
 
 export { HTTP_STATUS_CREATED };

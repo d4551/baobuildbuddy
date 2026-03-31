@@ -14,7 +14,11 @@ import type {
   ScrapeEnrichmentAccumulator,
   ScrapeEnrichmentAttempt,
 } from "./scraper-service-contracts";
-import { DEFAULT_JOB_SOURCE, DEFAULT_JOB_TYPE, PORTAL_SCRIPT_ID_BY_ID } from "./scraper-service-contracts";
+import {
+  DEFAULT_JOB_SOURCE,
+  DEFAULT_JOB_TYPE,
+  PORTAL_SCRIPT_ID_BY_ID,
+} from "./scraper-service-contracts";
 
 export const runWithErrorCollection = async (
   operation: () => Promise<void>,
@@ -26,9 +30,7 @@ export const runWithErrorCollection = async (
   }
 };
 
-export const resolvePortalSourceUrl = async (
-  portalId: GamingPortalId,
-): Promise<string | null> => {
+export const resolvePortalSourceUrl = async (portalId: GamingPortalId): Promise<string | null> => {
   const providerSettings = await loadJobProviderSettings();
   const portalConfig =
     providerSettings.gamingPortals.find((portal) => portal.id === portalId && portal.enabled) ??
@@ -37,8 +39,7 @@ export const resolvePortalSourceUrl = async (
   return portalConfig?.fallbackUrl ?? null;
 };
 
-export const resolvePortalScriptId = (portalId: GamingPortalId) =>
-  PORTAL_SCRIPT_ID_BY_ID[portalId];
+export const resolvePortalScriptId = (portalId: GamingPortalId) => PORTAL_SCRIPT_ID_BY_ID[portalId];
 
 export const upsertStudioRow = async (
   studioRow: ScrapedStudio,
@@ -84,7 +85,10 @@ export const upsertScrapedJob = async (
   now: string,
   enrichment?: ScrapePersonaEnrichment,
 ): Promise<void> => {
-  const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(0, 100);
+  const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(
+    0,
+    100,
+  );
 
   await db
     .insert(jobs)
@@ -148,9 +152,7 @@ const applyEnrichmentTracking = (
   enrichmentAccumulator.model = enrichmentAttempt.model ?? enrichmentAccumulator.model;
 };
 
-const persistScrapedRowBase = (
-  options: PersistScrapedEntityOptions,
-) => {
+const persistScrapedRowBase = (options: PersistScrapedEntityOptions) => {
   if (options.enrichmentAttempt.warning) {
     options.pushWarning(options.enrichmentAccumulator, options.enrichmentAttempt.warning);
   }

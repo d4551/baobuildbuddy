@@ -1,9 +1,25 @@
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared";
-import { Elysia, t } from "elysia";
+import { StandardSchemaV1 } from "baobox";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { searchService } from "../services/search-service";
 
 const searchTypes = ["jobs", "studios", "skills", "resumes"] as const;
 type SearchType = (typeof searchTypes)[number];
+const searchTypeSchema = Type.Union(searchTypes.map((searchType) => Type.Literal(searchType)));
+
+const parseSearchTypes = (value: string | string[] | undefined): SearchType[] | undefined => {
+  if (!value) {
+    return;
+  }
+
+  const rawTypes = typeof value === "string" ? value.split(",") : value;
+  const parsedTypes = rawTypes
+    .map((type) => type.trim())
+    .filter((type): type is SearchType => (searchTypes as readonly string[]).includes(type));
+
+  return parsedTypes.length > 0 ? parsedTypes : undefined;
+};
 
 export const searchRoutes = new Elysia({ prefix: "/search", tags: ["Search"] })
   .get(
@@ -18,19 +34,21 @@ export const searchRoutes = new Elysia({ prefix: "/search", tags: ["Search"] })
           totalTime: 0,
         };
       }
-      const types = query.types
-        ? query.types
-            .split(",")
-            .map((type) => type.trim())
-            .filter((type): type is SearchType => (searchTypes as readonly string[]).includes(type))
-        : undefined;
+      const types = parseSearchTypes(query.types);
       return searchService.searchAll(q, types);
     },
     {
-      query: t.Object({
-        q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        types: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-      }),
+      query: StandardSchemaV1(
+        Type.Object({
+          q: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          types: Type.Optional(
+            Type.Union([
+              Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+              Type.Array(searchTypeSchema),
+            ]),
+          ),
+        }),
+      ),
     },
   )
   .get(
@@ -40,8 +58,10 @@ export const searchRoutes = new Elysia({ prefix: "/search", tags: ["Search"] })
       return await searchService.autocomplete(prefix);
     },
     {
-      query: t.Object({
-        prefix: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-      }),
+      query: StandardSchemaV1(
+        Type.Object({
+          prefix: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+        }),
+      ),
     },
   );

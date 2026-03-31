@@ -91,10 +91,7 @@ function createFetchMappingsAction({
   mappings,
   loading,
   pageError,
-}: Pick<
-  SkillsPageActionsInput,
-  "api" | "toast" | "t" | "mappings" | "loading" | "pageError"
->) {
+}: Pick<SkillsPageActionsInput, "api" | "toast" | "t" | "mappings" | "loading" | "pageError">) {
   async function fetchMappings(): Promise<void> {
     pageError.value = null;
     loading.value = true;
@@ -128,7 +125,10 @@ function createSkillsGamificationActions(
     await settlePromise(input.fetchProgress(), input.t("skillsPage.errors.gamificationLoadFailed"));
   }
 
-  async function tryAwardSkillXp(amount: number, reason: SkillsGamificationReason): Promise<boolean> {
+  async function tryAwardSkillXp(
+    amount: number,
+    reason: SkillsGamificationReason,
+  ): Promise<boolean> {
     const awardResult = await settlePromise(
       input.awardXP(amount, reason),
       input.t("apiErrors.gamification.awardXPFailed"),
@@ -177,10 +177,7 @@ function createAddMappingAction(
     SkillsPageActionsInput,
     "api" | "toast" | "t" | "loading" | "showAddModal" | "newMapping"
   >,
-  support: Pick<
-    Parameters<typeof createSkillsMutationActions>[1],
-    "fetchMappings" | "resetForm"
-  >,
+  support: Pick<Parameters<typeof createSkillsMutationActions>[1], "fetchMappings" | "resetForm">,
 ) {
   return async function handleAddMapping(): Promise<void> {
     const normalizedGameExpression = input.newMapping.gameExpression.trim();
@@ -215,7 +212,9 @@ function createAddMappingAction(
     input.loading.value = false;
 
     if (!addMappingResult.ok) {
-      input.toast.error(getErrorMessage(addMappingResult.error, input.t("skillsPage.errors.addFailed")));
+      input.toast.error(
+        getErrorMessage(addMappingResult.error, input.t("skillsPage.errors.addFailed")),
+      );
       return;
     }
 
@@ -252,7 +251,9 @@ function createDeleteMappingAction(
     input.closeDeleteMappingDialog();
 
     if (!deleteResult.ok) {
-      input.toast.error(getErrorMessage(deleteResult.error, input.t("skillsPage.errors.deleteFailed")));
+      input.toast.error(
+        getErrorMessage(deleteResult.error, input.t("skillsPage.errors.deleteFailed")),
+      );
       return;
     }
 
@@ -276,7 +277,9 @@ function createAnalyzeSkillsAction(
     input.analyzing.value = false;
 
     if (!analysisResult.ok) {
-      input.toast.error(getErrorMessage(analysisResult.error, input.t("skillsPage.errors.analysisFailed")));
+      input.toast.error(
+        getErrorMessage(analysisResult.error, input.t("skillsPage.errors.analysisFailed")),
+      );
       return;
     }
 

@@ -49,10 +49,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-function updateTextValue(
-  event: Event,
-  emitEvent: "update:job-search-term",
-): void {
+function updateTextValue(event: Event, emitEvent: "update:job-search-term"): void {
   const target = event.target;
   if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement) {
     emit(emitEvent, target.value);

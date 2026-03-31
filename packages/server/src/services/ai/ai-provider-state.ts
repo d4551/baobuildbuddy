@@ -5,9 +5,7 @@ import type {
   AIProviderType,
   GenerateOptions,
 } from "@bao/shared";
-import {
-  AI_PROVIDER_DEFAULT_ORDER,
-} from "@bao/shared";
+import { AI_PROVIDER_DEFAULT_ORDER } from "@bao/shared";
 import { createProvider } from "./ai-provider-config";
 import type { AIProvider } from "./provider-interface";
 

@@ -630,10 +630,10 @@ const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
       if (process.platform === "win32") {
         /**
          * On Windows, `bun --bun run nuxt generate` (the package.json script)
-         * causes a segfault because Bun's Node compatibility layer cannot handle
+         * causes a segfault because Bun's Node interop layer cannot handle
          * Nuxt's complex SSR/prerender pipeline. Invoke `nuxt generate` directly
          * without the `--bun` override so Bun delegates heavy Node.js work to
-         * its standard compatibility path.
+         * its standard execution path.
          */
         await runCommand([process.execPath, "run", "nuxt", "generate"], {
           cwd: CLIENT_ROOT,
@@ -873,7 +873,7 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
   await compileRuntimeBinary(compileTarget, SERVER_ENTRYPOINT, serverExecutablePath);
   if (compileTarget.startsWith("bun-linux")) {
     await writeOutput(
-      "desktop-runtime: packing Linux server as gzip payload + POSIX launcher (AppImage / linuxdeploy compatibility)",
+      "desktop-runtime: packing Linux server as gzip payload + POSIX launcher (AppImage / linuxdeploy support)",
     );
     await packLinuxElfBinaryAsGzipLauncher(
       serverExecutablePath,
@@ -887,7 +887,7 @@ const prepareRuntimeResources = async (tauriTarget: string | null): Promise<void
   await stageBundledScriptRunnerRuntime(runtimeTargetInfo);
   if (compileTarget.startsWith("bun-linux")) {
     await writeOutput(
-      "desktop-runtime: packing Linux bundled Bun binary as gzip payload + POSIX launcher (AppImage / linuxdeploy compatibility)",
+      "desktop-runtime: packing Linux bundled Bun binary as gzip payload + POSIX launcher (AppImage / linuxdeploy support)",
     );
     await packLinuxElfBinaryAsGzipLauncher(
       join(RUNTIME_ROOT, runtimeTargetInfo.scriptRunnerExecutable),
@@ -930,7 +930,7 @@ const main = async (): Promise<void> => {
   );
 };
 
-await main().catch(async (error: unknown) => {
+await main().then(undefined, async (error: unknown) => {
   const message = toErrorMessage(error);
   await writeError(`desktop-runtime: preparation failed: ${message}`);
   process.exit(1);

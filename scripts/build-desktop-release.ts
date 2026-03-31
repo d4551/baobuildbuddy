@@ -1014,7 +1014,10 @@ const resolveWindowsNsisScriptPath = async (): Promise<string | null> => {
       if (!(await pathExists(nsisDirectory))) {
         return;
       }
-      const directoryEntries = await readdir(nsisDirectory).catch(() => [] as string[]);
+      const directoryEntries = await readdir(nsisDirectory).then(
+        (entries) => entries,
+        () => [] as string[],
+      );
       const nsiFiles = directoryEntries.filter((entry) => entry.toLowerCase().endsWith(".nsi"));
       const preferred = nsiFiles.find((entry) => entry === "installer.nsi") ?? nsiFiles[0];
       return preferred ? join(nsisDirectory, preferred) : undefined;

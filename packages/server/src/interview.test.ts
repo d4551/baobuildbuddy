@@ -17,7 +17,7 @@ import type * as schema from "./db/schema/schema-modules";
 const INTERVIEW_TEST_TIMEOUT_MS = 15_000;
 setDefaultTimeout(INTERVIEW_TEST_TIMEOUT_MS);
 
-import type { InterviewResponse, InterviewSession } from "@bao/shared";
+import { API_ENDPOINT_PREFIX, type InterviewResponse, type InterviewSession } from "@bao/shared";
 import { coverLetters } from "./db/schema/cover-letters";
 import { portfolioProjects, portfolios } from "./db/schema/portfolios";
 import { resumes } from "./db/schema/resumes";
@@ -46,7 +46,7 @@ async function createTestHarness(): Promise<TestHarness> {
   const seedModule = await import("./db/seed");
   seedModule.seedDatabase(dbModule.db);
 
-  const app = new Elysia({ prefix: "/api" }).use(routesModule.interviewRoutes);
+  const app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.interviewRoutes);
 
   return {
     app,
@@ -57,6 +57,10 @@ async function createTestHarness(): Promise<TestHarness> {
 }
 
 let harness: TestHarness;
+const INTERVIEW_SESSIONS_ENDPOINT = `${API_ENDPOINT_PREFIX}/interview/sessions`;
+
+const buildInterviewResponseEndpoint = (sessionId: string): string =>
+  `${INTERVIEW_SESSIONS_ENDPOINT}/${sessionId}/response`;
 
 function clearInterviewCandidateFixtures(): void {
   harness.sqlite.exec("DELETE FROM portfolio_projects WHERE id LIKE 'portfolio-project-%'");
@@ -285,7 +289,7 @@ function registerRoleTypeCompatibilityTest(): void {
       role: string;
       totalQuestions: number;
       message: string;
-    }>(harness.app, "POST", "/api/interview/sessions", {
+    }>(harness.app, "POST", INTERVIEW_SESSIONS_ENDPOINT, {
       studioId: "activision-blizzard",
       config: {
         roleType: "Build Engineer",
@@ -307,7 +311,7 @@ function registerCanonicalResponsePayloadTest(): void {
       id: string;
       totalQuestions: number;
       totalResponses: number;
-    }>(harness.app, "POST", "/api/interview/sessions", {
+    }>(harness.app, "POST", INTERVIEW_SESSIONS_ENDPOINT, {
       studioId: "ubisoft",
       config: {
         roleType: "Technical Lead",
@@ -319,7 +323,7 @@ function registerCanonicalResponsePayloadTest(): void {
       status: string;
       totalResponses: number;
       message: string;
-    }>(harness.app, "POST", `/api/interview/sessions/${created.body.id}/response`, {
+    }>(harness.app, "POST", buildInterviewResponseEndpoint(created.body.id), {
       response:
         "I structured the interview by evaluating throughput, latency, and failure domains.",
       questionIndex: 0,
@@ -354,7 +358,7 @@ function registerJobContextPersistenceTest(): void {
         };
       };
       questions: Array<{ question: string }>;
-    }>(harness.app, "POST", "/api/interview/sessions", {
+    }>(harness.app, "POST", INTERVIEW_SESSIONS_ENDPOINT, {
       config: {
         interviewMode: "job",
         questionCount: 2,
@@ -394,7 +398,7 @@ function registerConversationConfigPersistenceTest(): void {
         };
       };
       totalQuestions: number;
-    }>(harness.app, "POST", "/api/interview/sessions", {
+    }>(harness.app, "POST", INTERVIEW_SESSIONS_ENDPOINT, {
       studioId: "riot-games",
       config: {
         questionCount: 3,
@@ -416,18 +420,18 @@ function registerConversationConfigPersistenceTest(): void {
   });
 }
 
-describe("interview API compatibility", () => {
+describe("interview API contract", () => {
   registerRoleTypeCompatibilityTest();
 });
 
-describe("interview API response payload compatibility", () => {
+describe("interview API response payload contract", () => {
   registerCanonicalResponsePayloadTest();
 });
 
-describe("interview API job context compatibility", () => {
+describe("interview API job context contract", () => {
   registerJobContextPersistenceTest();
 });
 
-describe("interview API conversation config compatibility", () => {
+describe("interview API conversation config contract", () => {
   registerConversationConfigPersistenceTest();
 });

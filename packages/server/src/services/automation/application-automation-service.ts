@@ -16,35 +16,22 @@ import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { createServerLogger } from "../../utils/logger";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
-import {
-  createEmailResponseRun,
-  executeEmailResponseRun,
-} from "./automation-email-response";
-import {
-  normalizeEmailResponsePayload,
-} from "./automation-email-response-payload";
-import {
-  normalizeScrapeTarget,
-  type JobApplyPayload,
-} from "./automation-run-inputs";
+import { createEmailResponseRun, executeEmailResponseRun } from "./automation-email-response";
+import { normalizeEmailResponsePayload } from "./automation-email-response-payload";
+import { normalizeScrapeTarget, type JobApplyPayload } from "./automation-run-inputs";
 import {
   executePreparedJobApplyRun,
   createExecutionTracking,
   handleJobApplyExecutionFailure,
   markJobApplyRunStarted,
 } from "./automation-job-apply-execution";
-import {
-  prepareJobApplyRun,
-} from "./automation-job-apply-preparation";
+import { prepareJobApplyRun } from "./automation-job-apply-preparation";
 import { AutomationProgressEvents } from "./automation-progress-events";
 import { AutomationRunCreator } from "./automation-run-creation";
 import { AutomationRunScheduler } from "./automation-run-scheduler";
 import { AutomationScheduledRunExecutor } from "./automation-scheduled-run-executor";
 import { executeScrapeRun, getRpaCapabilityAudit } from "./automation-scrape-run";
-import {
-  loadEmailTransportConfig,
-  tryLoadAIService,
-} from "./automation-settings-support";
+import { loadEmailTransportConfig, tryLoadAIService } from "./automation-settings-support";
 import type { AutomationRunRow } from "./automation-service-contracts";
 
 const automationServiceLogger = createServerLogger("application-automation-service");

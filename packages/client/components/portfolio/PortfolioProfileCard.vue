@@ -13,10 +13,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-function updatePortfolioField<K extends keyof PortfolioMetadata>(
-  key: K,
-  event: Event,
-): void {
+function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: Event): void {
   const target = event.target;
   if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
     return;

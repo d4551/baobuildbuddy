@@ -4,11 +4,8 @@ import type { Page } from "playwright";
 import { closeAutomationBrowser, launchAutomationBrowser } from "../runtime/browser";
 import { automationRuntimeConfig } from "../runtime/config";
 import type { ProtocolEmitter } from "../runtime/protocol";
-import type { JobApplyAdapter } from "./adapters";
-import {
-  APPLY_LINK_SELECTOR,
-  withRetry,
-} from "./runtime-locators";
+import type { JobApplyStrategy } from "./adapters";
+import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
 import {
   addStep,
   buildOutputDirectory,
@@ -20,7 +17,7 @@ import {
   JOB_APPLY_STEP_INDEX,
   type StepRecord,
 } from "./runtime-contracts";
-import { resolveJobApplyAdapter, JOB_APPLY_TOTAL_STEPS } from "./adapters";
+import { resolveJobApplyStrategy, JOB_APPLY_TOTAL_STEPS } from "./adapters";
 
 const buildResult = (
   success: boolean,
@@ -189,17 +186,17 @@ export const initializeApplicationPage = async (
   return null;
 };
 
-export const detectAdapter = async (state: JobApplyExecutionState): Promise<JobApplyAdapter> => {
+export const detectStrategy = async (state: JobApplyExecutionState): Promise<JobApplyStrategy> => {
   emitProgress(state.emitter, "detect_fields", JOB_APPLY_STEP_INDEX.detectFields);
-  const adapter = resolveJobApplyAdapter(state.session.page.url());
+  const strategy = resolveJobApplyStrategy(state.session.page.url());
   const fieldCount = await countFormFields(state.session.page);
   addStep(
     state.steps,
     "detect_fields",
     "ok",
-    `Detected ${String(fieldCount)} form fields via ${adapter.id}`,
+    `Detected ${String(fieldCount)} form fields via ${strategy.id}`,
   );
-  return adapter;
+  return strategy;
 };
 
 export const finalizeSuccessfulRun = async (state: JobApplyExecutionState): Promise<number> => {

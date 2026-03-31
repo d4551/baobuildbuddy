@@ -2,7 +2,7 @@ import type { JobApplyScriptEnvelope } from "@bao/shared";
 import type { Page } from "playwright";
 import type { AutomationBrowserSession } from "../runtime/browser";
 import type { ProtocolEmitter } from "../runtime/protocol";
-import type { JobApplyAdapter, JobApplySelectorBundle } from "./adapters";
+import type { JobApplyStrategy, JobApplySelectorBundle } from "./adapters";
 
 export type StepStatus = "ok" | "error";
 
@@ -38,7 +38,7 @@ export type CaptureScreenshotOptions = {
 
 export type FillTextFieldStepOptions = {
   state: JobApplyExecutionState;
-  adapter: JobApplyAdapter;
+  strategy: JobApplyStrategy;
   selectorKey: keyof JobApplySelectorBundle;
   action: string;
   step: number;

@@ -1,4 +1,5 @@
 import { writeError, writeOutput } from "./utils/cli-output";
+import { shouldIgnorePath } from "./utils/validation-helpers";
 
 type Violation = {
   filePath: string;
@@ -11,16 +12,8 @@ type SeoBlock = {
   offset: number;
 };
 
-const corePagePaths = [
-  "packages/client/pages/index.vue",
-  "packages/client/pages/setup.vue",
-  "packages/client/pages/resume/index.vue",
-  "packages/client/pages/jobs/index.vue",
-  "packages/client/pages/interview/index.vue",
-  "packages/client/pages/studios/index.vue",
-  "packages/client/pages/automation/index.vue",
-  "packages/client/pages/settings.vue",
-] as const;
+const projectRoot = process.cwd();
+const clientPagesRoot = "packages/client/pages";
 
 const seoComposableToken = "useServerSeoMeta";
 const seoComposableClosePattern = /\}\s*\)\s*;/u;
@@ -158,8 +151,13 @@ const collectFileViolations = async (filePath: string): Promise<Violation[]> => 
 };
 
 const collectViolations = async (): Promise<Violation[]> => {
+  const glob = new Bun.Glob(`${clientPagesRoot}/**/*.vue`);
+  const pagePaths = (await Array.fromAsync(glob.scan({ cwd: projectRoot, onlyFiles: true })))
+    .map((pathValue) => pathValue.replace(/\\/gu, "/"))
+    .filter((pathValue) => !shouldIgnorePath(pathValue));
+
   const perFileViolations = await Promise.all(
-    corePagePaths.map((pathValue) => collectFileViolations(pathValue)),
+    pagePaths.map((pathValue) => collectFileViolations(pathValue)),
   );
   return perFileViolations.flat();
 };
@@ -167,7 +165,7 @@ const collectViolations = async (): Promise<Violation[]> => {
 const main = async (): Promise<void> => {
   const violations = await collectViolations();
   if (violations.length === 0) {
-    await writeOutput("Page SEO metadata validation passed for all core pages.");
+    await writeOutput("Page SEO metadata validation passed for all client pages.");
     return;
   }
 

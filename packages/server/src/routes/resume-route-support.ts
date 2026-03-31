@@ -159,8 +159,7 @@ export const exportResumeAsset = async (
       set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
       return {
         error: API_ERROR_EXPORT_RESUME,
-        details:
-          docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
+        details: docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
       };
     }
     return createDocxAttachmentResponse(docxResult.value, `resume-${resumeId}.docx`);

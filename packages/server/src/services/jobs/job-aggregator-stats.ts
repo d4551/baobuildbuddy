@@ -34,8 +34,7 @@ export const getJobStats = async (): Promise<{
     bySource[source] = (bySource[source] || 0) + 1;
 
     if (job.experienceLevel) {
-      byExperienceLevel[job.experienceLevel] =
-        (byExperienceLevel[job.experienceLevel] || 0) + 1;
+      byExperienceLevel[job.experienceLevel] = (byExperienceLevel[job.experienceLevel] || 0) + 1;
     }
 
     if (job.remote) {
@@ -46,8 +45,7 @@ export const getJobStats = async (): Promise<{
   const lastUpdated =
     allJobs.length > 0
       ? allJobs.reduce(
-          (latest, job) =>
-            new Date(job.updatedAt) > new Date(latest) ? job.updatedAt : latest,
+          (latest, job) => (new Date(job.updatedAt) > new Date(latest) ? job.updatedAt : latest),
           allJobs[0].updatedAt,
         )
       : null;

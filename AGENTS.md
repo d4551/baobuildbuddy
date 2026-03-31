@@ -10,7 +10,7 @@ BaoBuildBuddy is a Bun-first monorepo (5 workspace packages) for game-industry c
 | `@bao/client` | `packages/client`  | Nuxt 4 SSR frontend (port 3001)              |
 | `@bao/shared` | `packages/shared`  | Shared types, schemas, constants             |
 | `@bao/scraper`| `packages/scraper` | Bun + Playwright automation and scraper exes |
-| `@bao/desktop`| `packages/desktop` | Tauri desktop wrapper (optional)             |
+| `@bao/desktop`| `packages/desktop` | Tauri desktop shell (optional)               |
 
 **Stack truth:** Client data fetching uses **Vue / Nuxt** (`NuxtLink`, `useAsyncData`, composables), not htmx. The ORM is **Drizzle**, not Prisma. Themes are defined once in `packages/client/assets/css/main.css` via daisyUI **`corporate` (light, default) and `business` (prefers-dark)**; `useTheme` + `data-theme` on the shell keep persistence/settings in sync, and the navbar uses daisyUI **`swap swap-rotate`** with **`input.theme-controller[value="business"]`**. See `docs/feature-trace-matrix.md` for route-to-page mapping.
 

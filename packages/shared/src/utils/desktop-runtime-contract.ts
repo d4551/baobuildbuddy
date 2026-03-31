@@ -32,7 +32,7 @@ export type DesktopRuntimeHostPlatform = Extract<NodeJS.Platform, "darwin" | "li
 export type DesktopRuntimeHostArch = "arm64" | "x64";
 
 /**
- * Typed runtime manifest contract consumed by the desktop wrapper and verification scripts.
+ * Typed runtime manifest contract consumed by the desktop host and verification scripts.
  */
 export const desktopRuntimeManifestSchema = z.object({
   serverExecutable: z.string().min(1),

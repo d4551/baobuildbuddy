@@ -1,9 +1,10 @@
-import { collectDefinedStringValues, PORTFOLIO_PROJECT_SPACE, type PortfolioProject } from "@bao/shared";
-import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
 import {
-  drawPortfolioWrappedText,
-  ensurePortfolioSpace,
-} from "./export-service-portfolio-context";
+  collectDefinedStringValues,
+  PORTFOLIO_PROJECT_SPACE,
+  type PortfolioProject,
+} from "@bao/shared";
+import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
+import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
 function renderPortfolioProjectHeading(
   context: PortfolioRenderContext,
@@ -75,7 +76,9 @@ function renderPortfolioTechnicalDetails(
     project.platforms && project.platforms.length > 0
       ? `Platforms: ${project.platforms.join(", ")}`
       : undefined,
-    project.engines && project.engines.length > 0 ? `Engines: ${project.engines.join(", ")}` : undefined,
+    project.engines && project.engines.length > 0
+      ? `Engines: ${project.engines.join(", ")}`
+      : undefined,
   ]);
   if (details.length === 0) {
     return;

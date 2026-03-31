@@ -7,7 +7,7 @@ const REPO_ROOT = resolve(import.meta.dir, "../..");
  * Build the command prefix used to invoke Biome. Uses `bunx` (i.e. `bun x`)
  * so that Bun resolves the locally-installed @biomejs/biome binary itself,
  * which works consistently across Windows, macOS and Linux regardless of
- * the extension or shim format that `bun install` wrote into node_modules/.bin/.
+ * the extension or launcher format that `bun install` wrote into node_modules/.bin/.
  */
 const BIOME_COMMAND_PREFIX = [process.execPath, "x", "biome"];
 const TEXT_ENCODER = new TextEncoder();
@@ -87,7 +87,7 @@ export const formatFilesWithBiome = async (filePaths: readonly string[]): Promis
  * Serializes JSON with a trailing newline, then normalizes the file with Biome.
  *
  * @param filePath Absolute or repo-relative target path.
- * @param value JSON-compatible value to persist.
+ * @param value JSON-serializable value to persist.
  */
 export const writeFormattedJsonFile = async (filePath: string, value: unknown): Promise<void> => {
   const absolutePath = resolve(filePath);
@@ -99,7 +99,7 @@ export const writeFormattedJsonFile = async (filePath: string, value: unknown): 
  * Returns the Biome-formatted JSON text for a value without mutating repository files.
  *
  * @param filePathHint Representative path used for Biome parser inference.
- * @param value JSON-compatible value to format.
+ * @param value JSON-serializable value to format.
  */
 export const formatJsonWithBiome = async (
   filePathHint: string,

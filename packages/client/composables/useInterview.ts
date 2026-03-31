@@ -1,15 +1,8 @@
 import type { InterviewConfig, InterviewSession } from "@bao/shared";
-import {
-  INTERVIEW_FALLBACK_STUDIO_ID,
-  STATE_KEYS,
-} from "@bao/shared";
+import { INTERVIEW_FALLBACK_STUDIO_ID, STATE_KEYS } from "@bao/shared";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
-import {
-  toInterviewSession,
-  toInterviewSessions,
-  toNumericRecord,
-} from "./interview-normalizers";
+import { toInterviewSession, toInterviewSessions, toNumericRecord } from "./interview-normalizers";
 
 interface SubmitResponseInput {
   questionId?: string;

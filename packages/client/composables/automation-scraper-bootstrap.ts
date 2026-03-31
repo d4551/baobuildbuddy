@@ -26,7 +26,9 @@ export const RUN_STATE_BADGE_CLASS: Record<AutomationScraperRunState, string> = 
 };
 
 const createTargetRecord = <TValue>(factory: () => TValue): TargetRecord<TValue> =>
-  Object.fromEntries(AUTOMATION_SCRAPE_TARGETS.map((target) => [target, factory()])) as TargetRecord<TValue>;
+  Object.fromEntries(
+    AUTOMATION_SCRAPE_TARGETS.map((target) => [target, factory()]),
+  ) as TargetRecord<TValue>;
 
 export const isScrapeCapabilityCard = (
   capability: RpaCapabilityAuditEntry,

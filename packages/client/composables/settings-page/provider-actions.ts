@@ -32,21 +32,27 @@ function createHandleTest(state: SettingsPageState) {
     state.testingProvider.value = providerId;
     state.testResults[providerId] = null;
 
-    const providerTestResult = await state.testApiKey(
-      providerId,
-      testInput,
-      providerId === "local"
-        ? state.localProviderDraftState.value.configuredModel || undefined
-        : undefined,
-    ).then(
-      (value) => ({ ok: true as const, value }),
-      (error: unknown) => ({ ok: false as const, error }),
-    );
+    const providerTestResult = await state
+      .testApiKey(
+        providerId,
+        testInput,
+        providerId === "local"
+          ? state.localProviderDraftState.value.configuredModel || undefined
+          : undefined,
+      )
+      .then(
+        (value) => ({ ok: true as const, value }),
+        (error: unknown) => ({ ok: false as const, error }),
+      );
 
     state.testingProvider.value = null;
 
     if (!providerTestResult.ok) {
-      showToastError(state.$toast, providerTestResult.error, state.t("settings.errors.failedToTestProvider"));
+      showToastError(
+        state.$toast,
+        providerTestResult.error,
+        state.t("settings.errors.failedToTestProvider"),
+      );
       state.testResults[providerId] = { valid: false };
       return;
     }

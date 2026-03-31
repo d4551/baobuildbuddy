@@ -9,8 +9,10 @@ import {
   SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
 
@@ -54,30 +56,32 @@ export const userRoutes = new Elysia({ prefix: "/user", tags: ["User"] })
       return updated[0];
     },
     {
-      body: t.Object({
-        name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        email: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
-        phone: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_PHONE })),
-        location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        linkedin: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        github: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        summary: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-        currentRole: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        currentCompany: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        yearsExperience: t.Optional(t.Number({ minimum: 0, maximum: 80 })),
-        technicalSkills: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
-          }),
-        ),
-        softSkills: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-        gamingExperience: t.Optional(t.Record(t.String(), t.Unknown())),
-        careerGoals: t.Optional(t.Record(t.String(), t.Unknown())),
-      }),
+      body: StandardSchemaV1(
+        Type.Object({
+          name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          email: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+          phone: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_PHONE })),
+          location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+          linkedin: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+          github: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+          summary: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+          currentRole: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          currentCompany: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          yearsExperience: Type.Optional(Type.Number({ minimum: 0, maximum: 80 })),
+          technicalSkills: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+              maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
+            }),
+          ),
+          softSkills: Type.Optional(
+            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+              maxItems: SCHEMA_MAX_ITEMS_LARGE,
+            }),
+          ),
+          gamingExperience: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+          careerGoals: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+        }),
+      ),
     },
   );

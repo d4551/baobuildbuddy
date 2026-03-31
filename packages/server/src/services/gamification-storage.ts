@@ -9,9 +9,7 @@ import {
 } from "./gamification-definitions";
 import { appendActionHistoryEntry } from "./gamification-progress";
 
-function toUserGamificationData(
-  row: typeof gamification.$inferSelect,
-): UserGamificationData {
+function toUserGamificationData(row: typeof gamification.$inferSelect): UserGamificationData {
   const progress: UserGamificationData = {
     xp: row.xp || 0,
     level: row.level || 1,

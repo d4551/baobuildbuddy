@@ -54,9 +54,7 @@ export const normalizeStringArray = (value: unknown): string[] =>
 const normalizeSkillEvidenceType = (value: unknown): SkillEvidenceType =>
   typeof value === "string" && isSkillEvidenceType(value) ? value : "document";
 
-const normalizeSkillEvidenceVerification = (
-  value: unknown,
-): SkillEvidenceVerificationStatus =>
+const normalizeSkillEvidenceVerification = (value: unknown): SkillEvidenceVerificationStatus =>
   typeof value === "string" && isSkillEvidenceVerificationStatus(value) ? value : "pending";
 
 const normalizeSkillEvidenceEntry = (value: unknown): SkillEvidence | null => {

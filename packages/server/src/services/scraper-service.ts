@@ -7,10 +7,7 @@ import {
   type ScrapedJob,
 } from "@bao/shared";
 import type { ScriptReferenceOverride } from "./scraper-service-contracts";
-import {
-  PORTAL_SCRIPT_ID_BY_ID,
-  STUDIO_SCRAPER_SCRIPT_ID,
-} from "./scraper-service-contracts";
+import { PORTAL_SCRIPT_ID_BY_ID, STUDIO_SCRAPER_SCRIPT_ID } from "./scraper-service-contracts";
 import {
   createScrapeEnrichmentAccumulator,
   createScrapeEnrichmentService,
@@ -39,7 +36,10 @@ export type { ScrapedJob } from "./scraper-service-contracts";
  * Scraper service for studio/job ingestion via Bun automation scripts.
  */
 export class ScraperService {
-  private createScrapeFailureResult(errors: string[], enrichment = createScrapeEnrichmentAccumulator()) {
+  private createScrapeFailureResult(
+    errors: string[],
+    enrichment = createScrapeEnrichmentAccumulator(),
+  ) {
     return { scraped: 0, upserted: 0, errors, enrichment: toScrapeEnrichmentSummary(enrichment) };
   }
 
@@ -68,18 +68,17 @@ export class ScraperService {
     await Promise.allSettled(
       normalizedResult.jobs.map((job, index) =>
         runWithErrorCollection(async () => {
-          const sourceRow =
-            params.parsedRows.rows[index] ?? {
-              title: job.title,
-              company: job.company,
-              location: job.location,
-              description: job.description,
-              url: job.url,
-              source: job.source,
-              contentHash: job.contentHash,
-              postDate: job.postedDate,
-              remote: job.remote,
-            };
+          const sourceRow = params.parsedRows.rows[index] ?? {
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            description: job.description,
+            url: job.url,
+            source: job.source,
+            contentHash: job.contentHash,
+            postDate: job.postedDate,
+            remote: job.remote,
+          };
           const enrichmentAttempt = await enrichJobRow(sourceRow, aiService);
           await persistScrapedJobRow(job, {
             now: params.now,
@@ -198,8 +197,9 @@ export class ScraperService {
 
   async scrapeHitmarkerJobsRaw(
     sourceUrl?: string,
-    scriptReference: AutomationScriptId | ScriptReferenceOverride =
-      PORTAL_SCRIPT_ID_BY_ID.hitmarker,
+    scriptReference:
+      | AutomationScriptId
+      | ScriptReferenceOverride = PORTAL_SCRIPT_ID_BY_ID.hitmarker,
   ): Promise<ScrapedJob[]> {
     return this.scrapePortalJobsRaw("hitmarker", sourceUrl, scriptReference);
   }
@@ -225,8 +225,9 @@ export class ScraperService {
   }
 
   async scrapeHitmarkerJobs(
-    scriptReference: AutomationScriptId | ScriptReferenceOverride =
-      PORTAL_SCRIPT_ID_BY_ID.hitmarker,
+    scriptReference:
+      | AutomationScriptId
+      | ScriptReferenceOverride = PORTAL_SCRIPT_ID_BY_ID.hitmarker,
   ): Promise<ScraperOperationResult> {
     return this.scrapePortalJobs("hitmarker", scriptReference);
   }

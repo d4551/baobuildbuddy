@@ -1,22 +1,10 @@
 import type { ResumeData } from "@bao/shared";
 import { PDFDocument } from "pdf-lib";
-import {
-  createResumeContext,
-  resolveResumePdfTemplate,
-} from "./export-service-resume-layout";
-import {
-  renderResumeEducation,
-  renderResumeSkills,
-} from "./export-service-resume-profile";
-import {
-  renderResumeHeader,
-  renderResumeSummary,
-} from "./export-service-resume-header";
+import { createResumeContext, resolveResumePdfTemplate } from "./export-service-resume-layout";
+import { renderResumeEducation, renderResumeSkills } from "./export-service-resume-profile";
+import { renderResumeHeader, renderResumeSummary } from "./export-service-resume-header";
 import { renderResumeGamingExperience } from "./export-service-resume-profile";
-import {
-  renderResumeExperience,
-  renderResumeProjects,
-} from "./export-service-resume-work";
+import { renderResumeExperience, renderResumeProjects } from "./export-service-resume-work";
 
 export async function exportResumePdf(
   resume: ResumeData,
@@ -44,7 +32,11 @@ export async function optimizeResumePdfForOnePage(
 
   const optimized: ResumeData = structuredClone(resume);
   const optimizedProjects = optimized.projects;
-  if (Array.isArray(optimizedProjects) && optimizedProjects.length > 0 && pdfDoc.getPageCount() > 1) {
+  if (
+    Array.isArray(optimizedProjects) &&
+    optimizedProjects.length > 0 &&
+    pdfDoc.getPageCount() > 1
+  ) {
     optimized.projects = optimizedProjects.slice(0, 2);
     pdfBytes = await exportResumePdf(optimized, templateName);
     pdfDoc = await PDFDocument.load(pdfBytes);

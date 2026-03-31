@@ -8,6 +8,11 @@ definePageMeta({
 });
 
 const { t } = useI18n();
+useServerSeoMeta({
+  title: () => t("coverLetterPage.title"),
+  description: () => t("coverLetterPage.subtitle"),
+});
+
 const {
   coverLetters,
   coverLetterCards,

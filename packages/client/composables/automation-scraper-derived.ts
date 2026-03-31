@@ -5,9 +5,7 @@ import {
 } from "@bao/shared";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";
-import {
-  isScrapeCapabilityCard,
-} from "~/composables/automation-scraper-bootstrap";
+import { isScrapeCapabilityCard } from "~/composables/automation-scraper-bootstrap";
 import {
   createAutomationPresentation,
   createAutomationSummaryStats,
@@ -129,10 +127,13 @@ export function useAutomationScraperDerived(
     jobCount: jobFeed.jobCount,
     jobInterviewFocusAreas: (job: AutomationScraperJobView) =>
       presentation.jobInterviewFocusAreas(job),
-    latestRunNoticeText: (target: AutomationScrapeTarget) => presentation.latestRunNoticeText(target),
-    latestRunStatusText: (target: AutomationScrapeTarget) => presentation.latestRunStatusText(target),
+    latestRunNoticeText: (target: AutomationScrapeTarget) =>
+      presentation.latestRunNoticeText(target),
+    latestRunStatusText: (target: AutomationScrapeTarget) =>
+      presentation.latestRunStatusText(target),
     relativePostedDate: (date: string) => presentation.relativePostedDate(date),
-    runStateBadgeClass: (state: AutomationScraperRunState) => presentation.runStateBadgeClass(state),
+    runStateBadgeClass: (state: AutomationScraperRunState) =>
+      presentation.runStateBadgeClass(state),
     runStateLabel: (state: AutomationScraperRunState) => presentation.runStateLabel(state),
     scrapeCapabilities: capabilityState.scrapeCapabilities,
     summaryStats,

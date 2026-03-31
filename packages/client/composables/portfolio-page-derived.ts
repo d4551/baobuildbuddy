@@ -74,11 +74,10 @@ function usePortfolioProjectTechnologySuggestions(
   });
 }
 
-export function usePortfolioPageDerived({
-  portfolioForm,
-  projects,
-  searchQuery,
-}: PortfolioPageDerivedInput, t: ComposerTranslation) {
+export function usePortfolioPageDerived(
+  { portfolioForm, projects, searchQuery }: PortfolioPageDerivedInput,
+  t: ComposerTranslation,
+) {
   const search = usePortfolioProjectSearch(projects, searchQuery, t);
 
   const featuredProjectCount = computed(
@@ -92,7 +91,9 @@ export function usePortfolioPageDerived({
       Boolean(portfolioForm.email?.trim()) ||
       Boolean(portfolioForm.website?.trim()),
   );
-  const projectTechnologySuggestions = usePortfolioProjectTechnologySuggestions(search.displayProjects);
+  const projectTechnologySuggestions = usePortfolioProjectTechnologySuggestions(
+    search.displayProjects,
+  );
 
   return {
     displayProjects: search.displayProjects,

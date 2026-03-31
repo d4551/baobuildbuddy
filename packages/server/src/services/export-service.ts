@@ -1,8 +1,5 @@
 import type { PortfolioMetadata, PortfolioProject, ResumeData } from "@bao/shared";
-import type {
-  CoverLetterPayload,
-  CoverLetterUserProfile,
-} from "./export-service-contracts";
+import type { CoverLetterPayload, CoverLetterUserProfile } from "./export-service-contracts";
 import { exportCoverLetterPdf } from "./export-service-cover-letter";
 import { exportPortfolioPdf } from "./export-service-portfolio";
 import { exportResumePdf, optimizeResumePdfForOnePage } from "./export-service-resume";

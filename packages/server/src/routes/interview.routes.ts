@@ -1,4 +1,5 @@
 import { HTTP_STATUS_CREATED } from "@bao/shared";
+import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import {
   createSessionBodySchema,
@@ -24,7 +25,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview", tags: ["Interv
       return result.body;
     },
     {
-      body: createSessionBodySchema,
+      body: StandardSchemaV1(createSessionBodySchema),
     },
   )
   .get("/sessions", async () => {
@@ -41,7 +42,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview", tags: ["Interv
       return result.body;
     },
     {
-      params: interviewSessionParamsSchema,
+      params: StandardSchemaV1(interviewSessionParamsSchema),
     },
   )
   .post(
@@ -54,8 +55,8 @@ export const interviewRoutes = new Elysia({ prefix: "/interview", tags: ["Interv
       return result.body;
     },
     {
-      params: interviewSessionParamsSchema,
-      body: submitResponseBodySchema,
+      params: StandardSchemaV1(interviewSessionParamsSchema),
+      body: StandardSchemaV1(submitResponseBodySchema),
     },
   )
   .post(
@@ -68,7 +69,7 @@ export const interviewRoutes = new Elysia({ prefix: "/interview", tags: ["Interv
       return result.body;
     },
     {
-      params: interviewSessionParamsSchema,
+      params: StandardSchemaV1(interviewSessionParamsSchema),
     },
   )
   .get("/stats", async () => getInterviewStats());

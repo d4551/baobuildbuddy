@@ -112,8 +112,15 @@ describe("useSettings ai diagnostics", () => {
 
 describe("useSettings job taxonomy", () => {
   it("updates job taxonomy through the dedicated settings endpoint", async () => {
-    const mockSettings = { id: "default", theme: "corporate", jobTaxonomy: { keywords: [], studioRules: [] } };
-    mockApi.settings["job-taxonomy"].put.mockResolvedValueOnce({ data: { success: true }, error: null });
+    const mockSettings = {
+      id: "default",
+      theme: "corporate",
+      jobTaxonomy: { keywords: [], studioRules: [] },
+    };
+    mockApi.settings["job-taxonomy"].put.mockResolvedValueOnce({
+      data: { success: true },
+      error: null,
+    });
     mockApi.settings.get.mockResolvedValueOnce({ data: mockSettings, error: null });
 
     const { updateJobTaxonomy } = useSettings();

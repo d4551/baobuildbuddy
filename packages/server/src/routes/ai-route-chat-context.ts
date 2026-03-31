@@ -11,44 +11,69 @@ import {
   SCHEMA_MAX_LENGTH_SOURCE,
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared";
-import { t } from "elysia";
+import Type, { type StaticParse } from "baobox";
 
-export const chatContextSchema = t.Object({
-  source: t.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE }),
-  domain: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE })),
-  route: t.Object({
-    path: t.String({ maxLength: SCHEMA_MAX_LENGTH_URL }),
-    name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-    params: t.Record(t.String(), t.String()),
-    query: t.Record(t.String(), t.String()),
-  }),
-  entity: t.Optional(
-    t.Object({
-      type: t.String({ maxLength: SCHEMA_MAX_LENGTH_ENTITY_TYPE }),
-      id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-      label: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-    }),
-  ),
-  state: t.Object({
-    hasResumes: t.Boolean(),
-    resumeCount: t.Number(),
-    hasJobs: t.Boolean(),
-    jobCount: t.Number(),
-    hasStudios: t.Boolean(),
-    studioCount: t.Number(),
-    hasInterviewSessions: t.Boolean(),
-    interviewSessionCount: t.Number(),
-    hasPortfolioProjects: t.Boolean(),
-    portfolioProjectCount: t.Number(),
-  }),
-});
-
-export const aiPreferenceSchema = t.Record(
-  t.String(),
-  t.Union([t.String(), t.Number(), t.Boolean()]),
+export const chatContextSchema = Type.Object(
+  {
+    source: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE }),
+    domain: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE })),
+    route: Type.Object(
+      {
+        path: Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL }),
+        name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+        params: Type.Record(Type.String(), Type.String()),
+        query: Type.Record(Type.String(), Type.String()),
+      },
+      { required: ["path", "params", "query"] },
+    ),
+    entity: Type.Optional(
+      Type.Object(
+        {
+          type: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ENTITY_TYPE }),
+          id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+          label: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+        },
+        { required: ["type", "id"] },
+      ),
+    ),
+    state: Type.Object(
+      {
+        hasResumes: Type.Boolean(),
+        resumeCount: Type.Number(),
+        hasJobs: Type.Boolean(),
+        jobCount: Type.Number(),
+        hasStudios: Type.Boolean(),
+        studioCount: Type.Number(),
+        hasInterviewSessions: Type.Boolean(),
+        interviewSessionCount: Type.Number(),
+        hasPortfolioProjects: Type.Boolean(),
+        portfolioProjectCount: Type.Number(),
+      },
+      {
+        required: [
+          "hasResumes",
+          "resumeCount",
+          "hasJobs",
+          "jobCount",
+          "hasStudios",
+          "studioCount",
+          "hasInterviewSessions",
+          "interviewSessionCount",
+          "hasPortfolioProjects",
+          "portfolioProjectCount",
+        ],
+      },
+    ),
+  },
+  { required: ["source", "route", "state"] },
 );
 
-export type ChatContextPayload = typeof chatContextSchema.static;
+export const aiPreferenceSchema = Type.Record(
+  Type.String(),
+  Type.Union([Type.String(), Type.Number(), Type.Boolean()]),
+);
+
+export type ChatContextPayload = StaticParse<typeof chatContextSchema>;
 
 const isValidChatContextSource = (value: string): value is AIChatContext["source"] =>
   AI_CHAT_CONTEXT_SOURCE_IDS.some((entry) => entry === value);
@@ -61,45 +86,59 @@ const isValidChatContextEntityType = (
 ): value is NonNullable<AIChatContext["entity"]>["type"] =>
   AI_CHAT_CONTEXT_ENTITY_TYPE_IDS.some((entry) => entry === value);
 
+const normalizeRouteName = (name: string | undefined): string | undefined =>
+  typeof name === "string" && name.trim().length > 0 ? name : undefined;
+
+const normalizeChatContextEntity = (
+  entity: ChatContextPayload["entity"],
+): AIChatContext["entity"] | undefined => {
+  if (!(entity && isValidChatContextEntityType(entity.type))) {
+    return;
+  }
+
+  const normalizedLabel =
+    typeof entity.label === "string" && entity.label.trim().length > 0 ? entity.label : undefined;
+
+  return {
+    type: entity.type,
+    id: entity.id,
+    ...(normalizedLabel ? { label: normalizedLabel } : {}),
+  };
+};
+
 export function normalizeClientChatContext(context?: ChatContextPayload): AIChatContext | null {
   if (!(context && isValidChatContextSource(context.source))) {
     return null;
   }
 
-  const fallbackDomain = inferAIChatDomainFromRoutePath(context.route.path);
+  const route = context.route;
+  const state = context.state;
+  if (!(route && state)) {
+    return null;
+  }
+
+  const fallbackDomain = inferAIChatDomainFromRoutePath(route.path);
   const domain =
     typeof context.domain === "string" && isValidChatContextDomain(context.domain)
       ? context.domain
       : fallbackDomain;
-
-  const routeName =
-    typeof context.route.name === "string" && context.route.name.trim().length > 0
-      ? context.route.name
-      : undefined;
+  const routeName = normalizeRouteName(route.name);
 
   const normalizedContext: AIChatContext = {
     source: context.source,
     domain,
     route: {
-      path: context.route.path,
+      path: route.path,
       ...(routeName ? { name: routeName } : {}),
-      params: context.route.params,
-      query: context.route.query,
+      params: route.params ?? {},
+      query: route.query ?? {},
     },
-    state: context.state,
+    state,
   };
 
-  if (context.entity && isValidChatContextEntityType(context.entity.type)) {
-    const normalizedLabel =
-      typeof context.entity.label === "string" && context.entity.label.trim().length > 0
-        ? context.entity.label
-        : undefined;
-
-    normalizedContext.entity = {
-      type: context.entity.type,
-      id: context.entity.id,
-      ...(normalizedLabel ? { label: normalizedLabel } : {}),
-    };
+  const normalizedEntity = normalizeChatContextEntity(context.entity);
+  if (normalizedEntity) {
+    normalizedContext.entity = normalizedEntity;
   }
 
   return normalizedContext;

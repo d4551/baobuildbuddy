@@ -4,12 +4,14 @@ import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers"
 type Violation = {
   filePath: string;
   line: number;
+  message: string;
 };
 
 const projectRoot = process.cwd();
 const scanRoots = ["packages", "scripts"] as const;
 const allowedExtensions = new Set([".ts", ".tsx", ".vue", ".js", ".mjs", ".cjs", ".ps1"]);
 const tryPattern = /\btry\s*\{/gu;
+const promiseCatchPattern = /\.\s*catch\s*\(/gu;
 
 const hasAllowedExtension = (pathValue: string): boolean => {
   const normalized = pathValue.toLowerCase();
@@ -41,17 +43,39 @@ const collectSourceFiles = async (): Promise<string[]> => {
   return fileGroups.flat();
 };
 
+export const collectNoTryCatchViolationsForContent = (
+  filePath: string,
+  fileContent: string,
+): Violation[] => {
+  const violations: Violation[] = [];
+
+  tryPattern.lastIndex = 0;
+  for (const match of fileContent.matchAll(tryPattern)) {
+    violations.push({
+      filePath,
+      line: getLineFromOffset(fileContent, match.index ?? 0),
+      message: "try/catch blocks are disallowed. Use result unions or explicit error branches.",
+    });
+  }
+
+  promiseCatchPattern.lastIndex = 0;
+  for (const match of fileContent.matchAll(promiseCatchPattern)) {
+    violations.push({
+      filePath,
+      line: getLineFromOffset(fileContent, match.index ?? 0),
+      message: "Promise catch handlers are disallowed. Use explicit result handling instead.",
+    });
+  }
+
+  return violations;
+};
+
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectSourceFiles();
   const violationGroups = await Promise.all(
-    files.map(async (filePath) => {
-      const fileContent = await Bun.file(filePath).text();
-      tryPattern.lastIndex = 0;
-      return Array.from(fileContent.matchAll(tryPattern), (match) => ({
-        filePath,
-        line: getLineFromOffset(fileContent, match.index ?? 0),
-      }));
-    }),
+    files.map(async (filePath) =>
+      collectNoTryCatchViolationsForContent(filePath, await Bun.file(filePath).text()),
+    ),
   );
 
   return violationGroups.flat();
@@ -66,7 +90,9 @@ const main = async (): Promise<void> => {
   }
 
   await writeError("try/catch blocks are disallowed. Found:");
-  const lines = violations.map((violation) => `- ${violation.filePath}:${violation.line}`);
+  const lines = violations.map(
+    (violation) => `- ${violation.filePath}:${violation.line} ${violation.message}`,
+  );
   if (lines.length > 0) {
     await writeError(lines.join("\n"));
   }
@@ -74,4 +100,6 @@ const main = async (): Promise<void> => {
   process.exit(1);
 };
 
-await main();
+if (import.meta.main) {
+  await main();
+}

@@ -1,8 +1,14 @@
 import { useI18n } from "vue-i18n";
 import type { InterviewHistoryPageContext } from "./interview-history-page-contracts";
-import { createInterviewHistoryDetailActions, useInterviewHistoryPageSessionSync } from "./interview-history-page-actions";
+import {
+  createInterviewHistoryDetailActions,
+  useInterviewHistoryPageSessionSync,
+} from "./interview-history-page-actions";
 import { createInterviewHistoryDerivedState } from "./interview-history-page-derived";
-import { createInterviewHistoryFormatters, createInterviewHistoryScoreState } from "./interview-history-page-formatters";
+import {
+  createInterviewHistoryFormatters,
+  createInterviewHistoryScoreState,
+} from "./interview-history-page-formatters";
 import { createInterviewHistoryPageState } from "./interview-history-page-state";
 
 export function useInterviewHistoryPage() {

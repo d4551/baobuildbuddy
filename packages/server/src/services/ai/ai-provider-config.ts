@@ -4,6 +4,7 @@ import {
   LOCAL_AI_AUTO_DETECT_MODEL,
   normalizeAIRouting,
 } from "@bao/shared";
+import { normalizeLocalModelEndpoint } from "@bao/shared/types/settings-normalization";
 import {
   DeterministicTestProvider,
   TEST_AI_MODEL_NAME,
@@ -45,10 +46,7 @@ export const appendOptionalProviderConfig = (
 };
 
 export const buildProviderConfigs = (settings?: AIServiceSettings): AIProviderConfig[] => {
-  const localModelEndpoint =
-    typeof settings?.localModelEndpoint === "string" && settings.localModelEndpoint.trim()
-      ? settings.localModelEndpoint.trim()
-      : null;
+  const localModelEndpoint = normalizeLocalModelEndpoint(settings?.localModelEndpoint);
   const localModelName =
     typeof settings?.localModelName === "string" && settings.localModelName.trim()
       ? settings.localModelName.trim()
@@ -75,14 +73,14 @@ export const buildProviderConfigs = (settings?: AIServiceSettings): AIProviderCo
   return configs;
 };
 
-export const resolvePreferredProvider = (
-  preferredProvider?: string | null,
-): AIProviderType => {
+export const resolvePreferredProvider = (preferredProvider?: string | null): AIProviderType => {
   if (!preferredProvider) {
     return AI_PROVIDER_DEFAULT_ORDER[0];
   }
 
-  const matchedProvider = AI_PROVIDER_DEFAULT_ORDER.find((provider) => provider === preferredProvider);
+  const matchedProvider = AI_PROVIDER_DEFAULT_ORDER.find(
+    (provider) => provider === preferredProvider,
+  );
   return matchedProvider ?? AI_PROVIDER_DEFAULT_ORDER[0];
 };
 

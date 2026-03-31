@@ -23,7 +23,7 @@ export function resolveApiBase(configuredBase: string, requestUrl: URL): string 
 /**
  * Resolves an API endpoint URL against the configured runtime API base.
  *
- * When the base already ends in `/api`, endpoint paths that include `/api` are de-duplicated.
+ * When the base already ends in the API prefix, matching endpoint paths are de-duplicated.
  *
  * @param configuredBase Runtime-configured API base.
  * @param requestUrl Current request URL.

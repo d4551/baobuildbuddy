@@ -86,9 +86,7 @@ export const normalizePlatforms = (value: string[] | null): Platform[] | undefin
   );
 };
 
-export const normalizeExperienceLevel = (
-  value: string | null,
-): JobExperienceLevel | undefined => {
+export const normalizeExperienceLevel = (value: string | null): JobExperienceLevel | undefined => {
   if (!isOneOf(JOB_EXPERIENCE_LEVELS, value)) {
     return;
   }

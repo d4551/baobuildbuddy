@@ -1,21 +1,26 @@
 import { flattenJsonStrings } from "./runtime-artifacts";
-import type { JobApplyAdapter } from "./adapters";
-import { collectResumeCandidateFields, addStep, captureScreenshot, uploadResumeArtifact } from "./runtime-artifacts";
+import type { JobApplyStrategy } from "./adapters";
+import {
+  collectResumeCandidateFields,
+  addStep,
+  captureScreenshot,
+  uploadResumeArtifact,
+} from "./runtime-artifacts";
 import type {
   FillTextFieldStepOptions,
   JobApplyExecutionState,
   ResumeCandidateFields,
 } from "./runtime-contracts";
 import { JOB_APPLY_STEP_INDEX } from "./runtime-contracts";
-import { fillFirstMatchingAnswer, fillFirstMatchingField, getCustomFieldSelectorList } from "./runtime-locators";
+import {
+  fillFirstMatchingAnswer,
+  fillFirstMatchingField,
+  getCustomFieldSelectorList,
+} from "./runtime-locators";
 import { JOB_APPLY_TOTAL_STEPS } from "./adapters";
-import { getAdapterSelectorList } from "./runtime-selector-map";
+import { getStrategySelectorList } from "./runtime-selector-map";
 
-const emitProgress = (
-  state: JobApplyExecutionState,
-  action: string,
-  step: number,
-): void => {
+const emitProgress = (state: JobApplyExecutionState, action: string, step: number): void => {
   state.emitter.emitProgress({
     action,
     status: "running",
@@ -26,30 +31,30 @@ const emitProgress = (
 
 const fillNamedFields = async (
   state: JobApplyExecutionState,
-  adapter: JobApplyAdapter,
+  strategy: JobApplyStrategy,
   resumeFields: ResumeCandidateFields,
 ): Promise<void> => {
   emitProgress(state, "fill_name", JOB_APPLY_STEP_INDEX.fillName);
   const fullNameParts = resumeFields.fullName.split(" ").filter((part) => part.trim().length > 0);
   const primaryName = fullNameParts[0] ?? resumeFields.fullName;
   const nameFilled =
-    adapter.id === "greenhouse"
+    strategy.id === "greenhouse"
       ? await fillFirstMatchingField(
           state.session.page,
-          getAdapterSelectorList(adapter, state.payload.selectorMap, "firstName"),
+          getStrategySelectorList(strategy, state.payload.selectorMap, "firstName"),
           primaryName,
         )
       : await fillFirstMatchingField(
           state.session.page,
-          getAdapterSelectorList(adapter, state.payload.selectorMap, "fullName"),
+          getStrategySelectorList(strategy, state.payload.selectorMap, "fullName"),
           resumeFields.fullName,
         );
 
   const lastName = fullNameParts.slice(1).join(" ").trim();
-  if (adapter.id === "greenhouse" && lastName.length > 0) {
+  if (strategy.id === "greenhouse" && lastName.length > 0) {
     await fillFirstMatchingField(
       state.session.page,
-      getAdapterSelectorList(adapter, state.payload.selectorMap, "lastName"),
+      getStrategySelectorList(strategy, state.payload.selectorMap, "lastName"),
       lastName,
     );
   }
@@ -64,7 +69,7 @@ const fillNamedFields = async (
 
 const fillTextFieldStep = async ({
   state,
-  adapter,
+  strategy,
   selectorKey,
   action,
   step,
@@ -77,7 +82,7 @@ const fillTextFieldStep = async ({
     value.trim().length > 0
       ? await fillFirstMatchingField(
           state.session.page,
-          getAdapterSelectorList(adapter, state.payload.selectorMap, selectorKey),
+          getStrategySelectorList(strategy, state.payload.selectorMap, selectorKey),
           value,
         )
       : false;
@@ -92,12 +97,12 @@ const fillTextFieldStep = async ({
 
 const uploadResumeStep = async (
   state: JobApplyExecutionState,
-  adapter: JobApplyAdapter,
+  strategy: JobApplyStrategy,
 ): Promise<void> => {
   emitProgress(state, "upload_resume", JOB_APPLY_STEP_INDEX.uploadResume);
   const resumeUploaded = await uploadResumeArtifact({
     page: state.session.page,
-    selectors: getAdapterSelectorList(adapter, state.payload.selectorMap, "resume"),
+    selectors: getStrategySelectorList(strategy, state.payload.selectorMap, "resume"),
     outputDir: state.outputDir,
     resume: state.payload.resume,
     resumeFilePath: state.payload.resumeFilePath,
@@ -137,17 +142,17 @@ const fillCustomFieldsRecursively = async (
 
 export const fillPrimaryFields = async (
   state: JobApplyExecutionState,
-  adapter: JobApplyAdapter,
+  strategy: JobApplyStrategy,
 ): Promise<void> => {
   const resumeFields = collectResumeCandidateFields(state.payload.resume);
   const coverLetterText = flattenJsonStrings(state.payload.coverLetter?.content)
     .join("\n\n")
     .trim();
 
-  await fillNamedFields(state, adapter, resumeFields);
+  await fillNamedFields(state, strategy, resumeFields);
   await fillTextFieldStep({
     state,
-    adapter,
+    strategy,
     selectorKey: "email",
     action: "fill_email",
     step: JOB_APPLY_STEP_INDEX.fillEmail,
@@ -157,7 +162,7 @@ export const fillPrimaryFields = async (
   });
   await fillTextFieldStep({
     state,
-    adapter,
+    strategy,
     selectorKey: "phone",
     action: "fill_phone",
     step: JOB_APPLY_STEP_INDEX.fillPhone,
@@ -165,10 +170,10 @@ export const fillPrimaryFields = async (
     emptyMessage: "No phone supplied",
     missingMessage: "Phone field not found",
   });
-  await uploadResumeStep(state, adapter);
+  await uploadResumeStep(state, strategy);
   await fillTextFieldStep({
     state,
-    adapter,
+    strategy,
     selectorKey: "coverLetter",
     action: "fill_cover_letter",
     step: JOB_APPLY_STEP_INDEX.fillCoverLetter,

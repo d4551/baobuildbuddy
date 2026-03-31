@@ -24,7 +24,7 @@ Providers fetch job listings from Applicant Tracking Systems and job boards.
 - GamesJobsDirect (RPA)
 - PocketGamer.biz (RPA)
 
-**Company board adapters** (via `settings.automationSettings.jobProviders.companyBoards`):
+**Company board sources** (via `settings.automationSettings.jobProviders.companyBoards`):
 - SmartRecruiters (e.g. CD Projekt Red)
 - Workday (e.g. Cloud Imperium Games, Activision/King, Netflix Games, Lightspeed Studios)
 - Ashby (e.g. Second Dinner, Sierra Studio)
@@ -60,7 +60,7 @@ Content-based duplicate detection using SHA-256 hashing (via `new Bun.CryptoHash
 
 ### Matching (`matching-service.ts`)
 
-Calculates compatibility scores between user profiles and job listings.
+Calculates match scores between user profiles and job listings.
 
 **Score breakdown (0-100):**
 

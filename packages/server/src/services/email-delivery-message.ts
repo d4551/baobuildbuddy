@@ -61,10 +61,7 @@ export const resolveEhloHost = (fromEmail: string, fallbackHost: string): string
 
 export const createMessageId = (domain: string): string => `<${generateId()}@${domain}>`;
 
-export const smtpSupportsCapability = (
-  capabilities: SmtpResponse,
-  capability: string,
-): boolean => {
+export const smtpSupportsCapability = (capabilities: SmtpResponse, capability: string): boolean => {
   const normalizedCapability = capability.toUpperCase();
   return capabilities.lines.some((line) => line.toUpperCase().startsWith(normalizedCapability));
 };

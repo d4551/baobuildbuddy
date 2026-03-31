@@ -2,9 +2,7 @@ import { AI_CHAT_PAGE_PATH } from "@bao/shared";
 import { FLOATING_CHAT_PANEL_ID } from "~/constants/layout";
 import type { FloatingChatWidgetState } from "./floating-chat-widget-contracts";
 
-export const createFloatingChatWidgetUiExposedState = (
-  state: FloatingChatWidgetState,
-) => {
+export const createFloatingChatWidgetUiExposedState = (state: FloatingChatWidgetState) => {
   return {
     AI_CHAT_PAGE_PATH,
     chatPanelId: FLOATING_CHAT_PANEL_ID,
@@ -40,9 +38,7 @@ export const createFloatingChatWidgetUiExposedState = (
   };
 };
 
-export const createFloatingChatWidgetSpeechExposedState = (
-  state: FloatingChatWidgetState,
-) => {
+export const createFloatingChatWidgetSpeechExposedState = (state: FloatingChatWidgetState) => {
   return {
     autoSpeakReplies: state.voice.autoSpeakReplies,
     canReplayAssistant: state.voice.canReplayAssistant,
@@ -66,9 +62,7 @@ export const createFloatingChatWidgetSpeechExposedState = (
   };
 };
 
-export const createFloatingChatWidgetExposedState = (
-  state: FloatingChatWidgetState,
-) => {
+export const createFloatingChatWidgetExposedState = (state: FloatingChatWidgetState) => {
   return {
     ...createFloatingChatWidgetUiExposedState(state),
     ...createFloatingChatWidgetSpeechExposedState(state),

@@ -1,6 +1,10 @@
 import { AI_PROVIDER_DEFAULT, type AIProviderType } from "@bao/shared";
 import { useI18n } from "vue-i18n";
-import type { DashboardStats, ProviderConfig, ProviderConnectivityResult } from "~/types/ai-dashboard";
+import type {
+  DashboardStats,
+  ProviderConfig,
+  ProviderConnectivityResult,
+} from "~/types/ai-dashboard";
 import {
   buildFallbackProviderRows,
   normalizeProviderRows,

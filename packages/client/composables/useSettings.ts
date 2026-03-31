@@ -39,8 +39,7 @@ function createAiConfigurationIncompleteComputed(
     }
 
     const localConfigured =
-      settings.value.hasLocalKey ??
-      Boolean(settings.value.localModelEndpoint?.trim());
+      settings.value.hasLocalKey ?? Boolean(settings.value.localModelEndpoint?.trim());
     const localDiagnosticCode = settings.value.providerDiagnostics?.local?.code;
     const hasLocalConfig =
       localConfigured &&
@@ -128,7 +127,11 @@ function createTestApiKeyAction(context: SettingsContext) {
     key: string,
     model?: string,
   ): Promise<ProviderTestResult> => {
-    const { data, error } = await context.api.settings["test-api-key"].post({ provider, key, model });
+    const { data, error } = await context.api.settings["test-api-key"].post({
+      provider,
+      key,
+      model,
+    });
     if (error || !data || typeof data.valid !== "boolean") {
       return { valid: false, provider, diagnosticCode: "error" };
     }

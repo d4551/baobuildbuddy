@@ -223,7 +223,7 @@ Automation pages use the same SSR-first layout/token model as the rest of the ap
 | NDJSON runner contract tests           | `packages/server/src/services/automation/rpa-runner.test.ts` |
 | Scraper service integration tests      | `packages/server/src/services/scraper-service.test.ts`  |
 | Playwright extractor tests (fixtures)  | `packages/scraper/src/providers/provider-extractors.test.ts` |
-| ATS adapter selection tests            | `packages/scraper/src/job-apply/adapters.test.ts`       |
+| ATS integration selection tests        | `packages/scraper/src/job-apply/adapters.test.ts`       |
 
 ---
 

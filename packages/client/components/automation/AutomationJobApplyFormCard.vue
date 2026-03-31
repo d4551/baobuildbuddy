@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import type {
-  CoverLetterSelectOption,
-  ResumeSelectOption,
-} from "~/types/automation-job-apply";
+import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 
 defineProps<{
   coverLetters: CoverLetterSelectOption[];

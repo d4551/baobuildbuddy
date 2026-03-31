@@ -1,10 +1,14 @@
 import {
   HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_CONFLICT,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared";
-import { Elysia, t } from "elysia";
+import { StandardSchemaV1 } from "baobox";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { automationRateLimit } from "../utils/rate-limit";
 import {
   handleAutomationCapabilitiesRoute,
@@ -18,7 +22,6 @@ import {
   handleVerifyAutomationContext,
 } from "./automation-route-actions";
 import {
-  automationRouteErrorResponses,
   automationRunEnvelopeBodySchema,
   automationRunIdParamsSchema,
   automationRunQuerySchema,
@@ -32,130 +35,260 @@ import {
   scheduledScrapeBodySchema,
   scrapeBodySchema,
 } from "./automation-route-contracts";
-import {
-  listAutomationRuns,
-} from "./automation-route-support";
+import { listAutomationRuns } from "./automation-route-support";
+import { toRouteError } from "../utils/automation-route-error";
+
+const hasText = (value: string | undefined): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const hasMessage = (value: object): value is { message: string } =>
+  "message" in value && typeof value.message === "string" && value.message.length > 0;
+
+const readValidationErrorMessage = (error: unknown): string => {
+  if (typeof error !== "object" || error === null) {
+    return "Request validation failed.";
+  }
+
+  return hasMessage(error) ? error.message : "Request validation failed.";
+};
 
 /**
  * Automation API routes for RPA-driven workflows and run history.
  */
 export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Automation"] })
   .use(automationRateLimit)
-  .get(
-    "/verify/context",
-    async ({ set }) => handleVerifyAutomationContext(set),
-    {
-      response: {
-        [HTTP_STATUS_OK]: t.Object({
-          resumeId: t.String({ minLength: 1 }),
+  .onError(({ code, error, set }) => {
+    if (code !== "VALIDATION") {
+      return;
+    }
+
+    set.status = HTTP_STATUS_UNPROCESSABLE_ENTITY;
+    return toRouteError("OUTPUT_VALIDATION_ERROR", readValidationErrorMessage(error));
+  })
+  .get("/verify/context", async ({ set }) => handleVerifyAutomationContext(set), {
+    response: {
+      [HTTP_STATUS_OK]: StandardSchemaV1(
+        Type.Object({
+          resumeId: Type.String({ minLength: 1 }),
         }),
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-      },
+      ),
+      [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
     },
-  )
+  })
   .post(
     "/job-apply",
-    async ({ body, set }) => handleJobApplyRoute(body, set),
+    async ({ body, set }) => {
+      if (!(hasText(body.jobUrl) && hasText(body.resumeId))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "jobUrl and resumeId are required.");
+      }
+
+      return handleJobApplyRoute(
+        {
+          jobUrl: body.jobUrl,
+          resumeId: body.resumeId,
+          ...(body.coverLetterId ? { coverLetterId: body.coverLetterId } : {}),
+          ...(body.jobId ? { jobId: body.jobId } : {}),
+          ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
+        },
+        set,
+      );
+    },
     {
-      body: jobApplyBodySchema,
+      body: StandardSchemaV1(jobApplyBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        ...automationRouteErrorResponses,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/job-apply/schedule",
-    async ({ body, set }) => handleScheduledJobApplyRoute(body, set),
+    async ({ body, set }) => {
+      if (!(hasText(body.jobUrl) && hasText(body.resumeId) && hasText(body.runAt))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "jobUrl, resumeId, and runAt are required.");
+      }
+
+      return handleScheduledJobApplyRoute(
+        {
+          jobUrl: body.jobUrl,
+          resumeId: body.resumeId,
+          runAt: body.runAt,
+          ...(body.coverLetterId ? { coverLetterId: body.coverLetterId } : {}),
+          ...(body.jobId ? { jobId: body.jobId } : {}),
+          ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
+        },
+        set,
+      );
+    },
     {
-      body: scheduledJobApplyBodySchema,
+      body: StandardSchemaV1(scheduledJobApplyBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        ...automationRouteErrorResponses,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/email-response",
-    async ({ body, set }) => handleEmailResponseRoute(body, set),
+    async ({ body, set }) => {
+      if (!(hasText(body.subject) && hasText(body.message))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "subject and message are required.");
+      }
+
+      return handleEmailResponseRoute(
+        {
+          subject: body.subject,
+          message: body.message,
+          ...(body.sender ? { sender: body.sender } : {}),
+          ...(body.tone ? { tone: body.tone } : {}),
+          ...(body.recipientEmail ? { recipientEmail: body.recipientEmail } : {}),
+          ...(body.deliverAfterGeneration !== undefined
+            ? { deliverAfterGeneration: body.deliverAfterGeneration }
+            : {}),
+        },
+        set,
+      );
+    },
     {
-      body: emailResponseBodySchema,
+      body: StandardSchemaV1(emailResponseBodySchema),
       response: {
-        [HTTP_STATUS_OK]: t.Object({
-          runId: t.String(),
-          status: t.Literal(AUTOMATION_STATUS_SUCCESS),
-          reply: t.String(),
-          provider: t.String(),
-          model: t.String(),
-          delivered: t.Boolean(),
-          recipientEmail: t.Optional(t.String()),
-          deliveredAt: t.Optional(t.String()),
-          messageId: t.Optional(t.String()),
-        }),
-        ...automationRouteErrorResponses,
+        [HTTP_STATUS_OK]: StandardSchemaV1(
+          Type.Object({
+            runId: Type.String(),
+            status: Type.Literal(AUTOMATION_STATUS_SUCCESS),
+            reply: Type.String(),
+            provider: Type.String(),
+            model: Type.String(),
+            delivered: Type.Boolean(),
+            recipientEmail: Type.Optional(Type.String()),
+            deliveredAt: Type.Optional(Type.String()),
+            messageId: Type.Optional(Type.String()),
+          }),
+        ),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/email-response/schedule",
-    async ({ body, set }) => handleScheduledEmailResponseRoute(body, set),
+    async ({ body, set }) => {
+      if (!(hasText(body.subject) && hasText(body.message) && hasText(body.runAt))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "subject, message, and runAt are required.");
+      }
+
+      return handleScheduledEmailResponseRoute(
+        {
+          subject: body.subject,
+          message: body.message,
+          runAt: body.runAt,
+          ...(body.sender ? { sender: body.sender } : {}),
+          ...(body.tone ? { tone: body.tone } : {}),
+          ...(body.recipientEmail ? { recipientEmail: body.recipientEmail } : {}),
+          ...(body.deliverAfterGeneration !== undefined
+            ? { deliverAfterGeneration: body.deliverAfterGeneration }
+            : {}),
+        },
+        set,
+      );
+    },
     {
-      body: scheduledEmailResponseBodySchema,
+      body: StandardSchemaV1(scheduledEmailResponseBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        ...automationRouteErrorResponses,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/scrape",
-    async ({ body, set }) => handleScrapeRoute(body, set),
+    async ({ body, set }) => {
+      if (!body.target) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "target is required.");
+      }
+
+      return handleScrapeRoute({ target: body.target }, set);
+    },
     {
-      body: scrapeBodySchema,
+      body: StandardSchemaV1(scrapeBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        ...automationRouteErrorResponses,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/scrape/schedule",
-    async ({ body, set }) => handleScheduledScrapeRoute(body, set),
+    async ({ body, set }) => {
+      if (!(body.target && hasText(body.runAt))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "target and runAt are required.");
+      }
+
+      return handleScheduledScrapeRoute({ target: body.target, runAt: body.runAt }, set);
+    },
     {
-      body: scheduledScrapeBodySchema,
+      body: StandardSchemaV1(scheduledScrapeBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        ...automationRouteErrorResponses,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
-  .get(
-    "/capabilities",
-    async ({ set }) => handleAutomationCapabilitiesRoute(set),
-    {
-      response: {
-        [HTTP_STATUS_OK]: capabilityAuditReportBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
+  .get("/capabilities", async ({ set }) => handleAutomationCapabilitiesRoute(set), {
+    response: {
+      [HTTP_STATUS_OK]: StandardSchemaV1(capabilityAuditReportBodySchema),
+      [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
     },
-  )
-  .get(
-    "/runs",
-    async ({ query }) => listAutomationRuns(query),
-    {
-      response: t.Array(automationRunEnvelopeBodySchema),
-      query: automationRunQuerySchema,
-    },
-  )
+  })
+  .get("/runs", async ({ query }) => listAutomationRuns(query), {
+    response: StandardSchemaV1(Type.Array(automationRunEnvelopeBodySchema)),
+    query: StandardSchemaV1(automationRunQuerySchema),
+  })
   .get(
     "/runs/:id",
-    async ({ params, set }) => handleAutomationRunByIdRoute(params.id, set),
+    async ({ params, set }) => {
+      if (!hasText(params.id)) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "id is required.");
+      }
+
+      return handleAutomationRunByIdRoute(params.id, set);
+    },
     {
-      params: automationRunIdParamsSchema,
+      params: StandardSchemaV1(automationRunIdParamsSchema),
       response: {
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
       },
     },
   );

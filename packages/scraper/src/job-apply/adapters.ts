@@ -1,7 +1,7 @@
 /**
- * Supported ATS adapter identifiers for job-apply automation.
+ * Supported ATS strategy identifiers for job-apply automation.
  */
-export type JobApplyAdapterId = "greenhouse" | "lever" | "generic";
+export type JobApplyStrategyId = "greenhouse" | "lever" | "generic";
 
 /**
  * Selector buckets used by the job-apply runtime.
@@ -26,12 +26,12 @@ export interface JobApplySelectorBundle {
 }
 
 /**
- * ATS adapter definition used by the Bun job-apply runtime.
+ * ATS strategy definition used by the Bun job-apply runtime.
  */
-export interface JobApplyAdapter {
-  /** Stable adapter identifier. */
-  readonly id: JobApplyAdapterId;
-  /** URL fragments used to detect the adapter from the current page URL. */
+export interface JobApplyStrategy {
+  /** Stable strategy identifier. */
+  readonly id: JobApplyStrategyId;
+  /** URL fragments used to detect the strategy from the current page URL. */
   readonly urlHints: readonly string[];
   /** Selector bundle applied by the runtime. */
   readonly selectors: JobApplySelectorBundle;
@@ -75,7 +75,7 @@ const greenhouseFieldName = (fieldName: string): string => `job_application[${fi
 
 const leverFieldName = (fieldName: string): string => `cards[0][${fieldName}]`;
 
-const GREENHOUSE_ADAPTER: JobApplyAdapter = {
+const GREENHOUSE_STRATEGY: JobApplyStrategy = {
   id: "greenhouse",
   urlHints: ["greenhouse.io", "boards.greenhouse.io"],
   selectors: {
@@ -104,7 +104,7 @@ const GREENHOUSE_ADAPTER: JobApplyAdapter = {
   },
 };
 
-const LEVER_ADAPTER: JobApplyAdapter = {
+const LEVER_STRATEGY: JobApplyStrategy = {
   id: "lever",
   urlHints: ["lever.co", "jobs.lever.co"],
   selectors: {
@@ -123,7 +123,7 @@ const LEVER_ADAPTER: JobApplyAdapter = {
   },
 };
 
-const GENERIC_ADAPTER: JobApplyAdapter = {
+const GENERIC_STRATEGY: JobApplyStrategy = {
   id: "generic",
   urlHints: [],
   selectors: {
@@ -160,25 +160,25 @@ const GENERIC_ADAPTER: JobApplyAdapter = {
 };
 
 /**
- * Stable ordered adapter list used for ATS detection.
+ * Stable ordered strategy list used for ATS detection.
  */
-export const JOB_APPLY_ADAPTERS: readonly JobApplyAdapter[] = [
-  GREENHOUSE_ADAPTER,
-  LEVER_ADAPTER,
-  GENERIC_ADAPTER,
+export const JOB_APPLY_STRATEGIES: readonly JobApplyStrategy[] = [
+  GREENHOUSE_STRATEGY,
+  LEVER_STRATEGY,
+  GENERIC_STRATEGY,
 ];
 
 /**
- * Resolves the ATS adapter for a URL.
+ * Resolves the ATS strategy for a URL.
  *
  * @param currentUrl Current page URL after any hosted-form redirect.
- * @returns Matching adapter definition.
+ * @returns Matching strategy definition.
  */
-export const resolveJobApplyAdapter = (currentUrl: string): JobApplyAdapter => {
+export const resolveJobApplyStrategy = (currentUrl: string): JobApplyStrategy => {
   const normalizedUrl = currentUrl.toLowerCase();
   return (
-    JOB_APPLY_ADAPTERS.find((adapter) =>
-      adapter.urlHints.some((hint) => normalizedUrl.includes(hint)),
-    ) ?? GENERIC_ADAPTER
+    JOB_APPLY_STRATEGIES.find((strategy) =>
+      strategy.urlHints.some((hint) => normalizedUrl.includes(hint)),
+    ) ?? GENERIC_STRATEGY
   );
 };

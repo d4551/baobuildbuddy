@@ -6,24 +6,24 @@ import {
   toApiScopedPath,
   WS_ENDPOINTS,
 } from "@bao/shared";
+import Type, { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
-import {
-  handleEndSession,
-  handleStartSession,
-  handleSubmitResponse,
-} from "./interview-ws-support";
+import { sessionConfigSchema } from "../routes/interview-route-contracts";
+import { handleEndSession, handleStartSession, handleSubmitResponse } from "./interview-ws-support";
 
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
-  body: t.Object({
-    type: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
-    sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    content: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE })),
-    studioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    config: t.Optional(t.Record(t.String(), t.Unknown())),
-  }),
+  body: StandardSchemaV1(
+    Type.Object({
+      type: Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
+      sessionId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+      content: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE })),
+      studioId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+      config: Type.Optional(sessionConfigSchema),
+    }),
+  ),
   async open(ws) {
     const settingsRows = await db
       .select()
@@ -38,24 +38,40 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
     );
   },
   async message(ws, data) {
-    switch (data.type) {
+    const messageType = data.type;
+    if (!messageType) {
+      ws.send(
+        JSON.stringify({
+          type: "error",
+          message: "Missing message type.",
+        }),
+      );
+      return;
+    }
+
+    const normalizedData = {
+      ...data,
+      type: messageType,
+    };
+
+    switch (messageType) {
       case "start_session": {
-        await handleStartSession(ws, data);
+        await handleStartSession(ws, normalizedData);
         break;
       }
       case "submit_response": {
-        await handleSubmitResponse(ws, data);
+        await handleSubmitResponse(ws, normalizedData);
         break;
       }
       case "end_session": {
-        await handleEndSession(ws, data);
+        await handleEndSession(ws, normalizedData);
         break;
       }
       default: {
         ws.send(
           JSON.stringify({
             type: "error",
-            message: `Unknown message type: ${data.type}`,
+            message: `Unknown message type: ${messageType}`,
           }),
         );
       }
