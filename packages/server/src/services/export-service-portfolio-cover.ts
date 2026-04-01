@@ -28,6 +28,7 @@ export function renderPortfolioCoverPage(
   context: PortfolioRenderContext,
   metadata: PortfolioMetadata,
 ): void {
+  const summary = metadata.description ?? metadata.bio;
   context.yPosition = context.height - context.margin;
   context.page.drawText(metadata.title ?? "Portfolio", {
     x: context.margin,
@@ -49,9 +50,9 @@ export function renderPortfolioCoverPage(
     context.yPosition -= 18;
   }
 
-  if (metadata.description) {
+  if (summary) {
     drawPortfolioWrappedText(context, {
-      text: metadata.description,
+      text: summary,
       x: context.margin,
       size: 11,
       color: PORTFOLIO_PDF_COLORS.text,

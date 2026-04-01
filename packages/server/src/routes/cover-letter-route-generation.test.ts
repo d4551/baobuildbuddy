@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { toGeneratedCoverLetterContent } from "./cover-letter-route-generation-support";
+import {
+  ensureCompleteCoverLetterContent,
+  toGeneratedCoverLetterContent,
+} from "./cover-letter-route-generation-support";
 
 const testParsesFencedJsonResponses = () => {
   test("parses fenced JSON responses into clean letter segments", () => {
@@ -151,4 +154,55 @@ describe("toGeneratedCoverLetterContent", () => {
   testStripsReasoningTails();
   testParsesPartialFencedJson();
   testStripsEditorialCleanupArtifacts();
+});
+
+describe("ensureCompleteCoverLetterContent", () => {
+  test("replaces planning artifacts with fallback copy", () => {
+    const result = ensureCompleteCoverLetterContent(
+      {
+        introduction: "Dear Hiring Team,",
+        body: "Gameplay systems paragraph.",
+        conclusion: "~50 words. Total: ~190 words. Well under the 400-word limit.",
+      },
+      {
+        company: "Studio Hash",
+        position: "AI Gameplay Engineer",
+      },
+      {
+        promptContext: "",
+        summary: "I build combat systems for online action games.",
+        experienceHighlight: "Gameplay Programmer at Test Studio",
+        skills: ["TypeScript", "Bun"],
+      },
+    );
+
+    expect(result.conclusion).toBe(
+      "Thank you for your consideration. I would welcome the chance to discuss how my background aligns with the AI Gameplay Engineer role at Studio Hash.",
+    );
+  });
+
+  test("avoids duplicate punctuation in fallback experience copy", () => {
+    const result = ensureCompleteCoverLetterContent(
+      {
+        introduction: "",
+        body: "",
+        conclusion: "",
+      },
+      {
+        company: "Studio Hash",
+        position: "AI Gameplay Engineer",
+      },
+      {
+        promptContext: "",
+        summary: "I build combat systems for online action games.",
+        experienceHighlight: "Gameplay Programmer at Test Studio, shipped combat systems.",
+        skills: ["TypeScript", "Bun"],
+      },
+    );
+
+    expect(result.body).toContain(
+      "Most recently, I worked as Gameplay Programmer at Test Studio, shipped combat systems.",
+    );
+    expect(result.body).not.toContain("systems..");
+  });
 });

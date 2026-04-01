@@ -15,6 +15,7 @@ This guide walks you through getting BaoBuildBuddy running locally for the first
 |------------------------------------------------|----------------------------------------------------------|
 | Understand the app in simple terms             | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)  |
 | Set up local AI with Ollama                    | [Local AI Setup Guide](./LOCAL_AI_SETUP.md)               |
+| Run the full proof pass after setup            | [Verification Runbook](./VERIFICATION_RUNBOOK.md)         |
 | Do the full first-time local setup             | Keep reading below                                        |
 | Read the full technical reference              | [README.md](../README.md)                                 |
 
@@ -235,6 +236,8 @@ bun run build
 ```
 
 For the full validation sequence, see [README.md > Validation & Quality Gates](../README.md#validation--quality-gates).
+
+For the complete post-setup proof flow, including page screenshots, export checks, runtime verification, and desktop artifact verification, use [VERIFICATION_RUNBOOK.md](./VERIFICATION_RUNBOOK.md).
 
 If port `3001` is already in use, run page verification against an alternate port:
 

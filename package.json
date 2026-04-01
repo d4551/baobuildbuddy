@@ -42,6 +42,7 @@
     "verify:desktop-runtime": "bun run scripts/verify-desktop-runtime.ts",
     "verify:desktop-releases": "bun run scripts/verify-desktop-release-artifacts.ts",
     "verify:production-client": "bun run scripts/verify-production-client-output.ts",
+    "proof:pages": "bun run scripts/capture-page-proof.ts",
     "build:verify": "bun run build && bun run verify:production-client",
     "typecheck": "bun run --cwd packages/shared typecheck && bun run --cwd packages/scraper typecheck && bun run --cwd packages/server typecheck && bun run --cwd packages/client typecheck",
     "db:generate": "bun --env-file=.env run drizzle-kit generate",

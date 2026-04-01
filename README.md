@@ -45,6 +45,7 @@ Not sure where to start? Choose the guide that matches your goal:
 | Get BaoBuildBuddy running for the first time | [First-Time Setup Guide](docs/STARTER_GUIDE.md)             |
 | Set up local AI with Ollama               | [Local AI Setup Guide](docs/LOCAL_AI_SETUP.md)                 |
 | Learn the automation and RPA flows        | [Automation Guide](docs/AUTOMATION.md)                         |
+| Run the full proof and verification pass  | [Verification Runbook](docs/VERIFICATION_RUNBOOK.md)           |
 | Deploy to Railway                         | [Railway Deployment Guide](docs/RAILWAY.md)                    |
 | Install a desktop app (no dev setup)      | [Non-Technical Install](#non-technical-install)                |
 | Read the full technical reference         | Keep reading this file                                         |
@@ -79,6 +80,7 @@ Not sure where to start? Choose the guide that matches your goal:
 - [Project Structure](#project-structure)
 - [Client Pages & Features](#client-pages--features)
 - [Validation & Quality Gates](#validation--quality-gates)
+- [Verification Runbook](#verification-runbook)
 - [Desktop Packaging (Tauri)](#desktop-packaging-tauri)
 - [Troubleshooting](#troubleshooting)
 - [Final Checklist](#final-checklist)
@@ -174,6 +176,20 @@ Want BaoBuildBuddy to use AI on your own computer without cloud API keys?
 6. Use the built-in test button before saving. The settings and setup flows now surface concrete local diagnostics such as unreachable endpoint, timeout, empty model list, and invalid selected model.
 
 For the full beginner walkthrough, see [docs/LOCAL_AI_SETUP.md](docs/LOCAL_AI_SETUP.md).
+
+---
+
+## Verification Runbook
+
+For the current step-by-step proof flow covering:
+
+- format, lint, test, and build gates
+- full routed page screenshots with a report
+- export verification for resume / cover letter / portfolio
+- desktop runtime verification
+- Tauri 2 matching-host release generation
+
+use [docs/VERIFICATION_RUNBOOK.md](docs/VERIFICATION_RUNBOOK.md).
 
 ---
 

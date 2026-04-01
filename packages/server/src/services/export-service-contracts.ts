@@ -1,11 +1,9 @@
-import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-layout";
 import {
-  A4_PAGE_HEIGHT,
-  A4_PAGE_SIZE,
-  A4_PAGE_WIDTH,
   COVER_LETTER_EXPORT_THEME,
   PORTFOLIO_EXPORT_THEME,
-} from "@bao/shared/constants/export-layout";
+} from "@bao/shared/constants/export-document-theme";
+import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-layout";
+import { A4_PAGE_HEIGHT, A4_PAGE_SIZE, A4_PAGE_WIDTH } from "@bao/shared/constants/export-layout";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { type Color, type PDFDocument, type PDFFont, type PDFPage, rgb } from "pdf-lib";
 

@@ -39,6 +39,12 @@ const SECTION_TRAILING_ESCAPE_PATTERN = /\\+$/u;
 const SECTION_TRAILING_EDITORIAL_PATTERN =
   /\s+\((?:good|great|strong|clear|works|covers|aligned|solid|meets)[^)]*\)\.?$/iu;
 const COMPLETE_SENTENCE_PATTERN = /[.!?]["')\]]?$/u;
+const COVER_LETTER_PLANNING_ARTIFACT_PATTERN =
+  /(?:~\d+\s+words|total:\s*~?\d+|word limit|under the \d+-word|concise and engaging|draft outline|bullet points?)/iu;
+const TRAILING_SENTENCE_PUNCTUATION_PATTERN = /[.!?]+$/u;
+
+const trimTrailingSentencePunctuation = (value: string): string =>
+  value.replace(TRAILING_SENTENCE_PUNCTUATION_PATTERN, "");
 
 const stripMarkdownCodeFence = (content: string): string => {
   const trimmed = content.trim();
@@ -273,12 +279,15 @@ const buildFallbackCoverLetterContent = (
   const company = body.company.trim() || DEFAULT_UNSPECIFIED_LABEL;
   const position = body.position.trim() || DEFAULT_UNSPECIFIED_LABEL;
   const skillsLabel = resumeContext.skills.slice(0, 3).join(", ");
+  const normalizedExperienceHighlight = trimTrailingSentencePunctuation(
+    resumeContext.experienceHighlight,
+  );
   const backgroundSentence =
     resumeContext.summary ||
     `I build player-facing gameplay systems and collaborate closely with design and engineering teams.`;
   const experienceSentence =
-    resumeContext.experienceHighlight.length > 0
-      ? `Most recently, I worked as ${resumeContext.experienceHighlight}.`
+    normalizedExperienceHighlight.length > 0
+      ? `Most recently, I worked as ${normalizedExperienceHighlight}.`
       : "";
   const skillsSentence =
     skillsLabel.length > 0
@@ -304,11 +313,15 @@ export const ensureCompleteCoverLetterContent = (
   const generatedBody = content.body.trim();
   const generatedConclusion = content.conclusion.trim();
   const bodyContent =
-    generatedBody.length > 0 && COMPLETE_SENTENCE_PATTERN.test(generatedBody)
+    generatedBody.length > 0 &&
+    COMPLETE_SENTENCE_PATTERN.test(generatedBody) &&
+    !COVER_LETTER_PLANNING_ARTIFACT_PATTERN.test(generatedBody)
       ? generatedBody
       : fallbackContent.body;
   const conclusionContent =
-    generatedConclusion.length > 0 && COMPLETE_SENTENCE_PATTERN.test(generatedConclusion)
+    generatedConclusion.length > 0 &&
+    COMPLETE_SENTENCE_PATTERN.test(generatedConclusion) &&
+    !COVER_LETTER_PLANNING_ARTIFACT_PATTERN.test(generatedConclusion)
       ? generatedConclusion
       : fallbackContent.conclusion;
   return {

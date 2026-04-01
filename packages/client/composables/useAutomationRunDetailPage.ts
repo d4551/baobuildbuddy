@@ -344,7 +344,9 @@ export const useAutomationRunDetailPage = () => {
   const retryRunStream = async (): Promise<void> => {
     await runStream.retry();
   };
-  registerAutomationRunDetailLifecycle(detailState.runId, failedScreenshotIndexes, runStream);
+  if (import.meta.client) {
+    registerAutomationRunDetailLifecycle(detailState.runId, failedScreenshotIndexes, runStream);
+  }
 
   return {
     t,

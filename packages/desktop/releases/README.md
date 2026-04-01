@@ -2,6 +2,17 @@
 
 Canonical installer output manifest for this repository baseline
 
+## Matching-host rule
+
+Desktop release generation is intentionally matching-host only:
+
+- macOS hosts generate `macos`
+- Windows hosts generate `windows`
+- Linux x64 hosts generate `linux-x64`
+- Linux ARM64 hosts generate `linux-arm64`
+
+Cross-host generation is blocked by `scripts/build-desktop-release.ts`. Use matching CI runners or matching local machines for the full release matrix. For the complete proof flow, including runtime verification and release verification, see [docs/VERIFICATION_RUNBOOK.md](../../../docs/VERIFICATION_RUNBOOK.md).
+
 ## Quality Gate Before Packaging
 
 For the full validation sequence and script verification commands, see [README.md § Release Validation Workflow](../../../README.md#release-validation-workflow). Packaging docs in this file assume those quality gates succeed without masked diagnostics.

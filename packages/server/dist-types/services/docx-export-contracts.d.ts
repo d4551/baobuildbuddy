@@ -19,14 +19,19 @@ export interface CoverLetterUserProfile {
     phone?: string;
     location?: string;
 }
-export declare const COVER_LETTER_DOCX_FONT_FAMILY: "Times New Roman";
+export declare const COVER_LETTER_DOCX_FONT_FAMILY: "Calibri";
 export declare const PORTFOLIO_DOCX_FONT_FAMILY: "Calibri";
-export declare const COVER_LETTER_DOCX_TEXT_COLOR: "000000";
+export declare const COVER_LETTER_DOCX_PRIMARY_COLOR: "2962FF";
+export declare const COVER_LETTER_DOCX_TEXT_COLOR: "222222";
 export declare const COVER_LETTER_DOCX_MUTED_COLOR: "666666";
-export declare const PORTFOLIO_DOCX_PRIMARY_COLOR: "331A80";
+export declare const COVER_LETTER_DOCX_SUBTLE_COLOR: "999999";
+export declare const COVER_LETTER_DOCX_LINE_COLOR: "D1DBE8";
+export declare const PORTFOLIO_DOCX_PRIMARY_COLOR: "2962FF";
+export declare const PORTFOLIO_DOCX_ACCENT_COLOR: "009688";
 export declare const PORTFOLIO_DOCX_MUTED_COLOR: "666666";
 export declare const PORTFOLIO_DOCX_SUBTLE_COLOR: "999999";
-export declare const PORTFOLIO_DOCX_FOOTER_COLOR: "999999";
+export declare const PORTFOLIO_DOCX_FOOTER_COLOR: "808080";
+export declare const PORTFOLIO_DOCX_LINE_COLOR: "D1DBE8";
 export declare const createDivider: (color: string) => Paragraph;
 export declare const createSectionHeading: (label: string, color: string, pt: number, fontFamily: string) => Paragraph;
 export { DOCX_COVER_LETTER_FONT_BODY_PT, DOCX_COVER_LETTER_FONT_HEADER_PT, DOCX_PORTFOLIO_FONT_BODY_PT, DOCX_PORTFOLIO_FONT_HEADING_PT, DOCX_PORTFOLIO_FONT_TITLE_PT, DOCX_RESUME_FONT_ACCENT_PT, DOCX_RESUME_FONT_BODY_PT, DOCX_RESUME_FONT_HEADER_PT, DOCX_RESUME_FONT_NAME_PT, RESUME_EXPORT_THEME_CONFIGS, };

@@ -10,6 +10,7 @@ import {
 } from "./api-request";
 import { toJob } from "./api-normalizer-jobs";
 import { withLoadingState } from "./async-flow";
+import { requireApiResponsePayload } from "~/utils/api-response";
 
 const toJobList = (value: unknown): Job[] =>
   Array.isArray(value)
@@ -33,13 +34,7 @@ const readApiData = async (
   fallbackMessage: string,
 ): Promise<unknown> => {
   const response = await request;
-  if (!(isRecord(response) && "data" in response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  return response.data;
+  return requireApiResponsePayload(response, fallbackMessage);
 };
 
 async function searchJobs(

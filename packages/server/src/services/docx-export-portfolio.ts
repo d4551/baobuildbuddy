@@ -56,7 +56,8 @@ function buildPortfolioAuthorParagraph(author: string | undefined): Paragraph[] 
   ];
 }
 
-function buildPortfolioDescriptionParagraph(description: string | undefined): Paragraph[] {
+function buildPortfolioDescriptionParagraph(metadata: PortfolioMetadata): Paragraph[] {
+  const description = metadata.description ?? metadata.bio;
   if (!description) return [];
   return [
     new Paragraph({
@@ -244,7 +245,7 @@ function buildPortfolioDocumentSection(
     children: [
       buildPortfolioTitleParagraph(metadata.title),
       ...buildPortfolioAuthorParagraph(metadata.author),
-      ...buildPortfolioDescriptionParagraph(metadata.description),
+      ...buildPortfolioDescriptionParagraph(metadata),
       ...buildPortfolioContactParagraph(metadata),
       createDivider(PORTFOLIO_DOCX_LINE_COLOR),
       buildPortfolioProjectsHeading(),

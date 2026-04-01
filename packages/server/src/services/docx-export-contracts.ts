@@ -1,5 +1,8 @@
 import {
   COVER_LETTER_EXPORT_THEME,
+  PORTFOLIO_EXPORT_THEME,
+} from "@bao/shared/constants/export-document-theme";
+import {
   DOCX_COVER_LETTER_FONT_BODY_PT,
   DOCX_COVER_LETTER_FONT_HEADER_PT,
   DOCX_PORTFOLIO_FONT_BODY_PT,
@@ -9,7 +12,6 @@ import {
   DOCX_RESUME_FONT_BODY_PT,
   DOCX_RESUME_FONT_HEADER_PT,
   DOCX_RESUME_FONT_NAME_PT,
-  PORTFOLIO_EXPORT_THEME,
   RESUME_EXPORT_THEME_CONFIGS,
 } from "@bao/shared/constants/export-layout";
 import type { ResumeTemplate } from "@bao/shared/constants/resume";
