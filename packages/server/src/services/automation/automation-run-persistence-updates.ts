@@ -4,7 +4,7 @@ import {
   AUTOMATION_FINISHED_PROGRESS,
   AUTOMATION_MAX_PROGRESS_STEPS,
   AUTOMATION_MAX_SCREENSHOT_RETENTION_DAYS,
-} from "@bao/shared/constants/automation";
+} from "@bao/shared/constants/automation-limits";
 import { MS_PER_DAY } from "@bao/shared/constants/time";
 import type { ErrorEnvelope } from "@bao/shared/schemas/error-envelope.schema";
 import type { RpaRunEvent, RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";

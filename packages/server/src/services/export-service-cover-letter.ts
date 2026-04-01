@@ -21,8 +21,8 @@ import {
 
 async function createCoverLetterContext(): Promise<CoverLetterRenderContext> {
   const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const page = addA4Page(pdfDoc);
   const { width, height } = page.getSize();
 
@@ -36,6 +36,16 @@ async function createCoverLetterContext(): Promise<CoverLetterRenderContext> {
     font,
     boldFont,
   };
+}
+
+function drawCoverLetterDivider(context: CoverLetterRenderContext): void {
+  context.page.drawLine({
+    start: { x: context.margin, y: context.yPosition },
+    end: { x: context.width - context.margin, y: context.yPosition },
+    thickness: 1,
+    color: COVER_LETTER_PDF_COLORS.line,
+  });
+  context.yPosition -= 24;
 }
 
 function ensureCoverLetterSpace(context: CoverLetterRenderContext, requiredSpace: number): void {
@@ -54,11 +64,11 @@ function renderCoverLetterSender(
   context.page.drawText(userProfile.name, {
     x: context.margin,
     y: context.yPosition,
-    size: 14,
+    size: 22,
     font: context.boldFont,
-    color: COVER_LETTER_PDF_COLORS.text,
+    color: COVER_LETTER_PDF_COLORS.primary,
   });
-  context.yPosition -= 18;
+  context.yPosition -= 22;
 
   const contactLine = collectDefinedStringValues([
     userProfile.email,
@@ -72,11 +82,11 @@ function renderCoverLetterSender(
   context.page.drawText(contactLine, {
     x: context.margin,
     y: context.yPosition,
-    size: 10,
+    size: 9,
     font: context.font,
-    color: COVER_LETTER_PDF_COLORS.subtle,
+    color: COVER_LETTER_PDF_COLORS.muted,
   });
-  context.yPosition -= 25;
+  context.yPosition -= 28;
 }
 
 function renderCoverLetterDate(context: CoverLetterRenderContext, date: Date): void {
@@ -87,7 +97,7 @@ function renderCoverLetterDate(context: CoverLetterRenderContext, date: Date): v
     font: context.font,
     color: COVER_LETTER_PDF_COLORS.muted,
   });
-  context.yPosition -= 25;
+  context.yPosition -= 24;
 }
 
 function renderCoverLetterRecipient(
@@ -99,7 +109,7 @@ function renderCoverLetterRecipient(
     y: context.yPosition,
     size: 11,
     font: context.boldFont,
-    color: COVER_LETTER_PDF_COLORS.text,
+    color: COVER_LETTER_PDF_COLORS.primary,
   });
   context.yPosition -= 15;
 
@@ -108,9 +118,10 @@ function renderCoverLetterRecipient(
     y: context.yPosition,
     size: 10,
     font: context.font,
-    color: COVER_LETTER_PDF_COLORS.muted,
+    color: COVER_LETTER_PDF_COLORS.accent,
   });
-  context.yPosition -= 25;
+  context.yPosition -= 18;
+  drawCoverLetterDivider(context);
 }
 
 function drawCoverLetterLine(context: CoverLetterRenderContext, line: string): void {
@@ -161,7 +172,7 @@ function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName:
     y: context.yPosition,
     size: 11,
     font: context.font,
-    color: COVER_LETTER_PDF_COLORS.text,
+    color: COVER_LETTER_PDF_COLORS.muted,
   });
   context.yPosition -= 25;
 

@@ -569,7 +569,11 @@ export declare const automationRoutes: Elysia<string, {
                             category?: "scrape" | "job_apply" | undefined;
                             enabled?: boolean | undefined;
                             target?: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null | undefined;
-                            issues?: string[] | undefined;
+                            issues?: ({} & {
+                                code?: "provider_settings_unavailable" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | undefined;
+                                portalId?: string | undefined;
+                                portalName?: string | undefined;
+                            })[] | undefined;
                             configured?: boolean | undefined;
                             implemented?: boolean | undefined;
                             manualRunAvailable?: boolean | undefined;

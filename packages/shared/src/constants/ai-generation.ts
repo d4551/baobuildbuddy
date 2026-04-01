@@ -18,6 +18,7 @@ export const AI_MAX_TOKENS_CHAT = 1000;
 export const AI_MAX_TOKENS_ANALYSIS = 1200;
 export const AI_MAX_TOKENS_MATCH = 1500;
 export const AI_MAX_TOKENS_RESUME = 1500;
+export const AI_MAX_TOKENS_COVER_LETTER = 1200;
 export const AI_MAX_TOKENS_WS = 2048;
 export const AI_MAX_TOKENS_QUESTION = 900;
 export const AI_MAX_TOKENS_FEEDBACK = 500;

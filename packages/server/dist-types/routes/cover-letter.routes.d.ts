@@ -212,11 +212,7 @@ export declare const coverLetterRoutes: Elysia<string, {
                         coverLetter?: undefined;
                     } | {
                         message: string;
-                        content: {
-                            introduction: string;
-                            body: string;
-                            conclusion: string;
-                        };
+                        content: import("./cover-letter-route-generation-support").GeneratedCoverLetterContent;
                         error?: undefined;
                         details?: undefined;
                         coverLetter?: undefined;
@@ -227,11 +223,7 @@ export declare const coverLetterRoutes: Elysia<string, {
                             company: string;
                             position: string;
                             jobInfo: Record<string, unknown>;
-                            content: {
-                                introduction: string;
-                                body: string;
-                                conclusion: string;
-                            };
+                            content: import("./cover-letter-route-generation-support").GeneratedCoverLetterContent;
                             template: "professional" | "creative" | "gaming" | "executive" | "technical";
                         };
                         error?: undefined;

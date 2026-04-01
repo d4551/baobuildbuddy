@@ -17,7 +17,7 @@ import {
   AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH,
   AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH,
   AUTOMATION_MAX_JOB_URL_LENGTH,
-} from "@bao/shared/constants/automation";
+} from "@bao/shared/constants/automation-limits";
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { DEFAULT_HOST, LOOPBACK_HOST_IPV4 } from "@bao/shared/constants/runtime";
 import { config } from "../../config/env";

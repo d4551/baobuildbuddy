@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useSeoMeta } from "#imports";
+import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import {
   SETTINGS_DEFAULT_SECTION_ID,
+  isSettingsSectionId,
   type SettingsSectionId,
 } from "~/components/settings/settings-sections";
 import { useSettingsPage } from "~/composables/useSettingsPage";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
+const route = useRoute();
 
 useSeoMeta({
   title: t("settings.seoTitle"),
@@ -76,7 +79,28 @@ const {
   handleClearEmailDeliveryPassword,
 } = useSettingsPage();
 
-const activeSection = ref<SettingsSectionId>(SETTINGS_DEFAULT_SECTION_ID);
+const routeSection = computed<SettingsSectionId>(() => {
+  const sectionQueryValue = route.query[APP_ROUTE_QUERY_KEYS.section];
+  const candidateSection =
+    typeof sectionQueryValue === "string"
+      ? sectionQueryValue
+      : Array.isArray(sectionQueryValue)
+        ? sectionQueryValue[0]
+        : null;
+
+  return candidateSection && isSettingsSectionId(candidateSection)
+    ? candidateSection
+    : SETTINGS_DEFAULT_SECTION_ID;
+});
+const activeSection = ref<SettingsSectionId>(routeSection.value);
+
+watch(
+  routeSection,
+  (value) => {
+    activeSection.value = value;
+  },
+  { immediate: true },
+);
 </script>
 
 <template>

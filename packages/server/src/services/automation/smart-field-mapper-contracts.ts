@@ -1,7 +1,7 @@
 import {
   AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH,
   AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH,
-} from "@bao/shared/constants/automation";
+} from "@bao/shared/constants/automation-limits";
 import {
   SCHEMA_MAX_ITEMS_SMALL,
   SCHEMA_MAX_LENGTH_SHORT,

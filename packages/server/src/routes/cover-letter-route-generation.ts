@@ -1,4 +1,7 @@
-import { AI_DEFAULT_TEMPERATURE_CREATIVE } from "@bao/shared/constants/ai-generation";
+import {
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  AI_MAX_TOKENS_COVER_LETTER,
+} from "@bao/shared/constants/ai-generation";
 import {
   API_ERROR_AI_SETTINGS_NOT_CONFIGURED,
   API_ERROR_COVER_LETTER_GENERATION_FAILED,
@@ -11,24 +14,16 @@ import {
   API_MESSAGE_COVER_LETTER_GENERATED_SAVED,
 } from "@bao/shared/constants/api-messages";
 import {
-  COVER_LETTER_DEFAULT_CLOSING,
-  COVER_LETTER_DEFAULT_OPENING,
-} from "@bao/shared/constants/cover-letter";
-import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
-import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_SERVICE_UNAVAILABLE,
 } from "@bao/shared/constants/http";
-import { SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
 import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
-import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema/cover-letters";
-import { resumes } from "../db/schema/resumes";
 import { settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
@@ -37,87 +32,19 @@ import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
 import type { GenerateCoverLetterBody, RouteSetState } from "./cover-letter-route-contracts";
+import {
+  ensureCompleteCoverLetterContent,
+  resolveResumeContext,
+  toGeneratedCoverLetterContent,
+  type GeneratedCoverLetterContent,
+} from "./cover-letter-route-generation-support";
 import { getCoverLetterById, normalizeTemplate } from "./cover-letter-route-support";
-
-type GeneratedCoverLetterContent = {
-  introduction: string;
-  body: string;
-  conclusion: string;
-};
 
 type CoverLetterSender = {
   name: string;
   email?: string;
   phone?: string;
   location?: string;
-};
-
-const MARKDOWN_CODE_FENCE_PATTERN = /^```[a-zA-Z0-9_-]*\n([\s\S]*?)\n```$/u;
-
-const stripMarkdownCodeFence = (content: string): string => {
-  const trimmed = content.trim();
-  const codeFenceMatch = trimmed.match(MARKDOWN_CODE_FENCE_PATTERN);
-  return codeFenceMatch?.[1]?.trim() ?? trimmed;
-};
-
-const parseGeneratedCoverLetterContent = (content: string): Record<string, unknown> => {
-  const normalizedContent = stripMarkdownCodeFence(content);
-  const parsed = safeParseJson(normalizedContent);
-  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-    return parsed;
-  }
-
-  const lines = normalizedContent.split("\n").filter((line) => line.trim());
-  return {
-    introduction: lines[0] || COVER_LETTER_DEFAULT_OPENING,
-    body: lines.slice(1, -1).join("\n\n") || normalizedContent,
-    conclusion: lines[lines.length - 1] || COVER_LETTER_DEFAULT_CLOSING,
-  };
-};
-
-const readCoverLetterSegment = (value: unknown): string => {
-  if (typeof value === "string") {
-    return value;
-  }
-  if (Array.isArray(value)) {
-    return value.filter((entry): entry is string => typeof entry === "string").join("\n\n");
-  }
-  return "";
-};
-
-const resolveResumeContext = async (resumeId?: string): Promise<string> => {
-  if (!resumeId) return "";
-  const resumeRows = await db.select().from(resumes).where(eq(resumes.id, resumeId));
-  if (resumeRows.length === 0) return "";
-
-  const resume = resumeRows[0];
-  const personalInfo = resume.personalInfo || {};
-  const resumeName =
-    typeof personalInfo.name === "string" && personalInfo.name.trim()
-      ? personalInfo.name
-      : DEFAULT_UNSPECIFIED_LABEL;
-  return `
-Resume Context:
-Name: ${resumeName}
-Summary: ${resume.summary}
-Experience: ${JSON.stringify(resume.experience, null, 2)}
-Skills: ${JSON.stringify(resume.skills, null, 2)}
-  `.trim();
-};
-
-export const toGeneratedCoverLetterContent = (content: string): GeneratedCoverLetterContent => {
-  const generatedContent = parseGeneratedCoverLetterContent(content);
-  return {
-    introduction:
-      readCoverLetterSegment(generatedContent.introduction) ||
-      readCoverLetterSegment(generatedContent.intro),
-    body:
-      readCoverLetterSegment(generatedContent.body) ||
-      readCoverLetterSegment(generatedContent.main),
-    conclusion:
-      readCoverLetterSegment(generatedContent.conclusion) ||
-      readCoverLetterSegment(generatedContent.closing),
-  };
 };
 
 const saveGeneratedCoverLetter = async (
@@ -183,11 +110,14 @@ export const handleGenerateCoverLetter = async (
     ? JSON.stringify(body.jobInfo, null, 2)
     : "No additional job information provided";
   const aiResult = await settle(
-    aiService.generate(coverLetterPrompt(body.company, body.position, jobInfoText, resumeContext), {
-      purpose: "coverLetter",
-      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
-      maxTokens: SCHEMA_MAX_LENGTH_LONG,
-    }),
+    aiService.generate(
+      coverLetterPrompt(body.company, body.position, jobInfoText, resumeContext.promptContext),
+      {
+        purpose: "coverLetter",
+        temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+        maxTokens: AI_MAX_TOKENS_COVER_LETTER,
+      },
+    ),
   );
   if (aiResult.status === "rejected") {
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -203,7 +133,11 @@ export const handleGenerateCoverLetter = async (
     return { error: API_ERROR_COVER_LETTER_GENERATION_FAILED, details: response.error };
   }
 
-  const content = toGeneratedCoverLetterContent(response.content);
+  const content = ensureCompleteCoverLetterContent(
+    toGeneratedCoverLetterContent(response.content),
+    body,
+    resumeContext,
+  );
   if (!body.save) {
     return {
       message: API_MESSAGE_COVER_LETTER_GENERATED_ONLY,

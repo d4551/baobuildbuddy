@@ -14,7 +14,7 @@ function renderPortfolioProjectHeading(
     y: context.yPosition,
     size: 16,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.accent,
+    color: PORTFOLIO_PDF_COLORS.primary,
   });
   context.yPosition -= 20;
 
@@ -61,7 +61,7 @@ function renderPortfolioProjectTechnologies(
     y: context.yPosition,
     size: 9,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.muted,
+    color: PORTFOLIO_PDF_COLORS.accent,
   });
   context.yPosition -= 15;
 }

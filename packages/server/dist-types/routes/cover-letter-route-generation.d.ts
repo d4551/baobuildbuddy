@@ -1,10 +1,5 @@
 import type { GenerateCoverLetterBody, RouteSetState } from "./cover-letter-route-contracts";
-type GeneratedCoverLetterContent = {
-    introduction: string;
-    body: string;
-    conclusion: string;
-};
-export declare const toGeneratedCoverLetterContent: (content: string) => GeneratedCoverLetterContent;
+import { type GeneratedCoverLetterContent } from "./cover-letter-route-generation-support";
 export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, set: RouteSetState) => Promise<{
     error: string;
     details?: undefined;
@@ -43,4 +38,3 @@ export declare const exportCoverLetterAttachment: (id: string, format: string | 
 } | {
     error: string;
 }>;
-export {};

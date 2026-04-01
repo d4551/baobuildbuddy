@@ -11,6 +11,7 @@ import type {
   GenerateOptions,
 } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import OpenAI from "openai";
 import {
@@ -36,6 +37,38 @@ const buildLocalProviderMessages = (
     content: prompt,
   });
   return messages;
+};
+
+const isJsonRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const readNonEmptyString = (value: unknown): string | null =>
+  typeof value === "string" && value.trim().length > 0 ? value : null;
+
+const readMessageReasoning = (completion: OpenAI.Chat.ChatCompletion): string => {
+  const serializedMessage = JSON.stringify(completion.choices[0]?.message ?? null);
+  const parsedMessage = safeParseJson(serializedMessage);
+  if (!isJsonRecord(parsedMessage)) {
+    return "";
+  }
+
+  return readNonEmptyString(parsedMessage.reasoning) ?? "";
+};
+
+const readCompletionContent = (
+  completion: OpenAI.Chat.ChatCompletion,
+  options?: GenerateOptions,
+): string => {
+  const content = completion.choices[0]?.message?.content;
+  if (typeof content === "string" && content.trim().length > 0) {
+    return content;
+  }
+
+  if (options?.purpose === "coverLetter") {
+    return readMessageReasoning(completion);
+  }
+
+  return "";
 };
 
 /**
@@ -110,7 +143,7 @@ export class LocalProvider extends BaseAIProvider {
       };
     }
     const response = responseResult.value;
-    const text = response.choices[0]?.message?.content || "";
+    const text = readCompletionContent(response, options);
     return {
       id: this.generateId(),
       provider: this.name,

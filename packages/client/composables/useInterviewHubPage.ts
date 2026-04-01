@@ -186,6 +186,7 @@ export function useInterviewHubPage() {
     INTERVIEW_CONFIG_DIALOG_DESCRIPTION_ID,
     INTERVIEW_CONFIG_DIALOG_TITLE_ID,
     INTERVIEW_ROLE_SUGGESTIONS_LIST_ID,
+    formatSessionDate: actions.formatSessionDate,
     getScoreBadgeClass,
     handleStartInterview: async () => {
       await actions.handleStartInterview(derived.isStartDisabled.value || bootstrap.starting.value);

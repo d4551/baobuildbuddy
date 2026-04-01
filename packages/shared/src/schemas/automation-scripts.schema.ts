@@ -4,7 +4,7 @@ import {
   AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH,
   AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH,
   AUTOMATION_MAX_JOB_URL_LENGTH,
-} from "../constants/automation";
+} from "../constants/automation-limits";
 import {
   SCHEMA_MAX_LENGTH_DATE,
   SCHEMA_MAX_LENGTH_DESCRIPTION,

@@ -38,12 +38,17 @@ export interface CoverLetterUserProfile {
 
 export const COVER_LETTER_DOCX_FONT_FAMILY = COVER_LETTER_EXPORT_THEME.docx.fontFamily;
 export const PORTFOLIO_DOCX_FONT_FAMILY = PORTFOLIO_EXPORT_THEME.docx.fontFamily;
+export const COVER_LETTER_DOCX_PRIMARY_COLOR = COVER_LETTER_EXPORT_THEME.docx.primaryColorHex;
 export const COVER_LETTER_DOCX_TEXT_COLOR = COVER_LETTER_EXPORT_THEME.docx.textColorHex;
 export const COVER_LETTER_DOCX_MUTED_COLOR = COVER_LETTER_EXPORT_THEME.docx.mutedColorHex;
+export const COVER_LETTER_DOCX_SUBTLE_COLOR = COVER_LETTER_EXPORT_THEME.docx.subtleColorHex;
+export const COVER_LETTER_DOCX_LINE_COLOR = COVER_LETTER_EXPORT_THEME.docx.lineColorHex;
 export const PORTFOLIO_DOCX_PRIMARY_COLOR = PORTFOLIO_EXPORT_THEME.docx.primaryColorHex;
+export const PORTFOLIO_DOCX_ACCENT_COLOR = PORTFOLIO_EXPORT_THEME.docx.accentColorHex;
 export const PORTFOLIO_DOCX_MUTED_COLOR = PORTFOLIO_EXPORT_THEME.docx.mutedColorHex;
 export const PORTFOLIO_DOCX_SUBTLE_COLOR = PORTFOLIO_EXPORT_THEME.docx.subtleColorHex;
 export const PORTFOLIO_DOCX_FOOTER_COLOR = PORTFOLIO_EXPORT_THEME.docx.footerColorHex;
+export const PORTFOLIO_DOCX_LINE_COLOR = PORTFOLIO_EXPORT_THEME.docx.lineColorHex;
 
 export const createDivider = (color: string): Paragraph =>
   new Paragraph({

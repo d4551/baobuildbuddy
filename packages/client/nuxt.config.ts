@@ -20,6 +20,7 @@ import {
 } from "@bao/shared/constants/client-config";
 import { DEFAULT_CLIENT_DEV_PORT, DEFAULT_SERVER_PORT } from "@bao/shared/constants/ports";
 import { APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
+import { defineNuxtConfig } from "nuxt/config";
 import { buildApiProxyWildcardTarget, normalizeApiProxyTarget } from "./utils/api-proxy-target";
 
 const DEFAULT_CLIENT_PORT = String(DEFAULT_CLIENT_DEV_PORT);
@@ -197,12 +198,12 @@ export default defineNuxtConfig({
     componentIslands: false,
   },
   hooks: {
-    "prerender:routes": ({ routes }) => {
+    "prerender:routes": (context: { routes: Set<string> }) => {
       if (shouldPrerenderApplicationRoutes) {
         return;
       }
 
-      routes.clear();
+      context.routes.clear();
     },
   },
 

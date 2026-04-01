@@ -14,10 +14,40 @@ const catalog = {
         available: "Disponible",
         needsConfig: "Configuration requise",
         unavailable: "Indisponible",
-        noIssues: "Aucun problème détecté.",
-        category: {
-          job_apply: "Candidature",
-          scrape: "Scraping",
+        type: {
+          jobApply: "Flux de candidature",
+          scrape: "Flux de scraping",
+        },
+        capabilities: {
+          jobApply: "Candidature",
+        },
+        issueState: {
+          ready: "Prêt",
+          needsAttention: "Attention requise",
+        },
+        issueSummaryAria:
+          "Ouvrir les problèmes de configuration pour {capability}. {count} problème nécessite une attention.",
+        issues: {
+          providerSettingsUnavailable:
+            "Les paramètres du fournisseur d'offres sont actuellement indisponibles.",
+          portalConfigurationMissing:
+            "Ajoutez une configuration de portail gaming pour {portalId}.",
+          portalDisabled: "Activez {portalName} dans les paramètres du fournisseur d'offres.",
+          portalFallbackUrlMissing: "Ajoutez une URL de secours pour {portalName}.",
+        },
+        actions: {
+          fixSetup: "Corriger la config",
+          fixSetupAria: "Ouvrir les paramètres pour corriger les problèmes de scraping",
+          openJobApply: "Ouvrir la candidature",
+          openJobApplyAria: "Ouvrir le flux d'automatisation de candidature",
+          openScraper: "Ouvrir le scraper",
+          openScraperAria: "Ouvrir le flux d'automatisation du scraper",
+        },
+        coverage: {
+          manual: "Exécution manuelle prise en charge",
+          scheduled: "Exécution planifiée prise en charge",
+          history: "Historique des exécutions suivi",
+          live: "Mises à jour en direct disponibles",
         },
         summary: {
           total: "Capacités",
@@ -30,12 +60,13 @@ const catalog = {
         tableAria: "Détails de l'audit des capacités RPA",
         columns: {
           name: "Capacité",
-          category: "Catégorie",
           configured: "Configurée",
           manual: "Manuel",
           scheduled: "Planifiée",
           history: "Historique",
           live: "Direct",
+          coverage: "Couverture",
+          issues: "Problèmes",
         },
       },
     },

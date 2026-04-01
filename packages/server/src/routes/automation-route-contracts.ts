@@ -1,6 +1,7 @@
 import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
+  RPA_CAPABILITY_ISSUE_CODES,
   AUTOMATION_SCRAPE_TARGETS,
   type AutomationScrapeTarget,
 } from "@bao/shared/constants/automation";
@@ -148,7 +149,13 @@ export const capabilityAuditEntryBodySchema = Type.Object({
   scheduledRunAvailable: Type.Boolean(),
   runHistoryAvailable: Type.Boolean(),
   liveUpdatesAvailable: Type.Boolean(),
-  issues: Type.Array(Type.String({ minLength: 1 })),
+  issues: Type.Array(
+    Type.Object({
+      code: Type.Union(RPA_CAPABILITY_ISSUE_CODES.map((code) => Type.Literal(code))),
+      portalId: Type.Optional(Type.String({ minLength: 1 })),
+      portalName: Type.Optional(Type.String({ minLength: 1 })),
+    }),
+  ),
 });
 
 export const capabilityAuditReportBodySchema = Type.Object({

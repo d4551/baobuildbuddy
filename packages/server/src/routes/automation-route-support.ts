@@ -1,5 +1,5 @@
 import { API_ERROR_AUTOMATION_PAYLOAD_VALIDATION_FAILED } from "@bao/shared/constants/api-errors";
-import { AUTOMATION_RUN_HISTORY_LIMIT } from "@bao/shared/constants/automation";
+import { AUTOMATION_RUN_HISTORY_LIMIT } from "@bao/shared/constants/automation-limits";
 import { rpaRunErrorCodeSchema } from "@bao/shared/schemas/error-envelope.schema";
 import { jsonObjectSchema } from "@bao/shared/schemas/json.schema";
 import {

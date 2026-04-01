@@ -1,4 +1,4 @@
-import { AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH } from "@bao/shared/constants/automation";
+import { AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH } from "@bao/shared/constants/automation-limits";
 import { SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import type {
   EmailResponseRequest,

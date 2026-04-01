@@ -55,6 +55,13 @@ const breadcrumbs = computed(() => [
   { label: t("nav.coverLetter"), to: APP_ROUTES.coverLetter },
   { label: letter.value?.position || t("coverLetterDetailPage.breadcrumbFallback") },
 ]);
+const heroTitle = computed(() =>
+  t("coverLetterDetailPage.hero.title", {
+    position: formData.position.trim() || t("coverLetterDetailPage.breadcrumbFallback"),
+    company: formData.company.trim() || t("coverLetterDetailPage.details.companyPlaceholder"),
+  }),
+);
+const heroDescription = computed(() => t("coverLetterDetailPage.hero.description"));
 
 const contentCharacterCount = computed(() => formData.contentText.trim().length);
 const contentSectionCount = computed(() => {
@@ -208,13 +215,19 @@ async function handleExport(format: "pdf" | "docx") {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <AppBreadcrumbs :crumbs="breadcrumbs" />
-
-      <div class="flex flex-wrap gap-2">
+  <PageScaffold width-token="wide" spacing-token="comfortable" labelled-by="cover-letter-detail-title">
+    <PageHeroHeader
+      title-id="cover-letter-detail-title"
+      :title="heroTitle"
+      :description="heroDescription"
+      description-class="max-w-2xl text-base-content/70"
+    >
+      <template #breadcrumbs>
+        <AppBreadcrumbs :crumbs="breadcrumbs" />
+      </template>
+      <template #actions>
         <button
-          class="btn btn-sm btn-outline"
+          class="btn btn-outline"
           :disabled="regenerating"
           :aria-label="t('coverLetterDetailPage.actions.regenerateAria')"
           @click="requestRegenerate"
@@ -228,20 +241,20 @@ async function handleExport(format: "pdf" | "docx") {
           :button-label="t('coverLetterDetailPage.actions.exportButton')"
           :button-aria-label="t('coverLetterDetailPage.actions.exportAria')"
           :disabled="loading"
-          summary-class="btn btn-sm btn-outline"
+          summary-class="btn btn-outline"
           @export="handleExport"
         />
 
         <button
-          class="btn btn-sm btn-primary"
+          class="btn btn-primary"
           :disabled="!hasUnsavedChanges"
           :aria-label="t('coverLetterDetailPage.actions.saveAria')"
           @click="handleSave"
         >
           {{ t("coverLetterDetailPage.actions.saveButton") }}
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeroHeader>
 
     <LoadingSkeleton v-if="loading" :lines="10" />
 
@@ -276,5 +289,5 @@ async function handleExport(format: "pdf" | "docx") {
       @confirm="handleRegenerate"
       @cancel="showRegenerateDialog = false"
     />
-  </div>
+  </PageScaffold>
 </template>

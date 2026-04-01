@@ -2,11 +2,12 @@ import {
   AUTOMATION_SCRAPE_JOB_TARGETS,
   automationScrapeTargetToPortalId,
   buildRpaCapabilityIdFromScrapeTarget,
+  type AutomationScrapePortalId,
   type RpaCapabilityAuditEntry,
   type RpaCapabilityAuditReport,
+  type RpaCapabilityIssue,
   type RpaCapabilityAuditSummary,
 } from "@bao/shared/constants/automation";
-import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { loadJobProviderSettings } from "../jobs/providers/provider-settings";
 
@@ -17,8 +18,8 @@ interface ScrapePortalAuditConfig {
 }
 
 interface ScrapePortalAuditSnapshot {
-  portalConfigById: Map<string, ScrapePortalAuditConfig>;
-  sharedSettingsIssue: string | null;
+  portalConfigById: Map<AutomationScrapePortalId, ScrapePortalAuditConfig>;
+  sharedSettingsIssue: RpaCapabilityIssue | null;
 }
 
 const createJobApplyCapabilityAuditEntry = (): RpaCapabilityAuditEntry => ({
@@ -78,10 +79,10 @@ const summarizeRpaCapabilities = (
 
 const loadScrapePortalAuditSnapshot = async (): Promise<ScrapePortalAuditSnapshot> => {
   const providerSettingsResult = await settle(loadJobProviderSettings());
-  const portalConfigById = new Map<string, ScrapePortalAuditConfig>();
+  const portalConfigById = new Map<AutomationScrapePortalId, ScrapePortalAuditConfig>();
   const sharedSettingsIssue =
     providerSettingsResult.status === "rejected"
-      ? toErrorMessage(providerSettingsResult.reason, "Job provider settings are unavailable.")
+      ? ({ code: "provider_settings_unavailable" } satisfies RpaCapabilityIssue)
       : null;
 
   if (providerSettingsResult.status === "fulfilled") {
@@ -102,23 +103,31 @@ const loadScrapePortalAuditSnapshot = async (): Promise<ScrapePortalAuditSnapsho
 
 const buildScrapeCapabilityIssues = (
   configuredPortal: ScrapePortalAuditConfig | null,
-  portalId: string,
-  sharedSettingsIssue: string | null,
-): string[] => {
+  portalId: AutomationScrapePortalId,
+  sharedSettingsIssue: RpaCapabilityIssue | null,
+): RpaCapabilityIssue[] => {
   if (sharedSettingsIssue) {
     return [sharedSettingsIssue];
   }
 
   if (!configuredPortal) {
-    return [`Missing ${portalId} gaming portal configuration.`];
+    return [{ code: "portal_configuration_missing", portalId }];
   }
 
-  const issues: string[] = [];
+  const issues: RpaCapabilityIssue[] = [];
   if (!configuredPortal.enabled) {
-    issues.push(`${configuredPortal.name} is disabled in job provider settings.`);
+    issues.push({
+      code: "portal_disabled",
+      portalId,
+      portalName: configuredPortal.name,
+    });
   }
   if (configuredPortal.fallbackUrl.trim().length === 0) {
-    issues.push(`${configuredPortal.name} is missing a fallback URL.`);
+    issues.push({
+      code: "portal_fallback_url_missing",
+      portalId,
+      portalName: configuredPortal.name,
+    });
   }
   return issues;
 };

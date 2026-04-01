@@ -37,10 +37,38 @@ const automationhub = {
         available: "Available",
         needsConfig: "Needs Config",
         unavailable: "Unavailable",
-        noIssues: "No issues detected.",
-        category: {
-          job_apply: "Job Apply",
-          scrape: "Scrape",
+        type: {
+          jobApply: "Job apply workflow",
+          scrape: "Scraper workflow",
+        },
+        capabilities: {
+          jobApply: "Job Apply",
+          studios: "Studios",
+        },
+        issueState: {
+          ready: "Ready",
+          needsAttention: "Needs attention",
+        },
+        issueSummaryAria: "Open setup issues for {capability}. {count} issue needs attention.",
+        issues: {
+          providerSettingsUnavailable: "Job provider settings are currently unavailable.",
+          portalConfigurationMissing: "Add a gaming portal configuration for {portalId}.",
+          portalDisabled: "Enable {portalName} in job provider settings.",
+          portalFallbackUrlMissing: "Add a fallback URL for {portalName}.",
+        },
+        actions: {
+          fixSetup: "Fix Setup",
+          fixSetupAria: "Open settings to fix scrape setup issues",
+          openJobApply: "Open Job Apply",
+          openJobApplyAria: "Open the job apply automation workflow",
+          openScraper: "Open Scraper",
+          openScraperAria: "Open the scraper automation workflow",
+        },
+        coverage: {
+          manual: "Manual run supported",
+          scheduled: "Scheduled run supported",
+          history: "Run history tracked",
+          live: "Live updates available",
         },
         summary: {
           total: "Capabilities",
@@ -53,13 +81,14 @@ const automationhub = {
         tableAria: "RPA capability audit details",
         columns: {
           name: "Capability",
-          category: "Category",
           configured: "Configured",
           manual: "Manual",
           scheduled: "Scheduled",
           history: "History",
           live: "Live",
-          notes: "Notes",
+          coverage: "Coverage",
+          issues: "Issues",
+          actions: "Actions",
         },
       },
       cards: {

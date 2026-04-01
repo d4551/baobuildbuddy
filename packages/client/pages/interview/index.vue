@@ -19,6 +19,7 @@ const {
   INTERVIEW_CONFIG_DIALOG_TITLE_ID,
   INTERVIEW_ROLE_SUGGESTIONS_LIST_ID,
   averageScore,
+  formatSessionDate,
   getScoreBadgeClass,
   handleStartInterview,
   improvementTrend,

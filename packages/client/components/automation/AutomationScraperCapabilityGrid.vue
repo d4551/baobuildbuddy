@@ -40,7 +40,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const capabilityIssues = (capability: ScrapeCapabilityCard): string[] =>
-  resolveAutomationCapabilityIssues(capability);
+  resolveAutomationCapabilityIssues(capability, t);
 
 function handleScheduleInput(target: AutomationScrapeTarget, event: Event): void {
   const input = event.target;
@@ -101,7 +101,10 @@ function handleScheduleInput(target: AutomationScrapeTarget, event: Event): void
           <div class="space-y-1">
             <p class="font-medium">{{ capabilityAvailabilityLabel(capability) }}</p>
             <ul class="space-y-1 text-sm">
-              <li v-for="issue in capabilityIssues(capability)" :key="issue">
+              <li
+                v-for="(issue, issueIndex) in capabilityIssues(capability)"
+                :key="`${capability.id}-issue-${issueIndex}`"
+              >
                 {{ issue }}
               </li>
             </ul>

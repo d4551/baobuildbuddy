@@ -1,11 +1,14 @@
-export type SettingsSectionId =
-  | "profile"
-  | "preferences"
-  | "automation"
-  | "jobIntelligence"
-  | "emailDelivery"
-  | "aiProviders"
-  | "brand";
+export const SETTINGS_SECTION_IDS = [
+  "profile",
+  "preferences",
+  "automation",
+  "jobIntelligence",
+  "emailDelivery",
+  "aiProviders",
+  "brand",
+] as const;
+
+export type SettingsSectionId = (typeof SETTINGS_SECTION_IDS)[number];
 
 export const SETTINGS_DEFAULT_SECTION_ID: SettingsSectionId = "profile";
 
@@ -80,4 +83,8 @@ export function getSettingsSectionById(sectionId: SettingsSectionId): SettingsSe
   return (
     SETTINGS_SECTION_ITEMS.find((section) => section.id === sectionId) ?? SETTINGS_SECTION_ITEMS[0]
   );
+}
+
+export function isSettingsSectionId(value: string): value is SettingsSectionId {
+  return SETTINGS_SECTION_IDS.some((sectionId) => sectionId === value);
 }

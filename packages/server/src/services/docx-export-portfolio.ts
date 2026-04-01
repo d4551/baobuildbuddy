@@ -4,18 +4,21 @@ import {
   AlignmentType,
   Document,
   HeadingLevel,
+  type ISectionOptions,
+  Packer,
   PageNumber,
   Paragraph,
-  Packer,
   TextRun,
-  type ISectionOptions,
 } from "docx";
 import {
+  createDivider,
   DOCX_PORTFOLIO_FONT_BODY_PT,
   DOCX_PORTFOLIO_FONT_HEADING_PT,
   DOCX_PORTFOLIO_FONT_TITLE_PT,
-  PORTFOLIO_DOCX_FOOTER_COLOR,
+  PORTFOLIO_DOCX_ACCENT_COLOR,
   PORTFOLIO_DOCX_FONT_FAMILY,
+  PORTFOLIO_DOCX_FOOTER_COLOR,
+  PORTFOLIO_DOCX_LINE_COLOR,
   PORTFOLIO_DOCX_MUTED_COLOR,
   PORTFOLIO_DOCX_PRIMARY_COLOR,
   PORTFOLIO_DOCX_SUBTLE_COLOR,
@@ -23,13 +26,12 @@ import {
 
 function buildPortfolioTitleParagraph(title: string | undefined): Paragraph {
   return new Paragraph({
-    alignment: AlignmentType.CENTER,
-    spacing: { before: 4000 },
+    spacing: { after: 120 },
     children: [
       new TextRun({
         text: title ?? "Portfolio",
         bold: true,
-        size: DOCX_PORTFOLIO_FONT_TITLE_PT * 2,
+        size: (DOCX_PORTFOLIO_FONT_TITLE_PT - 8) * 2,
         color: PORTFOLIO_DOCX_PRIMARY_COLOR,
         font: PORTFOLIO_DOCX_FONT_FAMILY,
       }),
@@ -41,12 +43,11 @@ function buildPortfolioAuthorParagraph(author: string | undefined): Paragraph[] 
   if (!author) return [];
   return [
     new Paragraph({
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 400 },
+      spacing: { after: 80 },
       children: [
         new TextRun({
           text: author,
-          size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
+          size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
           color: PORTFOLIO_DOCX_MUTED_COLOR,
           font: PORTFOLIO_DOCX_FONT_FAMILY,
         }),
@@ -59,12 +60,10 @@ function buildPortfolioDescriptionParagraph(description: string | undefined): Pa
   if (!description) return [];
   return [
     new Paragraph({
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 400, after: 200 },
+      spacing: { after: 160 },
       children: [
         new TextRun({
           text: description,
-          italics: true,
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
           color: PORTFOLIO_DOCX_SUBTLE_COLOR,
           font: PORTFOLIO_DOCX_FONT_FAMILY,
@@ -79,13 +78,12 @@ function buildPortfolioContactParagraph(metadata: PortfolioMetadata): Paragraph[
   if (contactParts.length === 0) return [];
   return [
     new Paragraph({
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 200 },
+      spacing: { after: 140 },
       children: [
         new TextRun({
           text: contactParts.join(" | "),
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_PRIMARY_COLOR,
+          color: PORTFOLIO_DOCX_ACCENT_COLOR,
           font: PORTFOLIO_DOCX_FONT_FAMILY,
         }),
       ],
@@ -98,14 +96,14 @@ function buildPortfolioProjectsHeading(): Paragraph {
     heading: HeadingLevel.HEADING_1,
     children: [
       new TextRun({
-        text: "Projects",
+        text: "Selected Projects",
         bold: true,
         size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
         color: PORTFOLIO_DOCX_PRIMARY_COLOR,
         font: PORTFOLIO_DOCX_FONT_FAMILY,
       }),
     ],
-    spacing: { after: 200 },
+    spacing: { before: 120, after: 120 },
   });
 }
 
@@ -122,6 +120,7 @@ function buildPortfolioProjectRole(role: string | undefined): Paragraph[] {
           font: PORTFOLIO_DOCX_FONT_FAMILY,
         }),
       ],
+      spacing: { after: 40 },
     }),
   ];
 }
@@ -174,7 +173,7 @@ function buildPortfolioProjectUrls(urls: string[]): Paragraph[] {
         new TextRun({
           text: urls.join(" | "),
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_PRIMARY_COLOR,
+          color: PORTFOLIO_DOCX_ACCENT_COLOR,
           font: PORTFOLIO_DOCX_FONT_FAMILY,
         }),
       ],
@@ -191,12 +190,12 @@ function buildPortfolioProjectParagraphs(project: PortfolioProject, index: numbe
         new TextRun({
           text: `${String(index + 1)}. ${project.title}`,
           bold: true,
-          size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
+          size: (DOCX_PORTFOLIO_FONT_HEADING_PT - 1) * 2,
           color: PORTFOLIO_DOCX_PRIMARY_COLOR,
           font: PORTFOLIO_DOCX_FONT_FAMILY,
         }),
       ],
-      spacing: { before: 240 },
+      spacing: { before: 200, after: 20 },
     }),
     ...buildPortfolioProjectRole(project.role),
     new Paragraph({
@@ -212,6 +211,7 @@ function buildPortfolioProjectParagraphs(project: PortfolioProject, index: numbe
     ...buildPortfolioProjectTechnologies(project.technologies),
     ...buildPortfolioProjectTags(project.tags),
     ...buildPortfolioProjectUrls(urls),
+    createDivider(PORTFOLIO_DOCX_LINE_COLOR),
   ];
 }
 
@@ -236,20 +236,17 @@ function buildPortfolioFooter(): Paragraph {
   });
 }
 
-function buildPortfolioCoverPage(metadata: PortfolioMetadata): ISectionOptions {
+function buildPortfolioDocumentSection(
+  metadata: PortfolioMetadata,
+  projects: PortfolioProject[],
+): ISectionOptions {
   return {
     children: [
       buildPortfolioTitleParagraph(metadata.title),
       ...buildPortfolioAuthorParagraph(metadata.author),
       ...buildPortfolioDescriptionParagraph(metadata.description),
       ...buildPortfolioContactParagraph(metadata),
-    ],
-  };
-}
-
-function buildPortfolioProjectsSection(projects: PortfolioProject[]): ISectionOptions {
-  return {
-    children: [
+      createDivider(PORTFOLIO_DOCX_LINE_COLOR),
       buildPortfolioProjectsHeading(),
       ...projects.flatMap((project, index) => buildPortfolioProjectParagraphs(project, index)),
       buildPortfolioFooter(),
@@ -262,7 +259,7 @@ export async function exportPortfolioDocxDocument(
   projects: PortfolioProject[],
 ): Promise<Uint8Array> {
   const doc = new Document({
-    sections: [buildPortfolioCoverPage(metadata), buildPortfolioProjectsSection(projects)],
+    sections: [buildPortfolioDocumentSection(metadata, projects)],
   });
   const buffer = await Packer.toBuffer(doc);
   return new Uint8Array(buffer);

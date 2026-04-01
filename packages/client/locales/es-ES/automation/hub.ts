@@ -33,10 +33,41 @@ const catalog = {
         available: "Disponible",
         needsConfig: "Requiere Configuración",
         unavailable: "No Disponible",
-        noIssues: "No se detectaron incidencias.",
-        category: {
-          job_apply: "Solicitud",
-          scrape: "Extracción",
+        type: {
+          jobApply: "Flujo de solicitud de empleo",
+          scrape: "Flujo de extracción",
+        },
+        capabilities: {
+          jobApply: "Solicitud de Empleo",
+          studios: "Estudios",
+        },
+        issueState: {
+          ready: "Listo",
+          needsAttention: "Requiere atención",
+        },
+        issueSummaryAria:
+          "Abrir incidencias de configuración para {capability}. {count} incidencia requiere atención.",
+        issues: {
+          providerSettingsUnavailable:
+            "La configuración del proveedor de empleos no está disponible actualmente.",
+          portalConfigurationMissing:
+            "Añade una configuración de portal de videojuegos para {portalId}.",
+          portalDisabled: "Activa {portalName} en la configuración del proveedor de empleos.",
+          portalFallbackUrlMissing: "Añade una URL de respaldo para {portalName}.",
+        },
+        actions: {
+          fixSetup: "Corregir Configuración",
+          fixSetupAria: "Abrir configuración para corregir incidencias del scraping",
+          openJobApply: "Abrir Solicitud",
+          openJobApplyAria: "Abrir el flujo de automatización de solicitud de empleo",
+          openScraper: "Abrir Scraper",
+          openScraperAria: "Abrir el flujo de automatización del scraper",
+        },
+        coverage: {
+          manual: "Permite ejecución manual",
+          scheduled: "Permite ejecución programada",
+          history: "Registra historial de ejecuciones",
+          live: "Ofrece actualizaciones en vivo",
         },
         summary: {
           total: "Capacidades",
@@ -49,12 +80,13 @@ const catalog = {
         tableAria: "Detalle de la auditoría de capacidades RPA",
         columns: {
           name: "Capacidad",
-          category: "Categoría",
           configured: "Configurada",
           scheduled: "Programada",
           history: "Historial",
           live: "En Vivo",
-          notes: "Notas",
+          coverage: "Cobertura",
+          issues: "Incidencias",
+          actions: "Acciones",
         },
       },
       cards: {

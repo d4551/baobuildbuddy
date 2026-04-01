@@ -153,6 +153,39 @@ export const RPA_CAPABILITY_IDS = [
 export type RpaCapabilityId = (typeof RPA_CAPABILITY_IDS)[number];
 
 /**
+ * Stable issue codes emitted by the RPA capability audit.
+ */
+export const RPA_CAPABILITY_ISSUE_CODES = [
+  "provider_settings_unavailable",
+  "portal_configuration_missing",
+  "portal_disabled",
+  "portal_fallback_url_missing",
+] as const;
+
+/**
+ * Union type for structured RPA capability audit issues.
+ */
+export type RpaCapabilityIssueCode = (typeof RPA_CAPABILITY_ISSUE_CODES)[number];
+
+/**
+ * Structured audit issue payload localized by client surfaces.
+ */
+export interface RpaCapabilityIssue {
+  /**
+   * Stable issue identifier.
+   */
+  code: RpaCapabilityIssueCode;
+  /**
+   * Related gaming portal id when the issue is portal-specific.
+   */
+  portalId?: AutomationScrapePortalId;
+  /**
+   * Resolved portal label from current settings when available.
+   */
+  portalName?: string;
+}
+
+/**
  * Point-in-time audit row for one RPA capability.
  */
 export interface RpaCapabilityAuditEntry {
@@ -203,7 +236,7 @@ export interface RpaCapabilityAuditEntry {
   /**
    * Audit warnings or missing-configuration notes.
    */
-  issues: string[];
+  issues: RpaCapabilityIssue[];
 }
 
 /**
@@ -258,73 +291,6 @@ export interface RpaCapabilityAuditReport {
  * Canonical automation run status lifecycle values.
  */
 export const AUTOMATION_RUN_STATUSES = ["pending", "running", "success", "error"] as const;
-
-/**
- * Default maximum number of automation runs returned by history endpoints.
- */
-export const AUTOMATION_RUN_HISTORY_LIMIT = 50;
-
-/**
- * Maximum length for job application URLs.
- */
-export const AUTOMATION_MAX_JOB_URL_LENGTH = 2_048;
-
-/**
- * Maximum length for custom answer keys.
- */
-export const AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH = 120;
-
-/**
- * Maximum length for custom answer values.
- */
-export const AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH = 2_000;
-
-/**
- * Maximum number of custom answers per job application.
- */
-export const AUTOMATION_MAX_CUSTOM_ANSWER_COUNT = 50;
-
-/**
- * Maximum days to retain automation screenshots before cleanup.
- */
-export const AUTOMATION_MAX_SCREENSHOT_RETENTION_DAYS = 30;
-
-/**
- * Maximum number of runs to process per cleanup batch.
- */
-export const AUTOMATION_CLEANUP_LIMIT = 500;
-
-/**
- * Maximum concurrent automation runs.
- */
-export const AUTOMATION_MAX_CONCURRENT_RUNS = 5;
-
-/**
- * Maximum length for AI-generated email response body.
- */
-export const AUTOMATION_MAX_EMAIL_MESSAGE_LENGTH = 12_000;
-
-/**
- * Delay before retrying a failed scheduled run (ms).
- */
-export const AUTOMATION_SCHEDULE_RETRY_DELAY_MS = 30_000;
-
-/**
- * Maximum lead time for scheduling a run (30 days, ms).
- */
-export const AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS = 30 * 24 * 60 * 60 * 1000;
-
-/** Progress value when run is complete (100%). */
-export const AUTOMATION_FINISHED_PROGRESS = 100;
-
-/** Max length for screenshot filenames. */
-export const AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH = 96;
-
-/** Max progress steps for run progress tracking. */
-export const AUTOMATION_MAX_PROGRESS_STEPS = 10_000;
-
-/** Min length for run IDs. */
-export const AUTOMATION_MIN_ID_LENGTH = 8;
 
 /**
  * Union type for an automation run type.

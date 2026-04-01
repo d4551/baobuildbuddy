@@ -3,11 +3,11 @@ import {
   API_ERROR_SCRAPE_STUDIOS_FAILED,
 } from "@bao/shared/constants/api-errors";
 import {
-  AUTOMATION_FINISHED_PROGRESS,
   isAutomationJobScrapeTarget,
   type AutomationScrapeTarget,
   type RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
+import { AUTOMATION_FINISHED_PROGRESS } from "@bao/shared/constants/automation-limits";
 import type { ScraperOperationResult } from "@bao/shared/types/jobs";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { eq } from "drizzle-orm";

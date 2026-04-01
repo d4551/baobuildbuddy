@@ -4,13 +4,17 @@ import {
   formatExportDate,
   toCoverLetterParagraphs,
 } from "@bao/shared/utils/export-contract";
-import { Document, Paragraph, Packer, TextRun } from "docx";
+import { Document, Packer, Paragraph, TextRun } from "docx";
 import {
   COVER_LETTER_DOCX_FONT_FAMILY,
+  COVER_LETTER_DOCX_LINE_COLOR,
   COVER_LETTER_DOCX_MUTED_COLOR,
+  COVER_LETTER_DOCX_PRIMARY_COLOR,
+  COVER_LETTER_DOCX_SUBTLE_COLOR,
   COVER_LETTER_DOCX_TEXT_COLOR,
   type CoverLetterPayload,
   type CoverLetterUserProfile,
+  createDivider,
   DOCX_COVER_LETTER_FONT_BODY_PT,
   DOCX_COVER_LETTER_FONT_HEADER_PT,
 } from "./docx-export-contracts";
@@ -23,10 +27,11 @@ function buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[
           text: userProfile.name,
           bold: true,
           size: DOCX_COVER_LETTER_FONT_HEADER_PT * 2,
+          color: COVER_LETTER_DOCX_PRIMARY_COLOR,
           font: COVER_LETTER_DOCX_FONT_FAMILY,
         }),
       ],
-      spacing: { after: 40 },
+      spacing: { after: 60 },
     }),
   ];
 
@@ -46,7 +51,7 @@ function buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[
             font: COVER_LETTER_DOCX_FONT_FAMILY,
           }),
         ],
-        spacing: { after: 200 },
+        spacing: { after: 140 },
       }),
     );
   }
@@ -57,7 +62,7 @@ function buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[
         new TextRun({
           text: formatExportDate(new Date()),
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_TEXT_COLOR,
+          color: COVER_LETTER_DOCX_MUTED_COLOR,
           font: COVER_LETTER_DOCX_FONT_FAMILY,
         }),
       ],
@@ -76,7 +81,7 @@ function buildCoverLetterRecipientBlock(coverLetter: CoverLetterPayload): Paragr
           text: coverLetter.company,
           bold: true,
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_TEXT_COLOR,
+          color: COVER_LETTER_DOCX_PRIMARY_COLOR,
           font: COVER_LETTER_DOCX_FONT_FAMILY,
         }),
       ],
@@ -87,12 +92,13 @@ function buildCoverLetterRecipientBlock(coverLetter: CoverLetterPayload): Paragr
           text: `Re: ${coverLetter.position}`,
           italics: true,
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_MUTED_COLOR,
+          color: COVER_LETTER_DOCX_SUBTLE_COLOR,
           font: COVER_LETTER_DOCX_FONT_FAMILY,
         }),
       ],
-      spacing: { after: 200 },
+      spacing: { after: 140 },
     }),
+    createDivider(COVER_LETTER_DOCX_LINE_COLOR),
   ];
 }
 

@@ -1785,11 +1785,7 @@ export declare const app: Elysia<"/api", {
                             coverLetter?: undefined;
                         } | {
                             message: string;
-                            content: {
-                                introduction: string;
-                                body: string;
-                                conclusion: string;
-                            };
+                            content: import("./routes/cover-letter-route-generation-support").GeneratedCoverLetterContent;
                             error?: undefined;
                             details?: undefined;
                             coverLetter?: undefined;
@@ -1800,11 +1796,7 @@ export declare const app: Elysia<"/api", {
                                 company: string;
                                 position: string;
                                 jobInfo: Record<string, unknown>;
-                                content: {
-                                    introduction: string;
-                                    body: string;
-                                    conclusion: string;
-                                };
+                                content: import("./routes/cover-letter-route-generation-support").GeneratedCoverLetterContent;
                                 template: "professional" | "creative" | "gaming" | "executive" | "technical";
                             };
                             error?: undefined;
@@ -3880,7 +3872,11 @@ export declare const app: Elysia<"/api", {
                                 category?: "scrape" | "job_apply" | undefined;
                                 enabled?: boolean | undefined;
                                 target?: "jobs_hitmarker" | "jobs_grackle" | "jobs_workwithindies" | "jobs_remotegamejobs" | "jobs_gamesjobsdirect" | "jobs_pocketgamer" | "studios" | null | undefined;
-                                issues?: string[] | undefined;
+                                issues?: ({} & {
+                                    code?: "provider_settings_unavailable" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | undefined;
+                                    portalId?: string | undefined;
+                                    portalName?: string | undefined;
+                                })[] | undefined;
                                 configured?: boolean | undefined;
                                 implemented?: boolean | undefined;
                                 manualRunAvailable?: boolean | undefined;

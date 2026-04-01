@@ -6,7 +6,7 @@ import {
   API_MESSAGE_EMAIL_RESPONSE_DELIVERED,
   API_MESSAGE_EMAIL_RESPONSE_GENERATED,
 } from "@bao/shared/constants/api-messages";
-import { AUTOMATION_FINISHED_PROGRESS } from "@bao/shared/constants/automation";
+import { AUTOMATION_FINISHED_PROGRESS } from "@bao/shared/constants/automation-limits";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";

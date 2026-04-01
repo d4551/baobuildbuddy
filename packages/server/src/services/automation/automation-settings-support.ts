@@ -1,7 +1,7 @@
 import {
   AUTOMATION_MAX_CONCURRENT_RUNS,
   AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS,
-} from "@bao/shared/constants/automation";
+} from "@bao/shared/constants/automation-limits";
 import {
   automationSettingsSchema,
   emailTransportSettingsSchema,

@@ -75,7 +75,11 @@ export declare const capabilityAuditEntryBodySchema: Type.TObject<{
     readonly scheduledRunAvailable: Type.TBoolean;
     readonly runHistoryAvailable: Type.TBoolean;
     readonly liveUpdatesAvailable: Type.TBoolean;
-    readonly issues: Type.TArray<Type.TString>;
+    readonly issues: Type.TArray<Type.TObject<{
+        readonly code: Type.TUnion<Type.TLiteral<"provider_settings_unavailable" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing">[]>;
+        readonly portalId: Type.TOptional<Type.TString>;
+        readonly portalName: Type.TOptional<Type.TString>;
+    }, never, never>>;
 }, never, never>;
 export declare const capabilityAuditReportBodySchema: Type.TObject<{
     readonly generatedAt: Type.TString;
@@ -99,7 +103,11 @@ export declare const capabilityAuditReportBodySchema: Type.TObject<{
         readonly scheduledRunAvailable: Type.TBoolean;
         readonly runHistoryAvailable: Type.TBoolean;
         readonly liveUpdatesAvailable: Type.TBoolean;
-        readonly issues: Type.TArray<Type.TString>;
+        readonly issues: Type.TArray<Type.TObject<{
+            readonly code: Type.TUnion<Type.TLiteral<"provider_settings_unavailable" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing">[]>;
+            readonly portalId: Type.TOptional<Type.TString>;
+            readonly portalName: Type.TOptional<Type.TString>;
+        }, never, never>>;
     }, never, never>>;
 }, never, never>;
 export declare const automationRouteErrorResponses: {

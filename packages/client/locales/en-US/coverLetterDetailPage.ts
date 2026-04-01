@@ -1,6 +1,11 @@
 const coverLetterDetailPage = {
   coverLetterDetailPage: {
     breadcrumbFallback: "Cover Letter Detail",
+    hero: {
+      title: "{position} at {company}",
+      description:
+        "Review grounded draft content, refine the message, and export the finished letter.",
+    },
     templates: {
       professional: "Professional",
       creative: "Creative",

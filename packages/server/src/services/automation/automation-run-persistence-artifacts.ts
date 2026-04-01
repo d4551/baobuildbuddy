@@ -2,7 +2,7 @@ import { join, resolve } from "node:path";
 import {
   AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
   AUTOMATION_MIN_ID_LENGTH,
-} from "@bao/shared/constants/automation";
+} from "@bao/shared/constants/automation-limits";
 import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { settle } from "@bao/shared/utils/promise";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";

@@ -1,6 +1,6 @@
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
-import { drawPortfolioWrappedText } from "./export-service-portfolio-context";
+import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
 export function renderPortfolioSocialLinks(
   context: PortfolioRenderContext,
@@ -19,45 +19,34 @@ export function renderPortfolioSocialLinks(
     y: context.yPosition,
     size: 9,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.muted,
+    color: PORTFOLIO_PDF_COLORS.subtle,
   });
+  context.yPosition -= 16;
 }
 
 export function renderPortfolioCoverPage(
   context: PortfolioRenderContext,
   metadata: PortfolioMetadata,
 ): void {
-  context.yPosition = context.height / 2 + 100;
-
-  context.page.drawText("PORTFOLIO", {
+  context.yPosition = context.height - context.margin;
+  context.page.drawText(metadata.title ?? "Portfolio", {
     x: context.margin,
     y: context.yPosition,
-    size: 36,
+    size: 24,
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.primary,
   });
-  context.yPosition -= 50;
-
-  if (metadata.title) {
-    context.page.drawText(metadata.title, {
-      x: context.margin,
-      y: context.yPosition,
-      size: 20,
-      font: context.boldFont,
-      color: PORTFOLIO_PDF_COLORS.text,
-    });
-    context.yPosition -= 30;
-  }
+  context.yPosition -= 26;
 
   if (metadata.author) {
-    context.page.drawText(`By ${metadata.author}`, {
+    context.page.drawText(metadata.author, {
       x: context.margin,
       y: context.yPosition,
-      size: 14,
+      size: 12,
       font: context.font,
-      color: PORTFOLIO_PDF_COLORS.text,
+      color: PORTFOLIO_PDF_COLORS.muted,
     });
-    context.yPosition -= 25;
+    context.yPosition -= 18;
   }
 
   if (metadata.description) {
@@ -68,34 +57,44 @@ export function renderPortfolioCoverPage(
       color: PORTFOLIO_PDF_COLORS.text,
       font: context.font,
       maxWidth: context.width - context.margin * 2,
+      lineGap: 3,
     });
-    context.yPosition -= 20;
+    context.yPosition -= 8;
   }
 
-  if (metadata.website) {
-    context.page.drawText(metadata.website, {
+  const contactLine = [metadata.website, metadata.email].filter(
+    (value): value is string => typeof value === "string" && value.trim().length > 0,
+  );
+  if (contactLine.length > 0) {
+    context.page.drawText(contactLine.join(" | "), {
       x: context.margin,
       y: context.yPosition,
       size: 10,
       font: context.font,
       color: PORTFOLIO_PDF_COLORS.accent,
     });
-    context.yPosition -= 20;
+    context.yPosition -= 18;
   }
 
   renderPortfolioSocialLinks(context, metadata.social);
+  context.yPosition -= 18;
+  context.page.drawLine({
+    start: { x: context.margin, y: context.yPosition },
+    end: { x: context.width - context.margin, y: context.yPosition },
+    thickness: 1,
+    color: PORTFOLIO_PDF_COLORS.line,
+  });
+  context.yPosition -= 26;
 }
 
 export function startPortfolioProjectsSection(context: PortfolioRenderContext): void {
-  context.page = context.pdfDoc.addPage([context.width, context.height]);
-  context.yPosition = context.height - context.margin;
-
-  context.page.drawText("PROJECTS", {
+  ensurePortfolioSpace(context, 32);
+  context.page.drawText("SELECTED PROJECTS", {
     x: context.margin,
     y: context.yPosition,
-    size: 24,
+    size: 16,
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.primary,
   });
-  context.yPosition -= 40;
+  context.yPosition -= 22;
 }

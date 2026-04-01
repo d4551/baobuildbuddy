@@ -41,6 +41,7 @@ export const APP_ROUTE_QUERY_KEYS = {
   studioId: "studio",
   mode: "mode",
   source: "source",
+  section: "section",
 } as const;
 
 /**
@@ -93,6 +94,15 @@ export const APP_ROUTE_BUILDERS = {
    */
   automationRunDetail(runId: string): string {
     return `${APP_ROUTES.automationRuns}/${encodeRouteParam(runId)}`;
+  },
+  /**
+   * Builds the settings route with a selected section query.
+   *
+   * @param sectionId Settings section identifier.
+   * @returns Canonical settings route with section query.
+   */
+  settingsSection(sectionId: string): string {
+    return `${APP_ROUTES.settings}?${APP_ROUTE_QUERY_KEYS.section}=${encodeRouteParam(sectionId)}`;
   },
   /**
    * Builds the resume editor route with selected resume id query.
