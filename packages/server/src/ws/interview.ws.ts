@@ -1,28 +1,18 @@
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
 import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import {
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_LABEL,
-  SCHEMA_MAX_LENGTH_MESSAGE,
-} from "@bao/shared/constants/schema-limits";
-import Type, { StandardSchemaV1 } from "baobox";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
-import { sessionConfigSchema } from "../routes/interview-route-contracts";
 import { handleEndSession, handleStartSession, handleSubmitResponse } from "./interview-ws-support";
+import {
+  interviewWebSocketBodySchema,
+  type InterviewWebSocketBody,
+} from "./interview-ws-contracts";
 
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
-  body: StandardSchemaV1(
-    Type.Object({
-      type: Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
-      sessionId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-      content: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE })),
-      studioId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-      config: Type.Optional(sessionConfigSchema),
-    }),
-  ),
+  body: StandardSchemaV1(interviewWebSocketBodySchema),
   async open(ws) {
     const settingsRows = await db
       .select()
@@ -36,7 +26,7 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
       }),
     );
   },
-  async message(ws, data) {
+  async message(ws, data: InterviewWebSocketBody) {
     const messageType = data.type;
     if (!messageType) {
       ws.send(

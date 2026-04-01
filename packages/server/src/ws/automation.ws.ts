@@ -1,8 +1,11 @@
 import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { SCHEMA_MAX_LENGTH_RUN_ID } from "@bao/shared/constants/schema-limits";
 import { rpaRunEventSchema, type RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
-import Type, { StandardSchemaV1 } from "baobox";
+import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
+import {
+  automationWebSocketBodySchema,
+  type AutomationWebSocketMessage,
+} from "./automation-ws-contracts";
 
 const WS_READY_STATE_OPEN = 1;
 
@@ -78,14 +81,9 @@ export function broadcastAutomationEvent(event: RpaRunEvent): void {
  * Automation websocket endpoint for run-scoped event subscriptions.
  */
 export const automationWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.automation), {
-  body: StandardSchemaV1(
-    Type.Object({
-      type: Type.Union([Type.Literal("subscribe"), Type.Literal("unsubscribe")]),
-      runId: Type.Optional(Type.String({ minLength: 8, maxLength: SCHEMA_MAX_LENGTH_RUN_ID })),
-    }),
-  ),
+  body: StandardSchemaV1(automationWebSocketBodySchema),
 
-  message(ws, payload) {
+  message(ws, payload: AutomationWebSocketMessage) {
     if (!payload.runId) {
       return;
     }

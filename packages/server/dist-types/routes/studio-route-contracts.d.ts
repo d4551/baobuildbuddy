@@ -1,0 +1,88 @@
+import Type, { type StaticParse } from "baobox";
+export type RouteSetState = {
+    status?: number | string;
+};
+export declare const studioListQuerySchema: Type.TObject<{
+    readonly q: Type.TOptional<Type.TString>;
+    readonly type: Type.TOptional<Type.TString>;
+    readonly size: Type.TOptional<Type.TString>;
+    readonly remoteWork: Type.TOptional<Type.TString>;
+}, never, Type.InferOptionalKeys<{
+    readonly q: Type.TOptional<Type.TString>;
+    readonly type: Type.TOptional<Type.TString>;
+    readonly size: Type.TOptional<Type.TString>;
+    readonly remoteWork: Type.TOptional<Type.TString>;
+}>>;
+export type StudioListRouteQuery = StaticParse<typeof studioListQuerySchema>;
+export declare const studioIdParamsSchema: Type.TObject<{
+    readonly id: Type.TString;
+}, "id", never>;
+export type StudioIdParams = StaticParse<typeof studioIdParamsSchema>;
+export declare const studioMutationBodySchema: Type.TObject<{
+    readonly name: Type.TString;
+    readonly description: Type.TOptional<Type.TString>;
+    readonly website: Type.TOptional<Type.TString>;
+    readonly location: Type.TOptional<Type.TString>;
+    readonly type: Type.TOptional<Type.TString>;
+    readonly size: Type.TOptional<Type.TString>;
+    readonly founded: Type.TOptional<Type.TString>;
+    readonly remoteWork: Type.TOptional<Type.TBoolean>;
+    readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly genres: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly platforms: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly culture: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly benefits: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly socialMedia: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
+    readonly notableGames: Type.TOptional<Type.TArray<Type.TString>>;
+}, "name", Type.InferOptionalKeys<{
+    readonly name: Type.TString;
+    readonly description: Type.TOptional<Type.TString>;
+    readonly website: Type.TOptional<Type.TString>;
+    readonly location: Type.TOptional<Type.TString>;
+    readonly type: Type.TOptional<Type.TString>;
+    readonly size: Type.TOptional<Type.TString>;
+    readonly founded: Type.TOptional<Type.TString>;
+    readonly remoteWork: Type.TOptional<Type.TBoolean>;
+    readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly genres: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly platforms: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly culture: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly benefits: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly socialMedia: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
+    readonly notableGames: Type.TOptional<Type.TArray<Type.TString>>;
+}>>;
+export type StudioMutationRouteBody = StaticParse<typeof studioMutationBodySchema>;
+export declare const studioUpdateBodySchema: Type.TObject<{
+    readonly name: Type.TOptional<Type.TString>;
+    readonly description: Type.TOptional<Type.TString>;
+    readonly website: Type.TOptional<Type.TString>;
+    readonly location: Type.TOptional<Type.TString>;
+    readonly type: Type.TOptional<Type.TString>;
+    readonly size: Type.TOptional<Type.TString>;
+    readonly founded: Type.TOptional<Type.TString>;
+    readonly remoteWork: Type.TOptional<Type.TBoolean>;
+    readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly genres: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly platforms: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly culture: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly benefits: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly socialMedia: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
+    readonly notableGames: Type.TOptional<Type.TArray<Type.TString>>;
+}, never, Type.InferOptionalKeys<{
+    readonly name: Type.TOptional<Type.TString>;
+    readonly description: Type.TOptional<Type.TString>;
+    readonly website: Type.TOptional<Type.TString>;
+    readonly location: Type.TOptional<Type.TString>;
+    readonly type: Type.TOptional<Type.TString>;
+    readonly size: Type.TOptional<Type.TString>;
+    readonly founded: Type.TOptional<Type.TString>;
+    readonly remoteWork: Type.TOptional<Type.TBoolean>;
+    readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly genres: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly platforms: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly culture: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly benefits: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly socialMedia: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
+    readonly notableGames: Type.TOptional<Type.TArray<Type.TString>>;
+}>>;
+export type StudioUpdateRouteBody = StaticParse<typeof studioUpdateBodySchema>;

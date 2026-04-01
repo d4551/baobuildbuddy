@@ -2,24 +2,23 @@ import { API_ERROR_STUDIO_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_STUDIO_DELETED } from "@bao/shared/constants/api-messages";
 import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import {
-  SCHEMA_MAX_ITEMS_LARGE,
-  SCHEMA_MAX_ITEMS_MEDIUM,
-  SCHEMA_MAX_ITEMS_SMALL,
-  SCHEMA_MAX_LENGTH_DESCRIPTION,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_LABEL,
-  SCHEMA_MAX_LENGTH_SHORT,
-  SCHEMA_MAX_LENGTH_TINY,
-  SCHEMA_MAX_LENGTH_URL,
-} from "@bao/shared/constants/schema-limits";
 import { generateId } from "@bao/shared/utils/validation";
 import { StandardSchemaV1 } from "baobox";
 import { desc, eq } from "drizzle-orm";
-import Type from "baobox";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
+import {
+  type RouteSetState,
+  type StudioIdParams,
+  type StudioListRouteQuery,
+  type StudioMutationRouteBody,
+  type StudioUpdateRouteBody,
+  studioIdParamsSchema,
+  studioListQuerySchema,
+  studioMutationBodySchema,
+  studioUpdateBodySchema,
+} from "./studio-route-contracts";
 
 export interface StudioAnalytics {
   totalStudios: number;
@@ -35,7 +34,7 @@ export const studioRoutes = new Elysia({
 })
   .get(
     "/",
-    async ({ query }) => {
+    async ({ query }: { query: StudioListRouteQuery }) => {
       const { q = "", type, size, remoteWork } = query;
 
       let results = await db.select().from(studios).orderBy(desc(studios.createdAt));
@@ -70,19 +69,12 @@ export const studioRoutes = new Elysia({
       return results;
     },
     {
-      query: StandardSchemaV1(
-        Type.Object({
-          q: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-          type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-          size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-          remoteWork: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-        }),
-      ),
+      query: StandardSchemaV1(studioListQuerySchema),
     },
   )
   .get(
     "/:id",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const rows = await db.select().from(studios).where(eq(studios.id, params.id));
       if (rows.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -91,19 +83,12 @@ export const studioRoutes = new Elysia({
       return rows[0];
     },
     {
-      params: StandardSchemaV1(
-        Type.Object(
-          {
-            id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-          },
-          { required: ["id"] },
-        ),
-      ),
+      params: StandardSchemaV1(studioIdParamsSchema),
     },
   )
   .post(
     "/",
-    async ({ body, set }) => {
+    async ({ body, set }: { body: StudioMutationRouteBody; set: RouteSetState }) => {
       const newStudio = {
         id: generateId(),
         name: body.name,
@@ -128,53 +113,20 @@ export const studioRoutes = new Elysia({
       return newStudio;
     },
     {
-      body: StandardSchemaV1(
-        Type.Object(
-          {
-            name: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-            description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-            website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-            location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-            type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-            size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-            founded: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-            remoteWork: Type.Optional(Type.Boolean()),
-            technologies: Type.Optional(
-              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-                maxItems: SCHEMA_MAX_ITEMS_LARGE,
-              }),
-            ),
-            genres: Type.Optional(
-              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-                maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-              }),
-            ),
-            platforms: Type.Optional(
-              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-                maxItems: SCHEMA_MAX_ITEMS_SMALL,
-              }),
-            ),
-            culture: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-            benefits: Type.Optional(
-              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-                maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-              }),
-            ),
-            socialMedia: Type.Optional(Type.Record(Type.String(), Type.String())),
-            notableGames: Type.Optional(
-              Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-                maxItems: SCHEMA_MAX_ITEMS_LARGE,
-              }),
-            ),
-          },
-          { required: ["name"] },
-        ),
-      ),
+      body: StandardSchemaV1(studioMutationBodySchema),
     },
   )
   .put(
     "/:id",
-    async ({ params, body, set }) => {
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: StudioIdParams;
+      body: StudioUpdateRouteBody;
+      set: RouteSetState;
+    }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -191,53 +143,13 @@ export const studioRoutes = new Elysia({
       return updated[0];
     },
     {
-      params: StandardSchemaV1(
-        Type.Object({ id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }, { required: ["id"] }),
-      ),
-      body: StandardSchemaV1(
-        Type.Object({
-          name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-          description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-          website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-          location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-          type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-          size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-          founded: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-          remoteWork: Type.Optional(Type.Boolean()),
-          technologies: Type.Optional(
-            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-              maxItems: SCHEMA_MAX_ITEMS_LARGE,
-            }),
-          ),
-          genres: Type.Optional(
-            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-              maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-            }),
-          ),
-          platforms: Type.Optional(
-            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-              maxItems: SCHEMA_MAX_ITEMS_SMALL,
-            }),
-          ),
-          culture: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-          benefits: Type.Optional(
-            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-              maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-            }),
-          ),
-          socialMedia: Type.Optional(Type.Record(Type.String(), Type.String())),
-          notableGames: Type.Optional(
-            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-              maxItems: SCHEMA_MAX_ITEMS_LARGE,
-            }),
-          ),
-        }),
-      ),
+      params: StandardSchemaV1(studioIdParamsSchema),
+      body: StandardSchemaV1(studioUpdateBodySchema),
     },
   )
   .delete(
     "/:id",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -248,9 +160,7 @@ export const studioRoutes = new Elysia({
       return { message: API_MESSAGE_STUDIO_DELETED, id: params.id };
     },
     {
-      params: StandardSchemaV1(
-        Type.Object({ id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }, { required: ["id"] }),
-      ),
+      params: StandardSchemaV1(studioIdParamsSchema),
     },
   )
   .get("/analytics", async (): Promise<StudioAnalytics> => {

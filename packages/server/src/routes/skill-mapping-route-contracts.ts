@@ -4,7 +4,7 @@ import {
   SCHEMA_MAX_LENGTH_LABEL,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 
 export type SkillMappingsQuery = {
   category?: string;
@@ -38,6 +38,7 @@ export const skillMappingsQuerySchema = Type.Object({
   category: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
   search: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
 });
+export type SkillMappingsRouteQuery = StaticParse<typeof skillMappingsQuerySchema>;
 
 export const skillMappingIdParamsSchema = Type.Object(
   {
@@ -45,6 +46,7 @@ export const skillMappingIdParamsSchema = Type.Object(
   },
   { required: ["id"] },
 );
+export type SkillMappingIdParams = StaticParse<typeof skillMappingIdParamsSchema>;
 
 export const skillMappingCreateBodySchema = Type.Object(
   {
@@ -65,6 +67,7 @@ export const skillMappingCreateBodySchema = Type.Object(
   },
   { required: ["gameExpression", "transferableSkill"] },
 );
+export type SkillMappingCreateRouteBody = StaticParse<typeof skillMappingCreateBodySchema>;
 
 export const skillMappingUpdateBodySchema = Type.Object({
   gameExpression: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
@@ -82,13 +85,16 @@ export const skillMappingUpdateBodySchema = Type.Object({
   demandLevel: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
   aiGenerated: Type.Optional(Type.Boolean()),
 });
+export type SkillMappingUpdateRouteBody = StaticParse<typeof skillMappingUpdateBodySchema>;
 
 export const skillAnalysisBodySchema = Type.Object({
   gameExperience: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   resume: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   autoCreateMappings: Type.Optional(Type.Boolean()),
 });
+export type SkillAnalysisRouteBody = StaticParse<typeof skillAnalysisBodySchema>;
 
 export const skillReadinessQuerySchema = Type.Object({
   jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
 });
+export type SkillReadinessRouteQuery = StaticParse<typeof skillReadinessQuerySchema>;

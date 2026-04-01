@@ -1,4 +1,4 @@
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 export type SkillMappingsQuery = {
     category?: string;
     search?: string;
@@ -29,9 +29,11 @@ export declare const skillMappingsQuerySchema: Type.TObject<{
     readonly category: Type.TOptional<Type.TString>;
     readonly search: Type.TOptional<Type.TString>;
 }>>;
+export type SkillMappingsRouteQuery = StaticParse<typeof skillMappingsQuerySchema>;
 export declare const skillMappingIdParamsSchema: Type.TObject<{
     readonly id: Type.TString;
 }, "id", never>;
+export type SkillMappingIdParams = StaticParse<typeof skillMappingIdParamsSchema>;
 export declare const skillMappingCreateBodySchema: Type.TObject<{
     readonly gameExpression: Type.TString;
     readonly transferableSkill: Type.TString;
@@ -51,6 +53,7 @@ export declare const skillMappingCreateBodySchema: Type.TObject<{
     readonly demandLevel: Type.TOptional<Type.TString>;
     readonly aiGenerated: Type.TOptional<Type.TBoolean>;
 }>>;
+export type SkillMappingCreateRouteBody = StaticParse<typeof skillMappingCreateBodySchema>;
 export declare const skillMappingUpdateBodySchema: Type.TObject<{
     readonly gameExpression: Type.TOptional<Type.TString>;
     readonly transferableSkill: Type.TOptional<Type.TString>;
@@ -70,6 +73,7 @@ export declare const skillMappingUpdateBodySchema: Type.TObject<{
     readonly demandLevel: Type.TOptional<Type.TString>;
     readonly aiGenerated: Type.TOptional<Type.TBoolean>;
 }>>;
+export type SkillMappingUpdateRouteBody = StaticParse<typeof skillMappingUpdateBodySchema>;
 export declare const skillAnalysisBodySchema: Type.TObject<{
     readonly gameExperience: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly resume: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
@@ -79,6 +83,8 @@ export declare const skillAnalysisBodySchema: Type.TObject<{
     readonly resume: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly autoCreateMappings: Type.TOptional<Type.TBoolean>;
 }>>;
+export type SkillAnalysisRouteBody = StaticParse<typeof skillAnalysisBodySchema>;
 export declare const skillReadinessQuerySchema: Type.TObject<{
     readonly jobId: Type.TOptional<Type.TString>;
 }, never, "jobId">;
+export type SkillReadinessRouteQuery = StaticParse<typeof skillReadinessQuerySchema>;

@@ -5,14 +5,10 @@ import {
 import { API_ERROR_GENERATE_RESPONSE } from "@bao/shared/constants/api-errors";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
 import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import {
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_MESSAGE,
-} from "@bao/shared/constants/schema-limits";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
-import Type, { StandardSchemaV1 } from "baobox";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
@@ -20,15 +16,13 @@ import { chatHistory } from "../db/schema/chat-history";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import type { AIService } from "../services/ai/ai-service";
 import { contextManager } from "../services/ai/context-manager";
+import { chatWebSocketBodySchema, type ChatWebSocketBody } from "./chat-ws-contracts";
 
 type AIServiceInstance = AIService;
 type SettingsRow = typeof settings.$inferSelect;
 type ChatContext = Awaited<ReturnType<typeof contextManager.buildContext>>;
 type ChatSocket = { send: (data: string) => void };
-type ChatMessage = {
-  content: string;
-  sessionId?: string;
-};
+type ChatMessage = ChatWebSocketBody;
 type StreamAssistantResponseInput = {
   socket: ChatSocket;
   aiService: AIServiceInstance;
@@ -212,12 +206,7 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
 }
 
 export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat), {
-  body: StandardSchemaV1(
-    Type.Object({
-      content: Type.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
-      sessionId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    }),
-  ),
+  body: StandardSchemaV1(chatWebSocketBodySchema),
   async open(ws) {
     const brand = resolveRuntimeBrand(await getSettingsRow());
     sendSocketPayload(ws, {
@@ -225,7 +214,7 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
       message: `Connected to ${brand.assistantName} chat`,
     });
   },
-  async message(ws, data) {
+  async message(ws, data: ChatWebSocketBody) {
     if (!data.content) {
       sendSocketPayload(ws, {
         type: "error",

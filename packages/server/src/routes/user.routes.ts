@@ -1,21 +1,14 @@
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import {
-  SCHEMA_MAX_ITEMS_LARGE,
-  SCHEMA_MAX_ITEMS_XXLARGE,
-  SCHEMA_MAX_LENGTH_DESCRIPTION,
-  SCHEMA_MAX_LENGTH_EMAIL,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_PHONE,
-  SCHEMA_MAX_LENGTH_SHORT,
-  SCHEMA_MAX_LENGTH_URL,
-} from "@bao/shared/constants/schema-limits";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import Type from "baobox";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
+import {
+  userProfileUpdateBodySchema,
+  type UserProfileUpdateRouteBody,
+} from "./user-route-contracts";
 
 export const userRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.userBase),
@@ -40,7 +33,7 @@ export const userRoutes = new Elysia({
   })
   .put(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
-    async ({ body }) => {
+    async ({ body }: { body: UserProfileUpdateRouteBody }) => {
       const existing = await db
         .select()
         .from(userProfile)
@@ -60,32 +53,6 @@ export const userRoutes = new Elysia({
       return updated[0];
     },
     {
-      body: StandardSchemaV1(
-        Type.Object({
-          name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-          email: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
-          phone: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_PHONE })),
-          location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-          website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-          linkedin: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-          github: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-          summary: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-          currentRole: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-          currentCompany: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-          yearsExperience: Type.Optional(Type.Number({ minimum: 0, maximum: 80 })),
-          technicalSkills: Type.Optional(
-            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-              maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
-            }),
-          ),
-          softSkills: Type.Optional(
-            Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-              maxItems: SCHEMA_MAX_ITEMS_LARGE,
-            }),
-          ),
-          gamingExperience: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-          careerGoals: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-        }),
-      ),
+      body: StandardSchemaV1(userProfileUpdateBodySchema),
     },
   );
