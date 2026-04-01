@@ -88,6 +88,29 @@ const ROOT_MANIFEST_TEXT = readFileSync(new URL("../package.json", import.meta.u
 const ROOT_MANIFEST = JSON.parse(ROOT_MANIFEST_TEXT) as {
   scripts: Record<string, string>;
 };
+const REQUIRED_ROOT_LINT_VALIDATORS = [
+  "validate:no-htmx",
+  "validate:no-monoliths",
+  "validate:no-raw-design-tokens",
+  "validate:no-local-styles",
+  "validate:no-hardcoded-user-strings",
+  "validate:i18n-parity",
+  "validate:no-direct-route-literals",
+  "validate:no-direct-env-access",
+  "validate:no-client-fetch-drift",
+  "validate:no-schema-duplication",
+  "validate:no-unsafe-storage",
+  "validate:page-state-contracts",
+  "validate:seo-contracts",
+  "validate:accessibility-landmarks",
+  "validate:no-dead-exports",
+  "validate:no-fallback-shims",
+  "validate:no-try-catch",
+  "validate:no-unsafe-casts",
+  "validate:i18n-ui",
+  "validate:aria",
+  "validate:ui-ssot",
+] as const;
 
 const collectExamplePageStateViolations = (content: string) =>
   collectPageStateViolationsForContent(PAGE_STATE_EXAMPLE_PATH, content);
@@ -115,14 +138,12 @@ describe("collectNoHtmxViolationsForContent", () => {
 });
 
 describe("root lint contract", () => {
-  test("keeps htmx, page-state, aria, i18n, and ui single-source validators in the root lint entrypoint", () => {
+  test("keeps the required repo validators in the root lint entrypoint", () => {
     const lintScript = ROOT_MANIFEST.scripts.lint;
 
-    expect(lintScript).toContain("validate:no-htmx");
-    expect(lintScript).toContain("validate:page-state-contracts");
-    expect(lintScript).toContain("validate:aria");
-    expect(lintScript).toContain("validate:i18n-ui");
-    expect(lintScript).toContain("validate:ui-ssot");
+    for (const validator of REQUIRED_ROOT_LINT_VALIDATORS) {
+      expect(lintScript).toContain(validator);
+    }
   });
 
   test("does not use workspace filters in the root manifest", () => {

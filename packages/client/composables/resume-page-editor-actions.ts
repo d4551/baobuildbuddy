@@ -1,7 +1,7 @@
 import { formDataToResumeData, resumeDataToFormData } from "@bao/shared/utils/resume-transform";
-import type { NuxtApp } from "#app";
-import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";
+import type { ComposerTranslation } from "vue-i18n";
+import type { NuxtApp } from "#app";
 import { settlePromise } from "~/composables/async-flow";
 import type { ResumePageActionsInput } from "~/composables/resume-page-actions-contracts";
 import { RESUME_EMAIL_PATTERN } from "~/composables/resume-page-bootstrap";
@@ -35,22 +35,22 @@ type ResumeSaveActionInput = Pick<
 
 export function useAiEnhancementProgress(aiEnhancementStepLabels: Ref<readonly string[]>) {
   const aiEnhancementStepIndex = ref(0);
-  let aiEnhancementTimer: ReturnType<typeof setInterval> | null = null;
+  let aiEnhancementTimer: number | null = null;
 
   onUnmounted(() => {
     if (!aiEnhancementTimer) {
       return;
     }
-    clearInterval(aiEnhancementTimer);
+    window.clearInterval(aiEnhancementTimer);
     aiEnhancementTimer = null;
   });
 
   function startAiEnhancementProgress(): void {
     aiEnhancementStepIndex.value = 0;
     if (aiEnhancementTimer) {
-      clearInterval(aiEnhancementTimer);
+      window.clearInterval(aiEnhancementTimer);
     }
-    aiEnhancementTimer = setInterval(() => {
+    aiEnhancementTimer = window.setInterval(() => {
       if (aiEnhancementStepIndex.value < aiEnhancementStepLabels.value.length - 1) {
         aiEnhancementStepIndex.value += 1;
       }
@@ -59,7 +59,7 @@ export function useAiEnhancementProgress(aiEnhancementStepLabels: Ref<readonly s
 
   function stopAiEnhancementProgress(): void {
     if (aiEnhancementTimer) {
-      clearInterval(aiEnhancementTimer);
+      window.clearInterval(aiEnhancementTimer);
       aiEnhancementTimer = null;
     }
     aiEnhancementStepIndex.value = 0;

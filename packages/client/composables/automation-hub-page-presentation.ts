@@ -1,17 +1,17 @@
 import type { DashboardStats } from "@bao/shared/types/search";
-import { computed } from "vue";
 import type { Ref } from "vue";
+import { computed } from "vue";
+import {
+  type AutomationHubCard,
+  type AutomationHubCardId,
+  type AutomationHubTranslate,
+  BASE_AUTOMATION_CARDS,
+  resolveOrderedCardIds,
+} from "~/composables/automation-hub-page-contracts";
 import { useFlowEngine } from "~/composables/useFlowEngine";
 import type { DashboardPipelineStepViewModel } from "~/constants/dashboard-contracts";
 import { resolveDashboardPipelineSteps } from "~/constants/dashboard-pipeline";
 import { createFlowEngineInput, type FlowActionId } from "~/constants/flow-engine";
-import {
-  BASE_AUTOMATION_CARDS,
-  resolveOrderedCardIds,
-  type AutomationHubCard,
-  type AutomationHubCardId,
-  type AutomationHubTranslate,
-} from "~/composables/automation-hub-page-contracts";
 
 const createAutomationPipelineSteps = (stats: Readonly<Ref<DashboardStats | null>>) =>
   computed<readonly DashboardPipelineStepViewModel[]>(() => {
@@ -84,9 +84,19 @@ const createAutomationCardPresentation = (
     return null;
   });
 
+  const primaryCard = computed<AutomationHubCard | null>(() => {
+    const currentPrimaryCardId = primaryCardId.value;
+    if (!currentPrimaryCardId) {
+      return orderedCards.value[0] ?? null;
+    }
+
+    return orderedCards.value.find((card) => card.id === currentPrimaryCardId) ?? null;
+  });
+
   return {
     orderedCards,
     primaryCardId,
+    primaryCard,
   };
 };
 

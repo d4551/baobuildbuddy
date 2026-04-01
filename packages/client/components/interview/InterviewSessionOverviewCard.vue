@@ -2,7 +2,6 @@
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import PageHeaderBlock from "~/components/ui/PageHeaderBlock.vue";
-import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const props = defineProps<{
   activeSession: InterviewSession;
@@ -50,17 +49,6 @@ const voiceDescription = computed(() =>
 );
 
 const roundedProgress = computed(() => Math.round(props.progress));
-
-const targetSignals = computed(() => {
-  const signals = props.targetJob?.technologies?.filter((entry) => entry.trim().length > 0) ?? [];
-  return signals.slice(0, 6);
-});
-
-const focusAreas = computed(() =>
-  props.activeSession.config.focusAreas.filter((entry) => entry.trim().length > 0).slice(0, 6),
-);
-
-const interviewerPersona = computed(() => props.activeSession.interviewerPersona);
 </script>
 
 <template>
@@ -116,112 +104,12 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         </div>
       </div>
 
-      <SectionGrid grid-token="split">
-        <div class="space-y-4">
-          <section class="card card-border bg-base-200/50" aria-labelledby="interview-session-target-title">
-            <div class="card-body gap-4">
-              <div class="space-y-1">
-                <h3 id="interview-session-target-title" class="card-title text-base">
-                  {{ t("interviewSession.targetTitle") }}
-                </h3>
-                <p class="text-sm text-base-content/60">
-                  {{ t("interviewSession.targetDescription") }}
-                </p>
-              </div>
-
-              <div class="space-y-2">
-                <p class="text-lg font-semibold">
-                  {{ targetJob?.title ?? activeSession.role }}
-                </p>
-                <p class="text-sm text-base-content/70">
-                  {{ targetJob?.company ?? activeSession.studioName }}
-                  <span v-if="targetJob?.location"> · {{ targetJob.location }}</span>
-                </p>
-              </div>
-
-              <div class="space-y-2">
-                <p class="text-sm font-medium text-base-content/70">
-                  {{ t("interviewSession.focusAreasTitle") }}
-                </p>
-                <div v-if="focusAreas.length > 0" class="flex flex-wrap gap-2">
-                  <span
-                    v-for="focusArea in focusAreas"
-                    :key="focusArea"
-                    class="badge badge-outline badge-primary"
-                  >
-                    {{ focusArea }}
-                  </span>
-                </div>
-                <p v-else class="text-sm text-base-content/60">
-                  {{ t("interviewSession.focusAreasEmpty") }}
-                </p>
-              </div>
-
-              <div v-if="targetSignals.length > 0" class="space-y-2">
-                <p class="text-sm font-medium text-base-content/70">
-                  {{ t("interviewSession.promptTagsLabel") }}
-                </p>
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="signal in targetSignals"
-                    :key="signal"
-                    class="badge badge-outline"
-                  >
-                    {{ signal }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <section class="card card-border bg-base-200/50" aria-labelledby="interview-session-interviewer-title">
-          <div class="card-body gap-4">
-            <div class="space-y-1">
-              <h3 id="interview-session-interviewer-title" class="card-title text-base">
-                {{ t("interviewSession.interviewerTitle") }}
-              </h3>
-              <p class="text-sm text-base-content/60">
-                {{ t("interviewSession.interviewerDescription") }}
-              </p>
-            </div>
-
-            <template v-if="interviewerPersona">
-              <div class="space-y-1">
-                <p class="text-lg font-semibold">{{ interviewerPersona.name }}</p>
-                <p class="text-sm text-base-content/70">
-                  {{ interviewerPersona.role }} · {{ interviewerPersona.studioName }}
-                </p>
-              </div>
-
-              <dl class="space-y-3">
-                <div class="space-y-1">
-                  <dt class="text-sm font-medium text-base-content/70">
-                    {{ t("interviewSession.interviewerRoleLabel") }}
-                  </dt>
-                  <dd class="text-sm text-base-content">{{ interviewerPersona.role }}</dd>
-                </div>
-                <div class="space-y-1">
-                  <dt class="text-sm font-medium text-base-content/70">
-                    {{ t("interviewSession.interviewerStyleLabel") }}
-                  </dt>
-                  <dd class="text-sm text-base-content">{{ interviewerPersona.style }}</dd>
-                </div>
-                <div class="space-y-1">
-                  <dt class="text-sm font-medium text-base-content/70">
-                    {{ t("interviewSession.interviewerBackgroundLabel") }}
-                  </dt>
-                  <dd class="text-sm text-base-content">{{ interviewerPersona.background }}</dd>
-                </div>
-              </dl>
-            </template>
-
-            <p v-else class="text-sm text-base-content/60">
-              {{ t("interviewSession.interviewerFallback") }}
-            </p>
-          </div>
-        </section>
-      </SectionGrid>
+      <progress
+        class="progress progress-primary w-full"
+        :value="progress"
+        max="100"
+        :aria-label="t('interviewSession.progressAria')"
+      ></progress>
     </div>
   </section>
 </template>

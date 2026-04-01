@@ -1,3 +1,5 @@
+import type { AppIconName } from "~/components/icons/icon-registry";
+
 export const SETTINGS_SECTION_IDS = [
   "profile",
   "preferences",
@@ -65,14 +67,7 @@ export const SETTINGS_SECTION_ITEMS = [
   labelKey: string;
   descriptionKey?: string;
   slotName: string;
-  iconName:
-    | "IconDocumentText"
-    | "IconGlobe"
-    | "IconBolt"
-    | "IconSearch"
-    | "IconSend"
-    | "IconSparkles"
-    | "IconPencil";
+  iconName: AppIconName;
 }>;
 
 export type SettingsSectionItem = (typeof SETTINGS_SECTION_ITEMS)[number];

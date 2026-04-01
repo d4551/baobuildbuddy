@@ -1,11 +1,21 @@
 <script setup lang="ts">
+import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import {
+  AUTOMATION_SCRAPER_DEFAULT_SECTION_ID,
+  AUTOMATION_SCRAPER_SECTION_ITEMS,
+  type AutomationScraperSectionId,
+  isAutomationScraperSectionId,
+} from "~/components/automation/scraper-sections";
+import { UI_SPACING_CLASS_BY_TOKEN, UI_WIDTH_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 
 definePageMeta({
   middleware: ["auth"],
 });
 
 const { t } = useI18n();
+const route = useRoute();
 
 useSeoMeta({
   title: t("automation.scraper.title"),
@@ -50,6 +60,39 @@ const {
   jobInterviewFocusAreas,
 } = useAutomationScraperPage();
 
+const routeSection = computed<AutomationScraperSectionId>(() => {
+  const sectionQueryValue = route.query[APP_ROUTE_QUERY_KEYS.section];
+  const candidateSection =
+    typeof sectionQueryValue === "string"
+      ? sectionQueryValue
+      : Array.isArray(sectionQueryValue)
+        ? sectionQueryValue[0]
+        : null;
+
+  return candidateSection && isAutomationScraperSectionId(candidateSection)
+    ? candidateSection
+    : AUTOMATION_SCRAPER_DEFAULT_SECTION_ID;
+});
+
+const activeSection = ref<AutomationScraperSectionId>(routeSection.value);
+
+const scraperSectionBadgeById = computed<Record<AutomationScraperSectionId, number>>(() => ({
+  providers: scrapeCapabilities.value.length,
+  jobs: topJobs.value.length,
+}));
+const contentScaffoldClass = computed(() => [
+  UI_WIDTH_CLASS_BY_TOKEN.shell,
+  UI_SPACING_CLASS_BY_TOKEN.comfortable,
+]);
+
+watch(
+  routeSection,
+  (value) => {
+    activeSection.value = value;
+  },
+  { immediate: true },
+);
+
 function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string): void {
   scheduledRunAt[target] = value;
 }
@@ -63,95 +106,92 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
       :description="t('automation.scraper.subtitle')"
       description-class="text-base-content/70"
       density="compact"
-    />
-
-    <div
-      role="alert"
-      class="alert alert-info alert-soft alert-vertical gap-4 rounded-box border border-info/20 bg-base-100 sm:alert-horizontal"
     >
-      <div class="space-y-1">
-        <p class="font-display text-sm font-semibold uppercase tracking-widest text-info">
-          {{ t("automation.hub.audit.title") }}
-        </p>
-        <p class="text-sm text-base-content/75">
-          {{ t("automation.hub.audit.description") }}
-        </p>
-      </div>
-      <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-info btn-soft btn-sm">
-        {{ t("automation.hub.viewRunsButton") }}
-      </NuxtLink>
-    </div>
+      <template #actions>
+        <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-outline">
+          {{ t("automation.hub.viewRunsButton") }}
+        </NuxtLink>
+      </template>
+    </PageHeroHeader>
 
-    <ul
-      class="steps steps-vertical w-full rounded-box border border-base-300 bg-base-100 p-4 shadow-sm lg:steps-horizontal"
-      :aria-label="t('automation.scraper.stepsAria')"
-    >
-      <li class="step step-primary">{{ t("automation.scraper.steps.run") }}</li>
-      <li class="step">{{ t("automation.scraper.steps.review") }}</li>
-      <li class="step">{{ t("automation.scraper.steps.interview") }}</li>
-    </ul>
-
-    <LoadingSkeleton
-      v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'"
-      :lines="6"
-    />
-
-    <BootstrapErrorAlert
-      v-else-if="capabilityAuditStatus === 'error'"
-      :message="getErrorMessage(capabilityAuditError, t('automation.scraper.errors.capabilitiesLoadFailed'))"
-      :retry-label="t('automation.scraper.errors.capabilitiesRetry')"
-      :retry-aria-label="t('automation.scraper.errors.capabilitiesRetryAria')"
-      @retry="() => refreshCapabilityAudit()"
-    />
-
-    <template v-else>
-      <BootstrapErrorAlert
-        v-if="scraperJobsStatus === 'error'"
-        :message="getErrorMessage(scraperJobsError, t('automation.scraper.errors.jobsFeedLoadFailed'))"
-        :retry-label="t('automation.scraper.errors.jobsFeedRetry')"
-        :retry-aria-label="t('automation.scraper.errors.jobsFeedRetryAria')"
-        @retry="() => refreshScraperJobs()"
+    <div :class="contentScaffoldClass">
+      <LoadingSkeleton
+        v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'"
+        :lines="6"
       />
 
-      <LoadingSkeleton v-if="scraperJobsPending" :lines="6" />
+      <BootstrapErrorAlert
+        v-else-if="capabilityAuditStatus === 'error'"
+        :message="getErrorMessage(capabilityAuditError, t('automation.scraper.errors.capabilitiesLoadFailed'))"
+        :retry-label="t('automation.scraper.errors.capabilitiesRetry')"
+        :retry-aria-label="t('automation.scraper.errors.capabilitiesRetryAria')"
+        @retry="() => refreshCapabilityAudit()"
+      />
 
       <template v-else>
-        <StatsRow :stats="summaryStats" />
-
-        <AutomationScraperCapabilityGrid
-          :capabilities="scrapeCapabilities"
-          :run-states="runStates"
-          :run-messages="runMessages"
-          :scheduled-run-at="scheduledRunAt"
-          :latest-runs="latestRuns"
-          :pending-action="pendingAction"
-          :card-description="cardDescription"
-          :card-run-aria="cardRunAria"
-          :card-run-button-label="cardRunButtonLabel"
-          :capability-availability-label="capabilityAvailabilityLabel"
-          :capability-availability-badge-class="capabilityAvailabilityBadgeClass"
-          :run-state-label="runStateLabel"
-          :run-state-badge-class="runStateBadgeClass"
-          :latest-run-notice-text="latestRunNoticeText"
-          :latest-run-status-text="latestRunStatusText"
-          :is-pending-action="isPendingAction"
-          :automation-runs-route="APP_ROUTES.automationRuns"
-          :build-run-detail-route="APP_ROUTE_BUILDERS.automationRunDetail"
-          @run="runScrapeTarget"
-          @schedule="scheduleScrapeRun"
-          @update:scheduled-run-at="updateScheduledRunAt"
+        <BootstrapErrorAlert
+          v-if="scraperJobsStatus === 'error'"
+          :message="getErrorMessage(scraperJobsError, t('automation.scraper.errors.jobsFeedLoadFailed'))"
+          :retry-label="t('automation.scraper.errors.jobsFeedRetry')"
+          :retry-aria-label="t('automation.scraper.errors.jobsFeedRetryAria')"
+          @retry="() => refreshScraperJobs()"
         />
 
-        <AutomationScraperJobsCard
-          :jobs-loading="jobsLoading"
-          :top-jobs="topJobs"
-          :jobs-route="APP_ROUTES.jobs"
-          :has-job-enrichment="hasJobEnrichment"
-          :job-interview-focus-areas="jobInterviewFocusAreas"
-          :relative-posted-date="relativePostedDate"
-          @interview="startJobInterview"
-        />
+        <LoadingSkeleton v-if="scraperJobsPending" :lines="6" />
+
+        <template v-else>
+          <WorkspaceSectionNavigator
+            :sections="AUTOMATION_SCRAPER_SECTION_ITEMS"
+            :active-section="activeSection"
+            v-bind="{ ariaLabelKey: 'automation.scraper.sections.aria' }"
+            :build-route="APP_ROUTE_BUILDERS.automationScraperSection"
+            :badge-by-id="scraperSectionBadgeById"
+          >
+            <StatsRow :stats="summaryStats" />
+
+            <template v-if="activeSection === 'providers'">
+              <div class="space-y-6">
+                <AutomationScraperOverviewCard :runs-route="APP_ROUTES.automationRuns" />
+
+                <AutomationScraperCapabilityGrid
+                  :capabilities="scrapeCapabilities"
+                  :run-states="runStates"
+                  :run-messages="runMessages"
+                  :scheduled-run-at="scheduledRunAt"
+                  :latest-runs="latestRuns"
+                  :pending-action="pendingAction"
+                  :card-description="cardDescription"
+                  :card-run-aria="cardRunAria"
+                  :card-run-button-label="cardRunButtonLabel"
+                  :capability-availability-label="capabilityAvailabilityLabel"
+                  :capability-availability-badge-class="capabilityAvailabilityBadgeClass"
+                  :run-state-label="runStateLabel"
+                  :run-state-badge-class="runStateBadgeClass"
+                  :latest-run-notice-text="latestRunNoticeText"
+                  :latest-run-status-text="latestRunStatusText"
+                  :is-pending-action="isPendingAction"
+                  :automation-runs-route="APP_ROUTES.automationRuns"
+                  :build-run-detail-route="APP_ROUTE_BUILDERS.automationRunDetail"
+                  @run="runScrapeTarget"
+                  @schedule="scheduleScrapeRun"
+                  @update:scheduled-run-at="updateScheduledRunAt"
+                />
+              </div>
+            </template>
+
+            <AutomationScraperJobsCard
+              v-else
+              :jobs-loading="jobsLoading"
+              :top-jobs="topJobs"
+              :jobs-route="APP_ROUTES.jobs"
+              :has-job-enrichment="hasJobEnrichment"
+              :job-interview-focus-areas="jobInterviewFocusAreas"
+              :relative-posted-date="relativePostedDate"
+              @interview="startJobInterview"
+            />
+          </WorkspaceSectionNavigator>
+        </template>
       </template>
-    </template>
+    </div>
   </PageScaffold>
 </template>

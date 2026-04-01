@@ -8,9 +8,8 @@ import type {
   ScrapePendingAction,
   TargetRecord,
 } from "~/types/automation-scraper";
-import { resolveAutomationCapabilityIssues } from "~/utils/automation-capabilities";
 
-defineProps<{
+const props = defineProps<{
   capabilities: readonly ScrapeCapabilityCard[];
   runStates: TargetRecord<AutomationScraperRunState>;
   runMessages: TargetRecord<string>;
@@ -39,158 +38,103 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const capabilityIssues = (capability: ScrapeCapabilityCard): string[] =>
-  resolveAutomationCapabilityIssues(capability, t);
+const readyCapabilities = computed(() =>
+  props.capabilities.filter(
+    (capability) => capability.configured && capability.issues.length === 0,
+  ),
+);
 
-function handleScheduleInput(target: AutomationScrapeTarget, event: Event): void {
-  const input = event.target;
-  if (input instanceof HTMLInputElement) {
-    emit("update:scheduledRunAt", target, input.value);
-  }
+const attentionCapabilities = computed(() =>
+  props.capabilities.filter((capability) => !capability.configured || capability.issues.length > 0),
+);
+
+function handleScheduledRunAtUpdate(payload: {
+  target: AutomationScrapeTarget;
+  value: string;
+}): void {
+  emit("update:scheduledRunAt", payload.target, payload.value);
 }
 </script>
 
 <template>
-  <SectionGrid grid-token="twoColumnXl">
-    <div
-      v-for="capability in capabilities"
-      :key="capability.id"
-      class="card card-border rounded-box border border-base-300 bg-base-100 shadow-sm"
-    >
-      <div class="card-body gap-4">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h2 class="card-title">{{ capability.name }}</h2>
-              <span class="badge badge-soft badge-sm" :class="capabilityAvailabilityBadgeClass(capability)">
-                {{ capabilityAvailabilityLabel(capability) }}
-              </span>
-              <span class="badge badge-sm" :class="runStateBadgeClass(runStates[capability.target])">
-                {{ runStateLabel(runStates[capability.target]) }}
-              </span>
-            </div>
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="badge badge-outline badge-sm">
-                {{ t("automation.hub.audit.columns.manual") }}
-              </span>
-              <span class="badge badge-outline badge-sm">
-                {{ t("automation.hub.audit.columns.scheduled") }}
-              </span>
-              <span class="badge badge-outline badge-sm">
-                {{ t("automation.hub.audit.columns.history") }}
-              </span>
-              <span class="badge badge-outline badge-sm">
-                {{ t("automation.hub.audit.columns.live") }}
-              </span>
-            </div>
-          </div>
-          <NuxtLink :to="automationRunsRoute" class="btn btn-ghost btn-sm">
-            {{ t("automation.hub.viewRunsButton") }}
-          </NuxtLink>
-        </div>
-
+  <div class="space-y-8">
+    <section v-if="readyCapabilities.length > 0" class="space-y-4">
+      <div class="space-y-1">
+        <h2 class="text-lg font-semibold text-base-content">
+          {{ t("automation.scraper.sections.providers.label") }}
+        </h2>
         <p class="text-sm text-base-content/70">
-          {{ cardDescription(capability.target) }}
+          {{ t("automation.scraper.sections.providers.description") }}
         </p>
-
-        <div
-          v-if="capabilityIssues(capability).length > 0"
-          role="alert"
-          class="alert alert-warning alert-soft"
-        >
-          <div class="space-y-1">
-            <p class="font-medium">{{ capabilityAvailabilityLabel(capability) }}</p>
-            <ul class="space-y-1 text-sm">
-              <li
-                v-for="(issue, issueIndex) in capabilityIssues(capability)"
-                :key="`${capability.id}-issue-${issueIndex}`"
-              >
-                {{ issue }}
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <fieldset class="fieldset rounded-box border border-base-300 bg-base-200/50 p-4">
-          <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
-          <input
-            :value="scheduledRunAt[capability.target]"
-            class="input w-full"
-            type="datetime-local"
-            :aria-label="t('automation.scraper.schedule.aria')"
-            @input="handleScheduleInput(capability.target, $event)"
-          />
-          <p class="label">{{ t("automation.scraper.schedule.hint") }}</p>
-        </fieldset>
-
-        <div class="card-actions justify-end gap-3">
-          <button
-            class="btn btn-primary"
-            :aria-label="cardRunAria(capability.target)"
-            :disabled="pendingAction !== null || !capability.configured"
-            @click="emit('run', capability.target)"
-          >
-            <span v-if="isPendingAction(capability.target, 'run')" class="loading loading-spinner loading-xs"></span>
-            <span>{{ cardRunButtonLabel(capability.target) }}</span>
-          </button>
-          <button
-            class="btn btn-outline"
-            :aria-label="t('automation.scraper.schedule.buttonAria')"
-            :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt[capability.target]"
-            @click="emit('schedule', capability.target)"
-          >
-            <span v-if="isPendingAction(capability.target, 'schedule')" class="loading loading-spinner loading-xs"></span>
-            <span>{{ t("automation.scraper.schedule.button") }}</span>
-          </button>
-        </div>
-
-        <div v-if="runStates[capability.target] !== 'idle'" class="mt-2">
-          <div
-            v-if="runStates[capability.target] === 'running'"
-            aria-live="polite"
-            class="alert alert-info alert-vertical sm:alert-horizontal"
-          >
-            <span class="loading loading-spinner loading-xs"></span>
-            <span>{{ runStateLabel(runStates[capability.target]) }}</span>
-          </div>
-          <div
-            v-else-if="runStates[capability.target] === 'success'"
-            role="alert"
-            class="alert alert-success alert-vertical sm:alert-horizontal"
-          >
-            <span>{{ runMessages[capability.target] }}</span>
-          </div>
-          <div
-            v-else-if="runStates[capability.target] === 'error'"
-            role="alert"
-            class="alert alert-error alert-vertical sm:alert-horizontal"
-          >
-            <span>{{ runMessages[capability.target] }}</span>
-          </div>
-        </div>
-
-        <div
-          v-if="latestRuns[capability.target]"
-          role="alert"
-          class="alert alert-info alert-vertical gap-3 sm:alert-horizontal"
-        >
-          <div class="space-y-1">
-            <p class="font-medium">
-              {{ latestRunNoticeText(capability.target) }}
-            </p>
-            <p class="text-sm">
-              {{ latestRunStatusText(capability.target) }}
-            </p>
-          </div>
-          <NuxtLink
-            :to="buildRunDetailRoute(latestRuns[capability.target]?.id ?? '')"
-            class="btn btn-ghost btn-sm"
-            :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRuns[capability.target]?.id ?? '' })"
-          >
-            {{ t("automation.scraper.openRunDetailButton") }}
-          </NuxtLink>
-        </div>
       </div>
-    </div>
-  </SectionGrid>
+
+      <SectionGrid grid-token="twoColumnXl">
+        <AutomationScraperCapabilityCard
+          v-for="capability in readyCapabilities"
+          :key="capability.id"
+          :capability="capability"
+          :run-state="runStates[capability.target]"
+          :run-message="runMessages[capability.target]"
+          :scheduled-run-at="scheduledRunAt[capability.target]"
+          :latest-run="latestRuns[capability.target]"
+          :pending-action="pendingAction"
+          :card-description="cardDescription"
+          :card-run-aria="cardRunAria"
+          :card-run-button-label="cardRunButtonLabel"
+          :capability-availability-label="capabilityAvailabilityLabel"
+          :capability-availability-badge-class="capabilityAvailabilityBadgeClass"
+          :run-state-label="runStateLabel"
+          :run-state-badge-class="runStateBadgeClass"
+          :latest-run-notice-text="latestRunNoticeText"
+          :latest-run-status-text="latestRunStatusText"
+          :is-pending-action="isPendingAction"
+          :automation-runs-route="automationRunsRoute"
+          :build-run-detail-route="buildRunDetailRoute"
+          @run="emit('run', $event)"
+          @schedule="emit('schedule', $event)"
+          @update:scheduled-run-at="handleScheduledRunAtUpdate"
+        />
+      </SectionGrid>
+    </section>
+
+    <section v-if="attentionCapabilities.length > 0" class="space-y-4">
+      <div class="space-y-1">
+        <h2 class="text-lg font-semibold text-base-content">
+          {{ t("automation.scraper.providerCard.issuesTitle") }}
+        </h2>
+        <p class="text-sm text-base-content/70">
+          {{ t("automation.scraper.providerCard.issuesNeedsAttention") }}
+        </p>
+      </div>
+
+      <SectionGrid grid-token="twoColumnXl">
+        <AutomationScraperCapabilityCard
+          v-for="capability in attentionCapabilities"
+          :key="capability.id"
+          :capability="capability"
+          :run-state="runStates[capability.target]"
+          :run-message="runMessages[capability.target]"
+          :scheduled-run-at="scheduledRunAt[capability.target]"
+          :latest-run="latestRuns[capability.target]"
+          :pending-action="pendingAction"
+          :card-description="cardDescription"
+          :card-run-aria="cardRunAria"
+          :card-run-button-label="cardRunButtonLabel"
+          :capability-availability-label="capabilityAvailabilityLabel"
+          :capability-availability-badge-class="capabilityAvailabilityBadgeClass"
+          :run-state-label="runStateLabel"
+          :run-state-badge-class="runStateBadgeClass"
+          :latest-run-notice-text="latestRunNoticeText"
+          :latest-run-status-text="latestRunStatusText"
+          :is-pending-action="isPendingAction"
+          :automation-runs-route="automationRunsRoute"
+          :build-run-detail-route="buildRunDetailRoute"
+          compact-mode
+          @run="emit('run', $event)"
+          @schedule="emit('schedule', $event)"
+          @update:scheduled-run-at="handleScheduledRunAtUpdate"
+        />
+      </SectionGrid>
+    </section>
+  </div>
 </template>

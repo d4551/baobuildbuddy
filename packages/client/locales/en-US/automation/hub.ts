@@ -6,6 +6,28 @@ const automationhub = {
         "Run and track automation workflows across scraping, job apply, and email response pipelines.",
       title: "Automation",
       viewRunsButton: "View Runs",
+      sections: {
+        aria: "Automation workspace sections",
+        overview: {
+          label: "Overview",
+          description: "Review pipeline progress, execution health, and the strongest next action.",
+        },
+        readiness: {
+          label: "Readiness",
+          description:
+            "Resolve blockers and confirm which browser workflows are configured to run.",
+        },
+        workflows: {
+          label: "Workflows",
+          description:
+            "Jump into the specific automation surfaces for scraping, apply, email, and runs.",
+        },
+      },
+      nextAction: {
+        title: "Recommended next action",
+        description:
+          "Keep the operator path short: focus on the most valuable workflow first, then branch into supporting automation only when needed.",
+      },
       pipelineTitle: "Work Pipeline",
       pipelineDescription:
         "Move from job discovery to scraping, customization, automation, and XP progression with a single flow.",
@@ -50,6 +72,7 @@ const automationhub = {
           needsAttention: "Needs attention",
         },
         issueSummaryAria: "Open setup issues for {capability}. {count} issue needs attention.",
+        coverageAria: "Automation capability coverage indicators",
         issues: {
           providerSettingsUnavailable: "Job provider settings are currently unavailable.",
           portalConfigurationMissing: "Add a gaming portal configuration for {portalId}.",
@@ -77,6 +100,17 @@ const automationhub = {
           configuredDesc: "Ready in the current environment",
           live: "Live Events",
           liveDesc: "Emit run progress updates",
+        },
+        groups: {
+          attentionTitle: "Needs attention first",
+          attentionDescription:
+            "Resolve configuration blockers here before expecting the automation surface to behave predictably.",
+          attentionEmptyTitle: "No setup blockers",
+          attentionEmptyDescription:
+            "Every tracked capability is configured enough to run from the current environment.",
+          readyTitle: "Ready to run",
+          readyDescription:
+            "These capabilities are already configured and can be launched from their workflow pages.",
         },
         tableAria: "RPA capability audit details",
         columns: {

@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import {
-  INTERVIEW_MIN_RESPONSE_LENGTH,
-  INTERVIEW_PROGRESS_MAX,
-  INTERVIEW_PROGRESS_MIN,
-} from "@bao/shared/constants/interview";
+import { INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
 import type {
   InterviewQuestion,
   InterviewSession,
@@ -89,29 +85,13 @@ const { t } = useI18n();
       </button>
     </div>
 
-    <div class="card card-border bg-base-100">
-      <div class="card-body gap-3">
-        <div class="flex items-center justify-between gap-3">
-          <span class="text-sm font-medium text-base-content/70">
-            {{ sessionProgressLabel }}
-          </span>
-          <span class="text-sm text-base-content/60">{{ Math.round(progress) }}%</span>
-        </div>
-        <progress
-          class="progress progress-primary w-full"
-          :value="progress"
-          :max="INTERVIEW_PROGRESS_MAX"
-          :aria-label="t('interviewSession.progressAria')"
-          :aria-valuenow="Math.round(progress)"
-          :aria-valuemin="INTERVIEW_PROGRESS_MIN"
-          :aria-valuemax="INTERVIEW_PROGRESS_MAX"
-        ></progress>
-      </div>
-    </div>
-
     <SectionGrid grid-token="twoColumnWide" extra-class="items-start">
       <div class="space-y-6">
         <InterviewSessionPromptCard :current-question="currentQuestion" />
+        <InterviewSessionContextCard
+          :active-session="activeSession"
+          :target-job="targetJob"
+        />
         <InterviewSessionFeedbackCard
           :current-question="currentQuestion"
           :get-alert-class="getAlertClass"
@@ -120,7 +100,7 @@ const { t } = useI18n();
 
       <div
         v-if="completionState === 'ready' || completionState === 'submitting' || completionState === 'completing'"
-        class="space-y-4"
+        class="space-y-4 lg:sticky lg:top-24"
       >
         <div
           v-if="canUseVoice"

@@ -1,7 +1,14 @@
 import { getXPProgress } from "@bao/shared/constants/xp-levels";
 import { formatRelativeTime } from "@bao/shared/utils/date-helpers";
 import { useI18n } from "vue-i18n";
-import { createFlowEngineInput } from "~/constants/flow-engine";
+import type {
+  DashboardStatCardViewModel,
+  DashboardUiState,
+} from "~/components/dashboard/dashboard-page-contracts";
+import type {
+  DashboardPipelineStepViewModel,
+  DashboardStatKey,
+} from "~/constants/dashboard-contracts";
 import {
   DASHBOARD_A11Y_KEYS,
   DASHBOARD_COPY_KEYS,
@@ -14,18 +21,11 @@ import {
   DASHBOARD_STAT_CARDS,
   DASHBOARD_TIME_CONSTANTS,
 } from "~/constants/dashboard-core";
-import type {
-  DashboardPipelineStepViewModel,
-  DashboardStatKey,
-} from "~/constants/dashboard-contracts";
 import { resolveDashboardPipelineSteps } from "~/constants/dashboard-pipeline";
+import { createFlowEngineInput } from "~/constants/flow-engine";
 import { GAMIFICATION_XP_TARGET_FALLBACK } from "~/constants/gamification";
-import type {
-  DashboardStatCardViewModel,
-  DashboardUiState,
-} from "~/components/dashboard/dashboard-page-contracts";
-import { fetchDashboardViewModel, isDashboardEmpty, toFlowStats } from "./dashboard-page-data";
 import { getErrorMessage } from "~/utils/errors";
+import { fetchDashboardViewModel, isDashboardEmpty, toFlowStats } from "./dashboard-page-data";
 
 type DashboardAsyncState = Awaited<ReturnType<typeof useDashboardAsyncState>>;
 type DashboardRef = DashboardAsyncState["dashboard"];
@@ -60,15 +60,15 @@ const useDashboardHeroPhrase = (t: ReturnType<typeof useI18n>["t"]) => {
     return t(phraseKey ?? DASHBOARD_MOTIVATIONAL_PHRASE_KEYS[0]);
   });
 
-  let heroPhraseTimer: ReturnType<typeof setInterval> | null = null;
+  let heroPhraseTimer: number | null = null;
   onMounted(() => {
-    heroPhraseTimer = setInterval(() => {
+    heroPhraseTimer = window.setInterval(() => {
       heroPhraseIndex.value += 1;
     }, DASHBOARD_TIME_CONSTANTS.heroTextRotateIntervalMs);
   });
   onUnmounted(() => {
     if (!heroPhraseTimer) return;
-    clearInterval(heroPhraseTimer);
+    window.clearInterval(heroPhraseTimer);
     heroPhraseTimer = null;
   });
 

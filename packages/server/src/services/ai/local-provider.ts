@@ -64,7 +64,11 @@ const readCompletionContent = (
     return content;
   }
 
-  if (options?.purpose === "coverLetter" || options?.purpose === "scrapeEnrichment") {
+  if (
+    options?.purpose === "coverLetter" ||
+    options?.purpose === "scrapeEnrichment" ||
+    options?.purpose === "emailResponse"
+  ) {
     return readMessageReasoning(completion);
   }
 

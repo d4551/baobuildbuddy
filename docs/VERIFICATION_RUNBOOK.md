@@ -25,6 +25,11 @@ Recommended environment:
 - `BAO_DISABLE_AUTH=true` for local proof runs
 - local AI endpoint configured if you want grounded AI generation in the same pass
 
+Proof-run hygiene:
+
+- keep scratch helpers and one-off proof scripts outside the repo, preferably under `/tmp`
+- do not leave repo-local proof helpers, ad hoc audit markdown, or temporary screenshots checked into the worktree at the end of the pass
+
 ## Step 1: Clear stale local ports
 
 Use the same ports for the whole proof run so screenshots and exports come from one known-good stack.
@@ -258,6 +263,12 @@ bun run verify:desktop-releases -- --targets macos,windows,linux-arm64
 ```
 
 That command validates the staged Tauri 2 artifacts, signatures, payload manifests, provenance, and checksums for the targets already present under `packages/desktop/releases/`.
+
+Important boundary:
+
+- a single host can verify the staged multi-platform artifact set
+- a single host cannot freshly regenerate every native installer
+- only claim fresh Windows/Linux/macOS regeneration after running the matching host build or CI job for that target
 
 Important:
 

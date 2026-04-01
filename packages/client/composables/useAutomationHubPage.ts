@@ -1,6 +1,6 @@
 import { useI18n } from "vue-i18n";
-import { createAutomationHubPagePresentation } from "~/composables/automation-hub-page-presentation";
 import { useAutomationHubPageData } from "~/composables/automation-hub-page-data";
+import { createAutomationHubPagePresentation } from "~/composables/automation-hub-page-presentation";
 
 export function useAutomationHubPage() {
   const { t } = useI18n();
@@ -30,6 +30,7 @@ export function useAutomationHubPage() {
     capabilityEntries: data.capabilityEntries,
     orderedCards: presentation.orderedCards,
     primaryCardId: presentation.primaryCardId,
+    primaryCard: presentation.primaryCard,
     retryLoad,
     refreshCapabilityAudit: data.refreshCapabilityAudit,
     capabilityStatusClass: (value: boolean, issueCount = 0) =>

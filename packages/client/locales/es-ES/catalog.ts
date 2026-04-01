@@ -7,13 +7,6 @@ const catalog = {
     "tagline": "Asistente de Carrera con IA para Desarrollo de Juegos"
   },
   "common": {
-    "exportMenu": {
-      "formatAria": "{action} {format}",
-      "formats": {
-        "pdf": "PDF",
-        "docx": "DOCX"
-      }
-    },
     "localeNames": {
       "enUS": "Inglés",
       "esES": "Español",
@@ -45,12 +38,6 @@ const catalog = {
     "dismissNotification": "Descartar notificación",
     "localeSwitcher": "Cambiar idioma",
     "localeOptionAria": "Cambiar idioma a {locale}"
-  },
-  "layout": {
-    "shell": {
-      "appVersion": "Version {version}",
-      "versionFooterAria": "Application version"
-    }
   },
   "apiErrors": {
     "jobs": {
@@ -224,7 +211,6 @@ const catalog = {
       "queryParametersIntro": "Parámetros de consulta",
       "requestBodyIntro": "Cuerpo de solicitud",
       "requestBodyAria": "Carga JSON del cuerpo de solicitud",
-      "bodyPlaceholder": "{\n  \"example\": \"value\"\n}",
       "noRequestBodyTemplate": "La especificación de OpenAPI no proporcionó una plantilla de cuerpo.",
       "parameterLabel": "Parámetro {name}",
       "send": "Enviar solicitud",
@@ -243,7 +229,6 @@ const catalog = {
       "emptyResponse": "La respuesta no devolvió cuerpo.",
       "requestTraceTitle": "Seguimiento de solicitud",
       "requestMethodLabel": "Método",
-      "requestUrlLabel": "URL",
       "steps": {
         "configure": "Configurar",
         "send": "Enviar",
@@ -281,7 +266,6 @@ const catalog = {
     "pipelineAria": "Flujo de trabajo de carrera",
     "pipelineNextStepLabel": "Siguiente paso: {step}",
     "dailyChallengeTitle": "Desafío Diario",
-    "dailyChallengeXpLabel": "+{xp} XP",
     "recentActivityTitle": "Actividad Reciente",
     "recentActivityEmptyLabel": "Sin actividad reciente",
     "quickActionsTitle": "Acciones Rápidas",
@@ -324,7 +308,6 @@ const catalog = {
       "resumesCta": "Editar biblioteca de currículums",
       "interviewSessionsTitle": "Sesiones de Entrevista",
       "interviewSessionsCta": "Practicar flujo de entrevista",
-      "cardAria": "{title}: {value}. {cta}",
       "levelProgressAria": "Progreso del nivel actual",
       "challengeProgressAria": "Progreso de completar el desafío diario"
     },
@@ -360,7 +343,6 @@ const catalog = {
     "emptyStateDescription": "Completa tareas de configuración, inicia la práctica de entrevistas y realiza desafíos diarios para ganar XP y desbloquear logros.",
     "emptyStateCta": "Abrir Panel",
     "levelPrefix": "Nivel",
-    "xpSuffix": "XP",
     "xpUntilLevelLabel": "XP hasta el nivel",
     "currentStreakTitle": "Racha Actual",
     "longestStreakTitle": "Racha Más Larga",
@@ -420,61 +402,33 @@ const catalog = {
       "allGenres": "Todos los Géneros",
       "experience": {
         "entry": "Principiante",
-        "junior": "Junior",
-        "mid": "Medio",
-        "senior": "Senior",
-        "principal": "Principal",
-        "director": "Director"
+        "mid": "Medio"
       },
       "studioType": {
-        "aaa": "AAA",
-        "indie": "Indie",
         "mobile": "Móvil",
-        "vrAr": "VR/AR",
         "platform": "Plataforma",
-        "esports": "Esports",
         "unknown": "Desconocido"
       },
       "platform": {
-        "pc": "PC",
         "console": "Consola",
-        "mobile": "Móvil",
-        "vr": "VR",
-        "ar": "AR",
-        "web": "Web",
-        "switch": "Switch",
-        "playStation": "PlayStation",
-        "xbox": "Xbox",
-        "steam": "Steam"
+        "mobile": "Móvil"
       },
       "genre": {
         "action": "Acción",
-        "rpg": "RPG",
         "strategy": "Estrategia",
         "puzzle": "Rompecabezas",
         "simulation": "Simulación",
         "sports": "Deportes",
         "racing": "Carreras",
-        "shooter": "Shooter",
         "platformer": "Plataformas",
         "horror": "Terror",
-        "mmorpg": "MMORPG",
-        "moba": "MOBA",
-        "battleRoyale": "Battle Royale",
-        "roguelike": "Roguelike",
-        "sandbox": "Sandbox",
         "adventure": "Aventura",
         "fighting": "Lucha",
         "survival": "Supervivencia",
-        "cardGame": "Juego de Cartas",
-        "casual": "Casual",
-        "indie": "Indie"
+        "cardGame": "Juego de Cartas"
       }
     },
     "emptyState": "No se encontraron empleos. Prueba ajustando filtros o búsqueda.",
-    "bootstrapError": "Could not load the job board.",
-    "bootstrapRetry": "Retry",
-    "bootstrapRetryAria": "Retry loading the job board",
     "openJobAria": "Abrir detalles del empleo {title} en {company}",
     "remoteBadge": "Remoto",
     "matchScoreAria": "Puntuación de coincidencia",
@@ -527,8 +481,7 @@ const catalog = {
       "yesterday": "Ayer",
       "daysAgo": "hace {count}d",
       "weeksAgo": "hace {count}s",
-      "monthsAgo": "hace {count}mes",
-      "unknown": "—"
+      "monthsAgo": "hace {count}mes"
     }
   },
   "resumePreview": {
@@ -547,9 +500,7 @@ const catalog = {
     "notFoundDescription": "Selecciona un currículum guardado desde el espacio de currículums para abrir esta vista previa.",
     "website": "Sitio Web",
     "websiteLinkAria": "Abrir sitio web personal",
-    "linkedin": "LinkedIn",
     "linkedinLinkAria": "Abrir perfil de LinkedIn",
-    "github": "GitHub",
     "githubLinkAria": "Abrir perfil de GitHub",
     "experience": "Experiencia",
     "education": "Formación",
@@ -568,7 +519,6 @@ const catalog = {
     "description": "Mapea tus logros de juego a habilidades transferibles al trabajo, luego reutiliza estos mapeos en currículums y entrevistas.",
     "gamification": {
       "levelLabel": "Nvl {level}",
-      "xpLabel": "{xp} XP",
       "openProgressAria": "Abrir progreso de gamificación"
     },
     "actions": {
@@ -634,7 +584,6 @@ const catalog = {
         "category": "Categoría",
         "actions": "Acciones"
       },
-      "moreApplications": "+{count}",
       "confidenceAria": "Puntuación de confianza {confidence} por ciento",
       "deleteButton": "Eliminar",
       "deleteAria": "Eliminar mapeo de {skill}"
@@ -784,7 +733,6 @@ const catalog = {
     "gamification": {
       "openProgressAria": "Abrir progreso de gamificación",
       "levelLabel": "Nvl {level}",
-      "xpLabel": "{xp} XP",
       "retryAria": "Reintentar carga del progreso de gamificación",
       "retryButton": "Reintentar",
       "unavailableHint": "Progreso no disponible"
@@ -800,9 +748,6 @@ const catalog = {
     "guidedButton": "Constructor Guiado",
     "guidedButtonAria": "Abrir constructor guiado de currículum",
     "emptyState": "Sin currículums aún. Crea tu primer currículum para empezar.",
-    "bootstrapError": "Could not load resumes or dashboard data.",
-    "bootstrapRetry": "Retry",
-    "bootstrapRetryAria": "Retry loading the resume workspace",
     "filteredEmptyState": "Ningún currículum coincide con tu búsqueda.",
     "defaultBadge": "Por defecto",
     "editButton": "Editar",
@@ -827,7 +772,6 @@ const catalog = {
     },
     "tabs": {
       "tablistAria": "Secciones del editor de currículum",
-      "personal": "Personal",
       "experience": "Experiencia",
       "education": "Formación",
       "skills": "Habilidades",
@@ -837,7 +781,6 @@ const catalog = {
     },
     "completion": {
       "title": "Completado del Currículum",
-      "percentLabel": "{percent}%",
       "progressAria": "Progreso de completado del currículum",
       "summary": "{completed} de {total} secciones completadas",
       "jumpAria": "Ir a la sección {section}",
@@ -871,7 +814,6 @@ const catalog = {
       "fullNameLegend": "Nombre Completo",
       "fullNameAria": "Nombre completo",
       "fullNameHint": "El nombre debe tener al menos 2 caracteres.",
-      "emailLegend": "Email",
       "emailAria": "Dirección de email",
       "emailHint": "Introduce una dirección de email válida.",
       "phoneLegend": "Teléfono",
@@ -981,8 +923,6 @@ const catalog = {
         "classic": "Clásico",
         "creative": "Creativo",
         "minimal": "Minimalista",
-        "google-xyz": "Google XYZ",
-        "gaming": "Gaming",
         "executive": "Ejecutivo",
         "technical": "Técnico"
       },
@@ -1045,7 +985,6 @@ const catalog = {
       "any": "Cualquiera",
       "entry": "Principiante",
       "mid": "Medio",
-      "senior": "Senior",
       "lead": "Líder"
     },
     "target": {
@@ -1182,10 +1121,6 @@ const catalog = {
   },
   "coverLetterDetailPage": {
     "breadcrumbFallback": "Detalle de Carta",
-    "hero": {
-      "title": "{position} at {company}",
-      "description": "Review grounded draft content, refine the message, and export the finished letter."
-    },
     "templates": {
       "professional": "Profesional",
       "creative": "Creativa",
@@ -1273,16 +1208,6 @@ const catalog = {
       "exportButton": "Exportar",
       "exportAria": "Exportar portafolio"
     },
-    "bootstrap": {
-      "loadError": "Failed to load portfolio data.",
-      "retryButton": "Retry",
-      "retryAria": "Retry loading portfolio data"
-    },
-    "emptyState": {
-      "title": "Your portfolio is ready to build",
-      "description": "Start with your profile details, then add one or more projects to shape the public portfolio view.",
-      "profileButton": "Edit profile"
-    },
     "preview": {
       "pageTitle": "Vista Previa del Portafolio",
       "description": "Revisa la presentación publicada de tu portafolio antes de exportarla o compartirla.",
@@ -1335,7 +1260,6 @@ const catalog = {
       "titleLegend": "Título del Portafolio",
       "titlePlaceholder": "ej. Juan Pérez - Desarrollador de Juegos",
       "titleAria": "Título del portafolio",
-      "emailLegend": "Email",
       "emailPlaceholder": "contacto{'@'}ejemplo.com",
       "emailAria": "Email de contacto",
       "websiteLegend": "Sitio Web",
@@ -1463,7 +1387,6 @@ const catalog = {
   },
   "xpBar": {
     "levelBadge": "Nivel {level}",
-    "progressLabel": "{xp} / {xpForNextLevel} XP",
     "progressAria": "Progreso XP {progress} por ciento"
   },
   "resumeComponentPersonalInfo": {
@@ -1471,7 +1394,6 @@ const catalog = {
     "nameLabel": "Nombre Completo",
     "namePlaceholder": "Juan Pérez",
     "nameAria": "Nombre completo",
-    "emailLabel": "Email",
     "emailPlaceholder": "juan{'@'}ejemplo.com",
     "emailAria": "Dirección de email",
     "phoneLabel": "Teléfono",
@@ -1483,10 +1405,8 @@ const catalog = {
     "websiteLabel": "Sitio Web",
     "websitePlaceholder": "https://tusitio.com",
     "websiteAria": "URL del sitio web",
-    "linkedinLabel": "LinkedIn",
     "linkedinPlaceholder": "https://linkedin.com/in/juanperez",
     "linkedinAria": "URL de LinkedIn",
-    "githubLabel": "GitHub",
     "githubPlaceholder": "https://github.com/juanperez",
     "githubAria": "URL de GitHub"
   },
@@ -1538,7 +1458,6 @@ const catalog = {
     "graduationDateLabel": "Fecha de Graduación",
     "graduationDateAria": "Fecha de graduación",
     "gpaLabel": "Nota media (opcional)",
-    "gpaPlaceholder": "3.8",
     "gpaAria": "Nota media",
     "addItemButton": "Añadir Formación",
     "addItemAria": "Añadir entrada de formación"
@@ -1657,8 +1576,7 @@ const catalog = {
       "remoteWorkLabel": "Trabajo Remoto"
     },
     "remoteLabels": {
-      "yes": "Sí",
-      "no": "No"
+      "yes": "Sí"
     },
     "emptyTitle": "Estudio no disponible",
     "emptyDescription": "Este perfil de estudio ya no está disponible. Vuelve al directorio y elige otro contexto de estudio.",
@@ -1705,13 +1623,8 @@ const catalog = {
     },
     "options": {
       "type": {
-        "aaa": "AAA",
-        "indie": "Indie",
         "mobile": "Móvil",
-        "vrAr": "VR/AR",
         "platform": "Plataforma",
-        "esports": "Esports",
-        "general": "General",
         "publisher": "Editora",
         "services": "Servicios",
         "aiTech": "IA/Tecnología",
@@ -1748,7 +1661,6 @@ const catalog = {
       "closeBackdropAria": "Cerrar fondo de vista previa",
       "closeBackdropButton": "Cerrar",
       "remoteYes": "Sí",
-      "remoteNo": "No",
       "startInterviewButton": "Iniciar Entrevista",
       "startInterviewAria": "Iniciar práctica de entrevista para {studio}",
       "openDetailButton": "Abrir Perfil Completo",
@@ -1815,9 +1727,6 @@ const catalog = {
       "loadErrorFallback": "Error al cargar métricas del centro de automatización",
       "retryButtonLabel": "Reintentar",
       "retryAria": "Reintentar carga de métricas del centro de automatización",
-      "emptyStateTitle": "No automation data yet",
-      "emptyStateDescription": "Start a scraper or automation workflow to populate the hub with actionable run history and capability signals.",
-      "emptyStateCta": "Open Scraper Hub",
       "stats": {
         "totalRunsTitle": "Total de Ejecuciones",
         "totalRunsDescription": "Ejecuciones de automatización registradas",
@@ -1881,7 +1790,6 @@ const catalog = {
         "columns": {
           "name": "Capacidad",
           "configured": "Configurada",
-          "manual": "Manual",
           "scheduled": "Programada",
           "history": "Historial",
           "live": "En Vivo",
@@ -1944,14 +1852,12 @@ const catalog = {
       },
       "typeOptions": {
         "scrape": "Extractor",
-        "job_apply": "Solicitud de Empleo",
-        "email": "Email"
+        "job_apply": "Solicitud de Empleo"
       },
       "statusOptions": {
         "pending": "Pendiente",
         "running": "En ejecución",
-        "success": "Éxito",
-        "error": "Error"
+        "success": "Éxito"
       }
     },
     "jobApply": {
@@ -1966,7 +1872,6 @@ const catalog = {
       "coverLetterLegend": "Carta de Presentación (opcional)",
       "coverLetterAria": "Seleccionar carta opcional",
       "noCoverLetterOption": "Sin carta",
-      "coverLetterOption": "{company} - {position}",
       "unknownCompany": "Desconocido",
       "unknownPosition": "Puesto",
       "jobIdLegend": "ID de Empleo (opcional)",
@@ -2023,8 +1928,7 @@ const catalog = {
         },
         "eventType": {
           "progress": "Progreso",
-          "result": "Resultado",
-          "error": "Error"
+          "result": "Resultado"
         },
         "eventMessages": {
           "resultSuccess": "La ejecución terminó correctamente.",
@@ -2059,7 +1963,6 @@ const catalog = {
       "senderLegend": "Remitente (opcional)",
       "senderPlaceholder": "reclutador{'@'}estudio.com",
       "senderAria": "Email o nombre del remitente",
-      "senderHint": "If this is an email address, it can be reused as the delivery recipient.",
       "recipientLegend": "Destinatario (opcional)",
       "recipientPlaceholder": "respuesta{'@'}estudio.com",
       "recipientAria": "Email destinatario para entrega saliente",
@@ -2172,9 +2075,7 @@ const catalog = {
         "outputDescription": "Instantánea del resultado",
         "statusTitle": "Estado",
         "typeDescription": "Tipo: {type}",
-        "errorTitle": "Error",
         "errorYes": "Sí",
-        "errorNo": "No",
         "errorNone": "Sin error"
       }
     },
@@ -2190,8 +2091,7 @@ const catalog = {
       "state": {
         "idle": "Inactivo",
         "running": "En ejecución",
-        "success": "Éxito",
-        "error": "Error"
+        "success": "Éxito"
       },
       "notRunYet": "Aún no ejecutado",
       "unknownPostedDate": "Desconocido",
@@ -2284,19 +2184,15 @@ const catalog = {
       "description": "RamaLama u Ollama con ejecución privada y local primero."
     },
     "gemini": {
-      "name": "Google Gemini",
       "description": "Proveedor cloud principal para QA general y generación de contenido."
     },
     "claude": {
-      "name": "Anthropic Claude",
       "description": "Proveedor de razonamiento de largo contexto para flujos analíticos."
     },
     "openai": {
-      "name": "OpenAI",
       "description": "Familia GPT para chat y generación en flujos generales."
     },
     "huggingface": {
-      "name": "Hugging Face",
       "description": "Respaldo cloud con un catálogo amplio de modelos abiertos."
     }
   },
@@ -2379,7 +2275,6 @@ const catalog = {
       "successRateTitle": "Tasa de Éxito",
       "successRateDesc": "Respuestas del asistente respecto a las solicitudes",
       "averageResponseTitle": "Tiempo de Respuesta Medio",
-      "averageResponseValue": "{seconds}s",
       "averageResponseDesc": "Latencia medida en solicitudes de chat",
       "sessionsTitle": "Sesiones",
       "sessionsDesc": "Proveedor activo: {provider}"
@@ -2477,9 +2372,7 @@ const catalog = {
     "fetchErrorFallback": "Error al cargar sesiones de entrevista",
     "sessionNotFound": "Sesión no encontrada",
     "detailLoadErrorFallback": "Error al cargar detalles de sesión",
-    "fetchErrorTitle": "Could not load interview sessions",
     "notAvailable": "N/D",
-    "minutesLabel": "{count} min",
     "viewModes": {
       "table": "Tabla",
       "timeline": "Línea temporal"
@@ -2648,7 +2541,6 @@ const catalog = {
     "experience": {
       "entry": "Principiante",
       "mid": "Medio",
-      "senior": "Senior",
       "lead": "Líder"
     },
     "questionCount": {
@@ -2668,48 +2560,15 @@ const catalog = {
   },
   "interviewSession": {
     "title": "Práctica de Entrevista",
-    "subtitle": "Review the role, interviewer, and prompt signals before you answer so every response stays grounded.",
-    "overviewTitle": "Session Briefing",
-    "overviewDescription": "Use this workspace to track pacing, confirm the target context, and line up the next answer.",
     "timeLabel": "Tiempo",
     "timeAria": "Tiempo transcurrido de entrevista {minutes} minutos y {seconds} segundos",
     "avatarLabelAi": "IA",
     "progressLabel": "Pregunta {current} de {total}",
     "progressAria": "Progreso de entrevista",
-    "progressStatTitle": "Progress",
-    "progressStatDescription": "{percent}% of the session completed",
-    "modeTitle": "Practice Mode",
-    "voiceTitle": "Voice Input",
-    "voiceEnabled": "Enabled",
-    "voiceDisabled": "Keyboard",
-    "voiceDescriptionEnabled": "Speech capture is ready for hands-free answers.",
-    "voiceDescriptionDisabled": "Type your response directly in the workspace below.",
     "jobTargetBadge": "Empleo Objetivo",
     "interviewerLabel": "Entrevistador",
-    "interviewerTitle": "Interviewer Lens",
-    "interviewerDescription": "These cues shape the tone, scoring, and follow-up emphasis for the current session.",
-    "interviewerRoleLabel": "Role",
-    "interviewerStyleLabel": "Style",
-    "interviewerBackgroundLabel": "Background",
-    "interviewerFallback": "Interviewer profile is still loading for this session.",
-    "targetTitle": "Target Role",
-    "targetDescription": "The practice run is grounded against this role and studio context so your examples stay specific.",
-    "focusAreasTitle": "Focus Areas",
-    "focusAreasEmpty": "No focus areas configured yet.",
-    "promptTitle": "Current Prompt",
-    "promptDescription": "Answer directly, tie your example to the target role, and keep the result concrete.",
-    "promptTypeLabel": "Prompt Type",
-    "promptDifficultyLabel": "Difficulty",
-    "promptExpectedDurationLabel": "Target Length",
-    "promptExpectedDurationValue": "{count} min",
-    "promptTagsLabel": "Signals",
-    "promptTagsEmpty": "No prompt signals yet.",
-    "feedbackTitle": "Feedback",
-    "feedbackDescription": "Use the latest scoring notes to sharpen the next answer.",
     "feedbackScore": "Puntuación: {score}%",
     "responseTitle": "Tu Respuesta",
-    "responseWorkspaceTitle": "Response Workspace",
-    "responseWorkspaceDescription": "Keep the answer outcome-focused, specific, and aligned to the current prompt.",
     "responsePlaceholder": "Escribe tu respuesta aquí...",
     "responseAria": "Texto de respuesta de entrevista",
     "minResponseHint": "La respuesta debe tener al menos {count} caracteres.",
@@ -2726,7 +2585,6 @@ const catalog = {
       "stopTitle": "Dejar de escuchar",
       "startAria": "Iniciar entrada de voz",
       "stopAria": "Detener entrada de voz",
-      "startButton": "Mic",
       "stopButton": "Detener"
     },
     "toasts": {
@@ -2737,18 +2595,6 @@ const catalog = {
       "minResponseLength": "La respuesta debe tener al menos {count} caracteres",
       "submitFailed": "Error al enviar respuesta",
       "completeFailed": "Error al completar entrevista"
-    },
-    "questionTypes": {
-      "intro": "Introduction",
-      "behavioral": "Behavioral",
-      "technical": "Technical",
-      "studio-specific": "Studio-Specific",
-      "closing": "Closing"
-    },
-    "difficulty": {
-      "easy": "Easy",
-      "medium": "Medium",
-      "hard": "Hard"
     }
   },
   "settings": {
@@ -2756,22 +2602,16 @@ const catalog = {
     "seoDescription": "Administra tu perfil, proveedores de IA, preferencias de notificación y valores predeterminados de automatización.",
     "title": "Configuración y Perfil",
     "subtitle": "Centraliza tu identidad, comportamiento del asistente y valores por defecto de automatización.",
-    "bootstrapError": "Could not load settings or profile.",
-    "bootstrapRetry": "Retry",
-    "bootstrapRetryAria": "Retry loading settings",
     "saveState": {
       "idle": "Inactivo",
       "saving": "Guardando",
-      "success": "Guardado",
-      "error": "Error"
+      "success": "Guardado"
     },
     "profile": {
       "title": "Perfil de Usuario",
       "nameLegend": "Nombre",
       "nameAria": "Nombre",
       "nameHint": "El nombre debe tener al menos 2 caracteres.",
-      "emailLegend": "Email",
-      "emailAria": "Email",
       "emailHint": "Introduce una dirección de email válida.",
       "currentRoleLegend": "Rol Actual",
       "currentRoleAria": "Rol actual",
@@ -2781,14 +2621,11 @@ const catalog = {
       "locationAria": "Ubicación",
       "yearsExperienceLegend": "Años de Experiencia",
       "yearsExperienceAria": "Años de experiencia",
-      "githubLegend": "GitHub",
       "githubAria": "URL del perfil de GitHub",
-      "linkedinLegend": "LinkedIn",
       "linkedinAria": "URL del perfil de LinkedIn",
       "summaryLegend": "Resumen",
       "summaryAria": "Resumen del perfil",
       "technicalSkillsLegend": "Habilidades Técnicas (separadas por comas)",
-      "technicalSkillsPlaceholder": "Unity, Unreal Engine, C++, TypeScript",
       "technicalSkillsAria": "Habilidades técnicas",
       "softSkillsLegend": "Habilidades Blandas (separadas por comas)",
       "softSkillsPlaceholder": "Comunicación, Liderazgo, Colaboración",
@@ -2838,79 +2675,8 @@ const catalog = {
       "concurrentRunsAria": "Máximo de ejecuciones simultáneas",
       "defaultBrowserLegend": "Navegador por Defecto",
       "defaultBrowserAria": "Navegador de automatización por defecto",
-      "browserOptions": {
-        "chrome": "Chrome",
-        "chromium": "Chromium",
-        "edge": "Edge"
-      },
       "saveAria": "Guardar configuración de automatización",
       "saveButton": "Guardar Automatización"
-    },
-    "jobIntelligence": {
-      "title": "Job Intelligence",
-      "subtitle": "Manage scraper provider settings and the persisted jobs taxonomy used for enrichment and autocomplete.",
-      "providersTitle": "Provider Configuration",
-      "providersDescription": "Keep the shared fetch defaults visible, tune each source in its own card, and hide raw source payloads until you need them.",
-      "taxonomyTitle": "Persisted Taxonomy",
-      "taxonomyDescription": "Shape the saved keyword and studio classification datasets that downstream matching, enrichment, and interview flows depend on.",
-      "summarySourcesTitle": "Active sources",
-      "summarySourcesDescription": "Enabled providers with enough configuration to fetch jobs.",
-      "summaryCollectionsTitle": "Source collections",
-      "summaryCollectionsDescription": "Advanced JSON datasets stored for boards, templates, and gaming portals.",
-      "summaryTaxonomyTitle": "Taxonomy assets",
-      "summaryTaxonomyDescription": "Saved keyword and studio rule datasets used across enrichment and autocomplete.",
-      "defaultsTitle": "Shared defaults",
-      "defaultsDescription": "These defaults apply across every source before provider-specific rules kick in.",
-      "providerTimeoutLabel": "Provider timeout (ms)",
-      "companyLimitLabel": "Company board result limit",
-      "gamingLimitLabel": "Gaming board result limit",
-      "hitmarkerEnabledLabel": "Enable Hitmarker API",
-      "hitmarkerEnabledHint": "Toggle the first-party Hitmarker feed without hiding the rest of the workspace.",
-      "unknownLocationLabel": "Unknown location label",
-      "unknownCompanyLabel": "Unknown company label",
-      "configuredBadge": "Configured",
-      "needsAttentionBadge": "Needs attention",
-      "hitmarkerTitle": "Hitmarker",
-      "hitmarkerApiLabel": "Hitmarker API base URL",
-      "hitmarkerQueryLabel": "Hitmarker default query",
-      "hitmarkerLocationLabel": "Hitmarker fallback location",
-      "hitmarkerDescription": "Control the direct Hitmarker feed, default query seed, and fallback location copy.",
-      "greenhouseTitle": "Greenhouse",
-      "greenhouseApiLabel": "Greenhouse API base URL",
-      "greenhouseMaxPagesLabel": "Greenhouse max pages",
-      "greenhouseDescription": "Tune Greenhouse discovery and paging separately from the shared source defaults.",
-      "leverTitle": "Lever",
-      "leverApiLabel": "Lever API base URL",
-      "leverMaxPagesLabel": "Lever max pages",
-      "leverDescription": "Use a focused Lever card so URL and pagination changes stay local to that source.",
-      "advancedCollectionsTitle": "Advanced source collections",
-      "advancedCollectionsDescription": "Keep raw JSON payload editors collapsed until you need to adjust source mappings or template payloads.",
-      "advancedBadge": "Advanced",
-      "greenhouseBoardsLabel": "Greenhouse boards JSON",
-      "leverCompaniesLabel": "Lever companies JSON",
-      "companyBoardsLabel": "Company boards JSON",
-      "companyTemplatesLabel": "Company board templates JSON",
-      "gamingPortalsLabel": "Gaming portals JSON",
-      "taxonomyKeywordsLabel": "Taxonomy keywords JSON",
-      "taxonomyKeywordsDescription": "Persist keyword clusters used for autocomplete, matching, and role enrichment.",
-      "taxonomyStudiosLabel": "Studio classification rules JSON",
-      "taxonomyStudiosDescription": "Maintain the studio classification rules that feed company and studio-aware workflows.",
-      "saveProviders": "Save Provider Config",
-      "saveTaxonomy": "Save Taxonomy",
-      "saveProvidersAria": "Save job provider configuration",
-      "saveTaxonomyAria": "Save persisted taxonomy configuration",
-      "savingProviders": "Saving providers...",
-      "savingTaxonomy": "Saving taxonomy...",
-      "errors": {
-        "invalidProviderConfig": "Provider configuration JSON is invalid.",
-        "invalidTaxonomy": "Taxonomy JSON is invalid.",
-        "failedToSaveProviders": "Failed to save job provider configuration.",
-        "failedToSaveTaxonomy": "Failed to save job taxonomy."
-      },
-      "toasts": {
-        "providersSaved": "Job provider configuration saved.",
-        "taxonomySaved": "Job taxonomy saved."
-      }
     },
     "emailDelivery": {
       "title": "Entrega de correo",
@@ -2918,7 +2684,6 @@ const catalog = {
       "configuredBadge": "Listo",
       "incompleteBadge": "Necesita configuración",
       "hostLegend": "Host SMTP",
-      "hostPlaceholder": "smtp.mailprovider.com",
       "hostAria": "Host del servidor SMTP",
       "portLegend": "Puerto",
       "portAria": "Puerto del servidor SMTP",
@@ -2928,23 +2693,15 @@ const catalog = {
       "securityAria": "Modo de seguridad del transporte SMTP",
       "securityOptions": {
         "tls": "TLS implícito",
-        "starttls": "STARTTLS",
         "plain": "TCP simple"
       },
       "authLegend": "Autenticación",
       "authAria": "Modo de autenticación SMTP",
-      "authOptions": {
-        "plain": "AUTH PLAIN",
-        "login": "AUTH LOGIN"
-      },
       "usernameLegend": "Usuario",
-      "usernamePlaceholder": "mailer{'@'}studio.com",
       "usernameAria": "Usuario SMTP",
       "fromNameLegend": "Nombre del remitente",
-      "fromNamePlaceholder": "{brand}",
       "fromNameAria": "Nombre visible del remitente",
       "fromEmailLegend": "Correo del remitente",
-      "fromEmailPlaceholder": "mailer{'@'}studio.com",
       "fromEmailAria": "Correo del remitente saliente",
       "fromEmailHint": "Esta dirección se usa en la cabecera From del mensaje.",
       "passwordLegend": "Contraseña",
@@ -2983,17 +2740,12 @@ const catalog = {
       "preferredProviderAria": "Seleccionar proveedor de IA preferido",
       "preferredProviderSaveButton": "Guardar chat por defecto",
       "preferredProviderHint": "Este control rápido define el proveedor predeterminado para chat y conversaciones.",
-      "readinessTitle": "Provider readiness",
-      "readinessDescription": "Check configuration and connectivity before assigning providers to workflows.",
       "preferredProviderSaved": "Proveedor preferido actualizado",
       "routingTitle": "Enrutamiento por propósito",
       "routingSubtitle": "Asigna un proveedor y un modelo opcional a cada capacidad de IA para que chat, entrevistas, exportaciones y automatizaciones no compartan una única configuración global.",
-      "routingCoverageTitle": "Routed workflows",
-      "routingCoverageDescription": "Each AI capability can keep its own provider and optional model override.",
       "saveRoutingAria": "Guardar enrutamiento de IA por propósito",
       "saveRoutingButton": "Guardar enrutamiento",
       "routingSaved": "Enrutamiento de IA guardado",
-      "purposeColumnLabel": "Purpose",
       "purposeProviderLegend": "Proveedor",
       "purposeProviderAria": "Seleccionar proveedor para {purpose}",
       "purposeModelLegend": "Modelo específico",
@@ -3040,9 +2792,7 @@ const catalog = {
       },
       "ollamaTipTitle": "Consejo: Ollama va por fuera de esta app",
       "ollamaTipDescription": "Instálalo primero y sigue la configuración oficial de Ollama para tu propia máquina o proyecto en",
-      "ollamaTipLinkLabel": "ollama.com",
-      "ollamaTipLinkAria": "Abrir sitio web de Ollama en una pestaña nueva",
-      "credentialsDescription": "Store and test credentials only for the providers you plan to route into live workflows."
+      "ollamaTipLinkAria": "Abrir sitio web de Ollama en una pestaña nueva"
     },
     "brand": {
       "title": "Plano de control de marca",
@@ -3068,7 +2818,6 @@ const catalog = {
       "logoPathAria": "Ruta o URL del logo",
       "faviconPathLegend": "Ruta o URL del favicon",
       "faviconPathAria": "Ruta o URL del favicon",
-      "assetPathPlaceholder": "/branding/logo.svg",
       "assetPathHint": "Usa una ruta de recurso pública o una URL absoluta que el cliente pueda cargar directamente.",
       "defaultTitleLegend": "Título SEO por defecto",
       "defaultTitleAria": "Título SEO por defecto",
@@ -3076,7 +2825,6 @@ const catalog = {
       "defaultDescriptionAria": "Descripción SEO por defecto",
       "fontStylesheetLegend": "URL de la hoja de estilos de fuentes",
       "fontStylesheetAria": "URL de la hoja de estilos de fuentes",
-      "fontStylesheetPlaceholder": "https://fonts.googleapis.com/css2?...",
       "fontStylesheetHint": "Carga la hoja de estilos alojada de tus tipografías antes de aplicar las pilas de font-family de abajo.",
       "displayFontLegend": "font-family de display",
       "displayFontAria": "font-family de display",
@@ -3111,7 +2859,6 @@ const catalog = {
         "assistantDescription": "Persona del asistente mostrada por defecto en las superficies de chat.",
         "locales": "Idiomas",
         "localesDescription": "Idiomas de interfaz compatibles expuestos en configuración.",
-        "overrides": "Overrides",
         "overridesDescription": "Claves de copy personalizadas mezcladas en el catálogo activo."
       },
       "errors": {
@@ -3162,15 +2909,13 @@ const catalog = {
     "sourceChip": "Superficie: {source}",
     "routeBadge": "Ruta: {route}",
     "contextChipsAria": "Chips de contexto específico del chat",
-    "entityChip": "{type}: {entity}",
     "contextDomain": {
       "resume": "Currículum",
       "jobSearch": "Empleos",
       "interview": "Entrevista",
       "portfolio": "Portafolio",
       "skills": "Habilidades",
-      "automation": "Automatización",
-      "general": "General"
+      "automation": "Automatización"
     },
     "entityTypes": {
       "job": "Empleo",
@@ -3180,8 +2925,7 @@ const catalog = {
       "automationRun": "Automatización"
     },
     "sources": {
-      "chatPage": "Página completa",
-      "floatingWidget": "Widget"
+      "chatPage": "Página completa"
     },
     "stateChips": {
       "resumes": "{count} currículum | {count} currículums",
@@ -3284,9 +3028,6 @@ const catalog = {
       "unsavedHint": "Tienes cambios sin guardar en el perfil de voz.",
       "providers": {
         "browser": "Navegador",
-        "openai": "OpenAI",
-        "huggingface": "Hugging Face",
-        "local": "Local",
         "custom": "Personalizado"
       }
     }

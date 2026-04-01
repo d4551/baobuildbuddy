@@ -187,7 +187,7 @@ For the current step-by-step proof flow covering:
 - full routed page screenshots with a report
 - export verification for resume / cover letter / portfolio
 - desktop runtime verification
-- Tauri 2 matching-host release generation
+- Tauri 2 host-matching release generation plus staged multi-platform verification
 
 use [docs/VERIFICATION_RUNBOOK.md](docs/VERIFICATION_RUNBOOK.md).
 
@@ -240,7 +240,7 @@ flowchart LR
   end
 
   subgraph Server["@bao/server"]
-    API["17 public route modules"]
+    API["Typed route modules"]
     WSHandlers["ws/chat · interview · automation"]
     Svcs["Services layer"]
   end
@@ -294,7 +294,7 @@ flowchart TD
   EdenClient -->|"type import"| ServerTypes
   ApiPrefix --> App["packages/server/src/app"]
   App --> Middleware["cors · swagger · rate-limit · logger · errorHandler · authGuard"]
-  App --> Routes["17 public route modules from route-modules.ts"]
+  App --> Routes["Typed route modules from route-modules.ts"]
   App --> WebSockets["ws: chat · interview · automation"]
   App --> Shared
   App --> ServerTypes
@@ -1066,6 +1066,12 @@ bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --
 bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --release
 ```
 
+Release truth:
+
+- `bun run build:desktop` regenerates only the current host desktop artifact.
+- Fresh native installer regeneration is host-specific. A macOS machine cannot honestly claim fresh Windows or Linux installer generation from a local run.
+- To regenerate every native installer, run the matching `release:desktop:*` command on each target host or through the CI matrix, then assemble the staged outputs.
+
 Assemble multi-platform release set:
 
 ```bash
@@ -1165,6 +1171,8 @@ bun run release:desktop:windows -- --output-root .desktop-release-artifacts --re
 bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --release
 bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --release
 ```
+
+Do not describe that as "everything regenerated" unless each target command actually ran on its matching host or in CI on that target platform.
 
 **Optional installable variants (defaults are on; set `false` to omit):**
 ```bash

@@ -36,7 +36,7 @@ export function createInterviewSessionTimer(input: {
   t: Translate;
 }) {
   const timeElapsed = ref(DEFAULT_TIMER_VALUE);
-  const timer = ref<ReturnType<typeof setInterval> | null>(null);
+  const timer = ref<number | null>(null);
 
   const presentation = createInterviewTimerPresentation(timeElapsed, input.t);
   const controls = createInterviewTimerControls({
@@ -84,11 +84,11 @@ function createInterviewTimerPresentation(timeElapsed: Ref<number>, t: Translate
 function createInterviewTimerControls(input: {
   activeSession: ComputedRef<TimedInterviewSession | null>;
   timeElapsed: Ref<number>;
-  timer: Ref<ReturnType<typeof setInterval> | null>;
+  timer: Ref<number | null>;
 }) {
   function stopTimer() {
     if (input.timer.value) {
-      clearInterval(input.timer.value);
+      window.clearInterval(input.timer.value);
       input.timer.value = null;
     }
   }
@@ -109,7 +109,7 @@ function createInterviewTimerControls(input: {
     }
 
     input.timeElapsed.value = estimateElapsedTime(DEFAULT_TIMER_VALUE, session.startTime);
-    input.timer.value = setInterval(() => {
+    input.timer.value = window.setInterval(() => {
       const current = input.activeSession.value;
       if (!current) {
         stopTimer();

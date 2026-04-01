@@ -106,6 +106,24 @@ export const APP_ROUTE_BUILDERS = {
     return `${APP_ROUTES.settings}?${APP_ROUTE_QUERY_KEYS.section}=${encodeRouteParam(sectionId)}`;
   },
   /**
+   * Builds the automation scraper route with a selected workspace section query.
+   *
+   * @param sectionId Scraper workspace section identifier.
+   * @returns Canonical scraper route with section query.
+   */
+  automationScraperSection(sectionId: string): string {
+    return `${APP_ROUTES.automationScraper}?${APP_ROUTE_QUERY_KEYS.section}=${encodeRouteParam(sectionId)}`;
+  },
+  /**
+   * Builds the automation hub route with a selected workspace section query.
+   *
+   * @param sectionId Automation hub section identifier.
+   * @returns Canonical automation hub route with section query.
+   */
+  automationHubSection(sectionId: string): string {
+    return `${APP_ROUTES.automation}?${APP_ROUTE_QUERY_KEYS.section}=${encodeRouteParam(sectionId)}`;
+  },
+  /**
    * Builds the resume editor route with selected resume id query.
    *
    * @param resumeId Resume identifier.

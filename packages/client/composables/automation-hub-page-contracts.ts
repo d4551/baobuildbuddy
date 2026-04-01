@@ -1,4 +1,5 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { AutomationVisualIconName } from "~/components/automation/automation-visuals";
 import type { FlowActionId } from "~/constants/flow-engine";
 
 export type AutomationHubUiState = "idle" | "loading" | "error" | "success";
@@ -11,6 +12,7 @@ export interface AutomationHubCard {
   readonly descriptionKey: string;
   readonly buttonKey: string;
   readonly to: string;
+  readonly iconName: AutomationVisualIconName;
 }
 
 export type AutomationHubTranslate = (key: string) => string;
@@ -23,6 +25,7 @@ export const BASE_AUTOMATION_CARDS: readonly AutomationHubCard[] = [
     descriptionKey: "automation.hub.cards.scraper.description",
     buttonKey: "automation.hub.cards.scraper.button",
     to: APP_ROUTES.automationScraper,
+    iconName: "IconSearch",
   },
   {
     id: "jobApply",
@@ -31,6 +34,7 @@ export const BASE_AUTOMATION_CARDS: readonly AutomationHubCard[] = [
     descriptionKey: "automation.hub.cards.jobApply.description",
     buttonKey: "automation.hub.cards.jobApply.button",
     to: APP_ROUTES.automationJobApply,
+    iconName: "IconBolt",
   },
   {
     id: "emailResponse",
@@ -39,6 +43,7 @@ export const BASE_AUTOMATION_CARDS: readonly AutomationHubCard[] = [
     descriptionKey: "automation.hub.cards.emailResponse.description",
     buttonKey: "automation.hub.cards.emailResponse.button",
     to: APP_ROUTES.automationEmail,
+    iconName: "IconSend",
   },
   {
     id: "runHistory",
@@ -47,6 +52,7 @@ export const BASE_AUTOMATION_CARDS: readonly AutomationHubCard[] = [
     descriptionKey: "automation.hub.cards.runHistory.description",
     buttonKey: "automation.hub.cards.runHistory.button",
     to: APP_ROUTES.automationRuns,
+    iconName: "IconDocumentText",
   },
 ] as const;
 

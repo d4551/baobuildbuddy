@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { useSeoMeta } from "#imports";
-import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { useSeoMeta } from "#imports";
+import {
+  AUTOMATION_HUB_DEFAULT_SECTION_ID,
+  AUTOMATION_HUB_SECTION_ITEMS,
+  type AutomationHubSectionId,
+  isAutomationHubSectionId,
+} from "~/components/automation/hub-sections";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
+const route = useRoute();
 const page = useAutomationHubPage();
 const {
   capabilityAuditError,
@@ -17,6 +25,7 @@ const {
   nextPipelineStepLabel,
   orderedCards,
   pipelineSteps,
+  primaryCard,
   primaryCardId,
   refreshCapabilityAudit,
   retryLoad,
@@ -44,6 +53,42 @@ const {
   uiState: page.uiState,
 };
 
+const routeSection = computed<AutomationHubSectionId>(() => {
+  const sectionQueryValue = route.query[APP_ROUTE_QUERY_KEYS.section];
+  const candidateSection =
+    typeof sectionQueryValue === "string"
+      ? sectionQueryValue
+      : Array.isArray(sectionQueryValue)
+        ? sectionQueryValue[0]
+        : null;
+
+  return candidateSection && isAutomationHubSectionId(candidateSection)
+    ? candidateSection
+    : AUTOMATION_HUB_DEFAULT_SECTION_ID;
+});
+
+const activeSection = ref<AutomationHubSectionId>(routeSection.value);
+
+const readinessIssueCount = computed(() =>
+  capabilityEntries.value
+    ? capabilityEntries.value.filter((entry) => entry.issues.length > 0).length
+    : 0,
+);
+
+const hubSectionBadgeById = computed<Record<AutomationHubSectionId, number>>(() => ({
+  overview: totalRuns.value,
+  readiness: readinessIssueCount.value,
+  workflows: orderedCards.value.length,
+}));
+
+watch(
+  routeSection,
+  (value) => {
+    activeSection.value = value;
+  },
+  { immediate: true },
+);
+
 useSeoMeta({
   title: t("automation.hub.pageTitle"),
   description: t("automation.hub.pageDescription"),
@@ -59,11 +104,11 @@ useSeoMeta({
     >
       <template #actions>
         <NuxtLink
-          :to="APP_ROUTES.automationRuns"
-          class="btn btn-outline"
-          :aria-label="t('automation.hub.viewRunsButton')"
+          :to="primaryCard?.to ?? APP_ROUTES.automationScraper"
+          class="btn btn-primary"
+          :aria-label="t(primaryCard?.buttonKey ?? 'automation.hub.cards.scraper.button')"
         >
-          {{ t("automation.hub.viewRunsButton") }}
+          {{ t(primaryCard?.buttonKey ?? "automation.hub.cards.scraper.button") }}
         </NuxtLink>
       </template>
     </PageHeroHeader>
@@ -87,37 +132,81 @@ useSeoMeta({
     />
 
     <template v-else>
-      <StatsRow
-        background-class="border border-base-300 bg-base-200"
-        :stats="[
-          { titleKey: 'automation.hub.stats.totalRunsTitle', value: totalRuns, descKey: 'automation.hub.stats.totalRunsDescription' },
-          { titleKey: 'automation.hub.stats.todayRunsTitle', value: todayRuns, descKey: 'automation.hub.stats.todayRunsDescription' },
-          { titleKey: 'automation.hub.stats.successRateTitle', value: `${successRate}%`, descKey: 'automation.hub.stats.successRateDescription' },
-        ]"
-      />
+      <WorkspaceSectionNavigator
+        :sections="AUTOMATION_HUB_SECTION_ITEMS"
+        :active-section="activeSection"
+        v-bind="{ ariaLabelKey: 'automation.hub.sections.aria' }"
+        :build-route="APP_ROUTE_BUILDERS.automationHubSection"
+        :badge-by-id="hubSectionBadgeById"
+      >
+        <template v-if="activeSection === 'overview'">
+          <StatsRow
+            background-class="border border-base-300 bg-base-200"
+            :stats="[
+              { titleKey: 'automation.hub.stats.totalRunsTitle', value: totalRuns, descKey: 'automation.hub.stats.totalRunsDescription' },
+              { titleKey: 'automation.hub.stats.todayRunsTitle', value: todayRuns, descKey: 'automation.hub.stats.todayRunsDescription' },
+              { titleKey: 'automation.hub.stats.successRateTitle', value: `${successRate}%`, descKey: 'automation.hub.stats.successRateDescription' },
+            ]"
+          />
 
-      <WorkPipeline
-        :title="t('automation.hub.pipelineTitle')"
-        :description="t('automation.hub.pipelineDescription')"
-        :aria-label="t('automation.hub.pipelineAria')"
-        :steps="pipelineSteps"
-        :next-step-label="nextPipelineStepLabel"
-      />
+          <SectionGrid grid-token="twoColumnWide">
+            <section class="card card-border bg-base-100" aria-labelledby="automation-next-action-title">
+              <div class="card-body gap-4">
+                <div class="space-y-2">
+                  <h2 id="automation-next-action-title" class="card-title">
+                    {{ t("automation.hub.nextAction.title") }}
+                  </h2>
+                  <p class="text-sm text-base-content/70">
+                    {{ t("automation.hub.nextAction.description") }}
+                  </p>
+                </div>
+                <div class="space-y-3 rounded-box border border-base-300 bg-base-200 p-4">
+                  <p class="text-sm font-medium text-base-content/80">
+                    {{ nextPipelineStepLabel }}
+                  </p>
+                  <p class="text-sm text-base-content/70">
+                    {{ t(primaryCard?.descriptionKey ?? "automation.hub.cards.scraper.description") }}
+                  </p>
+                  <div class="card-actions justify-end">
+                    <NuxtLink
+                      :to="primaryCard?.to ?? APP_ROUTES.automationScraper"
+                      class="btn btn-primary"
+                      :aria-label="t(primaryCard?.buttonKey ?? 'automation.hub.cards.scraper.button')"
+                    >
+                      {{ t(primaryCard?.buttonKey ?? "automation.hub.cards.scraper.button") }}
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
+            </section>
 
-      <AutomationHubAuditCard
-        :capability-audit-status="capabilityAuditStatus"
-        :capability-audit-error="capabilityAuditError"
-        :capability-summary="capabilitySummary"
-        :capability-entries="capabilityEntries"
-        :capability-status-class="capabilityStatusClass"
-        :capability-status-label="capabilityStatusLabel"
-        @retry="refreshCapabilityAudit"
-      />
+            <WorkPipeline
+              :title="t('automation.hub.pipelineTitle')"
+              :description="t('automation.hub.pipelineDescription')"
+              :aria-label="t('automation.hub.pipelineAria')"
+              :steps="pipelineSteps"
+              :next-step-label="nextPipelineStepLabel"
+            />
+          </SectionGrid>
+        </template>
 
-      <AutomationHubActionGrid
-        :ordered-cards="orderedCards"
-        :primary-card-id="primaryCardId"
-      />
+        <AutomationHubAuditCard
+          v-else-if="activeSection === 'readiness'"
+          :capability-audit-status="capabilityAuditStatus"
+          :capability-audit-error="capabilityAuditError"
+          :capability-summary="capabilitySummary"
+          :capability-entries="capabilityEntries"
+          :capability-status-class="capabilityStatusClass"
+          :capability-status-label="capabilityStatusLabel"
+          @retry="refreshCapabilityAudit"
+        />
+
+        <AutomationHubActionGrid
+          v-else
+          :ordered-cards="orderedCards"
+          :primary-card-id="primaryCardId"
+        />
+      </WorkspaceSectionNavigator>
     </template>
   </PageScaffold>
 </template>

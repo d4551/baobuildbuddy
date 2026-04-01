@@ -4,6 +4,28 @@ const automationscraper = {
       title: "Scraper Operations Hub",
       subtitle:
         "Refresh studio and job data, then immediately launch interview practice from scraped roles.",
+      overview: {
+        eyebrow: "Operator Workflow",
+        title: "Run discovery like an operator, not a report reader",
+        description:
+          "Start with provider health, run the right scrape target, then review the freshest jobs before launching interview practice.",
+        workflowTitle: "Recommended order",
+        workflowDescription:
+          "Configure any degraded providers first, run the target you need, review the latest jobs, and launch interview practice from the strongest scraped match.",
+      },
+      sections: {
+        aria: "Scraper workspace sections",
+        providers: {
+          label: "Providers",
+          description:
+            "Run, schedule, and repair provider integrations without mixing those controls into the interview-ready results feed.",
+        },
+        jobs: {
+          label: "Recent Jobs",
+          description:
+            "Review the freshest scraped jobs separately once the provider layer is healthy and ready to run.",
+        },
+      },
       stepsAria: "Scraper workflow",
       steps: {
         run: "Run Scraper",
@@ -76,11 +98,25 @@ const automationscraper = {
         aria: "Scheduled scrape run time",
         button: "Schedule Run",
         buttonAria: "Schedule scraper run",
+        disclosureTitle: "Schedule this provider",
         invalidRunAt: "Choose a future date and time for the scheduled scraper run.",
         createdTitle: "Scrape run scheduled",
         createdMessage: "Scrape run scheduled successfully.",
         scheduledForLabel: "Scheduled for: {date}",
         statusLabel: "Status: {status}",
+      },
+      latestRun: {
+        openButton: "Open Latest Run",
+      },
+      providerCard: {
+        readinessTitle: "Readiness",
+        readinessDescription: "Current setup state",
+        issuesTitle: "Issues",
+        issuesReady: "No setup blockers",
+        issuesNeedsAttention: "Needs setup review",
+        latestRunTitle: "Latest Run",
+        latestRunDescription: "No completed run yet",
+        setupTitle: "Setup details ({count})",
       },
       openRunDetailButton: "Open Run Detail",
       openRunDetailAria: "Open automation run detail for {id}",

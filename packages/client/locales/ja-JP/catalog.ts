@@ -7,13 +7,6 @@ const catalog = {
     "tagline": "ゲーム開発向けAIキャリアアシスタント"
   },
   "common": {
-    "exportMenu": {
-      "formatAria": "{action} {format}",
-      "formats": {
-        "pdf": "PDF",
-        "docx": "DOCX"
-      }
-    },
     "localeNames": {
       "enUS": "英語",
       "esES": "スペイン語",
@@ -45,119 +38,6 @@ const catalog = {
     "dismissNotification": "通知を閉じる",
     "localeSwitcher": "言語を変更",
     "localeOptionAria": "{locale} に言語を変更"
-  },
-  "layout": {
-    "shell": {
-      "appVersion": "Version {version}",
-      "versionFooterAria": "Application version"
-    }
-  },
-  "apiErrors": {
-    "jobs": {
-      "searchFailed": "Failed to search jobs",
-      "fetchFailed": "Failed to fetch job",
-      "saveFailed": "Failed to save job",
-      "unsaveFailed": "Failed to unsave job",
-      "fetchSavedFailed": "Failed to fetch saved jobs",
-      "applyFailed": "Failed to apply to job",
-      "updateApplicationFailed": "Failed to update application",
-      "fetchApplicationsFailed": "Failed to fetch applications",
-      "refreshFailed": "Failed to refresh jobs",
-      "fetchRecommendationsFailed": "Failed to fetch job recommendations"
-    },
-    "resumes": {
-      "fetchListFailed": "Failed to fetch resumes",
-      "fetchFailed": "Failed to fetch resume",
-      "createFailed": "Failed to create resume",
-      "updateFailed": "Failed to update resume",
-      "deleteFailed": "Failed to delete resume",
-      "exportFailed": "Failed to export resume",
-      "exportOnePageFailed": "Failed to export one-page resume",
-      "enhanceFailed": "Failed to enhance resume",
-      "scoreFailed": "Failed to score resume",
-      "invalidPayload": "Invalid resume payload"
-    },
-    "interview": {
-      "startFailed": "Failed to start interview session",
-      "fetchSessionsFailed": "Failed to fetch interview sessions",
-      "fetchSessionFailed": "Failed to fetch interview session",
-      "submitResponseFailed": "Failed to submit response",
-      "completeFailed": "Failed to complete session",
-      "fetchStatsFailed": "Failed to fetch interview stats",
-      "invalidPayload": "Invalid interview session payload"
-    },
-    "skills": {
-      "fetchMappingsFailed": "Failed to fetch skill mappings",
-      "createMappingFailed": "Failed to create skill mapping",
-      "updateMappingFailed": "Failed to update skill mapping",
-      "deleteMappingFailed": "Failed to delete skill mapping",
-      "fetchPathwaysFailed": "Failed to fetch learning pathways",
-      "fetchReadinessFailed": "Failed to fetch job readiness",
-      "analyzeFailed": "Failed to analyze skills",
-      "extractFailed": "Failed to extract skills from text",
-      "compareFailed": "Failed to compare skills with job"
-    },
-    "gamification": {
-      "fetchProgressFailed": "Failed to fetch progress",
-      "awardXPFailed": "Failed to award XP",
-      "fetchAchievementsFailed": "Failed to fetch achievements",
-      "fetchChallengesFailed": "Failed to fetch challenges",
-      "completeChallengeFailed": "Failed to complete challenge",
-      "fetchWeeklyFailed": "Failed to fetch weekly progress",
-      "fetchMonthlyFailed": "Failed to fetch monthly stats"
-    },
-    "studios": {
-      "searchFailed": "Failed to search studios",
-      "fetchFailed": "Failed to fetch studio",
-      "fetchAnalyticsFailed": "Failed to fetch studio analytics",
-      "createFailed": "Failed to create studio",
-      "updateFailed": "Failed to update studio",
-      "deleteFailed": "Failed to delete studio",
-      "invalidPayload": "Invalid studio payload"
-    },
-    "portfolio": {
-      "fetchFailed": "Failed to fetch portfolio",
-      "updateFailed": "Failed to update portfolio",
-      "addProjectFailed": "Failed to add project",
-      "updateProjectFailed": "Failed to update project",
-      "deleteProjectFailed": "Failed to delete project",
-      "reorderFailed": "Failed to reorder projects",
-      "exportFailed": "Failed to export portfolio"
-    },
-    "settings": {
-      "fetchFailed": "Failed to fetch settings",
-      "updateFailed": "Failed to update settings",
-      "updateApiKeysFailed": "Failed to update API keys",
-      "invalidPayload": "Invalid settings payload",
-      "loadFailed": "Failed to load settings",
-      "missingResponse": "Missing settings response"
-    },
-    "user": {
-      "fetchProfileFailed": "Failed to fetch profile",
-      "updateProfileFailed": "Failed to update profile",
-      "invalidPayload": "Invalid user profile payload"
-    },
-    "statistics": {
-      "fetchDashboardFailed": "Failed to fetch dashboard stats",
-      "fetchWeeklyFailed": "Failed to fetch weekly activity",
-      "fetchCareerFailed": "Failed to fetch career progress"
-    },
-    "search": {
-      "searchFailed": "Failed to search",
-      "autocompleteFailed": "Failed to fetch autocomplete suggestions"
-    },
-    "ai": {
-      "sendMessageFailed": "Failed to send message",
-      "analyzeResumeFailed": "Failed to analyze resume",
-      "generateCoverLetterFailed": "Failed to generate cover letter",
-      "matchJobsFailed": "Failed to match jobs",
-      "fetchModelsFailed": "Failed to fetch AI models",
-      "fetchUsageFailed": "Failed to fetch AI usage"
-    },
-    "auth": {
-      "initFailed": "Failed to init auth"
-    },
-    "unexpected": "An unexpected error occurred"
   },
   "confirmDialog": {
     "confirmButton": "確認",
@@ -264,123 +144,11 @@ const catalog = {
     }
   },
   "dashboard": {
-    "pageTitle": "ダッシュボード",
-    "seoDescription": "Track live opportunities, application assets, interview prep, and automation health in one operating dashboard.",
-    "welcomeDescription": "Run your job search like a disciplined studio pipeline.",
-    "welcomeHeading": {
-      "named": "Welcome, {name}!",
-      "fallback": "Welcome!"
-    },
-    "emptyStateTitle": "Stand up your hiring workspace",
-    "emptyStateDescription": "Connect your profile, add your core assets, and start tracking live opportunities to unlock the full dashboard.",
-    "onboardingChecklistTitle": "Complete the operating baseline",
-    "setupCtaLabel": "Complete Setup",
-    "metricsSummaryLabel": "{brand} operating snapshot",
-    "pipelineTitle": "Hiring Pipeline",
-    "pipelineDescription": "Keep momentum across sourcing, tailoring, automation, interview prep, and compounding progress.",
-    "pipelineAria": "Hiring workflow pipeline",
-    "pipelineNextStepLabel": "Next step: {step}",
-    "dailyChallengeTitle": "Daily Challenge",
-    "dailyChallengeXpLabel": "+{xp} XP",
-    "recentActivityTitle": "Recent Activity",
-    "recentActivityEmptyLabel": "No recent activity",
-    "quickActionsTitle": "Quick Actions",
-    "levelLabel": "Level",
-    "streakLabel": "day streak",
-    "retryButtonLabel": "Retry",
-    "retryAria": "Retry loading dashboard data",
-    "loadErrorFallback": "Failed to load dashboard data",
-    "activityFallback": "Activity",
-    "heroPhrases": {
-      "findDreamRole": "Source better-fit roles",
-      "buildPortfolio": "Sharpen your proof of work",
-      "prepareInterviews": "Rehearse the hard conversations",
-      "levelUpSkills": "Close the gaps that matter"
-    },
-    "onboarding": {
-      "profile": "Profile",
-      "aiProvider": "AI Provider",
-      "resume": "Resume",
-      "jobs": "Job Search"
-    },
-    "pipeline": {
-      "steps": {
-        "search": "Search Jobs",
-        "scrape": "Scrape Fresh Roles",
-        "customize": "Customize Resume",
-        "apply": "Automate Apply",
-        "gamify": "Earn XP"
-      },
-      "status": {
-        "complete": "Complete",
-        "inProgress": "In progress",
-        "pending": "Pending"
-      }
-    },
-    "stats": {
-      "savedJobsTitle": "Saved Jobs",
-      "savedJobsCta": "Open jobs workspace",
-      "resumesTitle": "Resumes",
-      "resumesCta": "Edit resume library",
-      "interviewSessionsTitle": "Interview Sessions",
-      "interviewSessionsCta": "Practice interview flow",
-      "cardAria": "{title}: {value}. {cta}",
-      "levelProgressAria": "Current level progress",
-      "challengeProgressAria": "Daily challenge completion progress"
-    },
-    "quickActions": {
-      "actions": {
-        "browseJobs": "Browse Jobs",
-        "buildResume": "Build Resume",
-        "practiceInterview": "Practice Interview",
-        "aiChat": "AI Chat"
-      }
-    },
-    "relativeTime": {
-      "minutesAgo": "{count}m ago",
-      "hoursAgo": "{count}h ago",
-      "daysAgo": "{count}d ago"
-    },
-    "errors": {
-      "profileLoadFallback": "Failed to load user profile",
-      "metricsLoadFallback": "Failed to load dashboard metrics",
-      "gamificationLoadFallback": "Failed to load gamification progress",
-      "challengesLoadFallback": "Failed to load daily challenges"
-    }
+    "pageTitle": "ダッシュボード"
   },
   "gamificationPage": {
     "pageTitle": "ゲーミフィケーションハブ",
-    "metricsSummary": "{brand} progression and challenge engine",
-    "seoTitle": "{brand} ゲーミフィケーションハブ",
-    "seoDescription": "Track XP progression, daily challenge completion, streak consistency, and achievement unlocks in one view.",
-    "loadErrorFallback": "Failed to load gamification data",
-    "retryButtonLabel": "Retry",
-    "retryAria": "Retry loading gamification data",
-    "emptyStateTitle": "No progression data yet",
-    "emptyStateDescription": "Complete setup tasks, start interview practice, and take daily challenges to begin earning XP and unlocking achievements.",
-    "emptyStateCta": "Open Dashboard",
-    "levelPrefix": "Level",
-    "xpSuffix": "XP",
-    "xpUntilLevelLabel": "XP until level",
-    "currentStreakTitle": "Current Streak",
-    "longestStreakTitle": "Longest Streak",
-    "achievementsTitle": "Achievements",
-    "achievementsUnlockedLabel": "Unlocked",
-    "achievementsLockedLabel": "Locked",
-    "dailyChallengesTitle": "Daily Challenges",
-    "challengeClaimLabel": "Claim Reward",
-    "challengeClaimAria": "Claim reward for challenge {challenge}",
-    "challengeDoneLabel": "Done",
-    "challengeCompletionToast": "Challenge completed",
-    "challengeCompleteErrorFallback": "Failed to complete challenge",
-    "streakDaysSuffix": "days in a row",
-    "longestStreakDesc": "personal best",
-    "noChallengesLabel": "No daily challenges available.",
-    "a11y": {
-      "levelProgress": "Level progression",
-      "challengeProgress": "Challenge progression"
-    },
-    "achievementBadgeAria": "Achievement: {name}. {description}"
+    "seoTitle": "{brand} ゲーミフィケーションハブ"
   },
   "jobsPage": {
     "seoTitle": "求人ボード",
@@ -388,31 +156,6 @@ const catalog = {
     "title": "求人ボード",
     "emptyStateTitle": "フィルターに一致する求人がありません",
     "emptyStateDescription": "現在の求人ビューを広げるために、検索条件またはフィルターを調整してください。",
-    "refreshButton": "Refresh Jobs",
-    "refreshAria": "Refresh job feed",
-    "searchPlaceholder": "Search jobs by title, company, or keywords...",
-    "searchAria": "Search jobs by title, company, or keywords",
-    "clearSearchAria": "Clear job search input",
-    "searchButton": "Search",
-    "searchButtonAria": "Run job search",
-    "toggleFiltersButton": "Filters",
-    "toggleFiltersAria": "Toggle filter panel",
-    "filtersTitle": "Filters",
-    "clearFiltersButton": "Clear",
-    "clearFiltersAria": "Clear all job filters",
-    "locationLegend": "Location",
-    "locationPlaceholder": "City, State, or Country",
-    "locationAria": "Filter jobs by location",
-    "remoteOnlyLabel": "Remote Only",
-    "remoteOnlyAria": "Filter remote jobs only",
-    "experienceLegend": "Experience Level",
-    "experienceAria": "Filter by experience level",
-    "studioTypeLegend": "Studio Type",
-    "studioTypeAria": "Filter by studio type",
-    "platformLegend": "Platform",
-    "platformAria": "Filter by platform",
-    "genreLegend": "Genre",
-    "genreAria": "Filter by game genre",
     "options": {
       "all": "すべて",
       "allTypes": "すべての種別",
@@ -427,29 +170,18 @@ const catalog = {
         "director": "ディレクター"
       },
       "studioType": {
-        "aaa": "AAA",
         "indie": "インディー",
         "mobile": "モバイル",
-        "vrAr": "VR/AR",
         "platform": "プラットフォーム",
         "esports": "eスポーツ",
         "unknown": "不明"
       },
       "platform": {
-        "pc": "PC",
         "console": "コンソール",
-        "mobile": "モバイル",
-        "vr": "VR",
-        "ar": "AR",
-        "web": "Web",
-        "switch": "Switch",
-        "playStation": "PlayStation",
-        "xbox": "Xbox",
-        "steam": "Steam"
+        "mobile": "モバイル"
       },
       "genre": {
         "action": "アクション",
-        "rpg": "RPG",
         "strategy": "ストラテジー",
         "puzzle": "パズル",
         "simulation": "シミュレーション",
@@ -458,8 +190,6 @@ const catalog = {
         "shooter": "シューター",
         "platformer": "プラットフォーマー",
         "horror": "ホラー",
-        "mmorpg": "MMORPG",
-        "moba": "MOBA",
         "battleRoyale": "バトルロイヤル",
         "roguelike": "ローグライク",
         "sandbox": "サンドボックス",
@@ -471,72 +201,24 @@ const catalog = {
         "indie": "インディー"
       }
     },
-    "emptyState": "No jobs found. Try adjusting your filters or search query.",
-    "bootstrapError": "Could not load the job board.",
-    "bootstrapRetry": "Retry",
-    "bootstrapRetryAria": "Retry loading the job board",
-    "openJobAria": "Open job details for {title} at {company}",
-    "remoteBadge": "Remote",
-    "matchScoreAria": "Job match score",
-    "matchBreakdown": {
-      "overallProgressAria": "Overall match score: {score} percent",
-      "skillsMatchLabel": "Skills Match",
-      "skillsProgressAria": "Skills match progress",
-      "experienceMatchLabel": "Experience Match",
-      "experienceProgressAria": "Experience match progress",
-      "locationMatchLabel": "Location Match",
-      "locationProgressAria": "Location match progress"
-    },
-    "interviewButton": "Interview",
-    "interviewAria": "Start interview for {title} at {company}",
-    "viewButton": "View",
-    "viewAria": "View job details for {title} at {company}",
     "pagination": {
       "navigationAria": "求人ページネーション",
       "previousAria": "前の求人ページ",
       "nextAria": "次の求人ページ",
       "pageAria": "求人ページ {page} へ移動",
       "summary": "{total} 件中 {start}-{end} 件を表示"
-    },
-    "previousPageAria": "Previous page",
-    "nextPageAria": "Next page",
-    "pageAria": "Go to page {page}",
-    "toasts": {
-      "searchReward": "Search progress recorded (+{xp} XP)"
-    },
-    "date": {
-      "unknown": "Unknown",
-      "today": "Today",
-      "yesterday": "Yesterday",
-      "daysAgo": "{count} days ago",
-      "weeksAgo": "{count} weeks ago",
-      "monthsAgo": "{count} months ago"
     }
   },
   "jobCard": {
-    "viewAria": "View job: {title} at {company}",
-    "saveAria": "Save job",
-    "unsaveAria": "Unsave job",
     "remoteBadge": "リモート",
     "hybridBadge": "ハイブリッド",
     "matchBadge": "{score}% マッチ",
     "matchBadgeAria": "マッチスコア {score} パーセント",
-    "moreTechnologies": "+{count} 件追加",
-    "relativeTime": {
-      "today": "Today",
-      "yesterday": "Yesterday",
-      "daysAgo": "{count}d ago",
-      "weeksAgo": "{count}w ago",
-      "monthsAgo": "{count}mo ago",
-      "unknown": "—"
-    }
+    "moreTechnologies": "+{count} 件追加"
   },
   "resumePreview": {
     "pageTitle": "履歴書プレビュー",
     "description": "エクスポートや共有の前に、印刷用の履歴書レイアウトを確認します。",
-    "defaultName": "Your Name",
-    "present": "Present",
-    "gpaLabel": "GPA: {gpa}",
     "printButton": "印刷",
     "printAria": "履歴書プレビューを印刷",
     "retryButton": "再試行",
@@ -545,174 +227,23 @@ const catalog = {
     "notFound": "履歴書が見つかりません。プレビューする履歴書を選択してください。",
     "notFoundTitle": "履歴書が見つかりません",
     "notFoundDescription": "このプレビューを開くには、履歴書ワークスペースから保存済みの履歴書を選択してください。",
-    "website": "Website",
     "websiteLinkAria": "個人ウェブサイトを開く",
-    "linkedin": "LinkedIn",
     "linkedinLinkAria": "LinkedInプロフィールを開く",
-    "github": "GitHub",
-    "githubLinkAria": "GitHubプロフィールを開く",
-    "experience": "Experience",
-    "education": "Education",
-    "skills": "Skills",
-    "technicalSkills": "Technical Skills",
-    "softSkills": "Soft Skills",
-    "gamingIndustrySkills": "Gaming Industry Skills"
+    "githubLinkAria": "GitHubプロフィールを開く"
   },
   "skillsPage": {
     "seoTitle": "スキルマッパー",
-    "seoDescription": "Translate gaming experience into career-ready competencies with confidence scoring, category mapping, and AI-assisted analysis.",
     "title": "スキルマッパー",
-    "subtitle": "Convert gaming achievements into clear professional capability signals.",
     "retryButton": "再試行",
     "retryAria": "スキルマッピングの読み込みを再試行",
-    "description": "Map your gameplay achievements to transferable workplace skills, then reuse these mappings across resumes and interviews.",
-    "gamification": {
-      "levelLabel": "Lvl {level}",
-      "xpLabel": "{xp} XP",
-      "openProgressAria": "Open gamification progress"
-    },
-    "actions": {
-      "aiAnalyzeButton": "AI Analyze",
-      "aiAnalyzeAria": "Run AI analysis for skill mappings",
-      "addMappingButton": "Add Mapping",
-      "addMappingAria": "Add a new skill mapping"
-    },
-    "stats": {
-      "totalMappingsTitle": "Total Mappings",
-      "totalMappingsDesc": "Saved transferable skill links",
-      "averageConfidenceTitle": "Avg Confidence",
-      "averageConfidenceDesc": "Across all mappings",
-      "aiGeneratedTitle": "AI Generated",
-      "aiGeneratedDesc": "Created from AI analysis",
-      "categoriesUsedTitle": "Categories Used",
-      "categoriesUsedDesc": "Coverage of skill domains"
-    },
-    "insights": {
-      "pathwaysTitle": "Skill Pathways",
-      "pathwaysDescription": "Turn mapped strengths into step-by-step growth tracks and prioritize what to practice next.",
-      "totalMappingsLabel": "Total mappings",
-      "avgConfidenceLabel": "Average confidence",
-      "categoriesCoverageLabel": "Categories covered",
-      "pathwaysButtonAria": "Open skill pathways dashboard",
-      "pathwaysButton": "Open Pathways",
-      "topMappingsTitle": "Top Mappings",
-      "topMappingsDescription": "Highest-confidence transferable skills, ranked by mapping confidence score.",
-      "topMappingsAria": "Top skill mappings by confidence",
-      "topMappingsEmptyTitle": "Top mappings are not available yet",
-      "topMappingsEmptyDescription": "Add or analyze mappings to populate the highest-confidence skills in this summary."
-    },
     "filters": {
-      "searchPlaceholder": "Search by gaming experience, transferable skill, or application...",
-      "searchAria": "Search skill mappings",
-      "categoryGroupAria": "Filter mappings by category",
-      "allAria": "Show all categories",
-      "allButton": "すべて",
-      "categoryAria": "Filter by category {category}",
-      "clearButton": "Clear Filters",
-      "clearAria": "Clear active skill mapping filters"
-    },
-    "emptyStateTitle": "No skill mappings yet",
-    "emptyStateDescription": "Add your first gaming-to-career mapping to start building reusable evidence for resumes and interviews.",
-    "filteredEmptyTitle": "No mappings match these filters",
-    "filteredEmptyDescription": "Adjust your search or category filters to restore matching skill mappings.",
-    "categories": {
-      "leadership": "Leadership",
-      "community": "Community Management",
-      "technical": "Technical Skills",
-      "creative": "Creative Direction",
-      "analytical": "Analytical Thinking",
-      "communication": "Communication",
-      "projectManagement": "Project Management"
-    },
-    "table": {
-      "ariaLabel": "Skill mapping table",
-      "columns": {
-        "gamingExperience": "Gaming Experience",
-        "transferableSkill": "Transferable Skill",
-        "applications": "Industry Applications",
-        "confidence": "Confidence",
-        "category": "Category",
-        "actions": "Actions"
-      },
-      "moreApplications": "+{count}",
-      "confidenceAria": "Confidence score {confidence} percent",
-      "deleteButton": "Delete",
-      "deleteAria": "Delete mapping for {skill}"
-    },
-    "mobile": {
-      "cardAria": "Skill mapping card for {skill}"
-    },
-    "createModal": {
-      "title": "Add Skill Mapping",
-      "gameExpressionLegend": "Gaming Experience",
-      "gameExpressionPlaceholder": "e.g. Led a 40-person raid group to a world-first clear",
-      "gameExpressionAria": "Gaming experience",
-      "gameExpressionHint": "Gaming experience must be at least 2 characters.",
-      "transferableSkillLegend": "Transferable Skill",
-      "transferableSkillPlaceholder": "e.g. Team Leadership and Coordination",
-      "transferableSkillAria": "Transferable skill",
-      "transferableSkillHint": "Transferable skill must be at least 2 characters.",
-      "categoryLegend": "Category",
-      "categoryAria": "Skill category",
-      "applicationsLegend": "Industry Applications",
-      "applicationPlaceholder": "e.g. Project management",
-      "applicationAria": "Industry application",
-      "addApplicationButton": "Add",
-      "addApplicationAria": "Add industry application",
-      "removeApplicationAria": "Remove application {application}",
-      "confidenceLegend": "Confidence Level: {confidence}%",
-      "confidenceAria": "Confidence level",
-      "cancelButton": "Cancel",
-      "cancelAria": "Cancel creating a skill mapping",
-      "createButton": "Add Mapping",
-      "createAria": "Create skill mapping",
-      "closeBackdropButton": "Close",
-      "closeBackdropAria": "Close skill mapping dialog"
-    },
-    "deleteDialog": {
-      "title": "Delete mapping",
-      "message": "This skill mapping will be permanently deleted.",
-      "confirmButton": "Delete",
-      "cancelButton": "Cancel"
-    },
-    "toasts": {
-      "mappingAdded": "Skill mapping added",
-      "mappingAddedWithXp": "Skill mapping added (+{xp} XP)",
-      "mappingDeleted": "Skill mapping deleted",
-      "analysisCompleted": "Skills analyzed successfully",
-      "analysisCompletedWithXp": "Skills analyzed successfully (+{xp} XP)"
-    },
-    "errors": {
-      "fetchFailed": "Failed to fetch skill mappings",
-      "gameExpressionMinLength": "Game experience must be at least 2 characters",
-      "transferableSkillMinLength": "Transferable skill must be at least 2 characters",
-      "addFailed": "Failed to add skill mapping",
-      "deleteFailed": "Failed to delete skill mapping",
-      "analysisFailed": "Failed to analyze skills",
-      "gamificationLoadFailed": "Failed to load gamification progress"
+      "allButton": "すべて"
     }
   },
   "skillsPathwaysPage": {
     "seoTitle": "キャリアパス",
-    "seoDescription": "Evaluate career readiness and discover role pathways based on your mapped transferable skills.",
     "title": "キャリアパス",
-    "subtitle": "Track readiness and explore role pathways generated from your mapped skill evidence.",
-    "retryButtonLabel": "Retry",
-    "retryAria": "Retry loading career pathways",
-    "categories": {
-      "technical": "Technical",
-      "softSkills": "Soft Skills",
-      "industryKnowledge": "Industry Knowledge",
-      "portfolio": "Portfolio"
-    },
     "readiness": {
-      "title": "Your Career Readiness",
-      "overallReadinessLabel": "Overall readiness",
-      "overallReadinessAria": "Overall readiness score {score} percent",
-      "categoryScoresLabel": "Category scores",
-      "categoryScoreAria": "{category} readiness score {score} percent",
-      "topImprovementsTitle": "Top improvements",
-      "nextStepsTitle": "Next steps",
       "feedback": {
         "empty": "{category} の準備データはまだありません。",
         "early": "{category} は初期段階です。マッピングと証拠をさらに追加してください。",
@@ -755,534 +286,28 @@ const catalog = {
         "step_learn_careers": "ゲーム業界のキャリア選択肢を学びましょう。",
         "step_setup_profile": "プロフェッショナルプロフィールを整備しましょう。"
       },
-      "emptyState": "Readiness data is not available yet. Add skill mappings and run analysis first.",
       "emptyStateTitle": "準備状況データはまだ利用できません",
       "emptyStateDescription": "マッピングしたスキルの証拠をさらに追加し、分析を再実行してこのセクションを埋めてください。"
     },
     "pathways": {
-      "title": "Pathway Recommendations",
-      "requiredSkillsTitle": "Required skills",
-      "matchScoreLabel": "Match score",
-      "matchScoreAria": "{title} pathway match score {score} percent",
-      "estimatedTimeLabel": "Estimated time to entry:",
-      "marketTrendLabel": "Market trend:",
-      "marketTrend": {
-        "growing": "Growing",
-        "stable": "Stable",
-        "declining": "Declining"
-      },
-      "emptyState": "No pathways available yet. Add more mapped skills to generate recommendations.",
       "emptyStateTitle": "まだ利用可能なパスがありません",
       "emptyStateDescription": "マッピング済みスキルを広げて、より良いロール提案と経路のカバレッジを解放してください。"
-    },
-    "errors": {
-      "loadFailed": "Failed to load career pathways data",
-      "pathwaysLoadFailed": "Failed to load pathway recommendations",
-      "readinessLoadFailed": "Failed to load readiness assessment",
-      "gamificationLoadFailed": "Failed to load gamification progress for this page"
-    },
-    "gamification": {
-      "openProgressAria": "Open gamification progress",
-      "levelLabel": "Lvl {level}",
-      "xpLabel": "{xp} XP",
-      "retryAria": "Retry loading gamification progress",
-      "retryButton": "Retry",
-      "unavailableHint": "Progress unavailable"
     }
   },
   "resumePage": {
     "seoTitle": "履歴書ビルダー",
     "seoDescription": "役割別の履歴書を作成し、完成度を管理しながらカバーレター、ポートフォリオ、面接準備へ接続します。",
-    "title": "履歴書ビルダー",
-    "subtitle": "Build role-targeted resume variants, keep content current, and move directly into cover letter, portfolio, and interview workflows.",
-    "createButton": "Create Resume",
-    "createButtonAria": "Create a new resume",
-    "guidedButton": "Guided Builder",
-    "guidedButtonAria": "Open guided resume builder",
-    "emptyState": "No resumes yet. Create your first resume to get started.",
-    "bootstrapError": "Could not load resumes or dashboard data.",
-    "bootstrapRetry": "Retry",
-    "bootstrapRetryAria": "Retry loading the resume workspace",
-    "filteredEmptyState": "No resumes match your active search.",
-    "defaultBadge": "Default",
-    "editButton": "Edit",
-    "editButtonAria": "Edit resume {name}",
-    "deleteButton": "Delete",
-    "deleteButtonAria": "Delete resume {name}",
-    "backButton": "Back to Resumes",
-    "backButtonAria": "Back to resume list",
-    "aiEnhanceButton": "AI Enhance",
-    "aiEnhanceButtonAria": "Enhance resume with AI suggestions",
-    "aiScoreButton": "Score Resume",
-    "aiScoreButtonAria": "Analyze and score this resume",
-    "exportButton": "Export",
-    "exportButtonAria": "Export resume",
-    "saveButton": "Save",
-    "saveButtonAria": "Save resume",
-    "aiEnhancementTitle": "AI Enhancement in Progress",
-    "aiSteps": {
-      "analyzing": "Analyzing",
-      "enhancing": "Enhancing",
-      "finalizing": "Finalizing"
-    },
-    "tabs": {
-      "tablistAria": "Resume editor sections",
-      "personal": "Personal",
-      "experience": "Experience",
-      "education": "Education",
-      "skills": "Skills",
-      "projects": "Projects",
-      "gaming": "Gaming",
-      "selectAria": "Select {tab} section"
-    },
-    "completion": {
-      "title": "Resume Completion",
-      "percentLabel": "{percent}%",
-      "progressAria": "Resume completion progress",
-      "summary": "{completed} of {total} sections completed",
-      "jumpAria": "Jump to {section} section",
-      "nextStep": "Next recommended section: {section}",
-      "complete": "All sections completed. Your resume is ready for final polish.",
-      "quickActions": {
-        "coverLetter": "Cover Letter",
-        "coverLetterAria": "Open cover-letter builder with this resume context",
-        "portfolio": "Portfolio",
-        "portfolioAria": "Open portfolio builder",
-        "interview": "Interview Prep",
-        "interviewAria": "Open interview prep hub"
-      }
-    },
-    "filters": {
-      "searchLegend": "Search Resumes",
-      "searchPlaceholder": "Search by resume name or template",
-      "searchAria": "Search resumes",
-      "clearButton": "Clear Filters",
-      "clearAria": "Clear resume filters"
-    },
-    "pagination": {
-      "navigationAria": "Resume pagination",
-      "previousAria": "Previous resume page",
-      "nextAria": "Next resume page",
-      "pageAria": "Go to resume page {page}",
-      "summary": "Showing {start}-{end} of {total} resumes"
-    },
-    "personal": {
-      "title": "Personal Information",
-      "fullNameLegend": "Full Name",
-      "fullNameAria": "Full name",
-      "fullNameHint": "Name must be at least 2 characters.",
-      "emailLegend": "Email",
-      "emailAria": "Email address",
-      "emailHint": "Enter a valid email address.",
-      "phoneLegend": "Phone",
-      "phoneAria": "Phone number",
-      "phoneHint": "Enter a valid phone number.",
-      "locationLegend": "Location",
-      "locationAria": "Location",
-      "linkedInLegend": "LinkedIn URL",
-      "linkedInAria": "LinkedIn profile URL",
-      "portfolioLegend": "Portfolio URL",
-      "portfolioAria": "Portfolio URL",
-      "summaryLegend": "Professional Summary",
-      "summaryAria": "Professional summary",
-      "summaryHint": "Summary should be at least 50 characters."
-    },
-    "experience": {
-      "title": "Experience",
-      "addButton": "Add Experience",
-      "addButtonAria": "Add new experience entry",
-      "itemTitle": "Experience {index}",
-      "removeButton": "Remove",
-      "removeButtonAria": "Remove experience {index}",
-      "jobTitleLegend": "Job Title",
-      "jobTitleAria": "Experience job title",
-      "jobTitleHint": "Job title must be at least 2 characters.",
-      "companyLegend": "Company",
-      "companyAria": "Experience company",
-      "companyHint": "Company must be at least 2 characters.",
-      "locationLegend": "Location",
-      "locationAria": "Experience location",
-      "startDateLegend": "Start Date",
-      "startDateAria": "Experience start date",
-      "endDateLegend": "End Date",
-      "endDateAria": "Experience end date",
-      "currentLabel": "Current Role",
-      "currentAria": "Mark as current role",
-      "descriptionLegend": "Description",
-      "descriptionAria": "Experience description",
-      "descriptionHint": "Description should be at least 50 characters."
-    },
-    "education": {
-      "title": "Education",
-      "addButton": "Add Education",
-      "addButtonAria": "Add new education entry",
-      "itemTitle": "Education {index}",
-      "removeButton": "Remove",
-      "removeButtonAria": "Remove education {index}",
-      "degreeLegend": "Degree",
-      "degreeAria": "Degree",
-      "degreeHint": "Degree must be at least 2 characters.",
-      "schoolLegend": "School",
-      "schoolAria": "School name",
-      "schoolHint": "School must be at least 2 characters.",
-      "locationLegend": "Location",
-      "locationAria": "Education location",
-      "graduationDateLegend": "Graduation Date",
-      "graduationDateAria": "Graduation date",
-      "gpaLegend": "GPA (optional)",
-      "gpaAria": "GPA"
-    },
-    "skills": {
-      "title": "Skills",
-      "inputPlaceholder": "Type a skill and press enter",
-      "inputAria": "New skill",
-      "addButton": "Add Skill",
-      "addButtonAria": "Add skill",
-      "removeButtonAria": "Remove skill {index}"
-    },
-    "projects": {
-      "title": "Projects",
-      "addButton": "Add Project",
-      "addButtonAria": "Add project",
-      "itemTitle": "Project {index}",
-      "removeButton": "Remove",
-      "removeButtonAria": "Remove project {index}",
-      "nameLegend": "Project Name",
-      "nameAria": "Project name",
-      "nameHint": "Project name must be at least 2 characters.",
-      "urlLegend": "Project URL",
-      "urlAria": "Project URL",
-      "descriptionLegend": "Description",
-      "descriptionAria": "Project description",
-      "descriptionHint": "Description should be at least 30 characters."
-    },
-    "gaming": {
-      "title": "Gaming Career Context",
-      "description": "Capture game-domain specifics to improve resume tailoring and AI scoring.",
-      "rolesLegend": "Target Roles",
-      "rolesAria": "Target game-industry roles",
-      "rolesPlaceholder": "Gameplay Engineer, Technical Artist",
-      "genresLegend": "Preferred Genres",
-      "genresAria": "Preferred game genres",
-      "genresPlaceholder": "RPG, Action, Strategy",
-      "achievementsLegend": "Key Achievements",
-      "achievementsAria": "Gaming achievements",
-      "achievementsPlaceholder": "Shipped titles, competition wins, major milestones"
-    },
-    "createModal": {
-      "title": "Create Resume",
-      "nameLegend": "Resume Name",
-      "namePlaceholder": "e.g. Gameplay Engineer Resume",
-      "nameAria": "Resume name",
-      "templateLegend": "Template",
-      "templateAria": "Resume template",
-      "templates": {
-        "modern": "Modern",
-        "classic": "Classic",
-        "creative": "Creative",
-        "minimal": "Minimal",
-        "google-xyz": "Google XYZ",
-        "gaming": "Gaming",
-        "executive": "Executive",
-        "technical": "Technical"
-      },
-      "cancelButton": "Cancel",
-      "cancelAria": "Cancel resume creation",
-      "createButton": "Create Resume",
-      "createAria": "Create resume",
-      "closeBackdropButton": "Close",
-      "closeBackdropAria": "Close create resume dialog"
-    },
-    "deleteDialog": {
-      "title": "Delete Resume",
-      "message": "This action cannot be undone. Delete this resume permanently?",
-      "confirmButton": "Delete",
-      "cancelButton": "Cancel"
-    },
-    "toasts": {
-      "resumeNameMinLength": "Resume name must be at least 2 characters",
-      "resumeCreated": "Resume created",
-      "resumeCreateFailed": "Failed to create resume",
-      "nameMinLength": "Name must be at least 2 characters",
-      "invalidEmail": "Enter a valid email address",
-      "summaryMinLength": "Summary must be at least 50 characters",
-      "invalidExperience": "Each experience item requires title, company, and valid dates",
-      "invalidEducation": "Each education item requires degree and school",
-      "invalidProjects": "Each project item requires a name and description",
-      "resumeSaved": "Resume saved",
-      "resumeSavedWithXp": "Resume saved (+{xp} XP)",
-      "resumeSaveFailed": "Failed to save resume",
-      "resumeDeleted": "Resume deleted",
-      "resumeDeleteFailed": "Failed to delete resume",
-      "resumeExported": "Resume exported",
-      "resumeExportFailed": "Failed to export resume",
-      "resumeEnhanced": "Resume enhanced",
-      "resumeEnhancedWithXp": "Resume enhanced (+{xp} XP)",
-      "aiSuggestionsReady": "AI suggestions ready",
-      "aiSuggestionsReadyWithXp": "AI suggestions ready (+{xp} XP)",
-      "resumeEnhanceFailed": "Failed to enhance resume",
-      "resumeScored": "Resume scored",
-      "resumeScoreFailed": "Failed to score resume"
-    }
+    "title": "履歴書ビルダー"
   },
   "resumeBuildPage": {
     "title": "AIで履歴書を作成",
-    "subtitle": "Tell us your target role and studio. We will generate tailored questions and create your resume.",
-    "seoTitle": "AI履歴書ビルダー",
-    "seoDescription": "Generate role-specific CV questions, answer them step-by-step, and synthesize a ready-to-edit resume.",
-    "progressAria": "Resume builder progress",
-    "generatingLabel": "Generating tailored questions...",
-    "synthesizingLabel": "Creating your resume...",
-    "toasts": {
-      "resumeCreated": "Resume created"
-    },
-    "errors": {
-      "emptyQuestions": "No questions were generated. Please try again.",
-      "generateQuestions": "Failed to generate questions",
-      "createResume": "Failed to create resume"
-    },
-    "experienceLevels": {
-      "any": "Any",
-      "entry": "Entry",
-      "mid": "Mid",
-      "senior": "Senior",
-      "lead": "Lead"
-    },
-    "target": {
-      "title": "Target Role & Studio",
-      "description": "What role are you targeting? Optionally select a studio to tailor the questions.",
-      "roleLegend": "Target Role",
-      "roleLabel": "e.g. Game Designer at AAA studio, Junior Programmer",
-      "rolePlaceholder": "e.g. Game Designer at AAA studio",
-      "roleAria": "Target role",
-      "studioLegend": "Studio (optional)",
-      "studioLabel": "Pick a studio to tailor questions",
-      "studioAria": "Studio selection",
-      "noStudioOption": "None selected",
-      "studioNameLabel": "Or type studio name",
-      "studioNamePlaceholder": "e.g. Epic Games",
-      "studioNameAria": "Custom studio name",
-      "experienceLegend": "Experience Level (optional)",
-      "experienceAria": "Experience level",
-      "generateButton": "Generate Questions",
-      "generateAria": "Generate tailored CV questions"
-    },
-    "questions": {
-      "title": "Question {current} of {total}",
-      "changeTargetButton": "Change target",
-      "changeTargetAria": "Return to target selection",
-      "answerPlaceholder": "Your answer for: {question}",
-      "answerAria": "Answer for question: {question}",
-      "backButton": "Back",
-      "backAria": "Previous question",
-      "nextButton": "Next",
-      "nextAria": "Next question",
-      "createResumeButton": "Create Resume"
-    }
+    "seoTitle": "AI履歴書ビルダー"
   },
   "coverLetterPage": {
-    "title": "カバーレター",
-    "subtitle": "Generate, search, and refine role-specific cover letters with a consistent workflow and reusable templates.",
-    "generateButton": "Generate Cover Letter",
-    "generateButtonAria": "Open cover-letter generation dialog",
-    "notAvailable": "N/A",
-    "emptyState": "No cover letters yet. Generate your first one to get started.",
-    "emptyStateTitle": "No cover letters yet",
-    "emptyStateDescription": "Generate your first one to get started.",
-    "filteredEmptyState": "No cover letters match your active filters.",
-    "stats": {
-      "totalTitle": "Total Letters",
-      "totalDesc": "Saved in your workspace",
-      "filteredTitle": "Filtered",
-      "filteredDesc": "Matching current search and filters",
-      "templatesTitle": "Template Types",
-      "templatesDesc": "Distinct templates used"
-    },
-    "templates": {
-      "professional": "Professional",
-      "creative": "Creative",
-      "gaming": "Gaming",
-      "executive": "Executive",
-      "technical": "Technical"
-    },
-    "filters": {
-      "searchLegend": "Search",
-      "searchPlaceholder": "Search company, position, or content",
-      "searchAria": "Search cover letters",
-      "templateLegend": "Template",
-      "templateAria": "Filter by template",
-      "templateAll": "All templates",
-      "sortLegend": "Sort",
-      "sortAria": "Sort cover letters",
-      "sortNewest": "Newest first",
-      "sortOldest": "Oldest first",
-      "clearButton": "Clear Filters",
-      "clearAria": "Clear cover-letter filters"
-    },
-    "pagination": {
-      "navigationAria": "Cover-letter pagination",
-      "previousAria": "Previous cover-letter page",
-      "nextAria": "Next cover-letter page",
-      "pageAria": "Go to cover-letter page {page}",
-      "summary": "Showing {start}-{end} of {total} cover letters"
-    },
-    "cards": {
-      "openAria": "Open cover letter for {position} at {company}",
-      "emptyPreview": "No preview available yet.",
-      "updatedAtLabel": "Updated",
-      "editButton": "Edit",
-      "editAria": "Edit cover letter for {position} at {company}",
-      "deleteButton": "Delete",
-      "deleteAria": "Delete cover letter for {position} at {company}"
-    },
-    "generate": {
-      "title": "Generate Cover Letter",
-      "subtitle": "Provide role context and generate a draft you can refine.",
-      "companyLegend": "Company",
-      "companyPlaceholder": "e.g. Riot Games",
-      "companyAria": "Target company",
-      "companyHint": "Company name must be at least {count} characters.",
-      "positionLegend": "Position",
-      "positionPlaceholder": "e.g. Senior Gameplay Engineer",
-      "positionAria": "Target position",
-      "positionHint": "Position must be at least {count} characters.",
-      "resumeLegend": "Resume (optional)",
-      "resumeAria": "Select resume context",
-      "resumeNoneOption": "No resume selected",
-      "jobDescriptionLegend": "Job Description (optional)",
-      "jobDescriptionPlaceholder": "Paste a job description for better personalization.",
-      "jobDescriptionAria": "Job description context",
-      "jobDescriptionHint": "When provided, include at least {count} characters.",
-      "templateLegend": "Template",
-      "templateAria": "Cover-letter template",
-      "cancelButton": "Cancel",
-      "cancelAria": "Cancel cover-letter generation",
-      "submitButton": "Generate",
-      "submitAria": "Generate cover letter",
-      "closeBackdropButton": "Close",
-      "closeBackdropAria": "Close generation dialog backdrop"
-    },
-    "deleteDialog": {
-      "title": "Delete Cover Letter",
-      "message": "This cover letter will be permanently deleted.",
-      "confirmButton": "Delete",
-      "cancelButton": "Cancel"
-    },
-    "toasts": {
-      "deleted": "Cover letter deleted",
-      "deleteFailed": "Failed to delete cover letter",
-      "fetchFailed": "Failed to fetch cover letters",
-      "companyMinLength": "Company name must be at least {count} characters",
-      "positionMinLength": "Position must be at least {count} characters",
-      "jobDescriptionMinLength": "Job description must be at least {count} characters when provided",
-      "generated": "Cover letter generated",
-      "generatedWithoutRedirect": "Cover letter generated",
-      "generateFailed": "Failed to generate cover letter"
-    }
-  },
-  "coverLetterDetailPage": {
-    "breadcrumbFallback": "Cover Letter Detail",
-    "hero": {
-      "title": "{position} at {company}",
-      "description": "Review grounded draft content, refine the message, and export the finished letter."
-    },
-    "templates": {
-      "professional": "Professional",
-      "creative": "Creative",
-      "gaming": "Gaming",
-      "executive": "Executive",
-      "technical": "Technical"
-    },
-    "actions": {
-      "regenerateButton": "Regenerate",
-      "regenerateAria": "Regenerate cover-letter content",
-      "exportButton": "Export",
-      "exportAria": "Export cover-letter content",
-      "saveButton": "Save",
-      "saveAria": "Save cover-letter changes"
-    },
-    "stats": {
-      "charactersTitle": "Characters",
-      "charactersDesc": "Current editor length",
-      "sectionsTitle": "Sections",
-      "sectionsDesc": "Detected paragraph blocks",
-      "statusTitle": "Status",
-      "statusDesc": "Change tracking",
-      "statusSaved": "Saved",
-      "statusUnsaved": "Unsaved"
-    },
-    "details": {
-      "title": "Cover Letter Details",
-      "companyLegend": "Company",
-      "companyPlaceholder": "Company name",
-      "companyAria": "Company name",
-      "companyHint": "Company name must be at least {count} characters.",
-      "positionLegend": "Position",
-      "positionPlaceholder": "Position title",
-      "positionAria": "Position title",
-      "positionHint": "Position must be at least {count} characters.",
-      "templateLegend": "Template",
-      "templateAria": "Cover-letter template"
-    },
-    "editor": {
-      "title": "Content Editor",
-      "info": "Edit the draft directly. Regenerate when you want a fresh version from the current company, role, and template inputs.",
-      "placeholder": "Cover-letter content appears here...",
-      "aria": "Cover-letter content editor",
-      "characterCount": "{count} characters",
-      "clearButton": "Clear",
-      "clearAria": "Clear editor content",
-      "saveButton": "Save Changes",
-      "saveAria": "Save editor changes"
-    },
-    "preview": {
-      "title": "Preview",
-      "empty": "No content to preview yet."
-    },
-    "regenerateDialog": {
-      "title": "Regenerate Content",
-      "message": "This will replace the current editor content with a newly generated draft.",
-      "confirmButton": "Regenerate",
-      "cancelButton": "Cancel"
-    },
-    "export": {
-      "fallbackCompany": "company",
-      "fallbackPosition": "position",
-      "suffix": "cover-letter"
-    },
-    "toasts": {
-      "loadFailed": "Failed to load cover letter",
-      "companyMinLength": "Company name must be at least {count} characters",
-      "positionMinLength": "Position must be at least {count} characters",
-      "saved": "Cover letter saved",
-      "saveFailed": "Failed to save cover letter",
-      "regenerated": "Cover letter regenerated",
-      "regenerateFailed": "Failed to regenerate cover letter",
-      "regenerateMissingContent": "Generation completed but returned no content",
-      "exportEmpty": "Add content before exporting",
-      "exported": "Cover letter exported",
-      "exportFailed": "Failed to export cover letter"
-    }
+    "title": "カバーレター"
   },
   "portfolioPage": {
     "title": "ポートフォリオビルダー",
-    "subtitle": "Curate projects, reorder your highlights, and maintain a polished portfolio profile for game-industry applications.",
-    "actions": {
-      "previewButton": "Preview",
-      "previewAria": "Open portfolio preview",
-      "exportButton": "Export",
-      "exportAria": "Export portfolio"
-    },
-    "bootstrap": {
-      "loadError": "Failed to load portfolio data.",
-      "retryButton": "Retry",
-      "retryAria": "Retry loading portfolio data"
-    },
-    "emptyState": {
-      "title": "Your portfolio is ready to build",
-      "description": "Start with your profile details, then add one or more projects to shape the public portfolio view.",
-      "profileButton": "Edit profile"
-    },
     "preview": {
       "pageTitle": "ポートフォリオプレビュー",
       "description": "エクスポートや共有の前に、公開状態のポートフォリオ表示を確認します。",
@@ -1305,147 +330,7 @@ const catalog = {
       "emptyStateDescription": "ポートフォリオビルダーでプロジェクトを追加して、このプレビューに掲載してください。",
       "notFoundTitle": "ポートフォリオが見つかりません",
       "notFoundDescription": "先にポートフォリオを作成してから、このプレビューに戻ってください。"
-    },
-    "stats": {
-      "projectsTitle": "Projects",
-      "projectsDesc": "Total projects in your portfolio",
-      "featuredTitle": "Featured",
-      "featuredDesc": "Highlighted projects",
-      "profileTitle": "Profile",
-      "profileReady": "Ready",
-      "profileMissing": "Missing",
-      "profileDesc": "Portfolio profile completeness"
-    },
-    "filters": {
-      "searchLegend": "Search Projects",
-      "searchPlaceholder": "Search by title, description, or technology",
-      "searchAria": "Search portfolio projects",
-      "clearButton": "Clear Filters",
-      "clearAria": "Clear project search filters"
-    },
-    "pagination": {
-      "navigationAria": "Portfolio project pagination",
-      "previousAria": "Previous project page",
-      "nextAria": "Next project page",
-      "pageAria": "Go to portfolio page {page}",
-      "summary": "Showing {start}-{end} of {total} projects"
-    },
-    "profile": {
-      "title": "Portfolio Information",
-      "titleLegend": "Portfolio Title",
-      "titlePlaceholder": "e.g. John Doe - Game Developer",
-      "titleAria": "Portfolio title",
-      "emailLegend": "Email",
-      "emailPlaceholder": "contact{'@'}example.com",
-      "emailAria": "Contact email",
-      "websiteLegend": "Website",
-      "websitePlaceholder": "https://yourwebsite.com",
-      "websiteAria": "Portfolio website",
-      "bioLegend": "Bio",
-      "bioPlaceholder": "Tell the world about yourself and your game development experience...",
-      "bioAria": "Portfolio bio",
-      "saveButton": "Save Portfolio Info",
-      "saveAria": "Save portfolio profile"
-    },
-    "projects": {
-      "title": "Projects",
-      "addButton": "Add Project",
-      "addAria": "Open project creation dialog",
-      "emptyState": "No projects yet. Add your first project to showcase your work.",
-      "filteredEmptyState": "No projects match your current search.",
-      "reorderCardAria": "Reorder card for project {title}",
-      "featuredBadge": "Featured",
-      "openProjectButton": "View Project",
-      "openProjectAria": "Open live project for {title}",
-      "moveUpButton": "Up",
-      "moveUpAria": "Move project {title} up",
-      "moveDownButton": "Down",
-      "moveDownAria": "Move project {title} down",
-      "editButton": "Edit",
-      "editAria": "Edit project {title}",
-      "deleteButton": "Delete",
-      "deleteAria": "Delete project {title}"
-    },
-    "modal": {
-      "addTitle": "Add Project",
-      "editTitle": "Edit Project",
-      "projectTitleLegend": "Project Title",
-      "projectTitlePlaceholder": "e.g. Dungeon Crawler RPG",
-      "projectTitleAria": "Project title",
-      "projectTitleHint": "Project title must be at least {count} characters.",
-      "descriptionLegend": "Description",
-      "descriptionPlaceholder": "Describe your project, your role, and key achievements...",
-      "descriptionAria": "Project description",
-      "descriptionHint": "Description must be at least {count} characters.",
-      "projectUrlLegend": "Project URL (optional)",
-      "projectUrlPlaceholder": "https://project.example",
-      "projectUrlAria": "Project URL",
-      "imageUrlLegend": "Image URL (optional)",
-      "imageUrlPlaceholder": "https://image.example/preview.png",
-      "imageUrlAria": "Project image URL",
-      "technologiesLegend": "Technologies",
-      "technologiesPlaceholder": "Add technology",
-      "technologiesAria": "Technology input",
-      "addTechnologyButton": "Add",
-      "addTechnologyAria": "Add technology to project",
-      "removeTechnologyAria": "Remove technology {tech}",
-      "featuredLabel": "Featured Project",
-      "featuredAria": "Mark project as featured",
-      "cancelButton": "Cancel",
-      "cancelAria": "Cancel project changes",
-      "createButton": "Add Project",
-      "updateButton": "Update Project",
-      "saveAria": "Save project changes",
-      "closeBackdropButton": "Close",
-      "closeBackdropAria": "Close project modal backdrop"
-    },
-    "deleteDialog": {
-      "title": "Delete Project",
-      "message": "This project will be permanently deleted.",
-      "confirmButton": "Delete",
-      "cancelButton": "Cancel"
-    },
-    "toasts": {
-      "saved": "Portfolio saved",
-      "saveFailed": "Failed to save portfolio",
-      "projectAdded": "Project added",
-      "projectUpdated": "Project updated",
-      "projectDeleted": "Project deleted",
-      "exported": "Portfolio exported",
-      "exportFailed": "Failed to export portfolio",
-      "projectTitleMinLength": "Project title must be at least {count} characters",
-      "projectDescriptionMinLength": "Project description must be at least {count} characters",
-      "projectIdMissing": "Project ID is missing",
-      "projectSaveFailed": "Failed to save project",
-      "projectDeleteFailed": "Failed to delete project",
-      "reordered": "Project order updated",
-      "reorderFailed": "Failed to reorder projects",
-      "technologyDuplicate": "Technology already added"
     }
-  },
-  "portfolioProjectCard": {
-    "openLiveAria": "Open live project for {title}",
-    "openLiveSrOnly": "Open live project",
-    "openGithubAria": "Open GitHub repository for {title}",
-    "openGithubSrOnly": "Open GitHub repository",
-    "featureAria": "Mark {title} as featured",
-    "unfeatureAria": "Remove featured status from {title}",
-    "editAria": "Edit project {title}",
-    "deleteAria": "Delete project {title}"
-  },
-  "interviewChatComponent": {
-    "interviewerLabel": "Interviewer",
-    "userLabel": "You",
-    "avatarLabelAi": "AI",
-    "avatarLabelUser": "U",
-    "responseLabel": "Your Response",
-    "questionProgress": "Question {current} of {total}",
-    "responsePlaceholder": "Type your answer here...",
-    "responseAria": "Interview response",
-    "submitHint": "Press Ctrl+Enter to submit",
-    "submitButton": "Submit Response",
-    "submitAria": "Submit interview response",
-    "completeMessage": "Interview complete. All questions have been answered."
   },
   "interviewScoreCard": {
     "title": "面接パフォーマンス分析",
@@ -1461,212 +346,9 @@ const catalog = {
     "completedButton": "完了済み",
     "completeAria": "デイリーチャレンジ {title} を完了"
   },
-  "xpBar": {
-    "levelBadge": "Level {level}",
-    "progressLabel": "{xp} / {xpForNextLevel} XP",
-    "progressAria": "XP progress {progress} percent"
-  },
-  "resumeComponentPersonalInfo": {
-    "title": "Personal Information",
-    "nameLabel": "Full Name",
-    "namePlaceholder": "John Doe",
-    "nameAria": "Full name",
-    "emailLabel": "Email",
-    "emailPlaceholder": "john{'@'}example.com",
-    "emailAria": "Email address",
-    "phoneLabel": "Phone",
-    "phonePlaceholder": "+1 (555) 123-4567",
-    "phoneAria": "Phone number",
-    "locationLabel": "Location",
-    "locationPlaceholder": "San Francisco, CA",
-    "locationAria": "Location",
-    "websiteLabel": "Website",
-    "websitePlaceholder": "https://yoursite.com",
-    "websiteAria": "Website URL",
-    "linkedinLabel": "LinkedIn",
-    "linkedinPlaceholder": "https://linkedin.com/in/johndoe",
-    "linkedinAria": "LinkedIn URL",
-    "githubLabel": "GitHub",
-    "githubPlaceholder": "https://github.com/johndoe",
-    "githubAria": "GitHub URL"
-  },
-  "resumeComponentExperience": {
-    "newItemTitle": "New Experience",
-    "moveUpAria": "Move experience up",
-    "moveDownAria": "Move experience down",
-    "toggleEditAria": "Toggle experience editor",
-    "removeItemAria": "Remove experience item",
-    "companyLabel": "Company",
-    "companyPlaceholder": "Company Name",
-    "companyAria": "Experience company",
-    "titleLabel": "Title",
-    "titlePlaceholder": "Job Title",
-    "titleAria": "Experience title",
-    "startDateLabel": "Start Date",
-    "startDateAria": "Experience start date",
-    "endDateLabel": "End Date",
-    "endDatePlaceholder": "Present",
-    "endDateAria": "Experience end date",
-    "descriptionLabel": "Description",
-    "descriptionPlaceholder": "Brief description of your role...",
-    "descriptionAria": "Experience description",
-    "highlightsLabel": "Key Highlights",
-    "removeHighlightAria": "Remove highlight {highlight}",
-    "newHighlightPlaceholder": "Add achievement or responsibility",
-    "newHighlightAria": "New highlight",
-    "addHighlightButton": "Add",
-    "addHighlightAria": "Add highlight",
-    "presentValue": "Present",
-    "addItemButton": "Add Experience",
-    "addItemAria": "Add experience item"
-  },
-  "resumeComponentEducation": {
-    "newItemTitle": "New Education",
-    "moveUpAria": "Move education up",
-    "moveDownAria": "Move education down",
-    "toggleEditAria": "Toggle education editor",
-    "removeItemAria": "Remove education item",
-    "institutionLabel": "Institution",
-    "institutionPlaceholder": "University Name",
-    "institutionAria": "Institution name",
-    "degreeLabel": "Degree",
-    "degreePlaceholder": "Bachelor of Science",
-    "degreeAria": "Degree",
-    "fieldLabel": "Field of Study",
-    "fieldPlaceholder": "Computer Science",
-    "fieldAria": "Field of study",
-    "graduationDateLabel": "Graduation Date",
-    "graduationDateAria": "Graduation date",
-    "gpaLabel": "GPA (optional)",
-    "gpaPlaceholder": "3.8",
-    "gpaAria": "GPA",
-    "addItemButton": "Add Education",
-    "addItemAria": "Add education item"
-  },
-  "resumeComponentSkills": {
-    "technicalTitle": "Technical Skills",
-    "technicalPlaceholder": "e.g., Unity, C#, Unreal Engine",
-    "technicalAria": "Technical skill input",
-    "softTitle": "Soft Skills",
-    "softPlaceholder": "e.g., Leadership, Communication, Problem Solving",
-    "softAria": "Soft skill input",
-    "gamingTitle": "Gaming Industry Skills",
-    "gamingPlaceholder": "e.g., Game Design, Level Design, Multiplayer Systems",
-    "gamingAria": "Gaming skill input",
-    "addButton": "Add",
-    "addSkillAria": "Add skill to {category}",
-    "removeSkillAria": "Remove {skill} from {category}"
-  },
-  "jobDetail": {
-    "breadcrumbs": {
-      "dashboard": "Dashboard",
-      "jobs": "Jobs",
-      "detailFallback": "Job Detail"
-    },
-    "matchScoreLabel": "Match Score",
-    "remoteBadge": "Remote",
-    "scoreProgressAria": "Match score progress",
-    "interviewAria": "Start interview for current job",
-    "interviewButton": "Interview This Job",
-    "applyAria": "Apply to this job",
-    "applyButton": "Apply Now",
-    "unsaveAria": "Unsave this job",
-    "saveAria": "Save this job",
-    "savedButton": "Saved",
-    "saveButton": "Save Job",
-    "descriptionTitle": "Job Description",
-    "requirementsTitle": "Requirements",
-    "technologiesTitle": "Technologies",
-    "matchBreakdownTitle": "Match Score Breakdown",
-    "companyInfoTitle": "Company Info",
-    "companyLabel": "Company",
-    "studioTypeLabel": "Studio Type",
-    "websiteLabel": "Website",
-    "visitWebsiteButton": "Visit Website",
-    "visitWebsiteAria": "Open website for {company}",
-    "postedLabel": "Posted",
-    "notableGamesTitle": "Notable Games",
-    "platformsTitle": "Platforms",
-    "genresTitle": "Genres",
-    "applyDialogAria": "Apply to job dialog",
-    "applyDialogTitle": "Apply to {title}",
-    "applicationNotesLegend": "Application Notes (Optional)",
-    "applicationNotesPlaceholder": "Add any notes about this application...",
-    "applicationNotesAria": "Application notes",
-    "cancelApplyAria": "Cancel job application",
-    "submitApplyAria": "Submit job application",
-    "cancelButton": "Cancel",
-    "submitButton": "Submit Application",
-    "closeApplyDialogAria": "Close apply dialog",
-    "closeButton": "Close",
-    "toasts": {
-      "saved": "Job saved",
-      "unsaved": "Job unsaved",
-      "applicationSubmitted": "Application submitted"
-    },
-    "errors": {
-      "saveFailed": "Failed to update saved job status",
-      "applyFailed": "Failed to submit application",
-      "loadFailed": "Could not load this job"
-    },
-    "retryButton": "Retry",
-    "retryAria": "Retry loading job details",
-    "notFoundTitle": "Job not found",
-    "notFoundBody": "This job may have been removed or the link is invalid.",
-    "invalidIdTitle": "No job selected",
-    "invalidIdBody": "Choose a job from the jobs list to review its details.",
-    "backToJobs": "Back to jobs",
-    "backToJobsAria": "Return to jobs list",
-    "invalidId": "No job selected."
-  },
   "studioDetail": {
-    "breadcrumbs": {
-      "dashboard": "Dashboard",
-      "studios": "Studios",
-      "detail": "Studio Detail"
-    },
-    "errorBannerAria": "Studio detail error",
-    "retryAria": "Retry loading studio details",
-    "retryButton": "Retry",
-    "noDescription": "No studio description available.",
-    "unknownLocation": "Unknown location",
-    "unknownValue": "Not provided",
-    "noCultureWorkStyle": "No culture details provided yet.",
-    "remoteFriendlyBadge": "Remote Friendly",
-    "practiceInterviewAria": "Start interview practice for this studio",
-    "practiceInterviewButton": "Practice Interview",
-    "visitWebsiteAria": "Open website for {studio}",
-    "visitWebsiteButton": "Visit Website",
-    "sections": {
-      "culture": "Studio Culture",
-      "interviewProcess": "Interview Process",
-      "technologies": "Technologies Used",
-      "info": "Studio Info",
-      "notableGames": "Notable Games"
-    },
-    "culture": {
-      "workStyleLabel": "Work Style",
-      "environmentLabel": "Environment",
-      "valuesLabel": "Core Values",
-      "noValues": "No culture values listed yet."
-    },
-    "info": {
-      "locationLabel": "Location",
-      "studioTypeLabel": "Studio Type",
-      "companySizeLabel": "Company Size",
-      "remoteWorkLabel": "Remote Work"
-    },
-    "remoteLabels": {
-      "yes": "Yes",
-      "no": "No"
-    },
     "emptyTitle": "スタジオを表示できません",
-    "emptyDescription": "このスタジオプロフィールは現在利用できません。ディレクトリに戻って別のスタジオ文脈を選択してください。",
-    "errors": {
-      "invalidStudioId": "Invalid studio identifier.",
-      "notFound": "Studio not found.",
-      "loadFailed": "Failed to load studio details."
-    }
+    "emptyDescription": "このスタジオプロフィールは現在利用できません。ディレクトリに戻って別のスタジオ文脈を選択してください。"
   },
   "studiosIndex": {
     "seoTitle": "スタジオディレクトリ",
@@ -1677,38 +359,12 @@ const catalog = {
     "errorBannerAria": "スタジオディレクトリのエラー",
     "retryAria": "スタジオ読み込みを再試行",
     "retryButton": "再試行",
-    "emptyState": "No studios match your current search and filters.",
     "emptyTitle": "この条件に一致するスタジオがありません",
     "emptyDescription": "現在の検索条件またはフィルターの組み合わせを調整して、別のスタジオプロフィールを表示してください。",
-    "stats": {
-      "totalTitle": "Total Studios",
-      "totalDesc": "Profiles currently indexed",
-      "filteredTitle": "Filtered Results",
-      "filteredDesc": "Matching your current filters",
-      "remoteTitle": "Remote Friendly",
-      "remoteDesc": "Studios marked as remote-friendly"
-    },
-    "filters": {
-      "searchLegend": "Search studios",
-      "searchPlaceholder": "Search by name, description, or location",
-      "searchAria": "Search studios",
-      "typeLegend": "Studio type",
-      "typeAria": "Filter studios by type",
-      "sizeLegend": "Studio size",
-      "sizeAria": "Filter studios by size",
-      "allTypesOption": "All types",
-      "allSizesOption": "All sizes",
-      "remoteLabel": "Remote friendly only",
-      "remoteAria": "Show only remote-friendly studios",
-      "clearButton": "Clear filters",
-      "clearAria": "Clear studio search and filters"
-    },
     "options": {
       "type": {
-        "aaa": "AAA",
         "indie": "インディー",
         "mobile": "モバイル",
-        "vrAr": "VR/AR",
         "platform": "プラットフォーム",
         "esports": "eスポーツ",
         "general": "汎用",
@@ -1725,107 +381,19 @@ const catalog = {
         "range1000Plus": "1000名以上",
         "notAvailable": "該当なし"
       }
-    },
-    "list": {
-      "loadMoreButton": "Load more studios",
-      "loadMoreAria": "Load more studio results"
-    },
-    "card": {
-      "remoteBadge": "Remote",
-      "unknownType": "Unknown type",
-      "unknownSize": "Unknown size",
-      "unknownLocation": "Unknown location",
-      "noDescription": "No studio description available.",
-      "previewButton": "Preview",
-      "previewAria": "Preview studio profile for {studio}",
-      "viewButton": "View Details",
-      "viewAria": "View studio details for {studio}"
-    },
-    "preview": {
-      "dialogAria": "Studio quick preview dialog",
-      "closeButtonAria": "Close studio preview dialog",
-      "closeButton": "Close",
-      "closeBackdropAria": "Close studio preview backdrop",
-      "closeBackdropButton": "Close",
-      "remoteYes": "Yes",
-      "remoteNo": "No",
-      "startInterviewButton": "Start Interview",
-      "startInterviewAria": "Start interview practice for {studio}",
-      "openDetailButton": "Open Full Profile",
-      "openDetailAria": "Open full studio profile for {studio}",
-      "missingTitle": "Studio Not Available",
-      "missingDescription": "This studio preview is no longer available in the current results. Refresh or choose another studio.",
-      "stats": {
-        "interviewReadyTitle": "Interview Ready",
-        "interviewReadyValue": "Enabled",
-        "interviewReadyDesc": "Use this studio as your interview context",
-        "locationTitle": "Location",
-        "locationDesc": "Primary operating region",
-        "remoteTitle": "Remote Work",
-        "remoteDesc": "Remote policy status"
-      }
-    },
-    "errors": {
-      "loadFailed": "Failed to load studios"
     }
   },
   "studioAnalytics": {
     "title": "スタジオ分析",
     "description": "インデックス済みスタジオデータセットから、スタジオ分布、リモート勤務比率、共通技術トレンドを確認します。",
-    "errorBannerAria": "Studio analytics error",
-    "retryAria": "Retry loading studio analytics",
-    "retryButton": "Retry",
     "openDirectoryAria": "スタジオディレクトリを開く",
     "emptyTitle": "利用できるスタジオ分析がありません",
-    "emptyDescription": "この分析ビューを埋めるには、ディレクトリまたはスクレイパーハブからスタジオデータを更新してください。",
-    "progressAria": "Progress for {label}",
-    "remoteWorkProgressAria": "Remote work availability: {value} percent",
-    "overview": {
-      "totalStudiosTitle": "Total Studios",
-      "totalStudiosDesc": "In database",
-      "remoteFriendlyTitle": "Remote Friendly",
-      "remoteFriendlyDesc": "Offer remote positions",
-      "indieStudiosTitle": "Indie Studios",
-      "percentageOfTotal": "{value}% of total"
-    },
-    "sections": {
-      "byTypeTitle": "Studios by Type",
-      "bySizeTitle": "Studios by Size",
-      "topTechnologiesTitle": "Most Common Technologies",
-      "topTechnologiesDescription": "Technologies used across game studios",
-      "remoteAvailabilityTitle": "Remote Work Availability",
-      "offerRemoteLabel": "Offer Remote",
-      "remoteFriendlyTitle": "Remote Friendly",
-      "onSiteOnlyTitle": "On-site Only"
-    },
-    "errors": {
-      "loadFailed": "Failed to load analytics data"
-    }
+    "emptyDescription": "この分析ビューを埋めるには、ディレクトリまたはスクレイパーハブからスタジオデータを更新してください。"
   },
   "automation": {
     "hub": {
       "pageTitle": "自動化ハブ",
-      "pageDescription": "Run and track automation workflows across scraping, job apply, and email response pipelines.",
       "title": "自動化",
-      "viewRunsButton": "View Runs",
-      "pipelineTitle": "Work Pipeline",
-      "pipelineDescription": "Move from job discovery to scraping, customization, automation, and XP progression with a single flow.",
-      "pipelineAria": "Career work pipeline",
-      "pipelineNextStepLabel": "Next workflow milestone: {step}",
-      "loadErrorFallback": "Failed to load automation hub metrics",
-      "retryButtonLabel": "Retry",
-      "retryAria": "Retry loading automation hub metrics",
-      "emptyStateTitle": "No automation data yet",
-      "emptyStateDescription": "Start a scraper or automation workflow to populate the hub with actionable run history and capability signals.",
-      "emptyStateCta": "Open Scraper Hub",
-      "stats": {
-        "totalRunsTitle": "Total Runs",
-        "totalRunsDescription": "Tracked automation executions",
-        "todayRunsTitle": "Today's Runs",
-        "todayRunsDescription": "Started today",
-        "successRateTitle": "Success Rate",
-        "successRateDescription": "Completed run history"
-      },
       "audit": {
         "title": "RPA機能監査",
         "description": "どのブラウザ自動化ワークフローが実装済みで、設定され、観測可能かを確認します。",
@@ -1889,108 +457,21 @@ const catalog = {
           "issues": "課題",
           "actions": "操作"
         }
-      },
-      "cards": {
-        "scraper": {
-          "title": "Scraper Workflows",
-          "description": "Run studio and job scrapers to refresh discovery data.",
-          "button": "Open Scraper Hub"
-        },
-        "jobApply": {
-          "title": "Job Apply",
-          "description": "Start or schedule an RPA job application using your saved resume and cover letter.",
-          "button": "Open Job Apply"
-        },
-        "emailResponse": {
-          "title": "Email Response",
-          "description": "Generate AI-assisted email replies and track each run for auditability.",
-          "button": "Open Email Response"
-        },
-        "runHistory": {
-          "title": "Run History",
-          "description": "Inspect full payloads, screenshots, and execution output.",
-          "button": "Open Run History"
-        }
       }
     },
     "runs": {
       "title": "自動化実行履歴",
-      "backButton": "Back to Automation",
-      "backToAutomation": "Back to automation overview",
-      "typeLabel": "Type",
-      "typeFilterAria": "Filter automation runs by type",
-      "allTypes": "All types",
-      "statusLabel": "Status",
-      "statusFilterAria": "Filter automation runs by status",
-      "allStatuses": "All statuses",
-      "tableAriaLabel": "Automation run history",
-      "emptyJobId": "N/A",
-      "emptyState": "No runs found.",
-      "loadingLabel": "Loading runs...",
-      "loadErrorTitle": "Unable to load runs",
-      "loadErrorFallback": "Could not load run history.",
-      "openRunDetailAria": "Open automation run details for {id}",
       "openButton": "開く",
       "liveBadge": "ライブ",
       "liveBadgeAria": "ライブ実行ステータス",
       "columns": {
-        "id": "Run ID",
-        "type": "Type",
-        "status": "Status",
         "progress": "進捗",
-        "job": "Job",
         "updated": "更新日時",
         "actions": "操作"
-      },
-      "typeOptions": {
-        "scrape": "Scraper",
-        "job_apply": "Job Apply",
-        "email": "Email"
-      },
-      "statusOptions": {
-        "pending": "Pending",
-        "running": "Running",
-        "success": "Success",
-        "error": "Error"
       }
     },
     "jobApply": {
       "title": "求人応募自動化",
-      "jobUrlLegend": "Job URL",
-      "jobUrlPlaceholder": "https://example.com/jobs/123",
-      "jobUrlAria": "Job posting URL",
-      "resumeLegend": "Resume",
-      "resumeAria": "Select resume",
-      "selectResumeOption": "Select resume",
-      "resumeFallbackName": "Resume {id}",
-      "coverLetterLegend": "Cover Letter (optional)",
-      "coverLetterAria": "Select optional cover letter",
-      "noCoverLetterOption": "No cover letter",
-      "coverLetterOption": "{company} - {position}",
-      "unknownCompany": "Unknown",
-      "unknownPosition": "Position",
-      "jobIdLegend": "Job ID (optional)",
-      "jobIdPlaceholder": "Optional job ID for correlation",
-      "jobIdAria": "Optional correlation job ID",
-      "runButton": "Run Application",
-      "runButtonAria": "Run job application automation",
-      "submitErrorTitle": "Submission failed",
-      "submitErrorFallback": "Failed to start job application automation",
-      "runStartedTitle": "Run started",
-      "runIdLabel": "Run ID: {id}",
-      "statusLabel": "Status: {status}",
-      "openRunDetailLink": "Open run detail",
-      "openRunDetailAria": "Open detail page for automation run {id}",
-      "schedule": {
-        "legend": "Schedule Run",
-        "aria": "Schedule run time",
-        "hint": "Choose when this run should start.",
-        "button": "Schedule Run",
-        "buttonAria": "Schedule job application automation run",
-        "createdTitle": "Run scheduled",
-        "scheduledForLabel": "Scheduled for: {date}",
-        "invalidRunAt": "Please choose a valid future date and time."
-      },
       "stream": {
         "title": "ライブ実行ストリーム",
         "subtitle": "自動化の実行中に進捗更新を追跡します。",
@@ -2045,95 +526,11 @@ const catalog = {
       }
     },
     "email": {
-      "title": "メール返信自動化",
-      "pageDescription": "Generate and track AI-assisted email responses through the automation pipeline.",
-      "bootstrapError": "Could not load email automation settings",
-      "bootstrapRetry": "Retry",
-      "bootstrapRetryAria": "Retry loading email automation settings",
-      "openRunsButton": "View Runs",
-      "openRunsAria": "Open automation runs page",
-      "subjectLegend": "Subject",
-      "subjectPlaceholder": "Interview follow-up regarding gameplay engineer role",
-      "subjectAria": "Email subject",
-      "subjectHint": "Subject should be at least 3 characters.",
-      "senderLegend": "Sender (optional)",
-      "senderPlaceholder": "recruiter{'@'}studio.com",
-      "senderAria": "Sender email or name",
-      "senderHint": "If this is an email address, it can be reused as the delivery recipient.",
-      "recipientLegend": "Recipient (optional)",
-      "recipientPlaceholder": "reply-to{'@'}studio.com",
-      "recipientAria": "Outbound delivery recipient email",
-      "recipientHint": "Leave blank to reuse the sender email when delivery is enabled.",
-      "toneLegend": "Tone",
-      "toneAria": "Preferred response tone",
-      "tones": {
-        "professional": "Professional",
-        "friendly": "Friendly",
-        "concise": "Concise"
-      },
-      "messageLegend": "Incoming Message",
-      "messagePlaceholder": "Paste the incoming email message to draft a response.",
-      "messageAria": "Incoming email message",
-      "messageHint": "Message should be at least 10 characters.",
-      "deliverLabel": "Deliver after generation",
-      "deliverAria": "Send the generated reply through configured email delivery",
-      "deliveryConfiguredDescription": "A delivery transport is configured. Enable this to send the drafted reply immediately.",
-      "deliveryUnavailableDescription": "Configure email delivery in Settings before sending replies automatically.",
-      "configureDeliveryButton": "Configure Delivery",
-      "configureDeliveryAria": "Open settings to configure email delivery",
-      "schedule": {
-        "legend": "Schedule Run",
-        "hint": "Choose when this email automation should execute.",
-        "aria": "Email automation scheduled run time",
-        "button": "Schedule Run",
-        "buttonAria": "Schedule email automation run",
-        "invalidRunAt": "Choose a future date and time for the scheduled email run.",
-        "createdTitle": "Email run scheduled",
-        "scheduledForLabel": "Scheduled for: {date}",
-        "statusLabel": "Status: {status}"
-      },
-      "invalidRecipient": "Enter a valid delivery recipient email address.",
-      "generateButton": "Generate Response",
-      "generateAria": "Generate email response",
-      "generatedTitle": "Response generated",
-      "deliveredTitle": "Response delivered",
-      "generatedProvider": "Provider: {provider} ({model})",
-      "runIdLabel": "Run ID: {id}",
-      "recipientLabel": "Recipient: {email}",
-      "messageIdLabel": "Message ID: {id}",
-      "replyLegend": "Draft Reply",
-      "replyAria": "Generated email reply",
-      "openRunDetailButton": "Open Run Detail",
-      "openRunDetailAria": "Open automation run detail for {id}",
-      "submitErrorTitle": "Generation failed",
-      "submitErrorFallback": "Failed to generate email response"
+      "title": "メール返信自動化"
     },
     "runDetail": {
-      "title": "Automation Run Detail",
-      "backButton": "Back",
-      "backToRunsAria": "Back to automation runs",
-      "breadcrumbs": {
-        "dashboard": "Dashboard",
-        "runs": "Automation Runs",
-        "detailFallback": "Run Detail"
-      },
-      "loadErrorTitle": "Failed to load run",
-      "loadErrorFallback": "Could not load automation run.",
-      "loadingStatus": "Loading...",
-      "inputSummaryEmpty": "No input recorded",
-      "inputSummary": "{count} field | {count} fields",
-      "outputSummaryEmpty": "No output",
-      "outputSummaryPresent": "Output received",
-      "noInputPayload": "No input payload",
-      "noOutputPayload": "No output payload",
-      "inputPayloadTitle": "Input Payload",
-      "outputPayloadTitle": "Output Payload",
-      "screenshotsTitle": "Screenshots",
-      "noScreenshots": "No screenshots available.",
-      "screenshotAlt": "Automation screenshot {index}",
       "screenshotLinkLabel": "スクリーンショット {index} を開く",
       "screenshotLoadError": "スクリーンショット {index} をプレビューできませんでした。",
-      "loadingAria": "Loading automation run detail",
       "retryButton": "再試行",
       "retryAria": "実行詳細の読み込みを再試行",
       "progressSummary": "{percent}% 完了",
@@ -2164,117 +561,20 @@ const catalog = {
           "status": "状態",
           "message": "メッセージ"
         }
-      },
-      "stats": {
-        "inputTitle": "Input",
-        "inputDescription": "Payload fields",
-        "outputTitle": "Output",
-        "outputDescription": "Automation result snapshot",
-        "statusTitle": "Status",
-        "typeDescription": "Type: {type}",
-        "errorTitle": "Error",
-        "errorYes": "Yes",
-        "errorNo": "No",
-        "errorNone": "No error"
       }
     },
     "scraper": {
       "title": "スクレイパー運用ハブ",
-      "subtitle": "Refresh studio and job data, then immediately launch interview practice from scraped roles.",
-      "stepsAria": "Scraper workflow",
-      "steps": {
-        "run": "Run Scraper",
-        "review": "Review Results",
-        "interview": "Interview Against Job"
-      },
-      "state": {
-        "idle": "Idle",
-        "running": "Running",
-        "success": "Success",
-        "error": "Error"
-      },
-      "notRunYet": "Not run yet",
-      "unknownPostedDate": "Unknown",
-      "today": "Today",
-      "yesterday": "Yesterday",
-      "daysAgo": "{count}d ago",
-      "weeksAgo": "{count}w ago",
-      "monthsAgo": "{count}mo ago",
-      "lastRunLabel": "Last run: {value}",
-      "studioCard": {
-        "title": "Studio Scraper",
-        "description": "Pull latest studio profiles and interview metadata.",
-        "runAria": "Run studio scraper",
-        "runButton": "Run Studio Scraper"
-      },
-      "jobCard": {
-        "title": "Job Scraper",
-        "description": "Fetch latest game-industry openings and sync them to the job board.",
-        "runAria": "Run job scraper",
-        "runButton": "Run Job Scraper"
-      },
       "stats": {
-        "availableJobsTitle": "Scraped Jobs Available",
-        "availableJobsDescription": "Current interview-ready inventory",
         "enrichedJobsTitle": "AI で拡張された求人",
-        "enrichedJobsDescription": "スタジオ文脈と採用シグナルを含む行",
-        "jobStatusTitle": "Job Scraper Status",
-        "jobStatusDescription": "Latest run health",
-        "interviewEntryTitle": "Interview Entry",
-        "interviewEntryValue": "1 click",
-        "interviewEntryDescription": "From scraped row to session config"
+        "enrichedJobsDescription": "スタジオ文脈と採用シグナルを含む行"
       },
       "table": {
-        "title": "Scraped Jobs Ready for Interview",
-        "openBoardButton": "Open Job Board",
-        "emptyState": "No jobs found yet. Run the job scraper to populate interview targets.",
-        "aria": "Scraped jobs available for interview",
-        "interviewButton": "Interview This Job",
-        "interviewAria": "Start interview for {title} at {company}",
         "actionsLabel": "操作",
-        "personaSummaryLabel": "ペルソナ:",
-        "columns": {
-          "role": "Role",
-          "company": "Company",
-          "location": "Location",
-          "posted": "Posted"
-        }
-      },
-      "messages": {
-        "studioCompleted": "Studio scrape completed. Directory data refreshed.",
-        "studioCompletedWithXp": "Studio scrape completed (+{xp} XP). Directory data refreshed.",
-        "jobCompleted": "Job scrape completed. Feed refreshed and ready for interview practice.",
-        "jobCompletedWithXp": "Job scrape completed (+{xp} XP). Feed refreshed and ready for interview practice."
-      },
-      "schedule": {
-        "legend": "Schedule Run",
-        "hint": "Choose when this scraper should execute.",
-        "aria": "Scheduled scrape run time",
-        "button": "Schedule Run",
-        "buttonAria": "Schedule scraper run",
-        "invalidRunAt": "Choose a future date and time for the scheduled scraper run.",
-        "createdTitle": "Scrape run scheduled",
-        "createdMessage": "Scrape run scheduled successfully.",
-        "scheduledForLabel": "Scheduled for: {date}",
-        "statusLabel": "Status: {status}"
-      },
-      "openRunDetailButton": "Open Run Detail",
-      "openRunDetailAria": "Open automation run detail for {id}",
-      "toasts": {
-        "studioReward": "Studio scrape complete (+{xp} XP)",
-        "jobReward": "Job scrape complete (+{xp} XP)"
+        "personaSummaryLabel": "ペルソナ:"
       },
       "errors": {
-        "studioFailed": "Studio scraper failed",
-        "jobFailed": "Job scraper failed",
-        "scheduleFailed": "Failed to schedule scraper run",
-        "rewardFailed": "スクレイパー進捗の付与に失敗しました。",
-        "capabilitiesLoadFailed": "Could not load scraper capability audit",
-        "capabilitiesRetry": "Retry",
-        "capabilitiesRetryAria": "Retry loading scraper capability audit",
-        "jobsFeedLoadFailed": "Could not refresh the job feed for this page",
-        "jobsFeedRetry": "Retry",
-        "jobsFeedRetryAria": "Retry loading job feed for scraper hub"
+        "rewardFailed": "スクレイパー進捗の付与に失敗しました。"
       }
     }
   },
@@ -2284,19 +584,15 @@ const catalog = {
       "description": "RamaLama または Ollama を使ったプライベートなローカル優先実行。"
     },
     "gemini": {
-      "name": "Google Gemini",
       "description": "一般的なQAとコンテンツ生成に適した主要クラウドプロバイダー。"
     },
     "claude": {
-      "name": "Anthropic Claude",
       "description": "長文脈推論が必要な分析系ワークフロー向けプロバイダー。"
     },
     "openai": {
-      "name": "OpenAI",
       "description": "幅広いチャットと生成タスクに対応するGPTモデルファミリー。"
     },
     "huggingface": {
-      "name": "Hugging Face",
       "description": "幅広いオープンモデルを提供するクラウドのフォールバック先。"
     }
   },
@@ -2304,44 +600,6 @@ const catalog = {
     "title": "{brand}へようこそ",
     "seoTitle": "{brand} セットアップ",
     "seoDescription": "プロフィールを設定し、AIプロバイダーを構成して、キャリアワークスペースを起動します。",
-    "bootstrapError": "Could not load setup data",
-    "bootstrapRetry": "Retry",
-    "bootstrapRetryAria": "Retry loading setup data",
-    "stepsAriaLabel": "Setup progress",
-    "steps": {
-      "profile": "Profile",
-      "localAi": "Local AI",
-      "done": "Done"
-    },
-    "profileTitle": "Set your operator profile",
-    "nameLegend": "Your Name",
-    "namePlaceholder": "Enter your name",
-    "nameAria": "Your name",
-    "currentRoleLegend": "Current Role (optional)",
-    "currentRolePlaceholder": "e.g. Game Designer, 3D Artist",
-    "currentRoleAria": "Current role",
-    "nextButton": "Next",
-    "backButton": "Back",
-    "nextToLocalAiAria": "Continue to local AI setup step",
-    "nextToDoneAria": "Continue to setup completion step",
-    "backToProfileAria": "Back to profile step",
-    "aiConfigTitle": "Configure AI (Local-first)",
-    "localFirstInfo": "{brand} runs local-first. Use RamaLama or Ollama for private, offline workflows, then add cloud providers only when you want fallback capacity.",
-    "localEndpointLegend": "Local endpoint",
-    "localEndpointAria": "Local model API endpoint",
-    "localEndpointExamples": "Examples: RamaLama /v1, Ollama /v1",
-    "localModelLegend": "Local model name",
-    "localModelAria": "Local model name",
-    "testLocalButton": "Test Local Endpoint",
-    "testLocalAria": "Test local endpoint connectivity",
-    "cloudOptionalTitle": "Cloud providers (optional)",
-    "cloudProviderLegend": "{provider} API key",
-    "cloudProviderPlaceholder": "Enter {provider} credential",
-    "cloudProviderAria": "{provider} API credential",
-    "testProviderAria": "Test {provider} API credential",
-    "testButton": "Test",
-    "doneTitle": "You're all set",
-    "doneDescription": "{assistant} is ready to help you plan, tailor, and execute your next move in game industry hiring.",
     "auth": {
       "setupTokenTitle": "初回セットアップ認証",
       "setupTokenDescription": "このワークスペースの最初の API キーを発行するために、運用セットアップトークンを入力してください。",
@@ -2357,359 +615,50 @@ const catalog = {
       "apiKeyRequiredError": "セットアップを完了するには既存の API キーを貼り付けてください。"
     },
     "successStatusAria": "セットアップ完了ステータス",
-    "backToAiConfigAria": "Back to AI configuration step",
-    "launchAria": "Finish setup and open workspace",
-    "launchButton": "Open Workspace",
-    "providerReachable": "{provider} is reachable",
-    "providerTestFailed": "{provider} test failed",
-    "providerTestErrorFallback": "Failed to test provider",
     "ollamaCommandCopyAria": "Ollama コマンドをコピー",
     "ollamaCommandCopyTitle": "Ollama コマンドをコピー",
     "ollamaCommandCopied": "Ollama コマンドをコピーしました",
-    "ollamaCommandCopyFailed": "Ollama コマンドをコピーできませんでした",
-    "completeToast": "Setup complete",
-    "completeErrorFallback": "Failed to complete setup"
-  },
-  "aiDashboard": {
-    "title": "AI Dashboard",
-    "subtitle": "Manage provider readiness, test connectivity, and set your preferred model using one centralized control surface.",
-    "stats": {
-      "totalRequestsTitle": "Total Requests",
-      "totalRequestsDesc": "Messages sent through AI services",
-      "successRateTitle": "Success Rate",
-      "successRateDesc": "Assistant responses relative to user prompts",
-      "averageResponseTitle": "Avg Response Time",
-      "averageResponseValue": "{seconds}s",
-      "averageResponseDesc": "Measured latency across chat requests",
-      "sessionsTitle": "Sessions",
-      "sessionsDesc": "Active provider: {provider}"
-    },
-    "preference": {
-      "title": "Provider Preference",
-      "description": "Choose the primary provider and default model for AI chat and generation flows.",
-      "providerLegend": "Provider",
-      "providerAria": "Preferred AI provider",
-      "modelLegend": "Model",
-      "modelAria": "Preferred AI model",
-      "selectProviderOption": "Select provider",
-      "selectModelOption": "Select model",
-      "providerNotConfiguredOption": "{provider} (Not configured)",
-      "saveButton": "Save Preference",
-      "saveAria": "Save preferred AI provider and model",
-      "refreshButton": "Refresh",
-      "refreshAria": "Refresh AI provider dashboard data"
-    },
-    "providerCard": {
-      "configuredBadge": "Configured",
-      "notConfiguredBadge": "Not configured",
-      "testButton": "Test Connection",
-      "testAria": "Test {provider} connectivity",
-      "configureButton": "Configure",
-      "configureAria": "Open settings to configure {provider}",
-      "testingLabel": "Testing..."
-    },
-    "availability": {
-      "available": "Available",
-      "unavailable": "Unavailable"
-    },
-    "health": {
-      "healthy": "Healthy",
-      "degraded": "Degraded",
-      "down": "Down",
-      "unconfigured": "Unconfigured"
-    },
-    "alerts": {
-      "noProvidersTitle": "No providers detected",
-      "noProvidersDescription": "Configure at least one AI provider in Settings to enable chat and generation features.",
-      "testSuccessTitle": "Connectivity OK",
-      "testErrorTitle": "Connectivity failed"
-    },
-    "tests": {
-      "localSuccess": "Local AI provider is reachable.",
-      "localFailure": "Local AI provider is not reachable.",
-      "missingCredential": "No credential is available for this provider.",
-      "connectionSuccess": "Connection successful.",
-      "connectionFailure": "Connection failed."
-    },
-    "errors": {
-      "usageLoadFailed": "Failed to load AI usage metrics.",
-      "modelsLoadFailed": "Failed to load AI model catalog.",
-      "localConnectivityFailed": "Failed to verify local provider connectivity.",
-      "providerTestFailed": "Provider test request failed.",
-      "preferenceSaveFailed": "Failed to save AI preference."
-    },
-    "toasts": {
-      "loadFailed": "Failed to load AI dashboard data.",
-      "preferenceSaved": "AI preference saved.",
-      "preferenceSaveFailed": "Failed to save AI preference."
-    }
+    "ollamaCommandCopyFailed": "Ollama コマンドをコピーできませんでした"
   },
   "interviewHistory": {
     "title": "面接履歴",
     "subtitle": "過去の面接実行を確認し、スコア推移を比較しながら、各セッションの完全なフィードバックを再表示できます。",
-    "allSessionsTitle": "All Sessions",
-    "studioFilterAria": "Filter sessions by studio",
-    "allStudiosOption": "All studios",
-    "emptyState": "No interview sessions found.",
     "emptyStateTitle": "面接セッションが見つかりません",
     "emptyStateDescription": "スクレイプした求人またはスタジオ練習から新しい面接を開始して履歴を作成してください。",
-    "tableAriaLabel": "Interview sessions",
-    "timelineAriaLabel": "Interview sessions timeline view",
-    "viewButton": "View",
-    "viewSessionAria": "View interview session {id}",
-    "loadingDetails": "Loading session details...",
     "retryButtonLabel": "再試行",
     "retryAria": "面接セッション詳細の読み込みを再試行",
-    "detailsTitle": "Session Details",
-    "closeDetailsAria": "Close session details panel",
-    "detailStudioLabel": "Studio",
-    "detailRoleLabel": "Role",
-    "detailScoreLabel": "Overall Score",
     "timelineScoreAria": "面接スコア: {score} パーセント",
     "detailScoreAria": "面接スコア: {score} パーセント",
-    "questionsLabel": "Questions",
-    "questionAria": "Interview question {index}",
-    "questionHeader": "Q{index}: {score}%",
-    "overallFeedbackLabel": "Overall Feedback",
-    "selectPrompt": "Select a session to view details",
     "selectPromptTitle": "セッションを選択",
-    "selectPromptDescription": "一覧から任意のセッションを開いて、スコア、回答、AIフィードバックを確認してください。",
-    "fetchErrorFallback": "Failed to load interview sessions",
-    "sessionNotFound": "Session not found",
-    "detailLoadErrorFallback": "Failed to load session details",
-    "fetchErrorTitle": "Could not load interview sessions",
-    "notAvailable": "N/A",
-    "minutesLabel": "{count} min",
-    "viewModes": {
-      "table": "Table",
-      "timeline": "Timeline"
-    },
-    "columns": {
-      "date": "Date",
-      "studio": "Studio",
-      "role": "Role",
-      "score": "Score",
-      "duration": "Duration",
-      "actions": "Actions"
-    }
+    "selectPromptDescription": "一覧から任意のセッションを開いて、スコア、回答、AIフィードバックを確認してください。"
   },
   "interviewHub": {
     "seoTitle": "面接準備ハブ",
     "seoDescription": "求人ベースとスタジオベースの面接フローで練習し、スコア付きフィードバックで改善点を確認できます。",
     "title": "面接準備ハブ",
-    "subtitle": "Practice against either real scraped job listings or studio-focused interview tracks. Every session returns scored feedback and targeted improvement points.",
-    "bootstrapRetry": "Retry",
-    "bootstrapRetryAria": "Retry loading interview hub data",
-    "pathwaysRetry": "Retry",
-    "pathwaysRetryAria": "Retry loading role recommendations",
-    "hero": {
-      "openJobAria": "Configure a job-based interview",
-      "openJobButton": "Interview a Scraped Job",
-      "openStudioAria": "Configure a studio interview",
-      "openStudioButton": "Start Studio Drill",
-      "stepsAria": "Interview workflow",
-      "steps": {
-        "chooseContext": "Choose Context",
-        "configureSession": "Configure Session",
-        "practiceAndScore": "Practice + Score"
-      }
-    },
-    "stats": {
-      "totalSessionsTitle": "Total Sessions",
-      "totalSessionsDesc": "Practice sessions completed",
-      "averageScoreTitle": "Average Score",
-      "averageScoreDesc": "Across completed sessions",
-      "improvementTitle": "Improvement Trend",
-      "improvementDesc": "Session-over-session change"
-    },
-    "prep": {
-      "title": "Interview Readiness Checklist",
-      "subtitle": "Keep resume, cover letter, and portfolio assets ready so each interview run reflects your latest positioning.",
-      "progressLabel": "{done}/{total} ready",
-      "progressAria": "Interview readiness progress",
-      "readyBadge": "Ready",
-      "pendingBadge": "Pending",
-      "openAria": "Open {title} workspace",
-      "items": {
-        "resume": {
-          "title": "Resume",
-          "description": "Maintain at least one current resume aligned to your target roles.",
-          "cta": "Open Resume"
-        },
-        "coverLetter": {
-          "title": "Cover Letter",
-          "description": "Keep reusable cover-letter drafts ready for role and studio tailoring.",
-          "cta": "Open Cover Letters"
-        },
-        "portfolio": {
-          "title": "Portfolio",
-          "description": "Showcase featured projects so your interview examples stay concrete.",
-          "cta": "Open Portfolio"
-        }
-      }
-    },
-    "cards": {
-      "jobPracticeTitle": "Job-Based Practice",
-      "recommendedBadge": "Recommended",
-      "jobPracticeDescription": "Use a scraped role as the interview target so questions align with a real posting.",
-      "selectedJobTitle": "Selected job",
-      "selectedJobValue": "{title} at {company}",
-      "changeJobAria": "Change selected scraped job",
-      "changeButton": "Change",
-      "configureJobAria": "Open job session configuration",
-      "configureJobButton": "Configure Job Session",
-      "studioDrillTitle": "Studio Drill",
-      "studioDrillDescription": "Run broader mock interviews tailored to studio profile and interview style.",
-      "currentStudio": "Current studio: {studio}",
-      "configureStudioAria": "Open studio session configuration",
-      "configureStudioButton": "Configure Studio Session"
-    },
-    "recent": {
-      "title": "Recent Sessions",
-      "viewAllButton": "View All",
-      "emptyState": "No interview sessions yet. Start your first run from a job or studio context.",
-      "tableAria": "Recent interview sessions",
-      "notAvailable": "N/A",
-      "viewSessionAria": "View interview session {id}",
-      "viewButton": "View",
-      "columns": {
-        "context": "Context",
-        "role": "Role",
-        "mode": "Mode",
-        "score": "Score",
-        "date": "Date"
-      },
-      "pagination": {
-        "navigationAria": "Recent sessions pagination",
-        "previousAria": "Previous recent-sessions page",
-        "nextAria": "Next recent-sessions page",
-        "pageAria": "Go to recent-sessions page {page}",
-        "summary": "Showing {start}-{end} of {total} sessions"
-      }
-    },
     "config": {
-      "dialogAria": "Configure interview session dialog",
-      "title": "Configure Interview Session",
-      "subtitle": "Pick a context, tune session options, then launch your practice run.",
-      "switchToJobAria": "Switch to scraped job mode",
-      "modeJobButton": "Scraped Job",
-      "switchToStudioAria": "Switch to studio mode",
-      "modeStudioButton": "Studio",
-      "searchJobsLegend": "Search scraped jobs",
-      "searchJobsPlaceholder": "Search title, company, or keyword",
-      "searchJobsAria": "Search title, company, or keyword",
-      "jobsTableAria": "Available scraped jobs",
-      "jobsColumns": {
-        "job": "Job",
-        "company": "Company"
-      },
-      "noJobsState": "No jobs match your current search.",
-      "selectJobAria": "Select {title} at {company} for interview",
-      "selectedButton": "Selected",
-      "selectButton": "Select",
-      "studioLegend": "Studio",
-      "studioAria": "Studio",
-      "selectStudioOption": "Select a studio",
-      "noStudiosHint": "No studios found yet. Run studio scraping or create a studio profile first.",
-      "roleLegend": "Role",
-      "roleAria": "Role",
-      "experienceLegend": "Experience level",
-      "experienceAria": "Experience level",
-      "questionCountLegend": "Question count",
-      "questionCountAria": "Question count",
       "conversationStyleLegend": "会話スタイル",
       "conversationStyleAria": "会話スタイル",
       "conversationStyleNatural": "自然な会話",
       "conversationStyleStructured": "構造化ラウンド",
-      "conversationStyleHint": "自然モードでは文脈に沿った質問を1つずつ生成します。構造化モードでは面接全体の質問セットを先に作成します。",
-      "enableVoiceAria": "Enable voice mode",
-      "enableVoiceLabel": "Enable voice mode",
-      "ttsVoiceLegend": "TTS voice",
-      "ttsVoiceAria": "TTS voice",
-      "ttsDefaultOption": "Default",
-      "cancelAria": "Cancel interview configuration",
-      "cancelButton": "Cancel",
-      "startAria": "Start interview session",
-      "startButton": "Start Interview",
-      "closeDialogAria": "Close interview configuration dialog",
-      "closeBackdropButton": "Close",
-      "pagination": {
-        "navigationAria": "Interview job-selection pagination",
-        "previousAria": "Previous jobs page",
-        "nextAria": "Next jobs page",
-        "pageAria": "Go to jobs page {page}",
-        "summary": "Showing {start}-{end} of {total} jobs"
-      }
-    },
-    "mode": {
-      "job": "Job",
-      "studio": "Studio"
-    },
-    "experience": {
-      "entry": "Entry",
-      "mid": "Mid",
-      "senior": "Senior",
-      "lead": "Lead"
-    },
-    "questionCount": {
-      "quick": "3 (Quick)",
-      "standard": "5 (Standard)",
-      "deep": "8 (Deep)"
-    },
-    "toasts": {
-      "started": "Interview session started"
+      "conversationStyleHint": "自然モードでは文脈に沿った質問を1つずつ生成します。構造化モードでは面接全体の質問セットを先に作成します。"
     },
     "errors": {
       "bootstrapLoadFailed": "面接ハブのデータ読み込みに失敗しました",
-      "roleRecommendationsFailed": "最適化されたロール提案の読み込みに失敗しました",
-      "startFailed": "Failed to start interview session",
-      "jobLoadFailed": "Failed to load selected job details"
+      "roleRecommendationsFailed": "最適化されたロール提案の読み込みに失敗しました"
     }
   },
   "interviewSession": {
     "title": "面接練習",
-    "subtitle": "Review the role, interviewer, and prompt signals before you answer so every response stays grounded.",
-    "overviewTitle": "Session Briefing",
-    "overviewDescription": "Use this workspace to track pacing, confirm the target context, and line up the next answer.",
     "timeLabel": "時間",
     "timeAria": "経過した面接時間 {minutes}分 {seconds}秒",
-    "avatarLabelAi": "AI",
     "progressLabel": "質問 {current} / {total}",
     "progressAria": "面接の進捗",
-    "progressStatTitle": "Progress",
-    "progressStatDescription": "{percent}% of the session completed",
-    "modeTitle": "Practice Mode",
-    "voiceTitle": "Voice Input",
-    "voiceEnabled": "Enabled",
-    "voiceDisabled": "Keyboard",
-    "voiceDescriptionEnabled": "Speech capture is ready for hands-free answers.",
-    "voiceDescriptionDisabled": "Type your response directly in the workspace below.",
     "jobTargetBadge": "対象職種",
     "interviewerLabel": "面接官",
-    "interviewerTitle": "Interviewer Lens",
-    "interviewerDescription": "These cues shape the tone, scoring, and follow-up emphasis for the current session.",
-    "interviewerRoleLabel": "Role",
-    "interviewerStyleLabel": "Style",
-    "interviewerBackgroundLabel": "Background",
-    "interviewerFallback": "Interviewer profile is still loading for this session.",
-    "targetTitle": "Target Role",
-    "targetDescription": "The practice run is grounded against this role and studio context so your examples stay specific.",
-    "focusAreasTitle": "Focus Areas",
-    "focusAreasEmpty": "No focus areas configured yet.",
-    "promptTitle": "Current Prompt",
-    "promptDescription": "Answer directly, tie your example to the target role, and keep the result concrete.",
-    "promptTypeLabel": "Prompt Type",
-    "promptDifficultyLabel": "Difficulty",
-    "promptExpectedDurationLabel": "Target Length",
-    "promptExpectedDurationValue": "{count} min",
-    "promptTagsLabel": "Signals",
-    "promptTagsEmpty": "No prompt signals yet.",
     "feedbackTitle": "フィードバック",
-    "feedbackDescription": "Use the latest scoring notes to sharpen the next answer.",
     "feedbackScore": "スコア: {score}%",
     "responseTitle": "あなたの回答",
-    "responseWorkspaceTitle": "Response Workspace",
-    "responseWorkspaceDescription": "Keep the answer outcome-focused, specific, and aligned to the current prompt.",
     "responsePlaceholder": "ここに回答を入力してください...",
     "responseAria": "面接回答テキスト",
     "minResponseHint": "回答は{count}文字以上で入力してください。",
@@ -2737,18 +686,6 @@ const catalog = {
       "minResponseLength": "回答は{count}文字以上で入力してください",
       "submitFailed": "回答の送信に失敗しました",
       "completeFailed": "面接の完了に失敗しました"
-    },
-    "questionTypes": {
-      "intro": "Introduction",
-      "behavioral": "Behavioral",
-      "technical": "Technical",
-      "studio-specific": "Studio-Specific",
-      "closing": "Closing"
-    },
-    "difficulty": {
-      "easy": "Easy",
-      "medium": "Medium",
-      "hard": "Hard"
     }
   },
   "settings": {
@@ -2756,44 +693,19 @@ const catalog = {
     "seoDescription": "プロフィール、AIプロバイダー、通知設定、自動化の既定値を一元的に管理します。",
     "title": "設定とプロフィール",
     "subtitle": "アイデンティティ、アシスタントの動作、自動化のデフォルト設定を一元管理します。",
-    "bootstrapError": "Could not load settings or profile.",
-    "bootstrapRetry": "Retry",
-    "bootstrapRetryAria": "Retry loading settings",
-    "saveState": {
-      "idle": "Idle",
-      "saving": "Saving",
-      "success": "Saved",
-      "error": "Error"
-    },
     "profile": {
       "title": "ユーザープロフィール",
       "nameLegend": "名前",
-      "nameAria": "Name",
-      "nameHint": "Name must be at least 2 characters.",
       "emailLegend": "メール",
-      "emailAria": "Email",
-      "emailHint": "Enter a valid email address.",
       "currentRoleLegend": "現在の役職",
-      "currentRoleAria": "Current role",
       "currentCompanyLegend": "現在の会社",
-      "currentCompanyAria": "Current company",
       "locationLegend": "所在地",
-      "locationAria": "Location",
       "yearsExperienceLegend": "経験年数",
-      "yearsExperienceAria": "Years of experience",
       "githubLegend": "GitHubプロフィール",
-      "githubAria": "GitHub profile URL",
       "linkedinLegend": "LinkedInプロフィール",
-      "linkedinAria": "LinkedIn profile URL",
       "summaryLegend": "概要",
-      "summaryAria": "Profile summary",
       "technicalSkillsLegend": "技術スキル（カンマ区切り）",
-      "technicalSkillsPlaceholder": "Unity, Unreal Engine, C++, TypeScript",
-      "technicalSkillsAria": "Technical skills",
       "softSkillsLegend": "ソフトスキル（カンマ区切り）",
-      "softSkillsPlaceholder": "Communication, Leadership, Collaboration",
-      "softSkillsAria": "Soft skills",
-      "saveAria": "Save user profile settings",
       "saveButton": "プロフィールを保存"
     },
     "preferences": {
@@ -2801,21 +713,8 @@ const catalog = {
       "themeLabel": "テーマ",
       "lightTheme": "ライト",
       "darkTheme": "ダーク",
-      "toggleThemeAria": "Toggle theme preference",
       "languageLegend": "言語",
-      "languageAria": "Language",
       "notificationsLegend": "通知",
-      "notifications": {
-        "achievements": "Achievements",
-        "achievementsAria": "Achievement notifications",
-        "dailyChallenges": "Daily challenges",
-        "dailyChallengesAria": "Daily challenge notifications",
-        "levelUp": "Level up",
-        "levelUpAria": "Level up notifications",
-        "jobAlerts": "Job alerts",
-        "jobAlertsAria": "Job alert notifications"
-      },
-      "saveAria": "Save user preferences",
       "saveButton": "設定を保存"
     },
     "automation": {
@@ -2823,159 +722,26 @@ const catalog = {
       "subtitle": "RPAスクリプトの動作とデフォルトブラウザを設定します。",
       "headlessTitle": "ヘッドレスモード",
       "headlessDescription": "UIなしでブラウザを実行します。",
-      "headlessAria": "Headless mode",
       "smartSelectorsTitle": "スマートセレクター",
       "smartSelectorsDescription": "AIでフォームフィールドを検出します。",
-      "smartSelectorsAria": "Smart selectors",
       "autoScreenshotsTitle": "自動スクリーンショット",
       "autoScreenshotsDescription": "各ステップでスクリーンショットを保存します。",
-      "autoScreenshotsAria": "Auto save screenshots",
       "timeoutLegend": "タイムアウト（秒）",
-      "timeoutAria": "Default timeout in seconds",
       "retentionLegend": "スクリーンショット保持（日数）",
-      "retentionAria": "Screenshot retention in days",
       "concurrentRunsLegend": "最大同時実行数",
-      "concurrentRunsAria": "Maximum concurrent automation runs",
       "defaultBrowserLegend": "デフォルトブラウザ",
-      "defaultBrowserAria": "Default automation browser",
-      "browserOptions": {
-        "chrome": "Chrome",
-        "chromium": "Chromium",
-        "edge": "Edge"
-      },
-      "saveAria": "Save automation settings",
       "saveButton": "自動化設定を保存"
-    },
-    "jobIntelligence": {
-      "title": "Job Intelligence",
-      "subtitle": "Manage scraper provider settings and the persisted jobs taxonomy used for enrichment and autocomplete.",
-      "providersTitle": "Provider Configuration",
-      "providersDescription": "Keep the shared fetch defaults visible, tune each source in its own card, and hide raw source payloads until you need them.",
-      "taxonomyTitle": "Persisted Taxonomy",
-      "taxonomyDescription": "Shape the saved keyword and studio classification datasets that downstream matching, enrichment, and interview flows depend on.",
-      "summarySourcesTitle": "Active sources",
-      "summarySourcesDescription": "Enabled providers with enough configuration to fetch jobs.",
-      "summaryCollectionsTitle": "Source collections",
-      "summaryCollectionsDescription": "Advanced JSON datasets stored for boards, templates, and gaming portals.",
-      "summaryTaxonomyTitle": "Taxonomy assets",
-      "summaryTaxonomyDescription": "Saved keyword and studio rule datasets used across enrichment and autocomplete.",
-      "defaultsTitle": "Shared defaults",
-      "defaultsDescription": "These defaults apply across every source before provider-specific rules kick in.",
-      "providerTimeoutLabel": "Provider timeout (ms)",
-      "companyLimitLabel": "Company board result limit",
-      "gamingLimitLabel": "Gaming board result limit",
-      "hitmarkerEnabledLabel": "Enable Hitmarker API",
-      "hitmarkerEnabledHint": "Toggle the first-party Hitmarker feed without hiding the rest of the workspace.",
-      "unknownLocationLabel": "Unknown location label",
-      "unknownCompanyLabel": "Unknown company label",
-      "configuredBadge": "Configured",
-      "needsAttentionBadge": "Needs attention",
-      "hitmarkerTitle": "Hitmarker",
-      "hitmarkerApiLabel": "Hitmarker API base URL",
-      "hitmarkerQueryLabel": "Hitmarker default query",
-      "hitmarkerLocationLabel": "Hitmarker fallback location",
-      "hitmarkerDescription": "Control the direct Hitmarker feed, default query seed, and fallback location copy.",
-      "greenhouseTitle": "Greenhouse",
-      "greenhouseApiLabel": "Greenhouse API base URL",
-      "greenhouseMaxPagesLabel": "Greenhouse max pages",
-      "greenhouseDescription": "Tune Greenhouse discovery and paging separately from the shared source defaults.",
-      "leverTitle": "Lever",
-      "leverApiLabel": "Lever API base URL",
-      "leverMaxPagesLabel": "Lever max pages",
-      "leverDescription": "Use a focused Lever card so URL and pagination changes stay local to that source.",
-      "advancedCollectionsTitle": "Advanced source collections",
-      "advancedCollectionsDescription": "Keep raw JSON payload editors collapsed until you need to adjust source mappings or template payloads.",
-      "advancedBadge": "Advanced",
-      "greenhouseBoardsLabel": "Greenhouse boards JSON",
-      "leverCompaniesLabel": "Lever companies JSON",
-      "companyBoardsLabel": "Company boards JSON",
-      "companyTemplatesLabel": "Company board templates JSON",
-      "gamingPortalsLabel": "Gaming portals JSON",
-      "taxonomyKeywordsLabel": "Taxonomy keywords JSON",
-      "taxonomyKeywordsDescription": "Persist keyword clusters used for autocomplete, matching, and role enrichment.",
-      "taxonomyStudiosLabel": "Studio classification rules JSON",
-      "taxonomyStudiosDescription": "Maintain the studio classification rules that feed company and studio-aware workflows.",
-      "saveProviders": "Save Provider Config",
-      "saveTaxonomy": "Save Taxonomy",
-      "saveProvidersAria": "Save job provider configuration",
-      "saveTaxonomyAria": "Save persisted taxonomy configuration",
-      "savingProviders": "Saving providers...",
-      "savingTaxonomy": "Saving taxonomy...",
-      "errors": {
-        "invalidProviderConfig": "Provider configuration JSON is invalid.",
-        "invalidTaxonomy": "Taxonomy JSON is invalid.",
-        "failedToSaveProviders": "Failed to save job provider configuration.",
-        "failedToSaveTaxonomy": "Failed to save job taxonomy."
-      },
-      "toasts": {
-        "providersSaved": "Job provider configuration saved.",
-        "taxonomySaved": "Job taxonomy saved."
-      }
-    },
-    "emailDelivery": {
-      "title": "Email Delivery",
-      "subtitle": "Configure the outbound SMTP transport used when automation sends a generated reply.",
-      "configuredBadge": "Ready",
-      "incompleteBadge": "Needs setup",
-      "hostLegend": "SMTP host",
-      "hostPlaceholder": "smtp.mailprovider.com",
-      "hostAria": "SMTP server host",
-      "portLegend": "Port",
-      "portAria": "SMTP server port",
-      "timeoutLegend": "Connection timeout (seconds)",
-      "timeoutAria": "SMTP connection timeout in seconds",
-      "securityLegend": "Security",
-      "securityAria": "SMTP transport security mode",
-      "securityOptions": {
-        "tls": "Implicit TLS",
-        "starttls": "STARTTLS",
-        "plain": "Plain TCP"
-      },
-      "authLegend": "Authentication",
-      "authAria": "SMTP authentication mode",
-      "authOptions": {
-        "plain": "AUTH PLAIN",
-        "login": "AUTH LOGIN"
-      },
-      "usernameLegend": "Username",
-      "usernamePlaceholder": "mailer{'@'}studio.com",
-      "usernameAria": "SMTP username",
-      "fromNameLegend": "From name",
-      "fromNamePlaceholder": "{brand}",
-      "fromNameAria": "Outbound sender display name",
-      "fromEmailLegend": "From email",
-      "fromEmailPlaceholder": "mailer{'@'}studio.com",
-      "fromEmailAria": "Outbound sender email",
-      "fromEmailHint": "This address is used in the message From header.",
-      "passwordLegend": "Password",
-      "passwordPlaceholder": "Store or replace the SMTP password",
-      "passwordAria": "SMTP password",
-      "passwordHint": "Save a password if this transport requires authenticated delivery.",
-      "passwordStoredHint": "A password is already stored. Saving a new value will replace it, or clear it below.",
-      "clearPasswordAria": "Clear stored email delivery password",
-      "clearPasswordButton": "Clear Password",
-      "savePasswordAria": "Save email delivery password",
-      "savePasswordButton": "Save Password",
-      "saveAria": "Save email delivery settings",
-      "saveButton": "Save Delivery Settings"
     },
     "aiProviders": {
       "title": "AIプロバイダー",
       "subtitle": "ローカルプロバイダーを優先し、クラウドプロバイダーをフォールバックとして使用します。",
-      "expandAria": "Expand {provider} provider settings",
       "configuredBadge": "設定済み",
       "endpointLabel": "エンドポイントURL",
       "credentialLabel": "APIキー",
-      "huggingFacePlaceholder": "Enter Hugging Face token",
-      "apiKeyPlaceholder": "Enter {provider} API key",
-      "testAria": "Test AI provider connection",
       "testButton": "テスト",
       "localModelLegend": "ローカルモデル名",
-      "localModelPlaceholder": "Auto-detected from server",
-      "localModelAria": "Local model name",
       "connectedBadge": "接続済み",
       "failedBadge": "失敗",
-      "saveAria": "Save AI provider credentials",
       "saveButton": "APIキーを保存",
       "connectionSuccessful": "接続成功",
       "connectionFailed": "接続失敗",
@@ -2983,17 +749,12 @@ const catalog = {
       "preferredProviderAria": "優先するAIプロバイダーを選択",
       "preferredProviderSaveButton": "チャット既定を保存",
       "preferredProviderHint": "このクイック設定は、チャットや会話系フローの既定プロバイダーを決めます。",
-      "readinessTitle": "Provider readiness",
-      "readinessDescription": "Check configuration and connectivity before assigning providers to workflows.",
       "preferredProviderSaved": "優先プロバイダーが更新されました",
       "routingTitle": "用途別ルーティング",
       "routingSubtitle": "チャット、面接、エクスポート、自動化ごとにプロバイダーと任意のモデルを割り当て、1つのグローバル既定値に依存しないようにします。",
-      "routingCoverageTitle": "Routed workflows",
-      "routingCoverageDescription": "Each AI capability can keep its own provider and optional model override.",
       "saveRoutingAria": "用途別のAIルーティングを保存",
       "saveRoutingButton": "ルーティングを保存",
       "routingSaved": "AIルーティングを保存しました",
-      "purposeColumnLabel": "Purpose",
       "purposeProviderLegend": "プロバイダー",
       "purposeProviderAria": "{purpose} 用のプロバイダーを選択",
       "purposeModelLegend": "モデル上書き",
@@ -3040,9 +801,7 @@ const catalog = {
       },
       "ollamaTipTitle": "補足: Ollama はこのアプリの外で導入します",
       "ollamaTipDescription": "先にインストールし、あなた自身のマシンやプロジェクト向けの Ollama 公式セットアップに従ってください:",
-      "ollamaTipLinkLabel": "ollama.com",
-      "ollamaTipLinkAria": "Ollama のサイトを新しいタブで開く",
-      "credentialsDescription": "Store and test credentials only for the providers you plan to route into live workflows."
+      "ollamaTipLinkAria": "Ollama のサイトを新しいタブで開く"
     },
     "brand": {
       "title": "ブランドコントロールプレーン",
@@ -3056,44 +815,8 @@ const catalog = {
       "previewPrimaryAction": "ワークスペースを開く",
       "previewSecondaryAction": "コピーを確認",
       "editorTabsAria": "ブランド編集セクション",
-      "nameLegend": "Product name",
-      "nameAria": "Product name",
-      "assistantNameLegend": "Assistant name",
-      "assistantNameAria": "Assistant name",
-      "apiNameLegend": "API name",
-      "apiNameAria": "API name",
-      "taglineLegend": "Tagline",
-      "taglineAria": "Tagline",
-      "logoPathLegend": "Logo path or URL",
-      "logoPathAria": "Logo path or URL",
-      "faviconPathLegend": "Favicon path or URL",
-      "faviconPathAria": "Favicon path or URL",
-      "assetPathPlaceholder": "/branding/logo.svg",
       "assetPathHint": "クライアントが直接読み込める公開アセットパス、または絶対URLを使用してください。",
-      "defaultTitleLegend": "Default SEO title",
-      "defaultTitleAria": "Default SEO title",
-      "defaultDescriptionLegend": "Default SEO description",
-      "defaultDescriptionAria": "Default SEO description",
-      "fontStylesheetLegend": "Font stylesheet URL",
-      "fontStylesheetAria": "Font stylesheet URL",
-      "fontStylesheetPlaceholder": "https://fonts.googleapis.com/css2?...",
       "fontStylesheetHint": "下の `font-family` スタックを適用する前に、使用するフォントのホスト済みスタイルシートを読み込んでください。",
-      "displayFontLegend": "Display font-family",
-      "displayFontAria": "Display font-family",
-      "bodyFontLegend": "Body font-family",
-      "bodyFontAria": "Body font-family",
-      "monoFontLegend": "Mono font-family",
-      "monoFontAria": "Mono font-family",
-      "lightThemeLegend": "Light theme JSON",
-      "lightThemeAria": "Light theme JSON",
-      "darkThemeLegend": "Dark theme JSON",
-      "darkThemeAria": "Dark theme JSON",
-      "themeJsonHint": "Provide a full daisyUI token object. Keys must match the brand theme contract exactly.",
-      "contentOverridesLegend": "Content overrides JSON",
-      "contentOverridesAria": "Content overrides JSON",
-      "contentOverridesHint": "Use dot-delimited locale keys such as `dashboard.pageTitle` to override any user-facing copy.",
-      "saveAria": "Save brand control plane settings",
-      "saveButton": "Save Brand Settings",
       "tabs": {
         "identity": "アイデンティティ",
         "identityDescription": "アクティブなブランドパッケージの名称、アシスタントのトーン、ロゴ資産を調整します。",
@@ -3113,37 +836,14 @@ const catalog = {
         "localesDescription": "設定画面で公開されている対応インターフェース言語数です。",
         "overrides": "オーバーライド",
         "overridesDescription": "アクティブなロケールカタログへ統合されるカスタムコピーキー数です。"
-      },
-      "errors": {
-        "invalidLightTheme": "Light theme JSON is invalid.",
-        "invalidDarkTheme": "Dark theme JSON is invalid.",
-        "invalidContentOverrides": "Content overrides JSON is invalid.",
-        "failedToSave": "Failed to save brand settings"
       }
     },
     "toasts": {
       "apiKeysSaved": "APIキーが保存されました",
-      "brandSaved": "Brand settings saved",
-      "emailDeliverySaved": "Email delivery settings saved",
-      "emailDeliveryPasswordSaved": "Email delivery password saved",
-      "emailDeliveryPasswordCleared": "Email delivery password cleared",
       "themeSaved": "テーマが保存されました",
       "preferencesSaved": "設定が保存されました",
       "profileSaved": "プロフィールが保存されました",
       "automationSaved": "自動化設定が保存されました"
-    },
-    "errors": {
-      "failedToTestProvider": "Failed to test provider",
-      "failedToSaveApiKeys": "Failed to save API keys",
-      "failedToSaveEmailDelivery": "Failed to save email delivery settings",
-      "failedToSaveEmailDeliveryPassword": "Failed to save email delivery password",
-      "failedToSaveTheme": "Failed to save theme",
-      "failedToSavePreferences": "Failed to save preferences",
-      "nameTooShort": "Name must be at least 2 characters",
-      "invalidEmail": "Enter a valid email address",
-      "invalidEmailDeliverySender": "Enter a valid sender email for email delivery",
-      "failedToSaveProfile": "Failed to save profile",
-      "failedToSaveAutomation": "Failed to save automation settings"
     }
   },
   "quickFab": {
@@ -3151,86 +851,6 @@ const catalog = {
     "expandAria": "クイックアクションを開く",
     "collapseAria": "クイックアクションを閉じる",
     "menuAria": "クイックアクションのショートカット"
-  },
-  "floatingChat": {
-    "subtitle": "Career Copilot",
-    "contextBadge": "Context: {context}",
-    "contextAria": "Current chat context: {context}",
-    "focusedEntityBadge": "Focus: {entity}",
-    "focusedEntityAria": "Focused entity in chat context: {entity}",
-    "domainChip": "Scope: {context}",
-    "sourceChip": "Surface: {source}",
-    "routeBadge": "Route: {route}",
-    "contextChipsAria": "Specific chat context chips",
-    "entityChip": "{type}: {entity}",
-    "contextDomain": {
-      "resume": "Resume",
-      "jobSearch": "Jobs",
-      "interview": "Interview",
-      "portfolio": "Portfolio",
-      "skills": "Skills",
-      "automation": "Automation",
-      "general": "General"
-    },
-    "entityTypes": {
-      "job": "Job",
-      "resume": "Resume",
-      "studio": "Studio",
-      "interviewSession": "Interview",
-      "automationRun": "Automation"
-    },
-    "sources": {
-      "chatPage": "Full page",
-      "floatingWidget": "Widget"
-    },
-    "stateChips": {
-      "resumes": "{count} resume | {count} resumes",
-      "jobs": "{count} tracked job | {count} tracked jobs",
-      "studios": "{count} studio | {count} studios",
-      "sessions": "{count} session | {count} sessions",
-      "projects": "{count} project | {count} projects"
-    },
-    "expandAria": "Open full chat page",
-    "expandButton": "Expand",
-    "clearAria": "Clear chat conversation",
-    "clearButton": "Clear",
-    "closeAria": "Close chat widget",
-    "logAria": "Floating chat conversation",
-    "youLabel": "You",
-    "suggestionsAria": "Contextual assistant prompt suggestions",
-    "suggestionAria": "Use contextual prompt: {prompt}",
-    "emptyTitle": "Start a quick check-in",
-    "emptyDescription": "Ask for next steps, follow-up copy, or a focused review from the page you are on.",
-    "composerHint": "Press Enter to send. Use Shift+Enter for a new line.",
-    "prompts": {
-      "focusedEntity": "Give me focused coaching for {target}.",
-      "resume": "How can I improve this resume for {target}?",
-      "jobSearch": "How should I approach this role at {target}?",
-      "interview": "Generate interview prep questions for {target}.",
-      "portfolio": "How can I tailor my portfolio for {target}?",
-      "skills": "What skills should I prioritize next for {target}?",
-      "automation": "How can I optimize this automation flow for {target}?",
-      "general": "What should I focus on next in my job search?",
-      "entity": {
-        "job": "Summarize the fit and next steps for {target}.",
-        "resume": "Identify the strongest upgrades for {target}.",
-        "studio": "Coach me on how to approach {target}.",
-        "interviewSession": "Review the signals and coaching points for {target}.",
-        "automationRun": "Explain what happened in {target} and what to fix next."
-      }
-    },
-    "inputPlaceholder": "Ask about interview prep, jobs, resumes...",
-    "inputAria": "Floating chat message",
-    "sendAria": "Send floating chat message",
-    "hideAria": "Hide floating chat assistant",
-    "showAria": "Show floating chat assistant",
-    "unreadAria": "{count} unread assistant messages",
-    "voiceSettings": {
-      "toggleButton": "Speech",
-      "toggleAria": "Toggle speech model profile settings",
-      "saveSuccess": "Speech profile saved",
-      "saveErrorFallback": "Failed to save speech profile"
-    }
   },
   "studioSelector": {
     "toggleAria": "スタジオセレクターを開く",
@@ -3256,16 +876,6 @@ const catalog = {
     "inputPlaceholder": "ゲーム業界でのキャリアについて質問してください",
     "inputAria": "チャットメッセージ",
     "sendAria": "チャットメッセージを送信",
-    "sendButton": "Send",
-    "emptyTitle": "Your assistant is ready",
-    "emptyDescription": "Use the suggested prompts or ask for coaching, writing help, opportunity research, or automation guidance.",
-    "composerHint": "Press Enter to send. Use Shift+Enter for a new line.",
-    "composerIdleStatus": "Ready when you are",
-    "composerBusyStatus": "Generating a response...",
-    "contextPanelTitle": "Current context",
-    "contextPanelDescription": "The assistant uses your active page, focused item, and recent workspace signals below.",
-    "promptsTitle": "Suggested prompts",
-    "promptsDescription": "Load one of these prompts into the composer with the current context already in view.",
     "voiceSettings": {
       "legend": "音声モデル設定",
       "sttProviderLabel": "音声認識プロバイダ",
@@ -3284,63 +894,17 @@ const catalog = {
       "unsavedHint": "音声プロフィールに保存されていない変更があります。",
       "providers": {
         "browser": "ブラウザ",
-        "openai": "OpenAI",
-        "huggingface": "Hugging Face",
         "local": "ローカル",
         "custom": "カスタム"
       }
     }
   },
   "aiChatCommon": {
-    "youLabel": "You",
-    "defaultGreeting": "Hi, I’m {assistant}, your hiring copilot for game industry roles. What are we moving forward today?",
-    "unableToProcessFallback": "I'm sorry, I couldn't process that request.",
-    "requestErrorFallback": "I hit an error processing that request. Please try again.",
-    "requestErrorToast": "Chat request failed. Please try again.",
     "timeAt": "{time} の時刻",
     "voice": {
-      "startTitle": "Start voice input",
-      "stopTitle": "Stop voice input",
-      "startAria": "Start voice input",
-      "stopAria": "Stop voice input",
-      "replayTitle": "Read latest assistant response",
-      "replayAria": "Read latest assistant response",
-      "voiceLegend": "Voice output",
-      "voiceAria": "Voice output selection",
-      "systemVoiceOption": "System default voice",
-      "autoSpeakLabel": "Auto-read replies",
-      "autoSpeakAria": "Automatically read assistant replies",
       "listeningStatus": "聴取中...",
       "speakingStatus": "応答を読み上げ中...",
-      "idleStatus": "音声準備完了",
-      "unsupportedHint": "Voice controls are unavailable in this browser.",
-      "recognitionUnsupportedHint": "Voice input is unavailable in this browser.",
-      "synthesisUnsupportedHint": "Voice playback is unavailable in this browser.",
-      "errorLabel": "Voice error: {error}",
-      "errors": {
-        "unsupportedRecognition": "Voice input is not supported by this browser.",
-        "unsupportedSynthesis": "Voice playback is not supported by this browser.",
-        "startFailed": "Voice input could not start. Verify microphone permissions.",
-        "noSpeech": "No speech was detected. Try speaking again.",
-        "aborted": "Voice input was stopped before completion.",
-        "audioCapture": "No microphone source is available.",
-        "network": "A network issue interrupted voice processing.",
-        "notAllowed": "Microphone permission was denied.",
-        "serviceNotAllowed": "Speech service access is blocked in this environment.",
-        "badGrammar": "Voice grammar parsing failed.",
-        "languageNotSupported": "Selected speech language is not supported.",
-        "canceled": "Voice playback was canceled.",
-        "interrupted": "Voice playback was interrupted.",
-        "audioBusy": "Audio output is currently busy.",
-        "audioHardware": "Audio hardware is unavailable.",
-        "synthesisUnavailable": "Speech synthesis is currently unavailable.",
-        "synthesisFailed": "Speech synthesis failed to generate audio.",
-        "languageUnavailable": "Speech synthesis does not support the selected language.",
-        "voiceUnavailable": "Selected voice is unavailable on this device.",
-        "textTooLong": "The message is too long for speech playback.",
-        "invalidArgument": "Voice playback received an invalid argument.",
-        "unknown": "An unknown voice error occurred."
-      }
+      "idleStatus": "音声準備完了"
     }
   }
 } as const;
