@@ -61,7 +61,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
       <div class="card-actions justify-end">
         <button
           class="btn btn-primary"
-          :disabled="!selectedProvider || !selectedModel || loading"
+          :disabled="!selectedProviderModel || !selectedModelValue || loading"
           :aria-label="t('aiDashboard.preference.saveAria')"
           @click="onSave"
         >
