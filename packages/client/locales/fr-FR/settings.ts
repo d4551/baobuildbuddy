@@ -67,13 +67,20 @@ const catalog = {
       preferredProviderSaveButton: "Enregistrer le chat par défaut",
       preferredProviderHint:
         "Ce contrôle rapide définit le fournisseur par défaut pour le chat et les conversations.",
+      readinessTitle: "Disponibilité des fournisseurs",
+      readinessDescription:
+        "Vérifiez la configuration et la connectivité avant d'affecter un fournisseur à un flux.",
       preferredProviderSaved: "Fournisseur préféré mis à jour",
       routingTitle: "Routage par usage",
       routingSubtitle:
         "Attribuez un fournisseur et un modèle optionnel à chaque capacité IA afin que le chat, l'entretien, l'export et l'automatisation n'utilisent pas un unique défaut global.",
+      routingCoverageTitle: "Flux routés",
+      routingCoverageDescription:
+        "Chaque capacité IA peut conserver son propre fournisseur et un modèle optionnel.",
       saveRoutingAria: "Enregistrer le routage IA par usage",
       saveRoutingButton: "Enregistrer le routage",
       routingSaved: "Routage IA enregistré",
+      purposeColumnLabel: "Usage",
       purposeProviderLegend: "Fournisseur",
       purposeProviderAria: "Sélectionner le fournisseur pour {purpose}",
       purposeModelLegend: "Modèle spécifique",
@@ -128,6 +135,8 @@ const catalog = {
       ollamaTipDescription:
         "Installez-le d'abord puis suivez la configuration officielle d'Ollama pour votre machine ou votre projet sur",
       ollamaTipLinkAria: "Ouvrir le site Ollama dans un nouvel onglet",
+      credentialsDescription:
+        "N'enregistrez et ne testez que les identifiants des fournisseurs réellement utilisés dans vos flux actifs.",
     },
     brand: {
       title: "Plan de contrôle de marque",

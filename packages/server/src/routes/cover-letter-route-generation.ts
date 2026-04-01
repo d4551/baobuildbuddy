@@ -52,16 +52,25 @@ type CoverLetterSender = {
   location?: string;
 };
 
+const MARKDOWN_CODE_FENCE_PATTERN = /^```[a-zA-Z0-9_-]*\n([\s\S]*?)\n```$/u;
+
+const stripMarkdownCodeFence = (content: string): string => {
+  const trimmed = content.trim();
+  const codeFenceMatch = trimmed.match(MARKDOWN_CODE_FENCE_PATTERN);
+  return codeFenceMatch?.[1]?.trim() ?? trimmed;
+};
+
 const parseGeneratedCoverLetterContent = (content: string): Record<string, unknown> => {
-  const parsed = safeParseJson(content);
+  const normalizedContent = stripMarkdownCodeFence(content);
+  const parsed = safeParseJson(normalizedContent);
   if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
     return parsed;
   }
 
-  const lines = content.split("\n").filter((line) => line.trim());
+  const lines = normalizedContent.split("\n").filter((line) => line.trim());
   return {
     introduction: lines[0] || COVER_LETTER_DEFAULT_OPENING,
-    body: lines.slice(1, -1).join("\n\n") || content,
+    body: lines.slice(1, -1).join("\n\n") || normalizedContent,
     conclusion: lines[lines.length - 1] || COVER_LETTER_DEFAULT_CLOSING,
   };
 };
@@ -96,7 +105,7 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
   `.trim();
 };
 
-const toGeneratedCoverLetterContent = (content: string): GeneratedCoverLetterContent => {
+export const toGeneratedCoverLetterContent = (content: string): GeneratedCoverLetterContent => {
   const generatedContent = parseGeneratedCoverLetterContent(content);
   return {
     introduction:

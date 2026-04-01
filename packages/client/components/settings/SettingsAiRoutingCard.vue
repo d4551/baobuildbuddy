@@ -39,53 +39,66 @@ const emit = defineEmits<{
         </button>
       </div>
 
-      <SectionGrid grid-token="twoColumnXl">
-        <div
-          v-for="section in aiRoutingSections"
-          :key="section.id"
-          class="space-y-3 rounded-box border border-base-300 bg-base-100 p-4"
-        >
-          <div class="space-y-1">
-            <h4 class="font-medium">{{ section.label }}</h4>
-            <p class="text-sm text-base-content/60">{{ section.description }}</p>
-          </div>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("settings.aiProviders.purposeProviderLegend") }}</legend>
-            <select
-              v-model="aiRoutingDraft[section.id].provider"
-              class="select w-full"
-              :aria-label="t('settings.aiProviders.purposeProviderAria', { purpose: section.label })"
-            >
-              <option v-for="provider in providerInputs" :key="`${section.id}-${provider.id}`" :value="provider.id">
-                {{ provider.label }}
-              </option>
-            </select>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("settings.aiProviders.purposeModelLegend") }}</legend>
-            <input
-              v-model="aiRoutingDraft[section.id].model"
-              :list="`routing-model-options-${section.id}`"
-              type="text"
-              class="input w-full"
-              :placeholder="t('settings.aiProviders.purposeModelPlaceholder')"
-              :aria-label="t('settings.aiProviders.purposeModelAria', { purpose: section.label })"
-            />
-            <datalist :id="`routing-model-options-${section.id}`">
-              <option
-                v-for="model in routingModelOptions[section.id]"
-                :key="`${section.id}-${aiRoutingDraft[section.id].provider}-${model}`"
-                :value="model"
-              >
-                {{ model }}
-              </option>
-            </datalist>
-            <p class="text-xs text-base-content/50">{{ t("settings.aiProviders.purposeModelHint") }}</p>
-          </fieldset>
-        </div>
-      </SectionGrid>
+      <div class="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+        <table class="table table-sm" :aria-label="t('settings.aiProviders.routingTitle')">
+          <thead>
+            <tr>
+              <th scope="col">{{ t("settings.aiProviders.purposeColumnLabel") }}</th>
+              <th scope="col">{{ t("settings.aiProviders.purposeProviderLegend") }}</th>
+              <th scope="col">{{ t("settings.aiProviders.purposeModelLegend") }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="section in aiRoutingSections" :key="section.id">
+              <th scope="row" class="align-top">
+                <div class="space-y-1">
+                  <p class="font-medium">{{ section.label }}</p>
+                  <p class="text-xs leading-5 text-base-content/60">{{ section.description }}</p>
+                </div>
+              </th>
+              <td class="align-top">
+                <select
+                  v-model="aiRoutingDraft[section.id].provider"
+                  class="select select-sm w-full min-w-40"
+                  :aria-label="t('settings.aiProviders.purposeProviderAria', { purpose: section.label })"
+                >
+                  <option
+                    v-for="provider in providerInputs"
+                    :key="`${section.id}-${provider.id}`"
+                    :value="provider.id"
+                  >
+                    {{ provider.label }}
+                  </option>
+                </select>
+              </td>
+              <td class="align-top">
+                <div class="space-y-2">
+                  <input
+                    v-model="aiRoutingDraft[section.id].model"
+                    :list="`routing-model-options-${section.id}`"
+                    type="text"
+                    class="input input-sm w-full min-w-52"
+                    :placeholder="t('settings.aiProviders.purposeModelPlaceholder')"
+                    :aria-label="t('settings.aiProviders.purposeModelAria', { purpose: section.label })"
+                  />
+                  <datalist :id="`routing-model-options-${section.id}`">
+                    <option
+                      v-for="model in routingModelOptions[section.id]"
+                      :key="`${section.id}-${aiRoutingDraft[section.id].provider}-${model}`"
+                      :value="model"
+                    >
+                      {{ model }}
+                    </option>
+                  </datalist>
+                  <p class="text-xs text-base-content/50">
+                    {{ t("settings.aiProviders.purposeModelHint") }}
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>

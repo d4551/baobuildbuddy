@@ -25,13 +25,20 @@ const catalog = {
       preferredProviderSaveButton: "Guardar chat por defecto",
       preferredProviderHint:
         "Este control rápido define el proveedor predeterminado para chat y conversaciones.",
+      readinessTitle: "Estado de proveedores",
+      readinessDescription:
+        "Revisa configuración y conectividad antes de asignar proveedores a los flujos.",
       preferredProviderSaved: "Proveedor preferido actualizado",
       routingTitle: "Enrutamiento por propósito",
       routingSubtitle:
         "Asigna un proveedor y un modelo opcional a cada capacidad de IA para que chat, entrevistas, exportaciones y automatizaciones no compartan una única configuración global.",
+      routingCoverageTitle: "Flujos enrutados",
+      routingCoverageDescription:
+        "Cada capacidad de IA puede mantener su propio proveedor y un modelo opcional.",
       saveRoutingAria: "Guardar enrutamiento de IA por propósito",
       saveRoutingButton: "Guardar enrutamiento",
       routingSaved: "Enrutamiento de IA guardado",
+      purposeColumnLabel: "Propósito",
       purposeProviderLegend: "Proveedor",
       purposeProviderAria: "Seleccionar proveedor para {purpose}",
       purposeModelLegend: "Modelo específico",
@@ -85,6 +92,8 @@ const catalog = {
       ollamaTipDescription:
         "Instálalo primero y sigue la configuración oficial de Ollama para tu propia máquina o proyecto en",
       ollamaTipLinkAria: "Abrir sitio web de Ollama en una pestaña nueva",
+      credentialsDescription:
+        "Guarda y prueba credenciales solo para los proveedores que realmente vayas a usar en flujos activos.",
     },
   },
 } as const;

@@ -25,13 +25,20 @@ const settingsaiProviders = {
       preferredProviderSaveButton: "Save chat default",
       preferredProviderHint:
         "This quick control sets the default provider for chat and conversational surfaces.",
+      readinessTitle: "Provider readiness",
+      readinessDescription:
+        "Check configuration and connectivity before assigning providers to workflows.",
       preferredProviderSaved: "Preferred provider updated",
       routingTitle: "Purpose-based routing",
       routingSubtitle:
         "Assign a provider and optional model to each AI capability so chat, interview, export, and automation flows do not share one global default.",
+      routingCoverageTitle: "Routed workflows",
+      routingCoverageDescription:
+        "Each AI capability can keep its own provider and optional model override.",
       saveRoutingAria: "Save AI routing by purpose",
       saveRoutingButton: "Save routing",
       routingSaved: "AI routing saved",
+      purposeColumnLabel: "Purpose",
       purposeProviderLegend: "Provider",
       purposeProviderAria: "Select provider for {purpose}",
       purposeModelLegend: "Model override",
@@ -82,6 +89,8 @@ const settingsaiProviders = {
         "Install it first and follow Ollama's setup for your own machine or project at",
       ollamaTipLinkLabel: "ollama.com",
       ollamaTipLinkAria: "Open Ollama website in a new tab",
+      credentialsDescription:
+        "Store and test credentials only for the providers you plan to route into live workflows.",
     },
   },
 } as const;

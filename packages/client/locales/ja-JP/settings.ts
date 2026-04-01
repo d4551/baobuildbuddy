@@ -62,13 +62,19 @@ const catalog = {
       preferredProviderSaveButton: "チャット既定を保存",
       preferredProviderHint:
         "このクイック設定は、チャットや会話系フローの既定プロバイダーを決めます。",
+      readinessTitle: "プロバイダーの準備状況",
+      readinessDescription: "各ワークフローへ割り当てる前に、設定状況と接続性を確認します。",
       preferredProviderSaved: "優先プロバイダーが更新されました",
       routingTitle: "用途別ルーティング",
       routingSubtitle:
         "チャット、面接、エクスポート、自動化ごとにプロバイダーと任意のモデルを割り当て、1つのグローバル既定値に依存しないようにします。",
+      routingCoverageTitle: "ルーティング対象フロー",
+      routingCoverageDescription:
+        "各 AI 機能ごとに、独自のプロバイダーと任意のモデル上書きを持てます。",
       saveRoutingAria: "用途別のAIルーティングを保存",
       saveRoutingButton: "ルーティングを保存",
       routingSaved: "AIルーティングを保存しました",
+      purposeColumnLabel: "用途",
       purposeProviderLegend: "プロバイダー",
       purposeProviderAria: "{purpose} 用のプロバイダーを選択",
       purposeModelLegend: "モデル上書き",
@@ -118,6 +124,8 @@ const catalog = {
       ollamaTipDescription:
         "先にインストールし、あなた自身のマシンやプロジェクト向けの Ollama 公式セットアップに従ってください:",
       ollamaTipLinkAria: "Ollama のサイトを新しいタブで開く",
+      credentialsDescription:
+        "実運用フローに割り当てる予定のあるプロバイダーだけ、認証情報を保存して接続確認してください。",
     },
     brand: {
       title: "ブランドコントロールプレーン",

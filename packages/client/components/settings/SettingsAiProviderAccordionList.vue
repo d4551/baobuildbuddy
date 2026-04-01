@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LOCAL_AI_DEFAULT_ENDPOINT, OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
+import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 
 type ProviderField =
@@ -54,19 +54,18 @@ const emit = defineEmits<{
       </div>
     </div>
 
-    <div v-for="provider in providerInputs" :key="provider.id" class="collapse collapse-arrow border border-base-300 bg-base-100">
-      <input
-        type="radio"
-        name="provider-accordion"
-        :aria-label="t('settings.aiProviders.expandAria', { provider: provider.label })"
-      />
-      <div class="collapse-title flex items-center gap-2 font-medium">
+    <details
+      v-for="provider in providerInputs"
+      :key="provider.id"
+      class="collapse collapse-arrow border border-base-300 bg-base-100"
+    >
+      <summary class="collapse-title flex items-center gap-2 font-medium">
         <AIProviderIcon :provider-id="provider.id" class="h-5 w-5 text-primary" />
         {{ provider.label }}
         <span v-if="providerConfiguredById[provider.id]" class="badge badge-success badge-xs">
           {{ t("settings.aiProviders.configuredBadge") }}
         </span>
-      </div>
+      </summary>
       <div class="collapse-content space-y-3">
         <p class="text-sm text-base-content/60">{{ provider.description }}</p>
         <fieldset class="fieldset">
@@ -85,7 +84,10 @@ const emit = defineEmits<{
               :aria-label="t('settings.aiProviders.testAria')"
               @click="emit('testProvider', provider.id)"
             >
-              <span v-if="testingProvider === provider.id" class="loading loading-spinner loading-xs"></span>
+              <span
+                v-if="testingProvider === provider.id"
+                class="loading loading-spinner loading-xs"
+              ></span>
               {{ t("settings.aiProviders.testButton") }}
             </button>
           </div>
@@ -97,7 +99,7 @@ const emit = defineEmits<{
             v-model="apiKeys.localModelName"
             type="text"
             class="input w-full"
-            :placeholder="LOCAL_AI_DEFAULT_ENDPOINT"
+            :placeholder="t('settings.aiProviders.localModelPlaceholder')"
             :aria-label="t('settings.aiProviders.localModelAria')"
           />
         </fieldset>
@@ -107,16 +109,23 @@ const emit = defineEmits<{
           class="badge"
           :class="testResults[provider.id]?.valid ? 'badge-success' : 'badge-error'"
         >
-          {{ testResults[provider.id]?.valid ? t("settings.aiProviders.connectedBadge") : t("settings.aiProviders.failedBadge") }}
+          {{
+            testResults[provider.id]?.valid
+              ? t("settings.aiProviders.connectedBadge")
+              : t("settings.aiProviders.failedBadge")
+          }}
         </span>
-        <p v-if="!testResults[provider.id] && providerDiagnostics[provider.id]?.message" class="text-sm text-base-content/60">
+        <p
+          v-if="!testResults[provider.id] && providerDiagnostics[provider.id]?.message"
+          class="text-sm text-base-content/60"
+        >
           {{ providerDiagnostics[provider.id]?.message }}
         </p>
         <p v-else-if="testResults[provider.id]?.message" class="text-sm text-base-content/60">
           {{ testResults[provider.id]?.message }}
         </p>
       </div>
-    </div>
+    </details>
 
     <div class="mt-4 flex justify-end">
       <button class="btn btn-primary" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">

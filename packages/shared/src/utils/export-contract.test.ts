@@ -45,6 +45,16 @@ describe("export contract", () => {
     ).toEqual(["Intro", "Body", "Close"]);
   });
 
+  test("preserves mixed cover-letter section naming without dropping intro or closing text", () => {
+    expect(
+      toCoverLetterParagraphs({
+        introduction: "Intro",
+        body: ["Body"],
+        conclusion: "Close",
+      }),
+    ).toEqual(["Intro", "Body", "Close"]);
+  });
+
   test("splits raw text cover letters into paragraphs", () => {
     expect(toCoverLetterParagraphs("First paragraph\n\nSecond paragraph")).toEqual([
       "First paragraph",

@@ -4,6 +4,7 @@ type GeneratedCoverLetterContent = {
     body: string;
     conclusion: string;
 };
+export declare const toGeneratedCoverLetterContent: (content: string) => GeneratedCoverLetterContent;
 export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, set: RouteSetState) => Promise<{
     error: string;
     details?: undefined;

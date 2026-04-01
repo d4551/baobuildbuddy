@@ -69,18 +69,11 @@ export const toCoverLetterParagraphs = (content: unknown): string[] => {
     return [];
   }
 
-  const canonicalParagraphs = [
-    ...normalizeParagraphInput(content.opening),
-    ...normalizeParagraphInput(content.body),
-    ...normalizeParagraphInput(content.closing),
-  ];
-  if (canonicalParagraphs.length > 0) {
-    return canonicalParagraphs;
-  }
-
   return [
-    ...normalizeParagraphInput(content.introduction),
-    ...normalizeParagraphInput(content.main),
-    ...normalizeParagraphInput(content.conclusion),
+    ...normalizeParagraphInput(content.opening).concat(
+      normalizeParagraphInput(content.introduction),
+    ),
+    ...normalizeParagraphInput(content.body).concat(normalizeParagraphInput(content.main)),
+    ...normalizeParagraphInput(content.closing).concat(normalizeParagraphInput(content.conclusion)),
   ];
 };
