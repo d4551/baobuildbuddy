@@ -38,11 +38,10 @@ permissions:
 env:
   DESKTOP_RELEASE_RELEASE_MODE: "true"
   DESKTOP_RELEASE_LINUX_APPIMAGE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_linux_appimage || vars.DESKTOP_RELEASE_LINUX_APPIMAGE || 'true' }}
-  # workflow_dispatch: honour the boolean input directly (may be 'false').
-  # push: use repository var when set; otherwise default to 'true' (AppImage enabled).
-  DESKTOP_RELEASE_LINUX_SIGNATURES: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_LINUX_SIGNATURES || github.event.inputs.include_linux_signatures }}
+  # workflow_dispatch: honour boolean inputs; push: repo var when set, else 'true'.
+  DESKTOP_RELEASE_LINUX_SIGNATURES: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_linux_signatures || vars.DESKTOP_RELEASE_LINUX_SIGNATURES || 'true' }}
   DESKTOP_RELEASE_MACOS_ARCHITECTURES: ${{ github.event.inputs.macos_architectures || vars.DESKTOP_RELEASE_MACOS_ARCHITECTURES }}
-  DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event_name != 'workflow_dispatch' && vars.DESKTOP_RELEASE_WINDOWS_MSI || github.event.inputs.include_windows_msi }}
+  DESKTOP_RELEASE_WINDOWS_MSI: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.include_windows_msi || vars.DESKTOP_RELEASE_WINDOWS_MSI || 'true' }}
 
 jobs:
   quality-gates:
