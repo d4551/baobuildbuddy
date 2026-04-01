@@ -121,7 +121,7 @@ else { Warn "Nuxt prepare failed -- client typecheck/lint may fail" }
 Pop-Location
 
 Step "Generating server type declarations..."
-& bun run --filter '@bao/server' build:types 2>&1
+& bun run --cwd packages/server build:types 2>&1
 if ($LASTEXITCODE -eq 0) { Ok "Server type declarations generated" }
 else { Warn "Server build:types failed -- client lint may fail" }
 

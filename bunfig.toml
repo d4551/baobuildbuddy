@@ -2,7 +2,7 @@
 peer = false
 
 # Repo-root `bun test` discovers packages/server tests without packages/server/bunfig.toml; mirror the
-# server preload so auth/DB env matches `bun run --filter @bao/server test`. CI uses `bun run test`.
+# server preload so auth/DB env matches `bun run --cwd packages/server test`. CI uses `bun run test`.
 # pathIgnorePatterns: Bun 1.4+ prunes Tauri target/ trees (optional when stale bundles exist locally).
 [test]
 preload = ["./packages/server/src/test-setup.ts"]

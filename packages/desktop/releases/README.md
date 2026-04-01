@@ -11,7 +11,7 @@ This repository now treats native matching-host Tauri bundles as the only canoni
 Optional SSR/page validation before packaging (when validating UI render contracts):
 
 ```bash
-PORT=4105 bun run --filter '@bao/client' preview
+PORT=4105 bun run --cwd packages/client preview
 VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 
@@ -99,7 +99,7 @@ The canonical release flow performs:
 - **AppImage count:** The canonical contract includes **one** AppImage (Linux x64 only). Linux ARM64 intentionally omits AppImage (linuxdeploy instability). The Linux x64 CI job fails if AppImage is enabled but no `*.AppImage` is staged.
 - **AppImage from macOS:** Use GitHub Actions (`desktop-release` workflow) or a real **x86_64 Linux** machine. Docker `--platform linux/amd64` on Apple Silicon often hits QEMU limitations and can abort the Tauri CLI mid-build.
 - **Linux bundled server layout:** On Linux targets, `prepare-desktop-runtime.ts` ships `server/bao-desktop-server` and `bin/bao-bun` as POSIX shell launchers plus adjacent `*.payload.gz` blobs (gzip of the Bun binaries) so linuxdeploy does not run `ldd` on those payloads during AppImage creation. Manifest paths are unchanged; Rust `Command::new` still launches them.
-- **Local commands:** Prefer `bun run test` (workspace-scoped) for CI parity. A bare `bun test` at the repo root uses [bunfig.toml](../../../bunfig.toml) (`preload` for server test env, `pathIgnorePatterns` for desktop `target/` when supported). Stale `packages/server/dist/**/*.test.js` from old builds duplicates server tests—`bun run --filter '@bao/server' build` clears `dist` first. After `prepare:desktop-runtime`, staged scraper sources omit `*.test.ts` so they are not shipped into app bundles.
+- **Local commands:** Prefer `bun run test` (workspace-scoped) for CI parity. A bare `bun test` at the repo root uses [bunfig.toml](../../../bunfig.toml) (`preload` for server test env, `pathIgnorePatterns` for desktop `target/` when supported). Stale `packages/server/dist/**/*.test.js` from old builds duplicates server tests—`bun run --cwd packages/server build` clears `dist` first. After `prepare:desktop-runtime`, staged scraper sources omit `*.test.ts` so they are not shipped into app bundles.
 
 Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact. The canonical release set ships both the NSIS setup installer and a portable `.zip` that keeps the executable, bundled `gen/runtime` tree, and WebView2 bootstrapper together.
 

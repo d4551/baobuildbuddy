@@ -239,7 +239,7 @@ For the full validation sequence, see [README.md > Validation & Quality Gates](.
 If port `3001` is already in use, run page verification against an alternate port:
 
 ```bash
-PORT=4105 bun run --filter '@bao/client' preview
+PORT=4105 bun run --cwd packages/client preview
 VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 

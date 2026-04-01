@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, test } from "bun:test";
 import { collectAccessibilityLandmarkViolationsForContent } from "./validate-accessibility-landmarks";
 import { ROUTE_JOBS } from "../packages/shared/src/constants/routes";
@@ -83,6 +84,10 @@ const PAGE_STATE_V_ELSE_SUCCESS_SAMPLE = [
   "<section v-else />",
   "</template>",
 ].join("\n");
+const ROOT_MANIFEST_TEXT = readFileSync(new URL("../package.json", import.meta.url), "utf8");
+const ROOT_MANIFEST = JSON.parse(ROOT_MANIFEST_TEXT) as {
+  scripts: Record<string, string>;
+};
 
 const collectExamplePageStateViolations = (content: string) =>
   collectPageStateViolationsForContent(PAGE_STATE_EXAMPLE_PATH, content);
@@ -106,6 +111,22 @@ describe("collectNoHtmxViolationsForContent", () => {
     );
 
     expect(violations.some((violation) => violation.message.includes("hx attributes"))).toBe(true);
+  });
+});
+
+describe("root lint contract", () => {
+  test("keeps htmx, page-state, aria, i18n, and ui single-source validators in the root lint entrypoint", () => {
+    const lintScript = ROOT_MANIFEST.scripts.lint;
+
+    expect(lintScript).toContain("validate:no-htmx");
+    expect(lintScript).toContain("validate:page-state-contracts");
+    expect(lintScript).toContain("validate:aria");
+    expect(lintScript).toContain("validate:i18n-ui");
+    expect(lintScript).toContain("validate:ui-ssot");
+  });
+
+  test("does not use workspace filters in the root manifest", () => {
+    expect(ROOT_MANIFEST_TEXT.includes("--filter")).toBe(false);
   });
 });
 

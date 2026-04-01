@@ -181,7 +181,7 @@ else
 fi
 
 step "Generating server type declarations..."
-if bun run --filter '@bao/server' build:types 2>&1; then
+if bun run --cwd packages/server build:types 2>&1; then
   ok "Server type declarations generated"
 else
   warn "Server build:types failed -- client lint may fail"

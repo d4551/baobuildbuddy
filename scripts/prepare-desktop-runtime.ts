@@ -604,7 +604,7 @@ const ensureStaticFrontendEntrypoint = async (directoryPath: string): Promise<vo
 
 const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
   await writeOutput("desktop-runtime: building server bundle for desktop prerender");
-  await runCommand([process.execPath, "run", "--filter", "@bao/server", "build"]);
+  await runCommand([process.execPath, "run", "--cwd", "packages/server", "build"]);
 
   await ensureBuildServerPortIsFree();
   await writeOutput(
@@ -640,7 +640,7 @@ const buildDesktopClient = async (tempDbPath: string): Promise<void> => {
           env: generateEnv,
         });
       } else {
-        await runCommand([process.execPath, "run", "--filter", "@bao/client", "generate"], {
+        await runCommand([process.execPath, "run", "--cwd", "packages/client", "generate"], {
           env: generateEnv,
         });
       }

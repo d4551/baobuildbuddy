@@ -487,7 +487,7 @@ bun run dev:client
 | Release desktop (Linux ARM) | `bun run release:desktop:linux-arm64`                  | Native Linux ARM64 release artifacts                |
 | Release refresh (all staged OSes) | `bun run release:refresh:all-os`                | Assemble staged release artifacts + checksums       |
 | Verify pages                | `bun run verify:pages`                                 | Validate SSR routes return proper HTML              |
-| Server type contract        | `bun run --filter '@bao/server' build:types`           | Generate dist-types for client typecheck            |
+| Server type contract        | `bun run --cwd packages/server build:types`            | Generate dist-types for client typecheck            |
 | Validate ARIA               | `bun run validate:aria`                                | Interactive labeling + dialog semantics             |
 | Validate layout tokens      | `bun run validate:ui-layout-tokens`                    | Block hardcoded width/grid literals                 |
 | Validate UI                 | `bun run validate:ui`                                  | WCAG contrast + hardcoded color checks              |

@@ -116,8 +116,8 @@ const ensureClientBuildExists = async (): Promise<boolean> => {
     return true;
   }
 
-  await writeOutput("Client build output missing; running `bun run --filter '@bao/client' build`.");
-  const buildProcess = Bun.spawn([process.execPath, "run", "--filter", "@bao/client", "build"], {
+  await writeOutput("Client build output missing; running `bun run --cwd packages/client build`.");
+  const buildProcess = Bun.spawn([process.execPath, "run", "--cwd", "packages/client", "build"], {
     cwd: process.cwd(),
     stdout: "inherit",
     stderr: "inherit",

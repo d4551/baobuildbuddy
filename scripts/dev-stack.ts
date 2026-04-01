@@ -85,7 +85,7 @@ const spawnProcess = (args: string[], env: Record<string, string>): ManagedProce
 };
 
 const spawnServer = (): ManagedProcess => {
-  return spawnProcess(["--env-file=.env", "run", "--filter", "@bao/server", "dev"], serverEnv);
+  return spawnProcess(["--env-file=.env", "run", "--cwd", "packages/server", "dev"], serverEnv);
 };
 
 const spawnClient = (): ManagedProcess => {
@@ -93,8 +93,8 @@ const spawnClient = (): ManagedProcess => {
     [
       "--env-file=.env",
       "run",
-      "--filter",
-      "@bao/client",
+      "--cwd",
+      "packages/client",
       "dev",
       "--",
       "--port",

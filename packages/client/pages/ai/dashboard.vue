@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAIDashboardPage } from "~/composables/useAIDashboardPage";
 import { getErrorMessage } from "~/utils/errors";
@@ -10,7 +11,7 @@ useSeoMeta({
   description: t("aiDashboard.subtitle"),
 });
 
-const page = useAIDashboardPage();
+const page = reactive(useAIDashboardPage());
 </script>
 
 <template>
