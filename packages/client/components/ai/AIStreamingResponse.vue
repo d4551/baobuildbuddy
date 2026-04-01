@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { resolvedBrand } = useBrand() as { resolvedBrand: ComputedRef<ResolvedBrandSettings> };
+const { resolvedBrand } = useBrand();
 
 defineProps<{
   text: string;

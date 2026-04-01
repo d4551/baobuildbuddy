@@ -266,7 +266,7 @@ export const buildDesktopReleaseArtifactSpecs = (
     windowsArtifacts.push(
       createDesktopReleaseArtifactSpec(
         target,
-        `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}-${DESKTOP_RELEASE_WINDOWS_MSI_LANGUAGE}.msi`,
+        `${metadata.productName}_${metadata.version}_${DESKTOP_RELEASE_WINDOWS_ARCH}_${DESKTOP_RELEASE_WINDOWS_MSI_LANGUAGE}.msi`,
         "msi",
       ),
     );

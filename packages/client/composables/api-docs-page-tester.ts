@@ -1,5 +1,6 @@
 import { safeParseJson } from "@bao/shared/utils/json";
 import { computed, ref } from "vue";
+import type { Ref } from "vue";
 import type { ApiDocsToast, ApiDocsTranslate } from "~/composables/api-docs-page-contracts";
 import { createEndpointTesterActions } from "~/composables/api-docs-page-tester-actions";
 import type { ApiEndpoint, ApiTesterState, FetchEndpointResultOk } from "~/types/api-docs";

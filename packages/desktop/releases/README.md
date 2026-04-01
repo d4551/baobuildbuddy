@@ -174,7 +174,7 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 
 - `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-setup.exe`
 - `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-portable.zip`
-- `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-en-US.msi` (omit with `DESKTOP_RELEASE_WINDOWS_MSI=false`)
+- `windows/${APP_PRODUCT_NAME}_<VERSION>_x64_en-US.msi` (omit with `DESKTOP_RELEASE_WINDOWS_MSI=false`)
 
 ## Integrity
 
